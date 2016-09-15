@@ -1,12 +1,15 @@
-package sapotero.rxtest;
+package sapotero.rxtest.views.activities;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import java.util.List;
 
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
@@ -15,18 +18,21 @@ import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.R;
 import sapotero.rxtest.models.AuthToken;
-import sapotero.rxtest.models.Documents;
+import sapotero.rxtest.models.documents.Document;
+import sapotero.rxtest.models.documents.Documents;
 import sapotero.rxtest.retrofit.AuthTokenService;
 import sapotero.rxtest.retrofit.DocumentsService;
+import sapotero.rxtest.utils.RecyclerItemClickListener;
+import sapotero.rxtest.views.adapters.DocumentsAdapter;
 
 public class MainActivity extends AppCompatActivity {
 
   private View progressBar;
   private TextView auth_token;
+  private RecyclerView rv;
   private String token;
-
-  private ListView documentList;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -36,8 +42,22 @@ public class MainActivity extends AppCompatActivity {
     progressBar  = findViewById(R.id.progressBar);
     auth_token   = (TextView) findViewById(R.id.auth_token);
 
+    rv           = (RecyclerView) findViewById(R.id.documentsRecycleView);
+    LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+    rv.setLayoutManager(linearLayoutManager);
+    rv.setHasFixedSize(true);
 
+    rv.addOnItemTouchListener(
+        new RecyclerItemClickListener(this, rv,new RecyclerItemClickListener.OnItemClickListener() {
+          @Override public void onItemClick(View view, int position) {
+            showDocumentInfo(view, position);
+          }
 
+          @Override public void onLongItemClick(View view, int position) {
+            // do whatever
+          }
+        })
+    );
 
     progressBar.setVisibility(ProgressBar.INVISIBLE);
 
@@ -111,8 +131,23 @@ public class MainActivity extends AppCompatActivity {
         .observeOn( AndroidSchedulers.mainThread() )
         .subscribe(data -> {
 
-          Log.e("_", data.getDocuments().get(0).getMd5() );
+          List<Document> docs = data.getDocuments();
+          DocumentsAdapter adapter = new DocumentsAdapter(docs);
+          rv.setAdapter(adapter);
+
+          Log.e("_", docs.get(0).getMd5() );
         });
+
+  }
+
+  private void showDocumentInfo(View view, int position){
+    Log.d("_showDocumentInfo", String.valueOf(position));
+    Log.d("_showDocumentInfo", String.valueOf(rv.getAdapter().getItemCount()));
+
+    DocumentsAdapter rvAdapter = (DocumentsAdapter) rv.getAdapter();
+
+
+    Log.d("_showDocumentInfo", rvAdapter.getItem(position).getUid() );
 
   }
 }
