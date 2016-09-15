@@ -43,6 +43,10 @@ dependencies {
 
     //Gson
     compile 'com.google.code.gson:gson:2.4'
+
+    //Recycle + Card
+    compile 'com.android.support:cardview-v7:24.2.0'
+    compile 'com.android.support:recyclerview-v7:24.2.0'
 }
 
 buildscript {
