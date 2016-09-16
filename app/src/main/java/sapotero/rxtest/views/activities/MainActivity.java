@@ -9,14 +9,17 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TableLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
-import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
@@ -27,27 +30,37 @@ import sapotero.rxtest.models.documents.Documents;
 import sapotero.rxtest.retrofit.AuthTokenService;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.DocumentsService;
-import sapotero.rxtest.utils.RecyclerItemClickListener;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 
 public class MainActivity extends AppCompatActivity {
 
-  private View progressBar;
+  private static View progressBar;
   private TextView auth_token;
-  private RecyclerView rv;
-  private String token;
+  private static RecyclerView rv;
+  private static String token;
 
-  private TextView uid;
-  private TextView md5;
-  private TextView title;
-  private TextView registration_number;
-  private TextView urgency;
-  private TextView short_description;
-  private TextView comment;
-  private TextView external_document_number;
-  private TextView receipt_date;
+  private static TextView uid;
+  private static TextView md5;
+  private static TextView title;
+  private static TextView registration_number;
+  private static TextView urgency;
+  private static TextView short_description;
+  private static TextView comment;
+  private static TextView external_document_number;
+  private static TextView receipt_date;
 
-  private TableLayout infoTable;
+  private static TableLayout infoTable;
+
+  final OkHttpClient okHttpClient = new OkHttpClient.Builder()
+      .readTimeout(60, TimeUnit.SECONDS)
+      .connectTimeout(60, TimeUnit.SECONDS)
+      .addInterceptor(
+          new HttpLoggingInterceptor(
+            message -> {
+              Log.d("_ERROR", message);
+            }
+      ))
+      .build();
 
 
   @Override
@@ -69,53 +82,21 @@ public class MainActivity extends AppCompatActivity {
     receipt_date             = (TextView) findViewById(R.id.receipt_date);
     infoTable                = (TableLayout) findViewById(R.id.infoTable);
 
-    rv           = (RecyclerView) findViewById(R.id.documentsRecycleView);
+    rv = (RecyclerView) findViewById(R.id.documentsRecycleView);
     LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+
     rv.setLayoutManager(linearLayoutManager);
-    rv.setHasFixedSize(true);
-
-    rv.addOnItemTouchListener(
-        new RecyclerItemClickListener(this, rv,new RecyclerItemClickListener.OnItemClickListener() {
-          @Override public void onItemClick(View view, int position) {
-            showDocumentInfo(view, position);
-          }
-
-          @Override public void onLongItemClick(View view, int position) {
-            // do whatever
-          }
-        })
-    );
-
     progressBar.setVisibility(ProgressBar.INVISIBLE);
+
 
   }
 
-  Subscriber<String> mySubscriber = new Subscriber<String>() {
-    @Override
-    public void onNext(String s) {
-      System.out.println(s);
-    }
-
-    @Override
-    public void onCompleted() { }
-
-    @Override
-    public void onError(Throwable e) { }
-  };
-
-  Observable<String> myObservable = Observable.create(
-      new Observable.OnSubscribe<String>() {
-        @Override
-        public void call(Subscriber<? super String> sub) {
-          sub.onNext("Hello, world!");
-          sub.onCompleted();
-        }
-      }
-  );
 
   public void run(View view) throws InterruptedException {
     progressBar.setVisibility(ProgressBar.VISIBLE);
+
     Retrofit retrofit = new Retrofit.Builder()
+        .client(okHttpClient)
         .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
         .addConverterFactory(GsonConverterFactory.create())
         .baseUrl("http://mobile.esd.n-core.ru/")
@@ -127,19 +108,27 @@ public class MainActivity extends AppCompatActivity {
 
     user.subscribeOn( Schedulers.newThread() )
         .observeOn( AndroidSchedulers.mainThread() )
-        .subscribe(data -> {
+        .subscribe(
+            data -> {
 
-          String _token = data.getAuthToken();
+                String _token = data.getAuthToken();
 
-          progressBar.setVisibility(ProgressBar.INVISIBLE);
-          auth_token.setText( "Auth_token: " + _token);
+                progressBar.setVisibility(ProgressBar.INVISIBLE);
+                auth_token.setText( "Auth_token: " + _token);
 
-          token = _token;
+                token = _token;
 
-          loadDocuments();
+                loadDocuments();
 
-          Log.e("_", _token );
-        });
+                Log.e("_", _token );
+            },
+            error -> {
+              Log.d( "_ERROR", error.getMessage() );
+              progressBar.setVisibility(ProgressBar.INVISIBLE);
+
+              Toast.makeText(this, error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        );
   }
 
   private void loadDocuments(){
@@ -147,6 +136,7 @@ public class MainActivity extends AppCompatActivity {
     progressBar.setVisibility(ProgressBar.VISIBLE);
 
     Retrofit retrofit = new Retrofit.Builder()
+        .client(okHttpClient)
         .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
         .addConverterFactory(GsonConverterFactory.create())
         .baseUrl("http://mobile.esd.n-core.ru/v3/")
@@ -158,18 +148,24 @@ public class MainActivity extends AppCompatActivity {
 
     documents.subscribeOn( Schedulers.newThread() )
         .observeOn( AndroidSchedulers.mainThread() )
-        .subscribe(data -> {
+        .subscribe(
+            data -> {
+                progressBar.setVisibility(ProgressBar.INVISIBLE);
 
-          progressBar.setVisibility(ProgressBar.INVISIBLE);
+                List<Document> docs = data.getDocuments();
+                DocumentsAdapter adapter = new DocumentsAdapter(this, docs);
+                rv.setAdapter(adapter);
+            },
+            error -> {
+                Log.d( "_ERROR", error.getMessage() );
+                progressBar.setVisibility(ProgressBar.INVISIBLE);
 
-          List<Document> docs = data.getDocuments();
-          DocumentsAdapter adapter = new DocumentsAdapter(docs);
-          rv.setAdapter(adapter);
-        });
+                Toast.makeText(this, error.getMessage(), Toast.LENGTH_SHORT).show();
+            });
 
   }
 
-  private void showDocumentInfo(View view, int position){
+  public static void showDocumentInfo(View view, int position){
     progressBar.setVisibility(ProgressBar.VISIBLE);
     infoTable.setVisibility(View.INVISIBLE);
 
@@ -177,7 +173,6 @@ public class MainActivity extends AppCompatActivity {
     Log.d("_showDocumentInfo", String.valueOf(rv.getAdapter().getItemCount()));
 
     DocumentsAdapter rvAdapter = (DocumentsAdapter) rv.getAdapter();
-    Log.d("_showDocumentInfo", rvAdapter.getItem(position).getUid() );
 
     Retrofit retrofit = new Retrofit.Builder()
         .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
@@ -195,24 +190,28 @@ public class MainActivity extends AppCompatActivity {
 
     info.subscribeOn( Schedulers.newThread() )
         .observeOn( AndroidSchedulers.mainThread() )
-        .subscribe(data -> {
-          progressBar.setVisibility(ProgressBar.INVISIBLE);
+        .subscribe(
+            data -> {
+                progressBar.setVisibility(ProgressBar.INVISIBLE);
 
-          infoTable.setVisibility(View.VISIBLE);
+                infoTable.setVisibility(View.VISIBLE);
 
-          uid.setText( data.getUid() );
-          md5.setText( data.getMd5() );
-          title.setText( data.getTitle() );
-          registration_number.setText( data.getRegistrationNumber() );
-          urgency.setText( data.getUrgency() );
-          short_description.setText( data.getShortDescription() );
-          comment.setText( data.getComment() );
-          external_document_number.setText( data.getExternalDocumentNumber() );
-          receipt_date.setText( data.getReceiptDate() );
+                uid.setText( data.getUid() );
+                md5.setText( data.getMd5() );
+                title.setText( data.getTitle() );
+                registration_number.setText( data.getRegistrationNumber() );
+                urgency.setText( data.getUrgency() );
+                short_description.setText( data.getShortDescription() );
+                comment.setText( data.getComment() );
+                external_document_number.setText( data.getExternalDocumentNumber() );
+                receipt_date.setText( data.getReceiptDate() );
+        },
+            error -> {
+              Log.d( "_ERROR", error.getMessage() );
+              progressBar.setVisibility(ProgressBar.INVISIBLE);
 
-
-
-        });
+//              Toast.makeText( this, error.getMessage(), Toast.LENGTH_SHORT).show();
+            });
 
   }
 }
