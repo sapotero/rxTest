@@ -9,4 +9,6 @@ import sapotero.rxtest.models.AuthToken;
 public interface AuthTokenService {
   @PUT("token/{username}.json")
   Observable<AuthToken> getAuth(@Path("username") String username, @Query("password") String password);
+
+
 }

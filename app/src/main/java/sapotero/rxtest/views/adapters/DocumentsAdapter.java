@@ -193,7 +193,7 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
       btnLocation = (ImageButton) itemView.findViewById(R.id.btnLocation);
 
       cv    = (CardView)itemView.findViewById(R.id.cv);
-      title = (TextView)itemView.findViewById(R.id.title);
+      title = (TextView)itemView.findViewById(R.id._title);
       from  = (TextView)itemView.findViewById(R.id.from);
       md5   = (TextView)itemView.findViewById(R.id.md5);
       date   = (TextView)itemView.findViewById(R.id.date);

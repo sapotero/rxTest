@@ -1,4 +1,4 @@
-package sapotero.rxtest.views.activities;
+package sapotero.rxtest.views.adapters.decorators;
 
 import android.content.Context;
 import android.content.res.TypedArray;

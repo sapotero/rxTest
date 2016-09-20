@@ -4,274 +4,54 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
+    android:padding="18dp"
+
+    android:clipToPadding="false"
     tools:context=".views.activities.MainActivity">
 
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_gravity="center_horizontal"
-        android:layout_weight="1">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Аккаунт"
-            android:id="@+id/textView"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/auth_token"/>
+        android:clipToPadding="false"
+        android:layout_weight="4">
 
         <ProgressBar
-            style="?android:attr/progressBarStyleLarge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/progressBar"
-            android:layout_centerVertical="true"
-            android:layout_centerHorizontal="true"
-            android:layout_gravity="center_horizontal"/>
-
-        <EditText
+            style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/editText"
-            android:hint="Login"
-            android:layout_alignParentTop="true"
-            android:layout_alignStart="@+id/button"
-            android:layout_marginTop="27dp"
-            android:text="admin"/>
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textPassword"
-            android:ems="10"
-            android:id="@+id/editText2"
-            android:layout_gravity="center_horizontal"
-            android:hint="Password"
-            android:text="123456"/>
-
-        <Button
-            android:id="@+id/button"
-            android:layout_width="156dp"
-            android:layout_height="wrap_content"
-            android:text="Войти"
-            android:onClick="run"
-            android:layout_above="@+id/progressBar"
-            android:layout_toStartOf="@+id/progressBar"
-            android:layout_gravity="center_horizontal"/>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_weight="2">
+            android:id="@+id/progressBar"
+            android:indeterminate="true"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Документы"
-            android:id="@+id/textView2"/>
+            android:text="Статус"
+            android:id="@+id/textView2"
+            android:layout_marginBottom="10dp"/>
+
+        <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/DOCUMENT_TYPE"
+            android:layout_gravity="center_horizontal"/>
+
         <android.support.v7.widget.RecyclerView
             android:id="@+id/documentsRecycleView"
             android:scrollbars="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="557dp"
+            android:layout_marginTop="20dp"
+            />
 
-    </LinearLayout>
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_weight="2">
-
-        <TextView
+        <ProgressBar
+            style="?android:attr/progressBarStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Информация"
-            android:id="@+id/textView3"/>
+            android:id="@+id/progressBar"
+            android:layout_gravity="right"/>
 
-        <TableLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:stretchColumns="*"
-            android:id="@+id/infoTable"
-            android:visibility="invisible">
-
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/_uid"
-                    android:text="uid"
-                    android:layout_column="0"
-                    android:layout_span="1"/>
-
-                <TextView
-                    android:id="@+id/uid"
-                    android:text=""
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_column="1"
-                    android:layout_span="3"/>
-            </TableRow>
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/_md5"
-                    android:text="md5"
-                    android:layout_column="0"
-                    android:layout_span="1"/>
-
-                <TextView
-                    android:id="@+id/md5"
-                    android:text=""
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_column="1"
-                    android:layout_span="3"/>
-            </TableRow>
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/_title"
-                    android:text="title"
-                    android:layout_column="0"
-                    android:layout_span="1"/>
-
-                <TextView
-                    android:id="@+id/title"
-                    android:text=""
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_column="1"
-                    android:layout_span="3"/>
-            </TableRow>
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/_registration_number"
-                    android:text="registration_number"
-                    android:layout_column="0"
-                    android:layout_span="1"/>
-
-                <TextView
-                    android:id="@+id/registration_number"
-                    android:text=""
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_column="1"
-                    android:layout_span="3"/>
-            </TableRow>
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/_urgency"
-                    android:text="urgency"
-                    android:layout_column="0"
-                    android:layout_span="1"/>
-
-                <TextView
-                    android:id="@+id/urgency"
-                    android:text=""
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_column="1"
-                    android:layout_span="3"/>
-            </TableRow>
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/_short_description"
-                    android:text="short_description"
-                    android:layout_column="0"
-                    android:layout_span="1"/>
-
-                <TextView
-                    android:id="@+id/short_description"
-                    android:text=""
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_column="1"
-                    android:layout_span="3"/>
-            </TableRow>
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/_comment"
-                    android:text="comment"
-                    android:layout_column="0"
-                    android:layout_span="1"/>
-
-                <TextView
-                    android:id="@+id/comment"
-                    android:text=""
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_column="1"
-                    android:layout_span="3"/>
-            </TableRow>
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/_external_document_number"
-                    android:text="external_document_number"
-                    android:layout_column="0"
-                    android:layout_span="1"/>
-
-                <TextView
-                    android:id="@+id/external_document_number"
-                    android:text=""
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_column="1"
-                    android:layout_span="3"/>
-            </TableRow>
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:id="@+id/_receipt_date"
-                    android:text="receipt_date"
-                    android:layout_column="0"
-                    android:layout_span="1"/>
-
-                <TextView
-                    android:id="@+id/receipt_date"
-                    android:text=""
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_column="1"
-                    android:layout_span="3"/>
-            </TableRow>
-        </TableLayout>
     </LinearLayout>
 
 

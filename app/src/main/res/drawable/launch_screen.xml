@@ -1,0 +1,10 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android" android:opacity="opaque">
+    <item android:drawable="@android:color/white"/>
+    <item>
+        <bitmap
+            android:src="@drawable/gerb"
+            android:gravity="center"
+            android:filter="false"
+            android:antialias="false"/>
+    </item>
+</layer-list>

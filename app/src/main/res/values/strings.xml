@@ -1,3 +1,23 @@
 <resources>
     <string name="app_name">RxTest</string>
+    <string name="username_hinf">Логин</string>
+    <string name="password_hint">Пароль</string>
+    <string name="login_button">Войти</string>
+
+    <string-array name="DOCUMENT_TYPES">
+        <item>Отправлен на доклад</item>
+        <item>Отправлен на исполнение</item>
+        <item>Первичное рассмотрение</item>
+        <item>Согласование проектов документов</item>
+        <item>Подписание проектов документов</item>
+    </string-array>
+
+    <string-array name="DOCUMENT_TYPES_VALUE">
+        <item>sent_to_the_report</item>
+        <item>sent_to_the_performance</item>
+        <item>primary_consideration</item>
+        <item>approval</item>
+        <item>signing</item>
+    </string-array>
+
 </resources>

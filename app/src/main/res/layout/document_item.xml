@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
-              android:layout_height="250dp"
+              android:layout_height="match_parent"
+                android:background="@android:color/white"
+                android:elevation="10dp"
               xmlns:card_view="http://schemas.android.com/apk/res-auto"
-              android:padding="16dp"
-
     >
 
     <android.support.v7.widget.CardView
@@ -12,9 +12,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         card_view:cardUseCompatPadding="true"
-        card_view:cardElevation="4dp"
-        card_view:cardCornerRadius="2dp"
-        android:clickable="true"
+        card_view:cardElevation="32dp"
+        card_view:cardCornerRadius="8dp"
         android:foreground="@drawable/card_foreground"
         >
 
@@ -28,7 +27,7 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:id="@+id/title"
+                android:id="@+id/_title"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentStart="true"
                 />
@@ -47,8 +46,8 @@
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:id="@+id/md5"
                 android:layout_alignParentEnd="false"
-                android:layout_below="@+id/title"
-                android:layout_toEndOf="@+id/title"/>
+                android:layout_below="@+id/_title"
+                android:layout_toEndOf="@+id/_title"/>
 
             <TextView
                 android:layout_width="wrap_content"
