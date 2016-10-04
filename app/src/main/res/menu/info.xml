@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--<group-->
+        <!--android:id="@+id/groupVsbl">-->
+        <!--<item-->
+            <!--android:id="@+id/item2"-->
+            <!--android:icon="@android:drawable/ic_menu_call"-->
+            <!--android:showAsAction="always|withText"-->
+            <!--android:title="CALL"-->
+            <!--android:onClick="showInfoCard"-->
+            <!--tools:ignore="AppCompatResource">-->
+        <!--</item>-->
+    <!--</group>-->
+</menu>

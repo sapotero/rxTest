@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">RxTest</string>
+    <string name="app_name">RxSed</string>
     <string name="username_hinf">Логин</string>
     <string name="password_hint">Пароль</string>
     <string name="login_button">Войти</string>
@@ -19,5 +19,38 @@
         <item>approval</item>
         <item>signing</item>
     </string-array>
+
+
+    <string-array name="JOURNAL_TYPES">
+        <item>Все документы</item>
+        <item>Входящие документы</item>
+        <item>Обращения граждан</item>
+        <item>НПА</item>
+        <item>Подписание/Согласование</item>
+        <item>Приказы</item>
+        <item>Приказы ДДО</item>
+        <item>Внутренние документы</item>
+        <item>На контроле</item>
+    </string-array>
+
+    <string-array name="JOURNAL_TYPES_VALUE">
+        <item>all</item>
+        <item>incoming_documents</item>
+        <item>citizen_requests</item>
+        <item>incoming_orders</item>
+        <item>approve</item>
+        <item>incoming_orders</item>
+        <item>orders_ddo</item>
+        <item>control</item>
+    </string-array>
+
+    <string-array name="ORGANIZATIONS">
+        <item>Все организации</item>
+    </string-array>
+
+
+    <string name="tab_document">документ</string>
+    <string name="tab_info">инфокарта</string>
+
 
 </resources>
