@@ -54,6 +54,13 @@ dependencies {
     compile 'org.greenrobot:eventbus:3.0.0'
     compile 'com.birbit:android-priority-jobqueue:2.0.0'
     compile 'com.android.support:design:24.2.0'
+
+    // pdf https://android-arsenal.com/details/1/3155#!description
+    compile 'es.voghdev.pdfviewpager:library:1.0.1'
+
+    // https://github.com/requery/requery
+    compile 'io.requery:requery:1.0.0'
+    compile 'io.requery:requery-android:1.0.0' // for android
 }
 
 buildscript {

@@ -59,13 +59,13 @@ public class DocumentInfo {
     private String infoCard;
     @SerializedName("links")
     @Expose
-    private List<Object> links = new ArrayList<Object>();
+    private List<String> links = new ArrayList<String>();
     @SerializedName("images")
     @Expose
-    private List<Object> images = new ArrayList<Object>();
+    private List<Image> images = new ArrayList<Image>();
     @SerializedName("control_labels")
     @Expose
-    private List<Object> controlLabels = new ArrayList<Object>();
+    private List<ControlLabel> controlLabels = new ArrayList<ControlLabel>();
     @SerializedName("actions")
     @Expose
     private List<Object> actions = new ArrayList<Object>();
@@ -363,7 +363,7 @@ public class DocumentInfo {
      * @return
      *     The links
      */
-    public List<Object> getLinks() {
+    public List<String> getLinks() {
         return links;
     }
 
@@ -372,7 +372,7 @@ public class DocumentInfo {
      * @param links
      *     The links
      */
-    public void setLinks(List<Object> links) {
+    public void setLinks(List<String> links) {
         this.links = links;
     }
 
@@ -381,7 +381,7 @@ public class DocumentInfo {
      * @return
      *     The images
      */
-    public List<Object> getImages() {
+    public List<Image> getImages() {
         return images;
     }
 
@@ -390,7 +390,7 @@ public class DocumentInfo {
      * @param images
      *     The images
      */
-    public void setImages(List<Object> images) {
+    public void setImages(List<Image> images) {
         this.images = images;
     }
 
@@ -399,7 +399,7 @@ public class DocumentInfo {
      * @return
      *     The controlLabels
      */
-    public List<Object> getControlLabels() {
+    public List<ControlLabel> getControlLabels() {
         return controlLabels;
     }
 
@@ -408,7 +408,7 @@ public class DocumentInfo {
      * @param controlLabels
      *     The control_labels
      */
-    public void setControlLabels(List<Object> controlLabels) {
+    public void setControlLabels(List<ControlLabel> controlLabels) {
         this.controlLabels = controlLabels;
     }
 

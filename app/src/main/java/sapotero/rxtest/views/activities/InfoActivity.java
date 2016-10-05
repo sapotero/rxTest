@@ -21,6 +21,10 @@ import android.widget.Toast;
 import java.io.UnsupportedEncodingException;
 import java.util.Objects;
 
+import es.voghdev.pdfviewpager.library.PDFViewPager;
+import es.voghdev.pdfviewpager.library.RemotePDFViewPager;
+import es.voghdev.pdfviewpager.library.adapter.PDFPagerAdapter;
+import es.voghdev.pdfviewpager.library.remote.DownloadFile;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -36,7 +40,7 @@ import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.fragments.InfoCardFragment;
 
-public class InfoActivity extends AppCompatActivity implements InfoCardFragment.OnFragmentInteractionListener {
+public class InfoActivity extends AppCompatActivity implements InfoCardFragment.OnFragmentInteractionListener, DownloadFile.Listener {
 
   private  TextView uid;
   private  TextView sort_key;
@@ -65,11 +69,21 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
   private static Integer POSITION = 0;
   private View loader;
 
+  private DocumentInfo DOCUMENT;
+
+
+  private RemotePDFViewPager remotePDFViewPager;
+
+  private PDFViewPager pdfView;
+  private PDFPagerAdapter adapter;
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     setTheme(R.style.AppTheme);
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_info);
+
+    remotePDFViewPager = new RemotePDFViewPager(this, "http://partners.adobe.com/public/developer/en/xml/AdobeXMLFormsSamples.pdf", this);
 
     uid                      = (TextView) findViewById(R.id._uid);
     sort_key                 = (TextView) findViewById(R.id.SortKey);
@@ -112,6 +126,9 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
         if ( Objects.equals( tab.getPosition(), 1 ) ) {
           WebView webView = (WebView) findViewById(R.id.web_infocard);
           try {
+            if ( CARD.length != 0 ){
+
+            }
             webView.loadData( new String(CARD, "UTF-8"), "text/html; charset=utf-8", "utf-8" );
           } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
@@ -130,7 +147,7 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
       }
     });
 
-    if (extras != null){
+    if (extras != null) {
         LOGIN    = extras.getString( EsdConfig.LOGIN);
         TOKEN    = extras.getString( EsdConfig.TOKEN);
         PASSWORD = extras.getString( EsdConfig.PASSWORD);
@@ -160,6 +177,9 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
           .observeOn( AndroidSchedulers.mainThread() )
           .subscribe(
             data -> {
+
+              DOCUMENT = data;
+
               loader.setVisibility(ProgressBar.INVISIBLE);
 
               title.setText( data.getTitle() );
@@ -194,7 +214,7 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
                 Log.d( "_ERROR", error.getMessage() );
                 Toast.makeText( this, error.getMessage(), Toast.LENGTH_SHORT).show();
             });
-    }
+        }
   }
 
   @Override
@@ -205,13 +225,7 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
       .setIcon(android.R.drawable.ic_dialog_info)
       .setOnMenuItemClickListener(
         item -> {
-
-          try {
-            InfoActivity.this.showInfoCard();
-          } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-          }
-
+          Log.d( "__InfoActivity", String.valueOf( DOCUMENT.getImages().size() ) );
           return true;
       })
       .setShowAsAction( MenuItem.SHOW_AS_ACTION_ALWAYS);
@@ -278,19 +292,44 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
 
   }
 
-  private void showInfoCard() throws UnsupportedEncodingException {
-//    AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-
-//    WebView webView =
-//    webView.loadData( new String(CARD, "UTF-8"), "text/html; charset=utf-8", "utf-8" );
-
-//    dialog.setView( webView )
-//      .setPositiveButton( "Ok", null )
-//      .show();
-  }
-
   @Override
   public void onFragmentInteraction(Uri uri) {
 
+  }
+
+
+
+  // pdf
+  @Override
+  public void onSuccess(String url, String destinationPath) {
+    // That's the positive case. PDF Download went fine
+
+    adapter = new PDFPagerAdapter(this, "AdobeXMLFormsSamples.pdf");
+
+    pdfView = (PDFViewPager) findViewById(R.id.pdfView);
+    pdfView.setAdapter(adapter);
+
+  }
+
+  @Override
+  public void onFailure(Exception e) {
+    // This will be called if download fails
+  }
+
+  @Override
+  public void onProgressUpdate(int progress, int total) {
+    // You will get download progress here
+    // Always on UI Thread so feel free to update your views here
+    Log.d( "PROGRESS", String.valueOf(progress));
+    Log.d( "TOTAL", String.valueOf(total));
+  }
+
+  @Override
+  protected void onDestroy() {
+    super.onDestroy();
+
+    if ( adapter != null ){
+      adapter.close();
+    }
   }
 }
