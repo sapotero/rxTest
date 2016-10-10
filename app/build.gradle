@@ -1,8 +1,5 @@
 apply plugin: 'com.android.application'
 apply plugin: 'me.tatarka.retrolambda'
-repositories {
-    mavenCentral()
-}
 
 android {
     compileSdkVersion 24
@@ -17,7 +14,7 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -26,6 +23,7 @@ android {
         sourceCompatibility 1.8
     }
 }
+
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
@@ -56,11 +54,15 @@ dependencies {
     compile 'com.android.support:design:24.2.0'
 
     // pdf https://android-arsenal.com/details/1/3155#!description
-    compile 'es.voghdev.pdfviewpager:library:1.0.1'
+    // compile 'es.voghdev.pdfviewpager:library:1.0.1'
+    compile 'com.github.barteksc:android-pdf-viewer:2.1.0'
 
-    // https://github.com/requery/requery
-    compile 'io.requery:requery:1.0.0'
-    compile 'io.requery:requery-android:1.0.0' // for android
+    // rx sqlite provider
+    compile 'com.squareup.sqlbrite:sqlbrite:0.7.0'
+
+    // logger
+    compile 'com.jakewharton.timber:timber:4.3.1'
+
 }
 
 buildscript {
@@ -70,5 +72,15 @@ buildscript {
 
     dependencies {
         classpath 'me.tatarka:gradle-retrolambda:3.3.0'
+        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
     }
 }
+// Apply plugin
+apply plugin: 'com.neenbedankt.android-apt'
+
+// Add Dagger dependencies
+dependencies {
+    compile 'com.google.dagger:dagger:2.7'
+    apt 'com.google.dagger:dagger-compiler:2.7'
+}
+

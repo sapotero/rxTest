@@ -18,21 +18,24 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.squareup.sqlbrite.BriteDatabase;
+
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Objects;
 
-import es.voghdev.pdfviewpager.library.PDFViewPager;
-import es.voghdev.pdfviewpager.library.RemotePDFViewPager;
-import es.voghdev.pdfviewpager.library.adapter.PDFPagerAdapter;
-import es.voghdev.pdfviewpager.library.remote.DownloadFile;
+import javax.inject.Inject;
+
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Func0;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.EsdConfig;
 import sapotero.rxtest.R;
+import sapotero.rxtest.db.Auth;
 import sapotero.rxtest.models.document.Decision;
 import sapotero.rxtest.models.document.DocumentInfo;
 import sapotero.rxtest.retrofit.DocumentService;
@@ -40,7 +43,7 @@ import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.fragments.InfoCardFragment;
 
-public class InfoActivity extends AppCompatActivity implements InfoCardFragment.OnFragmentInteractionListener, DownloadFile.Listener {
+public class InfoActivity extends AppCompatActivity implements InfoCardFragment.OnFragmentInteractionListener {
 
   private  TextView uid;
   private  TextView sort_key;
@@ -71,11 +74,10 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
 
   private DocumentInfo DOCUMENT;
 
+  private Auth Auth;
 
-  private RemotePDFViewPager remotePDFViewPager;
-
-  private PDFViewPager pdfView;
-  private PDFPagerAdapter adapter;
+  @Inject
+  BriteDatabase db;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -83,7 +85,7 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_info);
 
-    remotePDFViewPager = new RemotePDFViewPager(this, "http://partners.adobe.com/public/developer/en/xml/AdobeXMLFormsSamples.pdf", this);
+    Auth = new Auth(this);
 
     uid                      = (TextView) findViewById(R.id._uid);
     sort_key                 = (TextView) findViewById(R.id.SortKey);
@@ -221,16 +223,72 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
   public boolean onCreateOptionsMenu(Menu menu) {
     getMenuInflater().inflate(R.menu.info, menu);
 
-    menu.add(0, 0, 0, "Информационная карточка")
+    menu
+      .add(0, 0, 0, "Информационная карточка")
       .setIcon(android.R.drawable.ic_dialog_info)
       .setOnMenuItemClickListener(
         item -> {
-          Log.d( "__InfoActivity", String.valueOf( DOCUMENT.getImages().size() ) );
+
+          ArrayList<ArrayList<String>> result = Auth.select("*", null, null, null, null);
+          Log.d( "_DATA", result.toString() );
+
           return true;
       })
       .setShowAsAction( MenuItem.SHOW_AS_ACTION_ALWAYS);
 
+    menu
+      .add(0, 0, 0, "Добавить")
+      .setIcon(android.R.drawable.ic_input_add)
+      .setOnMenuItemClickListener(
+        item -> {
+
+          if ( Auth.hasUser( LOGIN ) ){
+            Auth.update( Auth.token, TOKEN, Auth.login, LOGIN );
+          } else {
+            Auth.insert(LOGIN, TOKEN, null, null);
+          };
+
+          return true;
+        })
+      .setShowAsAction( MenuItem.SHOW_AS_ACTION_ALWAYS);
+
+    menu
+      .add(0, 0, 0, "Удалить")
+      .setIcon(android.R.drawable.ic_delete)
+      .setOnMenuItemClickListener(
+        item -> {
+
+          Auth.deleteAll();
+
+          return true;
+        })
+      .setShowAsAction( MenuItem.SHOW_AS_ACTION_ALWAYS);
+
+    menu
+      .add(0, 0, 0, "Insert")
+      .setIcon(android.R.drawable.ic_menu_week)
+      .setOnMenuItemClickListener(
+        item -> {
+
+          Observable.defer(new Func0<Observable<Observable>>() {
+            @Override
+            public Observable<Observable> call() {
+              return Observable.just(massInsert());
+            }
+          });
+
+          return true;
+
+
+        })
+      .setShowAsAction( MenuItem.SHOW_AS_ACTION_ALWAYS);
+
     return true;
+  }
+
+  private Observable massInsert() {
+    Auth.massInsert();
+    return Observable.just(1);
   }
 
   public void createDecisionTableHeader(){
@@ -298,38 +356,11 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
   }
 
 
-
-  // pdf
-  @Override
-  public void onSuccess(String url, String destinationPath) {
-    // That's the positive case. PDF Download went fine
-
-    adapter = new PDFPagerAdapter(this, "AdobeXMLFormsSamples.pdf");
-
-    pdfView = (PDFViewPager) findViewById(R.id.pdfView);
-    pdfView.setAdapter(adapter);
-
-  }
-
-  @Override
-  public void onFailure(Exception e) {
-    // This will be called if download fails
-  }
-
-  @Override
-  public void onProgressUpdate(int progress, int total) {
-    // You will get download progress here
-    // Always on UI Thread so feel free to update your views here
-    Log.d( "PROGRESS", String.valueOf(progress));
-    Log.d( "TOTAL", String.valueOf(total));
-  }
-
   @Override
   protected void onDestroy() {
-    super.onDestroy();
 
-    if ( adapter != null ){
-      adapter.close();
-    }
+    Auth.close();
+    super.onDestroy();
   }
+
 }
