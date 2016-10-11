@@ -12,6 +12,7 @@
         android:label="@string/app_name"
         android:screenOrientation="landscape"
         android:supportsRtl="true"
+        android:name=".EsdApplication"
         android:theme="@style/AppTheme.Launcher">
         <activity
             android:name=".views.activities.LoginActivity"

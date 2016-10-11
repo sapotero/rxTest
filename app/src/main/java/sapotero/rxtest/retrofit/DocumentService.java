@@ -4,7 +4,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 import rx.Observable;
-import sapotero.rxtest.models.document.DocumentInfo;
+import sapotero.rxtest.retrofit.models.document.DocumentInfo;
 
 public interface DocumentService {
   @GET("{document}.json")

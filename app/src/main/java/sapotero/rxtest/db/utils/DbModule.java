@@ -14,11 +14,11 @@ import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 @Module
-public final class RxDb {
+public final class DbModule {
   @Provides
   @Singleton
   SQLiteOpenHelper provideOpenHelper(Context context) {
-    return new RxDbOpenHelper(context);
+    return new DbOpenHelper(context);
   }
 
   @Provides

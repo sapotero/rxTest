@@ -34,12 +34,12 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import sapotero.rxtest.EsdConfig;
+import sapotero.rxtest.EsdApplication;
 import sapotero.rxtest.Jobs.GetDocumentInfoJob;
 import sapotero.rxtest.R;
 import sapotero.rxtest.events.GetDocumentInfoEvent;
-import sapotero.rxtest.models.documents.Document;
-import sapotero.rxtest.models.documents.Documents;
+import sapotero.rxtest.retrofit.models.documents.Document;
+import sapotero.rxtest.retrofit.models.documents.Documents;
 import sapotero.rxtest.retrofit.DocumentsService;
 import sapotero.rxtest.retrofit.utils.RxErrorHandlingCallAdapterFactory;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
@@ -85,9 +85,9 @@ public class MainActivity extends AppCompatActivity {
     Bundle extras = getIntent().getExtras();
 
     if (extras != null) {
-      LOGIN    = extras.getString( EsdConfig.LOGIN);
-      TOKEN    = extras.getString( EsdConfig.TOKEN);
-      PASSWORD = extras.getString( EsdConfig.PASSWORD);
+      LOGIN    = extras.getString( EsdApplication.LOGIN);
+      TOKEN    = extras.getString( EsdApplication.TOKEN);
+      PASSWORD = extras.getString( EsdApplication.PASSWORD);
 
       Log.d( "__INTENT", LOGIN );
       Log.d( "__INTENT", PASSWORD );
@@ -189,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addCallAdapterFactory(RxErrorHandlingCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl("http://mobile.esd.n-core.ru/v3/")
+      .baseUrl(EsdApplication.HOST + "/v3/")
       .build();
 
     DocumentsService documentsService = retrofit.create( DocumentsService.class );
@@ -224,10 +224,10 @@ public class MainActivity extends AppCompatActivity {
 
   public static void showDocumentInfo(View view, int position) {
     Intent intent = new Intent(context, InfoActivity.class);
-    intent.putExtra( EsdConfig.LOGIN,    LOGIN );
-    intent.putExtra( EsdConfig.PASSWORD, PASSWORD );
-    intent.putExtra( EsdConfig.TOKEN,    TOKEN );
-    intent.putExtra(String.valueOf(EsdConfig.POSITION),    position );
+    intent.putExtra( EsdApplication.LOGIN,    LOGIN );
+    intent.putExtra( EsdApplication.PASSWORD, PASSWORD );
+    intent.putExtra( EsdApplication.TOKEN,    TOKEN );
+    intent.putExtra(String.valueOf(EsdApplication.POSITION),    position );
 
     context.startActivity(intent);
   }

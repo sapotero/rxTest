@@ -16,7 +16,7 @@ import com.daimajia.swipe.adapters.RecyclerSwipeAdapter;
 import java.util.List;
 
 import sapotero.rxtest.R;
-import sapotero.rxtest.models.documents.Document;
+import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.views.activities.MainActivity;
 
 public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.SimpleViewHolder> {

@@ -11,13 +11,16 @@ import android.view.ViewGroup;
 
 import java.util.Objects;
 
+import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
+
 
 public class InfoCardFragment extends Fragment {
 
   public  static final String ARG_PAGE = "ARG_PAGE";
   private int mPage;
 
+  private CompositeSubscription subscriptions;
   private OnFragmentInteractionListener mListener;
 
   public InfoCardFragment() {
@@ -65,7 +68,9 @@ public class InfoCardFragment extends Fragment {
 
   @Override
   public void onAttach(Context context) {
+
     super.onAttach(context);
+
     if (context instanceof OnFragmentInteractionListener) {
       mListener = (OnFragmentInteractionListener) context;
     } else {

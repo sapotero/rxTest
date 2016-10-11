@@ -25,6 +25,27 @@ android {
 }
 
 
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'me.tatarka:gradle-retrolambda:3.3.0'
+        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
+    }
+}
+// Apply plugin
+apply plugin: 'com.neenbedankt.android-apt'
+
+// Add Dagger dependencies
+dependencies {
+    compile 'com.google.dagger:dagger:2.7'
+    apt 'com.google.dagger:dagger-compiler:2.7'
+}
+
+
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
@@ -39,6 +60,9 @@ dependencies {
     //RxAndroid
     compile 'io.reactivex:rxandroid:1.2.1'
     compile 'io.reactivex:rxjava:1.1.6'
+    compile 'com.jakewharton.rxbinding:rxbinding:0.4.0'
+//    compile 'com.jakewharton.rxbinding:rxbinding-recyclerview-v7:0.4.0'
+//    compile 'com.jakewharton.rxbinding:rxbinding-appcompat-v7:0.4.0'
 
     //Gson
     compile 'com.google.code.gson:gson:2.4'
@@ -63,24 +87,26 @@ dependencies {
     // logger
     compile 'com.jakewharton.timber:timber:4.3.1'
 
+    // генерация rx-моделек
+    compile 'javax.annotation:javax.annotation-api:1.2'
+
+    compile 'com.google.auto.value:auto-value:1.2'
+    apt     'com.google.auto.value:auto-value:1.2'
+
+    apt     'com.ryanharter.auto.value:auto-value-parcel:0.2.4-rc2'
+    compile 'com.ryanharter.auto.value:auto-value-parcel-adapter:0.2.4-rc2'
+
+    // простой биндинг
+    compile 'com.jakewharton:butterknife:8.4.0'
+    apt 'com.jakewharton:butterknife-compiler:8.4.0'
+
+    //бейджи https://github.com/mikepenz/Android-ActionItemBadge
+    compile 'com.mikepenz:actionitembadge:3.3.0@aar'
+    compile 'com.mikepenz:iconics-core:2.8.0@aar'
+    compile 'com.mikepenz:material-design-iconic-typeface:2.2.0.2@aar'
+    compile "com.android.support:appcompat-v7:24.2.0"
+
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.6'
+
+
 }
-
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath 'me.tatarka:gradle-retrolambda:3.3.0'
-        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
-    }
-}
-// Apply plugin
-apply plugin: 'com.neenbedankt.android-apt'
-
-// Add Dagger dependencies
-dependencies {
-    compile 'com.google.dagger:dagger:2.7'
-    apt 'com.google.dagger:dagger-compiler:2.7'
-}
-

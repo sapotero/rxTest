@@ -1,5 +1,5 @@
 
-package sapotero.rxtest.models.documents;
+package sapotero.rxtest.retrofit.models.documents;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

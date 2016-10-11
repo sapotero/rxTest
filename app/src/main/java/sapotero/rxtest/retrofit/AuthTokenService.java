@@ -4,7 +4,7 @@ import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 import rx.Observable;
-import sapotero.rxtest.models.AuthToken;
+import sapotero.rxtest.retrofit.models.AuthToken;
 
 public interface AuthTokenService {
   @PUT("token/{username}.json")

@@ -1,9 +1,13 @@
-package sapotero.rxtest.models.documents;
+
+package sapotero.rxtest.retrofit.models.document;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Document {
+import java.util.ArrayList;
+import java.util.List;
+
+public class DocumentInfo {
 
     @SerializedName("uid")
     @Expose
@@ -25,7 +29,7 @@ public class Document {
     private String registrationDate;
     @SerializedName("urgency")
     @Expose
-    private Object urgency;
+    private String urgency;
     @SerializedName("short_description")
     @Expose
     private String shortDescription;
@@ -37,13 +41,34 @@ public class Document {
     private String externalDocumentNumber;
     @SerializedName("receipt_date")
     @Expose
-    private Object receiptDate;
+    private String receiptDate;
     @SerializedName("signer")
     @Expose
     private Signer signer;
     @SerializedName("viewed")
     @Expose
     private Boolean viewed;
+    @SerializedName("exemplars")
+    @Expose
+    private List<Exemplar> exemplars = new ArrayList<Exemplar>();
+    @SerializedName("decisions")
+    @Expose
+    private List<Decision> decisions = new ArrayList<Decision>();
+    @SerializedName("info_card")
+    @Expose
+    private String infoCard;
+    @SerializedName("links")
+    @Expose
+    private List<String> links = new ArrayList<String>();
+    @SerializedName("images")
+    @Expose
+    private List<Image> images = new ArrayList<Image>();
+    @SerializedName("control_labels")
+    @Expose
+    private List<ControlLabel> controlLabels = new ArrayList<ControlLabel>();
+    @SerializedName("actions")
+    @Expose
+    private List<Object> actions = new ArrayList<Object>();
 
     /**
      * 
@@ -158,7 +183,7 @@ public class Document {
      * @return
      *     The urgency
      */
-    public Object getUrgency() {
+    public String getUrgency() {
         return urgency;
     }
 
@@ -167,7 +192,7 @@ public class Document {
      * @param urgency
      *     The urgency
      */
-    public void setUrgency(Object urgency) {
+    public void setUrgency(String urgency) {
         this.urgency = urgency;
     }
 
@@ -230,7 +255,7 @@ public class Document {
      * @return
      *     The receiptDate
      */
-    public Object getReceiptDate() {
+    public String getReceiptDate() {
         return receiptDate;
     }
 
@@ -239,7 +264,7 @@ public class Document {
      * @param receiptDate
      *     The receipt_date
      */
-    public void setReceiptDate(Object receiptDate) {
+    public void setReceiptDate(String receiptDate) {
         this.receiptDate = receiptDate;
     }
 
@@ -277,6 +302,132 @@ public class Document {
      */
     public void setViewed(Boolean viewed) {
         this.viewed = viewed;
+    }
+
+    /**
+     * 
+     * @return
+     *     The exemplars
+     */
+    public List<Exemplar> getExemplars() {
+        return exemplars;
+    }
+
+    /**
+     * 
+     * @param exemplars
+     *     The exemplars
+     */
+    public void setExemplars(List<Exemplar> exemplars) {
+        this.exemplars = exemplars;
+    }
+
+    /**
+     * 
+     * @return
+     *     The decisions
+     */
+    public List<Decision> getDecisions() {
+        return decisions;
+    }
+
+    /**
+     * 
+     * @param decisions
+     *     The decisions
+     */
+    public void setDecisions(List<Decision> decisions) {
+        this.decisions = decisions;
+    }
+
+    /**
+     * 
+     * @return
+     *     The infoCard
+     */
+    public String getInfoCard() {
+        return infoCard;
+    }
+
+    /**
+     * 
+     * @param infoCard
+     *     The info_card
+     */
+    public void setInfoCard(String infoCard) {
+        this.infoCard = infoCard;
+    }
+
+    /**
+     * 
+     * @return
+     *     The links
+     */
+    public List<String> getLinks() {
+        return links;
+    }
+
+    /**
+     * 
+     * @param links
+     *     The links
+     */
+    public void setLinks(List<String> links) {
+        this.links = links;
+    }
+
+    /**
+     * 
+     * @return
+     *     The images
+     */
+    public List<Image> getImages() {
+        return images;
+    }
+
+    /**
+     * 
+     * @param images
+     *     The images
+     */
+    public void setImages(List<Image> images) {
+        this.images = images;
+    }
+
+    /**
+     * 
+     * @return
+     *     The controlLabels
+     */
+    public List<ControlLabel> getControlLabels() {
+        return controlLabels;
+    }
+
+    /**
+     * 
+     * @param controlLabels
+     *     The control_labels
+     */
+    public void setControlLabels(List<ControlLabel> controlLabels) {
+        this.controlLabels = controlLabels;
+    }
+
+    /**
+     * 
+     * @return
+     *     The actions
+     */
+    public List<Object> getActions() {
+        return actions;
+    }
+
+    /**
+     * 
+     * @param actions
+     *     The actions
+     */
+    public void setActions(List<Object> actions) {
+        this.actions = actions;
     }
 
 }

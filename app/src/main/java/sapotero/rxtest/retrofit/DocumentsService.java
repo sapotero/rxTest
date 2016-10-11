@@ -3,7 +3,7 @@ package sapotero.rxtest.retrofit;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 import rx.Observable;
-import sapotero.rxtest.models.documents.Documents;
+import sapotero.rxtest.retrofit.models.documents.Documents;
 
 public interface DocumentsService {
   @GET("documents.json")

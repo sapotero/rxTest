@@ -19,9 +19,9 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import sapotero.rxtest.EsdConfig;
+import sapotero.rxtest.EsdApplication;
 import sapotero.rxtest.R;
-import sapotero.rxtest.models.AuthToken;
+import sapotero.rxtest.retrofit.models.AuthToken;
 import sapotero.rxtest.retrofit.AuthTokenService;
 
 public class LoginActivity extends AppCompatActivity {
@@ -58,7 +58,7 @@ public class LoginActivity extends AppCompatActivity {
         .client(okHttpClient)
         .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
         .addConverterFactory(GsonConverterFactory.create())
-        .baseUrl("http://mobile.esd.n-core.ru/")
+        .baseUrl( EsdApplication.HOST )
         .build();
     AuthTokenService authTokenService = retrofit.create( AuthTokenService.class );
 
@@ -72,9 +72,9 @@ public class LoginActivity extends AppCompatActivity {
               LOADER.setVisibility(ProgressBar.INVISIBLE);
 
               Intent intent = new Intent(this, MainActivity.class);
-              intent.putExtra( EsdConfig.LOGIN,    LOGIN.getText().toString() );
-              intent.putExtra( EsdConfig.PASSWORD, PASSWORD.getText().toString() );
-              intent.putExtra( EsdConfig.TOKEN,    _token );
+              intent.putExtra( EsdApplication.LOGIN,    LOGIN.getText().toString() );
+              intent.putExtra( EsdApplication.PASSWORD, PASSWORD.getText().toString() );
+              intent.putExtra( EsdApplication.TOKEN,    _token );
               startActivity(intent);
 
               finish();

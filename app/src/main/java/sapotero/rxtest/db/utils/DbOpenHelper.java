@@ -3,16 +3,17 @@ package sapotero.rxtest.db.utils;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
-public class DBHelper extends SQLiteOpenHelper {
+import timber.log.Timber;
+
+final class DbOpenHelper extends SQLiteOpenHelper {
   private static final String DATABASE_NAME = "esd.db";
   private static final int DATABASE_VERSION = 1;
-  private static final String TAG = DBHelper.class.getSimpleName();
+  private static final String TAG = DbOpenHelper.class.getSimpleName();
 
-  public DBHelper(Context context) {
+  public DbOpenHelper(Context context) {
     super(context, DATABASE_NAME, null, DATABASE_VERSION);
-    Log.d(TAG, "constructor");
+    Timber.tag(TAG).v("constructor");
   }
 
   @Override
@@ -25,9 +26,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
   @Override
   public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-    Log.w(TAG, "Update database from version  " + oldVersion
-      + " to " + newVersion + ", which remove all old records");
+    Timber.tag(TAG).v("Update database from version  " + oldVersion + " to " + newVersion + ", which remove all old records");
     onCreate(db);
   }
-
 }

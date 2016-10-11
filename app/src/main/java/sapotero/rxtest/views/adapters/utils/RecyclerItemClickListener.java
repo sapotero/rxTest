@@ -1,4 +1,4 @@
-package sapotero.rxtest.utils;
+package sapotero.rxtest.views.adapters.utils;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
