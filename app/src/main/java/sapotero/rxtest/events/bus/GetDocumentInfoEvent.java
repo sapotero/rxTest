@@ -1,4 +1,4 @@
-package sapotero.rxtest.events;
+package sapotero.rxtest.events.bus;
 
 /**
  * Created by sapotero on 04.10.16.

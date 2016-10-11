@@ -1,4 +1,4 @@
-package sapotero.rxtest.Jobs;
+package sapotero.rxtest.jobs.bus;
 
 import com.birbit.android.jobqueue.Job;
 import com.birbit.android.jobqueue.Params;

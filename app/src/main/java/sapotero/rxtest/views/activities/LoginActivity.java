@@ -5,32 +5,32 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.concurrent.TimeUnit;
+import javax.inject.Inject;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
-import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import sapotero.rxtest.EsdApplication;
 import sapotero.rxtest.R;
-import sapotero.rxtest.retrofit.models.AuthToken;
+import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.retrofit.AuthTokenService;
+import sapotero.rxtest.retrofit.models.AuthToken;
+import sapotero.rxtest.retrofit.utils.RetrofitManager;
 
 public class LoginActivity extends AppCompatActivity {
 
-  private EditText LOGIN;
-  private EditText PASSWORD;
-  private static View LOADER;
+  @BindView(R.id.username) TextView LOGIN;
+  @BindView(R.id.password) TextView PASSWORD;
+  @BindView(R.id.progress) View     LOADER;
 
-  private OkHttpClient okHttpClient;
+  @Inject OkHttpClient okHttpClient;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -38,28 +38,20 @@ public class LoginActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_login);
 
-    LOADER   = findViewById(R.id.loginProgress);
-    LOGIN    = (EditText) findViewById(R.id.username);
-    PASSWORD = (EditText) findViewById(R.id.password);
+    ButterKnife.bind(this);
+    EsdApplication.getComponent(this).inject(this);
+  }
 
-    okHttpClient = new OkHttpClient.Builder()
-        .readTimeout(60,    TimeUnit.SECONDS)
-        .connectTimeout(60, TimeUnit.SECONDS)
-        .addNetworkInterceptor(
-            new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.HEADERS)
-        )
-        .build();
+  @Override
+  public void onStop() {
+    super.onStop();
+
   }
 
   public void tryToLogin(View view) {
     LOADER.setVisibility(ProgressBar.VISIBLE);
 
-    Retrofit retrofit = new Retrofit.Builder()
-        .client(okHttpClient)
-        .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-        .addConverterFactory(GsonConverterFactory.create())
-        .baseUrl( EsdApplication.HOST )
-        .build();
+    Retrofit retrofit = new RetrofitManager( this, EsdApplication.HOST, okHttpClient).process();
     AuthTokenService authTokenService = retrofit.create( AuthTokenService.class );
 
     Observable<AuthToken> user = authTokenService.getAuth( LOGIN.getText().toString(), PASSWORD.getText().toString() );

@@ -1,4 +1,4 @@
-package sapotero.rxtest.Jobs;
+package sapotero.rxtest.jobs.bus;
 
 
 import android.support.annotation.Nullable;
@@ -11,7 +11,7 @@ import com.birbit.android.jobqueue.RetryConstraint;
 
 import org.greenrobot.eventbus.EventBus;
 
-import sapotero.rxtest.events.GetDocumentInfoEvent;
+import sapotero.rxtest.events.bus.GetDocumentInfoEvent;
 
 public class GetDocumentInfoJob extends Job {
 

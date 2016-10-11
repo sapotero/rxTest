@@ -1,4 +1,4 @@
-package sapotero.rxtest.events;
+package sapotero.rxtest.events.bus;
 
 
 public class MassInsertDoneEvent {

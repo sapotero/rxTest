@@ -1,4 +1,4 @@
-package sapotero.rxtest.Jobs;
+package sapotero.rxtest.jobs.bus;
 
 import android.support.annotation.Nullable;
 
@@ -10,7 +10,7 @@ import com.squareup.sqlbrite.BriteDatabase;
 import org.greenrobot.eventbus.EventBus;
 
 import sapotero.rxtest.db.models.Auth;
-import sapotero.rxtest.events.MassInsertDoneEvent;
+import sapotero.rxtest.events.bus.MassInsertDoneEvent;
 import timber.log.Timber;
 
 public class MassInsertJob extends BaseJob {

@@ -20,10 +20,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.birbit.android.jobqueue.Job;
 import com.birbit.android.jobqueue.JobManager;
-import com.birbit.android.jobqueue.config.Configuration;
-import com.birbit.android.jobqueue.di.DependencyInjector;
 import com.mikepenz.actionitembadge.library.ActionItemBadge;
 import com.mikepenz.actionitembadge.library.ActionItemBadgeAdder;
 import com.mikepenz.iconics.IconicsDrawable;
@@ -39,10 +36,10 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -50,12 +47,11 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
-import sapotero.rxtest.EsdApplication;
-import sapotero.rxtest.Jobs.BaseJob;
-import sapotero.rxtest.Jobs.MassInsertJob;
 import sapotero.rxtest.R;
+import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.models.Auth;
-import sapotero.rxtest.events.MassInsertDoneEvent;
+import sapotero.rxtest.events.bus.MassInsertDoneEvent;
+import sapotero.rxtest.jobs.bus.MassInsertJob;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
@@ -88,26 +84,28 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
   @BindView(R.id.tab_main)                 ViewPager viewPager;
   @BindView(R.id.tabs)                     TabLayout tabLayout;
 
-//  private  WebView info_card;
+  @Inject BriteDatabase db;
+  @Inject JobManager jobManager;
+  @Inject CompositeSubscription subscriptions;
+  @Inject OkHttpClient okHttpClient;
 
-  private Menu button;
   private static byte[] CARD;
+
   private static String  TOKEN    = "";
   private static String  LOGIN    = "";
   private static String  PASSWORD = "";
   private static Integer POSITION = 0;
 
-  private Context context;
-  static JobManager jobManager;
-
   private DocumentInfo DOCUMENT;
+
+  private Menu button;
   private Auth Auth;
   private String TAG = InfoActivity.this.getClass().getSimpleName();
 
-  @Inject BriteDatabase db;
+  private Context context;
 
-  @Singleton
-  private CompositeSubscription subscriptions = new CompositeSubscription();;
+//  @Singleton
+//  private CompositeSubscription subscriptions = new CompositeSubscription();;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -130,20 +128,6 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
     if (extras != null) {
       loadDocuments(extras);
     }
-
-    Configuration.Builder builder = new Configuration.Builder(this)
-      .minConsumerCount(1)
-      .maxConsumerCount(3)
-      .loadFactor(3)
-      .injector(new DependencyInjector() {
-        @Override
-        public void inject(Job job) {
-          EsdApplication.mainComponent.inject((BaseJob) job);
-        }
-      })
-      .consumerKeepAlive(120);
-
-    jobManager = new JobManager(builder.build());
   }
 
   private void loadDocuments(Bundle extras) {
@@ -156,12 +140,13 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
     Log.d( "__INTENT", PASSWORD );
     Log.d( "__INTENT", TOKEN );
 
-    DocumentsAdapter rvAdapter = (DocumentsAdapter) MainActivity.rv.getAdapter();
+    DocumentsAdapter rvAdapter = (DocumentsAdapter) MainActivity.rvv.getAdapter();
 
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
       .baseUrl(EsdApplication.HOST + "v3/documents/")
+      .client(okHttpClient)
       .build();
 
     DocumentService documentService = retrofit.create( DocumentService.class );

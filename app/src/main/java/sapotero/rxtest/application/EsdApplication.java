@@ -1,8 +1,12 @@
-package sapotero.rxtest;
+package sapotero.rxtest.application;
 
 import android.app.Application;
 import android.content.Context;
 
+import sapotero.rxtest.BuildConfig;
+import sapotero.rxtest.application.components.DaggerEsdComponent;
+import sapotero.rxtest.application.components.EsdComponent;
+import sapotero.rxtest.application.modules.EsdModule;
 import timber.log.Timber;
 
 public final class EsdApplication extends Application {
