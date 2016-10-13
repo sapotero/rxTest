@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/tools"
+    android:id="@+id/decision_card_view"
+    android:layout_width="match_parent"
+    android:layout_height="60dp"
+    android:layout_margin="@dimen/half_date_offset"
+    card_view:cardUseCompatPadding="true"
+
+    android:outlineProvider="bounds"
+    android:padding="@dimen/half_date_offset"
+
+    card_view:cardElevation="16dp"
+    android:clickable="true"
+    android:foreground="@drawable/card_foreground">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:padding="@dimen/date_offset"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/decision_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="date"
+            android:layout_weight="1"/>
+        <TextView
+            android:id="@+id/decision_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="user"
+            android:textAlignment="textEnd"
+            android:textSize="16sp"
+            android:layout_weight="1"
+            />
+    </LinearLayout>
+
+
+</android.support.v7.widget.CardView>

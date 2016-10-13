@@ -8,14 +8,17 @@ import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,6 +37,8 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -54,10 +59,13 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.application.config.Constant;
 import sapotero.rxtest.db.models.Auth;
 import sapotero.rxtest.events.bus.MassInsertDoneEvent;
+import sapotero.rxtest.events.bus.SetActiveDecisonEvent;
 import sapotero.rxtest.jobs.bus.MassInsertJob;
 import sapotero.rxtest.retrofit.DocumentService;
+import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
+import sapotero.rxtest.views.adapters.DecisionAdapter;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.fragments.InfoCardFragment;
@@ -65,22 +73,9 @@ import timber.log.Timber;
 
 public class InfoActivity extends AppCompatActivity implements InfoCardFragment.OnFragmentInteractionListener {
 
-  @BindView(R.id._uid)                     TextView uid;
-  @BindView(R.id.SortKey)                  TextView sort_key;
-  @BindView(R.id._title)                   TextView title;
-  @BindView(R.id.registration_number)      TextView registration_number;
-  @BindView(R.id.urgency)                  TextView urgency;
-  @BindView(R.id.short_description)        TextView short_description;
-  @BindView(R.id.comment)                  TextView comment;
-  @BindView(R.id.external_document_number) TextView external_document_number;
-  @BindView(R.id.receipt_date)             TextView receipt_date;
-  @BindView(R.id.signer)                   TextView signer;
-  @BindView(R.id.organisation)             TextView organisation;
+  @BindView(R.id.desigions_recycler_view) RecyclerView desigions_recycler_view;
+  @BindView(R.id.desigion_view)           LinearLayout desigion_view;
 
-  @BindView(R.id.decision_table)           TableLayout decision_table;
-  @BindView(R.id.route_table)              TableLayout route_table;
-  @BindView(R.id.decision_row)             TableRow decision_row;
-  @BindView(R.id.route_row)                TableRow route_row;
 
   @BindView(R.id.loader)                   View loader;
 
@@ -107,6 +102,7 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
   private String TAG = InfoActivity.class.getSimpleName();
 
   private Context context;
+  private DecisionAdapter decision_adapter;
 
 //  @Singleton
 //  private CompositeSubscription subscriptions = new CompositeSubscription();;
@@ -152,33 +148,43 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         data -> {
-
           DOCUMENT = data;
 
           loader.setVisibility(ProgressBar.INVISIBLE);
 
-          title.setText( data.getTitle() );
-          uid.setText( data.getUid() );
-          //            sort_key.setText( data.getSortKey() );
-          registration_number.setText(data.getRegistrationNumber());
-          urgency.setText( data.getUrgency() );
-          short_description.setText( data.getShortDescription() );
-          external_document_number.setText(data.getExternalDocumentNumber());
-          receipt_date.setText(data.getReceiptDate());
-          comment.setText( data.getComment() );
-
-          signer.setText( data.getSigner().getName() );
-          organisation.setText( data.getSigner().getOrganisation() );
+//          title.setText( data.getTitle() );
+//          uid.setText( data.getUid() );
+//          //            sort_key.setText( data.getSortKey() );
+//          registration_number.setText(data.getRegistrationNumber());
+//          urgency.setText( data.getUrgency() );
+//          short_description.setText( data.getShortDescription() );
+//          external_document_number.setText(data.getExternalDocumentNumber());
+//          receipt_date.setText(data.getReceiptDate());
+//          comment.setText( data.getComment() );
+//
+//          signer.setText( data.getSigner().getName() );
+//          organisation.setText( data.getSigner().getOrganisation() );
 
           if ( data.getDecisions().size() >= 1 ){
-            Log.d( "__ERROR", String.valueOf(data.getDecisions().size()));
-            createDecisionTableHeader();
 
+            desigions_recycler_view.setLayoutManager(new LinearLayoutManager(this));
+
+            List<Decision> decisions_list = new ArrayList<>();
             for (Decision decision: data.getDecisions()) {
-              addRowToDecisionTable( decision );
+              decisions_list.add(decision);
             }
+
+            decision_adapter = new DecisionAdapter(decisions_list, this, desigions_recycler_view);
+            desigions_recycler_view.setAdapter(decision_adapter);
+            desigions_recycler_view.setLayoutManager(new LinearLayoutManager(this));
+
+            RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
+            itemAnimator.setAddDuration(1000);
+            itemAnimator.setRemoveDuration(1000);
+            desigions_recycler_view.setItemAnimator(itemAnimator);
+
           } else {
-            decision_row.setVisibility(TableRow.INVISIBLE);
+//            decision_row.setVisibility(TableRow.INVISIBLE);
           }
 
           CARD = Base64.decode( data.getInfoCard().getBytes(), Base64.DEFAULT );
@@ -250,7 +256,7 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
     field_status.setTextColor( Color.BLACK );
     header.addView(field_status);
 
-    decision_table.addView(header);
+//    decision_table.addView(header);
   }
 
 
@@ -417,7 +423,7 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
     field_status.setText(data.getApproved() ? "Утверждена" : "Не утверждена" );
     row.addView(field_status);
 
-    decision_table.addView(row);
+//    decision_table.addView(row);
 
   }
 
@@ -447,6 +453,35 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
   public void onMessageEvent(MassInsertDoneEvent event) {
     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show();
   }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(SetActiveDecisonEvent event) {
+
+    desigion_view.removeAllViews();
+
+    Decision item = decision_adapter.getItem(event.decision);
+
+    TextView letterHead = new TextView(this);
+    letterHead.setText( item.getLetterhead() );
+    letterHead.setTextColor( Color.BLACK );
+    desigion_view.addView( letterHead );
+
+    if( item.getBlocks().size() > 0 ){
+      List<Block> blocks = item.getBlocks();
+      for (Block decision: blocks){
+        TextView block = new TextView(this);
+        letterHead.setText( decision.getText() );
+        letterHead.setTextColor( Color.BLACK );
+        desigion_view.addView( block );
+      }
+    }
+
+    TextView signer = new TextView(this);
+    signer.setText( item.getSigner() );
+    signer.setTextColor( Color.BLACK );
+    desigion_view.addView( signer );
+  }
+
 
   @Override
   public void onFragmentInteraction(Uri uri) {
