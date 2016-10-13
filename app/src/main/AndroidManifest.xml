@@ -2,21 +2,23 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="sapotero.rxtest">
 
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
     <application
+        android:name=".application.EsdApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:screenOrientation="landscape"
         android:supportsRtl="true"
-        android:name=".application.EsdApplication"
         android:theme="@style/AppTheme.Launcher">
         <activity
             android:name=".views.activities.LoginActivity"
-            android:screenOrientation="landscape">
+            android:screenOrientation="landscape"
+            android:windowSoftInputMode="stateHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -28,12 +30,18 @@
             android:screenOrientation="landscape">
         </activity>
         <activity
-            android:screenOrientation="landscape"
-            android:name=".views.activities.InfoActivity">
+            android:name=".views.activities.InfoActivity"
+            android:screenOrientation="landscape">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".views.activities.MainActivity" />
+                android:value=".views.activities.MainActivity"/>
         </activity>
+
+        <service
+            android:name=".views.services.AuthService"
+            android:enabled="true"
+            android:exported="true">
+        </service>
     </application>
 
 </manifest>

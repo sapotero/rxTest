@@ -10,11 +10,6 @@ import sapotero.rxtest.application.modules.EsdModule;
 import timber.log.Timber;
 
 public final class EsdApplication extends Application {
-  public static Integer POSITION = 0;
-  public static String HOST     = "http://mobile.sed.a-soft.org/";
-  public static String LOGIN    = "LOGIN";
-  public static String PASSWORD = "PASSWORD";
-  public static String TOKEN    = "TOKEN";
 
   public static EsdComponent mainComponent;
   public Application app;

@@ -38,7 +38,7 @@
         android:layout_below="@+id/password"
         android:layout_alignStart="@+id/password"
         android:layout_alignEnd="@+id/password"
-        android:onClick="tryToLogin"/>
+        android:onClick="tryToLogin" />
 
     <ProgressBar
         style="?android:attr/progressBarStyleHorizontal"

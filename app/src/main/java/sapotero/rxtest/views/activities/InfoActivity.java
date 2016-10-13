@@ -21,6 +21,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.birbit.android.jobqueue.JobManager;
+import com.f2prateek.rx.preferences.Preference;
+import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.mikepenz.actionitembadge.library.ActionItemBadge;
 import com.mikepenz.actionitembadge.library.ActionItemBadgeAdder;
 import com.mikepenz.iconics.IconicsDrawable;
@@ -49,6 +51,7 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.application.config.Constant;
 import sapotero.rxtest.db.models.Auth;
 import sapotero.rxtest.events.bus.MassInsertDoneEvent;
 import sapotero.rxtest.jobs.bus.MassInsertJob;
@@ -88,6 +91,7 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
   @Inject JobManager jobManager;
   @Inject CompositeSubscription subscriptions;
   @Inject OkHttpClient okHttpClient;
+  @Inject RxSharedPreferences settings;
 
   private static byte[] CARD;
 
@@ -100,7 +104,7 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
 
   private Menu button;
   private Auth Auth;
-  private String TAG = InfoActivity.this.getClass().getSimpleName();
+  private String TAG = InfoActivity.class.getSimpleName();
 
   private Context context;
 
@@ -121,31 +125,18 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
     setContentView(R.layout.activity_info);
     ButterKnife.bind(this);
 
-    Bundle extras = getIntent().getExtras();
-
+    loadSettings();
     setTabContent();
-
-    if (extras != null) {
-      loadDocuments(extras);
-    }
+    loadDocuments();
   }
 
-  private void loadDocuments(Bundle extras) {
-    LOGIN    = extras.getString( EsdApplication.LOGIN);
-    TOKEN    = extras.getString( EsdApplication.TOKEN);
-    PASSWORD = extras.getString( EsdApplication.PASSWORD);
-    POSITION = extras.getInt(String.valueOf(EsdApplication.POSITION));
-
-    Log.d( "__INTENT", LOGIN );
-    Log.d( "__INTENT", PASSWORD );
-    Log.d( "__INTENT", TOKEN );
-
+  private void loadDocuments() {
     DocumentsAdapter rvAdapter = (DocumentsAdapter) MainActivity.rvv.getAdapter();
 
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl(EsdApplication.HOST + "v3/documents/")
+      .baseUrl(Constant.HOST + "v3/documents/")
       .client(okHttpClient)
       .build();
 
@@ -232,6 +223,99 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
     });
   }
 
+  public void createDecisionTableHeader(){
+    TableRow header = new TableRow(this);
+
+    TextView field_num = new TextView(this);
+    field_num.setText(" № ");
+    field_num.setTextColor( Color.BLACK );
+    header.addView(field_num);
+
+    TextView field_type = new TextView(this);
+    field_type.setText(" Тип ");
+    field_type.setTextColor( Color.BLACK );
+    header.addView(field_type);
+
+    TextView field_date = new TextView(this);
+    field_date.setText(" Дата ");
+    field_date.setTextColor( Color.BLACK );
+    header.addView(field_date);
+
+    TextView field_resolution = new TextView(this);
+    field_resolution.setText(" Резолюция ");
+    field_resolution.setTextColor( Color.BLACK );
+    header.addView(field_resolution);
+
+    TextView field_status = new TextView(this);
+    field_status.setText(" Статус ");
+    field_status.setTextColor( Color.BLACK );
+    header.addView(field_status);
+
+    decision_table.addView(header);
+  }
+
+
+
+  private void massInsert() {
+    try {
+      jobManager.addJobInBackground( new MassInsertJob(10000) );
+    } catch ( Exception e){
+      Timber.tag(TAG + " massInsert error").v( e );
+    }
+  }
+
+
+
+  public void count() {
+
+    if ( subscriptions != null && subscriptions.hasSubscriptions() ){
+      subscriptions.unsubscribe();
+    }
+
+    Observable<Integer> itemCount = db.createQuery( Auth.TABLE, Auth.COUNT_QUERY )
+      .map(query -> {
+        try (Cursor cursor = query.run()) {
+          if ( !(cursor != null && cursor.moveToNext()) ) {
+            Timber.tag(TAG + " total error").v("No rows");
+            throw new AssertionError("No rows");
+          }
+          return cursor.getInt(0);
+        }
+      });
+
+    subscriptions.add(
+      itemCount
+        .subscribeOn( Schedulers.newThread() )
+        .sample(5, TimeUnit.SECONDS)
+        .observeOn( AndroidSchedulers.mainThread() )
+        .subscribe(title -> {
+          Timber.tag( TAG + " total").v(String.valueOf(title));
+          ActionItemBadge.update(this, button.findItem(22), MaterialDesignIconic.Icon.gmi_account, ActionItemBadge.BadgeStyles.DARK_GREY, title);
+        })
+    );
+
+
+  }
+
+  private void loadSettings() {
+    Preference<String> username = settings.getString("login");
+    LOGIN = username.get();
+
+    Preference<String> password = settings.getString("password");
+    PASSWORD = password.get();
+
+    Preference<String> token = settings.getString("token");
+    TOKEN = token.get();
+
+    Preference<Integer> position = settings.getInteger("position");
+    POSITION = position.get();
+
+    Timber.tag(TAG).v("LOGIN: "+ LOGIN );
+    Timber.tag(TAG).v("PASSWORD: "+ PASSWORD );
+    Timber.tag(TAG).v("TOKEN: "+ TOKEN );
+  }
+
+
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
     getMenuInflater().inflate(R.menu.info, menu);
@@ -247,7 +331,7 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
           count();
 
           return true;
-      })
+        })
       .setShowAsAction( MenuItem.SHOW_AS_ACTION_ALWAYS);
 
     menu
@@ -310,39 +394,6 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
     return true;
   }
 
-
-
-  public void createDecisionTableHeader(){
-    TableRow header = new TableRow(this);
-
-    TextView field_num = new TextView(this);
-    field_num.setText(" № ");
-    field_num.setTextColor( Color.BLACK );
-    header.addView(field_num);
-
-    TextView field_type = new TextView(this);
-    field_type.setText(" Тип ");
-    field_type.setTextColor( Color.BLACK );
-    header.addView(field_type);
-
-    TextView field_date = new TextView(this);
-    field_date.setText(" Дата ");
-    field_date.setTextColor( Color.BLACK );
-    header.addView(field_date);
-
-    TextView field_resolution = new TextView(this);
-    field_resolution.setText(" Резолюция ");
-    field_resolution.setTextColor( Color.BLACK );
-    header.addView(field_resolution);
-
-    TextView field_status = new TextView(this);
-    field_status.setText(" Статус ");
-    field_status.setTextColor( Color.BLACK );
-    header.addView(field_status);
-
-    decision_table.addView(header);
-  }
-
   public void addRowToDecisionTable(Decision data){
 
     TableRow row = new TableRow(this);
@@ -371,59 +422,22 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
 
   }
 
-
-
-  private void massInsert() {
-    try {
-      jobManager.addJobInBackground( new MassInsertJob(10000) );
-    } catch ( Exception e){
-      Timber.tag(TAG + " massInsert error").v( e );
-    }
-  }
-
-
-  public void count() {
-
-    if ( subscriptions != null && subscriptions.hasSubscriptions() ){
-      subscriptions.unsubscribe();
-    }
-
-    Observable<Integer> itemCount = db.createQuery( Auth.TABLE, Auth.COUNT_QUERY )
-      .map(query -> {
-        try (Cursor cursor = query.run()) {
-          if ( !(cursor != null && cursor.moveToNext()) ) {
-            Timber.tag(TAG + " total error").v("No rows");
-            throw new AssertionError("No rows");
-          }
-          return cursor.getInt(0);
-        }
-      });
-
-    subscriptions.add(
-      itemCount
-        .subscribeOn( Schedulers.newThread() )
-        .sample(5, TimeUnit.SECONDS)
-        .observeOn( AndroidSchedulers.mainThread() )
-        .subscribe(title -> {
-          Timber.tag( TAG + " total").v(String.valueOf(title));
-          ActionItemBadge.update(this, button.findItem(22), MaterialDesignIconic.Icon.gmi_account, ActionItemBadge.BadgeStyles.DARK_GREY, title);
-        })
-    );
-
-
-  }
-
   @Override
   public void onStart() {
     super.onStart();
-    EventBus.getDefault().register(this);
+
+    if ( !EventBus.getDefault().isRegistered(this) ){
+      EventBus.getDefault().register(this);
+    }
   }
 
   @Override
   protected void onDestroy() {
     super.onDestroy();
 
-    EventBus.getDefault().unregister(this);
+    if ( EventBus.getDefault().isRegistered(this) ){
+      EventBus.getDefault().unregister(this);
+    }
 
     if ( subscriptions != null && subscriptions.hasSubscriptions() ){
       subscriptions.unsubscribe();

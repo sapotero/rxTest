@@ -1,6 +1,9 @@
 package sapotero.rxtest.views.adapters;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -12,12 +15,14 @@ import android.widget.Toast;
 
 import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.adapters.RecyclerSwipeAdapter;
+import com.f2prateek.rx.preferences.Preference;
+import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import java.util.List;
 
 import sapotero.rxtest.R;
 import sapotero.rxtest.retrofit.models.documents.Document;
-import sapotero.rxtest.views.activities.MainActivity;
+import sapotero.rxtest.views.activities.InfoActivity;
 
 public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.SimpleViewHolder> {
 
@@ -42,7 +47,6 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
 
     viewHolder.title.setText(item.getTitle() );
     viewHolder.from.setText( item.getSigner().getOrganisation());
-    viewHolder.md5.setText(  item.getMd5());
     viewHolder.date.setText( item.getRegistrationDate());
 
     viewHolder.swipeLayout.setShowMode(SwipeLayout.ShowMode.PullOut);
@@ -103,7 +107,15 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
     viewHolder.cv.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
-        MainActivity.showDocumentInfo(view, position);
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        RxSharedPreferences rxPreferences = RxSharedPreferences.create(preferences);
+        Preference<Integer> rxPosition = rxPreferences.getInteger("position");
+        rxPosition.set(position);
+
+        Intent intent = new Intent(mContext, InfoActivity.class);
+        mContext.startActivity(intent);
+
         Toast.makeText(mContext, " onClick : " + item.getMd5() + " \n" + item.getTitle(), Toast.LENGTH_SHORT).show();
       }
     });
@@ -118,7 +130,7 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
     });
 
 
-    viewHolder.tvShare.setOnClickListener(new View.OnClickListener() {
+    viewHolder.to_contol.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
 
@@ -126,16 +138,7 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
       }
     });
 
-    viewHolder.tvEdit.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-
-        Toast.makeText(view.getContext(), "Быстрый ответ " + viewHolder.title.getText().toString(), Toast.LENGTH_SHORT).show();
-      }
-    });
-
-
-    viewHolder.tvDelete.setOnClickListener(new View.OnClickListener() {
+    viewHolder.to_favorites.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
         mItemManger.removeShownLayouts(viewHolder.swipeLayout);
@@ -172,30 +175,27 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
 
   public static class SimpleViewHolder extends RecyclerView.ViewHolder {
     SwipeLayout swipeLayout;
-    TextView tvDelete;
+    TextView to_favorites;
     TextView tvEdit;
-    TextView tvShare;
+    TextView to_contol;
     ImageButton btnLocation;
 
     CardView cv;
     TextView title;
     TextView date;
     TextView from;
-    TextView md5;
 
     public SimpleViewHolder(View itemView) {
       super(itemView);
       swipeLayout = (SwipeLayout) itemView.findViewById(R.id.swipe);
 
-      tvDelete = (TextView) itemView.findViewById(R.id.tvDelete);
-      tvEdit = (TextView) itemView.findViewById(R.id.tvEdit);
-      tvShare = (TextView) itemView.findViewById(R.id.tvShare);
+      to_favorites = (TextView) itemView.findViewById(R.id.tvDelete);
+      to_contol = (TextView) itemView.findViewById(R.id.tvEdit);
       btnLocation = (ImageButton) itemView.findViewById(R.id.btnLocation);
 
       cv    = (CardView)itemView.findViewById(R.id.cv);
       title = (TextView)itemView.findViewById(R.id._title);
       from  = (TextView)itemView.findViewById(R.id.from);
-      md5   = (TextView)itemView.findViewById(R.id.md5);
       date   = (TextView)itemView.findViewById(R.id.date);
 
 

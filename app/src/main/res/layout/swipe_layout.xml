@@ -95,12 +95,19 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="16dp"
                 android:layout_alignParentEnd="true">
+
+                <TextView
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentTop="true"
+                    android:background="@drawable/badge_favorite" />
 
                 <TextView
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
+                    android:padding="16dp"
                     android:textAppearance="?android:attr/textAppearanceLarge"
                     android:id="@+id/_title"
                     android:layout_alignParentTop="true"
@@ -131,6 +138,13 @@
                     android:id="@+id/from"
                     android:layout_above="@+id/date"
                     android:layout_alignParentStart="true"/>
+
+                <TextView
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentBottom="true"
+                    android:background="@drawable/badge_control" />
 
             </RelativeLayout>
 

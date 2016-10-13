@@ -5,16 +5,16 @@
     <string name="login_button">Войти</string>
 
     <string-array name="DOCUMENT_TYPES">
-        <item>Отправлен на доклад</item>
         <item>Отправлен на исполнение</item>
+        <item>Отправлен на доклад</item>
         <item>Первичное рассмотрение</item>
         <item>Согласование проектов документов</item>
         <item>Подписание проектов документов</item>
     </string-array>
 
     <string-array name="DOCUMENT_TYPES_VALUE">
-        <item>sent_to_the_report</item>
         <item>sent_to_the_performance</item>
+        <item>sent_to_the_report</item>
         <item>primary_consideration</item>
         <item>approval</item>
         <item>signing</item>

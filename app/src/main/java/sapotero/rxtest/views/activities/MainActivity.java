@@ -1,6 +1,5 @@
 package sapotero.rxtest.views.activities;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -16,11 +15,14 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.birbit.android.jobqueue.JobManager;
+import com.f2prateek.rx.preferences.Preference;
+import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -34,26 +36,32 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.application.config.Constant;
 import sapotero.rxtest.events.bus.GetDocumentInfoEvent;
 import sapotero.rxtest.jobs.bus.GetDocumentInfoJob;
+import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
 import sapotero.rxtest.retrofit.DocumentsService;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.retrofit.models.documents.Documents;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
+import sapotero.rxtest.views.adapters.models.FilterItem;
+import sapotero.rxtest.views.adapters.utils.StatusAdapter;
+import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
 
-  private static String TOKEN    = "";
+  private String TOKEN    = "";
+  private String LOGIN    = "";
+  private String PASSWORD = "";
 
-  private static String LOGIN    = "";
-  private static String PASSWORD = "";
-  private static Integer total = 0;
+  private String total;
+  private String TAG = MainActivity.class.getSimpleName();
 
   private static MainActivity context;
   protected static RecyclerView rvv;
-  @BindView(R.id.documentsRecycleView) RecyclerView rv;
 
+  @BindView(R.id.documentsRecycleView) RecyclerView rv;
   @BindView(R.id.progressBar) View progressBar;
   @BindView(R.id.DOCUMENT_TYPE) Spinner DOCUMENT_TYPE_SELECTOR;
   @BindView(R.id.JOURNAL_TYPE)  Spinner JOURNAL_TYPE_SELECTOR;
@@ -61,6 +69,9 @@ public class MainActivity extends AppCompatActivity {
 
   @Inject JobManager jobManager;
   @Inject OkHttpClient okHttpClient;
+  @Inject RxSharedPreferences settings;
+
+  private StatusAdapter filterAdapter;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -69,26 +80,108 @@ public class MainActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
+
     context = this;
     ButterKnife.bind(this);
     EsdApplication.getComponent(this).inject(this);
 
-    Bundle extras = getIntent().getExtras();
+    loadSettings();
 
-    if (extras != null) {
-      LOGIN    = extras.getString( EsdApplication.LOGIN);
-      TOKEN    = extras.getString( EsdApplication.TOKEN);
-      PASSWORD = extras.getString( EsdApplication.PASSWORD);
+    progressBar.setVisibility(ProgressBar.INVISIBLE);
+    setAdapters();
 
-      Log.d( "__INTENT", LOGIN );
-      Log.d( "__INTENT", PASSWORD );
-      Log.d( "__INTENT", TOKEN );
+    GridLayoutManager gridLayoutManager = new GridLayoutManager( this, 2, GridLayoutManager.VERTICAL, false );
+    rv.setLayoutManager(gridLayoutManager);
+  }
+
+  private void loadSettings() {
+    Preference<String> username = settings.getString("login");
+    LOGIN = username.get();
+
+    Preference<String> password = settings.getString("password");
+    PASSWORD = password.get();
+
+    Preference<String> token = settings.getString("token");
+    TOKEN = token.get();
+
+    Timber.tag(TAG).v("LOGIN: "+ LOGIN );
+    Timber.tag(TAG).v("PASSWORD: "+ PASSWORD );
+    Timber.tag(TAG).v("TOKEN: "+ TOKEN );
+  }
+
+  @Override
+  public boolean onCreateOptionsMenu(Menu menu) {
+    getMenuInflater().inflate(R.menu.info, menu);
+
+    menu.add(0, 0, 0, "Загрузка документов")
+      .setIcon(android.R.drawable.ic_menu_info_details)
+      .setOnMenuItemClickListener(
+        item -> {
+
+          loadSettings();
+
+          try {
+            jobManager.addJobInBackground( new UpdateAuthTokenJob(LOGIN, PASSWORD) );
+          } catch ( Exception e){
+            Timber.tag(TAG + " process error").v( e );
+          }
+
+          return true;
+        })
+      .setShowAsAction( MenuItem.SHOW_AS_ACTION_ALWAYS);
+
+    menu.add(0, 0, 0, "test")
+      .setIcon(android.R.drawable.ic_input_add)
+      .setOnMenuItemClickListener(
+        item -> {
+          loadSettings();
+          return true;
+        })
+      .setShowAsAction( MenuItem.SHOW_AS_ACTION_ALWAYS);
+
+    return true;
+  }
+
+  @Override
+  public void onStart() {
+    super.onStart();
+
+    if ( !EventBus.getDefault().isRegistered(this) ){
+      EventBus.getDefault().register(this);
     }
+  }
 
+  @Override
+  public void onStop() {
+    if ( EventBus.getDefault().isRegistered(this) ){
+      EventBus.getDefault().unregister(this);
+    }
+    super.onStop();
+  }
+
+  private void setAdapters() {
     // устанавливаем статус документов
-    ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.DOCUMENT_TYPES, android.R.layout.simple_spinner_item);
-    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-    DOCUMENT_TYPE_SELECTOR.setAdapter(adapter);
+//    ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.DOCUMENT_TYPES, android.R.layout.simple_spinner_item);
+//
+// adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//    ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.DOCUMENT_TYPES, android.R.layout.simple_spinner_item);
+
+
+//    String[] types = getResources().getStringArray(R.array.DOCUMENT_TYPES);
+//    int[] arr = new int[ types.length ];
+
+    List<FilterItem> filters = new ArrayList<FilterItem>();
+
+    String[] filter_types = getResources().getStringArray(R.array.DOCUMENT_TYPES_VALUE);
+    String[] filter_names = getResources().getStringArray(R.array.DOCUMENT_TYPES);
+
+    for (int i = 0; i < filter_types.length; i++) {
+      filters.add(new FilterItem( filter_names[i] , filter_types[i], "0"));
+    }
+//    filters.add(new FilterItem("Name 1", "Desc1", "0"));
+
+    filterAdapter = new StatusAdapter(this, filters );
+    DOCUMENT_TYPE_SELECTOR.setAdapter(filterAdapter);
 
     DOCUMENT_TYPE_SELECTOR.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
       @Override
@@ -137,61 +230,68 @@ public class MainActivity extends AppCompatActivity {
       }
     });
 
-    GridLayoutManager   gridLayoutManager = new GridLayoutManager(
-      this,
-      2,
-      GridLayoutManager.VERTICAL,
-      false
+    Observable.from(filter_types).subscribe(
+      TYPE -> {
+        loadDocumentsCountByType(TYPE);
+      }
     );
-
-    rv.setLayoutManager(gridLayoutManager);
-    progressBar.setVisibility(ProgressBar.INVISIBLE);
-
-
   }
 
-  @Override
-  public boolean onCreateOptionsMenu(Menu menu) {
-    getMenuInflater().inflate(R.menu.info, menu);
+  private void loadDocumentsCountByType( String TYPE){
 
-    menu.add(0, 0, 0, "Загрузка документов")
-      .setIcon(android.R.drawable.ic_menu_info_details)
-      .setOnMenuItemClickListener(
-        item -> {
+    Retrofit retrofit = new RetrofitManager( this, Constant.HOST + "/v3/", okHttpClient).process();
+    DocumentsService documentsService = retrofit.create( DocumentsService.class );
 
-          process();
+    Observable<Documents> documents = documentsService.getDocuments( LOGIN, TOKEN, TYPE, 0,0);
 
-          return true;
-        })
-      .setShowAsAction( MenuItem.SHOW_AS_ACTION_ALWAYS);
+    documents.subscribeOn( Schedulers.newThread() )
+      .observeOn( AndroidSchedulers.mainThread() )
+      .subscribe(
+        data -> {
+          total = data.getMeta().getTotal();
 
-    return true;
-  }
 
-  @Override
-  public void onStart() {
-    super.onStart();
-    EventBus.getDefault().register(this);
-  }
+          if ( total != null && Integer.valueOf(total) > 0 ){
 
-  @Override
-  public void onStop() {
-    EventBus.getDefault().unregister(this);
-    super.onStop();
+
+            String[] values = getResources().getStringArray(R.array.DOCUMENT_TYPES_VALUE);
+
+            int index = -1;
+            for (int i=0;i<values.length;i++) {
+              if (values[i].equals(TYPE)) {
+                index = i;
+                break;
+              }
+            }
+
+            Timber.tag(TAG).i( TYPE + " - " + total + " | " + index );
+
+            FilterItem filterItem = filterAdapter.getItem(index);
+
+            filterItem.setCount( total );
+            filterAdapter.notifyDataSetChanged();
+          }
+
+        },
+        error -> {
+          Timber.tag(TAG).d( "_ERROR", error.getMessage() );
+        });
+
   }
 
   private void loadDocuments(){
 
     progressBar.setVisibility(ProgressBar.VISIBLE);
 
-    Retrofit retrofit = new RetrofitManager( this, EsdApplication.HOST + "/v3/", okHttpClient).process();
+    Retrofit retrofit = new RetrofitManager( this, Constant.HOST + "/v3/", okHttpClient).process();
     DocumentsService documentsService = retrofit.create( DocumentsService.class );
 
     int spinner_pos = DOCUMENT_TYPE_SELECTOR.getSelectedItemPosition();
+
     String[] document_type = getResources().getStringArray(R.array.DOCUMENT_TYPES_VALUE);
     String type = String.valueOf(document_type[spinner_pos]);
 
-    Observable<Documents> documents = documentsService.getDocuments( LOGIN, TOKEN, type);
+    Observable<Documents> documents = documentsService.getDocuments( LOGIN, TOKEN, type, 100,0);
 
     documents.subscribeOn( Schedulers.newThread() )
       .observeOn( AndroidSchedulers.mainThread() )
@@ -200,11 +300,16 @@ public class MainActivity extends AppCompatActivity {
           progressBar.setVisibility(ProgressBar.INVISIBLE);
 
           List<Document> docs = data.getDocuments();
-          total = docs.size();
+          total = data.getMeta().getTotal();
 
-          DocumentsAdapter adapter = new DocumentsAdapter(this, docs);
-          rv.setAdapter(adapter);
+          DocumentsAdapter documentsAdapter = new DocumentsAdapter(this, docs);
+          rv.setAdapter(documentsAdapter);
           rvv = rv;
+
+          FilterItem filterItem = filterAdapter.getItem(spinner_pos);
+          filterItem.setCount( total );
+          filterAdapter.notifyDataSetChanged();
+
         },
         error -> {
           Log.d( "_ERROR", error.getMessage() );
@@ -215,18 +320,8 @@ public class MainActivity extends AppCompatActivity {
 
   }
 
-  public static void showDocumentInfo(View view, int position) {
-    Intent intent = new Intent(context, InfoActivity.class);
-
-    intent.putExtra( EsdApplication.LOGIN,    LOGIN );
-    intent.putExtra( EsdApplication.PASSWORD, PASSWORD );
-    intent.putExtra( EsdApplication.TOKEN,    TOKEN );
-    intent.putExtra(String.valueOf(EsdApplication.POSITION),    position );
-
-    context.startActivity(intent);
-  }
   private void process() {
-    Toast.makeText( context, "Total: "+total.toString(), Toast.LENGTH_SHORT).show();
+    Toast.makeText( context, "Total: " + total, Toast.LENGTH_SHORT).show();
     try {
       jobManager.addJobInBackground( new GetDocumentInfoJob("1"));
     } catch ( Exception e){

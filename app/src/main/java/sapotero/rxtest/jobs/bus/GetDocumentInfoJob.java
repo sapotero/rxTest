@@ -5,7 +5,6 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.birbit.android.jobqueue.CancelReason;
-import com.birbit.android.jobqueue.Job;
 import com.birbit.android.jobqueue.Params;
 import com.birbit.android.jobqueue.RetryConstraint;
 
@@ -13,7 +12,7 @@ import org.greenrobot.eventbus.EventBus;
 
 import sapotero.rxtest.events.bus.GetDocumentInfoEvent;
 
-public class GetDocumentInfoJob extends Job {
+public class GetDocumentInfoJob extends BaseJob {
 
   public static final int PRIORITY = 1;
   private String id;

@@ -17,7 +17,8 @@ import sapotero.rxtest.retrofit.utils.OkHttpModule;
     DbModule.class,
     JobModule.class,
     SubscriptionsModule.class,
-    OkHttpModule.class
+    OkHttpModule.class,
+    SettingsModule.class
   }
 )
 public final class EsdModule {
