@@ -12,33 +12,33 @@
     <!--Bottom View For Right to Left-->
 
     <LinearLayout
-        android:id="@+id/bottom_wrapper"
+        android:id="@+id/from_right_to_left"
         android:layout_width="240dp"
         android:layout_height="match_parent"
         android:weightSum="3">
 
         <TextView
-            android:id="@+id/tvEdit"
+            android:id="@+id/card_to_favorites"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/colorPrimary"
             android:gravity="center"
-            android:text="Быстрый ответ"
+            android:text="В избранное"
             android:textColor="#fff" />
 
         <TextView
-            android:id="@+id/tvShare"
+            android:id="@+id/card_to_control"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="#FF0000"
             android:gravity="center"
-            android:text="K"
+            android:text="На контроль"
             android:textColor="#fff" />
 
         <TextView
-            android:id="@+id/tvDelete"
+            android:id="@+id/card_delete"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -52,7 +52,7 @@
     <!-- Another Bottom View For Left to Right -->
 
     <LinearLayout
-        android:id="@+id/bottom_wrapper1"
+        android:id="@+id/from_left_to_right"
         android:layout_width="80dp"
         android:layout_height="match_parent"
         android:weightSum="1">
@@ -98,6 +98,7 @@
                 android:layout_alignParentEnd="true">
 
                 <TextView
+                    android:id="@+id/favorite_label"
                     android:layout_width="100dp"
                     android:layout_height="100dp"
                     android:layout_alignParentEnd="true"
@@ -170,6 +171,7 @@
 
 
                 <TextView
+                    android:id="@+id/control_label"
                     android:layout_width="100dp"
                     android:layout_height="100dp"
                     android:layout_alignParentEnd="true"

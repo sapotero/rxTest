@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Singleton;
@@ -11,6 +12,7 @@ import javax.inject.Singleton;
 import dagger.Module;
 import dagger.Provides;
 import okhttp3.Cache;
+import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -45,6 +47,20 @@ public class OkHttpModule {
 
         return chain.proceed(request);
       })
+      .addInterceptor(
+        chain -> {
+          Request original = chain.request();
+          HttpUrl originalHttpUrl = original.url();
+
+          HttpUrl url = originalHttpUrl.newBuilder()
+            .addQueryParameter("request_uid",  UUID.randomUUID().toString() )
+            .build();
+
+          Request.Builder requestBuilder = original.newBuilder().url(url);
+
+          Request request = requestBuilder.build();
+          return chain.proceed(request);
+        })
       .build();
   }
 }

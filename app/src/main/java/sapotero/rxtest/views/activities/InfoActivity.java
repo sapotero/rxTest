@@ -201,10 +201,9 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
         if ( Objects.equals( tab.getPosition(), 1 ) ) {
           WebView webView = (WebView) findViewById(R.id.web_infocard);
           try {
-            if ( CARD.length != 0 ){
-
+            if ( CARD != null && CARD.length != 0 ){
+              webView.loadData( new String(CARD, "UTF-8"), "text/html; charset=utf-8", "utf-8" );
             }
-            webView.loadData( new String(CARD, "UTF-8"), "text/html; charset=utf-8", "utf-8" );
           } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
           }

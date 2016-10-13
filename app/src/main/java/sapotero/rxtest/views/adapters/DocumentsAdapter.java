@@ -49,24 +49,21 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
     viewHolder.from.setText( item.getSigner().getOrganisation());
     viewHolder.date.setText( item.getExternalDocumentNumber() + " от " + item.getRegistrationDate());
 
+
+
     viewHolder.swipeLayout.setShowMode(SwipeLayout.ShowMode.PullOut);
 
-    // Drag From Left
-    viewHolder.swipeLayout.addDrag(SwipeLayout.DragEdge.Left, viewHolder.swipeLayout.findViewById(R.id.bottom_wrapper1));
-    // Drag From Right
-    viewHolder.swipeLayout.addDrag(SwipeLayout.DragEdge.Right, viewHolder.swipeLayout.findViewById(R.id.bottom_wrapper));
+    viewHolder.swipeLayout.addDrag(SwipeLayout.DragEdge.Left,  viewHolder.swipeLayout.findViewById(R.id.from_left_to_right));
+    viewHolder.swipeLayout.addDrag(SwipeLayout.DragEdge.Right, viewHolder.swipeLayout.findViewById(R.id.from_right_to_left));
 
 
-    // Handling different events when swiping
     viewHolder.swipeLayout.addSwipeListener(new SwipeLayout.SwipeListener() {
       @Override
       public void onClose(SwipeLayout layout) {
-        //when the SurfaceView totally cover the BottomView.
       }
 
       @Override
       public void onUpdate(SwipeLayout layout, int leftOffset, int topOffset) {
-        //you are swiping.
       }
 
       @Override
@@ -76,7 +73,6 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
 
       @Override
       public void onOpen(SwipeLayout layout) {
-        //when the BottomView totally show.
       }
 
       @Override
@@ -86,23 +82,8 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
 
       @Override
       public void onHandRelease(SwipeLayout layout, float xvel, float yvel) {
-        //when user's hand released.
       }
     });
-
-        /*viewHolder.swipeLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-
-                if ((((SwipeLayout) v).getOpenStatus() == SwipeLayout.Status.Close)) {
-                    //Start your activity
-
-                    Toast.makeText(mContext, " onClick : " + item.getName() + " \n" + item.getEmailId(), Toast.LENGTH_SHORT).show();
-                }
-
-            }
-        });*/
 
     viewHolder.cv.setOnClickListener(new View.OnClickListener() {
       @Override
@@ -174,6 +155,8 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
   //  ViewHolder Class
 
   public static class SimpleViewHolder extends RecyclerView.ViewHolder {
+    private TextView control_label;
+    private TextView favorite_label;
     SwipeLayout swipeLayout;
     TextView to_favorites;
     TextView tvEdit;
@@ -189,14 +172,17 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
       super(itemView);
       swipeLayout = (SwipeLayout) itemView.findViewById(R.id.swipe);
 
-      to_favorites = (TextView) itemView.findViewById(R.id.tvDelete);
-      to_contol = (TextView) itemView.findViewById(R.id.tvEdit);
+      to_contol = (TextView) itemView.findViewById(R.id.card_to_favorites);
+      to_favorites = (TextView) itemView.findViewById(R.id.card_delete);
       btnLocation = (ImageButton) itemView.findViewById(R.id.btnLocation);
 
       cv    = (CardView)itemView.findViewById(R.id.cv);
       title = (TextView)itemView.findViewById(R.id._title);
       from  = (TextView)itemView.findViewById(R.id.from);
       date   = (TextView)itemView.findViewById(R.id.date);
+      favorite_label   = (TextView)itemView.findViewById(R.id.favorite_label);
+      control_label   = (TextView)itemView.findViewById(R.id.control_label);
+
 
 
     }
