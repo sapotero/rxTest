@@ -98,53 +98,90 @@
                 android:layout_alignParentEnd="true">
 
                 <TextView
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
                     android:layout_alignParentEnd="true"
                     android:layout_alignParentTop="true"
+                    android:text="@string/favorites"
+                    android:textColor="@color/md_white_1000"
+                    android:gravity="top|end"
+                    android:paddingTop="0dp"
+                    android:paddingRight="4dp"
+                    android:textSize="24sp"
                     android:background="@drawable/badge_favorite" />
 
                 <TextView
+                    android:id="@+id/_title"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:padding="16dp"
                     android:textAppearance="?android:attr/textAppearanceLarge"
-                    android:id="@+id/_title"
                     android:layout_alignParentTop="true"
                     android:layout_alignParentStart="true"
                     />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:id="@+id/date"
-                    android:layout_alignParentBottom="true"
-                    android:layout_alignParentStart="true"/>
 
                 <TextView
+                    android:id="@+id/md5"
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:id="@+id/md5"
                     android:layout_alignParentEnd="false"
-                    android:layout_below="@+id/_title"
-                    android:layout_toEndOf="@+id/_title"/>
+                    />
+
+                <View
+                    android:layout_width="550dp"
+                    android:layout_centerHorizontal="true"
+                    android:layout_height="1dp"
+                    android:layout_above="@+id/from"
+                    android:background="@color/md_grey_200" />
 
                 <TextView
+                    android:id="@+id/from"
+
+                    android:paddingStart="@dimen/date_offset"
+                    android:paddingEnd="@dimen/date_offset"
+                    android:paddingBottom="@dimen/half_date_offset"
+                    android:paddingTop="@dimen/date_offset"
+
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:singleLine="true"
+
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:id="@+id/from"
                     android:layout_above="@+id/date"
                     android:layout_alignParentStart="true"/>
+
+                <TextView
+                    android:id="@+id/date"
+
+                    android:paddingStart="@dimen/date_offset"
+                    android:paddingEnd="0sp"
+                    android:paddingBottom="@dimen/half_date_offset"
+
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentStart="true"/>
+
+
 
                 <TextView
                     android:layout_width="100dp"
                     android:layout_height="100dp"
                     android:layout_alignParentEnd="true"
                     android:layout_alignParentBottom="true"
-                    android:background="@drawable/badge_control" />
+                    android:text="@string/control"
+                    android:textColor="@color/md_white_1000"
+                    android:gravity="bottom|end"
+                    android:paddingBottom="2dp"
+                    android:paddingRight="6dp"
+                    android:textSize="24sp"
+                    android:background="@drawable/badge_control"
+                    />
 
             </RelativeLayout>
 

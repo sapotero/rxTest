@@ -47,7 +47,7 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
 
     viewHolder.title.setText(item.getTitle() );
     viewHolder.from.setText( item.getSigner().getOrganisation());
-    viewHolder.date.setText( item.getRegistrationDate());
+    viewHolder.date.setText( item.getExternalDocumentNumber() + " от " + item.getRegistrationDate());
 
     viewHolder.swipeLayout.setShowMode(SwipeLayout.ShowMode.PullOut);
 

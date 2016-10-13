@@ -51,6 +51,8 @@
 
     <string name="tab_document">документ</string>
     <string name="tab_info">инфокарта</string>
+    <string name="control">K</string>
+    <string name="favorites">★</string>
 
 
 </resources>
