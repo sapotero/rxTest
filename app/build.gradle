@@ -104,6 +104,7 @@ dependencies {
     //бейджи https://github.com/mikepenz/Android-ActionItemBadge
     compile 'com.mikepenz:actionitembadge:3.3.0@aar'
     compile 'com.mikepenz:iconics-core:2.8.0@aar'
+    compile "com.android.support:appcompat-v7:24.2.0"
     compile 'com.mikepenz:material-design-iconic-typeface:2.2.0.2@aar'
     compile "com.android.support:appcompat-v7:24.2.0"
 

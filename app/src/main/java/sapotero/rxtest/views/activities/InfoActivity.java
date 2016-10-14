@@ -41,7 +41,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -62,7 +61,7 @@ import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.application.config.Constant;
-import sapotero.rxtest.db.models.Auth;
+import sapotero.rxtest.db.models.RxAuth;
 import sapotero.rxtest.events.bus.MassInsertDoneEvent;
 import sapotero.rxtest.events.bus.SetActiveDecisonEvent;
 import sapotero.rxtest.jobs.bus.MassInsertJob;
@@ -104,7 +103,7 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
   private DocumentInfo DOCUMENT;
 
   private Menu button;
-  private Auth Auth;
+  private RxAuth RxAuth;
   private String TAG = InfoActivity.class.getSimpleName();
 
   private Context context;
@@ -216,9 +215,12 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
           WebView webView = (WebView) findViewById(R.id.web_infocard);
           try {
             if ( CARD != null && CARD.length != 0 ){
-              webView.loadData( new String(CARD, "UTF-8"), "text/html; charset=utf-8", "utf-8" );
+              String htmlData = "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />" + new String(CARD, "UTF-8");
+//              webView.loadData( new String(CARD, "UTF-8"), "text/html; charset=utf-8", "utf-8" );
+              Timber.tag("HTML").v(htmlData);
+              webView.loadDataWithBaseURL("file:///android_asset/", htmlData, "text/html", "UTF-8", null);
             }
-          } catch (UnsupportedEncodingException e) {
+          } catch (Exception e) {
             e.printStackTrace();
           }
         }
@@ -285,7 +287,7 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
       subscriptions.unsubscribe();
     }
 
-    Observable<Integer> itemCount = db.createQuery(sapotero.rxtest.db.models.Auth.TABLE, sapotero.rxtest.db.models.Auth.COUNT_QUERY)
+    Observable<Integer> itemCount = db.createQuery(RxAuth.TABLE, RxAuth.COUNT_QUERY)
       .map(query -> {
         try (Cursor cursor = query.run()) {
           if ( !(cursor != null && cursor.moveToNext()) ) {
@@ -328,52 +330,44 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
     Timber.tag(TAG).v("TOKEN: "+ TOKEN );
   }
 
-
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
     getMenuInflater().inflate(R.menu.info, menu);
 
     menu
-      .add(0, 0, 0, "Информационная карточка")
+      .add(0, 0, 0, "  Информационная карточка")
       .setIcon(android.R.drawable.ic_dialog_info)
       .setOnMenuItemClickListener(
         item -> {
-
-//          ArrayList<ArrayList<String>> result = Auth.select("*", null, null, null, null);
-//          Log.d( "_DATA", result.toString() );
           count();
-
           return true;
         })
-      .setShowAsAction( MenuItem.SHOW_AS_ACTION_ALWAYS);
+      .setShowAsAction( MenuItem.SHOW_AS_ACTION_WITH_TEXT | MenuItem.SHOW_AS_ACTION_ALWAYS);
 
     menu
-      .add(0, 0, 0, "Добавить")
+      .add(0, 0, 0, "  Добавить")
       .setIcon(android.R.drawable.ic_input_add)
       .setOnMenuItemClickListener(
         item -> {
 
-//          if ( Auth.hasUser( LOGIN ) ){
-//            Auth.update( Auth.token, TOKEN, Auth.login, LOGIN );
+//          if ( RxAuth.hasUser( LOGIN ) ){
+//            RxAuth.update( RxAuth.token, TOKEN, RxAuth.login, LOGIN );
 //          } else {
-//            Auth.insert(LOGIN, TOKEN, null, null);
+//            RxAuth.insert(LOGIN, TOKEN, null, null);
 //          };
 
           return true;
         })
-      .setShowAsAction( MenuItem.SHOW_AS_ACTION_ALWAYS);
+      .setShowAsAction( MenuItem.SHOW_AS_ACTION_WITH_TEXT | MenuItem.SHOW_AS_ACTION_ALWAYS);
 
     menu
-      .add(0, 0, 0, "Удалить")
+      .add(0, 0, 0, "  Удалить")
       .setIcon(android.R.drawable.ic_delete)
       .setOnMenuItemClickListener(
         item -> {
-
-//          Auth.deleteAll();
-
           return true;
         })
-      .setShowAsAction( MenuItem.SHOW_AS_ACTION_ALWAYS);
+      .setShowAsAction( MenuItem.SHOW_AS_ACTION_WITH_TEXT | MenuItem.SHOW_AS_ACTION_ALWAYS);
 
     menu
       .add(0, 0, 0, "Insert")
@@ -405,34 +399,6 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
 
 
     return true;
-  }
-
-  public void addRowToDecisionTable(Decision data){
-
-    TableRow row = new TableRow(this);
-
-    TextView field_num = new TextView(this);
-    field_num.setText( data.getId() );
-    row.addView(field_num);
-
-    TextView field_type = new TextView(this);
-    field_type.setText( data.getSigner() );
-    row.addView(field_type);
-
-    TextView field_date = new TextView(this);
-    field_date.setText( data.getDate() );
-    row.addView(field_date);
-
-    TextView field_resolution = new TextView(this);
-    field_resolution.setText( data.getLetterhead() );
-    row.addView(field_resolution);
-
-    TextView field_status = new TextView(this);
-    field_status.setText(data.getApproved() ? "Утверждена" : "Не утверждена" );
-    row.addView(field_status);
-
-//    decision_table.addView(row);
-
   }
 
   @Override
@@ -499,8 +465,9 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
     LinearLayout relativeSigner = new LinearLayout(this);
     relativeSigner.setOrientation(LinearLayout.VERTICAL);
     relativeSigner.setVerticalGravity( Gravity.BOTTOM );
-    LinearLayout.LayoutParams relativeSigner_params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
-    relativeSigner_params.height = LinearLayout.LayoutParams.MATCH_PARENT;
+    relativeSigner.setMinimumHeight(350);
+    LinearLayout.LayoutParams relativeSigner_params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+    relativeSigner_params.height = LinearLayout.LayoutParams.WRAP_CONTENT;
     relativeSigner.setLayoutParams( relativeSigner_params );
 
 

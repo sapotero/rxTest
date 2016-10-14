@@ -10,9 +10,9 @@ import rx.functions.Func1;
 import sapotero.rxtest.db.utils.Db;
 
 @AutoValue
-public abstract class Document implements Parcelable {
+public abstract class RxDocuments implements Parcelable {
 
-  public static final String TABLE = "Document";
+  public static final String TABLE = "RxDocuments";
 
   public static final String _ID                      = "_id";
   public static final String UID                      = "uid";
@@ -45,12 +45,12 @@ public abstract class Document implements Parcelable {
   public abstract String  signer_id();
   public abstract Boolean viewed();
 
-  public static String COUNT_QUERY = "SELECT COUNT(*) FROM Document;";
+  public static String COUNT_QUERY = "SELECT COUNT(*) FROM RxDocuments;";
 
 
 
-  public static final Func1<Cursor, Document> MAPPER = new Func1<Cursor, Document>() {
-    @Override public AutoValue_Document call(Cursor cursor) {
+  public static final Func1<Cursor, RxDocuments> MAPPER = new Func1<Cursor, RxDocuments>() {
+    @Override public AutoValue_RxDocuments call(Cursor cursor) {
       String  _id                      = Db.getString( cursor, _ID );
       String  uid                      = Db.getString( cursor, UID );
       String  md5                      = Db.getString( cursor, MD5 );
@@ -66,7 +66,7 @@ public abstract class Document implements Parcelable {
       String  signer_id                = Db.getString( cursor, SIGNER_ID );
       Boolean viewed                   = Db.getBoolean(cursor, VIEWED );
 
-      return new AutoValue_Document(_id, uid, md5, sort_key, title, registration_number, registration_date, urgency, short_description, comment, external_document_number, receipt_date, signer_id, viewed);
+      return new AutoValue_RxDocuments(_id, uid, md5, sort_key, title, registration_number, registration_date, urgency, short_description, comment, external_document_number, receipt_date, signer_id, viewed);
     }
   };
 

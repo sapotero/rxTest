@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">RxSed</string>
+    <string name="app_name">СЭД</string>
     <string name="username_hinf">Логин</string>
     <string name="password_hint">Пароль</string>
     <string name="login_button">Войти</string>

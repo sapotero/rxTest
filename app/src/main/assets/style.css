@@ -1,0 +1,82 @@
+ 
+#info_card {
+  margin-top: 20px;
+}
+.infocard {
+  word-wrap: break-word;
+}
+.infocard h4 {
+  font-size: 14px;
+  text-align: center;
+}
+.infocard hr {
+  border-bottom-color: #000;
+}
+.infocard p {
+  margin-bottom: 20px;
+}
+.infocard .table-bordered {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+.infocard .table-bordered, .infocard .table-bordered th, .infocard .table-bordered td {
+  border: 1px solid;
+  border-color: #000 !important;
+}
+.table-bordered th, .infocard .table-bordered td {
+  padding: 1px 5px;
+}
+.tab-content {
+    border: 1px solid #c2d3da;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    padding: 20px 20px 1px;
+    overflow: visible;
+}
+
+h2{
+    margin-bottom: 20px;
+    /* padding: 0 20px; */
+    font-size: 20px;
+    font-weight: normal;
+}
+
+.dl-horizontal dt {
+    float: left;
+    clear: left;
+    margin: 0 10px 5px 0;
+    text-decoration: underline;
+}
+.dl-horizontal dt {
+    overflow: visible;
+    text-align: left;
+    white-space: normal;
+    width: auto;
+}
+
+.dl-horizontal dd {
+    min-height: 20px;
+    margin: 0 0 5px;
+}
+dt, dd {
+    line-height: 20px;
+}
+.dl-horizontal:before, .dl-horizontal:after {
+    display: table;
+    content: "";
+    line-height: 0;
+}
+.dl-horizontal:before, .dl-horizontal:after {
+    display: table;
+    content: "";
+    line-height: 0;
+    clear: both;
+}
+
+.span6 {
+    width: 48.717948717948715%;
+}
+.row-fluid {
+    width: 100%;
+}

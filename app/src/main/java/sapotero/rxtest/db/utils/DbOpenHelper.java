@@ -18,9 +18,9 @@ final class DbOpenHelper extends SQLiteOpenHelper {
 
   @Override
   public void onCreate(SQLiteDatabase db) {
-    db.execSQL("CREATE TABLE IF NOT EXISTS Auth (  login TEXT PRIMARY KEY,  token TEXT,  collegue_login TEXT,  collegue_token TEXT)");
-    db.execSQL("CREATE TABLE IF NOT EXISTS Document (_id INTEGER PRIMARY KEY AUTOINCREMENT, uid TEXT, md5 TEXT, sort_key INTEGER, title TEXT, registration_number TEXT, registration_date DATE, urgency TEXT, short_description TEXT, comment TEXT, external_document_number TEXT, receipt_date DATE, signer_id INTEGER, viewed BOOLEAN)");
-    db.execSQL("CREATE TABLE IF NOT EXISTS Signer (_id INTEGER PRIMARY KEY AUTOINCREMENT, id TEXT, type TEXT, name TEXT, organisation TEXT)");
+    db.execSQL("CREATE TABLE IF NOT EXISTS RxAuth (  login TEXT PRIMARY KEY,  token TEXT,  collegue_login TEXT,  collegue_token TEXT)");
+    db.execSQL("CREATE TABLE IF NOT EXISTS RxDocuments (_id INTEGER PRIMARY KEY AUTOINCREMENT, uid TEXT, md5 TEXT, sort_key INTEGER, title TEXT, registration_number TEXT, registration_date DATE, urgency TEXT, short_description TEXT, comment TEXT, external_document_number TEXT, receipt_date DATE, signer_id INTEGER, viewed BOOLEAN)");
+    db.execSQL("CREATE TABLE IF NOT EXISTS RxSigner (_id INTEGER PRIMARY KEY AUTOINCREMENT, id TEXT, type TEXT, name TEXT, organisation TEXT, documents_id INTEGER)");
     db.execSQL("CREATE TABLE IF NOT EXISTS User (_id INTEGER PRIMARY KEY AUTOINCREMENT, id TEXT, is_organization BOOLEAN, is_group BOOLEAN, name TEXT, organization TEXT, position TEXT, last_name TEXT, first_name TEXT, middle_name TEXT, gender TEXT, image TEXT)");
   }
 

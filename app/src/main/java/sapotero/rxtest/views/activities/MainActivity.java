@@ -1,5 +1,7 @@
 package sapotero.rxtest.views.activities;
 
+import android.annotation.SuppressLint;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -17,6 +19,8 @@ import android.widget.Toast;
 import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
+import com.squareup.sqlbrite.BriteDatabase;
+import com.squareup.sqlbrite.SqlBrite;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -37,9 +41,12 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.application.config.Constant;
+import sapotero.rxtest.db.models.RxDocuments;
 import sapotero.rxtest.events.bus.GetDocumentInfoEvent;
+import sapotero.rxtest.events.rx.InsertRxDocumentsEvent;
 import sapotero.rxtest.jobs.bus.GetDocumentInfoJob;
 import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
+import sapotero.rxtest.jobs.rx.InsertRxDocumentsJob;
 import sapotero.rxtest.retrofit.DocumentsService;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.retrofit.models.documents.Documents;
@@ -58,7 +65,10 @@ public class MainActivity extends AppCompatActivity {
   private String total;
   private String TAG = MainActivity.class.getSimpleName();
 
+  @SuppressLint("StaticFieldLeak")
   private static MainActivity context;
+
+  @SuppressLint("StaticFieldLeak")
   protected static RecyclerView rvv;
 
   @BindView(R.id.documentsRecycleView) RecyclerView rv;
@@ -70,8 +80,10 @@ public class MainActivity extends AppCompatActivity {
   @Inject JobManager jobManager;
   @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
+  @Inject public BriteDatabase db;
 
   private StatusAdapter filterAdapter;
+  private List<Document> loaded_documents;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -139,6 +151,24 @@ public class MainActivity extends AppCompatActivity {
         })
       .setShowAsAction( MenuItem.SHOW_AS_ACTION_ALWAYS);
 
+    menu.add(0, 0, 0, "Q")
+      .setIcon(android.R.drawable.ic_popup_disk_full)
+      .setOnMenuItemClickListener(
+        item -> {
+
+          try {
+            jobManager.addJobInBackground( new InsertRxDocumentsJob(loaded_documents) );
+          } catch ( Exception e){
+            Timber.tag(TAG + " massInsert error").v( e );
+          }
+
+          return true;
+        })
+      .setShowAsAction( MenuItem.SHOW_AS_ACTION_ALWAYS);
+
+
+
+
     return true;
   }
 
@@ -160,15 +190,6 @@ public class MainActivity extends AppCompatActivity {
   }
 
   private void setAdapters() {
-    // устанавливаем статус документов
-//    ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.DOCUMENT_TYPES, android.R.layout.simple_spinner_item);
-//
-// adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//    ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.DOCUMENT_TYPES, android.R.layout.simple_spinner_item);
-
-
-//    String[] types = getResources().getStringArray(R.array.DOCUMENT_TYPES);
-//    int[] arr = new int[ types.length ];
 
     List<FilterItem> filters = new ArrayList<FilterItem>();
 
@@ -178,7 +199,6 @@ public class MainActivity extends AppCompatActivity {
     for (int i = 0; i < filter_types.length; i++) {
       filters.add(new FilterItem( filter_names[i] , filter_types[i], "0"));
     }
-//    filters.add(new FilterItem("Name 1", "Desc1", "0"));
 
     filterAdapter = new StatusAdapter(this, filters );
     DOCUMENT_TYPE_SELECTOR.setAdapter(filterAdapter);
@@ -231,9 +251,7 @@ public class MainActivity extends AppCompatActivity {
     });
 
     Observable.from(filter_types).subscribe(
-      TYPE -> {
-        loadDocumentsCountByType(TYPE);
-      }
+      this::loadDocumentsCountByType
     );
   }
 
@@ -249,7 +267,6 @@ public class MainActivity extends AppCompatActivity {
       .subscribe(
         data -> {
           total = data.getMeta().getTotal();
-
 
           if ( total != null && Integer.valueOf(total) > 0 ){
 
@@ -302,8 +319,35 @@ public class MainActivity extends AppCompatActivity {
           List<Document> docs = data.getDocuments();
           total = data.getMeta().getTotal();
 
+          loaded_documents = docs;
+
           DocumentsAdapter documentsAdapter = new DocumentsAdapter(this, docs);
           rv.setAdapter(documentsAdapter);
+
+          Observable<SqlBrite.Query> users = db.createQuery(RxDocuments.TABLE, "SELECT * FROM "+RxDocuments.TABLE);
+          users.subscribe(query -> {
+            Cursor cursor = query.run();
+            if (cursor != null) {
+              while (cursor.moveToNext()) {
+                documentsAdapter.addItem(
+                  new Document(
+                    cursor.getString(0),
+                    cursor.getString(0),
+                    cursor.getString(0),
+                    cursor.getString(0),
+                    cursor.getString(0),
+                    cursor.getString(0),
+                    cursor.getString(0),
+                    cursor.getString(0),
+                    cursor.getString(0)
+                  )
+                );
+              }
+              documentsAdapter.notifyDataSetChanged();
+            }
+          });
+
+
           rvv = rv;
 
           FilterItem filterItem = filterAdapter.getItem(spinner_pos);
@@ -334,4 +378,11 @@ public class MainActivity extends AppCompatActivity {
   public void onMessageEvent(GetDocumentInfoEvent event) {
     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show();
   }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(InsertRxDocumentsEvent event) {
+    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show();
+  }
+
+
 }

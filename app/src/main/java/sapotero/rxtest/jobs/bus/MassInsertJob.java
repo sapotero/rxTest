@@ -9,7 +9,7 @@ import com.squareup.sqlbrite.BriteDatabase;
 
 import org.greenrobot.eventbus.EventBus;
 
-import sapotero.rxtest.db.models.Auth;
+import sapotero.rxtest.db.models.RxAuth;
 import sapotero.rxtest.events.bus.MassInsertDoneEvent;
 import timber.log.Timber;
 
@@ -37,8 +37,8 @@ public class MassInsertJob extends BaseJob {
 
     try {
       for (Integer i = 0; i< add_count; i++){
-        db.insert( Auth.TABLE,
-          new Auth.Builder()
+        db.insert( RxAuth.TABLE,
+          new RxAuth.Builder()
             .login("test" + Math.random() )
             .token("test" + Math.random() )
             .collegue_login("")

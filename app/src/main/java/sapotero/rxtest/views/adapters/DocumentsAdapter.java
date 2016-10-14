@@ -20,11 +20,12 @@ import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import java.util.List;
 
+import rx.functions.Action1;
 import sapotero.rxtest.R;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.views.activities.InfoActivity;
 
-public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.SimpleViewHolder> {
+public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.SimpleViewHolder> implements Action1<List<Document>> {
 
 
   private Context mContext;
@@ -149,6 +150,16 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
 
   public Document getItem(int position) {
     return this.documents.get(position);
+  }
+
+  @Override
+  public void call(List<Document> documents) {
+    this.documents = documents;
+    notifyDataSetChanged();
+  }
+
+  public void addItem(Document document) {
+    documents.add(document);
   }
 
 

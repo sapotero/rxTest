@@ -29,25 +29,42 @@
             android:orientation="vertical"
             android:layout_width="346dp"
             android:layout_height="match_parent"
-            android:weightSum="1">
+            android:weightSum="3">
+
 
             <LinearLayout
-                android:id="@+id/desigion_view"
+                android:id="@+id/desigion_view_root"
                 android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_weight="1.14"
-                android:layout_height="430dp"
-                android:padding="@dimen/date_offset"
                 android:layout_margin="@dimen/half_date_offset"
                 android:background="@color/cardview_light_background"
-                >
+                android:layout_height="360dp"
+                android:layout_weight="1.29">
+                <ScrollView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    >
+                    <LinearLayout
+                        android:id="@+id/desigion_view"
+                        android:orientation="vertical"
+                        android:layout_width="match_parent"
+                        android:padding="@dimen/date_offset"
+                        android:minHeight="350dp"
+                        android:layout_height="match_parent"
+                        android:layout_margin="@dimen/half_date_offset"
+                        android:background="@drawable/corner_background"
+                        >
+
+                    </LinearLayout>
+                </ScrollView>
 
             </LinearLayout>
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/desigions_recycler_view"
                 android:layout_width="match_parent"
-                android:layout_height="160dp"/>
+                android:layout_height="160dp"
+                android:layout_weight="2.89"/>
 
         </LinearLayout>
 

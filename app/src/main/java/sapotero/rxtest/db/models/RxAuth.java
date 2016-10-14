@@ -10,16 +10,16 @@ import rx.functions.Func1;
 import sapotero.rxtest.db.utils.Db;
 
 @AutoValue
-public abstract class Auth implements Parcelable {
+public abstract class RxAuth implements Parcelable {
 
-  public static final String TABLE = "Auth";
+  public static final String TABLE = "RxAuth";
   public static final String LOGIN = "login";
 
   public static final String TOKEN = "token";
   public static final String COLLEGUE_LOGIN = "collegue_login";
   public static final String COLLEGUE_TOKEN = "collegue_token";
 
-  public static String COUNT_QUERY = "SELECT COUNT(*) FROM Auth;";
+  public static String COUNT_QUERY = "SELECT COUNT(*) FROM RxAuth;";
 
   public abstract String login();
   public abstract String token();
@@ -27,14 +27,14 @@ public abstract class Auth implements Parcelable {
   public abstract String collegue_token();
 
 
-  public static final Func1<Cursor, Auth> MAPPER = new Func1<Cursor, Auth>() {
-    @Override public AutoValue_Auth call(Cursor cursor) {
+  public static final Func1<Cursor, RxAuth> MAPPER = new Func1<Cursor, RxAuth>() {
+    @Override public AutoValue_RxAuth call(Cursor cursor) {
       String login          = Db.getString(cursor, LOGIN);
       String token          = Db.getString(cursor, TOKEN);
       String collegue_login = Db.getString(cursor, COLLEGUE_LOGIN);
       String collegue_token = Db.getString(cursor, COLLEGUE_TOKEN);
 
-      return new AutoValue_Auth( login, token, collegue_login, collegue_token);
+      return new AutoValue_RxAuth( login, token, collegue_login, collegue_token);
     }
   };
 
