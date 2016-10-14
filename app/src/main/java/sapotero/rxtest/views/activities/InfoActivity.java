@@ -3,9 +3,11 @@ package sapotero.rxtest.views.activities;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -13,12 +15,15 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Base64;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -65,6 +70,7 @@ import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
+import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.views.adapters.DecisionAdapter;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
@@ -151,6 +157,8 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
           DOCUMENT = data;
 
           loader.setVisibility(ProgressBar.INVISIBLE);
+
+          setTitle( data.getTitle() );
 
 //          title.setText( data.getTitle() );
 //          uid.setText( data.getUid() );
@@ -277,7 +285,7 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
       subscriptions.unsubscribe();
     }
 
-    Observable<Integer> itemCount = db.createQuery( Auth.TABLE, Auth.COUNT_QUERY )
+    Observable<Integer> itemCount = db.createQuery(sapotero.rxtest.db.models.Auth.TABLE, sapotero.rxtest.db.models.Auth.COUNT_QUERY)
       .map(query -> {
         try (Cursor cursor = query.run()) {
           if ( !(cursor != null && cursor.moveToNext()) ) {
@@ -458,28 +466,209 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
   public void onMessageEvent(SetActiveDecisonEvent event) {
 
     desigion_view.removeAllViews();
+    Decision decision = decision_adapter.getItem(event.decision);
 
-    Decision item = decision_adapter.getItem(event.decision);
+    if( decision.getLetterhead() != null ) {
+      printLetterHead(decision.getLetterhead());
+    }
+    if( decision.getUrgencyText() != null ){
+      printUrgency( decision.getUrgencyText().toString() );
+    }
 
-    TextView letterHead = new TextView(this);
-    letterHead.setText( item.getLetterhead() );
-    letterHead.setTextColor( Color.BLACK );
-    desigion_view.addView( letterHead );
+    if( decision.getBlocks().size() > 0 ){
+      List<Block> blocks = decision.getBlocks();
+      for (Block block: blocks){
+        Timber.tag("block").v( block.getText() );
+        printAppealText( block );
 
-    if( item.getBlocks().size() > 0 ){
-      List<Block> blocks = item.getBlocks();
-      for (Block decision: blocks){
-        TextView block = new TextView(this);
-        letterHead.setText( decision.getText() );
-        letterHead.setTextColor( Color.BLACK );
-        desigion_view.addView( block );
+        if ( block.getTextBefore() ){
+          printBlockText( block.getText() );
+          printBlockPerformers( block.getPerformers(), block.getToFamiliarization(), block.getNumber() );
+        } else {
+          printBlockPerformers( block.getPerformers(), block.getToFamiliarization(), block.getNumber() );
+          printBlockText( block.getText() );
+        }
       }
     }
 
-    TextView signer = new TextView(this);
-    signer.setText( item.getSigner() );
-    signer.setTextColor( Color.BLACK );
-    desigion_view.addView( signer );
+    printSigner( decision.getShowPosition(), decision.getSignerBlankText(), decision.getSignerPositionS(), decision.getDate(), DOCUMENT.getRegistrationNumber()  );
+  }
+
+  private void printSigner(Boolean showPosition, String signerBlankText, String signerPositionS, String date, String registrationNumber) {
+
+    LinearLayout relativeSigner = new LinearLayout(this);
+    relativeSigner.setOrientation(LinearLayout.VERTICAL);
+    relativeSigner.setVerticalGravity( Gravity.BOTTOM );
+    LinearLayout.LayoutParams relativeSigner_params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+    relativeSigner_params.height = LinearLayout.LayoutParams.MATCH_PARENT;
+    relativeSigner.setLayoutParams( relativeSigner_params );
+
+
+
+
+    LinearLayout signer_view = new LinearLayout(this);
+    signer_view.setOrientation(LinearLayout.VERTICAL);
+    signer_view.setPadding(0,40,0,0);
+
+    if ( showPosition ){
+      TextView signerPositionView = new TextView(this);
+      signerPositionView.setText( signerPositionS );
+      signerPositionView.setTextColor( Color.BLACK );
+      signerPositionView.setGravity( Gravity.END );
+      signer_view.addView( signerPositionView );
+    }
+    TextView signerBlankTextView = new TextView(this);
+    signerBlankTextView.setText( signerBlankText );
+    signerBlankTextView.setTextColor( Color.BLACK );
+    signerBlankTextView.setGravity( Gravity.END);
+    signer_view.addView( signerBlankTextView );
+
+
+
+
+
+    LinearLayout date_and_number_view = new LinearLayout(this);
+    date_and_number_view.setOrientation(LinearLayout.HORIZONTAL);
+
+    TextView numberView = new TextView(this);
+    numberView.setText( "№ " + registrationNumber );
+    numberView.setTextColor( Color.BLACK );
+    LinearLayout.LayoutParams numberViewParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f);
+    numberView.setLayoutParams(numberViewParams);
+    date_and_number_view.addView(numberView);
+
+    TextView dateView = new TextView(this);
+    dateView.setText( date );
+    dateView.setGravity( Gravity.END );
+    dateView.setTextColor( Color.BLACK );
+    RelativeLayout.LayoutParams dateView_params = new RelativeLayout.LayoutParams(
+      RelativeLayout.LayoutParams.MATCH_PARENT,
+      RelativeLayout.LayoutParams.WRAP_CONTENT);
+    dateView_params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+    dateView.setLayoutParams(dateView_params);
+    LinearLayout.LayoutParams dateView_params1 = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f);
+    dateView.setLayoutParams(dateView_params1);
+    date_and_number_view.addView(dateView);
+
+    relativeSigner.addView( signer_view );
+    relativeSigner.addView( date_and_number_view );
+
+
+    desigion_view.addView( relativeSigner );
+  }
+
+  private void printUrgency(String urgency) {
+    TextView urgencyView = new TextView(this);
+    urgencyView.setGravity(Gravity.RIGHT);
+    urgencyView.setAllCaps(true);
+    urgencyView.setPaintFlags( Paint.UNDERLINE_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG | Paint.FAKE_BOLD_TEXT_FLAG );
+    urgencyView.setText( urgency );
+    urgencyView.setTextColor( ContextCompat.getColor(context, R.color.md_black_1000) );
+
+    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+    params.setMargins(0,0,0,10);
+    urgencyView.setLayoutParams(params);
+
+    desigion_view.addView( urgencyView );
+  }
+
+  private void printLetterHead(String letterhead) {
+    TextView letterHead = new TextView(this);
+    letterHead.setGravity(Gravity.CENTER);
+    letterHead.setText( letterhead );
+    letterHead.setTextColor( Color.BLACK );
+    desigion_view.addView( letterHead );
+
+    TextView delimiter = new TextView(this);
+    delimiter.setGravity(Gravity.CENTER);
+    delimiter.setHeight(1);
+    delimiter.setWidth(400);
+    delimiter.setBackgroundColor( ContextCompat.getColor(context, R.color.md_blue_grey_200) );
+
+    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+    params.setMargins(50, 10, 50, 10);
+    delimiter.setLayoutParams(params);
+
+    desigion_view.addView( delimiter );
+  }
+
+  private void printBlockText(String text) {
+    TextView block_view = new TextView(this);
+    block_view.setText( text );
+    block_view.setTextColor( Color.BLACK );
+
+    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+    params.setMargins(0, 10, 0, 10);
+    block_view.setLayoutParams(params);
+
+    desigion_view.addView( block_view );
+  }
+
+  private void printAppealText( Block block ) {
+
+    String text = "";
+    String appealText;
+    String number;
+    boolean toFamiliarization = block.getToFamiliarization();
+
+    if ( block.getAppealText() != null ){
+      appealText = block.getAppealText().toString();
+    } else {
+      appealText = "";
+    }
+
+    if ( block.getNumber() != null ){
+      number = block.getNumber().toString();
+    } else {
+      number = "1";
+    }
+
+
+
+    if (toFamiliarization){
+      text += number + ". ";
+      block.setToFamiliarization(false);
+    }
+    text += appealText;
+
+    TextView blockAppealView = new TextView(this);
+    blockAppealView.setGravity(Gravity.CENTER);
+    blockAppealView.setText( text );
+    blockAppealView.setTextColor( Color.BLACK );
+    blockAppealView.setTextSize( TypedValue.COMPLEX_UNIT_SP, 12 );
+
+    desigion_view.addView( blockAppealView );
+  }
+
+  private void printBlockPerformers(List<Performer> performers, Boolean toFamiliarization, Integer number) {
+
+    boolean numberPrinted = false;
+    LinearLayout users_view = new LinearLayout(this);
+    users_view.setOrientation(LinearLayout.VERTICAL);
+    users_view.setPadding(40,5,5,5);
+
+    if( performers.size() > 0 ){
+      List<Performer> users = performers;
+      for (Performer user: users){
+
+        String performerName = "";
+
+        if (toFamiliarization && !numberPrinted){
+          performerName += number.toString() + ". ";
+          numberPrinted = true;
+        } else {
+          performerName += user.getPerformerText();
+        }
+
+        TextView performer_view = new TextView(this);
+        performer_view.setText( performerName );
+        performer_view.setTextColor( Color.BLACK );
+        users_view.addView(performer_view);
+      }
+    }
+
+
+    desigion_view.addView( users_view );
   }
 
 
