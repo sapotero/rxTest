@@ -329,19 +329,11 @@ public class MainActivity extends AppCompatActivity {
             Cursor cursor = query.run();
             if (cursor != null) {
               while (cursor.moveToNext()) {
-                documentsAdapter.addItem(
-                  new Document(
-                    cursor.getString(0),
-                    cursor.getString(0),
-                    cursor.getString(0),
-                    cursor.getString(0),
-                    cursor.getString(0),
-                    cursor.getString(0),
-                    cursor.getString(0),
-                    cursor.getString(0),
-                    cursor.getString(0)
-                  )
-                );
+//                documentsAdapter.addItem(
+//                  new Document(
+//                    cursor.getString(0)
+//                  )
+//                );
               }
               documentsAdapter.notifyDataSetChanged();
             }

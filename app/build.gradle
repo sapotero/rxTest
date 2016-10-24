@@ -82,12 +82,18 @@ dependencies {
     // compile 'es.voghdev.pdfviewpager:library:1.0.1'
     compile 'com.github.barteksc:android-pdf-viewer:2.1.0'
 
-    // rx sqlite provider
-    compile 'com.squareup.sqlbrite:sqlbrite:0.7.0'
 
     // logger
     compile 'com.jakewharton.timber:timber:4.3.1'
 
+
+    // If you need StorIO for ContentResolver
+    compile 'com.pushtorefresh.storio:content-resolver:1.11.0'
+    compile 'com.pushtorefresh.storio:sqlite:1.11.0'
+
+
+    // rx sqlite provider
+    compile 'com.squareup.sqlbrite:sqlbrite:0.7.0'
     // генерация rx-моделек
     compile 'javax.annotation:javax.annotation-api:1.2'
 
