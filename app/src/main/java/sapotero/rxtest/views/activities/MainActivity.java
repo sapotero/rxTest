@@ -1,7 +1,6 @@
 package sapotero.rxtest.views.activities;
 
 import android.annotation.SuppressLint;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -19,8 +18,8 @@ import android.widget.Toast;
 import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
-import com.squareup.sqlbrite.BriteDatabase;
-import com.squareup.sqlbrite.SqlBrite;
+import com.pushtorefresh.storio.sqlite.StorIOSQLite;
+import com.pushtorefresh.storio.sqlite.queries.Query;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -36,17 +35,16 @@ import butterknife.ButterKnife;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
+import rx.Subscription;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.application.config.Constant;
-import sapotero.rxtest.db.models.RxDocuments;
+import sapotero.rxtest.db.Storio.entities.Auth;
+import sapotero.rxtest.db.Storio.tables.AuthTable;
 import sapotero.rxtest.events.bus.GetDocumentInfoEvent;
 import sapotero.rxtest.events.rx.InsertRxDocumentsEvent;
 import sapotero.rxtest.jobs.bus.GetDocumentInfoJob;
-import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
-import sapotero.rxtest.jobs.rx.InsertRxDocumentsJob;
 import sapotero.rxtest.retrofit.DocumentsService;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.retrofit.models.documents.Documents;
@@ -56,10 +54,13 @@ import sapotero.rxtest.views.adapters.models.FilterItem;
 import sapotero.rxtest.views.adapters.utils.StatusAdapter;
 import timber.log.Timber;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static rx.android.schedulers.AndroidSchedulers.mainThread;
+
 public class MainActivity extends AppCompatActivity {
 
-  private String TOKEN    = "";
-  private String LOGIN    = "";
+  private String TOKEN = "";
+  private String LOGIN = "";
   private String PASSWORD = "";
 
   private String total;
@@ -71,16 +72,26 @@ public class MainActivity extends AppCompatActivity {
   @SuppressLint("StaticFieldLeak")
   protected static RecyclerView rvv;
 
-  @BindView(R.id.documentsRecycleView) RecyclerView rv;
-  @BindView(R.id.progressBar) View progressBar;
-  @BindView(R.id.DOCUMENT_TYPE) Spinner DOCUMENT_TYPE_SELECTOR;
-  @BindView(R.id.JOURNAL_TYPE)  Spinner JOURNAL_TYPE_SELECTOR;
-  @BindView(R.id.ORGANIZATION)  Spinner ORGANIZATION_SELECTOR;
+  @BindView(R.id.documentsRecycleView)
+  RecyclerView rv;
+  @BindView(R.id.progressBar)
+  View progressBar;
+  @BindView(R.id.DOCUMENT_TYPE)
+  Spinner DOCUMENT_TYPE_SELECTOR;
+  @BindView(R.id.JOURNAL_TYPE)
+  Spinner JOURNAL_TYPE_SELECTOR;
+  @BindView(R.id.ORGANIZATION)
+  Spinner ORGANIZATION_SELECTOR;
 
-  @Inject JobManager jobManager;
-  @Inject OkHttpClient okHttpClient;
-  @Inject RxSharedPreferences settings;
-  @Inject public BriteDatabase db;
+  @Inject
+  JobManager jobManager;
+  @Inject
+  OkHttpClient okHttpClient;
+  @Inject
+  RxSharedPreferences settings;
+  //  @Inject public BriteDatabase db;
+  @Inject
+  StorIOSQLite storIOSQLite;
 
   private StatusAdapter filterAdapter;
   private List<Document> loaded_documents;
@@ -102,8 +113,9 @@ public class MainActivity extends AppCompatActivity {
     progressBar.setVisibility(ProgressBar.INVISIBLE);
     setAdapters();
 
-    GridLayoutManager gridLayoutManager = new GridLayoutManager( this, 2, GridLayoutManager.VERTICAL, false );
+    GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2, GridLayoutManager.VERTICAL, false);
     rv.setLayoutManager(gridLayoutManager);
+
   }
 
   private void loadSettings() {
@@ -116,9 +128,9 @@ public class MainActivity extends AppCompatActivity {
     Preference<String> token = settings.getString("token");
     TOKEN = token.get();
 
-    Timber.tag(TAG).v("LOGIN: "+ LOGIN );
-    Timber.tag(TAG).v("PASSWORD: "+ PASSWORD );
-    Timber.tag(TAG).v("TOKEN: "+ TOKEN );
+    Timber.tag(TAG).v("LOGIN: " + LOGIN);
+    Timber.tag(TAG).v("PASSWORD: " + PASSWORD);
+    Timber.tag(TAG).v("TOKEN: " + TOKEN);
   }
 
   @Override
@@ -131,16 +143,47 @@ public class MainActivity extends AppCompatActivity {
         item -> {
 
           loadSettings();
+//
+//          try {
+//            jobManager.addJobInBackground(new UpdateAuthTokenJob(LOGIN, PASSWORD));
+//          } catch (Exception e) {
+//            Timber.tag(TAG + " process error").v(e);
+//          }
 
-          try {
-            jobManager.addJobInBackground( new UpdateAuthTokenJob(LOGIN, PASSWORD) );
-          } catch ( Exception e){
-            Timber.tag(TAG + " process error").v( e );
-          }
+          storIOSQLite
+            .put()
+            .object( Auth.newAuth(LOGIN, PASSWORD) )
+            .prepare()
+            .executeAsBlocking();
+
+          List<Auth> user = storIOSQLite
+            .get()
+            .listOfObjects(Auth.class) // Type safety
+            .withQuery(Query.builder() // Query builder
+              .table(AuthTable.TABLE)
+              .where("login = ?")
+              .whereArgs("admin") // Varargs Object..., no more new String[] {"I", "am", "tired", "of", "this", "shit"}
+              .build())
+            .prepare()
+            .executeAsBlocking();
+
+          Timber.tag(TAG).i( user.toString() );
+
+
+//            .asRxObservable()
+//            .observeOn(mainThread())
+//            .subscribe(
+//              data -> {
+//                Timber.i( TAG, data );
+//              },
+//              error -> {
+//                Timber.e( TAG, error );
+//              }
+//            );
 
           return true;
         })
-      .setShowAsAction( MenuItem.SHOW_AS_ACTION_ALWAYS);
+      .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
     menu.add(0, 0, 0, "test")
       .setIcon(android.R.drawable.ic_input_add)
@@ -149,24 +192,36 @@ public class MainActivity extends AppCompatActivity {
           loadSettings();
           return true;
         })
-      .setShowAsAction( MenuItem.SHOW_AS_ACTION_ALWAYS);
+      .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
     menu.add(0, 0, 0, "Q")
       .setIcon(android.R.drawable.ic_popup_disk_full)
       .setOnMenuItemClickListener(
         item -> {
 
-          try {
-            jobManager.addJobInBackground( new InsertRxDocumentsJob(loaded_documents) );
-          } catch ( Exception e){
-            Timber.tag(TAG + " massInsert error").v( e );
-          }
+          final Subscription subscription = storIOSQLite
+            .get()
+            .listOfObjects(Auth.class)
+            .withQuery(AuthTable.QUERY_ALL)
+            .prepare()
+            .asRxObservable()
+            .delay(1, SECONDS)
+            .observeOn(mainThread())
+            .subscribe(auths -> {
+
+              if (auths.isEmpty()) {
+                Timber.e("isEmpty", "reloadData() ++");
+              } else {
+                Timber.e("isEmpty", "reloadData() --");
+              }
+
+            }, throwable -> {
+              Timber.e(throwable, "reloadData()");
+            });
 
           return true;
         })
-      .setShowAsAction( MenuItem.SHOW_AS_ACTION_ALWAYS);
-
-
+      .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
 
     return true;
@@ -176,14 +231,15 @@ public class MainActivity extends AppCompatActivity {
   public void onStart() {
     super.onStart();
 
-    if ( !EventBus.getDefault().isRegistered(this) ){
+    if (!EventBus.getDefault().isRegistered(this)) {
       EventBus.getDefault().register(this);
     }
+
   }
 
   @Override
   public void onStop() {
-    if ( EventBus.getDefault().isRegistered(this) ){
+    if (EventBus.getDefault().isRegistered(this)) {
       EventBus.getDefault().unregister(this);
     }
     super.onStop();
@@ -197,10 +253,10 @@ public class MainActivity extends AppCompatActivity {
     String[] filter_names = getResources().getStringArray(R.array.DOCUMENT_TYPES);
 
     for (int i = 0; i < filter_types.length; i++) {
-      filters.add(new FilterItem( filter_names[i] , filter_types[i], "0"));
+      filters.add(new FilterItem(filter_names[i], filter_types[i], "0"));
     }
 
-    filterAdapter = new StatusAdapter(this, filters );
+    filterAdapter = new StatusAdapter(this, filters);
     DOCUMENT_TYPE_SELECTOR.setAdapter(filterAdapter);
 
     DOCUMENT_TYPE_SELECTOR.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -255,63 +311,63 @@ public class MainActivity extends AppCompatActivity {
     );
   }
 
-  private void loadDocumentsCountByType( String TYPE){
+  private void loadDocumentsCountByType(String TYPE) {
 
-    Retrofit retrofit = new RetrofitManager( this, Constant.HOST + "/v3/", okHttpClient).process();
-    DocumentsService documentsService = retrofit.create( DocumentsService.class );
+    Retrofit retrofit = new RetrofitManager(this, Constant.HOST + "/v3/", okHttpClient).process();
+    DocumentsService documentsService = retrofit.create(DocumentsService.class);
 
-    Observable<Documents> documents = documentsService.getDocuments( LOGIN, TOKEN, TYPE, 0,0);
+    Observable<Documents> documents = documentsService.getDocuments(LOGIN, TOKEN, TYPE, 0, 0);
 
-    documents.subscribeOn( Schedulers.newThread() )
-      .observeOn( AndroidSchedulers.mainThread() )
+    documents.subscribeOn(Schedulers.newThread())
+      .observeOn(mainThread())
       .subscribe(
         data -> {
           total = data.getMeta().getTotal();
 
-          if ( total != null && Integer.valueOf(total) > 0 ){
+          if (total != null && Integer.valueOf(total) > 0) {
 
 
             String[] values = getResources().getStringArray(R.array.DOCUMENT_TYPES_VALUE);
 
             int index = -1;
-            for (int i=0;i<values.length;i++) {
+            for (int i = 0; i < values.length; i++) {
               if (values[i].equals(TYPE)) {
                 index = i;
                 break;
               }
             }
 
-            Timber.tag(TAG).i( TYPE + " - " + total + " | " + index );
+            Timber.tag(TAG).i(TYPE + " - " + total + " | " + index);
 
             FilterItem filterItem = filterAdapter.getItem(index);
 
-            filterItem.setCount( total );
+            filterItem.setCount(total);
             filterAdapter.notifyDataSetChanged();
           }
 
         },
         error -> {
-          Timber.tag(TAG).d( "_ERROR", error.getMessage() );
+          Timber.tag(TAG).d("_ERROR", error.getMessage());
         });
 
   }
 
-  private void loadDocuments(){
+  private void loadDocuments() {
 
     progressBar.setVisibility(ProgressBar.VISIBLE);
 
-    Retrofit retrofit = new RetrofitManager( this, Constant.HOST + "/v3/", okHttpClient).process();
-    DocumentsService documentsService = retrofit.create( DocumentsService.class );
+    Retrofit retrofit = new RetrofitManager(this, Constant.HOST + "/v3/", okHttpClient).process();
+    DocumentsService documentsService = retrofit.create(DocumentsService.class);
 
     int spinner_pos = DOCUMENT_TYPE_SELECTOR.getSelectedItemPosition();
 
     String[] document_type = getResources().getStringArray(R.array.DOCUMENT_TYPES_VALUE);
     String type = String.valueOf(document_type[spinner_pos]);
 
-    Observable<Documents> documents = documentsService.getDocuments( LOGIN, TOKEN, type, 100,0);
+    Observable<Documents> documents = documentsService.getDocuments(LOGIN, TOKEN, type, 100, 0);
 
-    documents.subscribeOn( Schedulers.newThread() )
-      .observeOn( AndroidSchedulers.mainThread() )
+    documents.subscribeOn(Schedulers.newThread())
+      .observeOn(mainThread())
       .subscribe(
         data -> {
           progressBar.setVisibility(ProgressBar.INVISIBLE);
@@ -324,31 +380,15 @@ public class MainActivity extends AppCompatActivity {
           DocumentsAdapter documentsAdapter = new DocumentsAdapter(this, docs);
           rv.setAdapter(documentsAdapter);
 
-          Observable<SqlBrite.Query> users = db.createQuery(RxDocuments.TABLE, "SELECT * FROM "+RxDocuments.TABLE);
-          users.subscribe(query -> {
-            Cursor cursor = query.run();
-            if (cursor != null) {
-              while (cursor.moveToNext()) {
-//                documentsAdapter.addItem(
-//                  new Document(
-//                    cursor.getString(0)
-//                  )
-//                );
-              }
-              documentsAdapter.notifyDataSetChanged();
-            }
-          });
-
-
           rvv = rv;
 
           FilterItem filterItem = filterAdapter.getItem(spinner_pos);
-          filterItem.setCount( total );
+          filterItem.setCount(total);
           filterAdapter.notifyDataSetChanged();
 
         },
         error -> {
-          Log.d( "_ERROR", error.getMessage() );
+          Log.d("_ERROR", error.getMessage());
           progressBar.setVisibility(ProgressBar.INVISIBLE);
 
           Toast.makeText(this, error.getMessage(), Toast.LENGTH_SHORT).show();
@@ -357,11 +397,11 @@ public class MainActivity extends AppCompatActivity {
   }
 
   private void process() {
-    Toast.makeText( context, "Total: " + total, Toast.LENGTH_SHORT).show();
+    Toast.makeText(context, "Total: " + total, Toast.LENGTH_SHORT).show();
     try {
-      jobManager.addJobInBackground( new GetDocumentInfoJob("1"));
-    } catch ( Exception e){
-      Log.d( "_ERROR", e.toString() );
+      jobManager.addJobInBackground(new GetDocumentInfoJob("1"));
+    } catch (Exception e) {
+      Log.d("_ERROR", e.toString());
     }
 
   }
@@ -375,6 +415,5 @@ public class MainActivity extends AppCompatActivity {
   public void onMessageEvent(InsertRxDocumentsEvent event) {
     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show();
   }
-
 
 }

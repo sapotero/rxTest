@@ -1,7 +1,6 @@
 package sapotero.rxtest.views.activities;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.net.Uri;
@@ -35,7 +34,6 @@ import com.mikepenz.actionitembadge.library.ActionItemBadge;
 import com.mikepenz.actionitembadge.library.ActionItemBadgeAdder;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mikepenz.material_design_iconic_typeface_library.MaterialDesignIconic;
-import com.squareup.sqlbrite.BriteDatabase;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -44,7 +42,6 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -87,7 +84,7 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
   @BindView(R.id.tab_main)                 ViewPager viewPager;
   @BindView(R.id.tabs)                     TabLayout tabLayout;
 
-  @Inject BriteDatabase db;
+//  @Inject BriteDatabase db;
   @Inject JobManager jobManager;
   @Inject CompositeSubscription subscriptions;
   @Inject OkHttpClient okHttpClient;
@@ -287,27 +284,27 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
       subscriptions.unsubscribe();
     }
 
-    Observable<Integer> itemCount = db.createQuery(RxAuth.TABLE, RxAuth.COUNT_QUERY)
-      .map(query -> {
-        try (Cursor cursor = query.run()) {
-          if ( !(cursor != null && cursor.moveToNext()) ) {
-            Timber.tag(TAG + " total error").v("No rows");
-            throw new AssertionError("No rows");
-          }
-          return cursor.getInt(0);
-        }
-      });
+//    Observable<Integer> itemCount = db.createQuery(RxAuth.TABLE, RxAuth.COUNT_QUERY)
+//      .map(query -> {
+//        try (Cursor cursor = query.run()) {
+//          if ( !(cursor != null && cursor.moveToNext()) ) {
+//            Timber.tag(TAG + " total error").v("No rows");
+//            throw new AssertionError("No rows");
+//          }
+//          return cursor.getInt(0);
+//        }
+//      });
 
-    subscriptions.add(
-      itemCount
-        .subscribeOn( Schedulers.newThread() )
-        .sample(5, TimeUnit.SECONDS)
-        .observeOn( AndroidSchedulers.mainThread() )
-        .subscribe(title -> {
-          Timber.tag( TAG + " total").v(String.valueOf(title));
-          ActionItemBadge.update(this, button.findItem(22), MaterialDesignIconic.Icon.gmi_account, ActionItemBadge.BadgeStyles.DARK_GREY, title);
-        })
-    );
+//    subscriptions.add(
+//      itemCount
+//        .subscribeOn( Schedulers.newThread() )
+//        .sample(5, TimeUnit.SECONDS)
+//        .observeOn( AndroidSchedulers.mainThread() )
+//        .subscribe(title -> {
+//          Timber.tag( TAG + " total").v(String.valueOf(title));
+//          ActionItemBadge.update(this, button.findItem(22), MaterialDesignIconic.Icon.gmi_account, ActionItemBadge.BadgeStyles.DARK_GREY, title);
+//        })
+//    );
 
 
   }

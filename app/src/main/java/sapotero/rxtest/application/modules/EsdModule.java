@@ -7,14 +7,15 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
-import sapotero.rxtest.jobs.utils.JobModule;
-import sapotero.rxtest.db.utils.DbModule;
+import sapotero.rxtest.db.Storio.StroioDbModule;
 import sapotero.rxtest.events.utils.SubscriptionsModule;
+import sapotero.rxtest.jobs.utils.JobModule;
 import sapotero.rxtest.retrofit.utils.OkHttpModule;
 
 @Module(
   includes = {
-    DbModule.class,
+//    DbModule.class,
+    StroioDbModule.class,
     JobModule.class,
     SubscriptionsModule.class,
     OkHttpModule.class,
