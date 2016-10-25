@@ -5,4 +5,6 @@
 
     <dimen name="date_offset">16sp</dimen>
     <dimen name="half_date_offset">8sp</dimen>
+
+    <dimen name="alert_def_padding">18dp</dimen>
 </resources>

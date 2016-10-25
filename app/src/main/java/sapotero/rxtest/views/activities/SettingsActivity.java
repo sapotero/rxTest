@@ -1,7 +1,10 @@
 package sapotero.rxtest.views.activities;
 
+import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.widget.CheckBox;
 
 import com.f2prateek.rx.preferences.Preference;
@@ -15,17 +18,23 @@ import butterknife.ButterKnife;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
+import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.views.fragments.SettingsDecisionFragment;
+import sapotero.rxtest.views.fragments.SettingsUserFragment;
+import sapotero.rxtest.views.fragments.SettingsViewFragment;
+import timber.log.Timber;
 
 
 public class SettingsActivity extends AppCompatActivity {
 
-  @BindView(R.id.foo_1) CheckBox foo1Checkbox;
-  @BindView(R.id.foo_2) CheckBox foo2Checkbox;
+  @BindView(R.id.toolbar) Toolbar toolbar;
+
+  @Inject RxSharedPreferences settings;
 
   Preference<Boolean> fooPreference;
   CompositeSubscription subscriptions;
 
-  @Inject RxSharedPreferences settings;
+  private String TAG = this.getClass().getSimpleName();
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -34,16 +43,34 @@ public class SettingsActivity extends AppCompatActivity {
     setContentView(R.layout.activity_settings);
 
     ButterKnife.bind(this);
+    EsdApplication.getComponent(this).inject(this);
 
-    fooPreference = settings.getBoolean("foo", false);
+    fooPreference = settings.getBoolean("foo");
+
+    toolbar.setTitleTextColor(Color.WHITE);
+    toolbar.setTitle("Settings");
+    toolbar.setNavigationOnClickListener(v ->{
+        finish();
+      }
+    );
+
+    if (savedInstanceState == null) {
+      FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+      ft.add(R.id.settings_user_fragment,    new SettingsUserFragment() );
+      ft.add(R.id.settings_view_fragment,    new SettingsViewFragment());
+      ft.add(R.id.settings_decision_fragment,new SettingsDecisionFragment());
+      ft.commit();
+    }
   }
 
   @Override protected void onResume() {
     super.onResume();
 
     subscriptions = new CompositeSubscription();
-    bindPreference(foo1Checkbox, fooPreference);
-    bindPreference(foo2Checkbox, fooPreference);
+//    bindPreference(foo1Checkbox, fooPreference);
+//    bindPreference(foo2Checkbox, fooPreference);
+
+    Timber.tag(TAG).i( " settings_username_host - " + settings.getString("settings_username_host").get() );
   }
 
   @Override protected void onPause() {
@@ -55,6 +82,7 @@ public class SettingsActivity extends AppCompatActivity {
     subscriptions.add(preference.asObservable()
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(RxCompoundButton.checked(checkBox)));
+
     subscriptions.add(RxCompoundButton.checkedChanges(checkBox)
       .skip(1)
       .subscribe(preference.asAction()));

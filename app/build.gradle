@@ -118,8 +118,15 @@ dependencies {
     compile('com.mikepenz:materialdrawer:5.6.0@aar') {
         transitive = true
     }
+    compile 'com.android.support:preference-v14:24.2.0'
 
     annotationProcessor 'com.google.dagger:dagger-compiler:2.6'
+}
+dependencies {
+    compile 'com.android.support:support-v4:24.2.0'
+}
+dependencies {
+    compile 'com.android.support:support-v4:24.+'
 }
 dependencies {
     compile 'com.android.support:support-v4:24.+'

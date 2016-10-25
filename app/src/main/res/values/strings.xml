@@ -44,6 +44,33 @@
         <item>control</item>
     </string-array>
 
+    <string-array name="settings_view_start_page">
+        <item>Все документы</item>
+        <item>Входящие документы</item>
+        <item>Обращения граждан</item>
+        <item>НПА</item>
+        <item>Внутренние документы</item>
+        <item>Приказы подразделений</item>
+        <item>Приказы МВД</item>
+        <item>Приказы ДДО)ddo</item>
+        <item>Подписание/согласование</item>
+    </string-array>
+
+    <string-array name="settings_view_start_page_values">
+        <item>settings_view_type_all</item>
+        <item>settings_view_type_incoming_documents</item>
+        <item>settings_view_type_citizen_requests</item>
+        <item>settings_view_type_incoming_orders</item>
+        <item>settings_view_type_internal</item>
+        <item>settings_view_type_orders</item>
+        <item>settings_view_type_orders_mvd</item>
+        <item>settings_view_type_orders)ddo</item>
+        <item>settings_view_type_approve</item>
+    </string-array>
+
+
+
+
     <string-array name="ORGANIZATIONS">
         <item>Все организации</item>
     </string-array>
