@@ -22,6 +22,9 @@ android {
         targetCompatibility 1.8
         sourceCompatibility 1.8
     }
+    dataBinding {
+        enabled = true
+    }
 }
 
 
@@ -87,9 +90,12 @@ dependencies {
     compile 'com.jakewharton.timber:timber:4.3.1'
 
 
-    // If you need StorIO for ContentResolver
-    compile 'com.pushtorefresh.storio:content-resolver:1.11.0'
-    compile 'com.pushtorefresh.storio:sqlite:1.11.0'
+//    // If you need StorIO for ContentResolver
+//    compile 'com.pushtorefresh.storio:content-resolver:1.11.0'
+//    compile 'com.pushtorefresh.storio:sqlite:1.11.0'
+    compile 'io.requery:requery:1.0.0'
+    compile 'io.requery:requery-android:1.0.0' // for android
+    apt 'io.requery:requery-processor:1.0.0'   // use an APT plugin
 
 
     // rx sqlite provider
@@ -110,9 +116,11 @@ dependencies {
     //бейджи https://github.com/mikepenz/Android-ActionItemBadge
     compile 'com.mikepenz:actionitembadge:3.3.0@aar'
     compile 'com.mikepenz:iconics-core:2.8.0@aar'
-    compile "com.android.support:appcompat-v7:24.2.0"
     compile 'com.mikepenz:material-design-iconic-typeface:2.2.0.2@aar'
-    compile "com.android.support:appcompat-v7:24.2.0"
+
+    compile('com.mikepenz:materialdrawer:5.6.0@aar') {
+        transitive = true
+    }
 
     annotationProcessor 'com.google.dagger:dagger-compiler:2.6'
 }

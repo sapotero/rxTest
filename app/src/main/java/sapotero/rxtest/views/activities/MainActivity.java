@@ -1,7 +1,6 @@
 package sapotero.rxtest.views.activities;
 
 import android.annotation.SuppressLint;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -19,8 +18,6 @@ import android.widget.Toast;
 import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
-import com.squareup.sqlbrite.BriteDatabase;
-import com.squareup.sqlbrite.SqlBrite;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -33,20 +30,22 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.requery.Persistable;
+import io.requery.rx.SingleEntityStore;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.application.config.Constant;
-import sapotero.rxtest.db.models.RxDocuments;
+import sapotero.rxtest.db.requery.CreateDoc;
+import sapotero.rxtest.db.requery.Doc;
 import sapotero.rxtest.events.bus.GetDocumentInfoEvent;
 import sapotero.rxtest.events.rx.InsertRxDocumentsEvent;
 import sapotero.rxtest.jobs.bus.GetDocumentInfoJob;
-import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
-import sapotero.rxtest.jobs.rx.InsertRxDocumentsJob;
 import sapotero.rxtest.retrofit.DocumentsService;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.retrofit.models.documents.Documents;
@@ -80,10 +79,12 @@ public class MainActivity extends AppCompatActivity {
   @Inject JobManager jobManager;
   @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
-  @Inject public BriteDatabase db;
+//  @Inject public BriteDatabase db;
+  @Inject public SingleEntityStore<Persistable> dataStore;
 
   private StatusAdapter filterAdapter;
   private List<Document> loaded_documents;
+//  private DocAdapter adapter;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -101,6 +102,14 @@ public class MainActivity extends AppCompatActivity {
 
     progressBar.setVisibility(ProgressBar.INVISIBLE);
     setAdapters();
+
+
+//    ExecutorService executor = Executors.newSingleThreadExecutor();
+//    adapter = new DocAdapter();
+//    adapter.setExecutor(executor);
+//    rv.setAdapter(adapter);
+//    rv.setLayoutManager(new LinearLayoutManager(this));
+
 
     GridLayoutManager gridLayoutManager = new GridLayoutManager( this, 2, GridLayoutManager.VERTICAL, false );
     rv.setLayoutManager(gridLayoutManager);
@@ -130,13 +139,25 @@ public class MainActivity extends AppCompatActivity {
       .setOnMenuItemClickListener(
         item -> {
 
-          loadSettings();
+          dataStore.count(Doc.class).get().toSingle()
+            .subscribe(count -> {
+              if (count == 0) {
+                Observable.fromCallable(new CreateDoc(dataStore))
+                  .flatMap((Func1<Observable<Iterable<Doc>>, Observable<?>>) o -> o)
+                  .observeOn(Schedulers.computation())
+                  .subscribe( o -> {
+                     Timber.tag(TAG).e(String.valueOf(o));
+                  });
+              }
+            });
 
-          try {
-            jobManager.addJobInBackground( new UpdateAuthTokenJob(LOGIN, PASSWORD) );
-          } catch ( Exception e){
-            Timber.tag(TAG + " process error").v( e );
-          }
+//          loadSettings();
+//
+//          try {
+//            jobManager.addJobInBackground( new UpdateAuthTokenJob(LOGIN, PASSWORD) );
+//          } catch ( Exception e){
+//            Timber.tag(TAG + " process error").v( e );
+//          }
 
           return true;
         })
@@ -156,11 +177,26 @@ public class MainActivity extends AppCompatActivity {
       .setOnMenuItemClickListener(
         item -> {
 
-          try {
-            jobManager.addJobInBackground( new InsertRxDocumentsJob(loaded_documents) );
-          } catch ( Exception e){
-            Timber.tag(TAG + " massInsert error").v( e );
-          }
+          Observable<Doc> observable = dataStore
+            .select(Doc.class)
+            .get()
+            .toObservable();
+
+          observable.subscribeOn( Schedulers.newThread() )
+            .subscribe(
+              docs -> {
+                Timber.tag(TAG).v( String.valueOf(docs.getEmail()) );
+                Timber.tag(TAG).v( String.valueOf(docs.getSigner().getCity()) );
+              }
+            );
+
+
+
+//          try {
+//            jobManager.addJobInBackground( new InsertRxDocumentsJob(loaded_documents) );
+//          } catch ( Exception e){
+//            Timber.tag(TAG + " massInsert error").v( e );
+//          }
 
           return true;
         })
@@ -324,20 +360,20 @@ public class MainActivity extends AppCompatActivity {
           DocumentsAdapter documentsAdapter = new DocumentsAdapter(this, docs);
           rv.setAdapter(documentsAdapter);
 
-          Observable<SqlBrite.Query> users = db.createQuery(RxDocuments.TABLE, "SELECT * FROM "+RxDocuments.TABLE);
-          users.subscribe(query -> {
-            Cursor cursor = query.run();
-            if (cursor != null) {
-              while (cursor.moveToNext()) {
-//                documentsAdapter.addItem(
-//                  new Document(
-//                    cursor.getString(0)
-//                  )
-//                );
-              }
-              documentsAdapter.notifyDataSetChanged();
-            }
-          });
+//          Observable<SqlBrite.Query> users = db.createQuery(RxDocuments.TABLE, "SELECT * FROM "+RxDocuments.TABLE);
+//          users.subscribe(query -> {
+//            Cursor cursor = query.run();
+//            if (cursor != null) {
+//              while (cursor.moveToNext()) {
+////                documentsAdapter.addItem(
+////                  new Document(
+////                    cursor.getString(0)
+////                  )
+////                );
+//              }
+//              documentsAdapter.notifyDataSetChanged();
+//            }
+//          });
 
 
           rvv = rv;
@@ -375,6 +411,5 @@ public class MainActivity extends AppCompatActivity {
   public void onMessageEvent(InsertRxDocumentsEvent event) {
     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show();
   }
-
 
 }
