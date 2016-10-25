@@ -576,7 +576,7 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
     String text = "";
     String appealText;
     String number;
-    boolean toFamiliarization = block.getToFamiliarization();
+    boolean toFamiliarization = block.getToFamiliarization() == null ? false : block.getToFamiliarization();
 
     if ( block.getAppealText() != null ){
       appealText = block.getAppealText().toString();

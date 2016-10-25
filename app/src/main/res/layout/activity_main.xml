@@ -1,20 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="18dp"
 
     android:clipToPadding="false"
     tools:context=".views.activities.MainActivity">
 
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        android:minHeight="?attr/actionBarSize"
+        android:paddingTop="@dimen/half_date_offset"
+        android:transitionName="actionBar"
+        android:title="test"/>
+
     <LinearLayout
         android:orientation="vertical"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
-        android:layout_weight="4">
+        android:layout_weight="4"
+        android:layout_below="@+id/toolbar">
 
         <ProgressBar
             style="?android:attr/progressBarStyleHorizontal"
@@ -93,4 +104,4 @@
     </LinearLayout>
 
 
-</LinearLayout>
+</RelativeLayout>

@@ -85,10 +85,8 @@ dependencies {
     // compile 'es.voghdev.pdfviewpager:library:1.0.1'
     compile 'com.github.barteksc:android-pdf-viewer:2.1.0'
 
-
     // logger
     compile 'com.jakewharton.timber:timber:4.3.1'
-
 
 //    // If you need StorIO for ContentResolver
 //    compile 'com.pushtorefresh.storio:content-resolver:1.11.0'
@@ -97,16 +95,15 @@ dependencies {
     compile 'io.requery:requery-android:1.0.0' // for android
     apt 'io.requery:requery-processor:1.0.0'   // use an APT plugin
 
-
     // rx sqlite provider
     compile 'com.squareup.sqlbrite:sqlbrite:0.7.0'
     // генерация rx-моделек
     compile 'javax.annotation:javax.annotation-api:1.2'
 
     compile 'com.google.auto.value:auto-value:1.2'
-    apt     'com.google.auto.value:auto-value:1.2'
+    apt 'com.google.auto.value:auto-value:1.2'
 
-    apt     'com.ryanharter.auto.value:auto-value-parcel:0.2.4-rc2'
+    apt 'com.ryanharter.auto.value:auto-value-parcel:0.2.4-rc2'
     compile 'com.ryanharter.auto.value:auto-value-parcel-adapter:0.2.4-rc2'
 
     // простой биндинг
@@ -123,4 +120,7 @@ dependencies {
     }
 
     annotationProcessor 'com.google.dagger:dagger-compiler:2.6'
+}
+dependencies {
+    compile 'com.android.support:support-v4:24.+'
 }

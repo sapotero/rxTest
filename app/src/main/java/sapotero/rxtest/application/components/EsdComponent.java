@@ -14,6 +14,7 @@ import sapotero.rxtest.retrofit.utils.OkHttpModule;
 import sapotero.rxtest.views.activities.InfoActivity;
 import sapotero.rxtest.views.activities.LoginActivity;
 import sapotero.rxtest.views.activities.MainActivity;
+import sapotero.rxtest.views.activities.SettingsActivity;
 import sapotero.rxtest.views.adapters.DecisionAdapter;
 import sapotero.rxtest.views.services.AuthService;
 
@@ -30,8 +31,10 @@ public interface EsdComponent {
   void inject(LoginActivity activity);
   void inject(MainActivity  activity);
   void inject(InfoActivity  activity);
-  void inject(DecisionAdapter activity);
+  void inject(SettingsActivity activity);
+
   void inject(AuthService service);
+  void inject(DecisionAdapter activity);
 
   void inject(BaseJob job);
 

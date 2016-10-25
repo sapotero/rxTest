@@ -1,10 +1,12 @@
 package sapotero.rxtest.views.activities;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,6 +20,17 @@ import android.widget.Toast;
 import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
+import com.mikepenz.material_design_iconic_typeface_library.MaterialDesignIconic;
+import com.mikepenz.materialdrawer.AccountHeader;
+import com.mikepenz.materialdrawer.AccountHeaderBuilder;
+import com.mikepenz.materialdrawer.Drawer;
+import com.mikepenz.materialdrawer.DrawerBuilder;
+import com.mikepenz.materialdrawer.icons.MaterialDrawerFont;
+import com.mikepenz.materialdrawer.model.DividerDrawerItem;
+import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
+import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
+import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
+import com.mikepenz.materialdrawer.model.SectionDrawerItem;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -76,6 +89,8 @@ public class MainActivity extends AppCompatActivity {
   @BindView(R.id.JOURNAL_TYPE)  Spinner JOURNAL_TYPE_SELECTOR;
   @BindView(R.id.ORGANIZATION)  Spinner ORGANIZATION_SELECTOR;
 
+  @BindView(R.id.toolbar) Toolbar toolbar;
+
   @Inject JobManager jobManager;
   @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
@@ -84,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
 
   private StatusAdapter filterAdapter;
   private List<Document> loaded_documents;
-//  private DocAdapter adapter;
+  private Drawer drawer;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -103,16 +118,75 @@ public class MainActivity extends AppCompatActivity {
     progressBar.setVisibility(ProgressBar.INVISIBLE);
     setAdapters();
 
-
-//    ExecutorService executor = Executors.newSingleThreadExecutor();
-//    adapter = new DocAdapter();
-//    adapter.setExecutor(executor);
-//    rv.setAdapter(adapter);
-//    rv.setLayoutManager(new LinearLayoutManager(this));
-
-
     GridLayoutManager gridLayoutManager = new GridLayoutManager( this, 2, GridLayoutManager.VERTICAL, false );
     rv.setLayoutManager(gridLayoutManager);
+
+
+    AccountHeader headerResult = new AccountHeaderBuilder()
+      .withActivity(this)
+      .withHeaderBackground(R.drawable.header)
+      .addProfiles(
+        new ProfileDrawerItem()
+          .withName("Admin")
+          .withEmail("admin_id")
+          .withIcon(MaterialDesignIconic.Icon.gmi_account)
+      )
+      .withOnAccountHeaderListener(
+        (view, profile, currentProfile) -> false
+      )
+      .build();
+
+    drawer = new DrawerBuilder()
+      .withActivity(this)
+      .withToolbar(toolbar)
+      .withActionBarDrawerToggle(true)
+      .withHeader(R.layout.drawer_header)
+      .withAccountHeader(headerResult)
+      .addDrawerItems(
+        new PrimaryDrawerItem().withName(R.string.drawer_item_home)
+          .withIcon(MaterialDrawerFont.Icon.mdf_arrow_drop_down)
+          .withBadge("99")
+          .withIdentifier(1),
+
+        new SectionDrawerItem().withName(R.string.drawer_item_settings),
+
+        new SecondaryDrawerItem()
+          .withName(R.string.drawer_item_settings_account)
+          .withIcon(MaterialDesignIconic.Icon.gmi_accounts),
+        new SecondaryDrawerItem()
+          .withName(R.string.drawer_item_settings_config)
+          .withIcon(MaterialDesignIconic.Icon.gmi_settings),
+        new SecondaryDrawerItem()
+          .withName(R.string.drawer_item_settings_templates)
+          .withIcon(MaterialDesignIconic.Icon.gmi_comment_edit),
+
+        new DividerDrawerItem(),
+        new SecondaryDrawerItem()
+          .withName(R.string.drawer_item_debug)
+          .withIcon(MaterialDesignIconic.Icon.gmi_developer_board)
+          .withIdentifier(99)
+      )
+      .withOnDrawerItemClickListener(
+        (view, position, drawerItem) -> {
+
+          Timber.tag(TAG).i( String.valueOf(view) );
+          Timber.tag(TAG).i(String.valueOf(position));
+          Timber.tag(TAG).i(String.valueOf( drawerItem.getIdentifier() ));
+
+          Intent intent = new Intent(this, SettingsActivity.class);
+          startActivity(intent);
+
+          return false;
+
+        }
+      )
+      .build();
+    toolbar.setSubtitle("subtitle");
+    toolbar.setTitle("TITLE");
+    toolbar.setTitleTextColor( getResources().getColor( R.color.md_grey_100 ) );
+    toolbar.setSubtitleTextColor( getResources().getColor( R.color.md_grey_400 ) );
+
+    toolbar.inflateMenu(R.menu.info);
   }
 
   private void loadSettings() {
