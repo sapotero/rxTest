@@ -19,7 +19,6 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.views.fragments.SettingsDecisionFragment;
 import sapotero.rxtest.views.fragments.SettingsUserFragment;
 import sapotero.rxtest.views.fragments.SettingsViewFragment;
 import timber.log.Timber;
@@ -42,6 +41,7 @@ public class SettingsActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_settings);
 
+
     ButterKnife.bind(this);
     EsdApplication.getComponent(this).inject(this);
 
@@ -50,16 +50,15 @@ public class SettingsActivity extends AppCompatActivity {
     toolbar.setTitleTextColor(Color.WHITE);
     toolbar.setTitle("Settings");
     toolbar.setNavigationOnClickListener(v ->{
-        finish();
+      finish();
       }
     );
 
     if (savedInstanceState == null) {
-      FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-      ft.add(R.id.settings_user_fragment,    new SettingsUserFragment() );
-      ft.add(R.id.settings_view_fragment,    new SettingsViewFragment());
-      ft.add(R.id.settings_decision_fragment,new SettingsDecisionFragment());
-      ft.commit();
+      FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+      fragmentTransaction.add(R.id.settings_user_fragment, new SettingsUserFragment() );
+      fragmentTransaction.add(R.id.settings_view_fragment, new SettingsViewFragment());
+    fragmentTransaction.commit();
     }
   }
 
@@ -79,12 +78,18 @@ public class SettingsActivity extends AppCompatActivity {
   }
 
   void bindPreference(CheckBox checkBox, Preference<Boolean> preference) {
-    subscriptions.add(preference.asObservable()
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(RxCompoundButton.checked(checkBox)));
+    subscriptions.add(
+      preference
+        .asObservable()
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(RxCompoundButton.checked(checkBox))
+    );
 
-    subscriptions.add(RxCompoundButton.checkedChanges(checkBox)
-      .skip(1)
-      .subscribe(preference.asAction()));
+    subscriptions.add(
+      RxCompoundButton
+        .checkedChanges(checkBox)
+        .skip(1)
+        .subscribe(preference.asAction())
+    );
   }
 }

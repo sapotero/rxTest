@@ -12,42 +12,41 @@
             android:entries="@array/settings_view_start_page"
             android:entryValues="@array/settings_view_start_page_values" />
 
-        <android.support.v7.preference.SwitchPreferenceCompat
-            android:key="settings_view_type_all"
-            android:title="Все документы"
-            android:defaultValue="true" />
-        <android.support.v7.preference.SwitchPreferenceCompat
-            android:key="settings_view_type_incoming_documents"
-            android:title="Входящие документы"
-            android:defaultValue="true" />
-        <android.support.v7.preference.SwitchPreferenceCompat
-            android:key="settings_view_type_citizen_requests"
-            android:title="Обращения граждан"
-            android:defaultValue="true" />
-        <android.support.v7.preference.SwitchPreferenceCompat
-            android:key="settings_view_type_incoming_orders"
-            android:title="НПА"
-            android:defaultValue="true" />
-        <android.support.v7.preference.SwitchPreferenceCompat
-            android:key="settings_view_type_internal"
-            android:title="Внутренние документы"
-            android:defaultValue="true" />
-        <android.support.v7.preference.SwitchPreferenceCompat
-            android:key="settings_view_type_orders"
-            android:title="Приказы подразделений"
-            android:defaultValue="true" />
-        <android.support.v7.preference.SwitchPreferenceCompat
-            android:key="settings_view_type_orders_mvd"
-            android:title="Приказы МВД"
-            android:defaultValue="true" />
-        <android.support.v7.preference.SwitchPreferenceCompat
-            android:key="settings_view_type_orders_ddo"
-            android:title="Приказы ДДО"
-            android:defaultValue="true" />
-        <android.support.v7.preference.SwitchPreferenceCompat
-            android:key="settings_view_type_approve"
-            android:title="Подписание/согласование"
-            android:defaultValue="true" />
+        <MultiSelectListPreference
+            android:key="settings_view_journals"
+            android:title="Журналы"
+            android:summary="Выберете журналы, отображаемые в приложении"
+            android:defaultValue="@array/empty_array"
+            android:entries="@array/settings_view_start_page"
+            android:entryValues="@array/settings_view_start_page_values" />
+        <CheckBoxPreference
+            android:key="settings_view_hide_first"
+            android:title="Не отображать статус «Первичное рассмотрение»"
+            android:defaultValue="false" />
+        <CheckBoxPreference
+            android:key="settings_view_type_show_without_project"
+            android:title="Отображать документы без проекта резолюции"
+            android:defaultValue="false" />
+        <CheckBoxPreference
+            android:key="settings_view_hide_buttons"
+            android:title="Не отображать «Прошу доложить» и «Прошу ознакомить»"
+            android:defaultValue="false" />
+        <CheckBoxPreference
+            android:key="settings_view_show_urgency"
+            android:title="Отображать настройки срочности"
+            android:defaultValue="false" />
+        <CheckBoxPreference
+            android:key="settings_view_only_urgent"
+            android:title="C одним типом «Срочно»"
+            android:defaultValue="false" />
+        <CheckBoxPreference
+            android:key="settings_view_show_origin"
+            android:title="Отображать настройки подлинника"
+            android:defaultValue="false" />
+        <EditTextPreference
+            android:key="settings_view_time"
+            android:title="Время показа уведомления"
+            android:defaultValue="0" />
 
     </android.support.v7.preference.PreferenceCategory>
 

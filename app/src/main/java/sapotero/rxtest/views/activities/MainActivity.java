@@ -23,9 +23,7 @@ import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.mikepenz.material_design_iconic_typeface_library.MaterialDesignIconic;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
-import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
-import com.mikepenz.materialdrawer.icons.MaterialDrawerFont;
 import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
@@ -37,7 +35,9 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -51,6 +51,7 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.application.config.Constant;
@@ -94,12 +95,17 @@ public class MainActivity extends AppCompatActivity {
   @Inject JobManager jobManager;
   @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
-//  @Inject public BriteDatabase db;
   @Inject public SingleEntityStore<Persistable> dataStore;
 
   private StatusAdapter filterAdapter;
   private List<Document> loaded_documents;
-  private Drawer drawer;
+  private DrawerBuilder drawer;
+
+  CompositeSubscription subscriptions;
+
+  private final int SETTINGS_VIEW          = 20;
+  private final int SETTINGS_TEMPLATES     = 21;
+  private final int SETTINGS_TEMPLATES_OFF = 22;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -122,6 +128,73 @@ public class MainActivity extends AppCompatActivity {
     rv.setLayoutManager(gridLayoutManager);
 
 
+    toolbar.setSubtitle("subtitle");
+    toolbar.setTitle("TITLE");
+    toolbar.setTitleTextColor( getResources().getColor( R.color.md_grey_100 ) );
+    toolbar.setSubtitleTextColor( getResources().getColor( R.color.md_grey_400 ) );
+
+    toolbar.inflateMenu(R.menu.info);
+  }
+
+  private void drawer_build_bottom() {
+    drawer
+      .addDrawerItems(
+
+        new SectionDrawerItem().withName(R.string.drawer_item_settings),
+
+        new SecondaryDrawerItem()
+          .withName(R.string.drawer_item_settings_account)
+          .withIcon(MaterialDesignIconic.Icon.gmi_accounts)
+          .withIdentifier(SETTINGS_VIEW),
+        new SecondaryDrawerItem()
+          .withName(R.string.drawer_item_settings_templates)
+          .withIcon(MaterialDesignIconic.Icon.gmi_comment_edit)
+          .withIdentifier(SETTINGS_TEMPLATES),
+        new SecondaryDrawerItem()
+          .withName(R.string.drawer_item_settings_templates_off)
+          .withIcon(MaterialDesignIconic.Icon.gmi_comment_list)
+          .withIdentifier(SETTINGS_TEMPLATES_OFF),
+
+        new DividerDrawerItem(),
+        new SecondaryDrawerItem()
+          .withName(R.string.drawer_item_debug)
+          .withIcon(MaterialDesignIconic.Icon.gmi_developer_board)
+          .withIdentifier(99)
+      )
+      .withOnDrawerItemClickListener(
+        (view, position, drawerItem) -> {
+
+          Class<?> activity;
+          switch ((int) drawerItem.getIdentifier()){
+            case SETTINGS_VIEW:
+              activity = SettingsActivity.class;
+              break;
+            case SETTINGS_TEMPLATES:
+              activity = SettingsActivity.class;
+              break;
+            case SETTINGS_TEMPLATES_OFF:
+              activity = SettingsActivity.class;
+              break;
+            default:
+              activity = SettingsActivity.class;
+              break;
+          }
+
+          Timber.tag(TAG).i( String.valueOf(view) );
+          Timber.tag(TAG).i( String.valueOf(position) );
+          Timber.tag(TAG).i( String.valueOf( drawerItem.getIdentifier() ));
+
+          Intent intent = new Intent(this, activity);
+          startActivity(intent);
+
+          return false;
+
+        }
+      )
+      .build();
+  }
+
+  private void drawer_build_head() {
     AccountHeader headerResult = new AccountHeaderBuilder()
       .withActivity(this)
       .withHeaderBackground(R.drawable.header)
@@ -141,52 +214,11 @@ public class MainActivity extends AppCompatActivity {
       .withToolbar(toolbar)
       .withActionBarDrawerToggle(true)
       .withHeader(R.layout.drawer_header)
-      .withAccountHeader(headerResult)
-      .addDrawerItems(
-        new PrimaryDrawerItem().withName(R.string.drawer_item_home)
-          .withIcon(MaterialDrawerFont.Icon.mdf_arrow_drop_down)
-          .withBadge("99")
-          .withIdentifier(1),
+      .withAccountHeader(headerResult);
 
-        new SectionDrawerItem().withName(R.string.drawer_item_settings),
-
-        new SecondaryDrawerItem()
-          .withName(R.string.drawer_item_settings_account)
-          .withIcon(MaterialDesignIconic.Icon.gmi_accounts),
-        new SecondaryDrawerItem()
-          .withName(R.string.drawer_item_settings_config)
-          .withIcon(MaterialDesignIconic.Icon.gmi_settings),
-        new SecondaryDrawerItem()
-          .withName(R.string.drawer_item_settings_templates)
-          .withIcon(MaterialDesignIconic.Icon.gmi_comment_edit),
-
-        new DividerDrawerItem(),
-        new SecondaryDrawerItem()
-          .withName(R.string.drawer_item_debug)
-          .withIcon(MaterialDesignIconic.Icon.gmi_developer_board)
-          .withIdentifier(99)
-      )
-      .withOnDrawerItemClickListener(
-        (view, position, drawerItem) -> {
-
-          Timber.tag(TAG).i( String.valueOf(view) );
-          Timber.tag(TAG).i(String.valueOf(position));
-          Timber.tag(TAG).i(String.valueOf( drawerItem.getIdentifier() ));
-
-          Intent intent = new Intent(this, SettingsActivity.class);
-          startActivity(intent);
-
-          return false;
-
-        }
-      )
-      .build();
-    toolbar.setSubtitle("subtitle");
-    toolbar.setTitle("TITLE");
-    toolbar.setTitleTextColor( getResources().getColor( R.color.md_grey_100 ) );
-    toolbar.setSubtitleTextColor( getResources().getColor( R.color.md_grey_400 ) );
-
-    toolbar.inflateMenu(R.menu.info);
+    drawer.addDrawerItems(
+      new SectionDrawerItem().withName( R.string.drawer_item_journals )
+    );
   }
 
   private void loadSettings() {
@@ -286,9 +318,55 @@ public class MainActivity extends AppCompatActivity {
   public void onStart() {
     super.onStart();
 
+    if ( subscriptions == null ){
+      subscriptions = new CompositeSubscription();
+    }
+
     if ( !EventBus.getDefault().isRegistered(this) ){
       EventBus.getDefault().register(this);
     }
+  }
+
+  public void rxSettings(){
+    drawer_build_head();
+
+
+
+    Preference<Set<String>> set = settings.getStringSet("settings_view_journals");
+    if (set != null) {
+      for ( String item: set.get() ) {
+
+
+        drawer_add_item( item );
+      }
+    }
+
+    drawer_build_bottom();
+  }
+
+  private void drawer_add_item(String item) {
+//    settings_view_start_page_values
+    int index = Arrays.asList((getResources().getStringArray(R.array.settings_view_start_page_values))).indexOf(item);
+    String title = Arrays.asList((getResources().getStringArray(R.array.settings_view_start_page))).get(index);
+    Timber.tag(TAG).v(" !index "+index + " " + title);
+    drawer.addDrawerItems(
+      new PrimaryDrawerItem().withName( title )
+    );
+  }
+
+  @Override
+  public void onResume(){
+    super.onResume();
+
+    subscriptions = new CompositeSubscription();
+    rxSettings();
+  }
+  @Override protected void onPause() {
+    super.onPause();
+    if ( subscriptions != null ){
+      subscriptions.unsubscribe();
+    }
+
   }
 
   @Override

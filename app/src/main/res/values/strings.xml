@@ -52,9 +52,11 @@
         <item>Внутренние документы</item>
         <item>Приказы подразделений</item>
         <item>Приказы МВД</item>
-        <item>Приказы ДДО)ddo</item>
+        <item>Приказы ДДО</item>
         <item>Подписание/согласование</item>
     </string-array>
+
+    <string-array name="empty_array"/>
 
     <string-array name="settings_view_start_page_values">
         <item>settings_view_type_all</item>
@@ -64,7 +66,7 @@
         <item>settings_view_type_internal</item>
         <item>settings_view_type_orders</item>
         <item>settings_view_type_orders_mvd</item>
-        <item>settings_view_type_orders)ddo</item>
+        <item>settings_view_type_orders_ddo</item>
         <item>settings_view_type_approve</item>
     </string-array>
 
@@ -82,17 +84,14 @@
     <string name="favorites">★</string>
 
     <string name="action_settings">Settings</string>
-    <string name="drawer_item_home">Home</string>
-    <string name="drawer_item_free_play">Free Play</string>
-    <string name="drawer_item_custom">Custom</string>
+    <string name="drawer_item_journals">Журналы</string>
     <string name="drawer_item_settings">Настройки</string>
-    <string name="drawer_item_settings_account">Учетная запись</string>
+    <string name="drawer_item_settings_account">Учетная запись/Отображение</string>
     <string name="drawer_item_settings_config">Отображение</string>
     <string name="drawer_item_settings_templates">Шаблоны резолюций</string>
+    <string name="drawer_item_settings_templates_off">Шаблоны отклонения</string>
     <string name="drawer_item_debug">Отладка</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 
 </resources>

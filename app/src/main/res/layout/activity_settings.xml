@@ -13,24 +13,24 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimary"
-        android:elevation="4dp"
+        android:elevation="8dp"
         android:minHeight="?attr/actionBarSize"
-        android:paddingTop="@dimen/half_date_offset"
         android:transitionName="actionBar"
-        app:navigationIcon="?attr/homeAsUpIndicator"/>
+        app:navigationIcon="?attr/homeAsUpIndicator"
+        android:theme="@style/AlertDialog.AppCompat.Light"/>
 
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/toolbar"
-        android:weightSum="3">
+        android:weightSum="2">
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:padding="40dp"
+            android:padding="@dimen/date_offset"
             android:layout_weight="1"
             android:id="@+id/settings_user_fragment">
 
@@ -42,19 +42,9 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:padding="40dp"
+            android:padding="@dimen/date_offset"
             android:layout_weight="1"
             android:id="@+id/settings_view_fragment">
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:padding="40dp"
-            android:layout_weight="1"
-            android:id="@+id/settings_decision_fragment">
 
         </LinearLayout>
 
