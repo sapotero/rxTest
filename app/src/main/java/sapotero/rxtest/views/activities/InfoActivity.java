@@ -1,6 +1,7 @@
 package sapotero.rxtest.views.activities;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -13,12 +14,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Base64;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.LinearLayout;
@@ -32,8 +33,6 @@ import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.mikepenz.actionitembadge.library.ActionItemBadge;
-import com.mikepenz.actionitembadge.library.ActionItemBadgeAdder;
-import com.mikepenz.iconics.IconicsDrawable;
 import com.mikepenz.material_design_iconic_typeface_library.MaterialDesignIconic;
 import com.squareup.sqlbrite.BriteDatabase;
 
@@ -109,8 +108,7 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
   private Context context;
   private DecisionAdapter decision_adapter;
 
-//  @Singleton
-//  private CompositeSubscription subscriptions = new CompositeSubscription();;
+  @BindView(R.id.toolbar) Toolbar toolbar;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -125,6 +123,45 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
 
     setContentView(R.layout.activity_info);
     ButterKnife.bind(this);
+
+    toolbar.inflateMenu(R.menu.info_menu);
+
+    toolbar.setNavigationOnClickListener(v ->{
+        finish();
+      }
+    );
+
+    toolbar.setOnMenuItemClickListener(
+      item -> {
+
+        String operation;
+
+        switch ( item.getItemId() ){
+          case R.id.action_info_create_to_control:
+            operation = "action_info_create_to_control";
+            break;
+          case R.id.action_info_create_to_favorites:
+            operation = "action_info_create_to_favorites";
+            break;
+          case R.id.action_info_create_no_answer:
+            operation = "action_info_create_no_answer";
+            break;
+          case R.id.action_info_create_decision:
+            operation = "action_info_create_decision";
+
+            Intent intent = new Intent(this, DecisionConstructorActivity.class);
+            startActivity(intent);
+
+            break;
+          default:
+            operation = "incorrect";
+            break;
+        }
+
+        Timber.tag(TAG).i( operation );
+        return false;
+      }
+    );
 
     loadSettings();
     setTabContent();
@@ -157,7 +194,7 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
 
           loader.setVisibility(ProgressBar.INVISIBLE);
 
-          setTitle( data.getTitle() );
+          toolbar.setTitle( data.getTitle() );
 
 //          title.setText( data.getTitle() );
 //          uid.setText( data.getUid() );
@@ -332,73 +369,8 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
-    getMenuInflater().inflate(R.menu.info, menu);
-
-    menu
-      .add(0, 0, 0, "  Информационная карточка")
-      .setIcon(android.R.drawable.ic_dialog_info)
-      .setOnMenuItemClickListener(
-        item -> {
-          count();
-          return true;
-        })
-      .setShowAsAction( MenuItem.SHOW_AS_ACTION_WITH_TEXT | MenuItem.SHOW_AS_ACTION_ALWAYS);
-
-    menu
-      .add(0, 0, 0, "  Добавить")
-      .setIcon(android.R.drawable.ic_input_add)
-      .setOnMenuItemClickListener(
-        item -> {
-
-//          if ( RxAuth.hasUser( LOGIN ) ){
-//            RxAuth.update( RxAuth.token, TOKEN, RxAuth.login, LOGIN );
-//          } else {
-//            RxAuth.insert(LOGIN, TOKEN, null, null);
-//          };
-
-          return true;
-        })
-      .setShowAsAction( MenuItem.SHOW_AS_ACTION_WITH_TEXT | MenuItem.SHOW_AS_ACTION_ALWAYS);
-
-    menu
-      .add(0, 0, 0, "  Удалить")
-      .setIcon(android.R.drawable.ic_delete)
-      .setOnMenuItemClickListener(
-        item -> {
-          return true;
-        })
-      .setShowAsAction( MenuItem.SHOW_AS_ACTION_WITH_TEXT | MenuItem.SHOW_AS_ACTION_ALWAYS);
-
-    menu
-      .add(0, 0, 0, "Insert")
-      .setIcon(android.R.drawable.ic_menu_week)
-      .setOnMenuItemClickListener(
-        item -> {
-
-          massInsert();
-          return true;
-
-
-        })
-      .setShowAsAction( MenuItem.SHOW_AS_ACTION_ALWAYS);
-
-    button = new ActionItemBadgeAdder()
-      .act(this)
-      .menu(menu)
-      .title("TEST")
-      .itemDetails(0, 22, 1)
-      .showAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
-      .add(
-        new IconicsDrawable(this)
-          .icon(MaterialDesignIconic.Icon.gmi_account)
-          .color(Color.WHITE)
-          .sizeDp(16),
-        ActionItemBadge.BadgeStyles.RED,
-        123
-      );
-
-
-    return true;
+    Timber.tag(TAG).i(String.valueOf(menu));
+    return false;
   }
 
   @Override

@@ -1,0 +1,15 @@
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="net.taptools.android.sportshistory.PlayerProfileActivity">
+
+    <item
+        android:id="@+id/decision_card_action_delete"
+        app:showAsAction="ifRoom|withText"
+        android:title="@string/decision_create_no_answer"/>
+    <item
+        android:id="@+id/decision_card_action_add"
+        app:showAsAction="ifRoom|withText"
+        android:title="@string/decision_create_to_favorites"/>
+</menu>

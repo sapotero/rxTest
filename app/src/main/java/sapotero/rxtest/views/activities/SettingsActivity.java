@@ -1,6 +1,5 @@
 package sapotero.rxtest.views.activities;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
@@ -47,7 +46,6 @@ public class SettingsActivity extends AppCompatActivity {
 
     fooPreference = settings.getBoolean("foo");
 
-    toolbar.setTitleTextColor(Color.WHITE);
     toolbar.setTitle("Settings");
     toolbar.setNavigationOnClickListener(v ->{
       finish();

@@ -17,6 +17,7 @@
         android:minHeight="?attr/actionBarSize"
         android:transitionName="actionBar"
         app:navigationIcon="?attr/homeAsUpIndicator"
+        app:theme="@style/ToolbarColoredBackArrow"
         android:theme="@style/AlertDialog.AppCompat.Light"/>
 
     <LinearLayout

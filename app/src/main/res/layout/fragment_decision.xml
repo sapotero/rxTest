@@ -1,0 +1,76 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                tools:context="sapotero.rxtest.views.fragments.DecisionFragment"
+                >
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="@dimen/date_offset"
+        app:cardBackgroundColor="@color/md_grey_300"
+        android:elevation="2sp"
+        app:cardUseCompatPadding="true"
+        >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/md_grey_100"
+            android:orientation="vertical">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/card_toolbar"
+                android:layout_width="match_parent"
+                android:background="@color/md_grey_300"
+                android:layout_height="?attr/actionBarSize" />
+
+            <RadioGroup
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:orientation="horizontal"
+                android:id="@+id/decision_report_action"
+                android:gravity="right">
+                <RadioButton
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:checked="true"
+                    android:text="Прошу ознакомить"
+                    android:id="@+id/decision_familiarization">
+                </RadioButton>
+                <RadioButton
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="Прошу доложить"
+                    android:id="@+id/decision_report">
+                </RadioButton>
+
+            </RadioGroup>
+
+            <CheckBox
+                android:text="Скрыть исполнителей"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/checkBox"
+                android:layout_weight="1"/>
+
+            <EditText
+                android:id="@+id/decision_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Резолюция"
+                android:inputType="textMultiLine"
+                android:lines="8"
+                android:minLines="6"
+                android:gravity="top|left"
+                android:maxLines="10"
+                android:scrollbars="vertical"
+                android:layout_centerVertical="true"
+                android:layout_alignParentStart="true"
+                android:layout_weight="1"/>
+
+        </LinearLayout>
+    </android.support.v7.widget.CardView>
+</RelativeLayout>

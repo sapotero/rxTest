@@ -70,7 +70,17 @@
         <item>settings_view_type_approve</item>
     </string-array>
 
-
+    <string-array name="settings_view_start_page_identifier">
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+        <item>13</item>
+        <item>14</item>
+        <item>15</item>
+        <item>16</item>
+        <item>17</item>
+        <item>18</item>
+    </string-array>
 
 
     <string-array name="ORGANIZATIONS">
@@ -83,6 +93,15 @@
     <string name="control">K</string>
     <string name="favorites">★</string>
 
+    <string name="info_create_decision"> Создать резолюцию </string>
+    <string name="info_create_no_answer"> Без ответа </string>
+    <string name="info_create_to_control"> Добавить отметку о контроле </string>
+    <string name="info_create_to_favorites"> Добавить в избранное </string>
+
+    <string name="constructor_create_no_answer">Редактор - Без ответа </string>
+    <string name="constructor_create_to_favorites"> Редактор- В избранное </string>
+
+
     <string name="action_settings">Settings</string>
     <string name="drawer_item_journals">Журналы</string>
     <string name="drawer_item_settings">Настройки</string>
@@ -92,6 +111,13 @@
     <string name="drawer_item_settings_templates_off">Шаблоны отклонения</string>
     <string name="drawer_item_debug">Отладка</string>
 
+
+    <string name="hint_urgency">Срочность</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="decision_create_no_answer"> ❌ delete</string>
+    <string name="decision_create_to_favorites"> ✓ action</string>
 
 
 </resources>

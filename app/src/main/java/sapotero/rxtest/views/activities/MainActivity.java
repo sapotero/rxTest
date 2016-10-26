@@ -103,9 +103,19 @@ public class MainActivity extends AppCompatActivity {
 
   CompositeSubscription subscriptions;
 
-  private final int SETTINGS_VIEW          = 20;
-  private final int SETTINGS_TEMPLATES     = 21;
-  private final int SETTINGS_TEMPLATES_OFF = 22;
+  private final int SETTINGS_VIEW_TYPE_ALL                = 10;
+  private final int SETTINGS_VIEW_TYPE_INCOMING_DOCUMENTS = 11;
+  private final int SETTINGS_VIEW_TYPE_CITIZEN_REQUESTS   = 12;
+  private final int SETTINGS_VIEW_TYPE_INCOMING_ORDERS    = 13;
+  private final int SETTINGS_VIEW_TYPE_INTERNAL           = 14;
+  private final int SETTINGS_VIEW_TYPE_ORDERS             = 15;
+  private final int SETTINGS_VIEW_TYPE_ORDERS_MVD         = 16;
+  private final int SETTINGS_VIEW_TYPE_ORDERS_DDO         = 17;
+  private final int SETTINGS_VIEW_TYPE_APPROVE            = 18;
+
+  private final int SETTINGS_VIEW                         = 20;
+  private final int SETTINGS_TEMPLATES                    = 21;
+  private final int SETTINGS_TEMPLATES_OFF                = 22;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -348,9 +358,13 @@ public class MainActivity extends AppCompatActivity {
 //    settings_view_start_page_values
     int index = Arrays.asList((getResources().getStringArray(R.array.settings_view_start_page_values))).indexOf(item);
     String title = Arrays.asList((getResources().getStringArray(R.array.settings_view_start_page))).get(index);
+    Long identifier = Long.valueOf(Arrays.asList((getResources().getStringArray(R.array.settings_view_start_page_identifier))).get(index));
+
     Timber.tag(TAG).v(" !index "+index + " " + title);
     drawer.addDrawerItems(
-      new PrimaryDrawerItem().withName( title )
+      new PrimaryDrawerItem()
+        .withName( title )
+        .withIdentifier(identifier)
     );
   }
 
@@ -496,7 +510,7 @@ public class MainActivity extends AppCompatActivity {
     String[] document_type = getResources().getStringArray(R.array.DOCUMENT_TYPES_VALUE);
     String type = String.valueOf(document_type[spinner_pos]);
 
-    Observable<Documents> documents = documentsService.getDocuments( LOGIN, TOKEN, type, 100,0);
+    Observable<Documents> documents = documentsService.getDocuments( LOGIN, TOKEN, type, 100 , 0);
 
     documents.subscribeOn( Schedulers.newThread() )
       .observeOn( AndroidSchedulers.mainThread() )

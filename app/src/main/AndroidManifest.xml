@@ -58,6 +58,8 @@
 
         <activity android:name=".views.activities.SettingsActivity">
         </activity>
+        <activity android:name=".views.activities.DecisionConstructorActivity">
+        </activity>
     </application>
 
 </manifest>
