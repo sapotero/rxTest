@@ -36,20 +36,30 @@
             android:layout_height="match_parent"
             android:layout_weight="2">
 
+            <TextView
+                android:text="Предпросмотр резолюции"
+                android:layout_width="match_parent"
+                android:layout_height="38dp"
+                android:id="@+id/textView"
+                android:gravity="center|center_vertical"
+                />
+
             <ScrollView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
                 android:clipToPadding="false"
                 style="@android:style/Widget.Material.Light.ScrollView"
-                android:fillViewport="false">
+                android:fillViewport="false"
 
-                <LinearLayout
+                >
+
+                <RelativeLayout
                     android:orientation="vertical"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
+                    android:id="@+id/decision_constructor_decision_preview"
                     >
-                </LinearLayout>
+                </RelativeLayout>
             </ScrollView>
         </LinearLayout>
 
@@ -104,6 +114,7 @@
                         android:text="Добавить блок"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/half_date_offset"
                         android:id="@+id/button_add_decision"/>
 
 

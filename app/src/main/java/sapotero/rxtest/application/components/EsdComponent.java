@@ -17,7 +17,9 @@ import sapotero.rxtest.views.activities.LoginActivity;
 import sapotero.rxtest.views.activities.MainActivity;
 import sapotero.rxtest.views.activities.SettingsActivity;
 import sapotero.rxtest.views.adapters.DecisionAdapter;
+import sapotero.rxtest.views.adapters.OshsAutoCompleteAdapter;
 import sapotero.rxtest.views.fragments.DecisionFragment;
+import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
 import sapotero.rxtest.views.services.AuthService;
 
 @Singleton
@@ -37,11 +39,15 @@ public interface EsdComponent {
   void inject(DecisionConstructorActivity activity);
 
   void inject(AuthService service);
-  void inject(DecisionAdapter activity);
 
-  void inject(DecisionFragment activity);
+  void inject(DecisionAdapter adapter);
+  void inject(OshsAutoCompleteAdapter context);
+
+  void inject(DecisionFragment fragment);
+  void inject(DecisionPreviewFragment fragment);
 
   void inject(BaseJob job);
+
 
   Application application();
 }

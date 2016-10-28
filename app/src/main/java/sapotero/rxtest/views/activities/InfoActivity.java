@@ -419,11 +419,15 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
         Timber.tag("block").v( block.getText() );
         printAppealText( block );
 
+        Boolean f = block.getToFamiliarization();
+        if (f == null)
+            f = false;
+
         if ( block.getTextBefore() ){
           printBlockText( block.getText() );
-          printBlockPerformers( block.getPerformers(), block.getToFamiliarization(), block.getNumber() );
+          printBlockPerformers( block.getPerformers(), f, block.getNumber() );
         } else {
-          printBlockPerformers( block.getPerformers(), block.getToFamiliarization(), block.getNumber() );
+          printBlockPerformers( block.getPerformers(), f, block.getNumber() );
           printBlockText( block.getText() );
         }
       }

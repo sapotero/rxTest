@@ -118,6 +118,8 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="decision_create_no_answer"> ❌ delete</string>
     <string name="decision_create_to_favorites"> ✓ action</string>
+    <string name="dialog_oshs_add">Добавить</string>
+    <string name="dialog_oshs_cancel">Отмена</string>
 
 
 </resources>

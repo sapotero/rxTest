@@ -2,12 +2,14 @@ package sapotero.rxtest.views.adapters;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.birbit.android.jobqueue.JobManager;
+import com.google.gson.Gson;
 
 import java.util.Collections;
 import java.util.List;
@@ -18,6 +20,7 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.jobs.rx.SetActiveDecisionJob;
 import sapotero.rxtest.retrofit.models.document.Decision;
+import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.adapters.holders.DecisionViewHolder;
 import timber.log.Timber;
 
@@ -40,6 +43,7 @@ public class DecisionAdapter extends RecyclerView.Adapter<DecisionViewHolder> {
   @Override
   public DecisionViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
     View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.decision_item, parent, false);
+
     view.setOnClickListener(listener -> {
 
       int pos = recycler_view.getChildAdapterPosition(listener);
@@ -53,6 +57,28 @@ public class DecisionAdapter extends RecyclerView.Adapter<DecisionViewHolder> {
           Timber.tag(TAG + " massInsert error").v( e );
         }
       }
+    });
+
+    view.setOnLongClickListener(v -> {
+      int pos = recycler_view.getChildAdapterPosition(v);
+
+      if (pos >= 0 && pos < getItemCount()) {
+
+
+        Gson gson = new Gson();
+        Decision data = list.get(pos);
+        String json = gson.toJson(data, Decision.class);
+
+        Timber.tag("LONG CLICK").i( json );
+
+
+        Intent intent = new Intent(context, DecisionConstructorActivity.class);
+        intent.putExtra("decision", json);
+        context.startActivity(intent);
+
+
+      }
+      return false;
     });
 
     final DecisionViewHolder viewHolder = new DecisionViewHolder(view);

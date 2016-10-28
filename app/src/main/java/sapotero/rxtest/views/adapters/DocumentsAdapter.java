@@ -103,6 +103,8 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
     });
 
 
+
+
     viewHolder.btnLocation.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {

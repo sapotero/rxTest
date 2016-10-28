@@ -1,0 +1,59 @@
+
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        tools:context="sapotero.rxtest.views.fragments.DecisionPreviewFragment"
+
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="@dimen/date_offset"
+        android:layout_marginBottom="@dimen/date_offset"
+        android:layout_marginLeft="@dimen/half_date_offset"
+        android:layout_marginRight="22sp"
+        android:weightSum="8"
+        android:padding="@dimen/date_offset"
+        android:background="@drawable/card_border"
+        >
+
+        <TextView
+            android:text="Бланк резолюции"
+            android:textStyle="bold"
+            android:gravity="center|center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/decision_preview_head"
+            android:layout_weight="7"
+            />
+        <TextView
+            android:gravity="center|center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="1sp"
+            android:background="@color/md_grey_200"
+            android:layout_margin="@dimen/date_offset"
+            />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:minHeight="500dp"
+            >
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/decision_preview_body">
+
+            </RelativeLayout>
+        </ScrollView>
+
+        <sapotero.rxtest.views.views.ContactsCompletionView
+            android:text="TextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/decision_preview_bottom"
+            android:layout_weight="7"
+            />
+
+    </LinearLayout>
