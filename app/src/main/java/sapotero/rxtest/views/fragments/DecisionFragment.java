@@ -1,6 +1,5 @@
 package sapotero.rxtest.views.fragments;
 
-import android.app.DialogFragment;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
@@ -12,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ToggleButton;
 
 import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
@@ -32,7 +32,6 @@ import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.utils.OshsService;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
-import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
 import timber.log.Timber;
 
 public class DecisionFragment extends Fragment {
@@ -47,6 +46,10 @@ public class DecisionFragment extends Fragment {
 
   @BindView(R.id.card_toolbar)  Toolbar  card_toolbar;
   @BindView(R.id.decision_text) EditText decision_text;
+
+  @BindView(R.id.fragment_decision_button_familiarization) ToggleButton button_familiarization;
+  @BindView(R.id.fragment_decision_button_report) ToggleButton button_report;
+
 
 
 
@@ -122,13 +125,6 @@ public class DecisionFragment extends Fragment {
           operation = "decision_card_action_delete";
           getActivity().getSupportFragmentManager().beginTransaction().remove(this).commit();
           break;
-        case R.id.decision_card_action_add:
-          operation = "decision_card_action_add";
-
-          DialogFragment dialog = new SelectOshsDialogFragment();
-          dialog.show( getActivity().getFragmentManager(), "oshs_dialog" );
-
-          break;
         default:
           operation = "incorrect";
           break;
@@ -138,6 +134,27 @@ public class DecisionFragment extends Fragment {
       getActivity().getSupportFragmentManager().popBackStack();
       return false;
     });
+
+
+    button_familiarization.setOnCheckedChangeListener(
+      (buttonView, isChecked) -> {
+        Timber.tag(TAG).v( "button_familiarization ++" );
+        if (isChecked){
+          button_report.setChecked(false);
+          button_familiarization.setChecked(true);
+        }
+      }
+    );
+
+    button_report.setOnCheckedChangeListener(
+      (buttonView, isChecked) -> {
+        Timber.tag(TAG).v( "button_report ++" );
+        if (isChecked){
+          button_familiarization.setChecked(false);
+          button_report.setChecked(true);
+        }
+      }
+    );
 
     return view;
   }
@@ -179,11 +196,19 @@ public class DecisionFragment extends Fragment {
   }
 
   public Block getBlock(){
+
+    String appealText = "";
+    if (button_report.isChecked()) {
+      appealText = button_report.getTextOn().toString();
+    } else if (button_familiarization.isChecked()) {
+      appealText = button_familiarization.getTextOn().toString();
+    }
+
     Block block = new Block();
     block.setNumber(number);
-    block.setAppealText("");
+    block.setAppealText( appealText );
     block.setText( decision_text.getText().toString() );
-    block.setTextBefore(false);
+    block.setTextBefore(true);
     block.setToFamiliarization(false);
     block.setToCopy(false);
     block.setHidePerformers(false);
@@ -201,4 +226,5 @@ public class DecisionFragment extends Fragment {
   public void setNumber( int number){
     card_toolbar.setTitle("Исполнители и содержание. Блок " + number);
   }
+
 }

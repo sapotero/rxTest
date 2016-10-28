@@ -76,7 +76,7 @@
                 >
 
                 <sapotero.rxtest.views.views.EsdSelectView
-                    android:id="@+id/signup_text_input_job_category"
+                    android:id="@+id/fragment_decision_urgency_selector"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/hint_urgency"
@@ -108,6 +108,36 @@
 
                         >
                     </LinearLayout>
+
+                    <TextView
+                        android:text="Подписал"
+                        android:padding="@dimen/date_offset"
+                        android:gravity="center_horizontal|left"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/textView3"/>
+                    <FrameLayout android:layout_width="match_parent"
+                                 android:layout_height="wrap_content"
+                                 android:layout_margin="@dimen/date_offset">
+
+                        <sapotero.rxtest.views.views.DelayAutoCompleteTextView
+                            android:id="@+id/fragment_decision_autocomplete_field"
+                            android:inputType="textCapSentences"
+                            android:layout_width="1170dp"
+                            android:layout_height="wrap_content"
+                            android:paddingRight="@dimen/date_offset"
+                            android:imeOptions="flagNoExtractUi|actionSearch"/>
+                        <ProgressBar
+                            android:id="@+id/fragment_decision_autocomplete_field_loading_indicator"
+                            style="?android:attr/progressBarStyleSmall"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center_vertical|right"
+                            android:layout_marginRight="@dimen/date_offset"
+                            android:visibility="invisible"
+                            android:foregroundGravity="right|center_vertical"/>
+                    </FrameLayout>
+
 
                     <Button
 

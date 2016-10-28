@@ -21,7 +21,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
   
   private String TAG = this.getClass().getSimpleName();
 
-  @BindView(R.id.et_book_title) DelayAutoCompleteTextView bookTitle;
+  @BindView(R.id.user_autocomplete_field) DelayAutoCompleteTextView bookTitle;
   @BindView(R.id.pb_loading_indicator) ProgressBar indicator;
 
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

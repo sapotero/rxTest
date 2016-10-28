@@ -50,7 +50,7 @@ public class DecisionPreviewFragment extends Fragment  {
 
   private View view;
   private String TAG = this.getClass().getSimpleName();
-  private Decision decision;
+  public Decision decision;
 
   public DecisionPreviewFragment() {
   }
@@ -270,7 +270,7 @@ public class DecisionPreviewFragment extends Fragment  {
     date_and_number_view.setOrientation(LinearLayout.HORIZONTAL);
 
     TextView numberView = new TextView(getActivity());
-    numberView.setText( "№ " + decision.getId() );
+    numberView.setText( "№ " + settings.getString("document.number").get() );
     numberView.setTextColor( Color.BLACK );
     LinearLayout.LayoutParams numberViewParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f);
     numberView.setLayoutParams(numberViewParams);

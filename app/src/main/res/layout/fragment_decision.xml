@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="@dimen/date_offset"
-        app:cardBackgroundColor="@color/md_grey_300"
+        app:cardBackgroundColor="@color/md_grey_200"
         android:elevation="2sp"
         app:cardUseCompatPadding="true"
         >
@@ -24,7 +24,7 @@
             <android.support.v7.widget.Toolbar
                 android:id="@+id/card_toolbar"
                 android:layout_width="match_parent"
-                android:background="@color/md_grey_300"
+                android:background="@color/md_grey_200"
                 android:layout_height="?attr/actionBarSize" />
 
             <RadioGroup
@@ -32,20 +32,26 @@
                 android:layout_width="match_parent"
                 android:orientation="horizontal"
                 android:id="@+id/decision_report_action"
+                android:padding="@dimen/date_offset"
                 android:gravity="right">
-                <RadioButton
+
+                <ToggleButton
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
                     android:checked="true"
-                    android:text="Прошу ознакомить"
-                    android:id="@+id/decision_familiarization">
-                </RadioButton>
-                <RadioButton
+                    android:text="@string/fragment_decision_familiarize"
+                    android:textOff="@string/fragment_decision_familiarize"
+                    android:textOn="@string/fragment_decision_familiarize"
+                    android:id="@+id/fragment_decision_button_familiarization">
+                </ToggleButton>
+                <ToggleButton
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:text="Прошу доложить"
-                    android:id="@+id/decision_report">
-                </RadioButton>
+                    android:text="@string/fragment_decision_report"
+                    android:textOff="@string/fragment_decision_report"
+                    android:textOn="@string/fragment_decision_report"
+                    android:id="@+id/fragment_decision_button_report">
+                </ToggleButton>
 
             </RadioGroup>
 

@@ -71,8 +71,8 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
       LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
       convertView = inflater.inflate(R.layout.oshs_dropdown_item, parent, false);
     }
-    ((TextView) convertView.findViewById(R.id.firstname)).setText(getItem(position).getFirstName());
-    ((TextView) convertView.findViewById(R.id.lastname)).setText(getItem(position).getLastName());
+    ((TextView) convertView.findViewById(R.id.user_name)).setText(getItem(position).getName());
+    ((TextView) convertView.findViewById(R.id.user_organization)).setText(getItem(position).getOrganization());
     return convertView;
   }
 

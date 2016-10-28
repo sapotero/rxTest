@@ -8,8 +8,4 @@
         android:id="@+id/decision_card_action_delete"
         app:showAsAction="ifRoom|withText"
         android:title="@string/decision_create_no_answer"/>
-    <item
-        android:id="@+id/decision_card_action_add"
-        app:showAsAction="ifRoom|withText"
-        android:title="@string/decision_create_to_favorites"/>
 </menu>

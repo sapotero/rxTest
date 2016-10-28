@@ -192,22 +192,12 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
         data -> {
           DOCUMENT = data;
 
+          Preference<String> documentNumber = settings.getString("document.number");
+          documentNumber.set( DOCUMENT.getRegistrationNumber() );
+
           loader.setVisibility(ProgressBar.INVISIBLE);
 
           toolbar.setTitle( data.getTitle() );
-
-//          title.setText( data.getTitle() );
-//          uid.setText( data.getUid() );
-//          //            sort_key.setText( data.getSortKey() );
-//          registration_number.setText(data.getRegistrationNumber());
-//          urgency.setText( data.getUrgency() );
-//          short_description.setText( data.getShortDescription() );
-//          external_document_number.setText(data.getExternalDocumentNumber());
-//          receipt_date.setText(data.getReceiptDate());
-//          comment.setText( data.getComment() );
-//
-//          signer.setText( data.getSigner().getName() );
-//          organisation.setText( data.getSigner().getOrganisation() );
 
           if ( data.getDecisions().size() >= 1 ){
 
@@ -223,8 +213,8 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
             desigions_recycler_view.setLayoutManager(new LinearLayoutManager(this));
 
             RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
-            itemAnimator.setAddDuration(1000);
-            itemAnimator.setRemoveDuration(1000);
+            itemAnimator.setAddDuration(10);
+            itemAnimator.setRemoveDuration(10);
             desigions_recycler_view.setItemAnimator(itemAnimator);
 
           } else {

@@ -7,17 +7,17 @@
                  android:paddingStart="?android:attr/listPreferredItemPaddingStart"
                  android:paddingEnd="?android:attr/listPreferredItemPaddingEnd">
 
-    <TextView android:id="@+id/firstname"
+    <TextView android:id="@+id/user_name"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:layout_marginTop="@dimen/date_offset"
               android:textAppearance="?android:attr/textAppearanceLargePopupMenu"/>
 
-    <TextView android:id="@+id/lastname"
+    <TextView android:id="@+id/user_organization"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
-              android:layout_below="@id/firstname"
-              android:layout_alignStart="@id/firstname"
+              android:layout_below="@id/user_name"
+              android:layout_alignStart="@id/user_name"
               android:layout_marginBottom="@dimen/date_offset"
               android:textAppearance="?android:attr/textAppearanceSmall"/>
 

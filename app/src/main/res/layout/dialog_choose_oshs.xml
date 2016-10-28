@@ -20,7 +20,7 @@
         >
 
         <sapotero.rxtest.views.views.DelayAutoCompleteTextView
-            android:id="@+id/et_book_title"
+            android:id="@+id/user_autocomplete_field"
             android:inputType="textCapSentences"
             android:layout_width="1170dp"
             android:layout_height="wrap_content"

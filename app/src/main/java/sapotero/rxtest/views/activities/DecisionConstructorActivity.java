@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.google.gson.Gson;
@@ -31,11 +32,14 @@ import butterknife.OnClick;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.events.bus.UpdateDecisionPreviewEvent;
+import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
+import sapotero.rxtest.views.adapters.OshsAutoCompleteAdapter;
 import sapotero.rxtest.views.adapters.models.UrgencyItem;
 import sapotero.rxtest.views.fragments.DecisionFragment;
 import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
+import sapotero.rxtest.views.views.DelayAutoCompleteTextView;
 import sapotero.rxtest.views.views.EsdSelectView;
 import timber.log.Timber;
 
@@ -46,7 +50,10 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   @BindView(R.id.toolbar) Toolbar toolbar;
   @BindView(R.id.button_add_decision) Button button_add_decision;
 
-  @BindView(R.id.signup_text_input_job_category) EsdSelectView<UrgencyItem> editTextJobCategory;
+  @BindView(R.id.fragment_decision_urgency_selector) EsdSelectView<UrgencyItem> urgencySelector;
+
+  @BindView(R.id.fragment_decision_autocomplete_field) DelayAutoCompleteTextView user_autocomplete;
+  @BindView(R.id.fragment_decision_autocomplete_field_loading_indicator) ProgressBar indicator;
 
   private String TAG = this.getClass().getSimpleName();
   private final DecisionManager manager = new DecisionManager(this);
@@ -111,9 +118,23 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     urgency.add(new UrgencyItem("Очень срочно", "Очень срочно"));
     urgency.add(new UrgencyItem("Срочно", "Срочно"));
 
-    editTextJobCategory.setItems(urgency);
-    editTextJobCategory.setOnItemSelectedListener(
-      (item, selectedIndex) -> Timber.tag(TAG).v(String.valueOf(item))
+    urgencySelector.setItems(urgency);
+    urgencySelector.setOnItemSelectedListener(
+      (item, selectedIndex) -> {
+        Timber.tag(TAG).v(String.valueOf(item));
+        manager.setUrgency( item.getLabel() );
+      }
+    );
+
+    user_autocomplete.setThreshold(2);
+    user_autocomplete.setAdapter( new OshsAutoCompleteAdapter(this) );
+    user_autocomplete.setLoadingIndicator( indicator );
+    user_autocomplete.setOnItemClickListener(
+      (adapterView, view1, position, id) -> {
+        Oshs user = (Oshs) adapterView.getItemAtPosition(position);
+        user_autocomplete.setText( String.format("%s - %s", user.getName(), user.getOrganization() ) );
+        manager.setSigner( user );
+      }
     );
 
 
@@ -223,6 +244,17 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     void setDecision(Decision decision) {
       Timber.tag(TAG).v( "decision" + decision );
       this.decision = decision;
+    }
+
+    public void setSigner(Oshs user) {
+      body.decision.setSigner( String.format("%s - %s", user.getName(), user.getOrganization()) );
+      body.decision.setSignerId( user.getId() );
+      body.decision.setSignerBlankText( user.getName() );
+      body.decision.setSignerPositionS( user.getPosition() );
+    }
+
+    public void setUrgency(String urgency) {
+      body.decision.setUrgencyText(urgency);
     }
   }
 
