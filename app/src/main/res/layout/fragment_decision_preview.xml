@@ -35,25 +35,25 @@
 
         <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:layout_height="459dp"
             android:minHeight="500dp"
             >
 
-            <RelativeLayout
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:id="@+id/decision_preview_body">
+                android:id="@+id/decision_preview_body"
+                android:orientation="vertical">
 
-            </RelativeLayout>
+            </LinearLayout>
         </ScrollView>
 
-        <sapotero.rxtest.views.views.ContactsCompletionView
-            android:text="TextView"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/decision_preview_bottom"
+            android:layout_height="40sp"
+            android:id="@+id/decision_preview_sign_text"
             android:layout_weight="7"
+
             />
 
     </LinearLayout>

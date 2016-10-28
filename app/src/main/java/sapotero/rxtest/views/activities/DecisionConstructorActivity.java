@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -13,6 +12,10 @@ import android.widget.Button;
 
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.google.gson.Gson;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -27,6 +30,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.events.bus.UpdateDecisionPreviewEvent;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.views.adapters.models.UrgencyItem;
@@ -59,59 +63,53 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
     toolbar.setTitle("Редактор резолюции ");
     toolbar.inflateMenu(R.menu.info_decision_constructor);
-    toolbar.setNavigationOnClickListener(v ->{
+    toolbar.setNavigationOnClickListener(v -> {
       finish();
       }
     );
 
-
-    manager.addPreview();
+    Decision raw_decision = null;
+    Gson gson = new Gson();
 
     Intent intent = getIntent();
+
     if (null != intent) {
       String data = intent.getStringExtra("decision");
+      raw_decision = gson.fromJson(data, Decision.class);
 
-      Gson gson = new Gson();
-      Decision decisions = gson.fromJson(data, Decision.class);
-
-      if ( decisions.getBlocks().size() > 0 ){
-        for ( Block block: decisions.getBlocks() ) {
-          manager.add( block );
-        }
+      Timber.tag(TAG).v( "getIntent ++" + raw_decision);
+      if (raw_decision == null) {
+        raw_decision = new Decision();
+        raw_decision.setLetterhead("TEST");
+        raw_decision.setShowPosition(true);
+        raw_decision.setSignerPositionS("--");
+        raw_decision.setSignerBlankText("---");
+        raw_decision.setUrgencyText("URGENCY");
+        raw_decision.setId("---");
+        raw_decision.setDate("---");
+        raw_decision.setBlocks(new ArrayList<>());
+        Timber.tag(TAG).v( "raw_decision" + gson.toJson( raw_decision, Decision.class ) );
       }
+    }
 
+    manager.setDecision(raw_decision);
+    manager.addPreview();
+
+    if (raw_decision!= null && raw_decision.getBlocks().size() > 0) {
+      for (Block block : raw_decision.getBlocks()) {
+        manager.add(block);
+      }
     } else {
       manager.add(new Block());
     }
 
-
-
-
-//    ArrayList<UrgencyItem> array = new ArrayList<UrgencyItem>();
-//
-//    UrgencyItem item1 = new UrgencyItem("label1", "value1");
-//
-//    array.add( new UrgencyItem("label", "value") );
-//    array.add( item1 );
-//
-//    Timber.tag(TAG).i("  +++ BEFORE +++ "+String.valueOf(array.toArray()));
-//    if ( array.contains(item1) ){
-//      array.remove(item1);
-//      Timber.tag(TAG).i("  +++ DELETED +++ ");
-//      Timber.tag(TAG).i(String.valueOf(array));
-//    } else {
-//      Timber.tag(TAG).i("  --- DELETED --- ");
-//      Timber.tag(TAG).i(String.valueOf(array));
-//    }
-
-
     List<UrgencyItem> urgency = new ArrayList<>();
 
-    urgency.add( new UrgencyItem( "Весьма срочно"    , "Весьма срочно" ) );
-    urgency.add( new UrgencyItem( "Крайне срочно"    , "Крайне срочно" ) );
-    urgency.add( new UrgencyItem( "Няшная срочность" , "Няшная срочность" ) );
-    urgency.add( new UrgencyItem( "Очень срочно"     , "Очень срочно" ) );
-    urgency.add( new UrgencyItem( "Срочно"           , "Срочно" ) );
+    urgency.add(new UrgencyItem("Весьма срочно", "Весьма срочно"));
+    urgency.add(new UrgencyItem("Крайне срочно", "Крайне срочно"));
+    urgency.add(new UrgencyItem("Няшная срочность", "Няшная срочность"));
+    urgency.add(new UrgencyItem("Очень срочно", "Очень срочно"));
+    urgency.add(new UrgencyItem("Срочно", "Срочно"));
 
     editTextJobCategory.setItems(urgency);
     editTextJobCategory.setOnItemSelectedListener(
@@ -139,20 +137,31 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
     private Context context;
     private ArrayList<DecisionFragment> fragments = new ArrayList<>();
-    private int index = 1;
+    private int index = 0;
+    private DecisionPreviewFragment body;
+    private Decision decision;
 
     DecisionManager(Context decisionConstructorActivity) {
       context = decisionConstructorActivity;
     }
 
-    public void addPreview(){
+    void addPreview(){
+
       FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-      DecisionPreviewFragment body = new DecisionPreviewFragment();
+      body = new DecisionPreviewFragment();
+
+      if ( decision != null ){
+        Bundle bundle = new Bundle();
+        Gson gson = new Gson();
+        bundle.putString("decision", gson.toJson(decision, Decision.class) );
+
+        body.setArguments(bundle);
+      }
+
       transaction.add(R.id.decision_constructor_decision_preview, body );
       transaction.commit();
     }
 
-    @Nullable
     public void add( Block block ) {
       try{
         FragmentTransaction decision_manager = getSupportFragmentManager().beginTransaction();
@@ -160,7 +169,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
         DecisionFragment fragment = new DecisionFragment();
 
         Bundle bundle = new Bundle();
-        bundle.putInt( "number", index++ );
+        bundle.putInt( "number", ++index );
 
         Gson gson = new Gson();
         bundle.putString( "block", gson.toJson(block) );
@@ -178,7 +187,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
     public void remove( DecisionFragment fragment ){
       try{
-        index--;
+        --index;
         fragments.remove( fragment );
         update();
       } catch (Exception e){
@@ -188,10 +197,20 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
     public void update(){
       int _index = 1;
+      ArrayList<Block> blocks = new ArrayList<>();
+
       for (DecisionFragment item: fragments ) {
         item.setNumber( _index++ );
-        Timber.tag(TAG).i( item.getDecision().toString() );
+        Timber.tag(TAG).i( item.getBlock().toString() );
+        blocks.add( item.getBlock() );
       }
+
+      updateBlocks(blocks);
+    }
+
+    private void updateBlocks(ArrayList<Block> blocks) {
+      body.setBlocks(blocks);
+      body.getBlocksInfo();
     }
 
     public String getDate(){
@@ -200,6 +219,42 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       SimpleDateFormat format = new SimpleDateFormat("dd MMMM yyyy г.", new Locale("ru"));
       return format.format(c.getTime());
     }
+
+    void setDecision(Decision decision) {
+      Timber.tag(TAG).v( "decision" + decision );
+      this.decision = decision;
+    }
+  }
+
+  @Override
+  public void onStart() {
+    super.onStart();
+
+    if ( !EventBus.getDefault().isRegistered(this) ){
+      EventBus.getDefault().register(this);
+    }
+  }
+  @Override protected void onPause() {
+    super.onPause();
+
+    if ( EventBus.getDefault().isRegistered(this) ){
+      EventBus.getDefault().unregister(this);
+      EventBus.getDefault().register(this);
+    }
+
+  }
+
+  @Override
+  public void onStop() {
+    if ( EventBus.getDefault().isRegistered(this) ){
+      EventBus.getDefault().unregister(this);
+    }
+    super.onStop();
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(UpdateDecisionPreviewEvent event) {
+    manager.update();
   }
 
 }

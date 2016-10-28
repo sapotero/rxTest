@@ -6,11 +6,14 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+import android.widget.EditText;
 
+import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.google.gson.Gson;
@@ -24,8 +27,8 @@ import retrofit2.Retrofit;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.application.config.Constant;
+import sapotero.rxtest.jobs.bus.UpdateDecisionPreviewJob;
 import sapotero.rxtest.retrofit.models.document.Block;
-import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.utils.OshsService;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
@@ -40,9 +43,10 @@ public class DecisionFragment extends Fragment {
 
   @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
+  @Inject JobManager jobManager;
 
   @BindView(R.id.card_toolbar)  Toolbar  card_toolbar;
-  @BindView(R.id.decision_text) TextView decision_text;
+  @BindView(R.id.decision_text) EditText decision_text;
 
 
 
@@ -91,6 +95,23 @@ public class DecisionFragment extends Fragment {
     card_toolbar.inflateMenu(R.menu.card_menu);
     card_toolbar.setTitle("Исполнители и содержание. Блок " + number );
     decision_text.setText( block.getText() );
+    decision_text.addTextChangedListener(new TextWatcher() {
+
+      public void onTextChanged(CharSequence s, int start, int before, int count) {
+        Timber.tag(TAG).v( "onTextChanged" );
+        try {
+          jobManager.addJobInBackground( new UpdateDecisionPreviewJob() );
+        } catch ( Exception e){
+          Timber.tag(TAG + " massInsert error").v( e );
+        }
+      }
+
+      public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+      }
+
+      public void afterTextChanged(Editable s) {
+      }
+    });
 
     card_toolbar.setOnMenuItemClickListener(
       item -> {
@@ -157,8 +178,24 @@ public class DecisionFragment extends Fragment {
     void onFragmentInteraction(Uri uri);
   }
 
-  public Decision getDecision(){
-    return new Decision();
+  public Block getBlock(){
+    Block block = new Block();
+    block.setNumber(number);
+    block.setAppealText("");
+    block.setText( decision_text.getText().toString() );
+    block.setTextBefore(false);
+    block.setToFamiliarization(false);
+    block.setToCopy(false);
+    block.setHidePerformers(false);
+
+//    number: 1,
+//      text: "ТЕСТ",
+//      appeal_text: "Прошу доложить",
+//      text_before: false,
+//      hide_performers: false,
+//      to_copy: false,
+//      to_familiarization: true,
+    return block;
   }
 
   public void setNumber( int number){
