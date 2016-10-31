@@ -60,6 +60,7 @@ import sapotero.rxtest.db.requery.Doc;
 import sapotero.rxtest.events.bus.GetDocumentInfoEvent;
 import sapotero.rxtest.events.rx.InsertRxDocumentsEvent;
 import sapotero.rxtest.jobs.bus.GetDocumentInfoJob;
+import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
 import sapotero.rxtest.retrofit.DocumentsService;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.retrofit.models.documents.Documents;
@@ -71,9 +72,9 @@ import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
 
-  private String TOKEN    = "";
-  private String LOGIN    = "";
-  private String PASSWORD = "";
+  private Preference<String> TOKEN;
+  private Preference<String> LOGIN;
+  private Preference<String> PASSWORD;
 
   private String total;
   private String TAG = MainActivity.class.getSimpleName();
@@ -144,6 +145,21 @@ public class MainActivity extends AppCompatActivity {
     toolbar.setSubtitleTextColor( getResources().getColor( R.color.md_grey_400 ) );
 
     toolbar.inflateMenu(R.menu.info);
+    toolbar.setOnMenuItemClickListener(item -> {
+      switch ( item.getItemId() ){
+        case R.id.action_test:
+          break;
+        default:
+
+          try {
+            jobManager.addJobInBackground( new UpdateAuthTokenJob());
+          } catch ( Exception e){
+            Log.d( "_ERROR", e.toString() );
+          }
+          break;
+      }
+      return false;
+    });
   }
 
   private void drawer_build_bottom() {
@@ -232,18 +248,13 @@ public class MainActivity extends AppCompatActivity {
   }
 
   private void loadSettings() {
-    Preference<String> username = settings.getString("login");
-    LOGIN = username.get();
+    LOGIN = settings.getString("login");
+    PASSWORD = settings.getString("password");
+    TOKEN = settings.getString("token");
 
-    Preference<String> password = settings.getString("password");
-    PASSWORD = password.get();
-
-    Preference<String> token = settings.getString("token");
-    TOKEN = token.get();
-
-    Timber.tag(TAG).v("LOGIN: "+ LOGIN );
-    Timber.tag(TAG).v("PASSWORD: "+ PASSWORD );
-    Timber.tag(TAG).v("TOKEN: "+ TOKEN );
+    Timber.tag(TAG).v("LOGIN: "+ LOGIN.get() );
+    Timber.tag(TAG).v("PASSWORD: "+ PASSWORD.get() );
+    Timber.tag(TAG).v("TOKEN: "+ TOKEN.get() );
   }
 
   @Override
@@ -283,7 +294,11 @@ public class MainActivity extends AppCompatActivity {
       .setIcon(android.R.drawable.ic_input_add)
       .setOnMenuItemClickListener(
         item -> {
-          loadSettings();
+          try {
+            jobManager.addJobInBackground( new UpdateAuthTokenJob());
+          } catch ( Exception e){
+            Log.d( "_ERROR", e.toString() );
+          }
           return true;
         })
       .setShowAsAction( MenuItem.SHOW_AS_ACTION_ALWAYS);
@@ -462,7 +477,7 @@ public class MainActivity extends AppCompatActivity {
     Retrofit retrofit = new RetrofitManager( this, Constant.HOST + "/v3/", okHttpClient).process();
     DocumentsService documentsService = retrofit.create( DocumentsService.class );
 
-    Observable<Documents> documents = documentsService.getDocuments( LOGIN, TOKEN, TYPE, 0,0);
+    Observable<Documents> documents = documentsService.getDocuments( LOGIN.get(), TOKEN.get(), TYPE, 0,0);
 
     documents.subscribeOn( Schedulers.newThread() )
       .observeOn( AndroidSchedulers.mainThread() )
@@ -510,7 +525,7 @@ public class MainActivity extends AppCompatActivity {
     String[] document_type = getResources().getStringArray(R.array.DOCUMENT_TYPES_VALUE);
     String type = String.valueOf(document_type[spinner_pos]);
 
-    Observable<Documents> documents = documentsService.getDocuments( LOGIN, TOKEN, type, 100 , 0);
+    Observable<Documents> documents = documentsService.getDocuments( LOGIN.get(), TOKEN.get(), type, 100 , 0);
 
     documents.subscribeOn( Schedulers.newThread() )
       .observeOn( AndroidSchedulers.mainThread() )

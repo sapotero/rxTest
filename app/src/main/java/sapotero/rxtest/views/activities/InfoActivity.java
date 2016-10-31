@@ -21,7 +21,6 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.View;
-import android.webkit.WebView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -32,6 +31,7 @@ import android.widget.Toast;
 import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
+import com.google.gson.Gson;
 import com.mikepenz.actionitembadge.library.ActionItemBadge;
 import com.mikepenz.material_design_iconic_typeface_library.MaterialDesignIconic;
 import com.squareup.sqlbrite.BriteDatabase;
@@ -40,9 +40,9 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -72,19 +72,19 @@ import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.views.adapters.DecisionAdapter;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
-import sapotero.rxtest.views.fragments.InfoCardFragment;
+import sapotero.rxtest.views.fragments.InfoCardDocumentsFragment;
+import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
 import timber.log.Timber;
 
-public class InfoActivity extends AppCompatActivity implements InfoCardFragment.OnFragmentInteractionListener {
+public class InfoActivity extends AppCompatActivity implements InfoCardDocumentsFragment.OnFragmentInteractionListener, InfoCardWebViewFragment.OnFragmentInteractionListener {
 
   @BindView(R.id.desigions_recycler_view) RecyclerView desigions_recycler_view;
   @BindView(R.id.desigion_view)           LinearLayout desigion_view;
 
+  @BindView(R.id.loader) View loader;
 
-  @BindView(R.id.loader)                   View loader;
-
-  @BindView(R.id.tab_main)                 ViewPager viewPager;
-  @BindView(R.id.tabs)                     TabLayout tabLayout;
+  @BindView(R.id.tab_main) ViewPager viewPager;
+  @BindView(R.id.tabs) TabLayout tabLayout;
 
   @Inject BriteDatabase db;
   @Inject JobManager jobManager;
@@ -164,7 +164,6 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
     );
 
     loadSettings();
-    setTabContent();
     loadDocuments();
   }
 
@@ -192,8 +191,18 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
         data -> {
           DOCUMENT = data;
 
+          Gson gson = new Gson();
+
           Preference<String> documentNumber = settings.getString("document.number");
           documentNumber.set( DOCUMENT.getRegistrationNumber() );
+
+          Preference<String> documentJson = settings.getString("document.json");
+          documentJson.set( gson.toJson(DOCUMENT) );
+
+          Preference<String> documentImages = settings.getString("document.images");
+          documentImages.set( gson.toJson( DOCUMENT.getImages() ) );
+
+          setTabContent();
 
           loader.setVisibility(ProgressBar.INVISIBLE);
 
@@ -217,11 +226,12 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
             itemAnimator.setRemoveDuration(10);
             desigions_recycler_view.setItemAnimator(itemAnimator);
 
-          } else {
-//            decision_row.setVisibility(TableRow.INVISIBLE);
           }
 
+
           CARD = Base64.decode( data.getInfoCard().getBytes(), Base64.DEFAULT );
+          Preference<String> infocard = settings.getString("document.infoCard");
+          infocard.set( new String(CARD , StandardCharsets.UTF_8) );
 
         },
         error -> {
@@ -232,35 +242,56 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
   }
 
   private void setTabContent() {
-    viewPager.setAdapter( new TabPagerAdapter(getSupportFragmentManager(), InfoActivity.this) );
+//    viewPager.setAdapter( new TabPagerAdapter(getSupportFragmentManager(), InfoActivity.this) );
 
-    tabLayout.setupWithViewPager(viewPager);
+//    tabLayout.setupWithViewPager(viewPager);
+//    tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+//      @Override
+//      public void onTabSelected(TabLayout.Tab tab) {
+//        if ( Objects.equals( tab.getPosition(), 1 ) ) {
+//          WebView webView = (WebView) findViewById(R.id.web_infocard);
+//          try {
+//            if ( CARD != null && CARD.length != 0 ){
+//              String htmlData = "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />" + new String(CARD, "UTF-8");
+////              webView.loadData( new String(CARD, "UTF-8"), "text/html; charset=utf-8", "utf-8" );
+//              Timber.tag("HTML").v(htmlData);
+//              webView.loadDataWithBaseURL("file:///android_asset/", htmlData, "text/html", "UTF-8", null);
+//            }
+//          } catch (Exception e) {
+//            e.printStackTrace();
+//          }
+//        }
+//      }
+//
+//      @Override
+//      public void onTabUnselected(TabLayout.Tab tab) {
+//
+//      }
+//
+//      @Override
+//      public void onTabReselected(TabLayout.Tab tab) {
+//
+//      }
+//    });
+    tabLayout.addTab(tabLayout.newTab().setText("Documents"));
+    tabLayout.addTab(tabLayout.newTab().setText("Infocard"));
+    tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
+
+    final TabPagerAdapter adapter = new TabPagerAdapter (getSupportFragmentManager(), tabLayout.getTabCount());
+    viewPager.setAdapter(adapter);
+    viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
     tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
       @Override
       public void onTabSelected(TabLayout.Tab tab) {
-        if ( Objects.equals( tab.getPosition(), 1 ) ) {
-          WebView webView = (WebView) findViewById(R.id.web_infocard);
-          try {
-            if ( CARD != null && CARD.length != 0 ){
-              String htmlData = "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />" + new String(CARD, "UTF-8");
-//              webView.loadData( new String(CARD, "UTF-8"), "text/html; charset=utf-8", "utf-8" );
-              Timber.tag("HTML").v(htmlData);
-              webView.loadDataWithBaseURL("file:///android_asset/", htmlData, "text/html", "UTF-8", null);
-            }
-          } catch (Exception e) {
-            e.printStackTrace();
-          }
-        }
+        viewPager.setCurrentItem(tab.getPosition());
       }
 
       @Override
       public void onTabUnselected(TabLayout.Tab tab) {
-
       }
 
       @Override
       public void onTabReselected(TabLayout.Tab tab) {
-
       }
     });
   }
@@ -604,8 +635,8 @@ public class InfoActivity extends AppCompatActivity implements InfoCardFragment.
     desigion_view.addView( users_view );
   }
 
-
   @Override
   public void onFragmentInteraction(Uri uri) {
+
   }
 }

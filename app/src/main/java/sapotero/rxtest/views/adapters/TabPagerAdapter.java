@@ -1,38 +1,35 @@
 package sapotero.rxtest.views.adapters;
 
-import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.util.Log;
 
-import sapotero.rxtest.views.fragments.InfoCardFragment;
+import sapotero.rxtest.views.fragments.InfoCardDocumentsFragment;
+import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
 
 public class TabPagerAdapter extends FragmentPagerAdapter {
-  final int PAGE_COUNT = 2;
+  private int tabs_count;
 
-  private String tabTitles[] = new String[] { "Документ", "Инфокарточка" };
-  private Context context;
-
-  public TabPagerAdapter(FragmentManager fm, Context context) {
-    super(fm);
-    this.context = context;
-  }
-
-  @Override
-  public int getCount() {
-    return PAGE_COUNT;
+  public TabPagerAdapter(FragmentManager fragmentManager, int tabs_count) {
+    super(fragmentManager);
+    this.tabs_count = tabs_count;
   }
 
   @Override
   public Fragment getItem(int position) {
-    Log.d( "__position" , String.valueOf(position) );
-    return InfoCardFragment.newInstance(position + 1);
+
+    switch (position) {
+      case 0:
+        return new InfoCardDocumentsFragment();
+      case 1:
+        return new InfoCardWebViewFragment();
+      default:
+        return null;
+    }
   }
 
   @Override
-  public CharSequence getPageTitle(int position) {
-    Log.d( "__getPageTitle" , String.valueOf(position) );
-    return tabTitles[position];
+  public int getCount() {
+    return tabs_count;
   }
 }

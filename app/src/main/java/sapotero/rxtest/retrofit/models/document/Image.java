@@ -174,5 +174,4 @@ public class Image {
     public void setSigned(Boolean signed) {
         this.signed = signed;
     }
-
 }

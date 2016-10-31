@@ -24,14 +24,10 @@ public class UpdateAuthTokenJob extends BaseJob{
   private static final int PRIORITY = 1;
   private String TOKEN;
 
-  private String PASSWORD;
-  private String LOGIN;
   private String TAG = "UpdateAuthTokenJob";
 
-  public UpdateAuthTokenJob(String username, String password) {
+  public UpdateAuthTokenJob() {
     super( new Params(PRIORITY).requireNetwork().persist() );
-    this.LOGIN = username;
-    this.PASSWORD = password;
 
     TOKEN = "";
   }
@@ -49,7 +45,7 @@ public class UpdateAuthTokenJob extends BaseJob{
     Retrofit retrofit = new RetrofitManager( getApplicationContext(), Constant.HOST, okHttpClient).process();
     AuthTokenService authTokenService = retrofit.create( AuthTokenService.class );
 
-    Observable<AuthToken> user = authTokenService.getAuth( LOGIN, PASSWORD );
+    Observable<AuthToken> user = authTokenService.getAuth( settings.getString("login").get(), settings.getString("password").get() );
 
     user.subscribeOn( Schedulers.newThread() )
       .observeOn( AndroidSchedulers.mainThread() )
@@ -58,8 +54,6 @@ public class UpdateAuthTokenJob extends BaseJob{
           submitData( data.getAuthToken() );
         },
         error -> {
-          Timber.tag(TAG).d( "onRun LOGIN " + LOGIN );
-          Timber.tag(TAG).d( "onRun PASSWORD " + PASSWORD );
           Timber.tag(TAG).d( "onRun " + error );
         }
       );

@@ -100,6 +100,8 @@ public class DecisionPreviewFragment extends Fragment  {
       List<Block> blocks = decision.getBlocks();
       for (Block block: blocks){
         Timber.tag("block").v( block.getText() );
+        Timber.tag("block").v(String.valueOf(block.getNumber()));
+        Timber.tag("block").v(String.valueOf(block.getHidePerformers()));
         setAppealText( block );
 
         Boolean toFamiliarization = block.getToFamiliarization();

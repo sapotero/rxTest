@@ -20,6 +20,8 @@ import sapotero.rxtest.views.adapters.DecisionAdapter;
 import sapotero.rxtest.views.adapters.OshsAutoCompleteAdapter;
 import sapotero.rxtest.views.fragments.DecisionFragment;
 import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
+import sapotero.rxtest.views.fragments.InfoCardDocumentsFragment;
+import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
 import sapotero.rxtest.views.services.AuthService;
 
 @Singleton
@@ -45,6 +47,8 @@ public interface EsdComponent {
 
   void inject(DecisionFragment fragment);
   void inject(DecisionPreviewFragment fragment);
+  void inject(InfoCardWebViewFragment fragment);
+  void inject(InfoCardDocumentsFragment fragment);
 
   void inject(BaseJob job);
 
