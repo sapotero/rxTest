@@ -107,10 +107,10 @@ public class StatusAdapter extends BaseAdapter {
 
     int position = mPos + 1;
 
-    if ( position > statuses.size() ){
+    if ( position >= statuses.size() ){
       return 0;
     } else {
-      return position - 1;
+      return position;
     }
   }
 
