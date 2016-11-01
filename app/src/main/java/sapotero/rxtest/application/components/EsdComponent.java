@@ -12,11 +12,13 @@ import sapotero.rxtest.jobs.bus.BaseJob;
 import sapotero.rxtest.jobs.utils.JobModule;
 import sapotero.rxtest.retrofit.utils.OkHttpModule;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
+import sapotero.rxtest.views.activities.DocumentImageFullScreenActivity;
 import sapotero.rxtest.views.activities.InfoActivity;
 import sapotero.rxtest.views.activities.LoginActivity;
 import sapotero.rxtest.views.activities.MainActivity;
 import sapotero.rxtest.views.activities.SettingsActivity;
 import sapotero.rxtest.views.adapters.DecisionAdapter;
+import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OshsAutoCompleteAdapter;
 import sapotero.rxtest.views.fragments.DecisionFragment;
 import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
@@ -39,10 +41,12 @@ public interface EsdComponent {
   void inject(InfoActivity  activity);
   void inject(SettingsActivity activity);
   void inject(DecisionConstructorActivity activity);
+  void inject(DocumentImageFullScreenActivity activity);
 
   void inject(AuthService service);
 
   void inject(DecisionAdapter adapter);
+  void inject(DocumentsAdapter adapter);
   void inject(OshsAutoCompleteAdapter context);
 
   void inject(DecisionFragment fragment);

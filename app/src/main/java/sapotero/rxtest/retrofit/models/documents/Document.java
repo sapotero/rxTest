@@ -27,7 +27,7 @@ public class Document implements Serializable {
     private String registrationDate;
     @SerializedName("urgency")
     @Expose
-    private Object urgency;
+    private String urgency;
     @SerializedName("short_description")
     @Expose
     private String shortDescription;
@@ -160,7 +160,7 @@ public class Document implements Serializable {
      * @return
      *     The urgency
      */
-    public Object getUrgency() {
+    public String getUrgency() {
         return urgency;
     }
 
@@ -169,7 +169,7 @@ public class Document implements Serializable {
      * @param urgency
      *     The urgency
      */
-    public void setUrgency(Object urgency) {
+    public void setUrgency(String urgency) {
         this.urgency = urgency;
     }
 

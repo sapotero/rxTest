@@ -1,7 +1,9 @@
 package sapotero.rxtest.views.fragments;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.RectF;
 import android.graphics.pdf.PdfRenderer;
 import android.net.Uri;
@@ -10,14 +12,16 @@ import android.os.ParcelFileDescriptor;
 import android.os.StrictMode;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.f2prateek.rx.preferences.Preference;
@@ -55,20 +59,19 @@ import sapotero.rxtest.application.config.Constant;
 import sapotero.rxtest.retrofit.DocumentLinkService;
 import sapotero.rxtest.retrofit.models.DownloadLink;
 import sapotero.rxtest.retrofit.models.document.Image;
-import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
+import sapotero.rxtest.views.activities.DocumentImageFullScreenActivity;
 import sapotero.rxtest.views.adapters.DocumentLinkAdapter;
 import timber.log.Timber;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
-public class InfoCardDocumentsFragment extends Fragment implements AdapterView.OnItemClickListener {
+public class InfoCardDocumentsFragment extends Fragment implements AdapterView.OnItemClickListener, GestureDetector.OnDoubleTapListener {
 
   @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
 
   private OnFragmentInteractionListener mListener;
   private Context mContext;
-  private Document document;
   private String TAG = this.getClass().getSimpleName();
 
 
@@ -84,12 +87,19 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 //  private Button mButtonNext;
 
   @BindView(R.id.pdf_image) ImageView mImageView;
+  @BindView(R.id.empty_list_image) ImageView empty_list_image;
+  @BindView(R.id.doc_tmp_layout) FrameLayout doc_tmp_layout;
+
+
   @BindView(R.id.pdf_previous) Button mButtonPrevious;
   @BindView(R.id.pdf_next) Button     mButtonNext;
-  @BindView(R.id.documents_files) ListView mDocumentList;
+//  @BindView(R.id.documents_files) ListView mDocumentList;
+  @BindView(R.id.documents_files) Spinner mDocumentList;
   private int index;
 
   private PhotoViewAttacher mAttacher;
+  private Image IMAGE;
+  private String fileName;
 
 
   public InfoCardDocumentsFragment() {
@@ -124,12 +134,12 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
     DocumentLinkAdapter adapter = new DocumentLinkAdapter(mContext, documents);
     mDocumentList.setAdapter(adapter);
-
-    mDocumentList.setOnItemClickListener(
-      (parent, view1, position, id) -> {
+    mDocumentList.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+      @Override
+      public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         Image image = (Image) mDocumentList.getItemAtPosition(position);
+        IMAGE = image;
         Timber.tag(TAG).i( " setOnItemClickListener " + image.getPath() );
-
 
         try{
           downloadFile( "http://mobile.sed.a-soft.org", image.getPath(), "", image.getMd5()+"_"+image.getTitle()  );
@@ -137,7 +147,11 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
           e.printStackTrace();
         }
       }
-    );
+
+      @Override
+      public void onNothingSelected(AdapterView<?> parent) {
+      }
+    });
 
     index = 0;
     if (null != savedInstanceState) {
@@ -147,10 +161,10 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
     mAttacher = new PhotoViewAttacher(mImageView);
 
-    // Lets attach some listeners, not required though!
-    mAttacher.setOnMatrixChangeListener(new MatrixChangeListener());
-    mAttacher.setOnPhotoTapListener(new PhotoTapListener());
-    mAttacher.setOnSingleFlingListener(new SingleFlingListener());
+//    mAttacher.setOnMatrixChangeListener(new MatrixChangeListener());
+//    mAttacher.setOnSingleFlingListener(new SingleFlingListener());
+//    mAttacher.setOnPhotoTapListener(new PhotoTapListener());
+    mAttacher.setOnDoubleTapListener(this);
 
     return view;
   }
@@ -164,11 +178,66 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
       mCurrentPage.close();
     }
 
-    mCurrentPage = mPdfRenderer.openPage(index);
-    Bitmap bitmap = Bitmap.createBitmap(mCurrentPage.getWidth(), mCurrentPage.getHeight(), Bitmap.Config.ARGB_8888);
-    mCurrentPage.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
-    mImageView.setImageBitmap(bitmap);
+    getFromPdf(index);
+
     updatePreview();
+  }
+
+  public void getFromPdf(int index) {
+    Boolean exist = true;
+
+
+    mCurrentPage = mPdfRenderer.openPage(index);
+    Bitmap image = Bitmap.createBitmap(
+      getResources().getDisplayMetrics().densityDpi / 80 * mCurrentPage.getWidth(),
+      getResources().getDisplayMetrics().densityDpi / 80 * mCurrentPage.getHeight(),
+      Bitmap.Config.ARGB_8888
+    );
+
+    mCurrentPage.render(image, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
+
+
+
+    if ( IMAGE != null){
+      fileName = String.format( "%s_%s", index, IMAGE.getMd5());
+      Timber.tag(TAG).i(" FILE SAVE TO DISC " + fileName );
+
+      File file = getActivity().getFileStreamPath(fileName);
+      if(file == null || !file.exists()) {
+        exist = false;
+      }
+
+      // если файл есть то читаем с диска
+      if (exist){
+        try {
+          mImageView.setImageBitmap( BitmapFactory.decodeStream(getActivity().openFileInput(fileName)) );
+        } catch (FileNotFoundException e) {
+          e.printStackTrace();
+        }
+      }
+      // если файла нет то пишем в tmp
+      else {
+        try {
+          ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+
+          image.compress(Bitmap.CompressFormat.PNG, 100, bytes);
+
+          FileOutputStream fo = getActivity().openFileOutput(fileName, Context.MODE_PRIVATE);
+          fo.write(bytes.toByteArray());
+          fo.close();
+
+          mImageView.setImageBitmap( BitmapFactory.decodeStream(getActivity().openFileInput(fileName)) );
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+
+
+    } else {
+      mImageView.setImageBitmap(image);
+    }
+
+
   }
 
   private void updatePreview() {
@@ -255,14 +324,33 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     } catch (IOException e) {
       e.printStackTrace();
     }
-    mListener = null;
     mAttacher.cleanup();
+    mAttacher = null;
   }
 
 
   @Override
   public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
     Toast.makeText(getContext(), "test", Toast.LENGTH_SHORT).show();
+  }
+
+  @Override
+  public boolean onSingleTapConfirmed(MotionEvent e) {
+    return false;
+  }
+
+  @Override
+  public boolean onDoubleTap(MotionEvent e) {
+    Timber.tag(TAG).i("onDoubleTap");
+    Intent intent = new Intent(mContext, DocumentImageFullScreenActivity.class);
+    intent.putExtra("filename", fileName );
+    startActivity(intent);
+    return false;
+  }
+
+  @Override
+  public boolean onDoubleTapEvent(MotionEvent e) {
+    return false;
   }
 
   public interface OnFragmentInteractionListener {
@@ -274,12 +362,6 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     StrictMode.setThreadPolicy(policy);
 
     try {
-//      File dir = new File(Environment.getExternalStorageDirectory() + "/" + folderName);
-//      File dir = new File(Environment.getExternalStorageDirectory().toString());
-//
-//      if (!dir.exists()) {
-//        dir.mkdirs();
-//      }
 
       String admin = settings.getString("login").get();
       String token = settings.getString("token").get();
@@ -353,10 +435,14 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
             }
 
 
-
+            doc_tmp_layout.setVisibility(View.GONE);
+            mImageView.setVisibility(View.VISIBLE);
 
           },
           error -> {
+            Timber.tag(TAG).d( "HUETA -> ");
+            doc_tmp_layout.setVisibility(View.VISIBLE);
+            mImageView.setVisibility(View.GONE);
             error.printStackTrace();
           }
         );
@@ -374,7 +460,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
       float xPercentage = x * 100f;
       float yPercentage = y * 100f;
 
-      Log.d("onOutsidePhotoTap", String.format("%s %s", xPercentage, yPercentage));
+      Log.d("onPhotoTap", String.format("%s %s", xPercentage, yPercentage));
     }
 
     @Override

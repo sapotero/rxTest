@@ -22,5 +22,4 @@ public class DecisionViewHolder extends RecyclerView.ViewHolder{
     title = (TextView) itemView.findViewById(R.id.decision_title);
     date  = (TextView) itemView.findViewById(R.id.decision_date);
   }
-
 }

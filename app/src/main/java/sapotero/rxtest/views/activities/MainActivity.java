@@ -20,6 +20,7 @@ import android.widget.Toast;
 import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
+import com.google.gson.Gson;
 import com.mikepenz.material_design_iconic_typeface_library.MaterialDesignIconic;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
@@ -59,11 +60,12 @@ import sapotero.rxtest.db.requery.CreateDoc;
 import sapotero.rxtest.db.requery.Doc;
 import sapotero.rxtest.events.bus.GetDocumentInfoEvent;
 import sapotero.rxtest.events.rx.InsertRxDocumentsEvent;
-import sapotero.rxtest.jobs.bus.GetDocumentInfoJob;
 import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
 import sapotero.rxtest.retrofit.DocumentsService;
+import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.retrofit.models.documents.Documents;
+import sapotero.rxtest.retrofit.utils.MeService;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.models.FilterItem;
@@ -90,6 +92,9 @@ public class MainActivity extends AppCompatActivity {
   @BindView(R.id.DOCUMENT_TYPE) Spinner DOCUMENT_TYPE_SELECTOR;
   @BindView(R.id.JOURNAL_TYPE)  Spinner JOURNAL_TYPE_SELECTOR;
   @BindView(R.id.ORGANIZATION)  Spinner ORGANIZATION_SELECTOR;
+
+  @BindView(R.id.documents_empty_list)  View documents_empty_list;
+
 
   @BindView(R.id.toolbar) Toolbar toolbar;
 
@@ -137,6 +142,8 @@ public class MainActivity extends AppCompatActivity {
 
     GridLayoutManager gridLayoutManager = new GridLayoutManager( this, 2, GridLayoutManager.VERTICAL, false );
     rv.setLayoutManager(gridLayoutManager);
+
+    loadMe();
 
 
     toolbar.setSubtitle("subtitle");
@@ -538,26 +545,20 @@ public class MainActivity extends AppCompatActivity {
 
           loaded_documents = docs;
 
+
+
           DocumentsAdapter documentsAdapter = new DocumentsAdapter(this, docs);
           rv.setAdapter(documentsAdapter);
 
-//          Observable<SqlBrite.Query> users = db.createQuery(RxDocuments.TABLE, "SELECT * FROM "+RxDocuments.TABLE);
-//          users.subscribe(query -> {
-//            Cursor cursor = query.run();
-//            if (cursor != null) {
-//              while (cursor.moveToNext()) {
-////                documentsAdapter.addItem(
-////                  new Document(
-////                    cursor.getString(0)
-////                  )
-////                );
-//              }
-//              documentsAdapter.notifyDataSetChanged();
-//            }
-//          });
-
-
           rvv = rv;
+
+          if (docs.size() == 0){
+            rv.setVisibility(View.GONE);
+            documents_empty_list.setVisibility(View.VISIBLE);
+          } else {
+            rv.setVisibility(View.VISIBLE);
+            documents_empty_list.setVisibility(View.GONE);
+          }
 
           FilterItem filterItem = filterAdapter.getItem(spinner_pos);
           filterItem.setCount( total );
@@ -573,13 +574,23 @@ public class MainActivity extends AppCompatActivity {
 
   }
 
-  private void process() {
-    Toast.makeText( context, "Total: " + total, Toast.LENGTH_SHORT).show();
-    try {
-      jobManager.addJobInBackground( new GetDocumentInfoJob("1"));
-    } catch ( Exception e){
-      Log.d( "_ERROR", e.toString() );
-    }
+  private void loadMe() {
+    Retrofit retrofit = new RetrofitManager( this, Constant.HOST + "/v3/", okHttpClient).process();
+    MeService meService = retrofit.create( MeService.class );
+
+    Observable<Oshs> info = meService.get( LOGIN.get(), TOKEN.get());
+
+    info.subscribeOn( Schedulers.newThread() )
+      .observeOn( AndroidSchedulers.mainThread() )
+      .subscribe(
+        me -> {
+          Timber.tag(TAG).d( "ME " +  me.getName() );
+          Preference<String> current_user = settings.getString("current_user");
+          current_user.set( new Gson().toJson( me, Oshs.class ) );
+        },
+        error -> {
+          Timber.tag(TAG).d( "ERROR " + error.getMessage() );
+        });
 
   }
 

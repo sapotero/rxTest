@@ -10,26 +10,60 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <ListView
-            android:id="@+id/documents_files"
-            android:layout_width="wrap_content"
-            android:layout_height="60dp"/>
-
 
         <ImageView
             android:id="@+id/pdf_image"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:scaleType="centerInside"
             android:background="@android:color/white"
-            android:scaleType="fitCenter" />
+            />
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="580dp"
+            android:id="@+id/doc_tmp_layout"
+            >
+
+            <ImageView
+                android:id="@+id/empty_list_image"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/gerb_big"
+                android:scaleX="0.8"
+                android:scaleY="0.8"
+                android:alpha="0.1"
+                />
+            <TextView android:id="@+id/empty_list"
+                      android:layout_width="match_parent"
+                      android:layout_height="match_parent"
+                      android:textSize="24dp"
+
+                      android:layout_alignLeft="@+id/empty_list_image"
+                      android:layout_alignTop="@+id/empty_list_image"
+                      android:layout_alignRight="@+id/empty_list_image"
+                      android:layout_alignBottom="@+id/empty_list_image"
+                      android:layout_margin="1dp"
+                      android:gravity="center"
+
+                      android:textColor="@color/md_grey_600"
+                      android:text="Тут будет заглушка под документ (или их отсутствие)"
+                />
+        </FrameLayout>
 
         <LinearLayout
             style="?android:attr/buttonBarStyle"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="40sp"
             android:measureWithLargestChild="true"
             android:orientation="horizontal">
+
+            <Spinner
+                android:id="@+id/documents_files"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="2"/>
 
             <Button
                 android:id="@+id/pdf_previous"

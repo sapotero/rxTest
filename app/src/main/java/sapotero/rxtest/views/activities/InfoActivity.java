@@ -64,6 +64,7 @@ import sapotero.rxtest.db.models.RxAuth;
 import sapotero.rxtest.events.bus.MassInsertDoneEvent;
 import sapotero.rxtest.events.bus.SetActiveDecisonEvent;
 import sapotero.rxtest.jobs.bus.MassInsertJob;
+import sapotero.rxtest.jobs.rx.SetActiveDecisionJob;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
@@ -219,6 +220,16 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
 
             decision_adapter = new DecisionAdapter(decisions_list, this, desigions_recycler_view);
             desigions_recycler_view.setAdapter(decision_adapter);
+
+            // если есть резолюции, то отобразить первую
+            if ( decisions_list.size() > 0 ) {
+              try {
+                jobManager.addJobInBackground( new SetActiveDecisionJob(0) );
+              } catch ( Exception e){
+                Timber.tag(TAG + " massInsert error").v( e );
+              }
+            }
+
             desigions_recycler_view.setLayoutManager(new LinearLayoutManager(this));
 
             RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
@@ -228,53 +239,26 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
 
           }
 
-
-          CARD = Base64.decode( data.getInfoCard().getBytes(), Base64.DEFAULT );
+          if ( data.getInfoCard() != null ){
+            CARD = Base64.decode( data.getInfoCard().getBytes(), Base64.DEFAULT );
+          } else {
+            CARD = Base64.decode( "".getBytes(), Base64.DEFAULT );
+          }
           Preference<String> infocard = settings.getString("document.infoCard");
           infocard.set( new String(CARD , StandardCharsets.UTF_8) );
 
         },
         error -> {
           loader.setVisibility(ProgressBar.INVISIBLE);
-          Log.d( "_ERROR", error.getMessage() );
+          Log.d( "++_ERROR", error.getMessage() );
           Toast.makeText( this, error.getMessage(), Toast.LENGTH_SHORT).show();
         });
   }
 
   private void setTabContent() {
-//    viewPager.setAdapter( new TabPagerAdapter(getSupportFragmentManager(), InfoActivity.this) );
 
-//    tabLayout.setupWithViewPager(viewPager);
-//    tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-//      @Override
-//      public void onTabSelected(TabLayout.Tab tab) {
-//        if ( Objects.equals( tab.getPosition(), 1 ) ) {
-//          WebView webView = (WebView) findViewById(R.id.web_infocard);
-//          try {
-//            if ( CARD != null && CARD.length != 0 ){
-//              String htmlData = "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />" + new String(CARD, "UTF-8");
-////              webView.loadData( new String(CARD, "UTF-8"), "text/html; charset=utf-8", "utf-8" );
-//              Timber.tag("HTML").v(htmlData);
-//              webView.loadDataWithBaseURL("file:///android_asset/", htmlData, "text/html", "UTF-8", null);
-//            }
-//          } catch (Exception e) {
-//            e.printStackTrace();
-//          }
-//        }
-//      }
-//
-//      @Override
-//      public void onTabUnselected(TabLayout.Tab tab) {
-//
-//      }
-//
-//      @Override
-//      public void onTabReselected(TabLayout.Tab tab) {
-//
-//      }
-//    });
-    tabLayout.addTab(tabLayout.newTab().setText("Documents"));
-    tabLayout.addTab(tabLayout.newTab().setText("Infocard"));
+    tabLayout.addTab(tabLayout.newTab().setText("Документ"));
+    tabLayout.addTab(tabLayout.newTab().setText("Инфокарточка"));
     tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
     final TabPagerAdapter adapter = new TabPagerAdapter (getSupportFragmentManager(), tabLayout.getTabCount());
@@ -414,6 +398,8 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
     if ( subscriptions != null && subscriptions.hasSubscriptions() ){
       subscriptions.unsubscribe();
     }
+
+    finish();
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)

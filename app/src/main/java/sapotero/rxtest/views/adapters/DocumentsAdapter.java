@@ -17,28 +17,41 @@ import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.adapters.RecyclerSwipeAdapter;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
+import com.google.gson.Gson;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import rx.functions.Action1;
 import sapotero.rxtest.R;
+import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.views.activities.InfoActivity;
 
 public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.SimpleViewHolder> implements Action1<List<Document>> {
 
+  @Inject RxSharedPreferences settings;
 
   private Context mContext;
   private List<Document> documents;
+  private Oshs current_user;
+  private View emptyView;
 
   public DocumentsAdapter(Context context, List<Document> documents) {
     this.mContext  = context;
     this.documents = documents;
+    EsdApplication.getComponent(context).inject(this);
+
+    Preference<String> user = settings.getString("current_user");
+    current_user = new Gson().fromJson( user.get(), Oshs.class );
+
   }
 
   @Override
   public SimpleViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-    View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.swipe_layout, parent, false);
+    View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.documents_adapter_item_layout, parent, false);
     return new SimpleViewHolder(view);
   }
 
@@ -50,7 +63,13 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
     viewHolder.from.setText( item.getSigner().getOrganisation());
     viewHolder.date.setText( item.getExternalDocumentNumber() + " от " + item.getRegistrationDate());
 
+    viewHolder.date.setText( item.getExternalDocumentNumber() + " от " + item.getRegistrationDate());
 
+    if ( item.getUrgency() != null ){
+      viewHolder.badge.setText( item.getUrgency() );
+    } else {
+      viewHolder.badge.setVisibility(View.INVISIBLE);
+    }
 
     viewHolder.swipeLayout.setShowMode(SwipeLayout.ShowMode.PullOut);
 
@@ -105,7 +124,7 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
 
 
 
-    viewHolder.btnLocation.setOnClickListener(new View.OnClickListener() {
+    viewHolder.to_actiob.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
 
@@ -168,31 +187,32 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
   //  ViewHolder Class
 
   public static class SimpleViewHolder extends RecyclerView.ViewHolder {
+    private TextView badge;
     private TextView control_label;
     private TextView favorite_label;
-    SwipeLayout swipeLayout;
-    TextView to_favorites;
-    TextView tvEdit;
-    TextView to_contol;
-    ImageButton btnLocation;
+    private SwipeLayout swipeLayout;
+    private TextView to_favorites;
+    private TextView to_contol;
+    private ImageButton to_actiob;
 
-    CardView cv;
-    TextView title;
-    TextView date;
-    TextView from;
+    private CardView cv;
+    private TextView title;
+    private TextView date;
+    private TextView from;
 
     public SimpleViewHolder(View itemView) {
       super(itemView);
       swipeLayout = (SwipeLayout) itemView.findViewById(R.id.swipe);
 
-      to_contol = (TextView) itemView.findViewById(R.id.card_to_favorites);
-      to_favorites = (TextView) itemView.findViewById(R.id.card_delete);
-      btnLocation = (ImageButton) itemView.findViewById(R.id.btnLocation);
+      to_contol = (TextView) itemView.findViewById(R.id.swipe_layout_card_to_favorites);
+      to_favorites = (TextView) itemView.findViewById(R.id.swipe_layout_card_delete);
+      to_actiob = (ImageButton) itemView.findViewById(R.id.swipe_layout_card_to_action);
 
-      cv    = (CardView)itemView.findViewById(R.id.cv);
-      title = (TextView)itemView.findViewById(R.id._title);
-      from  = (TextView)itemView.findViewById(R.id.from);
-      date   = (TextView)itemView.findViewById(R.id.date);
+      cv    = (CardView)itemView.findViewById(R.id.swipe_layout_cv);
+      title = (TextView)itemView.findViewById(R.id.swipe_layout_title);
+      badge = (TextView)itemView.findViewById(R.id.swipe_layout_urgency_badge);
+      from  = (TextView)itemView.findViewById(R.id.swipe_layout_from);
+      date   = (TextView)itemView.findViewById(R.id.swipe_layout_date);
       favorite_label   = (TextView)itemView.findViewById(R.id.favorite_label);
       control_label   = (TextView)itemView.findViewById(R.id.control_label);
 

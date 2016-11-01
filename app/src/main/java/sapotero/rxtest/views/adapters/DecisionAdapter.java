@@ -48,6 +48,8 @@ public class DecisionAdapter extends RecyclerView.Adapter<DecisionViewHolder> {
 
       int pos = recycler_view.getChildAdapterPosition(listener);
 
+
+
       if (pos >= 0 && pos < getItemCount()) {
         Timber.tag(TAG).v( "COMMENT " + list.get(pos).getSigner() );
 
@@ -82,6 +84,7 @@ public class DecisionAdapter extends RecyclerView.Adapter<DecisionViewHolder> {
     });
 
     final DecisionViewHolder viewHolder = new DecisionViewHolder(view);
+
     return viewHolder;
 
   }
@@ -93,6 +96,8 @@ public class DecisionAdapter extends RecyclerView.Adapter<DecisionViewHolder> {
 
     holder.title.setText( item.getSignerBlankText() );
     holder.date.setText( item.getDate() );
+
+//    holder. .setSelected(mSelectedRows.contains(i));
 
   }
 

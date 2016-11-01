@@ -6,20 +6,22 @@
     android:layout_width="match_parent"
     android:layout_height="60dp"
     android:layout_margin="@dimen/half_date_offset"
-    card_view:cardUseCompatPadding="true"
-
-    android:outlineProvider="bounds"
     android:padding="@dimen/half_date_offset"
 
     card_view:cardElevation="16dp"
+    card_view:cardUseCompatPadding="true"
+    android:outlineProvider="bounds"
     android:clickable="true"
-    android:foreground="@drawable/card_foreground">
+    android:foreground="@drawable/card_foreground"
+    >
 
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:padding="@dimen/date_offset"
-        android:layout_height="match_parent">
+
+<LinearLayout
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:padding="@dimen/date_offset"
+    android:layout_height="match_parent"
+    >
 
         <TextView
             android:id="@+id/decision_date"
