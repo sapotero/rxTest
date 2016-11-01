@@ -4,9 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-
+    android:id="@+id/activity_main_wrapper"
     android:clipToPadding="false"
-    tools:context=".views.activities.MainActivity">
+    tools:context=".views.activities.MainActivity"
+    android:gravity="center">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
@@ -19,115 +20,145 @@
         android:transitionName="actionBar"
         android:title="test"/>
 
+
     <LinearLayout
-        android:orientation="vertical"
+        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:layout_weight="4"
-        android:layout_below="@+id/toolbar">
+        android:gravity="center"
+        android:paddingTop="@dimen/half_date_offset"
+        android:paddingLeft="@dimen/date_offset"
+        android:paddingRight="@dimen/date_offset"
+        android:layout_below="@+id/toolbar"
+        >
 
-        <ProgressBar
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/progressBar"
-            android:indeterminate="true"/>
+        <sapotero.rxtest.views.views.CircleLeftArrow
+            android:clickable="true"
+            android:layout_margin="@dimen/half_date_offset"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:id="@+id/activity_main_left_button"/>
 
         <LinearLayout
-            android:orientation="horizontal"
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:layout_weight="4"
+            android:layout_below="@+id/toolbar">
 
             <LinearLayout
-                android:orientation="vertical"
+                android:orientation="horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1">
+                android:layout_height="wrap_content">
 
-                <Spinner
+                <LinearLayout
+                    android:orientation="vertical"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/JOURNAL_TYPE"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_weight="1"/>
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
 
-                <Spinner
+                    <Spinner
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/JOURNAL_TYPE"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_weight="1"/>
+
+                    <Spinner
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/ORGANIZATION"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_weight="1"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:orientation="vertical"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/ORGANIZATION"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_weight="1"/>
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:text="Статус"
+                        android:id="@+id/textView10"
+                        android:layout_marginBottom="10dp"
+                        android:layout_weight="1"/>
+
+                    <Spinner
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/DOCUMENT_TYPE"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_weight="1"/>
+                </LinearLayout>
 
             </LinearLayout>
 
-            <LinearLayout
-                android:orientation="vertical"
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/documentsRecycleView"
+                android:scrollbars="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="1">
+                android:layout_marginTop="20dp"
+                />
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:text="Статус"
-                    android:id="@+id/textView10"
-                    android:layout_marginBottom="10dp"
-                    android:layout_weight="1"/>
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                >
 
-                <Spinner
+                <ImageView
+                    android:id="@+id/myImageView"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/DOCUMENT_TYPE"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_weight="1"/>
-            </LinearLayout>
+                    android:layout_height="match_parent"
+                    android:src="@drawable/gerb_big"
+                    android:scaleX="0.8"
+                    android:scaleY="0.8"
+                    android:alpha="0.1"
+
+
+                    />
+                <TextView android:id="@+id/documents_empty_list"
+                          android:layout_width="match_parent"
+                          android:layout_height="match_parent"
+                          android:textSize="24dp"
+
+                          android:layout_alignLeft="@+id/myImageView"
+                          android:layout_alignTop="@+id/myImageView"
+                          android:layout_alignRight="@+id/myImageView"
+                          android:layout_alignBottom="@+id/myImageView"
+                          android:layout_margin="1dp"
+                          android:gravity="center"
+
+                          android:textColor="@color/md_grey_600"
+                          android:text="Тут будет заглушка под пустой результат в выборе документов"
+                    />
+            </RelativeLayout>
 
         </LinearLayout>
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/documentsRecycleView"
-            android:scrollbars="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="20dp"
-            />
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            >
-
-            <ImageView
-                android:id="@+id/myImageView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:src="@drawable/gerb_big"
-                android:scaleX="0.8"
-                android:scaleY="0.8"
-                android:alpha="0.1"
-
-
-                />
-            <TextView android:id="@+id/documents_empty_list"
-                      android:layout_width="match_parent"
-                      android:layout_height="match_parent"
-                      android:textSize="24dp"
-
-                      android:layout_alignLeft="@+id/myImageView"
-                      android:layout_alignTop="@+id/myImageView"
-                      android:layout_alignRight="@+id/myImageView"
-                      android:layout_alignBottom="@+id/myImageView"
-                      android:layout_margin="1dp"
-                      android:gravity="center"
-
-                      android:textColor="@color/md_grey_600"
-                      android:text="Тут будет заглушка под пустой результат в выборе документов"
-                />
-        </RelativeLayout>
-
+        <sapotero.rxtest.views.views.CircleRightArrow
+            android:clickable="true"
+            android:layout_margin="@dimen/half_date_offset"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:id="@+id/activity_main_right_button"/>
     </LinearLayout>
+
+    <ProgressBar
+        style="@android:style/Widget.DeviceDefault.Light.ProgressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/progressBar"
+        android:indeterminate="true"
+        android:layout_centerInParent="true"
+        android:layout_centerHorizontal="true"
+        />
 
 
 </RelativeLayout>

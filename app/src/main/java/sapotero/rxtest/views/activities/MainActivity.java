@@ -44,6 +44,7 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
 import okhttp3.OkHttpClient;
@@ -70,6 +71,8 @@ import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.models.FilterItem;
 import sapotero.rxtest.views.adapters.utils.StatusAdapter;
+import sapotero.rxtest.views.views.CircleLeftArrow;
+import sapotero.rxtest.views.views.CircleRightArrow;
 import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
@@ -92,6 +95,11 @@ public class MainActivity extends AppCompatActivity {
   @BindView(R.id.DOCUMENT_TYPE) Spinner DOCUMENT_TYPE_SELECTOR;
   @BindView(R.id.JOURNAL_TYPE)  Spinner JOURNAL_TYPE_SELECTOR;
   @BindView(R.id.ORGANIZATION)  Spinner ORGANIZATION_SELECTOR;
+
+  @BindView(R.id.activity_main_right_button) CircleRightArrow rightArrow;
+  @BindView(R.id.activity_main_left_button)  CircleLeftArrow leftArrow;
+
+
 
   @BindView(R.id.documents_empty_list)  View documents_empty_list;
 
@@ -146,8 +154,7 @@ public class MainActivity extends AppCompatActivity {
     loadMe();
 
 
-    toolbar.setSubtitle("subtitle");
-    toolbar.setTitle("TITLE");
+    toolbar.setTitle("Все документы");
     toolbar.setTitleTextColor( getResources().getColor( R.color.md_grey_100 ) );
     toolbar.setSubtitleTextColor( getResources().getColor( R.color.md_grey_400 ) );
 
@@ -431,6 +438,7 @@ public class MainActivity extends AppCompatActivity {
       @Override
       public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
         loadDocuments();
+        toolbar.setSubtitle( filterAdapter.getItem(position).getName() );
       }
 
       @Override
@@ -591,6 +599,27 @@ public class MainActivity extends AppCompatActivity {
         error -> {
           Timber.tag(TAG).d( "ERROR " + error.getMessage() );
         });
+
+  }
+
+  @OnClick(R.id.activity_main_left_button)
+  public void setLeftArrowArrow(){
+    int position = filterAdapter.prev();
+    Timber.tag(TAG).d( "setLeftArrowArrow " + position );
+
+    DOCUMENT_TYPE_SELECTOR.setSelection(position);
+
+//    toolbar.setSubtitle( filterAdapter.getItem(position).getName() );
+  }
+
+  @OnClick(R.id.activity_main_right_button)
+  public void setRightArrow(){
+    int position = filterAdapter.next();
+    Timber.tag(TAG).d( "setRightArrow " + position );
+
+    DOCUMENT_TYPE_SELECTOR.setSelection(position);
+
+//    toolbar.setSubtitle( filterAdapter.getItem(position).getName() );
 
   }
 

@@ -15,7 +15,7 @@ import sapotero.rxtest.views.adapters.models.FilterItem;
 
 public class StatusAdapter extends BaseAdapter {
   private int template;
-  private List<FilterItem> filters;
+  private List<FilterItem> statuses;
   private Context context;
   private int filterCount[];
   private String[] filterName;
@@ -24,22 +24,23 @@ public class StatusAdapter extends BaseAdapter {
   private TextView count;
   private TextView name;
   private View mainView;
+  private int mPos;
 
-  public StatusAdapter(Context context, List<FilterItem> filters) {
+  public StatusAdapter(Context context, List<FilterItem> statuses) {
 
     this.context = context;
-    this.filters = filters;
+    this.statuses = statuses;
     this.inflter = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
   }
 
   @Override
   public int getCount() {
-    return filters.size();
+    return statuses.size();
   }
 
   @Override
   public FilterItem getItem(int position) {
-    return filters.get(position);
+    return statuses.get(position);
   }
 
   @Override
@@ -56,15 +57,13 @@ public class StatusAdapter extends BaseAdapter {
       view = inflter.inflate(R.layout.filter_spinner_items, parent, false);
     }
 
+    mPos = position;
+
     FilterItem filterItem = getFilterItem(position);
 
     ( (TextView) view.findViewById(R.id.filter_name)  ).setText( filterItem.getName()  );
     ( (TextView) view.findViewById(R.id.filter_count) ).setText( filterItem.getCount() );
 
-//    CheckBox cbBuy = (CheckBox) view.findViewById(R.id.cbBox);
-//    cbBuy.setOnCheckedChangeListener(myCheckChangeList);
-//    cbBuy.setTag(position);
-//    cbBuy.setChecked(filterItem.box);
     return view;
   }
 
@@ -74,11 +73,45 @@ public class StatusAdapter extends BaseAdapter {
 
   ArrayList<FilterItem> getBox() {
     ArrayList<FilterItem> box = new ArrayList<FilterItem>();
-    // for (FilterItem p : filters) {
+    // for (FilterItem p : statuses) {
     // if p.getName() == 1
     //   box.add(p)
     // }
     return box;
+  }
+
+  public int getPosition() {
+    return mPos;
+  }
+
+  public int prev() {
+
+    if (statuses == null || statuses.size() == 0){
+      return 0;
+    }
+
+    int position = mPos - 1;
+
+    if ( position < 0 ){
+      return statuses.size() - 1;
+    } else {
+      return position;
+    }
+
+  }
+
+  public int next() {
+    if (statuses == null || statuses.size() == 0){
+      return 0;
+    }
+
+    int position = mPos + 1;
+
+    if ( position > statuses.size() ){
+      return 0;
+    } else {
+      return position - 1;
+    }
   }
 
 //  CompoundButton.OnCheckedChangeListener myCheckChangeList = new CompoundButton.OnCheckedChangeListener() {

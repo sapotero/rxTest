@@ -21,6 +21,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -89,6 +90,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   @BindView(R.id.pdf_image) ImageView mImageView;
   @BindView(R.id.empty_list_image) ImageView empty_list_image;
   @BindView(R.id.doc_tmp_layout) FrameLayout doc_tmp_layout;
+  @BindView(R.id.documents_files_progressbar) ProgressBar progressBar;
 
 
   @BindView(R.id.pdf_previous) Button mButtonPrevious;
@@ -142,7 +144,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
         Timber.tag(TAG).i( " setOnItemClickListener " + image.getPath() );
 
         try{
-          downloadFile( "http://mobile.sed.a-soft.org", image.getPath(), "", image.getMd5()+"_"+image.getTitle()  );
+          downloadFile( "http://mobile.sed.a-soft.org", image.getPath(), image.getMd5()+"_"+image.getTitle()  );
         }catch (Exception e){
           e.printStackTrace();
         }
@@ -357,22 +359,18 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     void onFragmentInteraction(Uri uri);
   }
 
-  public void downloadFile(String host, String strUrl, String folderName, String fileName) {
+  public void downloadFile(String host, String strUrl, String fileName) {
     StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
     StrictMode.setThreadPolicy(policy);
+
+    progressBar.setVisibility(View.VISIBLE);
+    mImageView.setVisibility(View.VISIBLE);
+    doc_tmp_layout.setVisibility(View.GONE);
 
     try {
 
       String admin = settings.getString("login").get();
       String token = settings.getString("token").get();
-
-      Uri builtUri = Uri.parse(host + strUrl)
-        .buildUpon()
-        .appendQueryParameter("login",      admin)
-        .appendQueryParameter("auth_token", token)
-        .build();
-
-//      Timber.tag(TAG).i( " downloadFile " + builtUri.toString() );
 
       Retrofit retrofit = new RetrofitManager( getContext(), Constant.HOST, okHttpClient).process();
       DocumentLinkService documentLinkService = retrofit.create( DocumentLinkService.class );
@@ -380,7 +378,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
       strUrl = strUrl.replace("?expired_link=1", "");
       Observable<DownloadLink> user = documentLinkService.getByLink( strUrl, admin, token, "1" );
 
-      user.subscribeOn( Schedulers.newThread() )
+      user.subscribeOn( Schedulers.io() )
         .observeOn( AndroidSchedulers.mainThread() )
         .subscribe(
           link -> {
@@ -437,12 +435,14 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
             doc_tmp_layout.setVisibility(View.GONE);
             mImageView.setVisibility(View.VISIBLE);
+            progressBar.setVisibility(View.GONE);
 
           },
           error -> {
             Timber.tag(TAG).d( "HUETA -> ");
             doc_tmp_layout.setVisibility(View.VISIBLE);
             mImageView.setVisibility(View.GONE);
+            progressBar.setVisibility(View.GONE);
             error.printStackTrace();
           }
         );
