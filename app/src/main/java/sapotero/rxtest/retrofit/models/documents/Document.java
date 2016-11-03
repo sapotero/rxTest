@@ -39,7 +39,7 @@ public class Document implements Serializable {
     private String externalDocumentNumber;
     @SerializedName("receipt_date")
     @Expose
-    private Object receiptDate;
+    private String receiptDate;
     @SerializedName("signer")
     @Expose
     private Signer signer;
@@ -232,7 +232,7 @@ public class Document implements Serializable {
      * @return
      *     The receiptDate
      */
-    public Object getReceiptDate() {
+    public String getReceiptDate() {
         return receiptDate;
     }
 
@@ -241,7 +241,7 @@ public class Document implements Serializable {
      * @param receiptDate
      *     The receipt_date
      */
-    public void setReceiptDate(Object receiptDate) {
+    public void setReceiptDate(String receiptDate) {
         this.receiptDate = receiptDate;
     }
 
@@ -280,5 +280,6 @@ public class Document implements Serializable {
     public void setViewed(Boolean viewed) {
         this.viewed = viewed;
     }
+
 
 }

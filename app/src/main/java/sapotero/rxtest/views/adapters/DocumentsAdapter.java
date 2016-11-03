@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.birbit.android.jobqueue.JobManager;
 import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.adapters.RecyclerSwipeAdapter;
 import com.f2prateek.rx.preferences.Preference;
@@ -20,12 +22,14 @@ import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.google.gson.Gson;
 
 import java.util.List;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
 import rx.functions.Action1;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.views.activities.InfoActivity;
@@ -33,11 +37,13 @@ import sapotero.rxtest.views.activities.InfoActivity;
 public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.SimpleViewHolder> implements Action1<List<Document>> {
 
   @Inject RxSharedPreferences settings;
+  @Inject JobManager jobManager;
 
   private Context mContext;
   private List<Document> documents;
   private Oshs current_user;
   private View emptyView;
+  private SimpleViewHolder holder;
 
   public DocumentsAdapter(Context context, List<Document> documents) {
     this.mContext  = context;
@@ -52,7 +58,8 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
   @Override
   public SimpleViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
     View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.documents_adapter_item_layout, parent, false);
-    return new SimpleViewHolder(view);
+    holder = new SimpleViewHolder(view);
+    return holder;
   }
 
   @Override
@@ -105,52 +112,30 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
       }
     });
 
-    viewHolder.cv.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
+    viewHolder.cv.setOnClickListener(view -> {
 
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-        RxSharedPreferences rxPreferences = RxSharedPreferences.create(preferences);
-        Preference<Integer> rxPosition = rxPreferences.getInteger("position");
-        rxPosition.set(position);
+      SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+      RxSharedPreferences rxPreferences = RxSharedPreferences.create(preferences);
+      Preference<Integer> rxPosition = rxPreferences.getInteger("position");
+      rxPosition.set(position);
 
-        Intent intent = new Intent(mContext, InfoActivity.class);
-        mContext.startActivity(intent);
-
-        Toast.makeText(mContext, " onClick : " + item.getMd5() + " \n" + item.getTitle(), Toast.LENGTH_SHORT).show();
-      }
+      Intent intent = new Intent(mContext, InfoActivity.class);
+      mContext.startActivity(intent);
+      Toast.makeText(mContext, " onClick : " + item.getMd5() + " \n" + item.getTitle(), Toast.LENGTH_SHORT).show();
+      viewHolder.swipeLayout.close(true);
     });
 
-
-
-
-    viewHolder.to_actiob.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-
-        Toast.makeText(v.getContext(), "Просто так " + viewHolder.title.getText().toString(), Toast.LENGTH_SHORT).show();
-      }
+    viewHolder.to_contol.setOnClickListener(view -> {
+      Toast.makeText(view.getContext(), "Избранное " + viewHolder.title.getText().toString(), Toast.LENGTH_SHORT).show();
+      viewHolder.swipeLayout.close(true);
     });
 
+    viewHolder.to_favorites.setOnClickListener(view -> {
 
-    viewHolder.to_contol.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
+      jobManager.addJobInBackground( new UpdateDocumentJob( item.getUid(), "favorites", true ) );
 
-        Toast.makeText(view.getContext(), "Контроль " + viewHolder.title.getText().toString(), Toast.LENGTH_SHORT).show();
-      }
-    });
-
-    viewHolder.to_favorites.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        mItemManger.removeShownLayouts(viewHolder.swipeLayout);
-        documents.remove(position);
-        notifyItemRemoved(position);
-        notifyItemRangeChanged(position, documents.size());
-        mItemManger.closeAllItems();
-        Toast.makeText(view.getContext(), "Удалён " + viewHolder.title.getText().toString(), Toast.LENGTH_SHORT).show();
-      }
+      Toast.makeText(view.getContext(), "Контроль " + viewHolder.title.getText().toString(), Toast.LENGTH_SHORT).show();
+      viewHolder.swipeLayout.close(true);
     });
 
 
@@ -161,7 +146,7 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
 
   @Override
   public int getItemCount() {
-    return documents.size();
+    return documents == null ? 0 : documents.size();
   }
 
   @Override
@@ -181,19 +166,36 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
 
   public void addItem(Document document) {
     documents.add(document);
+    notifyDataSetChanged();
   }
 
+  public void findByUid(String uid) {
+    Document document = null;
+
+    Log.d( "findByUid", " UpdateDocumentJob " + uid );
+
+    for (Document doc: documents) {
+      if (Objects.equals(doc.getUid(), uid)){
+        document = doc;
+        break;
+      }
+    }
+
+    if (document != null){
+      holder.setControl();
+    }
+  }
 
   //  ViewHolder Class
 
-  public static class SimpleViewHolder extends RecyclerView.ViewHolder {
+  public class SimpleViewHolder extends RecyclerView.ViewHolder {
+    private ImageButton to_action;
     private TextView badge;
     private TextView control_label;
     private TextView favorite_label;
     private SwipeLayout swipeLayout;
     private TextView to_favorites;
     private TextView to_contol;
-    private ImageButton to_actiob;
 
     private CardView cv;
     private TextView title;
@@ -204,9 +206,9 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
       super(itemView);
       swipeLayout = (SwipeLayout) itemView.findViewById(R.id.swipe);
 
-      to_contol = (TextView) itemView.findViewById(R.id.swipe_layout_card_to_favorites);
-      to_favorites = (TextView) itemView.findViewById(R.id.swipe_layout_card_delete);
-      to_actiob = (ImageButton) itemView.findViewById(R.id.swipe_layout_card_to_action);
+      to_contol = (TextView) itemView.findViewById(R.id.swipe_layout_card_to_control);
+      to_favorites = (TextView) itemView.findViewById(R.id.swipe_layout_card_to_favorites);
+      to_action = (ImageButton) itemView.findViewById(R.id.swipe_layout_card_to_action);
 
       cv    = (CardView)itemView.findViewById(R.id.swipe_layout_cv);
       title = (TextView)itemView.findViewById(R.id.swipe_layout_title);
@@ -216,8 +218,12 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
       favorite_label   = (TextView)itemView.findViewById(R.id.favorite_label);
       control_label   = (TextView)itemView.findViewById(R.id.control_label);
 
+      favorite_label.setVisibility(View.GONE);
+      control_label.setVisibility(View.GONE);
+    }
 
-
+    public void setControl() {
+      control_label.setVisibility(View.VISIBLE);
     }
   }
 }

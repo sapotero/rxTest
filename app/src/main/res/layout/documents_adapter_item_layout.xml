@@ -15,10 +15,10 @@
         android:id="@+id/from_right_to_left"
         android:layout_width="240dp"
         android:layout_height="match_parent"
-        android:weightSum="3">
+        android:weightSum="2">
 
         <TextView
-            android:id="@+id/swipe_layout_card_to_favorites"
+            android:id="@+id/swipe_layout_card_to_control"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -28,7 +28,7 @@
             android:textColor="#fff" />
 
         <TextView
-            android:id="@+id/card_to_control"
+            android:id="@+id/swipe_layout_card_to_favorites"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -37,15 +37,6 @@
             android:text="На контроль"
             android:textColor="#fff" />
 
-        <TextView
-            android:id="@+id/swipe_layout_card_delete"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="#0076a5"
-            android:gravity="center"
-            android:text="Удалить"
-            android:textColor="#fff" />
     </LinearLayout>
 
 

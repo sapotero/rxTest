@@ -7,7 +7,7 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
-import sapotero.rxtest.db.requery.RequeryDbModule;
+import sapotero.rxtest.db.requery.utils.RequeryDbModule;
 import sapotero.rxtest.jobs.utils.JobModule;
 import sapotero.rxtest.db.utils.DbModule;
 import sapotero.rxtest.events.utils.SubscriptionsModule;

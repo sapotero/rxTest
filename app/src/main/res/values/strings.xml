@@ -10,6 +10,7 @@
         <item>Первичное рассмотрение</item>
         <item>Согласование проектов документов</item>
         <item>Подписание проектов документов</item>
+        <item>from db</item>
     </string-array>
 
     <string-array name="DOCUMENT_TYPES_VALUE">
@@ -18,6 +19,7 @@
         <item>primary_consideration</item>
         <item>approval</item>
         <item>signing</item>
+        <item>db</item>
     </string-array>
 
 

@@ -2,7 +2,6 @@ package sapotero.rxtest.views.activities;
 
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.net.Uri;
@@ -24,7 +23,6 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,8 +30,6 @@ import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.google.gson.Gson;
-import com.mikepenz.actionitembadge.library.ActionItemBadge;
-import com.mikepenz.material_design_iconic_typeface_library.MaterialDesignIconic;
 import com.squareup.sqlbrite.BriteDatabase;
 
 import org.greenrobot.eventbus.EventBus;
@@ -43,7 +39,6 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -60,10 +55,8 @@ import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.application.config.Constant;
-import sapotero.rxtest.db.models.RxAuth;
 import sapotero.rxtest.events.bus.MassInsertDoneEvent;
 import sapotero.rxtest.events.bus.SetActiveDecisonEvent;
-import sapotero.rxtest.jobs.bus.MassInsertJob;
 import sapotero.rxtest.jobs.rx.SetActiveDecisionJob;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Block;
@@ -102,8 +95,6 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
 
   private DocumentInfo DOCUMENT;
 
-  private Menu button;
-  private RxAuth RxAuth;
   private String TAG = InfoActivity.class.getSimpleName();
 
   private Context context;
@@ -280,79 +271,6 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
     });
   }
 
-  public void createDecisionTableHeader(){
-    TableRow header = new TableRow(this);
-
-    TextView field_num = new TextView(this);
-    field_num.setText(" № ");
-    field_num.setTextColor( Color.BLACK );
-    header.addView(field_num);
-
-    TextView field_type = new TextView(this);
-    field_type.setText(" Тип ");
-    field_type.setTextColor( Color.BLACK );
-    header.addView(field_type);
-
-    TextView field_date = new TextView(this);
-    field_date.setText(" Дата ");
-    field_date.setTextColor( Color.BLACK );
-    header.addView(field_date);
-
-    TextView field_resolution = new TextView(this);
-    field_resolution.setText(" Резолюция ");
-    field_resolution.setTextColor( Color.BLACK );
-    header.addView(field_resolution);
-
-    TextView field_status = new TextView(this);
-    field_status.setText(" Статус ");
-    field_status.setTextColor( Color.BLACK );
-    header.addView(field_status);
-
-//    decision_table.addView(header);
-  }
-
-
-
-  private void massInsert() {
-    try {
-      jobManager.addJobInBackground( new MassInsertJob(10000) );
-    } catch ( Exception e){
-      Timber.tag(TAG + " massInsert error").v( e );
-    }
-  }
-
-
-
-  public void count() {
-
-    if ( subscriptions != null && subscriptions.hasSubscriptions() ){
-      subscriptions.unsubscribe();
-    }
-
-    Observable<Integer> itemCount = db.createQuery(RxAuth.TABLE, RxAuth.COUNT_QUERY)
-      .map(query -> {
-        try (Cursor cursor = query.run()) {
-          if ( !(cursor != null && cursor.moveToNext()) ) {
-            Timber.tag(TAG + " total error").v("No rows");
-            throw new AssertionError("No rows");
-          }
-          return cursor.getInt(0);
-        }
-      });
-
-    subscriptions.add(
-      itemCount
-        .subscribeOn( Schedulers.newThread() )
-        .sample(5, TimeUnit.SECONDS)
-        .observeOn( AndroidSchedulers.mainThread() )
-        .subscribe(title -> {
-          Timber.tag( TAG + " total").v(String.valueOf(title));
-          ActionItemBadge.update(this, button.findItem(22), MaterialDesignIconic.Icon.gmi_account, ActionItemBadge.BadgeStyles.DARK_GREY, title);
-        })
-    );
-
-
-  }
 
   private void loadSettings() {
     Preference<String> username = settings.getString("login");

@@ -153,8 +153,8 @@ public class CircleLeftArrow extends View {
 
     normalColor = ContextCompat.getColor(getContext(), R.color.md_blue_600);
     normalBackground = ContextCompat.getColor(getContext(), R.color.md_grey_50);
-    touchBackground = ContextCompat.getColor(getContext(), R.color.md_amber_100);
-    touchColor = ContextCompat.getColor(getContext(), R.color.md_amber_600);
+    touchBackground = ContextCompat.getColor(getContext(), R.color.md_blue_A100);
+    touchColor = ContextCompat.getColor(getContext(), R.color.md_blue_800);
     disabledBackground =  ContextCompat.getColor(getContext(), R.color.md_grey_200);
     disabledColor = ContextCompat.getColor(getContext(), R.color.md_grey_600);
 
