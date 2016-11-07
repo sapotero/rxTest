@@ -1,7 +1,6 @@
 package sapotero.rxtest.jobs.bus;
 
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.birbit.android.jobqueue.CancelReason;
 import com.birbit.android.jobqueue.Params;
@@ -9,23 +8,15 @@ import com.birbit.android.jobqueue.RetryConstraint;
 
 import org.greenrobot.eventbus.EventBus;
 
-import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.events.bus.UpdateDocumentJobEvent;
+import sapotero.rxtest.events.bus.AddDocumentToDBTimeoutEvent;
 
-public class UpdateDocumentJob extends BaseJob {
+public class AddDocumentToDBTimeoutJob extends BaseJob {
 
   public static final int PRIORITY = 1;
   private String TAG = this.getClass().getSimpleName();
 
-  private String  uid;
-  private String  field;
-  private Boolean value;
-
-  public UpdateDocumentJob(String uid, String field, boolean value) {
+  public AddDocumentToDBTimeoutJob() {
     super( new Params(PRIORITY).requireNetwork().persist() );
-    this.uid   = uid;
-    this.field = field;
-    this.value = value;
   }
 
   @Override
@@ -35,15 +26,7 @@ public class UpdateDocumentJob extends BaseJob {
 
   @Override
   public void onRun() throws Throwable {
-    int rows = dataStore.update(RDocumentEntity.class)
-      .set(RDocumentEntity.CONTROL, value)
-      .where(RDocumentEntity.UID.eq(uid))
-      .get().value();
-
-    Log.d( TAG, " UpdateDocumentJob " + rows + "  " + uid );
-    if ( rows > 0 ){
-      EventBus.getDefault().post( new UpdateDocumentJobEvent(uid, field, value) );
-    }
+    EventBus.getDefault().post( new AddDocumentToDBTimeoutEvent() );
   }
 
   @Override

@@ -73,10 +73,6 @@ public class StatusAdapter extends BaseAdapter {
 
   ArrayList<FilterItem> getBox() {
     ArrayList<FilterItem> box = new ArrayList<FilterItem>();
-    // for (FilterItem p : statuses) {
-    // if p.getName() == 1
-    //   box.add(p)
-    // }
     return box;
   }
 
@@ -113,11 +109,4 @@ public class StatusAdapter extends BaseAdapter {
       return position;
     }
   }
-
-//  CompoundButton.OnCheckedChangeListener myCheckChangeList = new CompoundButton.OnCheckedChangeListener() {
-//    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//      FilterItem item = getFilterItem((Integer) buttonView.getTag());
-//      item.setName("isChecked");
-//    }
-//  };
 }

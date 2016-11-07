@@ -43,7 +43,6 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
   private List<Document> documents;
   private Oshs current_user;
   private View emptyView;
-  private SimpleViewHolder holder;
 
   public DocumentsAdapter(Context context, List<Document> documents) {
     this.mContext  = context;
@@ -58,8 +57,7 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
   @Override
   public SimpleViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
     View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.documents_adapter_item_layout, parent, false);
-    holder = new SimpleViewHolder(view);
-    return holder;
+    return new SimpleViewHolder(view);
   }
 
   @Override
@@ -126,13 +124,15 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
     });
 
     viewHolder.to_contol.setOnClickListener(view -> {
+      jobManager.addJobInBackground( new UpdateDocumentJob( item.getUid(), "favorites", true ) );
+
       Toast.makeText(view.getContext(), "Избранное " + viewHolder.title.getText().toString(), Toast.LENGTH_SHORT).show();
       viewHolder.swipeLayout.close(true);
     });
 
     viewHolder.to_favorites.setOnClickListener(view -> {
 
-      jobManager.addJobInBackground( new UpdateDocumentJob( item.getUid(), "favorites", true ) );
+      jobManager.addJobInBackground( new UpdateDocumentJob( item.getUid(), "control", true ) );
 
       Toast.makeText(view.getContext(), "Контроль " + viewHolder.title.getText().toString(), Toast.LENGTH_SHORT).show();
       viewHolder.swipeLayout.close(true);
@@ -169,21 +169,24 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
     notifyDataSetChanged();
   }
 
-  public void findByUid(String uid) {
+  public Integer getPositionByUid(String uid) {
     Document document = null;
 
-    Log.d( "findByUid", " UpdateDocumentJob " + uid );
+    Log.d( "getPositionByUid", " UpdateDocumentJob " + uid );
+
+    int position = -1;
 
     for (Document doc: documents) {
+      position++;
+
       if (Objects.equals(doc.getUid(), uid)){
         document = doc;
         break;
       }
     }
 
-    if (document != null){
-      holder.setControl();
-    }
+    return position;
+
   }
 
   //  ViewHolder Class
@@ -191,8 +194,8 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
   public class SimpleViewHolder extends RecyclerView.ViewHolder {
     private ImageButton to_action;
     private TextView badge;
-    private TextView control_label;
-    private TextView favorite_label;
+    public TextView control_label;
+    public TextView favorite_label;
     private SwipeLayout swipeLayout;
     private TextView to_favorites;
     private TextView to_contol;

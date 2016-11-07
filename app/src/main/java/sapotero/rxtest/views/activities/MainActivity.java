@@ -36,7 +36,10 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -57,9 +60,11 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.application.config.Constant;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RSignerEntity;
+import sapotero.rxtest.events.bus.AddDocumentToDBTimeoutEvent;
 import sapotero.rxtest.events.bus.GetDocumentInfoEvent;
 import sapotero.rxtest.events.bus.UpdateDocumentJobEvent;
 import sapotero.rxtest.events.rx.InsertRxDocumentsEvent;
+import sapotero.rxtest.jobs.bus.AddDocumentToDBTimeoutJob;
 import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
 import sapotero.rxtest.retrofit.DocumentsService;
 import sapotero.rxtest.retrofit.models.Oshs;
@@ -69,11 +74,14 @@ import sapotero.rxtest.retrofit.models.documents.Signer;
 import sapotero.rxtest.retrofit.utils.MeService;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
+import sapotero.rxtest.views.adapters.OrganizationAdapter;
 import sapotero.rxtest.views.adapters.models.FilterItem;
+import sapotero.rxtest.views.adapters.models.OrganizationItem;
 import sapotero.rxtest.views.adapters.pagination.PagingRecyclerViewAdapter;
 import sapotero.rxtest.views.adapters.utils.StatusAdapter;
 import sapotero.rxtest.views.views.CircleLeftArrow;
 import sapotero.rxtest.views.views.CircleRightArrow;
+import sapotero.rxtest.views.views.MultiSpinner;
 import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
@@ -95,7 +103,9 @@ public class MainActivity extends AppCompatActivity {
   @BindView(R.id.progressBar) View progressBar;
   @BindView(R.id.DOCUMENT_TYPE) Spinner DOCUMENT_TYPE_SELECTOR;
   @BindView(R.id.JOURNAL_TYPE)  Spinner JOURNAL_TYPE_SELECTOR;
-  @BindView(R.id.ORGANIZATION)  Spinner ORGANIZATION_SELECTOR;
+//  @BindView(R.id.ORGANIZATION)  Spinner ORGANIZATION_SELECTOR;
+  @BindView(R.id.ORGANIZATION) MultiSpinner ORGANIZATION_SELECTOR;
+
 
   @BindView(R.id.activity_main_right_button) CircleRightArrow rightArrow;
   @BindView(R.id.activity_main_left_button)  CircleLeftArrow leftArrow;
@@ -135,6 +145,9 @@ public class MainActivity extends AppCompatActivity {
   private PagingRecyclerViewAdapter recyclerViewAdapter;
   private Subscription pagingSubscription;
   private DocumentsAdapter RAdapter;
+  private Document __document__;
+  private Subscription timeoutSubcribe;
+  private OrganizationAdapter organization_adapter;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -166,28 +179,10 @@ public class MainActivity extends AppCompatActivity {
     toolbar.setOnMenuItemClickListener(item -> {
       switch ( item.getItemId() ){
         case R.id.action_test:
-
-          dataStore
-            .select(RDocumentEntity.class)
-            .get()
-            .toObservable()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(
-              doc -> {
-                RSignerEntity sign = (RSignerEntity) doc.getSigner();
-                Timber.d("DOCUMENT Count" + sign.getName() );
-              }
-            );
-
+          jobManager.addJobInBackground( new AddDocumentToDBTimeoutJob());
           break;
         default:
-
-          try {
             jobManager.addJobInBackground( new UpdateAuthTokenJob());
-          } catch ( Exception e){
-            Log.d( "_ERROR", e.toString() );
-          }
           break;
       }
       return false;
@@ -410,50 +405,82 @@ public class MainActivity extends AppCompatActivity {
     });
 
     // устанавливаем тип документов
-    ArrayAdapter<CharSequence> organization_adapter = ArrayAdapter.createFromResource(this, R.array.ORGANIZATIONS, android.R.layout.simple_spinner_item);
-    organization_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-    ORGANIZATION_SELECTOR.setAdapter(organization_adapter);
+//    ArrayAdapter<CharSequence> organization_adapter = ArrayAdapter.createFromResource(this, R.array.ORGANIZATIONS, android.R.layout.simple_spinner_item);
+//    organization_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//    ORGANIZATION_SELECTOR.setAdapter(organization_adapter);
+//
+//    ORGANIZATION_SELECTOR.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//      @Override
+//      public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+//      }
+//
+//      @Override
+//      public void onNothingSelected(AdapterView<?> adapterView) {
+//      }
+//    });
+    organization_adapter = new OrganizationAdapter(this, new ArrayList<OrganizationItem>());
+    ORGANIZATION_SELECTOR.setAdapter(organization_adapter, false, onSelectedListener);
 
-    ORGANIZATION_SELECTOR.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-      @Override
-      public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-      }
-
-      @Override
-      public void onNothingSelected(AdapterView<?> adapterView) {
-      }
-    });
+//    boolean[] selectedItems = new boolean[organization_adapter.getCount()];
+//    ORGANIZATION_SELECTOR.setSelected(selectedItems);
 
     Observable.from(filter_types).subscribe(
       this::loadDocumentsCountByType
     );
   }
 
+  private MultiSpinner.MultiSpinnerListener onSelectedListener = selected -> {
+    Timber.d( "onSelectedListener " + Arrays.toString(selected));
+
+    int i = -1;
+    for ( Boolean checked: selected ) {
+      i++;
+      Timber.tag(TAG).i( String.format("%s - %s", organization_adapter.getItem(i), checked ) );
+    }
+  };
+
   private void loadFromDB() {
-//  RxDataSource<String> rxDataSource = new RxDataSource<>(dataSet);
 
-//    recyclerViewAdapter = new PagingRecyclerViewAdapter();
-//    pagingSubscription = PaginationTool
-//      .paging(rv, offset -> ResponseManager.getInstance().getEmulateResponse(offset, 20), 20)
-//      .observeOn(AndroidSchedulers.mainThread())
-//      .subscribe(new Subscriber<List<Document>>() {
-//        @Override
-//        public void onCompleted() {
-//        }
-//
-//        @Override
-//        public void onError(Throwable e) {
-//        }
-//
-//        @Override
-//        public void onNext(List<Document> items) {
-//          recyclerViewAdapter.addNewItems(items);
-//          recyclerViewAdapter.notifyItemInserted(recyclerViewAdapter.getItemCount() - items.size());
-//        }
-//      });
+    count_test();
 
-    RAdapter = new DocumentsAdapter(this, new ArrayList<Document>());
+    RAdapter = new DocumentsAdapter(this, new ArrayList<>());
     rv.setAdapter(RAdapter);
+
+//    dataStore
+//      .select(RDocumentEntity.class)
+//      .orderBy(RDocumentEntity.ID.desc())
+//      .get()
+//      .toSelfObservable()
+//      .subscribeOn(Schedulers.io())
+//      .observeOn(AndroidSchedulers.mainThread())
+//      .subscribe(result -> {
+//        Timber.tag(TAG).v( "RDocument UPDATE: " + result.first().getUid() );
+//
+//        RDocumentEntity doc = result.first();
+//        Document document = new Document();
+//        document.setUid( doc.getUid() );
+//        document.setMd5( doc.getMd5() );
+//        document.setSortKey( doc.getSortKey() );
+//        document.setTitle( doc.getTitle() );
+//        document.setRegistrationNumber( doc.getRegistrationNumber() );
+//        document.setRegistrationDate( doc.getRegistrationDate() );
+//        document.setUrgency( doc.getUrgency() );
+//        document.setShortDescription( doc.getShortDescription() );
+//        document.setComment( doc.getComment() );
+//        document.setExternalDocumentNumber( doc.getExternalDocumentNumber() );
+//        document.setReceiptDate( doc.getReceiptDate() );
+//
+//        RSignerEntity r_signer = (RSignerEntity) doc.getSigner();
+//        Signer signer = new Signer();
+//        signer.setId( r_signer.getUid() );
+//        signer.setName( r_signer.getName() );
+//        signer.setOrganisation( r_signer.getOrganisation() );
+//        signer.setType( r_signer.getType() );
+//        document.setSigner(signer);
+//
+//        RAdapter.addItem( document );
+//
+//      });
 
     dataStore
       .select(RDocumentEntity.class)
@@ -462,6 +489,9 @@ public class MainActivity extends AppCompatActivity {
       .subscribeOn(Schedulers.io())
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(doc -> {
+
+        Timber.tag(TAG).v( "loadFromDB ++ " + doc.getUid() );
+
         Document document = new Document();
         document.setUid( doc.getUid() );
         document.setMd5( doc.getMd5() );
@@ -485,8 +515,6 @@ public class MainActivity extends AppCompatActivity {
 
         RAdapter.addItem( document );
       });
-
-
   }
 
   private void loadDocumentsCountByType( String TYPE){
@@ -552,6 +580,7 @@ public class MainActivity extends AppCompatActivity {
 
           List<sapotero.rxtest.retrofit.models.documents.Document> docs = data.getDocuments();
 
+
           for (Document d: docs ) {
             insertRDoc(d);
           }
@@ -568,6 +597,9 @@ public class MainActivity extends AppCompatActivity {
           } else {
             rv.setVisibility(View.VISIBLE);
             documents_empty_list.setVisibility(View.GONE);
+
+            __document__ = docs.get(0);
+
           }
 
         },
@@ -580,6 +612,9 @@ public class MainActivity extends AppCompatActivity {
   }
 
   private void insertRDoc(Document d) {
+
+    Timber.tag(TAG).i( "insertRDoc " + d.toString() );
+
     RDocumentEntity rd = new RDocumentEntity();
 
     rd.setUid( d.getUid() );
@@ -612,9 +647,72 @@ public class MainActivity extends AppCompatActivity {
           Timber.d("inserted ++ " + result.getUid());
         },
         error ->{
-          Timber.d("insertedError ++ " + error.getStackTrace() );
+          error.printStackTrace();
         }
       );
+  }
+
+  private void insertTimeoutRDoc(Document d) {
+    timeoutSubcribe = Observable.interval(3, TimeUnit.SECONDS, Schedulers.io())
+      .map(tick -> {
+
+        RDocumentEntity rd = new RDocumentEntity();
+
+        rd.setUid(d.getUid() + "_timeout_" + new Random().nextFloat());
+        rd.setMd5(d.getMd5());
+        rd.setSortKey(d.getSortKey());
+        rd.setTitle(d.getTitle());
+        rd.setRegistrationNumber(d.getRegistrationNumber());
+        rd.setRegistrationDate(d.getRegistrationDate());
+        rd.setUrgency(d.getUrgency());
+        rd.setShortDescription(d.getShortDescription());
+        rd.setComment(d.getComment());
+        rd.setExternalDocumentNumber(d.getExternalDocumentNumber());
+        rd.setReceiptDate(d.getReceiptDate());
+        rd.setViewed(d.getViewed());
+
+        RSignerEntity signer = new RSignerEntity();
+        signer.setUid(d.getSigner().getId());
+        signer.setName(d.getSigner().getName());
+        signer.setOrganisation(d.getSigner().getOrganisation());
+        signer.setType(d.getSigner().getType());
+
+        rd.setSigner(signer);
+
+        return dataStore.insert(rd)
+          .toObservable()
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe(
+            result -> {
+              Timber.d("inserted ++ " + result.getUid());
+            },
+            error -> {
+              error.printStackTrace();
+            }
+          );
+      })
+      .doOnError(err -> Timber.e("Error retrieving messages", err))
+      .retry()
+      .subscribe(
+        result -> {
+          Timber.d("inserted ++ " + result);
+        }
+      );
+
+//    dataStore.insert(rd)
+//      .toObservable()
+//      .subscribeOn(Schedulers.io())
+//      .observeOn(AndroidSchedulers.mainThread())
+//      .take(10)
+//      .subscribe(
+//        result -> {
+//          Timber.d("inserted ++ " + result.getUid());
+//        },
+//        error ->{
+//          error.printStackTrace();
+//        }
+//      );
   }
 
   private void loadMe() {
@@ -659,21 +757,76 @@ public class MainActivity extends AppCompatActivity {
     }
   }
 
+  public void count_test() {
+    organization_adapter.clear();
+
+    Subscription organizations = dataStore
+      .select(RSignerEntity.ORGANISATION)
+      .distinct()
+      .get()
+      .toObservable()
+      .subscribeOn(Schedulers.io())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe( org -> {
+
+        Integer count = dataStore
+          .count(RSignerEntity.class)
+          .where(RSignerEntity.ORGANISATION.eq(org.get(0).toString()))
+          .get()
+          .value();
+
+        organization_adapter.add( new OrganizationItem( org.get(0).toString(), count ) );
+
+        Timber.tag(TAG).d("ORGANIZATION: " + org.get(0).toString() );
+        Timber.tag(TAG).d("ORGANIZATION COUNT: " + count );
+      });
+
+
+//    Observable<Tuple> count = dataStore
+//      .select(RSignerEntity.ORGANISATION)
+//      .distinct()
+//      .get()
+//      .toObservable()
+//      .subscribeOn(Schedulers.io())
+//      .observeOn(AndroidSchedulers.mainThread());
+  }
+
+
+
   @Subscribe(threadMode = ThreadMode.BACKGROUND)
   public void onMessageEvent(GetDocumentInfoEvent event) {
     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show();
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(UpdateDocumentJobEvent event) {
-    RAdapter.findByUid(event.uid);
-//    Toast.makeText(context, event.uid, Toast.LENGTH_SHORT).show();
-  }
-
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(InsertRxDocumentsEvent event) {
     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show();
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(UpdateDocumentJobEvent event) {
+    int position = RAdapter.getPositionByUid(event.uid);
+    RecyclerView.ViewHolder a = rv.findViewHolderForAdapterPosition( position );
+
+    Timber.d( a.getClass().getCanonicalName() );
+
+    int visibility = event.value ? View.VISIBLE : View.GONE;
+    int field = Objects.equals(event.field, "control") ? R.id.control_label : R.id.favorite_label ;
+
+
+    View view = a.itemView.findViewById(field);
+    view.setVisibility( visibility );
+
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(AddDocumentToDBTimeoutEvent event) {
+    Timber.d("AddDocumentToDBTimeoutEvent  ");
+    if (timeoutSubcribe != null && !timeoutSubcribe.isUnsubscribed()) {
+      timeoutSubcribe.unsubscribe();
+    } else {
+      insertTimeoutRDoc(__document__);
+    }
   }
 
 }

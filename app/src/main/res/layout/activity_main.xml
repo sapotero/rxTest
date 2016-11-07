@@ -65,9 +65,10 @@
                         android:layout_gravity="center_horizontal"
                         android:layout_weight="1"/>
 
-                    <Spinner
+                    <sapotero.rxtest.views.views.MultiSpinner
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:padding="@dimen/half_date_offset"
                         android:id="@+id/ORGANIZATION"
                         android:layout_gravity="center_horizontal"
                         android:layout_weight="1"/>
