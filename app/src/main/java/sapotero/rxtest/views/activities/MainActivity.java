@@ -7,10 +7,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -48,6 +46,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
+import jp.wasabeef.recyclerview.adapters.ScaleInAnimationAdapter;
+import jp.wasabeef.recyclerview.animators.SlideInLeftAnimator;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import rx.Observable;
@@ -75,9 +75,11 @@ import sapotero.rxtest.retrofit.utils.MeService;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
+import sapotero.rxtest.views.adapters.models.DocumentTypeItem;
 import sapotero.rxtest.views.adapters.models.FilterItem;
 import sapotero.rxtest.views.adapters.models.OrganizationItem;
 import sapotero.rxtest.views.adapters.pagination.PagingRecyclerViewAdapter;
+import sapotero.rxtest.views.adapters.utils.DocumentTypeAdapter;
 import sapotero.rxtest.views.adapters.utils.StatusAdapter;
 import sapotero.rxtest.views.views.CircleLeftArrow;
 import sapotero.rxtest.views.views.CircleRightArrow;
@@ -101,9 +103,8 @@ public class MainActivity extends AppCompatActivity {
 
   @BindView(R.id.documentsRecycleView) RecyclerView rv;
   @BindView(R.id.progressBar) View progressBar;
-  @BindView(R.id.DOCUMENT_TYPE) Spinner DOCUMENT_TYPE_SELECTOR;
-  @BindView(R.id.JOURNAL_TYPE)  Spinner JOURNAL_TYPE_SELECTOR;
-//  @BindView(R.id.ORGANIZATION)  Spinner ORGANIZATION_SELECTOR;
+  @BindView(R.id.JOURNAL_TYPE) Spinner DOCUMENT_TYPE_SELECTOR;
+  @BindView(R.id.DOCUMENT_TYPE)  Spinner JOURNAL_TYPE_SELECTOR;
   @BindView(R.id.ORGANIZATION) MultiSpinner ORGANIZATION_SELECTOR;
 
 
@@ -122,7 +123,9 @@ public class MainActivity extends AppCompatActivity {
   @Inject RxSharedPreferences settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
-  private StatusAdapter filterAdapter;
+  private StatusAdapter filter_adapter;
+  private OrganizationAdapter organization_adapter;
+  private DocumentTypeAdapter document_type_adapter;
   private List<sapotero.rxtest.retrofit.models.documents.Document> loaded_documents;
   private DrawerBuilder drawer;
 
@@ -147,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
   private DocumentsAdapter RAdapter;
   private Document __document__;
   private Subscription timeoutSubcribe;
-  private OrganizationAdapter organization_adapter;
+
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -353,18 +356,15 @@ public class MainActivity extends AppCompatActivity {
   private void setAdapters() {
 
     List<FilterItem> filters = new ArrayList<FilterItem>();
-
     String[] filter_types = getResources().getStringArray(R.array.DOCUMENT_TYPES_VALUE);
     String[] filter_names = getResources().getStringArray(R.array.DOCUMENT_TYPES);
-
     for (int i = 0; i < filter_types.length; i++) {
       filters.add(new FilterItem( filter_names[i] , filter_types[i], "0"));
     }
 
-    filterAdapter = new StatusAdapter(this, filters );
-    DOCUMENT_TYPE_SELECTOR.setAdapter(filterAdapter);
-
-    DOCUMENT_TYPE_SELECTOR.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+    filter_adapter = new StatusAdapter(this, filters );
+    JOURNAL_TYPE_SELECTOR.setAdapter(filter_adapter);
+    JOURNAL_TYPE_SELECTOR.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
       @Override
       public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
 
@@ -375,7 +375,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
           loadDocuments();
         }
-        toolbar.setSubtitle( filterAdapter.getItem(position).getName() );
+        toolbar.setSubtitle( filter_adapter.getItem(position).getName() );
       }
 
       @Override
@@ -383,20 +383,22 @@ public class MainActivity extends AppCompatActivity {
       }
     });
 
-    // устанавливаем тип документов
-    JOURNAL_TYPE_SELECTOR = (Spinner) findViewById(R.id.JOURNAL_TYPE);
-    ArrayAdapter<CharSequence> journal_adapter = ArrayAdapter.createFromResource(this, R.array.JOURNAL_TYPES, android.R.layout.simple_spinner_item);
-    journal_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-    JOURNAL_TYPE_SELECTOR.setAdapter(journal_adapter);
 
-    JOURNAL_TYPE_SELECTOR.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+    List<DocumentTypeItem> document_types = new ArrayList<DocumentTypeItem>();
+    String[] document_types_name  = getResources().getStringArray(R.array.JOURNAL_TYPES);
+    String[] document_types_value = getResources().getStringArray(R.array.JOURNAL_TYPES_VALUE);
+
+    for (int i = 0; i < filter_types.length; i++) {
+      document_types.add(new DocumentTypeItem( document_types_name[i] , document_types_value[i]));
+    }
+
+    document_type_adapter = new DocumentTypeAdapter(this, document_types );
+    DOCUMENT_TYPE_SELECTOR.setAdapter(document_type_adapter);
+    DOCUMENT_TYPE_SELECTOR.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
       @Override
       public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-        int spinner_pos = JOURNAL_TYPE_SELECTOR.getSelectedItemPosition();
-        String[] document_type = getResources().getStringArray(R.array.JOURNAL_TYPES_VALUE);
-        String type = String.valueOf(document_type[spinner_pos]);
-
-        Toast.makeText(context, type, Toast.LENGTH_SHORT).show();
+        loadFromDB();
       }
 
       @Override
@@ -404,25 +406,10 @@ public class MainActivity extends AppCompatActivity {
       }
     });
 
-    // устанавливаем тип документов
-//    ArrayAdapter<CharSequence> organization_adapter = ArrayAdapter.createFromResource(this, R.array.ORGANIZATIONS, android.R.layout.simple_spinner_item);
-//    organization_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//    ORGANIZATION_SELECTOR.setAdapter(organization_adapter);
-//
-//    ORGANIZATION_SELECTOR.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//      @Override
-//      public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-//      }
-//
-//      @Override
-//      public void onNothingSelected(AdapterView<?> adapterView) {
-//      }
-//    });
+
     organization_adapter = new OrganizationAdapter(this, new ArrayList<OrganizationItem>());
     ORGANIZATION_SELECTOR.setAdapter(organization_adapter, false, onSelectedListener);
 
-//    boolean[] selectedItems = new boolean[organization_adapter.getCount()];
-//    ORGANIZATION_SELECTOR.setSelected(selectedItems);
 
     Observable.from(filter_types).subscribe(
       this::loadDocumentsCountByType
@@ -443,47 +430,32 @@ public class MainActivity extends AppCompatActivity {
 
     count_test();
 
-    RAdapter = new DocumentsAdapter(this, new ArrayList<>());
-    rv.setAdapter(RAdapter);
-
+    // вкорячиваем поиск по критериям
 //    dataStore
 //      .select(RDocumentEntity.class)
-//      .orderBy(RDocumentEntity.ID.desc())
+//      .where(RDocumentEntity.UID.like("Bob%"))
 //      .get()
-//      .toSelfObservable()
+//      .toObservable()
 //      .subscribeOn(Schedulers.io())
-//      .observeOn(AndroidSchedulers.mainThread())
-//      .subscribe(result -> {
-//        Timber.tag(TAG).v( "RDocument UPDATE: " + result.first().getUid() );
-//
-//        RDocumentEntity doc = result.first();
-//        Document document = new Document();
-//        document.setUid( doc.getUid() );
-//        document.setMd5( doc.getMd5() );
-//        document.setSortKey( doc.getSortKey() );
-//        document.setTitle( doc.getTitle() );
-//        document.setRegistrationNumber( doc.getRegistrationNumber() );
-//        document.setRegistrationDate( doc.getRegistrationDate() );
-//        document.setUrgency( doc.getUrgency() );
-//        document.setShortDescription( doc.getShortDescription() );
-//        document.setComment( doc.getComment() );
-//        document.setExternalDocumentNumber( doc.getExternalDocumentNumber() );
-//        document.setReceiptDate( doc.getReceiptDate() );
-//
-//        RSignerEntity r_signer = (RSignerEntity) doc.getSigner();
-//        Signer signer = new Signer();
-//        signer.setId( r_signer.getUid() );
-//        signer.setName( r_signer.getName() );
-//        signer.setOrganisation( r_signer.getOrganisation() );
-//        signer.setType( r_signer.getType() );
-//        document.setSigner(signer);
-//
-//        RAdapter.addItem( document );
-//
-//      });
+//      .observeOn(AndroidSchedulers.mainThread());
+
+    int spinner_pos = DOCUMENT_TYPE_SELECTOR.getSelectedItemPosition();
+    String[] document_type = getResources().getStringArray(R.array.JOURNAL_TYPES_VALUE);
+    String type = String.valueOf(document_type[spinner_pos]);
+
+    Timber.d( "DOCUMENT_TYPE_SELECTOR " + spinner_pos);
+    Timber.d( "DOCUMENT_TYPE_SELECTOR " + type);
+
+
+    RAdapter = new DocumentsAdapter(this, new ArrayList<>());
+    ScaleInAnimationAdapter alphaAdapter = new ScaleInAnimationAdapter(RAdapter);
+    alphaAdapter.setDuration(10000);
+    rv.setAdapter(alphaAdapter);
+    rv.setItemAnimator(new SlideInLeftAnimator());
 
     dataStore
       .select(RDocumentEntity.class)
+      .where(RDocumentEntity.UID.like( type + "%" ))
       .get()
       .toObservable()
       .subscribeOn(Schedulers.io())
@@ -545,10 +517,10 @@ public class MainActivity extends AppCompatActivity {
 
             Timber.tag(TAG).i( TYPE + " - " + total + " | " + index );
 
-            FilterItem filterItem = filterAdapter.getItem(index);
+            FilterItem filterItem = filter_adapter.getItem(index);
 
             filterItem.setCount( total );
-            filterAdapter.notifyDataSetChanged();
+            filter_adapter.notifyDataSetChanged();
           }
 
         },
@@ -568,6 +540,10 @@ public class MainActivity extends AppCompatActivity {
     int spinner_pos = DOCUMENT_TYPE_SELECTOR.getSelectedItemPosition();
 
     String[] document_type = getResources().getStringArray(R.array.DOCUMENT_TYPES_VALUE);
+
+    Timber.tag(TAG).d("_ERROR "+ spinner_pos );
+
+    spinner_pos = 0;
     String type = String.valueOf(document_type[spinner_pos]);
 
     Observable<Documents> documents = documentsService.getDocuments(LOGIN.get(), TOKEN.get(), type, 100, 0);
@@ -604,7 +580,7 @@ public class MainActivity extends AppCompatActivity {
 
         },
         error -> {
-          Log.d("_ERROR", error.getMessage());
+          Timber.d("_ERROR", error.getMessage());
           progressBar.setVisibility(ProgressBar.INVISIBLE);
 
           Toast.makeText(this, error.getMessage(), Toast.LENGTH_SHORT).show();
@@ -747,8 +723,9 @@ public class MainActivity extends AppCompatActivity {
 
   public void showNextType( Boolean next){
     unsubscribe();
-    int position = next ? filterAdapter.next() : filterAdapter.prev();
-    DOCUMENT_TYPE_SELECTOR.setSelection(position);
+    int position = next ? filter_adapter.next() : filter_adapter.prev();
+//    DOCUMENT_TYPE_SELECTOR.setSelection(position);
+    JOURNAL_TYPE_SELECTOR.setSelection(position);
   }
 
   public void unsubscribe(){
@@ -780,15 +757,6 @@ public class MainActivity extends AppCompatActivity {
         Timber.tag(TAG).d("ORGANIZATION: " + org.get(0).toString() );
         Timber.tag(TAG).d("ORGANIZATION COUNT: " + count );
       });
-
-
-//    Observable<Tuple> count = dataStore
-//      .select(RSignerEntity.ORGANISATION)
-//      .distinct()
-//      .get()
-//      .toObservable()
-//      .subscribeOn(Schedulers.io())
-//      .observeOn(AndroidSchedulers.mainThread());
   }
 
 

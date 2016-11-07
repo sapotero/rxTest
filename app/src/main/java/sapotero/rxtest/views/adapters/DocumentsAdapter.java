@@ -166,7 +166,9 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
 
   public void addItem(Document document) {
     documents.add(document);
-    notifyDataSetChanged();
+    notifyItemInserted(documents.size());
+//    notifyDataSetChanged();
+
   }
 
   public Integer getPositionByUid(String uid) {

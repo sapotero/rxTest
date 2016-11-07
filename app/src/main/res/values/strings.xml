@@ -28,22 +28,22 @@
         <item>Входящие документы</item>
         <item>Обращения граждан</item>
         <item>НПА</item>
-        <item>Подписание/Согласование</item>
         <item>Приказы</item>
         <item>Приказы ДДО</item>
         <item>Внутренние документы</item>
         <item>На контроле</item>
+        <item>Подписание/Согласование</item>
     </string-array>
 
     <string-array name="JOURNAL_TYPES_VALUE">
-        <item>all</item>
-        <item>incoming_documents</item>
-        <item>citizen_requests</item>
-        <item>incoming_orders</item>
-        <item>approve</item>
-        <item>incoming_orders</item>
-        <item>orders_ddo</item>
-        <item>control</item>
+        <item></item>
+        <item>02</item>
+        <item>01</item>
+        <item>03</item>
+        <item>04</item>
+        <item>10</item>
+        <item>98</item>
+        <item>99</item>
     </string-array>
 
     <string-array name="settings_view_start_page">
