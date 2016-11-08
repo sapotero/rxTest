@@ -120,6 +120,9 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
       Preference<Integer> rxPosition = rxPreferences.getInteger("position");
       rxPosition.set(position);
 
+      Preference<String> rxUid = rxPreferences.getString("info.uid");
+      rxUid.set( item.getUid() );
+
       Intent intent = new Intent(mContext, InfoActivity.class);
       mContext.startActivity(intent);
       Toast.makeText(mContext, " onClick : " + item.getMd5() + " \n" + item.getTitle(), Toast.LENGTH_SHORT).show();

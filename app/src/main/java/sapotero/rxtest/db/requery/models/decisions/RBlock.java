@@ -15,13 +15,13 @@ public abstract class RBlock {
   @Generated
   int id;
 
-  String number;
+  Integer number;
   String text;
-  String appeal_text;
-  Boolean text_before;
-  Boolean hide_performers;
-  Boolean to_copy;
-  Boolean to_familiarization;
+  String appealText;
+  Boolean textBefore;
+  Boolean hidePerformers;
+  Boolean toCopy;
+  Boolean toFamiliarization;
 
   @ManyToOne
   RDecision decision;

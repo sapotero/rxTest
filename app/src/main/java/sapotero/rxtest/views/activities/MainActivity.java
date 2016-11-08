@@ -1,6 +1,5 @@
 package sapotero.rxtest.views.activities;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -76,7 +75,6 @@ import sapotero.rxtest.views.adapters.OrganizationAdapter;
 import sapotero.rxtest.views.adapters.models.DocumentTypeItem;
 import sapotero.rxtest.views.adapters.models.FilterItem;
 import sapotero.rxtest.views.adapters.models.OrganizationItem;
-import sapotero.rxtest.views.adapters.pagination.PagingRecyclerViewAdapter;
 import sapotero.rxtest.views.adapters.utils.DocumentTypeAdapter;
 import sapotero.rxtest.views.adapters.utils.StatusAdapter;
 import sapotero.rxtest.views.views.CircleLeftArrow;
@@ -86,34 +84,16 @@ import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
 
-  private Preference<String> TOKEN;
-  private Preference<String> LOGIN;
-  private Preference<String> PASSWORD;
-
-  private String total;
-  private String TAG = MainActivity.class.getSimpleName();
-
-  @SuppressLint("StaticFieldLeak")
-  private static MainActivity context;
-
-  @SuppressLint("StaticFieldLeak")
-  protected static RecyclerView rvv;
-
   @BindView(R.id.documentsRecycleView) RecyclerView rv;
   @BindView(R.id.progressBar) View progressBar;
   @BindView(R.id.JOURNAL_TYPE) Spinner DOCUMENT_TYPE_SELECTOR;
   @BindView(R.id.DOCUMENT_TYPE)  Spinner JOURNAL_TYPE_SELECTOR;
   @BindView(R.id.ORGANIZATION) MultiSpinner ORGANIZATION_SELECTOR;
 
-
   @BindView(R.id.activity_main_right_button) CircleRightArrow rightArrow;
   @BindView(R.id.activity_main_left_button)  CircleLeftArrow leftArrow;
 
-
-
   @BindView(R.id.documents_empty_list)  View documents_empty_list;
-
-
   @BindView(R.id.toolbar) Toolbar toolbar;
 
   @Inject JobManager jobManager;
@@ -121,13 +101,20 @@ public class MainActivity extends AppCompatActivity {
   @Inject RxSharedPreferences settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
+  private String TAG = MainActivity.class.getSimpleName();
+
+  private Preference<String> TOKEN;
+  private Preference<String> LOGIN;
+  private Preference<String> PASSWORD;
+
   private StatusAdapter filter_adapter;
   private OrganizationAdapter organization_adapter;
   private DocumentTypeAdapter document_type_adapter;
-  private List<sapotero.rxtest.retrofit.models.documents.Document> loaded_documents;
+
   private DrawerBuilder drawer;
 
   CompositeSubscription subscriptions;
+  private String total;
 
   private final int SETTINGS_VIEW_TYPE_ALL                = 10;
   private final int SETTINGS_VIEW_TYPE_INCOMING_DOCUMENTS = 11;
@@ -143,9 +130,8 @@ public class MainActivity extends AppCompatActivity {
   private final int SETTINGS_TEMPLATES                    = 21;
   private final int SETTINGS_TEMPLATES_OFF                = 22;
   private Subscription loader;
-  private PagingRecyclerViewAdapter recyclerViewAdapter;
-  private Subscription pagingSubscription;
-  private DocumentsAdapter RAdapter;
+
+  public DocumentsAdapter RAdapter;
   private Document __document__;
   private Subscription timeoutSubcribe;
 
@@ -157,7 +143,6 @@ public class MainActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 
-    context = this;
     ButterKnife.bind(this);
     EsdApplication.getComponent(this).inject(this);
 
@@ -185,6 +170,7 @@ public class MainActivity extends AppCompatActivity {
     toolbar.setOnMenuItemClickListener(item -> {
       switch ( item.getItemId() ){
         case R.id.action_test:
+          System.gc();
           jobManager.addJobInBackground( new AddDocumentToDBTimeoutJob());
           break;
         default:
@@ -555,19 +541,13 @@ public class MainActivity extends AppCompatActivity {
         data -> {
           progressBar.setVisibility(ProgressBar.INVISIBLE);
 
-          List<sapotero.rxtest.retrofit.models.documents.Document> docs = data.getDocuments();
+          List<Document> docs = data.getDocuments();
 
 
           for (Document d: docs ) {
             insertRDoc(d);
             RAdapter.addItem(d);
           }
-
-
-//          DocumentsAdapter documentsAdapter = new DocumentsAdapter(this, docs);
-//          rv.setAdapter(documentsAdapter);
-
-          rvv = rv;
 
           if (docs.size() == 0) {
             rv.setVisibility(View.GONE);
@@ -765,12 +745,12 @@ public class MainActivity extends AppCompatActivity {
 
   @Subscribe(threadMode = ThreadMode.BACKGROUND)
   public void onMessageEvent(GetDocumentInfoEvent event) {
-    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show();
+    Toast.makeText(getApplicationContext(), event.message, Toast.LENGTH_SHORT).show();
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(InsertRxDocumentsEvent event) {
-    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show();
+    Toast.makeText(getApplicationContext(), event.message, Toast.LENGTH_SHORT).show();
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)

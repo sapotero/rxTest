@@ -52,7 +52,7 @@ public abstract class  RDocument implements Persistable {
   @OneToOne
   RSigner signer;
 
-  String info_card;
+  String infoCard;
 
   @OneToMany(mappedBy = "document", cascade = {CascadeAction.DELETE, CascadeAction.SAVE})
   Set<RDecision> decisions;
@@ -64,7 +64,7 @@ public abstract class  RDocument implements Persistable {
   Set<RImage> images;
 
   @OneToMany(mappedBy = "document", cascade = {CascadeAction.DELETE, CascadeAction.SAVE})
-  Set<RControlLabels> control_labels;
+  Set<RControlLabels> controlLabels;
 
 //  exemplars: Тип массив структур Экземпляры документа,
 //  decisions: Тип массив структур Резолюции документа,

@@ -35,10 +35,10 @@ public class Decision {
     private Boolean signerIsManager;
     @SerializedName("sign_base64")
     @Expose
-    private Object signBase64;
+    private String signBase64;
     @SerializedName("assistant_id")
     @Expose
-    private Object assistantId;
+    private String assistantId;
     @SerializedName("comment")
     @Expose
     private String comment;
@@ -47,13 +47,13 @@ public class Decision {
     private String date;
     @SerializedName("urgency_text")
     @Expose
-    private Object urgencyText;
+    private String urgencyText;
     @SerializedName("show_position")
     @Expose
     private Boolean showPosition;
     @SerializedName("status")
     @Expose
-    private Object status;
+    private String status;
     @SerializedName("red")
     @Expose
     private Boolean red;
@@ -210,7 +210,7 @@ public class Decision {
      * @return
      *     The signBase64
      */
-    public Object getSignBase64() {
+    public String getSignBase64() {
         return signBase64;
     }
 
@@ -219,7 +219,7 @@ public class Decision {
      * @param signBase64
      *     The sign_base64
      */
-    public void setSignBase64(Object signBase64) {
+    public void setSignBase64(String signBase64) {
         this.signBase64 = signBase64;
     }
 
@@ -228,7 +228,7 @@ public class Decision {
      * @return
      *     The assistantId
      */
-    public Object getAssistantId() {
+    public String getAssistantId() {
         return assistantId;
     }
 
@@ -237,7 +237,7 @@ public class Decision {
      * @param assistantId
      *     The assistant_id
      */
-    public void setAssistantId(Object assistantId) {
+    public void setAssistantId(String assistantId) {
         this.assistantId = assistantId;
     }
 
@@ -282,7 +282,7 @@ public class Decision {
      * @return
      *     The urgencyText
      */
-    public Object getUrgencyText() {
+    public String getUrgencyText() {
         return urgencyText;
     }
 
@@ -291,7 +291,7 @@ public class Decision {
      * @param urgencyText
      *     The urgency_text
      */
-    public void setUrgencyText(Object urgencyText) {
+    public void setUrgencyText(String urgencyText) {
         this.urgencyText = urgencyText;
     }
 
@@ -318,7 +318,7 @@ public class Decision {
      * @return
      *     The status
      */
-    public Object getStatus() {
+    public String getStatus() {
         return status;
     }
 
@@ -327,7 +327,7 @@ public class Decision {
      * @param status
      *     The status
      */
-    public void setStatus(Object status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 

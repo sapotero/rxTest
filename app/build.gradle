@@ -91,8 +91,6 @@ dependencies {
     compile 'io.requery:requery-android:1.0.0' // for android
     apt 'io.requery:requery-processor:1.0.0'   // use an APT plugin
 
-    // rx sqlite provider
-    compile 'com.squareup.sqlbrite:sqlbrite:0.7.0'
     // генерация rx-моделек
     compile 'javax.annotation:javax.annotation-api:1.2'
     compile 'com.minimize.android:rxrecycler-adapter:1.2.2'

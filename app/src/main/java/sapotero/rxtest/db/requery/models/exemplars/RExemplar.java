@@ -17,15 +17,19 @@ public abstract class RExemplar {
   int id;
 
   String number;
-  String _date;
-  String status_code;
-  String addressed_to_id;
-  String addressed_to_name;
-  Boolean is_original;
+  String date;
+  String statusCode;
+  String addressedToId;
+  String addressedToName;
+  Boolean isOriginal;
 
   @ManyToOne
   RDocument document;
 
   @OneToMany(mappedBy = "exemplars", cascade = {CascadeAction.DELETE, CascadeAction.SAVE})
-  Set<RExemplarStatus> statuses;
+  Set<RExemplar> statuses;
+
+  @ManyToOne
+  RExemplar exemplars;
+
 }

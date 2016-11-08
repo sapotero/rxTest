@@ -19,7 +19,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import timber.log.Timber;
 
 public class InfoCardWebViewFragment extends Fragment {
 
@@ -73,7 +72,6 @@ public class InfoCardWebViewFragment extends Fragment {
     try {
       if ( document != null ){
         String htmlData = "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />" + document;
-        Timber.tag("HTML").v(htmlData);
         infocard.loadDataWithBaseURL("file:///android_asset/", htmlData, "text/html", "UTF-8", null);
       }
     } catch (Exception e) {

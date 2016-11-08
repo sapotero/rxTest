@@ -1,5 +1,7 @@
 package sapotero.rxtest.db.requery.models.decisions;
 
+import java.util.Set;
+
 import io.requery.CascadeAction;
 import io.requery.Entity;
 import io.requery.Generated;
@@ -15,21 +17,21 @@ public abstract class RDecision {
   int id;
 
   String letterhead;
-  String approved;
   String signer;
-  String signer_id;
-  String assistant_id;
-  String signer_blank_text;
-  String signer_position_s;
+  String signerId;
+  String assistantId;
+  String signerBlankText;
+  String signerPositionS;
   String comment;
-  String _date;
-  String urgency_text;
-  Boolean signer_is_manager;
-  Boolean show_position;
+  String date;
+  String urgencyText;
+  Boolean approved;
+  Boolean signerIsManager;
+  Boolean showPosition;
 
   @ManyToOne
   RDocument document;
 
   @OneToMany(mappedBy = "decision", cascade = {CascadeAction.DELETE, CascadeAction.SAVE})
-  RBlock blocks;
+  Set<RBlock> blocks;
 }

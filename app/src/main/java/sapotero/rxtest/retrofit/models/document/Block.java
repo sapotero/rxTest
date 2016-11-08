@@ -17,7 +17,7 @@ public class Block {
     private String text;
     @SerializedName("appeal_text")
     @Expose
-    private Object appealText;
+    private String appealText;
     @SerializedName("text_before")
     @Expose
     private Boolean textBefore;
@@ -75,7 +75,7 @@ public class Block {
      * @return
      *     The appealText
      */
-    public Object getAppealText() {
+    public String getAppealText() {
         return appealText;
     }
 
@@ -84,7 +84,7 @@ public class Block {
      * @param appealText
      *     The appeal_text
      */
-    public void setAppealText(Object appealText) {
+    public void setAppealText(String appealText) {
         this.appealText = appealText;
     }
 

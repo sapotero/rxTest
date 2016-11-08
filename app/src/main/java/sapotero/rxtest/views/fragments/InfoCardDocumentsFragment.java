@@ -83,10 +83,6 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   private PdfRenderer mPdfRenderer;
   private PdfRenderer.Page mCurrentPage;
 
-//  private ImageView mImageView;
-//  private Button mButtonPrevious;
-//  private Button mButtonNext;
-
   @BindView(R.id.pdf_image) ImageView mImageView;
   @BindView(R.id.empty_list_image) ImageView empty_list_image;
   @BindView(R.id.doc_tmp_layout) FrameLayout doc_tmp_layout;
@@ -162,6 +158,8 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
 
     mAttacher = new PhotoViewAttacher(mImageView);
+//    mAttacher.setZoomable(false);
+    mAttacher.setScaleType(ImageView.ScaleType.FIT_CENTER);
 
 //    mAttacher.setOnMatrixChangeListener(new MatrixChangeListener());
 //    mAttacher.setOnSingleFlingListener(new SingleFlingListener());
@@ -188,11 +186,11 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   public void getFromPdf(int index) {
     Boolean exist = true;
 
-
     mCurrentPage = mPdfRenderer.openPage(index);
+
     Bitmap image = Bitmap.createBitmap(
-      getResources().getDisplayMetrics().densityDpi / 80 * mCurrentPage.getWidth(),
-      getResources().getDisplayMetrics().densityDpi / 80 * mCurrentPage.getHeight(),
+      getResources().getDisplayMetrics().densityDpi / 60 * mCurrentPage.getWidth(),
+      getResources().getDisplayMetrics().densityDpi / 60 * mCurrentPage.getHeight(),
       Bitmap.Config.ARGB_8888
     );
 
@@ -239,6 +237,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
       mImageView.setImageBitmap(image);
     }
 
+    System.gc();
 
   }
 

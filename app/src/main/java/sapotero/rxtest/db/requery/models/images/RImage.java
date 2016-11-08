@@ -12,12 +12,12 @@ public abstract class RImage {
   @Generated
   int id;
 
-  String number;
-  String size;
+  Integer number;
+  Integer size;
   String title;
   String md5;
   String path;
-  String content_type;
+  String contentType;
   Boolean signed;
 
   @ManyToOne

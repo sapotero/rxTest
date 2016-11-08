@@ -11,13 +11,13 @@ public abstract class RPerformer {
   @Generated
   int id;
 
-  String number;
-  String performer_id;
-  String performer_type;
-  String performer_text;
-  String organization_text;
-  Boolean is_original;
-  Boolean is_responsible;
+  Integer number;
+  String performerId;
+  String performerType;
+  String performerText;
+  String organizationText;
+  Boolean isOriginal;
+  Boolean isResponsible;
 
   @ManyToOne
   RBlock block;

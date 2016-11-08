@@ -43,6 +43,8 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.requery.Persistable;
+import io.requery.rx.SingleEntityStore;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
@@ -54,16 +56,28 @@ import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.application.config.Constant;
+import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.db.requery.models.control_labels.RControlLabelsEntity;
+import sapotero.rxtest.db.requery.models.decisions.RBlock;
+import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
+import sapotero.rxtest.db.requery.models.decisions.RDecision;
+import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
+import sapotero.rxtest.db.requery.models.decisions.RPerformer;
+import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
+import sapotero.rxtest.db.requery.models.exemplars.RExemplarEntity;
+import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.events.bus.MassInsertDoneEvent;
 import sapotero.rxtest.events.bus.SetActiveDecisonEvent;
 import sapotero.rxtest.jobs.rx.SetActiveDecisionJob;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Block;
+import sapotero.rxtest.retrofit.models.document.ControlLabel;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
+import sapotero.rxtest.retrofit.models.document.Exemplar;
+import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.views.adapters.DecisionAdapter;
-import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.fragments.InfoCardDocumentsFragment;
 import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
@@ -79,26 +93,27 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
   @BindView(R.id.tab_main) ViewPager viewPager;
   @BindView(R.id.tabs) TabLayout tabLayout;
 
-//  @Inject BriteDatabase db;
+
   @Inject JobManager jobManager;
   @Inject CompositeSubscription subscriptions;
   @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
+  @Inject SingleEntityStore<Persistable> dataStore;
 
-  private static byte[] CARD;
+  private byte[] CARD;
 
-  private static String  TOKEN    = "";
-  private static String  LOGIN    = "";
-  private static String  PASSWORD = "";
-  private static Integer POSITION = 0;
+  private Preference<String> TOKEN;
+  private Preference<String> LOGIN;
+  private Preference<String> PASSWORD;
+  private Preference<String> UID;
+  private Preference<Integer> POSITION;
 
   private DocumentInfo DOCUMENT;
 
   private String TAG = InfoActivity.class.getSimpleName();
-
   private Context context;
-  private DecisionAdapter decision_adapter;
 
+  private DecisionAdapter decision_adapter;
   @BindView(R.id.toolbar) Toolbar toolbar;
 
   @Override
@@ -158,9 +173,273 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
     loadDocuments();
   }
 
-  private void loadDocuments() {
-    DocumentsAdapter rvAdapter = (DocumentsAdapter) MainActivity.rvv.getAdapter();
+  private Boolean documentExist(String uid){
+    Integer count = dataStore
+      .count( RDocumentEntity.class )
+      .where( RDocumentEntity.UID.eq(uid) )
+      .and( RDocumentEntity.INFO_CARD.ne("") )
+      .get()
+      .value();
 
+    Boolean result = count > 0;
+    Timber.i( "documentExist " + result.toString() );
+
+    return result;
+  }
+
+  private void loadDocuments() {
+
+    if ( documentExist( UID.get() ) ){
+      loadFromDb();
+    } else {
+      loadFromJson();
+    }
+
+  }
+
+  private void loadFromDb() {
+    Timber.tag("loadFromDb").v("start");
+    loader.setVisibility(ProgressBar.INVISIBLE);
+
+    dataStore
+      .select(RDocumentEntity.class)
+      .where(RDocumentEntity.UID.eq( UID.get() ))
+      .get()
+      .toObservable()
+      .subscribeOn(Schedulers.io())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(doc -> {
+
+        setTabContent();
+
+        toolbar.setTitle( doc.getTitle() );
+
+        if ( doc.getDecisions().size() >= 1 ){
+
+          desigions_recycler_view.setLayoutManager(new LinearLayoutManager(this));
+
+          List<Decision> decisions_list = new ArrayList<>();
+
+
+
+          for (RDecision rDecision: doc.getDecisions()) {
+            Decision raw_decision = new Decision();
+
+            RDecisionEntity decision = (RDecisionEntity) rDecision;
+
+            raw_decision.setLetterhead(decision.getLetterhead());
+            raw_decision.setSigner(decision.getSigner());
+            raw_decision.setSignerId(decision.getSignerId());
+            raw_decision.setAssistantId(decision.getAssistantId());
+            raw_decision.setSignerBlankText(decision.getSignerBlankText());
+            raw_decision.setComment(decision.getComment());
+            raw_decision.setDate(decision.getDate());
+            raw_decision.setApproved(decision.isApproved());
+            raw_decision.setUrgencyText(decision.getUrgencyText());
+            raw_decision.setSignerIsManager(decision.isSignerIsManager());
+            raw_decision.setShowPosition(decision.isShowPosition());
+
+            for (RBlock rBlock: decision.getBlocks()) {
+              RBlockEntity block = (RBlockEntity) rBlock;
+              Block raw_block = new Block();
+
+              raw_block.setNumber(block.getNumber());
+              raw_block.setText(block.getText());
+              raw_block.setAppealText(block.getAppealText());
+              raw_block.setTextBefore(block.isTextBefore());
+              raw_block.setHidePerformers(block.isHidePerformers());
+              raw_block.setToCopy(block.isToCopy());
+              raw_block.setToFamiliarization(block.isToFamiliarization());
+
+              for (RPerformer rPerformer: block.getPerformers()) {
+                RPerformerEntity performer = (RPerformerEntity) rPerformer;
+                Performer raw_performer = new Performer();
+
+                raw_performer.setNumber(performer.getNumber());
+                raw_performer.setPerformerId(performer.getPerformerId());
+                raw_performer.setPerformerType(performer.getPerformerType());
+                raw_performer.setPerformerText(performer.getPerformerText());
+                raw_performer.setOrganizationText(performer.getOrganizationText());
+                raw_performer.setIsOriginal(performer.isIsOriginal());
+                raw_performer.setIsResponsible(performer.isIsResponsible());
+
+                raw_block.getPerformers().add(raw_performer);
+              }
+
+              raw_decision.getBlocks().add(raw_block);
+            }
+
+            decisions_list.add(raw_decision);
+          }
+
+          decision_adapter = new DecisionAdapter(decisions_list, this, desigions_recycler_view);
+          desigions_recycler_view.setAdapter(decision_adapter);
+
+          // если есть резолюции, то отобразить первую
+          if ( decisions_list.size() > 0 ) {
+            try {
+              jobManager.addJobInBackground( new SetActiveDecisionJob(0) );
+            } catch ( Exception e){
+              Timber.tag(TAG + " massInsert error").v( e );
+            }
+          }
+
+          desigions_recycler_view.setLayoutManager(new LinearLayoutManager(this));
+
+          RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
+          itemAnimator.setAddDuration(10);
+          itemAnimator.setRemoveDuration(10);
+          desigions_recycler_view.setItemAnimator(itemAnimator);
+
+        }
+
+        if ( doc.getInfoCard() != null ){
+          CARD = Base64.decode( doc.getInfoCard().getBytes(), Base64.DEFAULT );
+        } else {
+          CARD = Base64.decode( "".getBytes(), Base64.DEFAULT );
+        }
+
+        Preference<String> infocard = settings.getString("document.infoCard");
+        infocard.set( new String(CARD , StandardCharsets.UTF_8) );
+
+      });
+  }
+
+  private void saveToDb(DocumentInfo document){
+    String tag = "saveToDb";
+
+    Timber.tag(tag).v("document " + document.getUid());
+
+    RDocumentEntity rDoc = dataStore
+      .select(RDocumentEntity.class)
+      .where(RDocumentEntity.UID.eq(UID.get()))
+      .get()
+      .first();
+
+    if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
+      for (Decision d: document.getDecisions() ) {
+
+        RDecisionEntity decision = new RDecisionEntity();
+        decision.setLetterhead(d.getLetterhead());
+        decision.setApproved(d.getApproved());
+        decision.setSigner(d.getSigner());
+        decision.setSignerId(d.getSignerId());
+        decision.setAssistantId(d.getAssistantId());
+        decision.setSignerBlankText(d.getSignerBlankText());
+        decision.setSignerIsManager(d.getSignerIsManager());
+        decision.setComment(d.getComment());
+        decision.setDate(d.getDate());
+        decision.setUrgencyText(d.getUrgencyText());
+        decision.setShowPosition(d.getShowPosition());
+
+        if ( d.getBlocks() != null && d.getBlocks().size() >= 1 ){
+
+          for (Block b: d.getBlocks() ) {
+            RBlockEntity block = new RBlockEntity();
+            block.setNumber(b.getNumber());
+            block.setText(b.getText());
+            block.setAppealText(b.getAppealText());
+            block.setTextBefore(b.getTextBefore());
+            block.setHidePerformers(b.getHidePerformers());
+            block.setToCopy(b.getToCopy());
+            block.setToFamiliarization(b.getToFamiliarization());
+
+            if ( b.getPerformers() != null && b.getPerformers().size() >= 1 ) {
+
+              for (Performer p : b.getPerformers()) {
+                RPerformerEntity performer = new RPerformerEntity();
+
+                performer.setNumber(p.getNumber());
+                performer.setPerformerId(p.getPerformerId());
+                performer.setPerformerType(p.getPerformerType());
+                performer.setPerformerText(p.getPerformerText());
+                performer.setOrganizationText(p.getOrganizationText());
+                performer.setIsOriginal(p.getIsOriginal());
+                performer.setIsResponsible(p.getIsResponsible());
+
+                performer.setBlock(block);
+                block.getPerformers().add(performer);
+              }
+            }
+
+
+            block.setDecision(decision);
+            decision.getBlocks().add(block);
+          }
+
+        }
+
+
+        decision.setDocument(rDoc);
+        rDoc.getDecisions().add(decision);
+      }
+    }
+
+    if ( document.getExemplars() != null && document.getExemplars().size() >= 1 ){
+      for (Exemplar e: document.getExemplars() ) {
+        RExemplarEntity exemplar = new RExemplarEntity();
+        exemplar.setNumber(String.valueOf(e.getNumber()));
+        exemplar.setIsOriginal(e.getIsOriginal());
+        exemplar.setStatusCode(e.getStatusCode());
+        exemplar.setAddressedToId(e.getAddressedToId());
+        exemplar.setAddressedToName(e.getAddressedToName());
+        exemplar.setDate(e.getDate());
+        exemplar.setDocument(rDoc);
+        rDoc.getExemplars().add(exemplar);
+      }
+    }
+
+    if ( document.getImages() != null && document.getImages().size() >= 1 ){
+      for (Image i: document.getImages() ) {
+        RImageEntity image = new RImageEntity();
+        image.setTitle(i.getTitle());
+        image.setNumber(i.getNumber());
+        image.setMd5(i.getMd5());
+        image.setSize(i.getSize());
+        image.setPath(i.getPath());
+        image.setContentType(i.getContentType());
+        image.setSigned(i.getSigned());
+        image.setDocument(rDoc);
+        rDoc.getImages().add(image);
+      }
+    }
+
+    if ( document.getControlLabels() != null && document.getControlLabels().size() >= 1 ){
+      for (ControlLabel l: document.getControlLabels() ) {
+        RControlLabelsEntity label = new RControlLabelsEntity();
+        label.setCreatedAt(l.getCreatedAt());
+        label.setOfficialId(l.getOfficialId());
+        label.setOfficialName(l.getOfficialName());
+        label.setSkippedOfficialId(l.getSkippedOfficialId());
+        label.setSkippedOfficialName(l.getSkippedOfficialName());
+        label.setState(l.getState());
+        label.setDocument(rDoc);
+        rDoc.getControlLabels().add(label);
+      }
+    }
+
+    if ( document.getInfoCard() != null){
+      rDoc.setInfoCard( document.getInfoCard() );
+    }
+
+
+    dataStore.update(rDoc)
+      .toObservable()
+      .subscribeOn(Schedulers.io())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(
+        result -> {
+          Timber.tag(tag).d("updated " + result.getUid());
+        },
+        error ->{
+          error.printStackTrace();
+        }
+      );
+
+
+  }
+
+  private void loadFromJson(){
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
@@ -171,9 +450,9 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
     DocumentService documentService = retrofit.create( DocumentService.class );
 
     Observable<DocumentInfo> info = documentService.getInfo(
-      rvAdapter.getItem(POSITION).getUid(),
-      LOGIN,
-      TOKEN
+      UID.get(),
+      LOGIN.get(),
+      TOKEN.get()
     );
 
     info.subscribeOn( Schedulers.newThread() )
@@ -181,6 +460,8 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
       .subscribe(
         data -> {
           DOCUMENT = data;
+
+          saveToDb(DOCUMENT);
 
           Gson gson = new Gson();
 
@@ -272,21 +553,11 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
 
 
   private void loadSettings() {
-    Preference<String> username = settings.getString("login");
-    LOGIN = username.get();
-
-    Preference<String> password = settings.getString("password");
-    PASSWORD = password.get();
-
-    Preference<String> token = settings.getString("token");
-    TOKEN = token.get();
-
-    Preference<Integer> position = settings.getInteger("position");
-    POSITION = position.get();
-
-    Timber.tag(TAG).v("LOGIN: "+ LOGIN );
-    Timber.tag(TAG).v("PASSWORD: "+ PASSWORD );
-    Timber.tag(TAG).v("TOKEN: "+ TOKEN );
+    LOGIN    = settings.getString("login");
+    UID      = settings.getString("info.uid");
+    PASSWORD = settings.getString("password");
+    TOKEN    = settings.getString("token");
+    POSITION = settings.getInteger("position");
   }
 
   @Override
