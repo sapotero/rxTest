@@ -1,9 +1,12 @@
 package sapotero.rxtest.views.adapters;
 
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -123,6 +126,33 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
       viewHolder.swipeLayout.close(true);
     });
 
+    viewHolder.cv.setOnLongClickListener(view -> {
+
+//      Intent dismissIntent = new Intent(mContext, MainActivity.class);
+//      PendingIntent dismiss = PendingIntent.getService(mContext, 0, dismissIntent, 0);
+//
+//      Intent snoozeIntent = new Intent(mContext, MainActivity.class);
+//      PendingIntent add = PendingIntent.getService(mContext, 0, snoozeIntent, 0);
+
+      Notification builder =
+        new NotificationCompat.Builder(mContext)
+          .setSmallIcon( R.drawable.gerb )
+          .setContentTitle("Уведомление")
+          .setContentText("Добавлена резолюция к документу " + item.getRegistrationNumber())
+          .setDefaults(Notification.DEFAULT_ALL)
+          .setCategory(Notification.CATEGORY_MESSAGE)
+          .setPriority(NotificationCompat.PRIORITY_HIGH)
+          .addAction( 1 , "Утвердить", null)
+          .addAction( 0 ,  "Отклонить", null)
+          .build();
+
+      NotificationManager notificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+      notificationManager.notify(0, builder);
+
+      return true;
+    });
+
+
     viewHolder.to_contol.setOnClickListener(view -> {
       jobManager.addJobInBackground( new UpdateDocumentJob( item.getUid(), "favorites", true ) );
 
@@ -166,9 +196,13 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
 
   public void addItem(Document document) {
     documents.add(document);
-    notifyItemInserted(documents.size());
-//    notifyDataSetChanged();
+    notifyDataSetChanged();
+//    notifyItemInserted(documents.size());
+  }
 
+  public void clear(){
+    documents.clear();
+    notifyDataSetChanged();
   }
 
   public Integer getPositionByUid(String uid) {
@@ -196,8 +230,8 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
   public class SimpleViewHolder extends RecyclerView.ViewHolder {
     private ImageButton to_action;
     private TextView badge;
-    public TextView control_label;
-    public TextView favorite_label;
+    private TextView control_label;
+    private TextView favorite_label;
     private SwipeLayout swipeLayout;
     private TextView to_favorites;
     private TextView to_contol;

@@ -30,7 +30,6 @@ import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.google.gson.Gson;
-import com.squareup.sqlbrite.BriteDatabase;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -80,7 +79,7 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
   @BindView(R.id.tab_main) ViewPager viewPager;
   @BindView(R.id.tabs) TabLayout tabLayout;
 
-  @Inject BriteDatabase db;
+//  @Inject BriteDatabase db;
   @Inject JobManager jobManager;
   @Inject CompositeSubscription subscriptions;
   @Inject OkHttpClient okHttpClient;

@@ -46,8 +46,6 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
-import jp.wasabeef.recyclerview.adapters.ScaleInAnimationAdapter;
-import jp.wasabeef.recyclerview.animators.SlideInLeftAnimator;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import rx.Observable;
@@ -172,6 +170,11 @@ public class MainActivity extends AppCompatActivity {
     rv.setLayoutManager(gridLayoutManager);
 
     loadMe();
+
+
+    RAdapter = new DocumentsAdapter(this, new ArrayList<>());
+    rv.setAdapter(RAdapter);
+
 
 
     toolbar.setTitle("Все документы");
@@ -385,11 +388,11 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-    List<DocumentTypeItem> document_types = new ArrayList<DocumentTypeItem>();
+    List<DocumentTypeItem> document_types = new ArrayList<>();
     String[] document_types_name  = getResources().getStringArray(R.array.JOURNAL_TYPES);
     String[] document_types_value = getResources().getStringArray(R.array.JOURNAL_TYPES_VALUE);
 
-    for (int i = 0; i < filter_types.length; i++) {
+    for (int i = 0; i < document_types_name.length; i++) {
       document_types.add(new DocumentTypeItem( document_types_name[i] , document_types_value[i]));
     }
 
@@ -440,18 +443,14 @@ public class MainActivity extends AppCompatActivity {
 //      .observeOn(AndroidSchedulers.mainThread());
 
     int spinner_pos = DOCUMENT_TYPE_SELECTOR.getSelectedItemPosition();
+
     String[] document_type = getResources().getStringArray(R.array.JOURNAL_TYPES_VALUE);
     String type = String.valueOf(document_type[spinner_pos]);
 
     Timber.d( "DOCUMENT_TYPE_SELECTOR " + spinner_pos);
     Timber.d( "DOCUMENT_TYPE_SELECTOR " + type);
 
-
-    RAdapter = new DocumentsAdapter(this, new ArrayList<>());
-    ScaleInAnimationAdapter alphaAdapter = new ScaleInAnimationAdapter(RAdapter);
-    alphaAdapter.setDuration(10000);
-    rv.setAdapter(alphaAdapter);
-    rv.setItemAnimator(new SlideInLeftAnimator());
+    RAdapter.clear();
 
     dataStore
       .select(RDocumentEntity.class)
@@ -537,16 +536,18 @@ public class MainActivity extends AppCompatActivity {
     Retrofit retrofit = new RetrofitManager( this, Constant.HOST + "/v3/", okHttpClient).process();
     DocumentsService documentsService = retrofit.create( DocumentsService.class );
 
-    int spinner_pos = DOCUMENT_TYPE_SELECTOR.getSelectedItemPosition();
-
+    int spinner_pos = JOURNAL_TYPE_SELECTOR.getSelectedItemPosition();
     String[] document_type = getResources().getStringArray(R.array.DOCUMENT_TYPES_VALUE);
 
-    Timber.tag(TAG).d("_ERROR "+ spinner_pos );
 
-    spinner_pos = 0;
     String type = String.valueOf(document_type[spinner_pos]);
+    Timber.tag(TAG).e("loadDocuments "+ spinner_pos );
+    Timber.tag(TAG).e("loadDocuments "+ type );
 
-    Observable<Documents> documents = documentsService.getDocuments(LOGIN.get(), TOKEN.get(), type, 100, 0);
+    Observable<Documents> documents = documentsService.getDocuments(LOGIN.get(), TOKEN.get(), type, 200, 0);
+
+    RAdapter.clear();
+
 
     loader = documents.subscribeOn(Schedulers.io())
       .observeOn(AndroidSchedulers.mainThread())
@@ -559,11 +560,12 @@ public class MainActivity extends AppCompatActivity {
 
           for (Document d: docs ) {
             insertRDoc(d);
+            RAdapter.addItem(d);
           }
 
 
-          DocumentsAdapter documentsAdapter = new DocumentsAdapter(this, docs);
-          rv.setAdapter(documentsAdapter);
+//          DocumentsAdapter documentsAdapter = new DocumentsAdapter(this, docs);
+//          rv.setAdapter(documentsAdapter);
 
           rvv = rv;
 
