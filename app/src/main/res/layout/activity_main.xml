@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/activity_main_wrapper"
     android:clipToPadding="false"
     tools:context=".views.activities.MainActivity"
@@ -14,7 +15,10 @@
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="80dp"
+
+
+
         android:paddingTop="@dimen/half_date_offset"
         android:transitionName="actionBar"
         android:minHeight="?attr/actionBarSize"
@@ -66,17 +70,57 @@
                     <Spinner
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:id="@+id/JOURNAL_TYPE"
+                        android:id="@+id/DOCUMENT_TYPE"
                         android:layout_gravity="center_horizontal"
-                        android:layout_weight="1"/>
+                        android:layout_weight="1"
+                        android:background="@drawable/spinner_document_type"
+                        />
+                    <!--<Spinner-->
+                        <!--android:layout_width="match_parent"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:id="@+id/DOCUMENT_TYPE"-->
+                        <!--android:layout_gravity="center_horizontal"-->
+                    <!--android:layout_weight="1"-->
+                    <!--android:background="@drawable/spinner_document_type"-->
+                    <!--/>-->
 
-                    <sapotero.rxtest.views.views.MultiSpinner
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:padding="@dimen/half_date_offset"
-                        android:id="@+id/ORGANIZATION"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_weight="1"/>
+
+
+                    <!--<RelativeLayout-->
+                        <!--android:layout_width="match_parent"-->
+                        <!--android:layout_height="match_parent"-->
+                        <!--android:layout_weight="1">-->
+
+                        <!--<ToggleButton-->
+                            <!--android:text="start"-->
+                            <!--android:layout_width="wrap_content"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:id="@+id/button3"-->
+                            <!--android:layout_margin="0dp"-->
+                            <!--android:padding="0dp"-->
+                            <!--android:layout_alignParentTop="true"-->
+                            <!--android:layout_weight="1"-->
+                            <!--style="@style/Widget.AppCompat.Button.Colored"-->
+                            <!--android:background="@drawable/button_left"-->
+                            <!--android:textColor="@drawable/button_text_color_change"-->
+                            <!--android:textOn="TEST"-->
+                            <!--android:textOff="TEST"-->
+                            <!--/>-->
+
+                        <!--<ToggleButton-->
+                            <!--android:text="middle"-->
+                            <!--android:layout_width="wrap_content"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:id="@+id/button4"-->
+                            <!--android:layout_margin="0dp"-->
+                            <!--android:padding="0dp"-->
+                            <!--android:layout_alignParentTop="true"-->
+                            <!--android:layout_toEndOf="@+id/button3"-->
+                            <!--android:background="@drawable/button_center"-->
+                            <!--style="@style/Widget.AppCompat.Button.Colored"/>-->
+
+
+                    <!--</RelativeLayout>-->
 
                 </LinearLayout>
 
@@ -86,19 +130,18 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1">
 
-                    <TextView
+                    <sapotero.rxtest.views.views.MultiOrganizationSpinner
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceMedium"
-                        android:text="Статус"
-                        android:id="@+id/textView10"
-                        android:layout_marginBottom="10dp"
+                        android:padding="@dimen/half_date_offset"
+                        android:id="@+id/ORGANIZATION"
+                        android:layout_gravity="center_horizontal"
                         android:layout_weight="1"/>
 
                     <Spinner
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:id="@+id/DOCUMENT_TYPE"
+                        android:id="@+id/JOURNAL_TYPE"
                         android:layout_gravity="center_horizontal"
                         android:layout_weight="1"/>
                 </LinearLayout>

@@ -11,18 +11,19 @@
         </shape>
     </item>
     <item
-        android:left="-40dp">
+        android:left="-44dp">
         <bitmap
             android:gravity="left"
             android:src="@drawable/gerb_white_cut"
             android:alpha="0.1"
-            android:height="80dp"
-            android:width="80dp"/>
+            android:height="72dp"
+            android:width="72dp"/>
     </item>
     <item
-        android:drawable="@drawable/gerb"
-        android:height="90dp"
+        android:drawable="@drawable/gerb_bg"
+        android:height="60dp"
         android:width="90dp"
-        android:left="72dp"
+        android:top="10dp"
+        android:left="70dp"
         />
 </layer-list>

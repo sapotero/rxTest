@@ -36,6 +36,7 @@ import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.views.activities.InfoActivity;
+import timber.log.Timber;
 
 public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.SimpleViewHolder> implements Action1<List<Document>> {
 
@@ -72,12 +73,6 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
     viewHolder.date.setText( item.getExternalDocumentNumber() + " от " + item.getRegistrationDate());
 
     viewHolder.date.setText( item.getExternalDocumentNumber() + " от " + item.getRegistrationDate());
-
-    if ( item.getUrgency() != null ){
-      viewHolder.badge.setText( item.getUrgency() );
-    } else {
-      viewHolder.badge.setVisibility(View.INVISIBLE);
-    }
 
     viewHolder.swipeLayout.setShowMode(SwipeLayout.ShowMode.PullOut);
 
@@ -131,12 +126,6 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
 
     viewHolder.cv.setOnLongClickListener(view -> {
 
-//      Intent dismissIntent = new Intent(mContext, MainActivity.class);
-//      PendingIntent dismiss = PendingIntent.getService(mContext, 0, dismissIntent, 0);
-//
-//      Intent snoozeIntent = new Intent(mContext, MainActivity.class);
-//      PendingIntent add = PendingIntent.getService(mContext, 0, snoozeIntent, 0);
-
       Notification builder =
         new NotificationCompat.Builder(mContext)
           .setSmallIcon( R.drawable.gerb )
@@ -170,6 +159,14 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
       Toast.makeText(view.getContext(), "Контроль " + viewHolder.title.getText().toString(), Toast.LENGTH_SHORT).show();
       viewHolder.swipeLayout.close(true);
     });
+
+    if ( item.getUrgency() != null ){
+      viewHolder.badge.setVisibility(View.VISIBLE);
+      viewHolder.badge.setText( item.getUrgency() );
+    } else {
+      viewHolder.badge.setVisibility(View.GONE);
+    }
+    Timber.tag("view " + item.getRegistrationNumber() + " " + item.getTitle());
 
 
     // mItemManger is member in RecyclerSwipeAdapter Class

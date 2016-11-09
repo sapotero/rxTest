@@ -79,16 +79,17 @@ import sapotero.rxtest.views.adapters.utils.DocumentTypeAdapter;
 import sapotero.rxtest.views.adapters.utils.StatusAdapter;
 import sapotero.rxtest.views.views.CircleLeftArrow;
 import sapotero.rxtest.views.views.CircleRightArrow;
-import sapotero.rxtest.views.views.MultiSpinner;
+import sapotero.rxtest.views.views.MultiOrganizationSpinner;
 import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
 
   @BindView(R.id.documentsRecycleView) RecyclerView rv;
   @BindView(R.id.progressBar) View progressBar;
-  @BindView(R.id.JOURNAL_TYPE) Spinner DOCUMENT_TYPE_SELECTOR;
-  @BindView(R.id.DOCUMENT_TYPE)  Spinner JOURNAL_TYPE_SELECTOR;
-  @BindView(R.id.ORGANIZATION) MultiSpinner ORGANIZATION_SELECTOR;
+  @BindView(R.id.DOCUMENT_TYPE) Spinner DOCUMENT_TYPE_SELECTOR;
+  @BindView(R.id.JOURNAL_TYPE)  Spinner JOURNAL_TYPE_SELECTOR;
+  @BindView(R.id.ORGANIZATION)
+  MultiOrganizationSpinner ORGANIZATION_SELECTOR;
 
   @BindView(R.id.activity_main_right_button) CircleRightArrow rightArrow;
   @BindView(R.id.activity_main_left_button)  CircleLeftArrow leftArrow;
@@ -148,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
 
     loadSettings();
 
-    progressBar.setVisibility(ProgressBar.INVISIBLE);
+    progressBar.setVisibility(ProgressBar.GONE);
     setAdapters();
 
     GridLayoutManager gridLayoutManager = new GridLayoutManager( this, 2, GridLayoutManager.VERTICAL, false );
@@ -407,7 +408,7 @@ public class MainActivity extends AppCompatActivity {
     );
   }
 
-  private MultiSpinner.MultiSpinnerListener onSelectedListener = selected -> {
+  private MultiOrganizationSpinner.MultiSpinnerListener onSelectedListener = selected -> {
     Timber.d( "onSelectedListener " + Arrays.toString(selected));
 
     int i = -1;
@@ -421,19 +422,14 @@ public class MainActivity extends AppCompatActivity {
 
     count_test();
 
-    // вкорячиваем поиск по критериям
-//    dataStore
-//      .select(RDocumentEntity.class)
-//      .where(RDocumentEntity.UID.like("Bob%"))
-//      .get()
-//      .toObservable()
-//      .subscribeOn(Schedulers.io())
-//      .observeOn(AndroidSchedulers.mainThread());
-
     int spinner_pos = DOCUMENT_TYPE_SELECTOR.getSelectedItemPosition();
 
     String[] document_type = getResources().getStringArray(R.array.JOURNAL_TYPES_VALUE);
     String type = String.valueOf(document_type[spinner_pos]);
+
+    String[] document_title = getResources().getStringArray(R.array.JOURNAL_TYPES);
+    String title = String.valueOf(document_title[spinner_pos]);
+    toolbar.setTitle(title);
 
     Timber.d( "DOCUMENT_TYPE_SELECTOR " + spinner_pos);
     Timber.d( "DOCUMENT_TYPE_SELECTOR " + type);
@@ -541,7 +537,7 @@ public class MainActivity extends AppCompatActivity {
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(
         data -> {
-          progressBar.setVisibility(ProgressBar.INVISIBLE);
+          progressBar.setVisibility(ProgressBar.GONE);
 
           List<Document> docs = data.getDocuments();
 
@@ -565,7 +561,7 @@ public class MainActivity extends AppCompatActivity {
         },
         error -> {
           Timber.d("_ERROR", error.getMessage());
-          progressBar.setVisibility(ProgressBar.INVISIBLE);
+          progressBar.setVisibility(ProgressBar.GONE);
 
           Toast.makeText(this, error.getMessage(), Toast.LENGTH_SHORT).show();
         });

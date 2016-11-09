@@ -18,26 +18,26 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
 import sapotero.rxtest.views.adapters.models.OrganizationItem;
 
-public class MultiSpinner extends TextView implements DialogInterface.OnMultiChoiceClickListener {
+public class MultiOrganizationSpinner extends TextView implements DialogInterface.OnMultiChoiceClickListener {
 
 //  private SpinnerAdapter mAdapter;
   private OrganizationAdapter mAdapter;
   private boolean[] mOldSelection;
   private boolean[] mSelected;
   private String mDefaultText;
-  private String mAllText;
+  private String mAllText = "Организации";
   private boolean mAllSelected;
   private MultiSpinnerListener mListener;
 
-  public MultiSpinner(Context context) {
+  public MultiOrganizationSpinner(Context context) {
     super(context);
   }
 
-  public MultiSpinner(Context context, AttributeSet attr) {
+  public MultiOrganizationSpinner(Context context, AttributeSet attr) {
     this(context, attr, R.attr.spinnerStyle);
   }
 
-  public MultiSpinner(Context context, AttributeSet attr, int defStyle) {
+  public MultiOrganizationSpinner(Context context, AttributeSet attr, int defStyle) {
     super(context, attr, defStyle);
   }
 
@@ -58,7 +58,7 @@ public class MultiSpinner extends TextView implements DialogInterface.OnMultiCho
       }
 
       System.arraycopy(mSelected, 0, mOldSelection, 0, mSelected.length);
-      builder.setMultiChoiceItems(choices, mSelected, MultiSpinner.this);
+      builder.setMultiChoiceItems(choices, mSelected, MultiOrganizationSpinner.this);
 
       builder.setNegativeButton(android.R.string.cancel, (dialog, which) -> {
         System.arraycopy(mOldSelection, 0, mSelected, 0, mSelected.length);
@@ -169,13 +169,11 @@ public class MultiSpinner extends TextView implements DialogInterface.OnMultiCho
       }
     }
 
-
-
     CharSequence spinnerText;
 
     switch( selected ){
       case 0:
-        spinnerText = "Все организации";
+        spinnerText = "Организации";
         break;
       case 1:
 
@@ -192,6 +190,9 @@ public class MultiSpinner extends TextView implements DialogInterface.OnMultiCho
       default:
         spinnerText = String.format("Выбрано организаций: %s", selected);
         break;
+    }
+    if ( selected == mAdapter.getCount() ){
+      spinnerText = "Все организации";
     }
 
 
