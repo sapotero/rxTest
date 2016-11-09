@@ -9,16 +9,21 @@
     tools:context=".views.activities.MainActivity"
     android:gravity="center">
 
+
+
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary"
-        android:elevation="4dp"
-        android:minHeight="?attr/actionBarSize"
         android:paddingTop="@dimen/half_date_offset"
         android:transitionName="actionBar"
-        android:title="test"/>
+        android:minHeight="?attr/actionBarSize"
+        android:background="@drawable/toolbar_background"
+
+        android:elevation="8dp">
+    <!--android:background="@color/colorPrimary"-->
+
+    </android.support.v7.widget.Toolbar>
 
 
     <LinearLayout

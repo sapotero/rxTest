@@ -166,6 +166,8 @@ public class MainActivity extends AppCompatActivity {
     toolbar.setTitleTextColor( getResources().getColor( R.color.md_grey_100 ) );
     toolbar.setSubtitleTextColor( getResources().getColor( R.color.md_grey_400 ) );
 
+    toolbar.setContentInsetStartWithNavigation(250);
+
     toolbar.inflateMenu(R.menu.info);
     toolbar.setOnMenuItemClickListener(item -> {
       switch ( item.getItemId() ){
