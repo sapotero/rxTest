@@ -76,5 +76,6 @@ public class OrganizationAdapter extends BaseAdapter {
 
   public void clear() {
     this.organizations = new ArrayList<>();
+//    notifyDataSetChanged();
   }
 }

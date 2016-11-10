@@ -9,6 +9,9 @@ import com.birbit.android.jobqueue.RetryConstraint;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.Objects;
+
+import io.requery.meta.QueryAttribute;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.bus.UpdateDocumentJobEvent;
 
@@ -35,8 +38,9 @@ public class UpdateDocumentJob extends BaseJob {
 
   @Override
   public void onRun() throws Throwable {
+    QueryAttribute<RDocumentEntity, Boolean> udpateFiled = Objects.equals(field, "favorites") ? RDocumentEntity.FAVORITES : RDocumentEntity.CONTROL;
     int rows = dataStore.update(RDocumentEntity.class)
-      .set(RDocumentEntity.CONTROL, value)
+      .set(udpateFiled, value)
       .where(RDocumentEntity.UID.eq(uid))
       .get().value();
 

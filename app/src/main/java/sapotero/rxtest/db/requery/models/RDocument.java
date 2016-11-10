@@ -52,6 +52,9 @@ public abstract class  RDocument implements Persistable {
   @OneToOne
   RSigner signer;
 
+  @Index("organization_index")
+  String organization;
+
   String infoCard;
 
   @OneToMany(mappedBy = "document", cascade = {CascadeAction.DELETE, CascadeAction.SAVE})

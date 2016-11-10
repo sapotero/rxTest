@@ -23,6 +23,7 @@ public class RetrofitManager {
       .client(okHttpClient)
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
+      .addConverterFactory(new ToStringConverterFactory())
       .baseUrl( this.host )
       .build();
   }

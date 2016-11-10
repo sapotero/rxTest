@@ -80,6 +80,21 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
     viewHolder.swipeLayout.addDrag(SwipeLayout.DragEdge.Right, viewHolder.swipeLayout.findViewById(R.id.from_right_to_left));
 
 
+
+    if ( item.getControl() != null && item.getControl() ){
+      Timber.d( "item.getControl() "   + item.getControl().toString() );
+      viewHolder.control_label.setVisibility(View.VISIBLE);
+    } else {
+      viewHolder.control_label.setVisibility(View.GONE);
+    }
+    if ( item.getFavorites() != null && item.getFavorites() ){
+      Timber.d( "item.getFavorites() " + item.getFavorites().toString() );
+      viewHolder.favorite_label.setVisibility(View.VISIBLE);
+    } else {
+      viewHolder.favorite_label.setVisibility(View.GONE);
+    }
+
+
     viewHolder.swipeLayout.addSwipeListener(new SwipeLayout.SwipeListener() {
       @Override
       public void onClose(SwipeLayout layout) {

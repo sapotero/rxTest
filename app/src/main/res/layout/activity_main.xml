@@ -131,9 +131,24 @@
                 android:id="@+id/document_control_buttons"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                app:mstbPrimaryColor  ="@color/md_blue_600"
+                app:mstbSecondaryColor="@color/md_grey_200"
                 app:values="@array/control_array"
-                app:mstbPrimaryColor  ="@color/md_grey_200"
-                app:mstbSecondaryColor="@color/md_blue_600"/>
+                >
+
+                <Button
+                    android:id="@+id/document_control_button"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="@string/control"/>
+                >
+                <Button
+                    android:id="@+id/document_favorite_button"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="@string/favorites"/>
+                >
+            </org.honorato.multistatetogglebutton.MultiStateToggleButton>
 
         </LinearLayout>
 

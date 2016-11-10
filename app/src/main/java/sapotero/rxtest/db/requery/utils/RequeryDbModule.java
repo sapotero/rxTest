@@ -30,12 +30,13 @@ public final class RequeryDbModule {
 
     EntityModel model = Models.DEFAULT;
     Configuration configuration = new ConfigurationBuilder(source, model)
-      .useDefaultLogging()
-      .setStatementCacheSize(100)
+//      .useDefaultLogging()
+      .setStatementCacheSize(200)
       .setBatchUpdateSize(50)
       .setWriteExecutor(
         Executors.newSingleThreadExecutor()
-      ).build();
+      )
+      .build();
 
     SchemaModifier schemaModifier = new SchemaModifier(configuration);
     schemaModifier.createTables(TableCreationMode.DROP_CREATE);

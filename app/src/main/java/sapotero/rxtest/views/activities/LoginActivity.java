@@ -21,6 +21,7 @@ import butterknife.ButterKnife;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import rx.Observable;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
@@ -39,6 +40,9 @@ public class LoginActivity extends AppCompatActivity {
 
   @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
+
+  private Observable<AuthToken> user;
+  private Subscription subscription = null;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -69,9 +73,13 @@ public class LoginActivity extends AppCompatActivity {
     Retrofit retrofit = new RetrofitManager( this, Constant.HOST, okHttpClient).process();
     AuthTokenService authTokenService = retrofit.create( AuthTokenService.class );
 
-    Observable<AuthToken> user = authTokenService.getAuth( LOGIN.getText().toString(), PASSWORD.getText().toString() );
+    user = authTokenService.getAuth( LOGIN.getText().toString(), PASSWORD.getText().toString() );
 
-    user.subscribeOn( Schedulers.newThread() )
+    if (subscription != null){
+      subscription.unsubscribe();
+    }
+
+    subscription = user.subscribeOn( Schedulers.newThread() )
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         data -> {
@@ -88,7 +96,7 @@ public class LoginActivity extends AppCompatActivity {
         error -> {
           Log.d( "_ERROR", error.getMessage() );
           LOADER.setVisibility(ProgressBar.INVISIBLE);
-          Toast.makeText(this, error.getMessage(), Toast.LENGTH_SHORT).show();
+          Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
         }
       );
   }

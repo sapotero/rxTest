@@ -8,6 +8,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -46,6 +47,10 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.requery.Persistable;
+import io.requery.query.Expression;
+import io.requery.query.LogicalCondition;
+import io.requery.query.Result;
+import io.requery.query.WhereAndOr;
 import io.requery.rx.SingleEntityStore;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
@@ -63,7 +68,6 @@ import sapotero.rxtest.events.bus.AddDocumentToDBTimeoutEvent;
 import sapotero.rxtest.events.bus.GetDocumentInfoEvent;
 import sapotero.rxtest.events.bus.UpdateDocumentJobEvent;
 import sapotero.rxtest.events.rx.InsertRxDocumentsEvent;
-import sapotero.rxtest.jobs.bus.AddDocumentToDBTimeoutJob;
 import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
 import sapotero.rxtest.retrofit.DocumentsService;
 import sapotero.rxtest.retrofit.models.Oshs;
@@ -101,6 +105,11 @@ public class MainActivity extends AppCompatActivity {
   @BindView(R.id.activity_main_left_button)  CircleLeftArrow leftArrow;
 
   @BindView(R.id.documents_empty_list) TextView documents_empty_list;
+
+  @BindView(R.id.document_control_button)  Button document_control_button;
+  @BindView(R.id.document_favorite_button) Button document_favorite_button;
+
+//  {document_control_button, document_favorite_button}
 
   @Inject JobManager jobManager;
   @Inject OkHttpClient okHttpClient;
@@ -140,6 +149,8 @@ public class MainActivity extends AppCompatActivity {
   public  DocumentsAdapter RAdapter;
   private Document __document__;
   private Subscription timeoutSubcribe;
+  private boolean[] old_selectd;
+  private boolean needToFindOrganizations = true;
 
 
   @Override
@@ -179,7 +190,29 @@ public class MainActivity extends AppCompatActivity {
       switch ( item.getItemId() ){
         case R.id.action_test:
           System.gc();
-          jobManager.addJobInBackground( new AddDocumentToDBTimeoutJob());
+
+          organization_adapter.clear();
+          dataStore
+            .select(RSignerEntity.ORGANISATION)
+            .distinct()
+            .get()
+            .toObservable()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe( org -> {
+
+              Integer count = dataStore
+                .count(RSignerEntity.class)
+                .where(RSignerEntity.ORGANISATION.eq(org.get(0).toString()))
+                .get()
+                .value();
+
+              organization_adapter.add( new OrganizationItem( org.get(0).toString(), count ) );
+
+              Timber.tag(TAG).d("ORGANIZATION: " + org.get(0).toString() );
+              Timber.tag(TAG).d("ORGANIZATION COUNT: " + count );
+            });
+//          jobManager.addJobInBackground( new AddDocumentToDBTimeoutJob());
           break;
         default:
             jobManager.addJobInBackground( new UpdateAuthTokenJob());
@@ -187,10 +220,18 @@ public class MainActivity extends AppCompatActivity {
       }
       return false;
     });
-    control_buttons.enableMultipleChoice(true);
+
+    View[] buttons = new View[] {document_control_button, document_favorite_button};
+    control_buttons.setButtons(buttons, new boolean[buttons.length]);
+
     control_buttons.setOnValueChangedListener(position ->{
       Timber.tag(TAG).d("Position: " + position);
+      Timber.tag(TAG).d("Position: " + control_buttons.getStates()[0] );
+      Timber.tag(TAG).d("Position: " + control_buttons.getStates()[1] );
+
+      loadFromDB();
     });
+    control_buttons.enableMultipleChoice(true);
   }
 
   @Override
@@ -398,6 +439,7 @@ public class MainActivity extends AppCompatActivity {
     DOCUMENT_TYPE_SELECTOR.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
       @Override
       public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+        findOrganizations();
         loadFromDB();
       }
 
@@ -407,15 +449,11 @@ public class MainActivity extends AppCompatActivity {
     });
 
 
-    organization_adapter = new OrganizationAdapter(this, new ArrayList<OrganizationItem>());
+    organization_adapter = new OrganizationAdapter(this, new ArrayList<>());
     ORGANIZATION_SELECTOR.setAdapter(organization_adapter, false, selected -> {
-      Timber.d( "onSelectedListener " + Arrays.toString(selected));
-
-      int i = -1;
-      for ( Boolean checked: selected ) {
-        i++;
-        Timber.tag(TAG).i( String.format("%s - %s", organization_adapter.getItem(i), checked ) );
-      }
+//      old_selectd = selected;
+      loadFromDB();
+//      ORGANIZATION_SELECTOR.setSelected(selected);
     });
 
     Observable.from(filter_types).subscribe(
@@ -425,7 +463,7 @@ public class MainActivity extends AppCompatActivity {
 
   private void loadFromDB() {
 
-    count_test();
+//    findOrganizations();
 
     int spinner_pos = DOCUMENT_TYPE_SELECTOR.getSelectedItemPosition();
 
@@ -438,13 +476,61 @@ public class MainActivity extends AppCompatActivity {
 
     Timber.d( "DOCUMENT_TYPE_SELECTOR " + spinner_pos);
     Timber.d( "DOCUMENT_TYPE_SELECTOR " + type);
-
     RAdapter.clear();
 
-    dataStore
+    WhereAndOr<Result<RDocumentEntity>> query = dataStore
       .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.like( type + "%" ))
-      .get()
+      .where(RDocumentEntity.UID.like(type + "%"));
+
+
+
+    // favorites && control
+    LogicalCondition<? extends Expression<Boolean>, ?> favorites_condition = null;
+    LogicalCondition<? extends Expression<Boolean>, ?> control_condition = null;
+
+    boolean favorites_button_value = control_buttons.getStates()[0];
+    boolean control_button_value   = control_buttons.getStates()[1];
+
+    favorites_condition  = favorites_button_value ? RDocumentEntity.CONTROL.eq(true)   : RDocumentEntity.CONTROL.in( Arrays.asList(true, false) );
+    control_condition    = control_button_value   ? RDocumentEntity.FAVORITES.eq(true) : RDocumentEntity.FAVORITES.in( Arrays.asList(true, false) );
+
+
+    if (favorites_button_value){
+      query = query.and(favorites_condition);
+    }
+    if (control_button_value){
+      query = query.and(control_condition);
+    }
+    // favorites && control
+
+
+    // organizations
+
+    LogicalCondition<? extends Expression<Boolean>, ?> organization_condition = null;
+
+    boolean organization_filter = false;
+
+    ArrayList<String> organizations = new ArrayList<String>();
+    if (  Arrays.asList( ORGANIZATION_SELECTOR.getSelected() ).size() > 0){
+
+      for (int i = 0; i < ORGANIZATION_SELECTOR.getSelected().length; i++) {
+        if (ORGANIZATION_SELECTOR.getSelected()[i]){
+          organizations.add(organization_adapter.getItem(i).getName());
+          Timber.tag(TAG).i( String.format("%s - ++", organization_adapter.getItem(i).getName()) );
+          organization_filter = true;
+        }
+      }
+    }
+
+    if (organization_filter){
+      query = query.and(RDocumentEntity.ORGANIZATION.in( organizations ));
+    }
+
+    // organizations
+
+
+
+    query.get()
       .toObservable()
       .subscribeOn(Schedulers.io())
       .observeOn(AndroidSchedulers.mainThread())
@@ -455,6 +541,8 @@ public class MainActivity extends AppCompatActivity {
         Document document = new Document();
         document.setUid( doc.getUid() );
         document.setMd5( doc.getMd5() );
+        document.setControl( doc.isControl() );
+        document.setFavorites( doc.isFavorites() );
         document.setSortKey( doc.getSortKey() );
         document.setTitle( doc.getTitle() );
         document.setRegistrationNumber( doc.getRegistrationNumber() );
@@ -465,6 +553,7 @@ public class MainActivity extends AppCompatActivity {
         document.setExternalDocumentNumber( doc.getExternalDocumentNumber() );
         document.setReceiptDate( doc.getReceiptDate() );
 
+
         RSignerEntity r_signer = (RSignerEntity) doc.getSigner();
         Signer signer = new Signer();
         signer.setId( r_signer.getUid() );
@@ -474,6 +563,27 @@ public class MainActivity extends AppCompatActivity {
         document.setSigner(signer);
 
         RAdapter.addItem( document );
+      });
+  }
+
+  private void findOrganizations() {
+    organization_adapter.clear();
+    dataStore
+      .select(RSignerEntity.ORGANISATION)
+      .distinct()
+      .get()
+      .toObservable()
+      .subscribeOn(Schedulers.io())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe( org -> {
+
+        Integer count = dataStore
+          .count(RSignerEntity.class)
+          .where(RSignerEntity.ORGANISATION.eq(org.get(0).toString()))
+          .get()
+          .value();
+
+        organization_adapter.add( new OrganizationItem( org.get(0).toString(), count ) );
       });
   }
 
@@ -521,6 +631,7 @@ public class MainActivity extends AppCompatActivity {
   private void loadDocuments(){
 
     progressBar.setVisibility(ProgressBar.VISIBLE);
+    documents_empty_list.setText(null);
 
     Retrofit retrofit = new RetrofitManager( this, Constant.HOST + "/v3/", okHttpClient).process();
     DocumentsService documentsService = retrofit.create( DocumentsService.class );
@@ -553,11 +664,11 @@ public class MainActivity extends AppCompatActivity {
           }
 
           if (docs.size() == 0) {
-            rv.setVisibility(View.GONE);
+//            rv.setVisibility(View.GONE);
             documents_empty_list.setVisibility(View.VISIBLE);
             documents_empty_list.setText( getString(R.string.document_empty_list) );
           } else {
-            rv.setVisibility(View.VISIBLE);
+//            rv.setVisibility(View.VISIBLE);
             documents_empty_list.setVisibility(View.GONE);
 
             __document__ = docs.get(0);
@@ -568,6 +679,9 @@ public class MainActivity extends AppCompatActivity {
         error -> {
           Timber.d("_ERROR", error.getMessage());
           progressBar.setVisibility(ProgressBar.GONE);
+
+          documents_empty_list.setVisibility(View.VISIBLE);
+          documents_empty_list.setText( getString(R.string.document_empty_list_error) );
 
           Toast.makeText(this, error.getMessage(), Toast.LENGTH_SHORT).show();
         });
@@ -591,6 +705,12 @@ public class MainActivity extends AppCompatActivity {
     rd.setExternalDocumentNumber( d.getExternalDocumentNumber() );
     rd.setReceiptDate( d.getReceiptDate() );
     rd.setViewed( d.getViewed() );
+
+    if ( d.getSigner().getOrganisation() != null && !Objects.equals(d.getSigner().getOrganisation(), "")){
+      rd.setOrganization( d.getSigner().getOrganisation() );
+    } else {
+      rd.setOrganization("Без организации" );
+    }
 
     RSignerEntity signer = new RSignerEntity();
     signer.setUid( d.getSigner().getId() );
@@ -710,30 +830,33 @@ public class MainActivity extends AppCompatActivity {
     }
   }
 
-  public void count_test() {
-    organization_adapter.clear();
-
-    Subscription organizations = dataStore
-      .select(RSignerEntity.ORGANISATION)
-      .distinct()
-      .get()
-      .toObservable()
-      .subscribeOn(Schedulers.io())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe( org -> {
-
-        Integer count = dataStore
-          .count(RSignerEntity.class)
-          .where(RSignerEntity.ORGANISATION.eq(org.get(0).toString()))
-          .get()
-          .value();
-
-        organization_adapter.add( new OrganizationItem( org.get(0).toString(), count ) );
-
-        Timber.tag(TAG).d("ORGANIZATION: " + org.get(0).toString() );
-        Timber.tag(TAG).d("ORGANIZATION COUNT: " + count );
-      });
-  }
+//  public void findOrganizations() {
+//    if (needToFindOrganizations){
+//      organization_adapter.clear();
+//
+//      dataStore
+//        .select(RSignerEntity.ORGANISATION)
+//        .distinct()
+//        .get()
+//        .toObservable()
+//        .subscribeOn(Schedulers.io())
+//        .observeOn(AndroidSchedulers.mainThread())
+//        .subscribe( org -> {
+//
+//          Integer count = dataStore
+//            .count(RSignerEntity.class)
+//            .where(RSignerEntity.ORGANISATION.eq(org.get(0).toString()))
+//            .get()
+//            .value();
+//
+//          organization_adapter.add( new OrganizationItem( org.get(0).toString(), count ) );
+//
+//          Timber.tag(TAG).d("ORGANIZATION: " + org.get(0).toString() );
+//          Timber.tag(TAG).d("ORGANIZATION COUNT: " + count );
+//        });
+//    }
+//    needToFindOrganizations = false;
+//  }
 
   @OnClick(R.id.activity_main_left_button)
   public void setLeftArrowArrow(){

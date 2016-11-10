@@ -46,6 +46,27 @@ public class Document implements Serializable {
     @SerializedName("viewed")
     @Expose
     private Boolean viewed;
+    @SerializedName("control")
+    @Expose
+    private Boolean control;
+    @SerializedName("favorites")
+    @Expose
+    private Boolean favorites;
+
+    public Boolean getControl() {
+        return control;
+    }
+
+    public void setControl(Boolean control) {
+        this.control = control;
+    }
+
+    public Boolean getFavorites() {
+        return favorites;
+    }
+    public void setFavorites(Boolean favorites) {
+        this.favorites = favorites;
+    }
 
     /**
      * 

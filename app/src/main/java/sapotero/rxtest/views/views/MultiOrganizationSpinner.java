@@ -80,6 +80,7 @@ public class MultiOrganizationSpinner extends TextView implements DialogInterfac
 
         System.arraycopy(mOldSelection, 0, mSelected, 0, mSelected.length);
         refreshSpinner();
+        dialog.dismiss();
       });
 
       builder.show();

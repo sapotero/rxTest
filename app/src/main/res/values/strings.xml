@@ -142,5 +142,6 @@
     </string-array>
 
     <string name="document_empty_list"> Нет документов для отображения </string>
+    <string name="document_empty_list_error"> Произошла ошибка во время загрузки документов</string>
 
 </resources>
