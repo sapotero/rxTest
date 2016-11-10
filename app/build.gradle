@@ -110,6 +110,8 @@ dependencies {
     compile 'com.mikepenz:iconics-core:2.8.0@aar'
     compile 'com.mikepenz:material-design-iconic-typeface:2.2.0.2@aar'
 
+    compile 'org.honorato.multistatetogglebutton:multistatetogglebutton:0.2.2'
+
     compile('com.mikepenz:materialdrawer:5.6.0@aar') {
         transitive = true
     }

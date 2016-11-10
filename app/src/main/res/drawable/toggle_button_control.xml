@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true" >
+        <bitmap
+            android:alpha="0.6"
+            android:gravity="left|center_vertical"
+            android:src="@drawable/drop_down" />
+    </item>
+    <item>
+        <bitmap
+            android:alpha="0.3"
+            android:gravity="left|center_vertical"
+            android:src="@drawable/drop_down"
+            />
+    </item>
+</selector>

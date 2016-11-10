@@ -29,6 +29,7 @@ import com.mikepenz.materialdrawer.model.SectionDrawerItem;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+import org.honorato.multistatetogglebutton.MultiStateToggleButton;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -88,8 +89,10 @@ public class MainActivity extends AppCompatActivity {
   @BindView(R.id.progressBar) View progressBar;
   @BindView(R.id.DOCUMENT_TYPE) Spinner DOCUMENT_TYPE_SELECTOR;
   @BindView(R.id.JOURNAL_TYPE)  Spinner JOURNAL_TYPE_SELECTOR;
-  @BindView(R.id.ORGANIZATION)
-  MultiOrganizationSpinner ORGANIZATION_SELECTOR;
+  @BindView(R.id.ORGANIZATION) MultiOrganizationSpinner ORGANIZATION_SELECTOR;
+
+  @BindView(R.id.document_control_buttons) MultiStateToggleButton control_buttons;
+
 
   @BindView(R.id.activity_main_right_button) CircleRightArrow rightArrow;
   @BindView(R.id.activity_main_left_button)  CircleLeftArrow leftArrow;
@@ -181,6 +184,10 @@ public class MainActivity extends AppCompatActivity {
           break;
       }
       return false;
+    });
+    control_buttons.enableMultipleChoice(true);
+    control_buttons.setOnValueChangedListener(position ->{
+      Timber.tag(TAG).d("Position: " + position);
     });
   }
 

@@ -136,5 +136,10 @@
     <string name="fragment_decision_familiarize">Прошу ознакомить</string>
     <string name="fragment_decision_report">Прошу доложить</string>
 
+    <string-array name="control_array">
+        <item>★</item>
+        <item>K</item>
+    </string-array>
+
 
 </resources>

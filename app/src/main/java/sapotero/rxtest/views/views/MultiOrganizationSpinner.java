@@ -197,6 +197,11 @@ public class MultiOrganizationSpinner extends TextView implements DialogInterfac
 
 
 //    setText(String.format(spinnerText, selected));
+
+    if (spinnerText.length() > 40){
+      spinnerText = spinnerText.toString().substring(0,37) + "...";
+    }
+
     setText( spinnerText );
   }
 

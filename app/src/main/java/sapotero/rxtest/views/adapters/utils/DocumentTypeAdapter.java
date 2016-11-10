@@ -54,6 +54,8 @@ public class DocumentTypeAdapter extends BaseAdapter {
 
     DocumentTypeItem item = getOrganizationItem(position);
 
+
+
     ( (TextView) view.findViewById(R.id.document_type_name)  ).setText( item.getName()  );
     ( (TextView) view.findViewById(R.id.document_type_count) ).setText( item.getCount() );
 

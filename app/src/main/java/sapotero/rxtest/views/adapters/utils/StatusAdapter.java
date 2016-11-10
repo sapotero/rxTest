@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Filter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -25,6 +26,9 @@ public class StatusAdapter extends BaseAdapter {
   private TextView name;
   private View mainView;
   private int mPos;
+
+  private Filter statusFilter = new CustomFilter();
+  private ArrayList<FilterItem> suggestions = new ArrayList<>();
 
   public StatusAdapter(Context context, List<FilterItem> statuses) {
 
@@ -107,6 +111,40 @@ public class StatusAdapter extends BaseAdapter {
       return 0;
     } else {
       return position;
+    }
+  }
+
+//  @Override
+//  public Filter getFilter() {
+//    return statusFilter;
+//  }
+
+  private class CustomFilter extends Filter {
+    @Override
+    protected FilterResults performFiltering(CharSequence constraint) {
+      suggestions.clear();
+
+      if (statuses != null && constraint != null) { // Check if the Original List and Constraint aren't null.
+        for (int i = 0; i < statuses.size(); i++) {
+          if (statuses.get(i).getName().toLowerCase().contains(constraint)) { // Compare item in original list if it contains constraints.
+            suggestions.add(statuses.get(i));
+          }
+        }
+      }
+      FilterResults results = new FilterResults(); // Create new Filter Results and return this to publishResults;
+      results.values = suggestions;
+      results.count = suggestions.size();
+
+      return results;
+    }
+
+    @Override
+    protected void publishResults(CharSequence constraint, FilterResults results) {
+      if (results.count > 0) {
+        notifyDataSetChanged();
+      } else {
+        notifyDataSetInvalidated();
+      }
     }
   }
 }
