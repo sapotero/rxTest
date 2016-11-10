@@ -141,5 +141,6 @@
         <item>K</item>
     </string-array>
 
+    <string name="document_empty_list"> Нет документов для отображения </string>
 
 </resources>

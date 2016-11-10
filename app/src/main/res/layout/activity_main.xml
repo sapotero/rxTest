@@ -31,82 +31,131 @@
     </android.support.v7.widget.Toolbar>
 
 
-    <LinearLayout
-        android:orientation="horizontal"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center_vertical"
-        android:paddingLeft="@dimen/date_offset"
-    android:paddingRight="@dimen/date_offset"
-    android:layout_below="@+id/toolbar"
-    >
-    <!--android:paddingTop="@dimen/half_date_offset"-->
+        android:layout_below="@+id/toolbar">
 
-        <sapotero.rxtest.views.views.CircleLeftArrow
-            android:clickable="true"
-            android:layout_margin="@dimen/half_date_offset"
+        <ProgressBar
+            style="@android:style/Widget.DeviceDefault.Light.ProgressBar"
             android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:id="@+id/activity_main_left_button"/>
+            android:layout_height="wrap_content"
+            android:id="@+id/progressBar"
+            android:indeterminate="true"
+            android:layout_centerInParent="true"
+            android:layout_centerHorizontal="true"
+            />
 
-        <LinearLayout
-            android:orientation="vertical"
+        <ImageView
+            android:id="@+id/myImageView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:layout_weight="4"
-            android:layout_below="@+id/toolbar">
+            android:src="@drawable/gerb_big"
+            android:scaleX="0.8"
+            android:scaleY="0.8"
+            android:alpha="0.05"
 
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
+
+            />
+        <TextView android:id="@+id/documents_empty_list"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:textSize="24dp"
+
+                  android:layout_alignLeft="@+id/myImageView"
+                  android:layout_alignTop="@+id/myImageView"
+                  android:layout_alignRight="@+id/myImageView"
+                  android:layout_alignBottom="@+id/myImageView"
+                  android:layout_margin="1dp"
+                  android:gravity="center"
+
+                  android:textColor="@color/md_grey_600"
+                  android:text="Тут будет заглушка под пустой результат в выборе документов"
+            />
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/toolbar">
+        <!--android:gravity="center_vertical"-->
+        <!--android:paddingTop="@dimen/half_date_offset"-->
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/date_offset"
+            android:paddingLeft="@dimen/date_offset"
+            android:paddingRight="@dimen/date_offset"
+            >
+            <!--android:background="@color/md_grey_200"-->
+            <!--android:elevation="4dp"-->
+
+            <Spinner
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginTop="16dp"
-                >
+                android:id="@+id/DOCUMENT_TYPE"
+                android:minWidth="300dp"
+            android:background="@drawable/spinner_document_type"
+            />
+            <!--android:layout_gravity="center_horizontal"-->
 
-                <Spinner
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/DOCUMENT_TYPE"
-                    android:layout_gravity="center_horizontal"
-                    android:minWidth="300dp"
-                    android:background="@drawable/spinner_document_type"
-                    />
+            <Spinner
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/JOURNAL_TYPE"
+                android:layout_weight="1"
+            android:background="@drawable/spinner_journal_background"
+            android:padding="3dp"
+            android:layout_marginRight="4dp"
+            />
+            <!--android:layout_gravity="center_horizontal"-->
 
-                <Spinner
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/JOURNAL_TYPE"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_weight="1"
-                    android:background="@drawable/spinner_journal_background"
-                    android:padding="3dp"
-                    android:layout_marginRight="4dp"
-                    />
-
-                <sapotero.rxtest.views.views.MultiOrganizationSpinner
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/ORGANIZATION"
-                    android:minWidth="300dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/spinner_journal_background"
-                    android:padding="15dp"
-                    android:layout_marginRight="4dp"
-                    />
-                <!--android:layout_margin="2dp"-->
+            <sapotero.rxtest.views.views.MultiOrganizationSpinner
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/ORGANIZATION"
+                android:minWidth="300dp"
+                android:layout_weight="1"
+                android:background="@drawable/spinner_journal_background"
+                android:padding="15dp"
+                android:layout_marginRight="4dp"
+                />
+            <!--android:layout_margin="2dp"-->
 
 
-                <org.honorato.multistatetogglebutton.MultiStateToggleButton
-                    android:id="@+id/document_control_buttons"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:values="@array/control_array"
-                    app:mstbPrimaryColor  ="@color/md_grey_200"
-                    app:mstbSecondaryColor="@color/md_blue_600"/>
+            <org.honorato.multistatetogglebutton.MultiStateToggleButton
+                android:id="@+id/document_control_buttons"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:values="@array/control_array"
+                app:mstbPrimaryColor  ="@color/md_grey_200"
+                app:mstbSecondaryColor="@color/md_blue_600"/>
 
-            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="10"
+            android:layout_below="@+id/toolbar"
+            android:weightSum="10">
+
+            <sapotero.rxtest.views.views.CircleLeftArrow
+                android:clickable="true"
+                android:layout_width="wrap_content"
+                android:layout_height="70dp"
+                android:id="@+id/activity_main_left_button"
+                android:layout_weight="1"
+                android:padding="4dp"
+                android:layout_marginTop="224dp"
+                android:layout_marginStart="@dimen/half_date_offset"
+                android:layout_marginEnd="@dimen/half_date_offset"
+                />
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/documentsRecycleView"
@@ -114,60 +163,22 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginTop="8dp"
+                android:layout_weight="8"
                 />
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                >
-
-                <ImageView
-                    android:id="@+id/myImageView"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:src="@drawable/gerb_big"
-                    android:scaleX="0.8"
-                    android:scaleY="0.8"
-                    android:alpha="0.1"
-
-
-                    />
-                <TextView android:id="@+id/documents_empty_list"
-                          android:layout_width="match_parent"
-                          android:layout_height="match_parent"
-                          android:textSize="24dp"
-
-                          android:layout_alignLeft="@+id/myImageView"
-                          android:layout_alignTop="@+id/myImageView"
-                          android:layout_alignRight="@+id/myImageView"
-                          android:layout_alignBottom="@+id/myImageView"
-                          android:layout_margin="1dp"
-                          android:gravity="center"
-
-                          android:textColor="@color/md_grey_600"
-                          android:text="Тут будет заглушка под пустой результат в выборе документов"
-                    />
-            </RelativeLayout>
+            <sapotero.rxtest.views.views.CircleRightArrow
+                android:clickable="true"
+                android:layout_width="wrap_content"
+                android:layout_height="70dp"
+                android:id="@+id/activity_main_right_button"
+                android:layout_weight="1"
+                android:layout_marginTop="224dp"
+                android:layout_marginStart="@dimen/half_date_offset"
+                android:layout_marginEnd="@dimen/half_date_offset"
+                />
 
         </LinearLayout>
-
-        <sapotero.rxtest.views.views.CircleRightArrow
-            android:clickable="true"
-            android:layout_margin="@dimen/half_date_offset"
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:id="@+id/activity_main_right_button"/>
     </LinearLayout>
-
-    <ProgressBar
-        style="@android:style/Widget.DeviceDefault.Light.ProgressBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/progressBar"
-        android:indeterminate="true"
-        android:layout_centerInParent="true"
-        android:layout_centerHorizontal="true"
-        />
 
 
 </RelativeLayout>

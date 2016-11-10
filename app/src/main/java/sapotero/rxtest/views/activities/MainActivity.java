@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.birbit.android.jobqueue.JobManager;
@@ -85,20 +86,21 @@ import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
 
+  @BindView(R.id.toolbar) Toolbar toolbar;
+
   @BindView(R.id.documentsRecycleView) RecyclerView rv;
   @BindView(R.id.progressBar) View progressBar;
+
   @BindView(R.id.DOCUMENT_TYPE) Spinner DOCUMENT_TYPE_SELECTOR;
   @BindView(R.id.JOURNAL_TYPE)  Spinner JOURNAL_TYPE_SELECTOR;
   @BindView(R.id.ORGANIZATION) MultiOrganizationSpinner ORGANIZATION_SELECTOR;
 
   @BindView(R.id.document_control_buttons) MultiStateToggleButton control_buttons;
 
-
   @BindView(R.id.activity_main_right_button) CircleRightArrow rightArrow;
   @BindView(R.id.activity_main_left_button)  CircleLeftArrow leftArrow;
 
-  @BindView(R.id.documents_empty_list)  View documents_empty_list;
-  @BindView(R.id.toolbar) Toolbar toolbar;
+  @BindView(R.id.documents_empty_list) TextView documents_empty_list;
 
   @Inject JobManager jobManager;
   @Inject OkHttpClient okHttpClient;
@@ -117,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
 
   private DrawerBuilder drawer;
 
-  CompositeSubscription subscriptions;
+  private CompositeSubscription subscriptions;
   private String total;
 
   private final int SETTINGS_VIEW_TYPE_ALL                = 10;
@@ -135,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
   private final int SETTINGS_TEMPLATES_OFF                = 22;
   private Subscription loader;
 
-  public DocumentsAdapter RAdapter;
+  public  DocumentsAdapter RAdapter;
   private Document __document__;
   private Subscription timeoutSubcribe;
 
@@ -189,6 +191,44 @@ public class MainActivity extends AppCompatActivity {
     control_buttons.setOnValueChangedListener(position ->{
       Timber.tag(TAG).d("Position: " + position);
     });
+  }
+
+  @Override
+  public void onStart() {
+    super.onStart();
+
+    if ( subscriptions == null ){
+      subscriptions = new CompositeSubscription();
+    }
+
+    if ( !EventBus.getDefault().isRegistered(this) ){
+      EventBus.getDefault().register(this);
+    }
+  }
+
+  @Override
+  public void onResume(){
+    super.onResume();
+
+    subscriptions = new CompositeSubscription();
+    rxSettings();
+  }
+
+  @Override
+  protected void onPause() {
+    super.onPause();
+    if ( subscriptions != null ){
+      subscriptions.unsubscribe();
+    }
+
+  }
+
+  @Override
+  public void onStop() {
+    if ( EventBus.getDefault().isRegistered(this) ){
+      EventBus.getDefault().unregister(this);
+    }
+    super.onStop();
   }
 
   private void drawer_build_bottom() {
@@ -286,25 +326,11 @@ public class MainActivity extends AppCompatActivity {
     Timber.tag(TAG).v("TOKEN: "+ TOKEN.get() );
   }
 
-  @Override
-  public void onStart() {
-    super.onStart();
-
-    if ( subscriptions == null ){
-      subscriptions = new CompositeSubscription();
-    }
-
-    if ( !EventBus.getDefault().isRegistered(this) ){
-      EventBus.getDefault().register(this);
-    }
-  }
-
-
   public void rxSettings(){
     drawer_build_head();
 
     Preference<Set<String>> set = settings.getStringSet("settings_view_journals");
-//    set.get().forEach(this::drawer_add_item);
+    // set.get().forEach(this::drawer_add_item);
 
     for (String journal: set.get() ) {
       drawer_add_item(journal);
@@ -314,7 +340,7 @@ public class MainActivity extends AppCompatActivity {
   }
 
   private void drawer_add_item(String item) {
-//    settings_view_start_page_values
+    // settings_view_start_page_values
     int index = Arrays.asList((getResources().getStringArray(R.array.settings_view_start_page_values))).indexOf(item);
     String title = Arrays.asList((getResources().getStringArray(R.array.settings_view_start_page))).get(index);
     Long identifier = Long.valueOf(Arrays.asList((getResources().getStringArray(R.array.settings_view_start_page_identifier))).get(index));
@@ -325,31 +351,6 @@ public class MainActivity extends AppCompatActivity {
         .withName( title )
         .withIdentifier(identifier)
     );
-  }
-
-  @Override
-  public void onResume(){
-    super.onResume();
-
-    subscriptions = new CompositeSubscription();
-    rxSettings();
-  }
-
-  @Override
-  protected void onPause() {
-    super.onPause();
-    if ( subscriptions != null ){
-      subscriptions.unsubscribe();
-    }
-
-  }
-
-  @Override
-  public void onStop() {
-    if ( EventBus.getDefault().isRegistered(this) ){
-      EventBus.getDefault().unregister(this);
-    }
-    super.onStop();
   }
 
   private void setAdapters() {
@@ -407,23 +408,20 @@ public class MainActivity extends AppCompatActivity {
 
 
     organization_adapter = new OrganizationAdapter(this, new ArrayList<OrganizationItem>());
-    ORGANIZATION_SELECTOR.setAdapter(organization_adapter, false, onSelectedListener);
+    ORGANIZATION_SELECTOR.setAdapter(organization_adapter, false, selected -> {
+      Timber.d( "onSelectedListener " + Arrays.toString(selected));
 
+      int i = -1;
+      for ( Boolean checked: selected ) {
+        i++;
+        Timber.tag(TAG).i( String.format("%s - %s", organization_adapter.getItem(i), checked ) );
+      }
+    });
 
     Observable.from(filter_types).subscribe(
       this::loadDocumentsCountByType
     );
   }
-
-  private MultiOrganizationSpinner.MultiSpinnerListener onSelectedListener = selected -> {
-    Timber.d( "onSelectedListener " + Arrays.toString(selected));
-
-    int i = -1;
-    for ( Boolean checked: selected ) {
-      i++;
-      Timber.tag(TAG).i( String.format("%s - %s", organization_adapter.getItem(i), checked ) );
-    }
-  };
 
   private void loadFromDB() {
 
@@ -557,6 +555,7 @@ public class MainActivity extends AppCompatActivity {
           if (docs.size() == 0) {
             rv.setVisibility(View.GONE);
             documents_empty_list.setVisibility(View.VISIBLE);
+            documents_empty_list.setText( getString(R.string.document_empty_list) );
           } else {
             rv.setVisibility(View.VISIBLE);
             documents_empty_list.setVisibility(View.GONE);
@@ -698,16 +697,6 @@ public class MainActivity extends AppCompatActivity {
 
   }
 
-  @OnClick(R.id.activity_main_left_button)
-  public void setLeftArrowArrow(){
-    showNextType(false);
-  }
-
-  @OnClick(R.id.activity_main_right_button)
-  public void setRightArrow(){
-    showNextType(true);
-  }
-
   public void showNextType( Boolean next){
     unsubscribe();
     int position = next ? filter_adapter.next() : filter_adapter.prev();
@@ -746,7 +735,15 @@ public class MainActivity extends AppCompatActivity {
       });
   }
 
+  @OnClick(R.id.activity_main_left_button)
+  public void setLeftArrowArrow(){
+    showNextType(false);
+  }
 
+  @OnClick(R.id.activity_main_right_button)
+  public void setRightArrow(){
+    showNextType(true);
+  }
 
   @Subscribe(threadMode = ThreadMode.BACKGROUND)
   public void onMessageEvent(GetDocumentInfoEvent event) {
