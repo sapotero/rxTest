@@ -25,23 +25,24 @@ import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import java.io.BufferedInputStream;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Type;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -49,18 +50,12 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import okhttp3.OkHttpClient;
-import retrofit2.Retrofit;
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import sapotero.rxtest.BuildConfig;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.application.config.Constant;
-import sapotero.rxtest.retrofit.DocumentLinkService;
-import sapotero.rxtest.retrofit.models.DownloadLink;
+import sapotero.rxtest.events.bus.FileDownloadedEvent;
+import sapotero.rxtest.jobs.bus.DownloadFileJob;
 import sapotero.rxtest.retrofit.models.document.Image;
-import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.views.activities.DocumentImageFullScreenActivity;
 import sapotero.rxtest.views.adapters.DocumentLinkAdapter;
 import timber.log.Timber;
@@ -70,6 +65,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
   @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
+  @Inject JobManager jobManager;
 
   private OnFragmentInteractionListener mListener;
   private Context mContext;
@@ -113,6 +109,11 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+
+    if ( !EventBus.getDefault().isRegistered(this) ){
+      EventBus.getDefault().register(this);
+    }
+
   }
 
   @Override
@@ -165,6 +166,9 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 //    mAttacher.setOnSingleFlingListener(new SingleFlingListener());
 //    mAttacher.setOnPhotoTapListener(new PhotoTapListener());
     mAttacher.setOnDoubleTapListener(this);
+
+    StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+    StrictMode.setThreadPolicy(policy);
 
     return view;
   }
@@ -325,6 +329,11 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     } catch (IOException e) {
       e.printStackTrace();
     }
+
+    if ( EventBus.getDefault().isRegistered(this) ){
+      EventBus.getDefault().unregister(this);
+    }
+
     mAttacher.cleanup();
     mAttacher = null;
   }
@@ -358,97 +367,13 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     void onFragmentInteraction(Uri uri);
   }
 
-  public void downloadFile(String host, String strUrl, String fileName) {
-    StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-    StrictMode.setThreadPolicy(policy);
 
+  public void downloadFile(String host, String strUrl, String fileName) {
     progressBar.setVisibility(View.VISIBLE);
     mImageView.setVisibility(View.VISIBLE);
     doc_tmp_layout.setVisibility(View.GONE);
 
-    try {
-
-      String admin = settings.getString("login").get();
-      String token = settings.getString("token").get();
-
-      Retrofit retrofit = new RetrofitManager( getContext(), Constant.HOST, okHttpClient).process();
-      DocumentLinkService documentLinkService = retrofit.create( DocumentLinkService.class );
-
-      strUrl = strUrl.replace("?expired_link=1", "");
-      Observable<DownloadLink> user = documentLinkService.getByLink( strUrl, admin, token, "1" );
-
-      user.subscribeOn( Schedulers.io() )
-        .observeOn( AndroidSchedulers.mainThread() )
-        .subscribe(
-          link -> {
-
-            Uri new_builtUri = Uri.parse(host + link.getExpiredLink())
-              .buildUpon()
-              .appendQueryParameter("login", admin)
-              .appendQueryParameter("auth_token", token)
-              .build();
-
-              URL new_url = null;
-              try {
-                new_url = new URL(new_builtUri.toString());
-              } catch (MalformedURLException e) {
-                e.printStackTrace();
-              }
-            Timber.tag(TAG).d( "SUCCESS -> " + new_url );
-
-            File file = new File(mContext.getFilesDir(), fileName);
-            final URLConnection[] urlConnection = {null};
-            URL finalNew_url = new_url;
-            try {
-              assert finalNew_url != null;
-              urlConnection[0] = finalNew_url.openConnection();
-
-              InputStream inputStream = urlConnection[0].getInputStream();
-              BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
-              ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-
-              byte[] data = new byte[1024];
-              int current = 0;
-
-              while ((current = bufferedInputStream.read(data,0,data.length)) != -1) {
-                byteArrayOutputStream.write(data,0,current);
-              }
-
-              FileOutputStream fileOutputStream = new FileOutputStream(file);
-              fileOutputStream.write(byteArrayOutputStream.toByteArray());
-              fileOutputStream.flush();
-              fileOutputStream.close();
-
-              try {
-                openRenderer(getActivity(), file.getAbsolutePath());
-              }
-              catch (  FileNotFoundException e) {
-                e.printStackTrace();
-              }
-
-
-            } catch (IOException e) {
-              e.printStackTrace();
-            }
-
-
-            doc_tmp_layout.setVisibility(View.GONE);
-            mImageView.setVisibility(View.VISIBLE);
-            progressBar.setVisibility(View.GONE);
-
-          },
-          error -> {
-            Timber.tag(TAG).d( "HUETA -> ");
-            doc_tmp_layout.setVisibility(View.VISIBLE);
-            mImageView.setVisibility(View.GONE);
-            progressBar.setVisibility(View.GONE);
-            error.printStackTrace();
-          }
-        );
-
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    jobManager.addJobInBackground( new DownloadFileJob(host, strUrl, fileName) );
   }
 
 
@@ -486,4 +411,25 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
       return true;
     }
   }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(FileDownloadedEvent event) {
+    Log.d("FileDownloadedEvent", event.path);
+
+    if (!Objects.equals(event.path, "")){
+      try {
+        doc_tmp_layout.setVisibility(View.GONE);
+        mImageView.setVisibility(View.VISIBLE);
+        progressBar.setVisibility(View.GONE);
+
+        openRenderer( getActivity(), event.path );
+      } catch (IOException e) {
+        e.printStackTrace();
+        doc_tmp_layout.setVisibility(View.VISIBLE);
+        mImageView.setVisibility(View.GONE);
+        progressBar.setVisibility(View.GONE);
+      }
+    }
+  }
+
 }

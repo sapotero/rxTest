@@ -818,6 +818,5 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
 
   @Override
   public void onFragmentInteraction(Uri uri) {
-
   }
 }
