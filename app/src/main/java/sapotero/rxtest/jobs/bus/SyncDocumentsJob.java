@@ -1,4 +1,4 @@
-package sapotero.rxtest.jobs.rx;
+package sapotero.rxtest.jobs.bus;
 
 import android.support.annotation.Nullable;
 
@@ -10,15 +10,16 @@ import org.greenrobot.eventbus.EventBus;
 
 import sapotero.rxtest.events.bus.SetActiveDecisonEvent;
 import sapotero.rxtest.jobs.bus.BaseJob;
+import sapotero.rxtest.jobs.rx.SetActiveDecisionJob;
 import timber.log.Timber;
 
-public class SetActiveDecisionJob extends BaseJob {
+public class SyncDocumentsJob  extends BaseJob {
 
   public static final int PRIORITY = 1;
   private Integer decision;
   private String TAG = SetActiveDecisionJob.class.getSimpleName();
 
-  public SetActiveDecisionJob(Integer DECISON) {
+  public SyncDocumentsJob(Integer DECISON) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.decision = DECISON;
   }

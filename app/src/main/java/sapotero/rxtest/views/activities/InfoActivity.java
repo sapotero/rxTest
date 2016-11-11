@@ -130,8 +130,14 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
     setContentView(R.layout.activity_info);
     ButterKnife.bind(this);
 
-    toolbar.inflateMenu(R.menu.info_menu);
 
+    toolbar.setTitle("Все документы");
+    toolbar.setTitleTextColor( getResources().getColor( R.color.md_grey_100 ) );
+    toolbar.setSubtitleTextColor( getResources().getColor( R.color.md_grey_400 ) );
+
+    toolbar.setContentInsetStartWithNavigation(250);
+
+    toolbar.inflateMenu(R.menu.info_menu);
     toolbar.setNavigationOnClickListener(v ->{
         finish();
       }
@@ -213,6 +219,7 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
         setTabContent();
 
         toolbar.setTitle( doc.getTitle() );
+        toolbar.setContentInsetStartWithNavigation(250);
 
         if ( doc.getDecisions().size() >= 1 ){
 

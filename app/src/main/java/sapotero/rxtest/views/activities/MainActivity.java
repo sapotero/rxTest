@@ -37,9 +37,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -64,10 +62,11 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.application.config.Constant;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RSignerEntity;
-import sapotero.rxtest.events.bus.AddDocumentToDBTimeoutEvent;
 import sapotero.rxtest.events.bus.GetDocumentInfoEvent;
 import sapotero.rxtest.events.bus.UpdateDocumentJobEvent;
 import sapotero.rxtest.events.rx.InsertRxDocumentsEvent;
+import sapotero.rxtest.events.rx.LoadAllDocumentsByStatusEvent;
+import sapotero.rxtest.jobs.bus.LoadAllDocumentsByStatusJob;
 import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
 import sapotero.rxtest.retrofit.DocumentsService;
 import sapotero.rxtest.retrofit.models.Oshs;
@@ -96,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
   @BindView(R.id.progressBar) View progressBar;
 
   @BindView(R.id.DOCUMENT_TYPE) Spinner DOCUMENT_TYPE_SELECTOR;
-  @BindView(R.id.JOURNAL_TYPE)  Spinner JOURNAL_TYPE_SELECTOR;
+  @BindView(R.id.JOURNAL_TYPE)  Spinner FILTER_TYPE_SELECTOR;
   @BindView(R.id.ORGANIZATION) MultiOrganizationSpinner ORGANIZATION_SELECTOR;
 
   @BindView(R.id.document_control_buttons) MultiStateToggleButton control_buttons;
@@ -129,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
   private DrawerBuilder drawer;
 
   private CompositeSubscription subscriptions;
-  private String total;
+//  private String total;
 
   private final int SETTINGS_VIEW_TYPE_ALL                = 10;
   private final int SETTINGS_VIEW_TYPE_INCOMING_DOCUMENTS = 11;
@@ -151,6 +150,8 @@ public class MainActivity extends AppCompatActivity {
   private Subscription timeoutSubcribe;
   private boolean[] old_selectd;
   private boolean needToFindOrganizations = true;
+  private Subscription documentQuery = null;
+  private Subscription loadFromDbQuery = null;
 
 
   @Override
@@ -172,7 +173,6 @@ public class MainActivity extends AppCompatActivity {
     rv.setLayoutManager(gridLayoutManager);
 
     loadMe();
-
 
     RAdapter = new DocumentsAdapter(this, new ArrayList<>());
     rv.setAdapter(RAdapter);
@@ -251,7 +251,11 @@ public class MainActivity extends AppCompatActivity {
   public void onResume(){
     super.onResume();
 
-    subscriptions = new CompositeSubscription();
+    if (documentQuery != null){
+      documentQuery.unsubscribe();
+      table_changes();
+    }
+
     rxSettings();
   }
 
@@ -396,26 +400,19 @@ public class MainActivity extends AppCompatActivity {
 
   private void setAdapters() {
 
-    List<FilterItem> filters = new ArrayList<FilterItem>();
-    String[] filter_types = getResources().getStringArray(R.array.DOCUMENT_TYPES_VALUE);
-    String[] filter_names = getResources().getStringArray(R.array.DOCUMENT_TYPES);
+    List<FilterItem> filters = new ArrayList<>();
+    String[] filter_types = getResources().getStringArray(R.array.FILTER_TYPES_VALUE);
+    String[] filter_names = getResources().getStringArray(R.array.FILTER_TYPES);
     for (int i = 0; i < filter_types.length; i++) {
       filters.add(new FilterItem( filter_names[i] , filter_types[i], "0"));
     }
 
     filter_adapter = new StatusAdapter(this, filters );
-    JOURNAL_TYPE_SELECTOR.setAdapter(filter_adapter);
-    JOURNAL_TYPE_SELECTOR.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+    FILTER_TYPE_SELECTOR.setAdapter(filter_adapter);
+    FILTER_TYPE_SELECTOR.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
       @Override
       public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-
-        Timber.tag(TAG).e("DOCUMENT_TYPE_SELECTOR.setOnItemSelectedListener " + position + " | " +parentView.getAdapter().getCount() );
-
-        if (position+1 == parentView.getAdapter().getCount()){
-          loadFromDB();
-        } else {
-          loadDocuments();
-        }
+        loadFromDB();
         toolbar.setSubtitle( filter_adapter.getItem(position).getName() );
       }
 
@@ -431,7 +428,7 @@ public class MainActivity extends AppCompatActivity {
     String[] document_types_value = getResources().getStringArray(R.array.JOURNAL_TYPES_VALUE);
 
     for (int i = 0; i < document_types_name.length; i++) {
-      document_types.add(new DocumentTypeItem( document_types_name[i] , document_types_value[i]));
+      document_types.add(new DocumentTypeItem( document_types_name[i] , document_types_value[i], 0));
     }
 
     document_type_adapter = new DocumentTypeAdapter(this, document_types );
@@ -464,6 +461,8 @@ public class MainActivity extends AppCompatActivity {
   private void loadFromDB() {
 
 //    findOrganizations();
+    updateFilterAdapter();
+//    updateOrganizationAdapter();
 
     int spinner_pos = DOCUMENT_TYPE_SELECTOR.getSelectedItemPosition();
 
@@ -505,9 +504,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     // organizations
-
-    LogicalCondition<? extends Expression<Boolean>, ?> organization_condition = null;
-
     boolean organization_filter = false;
 
     ArrayList<String> organizations = new ArrayList<String>();
@@ -515,9 +511,13 @@ public class MainActivity extends AppCompatActivity {
 
       for (int i = 0; i < ORGANIZATION_SELECTOR.getSelected().length; i++) {
         if (ORGANIZATION_SELECTOR.getSelected()[i]){
-          organizations.add(organization_adapter.getItem(i).getName());
-          Timber.tag(TAG).i( String.format("%s - ++", organization_adapter.getItem(i).getName()) );
-          organization_filter = true;
+          try{
+            organizations.add(organization_adapter.getItem(i).getName());
+            Timber.tag(TAG).i( String.format("%s - ++", organization_adapter.getItem(i).getName()) );
+            organization_filter = true;
+          } catch (Exception e){
+            Timber.tag(TAG).e( e );
+          }
         }
       }
     }
@@ -530,40 +530,60 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-    query.get()
+    // filter
+
+    int filter_index = FILTER_TYPE_SELECTOR.getSelectedItemPosition();
+    FilterItem filter_item = filter_adapter.getItem(filter_index);
+
+    Timber.tag(TAG).i( String.format("filter_name %s - ++", filter_item.getName()) );
+
+    query = query.and(RDocumentEntity.FILTER.eq( filter_item.getValue() ));
+
+
+    // filter
+
+    if (loadFromDbQuery != null){
+      loadFromDbQuery.unsubscribe();
+    }
+
+    loadFromDbQuery = query.get()
       .toObservable()
       .subscribeOn(Schedulers.io())
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(doc -> {
-
-        Timber.tag(TAG).v( "loadFromDB ++ " + doc.getUid() );
-
-        Document document = new Document();
-        document.setUid( doc.getUid() );
-        document.setMd5( doc.getMd5() );
-        document.setControl( doc.isControl() );
-        document.setFavorites( doc.isFavorites() );
-        document.setSortKey( doc.getSortKey() );
-        document.setTitle( doc.getTitle() );
-        document.setRegistrationNumber( doc.getRegistrationNumber() );
-        document.setRegistrationDate( doc.getRegistrationDate() );
-        document.setUrgency( doc.getUrgency() );
-        document.setShortDescription( doc.getShortDescription() );
-        document.setComment( doc.getComment() );
-        document.setExternalDocumentNumber( doc.getExternalDocumentNumber() );
-        document.setReceiptDate( doc.getReceiptDate() );
-
-
-        RSignerEntity r_signer = (RSignerEntity) doc.getSigner();
-        Signer signer = new Signer();
-        signer.setId( r_signer.getUid() );
-        signer.setName( r_signer.getName() );
-        signer.setOrganisation( r_signer.getOrganisation() );
-        signer.setType( r_signer.getType() );
-        document.setSigner(signer);
-
-        RAdapter.addItem( document );
+        addToAdapter(doc);
       });
+  }
+
+  private void addToAdapter(RDocumentEntity doc){
+    Timber.tag(TAG).v( "addToAdapter ++ " + doc.getUid() );
+
+    Document document = new Document();
+    document.setUid( doc.getUid() );
+    document.setMd5( doc.getMd5() );
+    document.setControl( doc.isControl() );
+    document.setFavorites( doc.isFavorites() );
+    document.setSortKey( doc.getSortKey() );
+    document.setTitle( doc.getTitle() );
+    document.setRegistrationNumber( doc.getRegistrationNumber() );
+    document.setRegistrationDate( doc.getRegistrationDate() );
+    document.setUrgency( doc.getUrgency() );
+    document.setShortDescription( doc.getShortDescription() );
+    document.setComment( doc.getComment() );
+    document.setExternalDocumentNumber( doc.getExternalDocumentNumber() );
+    document.setReceiptDate( doc.getReceiptDate() );
+
+
+    RSignerEntity r_signer = (RSignerEntity) doc.getSigner();
+    Signer signer = new Signer();
+    signer.setId( r_signer.getUid() );
+    signer.setName( r_signer.getName() );
+    signer.setOrganisation( r_signer.getOrganisation() );
+    signer.setType( r_signer.getType() );
+    document.setSigner(signer);
+
+    RAdapter.addItem( document );
+
   }
 
   private void findOrganizations() {
@@ -598,12 +618,10 @@ public class MainActivity extends AppCompatActivity {
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         data -> {
-          total = data.getMeta().getTotal();
+          String total = data.getMeta().getTotal();
 
           if ( total != null && Integer.valueOf(total) > 0 ){
-
-
-            String[] values = getResources().getStringArray(R.array.DOCUMENT_TYPES_VALUE);
+            String[] values = getResources().getStringArray(R.array.FILTER_TYPES_VALUE);
 
             int index = -1;
             for (int i=0;i<values.length;i++) {
@@ -618,184 +636,77 @@ public class MainActivity extends AppCompatActivity {
             FilterItem filterItem = filter_adapter.getItem(index);
 
             filterItem.setCount( total );
+
+            jobManager.addJobInBackground(new LoadAllDocumentsByStatusJob(index, total));
+
             filter_adapter.notifyDataSetChanged();
           }
 
         },
         error -> {
-          Timber.tag(TAG).d( "_ERROR", error.getMessage() );
+          Timber.tag(TAG).d( "loadDocumentsCountByType "+ error.getMessage() );
         });
 
   }
 
-  private void loadDocuments(){
-
-    progressBar.setVisibility(ProgressBar.VISIBLE);
-    documents_empty_list.setText(null);
-
-    Retrofit retrofit = new RetrofitManager( this, Constant.HOST + "/v3/", okHttpClient).process();
-    DocumentsService documentsService = retrofit.create( DocumentsService.class );
-
-    int spinner_pos = JOURNAL_TYPE_SELECTOR.getSelectedItemPosition();
-    String[] document_type = getResources().getStringArray(R.array.DOCUMENT_TYPES_VALUE);
-
-
-    String type = String.valueOf(document_type[spinner_pos]);
-    Timber.tag(TAG).e("loadDocuments "+ spinner_pos );
-    Timber.tag(TAG).e("loadDocuments "+ type );
-
-    Observable<Documents> documents = documentsService.getDocuments(LOGIN.get(), TOKEN.get(), type, 200, 0);
-
-    RAdapter.clear();
-
-
-    loader = documents.subscribeOn(Schedulers.io())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(
-        data -> {
-          progressBar.setVisibility(ProgressBar.GONE);
-
-          List<Document> docs = data.getDocuments();
-
-
-          for (Document d: docs ) {
-            insertRDoc(d);
-            RAdapter.addItem(d);
-          }
-
-          if (docs.size() == 0) {
-//            rv.setVisibility(View.GONE);
-            documents_empty_list.setVisibility(View.VISIBLE);
-            documents_empty_list.setText( getString(R.string.document_empty_list) );
-          } else {
-//            rv.setVisibility(View.VISIBLE);
-            documents_empty_list.setVisibility(View.GONE);
-
-            __document__ = docs.get(0);
-
-          }
-
-        },
-        error -> {
-          Timber.d("_ERROR", error.getMessage());
-          progressBar.setVisibility(ProgressBar.GONE);
-
-          documents_empty_list.setVisibility(View.VISIBLE);
-          documents_empty_list.setText( getString(R.string.document_empty_list_error) );
-
-          Toast.makeText(this, error.getMessage(), Toast.LENGTH_SHORT).show();
-        });
-  }
-
-  private void insertRDoc(Document d) {
-
-    Timber.tag(TAG).i( "insertRDoc " + d.toString() );
-
-    RDocumentEntity rd = new RDocumentEntity();
-
-    rd.setUid( d.getUid() );
-    rd.setMd5( d.getMd5() );
-    rd.setSortKey( d.getSortKey() );
-    rd.setTitle( d.getTitle() );
-    rd.setRegistrationNumber( d.getRegistrationNumber() );
-    rd.setRegistrationDate( d.getRegistrationDate() );
-    rd.setUrgency( d.getUrgency() );
-    rd.setShortDescription( d.getShortDescription() );
-    rd.setComment( d.getComment() );
-    rd.setExternalDocumentNumber( d.getExternalDocumentNumber() );
-    rd.setReceiptDate( d.getReceiptDate() );
-    rd.setViewed( d.getViewed() );
-
-    if ( d.getSigner().getOrganisation() != null && !Objects.equals(d.getSigner().getOrganisation(), "")){
-      rd.setOrganization( d.getSigner().getOrganisation() );
-    } else {
-      rd.setOrganization("Без организации" );
-    }
-
-    RSignerEntity signer = new RSignerEntity();
-    signer.setUid( d.getSigner().getId() );
-    signer.setName( d.getSigner().getName() );
-    signer.setOrganisation( d.getSigner().getOrganisation() );
-    signer.setType( d.getSigner().getType() );
-
-    rd.setSigner( signer );
-
-    dataStore.insert(rd)
-      .toObservable()
-      .subscribeOn(Schedulers.io())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(
-        result -> {
-          Timber.d("inserted ++ " + result.getUid());
-        },
-        error ->{
-          error.printStackTrace();
-        }
-      );
-  }
-
-  private void insertTimeoutRDoc(Document d) {
-    timeoutSubcribe = Observable.interval(3, TimeUnit.SECONDS, Schedulers.io())
-      .map(tick -> {
-
-        RDocumentEntity rd = new RDocumentEntity();
-
-        rd.setUid(d.getUid() + "_timeout_" + new Random().nextFloat());
-        rd.setMd5(d.getMd5());
-        rd.setSortKey(d.getSortKey());
-        rd.setTitle(d.getTitle());
-        rd.setRegistrationNumber(d.getRegistrationNumber());
-        rd.setRegistrationDate(d.getRegistrationDate());
-        rd.setUrgency(d.getUrgency());
-        rd.setShortDescription(d.getShortDescription());
-        rd.setComment(d.getComment());
-        rd.setExternalDocumentNumber(d.getExternalDocumentNumber());
-        rd.setReceiptDate(d.getReceiptDate());
-        rd.setViewed(d.getViewed());
-
-        RSignerEntity signer = new RSignerEntity();
-        signer.setUid(d.getSigner().getId());
-        signer.setName(d.getSigner().getName());
-        signer.setOrganisation(d.getSigner().getOrganisation());
-        signer.setType(d.getSigner().getType());
-
-        rd.setSigner(signer);
-
-        return dataStore.insert(rd)
-          .toObservable()
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(
-            result -> {
-              Timber.d("inserted ++ " + result.getUid());
-            },
-            error -> {
-              error.printStackTrace();
-            }
-          );
-      })
-      .doOnError(err -> Timber.e("Error retrieving messages", err))
-      .retry()
-      .subscribe(
-        result -> {
-          Timber.d("inserted ++ " + result);
-        }
-      );
-
-//    dataStore.insert(rd)
-//      .toObservable()
-//      .subscribeOn(Schedulers.io())
+//  private void loadDocuments(){
+//
+//    progressBar.setVisibility(ProgressBar.VISIBLE);
+//    documents_empty_list.setText(null);
+//
+//    Retrofit retrofit = new RetrofitManager( this, Constant.HOST + "/v3/", okHttpClient).process();
+//    DocumentsService documentsService = retrofit.create( DocumentsService.class );
+//
+//    int spinner_pos = FILTER_TYPE_SELECTOR.getSelectedItemPosition();
+//    String[] document_type = getResources().getStringArray(R.array.DOCUMENT_TYPES_VALUE);
+//
+//
+//    String type = String.valueOf(document_type[spinner_pos]);
+//    Timber.tag(TAG).e("loadDocuments "+ spinner_pos );
+//    Timber.tag(TAG).e("loadDocuments "+ type );
+//
+//    Observable<Documents> documents = documentsService.getDocuments(LOGIN.get(), TOKEN.get(), type, 500, 0);
+//
+//    RAdapter.clear();
+//
+//
+//    loader = documents.subscribeOn(Schedulers.io())
 //      .observeOn(AndroidSchedulers.mainThread())
-//      .take(10)
 //      .subscribe(
-//        result -> {
-//          Timber.d("inserted ++ " + result.getUid());
+//        data -> {
+//          progressBar.setVisibility(ProgressBar.GONE);
+//
+//          List<Document> docs = data.getDocuments();
+//
+//
+//          for (Document d: docs ) {
+//            insertRDoc(d);
+//            RAdapter.addItem(d);
+//          }
+//
+//          if (docs.size() == 0) {
+////            rv.setVisibility(View.GONE);
+//            documents_empty_list.setVisibility(View.VISIBLE);
+//            documents_empty_list.setText( getString(R.string.document_empty_list) );
+//          } else {
+////            rv.setVisibility(View.VISIBLE);
+//            documents_empty_list.setVisibility(View.GONE);
+//
+//            __document__ = docs.get(0);
+//
+//          }
+//
 //        },
-//        error ->{
-//          error.printStackTrace();
-//        }
-//      );
-  }
+//        error -> {
+//          Timber.d("_ERROR", error.getMessage());
+//          progressBar.setVisibility(ProgressBar.GONE);
+//
+//          documents_empty_list.setVisibility(View.VISIBLE);
+//          documents_empty_list.setText( getString(R.string.document_empty_list_error) );
+//
+//          Toast.makeText(this, error.getMessage(), Toast.LENGTH_SHORT).show();
+//        });
+//  }
 
   private void loadMe() {
     Retrofit retrofit = new RetrofitManager( this, Constant.HOST + "/v3/", okHttpClient).process();
@@ -821,13 +732,35 @@ public class MainActivity extends AppCompatActivity {
     unsubscribe();
     int position = next ? filter_adapter.next() : filter_adapter.prev();
 //    DOCUMENT_TYPE_SELECTOR.setSelection(position);
-    JOURNAL_TYPE_SELECTOR.setSelection(position);
+    FILTER_TYPE_SELECTOR.setSelection(position);
   }
 
   public void unsubscribe(){
     if (loader != null && !loader.isUnsubscribed()) {
       loader.unsubscribe();
     }
+  }
+
+  private void table_changes(){
+
+    documents_empty_list.setText(null);
+    if (documentQuery == null){
+      documentQuery = dataStore
+        .select(RDocumentEntity.class)
+        .orderBy(RDocumentEntity.ID.desc())
+        .get()
+        .toSelfObservable()
+        .subscribe(
+          data->{
+            document_type_adapter.updateCountByType( data.first().getUid() );
+          },
+          error -> {
+            Timber.tag("table_changes").e( "error " + error.toString() );
+          }
+        );
+    }
+
+
   }
 
 //  public void findOrganizations() {
@@ -856,6 +789,109 @@ public class MainActivity extends AppCompatActivity {
 //        });
 //    }
 //    needToFindOrganizations = false;
+//  }
+
+  private void updateFilterAdapter(){
+
+    int spinner_pos = DOCUMENT_TYPE_SELECTOR.getSelectedItemPosition();
+
+    String[] document_type = getResources().getStringArray(R.array.JOURNAL_TYPES_VALUE);
+    String type = String.valueOf(document_type[spinner_pos]);
+
+    String[] filter_types = getResources().getStringArray(R.array.FILTER_TYPES_VALUE);
+    for (int i = 0; i < filter_types.length; i++) {
+
+      Integer count = dataStore
+        .count(RDocumentEntity.class)
+        .where(RDocumentEntity.UID.like(type + "%"))
+        .and(RDocumentEntity.FILTER.eq( filter_types[i] ))
+        .get()
+        .value();
+
+      filter_adapter.updateByValue( filter_types[i], count );
+    }
+
+  }
+//
+//  private void updateOrganizationAdapter(){
+//
+//    int spinner_pos = DOCUMENT_TYPE_SELECTOR.getSelectedItemPosition();
+//
+//    String[] document_type = getResources().getStringArray(R.array.JOURNAL_TYPES_VALUE);
+//    String type = String.valueOf(document_type[spinner_pos]);
+//
+//    int filter_index = FILTER_TYPE_SELECTOR.getSelectedItemPosition();
+//    FilterItem filter_item = filter_adapter.getItem(filter_index);
+//
+//    organization_adapter.clear();
+//
+//    dataStore
+//      .select(RDocumentEntity.ORGANIZATION)
+//      .distinct()
+//      .where(RDocumentEntity.UID.like(type + "%"))
+//      .and(RDocumentEntity.FILTER.eq(filter_item.getValue()))
+//      .get()
+//      .toObservable()
+//      .subscribeOn(Schedulers.io())
+//      .observeOn(AndroidSchedulers.mainThread())
+//      .subscribe( doc -> {
+//        Timber.tag(TAG).d("updateOrganizationAdapter: " + doc.get(0).toString() );
+//
+//        Integer count = dataStore
+//          .count(RDocumentEntity.class)
+//          .distinct()
+//          .where(RDocumentEntity.UID.like(type + "%"))
+//          .and(RDocumentEntity.FILTER.eq(filter_item.getValue()))
+//          .and(RDocumentEntity.ORGANIZATION.eq(doc.get(0).toString()))
+//          .get()
+//          .value();
+//
+//        organization_adapter.add( new OrganizationItem( doc.get(0).toString(), count ) );
+//      });
+//
+//
+//
+////    dataStore
+////      .count(RDocumentEntity.class)
+////      .distinct()
+////      .get()
+////      .toObservable()
+////      .subscribeOn(Schedulers.io())
+////      .observeOn(AndroidSchedulers.mainThread())
+////      .subscribe( doc -> {
+////
+////        Integer count = dataStore
+////          .count(RDocumentEntity.class)
+////
+////          .get()
+////          .value();
+////
+////        organization_adapter.add( new OrganizationItem( doc.get(0).toString(), count ) );
+////
+////      });
+//
+////    dataStore
+////      .select(RSignerEntity.ORGANISATION)
+////      .distinct()
+////      .get()
+////      .toObservable()
+////      .subscribeOn(Schedulers.io())
+////      .observeOn(AndroidSchedulers.mainThread())
+////      .subscribe( org -> {
+////
+////        Integer count = dataStore
+////          .count(RSignerEntity.class)
+////          .where(RDocumentEntity.UID.like(type + "%"))
+////          .and(RSignerEntity.ORGANISATION.eq(org.get(0).toString()))
+////          .and(RDocumentEntity.FILTER.eq( filter_item.getValue() ))
+////          .get()
+////          .value();
+////
+////        organization_adapter.add( new OrganizationItem( org.get(0).toString(), count ) );
+////
+////        Timber.tag(TAG).d("ORGANIZATION: " + org.get(0).toString() );
+////        Timber.tag(TAG).d("ORGANIZATION COUNT: " + count );
+////      });
 //  }
 
   @OnClick(R.id.activity_main_left_button)
@@ -894,14 +930,12 @@ public class MainActivity extends AppCompatActivity {
 
   }
 
+
   @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(AddDocumentToDBTimeoutEvent event) {
-    Timber.d("AddDocumentToDBTimeoutEvent  ");
-    if (timeoutSubcribe != null && !timeoutSubcribe.isUnsubscribed()) {
-      timeoutSubcribe.unsubscribe();
-    } else {
-      insertTimeoutRDoc(__document__);
-    }
+  public void onMessageEvent(LoadAllDocumentsByStatusEvent event) {
+    table_changes();
   }
+
+
 
 }

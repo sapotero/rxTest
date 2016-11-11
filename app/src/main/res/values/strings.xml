@@ -4,22 +4,20 @@
     <string name="password_hint">Пароль</string>
     <string name="login_button">Войти</string>
 
-    <string-array name="DOCUMENT_TYPES">
+    <string-array name="FILTER_TYPES">
         <item>Отправлен на исполнение</item>
         <item>Отправлен на доклад</item>
         <item>Первичное рассмотрение</item>
         <item>Согласование проектов документов</item>
         <item>Подписание проектов документов</item>
-        <item>from db</item>
     </string-array>
 
-    <string-array name="DOCUMENT_TYPES_VALUE">
+    <string-array name="FILTER_TYPES_VALUE">
         <item>sent_to_the_performance</item>
         <item>sent_to_the_report</item>
         <item>primary_consideration</item>
         <item>approval</item>
         <item>signing</item>
-        <item>db</item>
     </string-array>
 
 
@@ -35,9 +33,9 @@
         <item>Пр. старые секретные</item>
         <item>Исходящие секретные</item>
         <item>Приказы</item>
-        <item>Доверенности</item>
         <item>На контроле</item>
-        <item>Подписание/Согласование</item>
+        <item>Подписание</item>
+        <item>Согласование</item>
     </string-array>
 
     <string-array name="JOURNAL_TYPES_VALUE">
@@ -52,7 +50,7 @@
         <item>08</item>
         <item>09</item>
         <item>10</item>
-        <item>11</item>
+        <item>97</item>
         <item>98</item>
         <item>99</item>
     </string-array>

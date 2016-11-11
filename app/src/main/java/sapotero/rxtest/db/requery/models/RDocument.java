@@ -55,6 +55,9 @@ public abstract class  RDocument implements Persistable {
   @Index("organization_index")
   String organization;
 
+  @Index("filter_index")
+  String filter;
+
   String infoCard;
 
   @OneToMany(mappedBy = "document", cascade = {CascadeAction.DELETE, CascadeAction.SAVE})

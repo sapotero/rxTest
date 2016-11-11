@@ -2,17 +2,15 @@ package sapotero.rxtest.jobs.utils;
 
 import android.content.Context;
 
-import com.birbit.android.jobqueue.Job;
 import com.birbit.android.jobqueue.JobManager;
 import com.birbit.android.jobqueue.config.Configuration;
-import com.birbit.android.jobqueue.di.DependencyInjector;
 
 import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
-import sapotero.rxtest.jobs.bus.BaseJob;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.jobs.bus.BaseJob;
 
 @Module
 public final class JobModule {
@@ -21,16 +19,11 @@ public final class JobModule {
   @Singleton
   JobManager provideJobModule(Context context) {
     Configuration.Builder builder = new Configuration.Builder(context)
-      .minConsumerCount(1)
-      .maxConsumerCount(3)
-      .loadFactor(3)
-      .injector(new DependencyInjector() {
-        @Override
-        public void inject(Job job) {
-          EsdApplication.mainComponent.inject((BaseJob) job);
-        }
-      })
-      .consumerKeepAlive(120);
+      .minConsumerCount(2)
+      .maxConsumerCount(5)
+      .loadFactor(5)
+      .injector(job -> EsdApplication.mainComponent.inject((BaseJob) job))
+      .consumerKeepAlive(60);
 
     return new JobManager(builder.build());
   }

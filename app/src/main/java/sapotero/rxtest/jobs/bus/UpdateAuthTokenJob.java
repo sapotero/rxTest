@@ -20,7 +20,7 @@ import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import timber.log.Timber;
 
 
-public class UpdateAuthTokenJob extends BaseJob{
+public class UpdateAuthTokenJob extends BaseJob {
   private static final int PRIORITY = 1;
   private String TOKEN;
 

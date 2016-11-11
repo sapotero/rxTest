@@ -10,13 +10,14 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import sapotero.rxtest.R;
 import sapotero.rxtest.views.adapters.models.FilterItem;
 
 public class StatusAdapter extends BaseAdapter {
   private int template;
-  private List<FilterItem> statuses;
+  private List<FilterItem> filters;
   private Context context;
   private int filterCount[];
   private String[] filterName;
@@ -30,21 +31,21 @@ public class StatusAdapter extends BaseAdapter {
   private Filter statusFilter = new CustomFilter();
   private ArrayList<FilterItem> suggestions = new ArrayList<>();
 
-  public StatusAdapter(Context context, List<FilterItem> statuses) {
+  public StatusAdapter(Context context, List<FilterItem> filters) {
 
     this.context = context;
-    this.statuses = statuses;
+    this.filters = filters;
     this.inflter = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
   }
 
   @Override
   public int getCount() {
-    return statuses.size();
+    return filters.size();
   }
 
   @Override
   public FilterItem getItem(int position) {
-    return statuses.get(position);
+    return filters.get(position);
   }
 
   @Override
@@ -86,14 +87,14 @@ public class StatusAdapter extends BaseAdapter {
 
   public int prev() {
 
-    if (statuses == null || statuses.size() == 0){
+    if (filters == null || filters.size() == 0){
       return 0;
     }
 
     int position = mPos - 1;
 
     if ( position < 0 ){
-      return statuses.size() - 1;
+      return filters.size() - 1;
     } else {
       return position;
     }
@@ -101,16 +102,26 @@ public class StatusAdapter extends BaseAdapter {
   }
 
   public int next() {
-    if (statuses == null || statuses.size() == 0){
+    if (filters == null || filters.size() == 0){
       return 0;
     }
 
     int position = mPos + 1;
 
-    if ( position >= statuses.size() ){
+    if ( position >= filters.size() ){
       return 0;
     } else {
       return position;
+    }
+  }
+
+  public void updateByValue(String filter_type, Integer count) {
+    for (int i = 0; i < filters.size(); i++) {
+      if (Objects.equals(filters.get(i).getValue(), filter_type)){
+        filters.get(i).setCount( String.valueOf(count) );
+        notifyDataSetChanged();
+        break;
+      }
     }
   }
 
@@ -124,10 +135,10 @@ public class StatusAdapter extends BaseAdapter {
     protected FilterResults performFiltering(CharSequence constraint) {
       suggestions.clear();
 
-      if (statuses != null && constraint != null) { // Check if the Original List and Constraint aren't null.
-        for (int i = 0; i < statuses.size(); i++) {
-          if (statuses.get(i).getName().toLowerCase().contains(constraint)) { // Compare item in original list if it contains constraints.
-            suggestions.add(statuses.get(i));
+      if (filters != null && constraint != null) { // Check if the Original List and Constraint aren't null.
+        for (int i = 0; i < filters.size(); i++) {
+          if (filters.get(i).getName().toLowerCase().contains(constraint)) { // Compare item in original list if it contains constraints.
+            suggestions.add(filters.get(i));
           }
         }
       }

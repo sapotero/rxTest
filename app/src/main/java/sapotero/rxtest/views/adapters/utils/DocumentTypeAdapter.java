@@ -7,14 +7,14 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import sapotero.rxtest.R;
 import sapotero.rxtest.views.adapters.models.DocumentTypeItem;
 
 public class DocumentTypeAdapter extends BaseAdapter {
-  private List<DocumentTypeItem> organizations;
+  private List<DocumentTypeItem> documents;
   private Context context;
   private LayoutInflater inflter;
 
@@ -23,18 +23,18 @@ public class DocumentTypeAdapter extends BaseAdapter {
   public DocumentTypeAdapter(Context context, List<DocumentTypeItem> organizations) {
 
     this.context = context;
-    this.organizations = organizations;
+    this.documents = organizations;
     this.inflter = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
   }
 
   @Override
   public int getCount() {
-    return organizations.size();
+    return documents.size();
   }
 
   @Override
   public DocumentTypeItem getItem(int position) {
-    return organizations.get(position);
+    return documents.get(position);
   }
 
   @Override
@@ -52,12 +52,12 @@ public class DocumentTypeAdapter extends BaseAdapter {
 
     mPos = position;
 
-    DocumentTypeItem item = getOrganizationItem(position);
+    DocumentTypeItem item = getItem(position);
 
 
 
     ( (TextView) view.findViewById(R.id.document_type_name)  ).setText( item.getName()  );
-    ( (TextView) view.findViewById(R.id.document_type_count) ).setText( item.getCount() );
+    ( (TextView) view.findViewById(R.id.document_type_count) ).setText( item.getValue() );
 
     return view;
   }
@@ -72,11 +72,27 @@ public class DocumentTypeAdapter extends BaseAdapter {
   }
 
   public void add(DocumentTypeItem organizationItem) {
-    this.organizations.add(organizationItem);
+    this.documents.add(organizationItem);
     notifyDataSetChanged();
   }
 
   public void clear() {
-    this.organizations = new ArrayList<>();
+    this.documents.clear();
+    notifyDataSetChanged();
   }
+
+  public void updateCountByType(String uid) {
+    String type = String.format("%.2s", uid);
+
+
+
+    for (int i = 0; i < this.documents.size(); i++) {
+      if( Objects.equals(documents.get(i).getCount(), type) ){
+        documents.get(i).setValue(Integer.parseInt(documents.get(i).getValue()) + 1 );
+        documents.get(0).setValue(Integer.parseInt(documents.get(0).getValue()) + 1 );
+        break;
+      }
+    }
+  }
+
 }

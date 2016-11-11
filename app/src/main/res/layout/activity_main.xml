@@ -25,11 +25,7 @@
         android:minHeight="?attr/actionBarSize"
         android:background="@drawable/toolbar_background"
 
-        android:elevation="8dp">
-    <!--android:background="@color/colorPrimary"-->
-
-    </android.support.v7.widget.Toolbar>
-
+        android:elevation="8dp"/>
 
     <RelativeLayout
         android:layout_width="match_parent"
