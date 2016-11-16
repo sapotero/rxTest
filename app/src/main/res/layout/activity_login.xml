@@ -1,38 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.stepstone.stepper.StepperLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/stepperLayout"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="sapotero.rxtest.views.activities.LoginActivity"
+
+    android:background="@color/md_grey_100"
+
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    app:ms_stepperType="progress_bar" />
-<!--<LinearLayout-->
-    <!--xmlns:android="http://schemas.android.com/apk/res/android"-->
-    <!--xmlns:tools="http://schemas.android.com/tools"-->
-    <!--tools:context="sapotero.rxtest.views.activities.LoginActivity"-->
 
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="match_parent"-->
+    android:gravity="center"
 
-    <!--android:gravity="center"-->
+    android:weightSum="1"
+    android:baselineAligned="false">
+    <FrameLayout
+        android:layout_width="440dp"
+        android:layout_height="660dp"
+        android:layout_weight="0.09"
+        >
 
-    <!--android:weightSum="1">-->
-    <!--<FrameLayout-->
-        <!--android:layout_width="340dp"-->
-        <!--android:layout_height="620dp"-->
-        <!--android:layout_weight="0.09"-->
-        <!--&gt;-->
+        <ernestoyaquello.com.verticalstepperform.VerticalStepperFormLayout
+            android:id="@+id/stepper_form"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
 
-        <!--<ernestoyaquello.com.verticalstepperform.VerticalStepperFormLayout-->
-            <!--android:id="@+id/stepper_form"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_centerInParent="true"-->
-            <!--android:layout_centerVertical="true"-->
-            <!--android:layout_centerHorizontal="true"-->
+            >
+        </ernestoyaquello.com.verticalstepperform.VerticalStepperFormLayout>
+    </FrameLayout>
 
-            <!--/>-->
-    <!--</FrameLayout>-->
-
-<!--</LinearLayout>-->
+</RelativeLayout>

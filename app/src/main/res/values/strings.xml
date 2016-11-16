@@ -154,5 +154,10 @@
     <string name="vertical_form_stepper_form_continue">Продолжить</string>
     <string name="vertical_form_stepper_form_last_step">Завершение</string>
     <string name="vertical_form_stepper_form_confirm_button">Начать работу</string>
+    <string name="stepper_fragment_login">Авторизация</string>
+    <string name="stepper_fragment_load_documents">Пользователь</string>
+    <string name="stepper_fragment_load_info">Документы</string>
+
+    <string name="stepper_login_username">авторизация</string>
 
 </resources>

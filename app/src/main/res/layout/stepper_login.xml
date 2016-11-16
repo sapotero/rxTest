@@ -1,75 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
+    android:id="@+id/wrapper"
+    android:alpha="1.0"
+    android:background="@color/transparent"
+
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
     android:layout_margin="@dimen/date_offset"
     >
-
-    <android.support.design.widget.TextInputLayout
-        android:layout_width="400dp"
-        android:layout_height="wrap_content"
-        android:paddingTop="16dp"
-        >
-        <EditText
-
-            android:id="@+id/username"
-            android:layout_width="300dp"
-            android:layout_height="wrap_content"
-            android:hint="@string/username_hinf"
-            android:text="admin"/>
-    </android.support.design.widget.TextInputLayout>
-
-    <android.support.design.widget.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="16dp"
-        >
-        <EditText
-            android:id="@+id/password"
-            android:layout_width="300dp"
-            android:layout_height="wrap_content"
-            android:hint="@string/password_hint"
-            android:inputType="textPassword"
-            android:text="123456"/>
-    </android.support.design.widget.TextInputLayout>
-
-    <android.support.design.widget.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="16dp"
-        >
-        <EditText
-            android:id="@+id/host"
-            android:layout_width="300dp"
-            android:layout_height="wrap_content"
-            android:inputType="textPersonName"
-            android:text=""
-            android:hint="@string/host_hint"
-            android:ems="10"
-        />
-    </android.support.design.widget.TextInputLayout>
-
-
-
+<!--android:gravity="center"-->
     <ProgressBar
-        style="?android:attr/progressBarStyleHorizontal"
+        style="@style/Widget.AppCompat.ProgressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/progress"
+        android:id="@+id/stepper_login_progress"
         android:indeterminate="true"
-        android:visibility="invisible"/>
+        android:visibility="invisible"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"/>
 
-    <!--<Button-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:text="@string/login_button"-->
-        <!--android:id="@+id/loginButton"-->
-        <!--android:onClick="tryToLogin"-->
-        <!--android:layout_below="@+id/host"-->
-        <!--android:layout_alignStart="@+id/password"-->
-        <!--android:layout_alignEnd="@+id/password"/>-->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true">
 
-</LinearLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="400dp"
+            android:layout_height="wrap_content"
+            android:paddingTop="16dp"
+            >
+            <EditText
+
+                android:id="@+id/stepper_login_username"
+                android:layout_width="400dp"
+                android:layout_height="wrap_content"
+                android:hint="@string/username_hinf"
+                android:text="admin"/>
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="400dp"
+            android:layout_height="wrap_content"
+            android:paddingTop="16dp"
+
+            >
+            <EditText
+                android:id="@+id/stepper_login_password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/password_hint"
+                android:inputType="textPassword"
+                android:text="123456"/>
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="400dp"
+            android:layout_height="wrap_content"
+            android:paddingTop="16dp"
+            >
+            <EditText
+                android:id="@+id/stepper_login_host"
+                android:layout_width="400dp"
+                android:layout_height="wrap_content"
+                android:inputType="textPersonName"
+                android:text=""
+                android:hint="@string/host_hint"
+                android:ems="10"
+                />
+        </android.support.design.widget.TextInputLayout>
+    </LinearLayout>
+
+</RelativeLayout>
