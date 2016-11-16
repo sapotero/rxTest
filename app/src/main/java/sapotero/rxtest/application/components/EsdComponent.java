@@ -17,6 +17,7 @@ import sapotero.rxtest.views.activities.InfoActivity;
 import sapotero.rxtest.views.activities.LoginActivity;
 import sapotero.rxtest.views.activities.MainActivity;
 import sapotero.rxtest.views.activities.SettingsActivity;
+import sapotero.rxtest.views.activities.SettingsTemplatesActivity;
 import sapotero.rxtest.views.adapters.DecisionAdapter;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OshsAutoCompleteAdapter;
@@ -42,6 +43,9 @@ public interface EsdComponent {
   void inject(SettingsActivity activity);
   void inject(DecisionConstructorActivity activity);
   void inject(DocumentImageFullScreenActivity activity);
+  void inject(SettingsTemplatesActivity activity);
+
+
 
   void inject(AuthService service);
 

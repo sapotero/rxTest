@@ -7,7 +7,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="sapotero.rxtest.views.activities.DocumentImageFullScreenActivity"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/md_white_1000">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/document_image_toolbar"

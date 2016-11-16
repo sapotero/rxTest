@@ -55,27 +55,20 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.application.config.Constant;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.models.control_labels.RControlLabelsEntity;
 import sapotero.rxtest.db.requery.models.decisions.RBlock;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecision;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RPerformer;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
-import sapotero.rxtest.db.requery.models.exemplars.RExemplarEntity;
-import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.events.bus.MassInsertDoneEvent;
 import sapotero.rxtest.events.bus.SetActiveDecisonEvent;
 import sapotero.rxtest.jobs.rx.SetActiveDecisionJob;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Block;
-import sapotero.rxtest.retrofit.models.document.ControlLabel;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
-import sapotero.rxtest.retrofit.models.document.Exemplar;
-import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.views.adapters.DecisionAdapter;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
@@ -106,15 +99,16 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
   private Preference<String> LOGIN;
   private Preference<String> PASSWORD;
   private Preference<String> UID;
+  private Preference<String> DOCUMENT_UID;
   private Preference<Integer> POSITION;
 
   private DocumentInfo DOCUMENT;
-
   private String TAG = InfoActivity.class.getSimpleName();
-  private Context context;
 
+  private Context context;
   private DecisionAdapter decision_adapter;
   @BindView(R.id.toolbar) Toolbar toolbar;
+  private Preference<String> HOST;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -129,6 +123,8 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
 
     setContentView(R.layout.activity_info);
     ButterKnife.bind(this);
+
+    HOST = settings.getString("settings_username_host");
 
 
     toolbar.setTitle("Все документы");
@@ -188,7 +184,7 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
       .value();
 
     Boolean result = count > 0;
-    Timber.i( "documentExist " + result.toString() );
+    Timber.i( "documentExist %s", result );
 
     return result;
   }
@@ -312,145 +308,11 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
       });
   }
 
-  private void saveToDb(DocumentInfo document){
-    String tag = "saveToDb";
-
-    Timber.tag(tag).v("document " + document.getUid());
-
-    RDocumentEntity rDoc = dataStore
-      .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq(UID.get()))
-      .get()
-      .first();
-
-    if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
-      for (Decision d: document.getDecisions() ) {
-
-        RDecisionEntity decision = new RDecisionEntity();
-        decision.setLetterhead(d.getLetterhead());
-        decision.setApproved(d.getApproved());
-        decision.setSigner(d.getSigner());
-        decision.setSignerId(d.getSignerId());
-        decision.setAssistantId(d.getAssistantId());
-        decision.setSignerBlankText(d.getSignerBlankText());
-        decision.setSignerIsManager(d.getSignerIsManager());
-        decision.setComment(d.getComment());
-        decision.setDate(d.getDate());
-        decision.setUrgencyText(d.getUrgencyText());
-        decision.setShowPosition(d.getShowPosition());
-
-        if ( d.getBlocks() != null && d.getBlocks().size() >= 1 ){
-
-          for (Block b: d.getBlocks() ) {
-            RBlockEntity block = new RBlockEntity();
-            block.setNumber(b.getNumber());
-            block.setText(b.getText());
-            block.setAppealText(b.getAppealText());
-            block.setTextBefore(b.getTextBefore());
-            block.setHidePerformers(b.getHidePerformers());
-            block.setToCopy(b.getToCopy());
-            block.setToFamiliarization(b.getToFamiliarization());
-
-            if ( b.getPerformers() != null && b.getPerformers().size() >= 1 ) {
-
-              for (Performer p : b.getPerformers()) {
-                RPerformerEntity performer = new RPerformerEntity();
-
-                performer.setNumber(p.getNumber());
-                performer.setPerformerId(p.getPerformerId());
-                performer.setPerformerType(p.getPerformerType());
-                performer.setPerformerText(p.getPerformerText());
-                performer.setOrganizationText(p.getOrganizationText());
-                performer.setIsOriginal(p.getIsOriginal());
-                performer.setIsResponsible(p.getIsResponsible());
-
-                performer.setBlock(block);
-                block.getPerformers().add(performer);
-              }
-            }
-
-
-            block.setDecision(decision);
-            decision.getBlocks().add(block);
-          }
-
-        }
-
-
-        decision.setDocument(rDoc);
-        rDoc.getDecisions().add(decision);
-      }
-    }
-
-    if ( document.getExemplars() != null && document.getExemplars().size() >= 1 ){
-      for (Exemplar e: document.getExemplars() ) {
-        RExemplarEntity exemplar = new RExemplarEntity();
-        exemplar.setNumber(String.valueOf(e.getNumber()));
-        exemplar.setIsOriginal(e.getIsOriginal());
-        exemplar.setStatusCode(e.getStatusCode());
-        exemplar.setAddressedToId(e.getAddressedToId());
-        exemplar.setAddressedToName(e.getAddressedToName());
-        exemplar.setDate(e.getDate());
-        exemplar.setDocument(rDoc);
-        rDoc.getExemplars().add(exemplar);
-      }
-    }
-
-    if ( document.getImages() != null && document.getImages().size() >= 1 ){
-      for (Image i: document.getImages() ) {
-        RImageEntity image = new RImageEntity();
-        image.setTitle(i.getTitle());
-        image.setNumber(i.getNumber());
-        image.setMd5(i.getMd5());
-        image.setSize(i.getSize());
-        image.setPath(i.getPath());
-        image.setContentType(i.getContentType());
-        image.setSigned(i.getSigned());
-        image.setDocument(rDoc);
-        rDoc.getImages().add(image);
-      }
-    }
-
-    if ( document.getControlLabels() != null && document.getControlLabels().size() >= 1 ){
-      for (ControlLabel l: document.getControlLabels() ) {
-        RControlLabelsEntity label = new RControlLabelsEntity();
-        label.setCreatedAt(l.getCreatedAt());
-        label.setOfficialId(l.getOfficialId());
-        label.setOfficialName(l.getOfficialName());
-        label.setSkippedOfficialId(l.getSkippedOfficialId());
-        label.setSkippedOfficialName(l.getSkippedOfficialName());
-        label.setState(l.getState());
-        label.setDocument(rDoc);
-        rDoc.getControlLabels().add(label);
-      }
-    }
-
-    if ( document.getInfoCard() != null){
-      rDoc.setInfoCard( document.getInfoCard() );
-    }
-
-
-    dataStore.update(rDoc)
-      .toObservable()
-      .subscribeOn(Schedulers.io())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(
-        result -> {
-          Timber.tag(tag).d("updated " + result.getUid());
-        },
-        error ->{
-          error.printStackTrace();
-        }
-      );
-
-
-  }
-
   private void loadFromJson(){
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl(Constant.HOST + "v3/documents/")
+      .baseUrl(HOST.get() + "v3/documents/")
       .client(okHttpClient)
       .build();
 
@@ -467,8 +329,6 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
       .subscribe(
         data -> {
           DOCUMENT = data;
-
-          saveToDb(DOCUMENT);
 
           Gson gson = new Gson();
 
@@ -565,6 +425,7 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
     PASSWORD = settings.getString("password");
     TOKEN    = settings.getString("token");
     POSITION = settings.getInteger("position");
+    DOCUMENT_UID = settings.getString("document.uid");
   }
 
   @Override
@@ -635,7 +496,13 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
       }
     }
 
-    printSigner( decision.getShowPosition(), decision.getSignerBlankText(), decision.getSignerPositionS(), decision.getDate(), DOCUMENT.getRegistrationNumber()  );
+    RDocumentEntity doc = dataStore
+      .select(RDocumentEntity.class)
+      .where(RDocumentEntity.UID.eq(UID.get()))
+      .and(RDocumentEntity.INFO_CARD.ne(""))
+      .get().first();
+
+    printSigner( decision.getShowPosition(), decision.getSignerBlankText(), decision.getSignerPositionS(), decision.getDate(), doc.getRegistrationNumber()  );
   }
 
   private void printSigner(Boolean showPosition, String signerBlankText, String signerPositionS, String date, String registrationNumber) {

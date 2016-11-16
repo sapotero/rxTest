@@ -2,7 +2,6 @@ package sapotero.rxtest.db.requery.models;
 
 import java.util.Set;
 
-import io.requery.CascadeAction;
 import io.requery.Column;
 import io.requery.Entity;
 import io.requery.ForeignKey;
@@ -27,6 +26,7 @@ public abstract class  RDocument implements Persistable {
   @Column(unique = true)
   String uid;
 
+  @Index("changed_index")
   String md5;
   Integer sortKey;
   String title;
@@ -60,23 +60,33 @@ public abstract class  RDocument implements Persistable {
 
   String infoCard;
 
-  @OneToMany(mappedBy = "document", cascade = {CascadeAction.DELETE, CascadeAction.SAVE})
-  Set<RDecision> decisions;
 
-  @OneToMany(mappedBy = "document", cascade = {CascadeAction.DELETE, CascadeAction.SAVE})
+  @OneToMany(mappedBy = "document")
+//  @OneToMany(mappedBy = "document", cascade = {CascadeAction.DELETE, CascadeAction.SAVE})
+    Set<RDecision> decisions;
+
+//  @OneToMany(mappedBy = "document", cascade = {CascadeAction.DELETE, CascadeAction.SAVE})
+
+  @OneToMany(mappedBy = "document")
   Set<RExemplar> exemplars;
 
-  @OneToMany(mappedBy = "document", cascade = {CascadeAction.DELETE, CascadeAction.SAVE})
+//  @OneToMany(mappedBy = "document", cascade = {CascadeAction.DELETE, CascadeAction.SAVE})
+
+  @OneToMany(mappedBy = "document")
   Set<RImage> images;
 
-  @OneToMany(mappedBy = "document", cascade = {CascadeAction.DELETE, CascadeAction.SAVE})
+//  @OneToMany(mappedBy = "document", cascade = {CascadeAction.DELETE, CascadeAction.SAVE})
+
+  @OneToMany(mappedBy = "document")
   Set<RControlLabels> controlLabels;
 
 //  exemplars: Тип массив структур Экземпляры документа,
 //  decisions: Тип массив структур Резолюции документа,
 //  images: Тип массив структур Электронные образы,
 //  control_labels: Тип массив структур Контрольные отметки,
-//  ** нет необходимости links: Тип массив. Массив UID связанных документов,
-//  ** нет необходимости route: Тип структура Маршрут прохождения документа
+
+//  ** нет необходимости
+//    links: Тип массив. Массив UID связанных документов,
+//    route: Тип структура Маршрут прохождения документа
 
 }

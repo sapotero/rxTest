@@ -24,7 +24,6 @@ import retrofit2.Call;
 import retrofit2.Retrofit;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.application.config.Constant;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.utils.OshsAdapterService;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
@@ -42,6 +41,7 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
 
   private Preference<String> login;
   private Preference<String> token;
+  private Preference<String> HOST;
 
 
   public OshsAutoCompleteAdapter(Context context) {
@@ -110,7 +110,7 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
 
   private List<Oshs> findOshs(Context context, String OshsTitle) throws IOException {
 
-    Retrofit retrofit = new RetrofitManager( context, Constant.HOST + "/v2/", okHttpClient).process();
+    Retrofit retrofit = new RetrofitManager( context, HOST.get() + "/v2/", okHttpClient).process();
     OshsAdapterService documentsService = retrofit.create( OshsAdapterService.class );
     Call<Oshs[]> call = documentsService.find(login.get(), token.get(), OshsTitle);
 
@@ -122,5 +122,7 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
   private void loadSettings(){
     login = settings.getString("login");
     token = settings.getString("token");
+    HOST  = settings.getString("settings_username_host");
+
   }
 }

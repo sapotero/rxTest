@@ -8,20 +8,13 @@ import com.birbit.android.jobqueue.Params;
 import com.birbit.android.jobqueue.RetryConstraint;
 import com.f2prateek.rx.preferences.Preference;
 
-import org.greenrobot.eventbus.EventBus;
-
 import java.util.List;
-import java.util.Objects;
 
 import retrofit2.Retrofit;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
-import sapotero.rxtest.application.config.Constant;
-import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.models.RSignerEntity;
-import sapotero.rxtest.events.rx.LoadAllDocumentsByStatusEvent;
 import sapotero.rxtest.retrofit.DocumentsService;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.retrofit.models.documents.Documents;
@@ -37,6 +30,7 @@ public class LoadAllDocumentsByStatusJob extends BaseJob {
   private final int index;
   private final String count;
   private String filter_type;
+  private Preference<String> HOST;
 
   public LoadAllDocumentsByStatusJob(int index, String total) {
     super( new Params(PRIORITY).requireNetwork().persist() );
@@ -48,7 +42,6 @@ public class LoadAllDocumentsByStatusJob extends BaseJob {
   @Override
   public void onAdded() {
     Timber.tag(TAG).v( "onRun"  );
-
   }
 
   @Override
@@ -58,7 +51,9 @@ public class LoadAllDocumentsByStatusJob extends BaseJob {
     String[] values = getApplicationContext().getResources().getStringArray(R.array.FILTER_TYPES_VALUE);
     filter_type = values[index];
 
-    Retrofit retrofit = new RetrofitManager( getApplicationContext(), Constant.HOST + "/v3/", okHttpClient).process();
+    HOST = settings.getString("settings_username_host");
+
+    Retrofit retrofit = new RetrofitManager( getApplicationContext(), HOST.get() + "/v3/", okHttpClient).process();
     DocumentsService documentsService = retrofit.create( DocumentsService.class );
 
     Preference<String> LOGIN = settings.getString("login");
@@ -66,19 +61,15 @@ public class LoadAllDocumentsByStatusJob extends BaseJob {
 
     Observable<Documents> documents = documentsService.getDocuments(LOGIN.get(), TOKEN.get(), filter_type, Integer.valueOf(count), 0);
 
-    documents.subscribeOn(Schedulers.io())
+    documents
+      .subscribeOn(Schedulers.io())
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(
         data -> {
 
+          Timber.d("LOAD "+ data.getDocuments().size() );
           List<Document> docs = data.getDocuments();
-          if ( docs != null && docs.size() > 0 ){
-            for (Document d: docs ) {
-              insertRDoc(d);
-            }
-          }
-
-          EventBus.getDefault().post( new LoadAllDocumentsByStatusEvent() );
+          insertRDocMass(docs);
         },
         error -> {
           Timber.d("_ERROR "+ error.getMessage());
@@ -87,52 +78,12 @@ public class LoadAllDocumentsByStatusJob extends BaseJob {
 
   }
 
-  private void insertRDoc(Document d) {
+  private void insertRDocMass(List<Document> docs) {
+    Timber.tag(TAG).i( "insertRDoc " + docs.size() );
 
-    Timber.tag(TAG).i( "insertRDoc " + filter_type );
-
-    RDocumentEntity rd = new RDocumentEntity();
-
-    rd.setUid( d.getUid() );
-    rd.setFilter(filter_type);
-    rd.setMd5( d.getMd5() );
-    rd.setSortKey( d.getSortKey() );
-    rd.setTitle( d.getTitle() );
-    rd.setRegistrationNumber( d.getRegistrationNumber() );
-    rd.setRegistrationDate( d.getRegistrationDate() );
-    rd.setUrgency( d.getUrgency() );
-    rd.setShortDescription( d.getShortDescription() );
-    rd.setComment( d.getComment() );
-    rd.setExternalDocumentNumber( d.getExternalDocumentNumber() );
-    rd.setReceiptDate( d.getReceiptDate() );
-    rd.setViewed( d.getViewed() );
-
-    if ( d.getSigner().getOrganisation() != null && !Objects.equals(d.getSigner().getOrganisation(), "")){
-      rd.setOrganization( d.getSigner().getOrganisation() );
-    } else {
-      rd.setOrganization("Без организации" );
+    for (Document d: docs) {
+      jobManager.addJobInBackground( new SyncDocumentsJob( d.getUid(), filter_type ) );
     }
-
-    RSignerEntity signer = new RSignerEntity();
-    signer.setUid( d.getSigner().getId() );
-    signer.setName( d.getSigner().getName() );
-    signer.setOrganisation( d.getSigner().getOrganisation() );
-    signer.setType( d.getSigner().getType() );
-
-    rd.setSigner( signer );
-
-    dataStore.insert(rd)
-      .toObservable()
-      .subscribeOn(Schedulers.io())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(
-        result -> {
-          Timber.d("inserted ++ " + result.getUid());
-        },
-        error ->{
-          error.printStackTrace();
-        }
-      );
   }
 
   @Override

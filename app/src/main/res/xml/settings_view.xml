@@ -43,10 +43,10 @@
             android:key="settings_view_show_origin"
             android:title="Отображать настройки подлинника"
             android:defaultValue="false" />
-        <EditTextPreference
-            android:key="settings_view_time"
-            android:title="Время показа уведомления"
-            android:defaultValue="0" />
+        <!--<EditTextPreference-->
+            <!--android:key="settings_view_time"-->
+            <!--android:title="Время показа уведомления"-->
+            <!--android:defaultValue="0" />-->
 
     </android.support.v7.preference.PreferenceCategory>
 

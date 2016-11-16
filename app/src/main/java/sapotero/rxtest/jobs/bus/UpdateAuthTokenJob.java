@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import com.birbit.android.jobqueue.CancelReason;
 import com.birbit.android.jobqueue.Params;
 import com.birbit.android.jobqueue.RetryConstraint;
+import com.f2prateek.rx.preferences.Preference;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -12,7 +13,6 @@ import retrofit2.Retrofit;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import sapotero.rxtest.application.config.Constant;
 import sapotero.rxtest.events.bus.UpdateAuthTokenEvent;
 import sapotero.rxtest.retrofit.AuthTokenService;
 import sapotero.rxtest.retrofit.models.AuthToken;
@@ -25,6 +25,7 @@ public class UpdateAuthTokenJob extends BaseJob {
   private String TOKEN;
 
   private String TAG = "UpdateAuthTokenJob";
+  private Preference<String> HOST;
 
   public UpdateAuthTokenJob() {
     super( new Params(PRIORITY).requireNetwork().persist() );
@@ -42,7 +43,10 @@ public class UpdateAuthTokenJob extends BaseJob {
 
   @Override
   public void onRun() throws Throwable {
-    Retrofit retrofit = new RetrofitManager( getApplicationContext(), Constant.HOST, okHttpClient).process();
+
+    HOST = settings.getString("settings_username_host");
+
+    Retrofit retrofit = new RetrofitManager( getApplicationContext(), HOST.get(), okHttpClient).process();
     AuthTokenService authTokenService = retrofit.create( AuthTokenService.class );
 
     Observable<AuthToken> user = authTokenService.getAuth( settings.getString("login").get(), settings.getString("password").get() );

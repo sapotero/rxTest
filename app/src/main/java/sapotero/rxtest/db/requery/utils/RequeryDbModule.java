@@ -31,7 +31,7 @@ public final class RequeryDbModule {
     EntityModel model = Models.DEFAULT;
     Configuration configuration = new ConfigurationBuilder(source, model)
 //      .useDefaultLogging()
-      .setStatementCacheSize(1000)
+      .setStatementCacheSize(200)
       .setBatchUpdateSize(100)
       .setWriteExecutor(
         Executors.newSingleThreadExecutor()
@@ -39,7 +39,7 @@ public final class RequeryDbModule {
       .build();
 
     SchemaModifier schemaModifier = new SchemaModifier(configuration);
-    schemaModifier.createTables(TableCreationMode.DROP_CREATE);
+    schemaModifier.createTables(TableCreationMode.CREATE_NOT_EXISTS);
 
     return RxSupport.toReactiveStore( new EntityDataStore<Persistable>(configuration) );
   }

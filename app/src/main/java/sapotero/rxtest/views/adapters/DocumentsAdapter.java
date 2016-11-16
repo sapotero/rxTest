@@ -24,6 +24,7 @@ import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.google.gson.Gson;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -32,6 +33,7 @@ import javax.inject.Inject;
 import rx.functions.Action1;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.jobs.bus.MarkDocumentAsChangedJob;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.models.documents.Document;
@@ -69,7 +71,7 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
     final Document item = documents.get(position);
 
     viewHolder.title.setText(item.getTitle() );
-    viewHolder.from.setText( item.getSigner().getOrganisation());
+    viewHolder.from.setText( item.getOrganization() );
     viewHolder.date.setText( item.getExternalDocumentNumber() + " от " + item.getRegistrationDate());
 
     viewHolder.date.setText( item.getExternalDocumentNumber() + " от " + item.getRegistrationDate());
@@ -93,6 +95,11 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
     } else {
       viewHolder.favorite_label.setVisibility(View.GONE);
     }
+
+//    if ( item.get != null && item.getFavorites() ){
+//      Timber.d( "item.getFavorites() " + item.getFavorites().toString() );
+//      viewHolder.favorite_label.setVisibility(View.VISIBLE);
+//    }
 
 
     viewHolder.swipeLayout.addSwipeListener(new SwipeLayout.SwipeListener() {
@@ -162,6 +169,7 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
 
     viewHolder.to_contol.setOnClickListener(view -> {
       jobManager.addJobInBackground( new UpdateDocumentJob( item.getUid(), "favorites", true ) );
+      jobManager.addJobInBackground( new MarkDocumentAsChangedJob( item.getUid() ) );
 
       Toast.makeText(view.getContext(), "Избранное " + viewHolder.title.getText().toString(), Toast.LENGTH_SHORT).show();
       viewHolder.swipeLayout.close(true);
@@ -170,6 +178,7 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
     viewHolder.to_favorites.setOnClickListener(view -> {
 
       jobManager.addJobInBackground( new UpdateDocumentJob( item.getUid(), "control", true ) );
+      jobManager.addJobInBackground( new MarkDocumentAsChangedJob( item.getUid() ) );
 
       Toast.makeText(view.getContext(), "Контроль " + viewHolder.title.getText().toString(), Toast.LENGTH_SHORT).show();
       viewHolder.swipeLayout.close(true);
@@ -211,6 +220,12 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
 
   public void addItem(Document document) {
     documents.add(document);
+    notifyDataSetChanged();
+//    notifyItemInserted(documents.size());
+  }
+
+  public void setDocuments(ArrayList<Document> docs) {
+    documents = docs;
     notifyDataSetChanged();
 //    notifyItemInserted(documents.size());
   }

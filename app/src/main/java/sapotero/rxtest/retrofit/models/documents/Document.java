@@ -68,6 +68,16 @@ public class Document implements Serializable {
         this.favorites = favorites;
     }
 
+    public String getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+        this.organization = organization;
+    }
+
+    public String organization;
+
     /**
      * 
      * @return

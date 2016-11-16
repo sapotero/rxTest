@@ -19,7 +19,6 @@ import butterknife.ButterKnife;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import timber.log.Timber;
-import uk.co.senab.photoview.PhotoViewAttacher;
 
 public class DocumentImageFullScreenActivity extends AppCompatActivity {
 
@@ -30,7 +29,7 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity {
   @Inject RxSharedPreferences settings;
 
   private String TAG = this.getClass().getSimpleName();
-  private PhotoViewAttacher mAttacher;
+//  private PhotoViewAttacher mAttacher;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +65,7 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity {
       }
     }
 
-    mAttacher = new PhotoViewAttacher(image);
+//    mAttacher = new PhotoViewAttacher(image);
 
     toolbar.setTitle("Просмотр документа");
     toolbar.setNavigationOnClickListener(v ->{
@@ -86,7 +85,7 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity {
 
   @Override protected void onDestroy() {
     super.onDestroy();
-    mAttacher.cleanup();
+//    mAttacher.cleanup();
   }
 
 }

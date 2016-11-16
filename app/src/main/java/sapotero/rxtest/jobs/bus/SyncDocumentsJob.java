@@ -1,37 +1,319 @@
 package sapotero.rxtest.jobs.bus;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.birbit.android.jobqueue.CancelReason;
 import com.birbit.android.jobqueue.Params;
 import com.birbit.android.jobqueue.RetryConstraint;
+import com.f2prateek.rx.preferences.Preference;
 
 import org.greenrobot.eventbus.EventBus;
 
-import sapotero.rxtest.events.bus.SetActiveDecisonEvent;
-import sapotero.rxtest.jobs.bus.BaseJob;
-import sapotero.rxtest.jobs.rx.SetActiveDecisionJob;
+import java.util.Objects;
+
+import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
+import rx.Observable;
+import rx.schedulers.Schedulers;
+import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.db.requery.models.RSignerEntity;
+import sapotero.rxtest.db.requery.models.control_labels.RControlLabelsEntity;
+import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
+import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
+import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
+import sapotero.rxtest.db.requery.models.exemplars.RExemplarEntity;
+import sapotero.rxtest.db.requery.models.images.RImageEntity;
+import sapotero.rxtest.events.bus.MarkDocumentAsChangedJobEvent;
+import sapotero.rxtest.retrofit.DocumentService;
+import sapotero.rxtest.retrofit.models.document.Block;
+import sapotero.rxtest.retrofit.models.document.ControlLabel;
+import sapotero.rxtest.retrofit.models.document.Decision;
+import sapotero.rxtest.retrofit.models.document.DocumentInfo;
+import sapotero.rxtest.retrofit.models.document.Exemplar;
+import sapotero.rxtest.retrofit.models.document.Image;
+import sapotero.rxtest.retrofit.models.document.Performer;
 import timber.log.Timber;
 
 public class SyncDocumentsJob  extends BaseJob {
 
-  public static final int PRIORITY = 1;
-  private Integer decision;
-  private String TAG = SetActiveDecisionJob.class.getSimpleName();
+  public static final int PRIORITY = 10;
 
-  public SyncDocumentsJob(Integer DECISON) {
+  private Preference<String> LOGIN = null;
+  private Preference<String> TOKEN = null;
+  private Preference<String> HOST;
+
+  private final String filter;
+  private String uid;
+  private String TAG = this.getClass().getSimpleName();
+
+  public SyncDocumentsJob(String uid, String filter) {
     super( new Params(PRIORITY).requireNetwork().persist() );
-    this.decision = DECISON;
+    this.uid = uid;
+    this.filter = filter;
   }
 
   @Override
   public void onAdded() {
-    EventBus.getDefault().post( new SetActiveDecisonEvent( decision ) );
   }
 
   @Override
   public void onRun() throws Throwable {
     Timber.tag(TAG).v( "onRun"  );
+
+    HOST  = settings.getString("settings_username_host");
+    LOGIN = settings.getString("login");
+    TOKEN = settings.getString("token");
+
+    Retrofit retrofit = new Retrofit.Builder()
+      .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+      .addConverterFactory(GsonConverterFactory.create())
+      .baseUrl(HOST.get() + "v3/documents/")
+      .client(okHttpClient)
+      .build();
+
+    DocumentService documentService = retrofit.create( DocumentService.class );
+
+    Observable<DocumentInfo> info = documentService.getInfo(
+      uid,
+      LOGIN.get(),
+      TOKEN.get()
+    );
+
+    info.subscribeOn( Schedulers.computation() )
+      .observeOn( Schedulers.io() )
+      .subscribe(
+        doc -> {
+          update( doc, exist(doc.getUid()) );
+          EventBus.getDefault().post( new MarkDocumentAsChangedJobEvent( doc.getUid() ) );
+        },
+        error -> {
+          error.printStackTrace();
+        }
+
+      );
+  }
+
+
+
+  @NonNull
+  private Boolean exist(String uid){
+
+    boolean result = false;
+
+    Integer count = dataStore
+      .count(RDocumentEntity.UID)
+      .where(RDocumentEntity.UID.eq(uid))
+      .get().value();
+
+
+
+
+    if( count != 0 ){
+      result = true;
+    }
+
+    Timber.tag(TAG).v("exist " + result );
+
+    return result;
+  }
+
+  @NonNull
+  private Observable<RDocumentEntity> create(DocumentInfo d){
+
+    RDocumentEntity rd = new RDocumentEntity();
+    rd.setUid( d.getUid() );
+    rd.setFilter(filter);
+    rd.setMd5( d.getMd5() );
+    rd.setSortKey( d.getSortKey() );
+    rd.setTitle( d.getTitle() );
+    rd.setRegistrationNumber( d.getRegistrationNumber() );
+    rd.setRegistrationDate( d.getRegistrationDate() );
+    rd.setUrgency( d.getUrgency() );
+    rd.setShortDescription( d.getShortDescription() );
+    rd.setComment( d.getComment() );
+    rd.setExternalDocumentNumber( d.getExternalDocumentNumber() );
+    rd.setReceiptDate( d.getReceiptDate() );
+    rd.setViewed( d.getViewed() );
+
+    if ( d.getSigner().getOrganisation() != null && !Objects.equals(d.getSigner().getOrganisation(), "")){
+      rd.setOrganization( d.getSigner().getOrganisation() );
+    } else {
+      rd.setOrganization("Без организации" );
+    }
+
+    RSignerEntity signer = new RSignerEntity();
+    signer.setUid( d.getSigner().getId() );
+    signer.setName( d.getSigner().getName() );
+    signer.setOrganisation( d.getSigner().getOrganisation() );
+    signer.setType( d.getSigner().getType() );
+
+    return dataStore.insert( rd ).toObservable();
+  }
+
+  private void update(DocumentInfo document, Boolean exist){
+    if (!exist){
+      create(document)
+        .subscribeOn(Schedulers.computation())
+        .observeOn(Schedulers.io())
+        .subscribe(data -> {
+          Timber.tag(TAG).v("update " + data.getRegistrationNumber() );
+          setData( data, document, false);
+        });
+    }
+    else {
+      setData(null, document, true);
+    }
+  }
+
+  private void setData(RDocumentEntity documentEntity, DocumentInfo document, boolean md5Equal){
+
+    if (!md5Equal){
+
+      RDocumentEntity rDoc;
+
+      if (documentEntity != null){
+        rDoc = documentEntity;
+      } else {
+        rDoc = dataStore
+          .select(RDocumentEntity.class)
+          .where(RDocumentEntity.UID.eq( document.getUid() ))
+          .get()
+          .first();
+      }
+
+      Timber.tag(TAG).v("setData " + rDoc.getRegistrationNumber() );
+      Timber.tag(TAG).v("getImages " + document.getImages().size() );
+      Timber.tag(TAG).v("getDecisions " + rDoc.getDecisions().size() );
+      Timber.tag(TAG).v("getExemplars " + rDoc.getExemplars().size() );
+      Timber.tag(TAG).v("getControlLabels " + rDoc.getControlLabels().size() );
+
+      if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
+        for (Decision d: document.getDecisions() ) {
+
+          RDecisionEntity decision = new RDecisionEntity();
+          decision.setLetterhead(d.getLetterhead());
+          decision.setApproved(d.getApproved());
+          decision.setSigner(d.getSigner());
+          decision.setSignerId(d.getSignerId());
+          decision.setAssistantId(d.getAssistantId());
+          decision.setSignerBlankText(d.getSignerBlankText());
+          decision.setSignerIsManager(d.getSignerIsManager());
+          decision.setComment(d.getComment());
+          decision.setDate(d.getDate());
+          decision.setUrgencyText(d.getUrgencyText());
+          decision.setShowPosition(d.getShowPosition());
+
+          if ( d.getBlocks() != null && d.getBlocks().size() >= 1 ){
+
+            for (Block b: d.getBlocks() ) {
+              RBlockEntity block = new RBlockEntity();
+              block.setNumber(b.getNumber());
+              block.setText(b.getText());
+              block.setAppealText(b.getAppealText());
+              block.setTextBefore(b.getTextBefore());
+              block.setHidePerformers(b.getHidePerformers());
+              block.setToCopy(b.getToCopy());
+              block.setToFamiliarization(b.getToFamiliarization());
+
+              if ( b.getPerformers() != null && b.getPerformers().size() >= 1 ) {
+
+                for (Performer p : b.getPerformers()) {
+                  RPerformerEntity performer = new RPerformerEntity();
+
+                  performer.setNumber(p.getNumber());
+                  performer.setPerformerId(p.getPerformerId());
+                  performer.setPerformerType(p.getPerformerType());
+                  performer.setPerformerText(p.getPerformerText());
+                  performer.setOrganizationText(p.getOrganizationText());
+                  performer.setIsOriginal(p.getIsOriginal());
+                  performer.setIsResponsible(p.getIsResponsible());
+
+                  performer.setBlock(block);
+                  block.getPerformers().add(performer);
+                }
+              }
+
+
+              block.setDecision(decision);
+              decision.getBlocks().add(block);
+            }
+
+          }
+
+
+          decision.setDocument(rDoc);
+          rDoc.getDecisions().add(decision);
+        }
+      }
+
+      if ( document.getExemplars() != null && document.getExemplars().size() >= 1 ){
+        for (Exemplar e: document.getExemplars() ) {
+          RExemplarEntity exemplar = new RExemplarEntity();
+          exemplar.setNumber(String.valueOf(e.getNumber()));
+          exemplar.setIsOriginal(e.getIsOriginal());
+          exemplar.setStatusCode(e.getStatusCode());
+          exemplar.setAddressedToId(e.getAddressedToId());
+          exemplar.setAddressedToName(e.getAddressedToName());
+          exemplar.setDate(e.getDate());
+          exemplar.setDocument(rDoc);
+          rDoc.getExemplars().add(exemplar);
+        }
+      }
+
+      if ( document.getImages() != null && document.getImages().size() >= 1 ){
+        for (Image i: document.getImages() ) {
+          RImageEntity image = new RImageEntity();
+          image.setTitle(i.getTitle());
+          image.setNumber(i.getNumber());
+          image.setMd5(i.getMd5());
+          image.setSize(i.getSize());
+          image.setPath(i.getPath());
+          image.setContentType(i.getContentType());
+          image.setSigned(i.getSigned());
+          image.setDocument(rDoc);
+          rDoc.getImages().add(image);
+        }
+      }
+
+      if ( document.getControlLabels() != null && document.getControlLabels().size() >= 1 ){
+        for (ControlLabel l: document.getControlLabels() ) {
+          RControlLabelsEntity label = new RControlLabelsEntity();
+          label.setCreatedAt(l.getCreatedAt());
+          label.setOfficialId(l.getOfficialId());
+          label.setOfficialName(l.getOfficialName());
+          label.setSkippedOfficialId(l.getSkippedOfficialId());
+          label.setSkippedOfficialName(l.getSkippedOfficialName());
+          label.setState(l.getState());
+          label.setDocument(rDoc);
+          rDoc.getControlLabels().add(label);
+        }
+      }
+
+      if ( document.getInfoCard() != null){
+        rDoc.setInfoCard( document.getInfoCard() );
+      }
+
+      rDoc.setFilter(filter);
+
+
+      dataStore.update(rDoc)
+        .toObservable()
+        .subscribeOn(Schedulers.computation())
+        .observeOn(Schedulers.io())
+        .toBlocking()
+        .subscribe(
+          result -> {
+            Timber.tag(TAG).d("updated " + result.getUid());
+          },
+          error ->{
+            error.printStackTrace();
+          }
+        );
+    } else {
+      Timber.tag(TAG).v("MD5 equal");
+    }
   }
 
   @Override

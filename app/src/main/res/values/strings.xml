@@ -99,6 +99,13 @@
     </string-array>
 
 
+    <string-array name="settings_templates_decisions">
+        <item>Шаблон 1</item>
+        <item>The layout_weight dictates how the extra space is to be used. The Button does not want to stretch beyond the space it requires, so it has a weight of 0. The ListView wants to take up all of the extra space, so it has a weight of 1.</item>
+        <item>You could accomplish something similar using a RelativeLayout, but if it is just these two items then I think a LinearLayout is simpler.</item>
+    </string-array>
+
+
     <string name="tab_document">документ</string>
     <string name="tab_info">инфокарта</string>
     <string name="control">K</string>
@@ -141,5 +148,11 @@
 
     <string name="document_empty_list"> Нет документов для отображения </string>
     <string name="document_empty_list_error"> Произошла ошибка во время загрузки документов</string>
+    <string name="host_hint">Хост</string>
+
+
+    <string name="vertical_form_stepper_form_continue">Продолжить</string>
+    <string name="vertical_form_stepper_form_last_step">Завершение</string>
+    <string name="vertical_form_stepper_form_confirm_button">Начать работу</string>
 
 </resources>

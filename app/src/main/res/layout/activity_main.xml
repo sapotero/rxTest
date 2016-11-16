@@ -95,7 +95,8 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/DOCUMENT_TYPE"
                 android:minWidth="300dp"
-            android:background="@drawable/spinner_document_type"
+                android:padding="1dp"
+                android:background="@drawable/spinner_document_type"
             />
             <!--android:layout_gravity="center_horizontal"-->
 

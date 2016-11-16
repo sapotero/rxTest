@@ -10,27 +10,28 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import sapotero.rxtest.R;
+import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.retrofit.models.document.Image;
 
 public class DocumentLinkAdapter extends BaseAdapter {
   private Context mContext;
   private LayoutInflater layoutInflater;
-  private ArrayList<Image> mImages;
+  private ArrayList<Image> images;
 
   public DocumentLinkAdapter(Context context, ArrayList<Image> products) {
     mContext = context;
-    mImages  = products;
+    images = products;
     layoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
   }
 
   @Override
   public int getCount() {
-    return mImages.size();
+    return images.size();
   }
 
   @Override
   public Object getItem(int position) {
-    return mImages.get(position);
+    return images.get(position);
   }
 
   @Override
@@ -54,4 +55,15 @@ public class DocumentLinkAdapter extends BaseAdapter {
     return ((Image) getItem(position));
   }
 
+  public void add(RImageEntity img) {
+    Image image = new Image();
+    image.setTitle(img.getTitle());
+    image.setPath(img.getPath());
+    image.setMd5(img.getMd5());
+    image.setContentType(img.getContentType());
+    image.setNumber(img.getNumber());
+    image.setSize(img.getSize());
+    images.add( image );
+    notifyDataSetChanged();
+  }
 }

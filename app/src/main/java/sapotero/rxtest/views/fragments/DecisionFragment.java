@@ -26,7 +26,6 @@ import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.application.config.Constant;
 import sapotero.rxtest.jobs.bus.UpdateDecisionPreviewJob;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.utils.OshsService;
@@ -61,6 +60,7 @@ public class DecisionFragment extends Fragment {
   private OshsService oshsService;
   private int number;
   private Block block;
+  private Preference<String> HOST;
 
   public DecisionFragment() {
   }
@@ -89,10 +89,11 @@ public class DecisionFragment extends Fragment {
     ButterKnife.bind(this, view);
     EsdApplication.getComponent(mContext).inject( this );
 
-    Retrofit retrofit = new RetrofitManager(mContext, Constant.HOST + "v2/", okHttpClient).process();
+    loadSettings();
+
+    Retrofit retrofit = new RetrofitManager(mContext, HOST.get() + "v2/", okHttpClient).process();
     oshsService = retrofit.create( OshsService.class );
 
-    loadSettings();
 
 
     card_toolbar.inflateMenu(R.menu.card_menu);
@@ -189,6 +190,8 @@ public class DecisionFragment extends Fragment {
 
     Preference<String> _token = settings.getString("token");
     token = _token.get();
+
+    HOST = settings.getString("settings_username_host");
   }
 
   public interface OnFragmentInteractionListener {
