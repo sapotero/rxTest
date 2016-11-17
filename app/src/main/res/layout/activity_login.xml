@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="sapotero.rxtest.views.activities.LoginActivity"
 
-    android:background="@color/md_grey_100"
+    android:background="@color/md_white_1000"
 
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -15,7 +15,9 @@
     android:baselineAligned="false">
     <FrameLayout
         android:layout_width="440dp"
-        android:layout_height="660dp"
+        android:layout_height="500dp"
+        android:layout_marginLeft="60dp"
+        android:layout_marginTop="0dp"
         android:layout_weight="0.09"
         >
 
@@ -23,6 +25,7 @@
             android:id="@+id/stepper_form"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="@drawable/stepper_background"
             android:layout_centerInParent="true"
             android:layout_centerVertical="true"
             android:layout_centerHorizontal="true"

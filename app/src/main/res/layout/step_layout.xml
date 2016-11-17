@@ -40,7 +40,7 @@
             android:layout_width="@dimen/vertical_stepper_circle_size"
             android:layout_height="@dimen/vertical_stepper_circle_size"
             android:src="@drawable/ic_done"
-            android:scaleType="center"
+            android:scaleType="fitCenter"
             android:layout_alignLeft="@id/circle"
             android:layout_alignStart="@id/circle"
             android:layout_alignTop="@id/circle"
@@ -158,21 +158,24 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <LinearLayout
-            android:layout_width="@dimen/vertical_stepper_vertical_line_thickness"
-            android:layout_marginLeft="12dp"
-            android:layout_marginStart="12dp"
-            android:layout_marginRight="26dp"
-            android:layout_marginEnd="26dp"
-            android:layout_height="match_parent"
-            android:background="#e0e0e0">
-        </LinearLayout>
+        <!--<LinearLayout-->
+            <!--android:layout_width="@dimen/vertical_stepper_vertical_line_thickness"-->
+            <!--android:layout_marginLeft="12dp"-->
+            <!--android:layout_marginStart="12dp"-->
+            <!--android:layout_marginRight="26dp"-->
+            <!--android:layout_marginEnd="26dp"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:background="#e0e0e0">-->
+        <!--</LinearLayout>-->
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
+            android:layout_marginLeft="32dp"
             android:layout_marginTop="12dp">
+
+
 
             <android.support.v7.widget.AppCompatButton
                 android:id="@+id/next_step"
@@ -180,7 +183,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/vertical_form_stepper_form_continue"
                 android:textColor="#FFFFFF"
-                android:layout_marginRight="8dp"
+                android:layout_marginLeft="32dp"
                 android:layout_marginEnd="8dp"/>
 
         </LinearLayout>

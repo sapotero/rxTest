@@ -584,8 +584,11 @@ public class VerticalStepperFormLayout extends RelativeLayout implements View.On
       }
     });
 
-    // Some content could be added to the final step inside stepContent layout
-    // RelativeLayout stepContent = (RelativeLayout) stepLayout.findViewById(R.id.step_content);
+//     Some content could be added to the final step inside stepContent layout
+    RelativeLayout stepContent = (RelativeLayout) stepLayout.findViewById(R.id.step_content);
+    stepContent.setVisibility(VISIBLE);
+
+    verticalStepperFormImplementation.setFinalView( stepContent );
   }
 
   protected LinearLayout createStepLayout(final int stepNumber) {

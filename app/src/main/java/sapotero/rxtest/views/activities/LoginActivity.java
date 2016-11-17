@@ -299,6 +299,11 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
   @Override
   public void sendData() {
     Timber.e("SendData");
+
+    Intent intent = new Intent(this, MainActivity.class);
+    startActivity(intent);
+
+    finish();
 //
 //    RelativeLayout finishLayout = (RelativeLayout) stepper.findViewById(R.id.step_done);
 //    finishLayout.setBackgroundColor( Color.BLACK );
@@ -311,6 +316,13 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
 //    finishLayout.setMinimumHeight(100);
 //    finishLayout.setVisibility(View.VISIBLE);
 
+  }
+
+  @Override
+  public void setFinalView(RelativeLayout content) {
+    View finalView = LayoutInflater.from(this).inflate(R.layout.stepper_final_view, null);
+
+    content.addView( finalView );
   }
 
   @Override
