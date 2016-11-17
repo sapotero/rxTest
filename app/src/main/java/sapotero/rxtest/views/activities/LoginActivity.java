@@ -10,11 +10,14 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.daimajia.numberprogressbar.NumberProgressBar;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
@@ -28,21 +31,17 @@ import butterknife.ButterKnife;
 import ernestoyaquello.com.verticalstepperform.VerticalStepperFormLayout;
 import ernestoyaquello.com.verticalstepperform.interfaces.VerticalStepperForm;
 import okhttp3.OkHttpClient;
-import retrofit2.Retrofit;
 import rx.Observable;
 import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.application.config.Constant;
-import sapotero.rxtest.retrofit.AuthTokenService;
 import sapotero.rxtest.retrofit.models.AuthToken;
-import sapotero.rxtest.retrofit.utils.RetrofitManager;
+import sapotero.rxtest.views.interfaces.DataLoaderInterface;
 import sapotero.rxtest.views.services.AuthService;
 import timber.log.Timber;
 
-public class LoginActivity extends AppCompatActivity implements VerticalStepperForm {
+public class LoginActivity extends AppCompatActivity implements VerticalStepperForm, DataLoaderInterface.Callback {
 
   @BindView(R.id.stepper_form) VerticalStepperFormLayout stepper;
 
@@ -67,6 +66,13 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
   private Preference<String> LOGIN;
   private Preference<String> PASSWORD;
   private Preference<String> HOST;
+  private NumberProgressBar load_progress;
+  private LinearLayout load_wrapper;
+
+  private DataLoaderInterface DataLoader;
+  private CheckBox stepper_loader_user;
+  private CheckBox stepper_loader_list;
+  private CheckBox stepper_loader_info;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -74,13 +80,16 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_login);
 
+    DataLoader = new DataLoaderInterface(this);
+    DataLoader.registerCallBack(this);
+
 
     ButterKnife.bind(this);
     EsdApplication.getComponent(this).inject(this);
 
-    loadSettings();
+    initialize();
 
-    String[] steps = {"Авторизация", "Загрузка данных пользователя"};
+    String[] steps = {"Авторизация", "Загрузка данных"};
     String[] subtitles = {"введите данные", null};
     VerticalStepperFormLayout.Builder.newInstance(stepper, steps, this, this)
       .primaryColor( Color.RED )
@@ -94,17 +103,17 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
     startService(new Intent(this, AuthService.class));
   }
 
-  @Override
-  public void onStop() {
-    super.onStop();
-
-  }
-
-  private void loadSettings() {
+  private void initialize() {
     LOGIN    = settings.getString("login");
     PASSWORD = settings.getString("password");
     TOKEN    = settings.getString("token");
     HOST     = settings.getString("settings_username_host");
+  }
+
+  @Override
+  public void onStop() {
+    super.onStop();
+
   }
 
   public void tryToLogin() {
@@ -115,47 +124,12 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
   public void getCredentials(){
 
     wrapper.setAlpha(0.25f);
-    username.setCursorVisible(false);
     progress.setVisibility(View.VISIBLE);
 
-    Retrofit retrofit = new RetrofitManager( this, HOST.get(), okHttpClient).process();
-    AuthTokenService authTokenService = retrofit.create( AuthTokenService.class );
+    saveSettings("");
 
-    if (button != null){
-      stepper.setActiveStepAsUncompleted();
-    }
-    user = authTokenService.getAuth( LOGIN.get(), PASSWORD.get() );
+    DataLoader.getAuthToken();
 
-    if (subscription != null){
-      subscription.unsubscribe();
-    }
-
-    subscription = user.subscribeOn( Schedulers.newThread() )
-      .observeOn( AndroidSchedulers.mainThread() )
-      .subscribe(
-        data -> {
-
-
-          saveSettings( data.getAuthToken() );
-
-          new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-              stepper.setActiveStepAsCompleted();
-              stepper.goToNextStep();
-              Timber.i( "LOGIN: %s\nTOKEN: %s", LOGIN.get(), TOKEN.get() );
-            }
-          }, 2000L);
-
-//          Intent intent = new Intent(this, MainActivity.class);
-//          startActivity(intent);
-//
-//          finish();
-        },
-        error -> {
-          Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
-        }
-      );
   }
 
   private void saveSettings(String authToken) {
@@ -185,7 +159,7 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
     }
     return view;
   }
-//
+
   public void onStepOpening(int stepNumber) {
     switch (stepNumber) {
       case 0:
@@ -203,9 +177,7 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
   private Boolean checkLogin( ) {
     boolean isCorrect = false;
 
-    progress.setVisibility(View.GONE);
-    wrapper.setAlpha(1.0f);
-    wrapper.setBackgroundColor( getResources().getColor(R.color.transparent) );
+    resetLoginForm();
 
     if( host.length() >0 && username.length() > 0 && password.length() > 0 ) {
       isCorrect = true;
@@ -223,6 +195,12 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
     }
 
     return isCorrect;
+  }
+
+  private void resetLoginForm() {
+    progress.setVisibility(View.GONE);
+    wrapper.setAlpha(1.0f);
+    wrapper.setBackgroundColor( getResources().getColor(R.color.transparent) );
   }
 
   private View loginForm() {
@@ -268,7 +246,28 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
 
   private View loadData() {
     view = LayoutInflater.from(this).inflate(R.layout.stepper_load_data, null);
-//    username = ButterKnife.findById(view, R.id.stepper_login_username);
+
+    load_progress = ButterKnife.findById(view, R.id.number_progress_bar);
+    load_progress.setMax(100);
+
+    stepper_loader_user = ButterKnife.findById(view, R.id.stepper_loader_user );
+    stepper_loader_list = ButterKnife.findById(view, R.id.stepper_loader_list );
+    stepper_loader_info = ButterKnife.findById(view, R.id.stepper_loader_info );
+
+    new Handler().postDelayed( () -> DataLoader.getUserInformation(), 2000L);
+
+//    TextView text_test = ButterKnife.findById(view, R.id.text_test);
+//    Button button_test = ButterKnife.findById(view, R.id.button_test);
+
+//    Animation slide_down = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide_down);
+//    Animation slide_up = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide_up);
+//
+//    button_test.setOnClickListener(v -> {
+//      Timber.e("button_test");
+//      load_progress.setProgress((int) (Math.random()*20));
+//
+////      text_test.startAnimation(slide_down);
+//    });
 //    password = ButterKnife.findById(view, R.id.stepper_login_password);
 //    host     = ButterKnife.findById(view, R.id.stepper_login_host);
 
@@ -291,5 +290,34 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
   @Override
   public void sendData() {
 
+  }
+
+  @Override
+  public void onAuthTokenSuccess() {
+
+    new Handler().postDelayed( () -> {
+      progress.setVisibility(View.GONE);
+      stepper.setActiveStepAsCompleted();
+      stepper.goToNextStep();
+      Timber.i( "LOGIN: %s\nTOKEN: %s", LOGIN.get(), TOKEN.get() );
+    }, 2000L);
+  }
+
+  @Override
+  public void onAuthTokenError(Throwable error) {
+    Toast.makeText( this, String.format( "onError: Error %s", error.getMessage() ), Toast.LENGTH_SHORT).show();
+    resetLoginForm();
+  }
+
+  @Override
+  public void onGetUserInformationSuccess() {
+    stepper_loader_user.setChecked(true);
+  }
+
+  @Override
+  public void onGetUserInformationError(Throwable error) {
+    Toast.makeText( this, String.format( "onError: Error %s", error.getMessage() ), Toast.LENGTH_SHORT).show();
+    stepper.setStepAsUncompleted(1);
+    stepper.goToPreviousStep();
   }
 }

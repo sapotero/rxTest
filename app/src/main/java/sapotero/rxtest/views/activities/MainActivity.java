@@ -17,7 +17,6 @@ import android.widget.Toast;
 import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
-import com.google.gson.Gson;
 import com.mikepenz.material_design_iconic_typeface_library.MaterialDesignIconic;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
@@ -72,10 +71,8 @@ import sapotero.rxtest.events.rx.LoadAllDocumentsByStatusEvent;
 import sapotero.rxtest.jobs.bus.LoadAllDocumentsByStatusJob;
 import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
 import sapotero.rxtest.retrofit.DocumentsService;
-import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.retrofit.models.documents.Documents;
-import sapotero.rxtest.retrofit.utils.MeService;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
@@ -192,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
     GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2, GridLayoutManager.VERTICAL, false);
     rv.setLayoutManager(gridLayoutManager);
 
-    loadMe();
+//    loadMe();
 
     progressBar.setVisibility(ProgressBar.GONE);
 
@@ -822,22 +819,22 @@ public class MainActivity extends AppCompatActivity {
 //  }
 
   private void loadMe() {
-    Retrofit retrofit = new RetrofitManager(this, HOST.get() + "/v3/", okHttpClient).process();
-    MeService meService = retrofit.create(MeService.class);
-
-    Observable<Oshs> info = meService.get(LOGIN.get(), TOKEN.get());
-
-    info.subscribeOn(Schedulers.io())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(
-        me -> {
-          Timber.tag(TAG).d("ME " + me.getName());
-          Preference<String> current_user = settings.getString("current_user");
-          current_user.set(new Gson().toJson(me, Oshs.class));
-        },
-        error -> {
-          Timber.tag(TAG).d("ERROR " + error.getMessage());
-        });
+//    Retrofit retrofit = new RetrofitManager(this, HOST.get() + "/v3/", okHttpClient).process();
+//    MeService meService = retrofit.create(MeService.class);
+//
+//    Observable<Oshs> info = meService.get(LOGIN.get(), TOKEN.get());
+//
+//    info.subscribeOn(Schedulers.io())
+//      .observeOn(AndroidSchedulers.mainThread())
+//      .subscribe(
+//        me -> {
+//          Timber.tag(TAG).d("ME " + me.getName());
+//          Preference<String> current_user = settings.getString("current_user");
+//          current_user.set(new Gson().toJson(me, Oshs.class));
+//        },
+//        error -> {
+//          Timber.tag(TAG).d("ERROR " + error.getMessage());
+//        });
 
   }
 

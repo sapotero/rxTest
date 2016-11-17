@@ -160,4 +160,10 @@
 
     <string name="stepper_login_username">авторизация</string>
 
+    <string name="stepper_loader_user">Загрузка данных о пользователе</string>
+    <string name="stepper_loader_list">Загрузка списка задач</string>
+    <string name="stepper_loader_info">Загрузка данных по задачам</string>
+
+
+
 </resources>
