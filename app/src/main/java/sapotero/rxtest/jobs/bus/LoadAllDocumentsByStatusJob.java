@@ -30,7 +30,6 @@ public class LoadAllDocumentsByStatusJob extends BaseJob {
   private final int index;
   private final String count;
   private String filter_type;
-  private Preference<String> HOST;
 
   public LoadAllDocumentsByStatusJob(int index, String total) {
     super( new Params(PRIORITY).requireNetwork().persist() );
@@ -51,13 +50,13 @@ public class LoadAllDocumentsByStatusJob extends BaseJob {
     String[] values = getApplicationContext().getResources().getStringArray(R.array.FILTER_TYPES_VALUE);
     filter_type = values[index];
 
-    HOST = settings.getString("settings_username_host");
+    Preference<String> HOST = settings.getString("settings_username_host");
+    Preference<String> LOGIN = settings.getString("login");
+    Preference<String> TOKEN = settings.getString("token");
 
     Retrofit retrofit = new RetrofitManager( getApplicationContext(), HOST.get() + "/v3/", okHttpClient).process();
     DocumentsService documentsService = retrofit.create( DocumentsService.class );
 
-    Preference<String> LOGIN = settings.getString("login");
-    Preference<String> TOKEN = settings.getString("token");
 
     Observable<Documents> documents = documentsService.getDocuments(LOGIN.get(), TOKEN.get(), filter_type, Integer.valueOf(count), 0);
 

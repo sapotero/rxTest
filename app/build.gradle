@@ -120,8 +120,8 @@ dependencies {
     annotationProcessor 'com.google.dagger:dagger-compiler:2.6'
 
     compile 'com.davemorrissey.labs:subsampling-scale-image-view:3.6.0'
-    compile 'com.ernestoyaquello.stepperform:vertical-stepper-form:0.9.9'
-    compile 'com.daimajia.numberprogressbar:library:1.2@aar'
+//    compile 'com.ernestoyaquello.stepperform:vertical-stepper-form:0.9.9'
+//    compile 'com.daimajia.numberprogressbar:library:1.2@aar'
 }
 
 

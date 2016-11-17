@@ -150,10 +150,6 @@
     <string name="document_empty_list_error"> Произошла ошибка во время загрузки документов</string>
     <string name="host_hint">Хост</string>
 
-
-    <string name="vertical_form_stepper_form_continue">Продолжить</string>
-    <string name="vertical_form_stepper_form_last_step">Завершение</string>
-    <string name="vertical_form_stepper_form_confirm_button">Начать работу</string>
     <string name="stepper_fragment_login">Авторизация</string>
     <string name="stepper_fragment_load_documents">Пользователь</string>
     <string name="stepper_fragment_load_info">Документы</string>
@@ -163,6 +159,24 @@
     <string name="stepper_loader_user">Загрузка данных о пользователе</string>
     <string name="stepper_loader_list">Загрузка списка задач</string>
     <string name="stepper_loader_info">Загрузка данных по задачам</string>
+
+
+
+    <!--<string name="vertical_form_stepper_form_continue">Continue</string>-->
+    <!--<string name="vertical_form_stepper_form_confirm_button">Confirm data</string>-->
+    <!--<string name="vertical_form_stepper_form_last_step">Confirmation</string>-->
+    <string name="vertical_form_stepper_form_continue">Продолжить</string>
+    <string name="vertical_form_stepper_form_last_step">Завершение</string>
+    <string name="vertical_form_stepper_form_confirm_button">Начать работу</string>
+    <string name="vertical_form_stepper_form_discard_question">Discard data?</string>
+    <string name="vertical_form_stepper_form_info_will_be_lost">All the information you have given will be lost</string>
+    <string name="vertical_form_stepper_form_discard_cancel">Cancel</string>
+    <string name="vertical_form_stepper_form_discard">Discard</string>
+    <string name="vertical_form_stepper_form_sending_data_message">Sending data…</string>
+    <string name="vertical_form_stepper_form_current_step_uncompleted_alert">Please complete the current field before continue</string>
+
+    <string name="vertical_form_stepper_form_down_previous">down_previous</string>
+    <string name="vertical_form_stepper_form_down_next">down_next</string>
 
 
 

@@ -19,7 +19,7 @@
         android:layout_weight="0.09"
         >
 
-        <ernestoyaquello.com.verticalstepperform.VerticalStepperFormLayout
+        <sapotero.rxtest.views.views.VerticalStepperFormLayout
             android:id="@+id/stepper_form"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -28,7 +28,7 @@
             android:layout_centerHorizontal="true"
 
             >
-        </ernestoyaquello.com.verticalstepperform.VerticalStepperFormLayout>
+        </sapotero.rxtest.views.views.VerticalStepperFormLayout>
     </FrameLayout>
 
 </RelativeLayout>

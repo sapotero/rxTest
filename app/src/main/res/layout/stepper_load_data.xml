@@ -1,29 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<TableLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
     >
 
-    <LinearLayout
-        android:id="@+id/load_wrapper"
-        android:alpha="1.0"
-        android:background="@color/transparent"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true">
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        >
 
-
-
-        <com.daimajia.numberprogressbar.NumberProgressBar
-            android:id="@+id/number_progress_bar"
+        <ProgressBar
+            android:id="@+id/stepper_loader_user_progressbar"
+            style="?android:attr/progressBarStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:visibility="invisible"
             />
 
         <CheckBox
@@ -33,6 +28,21 @@
             android:layout_height="wrap_content"
             android:clickable="false"
             />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        >
+
+        <ProgressBar
+            android:id="@+id/stepper_loader_list_progressbar"
+            style="?android:attr/progressBarStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="invisible"
+            />
 
         <CheckBox
             android:id="@+id/stepper_loader_list"
@@ -40,6 +50,22 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:clickable="false"
+            />
+    </TableRow>
+
+
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        >
+
+        <ProgressBar
+            android:id="@+id/stepper_loader_info_progressbar"
+            style="?android:attr/progressBarStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="invisible"
             />
 
         <CheckBox
@@ -49,9 +75,6 @@
             android:layout_height="wrap_content"
             android:clickable="false"
             />
+    </TableRow>
 
-    </LinearLayout>
-
-
-
-</RelativeLayout>
+</TableLayout>

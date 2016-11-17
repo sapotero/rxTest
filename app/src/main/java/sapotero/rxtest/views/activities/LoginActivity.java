@@ -14,12 +14,16 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.daimajia.numberprogressbar.NumberProgressBar;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -28,17 +32,18 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import ernestoyaquello.com.verticalstepperform.VerticalStepperFormLayout;
-import ernestoyaquello.com.verticalstepperform.interfaces.VerticalStepperForm;
 import okhttp3.OkHttpClient;
 import rx.Observable;
 import rx.Subscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.application.config.Constant;
+import sapotero.rxtest.events.bus.MarkDocumentAsChangedJobEvent;
 import sapotero.rxtest.retrofit.models.AuthToken;
 import sapotero.rxtest.views.interfaces.DataLoaderInterface;
 import sapotero.rxtest.views.services.AuthService;
+import sapotero.rxtest.views.views.VerticalStepperFormLayout;
+import sapotero.rxtest.views.views.utils.VerticalStepperForm;
 import timber.log.Timber;
 
 public class LoginActivity extends AppCompatActivity implements VerticalStepperForm, DataLoaderInterface.Callback {
@@ -66,13 +71,16 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
   private Preference<String> LOGIN;
   private Preference<String> PASSWORD;
   private Preference<String> HOST;
-  private NumberProgressBar load_progress;
   private LinearLayout load_wrapper;
 
   private DataLoaderInterface DataLoader;
   private CheckBox stepper_loader_user;
   private CheckBox stepper_loader_list;
   private CheckBox stepper_loader_info;
+  private ProgressBar stepper_loader_user_progressbar;
+  private ProgressBar stepper_loader_list_progressbar;
+  private ProgressBar stepper_loader_info_progressbar;
+//  private RelativeLayout finishLayout;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -101,6 +109,10 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
       .init();
 
     startService(new Intent(this, AuthService.class));
+
+    if (!EventBus.getDefault().isRegistered(this)) {
+      EventBus.getDefault().register(this);
+    }
   }
 
   private void initialize() {
@@ -113,6 +125,10 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
   @Override
   public void onStop() {
     super.onStop();
+
+    if (EventBus.getDefault().isRegistered(this)) {
+      EventBus.getDefault().unregister(this);
+    }
 
   }
 
@@ -154,11 +170,18 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
         view = loadData();
         break;
       case 2:
-        view = loadData();
+        view = showFinal();
         break;
     }
     return view;
   }
+
+  private View showFinal() {
+    view = LayoutInflater.from(this).inflate(R.layout.stepper_load_data, null);
+
+    return view;
+  }
+
 
   public void onStepOpening(int stepNumber) {
     switch (stepNumber) {
@@ -166,10 +189,10 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
         checkLogin();
         break;
       case 1:
-        stepper.setActiveStepAsUncompleted();
+//        stepper.setActiveStepAsUncompleted();
         break;
       case 2:
-        stepper.setStepAsCompleted(2);
+//        stepper.setStepAsCompleted(2);
         break;
     }
   }
@@ -247,29 +270,15 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
   private View loadData() {
     view = LayoutInflater.from(this).inflate(R.layout.stepper_load_data, null);
 
-    load_progress = ButterKnife.findById(view, R.id.number_progress_bar);
-    load_progress.setMax(100);
-
     stepper_loader_user = ButterKnife.findById(view, R.id.stepper_loader_user );
     stepper_loader_list = ButterKnife.findById(view, R.id.stepper_loader_list );
     stepper_loader_info = ButterKnife.findById(view, R.id.stepper_loader_info );
 
-    new Handler().postDelayed( () -> DataLoader.getUserInformation(), 2000L);
+    stepper_loader_user_progressbar = ButterKnife.findById(view, R.id.stepper_loader_user_progressbar );
+    stepper_loader_list_progressbar = ButterKnife.findById(view, R.id.stepper_loader_list_progressbar );
+    stepper_loader_info_progressbar = ButterKnife.findById(view, R.id.stepper_loader_info_progressbar );
 
-//    TextView text_test = ButterKnife.findById(view, R.id.text_test);
-//    Button button_test = ButterKnife.findById(view, R.id.button_test);
-
-//    Animation slide_down = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide_down);
-//    Animation slide_up = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide_up);
-//
-//    button_test.setOnClickListener(v -> {
-//      Timber.e("button_test");
-//      load_progress.setProgress((int) (Math.random()*20));
-//
-////      text_test.startAnimation(slide_down);
-//    });
-//    password = ButterKnife.findById(view, R.id.stepper_login_password);
-//    host     = ButterKnife.findById(view, R.id.stepper_login_host);
+    stepper_loader_user_progressbar.setVisibility(View.VISIBLE);
 
     return view;
   }
@@ -289,6 +298,18 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
 
   @Override
   public void sendData() {
+    Timber.e("SendData");
+//
+//    RelativeLayout finishLayout = (RelativeLayout) stepper.findViewById(R.id.step_done);
+//    finishLayout.setBackgroundColor( Color.BLACK );
+//
+//    TextView textview = new TextView(this);
+//    textview.setText("TEST");
+//
+//    finishLayout.addView(textview);
+//    finishLayout.setMinimumWidth(100);
+//    finishLayout.setMinimumHeight(100);
+//    finishLayout.setVisibility(View.VISIBLE);
 
   }
 
@@ -300,6 +321,8 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
       stepper.setActiveStepAsCompleted();
       stepper.goToNextStep();
       Timber.i( "LOGIN: %s\nTOKEN: %s", LOGIN.get(), TOKEN.get() );
+
+      DataLoader.getUserInformation();
     }, 2000L);
   }
 
@@ -311,7 +334,15 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
 
   @Override
   public void onGetUserInformationSuccess() {
-    stepper_loader_user.setChecked(true);
+    new Handler().postDelayed( () -> {
+
+      stepper_loader_user_progressbar.setVisibility(View.INVISIBLE);
+      stepper_loader_list_progressbar.setVisibility(View.VISIBLE);
+      stepper_loader_user.setChecked(true);
+
+      DataLoader.getDocumentsCount();
+
+    }, 2000L);
   }
 
   @Override
@@ -320,4 +351,54 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
     stepper.setStepAsUncompleted(1);
     stepper.goToPreviousStep();
   }
+
+  @Override
+  public void onGetDocumentsCountSuccess() {
+    new Handler().postDelayed( () -> {
+
+      stepper_loader_list_progressbar.setVisibility(View.INVISIBLE);
+      stepper_loader_info_progressbar.setVisibility(View.VISIBLE);
+      stepper_loader_list.setChecked(true);
+
+      DataLoader.getDocumentsInfo();
+
+    }, 2000L);
+  }
+
+  @Override
+  public void onGetDocumentsCountError(Throwable error) {
+    Toast.makeText( this, String.format( "onError: Error %s", error.getMessage() ), Toast.LENGTH_SHORT).show();
+    stepper.setStepAsUncompleted(1);
+    stepper.goToPreviousStep();
+  }
+
+  @Override
+  public void onGetDocumentsInfoSuccess() {
+    new Handler().postDelayed( () -> {
+
+      stepper_loader_info_progressbar.setVisibility(View.INVISIBLE);
+      stepper_loader_info.setChecked(true);
+
+      stepper.setActiveStepAsCompleted();
+      new Handler().postDelayed( () -> {
+        stepper.goToNextStep();
+      }, 500L);
+
+    }, 2000L);
+  }
+
+  @Override
+  public void onGetDocumentsInfoError(Throwable error) {
+    Toast.makeText( this, String.format( "onError: Error %s", error.getMessage() ), Toast.LENGTH_SHORT).show();
+    stepper.setStepAsUncompleted(1);
+    stepper.goToPreviousStep();
+  }
+
+
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(MarkDocumentAsChangedJobEvent event) {
+    Timber.tag("JOBS").i( "MarkDocumentAsChangedJobEvent ++ ");
+  }
+
 }
