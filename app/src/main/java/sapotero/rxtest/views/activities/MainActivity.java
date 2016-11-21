@@ -88,60 +88,43 @@ import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
 
-  private int total = 0;
-  @BindView(R.id.toolbar)
-  Toolbar toolbar;
+  @Inject JobManager jobManager;
+  @Inject OkHttpClient okHttpClient;
+  @Inject RxSharedPreferences settings;
+  @Inject SingleEntityStore<Persistable> dataStore;
 
-  @BindView(R.id.documentsRecycleView)
-  RecyclerView rv;
-  @BindView(R.id.progressBar)
-  View progressBar;
+  @BindView(R.id.toolbar) Toolbar toolbar;
 
-  @BindView(R.id.DOCUMENT_TYPE)
-  Spinner DOCUMENT_TYPE_SELECTOR;
-  @BindView(R.id.JOURNAL_TYPE)
-  Spinner FILTER_TYPE_SELECTOR;
-  @BindView(R.id.ORGANIZATION)
-  MultiOrganizationSpinner ORGANIZATION_SELECTOR;
+  @BindView(R.id.documentsRecycleView) RecyclerView rv;
+  @BindView(R.id.progressBar) View progressBar;
 
-  @BindView(R.id.document_control_buttons)
-  MultiStateToggleButton control_buttons;
+  @BindView(R.id.DOCUMENT_TYPE) Spinner DOCUMENT_TYPE_SELECTOR;
+  @BindView(R.id.JOURNAL_TYPE) Spinner FILTER_TYPE_SELECTOR;
+  @BindView(R.id.ORGANIZATION) MultiOrganizationSpinner ORGANIZATION_SELECTOR;
 
-  @BindView(R.id.activity_main_right_button)
-  CircleRightArrow rightArrow;
-  @BindView(R.id.activity_main_left_button)
-  CircleLeftArrow leftArrow;
+  @BindView(R.id.document_control_buttons) MultiStateToggleButton control_buttons;
 
-  @BindView(R.id.documents_empty_list)
-  TextView documents_empty_list;
+  @BindView(R.id.activity_main_right_button) CircleRightArrow rightArrow;
+  @BindView(R.id.activity_main_left_button) CircleLeftArrow leftArrow;
 
-  @BindView(R.id.document_control_button)
-  Button document_control_button;
-  @BindView(R.id.document_favorite_button)
-  Button document_favorite_button;
+  @BindView(R.id.documents_empty_list) TextView documents_empty_list;
 
-//  {document_control_button, document_favorite_button}
-
-  @Inject
-  JobManager jobManager;
-  @Inject
-  OkHttpClient okHttpClient;
-  @Inject
-  RxSharedPreferences settings;
-  @Inject
-  SingleEntityStore<Persistable> dataStore;
+  @BindView(R.id.document_control_button) Button document_control_button;
+  @BindView(R.id.document_favorite_button) Button document_favorite_button;
 
   private String TAG = MainActivity.class.getSimpleName();
 
   private Preference<String> TOKEN;
+
   private Preference<String> LOGIN;
   private Preference<String> HOST;
-
   private Preference<String> PASSWORD;
+
   private StatusAdapter filter_adapter;
   private OrganizationAdapter organization_adapter;
-
   private DocumentTypeAdapter document_type_adapter;
+
+  private int total = 0;
 
   private DrawerBuilder drawer;
   private CompositeSubscription subscriptions;
@@ -172,6 +155,8 @@ public class MainActivity extends AppCompatActivity {
   private Subscription loadFromDbQuery = null;
   private int loaded = 0;
   private Toast mToast;
+  private Subscription updateDocumentCount;
+  private Subscription updateOrganizations;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -188,8 +173,6 @@ public class MainActivity extends AppCompatActivity {
 
     GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2, GridLayoutManager.VERTICAL, false);
     rv.setLayoutManager(gridLayoutManager);
-
-//    loadMe();
 
     progressBar.setVisibility(ProgressBar.GONE);
 
@@ -209,27 +192,7 @@ public class MainActivity extends AppCompatActivity {
         case R.id.action_test:
           System.gc();
 
-          organization_adapter.clear();
-          dataStore
-            .select(RSignerEntity.ORGANISATION)
-            .distinct()
-            .get()
-            .toObservable()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(org -> {
 
-              Integer count = dataStore
-                .count(RSignerEntity.class)
-                .where(RSignerEntity.ORGANISATION.eq(org.get(0).toString()))
-                .get()
-                .value();
-
-              organization_adapter.add(new OrganizationItem(org.get(0).toString(), count));
-
-              Timber.tag(TAG).d("ORGANIZATION: " + org.get(0).toString());
-              Timber.tag(TAG).d("ORGANIZATION COUNT: " + count);
-            });
           break;
         default:
           jobManager.addJobInBackground(new UpdateAuthTokenJob());
@@ -451,10 +414,6 @@ public class MainActivity extends AppCompatActivity {
     PASSWORD = settings.getString("password");
     TOKEN = settings.getString("token");
     HOST = settings.getString("settings_username_host");
-
-    Timber.tag(TAG).v("LOGIN: " + LOGIN.get());
-    Timber.tag(TAG).v("PASSWORD: " + PASSWORD.get());
-    Timber.tag(TAG).v("TOKEN: " + TOKEN.get());
   }
 
   public void rxSettings() {
@@ -544,9 +503,60 @@ public class MainActivity extends AppCompatActivity {
       loadFromDB();
     });
 
-    Observable.from(filter_types).subscribe(
-      this::loadDocumentsCountByType
-    );
+    updateDocumentCount();
+
+//    Observable.from(filter_types).subscribe(
+//      this::loadDocumentsCountByType
+//    );
+  }
+
+  private void updateDocumentCount() {
+
+    if (updateDocumentCount != null){
+      updateDocumentCount.unsubscribe();
+    }
+    updateDocumentCount = dataStore
+      .select(RDocumentEntity.UID)
+      .get()
+      .toObservable()
+      .subscribeOn(Schedulers.io())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(uid -> {
+        document_type_adapter.updateCountByType( uid.get(0) );
+      });
+
+    updateOrganizations();
+  }
+
+  private void updateOrganizations(){
+
+    if (updateOrganizations != null){
+      updateOrganizations.unsubscribe();
+    }
+    updateOrganizations = dataStore
+      .select(RSignerEntity.ORGANISATION)
+      .distinct()
+      .get()
+      .toObservable()
+      .subscribeOn(Schedulers.io())
+      .observeOn(AndroidSchedulers.mainThread())
+//      .flatMap( org -> {
+//
+//      })
+//      })
+      .subscribe(org -> {
+
+        Integer count = dataStore
+          .count(RSignerEntity.class)
+          .where(RSignerEntity.ORGANISATION.eq(org.get(0).toString()))
+          .get()
+          .value();
+
+        organization_adapter.add(new OrganizationItem(org.get(0).toString(), count));
+
+        Timber.tag(TAG).d("ORGANIZATION: " + org.get(0).toString());
+        Timber.tag(TAG).d("ORGANIZATION COUNT: " + count);
+      });
   }
 
   private void loadFromDB() {
@@ -694,6 +704,7 @@ public class MainActivity extends AppCompatActivity {
 
   private void findOrganizations() {
     organization_adapter.clear();
+
     dataStore
       .select(RSignerEntity.ORGANISATION)
       .distinct()

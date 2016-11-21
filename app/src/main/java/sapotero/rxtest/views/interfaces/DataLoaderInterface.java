@@ -15,11 +15,14 @@ import retrofit2.Retrofit;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.jobs.bus.SyncDocumentsJob;
 import sapotero.rxtest.retrofit.AuthTokenService;
 import sapotero.rxtest.retrofit.DocumentsService;
 import sapotero.rxtest.retrofit.models.AuthToken;
+import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.retrofit.models.documents.Documents;
 import sapotero.rxtest.retrofit.models.me.UserInfo;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
@@ -40,6 +43,8 @@ public class DataLoaderInterface {
   private Preference<String> PASSWORD;
   private Preference<String> HOST;
   private Preference<String> COUNT;
+
+  private CompositeSubscription subscription;
 
   private final Context context;
 
@@ -77,40 +82,45 @@ public class DataLoaderInterface {
     COUNT    = settings.getString("documents.count");
   }
 
-  private void saveToken( String token ){
-    TOKEN.set(token);
+  private void unsubscribe(){
+    if ( subscription != null && subscription.hasSubscriptions() ){
+      subscription.unsubscribe();
+    }
+    subscription = new CompositeSubscription();
   }
-
-  private void saveUser( String token ){
-    TOKEN.set(token);
-  }
-
 
   public void registerCallBack(Callback callback){
     this.callback = callback;
   }
 
+  private void saveToken( String token ){
+    TOKEN.set(token);
+  }
 
   public void getAuthToken(){
+
 
     Retrofit retrofit = new RetrofitManager( context, HOST.get(), okHttpClient).process();
     AuthTokenService authTokenService = retrofit.create( AuthTokenService.class );
 
     Observable<AuthToken> user = authTokenService.getAuth( LOGIN.get(), PASSWORD.get() );
 
-    user.subscribeOn( Schedulers.computation() )
-      .observeOn( AndroidSchedulers.mainThread() )
-      .subscribe(
-        data -> {
-          Timber.i( "LOGIN: %s\nTOKEN: %s", LOGIN.get(), data.getAuthToken() );
-          saveToken( data.getAuthToken() );
-          callback.onAuthTokenSuccess();
-        },
-        error -> {
-          Toast.makeText( context, error.getMessage(), Toast.LENGTH_SHORT).show();
-          callback.onAuthTokenError(error);
-        }
-      );
+    unsubscribe();
+    subscription.add(
+      user.subscribeOn( Schedulers.computation() )
+        .observeOn( AndroidSchedulers.mainThread() )
+        .subscribe(
+          data -> {
+            Timber.i( "LOGIN: %s\nTOKEN: %s", LOGIN.get(), data.getAuthToken() );
+            saveToken( data.getAuthToken() );
+            callback.onAuthTokenSuccess();
+          },
+          error -> {
+            Toast.makeText( context, error.getMessage(), Toast.LENGTH_SHORT).show();
+            callback.onAuthTokenError(error);
+          }
+        )
+    );
   }
 
   public void getUserInformation() {
@@ -119,21 +129,24 @@ public class DataLoaderInterface {
 
     Observable<UserInfo> info = userInfoService.load( LOGIN.get(), TOKEN.get() );
 
-    info.subscribeOn(Schedulers.computation())
-      .observeOn( AndroidSchedulers.mainThread() )
-      .subscribe(
-        data -> {
+    unsubscribe();
+    subscription.add(
+      info.subscribeOn(Schedulers.computation())
+        .observeOn( AndroidSchedulers.mainThread() )
+        .subscribe(
+          data -> {
 
-          Preference<String> current_user = settings.getString("current_user");
-          String user_data = new Gson().toJson( data , UserInfo.class);
-          current_user.set( user_data );
+            Preference<String> current_user = settings.getString("current_user");
+            String user_data = new Gson().toJson( data , UserInfo.class);
+            current_user.set( user_data );
 
-          callback.onGetUserInformationSuccess();
-        },
-        error -> {
-          Timber.tag(TAG).d("ERROR " + error.getMessage());
-          callback.onGetUserInformationError(error);
-        });
+            callback.onGetUserInformationSuccess();
+          },
+          error -> {
+            Timber.tag(TAG).d("ERROR " + error.getMessage());
+            callback.onGetUserInformationError(error);
+          })
+    );
 
   }
 
@@ -145,35 +158,38 @@ public class DataLoaderInterface {
 
     String[] filter_types = context.getResources().getStringArray(R.array.FILTER_TYPES_VALUE);
 
-    Observable
-      .from(filter_types)
-      .flatMap(type -> documentsService.getDocuments(LOGIN.get(), TOKEN.get(), type, 0, 0))
-      .toList()
-      .subscribeOn( Schedulers.computation() )
-      .observeOn( AndroidSchedulers.mainThread() )
-      .subscribe(
-        documents -> {
-          int count = 0;
+    unsubscribe();
+    subscription.add(
+      Observable
+        .from(filter_types)
+        .flatMap(type -> documentsService.getDocuments(LOGIN.get(), TOKEN.get(), type, 0, 0))
+        .toList()
+        .subscribeOn( Schedulers.computation() )
+        .observeOn( AndroidSchedulers.mainThread() )
+        .subscribe(
+          documents -> {
+            int count = 0;
 
-          if (documents.size() > 0) {
-            for (Documents document : documents) {
-              if (document.getMeta() != null && document.getMeta().getTotal() != null) {
-                count += Integer.valueOf(document.getMeta().getTotal());
+            if (documents.size() > 0) {
+              for (Documents document : documents) {
+                if (document.getMeta() != null && document.getMeta().getTotal() != null) {
+                  count += Integer.valueOf(document.getMeta().getTotal());
+                }
               }
             }
+
+            if (count != 0) {
+              COUNT.set(String.valueOf(count));
+              callback.onGetDocumentsCountSuccess();
+            }
+
+
+          },
+          error -> {
+            callback.onGetDocumentsCountError(error);
           }
-
-          if (count != 0) {
-            COUNT.set(String.valueOf(count));
-            callback.onGetDocumentsCountSuccess();
-          }
-
-
-        },
-        error -> {
-          callback.onGetDocumentsCountError(error);
-        }
-      );
+        )
+    );
   }
 
   public void getDocumentsInfo(){
@@ -184,37 +200,43 @@ public class DataLoaderInterface {
 
     String[] filter_types = context.getResources().getStringArray(R.array.FILTER_TYPES_VALUE);
 
+
     Observable<String> types = Observable.from(filter_types);
     Observable<Documents> count = Observable
       .from(filter_types)
       .flatMap(type -> documentsService.getDocuments(LOGIN.get(), TOKEN.get(), type, 1000, 0));
 
 
-    Observable.zip( types, count, (type, docs) -> {
-      return new TDmodel( type, docs.getDocuments() );
-    })
-      .subscribeOn( Schedulers.computation() )
-      .observeOn( AndroidSchedulers.mainThread() )
-      .toList()
-      .subscribe(
-        raw -> {
-          Timber.tag(TAG).i(" RECV: %s", raw.size());
+    unsubscribe();
+    subscription.add(
+      Observable.zip( types, count, (type, docs) -> {
+        return new TDmodel( type, docs.getDocuments() );
+      })
+        .subscribeOn( Schedulers.computation() )
+        .observeOn( AndroidSchedulers.mainThread() )
+        .toList()
+        .subscribe(
+          raw -> {
+            Timber.tag(TAG).i(" RECV: %s", raw.size());
 
-          for (TDmodel data: raw) {
-            Timber.tag(TAG).i(" Type: %s | %s", data.getType(), data.getDocuments().size() );
+            for (TDmodel data: raw) {
+              Timber.tag(TAG).i(" Type: %s | %s", data.getType(), data.getDocuments().size() );
 
-  //          for (Document doc: docs.getDocuments() ) {
-  //            Timber.tag(TAG).d( "%s | %s", type, doc.getUid() );
-  //            jobManager.addJobInBackground( new SyncDocumentsJob( doc.getUid(), type ) );
-  //          }
-          }
+              for (Document doc: data.getDocuments() ) {
+                String type = data.getType();
+                Timber.tag(TAG).d( "%s | %s", type, doc.getUid() );
 
-          callback.onGetDocumentsInfoSuccess();
+                jobManager.addJobInBackground( new SyncDocumentsJob( doc.getUid(), type ) );
+              }
+            }
 
-        },
-        error -> {
-          callback.onGetDocumentsInfoError(error);
-        });
+            callback.onGetDocumentsInfoSuccess();
+
+          },
+          error -> {
+            callback.onGetDocumentsInfoError(error);
+          })
+    );
   }
 
 }

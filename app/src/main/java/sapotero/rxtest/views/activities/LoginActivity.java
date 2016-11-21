@@ -1,9 +1,9 @@
 package sapotero.rxtest.views.activities;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.text.Editable;
@@ -11,8 +11,6 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
-import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -33,13 +31,10 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import okhttp3.OkHttpClient;
-import rx.Observable;
-import rx.Subscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.application.config.Constant;
 import sapotero.rxtest.events.bus.MarkDocumentAsChangedJobEvent;
-import sapotero.rxtest.retrofit.models.AuthToken;
 import sapotero.rxtest.views.interfaces.DataLoaderInterface;
 import sapotero.rxtest.views.services.AuthService;
 import sapotero.rxtest.views.views.VerticalStepperFormLayout;
@@ -53,10 +48,7 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
   @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
 
-  private Observable<AuthToken> user;
-  private Subscription subscription = null;
   private String TAG = this.getClass().getSimpleName();
-  private EditText name;
 
   // login view
   private View wrapper;
@@ -71,7 +63,6 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
   private Preference<String> LOGIN;
   private Preference<String> PASSWORD;
   private Preference<String> HOST;
-  private LinearLayout load_wrapper;
 
   private DataLoaderInterface DataLoader;
   private CheckBox stepper_loader_user;
@@ -100,8 +91,8 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
     String[] steps = {"Авторизация", "Загрузка данных"};
     String[] subtitles = {"введите данные", null};
     VerticalStepperFormLayout.Builder.newInstance(stepper, steps, this, this)
-      .primaryColor( Color.RED )
-      .primaryDarkColor( Color.GRAY )
+      .primaryColor( ContextCompat.getColor( this, R.color.md_light_blue_800 ) )
+      .primaryDarkColor( ContextCompat.getColor( this, R.color.md_blue_grey_200 ) )
       .displayBottomNavigation(false)
       .materialDesignInDisabledSteps(true)
       .showVerticalLineWhenStepsAreCollapsed(true)
@@ -189,7 +180,7 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
         checkLogin();
         break;
       case 1:
-//        stepper.setActiveStepAsUncompleted();
+        resetLoadDataForm();
         break;
       case 2:
 //        stepper.setStepAsCompleted(2);
@@ -224,6 +215,18 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
     progress.setVisibility(View.GONE);
     wrapper.setAlpha(1.0f);
     wrapper.setBackgroundColor( getResources().getColor(R.color.transparent) );
+  }
+
+  private void resetLoadDataForm() {
+    stepper_loader_user_progressbar.setVisibility(View.INVISIBLE);
+    stepper_loader_list_progressbar.setVisibility(View.INVISIBLE);
+    stepper_loader_info_progressbar.setVisibility(View.INVISIBLE);
+
+    stepper_loader_user.setChecked(false);
+    stepper_loader_list.setChecked(false);
+    stepper_loader_info.setChecked(false);
+
+    stepper.setStepAsUncompleted(1, "");
   }
 
   private View loginForm() {
@@ -283,19 +286,6 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
     return view;
   }
 
-  private boolean checkName( String name) {
-    boolean titleIsCorrect = false;
-    if(name.length() >= 3 && name.length() <= 40) {
-      titleIsCorrect = true;
-      stepper.setActiveStepAsCompleted();
-    } else {
-      // This error message is optional (use null if you don't want to display an error message)
-      String errorMessage = "The name must have between 3 and 40 characters";
-      stepper.setActiveStepAsUncompleted(errorMessage);
-    }
-    return titleIsCorrect;
-  }
-
   @Override
   public void sendData() {
     Timber.e("SendData");
@@ -304,18 +294,6 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
     startActivity(intent);
 
     finish();
-//
-//    RelativeLayout finishLayout = (RelativeLayout) stepper.findViewById(R.id.step_done);
-//    finishLayout.setBackgroundColor( Color.BLACK );
-//
-//    TextView textview = new TextView(this);
-//    textview.setText("TEST");
-//
-//    finishLayout.addView(textview);
-//    finishLayout.setMinimumWidth(100);
-//    finishLayout.setMinimumHeight(100);
-//    finishLayout.setVisibility(View.VISIBLE);
-
   }
 
   @Override

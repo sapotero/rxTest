@@ -4,21 +4,34 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="sapotero.rxtest.views.activities.LoginActivity"
 
-    android:background="@color/md_white_1000"
-
     android:layout_width="match_parent"
     android:layout_height="match_parent"
 
     android:gravity="center"
 
     android:weightSum="1"
-    android:baselineAligned="false">
+    android:baselineAligned="false"
+    android:background="@color/it_mvd_background"
+    >
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/gerb_big"
+        android:scaleX="0.8"
+        android:scaleY="0.8"
+        android:alpha="0.05"
+        />
+
     <FrameLayout
         android:layout_width="440dp"
         android:layout_height="500dp"
         android:layout_marginLeft="60dp"
         android:layout_marginTop="0dp"
         android:layout_weight="0.09"
+        android:layout_centerInParent="true"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
         >
 
         <sapotero.rxtest.views.views.VerticalStepperFormLayout
@@ -33,5 +46,6 @@
             >
         </sapotero.rxtest.views.views.VerticalStepperFormLayout>
     </FrameLayout>
+
 
 </RelativeLayout>
