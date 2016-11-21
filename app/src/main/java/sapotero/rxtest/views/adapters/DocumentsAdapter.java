@@ -22,7 +22,6 @@ import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.adapters.RecyclerSwipeAdapter;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
-import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,8 +54,8 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
     this.documents = documents;
     EsdApplication.getComponent(context).inject(this);
 
-    Preference<String> user = settings.getString("current_user");
-    current_user = new Gson().fromJson( user.get(), Oshs.class );
+//    Preference<String> user = settings.getString("current_user");
+//    current_user = new Gson().fromJson( user.get(), Oshs.class );
 
   }
 

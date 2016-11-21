@@ -7,7 +7,6 @@ import android.graphics.pdf.PdfRenderer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
-import android.os.StrictMode;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -17,17 +16,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.birbit.android.jobqueue.JobManager;
-import com.davemorrissey.labs.subscaleview.ImageSource;
-import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
+import com.github.barteksc.pdfviewer.PDFView;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -56,7 +52,6 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.events.bus.FileDownloadedEvent;
-import sapotero.rxtest.jobs.bus.DownloadFileJob;
 import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.views.activities.DocumentImageFullScreenActivity;
 import sapotero.rxtest.views.adapters.DocumentLinkAdapter;
@@ -83,15 +78,24 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   private PdfRenderer.Page mCurrentPage;
 
 //  @BindView(R.id.pdf_image) ImageView mImageView;
-  @BindView(R.id.pdf_image) SubsamplingScaleImageView mImageView;
-  @BindView(R.id.empty_list_image) ImageView empty_list_image;
-  @BindView(R.id.doc_tmp_layout) FrameLayout doc_tmp_layout;
-  @BindView(R.id.documents_files_progressbar) ProgressBar progressBar;
+//  @BindView(R.id.pdf_image) SubsamplingScaleImageView mImageView;
+//  @BindView(R.id.empty_list_image) ImageView empty_list_image;
+//  @BindView(R.id.doc_tmp_layout) FrameLayout doc_tmp_layout;
+//  @BindView(R.id.documents_files_progressbar) ProgressBar progressBar;
 
 
   @BindView(R.id.pdf_previous) Button mButtonPrevious;
   @BindView(R.id.pdf_next) Button     mButtonNext;
   @BindView(R.id.documents_files) Spinner mDocumentList;
+
+
+  @BindView(R.id.pageInfo) TextView pageInfo;
+
+
+
+
+  @BindView(R.id.pdfView) PDFView pdfView;
+
   private int index;
 
 //  private PhotoViewAttacher mAttacher;
@@ -167,9 +171,32 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
         IMAGE = image;
         Timber.tag(TAG).i( " setOnItemClickListener " + image.getPath() );
 
-        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-        StrictMode.setThreadPolicy(policy);
-        jobManager.addJobInBackground( new DownloadFileJob(HOST.get(), image.getPath(), image.getMd5()+"_"+image.getTitle()) );
+        File file = new File(mContext.getFilesDir(), image.getMd5()+"_"+image.getTitle());
+
+        pdfView
+          .fromFile(file)
+          .enableSwipe(true)
+          .enableDoubletap(true)
+          .defaultPage(0)
+          .swipeHorizontal(false)
+//          .onDraw(onDrawListener)
+//          .onLoad(onLoadCompleteListener)
+          .onPageChange((page, pageCount) -> {
+            updatePageInfo();
+          })
+//          .onPageScroll(onPageScrollListener)
+//          .onError(onErrorListener)
+          .enableAnnotationRendering(false)
+          .password(null)
+          .scrollHandle(null)
+          .load();
+
+
+//        pdfViewPager = new PDFViewPager(mContext, file.getAbsolutePath() );
+
+//        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+//        StrictMode.setThreadPolicy(policy);
+//        jobManager.addJobInBackground( new DownloadFileJob(HOST.get(), image.getPath(), image.getMd5()+"_"+image.getTitle()) );
 
       }
 
@@ -211,8 +238,8 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     mCurrentPage = mPdfRenderer.openPage(index);
 
     Bitmap image = Bitmap.createBitmap(
-      getResources().getDisplayMetrics().densityDpi / 60 * mCurrentPage.getWidth(),
-      getResources().getDisplayMetrics().densityDpi / 60 * mCurrentPage.getHeight(),
+      getResources().getDisplayMetrics().densityDpi / 72 * mCurrentPage.getWidth(),
+      getResources().getDisplayMetrics().densityDpi / 72 * mCurrentPage.getHeight(),
       Bitmap.Config.ARGB_8888
     );
 
@@ -231,7 +258,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
       // если файл есть то читаем с диска
       if (exist){
         try {
-          mImageView.setImage(ImageSource.uri( mContext.getFileStreamPath( fileName ).toString() ));
+//          mImageView.setImage(ImageSource.uri( mContext.getFileStreamPath( fileName ).toString() ));
 //          mImageView.setImageBitmap( BitmapFactory.decodeStream(getActivity().openFileInput(fileName)) );
         } catch (Exception e) {
           e.printStackTrace();
@@ -249,7 +276,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
           fo.close();
 
 //          mImageView.setImage(ImageSource.uri(fileName));
-          mImageView.setImage(ImageSource.uri( mContext.getFileStreamPath( fileName ).toString() ));
+//          mImageView.setImage(ImageSource.uri( mContext.getFileStreamPath( fileName ).toString() ));
 //          mImageView.setImageBitmap( BitmapFactory.decodeStream(getActivity().openFileInput(fileName)) );
         } catch (Exception e) {
           e.printStackTrace();
@@ -259,7 +286,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
     } else {
 //      mImageView.setImageBitmap(image);
-      mImageView.setImage(ImageSource.bitmap(image));
+//      mImageView.setImage(ImageSource.bitmap(image));
 
     }
 
@@ -307,19 +334,24 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
       mListener.onFragmentInteraction(uri);
     }
   }
+
   @OnClick(R.id.pdf_previous)
   public void previousPage(View view) {
     try {
-      setDocumentPreview(mCurrentPage.getIndex() - 1);
+//      setDocumentPreview(mCurrentPage.getIndex() - 1);
+      pdfView.jumpTo( pdfView.getCurrentPage() - 1 );
+      updatePageInfo();
     } catch (NullPointerException e) {
       e.printStackTrace();
     }
+
   }
 
   @OnClick(R.id.pdf_next)
   public void nextPage(View view) {
     try {
-      setDocumentPreview(mCurrentPage.getIndex() + 1);
+      pdfView.jumpTo( pdfView.getCurrentPage() + 1 );
+      updatePageInfo();
     } catch (NullPointerException e) {
       e.printStackTrace();
     }
@@ -334,13 +366,12 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     } else {
       throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
     }
+  }
 
-    try {
-      openRenderer(getActivity(), null);
-    } catch (IOException e) {
-      e.printStackTrace();
+  private void updatePageInfo(){
+    if ( pdfView != null ){
+      pageInfo.setText( String.format(" Стр. %s/%s ", pdfView.getCurrentPage()+1 , pdfView.getPageCount()) );
     }
-
   }
 
   @Override
@@ -390,27 +421,22 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   }
 
 
-  public void downloadFile(String host, String strUrl, String fileName) {
-
-  }
-
-
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(FileDownloadedEvent event) {
     Log.d("FileDownloadedEvent", event.path);
 
     if (!Objects.equals(event.path, "")){
       try {
-        doc_tmp_layout.setVisibility(View.GONE);
-        mImageView.setVisibility(View.VISIBLE);
-        progressBar.setVisibility(View.GONE);
+//        doc_tmp_layout.setVisibility(View.GONE);
+//        mImageView.setVisibility(View.VISIBLE);
+//        progressBar.setVisibility(View.GONE);
 
         openRenderer( getActivity(), event.path );
       } catch (IOException e) {
         e.printStackTrace();
-        doc_tmp_layout.setVisibility(View.VISIBLE);
-        mImageView.setVisibility(View.GONE);
-        progressBar.setVisibility(View.GONE);
+//        doc_tmp_layout.setVisibility(View.VISIBLE);
+//        mImageView.setVisibility(View.GONE);
+//        progressBar.setVisibility(View.GONE);
       }
     }
   }

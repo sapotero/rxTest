@@ -1,6 +1,7 @@
 package sapotero.rxtest.views.activities;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
@@ -91,7 +92,8 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
     String[] steps = {"Авторизация", "Загрузка данных"};
     String[] subtitles = {"введите данные", null};
     VerticalStepperFormLayout.Builder.newInstance(stepper, steps, this, this)
-      .primaryColor( ContextCompat.getColor( this, R.color.md_light_blue_800 ) )
+      .primaryColor( Color.RED )
+//      .primaryColor( ContextCompat.getColor( this, R.color.md_red_800 ) )
       .primaryDarkColor( ContextCompat.getColor( this, R.color.md_blue_grey_200 ) )
       .displayBottomNavigation(false)
       .materialDesignInDisabledSteps(true)

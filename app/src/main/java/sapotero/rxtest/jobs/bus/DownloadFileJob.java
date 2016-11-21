@@ -145,67 +145,6 @@ public class DownloadFileJob  extends BaseJob {
       }
     });
 
-
-//    RxDownloader
-//      .getInstance( getApplicationContext() )
-//      .download( new_builtUri.toString(), fileName)
-//      .asObservable()
-//      .toBlocking()
-//      .subscribe(path -> {
-//          Timber.tag(TAG).i("PATH: %s", path);
-//        },
-//        error -> {
-//          Timber.tag(TAG).i("ERROR: " + error.getStackTrace());
-//        });
-//
-//    String new_url = new_builtUri.toString();
-//    Timber.tag(TAG).d("SUCCESS -> %s", new_url );
-//
-//
-//
-//
-//    Timber.tag(TAG).d("SUCCESS -> %s", new_url );
-//
-//            File file = new File(getApplicationContext().getFilesDir(), fileName);
-//            final URLConnection[] urlConnection = {null};
-//            URL finalNew_url = new_url;
-//
-//            try {
-//              assert finalNew_url != null;
-//              urlConnection[0] = finalNew_url.openConnection();
-//
-//              Timber.tag(TAG).d("try url content type-> %s", urlConnection[0].getContentType() );
-//
-//              InputStream inputStream = urlConnection[0].getInputStream();
-//
-//              Timber.tag(TAG).d("try url stage 2 -> %s", finalNew_url);
-//
-//              BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
-//              ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-//
-//              Timber.tag(TAG).d("try download -> %s", inputStream.available() );
-//
-//              byte[] data = new byte[1024];
-//              int current = 0;
-//
-//              while ((current = bufferedInputStream.read(data, 0, data.length)) != -1) {
-//                byteArrayOutputStream.write(data, 0, current);
-//              }
-//
-//              Timber.tag(TAG).d("try file -> %s", file.getName());
-//
-//              FileOutputStream fileOutputStream = new FileOutputStream(file);
-//              fileOutputStream.write(byteArrayOutputStream.toByteArray());
-//              fileOutputStream.flush();
-//              fileOutputStream.close();
-//
-//              EventBus.getDefault().post(new FileDownloadedEvent(file.getAbsolutePath()));
-//
-//            } catch (IOException e) {
-//              Timber.tag(TAG).d("try url fail" + e.getStackTrace());
-//
-//              EventBus.getDefault().post(new FileDownloadedEvent(""));
-//            }
   }
 
   private boolean writeResponseBodyToDisk(ResponseBody body) {

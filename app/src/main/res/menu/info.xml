@@ -5,9 +5,9 @@
     tools:context="net.taptools.android.sportshistory.PlayerProfileActivity">
 
     <item
-        android:id="@+id/action_test"
+        android:id="@+id/reload"
         app:showAsAction="always"
-        android:icon="@drawable/gerb"
+        android:icon="@android:drawable/ic_popup_sync"
         android:title="@string/action_settings"/>
 
     <item

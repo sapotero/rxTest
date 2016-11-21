@@ -177,7 +177,10 @@
 
     <string name="vertical_form_stepper_form_down_previous">down_previous</string>
     <string name="vertical_form_stepper_form_down_next">down_next</string>
-
+    <string name="pdf_button_next_page">Следующая</string>
+    <string name="pdf_button_prev_page">Предыдущая</string>
+    <string name="decision_blank">Бланк резолюции</string>
+    <string name="decision">РЕЗОЛЮЦИЯ</string>
 
 
 </resources>

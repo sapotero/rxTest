@@ -21,6 +21,7 @@ import com.mikepenz.material_design_iconic_typeface_library.MaterialDesignIconic
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.DrawerBuilder;
+import com.mikepenz.materialdrawer.icons.MaterialDrawerFont;
 import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
@@ -53,8 +54,6 @@ import io.requery.query.Result;
 import io.requery.query.WhereAndOr;
 import io.requery.rx.SingleEntityStore;
 import okhttp3.OkHttpClient;
-import retrofit2.Retrofit;
-import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -68,12 +67,8 @@ import sapotero.rxtest.events.bus.MarkDocumentAsChangedJobEvent;
 import sapotero.rxtest.events.bus.UpdateDocumentJobEvent;
 import sapotero.rxtest.events.rx.InsertRxDocumentsEvent;
 import sapotero.rxtest.events.rx.LoadAllDocumentsByStatusEvent;
-import sapotero.rxtest.jobs.bus.LoadAllDocumentsByStatusJob;
 import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
-import sapotero.rxtest.retrofit.DocumentsService;
 import sapotero.rxtest.retrofit.models.documents.Document;
-import sapotero.rxtest.retrofit.models.documents.Documents;
-import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
 import sapotero.rxtest.views.adapters.models.DocumentTypeItem;
@@ -189,9 +184,8 @@ public class MainActivity extends AppCompatActivity {
     toolbar.inflateMenu(R.menu.info);
     toolbar.setOnMenuItemClickListener(item -> {
       switch (item.getItemId()) {
-        case R.id.action_test:
+        case R.id.reload:
           System.gc();
-
 
           break;
         default:
@@ -388,9 +382,9 @@ public class MainActivity extends AppCompatActivity {
       .withHeaderBackground(R.drawable.header)
       .addProfiles(
         new ProfileDrawerItem()
-          .withName("Admin")
-          .withEmail("admin_id")
-          .withIcon(MaterialDesignIconic.Icon.gmi_account)
+          .withName( settings.getString("current_user").get() )
+//          .withEmail("admin_id")
+          .withIcon( MaterialDrawerFont.Icon.mdf_person )
       )
       .withOnAccountHeaderListener(
         (view, profile, currentProfile) -> false
@@ -724,135 +718,55 @@ public class MainActivity extends AppCompatActivity {
       });
   }
 
-  private void loadDocumentsCountByType(String TYPE) {
-
-    Retrofit retrofit = new RetrofitManager(this, HOST.get() + "/v3/", okHttpClient).process();
-    DocumentsService documentsService = retrofit.create(DocumentsService.class);
-
-    Observable<Documents> documents = documentsService.getDocuments(LOGIN.get(), TOKEN.get(), TYPE, 0, 0);
-
-    documents.subscribeOn(Schedulers.io())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(
-        data -> {
-          total += Integer.valueOf( data.getMeta().getTotal() );
-
-          notificationUpdate();
-
-          String total = data.getMeta().getTotal();
-
-          if (total != null && Integer.valueOf(total) > 0) {
-            String[] values = getResources().getStringArray(R.array.FILTER_TYPES_VALUE);
-
-            int index = -1;
-            for (int i = 0; i < values.length; i++) {
-              if (values[i].equals(TYPE)) {
-                index = i;
-                break;
-              }
-            }
-
-            Timber.tag(TAG).i(TYPE + " - " + total + " | " + index);
-
-            FilterItem filterItem = filter_adapter.getItem(index);
-
-            filterItem.setCount(total);
-
-            jobManager.addJobInBackground(new LoadAllDocumentsByStatusJob(index, total));
-
-            filter_adapter.notifyDataSetChanged();
-          }
-
-        },
-        error -> {
-          Timber.tag(TAG).d("loadDocumentsCountByType " + error.getMessage());
-        });
-
-  }
-
-//  private void loadDocuments(){
+//  private void loadDocumentsCountByType(String TYPE) {
 //
-//    progressBar.setVisibility(ProgressBar.VISIBLE);
-//    documents_empty_list.setText(null);
+//    Retrofit retrofit = new RetrofitManager(this, HOST.get() + "/v3/", okHttpClient).process();
+//    DocumentsService documentsService = retrofit.create(DocumentsService.class);
 //
-//    Retrofit retrofit = new RetrofitManager( this, Constant.HOST + "/v3/", okHttpClient).process();
-//    DocumentsService documentsService = retrofit.create( DocumentsService.class );
+//    Observable<Documents> documents = documentsService.getDocuments(LOGIN.get(), TOKEN.get(), TYPE, 0, 0);
 //
-//    int spinner_pos = FILTER_TYPE_SELECTOR.getSelectedItemPosition();
-//    String[] document_type = getResources().getStringArray(R.array.DOCUMENT_TYPES_VALUE);
-//
-//
-//    String type = String.valueOf(document_type[spinner_pos]);
-//    Timber.tag(TAG).e("loadDocuments "+ spinner_pos );
-//    Timber.tag(TAG).e("loadDocuments "+ type );
-//
-//    Observable<Documents> documents = documentsService.getDocuments(LOGIN.get(), TOKEN.get(), type, 500, 0);
-//
-//    RAdapter.clear();
-//
-//
-//    loader = documents.subscribeOn(Schedulers.io())
+//    documents.subscribeOn(Schedulers.io())
 //      .observeOn(AndroidSchedulers.mainThread())
 //      .subscribe(
 //        data -> {
-//          progressBar.setVisibility(ProgressBar.GONE);
+//          total += Integer.valueOf( data.getMeta().getTotal() );
 //
-//          List<Document> docs = data.getDocuments();
+//          notificationUpdate();
 //
+//          String total = data.getMeta().getTotal();
 //
-//          for (Document d: docs ) {
-//            insertRDoc(d);
-//            RAdapter.addItem(d);
-//          }
+//          if (total != null && Integer.valueOf(total) > 0) {
+//            String[] values = getResources().getStringArray(R.array.FILTER_TYPES_VALUE);
 //
-//          if (docs.size() == 0) {
-////            rv.setVisibility(View.GONE);
-//            documents_empty_list.setVisibility(View.VISIBLE);
-//            documents_empty_list.setText( getString(R.string.document_empty_list) );
-//          } else {
-////            rv.setVisibility(View.VISIBLE);
-//            documents_empty_list.setVisibility(View.GONE);
+//            int index = -1;
+//            for (int i = 0; i < values.length; i++) {
+//              if (values[i].equals(TYPE)) {
+//                index = i;
+//                break;
+//              }
+//            }
 //
-//            __document__ = docs.get(0);
+//            Timber.tag(TAG).i(TYPE + " - " + total + " | " + index);
 //
+//            FilterItem filterItem = filter_adapter.getItem(index);
+//
+//            filterItem.setCount(total);
+//
+//            jobManager.addJobInBackground(new LoadAllDocumentsByStatusJob(index, total));
+//
+//            filter_adapter.notifyDataSetChanged();
 //          }
 //
 //        },
 //        error -> {
-//          Timber.d("_ERROR", error.getMessage());
-//          progressBar.setVisibility(ProgressBar.GONE);
-//
-//          documents_empty_list.setVisibility(View.VISIBLE);
-//          documents_empty_list.setText( getString(R.string.document_empty_list_error) );
-//
-//          Toast.makeText(this, error.getMessage(), Toast.LENGTH_SHORT).show();
+//          Timber.tag(TAG).d("loadDocumentsCountByType " + error.getMessage());
 //        });
+//
 //  }
-
-  private void loadMe() {
-//    Retrofit retrofit = new RetrofitManager(this, HOST.get() + "/v3/", okHttpClient).process();
-//    MeService meService = retrofit.create(MeService.class);
 //
-//    Observable<Oshs> info = meService.get(LOGIN.get(), TOKEN.get());
-//
-//    info.subscribeOn(Schedulers.io())
-//      .observeOn(AndroidSchedulers.mainThread())
-//      .subscribe(
-//        me -> {
-//          Timber.tag(TAG).d("ME " + me.getName());
-//          Preference<String> current_user = settings.getString("current_user");
-//          current_user.set(new Gson().toJson(me, Oshs.class));
-//        },
-//        error -> {
-//          Timber.tag(TAG).d("ERROR " + error.getMessage());
-//        });
-
-  }
-
   public void showNextType(Boolean next) {
     unsubscribe();
     int position = next ? filter_adapter.next() : filter_adapter.prev();
-//    DOCUMENT_TYPE_SELECTOR.setSelection(position);
     FILTER_TYPE_SELECTOR.setSelection(position);
   }
 
@@ -888,34 +802,6 @@ public class MainActivity extends AppCompatActivity {
 
 
   }
-
-//  public void findOrganizations() {
-//    if (needToFindOrganizations){
-//      organization_adapter.clear();
-//
-//      dataStore
-//        .select(RSignerEntity.ORGANISATION)
-//        .distinct()
-//        .get()
-//        .toObservable()
-//        .subscribeOn(Schedulers.io())
-//        .observeOn(AndroidSchedulers.mainThread())
-//        .subscribe( org -> {
-//
-//          Integer count = dataStore
-//            .count(RSignerEntity.class)
-//            .where(RSignerEntity.ORGANISATION.eq(org.get(0).toString()))
-//            .get()
-//            .value();
-//
-//          organization_adapter.add( new OrganizationItem( org.get(0).toString(), count ) );
-//
-//          Timber.tag(TAG).d("ORGANIZATION: " + org.get(0).toString() );
-//          Timber.tag(TAG).d("ORGANIZATION COUNT: " + count );
-//        });
-//    }
-//    needToFindOrganizations = false;
-//  }
 
   private void updateFilterAdapter() {
 

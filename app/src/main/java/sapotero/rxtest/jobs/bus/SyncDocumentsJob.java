@@ -87,6 +87,15 @@ public class SyncDocumentsJob  extends BaseJob {
         doc -> {
           update( doc, exist(doc.getUid()) );
           EventBus.getDefault().post( new MarkDocumentAsChangedJobEvent( doc.getUid() ) );
+          
+          if ( doc.getImages() != null && doc.getImages().size() > 0 ){
+
+            for (Image image : doc.getImages()) {
+
+              jobManager.addJobInBackground( new DownloadFileJob(HOST.get(), image.getPath(), image.getMd5()+"_"+image.getTitle()) );
+            }
+
+          }
         },
         error -> {
           error.printStackTrace();

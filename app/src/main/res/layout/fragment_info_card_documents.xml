@@ -1,18 +1,37 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
              xmlns:tools="http://schemas.android.com/tools"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
              tools:context="sapotero.rxtest.views.fragments.InfoCardDocumentsFragment">
 
 
+    <ProgressBar
+        android:id="@+id/documents_files_progressbar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="?android:attr/progressBarStyle"
+        android:indeterminate="true"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        />
+
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:gravity="center"
         android:layout_gravity="center"
         android:foregroundGravity="center"
-        >
+        android:weightSum="1"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true">
+
+        <com.github.barteksc.pdfviewer.PDFView
+            android:id="@+id/pdfView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            />
 
 
         <!--<ImageView-->
@@ -25,92 +44,93 @@
             <!--android:adjustViewBounds="true"-->
             <!--android:contentDescription="pdf_image"/>-->
 
-        <com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
-            android:id="@+id/pdf_image"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:scaleType="fitXY"
-            android:background="@android:color/white"
-            android:adjustViewBounds="true"
-            android:contentDescription="pdf_image"/>
+        <!--<com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView-->
+            <!--android:id="@+id/pdf_image"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_weight="1"-->
+            <!--android:scaleType="fitXY"-->
+            <!--android:background="@android:color/white"-->
+            <!--android:adjustViewBounds="true"-->
+            <!--android:contentDescription="pdf_image"/>-->
 
-        <FrameLayout
-            android:layout_width="wrap_content"
-            android:layout_height="580dp"
-            android:id="@+id/doc_tmp_layout"
-            android:layout_gravity="center"
-            >
+        <!--<FrameLayout-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="580dp"-->
+            <!--android:id="@+id/doc_tmp_layout"-->
+            <!--android:layout_gravity="center"-->
+            <!--&gt;-->
 
-            <ImageView
-                android:id="@+id/empty_list_image"
-                android:layout_width="947dp"
-                android:layout_height="match_parent"
-                android:src="@drawable/gerb_big"
-                android:scaleX="0.8"
-                android:scaleY="0.8"
-                android:alpha="0.1"
+            <!--<ImageView-->
+                <!--android:id="@+id/empty_list_image"-->
+                <!--android:layout_width="947dp"-->
+                <!--android:layout_height="match_parent"-->
+                <!--android:src="@drawable/gerb_big"-->
+                <!--android:scaleX="0.8"-->
+                <!--android:scaleY="0.8"-->
+                <!--android:alpha="0.1"-->
 
-                />
-            <TextView android:id="@+id/empty_list"
-                      android:layout_width="match_parent"
-                      android:layout_height="match_parent"
-                      android:textSize="24dp"
+                <!--/>-->
+            <!--<TextView android:id="@+id/empty_list"-->
+                      <!--android:layout_width="match_parent"-->
+                      <!--android:layout_height="match_parent"-->
+                      <!--android:textSize="24dp"-->
 
-                      android:layout_alignLeft="@+id/empty_list_image"
-                      android:layout_alignTop="@+id/empty_list_image"
-                      android:layout_alignRight="@+id/empty_list_image"
-                      android:layout_alignBottom="@+id/empty_list_image"
-                      android:layout_margin="1dp"
-                      android:gravity="center"
+                      <!--android:layout_alignLeft="@+id/empty_list_image"-->
+                      <!--android:layout_alignTop="@+id/empty_list_image"-->
+                      <!--android:layout_alignRight="@+id/empty_list_image"-->
+                      <!--android:layout_alignBottom="@+id/empty_list_image"-->
+                      <!--android:layout_margin="1dp"-->
+                      <!--android:gravity="center"-->
 
-                      android:textColor="@color/md_grey_600"
-                      android:text="Тут будет заглушка под документ (или их отсутствие)"
-                />
-        </FrameLayout>
-
-        <LinearLayout
-            style="?android:attr/buttonBarStyle"
-            android:layout_width="match_parent"
-            android:layout_height="40sp"
-            android:measureWithLargestChild="true"
-            android:orientation="horizontal">
-
-            <Spinner
-                android:id="@+id/documents_files"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="2"/>
-
-            <Button
-                android:id="@+id/pdf_previous"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="previous" />
-
-            <Button
-                android:id="@+id/pdf_next"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="next" />
-        </LinearLayout>
+                      <!--android:textColor="@color/md_grey_600"-->
+                      <!--android:text="Тут будет заглушка под документ (или их отсутствие)"-->
+                <!--/>-->
+        <!--</FrameLayout>-->
 
     </LinearLayout>
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        >
-        <ProgressBar
-            android:id="@+id/documents_files_progressbar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="?android:attr/progressBarStyle"
-            android:indeterminate="true"/>
-    </RelativeLayout>
 
-</FrameLayout>
+    <LinearLayout
+        style="?android:attr/buttonBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:measureWithLargestChild="true"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal">
+
+        <Spinner
+            android:id="@+id/documents_files"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:padding="@dimen/half_date_offset"
+            android:layout_weight="2"/>
+
+        <TextView
+            android:gravity="center|start"
+            android:id="@+id/pageInfo"
+            android:text=""
+            android:width="40dp"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:textSize="18dp"
+            />
+
+
+        <Button
+            android:id="@+id/pdf_previous"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/pdf_button_prev_page" />
+        <Button
+        android:id="@+id/pdf_next"
+        style="?android:attr/buttonBarButtonStyle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="@string/pdf_button_next_page" />
+
+    </LinearLayout>
+</RelativeLayout>

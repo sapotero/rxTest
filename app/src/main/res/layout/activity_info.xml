@@ -33,42 +33,47 @@
 
         <LinearLayout
             android:orientation="vertical"
-            android:layout_width="330dp"
             android:layout_height="match_parent"
-            android:weightSum="3">
+            android:weightSum="3"
+            android:layout_width="300dp">
 
 
             <TextView
                 android:id="@+id/textView4"
-                android:text="РЕЗОЛЮЦИЯ"
+                android:text="@string/decision"
                 android:gravity="center"
-                android:textSize="14dp"
+                android:textStyle="bold"
+                android:textSize="13sp"
                 android:textColor="@color/md_grey_900"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 />
 
+            <!--android:background="@color/cardview_light_background"-->
             <LinearLayout
+
                 android:id="@+id/desigion_view_root"
                 android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_margin="@dimen/half_date_offset"
-                android:background="@color/cardview_light_background"
+
                 android:layout_height="360dp"
-                android:layout_weight="1.29">
+                android:layout_weight="1.29"
+                android:weightSum="1">
                 <ScrollView
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:background="@drawable/corner_background"
                     >
                     <LinearLayout
                         android:id="@+id/desigion_view"
                         android:orientation="vertical"
                         android:layout_width="match_parent"
-                        android:padding="@dimen/date_offset"
+                        android:paddingLeft="@dimen/date_offset"
+                        android:paddingRight="@dimen/date_offset"
+                        android:paddingBottom="@dimen/date_offset"
                         android:minHeight="350dp"
-                        android:layout_height="match_parent"
+                        android:layout_height="360dp"
                         android:layout_margin="@dimen/half_date_offset"
-                        android:background="@drawable/corner_background"
                         >
 
                     </LinearLayout>
@@ -79,19 +84,20 @@
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/desigions_recycler_view"
                 android:layout_width="match_parent"
-                android:layout_height="160dp"
+
+                android:layout_marginTop="@dimen/date_offset"
                 android:background="@drawable/selector_row"
-                android:layout_weight="2.89"/>
+                android:layout_height="240dp"/>
 
         </LinearLayout>
 
         <Space
-            android:layout_width="5dp"
+            android:layout_width="16dp"
             android:layout_height="wrap_content"/>
 
         <LinearLayout
             android:orientation="vertical"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="4"
             android:weightSum="1">
@@ -108,18 +114,11 @@
                 android:id="@+id/tab_main"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:padding="@dimen/half_date_offset"/>
+                android:padding="@dimen/half_date_offset"
+                android:background="@drawable/corner_background"
+                />
         </LinearLayout>
 
     </LinearLayout>
-
-    <ProgressBar
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/loader"
-        android:indeterminate="true"
-        android:layout_below="@+id/toolbar"
-        android:layout_alignParentStart="true"/>
 
 </RelativeLayout>

@@ -1,12 +1,12 @@
 package sapotero.rxtest.views.interfaces;
 
 import android.content.Context;
+import android.os.StrictMode;
 import android.widget.Toast;
 
 import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
-import com.google.gson.Gson;
 
 import javax.inject.Inject;
 
@@ -136,9 +136,10 @@ public class DataLoaderInterface {
         .subscribe(
           data -> {
 
-            Preference<String> current_user = settings.getString("current_user");
-            String user_data = new Gson().toJson( data , UserInfo.class);
-            current_user.set( user_data );
+            settings.getString("current_user").set( data.getMe().getName() );
+            // Preference<String> current_user = settings.getString("current_user");
+            // String user_data = new Gson().toJson( data , UserInfo.class);
+            // current_user.set( user_data );
 
             callback.onGetUserInformationSuccess();
           },
@@ -193,6 +194,10 @@ public class DataLoaderInterface {
   }
 
   public void getDocumentsInfo(){
+
+    StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+    StrictMode.setThreadPolicy(policy);
+
 
     Retrofit retrofit = new RetrofitManager(context, HOST.get() + "/v3/", okHttpClient).process();
     DocumentsService documentsService = retrofit.create(DocumentsService.class);
