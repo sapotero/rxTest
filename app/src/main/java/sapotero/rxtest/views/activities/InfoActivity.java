@@ -73,9 +73,10 @@ import sapotero.rxtest.views.adapters.DecisionAdapter;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.fragments.InfoCardDocumentsFragment;
 import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
+import sapotero.rxtest.views.interfaces.DocumentManager;
 import timber.log.Timber;
 
-public class InfoActivity extends AppCompatActivity implements InfoCardDocumentsFragment.OnFragmentInteractionListener, InfoCardWebViewFragment.OnFragmentInteractionListener {
+public class InfoActivity extends AppCompatActivity implements InfoCardDocumentsFragment.OnFragmentInteractionListener, InfoCardWebViewFragment.OnFragmentInteractionListener, DocumentManager.Callback {
 
   @BindView(R.id.desigions_recycler_view) RecyclerView desigions_recycler_view;
   @BindView(R.id.desigion_view)           LinearLayout desigion_view;
@@ -98,6 +99,9 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
   private Preference<String> UID;
   private Preference<String> DOCUMENT_UID;
   private Preference<Integer> POSITION;
+
+
+  private DocumentManager documentManager;
 
   private DocumentInfo DOCUMENT;
   private String TAG = this.getClass().getSimpleName();
@@ -125,8 +129,17 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
     setContentView(R.layout.activity_info);
     ButterKnife.bind(this);
 
-    HOST = settings.getString("settings_username_host");
+    documentManager = new DocumentManager(this);
+    documentManager.registerCallBack(this);
 
+    Timber.w("documentManager:\nUID: %s\nstate: %s\ntype: %s\n\n",
+      documentManager.getCurrentDocumentNumber(),
+      documentManager.getState(),
+      documentManager.getType()
+    );
+
+
+    HOST = settings.getString("settings_username_host");
 
     toolbar.setTitle("Все документы");
     toolbar.setTitleTextColor( getResources().getColor( R.color.md_grey_100 ) );
@@ -470,6 +483,16 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
 
   @Override
   public void onFragmentInteraction(Uri uri) {
+  }
+
+  @Override
+  public void onGetStateSuccess() {
+    Timber.tag("DocumentManagerCallback").i("onGetStateSuccess");
+  }
+
+  @Override
+  public void onGetStateError() {
+    Timber.tag("DocumentManagerCallback").i("onGetStateError");
   }
 
   class Preview{

@@ -225,7 +225,7 @@ public class DataLoaderInterface {
             Timber.tag(TAG).i(" RECV: %s", raw.size());
 
             for (TDmodel data: raw) {
-              Timber.tag(TAG).i(" Type: %s | %s", data.getType(), data.getDocuments().size() );
+              Timber.tag(TAG).i(" DocumentType: %s | %s", data.getType(), data.getDocuments().size() );
 
               for (Document doc: data.getDocuments() ) {
                 String type = data.getType();

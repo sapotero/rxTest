@@ -66,31 +66,14 @@
         </LinearLayout>
 
         <LinearLayout
-            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1">
-
-            <android.support.design.widget.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@null"
-                >
-
-                <sapotero.rxtest.views.views.EsdSelectView
-                    android:id="@+id/fragment_decision_urgency_selector"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/hint_urgency"
-                    android:background="@null"
-                    />
-            </android.support.design.widget.TextInputLayout>
-
+            android:layout_weight="1"
+            android:orientation="vertical">
 
             <ScrollView
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
+                android:layout_height="418dp"
 
                 >
 
@@ -119,14 +102,62 @@
                         <!--android:layout_width="match_parent"-->
                         <!--android:layout_height="wrap_content"-->
                         <!--android:id="@+id/textView3"/>-->
-                    <FrameLayout android:layout_width="match_parent"
-                                 android:layout_height="wrap_content"
-                                 android:layout_margin="@dimen/date_offset">
 
-                        <android.support.design.widget.TextInputLayout
-                            android:id="@+id/to_text_input_layout"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content">
+
+                    <!--<Button-->
+
+                        <!--android:text="Добавить блок"-->
+                        <!--android:layout_width="match_parent"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:layout_marginTop="@dimen/half_date_offset"-->
+                        <!--android:id="@+id/button_add_decision"/>-->
+
+
+                </LinearLayout>
+            </ScrollView>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    >
+
+                    <sapotero.rxtest.views.views.EsdSelectView
+                        android:id="@+id/fragment_decision_urgency_selector"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/hint_urgency"
+                        android:background="@null"
+                        />
+
+                </android.support.design.widget.TextInputLayout>
+
+                <android.support.design.widget.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    >
+
+                    <EditText
+                        android:id="@+id/fragment_decision_comment"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Комментарий"
+                        />
+                </android.support.design.widget.TextInputLayout>
+
+                <FrameLayout android:layout_width="match_parent"
+                             android:layout_height="wrap_content">
+
+                    <android.support.design.widget.TextInputLayout
+                        android:id="@+id/to_text_input_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
 
                         <sapotero.rxtest.views.views.DelayAutoCompleteTextView
                             android:id="@+id/fragment_decision_autocomplete_field"
@@ -136,31 +167,22 @@
                             android:paddingRight="@dimen/date_offset"
                             android:hint="Подписал"
                             android:imeOptions="flagNoExtractUi|actionSearch"/>
-                        </android.support.design.widget.TextInputLayout>
-
-                        <ProgressBar
-                            android:id="@+id/fragment_decision_autocomplete_field_loading_indicator"
-                            style="?android:attr/progressBarStyleSmall"
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:layout_gravity="center_vertical|right"
-                            android:layout_marginRight="@dimen/date_offset"
-                            android:visibility="invisible"
-                            android:foregroundGravity="right|center_vertical"/>
-                    </FrameLayout>
-
-
-                    <Button
-
-                        android:text="Добавить блок"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/half_date_offset"
-                        android:id="@+id/button_add_decision"/>
+                    </android.support.design.widget.TextInputLayout>
+                    <ProgressBar
+                        android:id="@+id/fragment_decision_autocomplete_field_loading_indicator"
+                        style="?android:attr/progressBarStyleSmall"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center_vertical|right"
+                        android:layout_marginRight="@dimen/date_offset"
+                        android:visibility="invisible"
+                        android:foregroundGravity="right|center_vertical"/>
+                </FrameLayout>
 
 
-                </LinearLayout>
-            </ScrollView>
+            </LinearLayout>
+
+
         </LinearLayout>
 
     </LinearLayout>
@@ -169,14 +191,14 @@
         android:id="@+id/fab_menu"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
         android:paddingRight="10dp"
         android:paddingBottom="10dp"
         android:paddingLeft="10dp"
         app:menu_labels_ellipsize="end"
         app:menu_labels_singleLine="true"
         app:menu_backgroundColor="@color/transparent_white"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
         >
 
         <com.github.clans.fab.FloatingActionButton
@@ -204,7 +226,7 @@
 
 
         <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/fab3"
+            android:id="@+id/button_add_decision"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/fab_add"

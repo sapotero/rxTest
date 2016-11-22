@@ -26,6 +26,7 @@ import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
 import sapotero.rxtest.views.fragments.InfoCardDocumentsFragment;
 import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
 import sapotero.rxtest.views.interfaces.DataLoaderInterface;
+import sapotero.rxtest.views.interfaces.DocumentManager;
 import sapotero.rxtest.views.services.AuthService;
 
 @Singleton
@@ -63,6 +64,8 @@ public interface EsdComponent {
 
 
   void inject(DataLoaderInterface context);
+  void inject(DocumentManager context);
+
 
 
   Application application();

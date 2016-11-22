@@ -8,10 +8,10 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ProgressBar;
 
 import com.f2prateek.rx.preferences.RxSharedPreferences;
+import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 import com.google.gson.Gson;
 
@@ -49,7 +49,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   @Inject RxSharedPreferences settings;
 
   @BindView(R.id.toolbar) Toolbar toolbar;
-  @BindView(R.id.button_add_decision) Button button_add_decision;
+  @BindView(R.id.button_add_decision) FloatingActionButton button_add_decision;
 
   @BindView(R.id.fragment_decision_urgency_selector) EsdSelectView<UrgencyItem> urgencySelector;
 
@@ -87,6 +87,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     );
 
 
+//    fab_menu.hideMenuButton(false);
+    fab_menu.setClosedOnTouchOutside(true);
 
     Decision raw_decision = null;
     Gson gson = new Gson();
@@ -156,6 +158,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   @OnClick(R.id.button_add_decision)
   public void submit(View view) {
     manager.add(new Block());
+//    fab_menu.hideMenu(true);
+    fab_menu.close(true);
   }
 
   @Override
@@ -164,6 +168,32 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
   public DecisionManager getDecisionManager(){
     return manager;
+  }
+
+  @Override
+  public void onStart() {
+    super.onStart();
+
+    if ( !EventBus.getDefault().isRegistered(this) ){
+      EventBus.getDefault().register(this);
+    }
+  }
+  @Override protected void onPause() {
+    super.onPause();
+
+    if ( EventBus.getDefault().isRegistered(this) ){
+      EventBus.getDefault().unregister(this);
+      EventBus.getDefault().register(this);
+    }
+
+  }
+
+  @Override
+  public void onStop() {
+    if ( EventBus.getDefault().isRegistered(this) ){
+      EventBus.getDefault().unregister(this);
+    }
+    super.onStop();
   }
 
 
@@ -271,31 +301,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     }
   }
 
-  @Override
-  public void onStart() {
-    super.onStart();
-
-    if ( !EventBus.getDefault().isRegistered(this) ){
-      EventBus.getDefault().register(this);
-    }
-  }
-  @Override protected void onPause() {
-    super.onPause();
-
-    if ( EventBus.getDefault().isRegistered(this) ){
-      EventBus.getDefault().unregister(this);
-      EventBus.getDefault().register(this);
-    }
-
-  }
-
-  @Override
-  public void onStop() {
-    if ( EventBus.getDefault().isRegistered(this) ){
-      EventBus.getDefault().unregister(this);
-    }
-    super.onStop();
-  }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(UpdateDecisionPreviewEvent event) {
