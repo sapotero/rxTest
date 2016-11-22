@@ -17,6 +17,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
@@ -35,6 +36,7 @@ import okhttp3.OkHttpClient;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.application.config.Constant;
+import sapotero.rxtest.events.bus.FileDownloadedEvent;
 import sapotero.rxtest.events.bus.MarkDocumentAsChangedJobEvent;
 import sapotero.rxtest.views.interfaces.DataLoaderInterface;
 import sapotero.rxtest.views.services.AuthService;
@@ -48,6 +50,8 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
 
   @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
+  @Inject JobManager jobManager;
+
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -388,9 +392,18 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
 
 
 
-  @Subscribe(threadMode = ThreadMode.MAIN)
+  private void printJobStat() {
+    Timber.tag(TAG).v( "JOB TOTAL: %s/%s [ %s ]", jobManager.getJobManagerExecutionThread().getState(), jobManager.countReadyJobs(), jobManager.getActiveConsumerCount() );
+  }
+
+  @Subscribe(threadMode = ThreadMode.BACKGROUND)
   public void onMessageEvent(MarkDocumentAsChangedJobEvent event) {
-    Timber.tag("JOBS").i( "MarkDocumentAsChangedJobEvent ++ ");
+    printJobStat();
+  }
+
+  @Subscribe(threadMode = ThreadMode.ASYNC)
+  public void onMessageEvent(FileDownloadedEvent event) {
+    printJobStat();
   }
 
 }

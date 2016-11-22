@@ -231,7 +231,9 @@ public class DataLoaderInterface {
                 String type = data.getType();
                 Timber.tag(TAG).d( "%s | %s", type, doc.getUid() );
 
-                jobManager.addJobInBackground( new SyncDocumentsJob( doc.getUid(), type ) );
+                jobManager.addJobInBackground(new SyncDocumentsJob(doc.getUid(), type), () -> {
+                  Timber.e("complete");
+                });
               }
             }
 

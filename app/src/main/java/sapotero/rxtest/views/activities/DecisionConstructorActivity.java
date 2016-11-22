@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 
 import com.f2prateek.rx.preferences.RxSharedPreferences;
+import com.github.clans.fab.FloatingActionMenu;
 import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
@@ -55,6 +56,10 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   @BindView(R.id.fragment_decision_autocomplete_field) DelayAutoCompleteTextView user_autocomplete;
   @BindView(R.id.fragment_decision_autocomplete_field_loading_indicator) ProgressBar indicator;
 
+//  @BindView(R.id.fab) FloatingActionButton fab;
+  @BindView(R.id.fab_menu) FloatingActionMenu fab_menu;
+
+
   private String TAG = this.getClass().getSimpleName();
   private final DecisionManager manager = new DecisionManager(this);
 
@@ -68,12 +73,20 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     ButterKnife.bind(this);
     EsdApplication.getComponent(this).inject(this);
 
+
+    toolbar.setTitleTextColor( getResources().getColor( R.color.md_grey_100 ) );
+    toolbar.setSubtitleTextColor( getResources().getColor( R.color.md_grey_400 ) );
+
+    toolbar.setContentInsetStartWithNavigation(250);
+
     toolbar.setTitle("Редактор резолюции ");
     toolbar.inflateMenu(R.menu.info_decision_constructor);
     toolbar.setNavigationOnClickListener(v -> {
       finish();
       }
     );
+
+
 
     Decision raw_decision = null;
     Gson gson = new Gson();
@@ -179,7 +192,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
         body.setArguments(bundle);
       }
 
-      transaction.add(R.id.decision_constructor_decision_preview, body );
+      transaction.add( R.id.decision_constructor_decision_preview, body );
       transaction.commit();
     }
 

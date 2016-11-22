@@ -60,7 +60,6 @@ public class SyncDocumentsJob  extends BaseJob {
 
   @Override
   public void onRun() throws Throwable {
-    Timber.tag(TAG).v( "onRun"  );
 
     HOST  = settings.getString("settings_username_host");
     LOGIN = settings.getString("login");
@@ -86,7 +85,6 @@ public class SyncDocumentsJob  extends BaseJob {
       .subscribe(
         doc -> {
           update( doc, exist(doc.getUid()) );
-          EventBus.getDefault().post( new MarkDocumentAsChangedJobEvent( doc.getUid() ) );
           
           if ( doc.getImages() != null && doc.getImages().size() > 0 ){
 
@@ -168,12 +166,20 @@ public class SyncDocumentsJob  extends BaseJob {
         .observeOn(Schedulers.io())
         .subscribe(data -> {
           Timber.tag(TAG).v("update " + data.getRegistrationNumber() );
+
+
+          complete_task( data.getUid() );
+
           setData( data, document, false);
         });
     }
     else {
       setData(null, document, true);
     }
+  }
+
+  private void complete_task(String uid) {
+    EventBus.getDefault().post( new MarkDocumentAsChangedJobEvent( uid ) );
   }
 
   private void setData(RDocumentEntity documentEntity, DocumentInfo document, boolean md5Equal){
@@ -315,6 +321,7 @@ public class SyncDocumentsJob  extends BaseJob {
         .subscribe(
           result -> {
             Timber.tag(TAG).d("updated " + result.getUid());
+            complete_task( result.getUid() );
           },
           error ->{
             error.printStackTrace();

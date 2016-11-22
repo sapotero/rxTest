@@ -13,7 +13,7 @@
         android:layout_marginRight="22sp"
         android:weightSum="8"
         android:padding="@dimen/date_offset"
-        android:background="@drawable/card_border"
+        android:background="@drawable/card_border_white"
         >
 
         <TextView

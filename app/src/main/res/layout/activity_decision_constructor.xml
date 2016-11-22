@@ -8,17 +8,19 @@
     android:layout_height="match_parent"
     tools:context="sapotero.rxtest.views.activities.DecisionConstructorActivity">
 
+
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary"
-        android:elevation="8dp"
-        android:minHeight="?attr/actionBarSize"
+        android:layout_height="80dp"
+        android:paddingTop="@dimen/half_date_offset"
         android:transitionName="actionBar"
+        android:minHeight="?attr/actionBarSize"
+        android:background="@drawable/toolbar_background"
         app:navigationIcon="?attr/homeAsUpIndicator"
         app:theme="@style/ToolbarColoredBackArrow"
-        android:theme="@style/AlertDialog.AppCompat.Light"/>
+        android:theme="@style/AlertDialog.AppCompat.Light"
+        android:elevation="8dp"/>
 
     <LinearLayout
         android:orientation="horizontal"
@@ -37,7 +39,7 @@
             android:layout_weight="2">
 
             <TextView
-                android:text="Предпросмотр резолюции"
+                android:text="Резолюция"
                 android:layout_width="match_parent"
                 android:layout_height="38dp"
                 android:id="@+id/textView"
@@ -109,16 +111,22 @@
                         >
                     </LinearLayout>
 
-                    <TextView
-                        android:text="Подписал"
-                        android:padding="@dimen/date_offset"
-                        android:gravity="center_horizontal|left"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/textView3"/>
+
+                    <!--<TextView-->
+                        <!--android:text="Подписал"-->
+                        <!--android:padding="@dimen/date_offset"-->
+                        <!--android:gravity="center_horizontal|left"-->
+                        <!--android:layout_width="match_parent"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:id="@+id/textView3"/>-->
                     <FrameLayout android:layout_width="match_parent"
                                  android:layout_height="wrap_content"
                                  android:layout_margin="@dimen/date_offset">
+
+                        <android.support.design.widget.TextInputLayout
+                            android:id="@+id/to_text_input_layout"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
 
                         <sapotero.rxtest.views.views.DelayAutoCompleteTextView
                             android:id="@+id/fragment_decision_autocomplete_field"
@@ -126,7 +134,10 @@
                             android:layout_width="1170dp"
                             android:layout_height="wrap_content"
                             android:paddingRight="@dimen/date_offset"
+                            android:hint="Подписал"
                             android:imeOptions="flagNoExtractUi|actionSearch"/>
+                        </android.support.design.widget.TextInputLayout>
+
                         <ProgressBar
                             android:id="@+id/fragment_decision_autocomplete_field_loading_indicator"
                             style="?android:attr/progressBarStyleSmall"
@@ -153,5 +164,54 @@
         </LinearLayout>
 
     </LinearLayout>
+
+    <com.github.clans.fab.FloatingActionMenu
+        android:id="@+id/fab_menu"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:paddingRight="10dp"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp"
+        app:menu_labels_ellipsize="end"
+        app:menu_labels_singleLine="true"
+        app:menu_backgroundColor="@color/transparent_white"
+        >
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/fab1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/fab_add"
+            app:fab_size="mini"
+            app:fab_label="Без ответа" />
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/fab21"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/fab_add"
+            app:fab_size="mini"
+            app:fab_label="Подписать" />
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/fab22"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/fab_add"
+            app:fab_size="mini"
+            app:fab_label="Отклонить" />
+
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/fab3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/fab_add"
+            app:fab_size="mini"
+            app:fab_label="Редактировать резолюцию" />
+
+    </com.github.clans.fab.FloatingActionMenu>
+
 
 </RelativeLayout>
