@@ -38,6 +38,7 @@ import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.views.adapters.OshsAutoCompleteAdapter;
 import sapotero.rxtest.views.adapters.models.UrgencyItem;
+import sapotero.rxtest.views.dialogs.RejectDecisionFragment;
 import sapotero.rxtest.views.fragments.DecisionFragment;
 import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
 import sapotero.rxtest.views.views.DelayAutoCompleteTextView;
@@ -50,6 +51,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
   @BindView(R.id.toolbar) Toolbar toolbar;
   @BindView(R.id.button_add_decision) FloatingActionButton button_add_decision;
+  @BindView(R.id.button_reject_decision) FloatingActionButton button_reject_decision;
 
   @BindView(R.id.fragment_decision_urgency_selector) EsdSelectView<UrgencyItem> urgencySelector;
 
@@ -156,11 +158,20 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   }
 
   @OnClick(R.id.button_add_decision)
-  public void submit(View view) {
+  public void _add(View view) {
     manager.add(new Block());
-//    fab_menu.hideMenu(true);
     fab_menu.close(true);
   }
+
+  @OnClick(R.id.button_reject_decision)
+  public void _reject(View view) {
+
+    new RejectDecisionFragment().show(getFragmentManager(), "reject");
+
+    fab_menu.close(true);
+  }
+
+
 
   @Override
   public void onFragmentInteraction(Uri uri) {

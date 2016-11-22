@@ -217,7 +217,7 @@
             app:fab_size="mini"
             app:fab_label="Подписать" />
         <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/fab22"
+            android:id="@+id/button_reject_decision"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/fab_add"

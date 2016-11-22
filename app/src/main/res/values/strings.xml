@@ -181,6 +181,7 @@
     <string name="pdf_button_prev_page">Предыдущая</string>
     <string name="decision_blank">Бланк резолюции</string>
     <string name="decision">РЕЗОЛЮЦИЯ</string>
+    <string name="reject_decision">Отклонить</string>
 
 
 </resources>
