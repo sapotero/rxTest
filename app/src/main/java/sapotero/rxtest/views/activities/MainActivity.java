@@ -206,6 +206,7 @@ public class MainActivity extends AppCompatActivity {
       loadFromDB();
     });
     control_buttons.enableMultipleChoice(true);
+    loadFromDB();
   }
 
   @Override

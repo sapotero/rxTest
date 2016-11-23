@@ -4,48 +4,67 @@
     android:orientation="vertical"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:clipToPadding="true"
-    android:padding="24dp"
-    android:background="@drawable/card_border_white"
+
+    style="@style/Theme.AppCompat.Dialog"
     >
 
-    <TextView
-        android:text="Укажите причину отклонения документа"
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/textView3"/>
+        android:layout_height="match_parent"
+        android:paddingTop="24dp"
+        android:paddingBottom="16dp"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        >
 
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="textMultiLine"
-        android:ems="10"
-        android:lines="10"
-        android:hint="Причина отклонения"
-        android:layout_below="@+id/textView3"
-        android:layout_alignEnd="@+id/textView3"
-        android:id="@+id/editText"/>
+        <TextView
+            android:text="Причина отклонения документа"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/textView6"
+            android:textAppearance="@style/TextAppearance.AppCompat.Headline"/>
+
+        <EditText
+            android:layout_height="wrap_content"
+            android:inputType="textMultiLine"
+            android:ems="5"
+            android:lines="5"
+            android:hint="..."
+            android:id="@+id/editText"
+            android:layout_width="match_parent"/>
+
+    </LinearLayout>
 
 
     <LinearLayout
+        android:layout_height="48dp"
+
+        android:gravity="center_horizontal|end"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:gravity="center_horizontal"
+        android:layout_marginBottom="8dp"
         >
         <Button
             android:id="@+id/dialog_reject_decision_button_cancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:text="@string/dialog_oshs_cancel">
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="6dp"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="4dp"
+            android:text="@string/dialog_oshs_cancel"
+            style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog">
         </Button>
         <Button
             android:id="@+id/dialog_reject_decision_button_yes"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:text="@string/reject_decision">
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="6dp"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="16dp"
+            android:text="@string/reject_decision"
+            style="@style/Widget.AppCompat.Button.ButtonBar.AlertDialog">
         </Button>
     </LinearLayout>
 

@@ -23,24 +23,21 @@ public class RejectDecisionFragment extends DialogFragment implements View.OnCli
   @BindView(R.id.dialog_reject_decision_button_yes) Button button_ok;
 
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    getDialog().setTitle("Title!");
     View view = inflater.inflate(R.layout.dialog_reject_decision, null);
-
-    getDialog().getWindow().setBackgroundDrawableResource(R.drawable.corner_background);
-
     ButterKnife.bind(this, view);
-
     return view;
   }
 
   @OnClick(R.id.dialog_reject_decision_button_cancel)
   public void _cancel(View view) {
     Timber.tag(TAG).i( "_cancel");
+    dismiss();
   }
 
   @OnClick(R.id.dialog_reject_decision_button_yes)
   public void _yes(View view) {
     Timber.tag(TAG).i( "_yes");
+    dismiss();
   }
 
   public void onClick(DialogInterface dialog, int which) {

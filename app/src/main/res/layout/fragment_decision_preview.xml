@@ -7,14 +7,13 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="@dimen/date_offset"
-        android:layout_marginBottom="@dimen/date_offset"
-        android:layout_marginLeft="@dimen/half_date_offset"
-        android:layout_marginRight="22sp"
+        android:layout_marginStart="@dimen/half_date_offset"
+        android:layout_marginEnd="22sp"
         android:weightSum="8"
         android:padding="@dimen/date_offset"
         android:background="@drawable/card_border_white"
         >
+    <!--android:layout_marginBottom="@dimen/date_offset"-->
 
         <TextView
             android:text="Бланк резолюции"
@@ -35,8 +34,8 @@
 
         <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="459dp"
-            android:minHeight="500dp"
+            android:layout_height="560dp"
+            android:minHeight="510dp"
             >
 
             <LinearLayout

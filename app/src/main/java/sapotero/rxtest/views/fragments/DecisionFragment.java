@@ -97,7 +97,7 @@ public class DecisionFragment extends Fragment {
 
 
     card_toolbar.inflateMenu(R.menu.card_menu);
-    card_toolbar.setTitle("Исполнители и содержание. Блок " + number );
+    card_toolbar.setTitle("Блок " + number );
     decision_text.setText( block.getText() );
     decision_text.addTextChangedListener(new TextWatcher() {
 
@@ -227,7 +227,7 @@ public class DecisionFragment extends Fragment {
   }
 
   public void setNumber( int number){
-    card_toolbar.setTitle("Исполнители и содержание. Блок " + number);
+    card_toolbar.setTitle("Блок " + number);
   }
 
 }

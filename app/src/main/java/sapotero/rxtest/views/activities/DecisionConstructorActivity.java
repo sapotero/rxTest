@@ -37,12 +37,13 @@ import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.views.adapters.OshsAutoCompleteAdapter;
+import sapotero.rxtest.views.adapters.models.FontItem;
 import sapotero.rxtest.views.adapters.models.UrgencyItem;
 import sapotero.rxtest.views.dialogs.RejectDecisionFragment;
 import sapotero.rxtest.views.fragments.DecisionFragment;
 import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
 import sapotero.rxtest.views.views.DelayAutoCompleteTextView;
-import sapotero.rxtest.views.views.EsdSelectView;
+import sapotero.rxtest.views.views.SpinnerWithLabel;
 import timber.log.Timber;
 
 public class DecisionConstructorActivity extends AppCompatActivity implements DecisionFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener {
@@ -53,13 +54,14 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   @BindView(R.id.button_add_decision) FloatingActionButton button_add_decision;
   @BindView(R.id.button_reject_decision) FloatingActionButton button_reject_decision;
 
-  @BindView(R.id.fragment_decision_urgency_selector) EsdSelectView<UrgencyItem> urgencySelector;
-
   @BindView(R.id.fragment_decision_autocomplete_field) DelayAutoCompleteTextView user_autocomplete;
   @BindView(R.id.fragment_decision_autocomplete_field_loading_indicator) ProgressBar indicator;
 
 //  @BindView(R.id.fab) FloatingActionButton fab;
   @BindView(R.id.fab_menu) FloatingActionMenu fab_menu;
+
+  @BindView(R.id.urgency_selector) SpinnerWithLabel<UrgencyItem> urgency_selector;
+  @BindView(R.id.head_font_selector) SpinnerWithLabel<FontItem> font_selector;
 
 
   private String TAG = this.getClass().getSimpleName();
@@ -87,6 +89,35 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       finish();
       }
     );
+
+    List<UrgencyItem> urgency = new ArrayList<>();
+
+    urgency.add(new UrgencyItem("Нет", ""));
+    urgency.add(new UrgencyItem("Весьма срочно", "Весьма срочно"));
+    urgency.add(new UrgencyItem("Крайне срочно", "Крайне срочно"));
+    urgency.add(new UrgencyItem("Няшная срочность", "Няшная срочность"));
+    urgency.add(new UrgencyItem("Очень срочно", "Очень срочно"));
+    urgency.add(new UrgencyItem("Срочно", "Срочно"));
+
+
+    urgency_selector.setItems(urgency);
+    urgency_selector.setOnItemSelectedListener((item, selectedIndex) -> {
+      manager.setUrgency( item.getLabel() );
+    });
+
+
+
+    List<FontItem> fonts = new ArrayList<>();
+    fonts.add(new FontItem("12", "12"));
+    fonts.add(new FontItem("13", "13"));
+    fonts.add(new FontItem("14", "14"));
+    fonts.add(new FontItem("15", "15"));
+    fonts.add(new FontItem("16", "16"));
+
+    font_selector.setItems(fonts);
+    font_selector.setOnItemSelectedListener((item, selectedIndex) -> {
+      Timber.e("%s - %s", item.getLabel(), item.getValue());
+    });
 
 
 //    fab_menu.hideMenuButton(false);
@@ -126,22 +157,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     } else {
       manager.add(new Block());
     }
-
-    List<UrgencyItem> urgency = new ArrayList<>();
-
-    urgency.add(new UrgencyItem("Весьма срочно", "Весьма срочно"));
-    urgency.add(new UrgencyItem("Крайне срочно", "Крайне срочно"));
-    urgency.add(new UrgencyItem("Няшная срочность", "Няшная срочность"));
-    urgency.add(new UrgencyItem("Очень срочно", "Очень срочно"));
-    urgency.add(new UrgencyItem("Срочно", "Срочно"));
-
-    urgencySelector.setItems(urgency);
-    urgencySelector.setOnItemSelectedListener(
-      (item, selectedIndex) -> {
-        Timber.tag(TAG).v(String.valueOf(item));
-        manager.setUrgency( item.getLabel() );
-      }
-    );
 
     user_autocomplete.setThreshold(2);
     user_autocomplete.setAdapter( new OshsAutoCompleteAdapter(this) );

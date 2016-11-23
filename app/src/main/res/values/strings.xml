@@ -110,6 +110,8 @@
     <string name="tab_info">инфокарта</string>
     <string name="control">K</string>
     <string name="favorites">★</string>
+    <string name="arrow_up">↑</string>
+    <string name="arrow_down">↓</string>
 
     <string name="info_create_decision"> Создать резолюцию </string>
     <string name="info_create_no_answer"> Без ответа </string>
@@ -131,6 +133,7 @@
 
 
     <string name="hint_urgency">Срочность</string>
+    <string name="hint_head_font_size">Шрифт исполнителя</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

@@ -10,7 +10,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="@dimen/date_offset"
-        app:cardBackgroundColor="@color/md_grey_200"
+        android:layout_marginBottom="@dimen/date_offset"
+        app:cardBackgroundColor="@color/md_white_1000"
         android:elevation="2sp"
         app:cardUseCompatPadding="true"
         >
@@ -18,7 +19,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/md_grey_100"
+            android:background="@color/md_grey_50"
             android:orientation="vertical">
 
             <android.support.v7.widget.Toolbar
@@ -28,56 +29,72 @@
                 android:layout_height="?attr/actionBarSize" />
 
             <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <CheckBox
-                    android:text="Не отображать № блока"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/checkBox22"
-                    android:layout_weight="1"/>
-
-                <CheckBox
-                    android:text="Скрыть исполнителей"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/checkBox2"
-                    android:layout_weight="1"/>
-
-                <CheckBox
-                    android:text="Ознакомление"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/checkBox1"
-                    android:layout_weight="1"/>
-
-                <CheckBox
-                    android:text="Размножать"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/checkBox"
-                    android:layout_weight="1"/>
-            </LinearLayout>
-
-            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:weightSum="1">
+
+                <!--<CheckBox-->
+                    <!--android:text="Размножать"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:id="@+id/checkBox"-->
+                    <!--android:layout_weight="1"/>-->
+                <!--<CheckBox-->
+                    <!--android:text="Ознакомление"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:id="@+id/checkBox1"-->
+                    <!--android:layout_weight="1"/>-->
+                <!--<CheckBox-->
+                    <!--android:text="Скрыть исполнителей"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:id="@+id/checkBox2"-->
+                    <!--android:layout_weight="1"/>-->
+                <!--<CheckBox-->
+                    <!--android:text="Не отображать номер блока"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:id="@+id/checkBox22"-->
+                    <!--android:layout_weight="1"/>-->
+
+                <FrameLayout
+                    android:layout_width="400dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.97"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="0dp"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
+                    >
+
+                    <Button
+                        android:id="@+id/button4"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Нажмите для выбора шаблона резолюции"
+                        android:textColor="@color/md_grey_400"
+                        android:foreground="@drawable/button_foreground"
+                        android:background="@drawable/button_border"
+                        android:layout_gravity="center_vertical|start"
+                        android:elevation="0dp"/>
+                </FrameLayout>
 
                 <RadioGroup
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
                     android:orientation="horizontal"
                     android:id="@+id/decision_report_action"
-                    android:padding="@dimen/date_offset"
-                    android:gravity="right">
+                    android:padding="8dp"
+                    android:layout_gravity="end">
 
                     <ToggleButton
                         android:layout_height="wrap_content"
                         android:layout_width="wrap_content"
-                        android:checked="true"
+                        android:checked="false"
                         android:text="@string/fragment_decision_familiarize"
                         android:textOff="@string/fragment_decision_familiarize"
                         android:textOn="@string/fragment_decision_familiarize"
@@ -86,6 +103,7 @@
                     <ToggleButton
                         android:layout_height="wrap_content"
                         android:layout_width="wrap_content"
+                        android:checked="false"
                         android:text="@string/fragment_decision_report"
                         android:textOff="@string/fragment_decision_report"
                         android:textOn="@string/fragment_decision_report"
@@ -96,28 +114,135 @@
 
             </LinearLayout>
 
-
-
-            <android.support.design.widget.TextInputLayout
-                android:id="@+id/to_text_input_layout"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:background="@drawable/text_border"
+                >
 
-            <EditText
-                android:id="@+id/decision_text"
+
+                <Button
+                    android:text="Button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/button6"
+                    android:layout_weight="1"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="1">
+
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="8dp"
+                    >
+
+                    <CheckBox
+                        android:text="Скрыть исполнителей"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/checkBox2"
+                        android:layout_weight="1"/>
+
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="end"
+                    android:layout_weight="0.14"
+                    android:padding="8dp"
+                    >
+
+                    <android.support.design.widget.TextInputLayout
+                        android:layout_height="match_parent"
+                        android:longClickable="false"
+                        android:layout_gravity="end|center_vertical"
+                        android:layout_width="211dp">
+
+                        <sapotero.rxtest.views.views.SpinnerWithLabel
+                            android:id="@+id/head_font_selector"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="@string/hint_head_font_size" />
+
+                    </android.support.design.widget.TextInputLayout>
+
+                </FrameLayout>
+
+            </LinearLayout>
+
+
+
+
+            <LinearLayout
+                android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:hint="Текст резолюции"
-                android:inputType="textMultiLine"
-                android:lines="8"
-                android:minLines="6"
-                android:gravity="top|left"
-                android:maxLines="10"
-                android:scrollbars="vertical"
-                android:layout_centerVertical="true"
-                android:layout_alignParentStart="true"
-                android:layout_weight="1"/>
-            </android.support.design.widget.TextInputLayout>
+                android:padding="16dp"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                >
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
+
+                    <android.support.design.widget.TextInputLayout
+                        android:id="@+id/to_text_input_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="8dp"
+                        android:background="@drawable/text_border"
+                        >
+
+                        <EditText
+                            android:id="@+id/decision_text"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:hint="Текст резолюции"
+                            android:background="@color/transparent"
+                            android:padding="@dimen/half_date_offset"
+                            android:inputType="textMultiLine"
+                            android:lines="8"
+                            android:gravity="top|start"
+                            android:maxLines="8"
+                            android:scrollbars="vertical"
+                            android:layout_centerVertical="true"
+                            android:layout_alignParentStart="true"
+                            android:nextFocusUp="@id/decision_text"
+                            android:nextFocusLeft="@id/decision_text"
+                            android:layout_weight="1"
+                            />
+
+                    </android.support.design.widget.TextInputLayout>
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="10"
+                    android:layout_marginLeft="-2dp"
+                    >
+
+                    <ToggleButton
+                        android:textOn="@string/arrow_up"
+                        android:textOff="@string/arrow_down"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:id="@+id/button5"
+                        android:foreground="@drawable/card_foreground"
+                        android:background="@drawable/text_border"
+                        style="@style/Widget.AppCompat.Button.Borderless"/>
+                </FrameLayout>
+
+            </LinearLayout>
 
         </LinearLayout>
     </android.support.v7.widget.CardView>

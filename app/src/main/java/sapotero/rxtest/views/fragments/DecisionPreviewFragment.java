@@ -302,23 +302,6 @@ public class DecisionPreviewFragment extends Fragment  {
 
   }
 
-  @Override
-  public void onAttach(Context context) {
-    super.onAttach(context);
-    mContext = context;
-    if (context instanceof OnFragmentInteractionListener) {
-      mListener = (OnFragmentInteractionListener) context;
-    } else {
-      throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
-    }
-  }
-
-  @Override
-  public void onDetach() {
-    super.onDetach();
-    mListener = null;
-  }
-
   public void setBlocks(ArrayList<Block> blocks) {
     decision.setBlocks(blocks);
     updateView();
@@ -332,8 +315,25 @@ public class DecisionPreviewFragment extends Fragment  {
 
   }
 
-
   public interface OnFragmentInteractionListener {
     void onFragmentInteraction(Uri uri);
+  }
+
+  @Override
+  public void onAttach(Context context) {
+    super.onAttach(context);
+    mContext = context;
+    if (context instanceof OnFragmentInteractionListener) {
+      mListener = (OnFragmentInteractionListener) context;
+    } else {
+      throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
+    }
+  }
+
+
+  @Override
+  public void onDetach() {
+    super.onDetach();
+    mListener = null;
   }
 }
