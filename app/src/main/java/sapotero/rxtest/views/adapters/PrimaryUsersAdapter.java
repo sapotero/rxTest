@@ -10,6 +10,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import sapotero.rxtest.R;
+import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 
 public class PrimaryUsersAdapter extends BaseAdapter {
@@ -52,6 +53,19 @@ public class PrimaryUsersAdapter extends BaseAdapter {
   public void add(PrimaryConsiderationPeople user) {
     items.add( user );
     notifyDataSetChanged();
+  }
+
+  public Oshs getOshs(int position){
+
+    PrimaryConsiderationPeople item = items.get(position);
+
+    Oshs oshs = new Oshs();
+    oshs.setOrganization( item.getOrganization());
+    oshs.setName( item.getName());
+    oshs.setPosition( item.getPosition());
+    oshs.setId( item.getId());
+
+    return oshs;
   }
 
 

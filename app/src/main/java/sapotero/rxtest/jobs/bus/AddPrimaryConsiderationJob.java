@@ -9,7 +9,7 @@ import com.birbit.android.jobqueue.RetryConstraint;
 
 import java.util.ArrayList;
 
-import rx.singles.BlockingSingle;
+import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RPrimaryConsiderationEntity;
 import sapotero.rxtest.retrofit.models.Oshs;
 import timber.log.Timber;
@@ -33,7 +33,7 @@ public class AddPrimaryConsiderationJob  extends BaseJob {
 
   @Override
   public void onRun() throws Throwable {
-
+    Timber.tag(TAG).i( "users: %s | %s", users.size(), users.get(0).getName() );
     for (Oshs user : users){
       if ( !exist( user.getId()) ){
         add(user);
@@ -55,7 +55,14 @@ public class AddPrimaryConsiderationJob  extends BaseJob {
     data.setIsGroup( user.getIsGroup() );
     data.setIsOrganization( user.getIsOrganization() );
 
-    BlockingSingle<RPrimaryConsiderationEntity> u = dataStore.insert(data).toBlocking();
+    dataStore
+      .insert(data)
+      .toObservable()
+      .subscribeOn(Schedulers.computation())
+      .observeOn(Schedulers.io())
+      .subscribe(u -> {
+        Timber.tag(TAG).v("update " + u.getName() );
+      });
   }
 
 

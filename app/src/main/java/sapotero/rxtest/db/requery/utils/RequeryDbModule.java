@@ -39,7 +39,7 @@ public final class RequeryDbModule {
       .build();
 
     SchemaModifier schemaModifier = new SchemaModifier(configuration);
-    schemaModifier.createTables(TableCreationMode.CREATE_NOT_EXISTS);
+    schemaModifier.createTables(TableCreationMode.DROP_CREATE);
 
     return RxSupport.toReactiveStore( new EntityDataStore<Persistable>(configuration) );
   }

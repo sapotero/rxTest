@@ -7,8 +7,10 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:paddingStart="@dimen/date_offset"
+        android:paddingEnd="@dimen/date_offset"
+        android:paddingTop="@dimen/half_date_offset"
+        android:paddingBottom="@dimen/half_date_offset"
         >
 
         <TextView
@@ -18,15 +20,16 @@
             android:layout_weight="1"
             android:layout_gravity="center_vertical"
             android:gravity="center_vertical"
-
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-            android:text="asdasdas"/>
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+            android:textSize="16dp"
+            android:text="title"/>
 
         <TextView
             android:id="@+id/primary_user__title"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:text="tile"
             />
 
     </LinearLayout>

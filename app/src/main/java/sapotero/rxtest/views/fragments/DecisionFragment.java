@@ -205,7 +205,6 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     }
 
     oshs.show( getActivity().getFragmentManager(), "SelectOshsDialogFragment");
-
   }
 
   @Override

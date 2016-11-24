@@ -18,7 +18,7 @@ public class DocumentInfo {
     @SerializedName("sort_key")
     @Expose
     private Integer sortKey;
-    @SerializedName("position")
+    @SerializedName("title")
     @Expose
     private String title;
     @SerializedName("registration_number")

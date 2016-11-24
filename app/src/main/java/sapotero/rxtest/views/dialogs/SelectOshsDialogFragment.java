@@ -6,18 +6,33 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 import android.widget.ProgressBar;
+
+import java.util.ArrayList;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.requery.Persistable;
+import io.requery.rx.SingleEntityStore;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
+import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.models.RPrimaryConsiderationEntity;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.views.adapters.OshsAutoCompleteAdapter;
+import sapotero.rxtest.views.adapters.PrimaryUsersAdapter;
+import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 import sapotero.rxtest.views.views.DelayAutoCompleteTextView;
 import timber.log.Timber;
 
 public class SelectOshsDialogFragment extends DialogFragment implements View.OnClickListener {
 
+
+  @Inject SingleEntityStore<Persistable> dataStore;
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -36,12 +51,41 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
 
 
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
+    EsdApplication.getComponent( getActivity() ).inject( this );
     getDialog().setTitle("Title!");
 
     View view = inflater.inflate(R.layout.dialog_choose_oshs, null);
     view.findViewById(R.id.dialog_oshs_add).setOnClickListener(this);
     view.findViewById(R.id.dialog_oshs_cancel).setOnClickListener(this);
 
+
+    ArrayList<PrimaryConsiderationPeople> people = new ArrayList<>();
+    PrimaryUsersAdapter adapter = new PrimaryUsersAdapter( getActivity(), people);
+    ListView list = (ListView) view.findViewById(R.id.dialog_oshs_listview_users);
+    list.setAdapter(adapter);
+
+    list.setOnItemClickListener((parent, view12, position, id) -> {
+      if ( callback != null){
+        Oshs user = (Oshs) adapter.getOshs(position);
+        callback.onSearchSuccess( user );
+        dismiss();
+      }
+    });
+
+      dataStore
+      .select(RPrimaryConsiderationEntity.class)
+      .get()
+      .toObservable()
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribeOn(Schedulers.io())
+      .subscribe( user -> {
+        Timber.tag("PrimaryUsersAdapter").e( "%s - %s", user.getId(), user.getName() );
+        adapter.add( new PrimaryConsiderationPeople( user.getUid(), user.getName(), user.getPosition(), user.getOrganization() ) );
+      });
+
+    // подпихнуть в автокомлпитер
+    // обноаить превьюху
 
     ButterKnife.bind(this, view);
 
@@ -55,9 +99,12 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
 
     title.setOnItemClickListener(
       (adapterView, view1, position, id) -> {
-        Oshs user = (Oshs) adapterView.getItemAtPosition(position);
         title.setText("");
-        callback.onSearchSuccess( user );
+
+        if ( callback != null){
+          Oshs user = (Oshs) adapterView.getItemAtPosition(position);
+          callback.onSearchSuccess( user );
+        }
         dismiss();
       }
     );

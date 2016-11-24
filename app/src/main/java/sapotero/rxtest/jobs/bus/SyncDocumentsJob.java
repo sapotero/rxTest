@@ -84,6 +84,7 @@ public class SyncDocumentsJob  extends BaseJob {
       .observeOn( Schedulers.io() )
       .subscribe(
         doc -> {
+          Timber.tag(TAG).d("recv title - %s", doc.getTitle() );
           update( doc, exist(doc.getUid()) );
           
           if ( doc.getImages() != null && doc.getImages().size() > 0 ){
@@ -129,6 +130,9 @@ public class SyncDocumentsJob  extends BaseJob {
   @NonNull
   private Observable<RDocumentEntity> create(DocumentInfo d){
 
+    Timber.tag(TAG).d("create title - %s", d.getTitle() );
+
+
     RDocumentEntity rd = new RDocumentEntity();
     rd.setUid( d.getUid() );
     rd.setFilter(filter);
@@ -165,7 +169,7 @@ public class SyncDocumentsJob  extends BaseJob {
         .subscribeOn(Schedulers.computation())
         .observeOn(Schedulers.io())
         .subscribe(data -> {
-          Timber.tag(TAG).v("update " + data.getRegistrationNumber() );
+          Timber.tag(TAG).v("update " + data.getTitle() );
           setData( data, document, false);
         });
     }

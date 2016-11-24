@@ -514,7 +514,7 @@ public class MainActivity extends AppCompatActivity {
       .select(RDocumentEntity.UID)
       .get()
       .toObservable()
-      .subscribeOn(Schedulers.io())
+      .subscribeOn(Schedulers.newThread())
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(uid -> {
         document_type_adapter.updateCountByType( uid.get(0) );
@@ -533,7 +533,7 @@ public class MainActivity extends AppCompatActivity {
       .distinct()
       .get()
       .toObservable()
-      .subscribeOn(Schedulers.io())
+      .subscribeOn(Schedulers.newThread())
       .observeOn(AndroidSchedulers.mainThread())
 //      .flatMap( org -> {
 //
@@ -647,7 +647,7 @@ public class MainActivity extends AppCompatActivity {
 
     loadFromDbQuery = query.get()
       .toObservable()
-      .subscribeOn(Schedulers.io())
+      .subscribeOn(Schedulers.newThread())
       .observeOn(AndroidSchedulers.mainThread())
       .toList()
       .subscribe(docs -> {
@@ -669,7 +669,7 @@ public class MainActivity extends AppCompatActivity {
       ArrayList<Document> list_dosc = new ArrayList<Document>();
       for (int i = 0; i < docs.size(); i++) {
         RDocumentEntity doc = docs.get(i);
-        Timber.tag(TAG).v("addToAdapter ++ " + doc.getUid());
+        Timber.tag(TAG).v("addToAdapter ++ " + doc.getTitle());
 
         Document document = new Document();
         document.setUid(doc.getUid());
@@ -705,7 +705,7 @@ public class MainActivity extends AppCompatActivity {
       .distinct()
       .get()
       .toObservable()
-      .subscribeOn(Schedulers.io())
+      .subscribeOn(Schedulers.newThread())
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(org -> {
 

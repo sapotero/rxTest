@@ -9,7 +9,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.BaseAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.f2prateek.rx.preferences.Preference;
@@ -27,15 +26,11 @@ import io.requery.rx.SingleEntityStore;
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Retrofit;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.db.requery.models.RPrimaryConsiderationEntity;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.utils.OshsAdapterService;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
-import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 
 public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable {
 
@@ -84,22 +79,6 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
     ((TextView) convertView.findViewById(R.id.user_name)).setText(getItem(position).getName());
     ((TextView) convertView.findViewById(R.id.user_organization)).setText(getItem(position).getOrganization());
 
-
-
-    ArrayList<PrimaryConsiderationPeople> people = new ArrayList<>();
-    PrimaryUsersAdapter adapter = new PrimaryUsersAdapter( mContext, people);
-    dataStore
-      .select(RPrimaryConsiderationEntity.class)
-      .where(RPrimaryConsiderationEntity.UID.ne(""))
-      .get()
-      .toObservable()
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribeOn(Schedulers.io())
-      .subscribe( user -> {
-        adapter.add( new PrimaryConsiderationPeople( user.getUid(), user.getName(), user.getPosition(), user.getOrganization() ) );
-      });
-
-    ((ListView) convertView.findViewById(R.id.primary_users)).setAdapter(adapter);
 
 
     return convertView;

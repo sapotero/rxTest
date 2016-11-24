@@ -3,7 +3,9 @@ package sapotero.rxtest.retrofit.models;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Oshs {
+import java.io.Serializable;
+
+public class Oshs implements Serializable {
 
   @SerializedName("id")
   @Expose
