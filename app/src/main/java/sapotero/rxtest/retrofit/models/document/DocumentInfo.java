@@ -18,7 +18,7 @@ public class DocumentInfo {
     @SerializedName("sort_key")
     @Expose
     private Integer sortKey;
-    @SerializedName("title")
+    @SerializedName("position")
     @Expose
     private String title;
     @SerializedName("registration_number")
@@ -127,7 +127,7 @@ public class DocumentInfo {
     /**
      * 
      * @return
-     *     The title
+     *     The position
      */
     public String getTitle() {
         return title;
@@ -136,7 +136,7 @@ public class DocumentInfo {
     /**
      * 
      * @param title
-     *     The title
+     *     The position
      */
     public void setTitle(String title) {
         this.title = title;

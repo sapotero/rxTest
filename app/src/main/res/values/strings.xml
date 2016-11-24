@@ -112,6 +112,8 @@
     <string name="favorites">★</string>
     <string name="arrow_up">↑</string>
     <string name="arrow_down">↓</string>
+    <string name="cross">❌</string>
+
 
     <string name="info_create_decision"> Создать резолюцию </string>
     <string name="info_create_no_answer"> Без ответа </string>
@@ -185,6 +187,9 @@
     <string name="decision_blank">Бланк резолюции</string>
     <string name="decision">РЕЗОЛЮЦИЯ</string>
     <string name="reject_decision">Отклонить</string>
+    <string name="primary_people_copy">Подлинник</string>
+    <string name="primary_people_responsible">Ответственный</string>
+    <string name="primary_people_out">В Д/Ч</string>
 
 
 </resources>

@@ -16,7 +16,7 @@ public class Document implements Serializable {
     @SerializedName("sort_key")
     @Expose
     private Integer sortKey;
-    @SerializedName("title")
+    @SerializedName("position")
     @Expose
     private String title;
     @SerializedName("registration_number")
@@ -135,7 +135,7 @@ public class Document implements Serializable {
     /**
      * 
      * @return
-     *     The title
+     *     The position
      */
     public String getTitle() {
         return title;
@@ -144,7 +144,7 @@ public class Document implements Serializable {
     /**
      * 
      * @param title
-     *     The title
+     *     The position
      */
     public void setTitle(String title) {
         this.title = title;

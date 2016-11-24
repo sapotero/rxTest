@@ -124,19 +124,19 @@ if $cygwin ; then
         OURCYGPATTERN="$OURCYGPATTERN|($GRADLE_CYGPATTERN)"
     fi
     # Now convert the arguments - kludge to limit ourselves to /bin/sh
-    i=0
+    id=0
     for arg in "$@" ; do
         CHECK=`echo "$arg"|egrep -c "$OURCYGPATTERN" -`
         CHECK2=`echo "$arg"|egrep -c "^-"`                                 ### Determine if an option
 
         if [ $CHECK -ne 0 ] && [ $CHECK2 -eq 0 ] ; then                    ### Added a condition
-            eval `echo args$i`=`cygpath --path --ignore --mixed "$arg"`
+            eval `echo args$id`=`cygpath --path --ignore --mixed "$arg"`
         else
-            eval `echo args$i`="\"$arg\""
+            eval `echo args$id`="\"$arg\""
         fi
-        i=$((i+1))
+        id=$((id+1))
     done
-    case $i in
+    case $id in
         (0) set -- ;;
         (1) set -- "$args0" ;;
         (2) set -- "$args0" "$args1" ;;

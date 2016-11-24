@@ -109,9 +109,9 @@ public class VerticalStepperFormLayout extends RelativeLayout implements View.On
   }
 
   /**
-   * Returns the title of a step
+   * Returns the position of a step
    * @param stepNumber The step number (counting from 0)
-   * @return the title string
+   * @return the position string
    */
   public String getStepTitle(int stepNumber) {
     return steps.get(stepNumber);
@@ -138,9 +138,9 @@ public class VerticalStepperFormLayout extends RelativeLayout implements View.On
   }
 
   /**
-   * Set the title of certain step
+   * Set the position of certain step
    * @param stepNumber The step number (counting from 0)
-   * @param title New title of the step
+   * @param title New position of the step
    */
   public void setStepTitle(int stepNumber, String title) {
     if(title != null && !title.equals("")) {
@@ -1138,8 +1138,8 @@ public class VerticalStepperFormLayout extends RelativeLayout implements View.On
     }
 
     /**
-     * Set the text color of the step title
-     * @param stepTitleTextColor the color of the step title
+     * Set the text color of the step position
+     * @param stepTitleTextColor the color of the step position
      * @return this builder instance
      */
     public Builder stepTitleTextColor(int stepTitleTextColor) {
@@ -1149,7 +1149,7 @@ public class VerticalStepperFormLayout extends RelativeLayout implements View.On
 
     /**
      * Set the text color of the step subtitle
-     * @param stepSubtitleTextColor the color of the step title
+     * @param stepSubtitleTextColor the color of the step position
      * @return this builder instance
      */
     public Builder stepSubtitleTextColor(int stepSubtitleTextColor) {

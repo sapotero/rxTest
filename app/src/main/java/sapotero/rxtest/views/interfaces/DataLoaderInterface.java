@@ -234,11 +234,9 @@ public class DataLoaderInterface {
                 jobManager.addJobInBackground(new SyncDocumentsJob(doc.getUid(), type), () -> {
                   Timber.e("complete");
                 });
+                callback.onGetDocumentsInfoSuccess();
               }
             }
-
-            callback.onGetDocumentsInfoSuccess();
-
           },
           error -> {
             callback.onGetDocumentsInfoError(error);

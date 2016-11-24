@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ToggleButton;
 
 import com.birbit.android.jobqueue.JobManager;
@@ -18,10 +19,13 @@ import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.google.gson.Gson;
 
+import java.util.ArrayList;
+
 import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import sapotero.rxtest.R;
@@ -31,9 +35,11 @@ import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.utils.OshsService;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
+import sapotero.rxtest.views.adapters.PrimaryConsiderationAdapter;
+import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 import timber.log.Timber;
 
-public class DecisionFragment extends Fragment {
+public class DecisionFragment extends Fragment implements PrimaryConsiderationAdapter.Callback {
   private static final String LOGIN = "";
   private static final String PASSWORD = "";
 
@@ -49,6 +55,9 @@ public class DecisionFragment extends Fragment {
   @BindView(R.id.fragment_decision_button_familiarization) ToggleButton button_familiarization;
   @BindView(R.id.fragment_decision_button_report) ToggleButton button_report;
 
+  @BindView(R.id.fragment_decision_linear_people) LinearLayout people_view;
+
+
 
 
 
@@ -61,6 +70,7 @@ public class DecisionFragment extends Fragment {
   private int number;
   private Block block;
   private Preference<String> HOST;
+  private PrimaryConsiderationAdapter adapter;
 
   public DecisionFragment() {
   }
@@ -157,6 +167,18 @@ public class DecisionFragment extends Fragment {
       }
     );
 
+    Timber.e(" ArrayList<PrimaryConsiderationPeople> people = new ArrayList<>(); ");
+
+    ArrayList<PrimaryConsiderationPeople> people = new ArrayList<>();
+    people.add( new PrimaryConsiderationPeople("123", "Казаков В.А.", "teisting", "TEST LTD") );
+    people.add( new PrimaryConsiderationPeople("123", "Казаков В.А1.", "teisting", "TEST LTD") );
+    people.add( new PrimaryConsiderationPeople("123", "Казаков В.А.2", "teisting", "TEST LTD") );
+    people.add( new PrimaryConsiderationPeople("123", "Казаков В.А.3", "teisting", "TEST LTD") );
+
+    adapter = new PrimaryConsiderationAdapter( getContext(), people);
+    adapter.registerCallBack(this);
+    updateUsers();
+
     return view;
   }
 
@@ -164,6 +186,36 @@ public class DecisionFragment extends Fragment {
     if (mListener != null) {
       mListener.onFragmentInteraction(uri);
     }
+  }
+
+  private void updateUsers(){
+    people_view.removeAllViews();
+    for (int i = 0; i < adapter.getCount(); i++) {
+      View item = adapter.getView(i, null, null);
+      people_view.addView(item);
+    }
+  }
+
+  private void updateUsersAttribute(){
+//    for(int index=0; index<( (ViewGroup) people_view).getChildCount(); ++index) {
+//      View nextChild = ( (ViewGroup) people_view).getChildAt(index);
+//
+//      Timber.tag("updateUsersAttribute").e("%s", nextChild.getId());
+//
+//      for(int i=0; i<( (ViewGroup) nextChild).getChildCount(); ++i) {
+//        View field = ((ViewGroup) nextChild).getChildAt(index);
+//
+//        Timber.tag("list").e("recv %s", field.getId());
+//      }
+//    }
+  }
+
+  @OnClick(R.id.fragment_decision_button_add_people)
+  public void add(){
+    Timber.tag("ADD PEOPLE").e("CLICKED");
+
+    adapter.add( new PrimaryConsiderationPeople("123", "Казаков В.А.3", "teisting", "TEST LTD") );
+    updateUsers();
   }
 
   @Override
@@ -192,6 +244,16 @@ public class DecisionFragment extends Fragment {
     token = _token.get();
 
     HOST = settings.getString("settings_username_host");
+  }
+
+  @Override
+  public void onRemove() {
+    updateUsers();
+  }
+
+  @Override
+  public void onAttrChange() {
+    updateUsersAttribute();
   }
 
   public interface OnFragmentInteractionListener {

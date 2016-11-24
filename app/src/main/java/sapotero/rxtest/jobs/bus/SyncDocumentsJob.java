@@ -38,7 +38,7 @@ import timber.log.Timber;
 
 public class SyncDocumentsJob  extends BaseJob {
 
-  public static final int PRIORITY = 10;
+  public static final int PRIORITY = 5;
 
   private Preference<String> LOGIN = null;
   private Preference<String> TOKEN = null;
@@ -90,7 +90,7 @@ public class SyncDocumentsJob  extends BaseJob {
 
             for (Image image : doc.getImages()) {
 
-              jobManager.addJobInBackground( new DownloadFileJob(HOST.get(), image.getPath(), image.getMd5()+"_"+image.getTitle()) );
+              //jobManager.addJobInBackground( new DownloadFileJob(HOST.get(), image.getPath(), image.getMd5()+"_"+image.getTitle()) );
             }
 
           }
@@ -166,10 +166,6 @@ public class SyncDocumentsJob  extends BaseJob {
         .observeOn(Schedulers.io())
         .subscribe(data -> {
           Timber.tag(TAG).v("update " + data.getRegistrationNumber() );
-
-
-          complete_task( data.getUid() );
-
           setData( data, document, false);
         });
     }

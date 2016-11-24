@@ -34,7 +34,7 @@ import timber.log.Timber;
 public class DownloadFileJob  extends BaseJob {
 
   private String TAG = this.getClass().getSimpleName();
-  public static final int PRIORITY = 1;
+  public static final int PRIORITY = 10;
 
   private String host;
   private String strUrl;

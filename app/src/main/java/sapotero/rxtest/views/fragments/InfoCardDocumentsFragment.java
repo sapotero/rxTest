@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -56,7 +57,6 @@ import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.views.activities.DocumentImageFullScreenActivity;
 import sapotero.rxtest.views.adapters.DocumentLinkAdapter;
 import timber.log.Timber;
-//import uk.co.senab.photoview.PhotoViewAttacher;
 
 public class InfoCardDocumentsFragment extends Fragment implements AdapterView.OnItemClickListener, GestureDetector.OnDoubleTapListener {
 
@@ -77,12 +77,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   private PdfRenderer mPdfRenderer;
   private PdfRenderer.Page mCurrentPage;
 
-//  @BindView(R.id.pdf_image) ImageView mImageView;
-//  @BindView(R.id.pdf_image) SubsamplingScaleImageView mImageView;
-//  @BindView(R.id.empty_list_image) ImageView empty_list_image;
-//  @BindView(R.id.doc_tmp_layout) FrameLayout doc_tmp_layout;
-//  @BindView(R.id.documents_files_progressbar) ProgressBar progressBar;
-
+  @BindView(R.id.documents_files_progressbar) ProgressBar progressBar;
 
   @BindView(R.id.pdf_previous) Button mButtonPrevious;
   @BindView(R.id.pdf_next) Button     mButtonNext;
@@ -179,13 +174,13 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
           .enableDoubletap(true)
           .defaultPage(0)
           .swipeHorizontal(false)
-//          .onDraw(onDrawListener)
-//          .onLoad(onLoadCompleteListener)
+          .onLoad(nbPages -> {
+            progressBar.setVisibility(View.GONE);
+          })
+          .onError(t -> progressBar.setVisibility(View.GONE))
           .onPageChange((page, pageCount) -> {
             updatePageInfo();
           })
-//          .onPageScroll(onPageScrollListener)
-//          .onError(onErrorListener)
           .enableAnnotationRendering(false)
           .password(null)
           .scrollHandle(null)
@@ -202,6 +197,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
       @Override
       public void onNothingSelected(AdapterView<?> parent) {
+
       }
     });
 
@@ -209,11 +205,6 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     if (null != savedInstanceState) {
       index = savedInstanceState.getInt(STATE_CURRENT_PAGE_INDEX, 0);
     }
-
-
-//    mAttacher = new PhotoViewAttacher(mImageView);
-//    mAttacher.setScaleType(ImageView.ScaleType.FIT_CENTER);
-//    mAttacher.setOnDoubleTapListener(this);
 
     return view;
   }
@@ -325,20 +316,9 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     }
   }
 
-  public int getPageCount() {
-    return mPdfRenderer.getPageCount();
-  }
-
-  public void onButtonPressed(Uri uri) {
-    if (mListener != null) {
-      mListener.onFragmentInteraction(uri);
-    }
-  }
-
   @OnClick(R.id.pdf_previous)
   public void previousPage(View view) {
     try {
-//      setDocumentPreview(mCurrentPage.getIndex() - 1);
       pdfView.jumpTo( pdfView.getCurrentPage() - 1 );
       updatePageInfo();
     } catch (NullPointerException e) {
@@ -386,9 +366,6 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     if ( EventBus.getDefault().isRegistered(this) ){
       EventBus.getDefault().unregister(this);
     }
-
-//    mAttacher.cleanup();
-//    mAttacher = null;
   }
 
 

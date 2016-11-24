@@ -45,7 +45,7 @@
             android:defaultValue="false" />
         <!--<EditTextPreference-->
             <!--android:key="settings_view_time"-->
-            <!--android:title="Время показа уведомления"-->
+            <!--android:position="Время показа уведомления"-->
             <!--android:defaultValue="0" />-->
 
     </android.support.v7.preference.PreferenceCategory>

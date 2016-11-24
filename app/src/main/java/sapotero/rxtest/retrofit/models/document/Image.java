@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName;
 
 public class Image {
 
-    @SerializedName("title")
+    @SerializedName("position")
     @Expose
     private String title;
     @SerializedName("created_at")
@@ -34,7 +34,7 @@ public class Image {
     /**
      * 
      * @return
-     *     The title
+     *     The position
      */
     public String getTitle() {
         return title;
@@ -43,7 +43,7 @@ public class Image {
     /**
      * 
      * @param title
-     *     The title
+     *     The position
      */
     public void setTitle(String title) {
         this.title = title;
