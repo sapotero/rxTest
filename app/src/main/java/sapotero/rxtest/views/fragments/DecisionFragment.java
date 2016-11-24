@@ -10,8 +10,10 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Switch;
 import android.widget.ToggleButton;
 
 import com.birbit.android.jobqueue.JobManager;
@@ -27,14 +29,13 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import okhttp3.OkHttpClient;
-import retrofit2.Retrofit;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.jobs.bus.UpdateDecisionPreviewJob;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.models.document.Block;
+import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.retrofit.utils.OshsService;
-import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.adapters.PrimaryConsiderationAdapter;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
@@ -54,10 +55,16 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   @BindView(R.id.card_toolbar)  Toolbar  card_toolbar;
   @BindView(R.id.decision_text) EditText decision_text;
 
-  @BindView(R.id.fragment_decision_button_familiarization) ToggleButton button_familiarization;
-  @BindView(R.id.fragment_decision_button_report) ToggleButton button_report;
-
+  @BindView(R.id.fragment_decision_button_familiarization) Switch button_familiarization;
+  @BindView(R.id.fragment_decision_button_report) Switch button_report;
   @BindView(R.id.fragment_decision_linear_people) LinearLayout people_view;
+
+
+
+  @BindView(R.id.fragment_decision_hide_performers) CheckBox hide_performers;
+  @BindView(R.id.fragment_decision_text_before) ToggleButton fragment_decision_text_before;
+
+
 
 
 
@@ -103,9 +110,9 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     EsdApplication.getComponent(mContext).inject( this );
 
     loadSettings();
-
-    Retrofit retrofit = new RetrofitManager(mContext, HOST.get() + "v2/", okHttpClient).process();
-    oshsService = retrofit.create( OshsService.class );
+//
+//    Retrofit retrofit = new RetrofitManager(mContext, HOST.get() + "v2/", okHttpClient).process();
+//    oshsService = retrofit.create( OshsService.class );
 
 
 
@@ -275,10 +282,31 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     block.setNumber(number);
     block.setAppealText( appealText );
     block.setText( decision_text.getText().toString() );
-    block.setTextBefore(true);
     block.setToFamiliarization(false);
     block.setToCopy(false);
-    block.setHidePerformers(false);
+    block.setTextBefore( fragment_decision_text_before.isChecked() );
+    block.setHidePerformers( hide_performers.isChecked() );
+
+    if ( adapter.getCount() > 0 ){
+      ArrayList<Performer> performers = new ArrayList<>();
+
+      for (int i = 0; i < adapter.getCount(); i++) {
+        Performer p = new Performer();
+        PrimaryConsiderationPeople item = adapter.getItem(i);
+
+        p.setPerformerId( item.getId() );
+        p.setIsResponsible( item.isResponsible() );
+        p.setIsOriginal( item.isCopy() );
+        p.setPerformerId( item.getId() );
+        p.setPerformerText( item.getName() );
+        p.setOrganizationText( item.getOrganization() );
+        p.setNumber( i );
+
+        performers.add(p);
+      }
+
+      block.setPerformers( performers );
+    }
 
 //    number: 1,
 //      text: "ТЕСТ",

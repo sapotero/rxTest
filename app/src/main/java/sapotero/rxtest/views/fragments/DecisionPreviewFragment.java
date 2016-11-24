@@ -28,6 +28,8 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.requery.Persistable;
+import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.retrofit.models.document.Block;
@@ -38,6 +40,7 @@ import timber.log.Timber;
 public class DecisionPreviewFragment extends Fragment  {
 
   @Inject RxSharedPreferences settings;
+  @Inject SingleEntityStore<Persistable> dataStore;
 
   private OnFragmentInteractionListener mListener;
   private Context mContext;

@@ -121,7 +121,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
 
 //    fab_menu.hideMenuButton(false);
-    fab_menu.setClosedOnTouchOutside(true);
+//    fab_menu.setClosedOnTouchOutside(true);
 
     Decision raw_decision = null;
     Gson gson = new Gson();
