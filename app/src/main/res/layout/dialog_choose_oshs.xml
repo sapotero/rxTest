@@ -3,14 +3,15 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:weightSum="1">
     <TextView
         android:id="@+id/textView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_margin="20dp"
-        android:text="string/message_text"
+        android:text="@string/dialog_oshs_title"
         android:textAppearance="?android:attr/textAppearanceLarge">
     </TextView>
 
@@ -22,9 +23,9 @@
         <sapotero.rxtest.views.views.DelayAutoCompleteTextView
             android:id="@+id/user_autocomplete_field"
             android:inputType="textCapSentences"
-            android:layout_width="1170dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingRight="@dimen/date_offset"
+            android:paddingEnd="@dimen/date_offset"
             android:imeOptions="flagNoExtractUi|actionSearch"/>
 
         <ProgressBar
@@ -32,29 +33,37 @@
             style="?android:attr/progressBarStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_gravity="center_vertical|right"
-            android:layout_marginRight="@dimen/date_offset"
+            android:layout_gravity="center_vertical|end"
+            android:layout_marginEnd="@dimen/date_offset"
             android:visibility="invisible"
             android:foregroundGravity="right|center_vertical"/>
 
     </FrameLayout>
 
+    <ListView
+        android:id="@+id/primary_users"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1.50"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <Button
-            android:id="@+id/dialog_oshs_add"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:text="string/yes">
-        </Button>
+
         <Button
             android:id="@+id/dialog_oshs_cancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
-            android:text="string/no">
+            android:text="@string/dialog_oshs_cancel">
+        </Button>
+
+        <Button
+            android:id="@+id/dialog_oshs_add"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:text="@string/dialog_oshs_add">
         </Button>
     </LinearLayout>
 </LinearLayout>

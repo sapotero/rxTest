@@ -49,7 +49,7 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
 
       viewHolder = new ViewHolder();
       viewHolder.name     = (TextView) view.findViewById(R.id.primary_name);
-      viewHolder.position = (TextView) view.findViewById(R.id.primary_title);
+//      viewHolder.position = (TextView) view.findViewById(R.id.primary_title);
       viewHolder.remove = (Button)   view.findViewById(R.id.remove_user);
 
       viewHolder.copy        = (Switch) view.findViewById(R.id.copy);
@@ -68,7 +68,7 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
 
 
     viewHolder.name.setText( user.getName() );
-    viewHolder.position.setText( user.getPosition() );
+//    viewHolder.position.setText( user.getPosition() );
 
     viewHolder.copy.setChecked( user.isCopy() );
     viewHolder.responsible.setChecked( user.isResponsible() );
@@ -85,7 +85,7 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
             break;
           }
         }
-        
+
         callback.onRemove();
       }
 
@@ -141,7 +141,7 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
 
   public static class ViewHolder {
     public TextView name;
-    public TextView position;
+//    public TextView position;
     public Button remove;
     public Switch copy;
     public Switch responsible;

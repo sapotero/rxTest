@@ -31,15 +31,17 @@ import retrofit2.Retrofit;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.jobs.bus.UpdateDecisionPreviewJob;
+import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.utils.OshsService;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.adapters.PrimaryConsiderationAdapter;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
+import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
 import timber.log.Timber;
 
-public class DecisionFragment extends Fragment implements PrimaryConsiderationAdapter.Callback {
+public class DecisionFragment extends Fragment implements PrimaryConsiderationAdapter.Callback, SelectOshsDialogFragment.Callback {
   private static final String LOGIN = "";
   private static final String PASSWORD = "";
 
@@ -71,6 +73,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   private Block block;
   private Preference<String> HOST;
   private PrimaryConsiderationAdapter adapter;
+  private SelectOshsDialogFragment oshs;
 
   public DecisionFragment() {
   }
@@ -170,10 +173,6 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     Timber.e(" ArrayList<PrimaryConsiderationPeople> people = new ArrayList<>(); ");
 
     ArrayList<PrimaryConsiderationPeople> people = new ArrayList<>();
-    people.add( new PrimaryConsiderationPeople("123", "Казаков В.А.", "teisting", "TEST LTD") );
-    people.add( new PrimaryConsiderationPeople("123", "Казаков В.А1.", "teisting", "TEST LTD") );
-    people.add( new PrimaryConsiderationPeople("123", "Казаков В.А.2", "teisting", "TEST LTD") );
-    people.add( new PrimaryConsiderationPeople("123", "Казаков В.А.3", "teisting", "TEST LTD") );
 
     adapter = new PrimaryConsiderationAdapter( getContext(), people);
     adapter.registerCallBack(this);
@@ -196,26 +195,17 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     }
   }
 
-  private void updateUsersAttribute(){
-//    for(int index=0; index<( (ViewGroup) people_view).getChildCount(); ++index) {
-//      View nextChild = ( (ViewGroup) people_view).getChildAt(index);
-//
-//      Timber.tag("updateUsersAttribute").e("%s", nextChild.getId());
-//
-//      for(int i=0; i<( (ViewGroup) nextChild).getChildCount(); ++i) {
-//        View field = ((ViewGroup) nextChild).getChildAt(index);
-//
-//        Timber.tag("list").e("recv %s", field.getId());
-//      }
-//    }
-  }
-
   @OnClick(R.id.fragment_decision_button_add_people)
   public void add(){
     Timber.tag("ADD PEOPLE").e("CLICKED");
 
-    adapter.add( new PrimaryConsiderationPeople("123", "Казаков В.А.3", "teisting", "TEST LTD") );
-    updateUsers();
+    if (oshs == null){
+      oshs = new SelectOshsDialogFragment();
+      oshs.registerCallBack( this );
+    }
+
+    oshs.show( getActivity().getFragmentManager(), "SelectOshsDialogFragment");
+
   }
 
   @Override
@@ -253,7 +243,20 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
 
   @Override
   public void onAttrChange() {
-    updateUsersAttribute();
+  }
+
+  @Override
+  public void onSearchSuccess(Oshs user) {
+    Timber.tag("FROM DIALOG").i( "[%s] %s | %s", user.getId(), user.getName(), user.getOrganization());
+
+    adapter.add( new PrimaryConsiderationPeople( user.getId(), user.getName(), user.getPosition(), user.getOrganization()) );
+    updateUsers();
+
+  }
+
+  @Override
+  public void onSearchError(Throwable error) {
+
   }
 
   public interface OnFragmentInteractionListener {

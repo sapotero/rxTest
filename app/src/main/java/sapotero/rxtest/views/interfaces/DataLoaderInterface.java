@@ -8,6 +8,8 @@ import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
+import java.util.ArrayList;
+
 import javax.inject.Inject;
 
 import okhttp3.OkHttpClient;
@@ -18,10 +20,13 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.jobs.bus.AddPrimaryConsiderationJob;
 import sapotero.rxtest.jobs.bus.SyncDocumentsJob;
 import sapotero.rxtest.retrofit.AuthTokenService;
 import sapotero.rxtest.retrofit.DocumentsService;
+import sapotero.rxtest.retrofit.PrimaryConsiderationService;
 import sapotero.rxtest.retrofit.models.AuthToken;
+import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.retrofit.models.documents.Documents;
 import sapotero.rxtest.retrofit.models.me.UserInfo;
@@ -113,6 +118,9 @@ public class DataLoaderInterface {
           data -> {
             Timber.i( "LOGIN: %s\nTOKEN: %s", LOGIN.get(), data.getAuthToken() );
             saveToken( data.getAuthToken() );
+
+            getPrimaryConsiderationUsers();
+
             callback.onAuthTokenSuccess();
           },
           error -> {
@@ -121,6 +129,29 @@ public class DataLoaderInterface {
           }
         )
     );
+  }
+
+
+
+  public void getPrimaryConsiderationUsers() {
+    Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
+    PrimaryConsiderationService primaryConsiderationService = retrofit.create(PrimaryConsiderationService.class);
+
+    Observable<ArrayList<Oshs>> info = primaryConsiderationService.getUsers( LOGIN.get(), TOKEN.get() );
+
+    unsubscribe();
+    subscription.add(
+      info.subscribeOn(Schedulers.computation())
+        .observeOn( AndroidSchedulers.mainThread() )
+        .subscribe(
+          users -> {
+            jobManager.addJobInBackground(new AddPrimaryConsiderationJob(users));
+          },
+          error -> {
+            Timber.tag(TAG).d("ERROR " + error.getMessage());
+          })
+    );
+
   }
 
   public void getUserInformation() {

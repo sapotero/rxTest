@@ -647,7 +647,7 @@ public class MainActivity extends AppCompatActivity {
 
     loadFromDbQuery = query.get()
       .toObservable()
-      .subscribeOn(Schedulers.computation())
+      .subscribeOn(Schedulers.io())
       .observeOn(AndroidSchedulers.mainThread())
       .toList()
       .subscribe(docs -> {

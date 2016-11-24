@@ -90,7 +90,7 @@ public class SyncDocumentsJob  extends BaseJob {
 
             for (Image image : doc.getImages()) {
 
-              //jobManager.addJobInBackground( new DownloadFileJob(HOST.get(), image.getPath(), image.getMd5()+"_"+image.getTitle()) );
+              jobManager.addJobInBackground( new DownloadFileJob(HOST.get(), image.getPath(), image.getMd5()+"_"+image.getTitle()) );
             }
 
           }

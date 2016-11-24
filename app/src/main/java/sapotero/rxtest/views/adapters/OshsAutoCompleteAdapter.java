@@ -1,12 +1,15 @@
 package sapotero.rxtest.views.adapters;
 
+import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.BaseAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.f2prateek.rx.preferences.Preference;
@@ -19,14 +22,20 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import io.requery.Persistable;
+import io.requery.rx.SingleEntityStore;
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Retrofit;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.models.RPrimaryConsiderationEntity;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.utils.OshsAdapterService;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
+import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 
 public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable {
 
@@ -38,6 +47,7 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
 
   @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
+  @Inject SingleEntityStore<Persistable> dataStore;
 
   private Preference<String> login;
   private Preference<String> token;
@@ -73,12 +83,31 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
     }
     ((TextView) convertView.findViewById(R.id.user_name)).setText(getItem(position).getName());
     ((TextView) convertView.findViewById(R.id.user_organization)).setText(getItem(position).getOrganization());
+
+
+
+    ArrayList<PrimaryConsiderationPeople> people = new ArrayList<>();
+    PrimaryUsersAdapter adapter = new PrimaryUsersAdapter( mContext, people);
+    dataStore
+      .select(RPrimaryConsiderationEntity.class)
+      .where(RPrimaryConsiderationEntity.UID.ne(""))
+      .get()
+      .toObservable()
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribeOn(Schedulers.io())
+      .subscribe( user -> {
+        adapter.add( new PrimaryConsiderationPeople( user.getUid(), user.getName(), user.getPosition(), user.getOrganization() ) );
+      });
+
+    ((ListView) convertView.findViewById(R.id.primary_users)).setAdapter(adapter);
+
+
     return convertView;
   }
 
   @Override
   public Filter getFilter() {
-    Filter filter = new Filter() {
+    return new Filter() {
       @Override
       protected FilterResults performFiltering(CharSequence constraint) {
         FilterResults filterResults = new FilterResults();
@@ -91,6 +120,7 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
           }
 
           filterResults.values = results;
+          assert results != null;
           filterResults.count  = results.size();
         }
         return filterResults;
@@ -100,12 +130,15 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
       protected void publishResults(CharSequence constraint, FilterResults results) {
         if (results != null && results.count > 0) {
           resultList = (List<Oshs>) results.values;
+
+          InputMethodManager imm = (InputMethodManager) mContext.getSystemService(Activity.INPUT_METHOD_SERVICE);
+          imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+
           notifyDataSetChanged();
         } else {
           notifyDataSetInvalidated();
         }
       }};
-    return filter;
   }
 
   private List<Oshs> findOshs(Context context, String OshsTitle) throws IOException {
