@@ -152,7 +152,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
               RImageEntity img = (RImageEntity) image;
 
-              Timber.tag(TAG).i("image " + img.getMd5() );
+              Timber.tag(TAG).i("image " + img.getTitle() );
               adapter.add( img );
             }
           }

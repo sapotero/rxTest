@@ -31,12 +31,10 @@ import butterknife.OnClick;
 import okhttp3.OkHttpClient;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.jobs.bus.UpdateDecisionPreviewJob;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.retrofit.utils.OshsService;
-import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.adapters.PrimaryConsiderationAdapter;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
@@ -66,10 +64,6 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
 
 
 
-
-
-
-
   private String TAG = this.getClass().getSimpleName();
   private Context mContext;
 
@@ -81,6 +75,18 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   private Preference<String> HOST;
   private PrimaryConsiderationAdapter adapter;
   private SelectOshsDialogFragment oshs;
+
+
+  public Callback callback;
+
+  public interface Callback {
+    void onUpdateSuccess();
+    void onUpdateError(Throwable error);
+  }
+
+  public void registerCallBack(Callback callback){
+    this.callback = callback;
+  }
 
   public DecisionFragment() {
   }
@@ -110,11 +116,6 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     EsdApplication.getComponent(mContext).inject( this );
 
     loadSettings();
-//
-//    Retrofit retrofit = new RetrofitManager(mContext, HOST.get() + "v2/", okHttpClient).process();
-//    oshsService = retrofit.create( OshsService.class );
-
-
 
     card_toolbar.inflateMenu(R.menu.card_menu);
     card_toolbar.setTitle("Блок " + number );
@@ -123,11 +124,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
 
       public void onTextChanged(CharSequence s, int start, int before, int count) {
         Timber.tag(TAG).v( "onTextChanged" );
-        try {
-          jobManager.addJobInBackground( new UpdateDecisionPreviewJob() );
-        } catch ( Exception e){
-          Timber.tag(TAG + " massInsert error").v( e );
-        }
+        callback.onUpdateSuccess();
       }
 
       public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -164,6 +161,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
           button_report.setChecked(false);
           button_familiarization.setChecked(true);
         }
+        callback.onUpdateSuccess();
       }
     );
 
@@ -174,6 +172,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
           button_familiarization.setChecked(false);
           button_report.setChecked(true);
         }
+        callback.onUpdateSuccess();
       }
     );
 
@@ -228,7 +227,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   @Override
   public void onDetach() {
     super.onDetach();
-    ((DecisionConstructorActivity)getActivity()).getDecisionManager().remove(this);
+//    ((DecisionConstructorActivity)getActivity()).getDecisionManager().remove(this);
     mListener = null;
   }
 
@@ -258,6 +257,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     adapter.add( new PrimaryConsiderationPeople( user.getId(), user.getName(), user.getPosition(), user.getOrganization()) );
     updateUsers();
 
+    callback.onUpdateSuccess();
   }
 
   @Override

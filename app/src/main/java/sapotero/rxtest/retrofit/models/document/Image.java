@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName;
 
 public class Image {
 
-    @SerializedName("position")
+    @SerializedName("title")
     @Expose
     private String title;
     @SerializedName("created_at")

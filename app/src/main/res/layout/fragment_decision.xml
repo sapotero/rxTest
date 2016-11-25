@@ -32,6 +32,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
+                android:paddingTop="@dimen/date_offset"
+                android:paddingBottom="@dimen/date_offset"
                 android:weightSum="1">
 
                 <!--<CheckBox-->
