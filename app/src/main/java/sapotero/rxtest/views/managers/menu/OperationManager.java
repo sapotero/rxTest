@@ -2,15 +2,27 @@ package sapotero.rxtest.views.managers.menu;
 
 import android.content.Context;
 
-import sapotero.rxtest.application.EsdApplication;
+import com.f2prateek.rx.preferences.RxSharedPreferences;
 
-public class OperationManager {
+import javax.inject.Inject;
+
+import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.views.managers.menu.factories.CommandFactory;
+import sapotero.rxtest.views.managers.menu.interfaces.Command;
+import sapotero.rxtest.views.managers.menu.invokers.RemoteExecutor;
+import sapotero.rxtest.views.managers.menu.receivers.DocumentReceiver;
+import timber.log.Timber;
+
+public class OperationManager implements CommandFactory.Callback {
+
+  @Inject RxSharedPreferences settings;
 
   private final String TAG = this.getClass().getSimpleName();
 
-  private Context context;
-  private OperationManager instance;
+  private final CommandFactory commandBuilder;
+  private final RemoteExecutor remoteExecutor;
 
+  private Context context;
   private String uid;
 
   Callback callback;
@@ -27,11 +39,34 @@ public class OperationManager {
   public OperationManager(Context context) {
     EsdApplication.getComponent(context).inject(this);
 
+    remoteExecutor = new RemoteExecutor();
+
+    commandBuilder = new CommandFactory(context);
+    commandBuilder.registerCallBack(this);
+
     this.context = context;
   }
 
 
   public void execute(String operation) {
+    Command command = commandBuilder
+      .withDocument( new DocumentReceiver( settings.getString("info.uid").get() ) )
+      .build( operation );
 
+    remoteExecutor
+      .setCommand( command )
+      .execute();
   }
+
+
+  @Override
+  public void onCommandSuccess() {
+    Timber.tag(TAG).w("onCommandSuccess");
+  }
+
+  @Override
+  public void onCommandError() {
+    Timber.tag(TAG).w("onCommandError");
+  }
+
 }

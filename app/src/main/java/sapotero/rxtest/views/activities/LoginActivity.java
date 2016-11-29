@@ -206,13 +206,7 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
 
       button.setOnClickListener(view ->{
         Timber.d( "BUTTON CLICK %s", view.getId() );
-
-        if ( Constant.DEBUG ) {
-          start();
-        } else {
-          tryToLogin();
-        }
-
+        tryToLogin();
       });
 
     } else {
@@ -327,7 +321,13 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
       stepper.goToNextStep();
       Timber.i( "LOGIN: %s\nTOKEN: %s", LOGIN.get(), TOKEN.get() );
 
-      DataLoader.getUserInformation();
+
+      if ( Constant.DEBUG ) {
+        start();
+      } else {
+        DataLoader.getUserInformation();
+      }
+
     }, 2000L);
   }
 

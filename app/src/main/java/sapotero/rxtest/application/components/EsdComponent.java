@@ -30,6 +30,9 @@ import sapotero.rxtest.views.interfaces.DataLoaderInterface;
 import sapotero.rxtest.views.interfaces.DocumentManager;
 import sapotero.rxtest.views.managers.db.factories.DocumentFactory;
 import sapotero.rxtest.views.managers.menu.OperationManager;
+import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
+import sapotero.rxtest.views.managers.menu.commands.FromTheReport;
+import sapotero.rxtest.views.managers.menu.commands.ReturnToPrimaryConsideration;
 import sapotero.rxtest.views.managers.view.DecisionManager;
 import sapotero.rxtest.views.services.AuthService;
 
@@ -76,13 +79,10 @@ public interface EsdComponent {
   void inject(DecisionManager context);
 
   void inject(OperationManager context);
+  void inject(AbstractCommand context);
 
-
-
-
-
-
-
+  void inject(FromTheReport context);
+  void inject(ReturnToPrimaryConsideration context);
 
   Application application();
 }
