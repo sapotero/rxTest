@@ -1,4 +1,4 @@
-package sapotero.rxtest.views.managers.builders;
+package sapotero.rxtest.views.managers.view.builders;
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
@@ -9,12 +9,25 @@ import com.google.gson.Gson;
 import sapotero.rxtest.R;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
-import sapotero.rxtest.views.managers.interfaces.DecisionInterface;
+import sapotero.rxtest.views.managers.view.interfaces.DecisionInterface;
 
 public class PreviewBuilder implements DecisionInterface {
   private final FragmentManager fragmentManger;
-  private Decision decision;
   private final String TAG = this.getClass().getSimpleName();
+
+  private Decision decision;
+  private DecisionPreviewFragment preview;
+
+  public  Callback callback;
+
+  public interface Callback {
+    void onUpdateSuccess(Decision decision);
+    void onUpdateError(Throwable error);
+  }
+
+  public void registerCallBack(Callback callback){
+    this.callback = callback;
+  }
 
   public PreviewBuilder(FragmentManager fragmentManger, Decision decision) {
     this.fragmentManger = fragmentManger;
@@ -33,9 +46,9 @@ public class PreviewBuilder implements DecisionInterface {
     }
 
     FragmentTransaction transaction = fragmentManger.beginTransaction();
-    DecisionPreviewFragment body = new DecisionPreviewFragment();
-    body.setArguments(bundle);
-    transaction.add( R.id.decision_constructor_decision_preview, body );
+    preview = new DecisionPreviewFragment();
+    preview.setArguments(bundle);
+    transaction.add( R.id.decision_constructor_decision_preview, preview, DecisionPreviewFragment.class.getSimpleName() );
     transaction.commit();
 
   }
@@ -43,6 +56,13 @@ public class PreviewBuilder implements DecisionInterface {
   private Decision getNewDecision() {
     Decision empty_decision = new Decision();
     return empty_decision;
+  }
+
+  public void update() {
+    if (preview != null){
+      preview.setDecision(decision);
+      preview.update();
+    }
   }
 
   /* DecisionInterface */
@@ -55,5 +75,4 @@ public class PreviewBuilder implements DecisionInterface {
   public void setDecision(Decision _decision_) {
     decision = _decision_;
   }
-
 }

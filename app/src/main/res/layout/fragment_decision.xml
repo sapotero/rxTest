@@ -36,33 +36,8 @@
                 android:paddingBottom="@dimen/date_offset"
                 android:weightSum="1">
 
-                <!--<CheckBox-->
-                    <!--android:text="Размножать"-->
-                    <!--android:layout_width="0dp"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:id="@+id/checkBox"-->
-                    <!--android:layout_weight="1"/>-->
-                <!--<CheckBox-->
-                    <!--android:text="Ознакомление"-->
-                    <!--android:layout_width="0dp"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:id="@+id/checkBox1"-->
-                    <!--android:layout_weight="1"/>-->
-                <!--<CheckBox-->
-                    <!--android:text="Скрыть исполнителей"-->
-                    <!--android:layout_width="0dp"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:id="@+id/checkBox2"-->
-                    <!--android:layout_weight="1"/>-->
-                <!--<CheckBox-->
-                    <!--android:text="Не отображать номер блока"-->
-                    <!--android:layout_width="0dp"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:id="@+id/checkBox22"-->
-                    <!--android:layout_weight="1"/>-->
-
                 <FrameLayout
-                    android:layout_width="400dp"
+                    android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="0.97"
                     android:paddingStart="16dp"
@@ -72,12 +47,12 @@
                     >
 
                     <Button
-                        android:id="@+id/button4"
+                        android:id="@+id/fragment_decision_button_get_template"
                         android:paddingStart="16dp"
                         android:paddingEnd="16dp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Нажмите для выбора шаблона резолюции"
+                        android:text="@string/fragment_decision_button_get_template"
                         android:textColor="@color/md_grey_400"
                         android:foreground="@drawable/button_foreground"
                         android:background="@drawable/button_border"
@@ -131,9 +106,9 @@
 
                 <Button
                     android:id="@+id/fragment_decision_button_add_people"
-                    android:text="Добавить исполнителя"
+                    android:text="@string/fragment_decision_button_add_people"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="0dp"
                     android:layout_weight="1"
                     android:background="@drawable/text_border"
                     android:foreground="@drawable/card_foreground"
@@ -153,12 +128,26 @@
                     android:padding="8dp"
                     >
 
-                    <CheckBox
-                        android:text="Скрыть исполнителей"
+                    <LinearLayout
+                        android:orientation="vertical"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/fragment_decision_hide_performers"
-                        android:layout_weight="1"/>
+                        android:layout_height="match_parent">
+
+                        <CheckBox
+                            android:text="@string/fragment_decision_hide_performers"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/fragment_decision_hide_performers"
+                            android:layout_weight="1"/>
+
+                        <!--<CheckBox-->
+                            <!--android:text="@string/fragment_decision_hide_number"-->
+                            <!--android:layout_width="match_parent"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:id="@+id/fragment_decision_hide_number"-->
+                            <!--android:layout_weight="1"/>-->
+
+                    </LinearLayout>
 
                 </FrameLayout>
 
@@ -180,7 +169,7 @@
                             android:id="@+id/head_font_selector"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/hint_head_font_size" />
+                            android:hint="@string/hint_decision_size" />
 
                     </android.support.design.widget.TextInputLayout>
 
@@ -198,7 +187,7 @@
                 android:padding="16dp"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
-                >
+                android:baselineAligned="false">
 
                 <FrameLayout
                     android:layout_width="match_parent"
@@ -217,7 +206,7 @@
                             android:id="@+id/decision_text"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:hint="Текст резолюции"
+                            android:hint="@string/decision_text"
                             android:background="@color/transparent"
                             android:padding="@dimen/half_date_offset"
                             android:inputType="textMultiLine"
@@ -239,7 +228,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="10"
-                    android:layout_marginLeft="-2dp"
+                    android:layout_marginStart="-2dp"
                     >
 
                     <ToggleButton

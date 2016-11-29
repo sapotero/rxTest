@@ -55,14 +55,13 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
 
   @BindView(R.id.fragment_decision_button_familiarization) Switch button_familiarization;
   @BindView(R.id.fragment_decision_button_report) Switch button_report;
+
   @BindView(R.id.fragment_decision_linear_people) LinearLayout people_view;
 
-
-
   @BindView(R.id.fragment_decision_hide_performers) CheckBox hide_performers;
+  // @BindView(R.id.fragment_decision_hide_number) CheckBox hide_number;
+
   @BindView(R.id.fragment_decision_text_before) ToggleButton fragment_decision_text_before;
-
-
 
   private String TAG = this.getClass().getSimpleName();
   private Context mContext;
@@ -92,8 +91,92 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   }
 
   public static DecisionFragment newInstance() {
-    DecisionFragment fragment = new DecisionFragment();
-    return fragment;
+    return new DecisionFragment();
+  }
+
+  private void updateUsers(){
+    people_view.removeAllViews();
+    for (int i = 0; i < adapter.getCount(); i++) {
+      View item = adapter.getView(i, null, null);
+      people_view.addView(item);
+    }
+  }
+
+  public interface OnFragmentInteractionListener {
+    void onFragmentInteraction(Uri uri);
+  }
+
+  public Block getBlock(){
+
+    String appealText = "";
+    if (button_report.isChecked()) {
+      appealText = button_report.getTextOn().toString();
+    } else if (button_familiarization.isChecked()) {
+      appealText = button_familiarization.getTextOn().toString();
+    }
+
+    Block block = new Block();
+    block.setNumber(number);
+    block.setText( decision_text.getText().toString() );
+    block.setAppealText( appealText );
+    block.setTextBefore( fragment_decision_text_before.isChecked() );
+    block.setHidePerformers( hide_performers.isChecked() );
+    block.setToCopy(false);
+    block.setToFamiliarization(false);
+
+    if ( adapter.getCount() > 0 ){
+      ArrayList<Performer> performers = new ArrayList<>();
+
+      for (int i = 0; i < adapter.getCount(); i++) {
+        Performer p = new Performer();
+        PrimaryConsiderationPeople item = adapter.getItem(i);
+
+        p.setPerformerId( item.getId() );
+        p.setIsResponsible( item.isResponsible() );
+        p.setIsOriginal( item.isCopy() );
+        p.setPerformerId( item.getId() );
+        p.setPerformerText( item.getName() );
+        p.setOrganizationText( item.getOrganization() );
+        p.setNumber( i );
+
+        performers.add(p);
+      }
+
+      block.setPerformers( performers );
+    }
+
+    return block;
+  }
+
+  public void setNumber( int number){
+    card_toolbar.setTitle("Блок " + number);
+  }
+
+  private void loadSettings() {
+    Preference<String> _username = settings.getString("login");
+    login = _username.get();
+
+    Preference<String> _token = settings.getString("token");
+    token = _token.get();
+
+    HOST = settings.getString("settings_username_host");
+  }
+
+  @OnClick(R.id.fragment_decision_button_add_people)
+  public void add(){
+    Timber.tag("ADD PEOPLE").e("CLICKED");
+
+    if (oshs == null){
+      oshs = new SelectOshsDialogFragment();
+      oshs.registerCallBack( this );
+    }
+
+    oshs.show( getActivity().getFragmentManager(), "SelectOshsDialogFragment");
+  }
+
+  @OnClick(R.id.fragment_decision_text_before)
+  public void text(){
+    callback.onUpdateSuccess();
   }
 
   @Override
@@ -136,24 +219,25 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
 
     card_toolbar.setOnMenuItemClickListener(
       item -> {
-      String operation;
+        String operation;
 
-      switch ( item.getItemId() ){
-        case R.id.decision_card_action_delete:
-          operation = "decision_card_action_delete";
-          getActivity().getSupportFragmentManager().beginTransaction().remove(this).commit();
-          break;
-        default:
-          operation = "incorrect";
-          break;
-      }
+        switch ( item.getItemId() ){
+          case R.id.decision_card_action_delete:
+            operation = "decision_card_action_delete";
+            getActivity().getSupportFragmentManager().beginTransaction().remove(this).commit();
+            break;
+          default:
+            operation = "incorrect";
+            break;
+        }
 
-      Timber.tag(TAG).i( operation );
-      getActivity().getSupportFragmentManager().popBackStack();
-      return false;
-    });
+        Timber.tag(TAG).i( operation );
+        getActivity().getSupportFragmentManager().popBackStack();
+        return false;
+      });
 
 
+    button_familiarization.setChecked( block.getToFamiliarization() );
     button_familiarization.setOnCheckedChangeListener(
       (buttonView, isChecked) -> {
         Timber.tag(TAG).v( "button_familiarization ++" );
@@ -165,6 +249,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
       }
     );
 
+    button_report.setChecked( block.getToCopy() );
     button_report.setOnCheckedChangeListener(
       (buttonView, isChecked) -> {
         Timber.tag(TAG).v( "button_report ++" );
@@ -176,41 +261,33 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
       }
     );
 
+    hide_performers.setChecked( block.getHidePerformers() );
+    hide_performers.setOnCheckedChangeListener(
+      (buttonView, isChecked) -> {
+        callback.onUpdateSuccess();
+      }
+    );
+
     Timber.e(" ArrayList<PrimaryConsiderationPeople> people = new ArrayList<>(); ");
 
+
+
     ArrayList<PrimaryConsiderationPeople> people = new ArrayList<>();
+
+    if (block.getPerformers().size() > 0){
+      for ( Performer u: block.getPerformers() ) {
+        Timber.tag(TAG).w("USER: %s [ %s | %s ]", u.getPerformerText(), u.getIsOriginal(), u.getIsResponsible() );
+        PrimaryConsiderationPeople user = new PrimaryConsiderationPeople( u );
+
+        people.add(user);
+      }
+    }
 
     adapter = new PrimaryConsiderationAdapter( getContext(), people);
     adapter.registerCallBack(this);
     updateUsers();
 
     return view;
-  }
-
-  public void onButtonPressed(Uri uri) {
-    if (mListener != null) {
-      mListener.onFragmentInteraction(uri);
-    }
-  }
-
-  private void updateUsers(){
-    people_view.removeAllViews();
-    for (int i = 0; i < adapter.getCount(); i++) {
-      View item = adapter.getView(i, null, null);
-      people_view.addView(item);
-    }
-  }
-
-  @OnClick(R.id.fragment_decision_button_add_people)
-  public void add(){
-    Timber.tag("ADD PEOPLE").e("CLICKED");
-
-    if (oshs == null){
-      oshs = new SelectOshsDialogFragment();
-      oshs.registerCallBack( this );
-    }
-
-    oshs.show( getActivity().getFragmentManager(), "SelectOshsDialogFragment");
   }
 
   @Override
@@ -231,23 +308,20 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     mListener = null;
   }
 
-  private void loadSettings() {
-    Preference<String> _username = settings.getString("login");
-    login = _username.get();
-
-    Preference<String> _token = settings.getString("token");
-    token = _token.get();
-
-    HOST = settings.getString("settings_username_host");
-  }
-
   @Override
   public void onRemove() {
     updateUsers();
   }
 
   @Override
+  public void onChange() {
+    updateUsers();
+    callback.onUpdateSuccess();
+  }
+
+  @Override
   public void onAttrChange() {
+    callback.onUpdateSuccess();
   }
 
   @Override
@@ -263,63 +337,6 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   @Override
   public void onSearchError(Throwable error) {
 
-  }
-
-  public interface OnFragmentInteractionListener {
-    void onFragmentInteraction(Uri uri);
-  }
-
-  public Block getBlock(){
-
-    String appealText = "";
-    if (button_report.isChecked()) {
-      appealText = button_report.getTextOn().toString();
-    } else if (button_familiarization.isChecked()) {
-      appealText = button_familiarization.getTextOn().toString();
-    }
-
-    Block block = new Block();
-    block.setNumber(number);
-    block.setAppealText( appealText );
-    block.setText( decision_text.getText().toString() );
-    block.setToFamiliarization(false);
-    block.setToCopy(false);
-    block.setTextBefore( fragment_decision_text_before.isChecked() );
-    block.setHidePerformers( hide_performers.isChecked() );
-
-    if ( adapter.getCount() > 0 ){
-      ArrayList<Performer> performers = new ArrayList<>();
-
-      for (int i = 0; i < adapter.getCount(); i++) {
-        Performer p = new Performer();
-        PrimaryConsiderationPeople item = adapter.getItem(i);
-
-        p.setPerformerId( item.getId() );
-        p.setIsResponsible( item.isResponsible() );
-        p.setIsOriginal( item.isCopy() );
-        p.setPerformerId( item.getId() );
-        p.setPerformerText( item.getName() );
-        p.setOrganizationText( item.getOrganization() );
-        p.setNumber( i );
-
-        performers.add(p);
-      }
-
-      block.setPerformers( performers );
-    }
-
-//    number: 1,
-//      text: "ТЕСТ",
-//      appeal_text: "Прошу доложить",
-//      text_before: false,
-//      hide_performers: false,
-//      to_copy: false,
-//      to_familiarization: true,
-    return block;
-  }
-
-  public void setNumber( int number){
-    card_toolbar.setTitle("Блок " + number);
   }
 
 }

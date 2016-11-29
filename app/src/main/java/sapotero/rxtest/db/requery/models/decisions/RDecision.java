@@ -5,6 +5,7 @@ import java.util.Set;
 import io.requery.CascadeAction;
 import io.requery.Entity;
 import io.requery.Generated;
+import io.requery.Index;
 import io.requery.Key;
 import io.requery.ManyToOne;
 import io.requery.OneToMany;
@@ -16,6 +17,7 @@ public abstract class RDecision {
   @Generated
   int id;
 
+  String uid;
   String letterhead;
   String signer;
   String signerId;
@@ -28,6 +30,9 @@ public abstract class RDecision {
   Boolean approved;
   Boolean signerIsManager;
   Boolean showPosition;
+
+  @Index("decision_changed_index")
+  Boolean changed;
 
   @ManyToOne
   RDocument document;

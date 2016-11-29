@@ -46,9 +46,11 @@ public class Document implements Serializable {
     @SerializedName("viewed")
     @Expose
     private Boolean viewed;
+
     @SerializedName("control")
     @Expose
     private Boolean control;
+
     @SerializedName("favorites")
     @Expose
     private Boolean favorites;
@@ -77,6 +79,29 @@ public class Document implements Serializable {
     }
 
     public String organization;
+
+
+    public Boolean changed;
+
+    public Boolean getChanged() {
+        return changed;
+    }
+
+    public void setChanged(Boolean changed) {
+        this.changed = changed;
+    }
+
+
+
+    public String statusCode;
+
+    public String getStatusCode() {
+        return statusCode;
+    }
+    public void setStatusCode(String statusCode) {
+        this.statusCode = statusCode;
+
+    }
 
     /**
      * 

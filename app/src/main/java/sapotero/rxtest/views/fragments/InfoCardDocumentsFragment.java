@@ -35,7 +35,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -401,21 +400,21 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(FileDownloadedEvent event) {
     Log.d("FileDownloadedEvent", event.path);
-
-    if (!Objects.equals(event.path, "")){
-      try {
-//        doc_tmp_layout.setVisibility(View.GONE);
-//        mImageView.setVisibility(View.VISIBLE);
-//        progressBar.setVisibility(View.GONE);
-
-        openRenderer( getActivity(), event.path );
-      } catch (IOException e) {
-        e.printStackTrace();
-//        doc_tmp_layout.setVisibility(View.VISIBLE);
-//        mImageView.setVisibility(View.GONE);
-//        progressBar.setVisibility(View.GONE);
-      }
-    }
+//
+//    if (!Objects.equals(event.path, "")){
+//      try {
+////        doc_tmp_layout.setVisibility(View.GONE);
+////        mImageView.setVisibility(View.VISIBLE);
+////        progressBar.setVisibility(View.GONE);
+//
+//        openRenderer( getActivity(), event.path );
+//      } catch (IOException e) {
+//        e.printStackTrace();
+////        doc_tmp_layout.setVisibility(View.VISIBLE);
+////        mImageView.setVisibility(View.GONE);
+////        progressBar.setVisibility(View.GONE);
+//      }
+//    }
   }
 
 

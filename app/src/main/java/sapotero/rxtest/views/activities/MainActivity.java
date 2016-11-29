@@ -237,6 +237,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     rxSettings();
+    loadFromDB();
   }
 
   private void documentsModifiedListener() {
@@ -672,6 +673,8 @@ public class MainActivity extends AppCompatActivity {
         Timber.tag(TAG).v("addToAdapter ++ " + doc.getTitle());
 
         Document document = new Document();
+        document.setChanged( doc.isChanged() );
+        document.setStatusCode( doc.getFilter() );
         document.setUid(doc.getUid());
         document.setMd5(doc.getMd5());
         document.setControl(doc.isControl());
@@ -719,52 +722,6 @@ public class MainActivity extends AppCompatActivity {
       });
   }
 
-//  private void loadDocumentsCountByType(String TYPE) {
-//
-//    Retrofit retrofit = new RetrofitManager(this, HOST.get() + "/v3/", okHttpClient).process();
-//    DocumentsService documentsService = retrofit.create(DocumentsService.class);
-//
-//    Observable<Documents> documents = documentsService.getDocuments(LOGIN.get(), TOKEN.get(), TYPE, 0, 0);
-//
-//    documents.subscribeOn(Schedulers.io())
-//      .observeOn(AndroidSchedulers.mainThread())
-//      .subscribe(
-//        data -> {
-//          total += Integer.valueOf( data.getMeta().getTotal() );
-//
-//          notificationUpdate();
-//
-//          String total = data.getMeta().getTotal();
-//
-//          if (total != null && Integer.valueOf(total) > 0) {
-//            String[] values = getResources().getStringArray(R.array.FILTER_TYPES_VALUE);
-//
-//            int index = -1;
-//            for (int i = 0; i < values.length; i++) {
-//              if (values[i].equals(TYPE)) {
-//                index = i;
-//                break;
-//              }
-//            }
-//
-//            Timber.tag(TAG).i(TYPE + " - " + total + " | " + index);
-//
-//            FilterItem filterItem = filter_adapter.getItem(index);
-//
-//            filterItem.setCount(total);
-//
-//            jobManager.addJobInBackground(new LoadAllDocumentsByStatusJob(index, total));
-//
-//            filter_adapter.notifyDataSetChanged();
-//          }
-//
-//        },
-//        error -> {
-//          Timber.tag(TAG).d("loadDocumentsCountByType " + error.getMessage());
-//        });
-//
-//  }
-//
   public void showNextType(Boolean next) {
     unsubscribe();
     int position = next ? filter_adapter.next() : filter_adapter.prev();
@@ -775,33 +732,6 @@ public class MainActivity extends AppCompatActivity {
     if (loader != null && !loader.isUnsubscribed()) {
       loader.unsubscribe();
     }
-  }
-
-  private void table_changes() {
-
-    documents_empty_list.setText(null);
-    if (documentQuery == null) {
-      documentQuery = dataStore
-        .select(RDocumentEntity.class)
-        .orderBy(RDocumentEntity.ID.desc())
-        .get()
-        .toSelfObservable()
-        .subscribe(
-          data -> {
-            List<RDocumentEntity> docs = data.toList();
-
-            for (RDocumentEntity doc:docs) {
-              document_type_adapter.updateCountByType( doc.getUid() );
-            }
-          },
-          error -> {
-            Timber.tag("table_changes").e("error " + error.toString());
-            error.printStackTrace();
-          }
-        );
-    }
-
-
   }
 
   private void updateFilterAdapter() {
@@ -879,8 +809,6 @@ public class MainActivity extends AppCompatActivity {
     loaded++;
     notificationUpdate();
   }
-
-
 
 
   @Subscribe(threadMode = ThreadMode.MAIN)

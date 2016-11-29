@@ -3,9 +3,12 @@ package sapotero.rxtest.application;
 import android.app.Application;
 import android.content.Context;
 
-import sapotero.rxtest.BuildConfig;
+import com.facebook.stetho.Stetho;
+import com.squareup.leakcanary.LeakCanary;
+
 import sapotero.rxtest.application.components.DaggerEsdComponent;
 import sapotero.rxtest.application.components.EsdComponent;
+import sapotero.rxtest.application.config.Constant;
 import sapotero.rxtest.application.modules.EsdModule;
 import timber.log.Timber;
 
@@ -17,8 +20,19 @@ public final class EsdApplication extends Application {
   @Override public void onCreate() {
     super.onCreate();
 
-    if (BuildConfig.DEBUG) {
+    if (Constant.DEBUG) {
       Timber.plant(new Timber.DebugTree());
+
+      if (LeakCanary.isInAnalyzerProcess(this)) {
+        return;
+      }
+      LeakCanary.install(this);
+
+      Stetho.Initializer initializer = Stetho.newInitializerBuilder(this)
+        .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this))
+        .enableDumpapp(Stetho.defaultDumperPluginsProvider(getApplicationContext()))
+        .build();
+      Stetho.initialize(initializer);
     }
 
     mainComponent = DaggerEsdComponent.builder().esdModule(new EsdModule(this)).build();

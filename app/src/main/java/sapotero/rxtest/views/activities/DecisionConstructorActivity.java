@@ -5,17 +5,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.widget.ProgressBar;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
-import com.github.clans.fab.FloatingActionButton;
-import com.github.clans.fab.FloatingActionMenu;
 import com.google.gson.Gson;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,20 +18,16 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.events.bus.UpdateDecisionPreviewEvent;
 import sapotero.rxtest.retrofit.models.Oshs;
-import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.views.adapters.OshsAutoCompleteAdapter;
 import sapotero.rxtest.views.adapters.models.FontItem;
 import sapotero.rxtest.views.adapters.models.UrgencyItem;
-import sapotero.rxtest.views.dialogs.RejectDecisionFragment;
 import sapotero.rxtest.views.fragments.DecisionFragment;
 import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
-import sapotero.rxtest.views.managers.DecisionManager;
+import sapotero.rxtest.views.managers.view.DecisionManager;
 import sapotero.rxtest.views.views.DelayAutoCompleteTextView;
 import sapotero.rxtest.views.views.SpinnerWithLabel;
 import timber.log.Timber;
@@ -47,14 +37,9 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   @Inject RxSharedPreferences settings;
 
   @BindView(R.id.toolbar) Toolbar toolbar;
-  @BindView(R.id.button_add_decision) FloatingActionButton button_add_decision;
-  @BindView(R.id.button_reject_decision) FloatingActionButton button_reject_decision;
 
   @BindView(R.id.fragment_decision_autocomplete_field) DelayAutoCompleteTextView user_autocomplete;
   @BindView(R.id.fragment_decision_autocomplete_field_loading_indicator) ProgressBar indicator;
-
-//  @BindView(R.id.fab) FloatingActionButton fab;
-  @BindView(R.id.fab_menu) FloatingActionMenu fab_menu;
 
   @BindView(R.id.urgency_selector) SpinnerWithLabel<UrgencyItem> urgency_selector;
   @BindView(R.id.head_font_selector) SpinnerWithLabel<FontItem> font_selector;
@@ -85,6 +70,62 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       finish();
       }
     );
+    toolbar.setOnMenuItemClickListener(item -> {
+
+      switch (item.getItemId()){
+        case R.id.action_constructor_add_block:
+          manager.getDecisionBuilder().addBlock();
+          break;
+        case R.id.action_constructor_save:
+          Timber.e("CHANGED: %s", manager.isChanged() );
+
+          manager.saveDecision();
+
+
+          break;
+        case R.id.action_constructor_close:
+
+          if ( manager.isChanged() ){
+//            new RejectDecisionFragment().show( getFragmentManager(), "SaveDialog");
+
+            new MaterialDialog.Builder(this)
+              .title("Имеются несохранненые данные")
+              .content("Резолюция была изменена")
+              .positiveText("сохранить")
+              .onPositive(
+                (dialog, which) -> {
+                  Decision new_decision = manager.getDecision();
+
+                  Timber.tag(TAG).w("positive %s", new_decision.getId() );
+                }
+              )
+              .neutralText("выход")
+              .onNeutral(
+                (dialog, which) -> {
+                  Timber.tag(TAG).w("nothing");
+                  finish();
+                }
+              )
+              .negativeText("возврат")
+              .onNegative(
+                (dialog, which) -> {
+                  Timber.tag(TAG).w("negative");
+                }
+              )
+              .show();
+
+
+          } else {
+            finish();
+          }
+
+        break;
+        default:
+          break;
+      }
+
+      return false;
+    });
 
     List<UrgencyItem> urgency = new ArrayList<>();
 
@@ -115,10 +156,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       Timber.e("%s - %s", item.getLabel(), item.getValue());
     });
 
-
-//    fab_menu.hideMenuButton(false);
-//    fab_menu.setClosedOnTouchOutside(true);
-
     Decision raw_decision = null;
     Gson gson = new Gson();
 
@@ -146,18 +183,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     manager = new DecisionManager(this, getSupportFragmentManager(), raw_decision);
     manager.build();
 
-
-//    manager.setDecision(raw_decision);
-//    manager.addPreview();
-
-    if (raw_decision!= null && raw_decision.getBlocks().size() > 0) {
-      for (Block block : raw_decision.getBlocks()) {
-//        manager.add(block);
-      }
-    } else {
-//      manager.add(new Block());
-    }
-
     user_autocomplete.setThreshold(2);
     user_autocomplete.setAdapter( new OshsAutoCompleteAdapter(this) );
     user_autocomplete.setLoadingIndicator( indicator );
@@ -170,167 +195,27 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     );
 
 
+
+
   }
-
-  @OnClick(R.id.button_add_decision)
-  public void _add(View view) {
-//    manager.add(new Block());
-    fab_menu.close(true);
-  }
-
-  @OnClick(R.id.button_reject_decision)
-  public void _reject(View view) {
-
-    new RejectDecisionFragment().show(getFragmentManager(), "reject");
-
-    fab_menu.close(true);
-  }
-
 
 
   @Override
   public void onFragmentInteraction(Uri uri) {
   }
-//
-//  public DecisionManager getDecisionManager(){
-//    return manager;
-//  }
 
   @Override
   public void onStart() {
     super.onStart();
-
-    if ( !EventBus.getDefault().isRegistered(this) ){
-      EventBus.getDefault().register(this);
-    }
   }
   @Override protected void onPause() {
     super.onPause();
-
-    if ( EventBus.getDefault().isRegistered(this) ){
-      EventBus.getDefault().unregister(this);
-      EventBus.getDefault().register(this);
-    }
-
   }
 
   @Override
   public void onStop() {
-    if ( EventBus.getDefault().isRegistered(this) ){
-      EventBus.getDefault().unregister(this);
-    }
     super.onStop();
   }
 
-
-//  public class DecisionManager {
-//
-//    private Context context;
-//    private ArrayList<DecisionFragment> fragments = new ArrayList<>();
-//    private int index = 0;
-//    private DecisionPreviewFragment body;
-//    private Decision decision;
-//
-//    DecisionManager(Context decisionConstructorActivity) {
-//      context = decisionConstructorActivity;
-//    }
-//
-//    void addPreview(){
-//
-//      FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-//      body = new DecisionPreviewFragment();
-//
-//      if ( decision != null ){
-//        Bundle bundle = new Bundle();
-//        Gson gson = new Gson();
-//        bundle.putString("decision", gson.toJson(decision, Decision.class) );
-//
-//        body.setArguments(bundle);
-//      }
-//
-//      transaction.add( R.id.decision_constructor_decision_preview, body );
-//      transaction.commit();
-//    }
-//
-//    public void add( Block block ) {
-//      try{
-//        FragmentTransaction decision_manager = getSupportFragmentManager().beginTransaction();
-//
-//        DecisionFragment fragment = new DecisionFragment();
-//
-//        Bundle bundle = new Bundle();
-//        bundle.putInt( "number", ++index );
-//
-//        Gson gson = new Gson();
-//        bundle.putString( "block", gson.toJson(block) );
-//
-//        fragment.setArguments(bundle);
-//
-//        decision_manager.add(R.id.decisions_container, fragment );
-//        decision_manager.commit();
-//
-//        fragments.add( fragment );
-//      } catch (Exception e){
-//        Timber.tag(TAG).e( e );
-//      }
-//    }
-//
-//    public void remove( DecisionFragment fragment ){
-//      try{
-//        --index;
-//        fragments.remove( fragment );
-//        update();
-//      } catch (Exception e){
-//        Timber.tag(TAG).e( e );
-//      }
-//    }
-//
-//    public void update(){
-//      int _index = 1;
-//      ArrayList<Block> blocks = new ArrayList<>();
-//
-//      for (DecisionFragment item: fragments ) {
-//        item.setNumber( _index++ );
-//        Timber.tag(TAG).i( item.getBlock().toString() );
-//        blocks.add( item.getBlock() );
-//      }
-//
-//      updateBlocks(blocks);
-//    }
-//
-//    private void updateBlocks(ArrayList<Block> blocks) {
-//      body.setBlocks(blocks);
-//      body.getBlocksInfo();
-//    }
-//
-//    public String getDate(){
-//
-//      Calendar c = Calendar.getInstance();
-//      SimpleDateFormat format = new SimpleDateFormat("dd MMMM yyyy г.", new Locale("ru"));
-//      return format.format(c.getTime());
-//    }
-//
-//    void setDecision(Decision decision) {
-//      Timber.tag(TAG).v( "decision" + decision );
-//      this.decision = decision;
-//    }
-//
-//    public void setSigner(Oshs user) {
-//      body.decision.setSigner( String.format("%s - %s", user.getName(), user.getOrganization()) );
-//      body.decision.setSignerId( user.getId() );
-//      body.decision.setSignerBlankText( user.getName() );
-//      body.decision.setSignerPositionS( user.getPosition() );
-//    }
-//
-//    public void setUrgency(String urgency) {
-//      body.decision.setUrgencyText(urgency);
-//    }
-//  }
-
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(UpdateDecisionPreviewEvent event) {
-//    manager.update();
-  }
 
 }

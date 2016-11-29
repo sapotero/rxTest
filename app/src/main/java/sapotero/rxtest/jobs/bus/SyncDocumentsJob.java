@@ -208,6 +208,7 @@ public class SyncDocumentsJob  extends BaseJob {
         for (Decision d: document.getDecisions() ) {
 
           RDecisionEntity decision = new RDecisionEntity();
+          decision.setUid( d.getId() );
           decision.setLetterhead(d.getLetterhead());
           decision.setApproved(d.getApproved());
           decision.setSigner(d.getSigner());

@@ -28,13 +28,13 @@ public class DecisionAdapter extends RecyclerView.Adapter<DecisionViewHolder> {
   @Inject JobManager jobManager;
 
   private final RecyclerView recycler_view;
-  private List<Decision> list = Collections.emptyList();
+  private List<Decision> decisions = Collections.emptyList();
   private Context context;
 
   private String TAG = DecisionAdapter.class.getSimpleName();
 
   public DecisionAdapter(List<Decision> decisions, Context context, RecyclerView recyclerView) {
-    this.list = decisions;
+    this.decisions = decisions;
     this.context = context;
     this.recycler_view = recyclerView;
     EsdApplication.getComponent(context).inject(this);
@@ -51,7 +51,7 @@ public class DecisionAdapter extends RecyclerView.Adapter<DecisionViewHolder> {
 
 
       if (pos >= 0 && pos < getItemCount()) {
-        Timber.tag(TAG).v( "COMMENT " + list.get(pos).getSigner() );
+        Timber.tag(TAG).v( "COMMENT " + decisions.get(pos).getSigner() );
 
         try {
           jobManager.addJobInBackground( new SetActiveDecisionJob( pos ) );
@@ -68,7 +68,7 @@ public class DecisionAdapter extends RecyclerView.Adapter<DecisionViewHolder> {
 
 
         Gson gson = new Gson();
-        Decision data = list.get(pos);
+        Decision data = decisions.get(pos);
         String json = gson.toJson(data, Decision.class);
 
         Timber.tag("LONG CLICK").i( json );
@@ -92,7 +92,7 @@ public class DecisionAdapter extends RecyclerView.Adapter<DecisionViewHolder> {
   @Override
   public void onBindViewHolder(DecisionViewHolder holder, int position) {
 
-    Decision item = list.get(position);
+    Decision item = decisions.get(position);
 
     holder.title.setText( item.getSignerBlankText() );
     holder.date.setText( item.getDate() );
@@ -103,10 +103,10 @@ public class DecisionAdapter extends RecyclerView.Adapter<DecisionViewHolder> {
 
   @Override
   public int getItemCount() {
-    return list.size();
+    return decisions.size();
   }
   public Decision getItem(int i){
-    return list.get(i);
+    return decisions.get(i);
   }
 
   @Override
@@ -115,13 +115,13 @@ public class DecisionAdapter extends RecyclerView.Adapter<DecisionViewHolder> {
   }
 
   public void insert(int position, Decision data) {
-    list.add(position, data);
+    decisions.add(position, data);
     notifyItemInserted(position);
   }
 
   public void remove(Decision data) {
-    int position = list.indexOf(data);
-    list.remove(position);
+    int position = decisions.indexOf(data);
+    decisions.remove(position);
     notifyItemRemoved(position);
   }
 }

@@ -74,9 +74,10 @@ import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.fragments.InfoCardDocumentsFragment;
 import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
 import sapotero.rxtest.views.interfaces.DocumentManager;
+import sapotero.rxtest.views.managers.menu.OperationManager;
 import timber.log.Timber;
 
-public class InfoActivity extends AppCompatActivity implements InfoCardDocumentsFragment.OnFragmentInteractionListener, InfoCardWebViewFragment.OnFragmentInteractionListener, DocumentManager.Callback {
+public class InfoActivity extends AppCompatActivity implements InfoCardDocumentsFragment.OnFragmentInteractionListener, InfoCardWebViewFragment.OnFragmentInteractionListener, DocumentManager.Callback, OperationManager.Callback {
 
   @BindView(R.id.desigions_recycler_view) RecyclerView desigions_recycler_view;
   @BindView(R.id.desigion_view)           LinearLayout desigion_view;
@@ -98,20 +99,20 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
   private Preference<String> PASSWORD;
   private Preference<String> UID;
   private Preference<String> DOCUMENT_UID;
+  private Preference<String> STATUS_CODE;
   private Preference<Integer> POSITION;
 
-
   private DocumentManager documentManager;
-
   private DocumentInfo DOCUMENT;
-  private String TAG = this.getClass().getSimpleName();
 
+  private String TAG = this.getClass().getSimpleName();
   private Context context;
   private DecisionAdapter decision_adapter;
   @BindView(R.id.toolbar) Toolbar toolbar;
-  private Preference<String> HOST;
 
+  private Preference<String> HOST;
   private Preview preview;
+  private OperationManager operationManager;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -132,26 +133,64 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
     documentManager = new DocumentManager(this);
     documentManager.registerCallBack(this);
 
+    operationManager = new OperationManager(this);
+    operationManager.registerCallBack(this);
+
     Timber.w("documentManager:\nUID: %s\nstate: %s\ntype: %s\n\n",
       documentManager.getCurrentDocumentNumber(),
       documentManager.getState(),
       documentManager.getType()
     );
 
+    loadSettings();
 
-    HOST = settings.getString("settings_username_host");
+    setToolbar();
+    loadDocuments();
+  }
 
+  private void setToolbar() {
     toolbar.setTitle("Все документы");
     toolbar.setTitleTextColor( getResources().getColor( R.color.md_grey_100 ) );
     toolbar.setSubtitleTextColor( getResources().getColor( R.color.md_grey_400 ) );
 
     toolbar.setContentInsetStartWithNavigation(250);
 
-    toolbar.inflateMenu(R.menu.info_menu);
     toolbar.setNavigationOnClickListener(v ->{
-        finish();
+      finish();
       }
     );
+
+
+    // sent_to_the_report (отправлен на доклад)
+    // sent_to_the_performance (отправлен на исполнение)
+    // primary_consideration (первичное рассмотрение)
+    // approval (согласование проектов документов)
+    // signing (подписание проектов документов)
+
+    int menu;
+
+    switch ( STATUS_CODE.get() ){
+      case "sent_to_the_report":
+        menu = R.menu.info_menu_sent_to_the_report;
+        break;
+      case "sent_to_the_performance":
+        menu = R.menu.info_menu_sent_to_the_performance;
+        break;
+      case "primary_consideration":
+        menu = R.menu.info_menu_primary_consideration;
+        break;
+      case "approval":
+        menu = R.menu.info_menu_approval;
+        break;
+      case "signing":
+        menu = R.menu.info_menu_signing;
+        break;
+      default:
+        menu = R.menu.info_menu;
+        break;
+    }
+    toolbar.inflateMenu(menu);
+
 
     toolbar.setOnMenuItemClickListener(
       item -> {
@@ -159,14 +198,42 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
         String operation;
 
         switch ( item.getItemId() ){
+          // sent_to_the_report (отправлен на доклад)
+          case R.id.menu_info_from_the_report:
+            operation = "menu_info_from_the_report";
+            break;
+          case R.id.return_to_the_primary_consideration:
+            operation = "return_to_the_primary_consideration";
+            break;
+
+          // sent_to_the_report (отправлен на доклад)
+          case R.id.menu_info_delegate_performance:
+            operation = "menu_info_delegate_performance";
+            break;
+          case R.id.menu_info_to_the_approval_performance:
+            operation = "menu_info_to_the_approval_performance";
+            break;
+
+          // primary_consideration (первичное рассмотрение)
+          case R.id.menu_info_to_the_primary_consideration:
+            operation = "menu_info_to_the_primary_consideration";
+            break;
+
+          // approval (согласование проектов документов)
+          case R.id.menu_info_change_person:
+            operation = "menu_info_change_person";
+            break;
+          case R.id.menu_info_next_person:
+            operation = "menu_info_next_person";
+            break;
+          case R.id.menu_info_prev_person:
+            operation = "menu_info_prev_person";
+            break;
+
+
+
           case R.id.action_info_create_to_control:
             operation = "action_info_create_to_control";
-            break;
-          case R.id.action_info_create_to_favorites:
-            operation = "action_info_create_to_favorites";
-            break;
-          case R.id.action_info_create_no_answer:
-            operation = "action_info_create_no_answer";
             break;
           case R.id.action_info_create_decision:
             operation = "action_info_create_decision";
@@ -180,13 +247,12 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
             break;
         }
 
-        Timber.tag(TAG).i( operation );
+        operationManager.execute( operation );
+
+        Timber.tag(TAG).i( "operation: %s", operation );
         return false;
       }
     );
-
-    loadSettings();
-    loadDocuments();
   }
 
   private Boolean documentExist(String uid){
@@ -247,6 +313,7 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
 
             RDecisionEntity decision = (RDecisionEntity) rDecision;
 
+            raw_decision.setId( String.valueOf(decision.getUid()) );
             raw_decision.setLetterhead(decision.getLetterhead());
             raw_decision.setSigner(decision.getSigner());
             raw_decision.setSignerId(decision.getSignerId());
@@ -327,6 +394,8 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
   }
 
   private void loadFromJson(){
+    HOST = settings.getString("settings_username_host");
+
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
@@ -438,6 +507,8 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
     TOKEN    = settings.getString("token");
     POSITION = settings.getInteger("position");
     DOCUMENT_UID = settings.getString("document.uid");
+    STATUS_CODE = settings.getString("info.status");
+
   }
 
   @Override
@@ -486,6 +557,15 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
   }
 
   @Override
+  protected void onResume() {
+    super.onResume();
+    loadFromDb();
+  }
+
+
+
+  /* DocumentManager.Callback */
+  @Override
   public void onGetStateSuccess() {
     Timber.tag("DocumentManagerCallback").i("onGetStateSuccess");
   }
@@ -493,6 +573,19 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
   @Override
   public void onGetStateError() {
     Timber.tag("DocumentManagerCallback").i("onGetStateError");
+  }
+
+
+
+  /* OperationManager.Callback */
+  @Override
+  public void onExecuteSuccess() {
+    Timber.tag("OpManagerCallback").i("onExecuteSuccess");
+  }
+
+  @Override
+  public void onExecuteError() {
+    Timber.tag("OpManagerCallback").i("onExecuteSuccess");
   }
 
   class Preview{
@@ -530,9 +623,12 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
 
           if ( block.getTextBefore() ){
             printBlockText( block.getText() );
-            printBlockPerformers( block.getPerformers(), f, block.getNumber() );
+            if (!block.getHidePerformers())
+              printBlockPerformers( block.getPerformers(), f, block.getNumber() );
+
           } else {
-            printBlockPerformers( block.getPerformers(), f, block.getNumber() );
+            if (!block.getHidePerformers())
+              printBlockPerformers( block.getPerformers(), f, block.getNumber() );
             printBlockText( block.getText() );
           }
         }

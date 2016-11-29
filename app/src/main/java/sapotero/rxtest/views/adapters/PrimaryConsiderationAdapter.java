@@ -31,6 +31,7 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
   private PrimaryConsiderationAdapter.Callback callback;
   public interface Callback {
     void onRemove();
+    void onChange();
     void onAttrChange();
   }
 
@@ -49,7 +50,6 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
 
       viewHolder = new ViewHolder();
       viewHolder.name     = (TextView) view.findViewById(R.id.primary_name);
-//      viewHolder.position = (TextView) view.findViewById(R.id.primary_title);
       viewHolder.remove = (Button)   view.findViewById(R.id.remove_user);
 
       viewHolder.copy        = (Switch) view.findViewById(R.id.copy);
@@ -66,10 +66,7 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
       checked.add( new PrimaryConsiderationAdapterViewModel(position, viewHolder, user) );
     }
 
-
     viewHolder.name.setText( user.getName() );
-//    viewHolder.position.setText( user.getPosition() );
-
     viewHolder.copy.setChecked( user.isCopy() );
     viewHolder.responsible.setChecked( user.isResponsible() );
     viewHolder.out.setChecked( user.isOut() );
@@ -99,8 +96,7 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
         u.setCopy(false);
       }
       user.setCopy( viewHolder.copy.isChecked() );
-
-      updateView();
+      callback.onChange();
     });
 
     viewHolder.responsible.setOnClickListener(v -> {
@@ -141,7 +137,6 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
 
   public static class ViewHolder {
     public TextView name;
-//    public TextView position;
     public Button remove;
     public Switch copy;
     public Switch responsible;

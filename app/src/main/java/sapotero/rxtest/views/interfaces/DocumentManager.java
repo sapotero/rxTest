@@ -35,12 +35,17 @@ public class DocumentManager {
   private String state;
   private String type;
 
-  Callback callback;
   private DocumentType document_type;
+  Callback callback;
 
   public interface Callback {
     void onGetStateSuccess();
     void onGetStateError();
+  }
+
+  public void registerCallBack(DocumentManager.Callback callback){
+    this.callback = callback;
+    getCurrentState();
   }
 
   public DocumentManager(Context context) {
@@ -48,11 +53,6 @@ public class DocumentManager {
     EsdApplication.getComponent(context).inject(this);
     document_type = new DocumentType(context);
     initialize();
-  }
-
-  public void registerCallBack(DocumentManager.Callback callback){
-    this.callback = callback;
-    getCurrentState();
   }
 
   private void initialize() {

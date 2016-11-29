@@ -1,4 +1,4 @@
-package sapotero.rxtest.views.managers.builders;
+package sapotero.rxtest.views.managers.view.builders;
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
@@ -12,7 +12,7 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.views.fragments.DecisionFragment;
-import sapotero.rxtest.views.managers.interfaces.DecisionInterface;
+import sapotero.rxtest.views.managers.view.interfaces.DecisionInterface;
 import timber.log.Timber;
 
 public class BlockFactory implements DecisionInterface, DecisionFragment.Callback {
@@ -52,6 +52,27 @@ public class BlockFactory implements DecisionInterface, DecisionFragment.Callbac
     } else {
       add(new Block());
     }
+  }
+
+  public void addNewBlock() {
+    Bundle bundle = new Bundle();
+    Gson gson = new Gson();
+
+    FragmentTransaction transaction = fragmentManger.beginTransaction();
+    DecisionFragment fragment = new DecisionFragment();
+    fragment.registerCallBack(this);
+
+    Block block = new Block();
+
+    bundle.putInt( "number", ++index );
+    bundle.putString( "block", gson.toJson(block) );
+
+    fragment.setArguments(bundle);
+
+    transaction.add(R.id.decisions_container, fragment );
+    transaction.commit();
+
+    blocks.add( fragment );
   }
 
   private void add(Block block) {
@@ -111,6 +132,12 @@ public class BlockFactory implements DecisionInterface, DecisionFragment.Callbac
 
   @Override
   public void onUpdateSuccess() {
+
+    Decision _temp_dec = getDecision();
+    Timber.tag(TAG).i("TEMP: %s / %s", _temp_dec.getBlocks().size(), decision.getBlocks().size() );
+
+
+
     Timber.tag(TAG).i("onUpdateSuccess");
     if (callback != null){
       callback.onUpdateSuccess( decision );

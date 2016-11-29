@@ -195,6 +195,29 @@
     <string name="primary_people_copy">Подлинник</string>
     <string name="primary_people_responsible">Ответственный</string>
     <string name="primary_people_out">В Д/Ч</string>
+    <string name="fragment_decision_hide_number">Не отображать номер блока</string>
+    <string name="fragment_decision_hide_performers">Скрыть исполнителей</string>
+    <string name="fragment_decision_button_add_people">Добавить исполнителя</string>
+    <string name="fragment_decision_button_get_template">Нажмите для выбора шаблона резолюции</string>
+    <string name="decision_text">Текст резолюции</string>
+
+    <string name="hint_decision_size">Шрифт текста</string>
+    <string name="constructor_add_block">Добавить блок</string>
+    <string name="constructor_save">Сохранить</string>
+    <string name="constructor_close">Закрыть</string>
+    <string name="wait_for_sync">Ожидает синхронизации</string>
+
+    <string name="menu_info_from_the_report">Возврата с доклада</string>
+    <string name="return_to_the_primary_consideration">Отклонить</string>
+
+    <string name="menu_info_delegate_performance">Передать</string>
+    <string name="menu_info_to_the_approval_performance">Без ответа</string>
+
+    <string name="menu_info_to_the_primary_consideration">Передача первичного рассмотрения</string>
+
+    <string name="menu_info_change_person">Передача согласования / подписания</string>
+    <string name="menu_info_next_person">Следующему</string>
+    <string name="menu_info_prev_person">Предыдущему</string>
 
 
 </resources>

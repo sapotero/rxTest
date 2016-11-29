@@ -35,9 +35,10 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.Performer;
+import sapotero.rxtest.views.managers.view.interfaces.DecisionInterface;
 import timber.log.Timber;
 
-public class DecisionPreviewFragment extends Fragment  {
+public class DecisionPreviewFragment extends Fragment implements DecisionInterface {
 
   @Inject RxSharedPreferences settings;
   @Inject SingleEntityStore<Persistable> dataStore;
@@ -114,9 +115,11 @@ public class DecisionPreviewFragment extends Fragment  {
 
         if ( block.getTextBefore() ){
           setBlockText( block.getText() );
-          setBlockPerformers( block.getPerformers(), toFamiliarization, block.getNumber() );
+          if (!block.getHidePerformers())
+            setBlockPerformers( block.getPerformers(), toFamiliarization, block.getNumber() );
         } else {
-          setBlockPerformers( block.getPerformers(), toFamiliarization, block.getNumber() );
+          if (!block.getHidePerformers())
+            setBlockPerformers( block.getPerformers(), toFamiliarization, block.getNumber() );
           setBlockText( block.getText() );
         }
       }
@@ -135,12 +138,17 @@ public class DecisionPreviewFragment extends Fragment  {
 
         String performerName = "";
 
+        if (user.getIsOriginal()){
+          performerName += "* ";
+        }
+
         if (toFamiliarization && !numberPrinted){
           performerName += number.toString() + ". ";
           numberPrinted = true;
         } else {
           performerName += user.getPerformerText();
         }
+
 
         TextView performer_view = new TextView( getActivity() );
         performer_view.setText( performerName );
@@ -174,7 +182,7 @@ public class DecisionPreviewFragment extends Fragment  {
     boolean toFamiliarization = block.getToFamiliarization() == null ? false : block.getToFamiliarization();
 
     if ( block.getAppealText() != null ){
-      appealText = block.getAppealText().toString();
+      appealText = block.getAppealText();
     } else {
       appealText = "";
     }
@@ -188,11 +196,13 @@ public class DecisionPreviewFragment extends Fragment  {
 
 
     if (toFamiliarization){
-      text += number + ". ";
       block.setToFamiliarization(false);
     }
-    text += appealText;
-    Timber.tag(TAG).i( "        setAppealText" + text );
+
+//    text += block.getNumber().toString() + ". ";
+    text += block.getAppealText();
+
+    Timber.tag(TAG).i( " setAppealText" + text );
 
     TextView blockAppealView = new TextView( getActivity() );
     blockAppealView.setGravity(Gravity.CENTER);
@@ -206,20 +216,16 @@ public class DecisionPreviewFragment extends Fragment  {
   private void updateUrgency() {
     String urgency = "";
     if ( decision.getUrgencyText() != null ){
-      urgency = decision.getUrgencyText().toString();
+      urgency = decision.getUrgencyText();
     }
 
     if (!Objects.equals(urgency, "")){
       TextView urgencyView = new TextView( getActivity() );
-      urgencyView.setGravity(Gravity.RIGHT);
+      urgencyView.setGravity(Gravity.END);
       urgencyView.setAllCaps(true);
       urgencyView.setPaintFlags( Paint.UNDERLINE_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG | Paint.FAKE_BOLD_TEXT_FLAG );
       urgencyView.setText( urgency );
       urgencyView.setTextColor( ContextCompat.getColor(mContext, R.color.md_black_1000) );
-
-//      LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-//      params.setMargins(0,0,0,10);
-//      urgencyView.setLayoutParams(params);
 
       decision_preview_body.addView( urgencyView );
     }
@@ -318,6 +324,17 @@ public class DecisionPreviewFragment extends Fragment  {
 
   }
 
+  public void update() {
+    try{
+      Timber.tag(TAG).w( "UPDATE: %s", decision.getBlocks().get(0).getText() );
+      updateView();
+    }
+    catch (Error e){
+      Timber.tag(TAG).w( String.valueOf(e.getStackTrace()) );
+    }
+
+  }
+
   public interface OnFragmentInteractionListener {
     void onFragmentInteraction(Uri uri);
   }
@@ -333,10 +350,19 @@ public class DecisionPreviewFragment extends Fragment  {
     }
   }
 
-
   @Override
   public void onDetach() {
     super.onDetach();
     mListener = null;
+  }
+
+  @Override
+  public Decision getDecision() {
+    return null;
+  }
+
+  @Override
+  public void setDecision(Decision _decision_) {
+    decision = _decision_;
   }
 }

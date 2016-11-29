@@ -5,11 +5,15 @@
     tools:context="net.taptools.android.sportshistory.PlayerProfileActivity">
 
     <item
-        android:id="@+id/action_constructor_create_no_answer"
+        android:id="@+id/action_constructor_add_block"
         app:showAsAction="ifRoom|withText"
-        android:title="@string/constructor_create_no_answer"/>
+        android:title="@string/constructor_add_block"/>
     <item
-        android:id="@+id/action_constructor_create_to_favorites"
+        android:id="@+id/action_constructor_save"
         app:showAsAction="ifRoom|withText"
-        android:title="@string/constructor_create_to_favorites"/>
+        android:title="@string/constructor_save"/>
+    <item
+        android:id="@+id/action_constructor_close"
+        app:showAsAction="ifRoom|withText"
+        android:title="@string/constructor_close"/>
 </menu>

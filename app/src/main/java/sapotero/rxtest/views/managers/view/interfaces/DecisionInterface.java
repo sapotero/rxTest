@@ -1,4 +1,4 @@
-package sapotero.rxtest.views.managers.interfaces;
+package sapotero.rxtest.views.managers.view.interfaces;
 
 import sapotero.rxtest.retrofit.models.document.Decision;
 

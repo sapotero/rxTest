@@ -1,9 +1,9 @@
-package sapotero.rxtest.views.managers.builders;
+package sapotero.rxtest.views.managers.view.builders;
 
 import android.support.v4.app.FragmentManager;
 
 import sapotero.rxtest.retrofit.models.document.Decision;
-import sapotero.rxtest.views.managers.interfaces.DecisionInterface;
+import sapotero.rxtest.views.managers.view.interfaces.DecisionInterface;
 import timber.log.Timber;
 
 public class DecisionBuilder implements DecisionInterface, BlockFactory.Callback {
@@ -33,6 +33,10 @@ public class DecisionBuilder implements DecisionInterface, BlockFactory.Callback
 
   public void build() {
     block_builder.build();
+  }
+
+  public void addBlock() {
+    block_builder.addNewBlock();
   }
 
 

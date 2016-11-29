@@ -37,6 +37,7 @@ import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.views.activities.InfoActivity;
+import sapotero.rxtest.views.managers.db.DocumentManager;
 import timber.log.Timber;
 
 public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.SimpleViewHolder> implements Action1<List<Document>> {
@@ -48,15 +49,14 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
   private List<Document> documents;
   private Oshs current_user;
   private View emptyView;
+  private DocumentManager documentManager;
 
   public DocumentsAdapter(Context context, List<Document> documents) {
     this.mContext  = context;
     this.documents = documents;
     EsdApplication.getComponent(context).inject(this);
 
-//    Preference<String> user = settings.getString("current_user");
-//    current_user = new Gson().fromJson( user.get(), Oshs.class );
-
+    documentManager = new DocumentManager().getInstance(mContext);
   }
 
   @Override
@@ -80,7 +80,9 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
     viewHolder.swipeLayout.addDrag(SwipeLayout.DragEdge.Left,  viewHolder.swipeLayout.findViewById(R.id.from_left_to_right));
     viewHolder.swipeLayout.addDrag(SwipeLayout.DragEdge.Right, viewHolder.swipeLayout.findViewById(R.id.from_right_to_left));
 
-
+    if (item.getChanged() != null){
+      viewHolder.wait_for_sync.setVisibility(  item.getChanged() ? View.VISIBLE : View.GONE );
+    }
 
     if ( item.getControl() != null && item.getControl() ){
       Timber.d( "item.getControl() "   + item.getControl().toString() );
@@ -139,6 +141,9 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
       Preference<String> rxUid = rxPreferences.getString("info.uid");
       rxUid.set( item.getUid() );
 
+      Preference<String> rxStatus = rxPreferences.getString("info.status");
+      rxStatus.set( item.getStatusCode() );
+
       Intent intent = new Intent(mContext, InfoActivity.class);
       mContext.startActivity(intent);
       Toast.makeText(mContext, " onClick : " + item.getMd5() + " \n" + item.getTitle(), Toast.LENGTH_SHORT).show();
@@ -146,6 +151,12 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
     });
 
     viewHolder.cv.setOnLongClickListener(view -> {
+
+      documentManager.get( item.getUid() ).toJson();
+
+
+      String _title = documentManager.getDocument(item.getUid()).getTitle();
+      Timber.e("title : %s", _title);
 
       Notification builder =
         new NotificationCompat.Builder(mContext)
@@ -265,6 +276,8 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
     private TextView to_favorites;
     private TextView to_contol;
 
+    private TextView wait_for_sync;
+
     private CardView cv;
     private TextView title;
     private TextView date;
@@ -285,6 +298,7 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
       date   = (TextView)itemView.findViewById(R.id.swipe_layout_date);
       favorite_label   = (TextView)itemView.findViewById(R.id.favorite_label);
       control_label   = (TextView)itemView.findViewById(R.id.control_label);
+      wait_for_sync   = (TextView)itemView.findViewById(R.id.wait_for_sync);
 
       favorite_label.setVisibility(View.GONE);
       control_label.setVisibility(View.GONE);

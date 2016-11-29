@@ -1,5 +1,7 @@
 package sapotero.rxtest.views.adapters.utils;
 
+import sapotero.rxtest.retrofit.models.document.Performer;
+
 public class PrimaryConsiderationPeople {
 
   private String id;
@@ -15,6 +17,16 @@ public class PrimaryConsiderationPeople {
     this.name = name;
     this.position = position;
     this.organization = organization;
+  }
+
+  public PrimaryConsiderationPeople(Performer u) {
+    this.id = u.getPerformerId();
+    this.name = u.getPerformerText();
+    this.position = String.valueOf( u.getNumber() );
+    this.organization = u.getOrganizationText();
+    this.copy = u.getIsOriginal();
+    this.out  = false;
+    this.responsible = u.getIsResponsible();
   }
 
   public String getPosition() {

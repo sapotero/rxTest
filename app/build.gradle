@@ -125,8 +125,18 @@ dependencies {
 //    compile 'com.daimajia.numberprogressbar:library:1.2@aar'
 
     compile 'com.github.barteksc:android-pdf-viewer:2.3.0'
+    compile 'com.afollestad.material-dialogs:core:0.9.1.0'
 
-    compile 'com.github.clans:fab:1.6.4'
+
+
+    /*debug*/
+    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5'
+    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
+    testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
+
+    compile 'com.facebook.stetho:stetho:1.4.1'
+    compile 'com.facebook.stetho:stetho-okhttp3:1.4.1'
+    /*debug*/
 }
 
 

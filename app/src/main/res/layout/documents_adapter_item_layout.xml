@@ -191,6 +191,25 @@
                     android:background="@drawable/badge_control"
                     />
 
+                <TextView
+                    android:text="@string/wait_for_sync"
+                    android:drawableStart="@drawable/clock_1"
+                    android:textColor="@color/md_red_400"
+                    android:textSize="16sp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+
+                    android:visibility="gone"
+
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentEnd="true"
+
+                    android:paddingBottom="@dimen/half_date_offset"
+                    android:paddingRight="48dp"
+                    android:id="@+id/wait_for_sync"
+                    />
+                <!--android:layout_alignParentBottom="true"-->
+
             </RelativeLayout>
 
         </android.support.v7.widget.CardView>

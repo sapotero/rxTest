@@ -9,10 +9,6 @@
         app:showAsAction="ifRoom|withText"
         android:title="@string/info_create_decision"/>
     <item
-        android:id="@+id/action_info_create_no_answer"
-        app:showAsAction="ifRoom|withText"
-        android:title="@string/info_create_no_answer"/>
-    <item
         android:id="@+id/action_info_create_to_control"
         app:showAsAction="ifRoom|withText"
         android:title="@string/info_create_to_control"/>

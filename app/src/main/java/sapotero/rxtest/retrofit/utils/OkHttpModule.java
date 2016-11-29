@@ -2,6 +2,8 @@ package sapotero.rxtest.retrofit.utils;
 
 import android.content.Context;
 
+import com.facebook.stetho.okhttp3.StethoInterceptor;
+
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -27,6 +29,7 @@ public class OkHttpModule {
           HttpLoggingInterceptor.Level.BASIC
         )
       )
+      .addInterceptor( new StethoInterceptor())
       .addInterceptor(
         chain -> {
           Request original = chain.request();

@@ -206,7 +206,13 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
 
       button.setOnClickListener(view ->{
         Timber.d( "BUTTON CLICK %s", view.getId() );
-        tryToLogin();
+
+        if ( Constant.DEBUG ) {
+          start();
+        } else {
+          tryToLogin();
+        }
+
       });
 
     } else {
@@ -295,7 +301,10 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
   @Override
   public void sendData() {
     Timber.e("SendData");
+    start();
+  }
 
+  private void start() {
     Intent intent = new Intent(this, MainActivity.class);
     startActivity(intent);
 
