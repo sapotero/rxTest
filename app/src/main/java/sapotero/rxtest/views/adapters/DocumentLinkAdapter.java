@@ -66,4 +66,8 @@ public class DocumentLinkAdapter extends BaseAdapter {
     images.add( image );
     notifyDataSetChanged();
   }
+
+  public ArrayList<Image> getItems() {
+    return images;
+  }
 }

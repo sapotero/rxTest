@@ -10,6 +10,11 @@ import android.view.View;
 import android.widget.Spinner;
 
 import com.github.barteksc.pdfviewer.PDFView;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 
 import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.views.activities.DocumentImageFullScreenActivity;
@@ -91,25 +96,30 @@ public class DragPinchManager implements GestureDetector.OnGestureListener, Gest
 
     Timber.tag("gestureDetector").i("filename: %s", e.toString());
 
-    int position = spinner.getSelectedItemPosition();
     DocumentLinkAdapter adapter = (DocumentLinkAdapter) spinner.getAdapter();
 
-    Image image = adapter.getItem(spinner.getSelectedItemPosition());
-    String filename = String.format( "%s_%s", image.getMd5(), image.getTitle() );
+    if (adapter.getCount() > 0){
+      int position = spinner.getSelectedItemPosition();
 
-    Timber.tag("gestureDetector").i("filename: %s", filename);
+      Image image = adapter.getItem(spinner.getSelectedItemPosition());
+      String filename = String.format( "%s_%s", image.getMd5(), image.getTitle() );
 
-    Intent intent = new Intent( context, DocumentImageFullScreenActivity.class);
-    intent.putExtra( "filename", filename );
-    context.startActivity(intent);
+      Type listType = new TypeToken<ArrayList<Image>>() {}.getType();
 
-    if (pdfView.getZoom() < pdfView.getMidZoom()) {
-      pdfView.zoomWithAnimation(e.getX(), e.getY(), pdfView.getMidZoom());
-    } else if (pdfView.getZoom() < pdfView.getMaxZoom()) {
-      pdfView.zoomWithAnimation(e.getX(), e.getY(), pdfView.getMaxZoom());
-    } else {
-      pdfView.resetZoomWithAnimation();
+      Intent intent = new Intent( context, DocumentImageFullScreenActivity.class);
+      intent.putExtra( "files", new Gson().toJson( adapter.getItems(), listType ) );
+      intent.putExtra( "filename", filename );
+      context.startActivity(intent);
+
     }
+
+    //    if (pdfView.getZoom() < pdfView.getMidZoom()) {
+    //      pdfView.zoomWithAnimation(e.getX(), e.getY(), pdfView.getMidZoom());
+    //    } else if (pdfView.getZoom() < pdfView.getMaxZoom()) {
+    //      pdfView.zoomWithAnimation(e.getX(), e.getY(), pdfView.getMaxZoom());
+    //    } else {
+    //      pdfView.resetZoomWithAnimation();
+    //    }
     return true;
   }
 

@@ -33,7 +33,6 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.inject.Inject;
@@ -130,23 +129,6 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
     loadSettings();
 
-
-    final GestureDetector gestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener() {
-      @Override
-      public boolean onDoubleTap(MotionEvent event) {
-        Image image = adapter.getItem(mDocumentList.getSelectedItemPosition());
-        String filename = String.format( "%s_%s", image.getMd5(), image.getTitle() );
-
-        Timber.tag("gestureDetector").i("filename: %s", filename);
-
-        Intent intent = new Intent(getContext(), DocumentImageFullScreenActivity.class);
-        intent.putExtra( "filename", filename );
-        getContext().startActivity(intent);
-
-        return true;
-      }
-    });
-
     DragPinchManager pinch = new DragPinchManager( getContext(), pdfView, new AnimationManager(pdfView), mDocumentList);
 
     ArrayList<Image> documents = new ArrayList<Image>();
@@ -200,14 +182,6 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
           .password(null)
           .scrollHandle(null)
           .load();
-//        pdfView.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
-
-
-//        pdfViewPager = new PDFViewPager(mContext, file.getAbsolutePath() );
-
-//        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-//        StrictMode.setThreadPolicy(policy);
-//        jobManager.addJobInBackground( new DownloadFileJob(HOST.get(), image.getPath(), image.getMd5()+"_"+image.getTitle()) );
 
       }
 
@@ -309,30 +283,6 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     mButtonNext.setEnabled(index + 1 < pageCount);
   }
 
-  private void openRenderer(Context context, String file) throws IOException {
-    if (file != null){
-      Timber.tag(TAG).i( "PATH " + file );
-
-      File fd = new File(file);
-      mFileDescriptor = ParcelFileDescriptor.open( fd ,ParcelFileDescriptor.MODE_READ_ONLY);
-      mPdfRenderer = new PdfRenderer(mFileDescriptor);
-
-      setDocumentPreview(index);
-    }
-  }
-
-  private void closeRenderer() throws IOException {
-    if (null != mCurrentPage) {
-      mCurrentPage.close();
-    }
-    if (mPdfRenderer != null){
-      mPdfRenderer.close();
-    }
-    if (mFileDescriptor != null){
-      mFileDescriptor.close();
-    }
-  }
-
   @OnClick(R.id.pdf_previous)
   public void previousPage(View view) {
     try {
@@ -374,11 +324,6 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   @Override
   public void onDetach() {
     super.onDetach();
-    try {
-      closeRenderer();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
 
     if ( EventBus.getDefault().isRegistered(this) ){
       EventBus.getDefault().unregister(this);
