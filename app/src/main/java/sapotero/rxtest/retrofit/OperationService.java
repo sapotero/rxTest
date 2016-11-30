@@ -37,7 +37,7 @@ public interface OperationService{
     @Query("uids[]") ArrayList<String> uids,
     @Query("operation_data[comment]") String operation_data,
     @Query("status_code") String status_code,
-    @Query("official_id") String official_id
+    @Query("person") String official_id
   );
 
   @PUT("{operation_name}.json")
@@ -48,7 +48,7 @@ public interface OperationService{
     @Query("uids[]") ArrayList<String> uids,
     @Query("operation_data[comment]") String operation_data,
     @Query("status_code") String status_code,
-    @Query("official_id") String official_id
+    @Query("person") String official_id
   );
 
   @PUT("{operation_name}.json")
@@ -59,7 +59,7 @@ public interface OperationService{
     @Query("uids[]") ArrayList<String> uids,
     @Query("operation_data[comment]") String operation_data,
     @Query("status_code") String status_code,
-    @Query("official_id") String official_id,
+    @Query("person") String official_id,
     @Query("sign") String sign
   );
   @PUT("{operation_name}.json")
@@ -70,7 +70,7 @@ public interface OperationService{
     @Query("uids[]") ArrayList<String> uids,
     @Query("operation_data[comment]") String operation_data,
     @Query("status_code") String status_code,
-    @Query("official_id") String official_id,
+    @Query("person") String official_id,
     @Query("sign") String sign
   );
 
@@ -82,7 +82,7 @@ public interface OperationService{
     @Query("uids[]") ArrayList<String> uids,
     @Query("operation_data[comment]") String operation_data,
     @Query("status_code") String status_code,
-    @Query("folder_id") String folder_id,
-    @Query("label_id") String label_id
+    @Query("folder") String folder_id,
+    @Query("label") String label_id
   );
 }

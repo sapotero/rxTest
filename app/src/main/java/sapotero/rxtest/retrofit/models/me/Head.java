@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName;
 
 public class Head {
 
-  @SerializedName("official_id")
+  @SerializedName("person")
   @Expose
   private String officialId;
   @SerializedName("official_name")
@@ -24,7 +24,7 @@ public class Head {
   /**
    *
    * @param officialId
-   *     The official_id
+   *     The person
    */
   public void setOfficialId(String officialId) {
     this.officialId = officialId;

@@ -11,6 +11,7 @@ import sapotero.rxtest.views.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.views.managers.menu.interfaces.Command;
 import sapotero.rxtest.views.managers.menu.invokers.RemoteExecutor;
 import sapotero.rxtest.views.managers.menu.receivers.DocumentReceiver;
+import sapotero.rxtest.views.managers.menu.utils.CommandParams;
 import timber.log.Timber;
 
 public class OperationManager implements CommandFactory.Callback {
@@ -48,9 +49,10 @@ public class OperationManager implements CommandFactory.Callback {
   }
 
 
-  public void execute(String operation) {
+  public void execute(String operation, CommandParams params) {
     Command command = commandBuilder
       .withDocument( new DocumentReceiver( settings.getString("info.uid").get() ) )
+      .withParams( params )
       .build( operation );
 
     remoteExecutor

@@ -9,7 +9,7 @@ public class ControlLabel {
     @SerializedName("created_at")
     @Expose
     private String createdAt;
-    @SerializedName("official_id")
+    @SerializedName("person")
     @Expose
     private String officialId;
     @SerializedName("official_name")
@@ -55,7 +55,7 @@ public class ControlLabel {
     /**
      * 
      * @param officialId
-     *     The official_id
+     *     The person
      */
     public void setOfficialId(String officialId) {
         this.officialId = officialId;

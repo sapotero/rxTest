@@ -75,6 +75,7 @@ import sapotero.rxtest.views.fragments.InfoCardDocumentsFragment;
 import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
 import sapotero.rxtest.views.interfaces.DocumentManager;
 import sapotero.rxtest.views.managers.menu.OperationManager;
+import sapotero.rxtest.views.managers.menu.utils.CommandParams;
 import timber.log.Timber;
 
 public class InfoActivity extends AppCompatActivity implements InfoCardDocumentsFragment.OnFragmentInteractionListener, InfoCardWebViewFragment.OnFragmentInteractionListener, DocumentManager.Callback, OperationManager.Callback {
@@ -196,6 +197,7 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
       item -> {
 
         String operation;
+        CommandParams params = new CommandParams();
 
         switch ( item.getItemId() ){
           // sent_to_the_report (отправлен на доклад)
@@ -209,25 +211,45 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
           // sent_to_the_report (отправлен на доклад)
           case R.id.menu_info_delegate_performance:
             operation = "menu_info_delegate_performance";
+            params.setPerson( "USER_UD" );
             break;
           case R.id.menu_info_to_the_approval_performance:
             operation = "menu_info_to_the_approval_performance";
+            params.setPerson( "USER_UD" );
             break;
 
           // primary_consideration (первичное рассмотрение)
           case R.id.menu_info_to_the_primary_consideration:
             operation = "menu_info_to_the_primary_consideration";
+            params.setPerson( "USER_UD" );
             break;
 
           // approval (согласование проектов документов)
-          case R.id.menu_info_change_person:
+          case R.id.menu_info_approval_change_person:
             operation = "menu_info_change_person";
+            params.setPerson( "USER_UD" );
             break;
-          case R.id.menu_info_next_person:
+          case R.id.menu_info_approval_next_person:
             operation = "menu_info_next_person";
+            params.setSign( "SIGN" );
             break;
-          case R.id.menu_info_prev_person:
+          case R.id.menu_info_approval_prev_person:
             operation = "menu_info_prev_person";
+            params.setSign( "SIGN" );
+            break;
+
+          // approval (согласование проектов документов)
+          case R.id.menu_info_sign_change_person:
+            operation = "menu_info_change_person";
+            params.setPerson( "USER_UD" );
+            break;
+          case R.id.menu_info_sign_next_person:
+            operation = "menu_info_next_person";
+            params.setSign( "SIGN" );
+            break;
+          case R.id.menu_info_sign_prev_person:
+            operation = "menu_info_prev_person";
+            params.setSign( "SIGN" );
             break;
 
 
@@ -247,7 +269,7 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
             break;
         }
 
-        operationManager.execute( operation );
+        operationManager.execute( operation, params );
 
         Timber.tag(TAG).i( "operation: %s", operation );
         return false;
