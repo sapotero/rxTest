@@ -20,7 +20,7 @@ public interface OperationService{
   );
 
   @PUT("{operation_name}.json")
-  Observable<OperationResult> execute(
+  Observable<OperationResult> report(
     @Path("operation_name") String operation_name,
     @Query("login") String login,
     @Query("auth_token") String auth_token,
@@ -29,5 +29,60 @@ public interface OperationService{
     @Query("status_code") String status_code
   );
 
+  @PUT("{operation_name}.json")
+  Observable<OperationResult> performance(
+    @Path("operation_name") String operation_name,
+    @Query("login") String login,
+    @Query("auth_token") String auth_token,
+    @Query("uids[]") ArrayList<String> uids,
+    @Query("operation_data[comment]") String operation_data,
+    @Query("status_code") String status_code,
+    @Query("official_id") String official_id
+  );
 
+  @PUT("{operation_name}.json")
+  Observable<OperationResult> consideration(
+    @Path("operation_name") String operation_name,
+    @Query("login") String login,
+    @Query("auth_token") String auth_token,
+    @Query("uids[]") ArrayList<String> uids,
+    @Query("operation_data[comment]") String operation_data,
+    @Query("status_code") String status_code,
+    @Query("official_id") String official_id
+  );
+
+  @PUT("{operation_name}.json")
+  Observable<OperationResult> approval(
+    @Path("operation_name") String operation_name,
+    @Query("login") String login,
+    @Query("auth_token") String auth_token,
+    @Query("uids[]") ArrayList<String> uids,
+    @Query("operation_data[comment]") String operation_data,
+    @Query("status_code") String status_code,
+    @Query("official_id") String official_id,
+    @Query("sign") String sign
+  );
+  @PUT("{operation_name}.json")
+  Observable<OperationResult> sign(
+    @Path("operation_name") String operation_name,
+    @Query("login") String login,
+    @Query("auth_token") String auth_token,
+    @Query("uids[]") ArrayList<String> uids,
+    @Query("operation_data[comment]") String operation_data,
+    @Query("status_code") String status_code,
+    @Query("official_id") String official_id,
+    @Query("sign") String sign
+  );
+
+  @PUT("{operation_name}.json")
+  Observable<OperationResult> shared(
+    @Path("operation_name") String operation_name,
+    @Query("login") String login,
+    @Query("auth_token") String auth_token,
+    @Query("uids[]") ArrayList<String> uids,
+    @Query("operation_data[comment]") String operation_data,
+    @Query("status_code") String status_code,
+    @Query("folder_id") String folder_id,
+    @Query("label_id") String label_id
+  );
 }

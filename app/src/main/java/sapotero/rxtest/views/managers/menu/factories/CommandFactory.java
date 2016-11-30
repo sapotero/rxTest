@@ -3,8 +3,8 @@ package sapotero.rxtest.views.managers.menu.factories;
 import android.content.Context;
 
 import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
-import sapotero.rxtest.views.managers.menu.commands.FromTheReport;
-import sapotero.rxtest.views.managers.menu.commands.ReturnToPrimaryConsideration;
+import sapotero.rxtest.views.managers.menu.commands.report.FromTheReport;
+import sapotero.rxtest.views.managers.menu.commands.report.ReturnToPrimaryConsideration;
 import sapotero.rxtest.views.managers.menu.interfaces.Command;
 import sapotero.rxtest.views.managers.menu.receivers.DocumentReceiver;
 import timber.log.Timber;
@@ -140,7 +140,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         operation = Operation.RETURN_TO_THE_PRIMARY_CONSIDERATION;
         break;
 
-      // sent_to_the_report (отправлен на доклад)
+      // sent_to_the_performance (Отправлен на исполнение)
       case "menu_info_delegate_performance":
         operation = Operation.DELEGATE_PERFORMANCE;
         break;

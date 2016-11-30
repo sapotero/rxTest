@@ -1,4 +1,4 @@
-package sapotero.rxtest.views.managers.menu.commands;
+package sapotero.rxtest.views.managers.menu.commands.shared;
 
 import android.content.Context;
 
@@ -19,10 +19,11 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
+import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.views.managers.menu.receivers.DocumentReceiver;
 import timber.log.Timber;
 
-public class FromTheReport extends AbstractCommand {
+public class CheckForControl extends AbstractCommand {
 
   @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
@@ -37,8 +38,9 @@ public class FromTheReport extends AbstractCommand {
   private Preference<String> UID;
   private Preference<String> HOST;
   private Preference<String> STATUS_CODE;
+  private String folder_id;
 
-  public FromTheReport(Context context, DocumentReceiver document){
+  public CheckForControl(Context context, DocumentReceiver document){
     this.context = context;
     this.document = document;
 
@@ -79,13 +81,15 @@ public class FromTheReport extends AbstractCommand {
     ArrayList<String> uids = new ArrayList<>();
     uids.add( UID.get() );
 
-    Observable<OperationResult> info = operationService.execute(
-      operationType(),
+    Observable<OperationResult> info = operationService.shared(
+      getType(),
       LOGIN.get(),
       TOKEN.get(),
       uids,
       UID.get(),
-      STATUS_CODE.get()
+      STATUS_CODE.get(),
+      null,
+      null
     );
 
     info.subscribeOn( Schedulers.computation() )
@@ -110,7 +114,7 @@ public class FromTheReport extends AbstractCommand {
   }
 
   @Override
-  String operationType() {
-    return "from_the_report";
+  public String getType() {
+    return "check_for_control";
   }
 }
