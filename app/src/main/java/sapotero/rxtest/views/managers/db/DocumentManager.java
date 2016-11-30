@@ -59,32 +59,4 @@ public class DocumentManager {
     return document;
   }
 
-
-
-
 }
-//
-//
-//  public DocumentManager uid (String uid){
-//    this.uid = uid;
-//    return this;
-//  }
-//
-//  public DocumentManager fromDb(){
-//    type = Type.DB;
-//    return this;
-//  }
-//
-//  public DocumentManager fromJson(){
-//    type = Type.JSON;
-//    return this;
-//  }
-//
-//  public Document asObject(){
-//    return loader.getObject(uid);
-//  }
-//  public RDocumentEntity asDb(){
-//    return loader.getDb(uid);
-//  }
-//
-//}

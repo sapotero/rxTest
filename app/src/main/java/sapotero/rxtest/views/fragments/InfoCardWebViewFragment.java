@@ -1,10 +1,13 @@
 package sapotero.rxtest.views.fragments;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
@@ -19,6 +22,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.views.activities.DocumentInfocardFullScreenActivity;
 
 public class InfoCardWebViewFragment extends Fragment {
 
@@ -52,6 +56,20 @@ public class InfoCardWebViewFragment extends Fragment {
     ButterKnife.bind(this, view);
     EsdApplication.getComponent(mContext).inject( this );
 
+    final GestureDetector gestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener() {
+      @Override
+      public boolean onDoubleTap(MotionEvent event) {
+
+
+        Intent intent = new Intent(getContext(), DocumentInfocardFullScreenActivity.class);
+        getContext().startActivity(intent);
+
+        return true;
+      }
+    });
+
+    infocard.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
+
     setWebView();
 
     return view;
@@ -73,6 +91,8 @@ public class InfoCardWebViewFragment extends Fragment {
       if ( document != null ){
         String htmlData = "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />" + document;
         infocard.loadDataWithBaseURL("file:///android_asset/", htmlData, "text/html", "UTF-8", null);
+        infocard.getSettings().setBuiltInZoomControls(true);
+        infocard.getSettings().setDisplayZoomControls(false);
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -96,7 +116,6 @@ public class InfoCardWebViewFragment extends Fragment {
     mListener = null;
   }
   public interface OnFragmentInteractionListener {
-    // TODO: Update argument type and name
     void onFragmentInteraction(Uri uri);
   }
 }

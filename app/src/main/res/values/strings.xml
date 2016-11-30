@@ -4,57 +4,6 @@
     <string name="password_hint">Пароль</string>
     <string name="login_button">Войти</string>
 
-    <string-array name="FILTER_TYPES">
-        <item>Отправлен на исполнение</item>
-        <item>Отправлен на доклад</item>
-        <item>Первичное рассмотрение</item>
-        <item>Согласование проектов документов</item>
-        <item>Подписание проектов документов</item>
-    </string-array>
-
-    <string-array name="FILTER_TYPES_VALUE">
-        <item>sent_to_the_performance</item>
-        <item>sent_to_the_report</item>
-        <item>primary_consideration</item>
-        <item>approval</item>
-        <item>signing</item>
-    </string-array>
-
-
-    <string-array name="JOURNAL_TYPES">
-        <item>Все документы</item>
-        <item>Обращения граждан</item>
-        <item>Входящие документы</item>
-        <item>НПА</item>
-        <item>Приказы старые</item>
-        <item>Исходящие документы</item>
-        <item>Входящие секретные</item>
-        <item>НПА секретные</item>
-        <item>Пр. старые секретные</item>
-        <item>Исходящие секретные</item>
-        <item>Приказы</item>
-        <item>На контроле</item>
-        <item>Подписание</item>
-        <item>Согласование</item>
-    </string-array>
-
-    <string-array name="JOURNAL_TYPES_VALUE">
-        <item></item>
-        <item>01</item>
-        <item>02</item>
-        <item>03</item>
-        <item>04</item>
-        <item>05</item>
-        <item>06</item>
-        <item>07</item>
-        <item>08</item>
-        <item>09</item>
-        <item>10</item>
-        <item>97</item>
-        <item>98</item>
-        <item>99</item>
-    </string-array>
-
     <string-array name="settings_view_start_page">
         <item>Все документы</item>
         <item>Входящие документы</item>
@@ -171,10 +120,6 @@
     <string name="stepper_loader_info">Загрузка данных по задачам</string>
 
 
-
-    <!--<string name="vertical_form_stepper_form_continue">Continue</string>-->
-    <!--<string name="vertical_form_stepper_form_confirm_button">Confirm data</string>-->
-    <!--<string name="vertical_form_stepper_form_last_step">Confirmation</string>-->
     <string name="vertical_form_stepper_form_continue">Продолжить</string>
     <string name="vertical_form_stepper_form_last_step">Завершение</string>
     <string name="vertical_form_stepper_form_confirm_button">Начать работу</string>

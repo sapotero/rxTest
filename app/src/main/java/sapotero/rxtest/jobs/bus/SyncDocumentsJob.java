@@ -25,6 +25,7 @@ import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.db.requery.models.exemplars.RExemplarEntity;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
+import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.bus.MarkDocumentAsChangedJobEvent;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Block;
@@ -44,11 +45,11 @@ public class SyncDocumentsJob  extends BaseJob {
   private Preference<String> TOKEN = null;
   private Preference<String> HOST;
 
-  private final String filter;
+  private final Fields.Status filter;
   private String uid;
   private String TAG = this.getClass().getSimpleName();
 
-  public SyncDocumentsJob(String uid, String filter) {
+  public SyncDocumentsJob(String uid, Fields.Status filter) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
     this.filter = filter;
@@ -135,7 +136,7 @@ public class SyncDocumentsJob  extends BaseJob {
 
     RDocumentEntity rd = new RDocumentEntity();
     rd.setUid( d.getUid() );
-    rd.setFilter(filter);
+    rd.setFilter( filter.toString() );
     rd.setMd5( d.getMd5() );
     rd.setSortKey( d.getSortKey() );
     rd.setTitle( d.getTitle() );
@@ -311,7 +312,7 @@ public class SyncDocumentsJob  extends BaseJob {
         rDoc.setInfoCard( document.getInfoCard() );
       }
 
-      rDoc.setFilter(filter);
+      rDoc.setFilter( filter.toString() );
 
 
       dataStore.update(rDoc)

@@ -3,12 +3,12 @@ package sapotero.rxtest.views.adapters.models;
 public class DocumentTypeItem {
 
   private int value;
-  private String count;
+  private String type;
   private String name;
-  public DocumentTypeItem(String name, String count, int value) {
+  public DocumentTypeItem(String name, String type, int value) {
     super();
     this.name = name;
-    this.count = count;
+    this.type = type;
     this.value = value;
   }
 
@@ -24,15 +24,15 @@ public class DocumentTypeItem {
     return name;
   }
 
-  public String getCount() {
-    return count;
+  public String getType() {
+    return type;
   }
 
   public void setName(String name) {
     this.name = name;
   }
 
-  public void setCount(String count) {
-    this.count = count;
+  public void setType(String type) {
+    this.type = type;
   }
 }

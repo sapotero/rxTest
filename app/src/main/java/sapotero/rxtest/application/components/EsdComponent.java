@@ -13,6 +13,7 @@ import sapotero.rxtest.jobs.utils.JobModule;
 import sapotero.rxtest.retrofit.utils.OkHttpModule;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.activities.DocumentImageFullScreenActivity;
+import sapotero.rxtest.views.activities.DocumentInfocardFullScreenActivity;
 import sapotero.rxtest.views.activities.InfoActivity;
 import sapotero.rxtest.views.activities.LoginActivity;
 import sapotero.rxtest.views.activities.MainActivity;
@@ -54,6 +55,7 @@ public interface EsdComponent {
   void inject(SettingsActivity activity);
   void inject(DecisionConstructorActivity activity);
   void inject(DocumentImageFullScreenActivity activity);
+  void inject(DocumentInfocardFullScreenActivity activity);
   void inject(SettingsTemplatesActivity activity);
 
 

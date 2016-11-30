@@ -18,8 +18,8 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
-import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.jobs.bus.AddPrimaryConsiderationJob;
 import sapotero.rxtest.jobs.bus.SyncDocumentsJob;
 import sapotero.rxtest.retrofit.AuthTokenService;
@@ -187,14 +187,15 @@ public class DataLoaderInterface {
     Retrofit retrofit = new RetrofitManager(context, HOST.get() + "/v3/", okHttpClient).process();
     DocumentsService documentsService = retrofit.create(DocumentsService.class);
 
+//    String[] filter_types = context.getResources().getStringArray(R.array.FILTER_TYPES_VALUE);
 
-    String[] filter_types = context.getResources().getStringArray(R.array.FILTER_TYPES_VALUE);
+    Fields.Status[] new_filter_types = Fields.Status.values();
 
     unsubscribe();
     subscription.add(
       Observable
-        .from(filter_types)
-        .flatMap(type -> documentsService.getDocuments(LOGIN.get(), TOKEN.get(), type, 0, 0))
+        .from(new_filter_types)
+        .flatMap(status -> documentsService.getDocuments(LOGIN.get(), TOKEN.get(), status.getValue(), 0, 0))
         .toList()
         .subscribeOn( Schedulers.computation() )
         .observeOn( AndroidSchedulers.mainThread() )
@@ -234,13 +235,15 @@ public class DataLoaderInterface {
     DocumentsService documentsService = retrofit.create(DocumentsService.class);
 
 
-    String[] filter_types = context.getResources().getStringArray(R.array.FILTER_TYPES_VALUE);
+//    String[] filter_types = context.getResources().getStringArray(R.array.FILTER_TYPES_VALUE);
+
+    Fields.Status[] new_filter_types = Fields.Status.values();
 
 
-    Observable<String> types = Observable.from(filter_types);
+    Observable<Fields.Status> types = Observable.from(new_filter_types);
     Observable<Documents> count = Observable
-      .from(filter_types)
-      .flatMap(type -> documentsService.getDocuments(LOGIN.get(), TOKEN.get(), type, 1000, 0));
+      .from(new_filter_types)
+      .flatMap(status -> documentsService.getDocuments(LOGIN.get(), TOKEN.get(), status.getValue(), 1000, 0));
 
 
     unsubscribe();
@@ -262,7 +265,7 @@ public class DataLoaderInterface {
                 String type = data.getType();
                 Timber.tag(TAG).d( "%s | %s", type, doc.getUid() );
 
-                jobManager.addJobInBackground(new SyncDocumentsJob(doc.getUid(), type), () -> {
+                jobManager.addJobInBackground(new SyncDocumentsJob( doc.getUid(), Fields.getStatus(type) ), () -> {
                   Timber.e("complete");
                 });
                 callback.onGetDocumentsInfoSuccess();

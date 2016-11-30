@@ -49,6 +49,8 @@
         </activity>
         <activity android:name=".views.activities.DocumentImageFullScreenActivity">
         </activity>
+        <activity android:name=".views.activities.DocumentInfocardFullScreenActivity">
+        </activity>
         <activity android:name=".views.activities.SettingsTemplatesActivity">
         </activity>
 

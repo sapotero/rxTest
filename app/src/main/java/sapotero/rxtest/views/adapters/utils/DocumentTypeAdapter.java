@@ -104,10 +104,14 @@ public class DocumentTypeAdapter extends BaseAdapter {
   public void updateCountByType(String uid) {
     String type = String.format("%.2s", uid);
 
+
     for (int i = 0; i < this.documents.size(); i++) {
-      if( Objects.equals(documents.get(i).getCount(), type) ){
-        documents.get(i).setValue(Integer.parseInt(documents.get(i).getValue()) + 1 );
-        documents.get(0).setValue(Integer.parseInt(documents.get(0).getValue()) + 1 );
+      int _int = Integer.valueOf(documents.get(i).getType());
+
+//      Timber.tag("updateCountByType").e("%s == %s", String.format("%02d", _int ) , Integer.valueOf(type));
+      if( Objects.equals( Integer.valueOf(documents.get(i).getType()) , Integer.valueOf(type)) ){
+        documents.get(i).setValue( Integer.parseInt(documents.get(i).getValue()) + 1 );
+        documents.get(0).setValue( Integer.parseInt(documents.get(0).getValue()) + 1 );
         notifyDataSetChanged();
         break;
       }

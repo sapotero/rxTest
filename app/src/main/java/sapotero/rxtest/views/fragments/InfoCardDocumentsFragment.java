@@ -55,6 +55,8 @@ import sapotero.rxtest.events.bus.FileDownloadedEvent;
 import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.views.activities.DocumentImageFullScreenActivity;
 import sapotero.rxtest.views.adapters.DocumentLinkAdapter;
+import sapotero.rxtest.views.views.utils.AnimationManager;
+import sapotero.rxtest.views.views.utils.DragPinchManager;
 import timber.log.Timber;
 
 public class InfoCardDocumentsFragment extends Fragment implements AdapterView.OnItemClickListener, GestureDetector.OnDoubleTapListener {
@@ -82,12 +84,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   @BindView(R.id.pdf_next) Button     mButtonNext;
   @BindView(R.id.documents_files) Spinner mDocumentList;
 
-
   @BindView(R.id.pageInfo) TextView pageInfo;
-
-
-
-
   @BindView(R.id.pdfView) PDFView pdfView;
 
   private int index;
@@ -132,6 +129,25 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     EsdApplication.getComponent(mContext).inject( this );
 
     loadSettings();
+
+
+    final GestureDetector gestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener() {
+      @Override
+      public boolean onDoubleTap(MotionEvent event) {
+        Image image = adapter.getItem(mDocumentList.getSelectedItemPosition());
+        String filename = String.format( "%s_%s", image.getMd5(), image.getTitle() );
+
+        Timber.tag("gestureDetector").i("filename: %s", filename);
+
+        Intent intent = new Intent(getContext(), DocumentImageFullScreenActivity.class);
+        intent.putExtra( "filename", filename );
+        getContext().startActivity(intent);
+
+        return true;
+      }
+    });
+
+    DragPinchManager pinch = new DragPinchManager( getContext(), pdfView, new AnimationManager(pdfView), mDocumentList);
 
     ArrayList<Image> documents = new ArrayList<Image>();
     adapter = new DocumentLinkAdapter(mContext, documents);
@@ -184,6 +200,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
           .password(null)
           .scrollHandle(null)
           .load();
+//        pdfView.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
 
 
 //        pdfViewPager = new PDFViewPager(mContext, file.getAbsolutePath() );
@@ -199,6 +216,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
       }
     });
+
 
     index = 0;
     if (null != savedInstanceState) {

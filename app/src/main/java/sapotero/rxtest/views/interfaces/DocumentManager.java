@@ -14,6 +14,7 @@ import okhttp3.OkHttpClient;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.db.requery.utils.Fields;
 import timber.log.Timber;
 
 public class DocumentManager {
@@ -35,7 +36,7 @@ public class DocumentManager {
   private String state;
   private String type;
 
-  private DocumentType document_type;
+//  private DocumentType document_type;
   Callback callback;
 
   public interface Callback {
@@ -51,7 +52,6 @@ public class DocumentManager {
   public DocumentManager(Context context) {
     this.context = context;
     EsdApplication.getComponent(context).inject(this);
-    document_type = new DocumentType(context);
     initialize();
   }
 
@@ -76,11 +76,11 @@ public class DocumentManager {
 
     if (document != null) {
 
-      String journal_type = document_type.getByUID( document.getUid() );
-      Timber.e( "JOURNAL_TYPE: %s" , journal_type);
+      Fields.Journal journal = Fields.getJournalByUid( document.getUid() );
+      Timber.tag(TAG).e( "JOURNAL_TYPE: %s" , journal.getType() );
 
       setState(document.getFilter());
-      setType( journal_type );
+      setType( String.valueOf(journal.getType()) );
     }
 
     callback.onGetStateSuccess();

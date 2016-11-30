@@ -22,11 +22,12 @@
         app:theme="@style/ToolbarColoredBackArrow"
         android:theme="@style/AlertDialog.AppCompat.Light"/>
 
-    <com.github.barteksc.pdfviewer.PDFView
-        android:id="@+id/document_image_fullscreen"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
 
+        <WebView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/fullscreen_web_infocard"
+            android:layout_margin="@dimen/date_offset">
 
+        </WebView>
 </LinearLayout>

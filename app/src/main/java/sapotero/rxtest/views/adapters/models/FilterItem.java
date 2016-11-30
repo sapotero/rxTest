@@ -9,9 +9,9 @@ public class FilterItem {
   public FilterItem(String name, String value, String count) {
     super();
 
-    this.count = count;
     this.name = name;
     this.value = value;
+    this.count = count;
 
   }
 

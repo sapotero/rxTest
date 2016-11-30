@@ -30,7 +30,7 @@ public class DocumentLinkAdapter extends BaseAdapter {
   }
 
   @Override
-  public Object getItem(int position) {
+  public Image getItem(int position) {
     return images.get(position);
   }
 

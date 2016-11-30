@@ -62,6 +62,7 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RSignerEntity;
+import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.bus.GetDocumentInfoEvent;
 import sapotero.rxtest.events.bus.MarkDocumentAsChangedJobEvent;
 import sapotero.rxtest.events.bus.UpdateDocumentJobEvent;
@@ -91,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
   @BindView(R.id.toolbar) Toolbar toolbar;
 
   @BindView(R.id.documentsRecycleView) RecyclerView rv;
-  @BindView(R.id.progressBar) View progressBar;
+  @BindView(R.id.progressBar) ProgressBar progressBar;
 
   @BindView(R.id.DOCUMENT_TYPE) Spinner DOCUMENT_TYPE_SELECTOR;
   @BindView(R.id.JOURNAL_TYPE) Spinner FILTER_TYPE_SELECTOR;
@@ -152,6 +153,7 @@ public class MainActivity extends AppCompatActivity {
   private Toast mToast;
   private Subscription updateDocumentCount;
   private Subscription updateOrganizations;
+  private Subscription loadFromDbQueryCount;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -450,10 +452,8 @@ public class MainActivity extends AppCompatActivity {
   private void setAdapters() {
 
     List<FilterItem> filters = new ArrayList<>();
-    String[] filter_types = getResources().getStringArray(R.array.FILTER_TYPES_VALUE);
-    String[] filter_names = getResources().getStringArray(R.array.FILTER_TYPES);
-    for (int i = 0; i < filter_types.length; i++) {
-      filters.add(new FilterItem(filter_names[i], filter_types[i], "0"));
+    for(Fields.Status status : Fields.Status.values()){
+      filters.add(new FilterItem( status.getName(), status.getValue(), "0"));
     }
 
     filter_adapter = new StatusAdapter(this, filters);
@@ -471,12 +471,16 @@ public class MainActivity extends AppCompatActivity {
     });
 
 
-    List<DocumentTypeItem> document_types = new ArrayList<>();
-    String[] document_types_name = getResources().getStringArray(R.array.JOURNAL_TYPES);
-    String[] document_types_value = getResources().getStringArray(R.array.JOURNAL_TYPES_VALUE);
+//    String[] document_types_name = getResources().getStringArray(R.array.JOURNAL_TYPES);
+//    String[] document_types_value = getResources().getStringArray(R.array.JOURNAL_TYPES_VALUE);
+//
+//    for (int i = 0; i < document_types_name.length; i++) {
+//      document_types.add(new DocumentTypeItem(document_types_name[i], document_types_value[i], 0));
+//    }
 
-    for (int i = 0; i < document_types_name.length; i++) {
-      document_types.add(new DocumentTypeItem(document_types_name[i], document_types_value[i], 0));
+    List<DocumentTypeItem> document_types = new ArrayList<>();
+    for(Fields.Journal journal : Fields.Journal.values()){
+      document_types.add(new DocumentTypeItem( journal.getName(), String.valueOf( journal.getType() ), 0));
     }
 
     document_type_adapter = new DocumentTypeAdapter(this, document_types);
@@ -515,13 +519,16 @@ public class MainActivity extends AppCompatActivity {
       .select(RDocumentEntity.UID)
       .get()
       .toObservable()
-      .subscribeOn(Schedulers.newThread())
+      .subscribeOn(Schedulers.io())
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(uid -> {
+
+        Timber.tag("updateDocumentCount").w( uid.toString() );
+
         document_type_adapter.updateCountByType( uid.get(0) );
       });
 
-    updateOrganizations();
+//    updateOrganizations();
   }
 
   private void updateOrganizations(){
@@ -561,27 +568,22 @@ public class MainActivity extends AppCompatActivity {
     progressBar.setVisibility(ProgressBar.VISIBLE);
 
     //    findOrganizations();
-    updateFilterAdapter();
-
     //    updateOrganizationAdapter();
 
-    int spinner_pos = DOCUMENT_TYPE_SELECTOR.getSelectedItemPosition();
+    updateFilterAdapter();
 
-    String[] document_type = getResources().getStringArray(R.array.JOURNAL_TYPES_VALUE);
-    String type = String.valueOf(document_type[spinner_pos]);
 
-    String[] document_title = getResources().getStringArray(R.array.JOURNAL_TYPES);
-    String title = String.valueOf(document_title[spinner_pos]);
+    Fields.Journal journal = Fields.Journal.INDEX[ DOCUMENT_TYPE_SELECTOR.getSelectedItemPosition() ];
+    String title = journal.getName();
+
     toolbar.setTitle(title);
 
-    Timber.d("DOCUMENT_TYPE_SELECTOR " + spinner_pos);
-    Timber.d("DOCUMENT_TYPE_SELECTOR " + type);
     RAdapter.clear();
+    Timber.d("%s - %s %s ", journal.getType(), journal.getValue(), journal.getName() );
 
     WhereAndOr<Result<RDocumentEntity>> query = dataStore
       .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.like(type + "%"));
-
+      .where(RDocumentEntity.UID.like( journal.getValue() + "%"));
 
     // favorites && control
     LogicalCondition<? extends Expression<Boolean>, ?> favorites_condition = null;
@@ -591,7 +593,7 @@ public class MainActivity extends AppCompatActivity {
     boolean control_button_value = control_buttons.getStates()[1];
 
     favorites_condition = favorites_button_value ? RDocumentEntity.CONTROL.eq(true) : RDocumentEntity.CONTROL.in(Arrays.asList(true, false));
-    control_condition = control_button_value ? RDocumentEntity.FAVORITES.eq(true) : RDocumentEntity.FAVORITES.in(Arrays.asList(true, false));
+    control_condition = control_button_value ? RDocumentEntity.FAVORITES.eq(true)   : RDocumentEntity.FAVORITES.in(Arrays.asList(true, false));
 
 
     if (favorites_button_value) {
@@ -605,7 +607,6 @@ public class MainActivity extends AppCompatActivity {
 
     // organizations
     boolean organization_filter = false;
-
     ArrayList<String> organizations = new ArrayList<String>();
     if (Arrays.asList(ORGANIZATION_SELECTOR.getSelected()).size() > 0) {
 
@@ -634,12 +635,22 @@ public class MainActivity extends AppCompatActivity {
     int filter_index = FILTER_TYPE_SELECTOR.getSelectedItemPosition();
     FilterItem filter_item = filter_adapter.getItem(filter_index);
 
-    Timber.tag(TAG).i(String.format("filter_name %s - ++", filter_item.getName()));
+    Timber.tag(TAG).i(String.format("filter_name %s - ++", filter_item.getValue()));
 
-    query = query.and(RDocumentEntity.FILTER.eq(filter_item.getValue()));
-
+    query = query.and(RDocumentEntity.FILTER.eq( Fields.Status.INDEX[ filter_index ].getValue()) );
 
     // filter
+
+
+
+//    Integer count = dataStore
+//      .count(RDocumentEntity.class)
+//      .where(RDocumentEntity.UID.like( journal.getValue() + "%"))
+//      .and(RDocumentEntity.FILTER.eq( Fields.Status.INDEX[ filter_index ].getValue()) )
+//      .get()
+//      .value();
+//    Timber.tag("loadFromDbQuery").e(" beforeLoad count: %s", count);
+
 
     if (loadFromDbQuery != null) {
       loadFromDbQuery.unsubscribe();
@@ -648,10 +659,11 @@ public class MainActivity extends AppCompatActivity {
 
     loadFromDbQuery = query.get()
       .toObservable()
-      .subscribeOn(Schedulers.newThread())
+      .subscribeOn(Schedulers.io())
       .observeOn(AndroidSchedulers.mainThread())
       .toList()
       .subscribe(docs -> {
+        Timber.tag("loadFromDbQuery").e("docs: %s", docs.size() );
         addToAdapterList(docs);
       });
 
@@ -661,6 +673,8 @@ public class MainActivity extends AppCompatActivity {
       documents_empty_list.setVisibility(View.VISIBLE);
       documents_empty_list.setText(getString(R.string.document_empty_list));
     }
+
+    Timber.tag("loadFromDbQuery").e(" afterLoad");
 
   }
 
@@ -736,22 +750,19 @@ public class MainActivity extends AppCompatActivity {
 
   private void updateFilterAdapter() {
 
-    int spinner_pos = DOCUMENT_TYPE_SELECTOR.getSelectedItemPosition();
+    Fields.Journal journal = Fields.Journal.INDEX[ DOCUMENT_TYPE_SELECTOR.getSelectedItemPosition() ];
 
-    String[] document_type = getResources().getStringArray(R.array.JOURNAL_TYPES_VALUE);
-    String type = String.valueOf(document_type[spinner_pos]);
-
-    String[] filter_types = getResources().getStringArray(R.array.FILTER_TYPES_VALUE);
-    for (int i = 0; i < filter_types.length; i++) {
+    for(Fields.Status status : Fields.Status.values()){
 
       Integer count = dataStore
         .count(RDocumentEntity.class)
-        .where(RDocumentEntity.UID.like(type + "%"))
-        .and(RDocumentEntity.FILTER.eq(filter_types[i]))
+        .where(RDocumentEntity.UID.like( journal.getValue() + "%"))
+        .and(RDocumentEntity.FILTER.eq( status.getValue()) )
         .get()
         .value();
 
-      filter_adapter.updateByValue(filter_types[i], count);
+      filter_adapter.updateByValue( status.getValue(), count);
+
     }
 
   }

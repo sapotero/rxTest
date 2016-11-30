@@ -1,14 +1,13 @@
 package sapotero.rxtest.views.activities;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.webkit.WebView;
 
+import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
-import com.github.barteksc.pdfviewer.PDFView;
-
-import java.io.File;
+import com.google.gson.Gson;
 
 import javax.inject.Inject;
 
@@ -18,10 +17,11 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import timber.log.Timber;
 
-public class DocumentImageFullScreenActivity extends AppCompatActivity {
+public class DocumentInfocardFullScreenActivity extends AppCompatActivity {
 
   @BindView(R.id.document_image_toolbar) Toolbar toolbar;
-  @BindView(R.id.document_image_fullscreen) PDFView pdfView;
+  @BindView(R.id.fullscreen_web_infocard) WebView webview;
+
 
   @Inject RxSharedPreferences settings;
 
@@ -32,39 +32,10 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity {
     setTheme(R.style.AppTheme);
     super.onCreate(savedInstanceState);
 
-    setContentView(R.layout.activity_document_image_full_screen);
+    setContentView(R.layout.activity_document_infocard_full_screen);
 
     ButterKnife.bind(this);
     EsdApplication.getComponent(this).inject(this);
-
-    Intent intent = getIntent();
-
-    if( intent.hasExtra("filename") ) {
-      String filename = intent.getStringExtra("filename");
-      File file = new File(getApplicationContext().getFilesDir(), filename);
-
-      pdfView
-        .fromFile(file)
-        .enableSwipe(true)
-        .enableDoubletap(true)
-        .defaultPage(0)
-        .swipeHorizontal(false)
-        .onLoad(nbPages -> {
-          Timber.tag(TAG).i(" onLoad");
-        })
-        .onError(t -> {
-          Timber.tag(TAG).i(" onError");
-        })
-        .onPageChange((page, pageCount) -> {
-          Timber.tag(TAG).i(" onPageChange");
-        })
-        .enableAnnotationRendering(false)
-        .password(null)
-        .scrollHandle(null)
-        .load();
-
-    }
-
 
     toolbar.setTitle("Просмотр документа");
     toolbar.setNavigationOnClickListener(v ->{
@@ -72,7 +43,22 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity {
       }
     );
 
+    setDocument();
+
   }
+
+  private void setDocument() {
+    Gson gson = new Gson();
+    Preference<String> data = settings.getString("document.infoCard");
+    String document = data.get();
+
+    String htmlData = "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />" + document;
+    webview.loadDataWithBaseURL("file:///android_asset/", htmlData, "text/html", "UTF-8", null);
+    webview.getSettings().setBuiltInZoomControls(true);
+    webview.getSettings().setDisplayZoomControls(true);
+
+  }
+
   @Override protected void onResume() {
     super.onResume();
     Timber.tag(TAG).i( " settings_username_host - " + settings.getString("settings_username_host").get() );
@@ -84,7 +70,6 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity {
 
   @Override protected void onDestroy() {
     super.onDestroy();
-//    mAttacher.cleanup();
   }
 
 }
