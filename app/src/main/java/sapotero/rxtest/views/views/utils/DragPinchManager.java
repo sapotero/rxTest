@@ -101,14 +101,11 @@ public class DragPinchManager implements GestureDetector.OnGestureListener, Gest
     if (adapter.getCount() > 0){
       int position = spinner.getSelectedItemPosition();
 
-      Image image = adapter.getItem(spinner.getSelectedItemPosition());
-      String filename = String.format( "%s_%s", image.getMd5(), image.getTitle() );
-
       Type listType = new TypeToken<ArrayList<Image>>() {}.getType();
 
       Intent intent = new Intent( context, DocumentImageFullScreenActivity.class);
       intent.putExtra( "files", new Gson().toJson( adapter.getItems(), listType ) );
-      intent.putExtra( "filename", filename );
+      intent.putExtra( "index", spinner.getSelectedItemPosition() );
       context.startActivity(intent);
 
     }

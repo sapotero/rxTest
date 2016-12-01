@@ -523,7 +523,7 @@ public class MainActivity extends AppCompatActivity {
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(uid -> {
 
-        Timber.tag("updateDocumentCount").w( uid.toString() );
+        Timber.tag("updateDocument").w( uid.toString() );
 
         document_type_adapter.updateCountByType( uid.get(0) );
       });

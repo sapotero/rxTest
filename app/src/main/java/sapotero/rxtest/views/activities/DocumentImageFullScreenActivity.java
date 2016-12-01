@@ -57,6 +57,11 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity {
 
     Intent intent = getIntent();
 
+    if( intent.hasExtra("index") ) {
+//      index = intent.getIntExtra("index");
+      index = intent.getIntExtra("index", 0);
+    }
+
     if( intent.hasExtra("files") ) {
 
       TypeToken<ArrayList<Image>> token = new TypeToken<ArrayList<Image>>() {};
@@ -65,39 +70,11 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity {
       Timber.tag(TAG).d("FILES: %s", files.size() );
     }
 
-    if( intent.hasExtra("filename") ) {
-      String filename = intent.getStringExtra("filename");
-      File file = new File(getApplicationContext().getFilesDir(), filename);
-
-      pdfView
-        .fromFile(file)
-        .enableSwipe(true)
-        .enableDoubletap(true)
-        .defaultPage(0)
-        .swipeHorizontal(false)
-        .onLoad(nbPages -> {
-          Timber.tag(TAG).i(" onLoad");
-        })
-        .onError(t -> {
-          Timber.tag(TAG).i(" onError");
-        })
-        .onPageChange((page, pageCount) -> {
-          Timber.tag(TAG).i(" onPageChange");
-          updatePageCount();
-        })
-        .enableAnnotationRendering(false)
-        .password(null)
-        .scrollHandle(null)
-        .load();
-
-      updatePageCount();
-
-    }
+    updateDocument();
 
     toolbar.setTitleTextColor(getResources().getColor(R.color.md_grey_100));
     toolbar.setSubtitleTextColor(getResources().getColor(R.color.md_grey_400));
     toolbar.setContentInsetStartWithNavigation(250);
-    toolbar.setTitle("Просмотр электронного образа");
     toolbar.setNavigationOnClickListener(v ->{
         finish();
       }
@@ -105,22 +82,78 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity {
 
   }
 
+  public void updateDocument(){
+    setPdfPreview();
+    updateDocumentCount();
+    updatePageCount();
+    updateTitle();
+
+  }
+
+  private void setPdfPreview() {
+    Image image = files.get(index);
+    File file = new File(getApplicationContext().getFilesDir(), String.format( "%s_%s", image.getMd5(), image.getTitle() ));
+
+    pdfView
+      .fromFile( file )
+      .enableSwipe(true)
+      .enableDoubletap(true)
+      .defaultPage(0)
+      .swipeHorizontal(false)
+      .onLoad(nbPages -> {
+        Timber.tag(TAG).i(" onLoad");
+      })
+      .onError(t -> {
+        Timber.tag(TAG).i(" onError");
+      })
+      .onPageChange((page, pageCount) -> {
+        Timber.tag(TAG).i(" onPageChange");
+        updatePageCount();
+      })
+      .enableAnnotationRendering(false)
+      .password(null)
+      .scrollHandle(null)
+      .load();
+  }
+
   public void updateDocumentCount(){
-    document_counter.setText( String.format("%s из %s", index, files.size()) );
+    document_counter.setText( String.format("%s из %s", index + 1, files.size()) );
   }
 
   public void updatePageCount(){
     page_counter.setText( String.format("%s из %s страниц", pdfView.getCurrentPage() + 1, pdfView.getPageCount()) );
   }
 
+  public void updateTitle(){
+    toolbar.setTitle("Просмотр электронного образа");
+    toolbar.setSubtitle( files.get(index).getTitle() );
+  }
+
+
   @OnClick(R.id.pdf_fullscreen_prev_document)
   public void setLeftArrowArrow() {
-    
+    Timber.tag(TAG).i( "BEFORE %s - %s", index, files.size() );
+    if ( index <= 0 ){
+      index = files.size()-1;
+    } else {
+      index--;
+    }
+    Timber.tag(TAG).i( "AFTER %s - %s", index, files.size() );
+
+    updateDocument();
   }
 
   @OnClick(R.id.pdf_fullscreen_next_document)
   public void setRightArrow() {
-//    showNextType(true);
+    Timber.tag(TAG).i( "BEFORE %s - %s", index, files.size() );
+    if ( index >= files.size()-1 ){
+      index = 0;
+    } else {
+      index++;
+    }
+    Timber.tag(TAG).i( "AFTER %s - %s", index, files.size() );
+
+    updateDocument();
   }
 
 
