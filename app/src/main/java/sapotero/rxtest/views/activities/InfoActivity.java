@@ -10,24 +10,22 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Base64;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.Menu;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
-import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -45,10 +43,6 @@ import io.requery.Persistable;
 import io.requery.query.Tuple;
 import io.requery.rx.SingleEntityStore;
 import okhttp3.OkHttpClient;
-import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
-import retrofit2.converter.gson.GsonConverterFactory;
-import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
@@ -63,14 +57,14 @@ import sapotero.rxtest.db.requery.models.decisions.RPerformer;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.events.bus.MassInsertDoneEvent;
 import sapotero.rxtest.events.bus.SetActiveDecisonEvent;
-import sapotero.rxtest.jobs.rx.SetActiveDecisionJob;
-import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
 import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.views.adapters.DecisionAdapter;
+import sapotero.rxtest.views.adapters.DecisionSpinnerAdapter;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
+import sapotero.rxtest.views.adapters.models.DecisionSpinnerItem;
 import sapotero.rxtest.views.fragments.InfoCardDocumentsFragment;
 import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
 import sapotero.rxtest.views.interfaces.DocumentManager;
@@ -80,8 +74,17 @@ import timber.log.Timber;
 
 public class InfoActivity extends AppCompatActivity implements InfoCardDocumentsFragment.OnFragmentInteractionListener, InfoCardWebViewFragment.OnFragmentInteractionListener, DocumentManager.Callback, OperationManager.Callback {
 
-  @BindView(R.id.desigions_recycler_view) RecyclerView desigions_recycler_view;
-  @BindView(R.id.desigion_view)           LinearLayout desigion_view;
+//  @BindView(R.id.desigions_recycler_view) RecyclerView desigions_recycler_view;
+//  @BindView(R.id.desigion_view)           LinearLayout desigion_view;
+
+  @BindView(R.id.activity_info_decision_preview_head) LinearLayout preview_head;
+  @BindView(R.id.activity_info_decision_preview_body) LinearLayout preview_body;
+  @BindView(R.id.activity_info_decision_preview_bottom) LinearLayout preview_bottom;
+
+
+  @BindView(R.id.activity_info_decision_spinner) Spinner decision_spinner;
+
+
 
   @BindView(R.id.tab_main) ViewPager viewPager;
   @BindView(R.id.tabs) TabLayout tabLayout;
@@ -114,6 +117,9 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
   private Preference<String> HOST;
   private Preview preview;
   private OperationManager operationManager;
+//  private ArrayList<Decision> decisions_list = new ArrayList<>();
+  private ArrayList<DecisionSpinnerItem> decisionSpinnerItems  = new ArrayList<>();;
+  private DecisionSpinnerAdapter decision_spinner_adapter;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -144,9 +150,24 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
     );
 
     loadSettings();
-
     setToolbar();
-    loadDocuments();
+
+
+    decision_spinner_adapter = new DecisionSpinnerAdapter(this, decisionSpinnerItems);
+    decision_spinner.setAdapter(decision_spinner_adapter);
+    decision_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+      @Override
+      public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+        if (position > 0){
+          Timber.tag(TAG).w( "name: %s", decision_spinner_adapter.getItem(position).getName() );
+          preview.show( decision_spinner_adapter.getItem(position).getDecision() );
+        }
+      }
+
+      @Override
+      public void onNothingSelected(AdapterView<?> adapterView) {
+      }
+    });
   }
 
   private void setToolbar() {
@@ -324,9 +345,11 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
 
         if ( doc.getDecisions().size() >= 1 ){
 
-          desigions_recycler_view.setLayoutManager(new LinearLayoutManager(this));
+          decision_spinner_adapter.add( new DecisionSpinnerItem(null, "Всего резолюций", doc.getDecisions().size() ) );
 
-          List<Decision> decisions_list = new ArrayList<>();
+//          desigions_recycler_view.setLayoutManager(new LinearLayoutManager(this));
+
+//          decisions_list = new ArrayList<>();
 
 
 
@@ -378,28 +401,30 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
               raw_decision.getBlocks().add(raw_block);
             }
 
-            decisions_list.add(raw_decision);
+//            decisions_list.add(raw_decision);
+
+            decision_spinner_adapter.add( new DecisionSpinnerItem( raw_decision, raw_decision.getSignerBlankText(), raw_decision.getDate() ) );
+
           }
 
-          decision_adapter = new DecisionAdapter(decisions_list, this, desigions_recycler_view);
-          desigions_recycler_view.setAdapter(decision_adapter);
+//          decision_adapter = new DecisionAdapter(decisions_list, this, desigions_recycler_view);
+//          desigions_recycler_view.setAdapter(decision_adapter);
 
           // если есть резолюции, то отобразить первую
-          if ( decision_adapter.getItemCount() > 0 ) {
+          if ( decision_spinner_adapter.size() > 0 ) {
 //            jobManager.addJobInBackground( new SetActiveDecisionJob(0) );
-            Timber.w("decisions_list.size() > 0");
-            preview.show( decision_adapter.getItem(0) );
+            Timber.w("decisions_list first:  %s", decision_spinner_adapter.getItem(1).getDecision().getLetterhead() );
+            preview.show( decision_spinner_adapter.getItem(1).getDecision() );
           } else {
             Timber.w("decisions_list.size() < 0");
             preview.showEmpty();
           }
 
-          desigions_recycler_view.setLayoutManager(new LinearLayoutManager(this));
-
-          RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
-          itemAnimator.setAddDuration(10);
-          itemAnimator.setRemoveDuration(10);
-          desigions_recycler_view.setItemAnimator(itemAnimator);
+//          desigions_recycler_view.setLayoutManager(new LinearLayoutManager(this));
+//          RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
+//          itemAnimator.setAddDuration(10);
+//          itemAnimator.setRemoveDuration(10);
+//          desigions_recycler_view.setItemAnimator(itemAnimator);
 
         }
 
@@ -416,85 +441,85 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
   }
 
   private void loadFromJson(){
-    HOST = settings.getString("settings_username_host");
-
-    Retrofit retrofit = new Retrofit.Builder()
-      .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-      .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl(HOST.get() + "v3/documents/")
-      .client(okHttpClient)
-      .build();
-
-    DocumentService documentService = retrofit.create( DocumentService.class );
-
-    Observable<DocumentInfo> info = documentService.getInfo(
-      UID.get(),
-      LOGIN.get(),
-      TOKEN.get()
-    );
-
-    info.subscribeOn( Schedulers.newThread() )
-      .observeOn( AndroidSchedulers.mainThread() )
-      .subscribe(
-        data -> {
-          DOCUMENT = data;
-
-          Gson gson = new Gson();
-
-          Preference<String> documentNumber = settings.getString("document.number");
-          documentNumber.set( DOCUMENT.getRegistrationNumber() );
-
-          Preference<String> documentJson = settings.getString("document.json");
-          documentJson.set( gson.toJson(DOCUMENT) );
-
-          Preference<String> documentImages = settings.getString("document.images");
-          documentImages.set( gson.toJson( DOCUMENT.getImages() ) );
-
-          toolbar.setTitle( data.getTitle() );
-
-          if ( data.getDecisions().size() >= 1 ){
-
-            desigions_recycler_view.setLayoutManager(new LinearLayoutManager(this));
-
-            List<Decision> decisions_list = new ArrayList<>();
-            for (Decision decision: data.getDecisions()) {
-              decisions_list.add(decision);
-            }
-
-            decision_adapter = new DecisionAdapter(decisions_list, this, desigions_recycler_view);
-            desigions_recycler_view.setAdapter(decision_adapter);
-
-            // если есть резолюции, то отобразить первую
-            if ( decisions_list.size() > 0 ) {
-              try {
-                jobManager.addJobInBackground( new SetActiveDecisionJob(0) );
-              } catch ( Exception e){
-                Timber.tag(TAG + " massInsert error").v( e );
-              }
-            }
-
-            desigions_recycler_view.setLayoutManager(new LinearLayoutManager(this));
-
-            RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
-            itemAnimator.setAddDuration(10);
-            itemAnimator.setRemoveDuration(10);
-            desigions_recycler_view.setItemAnimator(itemAnimator);
-
-          }
-
-          if ( data.getInfoCard() != null ){
-            CARD = Base64.decode( data.getInfoCard().getBytes(), Base64.DEFAULT );
-          } else {
-            CARD = Base64.decode( "".getBytes(), Base64.DEFAULT );
-          }
-          Preference<String> infocard = settings.getString("document.infoCard");
-          infocard.set( new String(CARD , StandardCharsets.UTF_8) );
-
-        },
-        error -> {
-          Log.d( "++_ERROR", error.getMessage() );
-          Toast.makeText( this, error.getMessage(), Toast.LENGTH_SHORT).show();
-        });
+//    HOST = settings.getString("settings_username_host");
+//
+//    Retrofit retrofit = new Retrofit.Builder()
+//      .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+//      .addConverterFactory(GsonConverterFactory.create())
+//      .baseUrl(HOST.get() + "v3/documents/")
+//      .client(okHttpClient)
+//      .build();
+//
+//    DocumentService documentService = retrofit.create( DocumentService.class );
+//
+//    Observable<DocumentInfo> info = documentService.getInfo(
+//      UID.get(),
+//      LOGIN.get(),
+//      TOKEN.get()
+//    );
+//
+//    info.subscribeOn( Schedulers.newThread() )
+//      .observeOn( AndroidSchedulers.mainThread() )
+//      .subscribe(
+//        data -> {
+//          DOCUMENT = data;
+//
+//          Gson gson = new Gson();
+//
+//          Preference<String> documentNumber = settings.getString("document.number");
+//          documentNumber.set( DOCUMENT.getRegistrationNumber() );
+//
+//          Preference<String> documentJson = settings.getString("document.json");
+//          documentJson.set( gson.toJson(DOCUMENT) );
+//
+//          Preference<String> documentImages = settings.getString("document.images");
+//          documentImages.set( gson.toJson( DOCUMENT.getImages() ) );
+//
+//          toolbar.setTitle( data.getTitle() );
+//
+//          if ( data.getDecisions().size() >= 1 ){
+//
+//            desigions_recycler_view.setLayoutManager(new LinearLayoutManager(this));
+//
+//            List<Decision> decisions_list = new ArrayList<>();
+//            for (Decision decision: data.getDecisions()) {
+//              decisions_list.add(decision);
+//            }
+//
+//            decision_adapter = new DecisionAdapter(decisions_list, this, desigions_recycler_view);
+//            desigions_recycler_view.setAdapter(decision_adapter);
+//
+//            // если есть резолюции, то отобразить первую
+//            if ( decisions_list.size() > 0 ) {
+//              try {
+//                jobManager.addJobInBackground( new SetActiveDecisionJob(0) );
+//              } catch ( Exception e){
+//                Timber.tag(TAG + " massInsert error").v( e );
+//              }
+//            }
+//
+//            desigions_recycler_view.setLayoutManager(new LinearLayoutManager(this));
+//
+//            RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
+//            itemAnimator.setAddDuration(10);
+//            itemAnimator.setRemoveDuration(10);
+//            desigions_recycler_view.setItemAnimator(itemAnimator);
+//
+//          }
+//
+//          if ( data.getInfoCard() != null ){
+//            CARD = Base64.decode( data.getInfoCard().getBytes(), Base64.DEFAULT );
+//          } else {
+//            CARD = Base64.decode( "".getBytes(), Base64.DEFAULT );
+//          }
+//          Preference<String> infocard = settings.getString("document.infoCard");
+//          infocard.set( new String(CARD , StandardCharsets.UTF_8) );
+//
+//        },
+//        error -> {
+//          Log.d( "++_ERROR", error.getMessage() );
+//          Toast.makeText( this, error.getMessage(), Toast.LENGTH_SHORT).show();
+//        });
   }
 
   private void setTabContent() {
@@ -581,7 +606,7 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
   @Override
   protected void onResume() {
     super.onResume();
-    loadFromDb();
+    loadDocuments();
   }
 
 
@@ -620,7 +645,9 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
     }
 
     private void clear(){
-      desigion_view.removeAllViews();
+      preview_head.removeAllViews();
+      preview_body.removeAllViews();
+      preview_bottom.removeAllViews();
     };
 
     private void show( Decision decision ){
@@ -677,7 +704,8 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
       LinearLayout relativeSigner = new LinearLayout(context);
       relativeSigner.setOrientation(LinearLayout.VERTICAL);
       relativeSigner.setVerticalGravity( Gravity.BOTTOM );
-      relativeSigner.setMinimumHeight(350);
+      relativeSigner.setPadding(0,0,0,0);
+//      relativeSigner.setMinimumHeight(350);
       LinearLayout.LayoutParams relativeSigner_params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
       relativeSigner_params.height = LinearLayout.LayoutParams.WRAP_CONTENT;
       relativeSigner.setLayoutParams( relativeSigner_params );
@@ -687,7 +715,7 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
 
       LinearLayout signer_view = new LinearLayout(context);
       signer_view.setOrientation(LinearLayout.VERTICAL);
-      signer_view.setPadding(0,40,0,0);
+//      signer_view.setPadding(0,0,0,0);
 
       if ( showPosition ){
         TextView signerPositionView = new TextView(context);
@@ -733,7 +761,7 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
       relativeSigner.addView( date_and_number_view );
 
 
-      desigion_view.addView( relativeSigner );
+      preview_bottom.addView( relativeSigner );
     }
 
     private void printUrgency(String urgency) {
@@ -748,7 +776,7 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
       params.setMargins(0,0,0,10);
       urgencyView.setLayoutParams(params);
 
-      desigion_view.addView( urgencyView );
+      preview_head.addView( urgencyView );
     }
 
     private void printLetterHead(String letterhead) {
@@ -756,7 +784,7 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
       letterHead.setGravity(Gravity.CENTER);
       letterHead.setText( letterhead );
       letterHead.setTextColor( Color.BLACK );
-      desigion_view.addView( letterHead );
+      preview_head.addView( letterHead );
 
       TextView delimiter = new TextView(context);
       delimiter.setGravity(Gravity.CENTER);
@@ -768,7 +796,7 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
       params.setMargins(50, 10, 50, 10);
       delimiter.setLayoutParams(params);
 
-      desigion_view.addView( delimiter );
+      preview_head.addView( delimiter );
     }
 
     private void printBlockText(String text) {
@@ -780,7 +808,7 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
       params.setMargins(0, 10, 0, 10);
       block_view.setLayoutParams(params);
 
-      desigion_view.addView( block_view );
+      preview_body.addView( block_view );
     }
 
     private void printAppealText( Block block ) {
@@ -816,7 +844,7 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
       blockAppealView.setTextColor( Color.BLACK );
       blockAppealView.setTextSize( TypedValue.COMPLEX_UNIT_SP, 12 );
 
-      desigion_view.addView( blockAppealView );
+      preview_body.addView( blockAppealView );
     }
 
     private void printBlockPerformers(List<Performer> performers, Boolean toFamiliarization, Integer number) {
@@ -847,7 +875,7 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
       }
 
 
-      desigion_view.addView( users_view );
+      preview_body.addView( users_view );
     }
 
 

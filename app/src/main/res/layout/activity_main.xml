@@ -169,6 +169,7 @@
                 android:layout_marginEnd="@dimen/half_date_offset"
                 />
 
+            <!--<RecyclerView-->
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/documentsRecycleView"
                 android:scrollbars="vertical"

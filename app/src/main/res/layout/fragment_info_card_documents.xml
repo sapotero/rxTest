@@ -96,7 +96,9 @@
         android:layout_height="wrap_content"
         android:measureWithLargestChild="true"
         android:layout_alignParentBottom="true"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:background="@drawable/pdf_fullscreen"
+        >
 
         <Spinner
             android:id="@+id/documents_files"

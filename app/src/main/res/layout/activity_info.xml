@@ -50,42 +50,63 @@
                 />
 
             <!--android:background="@color/cardview_light_background"-->
-            <android.support.v4.widget.NestedScrollView
+            <LinearLayout
+                android:background="@drawable/corner_background"
+                android:id="@+id/desigion_view_root"
+                android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-
+                android:layout_height="582dp"
+                android:padding="@dimen/date_offset"
                 >
 
 
+                <!--<android.support.v7.widget.RecyclerView-->
+                    <!--android:id="@+id/desigions_recycler_view"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_marginTop="@dimen/date_offset"-->
+                    <!--android:background="@drawable/selector_row"-->
+                    <!--/>-->
+
                 <LinearLayout
-                    android:id="@+id/desigion_view_root"
+                    android:id="@+id/activity_info_decision_preview_head"
                     android:orientation="vertical"
                     android:layout_width="match_parent"
-                    android:layout_height="300dp"
-                    >
+                    android:layout_height="64dp">
+
+                </LinearLayout>
+
+                <ScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="420dp">
 
                     <LinearLayout
-                        android:background="@drawable/corner_background"
-                        android:id="@+id/desigion_view"
-                        android:orientation="vertical"
-                        android:layout_width="match_parent"
-                        android:paddingLeft="@dimen/date_offset"
-                        android:paddingRight="@dimen/date_offset"
-                        android:paddingBottom="@dimen/date_offset"
-                        android:layout_margin="@dimen/half_date_offset"
-                        android:minHeight="420dp"
-                        android:layout_height="match_parent"
-                        />
-
-                    <android.support.v7.widget.RecyclerView
-                        android:id="@+id/desigions_recycler_view"
+                        android:id="@+id/activity_info_decision_preview_body"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/date_offset"
-                        android:background="@drawable/selector_row"
-                        />
+                        android:orientation="vertical"/>
+                </ScrollView>
+
+                <LinearLayout
+                    android:id="@+id/activity_info_decision_preview_bottom"
+                    android:orientation="vertical"
+                    android:layout_gravity="bottom"
+                    android:gravity="bottom"
+                    android:layout_width="match_parent"
+                    android:layout_height="64dp">
                 </LinearLayout>
-            </android.support.v4.widget.NestedScrollView>
+            </LinearLayout>
+
+
+            <Spinner
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:id="@+id/activity_info_decision_spinner"
+                android:layout_weight="1"
+                android:background="@drawable/spinner_journal_background"
+                android:padding="3dp"
+                android:layout_marginTop="@dimen/date_offset"
+                />
 
         </LinearLayout>
 

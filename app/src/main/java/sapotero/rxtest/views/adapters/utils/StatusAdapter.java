@@ -66,8 +66,8 @@ public class StatusAdapter extends BaseAdapter {
 
     FilterItem filterItem = getFilterItem(position);
 
-    ( (TextView) view.findViewById(R.id.filter_name)  ).setText( filterItem.getName()  );
-    ( (TextView) view.findViewById(R.id.filter_count) ).setText( filterItem.getCount() );
+    ( (TextView) view.findViewById(R.id.decision_name)  ).setText( filterItem.getName()  );
+    ( (TextView) view.findViewById(R.id.decision_date) ).setText( filterItem.getCount() );
 
     return view;
   }
