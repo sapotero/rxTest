@@ -82,4 +82,8 @@ public class DecisionSpinnerAdapter extends BaseAdapter {
   public int size() {
     return decisions.size();
   }
+
+  public void clear() {
+    this.decisions.clear();
+  }
 }

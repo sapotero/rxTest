@@ -17,6 +17,7 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
@@ -39,6 +40,7 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import io.requery.Persistable;
 import io.requery.query.Tuple;
 import io.requery.rx.SingleEntityStore;
@@ -65,6 +67,7 @@ import sapotero.rxtest.views.adapters.DecisionAdapter;
 import sapotero.rxtest.views.adapters.DecisionSpinnerAdapter;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.adapters.models.DecisionSpinnerItem;
+import sapotero.rxtest.views.dialogs.DecisionMagniferFragment;
 import sapotero.rxtest.views.fragments.InfoCardDocumentsFragment;
 import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
 import sapotero.rxtest.views.interfaces.DocumentManager;
@@ -81,6 +84,8 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
   @BindView(R.id.activity_info_decision_preview_body) LinearLayout preview_body;
   @BindView(R.id.activity_info_decision_preview_bottom) LinearLayout preview_bottom;
 
+
+  @BindView(R.id.activity_info_button_magnifer) ImageButton magnifer_button;
 
   @BindView(R.id.activity_info_decision_spinner) Spinner decision_spinner;
 
@@ -143,11 +148,11 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
     operationManager = new OperationManager(this);
     operationManager.registerCallBack(this);
 
-    Timber.w("documentManager:\nUID: %s\nstate: %s\ntype: %s\n\n",
-      documentManager.getCurrentDocumentNumber(),
-      documentManager.getState(),
-      documentManager.getType()
-    );
+//    Timber.w("documentManager:\nUID: %s\nstate: %s\ntype: %s\n\n",
+//      documentManager.getCurrentDocumentNumber(),
+//      documentManager.getState(),
+//      documentManager.getType()
+//    );
 
     loadSettings();
     setToolbar();
@@ -314,13 +319,13 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
 
   private void loadDocuments() {
 
-    setTabContent();
 
     if ( documentExist( UID.get() ) ){
       loadFromDb();
     } else {
       loadFromJson();
     }
+    setTabContent();
 
   }
 
@@ -345,6 +350,7 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
 
         if ( doc.getDecisions().size() >= 1 ){
 
+          decision_spinner_adapter.clear();
           decision_spinner_adapter.add( new DecisionSpinnerItem(null, "Всего резолюций", doc.getDecisions().size() ) );
 
 //          desigions_recycler_view.setLayoutManager(new LinearLayoutManager(this));
@@ -524,26 +530,33 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
 
   private void setTabContent() {
 
-    tabLayout.addTab(tabLayout.newTab().setText("Документ"));
-    tabLayout.addTab(tabLayout.newTab().setText("Инфокарточка"));
-    tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
-    final TabPagerAdapter adapter = new TabPagerAdapter (getSupportFragmentManager(), tabLayout.getTabCount());
-    viewPager.setAdapter(adapter);
-    tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-      @Override
-      public void onTabSelected(TabLayout.Tab tab) {
-        viewPager.setCurrentItem(tab.getPosition());
-      }
+    if ( viewPager.getAdapter() == null ){
+      tabLayout.addTab(tabLayout.newTab().setText("Документ"));
+      tabLayout.addTab(tabLayout.newTab().setText("Инфокарточка"));
+      tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
-      @Override
-      public void onTabUnselected(TabLayout.Tab tab) {
-      }
+      TabPagerAdapter adapter = new TabPagerAdapter (getSupportFragmentManager(), tabLayout.getTabCount());
 
-      @Override
-      public void onTabReselected(TabLayout.Tab tab) {
-      }
-    });
+      Timber.tag(TAG).e("adapter %s ", adapter.getCount() );
+      viewPager.setAdapter(adapter);
+
+      tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+        @Override
+        public void onTabSelected(TabLayout.Tab tab) {
+          viewPager.setCurrentItem(tab.getPosition());
+        }
+
+        @Override
+        public void onTabUnselected(TabLayout.Tab tab) {
+        }
+
+        @Override
+        public void onTabReselected(TabLayout.Tab tab) {
+        }
+      });
+    }
+
   }
 
 
@@ -609,6 +622,26 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
     loadDocuments();
   }
 
+  @OnClick(R.id.activity_info_button_magnifer)
+  public void magnifer(){
+
+    DecisionMagniferFragment magnifer = new DecisionMagniferFragment();
+    if ( decision_spinner_adapter.size() > 0 ){
+      DecisionSpinnerItem decision;
+
+      if (decision_spinner.getSelectedItemPosition() == 0){
+        decision = decision_spinner_adapter.getItem(1);
+      } else {
+        decision = decision_spinner_adapter.getItem( decision_spinner.getSelectedItemPosition() );
+      }
+
+      magnifer.setDecision( decision );
+      magnifer.setRegNumber( preview.getRegNumber() );
+    }
+
+    magnifer.show( getFragmentManager(), "DecisionMagniferFragment");
+  }
+
 
 
   /* DocumentManager.Callback */
@@ -635,10 +668,11 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
     Timber.tag("OpManagerCallback").i("onExecuteSuccess");
   }
 
-  class Preview{
+  public class Preview{
 
     private final Context context;
     private String TAG = this.getClass().getSimpleName();
+    private String reg_number;
 
     public Preview(InfoActivity infoActivity) {
       this.context = infoActivity;
@@ -683,13 +717,16 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
         }
       }
 
-      Tuple doc = dataStore
-        .select(RDocumentEntity.REGISTRATION_NUMBER)
-        .where(RDocumentEntity.UID.eq(UID.get()))
-        .and(RDocumentEntity.INFO_CARD.ne(""))
-        .get().first();
+      if (reg_number == null){
+        Tuple doc = dataStore
+          .select(RDocumentEntity.REGISTRATION_NUMBER)
+          .where(RDocumentEntity.UID.eq(UID.get()))
+          .and(RDocumentEntity.INFO_CARD.ne(""))
+          .get().first();
+        reg_number = doc.get(0);
+      }
 
-      printSigner( decision.getShowPosition(), decision.getSignerBlankText(), decision.getSignerPositionS(), decision.getDate(), doc.get(0)  );
+      printSigner( decision.getShowPosition(), decision.getSignerBlankText(), decision.getSignerPositionS(), decision.getDate(), reg_number  );
     }
 
     private void showEmpty(){
@@ -879,5 +916,8 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
     }
 
 
+    public String getRegNumber() {
+      return reg_number;
+    }
   }
 }

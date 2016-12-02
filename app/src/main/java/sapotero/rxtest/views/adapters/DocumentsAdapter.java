@@ -141,6 +141,9 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
       Preference<String> rxUid = rxPreferences.getString("info.uid");
       rxUid.set( item.getUid() );
 
+      Preference<String> rxReg = rxPreferences.getString("info.regnumber");
+      rxReg.set( item.getRegistrationNumber() );
+
       Preference<String> rxStatus = rxPreferences.getString("info.status");
       rxStatus.set( item.getStatusCode() );
 
