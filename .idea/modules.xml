@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/RxTest.iml" filepath="$PROJECT_DIR$/RxTest.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/org.eclipse.paho.android.service-release/org.eclipse.paho.android.service-release.iml" filepath="$PROJECT_DIR$/org.eclipse.paho.android.service-release/org.eclipse.paho.android.service-release.iml" />
     </modules>
   </component>
 </project>

@@ -48,8 +48,6 @@ dependencies {
     apt 'com.google.dagger:dagger-compiler:2.7'
 }
 
-
-
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
@@ -137,6 +135,8 @@ dependencies {
     compile 'com.facebook.stetho:stetho:1.4.1'
     compile 'com.facebook.stetho:stetho-okhttp3:1.4.1'
     /*debug*/
+
+    compile project(':org.eclipse.paho.android.service-release');
 }
 
 
@@ -149,6 +149,8 @@ dependencies {
 }
 allprojects {
     repositories {
-        maven { url "https://jitpack.io" }
+        maven {
+            url "https://jitpack.io"
+        }
     }
 }
