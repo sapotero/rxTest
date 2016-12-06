@@ -57,9 +57,9 @@ public class FromTheReport extends AbstractCommand {
   private void loadSettings(){
     LOGIN = settings.getString("login");
     TOKEN = settings.getString("token");
-    UID   = settings.getString("info.uid");
+    UID   = settings.getString("main_menu.uid");
     HOST  = settings.getString("settings_username_host");
-    STATUS_CODE = settings.getString("info.status");
+    STATUS_CODE = settings.getString("main_menu.status");
   }
 
   @Override

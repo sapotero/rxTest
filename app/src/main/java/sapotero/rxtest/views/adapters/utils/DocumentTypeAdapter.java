@@ -58,7 +58,7 @@ public class DocumentTypeAdapter extends BaseAdapter {
 
 
     ( (TextView) view.findViewById(R.id.document_type_name)  ).setText( item.getName()  );
-    ( (TextView) view.findViewById(R.id.document_type_count) ).setText( item.getValue() );
+//    ( (TextView) view.findViewById(R.id.document_type_count) ).setText( item.getValue() );
 
     return view;
   }
@@ -105,17 +105,17 @@ public class DocumentTypeAdapter extends BaseAdapter {
     String type = String.format("%.2s", uid);
 
 
-    for (int i = 0; i < this.documents.size(); i++) {
-      int _int = Integer.valueOf(documents.get(i).getType());
-
-//      Timber.tag("updateCountByType").e("%s == %s", String.format("%02d", _int ) , Integer.valueOf(type));
-      if( Objects.equals( Integer.valueOf(documents.get(i).getType()) , Integer.valueOf(type)) ){
-        documents.get(i).setValue( Integer.parseInt(documents.get(i).getValue()) + 1 );
-        documents.get(0).setValue( Integer.parseInt(documents.get(0).getValue()) + 1 );
-        notifyDataSetChanged();
-        break;
-      }
-    }
+//    for (int i = 0; i < this.documents.size(); i++) {
+//      int _int = Integer.valueOf(documents.get(i).getType());
+//
+////      Timber.tag("updateCountByType").e("%s == %s", String.format("%02d", _int ) , Integer.valueOf(type));
+//      if( Objects.equals( Integer.valueOf(documents.get(i).getType()) , Integer.valueOf(type)) ){
+//        documents.get(i).setValue( Integer.parseInt(documents.get(i).getValue()) + 1 );
+//        documents.get(0).setValue( Integer.parseInt(documents.get(0).getValue()) + 1 );
+//        notifyDataSetChanged();
+//        break;
+//      }
+//    }
   }
 
 }

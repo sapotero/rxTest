@@ -22,6 +22,7 @@ import sapotero.rxtest.views.activities.SettingsTemplatesActivity;
 import sapotero.rxtest.views.adapters.DecisionAdapter;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OshsAutoCompleteAdapter;
+import sapotero.rxtest.views.adapters.models.DocumentTypeItem;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
 import sapotero.rxtest.views.fragments.DecisionFragment;
 import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
@@ -78,6 +79,10 @@ public interface EsdComponent {
 
   void inject(DataLoaderInterface context);
   void inject(DocumentManager context);
+
+  void inject(DocumentTypeItem context);
+
+
 
   void inject(DocumentFactory context);
   void inject(DecisionManager context);

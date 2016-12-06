@@ -9,6 +9,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -20,8 +22,8 @@ import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.mikepenz.material_design_iconic_typeface_library.MaterialDesignIconic;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
+import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
-import com.mikepenz.materialdrawer.icons.MaterialDrawerFont;
 import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
@@ -33,6 +35,9 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.honorato.multistatetogglebutton.MultiStateToggleButton;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -48,10 +53,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.requery.Persistable;
-import io.requery.query.Expression;
-import io.requery.query.LogicalCondition;
-import io.requery.query.Result;
-import io.requery.query.WhereAndOr;
 import io.requery.rx.SingleEntityStore;
 import okhttp3.OkHttpClient;
 import rx.Subscription;
@@ -77,12 +78,15 @@ import sapotero.rxtest.views.adapters.models.FilterItem;
 import sapotero.rxtest.views.adapters.models.OrganizationItem;
 import sapotero.rxtest.views.adapters.utils.DocumentTypeAdapter;
 import sapotero.rxtest.views.adapters.utils.StatusAdapter;
+import sapotero.rxtest.views.menu.MenuBuilder;
 import sapotero.rxtest.views.views.CircleLeftArrow;
 import sapotero.rxtest.views.views.CircleRightArrow;
 import sapotero.rxtest.views.views.MultiOrganizationSpinner;
 import timber.log.Timber;
 
-public class MainActivity extends AppCompatActivity {
+import static android.widget.Toast.LENGTH_LONG;
+
+public class MainActivity extends AppCompatActivity implements MenuBuilder.Callback {
 
   @Inject JobManager jobManager;
   @Inject OkHttpClient okHttpClient;
@@ -94,19 +98,31 @@ public class MainActivity extends AppCompatActivity {
   @BindView(R.id.documentsRecycleView) RecyclerView rv;
   @BindView(R.id.progressBar) ProgressBar progressBar;
 
+  @BindView(R.id.activity_main_menu) LinearLayout activity_main_menu;
+
+  @BindView(R.id.activity_main_menu_builder_organization) LinearLayout menu_builder_organization;
+  @BindView(R.id.activity_main_menu_builder_buttons) FrameLayout menu_builder_buttons;
+
+
+
+
   @BindView(R.id.DOCUMENT_TYPE) Spinner DOCUMENT_TYPE_SELECTOR;
   @BindView(R.id.JOURNAL_TYPE) Spinner FILTER_TYPE_SELECTOR;
   @BindView(R.id.ORGANIZATION) MultiOrganizationSpinner ORGANIZATION_SELECTOR;
 
-  @BindView(R.id.document_control_buttons) MultiStateToggleButton control_buttons;
-
   @BindView(R.id.activity_main_right_button) CircleRightArrow rightArrow;
-  @BindView(R.id.activity_main_left_button) CircleLeftArrow leftArrow;
 
+  @BindView(R.id.activity_main_left_button) CircleLeftArrow leftArrow;
   @BindView(R.id.documents_empty_list) TextView documents_empty_list;
+
+
+  @BindView(R.id.document_control_buttons) MultiStateToggleButton control_buttons;
 
   @BindView(R.id.document_control_button) Button document_control_button;
   @BindView(R.id.document_favorite_button) Button document_favorite_button;
+  @BindView(R.id.document_control_button1) Button document_control_button1;
+
+
 
   private String TAG = MainActivity.class.getSimpleName();
 
@@ -154,6 +170,8 @@ public class MainActivity extends AppCompatActivity {
   private Subscription updateDocumentCount;
   private Subscription updateOrganizations;
   private Subscription loadFromDbQueryCount;
+  private MenuBuilder menuBuilder
+    ;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -164,9 +182,23 @@ public class MainActivity extends AppCompatActivity {
 
     ButterKnife.bind(this);
     EsdApplication.getComponent(this).inject(this);
-
     loadSettings();
-    setAdapters();
+
+
+
+
+    menuBuilder = new MenuBuilder(this);
+    menuBuilder
+      .withDB( dataStore )
+      .withJournalSelector( DOCUMENT_TYPE_SELECTOR )
+      .withButtons( menu_builder_buttons )
+      .withOrganization( menu_builder_organization )
+      .registerCallBack(this);
+    menuBuilder.build();
+
+//    setAdapters();
+
+    updateDocumentCount();
 
     GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2, GridLayoutManager.VERTICAL, false);
     rv.setLayoutManager(gridLayoutManager);
@@ -183,12 +215,12 @@ public class MainActivity extends AppCompatActivity {
 
     toolbar.setContentInsetStartWithNavigation(250);
 
-    toolbar.inflateMenu(R.menu.info);
+    toolbar.inflateMenu(R.menu.main_menu);
     toolbar.setOnMenuItemClickListener(item -> {
       switch (item.getItemId()) {
         case R.id.reload:
-          System.gc();
-
+          tryToread();
+          document_control_button1.setVisibility( document_control_button1.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
           break;
         default:
           jobManager.addJobInBackground(new UpdateAuthTokenJob());
@@ -197,7 +229,7 @@ public class MainActivity extends AppCompatActivity {
       return false;
     });
 
-    View[] buttons = new View[]{document_control_button, document_favorite_button};
+    View[] buttons = new View[]{document_control_button, document_favorite_button, document_control_button1};
     control_buttons.setButtons(buttons, new boolean[buttons.length]);
 
     control_buttons.setOnValueChangedListener(position -> {
@@ -208,7 +240,35 @@ public class MainActivity extends AppCompatActivity {
       loadFromDB();
     });
     control_buttons.enableMultipleChoice(true);
+
     loadFromDB();
+  }
+
+  private void tryToread() {
+    Timber.tag("IO").i( "tryToread start" );
+
+    try {
+      Process process = Runtime.getRuntime().exec("/system/bin/ls -la /storage");
+
+      BufferedReader reader = new BufferedReader( new InputStreamReader(process.getInputStream()) );
+      int read;
+      char[] buffer = new char[4096];
+
+      StringBuilder output = new StringBuilder();
+      while ((read = reader.read(buffer)) > 0) {
+        output.append(buffer, 0, read);
+      }
+      reader.close();
+
+      process.waitFor();
+
+      Toast.makeText (this, output.toString(), LENGTH_LONG ).show();
+
+    } catch (IOException | InterruptedException e) {
+      Timber.tag("IO").w( e );
+
+    }
+    Timber.tag("IO").d( "tryToread end" );
   }
 
   @Override
@@ -290,7 +350,7 @@ public class MainActivity extends AppCompatActivity {
   }
 
   private void drawer_build_bottom() {
-    drawer
+    Drawer dr = drawer
       .addDrawerItems(
 
         new SectionDrawerItem().withName(R.string.drawer_item_settings),
@@ -387,8 +447,10 @@ public class MainActivity extends AppCompatActivity {
       .addProfiles(
         new ProfileDrawerItem()
           .withName( settings.getString("current_user").get() )
+          .withEmail( settings.getString("current_user").get() )
+          .withSetSelected(true)
 //          .withEmail("admin_id")
-          .withIcon( MaterialDrawerFont.Icon.mdf_person )
+          .withIcon(R.drawable.gerb)
       )
       .withOnAccountHeaderListener(
         (view, profile, currentProfile) -> false
@@ -480,7 +542,7 @@ public class MainActivity extends AppCompatActivity {
 
     List<DocumentTypeItem> document_types = new ArrayList<>();
     for(Fields.Journal journal : Fields.Journal.values()){
-      document_types.add(new DocumentTypeItem( journal.getName(), String.valueOf( journal.getType() ), 0));
+//      document_types.add(new DocumentTypeItem(item, journal.getName(), String.valueOf( journal.getType() ), 0));
     }
 
     document_type_adapter = new DocumentTypeAdapter(this, document_types);
@@ -503,7 +565,7 @@ public class MainActivity extends AppCompatActivity {
       loadFromDB();
     });
 
-    updateDocumentCount();
+
 
 //    Observable.from(filter_types).subscribe(
 //      this::loadDocumentsCountByType
@@ -512,21 +574,21 @@ public class MainActivity extends AppCompatActivity {
 
   private void updateDocumentCount() {
 
-    if (updateDocumentCount != null){
-      updateDocumentCount.unsubscribe();
-    }
-    updateDocumentCount = dataStore
-      .select(RDocumentEntity.UID)
-      .get()
-      .toObservable()
-      .subscribeOn(Schedulers.io())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(uid -> {
-
-        Timber.tag("updateDocument").w( uid.toString() );
-
-        document_type_adapter.updateCountByType( uid.get(0) );
-      });
+//    if (updateDocumentCount != null){
+//      updateDocumentCount.unsubscribe();
+//    }
+//    updateDocumentCount = dataStore
+//      .select(RDocumentEntity.UID)
+//      .get()
+//      .toObservable()
+//      .subscribeOn(Schedulers.io())
+//      .observeOn(AndroidSchedulers.mainThread())
+//      .subscribe(uid -> {
+//
+//        Timber.tag("updateDocument").w( uid.toString() );
+//
+//        document_type_adapter.updateCountByType( uid.get(0) );
+//      });
 
 //    updateOrganizations();
   }
@@ -564,117 +626,117 @@ public class MainActivity extends AppCompatActivity {
 
   private void loadFromDB() {
 
-    documents_empty_list.setVisibility(View.GONE);
-    progressBar.setVisibility(ProgressBar.VISIBLE);
-
-    //    findOrganizations();
-    //    updateOrganizationAdapter();
-
-    updateFilterAdapter();
-
-
-    Fields.Journal journal = Fields.Journal.INDEX[ DOCUMENT_TYPE_SELECTOR.getSelectedItemPosition() ];
-    String title = journal.getName();
-
-    toolbar.setTitle(title);
-
-    RAdapter.clear();
-    Timber.d("%s - %s %s ", journal.getType(), journal.getValue(), journal.getName() );
-
-    WhereAndOr<Result<RDocumentEntity>> query = dataStore
-      .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.like( journal.getValue() + "%"));
-
-    // favorites && control
-    LogicalCondition<? extends Expression<Boolean>, ?> favorites_condition = null;
-    LogicalCondition<? extends Expression<Boolean>, ?> control_condition = null;
-
-    boolean favorites_button_value = control_buttons.getStates()[0];
-    boolean control_button_value = control_buttons.getStates()[1];
-
-    favorites_condition = favorites_button_value ? RDocumentEntity.CONTROL.eq(true) : RDocumentEntity.CONTROL.in(Arrays.asList(true, false));
-    control_condition = control_button_value ? RDocumentEntity.FAVORITES.eq(true)   : RDocumentEntity.FAVORITES.in(Arrays.asList(true, false));
-
-
-    if (favorites_button_value) {
-      query = query.and(favorites_condition);
-    }
-    if (control_button_value) {
-      query = query.and(control_condition);
-    }
-    // favorites && control
-
-
-    // organizations
-    boolean organization_filter = false;
-    ArrayList<String> organizations = new ArrayList<String>();
-    if (Arrays.asList(ORGANIZATION_SELECTOR.getSelected()).size() > 0) {
-
-      for (int i = 0; i < ORGANIZATION_SELECTOR.getSelected().length; i++) {
-        if (ORGANIZATION_SELECTOR.getSelected()[i]) {
-          try {
-            organizations.add(organization_adapter.getItem(i).getName());
-            Timber.tag(TAG).i(String.format("%s - ++", organization_adapter.getItem(i).getName()));
-            organization_filter = true;
-          } catch (Exception e) {
-            Timber.tag(TAG).e(e);
-          }
-        }
-      }
-    }
-
-    if (organization_filter) {
-      query = query.and(RDocumentEntity.ORGANIZATION.in(organizations));
-    }
-
-    // organizations
-
-
-    // filter
-
-    int filter_index = FILTER_TYPE_SELECTOR.getSelectedItemPosition();
-    FilterItem filter_item = filter_adapter.getItem(filter_index);
-
-    Timber.tag(TAG).i(String.format("filter_name %s - ++", filter_item.getValue()));
-
-    query = query.and(RDocumentEntity.FILTER.eq( Fields.Status.INDEX[ filter_index ].getValue()) );
-
-    // filter
-
-
-
-//    Integer count = dataStore
-//      .count(RDocumentEntity.class)
-//      .where(RDocumentEntity.UID.like( journal.getValue() + "%"))
-//      .and(RDocumentEntity.FILTER.eq( Fields.Status.INDEX[ filter_index ].getValue()) )
-//      .get()
-//      .value();
-//    Timber.tag("loadFromDbQuery").e(" beforeLoad count: %s", count);
-
-
-    if (loadFromDbQuery != null) {
-      loadFromDbQuery.unsubscribe();
-    }
-
-
-    loadFromDbQuery = query.get()
-      .toObservable()
-      .subscribeOn(Schedulers.io())
-      .observeOn(AndroidSchedulers.mainThread())
-      .toList()
-      .subscribe(docs -> {
-        Timber.tag("loadFromDbQuery").e("docs: %s", docs.size() );
-        addToAdapterList(docs);
-      });
-
-    if (Integer.valueOf(filter_item.getCount()) == 0) {
-      Timber.e("EMPTY LIST count");
-      progressBar.setVisibility(ProgressBar.GONE);
-      documents_empty_list.setVisibility(View.VISIBLE);
-      documents_empty_list.setText(getString(R.string.document_empty_list));
-    }
-
-    Timber.tag("loadFromDbQuery").e(" afterLoad");
+//    documents_empty_list.setVisibility(View.GONE);
+//    progressBar.setVisibility(ProgressBar.VISIBLE);
+//
+//    //    findOrganizations();
+//    //    updateOrganizationAdapter();
+//
+////    updateFilterAdapter();
+//
+//
+//    Fields.Journal journal = Fields.Journal.INDEX[ DOCUMENT_TYPE_SELECTOR.getSelectedItemPosition() ];
+//    String title = journal.getName();
+//
+//    toolbar.setTitle(title);
+//
+//    RAdapter.clear();
+//    Timber.d("%s - %s %s ", journal.getType(), journal.getValue(), journal.getName() );
+//
+//    WhereAndOr<Result<RDocumentEntity>> query = dataStore
+//      .select(RDocumentEntity.class)
+//      .where(RDocumentEntity.UID.like( journal.getValue() + "%"));
+//
+//    // favorites && control
+//    LogicalCondition<? extends Expression<Boolean>, ?> favorites_condition = null;
+//    LogicalCondition<? extends Expression<Boolean>, ?> control_condition = null;
+//
+//    boolean favorites_button_value = control_buttons.getStates()[0];
+//    boolean control_button_value = control_buttons.getStates()[1];
+//
+//    favorites_condition = favorites_button_value ? RDocumentEntity.CONTROL.eq(true) : RDocumentEntity.CONTROL.in(Arrays.asList(true, false));
+//    control_condition = control_button_value ? RDocumentEntity.FAVORITES.eq(true)   : RDocumentEntity.FAVORITES.in(Arrays.asList(true, false));
+//
+//
+//    if (favorites_button_value) {
+//      query = query.and(favorites_condition);
+//    }
+//    if (control_button_value) {
+//      query = query.and(control_condition);
+//    }
+//    // favorites && control
+//
+//
+//    // organizations
+//    boolean organization_filter = false;
+//    ArrayList<String> organizations = new ArrayList<String>();
+//    if ( ORGANIZATION_SELECTOR.getAdapter() != null && Arrays.asList(ORGANIZATION_SELECTOR.getSelected()).size() > 0) {
+//
+//      for (int i = 0; i < ORGANIZATION_SELECTOR.getSelected().length; i++) {
+//        if (ORGANIZATION_SELECTOR.getSelected()[i]) {
+//          try {
+//            organizations.add(organization_adapter.getItem(i).getName());
+//            Timber.tag(TAG).i(String.format("%s - ++", organization_adapter.getItem(i).getName()));
+//            organization_filter = true;
+//          } catch (Exception e) {
+//            Timber.tag(TAG).e(e);
+//          }
+//        }
+//      }
+//    }
+//
+//    if (organization_filter) {
+//      query = query.and(RDocumentEntity.ORGANIZATION.in(organizations));
+//    }
+//
+//    // organizations
+//
+//
+//    // filter
+//
+//    int filter_index = FILTER_TYPE_SELECTOR.getSelectedItemPosition();
+//    FilterItem filter_item = filter_adapter.getItem(filter_index);
+//
+//    Timber.tag(TAG).i(String.format("filter_name %s - ++", filter_item.getValue()));
+//
+//    query = query.and(RDocumentEntity.FILTER.eq( Fields.Status.INDEX[ filter_index ].getValue()) );
+//
+//    // filter
+//
+//
+//
+////    Integer count = dataStore
+////      .count(RDocumentEntity.class)
+////      .where(RDocumentEntity.UID.like( journal.getValue() + "%"))
+////      .and(RDocumentEntity.FILTER.eq( Fields.Status.INDEX[ filter_index ].getValue()) )
+////      .get()
+////      .value();
+////    Timber.tag("loadFromDbQuery").e(" beforeLoad count: %s", count);
+//
+//
+//    if (loadFromDbQuery != null) {
+//      loadFromDbQuery.unsubscribe();
+//    }
+//
+//
+//    loadFromDbQuery = query.get()
+//      .toObservable()
+//      .subscribeOn(Schedulers.io())
+//      .observeOn(AndroidSchedulers.mainThread())
+//      .toList()
+//      .subscribe(docs -> {
+//        Timber.tag("loadFromDbQuery").e("docs: %s", docs.size() );
+//        addToAdapterList(docs);
+//      });
+//
+//    if (Integer.valueOf(filter_item.getCount()) == 0) {
+//      Timber.e("EMPTY LIST count");
+//      progressBar.setVisibility(ProgressBar.GONE);
+//      documents_empty_list.setVisibility(View.VISIBLE);
+//      documents_empty_list.setText(getString(R.string.document_empty_list));
+//    }
+//
+//    Timber.tag("loadFromDbQuery").e(" afterLoad");
 
   }
 
@@ -770,7 +832,7 @@ public class MainActivity extends AppCompatActivity {
   private void notificationUpdate(){
 
     if (mToast == null) {
-      mToast = Toast.makeText(MainActivity.this, String.format(  "Загрузка документов: %s/%s ", loaded, total ), Toast.LENGTH_LONG);
+      mToast = Toast.makeText(MainActivity.this, String.format(  "Загрузка документов: %s/%s ", loaded, total ), LENGTH_LONG);
     }
 
     mToast.setText( String.format(  "Загрузка документов: %s/%s ", loaded, total ) );
@@ -827,4 +889,17 @@ public class MainActivity extends AppCompatActivity {
     //    table_changes();
   }
 
+
+
+  /* MenuBuilder.Callback */
+  @Override
+  public void onMenuBuilderUpdate(View view) {
+//    activity_main_menu.removeAllViews();
+//    activity_main_menu.addView(view);
+  }
+
+  @Override
+  public void onUpdateError(Throwable error) {
+
+  }
 }

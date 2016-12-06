@@ -51,7 +51,7 @@ public class OperationManager implements CommandFactory.Callback {
 
   public void execute(String operation, CommandParams params) {
     Command command = commandBuilder
-      .withDocument( new DocumentReceiver( settings.getString("info.uid").get() ) )
+      .withDocument( new DocumentReceiver( settings.getString("main_menu.uid").get() ) )
       .withParams( params )
       .build( operation );
 

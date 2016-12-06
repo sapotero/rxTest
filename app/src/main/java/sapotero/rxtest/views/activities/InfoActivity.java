@@ -458,13 +458,13 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
 //
 //    DocumentService documentService = retrofit.create( DocumentService.class );
 //
-//    Observable<DocumentInfo> info = documentService.getInfo(
+//    Observable<DocumentInfo> main_menu = documentService.getInfo(
 //      UID.get(),
 //      LOGIN.get(),
 //      TOKEN.get()
 //    );
 //
-//    info.subscribeOn( Schedulers.newThread() )
+//    main_menu.subscribeOn( Schedulers.newThread() )
 //      .observeOn( AndroidSchedulers.mainThread() )
 //      .subscribe(
 //        data -> {
@@ -562,12 +562,12 @@ public class InfoActivity extends AppCompatActivity implements InfoCardDocuments
 
   private void loadSettings() {
     LOGIN    = settings.getString("login");
-    UID      = settings.getString("info.uid");
+    UID      = settings.getString("main_menu.uid");
     PASSWORD = settings.getString("password");
     TOKEN    = settings.getString("token");
     POSITION = settings.getInteger("position");
     DOCUMENT_UID = settings.getString("document.uid");
-    STATUS_CODE = settings.getString("info.status");
+    STATUS_CODE = settings.getString("main_menu.status");
 
   }
 

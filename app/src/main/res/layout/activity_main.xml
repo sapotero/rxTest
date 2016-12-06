@@ -80,72 +80,95 @@
         <!--android:paddingTop="@dimen/half_date_offset"-->
 
         <LinearLayout
+            android:id="@+id/activity_main_menu"
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/date_offset"
             android:paddingLeft="@dimen/date_offset"
             android:paddingRight="@dimen/date_offset"
-            >
+            android:layout_height="96dp">
             <!--android:background="@color/md_grey_200"-->
-            <!--android:elevation="4dp"-->
+            <!--&lt;!&ndash;android:elevation="4dp"&ndash;&gt;-->
 
             <Spinner
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:id="@+id/DOCUMENT_TYPE"
                 android:minWidth="300dp"
                 android:padding="1dp"
                 android:background="@drawable/spinner_document_type"
-            />
+                android:layout_width="400dp"/>
             <!--android:layout_gravity="center_horizontal"-->
 
-            <Spinner
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/JOURNAL_TYPE"
-                android:layout_weight="1"
-            android:background="@drawable/spinner_journal_background"
-            android:padding="3dp"
-            android:layout_marginRight="4dp"
-            />
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <FrameLayout
+                    android:id="@+id/activity_main_menu_builder_buttons"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
+
+                    <Spinner
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:id="@+id/JOURNAL_TYPE"
+                        android:background="@drawable/spinner_journal_background"
+                        android:padding="3dp"
+                    />
+                </FrameLayout>
+
+                <LinearLayout
+                    android:id="@+id/activity_main_menu_builder_organization"
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
+
+                    <sapotero.rxtest.views.views.MultiOrganizationSpinner
+                        android:layout_height="match_parent"
+                        android:id="@+id/ORGANIZATION"
+                        android:minWidth="300dp"
+                        android:background="@drawable/spinner_journal_background"
+                        android:padding="15dp"
+                        android:layout_width="600dp"/>
+
+                    <org.honorato.multistatetogglebutton.MultiStateToggleButton
+                        android:id="@+id/document_control_buttons"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        app:mstbPrimaryColor  ="@color/md_blue_600"
+                        app:mstbSecondaryColor="@color/md_grey_200"
+                        app:values="@array/control_array">
+
+                        <Button
+                            android:id="@+id/document_control_button"
+                            android:layout_height="wrap_content"
+                            android:layout_width="wrap_content"
+                            android:text="@string/control"/>
+
+                        <Button
+                            android:id="@+id/document_control_button1"
+                            android:layout_height="wrap_content"
+                            android:layout_width="wrap_content"
+                            android:text="string/control"/>
+
+                        <Button
+                            android:id="@+id/document_favorite_button"
+                            android:layout_height="wrap_content"
+                            android:layout_width="wrap_content"
+                            android:text="@string/favorites"/>
+
+                    </org.honorato.multistatetogglebutton.MultiStateToggleButton>
+
+                </LinearLayout>
+            </LinearLayout>
+
             <!--android:layout_gravity="center_horizontal"-->
 
-            <sapotero.rxtest.views.views.MultiOrganizationSpinner
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/ORGANIZATION"
-                android:minWidth="300dp"
-                android:layout_weight="1"
-                android:background="@drawable/spinner_journal_background"
-                android:padding="15dp"
-                android:layout_marginRight="4dp"
-                />
             <!--android:layout_margin="2dp"-->
 
-
-            <org.honorato.multistatetogglebutton.MultiStateToggleButton
-                android:id="@+id/document_control_buttons"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:mstbPrimaryColor  ="@color/md_blue_600"
-                app:mstbSecondaryColor="@color/md_grey_200"
-                app:values="@array/control_array"
-                >
-
-                <Button
-                    android:id="@+id/document_control_button"
-                    android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="@string/control"/>
-                >
-                <Button
-                    android:id="@+id/document_favorite_button"
-                    android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="@string/favorites"/>
-                >
-            </org.honorato.multistatetogglebutton.MultiStateToggleButton>
 
         </LinearLayout>
 
@@ -169,10 +192,10 @@
                 android:layout_marginEnd="@dimen/half_date_offset"
                 />
 
-            <!--<RecyclerView-->
             <android.support.v7.widget.RecyclerView
-                android:id="@+id/documentsRecycleView"
-                android:scrollbars="vertical"
+
+            android:id="@+id/documentsRecycleView"
+            android:scrollbars="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginTop="8dp"

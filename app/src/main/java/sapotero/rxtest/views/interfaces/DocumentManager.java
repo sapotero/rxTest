@@ -56,7 +56,7 @@ public class DocumentManager {
   }
 
   private void initialize() {
-    UID = settings.getString("info.uid");
+    UID = settings.getString("main_menu.uid");
   }
 
   private void unsubscribe(){

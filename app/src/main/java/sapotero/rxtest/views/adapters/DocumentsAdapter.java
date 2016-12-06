@@ -138,13 +138,13 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
       Preference<Integer> rxPosition = rxPreferences.getInteger("position");
       rxPosition.set(position);
 
-      Preference<String> rxUid = rxPreferences.getString("info.uid");
+      Preference<String> rxUid = rxPreferences.getString("main_menu.uid");
       rxUid.set( item.getUid() );
 
-      Preference<String> rxReg = rxPreferences.getString("info.regnumber");
+      Preference<String> rxReg = rxPreferences.getString("main_menu.regnumber");
       rxReg.set( item.getRegistrationNumber() );
 
-      Preference<String> rxStatus = rxPreferences.getString("info.status");
+      Preference<String> rxStatus = rxPreferences.getString("main_menu.status");
       rxStatus.set( item.getStatusCode() );
 
       Intent intent = new Intent(mContext, InfoActivity.class);

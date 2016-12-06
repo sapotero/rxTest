@@ -107,7 +107,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   }
 
   private void loadSettings() {
-    UID  = settings.getString("info.uid");
+    UID  = settings.getString("main_menu.uid");
     HOST = settings.getString("settings_username_host");
   }
 

@@ -1,38 +1,89 @@
 package sapotero.rxtest.views.adapters.models;
 
+import android.content.Context;
+
+import javax.inject.Inject;
+
+import io.requery.Persistable;
+import io.requery.query.Scalar;
+import io.requery.query.WhereAndOr;
+import io.requery.rx.SingleEntityStore;
+import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.models.RDocument;
+import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.db.requery.utils.Fields;
+import sapotero.rxtest.views.menu.builders.ConditionBuilder;
+import sapotero.rxtest.views.menu.factories.ItemsFactory;
+
 public class DocumentTypeItem {
 
-  private int value;
-  private String type;
-  private String name;
-  public DocumentTypeItem(String name, String type, int value) {
+  @Inject SingleEntityStore<Persistable> dataStore;
+  private final ItemsFactory.Item item;
+
+  public DocumentTypeItem(Context context, ItemsFactory.Item item) {
     super();
-    this.name = name;
-    this.type = type;
-    this.value = value;
-  }
-
-  public String getValue() {
-    return String.valueOf(value);
-  }
-
-  public void setValue(int value) {
-    this.value = value;
+    this.item = item;
+    EsdApplication.getComponent(context).inject(this);
   }
 
   public String getName() {
-    return name;
+
+    if (item.getIndex() == 0){
+      Integer total = dataStore
+        .count(RDocumentEntity.class)
+        .get()
+        .value();
+
+      Integer projects = dataStore
+        .count(RDocumentEntity.class)
+        .where( RDocumentEntity.FILTER.eq(Fields.Status.APPROVAL.getValue() )   )
+        .or( RDocumentEntity.FILTER.eq(Fields.Status.SIGNING.getValue() )   )
+        .get()
+        .value();
+
+      return String.format( item.getName(), total, projects);
+    } else {
+      int count = 0;
+
+      WhereAndOr<Scalar<Integer>> query = dataStore.count(RDocument.class).where(RDocumentEntity.ID.ne(0));
+
+      if ( item.getConditions().length > 0 ){
+
+        for (ConditionBuilder condition : item.getConditions() ){
+          switch ( condition.getCondition() ){
+            case AND:
+              query = query.and( condition.getField() );
+              break;
+            case OR:
+              query = query.or( condition.getField() );
+              break;
+            default:
+              break;
+          }
+        }
+      }
+
+      count = query.get().value();
+
+      return String.format( item.getName(), count);
+    }
+
   }
 
-  public String getType() {
-    return type;
-  }
+  //  public String getValue() {
+//    return String.valueOf(value);
+//  }
+//
+//  public void setValue(int value) {
+//    this.value = value;
 
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public void setType(String type) {
-    this.type = type;
-  }
+//  }
+//
+//  public String getType() {
+//    return type;
+//  }
+//
+//  public void setType(String type) {
+//    this.type = type;
+//  }
 }

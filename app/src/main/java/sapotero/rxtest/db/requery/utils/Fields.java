@@ -17,8 +17,8 @@ public class Fields {
     private final String value;
     private final String name;
 
-    Status(final String text, final String name) {
-      this.value = text;
+    Status(final String value, final String name) {
+      this.value = value;
       this.name = name;
     }
 
@@ -82,7 +82,6 @@ public class Fields {
 
   }
 
-
   public static Status getStatus(String type ){
     Status status = null;
 
@@ -108,6 +107,7 @@ public class Fields {
 
     return journal;
   }
+
   public static Journal getJournalByUid(String uid ){
     Journal result = null;
 
