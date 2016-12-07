@@ -8,7 +8,6 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -33,7 +32,6 @@ import com.mikepenz.materialdrawer.model.SectionDrawerItem;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-import org.honorato.multistatetogglebutton.MultiStateToggleButton;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -116,11 +114,14 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @BindView(R.id.documents_empty_list) TextView documents_empty_list;
 
 
-  @BindView(R.id.document_control_buttons) MultiStateToggleButton control_buttons;
+//  @BindView(R.id.document_control_buttons) MultiStateToggleButton control_buttons;
 
-  @BindView(R.id.document_control_button) Button document_control_button;
-  @BindView(R.id.document_favorite_button) Button document_favorite_button;
-  @BindView(R.id.document_control_button1) Button document_control_button1;
+//  @BindView(R.id.document_control_button)  Button document_control_button;
+//  @BindView(R.id.document_favorite_button) Button document_favorite_button;
+//
+//  @BindView(R.id.document_favorite_button1) Button document_favorite_button1;
+//  @BindView(R.id.document_favorite_button2) Button document_favorite_button2;
+//  @BindView(R.id.document_favorite_button3) Button document_favorite_button3;
 
 
 
@@ -220,7 +221,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       switch (item.getItemId()) {
         case R.id.reload:
           tryToread();
-          document_control_button1.setVisibility( document_control_button1.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
+//          document_favorite_button1.setVisibility( document_favorite_button1.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
           break;
         default:
           jobManager.addJobInBackground(new UpdateAuthTokenJob());
@@ -229,17 +230,17 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       return false;
     });
 
-    View[] buttons = new View[]{document_control_button, document_favorite_button, document_control_button1};
-    control_buttons.setButtons(buttons, new boolean[buttons.length]);
-
-    control_buttons.setOnValueChangedListener(position -> {
-      Timber.tag(TAG).d("Position: " + position);
-      Timber.tag(TAG).d("Position: " + control_buttons.getStates()[0]);
-      Timber.tag(TAG).d("Position: " + control_buttons.getStates()[1]);
-
-      loadFromDB();
-    });
-    control_buttons.enableMultipleChoice(true);
+//    View[] buttons = new View[]{ document_control_button, document_favorite_button, document_favorite_button1, document_favorite_button2, document_favorite_button3 };
+//    control_buttons.setButtons( buttons, new boolean[buttons.length] );
+//
+//    control_buttons.setOnValueChangedListener(position -> {
+//      Timber.tag(TAG).d("Position: " + position);
+//      Timber.tag(TAG).d("Position: " + control_buttons.getStates()[0]);
+//      Timber.tag(TAG).d("Position: " + control_buttons.getStates()[1]);
+//
+//      loadFromDB();
+//    });
+//    control_buttons.enableMultipleChoice(true);
 
     loadFromDB();
   }
@@ -798,11 +799,11 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       });
   }
 
-  public void showNextType(Boolean next) {
-    unsubscribe();
-    int position = next ? filter_adapter.next() : filter_adapter.prev();
-    FILTER_TYPE_SELECTOR.setSelection(position);
-  }
+//  public void showNextType(Boolean next) {
+//    unsubscribe();
+//    int position = next ? filter_adapter.next() : filter_adapter.prev();
+//    FILTER_TYPE_SELECTOR.setSelection(position);
+//  }
 
   public void unsubscribe() {
     if (loader != null && !loader.isUnsubscribed()) {
@@ -843,12 +844,14 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   @OnClick(R.id.activity_main_left_button)
   public void setLeftArrowArrow() {
-    showNextType(false);
+//    showNextType(false);
+    menuBuilder.prev();
   }
 
   @OnClick(R.id.activity_main_right_button)
   public void setRightArrow() {
-    showNextType(true);
+//    showNextType(true);
+    menuBuilder.next();
   }
 
   @Subscribe(threadMode = ThreadMode.BACKGROUND)

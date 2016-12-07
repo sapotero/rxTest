@@ -87,9 +87,6 @@ public class DocumentTypeAdapter extends BaseAdapter {
     int index = Arrays.asList((context.getResources().getStringArray(R.array.settings_view_start_page_values))).indexOf(String.valueOf(value));
     List<String> names = Arrays.asList((context.getResources().getStringArray(R.array.settings_view_start_page)));
 
-//    Timber.tag("findByValue index").i( String.valueOf(index) );
-//    Timber.tag("findByValue value").i( value );
-
     for (int i = 0; i < documents.size(); i++) {
       if ( Objects.equals(documents.get(i).getName(), names.get(index)) ){
         index = i;
@@ -97,25 +94,39 @@ public class DocumentTypeAdapter extends BaseAdapter {
       }
     }
 
-//    Timber.tag("findByValue result").i( documents.get(index).getName() );
     return index;
   }
 
   public void updateCountByType(String uid) {
     String type = String.format("%.2s", uid);
+  }
 
+  public int prev() {
+    if (documents == null || documents.size() == 0){
+      return 0;
+    }
 
-//    for (int i = 0; i < this.documents.size(); i++) {
-//      int _int = Integer.valueOf(documents.get(i).getType());
-//
-////      Timber.tag("updateCountByType").e("%s == %s", String.format("%02d", _int ) , Integer.valueOf(type));
-//      if( Objects.equals( Integer.valueOf(documents.get(i).getType()) , Integer.valueOf(type)) ){
-//        documents.get(i).setValue( Integer.parseInt(documents.get(i).getValue()) + 1 );
-//        documents.get(0).setValue( Integer.parseInt(documents.get(0).getValue()) + 1 );
-//        notifyDataSetChanged();
-//        break;
-//      }
-//    }
+    int position = mPos - 1;
+
+    if ( position < 0 ){
+      return documents.size() - 1;
+    } else {
+      return position;
+    }
+
+  }
+  public int next() {
+    if (documents == null || documents.size() == 0){
+      return 0;
+    }
+
+    int position = mPos + 1;
+
+    if ( position >= documents.size() ){
+      return 0;
+    } else {
+      return position;
+    }
   }
 
 }

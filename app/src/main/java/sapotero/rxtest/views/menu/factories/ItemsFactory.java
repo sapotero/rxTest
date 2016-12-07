@@ -2,11 +2,11 @@ package sapotero.rxtest.views.menu.factories;
 
 import android.content.Context;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
-
-import org.honorato.multistatetogglebutton.MultiStateToggleButton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +15,7 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.views.adapters.models.DocumentTypeItem;
 import sapotero.rxtest.views.adapters.utils.DocumentTypeAdapter;
+import sapotero.rxtest.views.menu.builders.ButtonBuilder;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import timber.log.Timber;
 
@@ -24,75 +25,94 @@ public class ItemsFactory {
   private ArrayList<Item> items;
 
   private Callback callback;
-  private ViewGroup view;
+  private FrameLayout view;
   private Spinner journalSpinner;
   private String TAG = this.getClass().getSimpleName();
   private DocumentTypeAdapter journalSpinnerAdapter;
-//  private Condition<V, ?> query;
 
   public interface Callback {
     void onMenuUpdate();
   }
-
   public void registerCallBack(Callback callback){
     this.callback = callback;
   }
 
 
-
-
-  public void setSpinner(Spinner selector) {
-    journalSpinner = selector;
-
-    journalSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-      @Override
-      public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-        Timber.tag(TAG).w( journalSpinnerAdapter.getItem(position).getName() );
-      }
-
-      @Override
-      public void onNothingSelected(AdapterView<?> adapterView) {
-      }
-    });
-  }
-
-  public void setSpinnerDefaults() {
-
-    List<DocumentTypeItem> document_types = new ArrayList<>();
-
-    for ( Item item : Item.values()) {
-      document_types.add( new DocumentTypeItem( context, item ) );
-    }
-
-    journalSpinnerAdapter = new DocumentTypeAdapter(context, document_types);
-    journalSpinner.setAdapter(journalSpinnerAdapter);
-  }
-
   private enum Button {
 
-    PROJECTS              ( "Проекты %s"                , 0 ),
-    PERFORMANCE           ( "На рассмотрение %s"        , 0 ),
-    PRIMARY_CONSIDERATION ( "Первичное рассмотрение %s" , 0 ),
-    VIEWED                ( "Рассмотренные %s"          , 0 ),
-    ASSIGN                ( "На подпись %s"             , 0 ),
-    APPROVAL              ( "На согласование %s"        , 0 ),
-    PROCESSED             ( "Обпаботанные %s"           , 0 );
+    PROJECTS ( 1,
+      new ButtonBuilder(
+        "Проекты %s" ,
+        new ConditionBuilder[]{
+          new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq("approval")  ),
+          new ConditionBuilder( ConditionBuilder.Condition.OR,  RDocumentEntity.FILTER.eq("signing")  ),
+        }
+      )
+    ),
+    PERFORMANCE ( 2,
+      new ButtonBuilder(
+        "На рассмотрение %s" ,
+        new ConditionBuilder[]{
+          new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq("primary_consideration")  ),
+        }
+      )
+    ),
+    PRIMARY_CONSIDERATION ( 3,
+      new ButtonBuilder(
+        "Первичное рассмотрение %s" ,
+        new ConditionBuilder[]{
+          new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq("primary_consideration")  ),
+        }
+      )
+    ),
+    VIEWED ( 4,
+      new ButtonBuilder(
+        "Рассмотренные %s" ,
+        new ConditionBuilder[]{
+          new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq("viewed")  ),
+        }
+      )
+    ),
+    ASSIGN ( 5,
+      new ButtonBuilder(
+        "На подпись %s" ,
+        new ConditionBuilder[]{
+          new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq("signing")  ),
+        }
+      )
+    ),
+    APPROVAL ( 6,
+      new ButtonBuilder(
+        "На согласование %s" ,
+        new ConditionBuilder[]{
+          new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq("approval")  ),
+        }
+      )
+    ),
+    PROCESSED ( 7,
+      new ButtonBuilder(
+        "Обработанные %s" ,
+        new ConditionBuilder[]{
+          new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq("success")  ),
+        }
+      )
+    );
 
-    private final String text;
-    private final Integer count;
+    private final Integer index;
+    private final ButtonBuilder button;
 
-    Button( final String text, final Integer count ) {
-      this.text  = text;
-      this.count = count;
+    Button( final Integer index, final ButtonBuilder button ) {
+      this.index = index;
+      this.button = button;
     }
 
     @Override
     public String toString() {
-      return String.format( text, count );
+      return button.getLabel();
     }
 
     public View getView(Context context) {
-      return null;
+      return button.getView(context);
     }
   }
 
@@ -207,16 +227,39 @@ public class ItemsFactory {
     }
 
     public View getButtons( Context context ){
-      MultiStateToggleButton buttons = new MultiStateToggleButton(context);
+      RadioGroup view = new RadioGroup(context);
+      view.setOrientation(LinearLayout.HORIZONTAL);
+      LinearLayout.LayoutParams params = new LinearLayout.LayoutParams( LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT,1.0f );
+      view.setLayoutParams(params);
 
-      if ( this.buttons.length > 0 ){
+      ArrayList<View> buttonsList = new ArrayList<View>();
 
-        for(Button item: this.buttons){
-          buttons.addView( item.getView(context) );
+      if ( buttons.length > 0 ){
+
+        for (int i = 0, length = buttons.length-1; i <= length; i++) {
+
+          Button item = buttons[i];
+          Timber.tag("getButtons").w( "i: %s", i );
+
+          if (i == 0){
+            Timber.tag("getButtons").w( "left" );
+            item.button.setLeftCorner();
+          } else if ( i == length ){
+            Timber.tag("getButtons").w( "right" );
+            item.button.setRightCorner();
+          } else {
+            Timber.tag("getButtons").w( "none" );
+            item.button.setNoneCorner();
+          }
+
+
+          view.addView( item.getView(context) );
+
         }
+
       }
 
-      return buttons;
+      return view;
     }
 
     public Boolean getShowOrganization(){
@@ -235,9 +278,59 @@ public class ItemsFactory {
     this.context = context;
   }
 
-  private void buildItems() {
 
+
+  public void setSpinner(Spinner selector) {
+    journalSpinner = selector;
+
+    journalSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+      @Override
+      public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+        Timber.tag(TAG).w( journalSpinnerAdapter.getItem(position).getName() );
+
+        updateView();
+
+        callback.onMenuUpdate();
+      }
+
+      @Override
+      public void onNothingSelected(AdapterView<?> adapterView) {
+      }
+    });
+  }
+
+  public void setSpinnerDefaults() {
+
+    List<DocumentTypeItem> document_types = new ArrayList<>();
+
+    for ( Item item : Item.values()) {
+      document_types.add( new DocumentTypeItem( context, item ) );
+    }
+
+    journalSpinnerAdapter = new DocumentTypeAdapter(context, document_types);
+    journalSpinner.setAdapter(journalSpinnerAdapter);
+  }
+
+
+  public void prev() {
+    journalSpinner.setSelection( journalSpinnerAdapter.prev() );
+  }
+  public void next() {
+    journalSpinner.setSelection( journalSpinnerAdapter.next() );
+  }
+
+
+  private void buildItems() {
     callback.onMenuUpdate();
+  }
+
+  public void updateView() {
+    if( view == null ){
+      view = new FrameLayout(context);
+    }
+
+    view.removeAllViews();
+    view.addView( journalSpinnerAdapter.getItem( journalSpinner.getSelectedItemPosition() ).getItem().getButtons(context) );
   }
 
   public View getView() {

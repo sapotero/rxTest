@@ -38,6 +38,7 @@ import sapotero.rxtest.views.managers.menu.commands.performance.DelegatePerforma
 import sapotero.rxtest.views.managers.menu.commands.report.FromTheReport;
 import sapotero.rxtest.views.managers.menu.commands.report.ReturnToPrimaryConsideration;
 import sapotero.rxtest.views.managers.view.DecisionManager;
+import sapotero.rxtest.views.menu.builders.ButtonBuilder;
 import sapotero.rxtest.views.services.AuthService;
 
 @Singleton
@@ -81,6 +82,7 @@ public interface EsdComponent {
   void inject(DocumentManager context);
 
   void inject(DocumentTypeItem context);
+  void inject(ButtonBuilder context);
 
 
 

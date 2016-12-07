@@ -28,9 +28,13 @@ public class MenuBuilder implements ItemsFactory.Callback{
     void onMenuBuilderUpdate(View view);
     void onUpdateError(Throwable error);
   }
+
   public void registerCallBack(Callback callback){
     this.callback = callback;
   }
+
+
+
 
   public MenuBuilder(Context context) {
     this.context = context;
@@ -69,10 +73,25 @@ public class MenuBuilder implements ItemsFactory.Callback{
     }
   }
 
+  public void prev() {
+    items.prev();
+  }
+  public void next() {
+    items.next();
+  }
+
 
   @Override
   public void onMenuUpdate() {
     view = new FrameLayout(context);
+
+
+    buttons.removeAllViews();
+    if ( items.getView() != null){
+      buttons.addView( items.getView() );
+    }
+
+
     callback.onMenuBuilderUpdate( view );
   }
 

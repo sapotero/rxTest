@@ -70,20 +70,8 @@ public class DocumentTypeItem {
 
   }
 
-  //  public String getValue() {
-//    return String.valueOf(value);
-//  }
-//
-//  public void setValue(int value) {
-//    this.value = value;
+  public ItemsFactory.Item getItem(){
+    return item;
+  }
 
-//  }
-//
-//  public String getType() {
-//    return type;
-//  }
-//
-//  public void setType(String type) {
-//    this.type = type;
-//  }
 }

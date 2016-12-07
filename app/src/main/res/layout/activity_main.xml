@@ -110,13 +110,53 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1">
 
-                    <Spinner
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:id="@+id/JOURNAL_TYPE"
-                        android:background="@drawable/spinner_journal_background"
-                        android:padding="3dp"
-                    />
+
+                    <!--<org.honorato.multistatetogglebutton.MultiStateToggleButton-->
+                        <!--android:id="@+id/document_control_buttons"-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="match_parent"-->
+                        <!--app:mstbPrimaryColor  ="@color/md_blue_600"-->
+                        <!--app:mstbSecondaryColor="@color/md_grey_200"-->
+                        <!--app:values="@array/control_array">-->
+
+                        <!--<Button-->
+                            <!--android:id="@+id/document_control_button"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:layout_width="wrap_content"-->
+                            <!--android:text="@string/control"/>-->
+
+                        <!--<Button-->
+                            <!--android:id="@+id/document_favorite_button"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:layout_width="wrap_content"-->
+                            <!--android:text="@string/favorites"/>-->
+
+                        <!--<Button-->
+                            <!--android:id="@+id/document_control_button1"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:layout_width="wrap_content"-->
+                            <!--android:text="string/control"/>-->
+
+                        <!--<Button-->
+                            <!--android:id="@+id/document_favorite_button1"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:layout_width="wrap_content"-->
+                            <!--android:text="@string/favorites"/>-->
+                        <!--<Button-->
+                            <!--android:id="@+id/document_favorite_button3"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:layout_width="wrap_content"-->
+                            <!--android:text="@string/favorites"/>-->
+                        <!--<Button-->
+                            <!--android:id="@+id/document_favorite_button2"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:layout_width="wrap_content"-->
+                            <!--android:text="@string/favorites"/>-->
+
+
+                    <!--</org.honorato.multistatetogglebutton.MultiStateToggleButton>-->
+
+
                 </FrameLayout>
 
                 <LinearLayout
@@ -132,35 +172,16 @@
                         android:minWidth="300dp"
                         android:background="@drawable/spinner_journal_background"
                         android:padding="15dp"
-                        android:layout_width="600dp"/>
+                        android:layout_width="300dp"/>
 
-                    <org.honorato.multistatetogglebutton.MultiStateToggleButton
-                        android:id="@+id/document_control_buttons"
-                        android:layout_width="wrap_content"
+
+                    <Spinner
+                        android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        app:mstbPrimaryColor  ="@color/md_blue_600"
-                        app:mstbSecondaryColor="@color/md_grey_200"
-                        app:values="@array/control_array">
-
-                        <Button
-                            android:id="@+id/document_control_button"
-                            android:layout_height="wrap_content"
-                            android:layout_width="wrap_content"
-                            android:text="@string/control"/>
-
-                        <Button
-                            android:id="@+id/document_control_button1"
-                            android:layout_height="wrap_content"
-                            android:layout_width="wrap_content"
-                            android:text="string/control"/>
-
-                        <Button
-                            android:id="@+id/document_favorite_button"
-                            android:layout_height="wrap_content"
-                            android:layout_width="wrap_content"
-                            android:text="@string/favorites"/>
-
-                    </org.honorato.multistatetogglebutton.MultiStateToggleButton>
+                        android:id="@+id/JOURNAL_TYPE"
+                        android:background="@drawable/spinner_journal_background"
+                        android:padding="3dp"
+                        />
 
                 </LinearLayout>
             </LinearLayout>

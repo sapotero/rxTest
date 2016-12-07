@@ -16,6 +16,7 @@ public final class EsdApplication extends Application {
 
   public static EsdComponent mainComponent;
   public Application app;
+  private static Context context;
 
   @Override public void onCreate() {
     super.onCreate();
@@ -37,6 +38,12 @@ public final class EsdApplication extends Application {
 
     mainComponent = DaggerEsdComponent.builder().esdModule(new EsdModule(this)).build();
     app = this;
+
+    context=getApplicationContext();
+  }
+
+  public static Context getContext(){
+    return context;
   }
 
   public static EsdComponent getComponent(Context context) {
