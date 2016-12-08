@@ -320,13 +320,7 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
       stepper.setActiveStepAsCompleted();
       stepper.goToNextStep();
       Timber.i( "LOGIN: %s\nTOKEN: %s", LOGIN.get(), TOKEN.get() );
-
-
-      if ( Constant.DEBUG ) {
-        start();
-      } else {
-        dataLoader.getUserInformation();
-      }
+      dataLoader.getUserInformation();
 
     }, 2000L);
   }
@@ -339,15 +333,15 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
 
   @Override
   public void onGetUserInformationSuccess() {
-    new Handler().postDelayed( () -> {
+//    new Handler().postDelayed( () -> {
+//
+//      stepper_loader_user_progressbar.setVisibility(View.INVISIBLE);
+//      stepper_loader_list_progressbar.setVisibility(View.VISIBLE);
+//      stepper_loader_user.setChecked(true);
 
-      stepper_loader_user_progressbar.setVisibility(View.INVISIBLE);
-      stepper_loader_list_progressbar.setVisibility(View.VISIBLE);
-      stepper_loader_user.setChecked(true);
+      dataLoader.getFolders();
 
-      dataLoader.getDocumentsCount();
-
-    }, 2000L);
+//    }, 2000L);
   }
 
   @Override
@@ -402,34 +396,51 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
 
   @Override
   public void onGetFoldersInfoSuccess() {
-
+    dataLoader.getTemplates();
   }
 
   @Override
   public void onGetFoldersInfoError(Throwable error) {
-
+    Toast.makeText( this, String.format( "onError: Error %s", error.getMessage() ), Toast.LENGTH_SHORT).show();
+    stepper.setStepAsUncompleted(1);
+    stepper.goToPreviousStep();
   }
 
   @Override
   public void onGetTemplatesInfoSuccess() {
+    new Handler().postDelayed( () -> {
 
+      stepper_loader_user_progressbar.setVisibility(View.INVISIBLE);
+      stepper_loader_list_progressbar.setVisibility(View.VISIBLE);
+      stepper_loader_user.setChecked(true);
+
+
+      if ( Constant.DEBUG ) {
+        start();
+      } else {
+        dataLoader.getDocumentsCount();
+      }
+
+    }, 2000L);
   }
 
   @Override
   public void onGetTemplatesInfoError(Throwable error) {
-
+    Toast.makeText( this, String.format( "onError: Error %s", error.getMessage() ), Toast.LENGTH_SHORT).show();
+    stepper.setStepAsUncompleted(1);
+    stepper.goToPreviousStep();
   }
 
   private void printJobStat() {
     Timber.tag(TAG).v( "JOB TOTAL: %s/%s [ %s ]", jobManager.getJobManagerExecutionThread().getState(), jobManager.countReadyJobs(), jobManager.getActiveConsumerCount() );
   }
 
-  @Subscribe(threadMode = ThreadMode.BACKGROUND)
+  @Subscribe(threadMode = ThreadMode.POSTING)
   public void onMessageEvent(MarkDocumentAsChangedJobEvent event) {
-    printJobStat();
+    Timber.tag(TAG).v( "JOB TOTAL %s", event.uid );
   }
 
-  @Subscribe(threadMode = ThreadMode.ASYNC)
+  @Subscribe(threadMode = ThreadMode.POSTING)
   public void onMessageEvent(FileDownloadedEvent event) {
     printJobStat();
   }

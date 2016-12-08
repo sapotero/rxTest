@@ -181,8 +181,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       .withEmptyView( documents_empty_list )
       .withProgressBar( progressBar );
 
+    dbQueryBuilder.printFolders();
+    dbQueryBuilder.printTemplates();
 
-//    updateDocumentCount();
 
 
     progressBar.setVisibility(ProgressBar.GONE);
@@ -209,7 +210,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     });
 
 
-//    loadFromDB();
   }
 
   private void tryToread() {
@@ -243,9 +243,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   public void onStart() {
     super.onStart();
 
-    if (subscriptions == null) {
-      subscriptions = new CompositeSubscription();
-    }
 
     if (!EventBus.getDefault().isRegistered(this)) {
       EventBus.getDefault().register(this);
@@ -256,40 +253,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   public void onResume() {
     super.onResume();
 
-    if (documentQuery != null) {
-      documentQuery.unsubscribe();
-//      table_changes();
-    }
-
-    if (changedQuery != null) {
-      changedQuery.unsubscribe();
-      documentsModifiedListener();
-    }
-
     rxSettings();
-    loadFromDB();
   }
 
-  private void documentsModifiedListener() {
-
-//    if (changedQuery == null) {
-//      changedQuery = dataStore
-//        .select(RDocumentEntity.class)
-//        .where(RDocumentEntity.CHANGED.eq(true))
-//        .orderBy(RDocumentEntity.ID.desc())
-//        .get()
-//        .toSelfObservable()
-//        .subscribe(
-//          doc -> {
-//            Timber.tag("documentsModifiedListener").i( "data " + doc.first().getUid() );
-//          },
-//          error -> {
-//            Timber.tag("documentsModifiedListener").e("error " + error.toString());
-//            error.printStackTrace();
-//          }
-//        );
-//    }
-  }
 
   @Override
   protected void onPause() {

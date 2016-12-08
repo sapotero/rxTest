@@ -20,13 +20,19 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.utils.Fields;
+import sapotero.rxtest.jobs.bus.AddFoldersJob;
 import sapotero.rxtest.jobs.bus.AddPrimaryConsiderationJob;
+import sapotero.rxtest.jobs.bus.AddTemplatesJob;
 import sapotero.rxtest.jobs.bus.SyncDocumentsJob;
 import sapotero.rxtest.retrofit.AuthTokenService;
 import sapotero.rxtest.retrofit.DocumentsService;
+import sapotero.rxtest.retrofit.FoldersService;
 import sapotero.rxtest.retrofit.PrimaryConsiderationService;
+import sapotero.rxtest.retrofit.TemplatesService;
 import sapotero.rxtest.retrofit.models.AuthToken;
+import sapotero.rxtest.retrofit.models.Folder;
 import sapotero.rxtest.retrofit.models.Oshs;
+import sapotero.rxtest.retrofit.models.Template;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.retrofit.models.documents.Documents;
 import sapotero.rxtest.retrofit.models.me.UserInfo;
@@ -283,96 +289,44 @@ public class DataLoaderInterface {
 
   public void getFolders(){
 
-    Retrofit retrofit = new RetrofitManager(context, HOST.get() + "/v3/", okHttpClient).process();
-    DocumentsService documentsService = retrofit.create(DocumentsService.class);
+    Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
+    FoldersService foldersService = retrofit.create(FoldersService.class);
 
-    Fields.Status[] new_filter_types = Fields.Status.values();
+    Observable<ArrayList<Folder>> folder = foldersService.getFolders( LOGIN.get(), TOKEN.get() );
 
-    unsubscribe();
-    subscription.add(
-      Observable
-        .from(new_filter_types)
-        .flatMap(status -> documentsService.getDocuments(LOGIN.get(), TOKEN.get(), status.getValue(), 0, 0))
-        .toList()
-        .subscribeOn( Schedulers.computation() )
-        .observeOn( AndroidSchedulers.mainThread() )
-        .subscribe(
-          documents -> {
-            int count = 0;
-
-            if (documents.size() > 0) {
-              for (Documents document : documents) {
-                if (document.getMeta() != null && document.getMeta().getTotal() != null) {
-                  count += Integer.valueOf(document.getMeta().getTotal());
-                }
-              }
-            }
-
-            if (count != 0) {
-              COUNT.set(String.valueOf(count));
-              callback.onGetDocumentsCountSuccess();
-            }
-
-
-          },
-          error -> {
-            callback.onGetDocumentsCountError(error);
-          }
-        )
-    );
+    folder.subscribeOn(Schedulers.computation())
+      .observeOn( AndroidSchedulers.mainThread() )
+      .subscribe(
+        folders -> {
+          Timber.tag(TAG).w( "%s", folders );
+          jobManager.addJobInBackground(new AddFoldersJob(folders));
+          callback.onGetFoldersInfoSuccess();
+        },
+        error -> {
+          Timber.tag(TAG).d("ERROR " + error.getMessage());
+          callback.onGetFoldersInfoError(error);
+        });
   }
 
   public void getTemplates(){
+    Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
+    TemplatesService templatesService = retrofit.create(TemplatesService.class);
 
-    StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-    StrictMode.setThreadPolicy(policy);
+    Observable<ArrayList<Template>> template = templatesService.getTemplates( LOGIN.get(), TOKEN.get() );
 
+    template.subscribeOn(Schedulers.computation())
+      .observeOn( AndroidSchedulers.mainThread() )
+      .subscribe(
+        templates -> {
+          Timber.tag(TAG).w( "%s", templates );
+          jobManager.addJobInBackground(new AddTemplatesJob(templates));
+          callback.onGetTemplatesInfoSuccess();
+        },
+        error -> {
+          Timber.tag(TAG).d("ERROR " + error.getMessage());
+          callback.onGetFoldersInfoError(error);
+        });
 
-    Retrofit retrofit = new RetrofitManager(context, HOST.get() + "/v3/", okHttpClient).process();
-    DocumentsService documentsService = retrofit.create(DocumentsService.class);
-
-
-//    String[] filter_types = context.getResources().getStringArray(R.array.FILTER_TYPES_VALUE);
-
-    Fields.Status[] new_filter_types = Fields.Status.values();
-
-
-    Observable<Fields.Status> types = Observable.from(new_filter_types);
-    Observable<Documents> count = Observable
-      .from(new_filter_types)
-      .flatMap(status -> documentsService.getDocuments(LOGIN.get(), TOKEN.get(), status.getValue(), 1000, 0));
-
-
-    unsubscribe();
-    subscription.add(
-      Observable.zip( types, count, (type, docs) -> {
-        return new TDmodel( type, docs.getDocuments() );
-      })
-        .subscribeOn( Schedulers.computation() )
-        .observeOn( AndroidSchedulers.mainThread() )
-        .toList()
-        .subscribe(
-          raw -> {
-            Timber.tag(TAG).i(" RECV: %s", raw.size());
-
-            for (TDmodel data: raw) {
-              Timber.tag(TAG).i(" DocumentType: %s | %s", data.getType(), data.getDocuments().size() );
-
-              for (Document doc: data.getDocuments() ) {
-                String type = data.getType();
-                Timber.tag(TAG).d( "%s | %s", type, doc.getUid() );
-
-                jobManager.addJobInBackground(new SyncDocumentsJob( doc.getUid(), Fields.getStatus(type) ), () -> {
-                  Timber.e("complete");
-                });
-                callback.onGetDocumentsInfoSuccess();
-              }
-            }
-          },
-          error -> {
-            callback.onGetDocumentsInfoError(error);
-          })
-    );
   }
 
 }

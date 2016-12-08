@@ -19,6 +19,8 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.db.requery.models.RFolderEntity;
+import sapotero.rxtest.db.requery.models.RTemplateEntity;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
@@ -91,7 +93,7 @@ public class DBQueryBuilder {
       subscribe = query.get()
         .toObservable()
         .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
+        .observeOn( AndroidSchedulers.mainThread() )
         .toList()
         .subscribe(docs -> {
           Timber.tag("loadFromDbQuery").e("docs: %s", docs.size() );
@@ -151,5 +153,30 @@ public class DBQueryBuilder {
   }
   private void hideEmpty(){
     documents_empty_list.setVisibility(View.GONE);
+  }
+
+  public void printFolders() {
+    dataStore
+      .select(RFolderEntity.class)
+      .get()
+      .toObservable()
+      .observeOn( Schedulers.io() )
+      .subscribeOn( AndroidSchedulers.mainThread() )
+      .subscribe( folder ->{
+        Timber.tag("FOLDERS").i(" %s - %s", folder.getUid(), folder.getTitle() );
+      });
+  }
+
+  public void printTemplates() {
+    dataStore
+      .select(RTemplateEntity.class)
+      .get()
+      .toObservable()
+      .observeOn( Schedulers.io() )
+      .subscribeOn( AndroidSchedulers.mainThread() )
+      .subscribe( template ->{
+        Timber.tag("TEMPLATES").i(" %s - %s", template.getUid(), template.getTitle() );
+      });
+
   }
 }

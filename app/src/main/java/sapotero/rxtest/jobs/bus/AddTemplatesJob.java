@@ -10,21 +10,21 @@ import com.birbit.android.jobqueue.RetryConstraint;
 import java.util.ArrayList;
 
 import rx.schedulers.Schedulers;
-import sapotero.rxtest.db.requery.models.RPrimaryConsiderationEntity;
-import sapotero.rxtest.retrofit.models.Oshs;
+import sapotero.rxtest.db.requery.models.RTemplateEntity;
+import sapotero.rxtest.retrofit.models.Template;
 import timber.log.Timber;
 
 
-public class AddPrimaryConsiderationJob  extends BaseJob {
+public class AddTemplatesJob extends BaseJob {
 
   public static final int PRIORITY = 1;
-  private final ArrayList<Oshs> users;
+  private final ArrayList<Template> templates;
 
   private String TAG = this.getClass().getSimpleName();
 
-  public AddPrimaryConsiderationJob(ArrayList<Oshs> users) {
+  public AddTemplatesJob(ArrayList<Template> templates) {
     super( new Params(PRIORITY).requireNetwork().persist() );
-    this.users = users;
+    this.templates = templates;
   }
 
   @Override
@@ -33,35 +33,29 @@ public class AddPrimaryConsiderationJob  extends BaseJob {
 
   @Override
   public void onRun() throws Throwable {
-    Timber.tag(TAG).i( "users: %s | %s", users.size(), users.get(0).getName() );
-    for (Oshs user : users){
-      if ( !exist( user.getId()) ){
-        add(user);
+    Timber.tag(TAG).i( "templates: %s | %s", templates.size(), templates.get(0).getText() );
+    for (Template template : templates){
+      if ( !exist( template.getId()) ){
+        add(template);
       }
     }
 
   }
 
-  private void add(Oshs user) {
-    RPrimaryConsiderationEntity data = new RPrimaryConsiderationEntity();
-    data.setOrganization( user.getOrganization() );
-    data.setFirstName( user.getFirstName() );
-    data.setLastName( user.getLastName() );
-    data.setMiddleName( user.getMiddleName() );
-    data.setGender( user.getGender() );
-    data.setPosition( user.getPosition() );
-    data.setUid( user.getId() );
-    data.setName( user.getName() );
-    data.setIsGroup( user.getIsGroup() );
-    data.setIsOrganization( user.getIsOrganization() );
+  private void add(Template template) {
+    RTemplateEntity data = new RTemplateEntity();
+    data.setUid( template.getId() );
+    data.setTitle( template.getText() );
+    data.setType( template.getType() );
+
 
     dataStore
       .insert(data)
       .toObservable()
       .subscribeOn(Schedulers.computation())
-      .observeOn(Schedulers.computation())
+      .observeOn(Schedulers.io())
       .subscribe(u -> {
-        Timber.tag(TAG).v("update " + u.getName() );
+        Timber.tag(TAG).v("update " + u.getTitle() );
       });
   }
 
@@ -72,8 +66,8 @@ public class AddPrimaryConsiderationJob  extends BaseJob {
     boolean result = false;
 
     Integer count = dataStore
-      .count(RPrimaryConsiderationEntity.UID)
-      .where(RPrimaryConsiderationEntity.UID.eq(uid))
+      .count(RTemplateEntity.UID)
+      .where(RTemplateEntity.UID.eq(uid))
       .get().value();
 
     if( count != 0 ){

@@ -39,7 +39,7 @@ import timber.log.Timber;
 
 public class SyncDocumentsJob  extends BaseJob {
 
-  public static final int PRIORITY = 5;
+  public static final int PRIORITY = 10;
 
   private Preference<String> LOGIN = null;
   private Preference<String> TOKEN = null;
@@ -81,12 +81,13 @@ public class SyncDocumentsJob  extends BaseJob {
       TOKEN.get()
     );
 
-    info.subscribeOn( Schedulers.computation() )
+    info.subscribeOn( Schedulers.io() )
       .observeOn( Schedulers.io() )
       .subscribe(
         doc -> {
           Timber.tag(TAG).d("recv title - %s", doc.getTitle() );
           update( doc, exist(doc.getUid()) );
+
           
           if ( doc.getImages() != null && doc.getImages().size() > 0 ){
 
@@ -169,8 +170,8 @@ public class SyncDocumentsJob  extends BaseJob {
 
     if (!exist){
       create(document)
-        .subscribeOn(Schedulers.computation())
-        .observeOn(Schedulers.io())
+        .subscribeOn( Schedulers.io() )
+        .observeOn( Schedulers.io() )
         .subscribe(data -> {
           Timber.tag(TAG).v("update " + data.getTitle() );
           setData( data, document, false);
@@ -316,16 +317,16 @@ public class SyncDocumentsJob  extends BaseJob {
 
       rDoc.setFilter( filter.toString() );
 
+      complete_task( rDoc.getUid() );
 
       dataStore.update(rDoc)
         .toObservable()
-        .subscribeOn(Schedulers.computation())
-        .observeOn(Schedulers.io())
+        .subscribeOn( Schedulers.io() )
+        .observeOn( Schedulers.io() )
         .toBlocking()
         .subscribe(
           result -> {
             Timber.tag(TAG).d("updated " + result.getUid());
-            complete_task( result.getUid() );
           },
           error ->{
             error.printStackTrace();
@@ -333,6 +334,7 @@ public class SyncDocumentsJob  extends BaseJob {
         );
     } else {
       Timber.tag(TAG).v("MD5 equal");
+      complete_task( document.getUid() );
     }
   }
 
