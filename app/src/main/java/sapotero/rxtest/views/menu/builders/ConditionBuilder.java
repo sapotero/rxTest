@@ -5,13 +5,12 @@ import io.requery.query.LogicalCondition;
 
 public class ConditionBuilder {
 
-
-
   public enum Condition{
     WHERE,
     AND,
     OR;
   }
+
   private final Condition condition;
 
   private LogicalCondition<? extends Expression<String>, ?> field;
@@ -23,6 +22,10 @@ public class ConditionBuilder {
 
   public Condition getCondition() {
     return condition;
+  }
+
+  public String toString(){
+    return String.format( "NAME: %s - %s %s %s ", condition, field.getLeftOperand(), field.getOperator(), field.getRightOperand() );
   }
 
   public LogicalCondition<? extends Expression<String>, ?> getField() {

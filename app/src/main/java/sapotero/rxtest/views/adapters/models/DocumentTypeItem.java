@@ -13,17 +13,19 @@ import sapotero.rxtest.db.requery.models.RDocument;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
-import sapotero.rxtest.views.menu.factories.ItemsFactory;
+import sapotero.rxtest.views.menu.fields.Item;
 
 public class DocumentTypeItem {
-
   @Inject SingleEntityStore<Persistable> dataStore;
-  private final ItemsFactory.Item item;
 
-  public DocumentTypeItem(Context context, ItemsFactory.Item item) {
+  private final Item item;
+
+
+  public DocumentTypeItem(Context context, Item item) {
     super();
     this.item = item;
-    EsdApplication.getComponent(context).inject(this);
+
+    EsdApplication.getComponent( context ).inject(this);
   }
 
   public String getName() {
@@ -47,9 +49,9 @@ public class DocumentTypeItem {
 
       WhereAndOr<Scalar<Integer>> query = dataStore.count(RDocument.class).where(RDocumentEntity.ID.ne(0));
 
-      if ( item.getConditions().length > 0 ){
+      if ( item.getCountConditions().length > 0 ){
 
-        for (ConditionBuilder condition : item.getConditions() ){
+        for (ConditionBuilder condition : item.getCountConditions() ){
           switch ( condition.getCondition() ){
             case AND:
               query = query.and( condition.getField() );
@@ -70,7 +72,7 @@ public class DocumentTypeItem {
 
   }
 
-  public ItemsFactory.Item getItem(){
+  public Item getItem(){
     return item;
   }
 

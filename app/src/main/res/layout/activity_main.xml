@@ -83,20 +83,22 @@
             android:id="@+id/activity_main_menu"
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_marginTop="@dimen/date_offset"
             android:paddingLeft="@dimen/date_offset"
             android:paddingRight="@dimen/date_offset"
-            android:layout_height="96dp">
+            android:layout_marginTop="@dimen/date_offset"
+            android:layout_height="96dp"
+            android:layout_gravity="center_horizontal"
+            >
             <!--android:background="@color/md_grey_200"-->
             <!--&lt;!&ndash;android:elevation="4dp"&ndash;&gt;-->
 
             <Spinner
                 android:layout_height="match_parent"
                 android:id="@+id/DOCUMENT_TYPE"
-                android:minWidth="300dp"
                 android:padding="1dp"
                 android:background="@drawable/spinner_document_type"
-                android:layout_width="400dp"/>
+                android:layout_width="350dp"
+                android:minWidth="300dp"/>
             <!--android:layout_gravity="center_horizontal"-->
 
             <LinearLayout
@@ -164,7 +166,8 @@
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_weight="1">
+                    android:layout_weight="1"
+                    android:weightSum="1">
 
                     <sapotero.rxtest.views.views.MultiOrganizationSpinner
                         android:layout_height="match_parent"
@@ -172,16 +175,27 @@
                         android:minWidth="300dp"
                         android:background="@drawable/spinner_journal_background"
                         android:padding="15dp"
-                        android:layout_width="300dp"/>
+                        android:layout_width="0dp"
+                        android:layout_weight="1"/>
 
-
-                    <Spinner
-                        android:layout_width="match_parent"
+                    <CheckBox
+                        android:id="@+id/favorites_button"
+                        android:button="@android:color/transparent"
+                        android:layout_width="wrap_content"
                         android:layout_height="match_parent"
-                        android:id="@+id/JOURNAL_TYPE"
-                        android:background="@drawable/spinner_journal_background"
-                        android:padding="3dp"
+                        android:text = "@string/favorites_template"
+                        android:background="@drawable/button_corner_all"
+                        android:textColor="@color/text_selector"
                         />
+
+
+                    <!--<Spinner-->
+                        <!--android:layout_width="match_parent"-->
+                        <!--android:layout_height="match_parent"-->
+                        <!--android:id="@+id/JOURNAL_TYPE"-->
+                        <!--android:background="@drawable/spinner_journal_background"-->
+                        <!--android:padding="3dp"-->
+                        <!--/>-->
 
                 </LinearLayout>
             </LinearLayout>
@@ -196,9 +210,8 @@
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
             android:layout_weight="10"
-            android:layout_below="@+id/toolbar"
             android:weightSum="10">
 
             <sapotero.rxtest.views.views.CircleLeftArrow

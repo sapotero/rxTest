@@ -7,8 +7,8 @@
             <!--<stroke android:width="1dp" android:color="#FF000000" />-->
             <solid android:color="@color/md_grey_200" />
             <corners
-                android:bottomRightRadius="20dp"
-                android:topRightRadius="20dp"
+                android:bottomRightRadius="@dimen/half_date_offset"
+                android:topRightRadius="@dimen/half_date_offset"
                 />
         </shape>
     </item>
@@ -17,10 +17,10 @@
         <shape
             android:shape="rectangle">
             <!--<stroke android:width="1dp" android:color="#FF000000" />-->
-            <solid android:color="@color/md_blue_A400" />
+            <solid android:color="@color/md_light_blue_700" />
             <corners
-                android:bottomRightRadius="20dp"
-                android:topRightRadius="20dp"
+                android:bottomRightRadius="@dimen/half_date_offset"
+                android:topRightRadius="@dimen/half_date_offset"
                 />
         </shape>
     </item>

@@ -7,6 +7,7 @@ import javax.inject.Singleton;
 import dagger.Component;
 import sapotero.rxtest.application.modules.EsdModule;
 import sapotero.rxtest.application.modules.SettingsModule;
+import sapotero.rxtest.db.requery.query.DBQueryBuilder;
 import sapotero.rxtest.events.utils.SubscriptionsModule;
 import sapotero.rxtest.jobs.bus.BaseJob;
 import sapotero.rxtest.jobs.utils.JobModule;
@@ -84,6 +85,7 @@ public interface EsdComponent {
   void inject(DocumentTypeItem context);
   void inject(ButtonBuilder context);
 
+  void inject(DBQueryBuilder context);
 
 
   void inject(DocumentFactory context);

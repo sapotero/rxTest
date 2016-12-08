@@ -4,6 +4,10 @@
         <item name="android:windowBackground">@drawable/launch_screen</item>
     </style>
 
+    <style name="SpinnerTheme" parent="android:Widget.Spinner">
+        <item name="android:background">@drawable/bg_spinner</item>
+    </style>
+
     <!-- Base application theme. -->
     <style name="AppTheme" parent="MaterialDrawerTheme.Light.DarkToolbar.ActionBar.TranslucentStatus">
     <!--<style name="AppTheme" parent="MaterialDrawerTheme.Light.DarkToolbar.TranslucentStatus">-->

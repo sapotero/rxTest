@@ -59,6 +59,7 @@
     <string name="tab_info">инфокарта</string>
     <string name="control">K</string>
     <string name="favorites">★</string>
+    <string name="favorites_template">★ Избранное</string>
     <string name="arrow_up">↑</string>
     <string name="arrow_down">↓</string>
     <string name="cross">❌</string>

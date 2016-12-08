@@ -3,8 +3,10 @@ package sapotero.rxtest.views.menu.builders;
 import android.content.Context;
 import android.graphics.drawable.StateListDrawable;
 import android.support.v4.content.ContextCompat;
+import android.view.Gravity;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
+import android.widget.RadioGroup;
 
 import javax.inject.Inject;
 
@@ -16,13 +18,29 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocument;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import timber.log.Timber;
 
 public class ButtonBuilder {
-  private Corner corner;
+
   @Inject SingleEntityStore<Persistable> dataStore;
 
   private final ConditionBuilder[] conditions;
   private final String label;
+  private boolean active;
+  private Corner corner;
+
+  private Callback callback;
+  private RadioButton view;
+
+
+  private String TAG = this.getClass().getSimpleName();
+
+  public interface Callback {
+    void onButtonBuilderUpdate();
+  }
+  public void registerCallBack(Callback callback){
+    this.callback = callback;
+  }
 
 
   enum Corner{
@@ -35,9 +53,11 @@ public class ButtonBuilder {
     this.label = label;
     this.conditions = conditions;
     this.corner = Corner.NONE;
+    this.active = false;
 
     EsdApplication.getComponent( EsdApplication.getContext() ).inject(this);
   }
+
 
   private Integer getCount() {
     int count = 0;
@@ -69,15 +89,17 @@ public class ButtonBuilder {
   }
 
   public RadioButton getView(Context context){
-    RadioButton view = new RadioButton(context);
-    view.setPadding( 32,8,32,8 );
+    Timber.tag(TAG).e("create new");
+    view = new RadioButton(context);
 
-    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams( LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT,1.0f );
+    view.setPadding( 32,4,32,4 );
+    view.setGravity(Gravity.CENTER);
+
+    RadioGroup.LayoutParams params = new RadioGroup.LayoutParams( LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT,10.0f );
 
     switch (corner){
       case LEFT:
         view.setBackgroundResource( R.drawable.button_corner_left );
-        view.setChecked(true);
         params.setMargins(4,4,0,4);
         break;
       case RIGHT:
@@ -95,6 +117,23 @@ public class ButtonBuilder {
     view.setLayoutParams( params );
     view.setText( getLabel() );
 
+    view.setOnCheckedChangeListener((buttonView, isChecked) -> {
+      setActive(isChecked);
+
+      if (isChecked){
+        Timber.tag("setOnCheckedChangeListener").i("change");
+        callback.onButtonBuilderUpdate();
+      }
+    });
+
+    return view;
+  }
+
+  public ConditionBuilder[] getConditions() {
+    return conditions;
+  }
+
+  public RadioButton getButton(){
     return view;
   }
 
@@ -104,8 +143,15 @@ public class ButtonBuilder {
   public void setRightCorner() {
     corner = Corner.RIGHT;
   }
-
   public void setNoneCorner() {
     corner = Corner.NONE;
+  }
+
+  public boolean isActive() {
+    return active;
+  }
+
+  private void setActive(boolean active) {
+    this.active = active;
   }
 }

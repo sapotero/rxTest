@@ -1,31 +1,36 @@
 package sapotero.rxtest.views.menu;
 
 import android.content.Context;
-import android.view.View;
+import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 
-import io.requery.Persistable;
-import io.requery.rx.SingleEntityStore;
-import sapotero.rxtest.views.menu.factories.ItemsFactory;
+import java.util.ArrayList;
 
-public class MenuBuilder implements ItemsFactory.Callback{
-  private final ItemsFactory items;
+import sapotero.rxtest.views.menu.builders.ConditionBuilder;
+import sapotero.rxtest.views.menu.factories.ItemsBuilder;
+import sapotero.rxtest.views.views.MultiOrganizationSpinner;
+import timber.log.Timber;
+
+public class MenuBuilder implements ItemsBuilder.Callback{
+  private final ItemsBuilder itemsBuilder;
   private final Context context;
 
   private Callback callback;
   private FrameLayout view;
   private Spinner journalSpinner;
-  private SingleEntityStore<Persistable> db;
   private FrameLayout buttons;
   private LinearLayout organizations;
 
   private String TAG = this.getClass().getSimpleName();
+  private MultiOrganizationSpinner organizationsSelector;
+  private CheckBox favorites;
+
 
   public interface Callback {
 
-    void onMenuBuilderUpdate(View view);
+    void onMenuBuilderUpdate(ArrayList<ConditionBuilder> view);
     void onUpdateError(Throwable error);
   }
 
@@ -38,17 +43,12 @@ public class MenuBuilder implements ItemsFactory.Callback{
 
   public MenuBuilder(Context context) {
     this.context = context;
-    this.items = new ItemsFactory( context );
-    this.items.registerCallBack(this);
+    this.itemsBuilder = new ItemsBuilder( context );
+    this.itemsBuilder.registerCallBack(this);
   }
 
   public MenuBuilder withJournalSelector(Spinner selector) {
     journalSpinner = selector;
-    return this;
-  }
-
-  public MenuBuilder withDB(SingleEntityStore<Persistable> dataStore) {
-    db = dataStore;
     return this;
   }
 
@@ -62,37 +62,56 @@ public class MenuBuilder implements ItemsFactory.Callback{
     return this;
   }
 
+  public MenuBuilder withOrganizationSelector(MultiOrganizationSpinner organizationsSelector) {
+    organizationsSelector = organizationsSelector;
+    return this;
+  }
+
+  public MenuBuilder withFavorites(CheckBox favorites_button) {
+    favorites = favorites_button;
+    return this;
+  }
+
+
+
   public void build(){
     if ( journalSpinner != null ){
 
       if ( journalSpinner.getAdapter() == null){
-        items.setSpinner(journalSpinner);
-        items.setSpinnerDefaults();
+        itemsBuilder.setSpinner(journalSpinner);
+        itemsBuilder.setSpinnerDefaults();
       }
 
     }
   }
 
   public void prev() {
-    items.prev();
+    itemsBuilder.prev();
   }
   public void next() {
-    items.next();
+    itemsBuilder.next();
   }
 
 
   @Override
-  public void onMenuUpdate() {
+  public void onMenuUpdate( ArrayList<ConditionBuilder> result ) {
+
+    Timber.tag(TAG).i( "onMenuUpdate" );
+
     view = new FrameLayout(context);
 
 
     buttons.removeAllViews();
-    if ( items.getView() != null){
-      buttons.addView( items.getView() );
+    buttons.addView( itemsBuilder.getView() );
+
+
+    for ( ConditionBuilder condition: result ) {
+      Timber.tag(TAG).i( "++ %s", condition.toString() );
     }
 
 
-    callback.onMenuBuilderUpdate( view );
+    callback.onMenuBuilderUpdate( result );
   }
+
 
 }
