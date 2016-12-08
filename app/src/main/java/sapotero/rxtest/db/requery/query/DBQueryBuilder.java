@@ -35,7 +35,7 @@ public class DBQueryBuilder {
   private ArrayList<ConditionBuilder> conditions;
   private ProgressBar progressBar;
   private TextView documents_empty_list;
-  private Subscription loadFromDbQuery;
+  private Subscription subscribe;
 
   public DBQueryBuilder(Context context) {
     this.context = context;
@@ -59,13 +59,9 @@ public class DBQueryBuilder {
 
   public void execute(){
 
-    documents_empty_list.setVisibility(View.GONE);
+    hideEmpty();
+
     progressBar.setVisibility(ProgressBar.VISIBLE);
-
-
-    if (loadFromDbQuery != null) {
-      loadFromDbQuery.unsubscribe();
-    }
 
     WhereAndOr<Result<RDocumentEntity>> query = dataStore.select(RDocumentEntity.class).where(RDocumentEntity.ID.ne(0));
 
@@ -85,15 +81,24 @@ public class DBQueryBuilder {
       }
     }
 
-    loadFromDbQuery = query.get()
-      .toObservable()
-      .subscribeOn(Schedulers.io())
-      .observeOn(AndroidSchedulers.mainThread())
-      .toList()
-      .subscribe(docs -> {
-        Timber.tag("loadFromDbQuery").e("docs: %s", docs.size() );
-        addToAdapterList(docs);
-      });
+    if ( subscribe != null ){
+      subscribe.unsubscribe();
+    }
+
+    if (conditions.size() == 0){
+      addToAdapterList( new ArrayList<>() );
+    } else {
+      subscribe = query.get()
+        .toObservable()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .toList()
+        .subscribe(docs -> {
+          Timber.tag("loadFromDbQuery").e("docs: %s", docs.size() );
+          addToAdapterList(docs);
+        });
+    }
+
   }
 
   public void executeWithConditions(ArrayList<ConditionBuilder> conditions) {
@@ -102,9 +107,9 @@ public class DBQueryBuilder {
   }
 
   private void addToAdapterList(List<RDocumentEntity> docs) {
-    if (docs.size() > 0) {
+    ArrayList<Document> list_dosc = new ArrayList<>();
 
-      ArrayList<Document> list_dosc = new ArrayList<Document>();
+    if (docs.size() > 0) {
       for (int i = 0; i < docs.size(); i++) {
         RDocumentEntity doc = docs.get(i);
         Timber.tag(TAG).v("addToAdapter ++ " + doc.getTitle());
@@ -128,12 +133,23 @@ public class DBQueryBuilder {
         document.setOrganization(doc.getOrganization());
 
         list_dosc.add(document);
-
       }
-      adapter.setDocuments(list_dosc);
-      progressBar.setVisibility(ProgressBar.GONE);
     }
 
+    if ( list_dosc.size() == 0 ){
+      showEmpty();
+    }
 
+    adapter.setDocuments(list_dosc);
+    progressBar.setVisibility(ProgressBar.GONE);
+
+
+  }
+
+  private void showEmpty(){
+    documents_empty_list.setVisibility(View.VISIBLE);
+  }
+  private void hideEmpty(){
+    documents_empty_list.setVisibility(View.GONE);
   }
 }

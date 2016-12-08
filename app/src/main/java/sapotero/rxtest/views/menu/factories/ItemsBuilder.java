@@ -118,8 +118,6 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
     }
 
     view.addView( button_group );
-
-//    callback.onMenuUpdate( getCountConditions() );
   }
 
   private Item getSelectedItem(){
@@ -134,6 +132,7 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
     Collections.addAll(result, item.getQueryConditions());
 
     if (item.getButtons().size() > 0) {
+      Boolean empty = true;
       for (ButtonBuilder b : item.getButtons()) {
 
         RadioButton button = b.getButton();
@@ -141,14 +140,18 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
         Boolean active = false;
         if (button != null){
           active =  button.isPressed();
-        }
 
+          if ( active ){
+            empty = false;
+            Collections.addAll(result, b.getConditions());
+          }
+        }
 
         Timber.e( "button conditions: %s | active: %s ", Arrays.toString( b.getConditions() ), active  );
+      }
 
-        if ( b.isActive() ){
-          Collections.addAll(result, b.getConditions());
-        }
+      if (empty){
+        Collections.addAll(result, item.getButtons().get(0).getConditions() );
       }
     }
     return result;

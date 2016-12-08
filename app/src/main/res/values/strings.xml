@@ -166,6 +166,7 @@
     <string name="menu_info_prev_person">Предыдущему</string>
     <string name="magnifer">Увеличить</string>
     <string name="dialog_oshs_close">Закрыть</string>
+    <string name="empty_list">Заглушка под пустой результат в выборе документов</string>
 
 
 </resources>

@@ -26,8 +26,9 @@ public abstract class  RDocument implements Persistable {
   @Column(unique = true)
   String uid;
 
-  @Index("changed_index")
+  @Index("md5_index")
   String md5;
+
   Integer sortKey;
   String title;
   String registrationNumber;
@@ -42,12 +43,6 @@ public abstract class  RDocument implements Persistable {
   @Index("changed_index")
   Boolean changed;
 
-  @Index("control_index")
-  Boolean control;
-
-  @Index("favorites_index")
-  Boolean favorites;
-
   @ForeignKey
   @OneToOne
   RSigner signer;
@@ -59,6 +54,21 @@ public abstract class  RDocument implements Persistable {
   String filter;
 
   String infoCard;
+
+  @Index("folder_index")
+  String folder;
+
+  @Index("control_index")
+  Boolean control;
+
+  @Index("favorites_index")
+  Boolean favorites;
+
+  @Index("processed_index")
+  Boolean processed;
+
+  @Index("expired_index")
+  Boolean expired;
 
 
   @OneToMany(mappedBy = "document")

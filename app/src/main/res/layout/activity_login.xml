@@ -14,21 +14,20 @@
     android:background="@color/it_mvd_background"
     >
 
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:src="@drawable/gerb_big"
-        android:scaleX="0.8"
-        android:scaleY="0.8"
-        android:alpha="0.05"
-        />
+    <!--<ImageView-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:src="@drawable/gerb_big"-->
+        <!--android:scaleX="0.8"-->
+        <!--android:scaleY="0.8"-->
+        <!--android:alpha="0.05"-->
+        <!--/>-->
 
     <FrameLayout
         android:layout_width="440dp"
         android:layout_height="500dp"
         android:layout_marginLeft="60dp"
         android:layout_marginTop="0dp"
-        android:layout_weight="0.09"
         android:layout_centerInParent="true"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
@@ -39,9 +38,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/stepper_background"
-            android:layout_centerInParent="true"
-            android:layout_centerVertical="true"
-            android:layout_centerHorizontal="true"
 
             >
         </sapotero.rxtest.views.views.VerticalStepperFormLayout>

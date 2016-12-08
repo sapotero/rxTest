@@ -812,10 +812,10 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(MarkDocumentAsChangedJobEvent event) {
     Timber.tag("JOBS").i( "MarkDocumentAsChangedJobEvent ++ "  );
-    document_type_adapter.updateCountByType( event.uid );
+//    document_type_adapter.updateCountByType( event.uid );
 
-    loaded++;
-    notificationUpdate();
+//    loaded++;
+//    notificationUpdate();
   }
 
 
@@ -829,6 +829,11 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   /* MenuBuilder.Callback */
   @Override
   public void onMenuBuilderUpdate(ArrayList<ConditionBuilder> conditions) {
+
+    for ( ConditionBuilder condition: conditions ) {
+      Timber.tag(TAG).i( "++ %s", condition.toString() );
+    }
+
     dbQueryBuilder.executeWithConditions( conditions );
   }
 

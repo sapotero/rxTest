@@ -69,7 +69,7 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
   private Preference<String> PASSWORD;
   private Preference<String> HOST;
 
-  private DataLoaderInterface DataLoader;
+  private DataLoaderInterface dataLoader;
   private CheckBox stepper_loader_user;
   private CheckBox stepper_loader_list;
   private CheckBox stepper_loader_info;
@@ -84,8 +84,8 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_login);
 
-    DataLoader = new DataLoaderInterface(this);
-    DataLoader.registerCallBack(this);
+    dataLoader = new DataLoaderInterface(this);
+    dataLoader.registerCallBack(this);
 
 
     ButterKnife.bind(this);
@@ -141,7 +141,7 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
 
     saveSettings("");
 
-    DataLoader.getAuthToken();
+    dataLoader.getAuthToken();
 
   }
 
@@ -325,7 +325,7 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
       if ( Constant.DEBUG ) {
         start();
       } else {
-        DataLoader.getUserInformation();
+        dataLoader.getUserInformation();
       }
 
     }, 2000L);
@@ -345,7 +345,7 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
       stepper_loader_list_progressbar.setVisibility(View.VISIBLE);
       stepper_loader_user.setChecked(true);
 
-      DataLoader.getDocumentsCount();
+      dataLoader.getDocumentsCount();
 
     }, 2000L);
   }
@@ -365,7 +365,7 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
       stepper_loader_info_progressbar.setVisibility(View.VISIBLE);
       stepper_loader_list.setChecked(true);
 
-      DataLoader.getDocumentsInfo();
+      dataLoader.getDocumentsInfo();
 
     }, 2000L);
   }
@@ -400,6 +400,25 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
   }
 
 
+  @Override
+  public void onGetFoldersInfoSuccess() {
+
+  }
+
+  @Override
+  public void onGetFoldersInfoError(Throwable error) {
+
+  }
+
+  @Override
+  public void onGetTemplatesInfoSuccess() {
+
+  }
+
+  @Override
+  public void onGetTemplatesInfoError(Throwable error) {
+
+  }
 
   private void printJobStat() {
     Timber.tag(TAG).v( "JOB TOTAL: %s/%s [ %s ]", jobManager.getJobManagerExecutionThread().getState(), jobManager.countReadyJobs(), jobManager.getActiveConsumerCount() );

@@ -14,4 +14,14 @@ public interface DocumentsService {
       @Query("limit")  Integer limit,
       @Query("offset") Integer offset
   );
+
+  @GET("documents.json")
+  Observable<Documents> getFolders(
+    @Query("login") String login,
+    @Query("auth_token") String auth_token,
+    @Query("status_code") String status_code,
+    @Query("limit")  Integer limit,
+    @Query("folder_id") String folder,
+    @Query("offset") Integer offset
+  );
 }

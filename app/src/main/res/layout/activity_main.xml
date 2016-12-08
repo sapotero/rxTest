@@ -32,6 +32,27 @@
         android:layout_height="match_parent"
         android:layout_below="@+id/toolbar">
 
+
+        <!--<ImageView-->
+            <!--android:id="@+id/myImageView"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:src="@drawable/gerb_big"-->
+            <!--android:scaleX="0.8"-->
+            <!--android:scaleY="0.8"-->
+            <!--android:alpha="0.05"-->
+            <!--/>-->
+
+        <TextView android:id="@+id/documents_empty_list"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:textSize="@dimen/date_offset"
+                  android:layout_margin="1dp"
+                  android:gravity="center"
+                  android:textColor="@color/md_grey_600"
+                  android:text="@string/empty_list"
+        />
+
         <ProgressBar
             style="@android:style/Widget.DeviceDefault.Light.ProgressBar"
             android:layout_width="wrap_content"
@@ -40,33 +61,6 @@
             android:indeterminate="true"
             android:layout_centerInParent="true"
             android:layout_centerHorizontal="true"
-            />
-
-        <ImageView
-            android:id="@+id/myImageView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:src="@drawable/gerb_big"
-            android:scaleX="0.8"
-            android:scaleY="0.8"
-            android:alpha="0.05"
-
-
-            />
-        <TextView android:id="@+id/documents_empty_list"
-                  android:layout_width="match_parent"
-                  android:layout_height="match_parent"
-                  android:textSize="24dp"
-
-                  android:layout_alignLeft="@+id/myImageView"
-                  android:layout_alignTop="@+id/myImageView"
-                  android:layout_alignRight="@+id/myImageView"
-                  android:layout_alignBottom="@+id/myImageView"
-                  android:layout_margin="1dp"
-                  android:gravity="center"
-
-                  android:textColor="@color/md_grey_600"
-                  android:text="Тут будет заглушка под пустой результат в выборе документов"
             />
 
     </RelativeLayout>

@@ -158,45 +158,6 @@ public enum Item {
 
     return buttonsList;
   }
-//
-//  public View getButtons(Context context ){
-//
-//    RadioGroup button_group = getButtonGroupLayout(context);
-//
-//    buttonsList = new ArrayList<ButtonBuilder>();
-//
-////      if ( buttons.length > 0 ){
-////
-////        for (int i = 0, length = buttons.length-1; i <= length; i++) {
-////
-////          Button item = buttons[i];
-////
-////          ButtonBuilder button = new ButtonBuilder(
-////            item.getFormat() ,
-////            item.getCountConditions()
-////          );
-////
-////          buttonsList.add(button);
-////
-////          if (i == 0){
-////            button.setLeftCorner();
-////          } else if ( i == length ){
-////            button.setRightCorner();
-////          } else {
-////            button.setNoneCorner();
-////          }
-////
-////
-////          button_group.addView( button.getView(context) );
-////
-////        }
-////
-////        ((RadioButton) button_group.getChildAt(0)).setChecked(true);
-////      }
-//
-//
-//    return button_group;
-//  }
 
   public Boolean isVisible(){
     return showOrganization;

@@ -69,6 +69,12 @@ public class DataLoaderInterface {
 
     void onGetDocumentsInfoSuccess();
     void onGetDocumentsInfoError(Throwable error);
+
+    void onGetFoldersInfoSuccess();
+    void onGetFoldersInfoError(Throwable error);
+
+    void onGetTemplatesInfoSuccess();
+    void onGetTemplatesInfoError(Throwable error);
   }
 
   public DataLoaderInterface(LoginActivity loginActivity) {
@@ -133,7 +139,7 @@ public class DataLoaderInterface {
 
 
 
-  public void getPrimaryConsiderationUsers() {
+  private void getPrimaryConsiderationUsers() {
     Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
     PrimaryConsiderationService primaryConsiderationService = retrofit.create(PrimaryConsiderationService.class);
 
@@ -226,6 +232,97 @@ public class DataLoaderInterface {
   }
 
   public void getDocumentsInfo(){
+
+    StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+    StrictMode.setThreadPolicy(policy);
+
+
+    Retrofit retrofit = new RetrofitManager(context, HOST.get() + "/v3/", okHttpClient).process();
+    DocumentsService documentsService = retrofit.create(DocumentsService.class);
+
+    Fields.Status[] new_filter_types = Fields.Status.values();
+
+
+    Observable<Fields.Status> types = Observable.from(new_filter_types);
+    Observable<Documents> count = Observable
+      .from(new_filter_types)
+      .flatMap(status -> documentsService.getDocuments(LOGIN.get(), TOKEN.get(), status.getValue(), 1000, 0));
+
+
+    unsubscribe();
+    subscription.add(
+      Observable.zip( types, count, (type, docs) -> {
+        return new TDmodel( type, docs.getDocuments() );
+      })
+        .subscribeOn( Schedulers.computation() )
+        .observeOn( AndroidSchedulers.mainThread() )
+        .toList()
+        .subscribe(
+          raw -> {
+            Timber.tag(TAG).i(" RECV: %s", raw.size());
+
+            for (TDmodel data: raw) {
+              Timber.tag(TAG).i(" DocumentType: %s | %s", data.getType(), data.getDocuments().size() );
+
+              for (Document doc: data.getDocuments() ) {
+                String type = data.getType();
+                Timber.tag(TAG).d( "%s | %s", type, doc.getUid() );
+
+                jobManager.addJobInBackground(new SyncDocumentsJob( doc.getUid(), Fields.getStatus(type) ), () -> {
+                  Timber.e("complete");
+                });
+                callback.onGetDocumentsInfoSuccess();
+              }
+            }
+          },
+          error -> {
+            callback.onGetDocumentsInfoError(error);
+          })
+    );
+  }
+
+  public void getFolders(){
+
+    Retrofit retrofit = new RetrofitManager(context, HOST.get() + "/v3/", okHttpClient).process();
+    DocumentsService documentsService = retrofit.create(DocumentsService.class);
+
+    Fields.Status[] new_filter_types = Fields.Status.values();
+
+    unsubscribe();
+    subscription.add(
+      Observable
+        .from(new_filter_types)
+        .flatMap(status -> documentsService.getDocuments(LOGIN.get(), TOKEN.get(), status.getValue(), 0, 0))
+        .toList()
+        .subscribeOn( Schedulers.computation() )
+        .observeOn( AndroidSchedulers.mainThread() )
+        .subscribe(
+          documents -> {
+            int count = 0;
+
+            if (documents.size() > 0) {
+              for (Documents document : documents) {
+                if (document.getMeta() != null && document.getMeta().getTotal() != null) {
+                  count += Integer.valueOf(document.getMeta().getTotal());
+                }
+              }
+            }
+
+            if (count != 0) {
+              COUNT.set(String.valueOf(count));
+              callback.onGetDocumentsCountSuccess();
+            }
+
+
+          },
+          error -> {
+            callback.onGetDocumentsCountError(error);
+          }
+        )
+    );
+  }
+
+  public void getTemplates(){
 
     StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
     StrictMode.setThreadPolicy(policy);

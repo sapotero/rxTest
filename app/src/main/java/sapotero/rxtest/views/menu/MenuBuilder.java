@@ -100,15 +100,8 @@ public class MenuBuilder implements ItemsBuilder.Callback{
 
     view = new FrameLayout(context);
 
-
     buttons.removeAllViews();
     buttons.addView( itemsBuilder.getView() );
-
-
-    for ( ConditionBuilder condition: result ) {
-      Timber.tag(TAG).i( "++ %s", condition.toString() );
-    }
-
 
     callback.onMenuBuilderUpdate( result );
   }

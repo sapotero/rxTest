@@ -131,8 +131,6 @@ public class SyncDocumentsJob  extends BaseJob {
   @NonNull
   private Observable<RDocumentEntity> create(DocumentInfo d){
 
-    Timber.tag(TAG).d("create title - %s", d.getTitle() );
-
 
     RDocumentEntity rd = new RDocumentEntity();
     rd.setUid( d.getUid() );
@@ -165,6 +163,10 @@ public class SyncDocumentsJob  extends BaseJob {
   }
 
   private void update(DocumentInfo document, Boolean exist){
+
+
+    Timber.tag(TAG).d("create title - %s | %s", document.getTitle(), filter.toString() );
+
     if (!exist){
       create(document)
         .subscribeOn(Schedulers.computation())
