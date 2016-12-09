@@ -52,22 +52,22 @@ public class MenuBuilder implements ItemsBuilder.Callback{
     return this;
   }
 
-  public MenuBuilder withButtons(FrameLayout menu_builder_buttons) {
+  public MenuBuilder withButtonsLayout(FrameLayout menu_builder_buttons) {
     buttons = menu_builder_buttons;
     return this;
   }
 
-  public MenuBuilder withOrganization(LinearLayout menu_builder_organization) {
-    organizations = menu_builder_organization;
+  public MenuBuilder withOrganizationLayout(LinearLayout menu_builder_organization) {
+    this.organizations = menu_builder_organization;
     return this;
   }
 
   public MenuBuilder withOrganizationSelector(MultiOrganizationSpinner organizationsSelector) {
-    organizationsSelector = organizationsSelector;
+    this.organizationsSelector = organizationsSelector;
     return this;
   }
 
-  public MenuBuilder withFavorites(CheckBox favorites_button) {
+  public MenuBuilder withFavoritesButton(CheckBox favorites_button) {
     favorites = favorites_button;
     return this;
   }
@@ -83,12 +83,18 @@ public class MenuBuilder implements ItemsBuilder.Callback{
       }
 
     }
+
+    itemsBuilder.setFavoritesButton(favorites);
+    itemsBuilder.setOrganizationSelector( organizationsSelector );
+    itemsBuilder.setOrganizationsLayout( organizations );
   }
 
-  public void prev() {
+  public void showPrev() {
+    organizationsSelector.clear();
     itemsBuilder.prev();
   }
-  public void next() {
+  public void showNext() {
+    organizationsSelector.clear();
     itemsBuilder.next();
   }
 

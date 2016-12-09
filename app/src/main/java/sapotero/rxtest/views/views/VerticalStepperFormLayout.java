@@ -306,7 +306,7 @@ public class VerticalStepperFormLayout extends RelativeLayout implements View.On
   }
 
   /**
-   * Go to the next step
+   * Go to the showNext step
    */
   public void goToNextStep() {
     goToStep(activeStep + 1, false);

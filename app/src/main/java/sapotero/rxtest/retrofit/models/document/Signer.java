@@ -4,7 +4,9 @@ package sapotero.rxtest.retrofit.models.document;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Signer {
+import java.io.Serializable;
+
+public class Signer implements Serializable {
 
     @SerializedName("id")
     @Expose

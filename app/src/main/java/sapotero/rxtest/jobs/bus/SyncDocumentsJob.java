@@ -35,11 +35,12 @@ import sapotero.rxtest.retrofit.models.document.DocumentInfo;
 import sapotero.rxtest.retrofit.models.document.Exemplar;
 import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.retrofit.models.document.Performer;
+import sapotero.rxtest.retrofit.models.document.Signer;
 import timber.log.Timber;
 
 public class SyncDocumentsJob  extends BaseJob {
 
-  public static final int PRIORITY = 10;
+  public static final int PRIORITY = 1;
 
   private Preference<String> LOGIN = null;
   private Preference<String> TOKEN = null;
@@ -160,6 +161,8 @@ public class SyncDocumentsJob  extends BaseJob {
     signer.setOrganisation( d.getSigner().getOrganisation() );
     signer.setType( d.getSigner().getType() );
 
+    rd.setSigner( signer );
+
     return dataStore.insert( rd ).toObservable();
   }
 
@@ -207,6 +210,17 @@ public class SyncDocumentsJob  extends BaseJob {
       Timber.tag(TAG).v("getDecisions " + rDoc.getDecisions().size() );
       Timber.tag(TAG).v("getExemplars " + rDoc.getExemplars().size() );
       Timber.tag(TAG).v("getControlLabels " + rDoc.getControlLabels().size() );
+
+      if (document.getSigner() != null){
+        Signer _signer = document.getSigner();
+        RSignerEntity signer = new RSignerEntity();
+        signer.setUid( _signer.getId() );
+        signer.setName( _signer.getName() );
+        signer.setOrganisation( _signer.getOrganisation() );
+        signer.setType( _signer.getType() );
+
+        rDoc.setSigner( signer );
+      }
 
       if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
         for (Decision d: document.getDecisions() ) {

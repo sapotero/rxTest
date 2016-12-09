@@ -4,7 +4,9 @@ import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.CheckBox;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
@@ -19,20 +21,22 @@ import sapotero.rxtest.views.adapters.utils.DocumentTypeAdapter;
 import sapotero.rxtest.views.menu.builders.ButtonBuilder;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import sapotero.rxtest.views.menu.fields.Item;
+import sapotero.rxtest.views.views.MultiOrganizationSpinner;
 import timber.log.Timber;
 
 public class ItemsBuilder implements ButtonBuilder.Callback {
 
+  private String TAG = this.getClass().getSimpleName();
   private final Context context;
   private FrameLayout view;
   private Spinner journalSpinner;
   private DocumentTypeAdapter journalSpinnerAdapter;
-
-  private String TAG = this.getClass().getSimpleName();
-
-
-
   private Callback callback;
+  private LinearLayout organizationsLayout;
+  private MultiOrganizationSpinner organizationSelector;
+  private CheckBox favoritesButton;
+
+
 
   public interface Callback {
     void onMenuUpdate(ArrayList<ConditionBuilder> result);
@@ -65,6 +69,18 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
     });
   }
 
+  public void setOrganizationsLayout(LinearLayout organizationsLayout) {
+    this.organizationsLayout = organizationsLayout;
+  }
+
+  public void setOrganizationSelector(MultiOrganizationSpinner organizationSelector) {
+    this.organizationSelector = organizationSelector;
+  }
+
+  public void setFavoritesButton(CheckBox favoritesButton) {
+    this.favoritesButton = favoritesButton;
+  }
+
   public void setSpinnerDefaults() {
 
     List<DocumentTypeItem> document_types = new ArrayList<>();
@@ -77,15 +93,12 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
     journalSpinner.setAdapter(journalSpinnerAdapter);
   }
 
-
-
   public void prev() {
     journalSpinner.setSelection( journalSpinnerAdapter.prev() );
   }
   public void next() {
     journalSpinner.setSelection( journalSpinnerAdapter.next() );
   }
-
 
   public View getView() {
     return view;
@@ -113,8 +126,8 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
       ((RadioButton) button_group.getChildAt(0)).setChecked(true);
     }
 
-    if ( item.isVisible() ) {
-      Timber.tag(TAG).w("visible");
+    if (organizationsLayout != null){
+      organizationsLayout.setVisibility( item.isVisible() ?  View.VISIBLE : View.GONE);
     }
 
     view.addView( button_group );

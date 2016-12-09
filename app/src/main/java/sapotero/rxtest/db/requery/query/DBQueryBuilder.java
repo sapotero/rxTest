@@ -6,12 +6,14 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import io.requery.Persistable;
 import io.requery.query.Result;
+import io.requery.query.Tuple;
 import io.requery.query.WhereAndOr;
 import io.requery.rx.SingleEntityStore;
 import rx.Subscription;
@@ -20,10 +22,14 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
+import sapotero.rxtest.db.requery.models.RSignerEntity;
 import sapotero.rxtest.db.requery.models.RTemplateEntity;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
+import sapotero.rxtest.views.adapters.OrganizationAdapter;
+import sapotero.rxtest.views.adapters.models.OrganizationItem;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
+import sapotero.rxtest.views.views.MultiOrganizationSpinner;
 import timber.log.Timber;
 
 public class DBQueryBuilder {
@@ -38,6 +44,8 @@ public class DBQueryBuilder {
   private ProgressBar progressBar;
   private TextView documents_empty_list;
   private Subscription subscribe;
+  private OrganizationAdapter organizationAdapter;
+  private MultiOrganizationSpinner organizationSelector;
 
   public DBQueryBuilder(Context context) {
     this.context = context;
@@ -100,6 +108,8 @@ public class DBQueryBuilder {
           addToAdapterList(docs);
         });
     }
+
+    findOrganizations();
 
   }
 
@@ -178,5 +188,91 @@ public class DBQueryBuilder {
         Timber.tag("TEMPLATES").i(" %s - %s", template.getUid(), template.getTitle() );
       });
 
+  }
+
+  private void findOrganizations() {
+    Timber.i( "findOrganizations" );
+    organizationAdapter.clear();
+
+    WhereAndOr<Result<Tuple>> query = dataStore
+      .select(RDocumentEntity.SIGNER_ID)
+      .where(RDocumentEntity.ID.ne(0));
+
+    if ( conditions.size() > 0 ){
+
+      for (ConditionBuilder condition : conditions ){
+        switch ( condition.getCondition() ){
+          case AND:
+            query = query.and( condition.getField() );
+            break;
+          case OR:
+            query = query.or( condition.getField() );
+            break;
+          default:
+            break;
+        }
+      }
+    }
+
+    final ArrayList<Integer> ids = new ArrayList<Integer>();
+
+    query.get()
+      .toObservable()
+      .subscribeOn(Schedulers.io())
+      .observeOn(AndroidSchedulers.mainThread())
+      .toList()
+      .flatMap( signers_ids -> {
+
+
+        if (signers_ids.size() > 0){
+          for ( Tuple _id : signers_ids) {
+            ids.add( _id.get(0) );
+          }
+        }
+
+        Timber.tag("signers_ids").i("signers_ids: %s", ids );
+
+        return dataStore
+          .select( RSignerEntity.ORGANISATION )
+          .where( RSignerEntity.ID.in( ids ) )
+          .get().toObservable().toList();
+      })
+      .subscribe(signers -> {
+
+        HashMap< String, Integer> organizations = new HashMap< String, Integer>();
+
+        for (Tuple signer: signers){
+          String key = signer.get(0).toString();
+
+          if ( !organizations.containsKey( key ) ){
+            organizations.put(key, 0);
+          }
+
+          Integer value = organizations.get(key);
+          value += 1;
+
+          organizations.put( key, value  );
+        }
+
+        for ( String organization: organizations.keySet()) {
+          Timber.d( "org:  %s | %s", organization, organizations.get(organization) );
+          organizationAdapter.add( new OrganizationItem( organization, organizations.get(organization)) );
+        }
+
+      },
+      error -> {
+        Timber.tag("ERROR").e(error);
+      });
+
+  }
+
+  public DBQueryBuilder withOrganizationsAdapter(OrganizationAdapter organization_adapter) {
+    this.organizationAdapter = organization_adapter;
+    return this;
+  }
+
+  public DBQueryBuilder withOrganizationSelector(MultiOrganizationSpinner organization_selector) {
+    this.organizationSelector = organization_selector;
+    return this;
   }
 }

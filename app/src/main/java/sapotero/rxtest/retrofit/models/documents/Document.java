@@ -16,33 +16,43 @@ public class Document implements Serializable {
     @SerializedName("sort_key")
     @Expose
     private Integer sortKey;
-    @SerializedName("position")
+
+    @SerializedName("title")
     @Expose
     private String title;
+
     @SerializedName("registration_number")
     @Expose
     private String registrationNumber;
+
     @SerializedName("registration_date")
     @Expose
     private String registrationDate;
+
     @SerializedName("urgency")
     @Expose
     private String urgency;
+
     @SerializedName("short_description")
     @Expose
     private String shortDescription;
+
     @SerializedName("comment")
     @Expose
     private String comment;
+
     @SerializedName("external_document_number")
     @Expose
     private String externalDocumentNumber;
+
     @SerializedName("receipt_date")
     @Expose
     private String receiptDate;
+
     @SerializedName("signer")
     @Expose
     private Signer signer;
+
     @SerializedName("viewed")
     @Expose
     private Boolean viewed;

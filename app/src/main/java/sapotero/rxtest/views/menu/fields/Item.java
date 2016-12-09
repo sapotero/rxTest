@@ -28,7 +28,9 @@ public enum Item {
     Button.VIEWED
   },
     true,
-    new ConditionBuilder[]{},
+    new ConditionBuilder[]{
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( "%" + Fields.Journal.INCOMING_DOCUMENTS.getValue() ) )
+    },
     new ConditionBuilder[]{}
   ),
 
@@ -38,7 +40,9 @@ public enum Item {
     Button.VIEWED
   },
     true,
-    new ConditionBuilder[]{},
+    new ConditionBuilder[]{
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( "%" + Fields.Journal.CITIZEN_REQUESTS.getValue() ) )
+    },
     new ConditionBuilder[]{}
   ),
 
@@ -61,7 +65,9 @@ public enum Item {
     Button.PRIMARY_CONSIDERATION,
     Button.VIEWED
   },true,
-    new ConditionBuilder[]{},
+    new ConditionBuilder[]{
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( "%" + Fields.Journal.INCOMING_ORDERS.getValue() ) )
+    },
     new ConditionBuilder[]{}
   ),
 
@@ -70,7 +76,9 @@ public enum Item {
     Button.PRIMARY_CONSIDERATION,
     Button.VIEWED
   },true,
-    new ConditionBuilder[]{},
+    new ConditionBuilder[]{
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( "%" + Fields.Journal.ORDERS.getValue() ) )
+    },
     new ConditionBuilder[]{}
   ),
 
@@ -79,7 +87,9 @@ public enum Item {
     Button.PRIMARY_CONSIDERATION,
     Button.VIEWED
   },true,
-    new ConditionBuilder[]{},
+    new ConditionBuilder[]{
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( "%" + Fields.Journal.ORDERS_DDO.getValue() ) )
+    },
     new ConditionBuilder[]{}
   ),
 
@@ -89,13 +99,17 @@ public enum Item {
     Button.VIEWED
   },
     true,
-    new ConditionBuilder[]{},
+    new ConditionBuilder[]{
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( "%" + Fields.Journal.ORDERS.getValue() ) )
+    },
     new ConditionBuilder[]{}
   ),
 
   ON_CONTROL ( 8, "На контроле %s", new Button[]{},
     false,
-    new ConditionBuilder[]{},
+    new ConditionBuilder[]{
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.CONTROL.eq( true ) )
+    },
     new ConditionBuilder[]{}
   );
 

@@ -59,7 +59,6 @@ import sapotero.rxtest.events.bus.GetDocumentInfoEvent;
 import sapotero.rxtest.events.bus.MarkDocumentAsChangedJobEvent;
 import sapotero.rxtest.events.bus.UpdateDocumentJobEvent;
 import sapotero.rxtest.events.rx.InsertRxDocumentsEvent;
-import sapotero.rxtest.events.rx.LoadAllDocumentsByStatusEvent;
 import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
@@ -165,19 +164,26 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2, GridLayoutManager.VERTICAL, false);
     rv.setLayoutManager(gridLayoutManager);
 
+    organization_adapter = new OrganizationAdapter(this, new ArrayList<>());
+    ORGANIZATION_SELECTOR.setAdapter(organization_adapter, false, selected -> {
+      Timber.tag("ORGANIZATION_SELECTOR").i("selected");
+    });
+
 
 
     menuBuilder = new MenuBuilder(this);
     menuBuilder
-      .withJournalSelector( DOCUMENT_TYPE_SELECTOR )
-      .withButtons( menu_builder_buttons )
+      .withButtonsLayout( menu_builder_buttons )
+      .withOrganizationLayout( menu_builder_organization )
       .withOrganizationSelector( ORGANIZATION_SELECTOR )
-      .withFavorites( favorites_button )
+      .withFavoritesButton( favorites_button )
+      .withJournalSelector( DOCUMENT_TYPE_SELECTOR )
       .registerCallBack(this);
     menuBuilder.build();
 
     dbQueryBuilder = new DBQueryBuilder(this)
       .withAdapter( RAdapter )
+      .withOrganizationsAdapter( organization_adapter )
       .withEmptyView( documents_empty_list )
       .withProgressBar( progressBar );
 
@@ -445,311 +451,14 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     );
   }
 
-  private void setAdapters() {
-//
-//    List<FilterItem> filters = new ArrayList<>();
-//    for(Fields.Status status : Fields.Status.values()){
-//      filters.add(new FilterItem( status.getName(), status.getValue(), "0"));
-//    }
-
-//    filter_adapter = new StatusAdapter(this, filters);
-//    FILTER_TYPE_SELECTOR.setAdapter(filter_adapter);
-//    FILTER_TYPE_SELECTOR.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//      @Override
-//      public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-//        loadFromDB();
-//        toolbar.setSubtitle(filter_adapter.getItem(position).getName());
-//      }
-//
-//      @Override
-//      public void onNothingSelected(AdapterView<?> adapterView) {
-//      }
-//    });
-
-
-//    String[] document_types_name = getResources().getStringArray(R.array.JOURNAL_TYPES);
-//    String[] document_types_value = getResources().getStringArray(R.array.JOURNAL_TYPES_VALUE);
-//
-//    for (int i = 0; i < document_types_name.length; i++) {
-//      document_types.add(new DocumentTypeItem(document_types_name[i], document_types_value[i], 0));
-//    }
-
-//    List<DocumentTypeItem> document_types = new ArrayList<>();
-//    for(Fields.Journal journal : Fields.Journal.values()){
-//      document_types.add(new DocumentTypeItem(item, journal.getName(), String.valueOf( journal.getType() ), 0));
-//    }
-
-//    document_type_adapter = new DocumentTypeAdapter(this, document_types);
-//    DOCUMENT_TYPE_SELECTOR.setAdapter(document_type_adapter);
-//    DOCUMENT_TYPE_SELECTOR.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//      @Override
-//      public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-//        findOrganizations();
-//        loadFromDB();
-//      }
-//
-//      @Override
-//      public void onNothingSelected(AdapterView<?> adapterView) {
-//      }
-//    });
-//
-//
-//    organization_adapter = new OrganizationAdapter(this, new ArrayList<>());
-//    ORGANIZATION_SELECTOR.setAdapter(organization_adapter, false, selected -> {
-//      loadFromDB();
-//    });
-
-
-
-//    Observable.from(filter_types).subscribe(
-//      this::loadDocumentsCountByType
-//    );
-  }
-
-  private void updateDocumentCount() {
-
-//    if (updateDocumentCount != null){
-//      updateDocumentCount.unsubscribe();
-//    }
-//    updateDocumentCount = dataStore
-//      .select(RDocumentEntity.UID)
-//      .get()
-//      .toObservable()
-//      .subscribeOn(Schedulers.io())
-//      .observeOn(AndroidSchedulers.mainThread())
-//      .subscribe(uid -> {
-//
-//        Timber.tag("updateDocument").w( uid.toString() );
-//
-//        document_type_adapter.updateCountByType( uid.get(0) );
-//      });
-
-//    updateOrganizations();
-  }
-
-  private void updateOrganizations(){
-
-//    if (updateOrganizations != null){
-//      updateOrganizations.unsubscribe();
-//    }
-//    updateOrganizations = dataStore
-//      .select(RSignerEntity.ORGANISATION)
-//      .distinct()
-//      .get()
-//      .toObservable()
-//      .subscribeOn(Schedulers.newThread())
-//      .observeOn(AndroidSchedulers.mainThread())
-////      .flatMap( org -> {
-////
-////      })
-////      })
-//      .subscribe(org -> {
-//
-//        Integer count = dataStore
-//          .count(RSignerEntity.class)
-//          .where(RSignerEntity.ORGANISATION.eq(org.get(0).toString()))
-//          .get()
-//          .value();
-//
-//        organization_adapter.add(new OrganizationItem(org.get(0).toString(), count));
-//
-//        Timber.tag(TAG).d("ORGANIZATION: " + org.get(0).toString());
-//        Timber.tag(TAG).d("ORGANIZATION COUNT: " + count);
-//      });
-  }
-
-  private void loadFromDB() {
-
-//    documents_empty_list.setVisibility(View.GONE);
-//    progressBar.setVisibility(ProgressBar.VISIBLE);
-//
-//    //    findOrganizations();
-//    //    updateOrganizationAdapter();
-//
-////    updateFilterAdapter();
-//
-//
-//    Fields.Journal journal = Fields.Journal.INDEX[ DOCUMENT_TYPE_SELECTOR.getSelectedItemPosition() ];
-//    String title = journal.getName();
-//
-//    toolbar.setTitle(title);
-//
-//    RAdapter.clear();
-//    Timber.d("%s - %s %s ", journal.getType(), journal.getValue(), journal.getName() );
-//
-//    WhereAndOr<Result<RDocumentEntity>> query = dataStore
-//      .select(RDocumentEntity.class)
-//      .where(RDocumentEntity.UID.like( journal.getValue() + "%"));
-//
-//    // favorites && control
-//    LogicalCondition<? extends Expression<Boolean>, ?> favorites_condition = null;
-//    LogicalCondition<? extends Expression<Boolean>, ?> control_condition = null;
-//
-//    boolean favorites_button_value = control_buttons.getStates()[0];
-//    boolean control_button_value = control_buttons.getStates()[1];
-//
-//    favorites_condition = favorites_button_value ? RDocumentEntity.CONTROL.eq(true) : RDocumentEntity.CONTROL.in(Arrays.asList(true, false));
-//    control_condition = control_button_value ? RDocumentEntity.FAVORITES.eq(true)   : RDocumentEntity.FAVORITES.in(Arrays.asList(true, false));
-//
-//
-//    if (favorites_button_value) {
-//      query = query.and(favorites_condition);
-//    }
-//    if (control_button_value) {
-//      query = query.and(control_condition);
-//    }
-//    // favorites && control
-//
-//
-//    // organizations
-//    boolean organization_filter = false;
-//    ArrayList<String> organizations = new ArrayList<String>();
-//    if ( ORGANIZATION_SELECTOR.getAdapter() != null && Arrays.asList(ORGANIZATION_SELECTOR.getSelected()).size() > 0) {
-//
-//      for (int i = 0; i < ORGANIZATION_SELECTOR.getSelected().length; i++) {
-//        if (ORGANIZATION_SELECTOR.getSelected()[i]) {
-//          try {
-//            organizations.add(organization_adapter.getItem(i).getName());
-//            Timber.tag(TAG).i(String.format("%s - ++", organization_adapter.getItem(i).getName()));
-//            organization_filter = true;
-//          } catch (Exception e) {
-//            Timber.tag(TAG).e(e);
-//          }
-//        }
-//      }
-//    }
-//
-//    if (organization_filter) {
-//      query = query.and(RDocumentEntity.ORGANIZATION.in(organizations));
-//    }
-//
-//    // organizations
-//
-//
-//    // filter
-//
-//    int filter_index = FILTER_TYPE_SELECTOR.getSelectedItemPosition();
-//    FilterItem filter_item = filter_adapter.getItem(filter_index);
-//
-//    Timber.tag(TAG).i(String.format("filter_name %s - ++", filter_item.getValue()));
-//
-//    query = query.and(RDocumentEntity.FILTER.eq( Fields.Status.INDEX[ filter_index ].getValue()) );
-//
-//    // filter
-//
-//
-//
-////    Integer count = dataStore
-////      .count(RDocumentEntity.class)
-////      .where(RDocumentEntity.UID.like( journal.getValue() + "%"))
-////      .and(RDocumentEntity.FILTER.eq( Fields.Status.INDEX[ filter_index ].getValue()) )
-////      .get()
-////      .value();
-////    Timber.tag("loadFromDbQuery").e(" beforeLoad count: %s", count);
-//
-//
-//    if (loadFromDbQuery != null) {
-//      loadFromDbQuery.unsubscribe();
-//    }
-//
-//
-//    loadFromDbQuery = query.get()
-//      .toObservable()
-//      .subscribeOn(Schedulers.io())
-//      .observeOn(AndroidSchedulers.mainThread())
-//      .toList()
-//      .subscribe(docs -> {
-//        Timber.tag("loadFromDbQuery").e("docs: %s", docs.size() );
-//        addToAdapterList(docs);
-//      });
-//
-//    if (Integer.valueOf(filter_item.getCount()) == 0) {
-//      Timber.e("EMPTY LIST count");
-//      progressBar.setVisibility(ProgressBar.GONE);
-//      documents_empty_list.setVisibility(View.VISIBLE);
-//      documents_empty_list.setText(getString(R.string.document_empty_list));
-//    }
-//
-//    Timber.tag("loadFromDbQuery").e(" afterLoad");
-
-  }
-
-
-  private void findOrganizations() {
-//    organization_adapter.clear();
-//
-//    dataStore
-//      .select(RSignerEntity.ORGANISATION)
-//      .distinct()
-//      .get()
-//      .toObservable()
-//      .subscribeOn(Schedulers.newThread())
-//      .observeOn(AndroidSchedulers.mainThread())
-//      .subscribe(org -> {
-//
-//        Integer count = dataStore
-//          .count(RSignerEntity.class)
-//          .where(RSignerEntity.ORGANISATION.eq(org.get(0).toString()))
-//          .get()
-//          .value();
-//
-//        organization_adapter.add(new OrganizationItem(org.get(0).toString(), count));
-//      });
-  }
-
-//  public void showNextType(Boolean next) {
-//    unsubscribe();
-//    int position = next ? filter_adapter.next() : filter_adapter.prev();
-//    FILTER_TYPE_SELECTOR.setSelection(position);
-//  }
-
-  public void unsubscribe() {
-//    if (loader != null && !loader.isUnsubscribed()) {
-//      loader.unsubscribe();
-//    }
-  }
-
-  private void updateFilterAdapter() {
-
-//    Fields.Journal journal = Fields.Journal.INDEX[ DOCUMENT_TYPE_SELECTOR.getSelectedItemPosition() ];
-//
-//    for(Fields.Status status : Fields.Status.values()){
-//
-//      Integer count = dataStore
-//        .count(RDocumentEntity.class)
-//        .where(RDocumentEntity.UID.like( journal.getValue() + "%"))
-//        .and(RDocumentEntity.FILTER.eq( status.getValue()) )
-//        .get()
-//        .value();
-//
-//      filter_adapter.updateByValue( status.getValue(), count);
-
-//    }
-
-  }
-
-  private void notificationUpdate(){
-
-    if (mToast == null) {
-      mToast = Toast.makeText(MainActivity.this, String.format(  "Загрузка документов: %s/%s ", loaded, total ), LENGTH_LONG);
-    }
-
-    mToast.setText( String.format(  "Загрузка документов: %s/%s ", loaded, total ) );
-    mToast.show();
-  }
-
-
-
   @OnClick(R.id.activity_main_left_button)
   public void setLeftArrowArrow() {
-//    showNextType(false);
-    menuBuilder.prev();
+    menuBuilder.showPrev();
   }
 
   @OnClick(R.id.activity_main_right_button)
   public void setRightArrow() {
-//    showNextType(true);
-    menuBuilder.next();
+    menuBuilder.showNext();
   }
 
   @Subscribe(threadMode = ThreadMode.BACKGROUND)
@@ -778,16 +487,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(MarkDocumentAsChangedJobEvent event) {
     Timber.tag("JOBS").i( "MarkDocumentAsChangedJobEvent ++ "  );
-//    document_type_adapter.updateCountByType( event.uid );
-
-//    loaded++;
-//    notificationUpdate();
-  }
-
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(LoadAllDocumentsByStatusEvent event) {
-    //    table_changes();
   }
 
 

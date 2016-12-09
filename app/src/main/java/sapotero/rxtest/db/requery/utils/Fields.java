@@ -57,10 +57,10 @@ public class Fields {
     private final String name;
     private final Integer type;
 
-    Journal(final int index, final String text, final String name) {
-      this.type = index;
-      this.value = text;
-      this.name = name;
+    Journal(final int index, final String value, final String name) {
+      this.type  = index;
+      this.value = value;
+      this.name  = name;
     }
 
     public Integer getType(){
@@ -69,7 +69,7 @@ public class Fields {
     public String getValue(){
       return value;
     }
-    public String getName(){
+    public String getName() {
       return name;
     }
 

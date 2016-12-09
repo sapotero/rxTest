@@ -138,6 +138,11 @@ public class MultiOrganizationSpinner extends TextView implements DialogInterfac
     this.mListener = listener;
   }
 
+  public void clear() {
+    mSelected = new boolean[mAdapter.getCount()];
+    refreshSpinner();
+  }
+
   public interface MultiSpinnerListener {
     public void onItemsSelected(boolean[] selected);
   }

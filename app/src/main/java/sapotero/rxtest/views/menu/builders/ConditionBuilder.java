@@ -8,14 +8,16 @@ public class ConditionBuilder {
   public enum Condition{
     WHERE,
     AND,
-    OR;
+    OR,
+    LIKE;
+
   }
 
   private final Condition condition;
 
-  private LogicalCondition<? extends Expression<String>, ?> field;
+  private LogicalCondition<? extends Expression<?>, ?> field;
 
-  public ConditionBuilder(Condition condition, LogicalCondition<? extends Expression<String>, ?> field) {
+  public ConditionBuilder(Condition condition, LogicalCondition<? extends Expression<?>, ?> field) {
     this.condition = condition;
     this.field = field;
   }
@@ -28,7 +30,7 @@ public class ConditionBuilder {
     return String.format( "NAME: %s - %s %s %s ", condition, field.getLeftOperand(), field.getOperator(), field.getRightOperand() );
   }
 
-  public LogicalCondition<? extends Expression<String>, ?> getField() {
+  public LogicalCondition<? extends Expression<?>, ?> getField() {
     return field;
   }
 
