@@ -373,17 +373,7 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
 
   @Override
   public void onGetDocumentsInfoSuccess() {
-    new Handler().postDelayed( () -> {
-
-      stepper_loader_info_progressbar.setVisibility(View.INVISIBLE);
-      stepper_loader_info.setChecked(true);
-
-      stepper.setActiveStepAsCompleted();
-      new Handler().postDelayed( () -> {
-        stepper.goToNextStep();
-      }, 500L);
-
-    }, 2000L);
+    dataLoader.getFavorites();
   }
 
   @Override
@@ -426,6 +416,40 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
 
   @Override
   public void onGetTemplatesInfoError(Throwable error) {
+    Toast.makeText( this, String.format( "onError: Error %s", error.getMessage() ), Toast.LENGTH_SHORT).show();
+    stepper.setStepAsUncompleted(1);
+    stepper.goToPreviousStep();
+  }
+
+  @Override
+  public void onGetFavoritesInfoSuccess() {
+    dataLoader.getProcessed();
+  }
+
+  @Override
+  public void onGetFavoritesInfoError(Throwable error) {
+    Toast.makeText( this, String.format( "onError: Error %s", error.getMessage() ), Toast.LENGTH_SHORT).show();
+    stepper.setStepAsUncompleted(1);
+    stepper.goToPreviousStep();
+  }
+
+  @Override
+  public void onGetProcessedInfoSuccess() {
+    new Handler().postDelayed( () -> {
+
+      stepper_loader_info_progressbar.setVisibility(View.INVISIBLE);
+      stepper_loader_info.setChecked(true);
+
+      stepper.setActiveStepAsCompleted();
+      new Handler().postDelayed( () -> {
+        stepper.goToNextStep();
+      }, 500L);
+
+    }, 2000L);
+  }
+
+  @Override
+  public void onGetProcessedInfoError(Throwable error) {
     Toast.makeText( this, String.format( "onError: Error %s", error.getMessage() ), Toast.LENGTH_SHORT).show();
     stepper.setStepAsUncompleted(1);
     stepper.goToPreviousStep();

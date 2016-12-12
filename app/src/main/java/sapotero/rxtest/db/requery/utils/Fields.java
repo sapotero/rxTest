@@ -35,6 +35,19 @@ public class Fields {
     }
 
     public static Status[] INDEX = new Status[] { SENT_TO_THE_REPORT, SENT_TO_THE_PERFORMANCE, PRIMARY_CONSIDERATION, APPROVAL, SIGNING, PROCESSED };
+
+    public static Status findStatus( String string){
+      Status status = null;
+
+      for ( Status item: Status.values()  ){
+        if ( Objects.equals(item.getValue(), string) ){
+          status = item;
+          break;
+        }
+      }
+
+      return status;
+    }
   }
 
   public enum Journal {

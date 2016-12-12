@@ -499,7 +499,13 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       Timber.tag(TAG).i( "++ %s", condition.toString() );
     }
 
-    dbQueryBuilder.executeWithConditions( conditions );
+
+    menuBuilder.setFavorites( dbQueryBuilder.getFavoritesCount() );
+
+
+    Timber.tag(TAG).i( "visible: %s, pressed: %s", menuBuilder.getItem().isVisible(), favorites_button.isChecked() );
+
+    dbQueryBuilder.executeWithConditions( conditions, menuBuilder.getItem().isVisible() && favorites_button.isChecked() );
   }
 
   @Override

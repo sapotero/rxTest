@@ -1,0 +1,29 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              tools:context="sapotero.rxtest.views.fragments.RoutePreviewFragment"
+              android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/textView4"
+        android:text="@string/route"
+        android:textAllCaps="true"
+        android:gravity="center"
+        android:textStyle="bold"
+        android:textSize="13sp"
+        android:textColor="@color/md_grey_900"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="@dimen/date_offset"
+        android:background="@drawable/corner_background"
+        >
+
+    </RelativeLayout>
+
+</LinearLayout>

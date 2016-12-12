@@ -46,6 +46,7 @@ public class DBQueryBuilder {
   private Subscription subscribe;
   private OrganizationAdapter organizationAdapter;
   private MultiOrganizationSpinner organizationSelector;
+  private Boolean withFavorites;
 
   public DBQueryBuilder(Context context) {
     this.context = context;
@@ -59,6 +60,15 @@ public class DBQueryBuilder {
 
   public DBQueryBuilder withEmptyView(TextView documents_empty_list) {
     this.documents_empty_list = documents_empty_list;
+    return this;
+  }
+  public DBQueryBuilder withOrganizationsAdapter(OrganizationAdapter organization_adapter) {
+    this.organizationAdapter = organization_adapter;
+    return this;
+  }
+
+  public DBQueryBuilder withOrganizationSelector(MultiOrganizationSpinner organization_selector) {
+    this.organizationSelector = organization_selector;
     return this;
   }
 
@@ -91,6 +101,10 @@ public class DBQueryBuilder {
       }
     }
 
+    if (withFavorites){
+      query = query.or( RDocumentEntity.FAVORITES.eq(true) );
+    }
+
     if ( subscribe != null ){
       subscribe.unsubscribe();
     }
@@ -113,8 +127,9 @@ public class DBQueryBuilder {
 
   }
 
-  public void executeWithConditions(ArrayList<ConditionBuilder> conditions) {
+  public void executeWithConditions(ArrayList<ConditionBuilder> conditions, boolean withFavorites) {
     this.conditions = conditions;
+    this.withFavorites = withFavorites;
     execute();
   }
 
@@ -266,13 +281,52 @@ public class DBQueryBuilder {
 
   }
 
-  public DBQueryBuilder withOrganizationsAdapter(OrganizationAdapter organization_adapter) {
-    this.organizationAdapter = organization_adapter;
-    return this;
+  public int getFavoritesCount(){
+    return dataStore.count(RDocumentEntity.UID).where(RDocumentEntity.FAVORITES.eq(true)).get().value();
   }
 
-  public DBQueryBuilder withOrganizationSelector(MultiOrganizationSpinner organization_selector) {
-    this.organizationSelector = organization_selector;
-    return this;
+  public void getFavorites(){
+    dataStore
+      .select(RDocumentEntity.class)
+      .where(RDocumentEntity.FAVORITES.eq(true))
+      .get()
+      .toObservable()
+      .subscribeOn(Schedulers.io())
+      .observeOn( AndroidSchedulers.mainThread() )
+      .toList()
+      .subscribe(docs -> {
+        Timber.tag("loadFromDbQuery").e("docs: %s", docs.size() );
+        addFavoritesToAdapter(docs);
+      });
   }
+
+  private void addFavoritesToAdapter(List<RDocumentEntity> docs) {
+    if (docs.size() > 0) {
+      for (int i = 0; i < docs.size(); i++) {
+        RDocumentEntity doc = docs.get(i);
+        Timber.tag(TAG).v("addToAdapter ++ " + doc.getTitle());
+
+        Document document = new Document();
+        document.setChanged( doc.isChanged() );
+        document.setStatusCode( doc.getFilter() );
+        document.setUid(doc.getUid());
+        document.setMd5(doc.getMd5());
+        document.setControl(doc.isControl());
+        document.setFavorites(doc.isFavorites());
+        document.setSortKey(doc.getSortKey());
+        document.setTitle(doc.getTitle());
+        document.setRegistrationNumber(doc.getRegistrationNumber());
+        document.setRegistrationDate(doc.getRegistrationDate());
+        document.setUrgency(doc.getUrgency());
+        document.setShortDescription(doc.getShortDescription());
+        document.setComment(doc.getComment());
+        document.setExternalDocumentNumber(doc.getExternalDocumentNumber());
+        document.setReceiptDate(doc.getReceiptDate());
+        document.setOrganization(doc.getOrganization());
+
+        adapter.addItem(document);
+      }
+    }
+  }
+
 }

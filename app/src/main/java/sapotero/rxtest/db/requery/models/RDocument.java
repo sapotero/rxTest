@@ -90,13 +90,18 @@ public abstract class  RDocument implements Persistable {
   @OneToMany(mappedBy = "document")
   Set<RControlLabels> controlLabels;
 
+  @OneToMany(mappedBy = "document")
+  Set<RLinks> links;
+
+  @ForeignKey
+  @OneToOne
+  RRoute route;
+
 //  exemplars: Тип массив структур Экземпляры документа,
 //  decisions: Тип массив структур Резолюции документа,
 //  images: Тип массив структур Электронные образы,
 //  control_labels: Тип массив структур Контрольные отметки,
-
-//  ** нет необходимости
-//    links: Тип массив. Массив UID связанных документов,
-//    route: Тип структура Маршрут прохождения документа
+//  links: Тип массив. Массив UID связанных документов,
+//  route: Тип структура Маршрут прохождения документа
 
 }

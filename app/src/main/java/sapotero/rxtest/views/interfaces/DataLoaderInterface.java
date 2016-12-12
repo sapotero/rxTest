@@ -8,10 +8,15 @@ import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import javax.inject.Inject;
 
+import io.requery.Persistable;
+import io.requery.rx.SingleEntityStore;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import rx.Observable;
@@ -19,6 +24,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.models.RFolderEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.jobs.bus.AddFoldersJob;
 import sapotero.rxtest.jobs.bus.AddPrimaryConsiderationJob;
@@ -47,6 +53,7 @@ public class DataLoaderInterface {
   @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
   @Inject JobManager jobManager;
+  @Inject SingleEntityStore<Persistable> dataStore;
 
   private Preference<String> TOKEN;
 
@@ -81,6 +88,12 @@ public class DataLoaderInterface {
 
     void onGetTemplatesInfoSuccess();
     void onGetTemplatesInfoError(Throwable error);
+
+    void onGetFavoritesInfoSuccess();
+    void onGetFavoritesInfoError(Throwable error);
+
+    void onGetProcessedInfoSuccess();
+    void onGetProcessedInfoError(Throwable error);
   }
 
   public DataLoaderInterface(LoginActivity loginActivity) {
@@ -326,6 +339,120 @@ public class DataLoaderInterface {
           Timber.tag(TAG).d("ERROR " + error.getMessage());
           callback.onGetFoldersInfoError(error);
         });
+
+  }
+
+  public void getProcessed(){
+
+    String processed_folder = dataStore
+      .select(RFolderEntity.class)
+      .where(RFolderEntity.TYPE.eq("processed"))
+      .get().first().getUid();
+
+    StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+    StrictMode.setThreadPolicy(policy);
+
+
+    Retrofit retrofit = new RetrofitManager(context, HOST.get() + "/v3/", okHttpClient).process();
+    DocumentsService documentsService = retrofit.create(DocumentsService.class);
+
+    Fields.Status[] new_filter_types = Fields.Status.values();
+
+    DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+    Calendar cal = Calendar.getInstance();
+    cal.add(Calendar.MONTH, -1);
+    String date = dateFormat.format(cal.getTime());
+
+
+
+      Observable<Fields.Status> types = Observable.from(new_filter_types);
+    Observable<Documents> count = Observable
+      .from(new_filter_types)
+      .flatMap(status -> documentsService.getByFolders(LOGIN.get(), TOKEN.get(), status.getValue(), 1000, 0, processed_folder, date));
+
+
+    unsubscribe();
+    subscription.add(
+      Observable.zip( types, count, (type, docs) -> new TDmodel( type, docs.getDocuments() ))
+        .subscribeOn( Schedulers.computation() )
+        .observeOn( AndroidSchedulers.mainThread() )
+        .toList()
+        .subscribe(
+          raw -> {
+            Timber.tag(TAG).i(" RECV: %s", raw.size());
+
+            for (TDmodel data: raw) {
+              Timber.tag(TAG).i(" DocumentType: %s | %s", data.getType(), data.getDocuments().size() );
+
+              for (Document doc: data.getDocuments() ) {
+                String type = data.getType();
+                Timber.tag(TAG).d( "%s | %s", type, doc.getUid() );
+
+                jobManager.addJobInBackground(new SyncDocumentsJob( doc.getUid(), Fields.getStatus(type), processed_folder, false ), () -> {
+                  Timber.e("complete");
+                });
+              }
+            }
+            callback.onGetProcessedInfoSuccess();
+          },
+          error -> {
+            callback.onGetProcessedInfoError(error);
+          })
+    );
+
+  }
+
+  public void getFavorites(){
+
+    String processed_folder = dataStore
+      .select(RFolderEntity.class)
+      .where(RFolderEntity.TYPE.eq("favorites"))
+      .get().first().getUid();
+
+    StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+    StrictMode.setThreadPolicy(policy);
+
+
+    Retrofit retrofit = new RetrofitManager(context, HOST.get() + "/v3/", okHttpClient).process();
+    DocumentsService documentsService = retrofit.create(DocumentsService.class);
+
+    Fields.Status[] new_filter_types = Fields.Status.values();
+
+
+    Observable<Fields.Status> types = Observable.from(new_filter_types);
+    Observable<Documents> count = Observable
+      .from(new_filter_types)
+      .flatMap(status -> documentsService.getByFolders(LOGIN.get(), TOKEN.get(), status.getValue(), 1000, 0, processed_folder, null));
+
+
+    unsubscribe();
+    subscription.add(
+      Observable.zip( types, count, (type, docs) -> new TDmodel( type, docs.getDocuments() ))
+        .subscribeOn( Schedulers.computation() )
+        .observeOn( AndroidSchedulers.mainThread() )
+        .toList()
+        .subscribe(
+          raw -> {
+            Timber.tag(TAG).i(" RECV: %s", raw.size());
+
+            for (TDmodel data: raw) {
+              Timber.tag(TAG).i(" DocumentType: %s | %s", data.getType(), data.getDocuments().size() );
+
+              for (Document doc: data.getDocuments() ) {
+                String type = data.getType();
+                Timber.tag(TAG).d( "%s | %s", type, doc.getUid() );
+
+                jobManager.addJobInBackground(new SyncDocumentsJob( doc.getUid(), Fields.getStatus(type), processed_folder, true ), () -> {
+                  Timber.e("complete");
+                });
+              }
+            }
+            callback.onGetProcessedInfoSuccess();
+          },
+          error -> {
+            callback.onGetProcessedInfoError(error);
+          })
+    );
 
   }
 

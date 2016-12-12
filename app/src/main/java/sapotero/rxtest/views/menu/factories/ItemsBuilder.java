@@ -37,6 +37,10 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
   private CheckBox favoritesButton;
 
 
+  public boolean isVisible() {
+    return getSelectedItem().isVisible();
+  }
+
 
   public interface Callback {
     void onMenuUpdate(ArrayList<ConditionBuilder> result);
@@ -79,6 +83,10 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
 
   public void setFavoritesButton(CheckBox favoritesButton) {
     this.favoritesButton = favoritesButton;
+    this.favoritesButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+      Timber.tag("checkbox").i( "checked: %s", isChecked );
+      onButtonBuilderUpdate();
+    });
   }
 
   public void setSpinnerDefaults() {
@@ -133,7 +141,7 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
     view.addView( button_group );
   }
 
-  private Item getSelectedItem(){
+  public Item getSelectedItem(){
     return journalSpinnerAdapter.getItem(journalSpinner.getSelectedItemPosition()).getItem();
   }
 

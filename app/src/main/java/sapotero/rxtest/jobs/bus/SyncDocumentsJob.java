@@ -7,6 +7,7 @@ import com.birbit.android.jobqueue.CancelReason;
 import com.birbit.android.jobqueue.Params;
 import com.birbit.android.jobqueue.RetryConstraint;
 import com.f2prateek.rx.preferences.Preference;
+import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -18,7 +19,9 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.db.requery.models.RRouteEntity;
 import sapotero.rxtest.db.requery.models.RSignerEntity;
+import sapotero.rxtest.db.requery.models.RStepEntity;
 import sapotero.rxtest.db.requery.models.control_labels.RControlLabelsEntity;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
@@ -36,17 +39,20 @@ import sapotero.rxtest.retrofit.models.document.Exemplar;
 import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.retrofit.models.document.Signer;
+import sapotero.rxtest.retrofit.models.document.Step;
 import timber.log.Timber;
 
 public class SyncDocumentsJob  extends BaseJob {
 
   public static final int PRIORITY = 1;
+  private Boolean isFavorites;
+  private String processed_folder;
 
   private Preference<String> LOGIN = null;
   private Preference<String> TOKEN = null;
   private Preference<String> HOST;
 
-  private final Fields.Status filter;
+  private Fields.Status filter;
   private String uid;
   private String TAG = this.getClass().getSimpleName();
 
@@ -54,6 +60,14 @@ public class SyncDocumentsJob  extends BaseJob {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
     this.filter = filter;
+  }
+
+  public SyncDocumentsJob(String uid, Fields.Status filter, String processed_folder, Boolean isFavorites) {
+    super( new Params(PRIORITY).requireNetwork().persist() );
+    this.uid = uid;
+    this.filter = filter;
+    this.processed_folder = processed_folder;
+    this.isFavorites = isFavorites;
   }
 
   @Override
@@ -90,7 +104,7 @@ public class SyncDocumentsJob  extends BaseJob {
           update( doc, exist(doc.getUid()) );
 
           
-          if ( doc.getImages() != null && doc.getImages().size() > 0 ){
+          if ( doc.getImages() != null && doc.getImages().size() > 0 && !isFavorites ){
 
             for (Image image : doc.getImages()) {
 
@@ -148,6 +162,15 @@ public class SyncDocumentsJob  extends BaseJob {
     rd.setExternalDocumentNumber( d.getExternalDocumentNumber() );
     rd.setReceiptDate( d.getReceiptDate() );
     rd.setViewed( d.getViewed() );
+
+    if (processed_folder != null ){
+      if (isFavorites){
+        rd.setFavorites(true);
+      } else {
+        rd.setProcessed(true);
+      }
+      rd.setFolder(processed_folder);
+    }
 
     if ( d.getSigner().getOrganisation() != null && !Objects.equals(d.getSigner().getOrganisation(), "")){
       rd.setOrganization( d.getSigner().getOrganisation() );
@@ -222,7 +245,17 @@ public class SyncDocumentsJob  extends BaseJob {
         rDoc.setSigner( signer );
       }
 
+      if (processed_folder != null ){
+        if (isFavorites){
+          rDoc.setFavorites(true);
+        } else {
+          rDoc.setProcessed(true);
+        }
+        rDoc.setFolder(processed_folder);
+      }
+
       if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
+
         for (Decision d: document.getDecisions() ) {
 
           RDecisionEntity decision = new RDecisionEntity();
@@ -324,6 +357,42 @@ public class SyncDocumentsJob  extends BaseJob {
           rDoc.getControlLabels().add(label);
         }
       }
+
+      if ( document.getRoute() != null  ){
+        RRouteEntity route = new RRouteEntity();
+        route.setText( document.getRoute().getTitle() );
+
+
+        for (Step step: document.getRoute().getSteps() ) {
+
+          RStepEntity r_step = new RStepEntity();
+          r_step.setTitle( step.getTitle() );
+          r_step.setNumber( step.getNumber() );
+
+          if ( step.getPeople() != null && step.getPeople().size() > 1 ){
+            r_step.setPeople(  new Gson().toJson( step.getPeople() )  );
+          }
+          if ( step.getCards() != null && step.getCards().size() > 1 ){
+            r_step.setCards(  new Gson().toJson( step.getCards() )  );
+          }
+          if ( step.getAnotherApprovals() != null && step.getAnotherApprovals().size() > 1 ){
+            r_step.setAnother_approvals(  new Gson().toJson( step.getAnotherApprovals() )  );
+          }
+
+          route.getSteps().add( r_step );
+        }
+
+        rDoc.setRoute( route );
+
+      }
+
+//      if ( document.getLinks() != null){
+//        for (String l: document.getLinks() ) {
+//          RLinkEntity link = new RLinkEntity();
+//          link.setUid( l );
+//          rDoc.getLinks().add( link );
+//        }
+//      }
 
       if ( document.getInfoCard() != null){
         rDoc.setInfoCard( document.getInfoCard() );

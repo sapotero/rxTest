@@ -8,8 +8,10 @@ import android.widget.Spinner;
 
 import java.util.ArrayList;
 
+import sapotero.rxtest.R;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import sapotero.rxtest.views.menu.factories.ItemsBuilder;
+import sapotero.rxtest.views.menu.fields.Item;
 import sapotero.rxtest.views.views.MultiOrganizationSpinner;
 import timber.log.Timber;
 
@@ -27,6 +29,10 @@ public class MenuBuilder implements ItemsBuilder.Callback{
   private MultiOrganizationSpinner organizationsSelector;
   private CheckBox favorites;
 
+  public boolean isVisible() {
+    return itemsBuilder.isVisible();
+  }
+
 
   public interface Callback {
 
@@ -39,7 +45,9 @@ public class MenuBuilder implements ItemsBuilder.Callback{
   }
 
 
-
+  public Item getItem(){
+    return itemsBuilder.getSelectedItem();
+  }
 
   public MenuBuilder(Context context) {
     this.context = context;
@@ -98,6 +106,12 @@ public class MenuBuilder implements ItemsBuilder.Callback{
     itemsBuilder.next();
   }
 
+  public void setFavorites( int count ){
+    favorites.setText(
+      String.format( "%s %s", context.getString( R.string.favorites_template ), count )
+    );
+  }
+
 
   @Override
   public void onMenuUpdate( ArrayList<ConditionBuilder> result ) {
@@ -108,6 +122,9 @@ public class MenuBuilder implements ItemsBuilder.Callback{
 
     buttons.removeAllViews();
     buttons.addView( itemsBuilder.getView() );
+
+
+
 
     callback.onMenuBuilderUpdate( result );
   }

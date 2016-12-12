@@ -5,12 +5,13 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
 import sapotero.rxtest.views.fragments.InfoCardDocumentsFragment;
-import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
+import sapotero.rxtest.views.fragments.InfoCardFieldsFragment;
+import sapotero.rxtest.views.fragments.InfoCardLinksFragment;
 
-public class TabPagerAdapter extends FragmentPagerAdapter {
+public class TabSigningPagerAdapter extends FragmentPagerAdapter {
   private int tabs_count;
 
-  public TabPagerAdapter(FragmentManager fragmentManager) {
+  public TabSigningPagerAdapter(FragmentManager fragmentManager) {
     super(fragmentManager);
   }
 
@@ -20,7 +21,9 @@ public class TabPagerAdapter extends FragmentPagerAdapter {
       case 0:
         return new InfoCardDocumentsFragment();
       case 1:
-        return new InfoCardWebViewFragment();
+        return new InfoCardFieldsFragment();
+      case 2:
+        return new InfoCardLinksFragment();
       default:
         return null;
     }
@@ -32,13 +35,17 @@ public class TabPagerAdapter extends FragmentPagerAdapter {
       case 0:
         return "Документ";
       case 1:
-        return "Инфокарточка";
+        return "Поля документа";
+      case 2:
+        return "Связанные документы";
     }
     return null;
   }
 
   @Override
   public int getCount() {
-    return 2;
+    return 3;
   }
+
+
 }

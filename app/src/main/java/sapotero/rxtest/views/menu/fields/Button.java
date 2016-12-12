@@ -42,7 +42,12 @@ public enum Button {
   ),
   PROCESSED ( 7, "Обработанные %s" ,
     new ConditionBuilder[]{
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq("success")  ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.ne(false)  ),
+    }
+  ),
+  FAVORITES ( 8, "Избранное %s" ,
+    new ConditionBuilder[]{
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FAVORITES.ne(true)  ),
     }
   );
 

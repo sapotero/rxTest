@@ -69,6 +69,29 @@ public class DocumentInfo {
     @SerializedName("actions")
     @Expose
     private List<Object> actions = new ArrayList<Object>();
+    @SerializedName("route")
+    @Expose
+    private Route route;
+
+
+    /**
+     *
+     * @return
+     * The route
+     */
+    public Route getRoute() {
+        return route;
+    }
+
+    /**
+     *
+     * @param route
+     * The route
+     */
+    public void setRoute(Route route) {
+        this.route = route;
+    }
+
 
     /**
      * 

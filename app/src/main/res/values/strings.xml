@@ -167,6 +167,7 @@
     <string name="magnifer">Увеличить</string>
     <string name="dialog_oshs_close">Закрыть</string>
     <string name="empty_list">Заглушка под пустой результат в выборе документов</string>
+    <string name="route">Маршрут прохождения документа</string>
 
 
 </resources>
