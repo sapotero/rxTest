@@ -13,7 +13,7 @@ public class Action {
   private String status;
   @SerializedName("comment")
   @Expose
-  private Object comment;
+  private String comment;
 
   /**
    *
@@ -56,7 +56,7 @@ public class Action {
    * @return
    * The comment
    */
-  public Object getComment() {
+  public String getComment() {
     return comment;
   }
 
@@ -65,7 +65,7 @@ public class Action {
    * @param comment
    * The comment
    */
-  public void setComment(Object comment) {
+  public void setComment(String comment) {
     this.comment = comment;
   }
 

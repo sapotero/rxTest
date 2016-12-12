@@ -16,14 +16,17 @@
         android:layout_width="match_parent"
         android:layout_height="40dp"
         />
-
-    <RelativeLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="@dimen/date_offset"
-        android:background="@drawable/corner_background"
-        >
+        android:layout_height="match_parent">
 
-    </RelativeLayout>
+        <LinearLayout
+            android:id="@+id/fragment_route_wrapper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/date_offset"
+            android:background="@drawable/corner_background"
+            android:orientation="vertical"/>
+    </ScrollView>
 
 </LinearLayout>

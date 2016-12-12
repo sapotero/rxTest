@@ -36,7 +36,6 @@ import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.models.RRouteEntity;
 import sapotero.rxtest.db.requery.models.decisions.RBlock;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecision;
@@ -171,24 +170,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     }
 
     fragmentTransaction.commit();
-
-    dataStore
-      .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq( UID.get() ))
-      .get()
-      .toObservable()
-      .subscribeOn(Schedulers.io())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(doc -> {
-        Timber.tag("LOAD").e(" doc: %s ", doc.getUid() );
-
-        if ( doc.getRoute() != null ){
-          RRouteEntity route = (RRouteEntity) doc.getRoute();
-
-          Timber.tag("ROUTE").e(" is: %s | %s - %s", route.getId(), route.getText(), route.getSteps().size() );
-        }
-
-      });
   }
 
   private void setToolbar() {

@@ -31,6 +31,7 @@ import sapotero.rxtest.views.fragments.InfoCardDocumentsFragment;
 import sapotero.rxtest.views.fragments.InfoCardFieldsFragment;
 import sapotero.rxtest.views.fragments.InfoCardLinksFragment;
 import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
+import sapotero.rxtest.views.fragments.RoutePreviewFragment;
 import sapotero.rxtest.views.interfaces.DataLoaderInterface;
 import sapotero.rxtest.views.interfaces.DocumentManager;
 import sapotero.rxtest.views.managers.db.factories.DocumentFactory;
@@ -78,6 +79,9 @@ public interface EsdComponent {
   void inject(SelectOshsDialogFragment fragment);
   void inject(InfoCardFieldsFragment fragment);
   void inject(InfoCardLinksFragment fragment);
+  void inject(RoutePreviewFragment fragment);
+
+
 
 
   void inject(BaseJob job);

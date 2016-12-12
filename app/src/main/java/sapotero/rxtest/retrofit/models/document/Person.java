@@ -16,7 +16,7 @@ public class Person {
   private String officialName;
   @SerializedName("sign_png")
   @Expose
-  private Object signPng;
+  private String signPng;
   @SerializedName("actions")
   @Expose
   private List<Action> actions = null;
@@ -62,7 +62,7 @@ public class Person {
    * @return
    * The signPng
    */
-  public Object getSignPng() {
+  public String getSignPng() {
     return signPng;
   }
 
@@ -71,7 +71,7 @@ public class Person {
    * @param signPng
    * The sign_png
    */
-  public void setSignPng(Object signPng) {
+  public void setSignPng(String signPng) {
     this.signPng = signPng;
   }
 
