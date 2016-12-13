@@ -54,6 +54,8 @@ import sapotero.rxtest.events.bus.FileDownloadedEvent;
 import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.views.activities.DocumentImageFullScreenActivity;
 import sapotero.rxtest.views.adapters.DocumentLinkAdapter;
+import sapotero.rxtest.views.views.utils.AnimationManager;
+import sapotero.rxtest.views.views.utils.DragPinchManager;
 import timber.log.Timber;
 
 public class InfoCardDocumentsFragment extends Fragment implements AdapterView.OnItemClickListener, GestureDetector.OnDoubleTapListener {
@@ -127,7 +129,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
     loadSettings();
 
-//    DragPinchManager pinch = new DragPinchManager( getContext(), pdfView, new AnimationManager(pdfView), mDocumentList);
+    DragPinchManager pinch = new DragPinchManager( getContext(), pdfView, new AnimationManager(pdfView), mDocumentList);
 
     ArrayList<Image> documents = new ArrayList<Image>();
     adapter = new DocumentLinkAdapter(mContext, documents);

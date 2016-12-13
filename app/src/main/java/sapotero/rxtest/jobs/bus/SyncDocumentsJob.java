@@ -45,6 +45,7 @@ import timber.log.Timber;
 public class SyncDocumentsJob  extends BaseJob {
 
   public static final int PRIORITY = 1;
+  private Boolean isProcessed;
   private Boolean isFavorites;
   private String processed_folder;
 
@@ -60,15 +61,18 @@ public class SyncDocumentsJob  extends BaseJob {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
     this.filter = filter;
-    isFavorites = false;
+    this.isFavorites = false;
+    this.isProcessed = false;
+    this.processed_folder = "";
   }
 
-  public SyncDocumentsJob(String uid, Fields.Status filter, String processed_folder, Boolean isFavorites) {
+  public SyncDocumentsJob(String uid, Fields.Status filter, String processed_folder, Boolean isFavorites, Boolean isProcessed) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
     this.filter = filter;
     this.processed_folder = processed_folder;
     this.isFavorites = isFavorites;
+    this.isProcessed = isProcessed;
   }
 
   @Override
@@ -164,14 +168,9 @@ public class SyncDocumentsJob  extends BaseJob {
     rd.setReceiptDate( d.getReceiptDate() );
     rd.setViewed( d.getViewed() );
 
-    if (processed_folder != null ){
-      if (isFavorites){
-        rd.setFavorites(true);
-      } else {
-        rd.setProcessed(true);
-      }
-      rd.setFolder(processed_folder);
-    }
+    rd.setFavorites(true);
+    rd.setProcessed(true);
+    rd.setFolder(processed_folder);
 
     if ( d.getSigner().getOrganisation() != null && !Objects.equals(d.getSigner().getOrganisation(), "")){
       rd.setOrganization( d.getSigner().getOrganisation() );
@@ -246,14 +245,9 @@ public class SyncDocumentsJob  extends BaseJob {
         rDoc.setSigner( signer );
       }
 
-      if (processed_folder != null ){
-        if (isFavorites){
-          rDoc.setFavorites(true);
-        } else {
-          rDoc.setProcessed(true);
-        }
-        rDoc.setFolder(processed_folder);
-      }
+      rDoc.setFavorites(isFavorites);
+      rDoc.setProcessed(isProcessed);
+      rDoc.setFolder(processed_folder);
 
       if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
 
@@ -403,7 +397,6 @@ public class SyncDocumentsJob  extends BaseJob {
         .toObservable()
         .subscribeOn( Schedulers.io() )
         .observeOn( Schedulers.io() )
-        .toBlocking()
         .subscribe(
           result -> {
             Timber.tag(TAG).d("updated " + result.getUid());

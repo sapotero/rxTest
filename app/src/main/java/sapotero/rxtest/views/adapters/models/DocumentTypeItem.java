@@ -33,6 +33,8 @@ public class DocumentTypeItem {
     if (item.getIndex() == 0){
       Integer total = dataStore
         .count(RDocumentEntity.class)
+        .where( RDocumentEntity.FAVORITES.ne( true ) )
+        .and( RDocumentEntity.PROCESSED.ne( true ) )
         .get()
         .value();
 

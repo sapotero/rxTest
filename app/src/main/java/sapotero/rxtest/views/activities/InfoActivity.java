@@ -36,6 +36,7 @@ import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.db.requery.models.RFolderEntity;
 import sapotero.rxtest.db.requery.models.decisions.RBlock;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecision;
@@ -533,7 +534,16 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
     if (viewPager.getAdapter() == null) {
 
-      Timber.tag(TAG).e("setTabContent");
+      Timber.tag(TAG).e("setTabContent %s", "%" + Fields.Journal.CITIZEN_REQUESTS.getValue() );
+
+      dataStore
+        .select(RFolderEntity.class)
+        .get().toObservable()
+        .observeOn(Schedulers.io())
+        .subscribeOn(AndroidSchedulers.mainThread())
+        .subscribe( folder -> {
+          Timber.e( "%s - %s ", folder.getType(), folder.getTitle() );
+        });
 
       if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL ){
         TabSigningPagerAdapter adapter = new TabSigningPagerAdapter( getSupportFragmentManager() );
