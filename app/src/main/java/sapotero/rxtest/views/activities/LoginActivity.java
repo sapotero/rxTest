@@ -459,12 +459,12 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
     Timber.tag(TAG).v( "JOB TOTAL: %s/%s [ %s ]", jobManager.getJobManagerExecutionThread().getState(), jobManager.countReadyJobs(), jobManager.getActiveConsumerCount() );
   }
 
-  @Subscribe(threadMode = ThreadMode.POSTING)
+  @Subscribe(threadMode = ThreadMode.BACKGROUND)
   public void onMessageEvent(MarkDocumentAsChangedJobEvent event) {
     Timber.tag(TAG).v( "JOB TOTAL %s", event.uid );
   }
 
-  @Subscribe(threadMode = ThreadMode.POSTING)
+  @Subscribe(threadMode = ThreadMode.BACKGROUND)
   public void onMessageEvent(FileDownloadedEvent event) {
     printJobStat();
   }

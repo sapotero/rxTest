@@ -8,11 +8,24 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.f2prateek.rx.preferences.Preference;
+import com.f2prateek.rx.preferences.RxSharedPreferences;
+
+import javax.inject.Inject;
+
+import butterknife.ButterKnife;
+import io.requery.Persistable;
+import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.R;
+import sapotero.rxtest.application.EsdApplication;
 
 public class InfoActivityDecisionPreviewFragment extends Fragment {
 
+  @Inject RxSharedPreferences settings;
+  @Inject SingleEntityStore<Persistable> dataStore;
+
   private OnFragmentInteractionListener mListener;
+  private Preference<String> DOCUMENT_UID;
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -22,10 +35,20 @@ public class InfoActivityDecisionPreviewFragment extends Fragment {
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    return inflater.inflate(R.layout.fragment_info_card_decision_preview, container, false);
+    View view = inflater.inflate(R.layout.fragment_info_card_decision_preview, container, false);
+
+    EsdApplication.getComponent( getContext() ).inject(this);
+    ButterKnife.bind(view);
+
+    loadSettings();
+    return view;
   }
 
-  @Override
+  private void loadSettings() {
+    DOCUMENT_UID = settings.getString("main_menu.uid");
+  }
+
+    @Override
   public void onAttach(Context context) {
     super.onAttach(context);
     if (context instanceof OnFragmentInteractionListener) {

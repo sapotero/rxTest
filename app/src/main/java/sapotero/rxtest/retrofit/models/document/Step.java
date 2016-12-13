@@ -14,12 +14,15 @@ public class Step {
   @SerializedName("title")
   @Expose
   private String title;
+
   @SerializedName("people")
   @Expose
   private List<Person> people = null;
+
   @SerializedName("cards")
   @Expose
   private List<Card> cards = null;
+
   @SerializedName("another_approvals")
   @Expose
   private List<AnotherApproval> anotherApprovals = null;

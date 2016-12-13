@@ -1,23 +1,133 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:tools="http://schemas.android.com/tools"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             tools:context="sapotero.rxtest.views.fragments.InfoCardWebViewFragment">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              tools:context="sapotero.rxtest.views.fragments.InfoCardWebViewFragment"
+              android:orientation="vertical">
 
-    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                 xmlns:tools="http://schemas.android.com/tools"
-                 android:layout_width="match_parent"
-                 android:layout_height="match_parent"
-                 tools:context="sapotero.rxtest.views.fragments.InfoCardFragment">
-
-        <WebView
+    <LinearLayout
+        android:id="@+id/wrapper_field_created_at"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/half_date_offset"
+        android:orientation="horizontal">
+        <TextView
+            android:text="@string/field_created_at"
+            android:layout_marginEnd="@dimen/half_date_offset"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/web_infocard">
+            android:layout_height="match_parent"
+            android:textStyle="bold"
+            android:textColor="@color/md_grey_900"
+            android:textSize="@dimen/fragment_info_card_field_size"
+            />
 
-        </WebView>
+        <TextView
+            android:id="@+id/field_created_at"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textColor="@color/md_grey_900"
+            android:textSize="@dimen/fragment_info_card_field_size"
+            />
 
-    </FrameLayout>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/wrapper_field_short_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/half_date_offset"
+        android:orientation="horizontal">
+        <TextView
+            android:text="@string/field_short_description"
+            android:layout_marginEnd="@dimen/half_date_offset"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textStyle="bold"
+            android:textColor="@color/md_grey_900"
+            android:textSize="@dimen/fragment_info_card_field_size"
+            />
 
+        <TextView
+            android:id="@+id/field_short_description"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textColor="@color/md_grey_900"
+            android:textSize="@dimen/fragment_info_card_field_size"
+            />
 
-</FrameLayout>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/wrapper_field_urgency"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/half_date_offset"
+        android:orientation="horizontal">
+        <TextView
+            android:text="@string/field_urgency"
+            android:layout_marginEnd="@dimen/half_date_offset"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textStyle="bold"
+            android:textColor="@color/md_grey_900"
+            android:textSize="@dimen/fragment_info_card_field_size"
+            />
+
+        <TextView
+            android:id="@+id/field_urgency"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textColor="@color/md_grey_900"
+            android:textSize="@dimen/fragment_info_card_field_size"
+            />
+
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/wrapper_field_comment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/half_date_offset"
+        android:orientation="horizontal">
+        <TextView
+            android:text="@string/field_comment"
+            android:layout_marginEnd="@dimen/half_date_offset"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textStyle="bold"
+            android:textColor="@color/md_grey_900"
+            android:textSize="@dimen/fragment_info_card_field_size"
+            />
+
+        <TextView
+            android:id="@+id/field_comment"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textColor="@color/md_grey_900"
+            android:textSize="@dimen/fragment_info_card_field_size"
+            />
+
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/wrapper_field_external_number"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/half_date_offset"
+        android:orientation="horizontal">
+        <TextView
+            android:text="@string/field_external_number"
+            android:layout_marginEnd="@dimen/half_date_offset"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textStyle="bold"
+            android:textColor="@color/md_grey_900"
+            android:textSize="@dimen/fragment_info_card_field_size"
+            />
+
+        <TextView
+            android:id="@+id/field_external_number"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textColor="@color/md_grey_900"
+            android:textSize="@dimen/fragment_info_card_field_size"
+            />
+
+    </LinearLayout>
+</LinearLayout>

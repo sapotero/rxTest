@@ -168,6 +168,11 @@
     <string name="dialog_oshs_close">Закрыть</string>
     <string name="empty_list">Заглушка под пустой результат в выборе документов</string>
     <string name="route">Маршрут прохождения документа</string>
+    <string name="field_created_at">Дата создания:</string>
+    <string name="field_short_description">Краткое содержание:</string>
+    <string name="field_urgency">Срочность:</string>
+    <string name="field_comment">Комментарий:</string>
+    <string name="field_external_number">Номер поступившего документа:</string>
 
 
 </resources>

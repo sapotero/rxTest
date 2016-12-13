@@ -3,6 +3,9 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
 
+    <dimen name="fragment_info_card_field_size">20sp</dimen>
+
+
     <dimen name="date_offset">16sp</dimen>
     <dimen name="half_date_offset">8sp</dimen>
 

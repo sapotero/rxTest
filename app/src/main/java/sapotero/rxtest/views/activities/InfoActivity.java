@@ -351,8 +351,8 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
         if ( doc.getDecisions().size() >= 1 ){
 
-          decision_spinner_adapter.clear();
-          decision_spinner_adapter.add( new DecisionSpinnerItem(null, "Всего резолюций", doc.getDecisions().size() ) );
+//          decision_spinner_adapter.clear();
+//          decision_spinner_adapter.add( new DecisionSpinnerItem(null, "Всего резолюций", doc.getDecisions().size() ) );
 
 //          desigions_recycler_view.setLayoutManager(new LinearLayoutManager(this));
 
@@ -410,7 +410,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
 //            decisions_list.add(raw_decision);
 
-            decision_spinner_adapter.add( new DecisionSpinnerItem( raw_decision, raw_decision.getSignerBlankText(), raw_decision.getDate() ) );
+//            decision_spinner_adapter.add( new DecisionSpinnerItem( raw_decision, raw_decision.getSignerBlankText(), raw_decision.getDate() ) );
 
           }
 
@@ -418,14 +418,14 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 //          desigions_recycler_view.setAdapter(decision_adapter);
 
           // если есть резолюции, то отобразить первую
-          if ( decision_spinner_adapter.size() > 0 ) {
-//            jobManager.addJobInBackground( new SetActiveDecisionJob(0) );
-            Timber.w("decisions_list first:  %s", decision_spinner_adapter.getItem(1).getDecision().getLetterhead() );
-//            preview.show( decision_spinner_adapter.getItem(1).getDecision() );
-          } else {
-            Timber.w("decisions_list.size() < 0");
-//            preview.showEmpty();
-          }
+//          if ( decision_spinner_adapter.size() > 0 ) {
+////            jobManager.addJobInBackground( new SetActiveDecisionJob(0) );
+//            Timber.w("decisions_list first:  %s", decision_spinner_adapter.getItem(1).getDecision().getLetterhead() );
+////            preview.show( decision_spinner_adapter.getItem(1).getDecision() );
+//          } else {
+//            Timber.w("decisions_list.size() < 0");
+////            preview.showEmpty();
+//          }
 
 //          desigions_recycler_view.setLayoutManager(new LinearLayoutManager(this));
 //          RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();

@@ -60,6 +60,7 @@ public class SyncDocumentsJob  extends BaseJob {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
     this.filter = filter;
+    isFavorites = false;
   }
 
   public SyncDocumentsJob(String uid, Fields.Status filter, String processed_folder, Boolean isFavorites) {
@@ -369,13 +370,13 @@ public class SyncDocumentsJob  extends BaseJob {
           r_step.setTitle( step.getTitle() );
           r_step.setNumber( step.getNumber() );
 
-          if ( step.getPeople() != null && step.getPeople().size() > 1 ){
+          if ( step.getPeople() != null && step.getPeople().size() > 0 ){
             r_step.setPeople(  new Gson().toJson( step.getPeople() )  );
           }
-          if ( step.getCards() != null && step.getCards().size() > 1 ){
+          if ( step.getCards() != null && step.getCards().size() > 0 ){
             r_step.setCards(  new Gson().toJson( step.getCards() )  );
           }
-          if ( step.getAnotherApprovals() != null && step.getAnotherApprovals().size() > 1 ){
+          if ( step.getAnotherApprovals() != null && step.getAnotherApprovals().size() > 0 ){
             r_step.setAnother_approvals(  new Gson().toJson( step.getAnotherApprovals() )  );
           }
 

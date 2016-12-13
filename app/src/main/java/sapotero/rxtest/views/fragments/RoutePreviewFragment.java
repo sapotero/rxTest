@@ -17,6 +17,9 @@ import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 import javax.inject.Inject;
 
@@ -32,6 +35,7 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RRouteEntity;
 import sapotero.rxtest.db.requery.models.RStep;
 import sapotero.rxtest.db.requery.models.RStepEntity;
+import sapotero.rxtest.retrofit.models.document.Card;
 import sapotero.rxtest.retrofit.models.document.Person;
 import timber.log.Timber;
 
@@ -110,12 +114,14 @@ public class RoutePreviewFragment extends Fragment {
           if ( route.getSteps() != null && route.getSteps().size() > 0  ){
 
 
+            HashMap< Integer, PanelBuilder > hashMap = new HashMap<>();
 
             for (RStep step : route.getSteps() ){
               RStepEntity r_step = (RStepEntity) step;
 
 
               PanelBuilder panel = new PanelBuilder(getContext()).withTitle( r_step.getTitle() );
+
               ArrayList<ItemBuilder> items = new ArrayList<ItemBuilder>();
 
               Boolean valid = false;
@@ -124,6 +130,22 @@ public class RoutePreviewFragment extends Fragment {
 
               if ( r_step.getCards() != null ){
                 Timber.tag("cards").e(" %s", r_step.getCards() );
+
+                Card[] users = new Gson().fromJson( r_step.getCards(), Card[].class );
+
+                for (Card card: users) {
+                  valid = true;
+
+                  if (card.getOriginalApproval() != null) {
+                    ItemBuilder item = new ItemBuilder(getContext());
+
+                    item.withName( card.getOriginalApproval() );
+                    item.withAction( String.format("%s - %s", card.getUid(), card.getFullTextApproval()) );
+
+                    items.add(item);
+                  }
+                }
+
               }
               if ( r_step.getPeople() != null ){
                 Timber.tag("people").e(" %s", r_step.getPeople() );
@@ -150,16 +172,34 @@ public class RoutePreviewFragment extends Fragment {
                   }
                 }
 
+
+
               }
               if ( r_step.getAnother_approvals() != null ){
                 Timber.tag("another_approvals").e(" %s", r_step.getAnother_approvals() );
               }
 
               if (valid){
-                LinearLayout wrapper = (LinearLayout) getView().findViewById(R.id.fragment_route_wrapper);
-                wrapper.addView( panel.withItems( items ).build() );
+//
+                panel.withItems( items );
+
+                hashMap.put(Integer.valueOf(r_step.getNumber()), panel );
               }
 
+            }
+
+            if (hashMap.values().size() > 0){
+              LinearLayout wrapper = (LinearLayout) getView().findViewById(R.id.fragment_route_wrapper);
+
+              Map<Integer, PanelBuilder> map = new TreeMap<>(hashMap);
+
+              for (PanelBuilder panel: map.values()){
+                wrapper.addView( panel.build() );
+              }
+
+              for (Integer number: map.keySet()){
+                Timber.tag("SORT").i( "ORDER: %s", number );
+              }
             }
 
           }
