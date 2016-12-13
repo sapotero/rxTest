@@ -1,23 +1,16 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:tools="http://schemas.android.com/tools"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             tools:context="sapotero.rxtest.views.fragments.InfoCardWebViewFragment">
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              tools:context="sapotero.rxtest.views.fragments.InfoCardLinksFragment"
+    >
 
-    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                 xmlns:tools="http://schemas.android.com/tools"
-                 android:layout_width="match_parent"
-                 android:layout_height="match_parent"
-                 tools:context="sapotero.rxtest.views.fragments.InfoCardFragment">
+    <Spinner
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/fragment_info_card_link_wrapper"
+        >
 
-        <WebView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/web_infocard">
-
-        </WebView>
-
-    </FrameLayout>
-
+    </Spinner>
 
 </FrameLayout>

@@ -90,8 +90,7 @@ public abstract class  RDocument implements Persistable {
   @OneToMany(mappedBy = "document")
   Set<RControlLabels> controlLabels;
 
-  @OneToMany(mappedBy = "document")
-  Set<RLinks> links;
+  String links;
 
   @ForeignKey
   @OneToOne

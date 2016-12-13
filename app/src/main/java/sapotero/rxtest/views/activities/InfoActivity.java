@@ -533,6 +533,8 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
     if (viewPager.getAdapter() == null) {
 
+      Timber.tag(TAG).e("setTabContent");
+
       if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL ){
         TabSigningPagerAdapter adapter = new TabSigningPagerAdapter( getSupportFragmentManager() );
         viewPager.setAdapter(adapter);
@@ -540,6 +542,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
         TabPagerAdapter adapter = new TabPagerAdapter ( getSupportFragmentManager() );
         viewPager.setAdapter(adapter);
       }
+      viewPager.setOffscreenPageLimit(10);
 
       tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
         @Override

@@ -387,13 +387,9 @@ public class SyncDocumentsJob  extends BaseJob {
 
       }
 
-//      if ( document.getLinks() != null){
-//        for (String l: document.getLinks() ) {
-//          RLinkEntity link = new RLinkEntity();
-//          link.setUid( l );
-//          rDoc.getLinks().add( link );
-//        }
-//      }
+      if ( document.getLinks() != null){
+          rDoc.setLinks( new Gson().toJson( document.getLinks() ) );
+      }
 
       if ( document.getInfoCard() != null){
         rDoc.setInfoCard( document.getInfoCard() );

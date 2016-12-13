@@ -9,7 +9,6 @@ import sapotero.rxtest.views.fragments.InfoCardFieldsFragment;
 import sapotero.rxtest.views.fragments.InfoCardLinksFragment;
 
 public class TabSigningPagerAdapter extends FragmentPagerAdapter {
-  private int tabs_count;
 
   public TabSigningPagerAdapter(FragmentManager fragmentManager) {
     super(fragmentManager);
@@ -24,9 +23,8 @@ public class TabSigningPagerAdapter extends FragmentPagerAdapter {
         return new InfoCardFieldsFragment();
       case 2:
         return new InfoCardLinksFragment();
-      default:
-        return null;
     }
+    return null;
   }
 
   @Override
