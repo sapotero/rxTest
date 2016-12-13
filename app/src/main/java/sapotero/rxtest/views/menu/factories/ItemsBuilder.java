@@ -132,6 +132,8 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
         button.registerCallBack(this);
       }
       ((RadioButton) button_group.getChildAt(0)).setChecked(true);
+    } else {
+      onButtonBuilderUpdate();
     }
 
     if (organizationsLayout != null){
@@ -150,7 +152,7 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
 
     ArrayList<ConditionBuilder> result = new ArrayList<>();
 
-    Collections.addAll(result, item.getQueryConditions());
+    Collections.addAll(result, item.getQueryConditions() );
 
     if (item.getButtons().size() > 0) {
       Boolean empty = true;
@@ -159,6 +161,7 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
         RadioButton button = b.getButton();
 
         Boolean active = false;
+
         if (button != null){
           active =  button.isPressed();
 
@@ -168,13 +171,30 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
           }
         }
 
-        Timber.e( "button conditions: %s | active: %s ", Arrays.toString( b.getConditions() ), active  );
+        Timber.e( "button conditions: %s | active: %s %s %s", Arrays.toString( b.getConditions() ), active, button.isActivated(), button.isChecked()  );
       }
 
       if (empty){
-        Collections.addAll(result, item.getButtons().get(0).getConditions() );
+        Boolean nil = true;
+
+        for (ButtonBuilder b : item.getButtons()) {
+          RadioButton button = b.getButton();
+          if ( button.isChecked() ){
+            Collections.addAll(result, b.getConditions() );
+            nil = false;
+          }
+        }
+
+        if ( nil )  {
+          Collections.addAll(result, item.getButtons().get(0).getConditions() );
+        }
+
       }
     }
+
+    Timber.e( "button conditions: %s ", favoritesButton.isChecked() );
+
+
     return result;
   }
 

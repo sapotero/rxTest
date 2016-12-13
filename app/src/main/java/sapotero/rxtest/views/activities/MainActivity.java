@@ -281,12 +281,12 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void setJournalType(int type) {
-//    int index = Arrays.asList((getResources().getStringArray(R.array.settings_view_start_page_identifier))).indexOf(String.valueOf(type));
-//    String value = Arrays.asList((getResources().getStringArray(R.array.settings_view_start_page_values))).get(index);
-//
-//    Integer adapter_index = document_type_adapter.findByValue(value);
-//    Timber.tag(TAG).i("value selected int: " + adapter_index);
-//    DOCUMENT_TYPE_SELECTOR.setSelection(adapter_index);
+    int index = Arrays.asList((getResources().getStringArray(R.array.settings_view_start_page_identifier))).indexOf(String.valueOf(type));
+    String value = Arrays.asList((getResources().getStringArray(R.array.settings_view_start_page_values))).get(index);
+
+    Integer adapter_index = document_type_adapter.findByValue(value);
+    Timber.tag(TAG).i("value selected int: " + adapter_index);
+    DOCUMENT_TYPE_SELECTOR.setSelection(adapter_index);
   }
 
   private void drawer_build_bottom() {

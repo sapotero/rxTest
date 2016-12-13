@@ -45,6 +45,7 @@ import timber.log.Timber;
 public class SyncDocumentsJob  extends BaseJob {
 
   public static final int PRIORITY = 1;
+  private Boolean onControl;
   private Boolean isProcessed;
   private Boolean isFavorites;
   private String processed_folder;
@@ -73,6 +74,13 @@ public class SyncDocumentsJob  extends BaseJob {
     this.processed_folder = processed_folder;
     this.isFavorites = isFavorites;
     this.isProcessed = isProcessed;
+  }
+
+  public SyncDocumentsJob(String uid, Fields.Status filter, boolean control) {
+    super( new Params(PRIORITY).requireNetwork().persist() );
+    this.uid = uid;
+    this.filter = filter;
+    this.onControl = control;
   }
 
   @Override
@@ -109,7 +117,7 @@ public class SyncDocumentsJob  extends BaseJob {
           update( doc, exist(doc.getUid()) );
 
           
-          if ( doc.getImages() != null && doc.getImages().size() > 0 && !isFavorites ){
+          if ( doc.getImages() != null && doc.getImages().size() > 0 && ( isFavorites != null && !isFavorites ) ){
 
             for (Image image : doc.getImages()) {
 
@@ -171,6 +179,7 @@ public class SyncDocumentsJob  extends BaseJob {
     rd.setFavorites(true);
     rd.setProcessed(true);
     rd.setFolder(processed_folder);
+    rd.setControl(onControl);
 
     if ( d.getSigner().getOrganisation() != null && !Objects.equals(d.getSigner().getOrganisation(), "")){
       rd.setOrganization( d.getSigner().getOrganisation() );
@@ -248,6 +257,7 @@ public class SyncDocumentsJob  extends BaseJob {
       rDoc.setFavorites(isFavorites);
       rDoc.setProcessed(isProcessed);
       rDoc.setFolder(processed_folder);
+      rDoc.setControl(onControl);
 
       if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
 

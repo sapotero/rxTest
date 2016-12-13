@@ -112,7 +112,9 @@ public enum Item {
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.CONTROL.eq( true ) )
     },
-    new ConditionBuilder[]{}
+    new ConditionBuilder[]{
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.CONTROL.eq( true ) )
+    }
   );
 
   private final Integer index;
