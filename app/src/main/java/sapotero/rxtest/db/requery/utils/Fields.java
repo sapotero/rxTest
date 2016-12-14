@@ -51,29 +51,31 @@ public class Fields {
   }
 
   public enum Journal {
-    ALL_JOURNALS              (  0, "",   "Все документы"),
-    CITIZEN_REQUESTS          (  1, "01", "Обращения граждан"),
-    INCOMING_DOCUMENTS        (  2, "02", "Входящие документы"),
-    INCOMING_ORDERS           (  3, "03", "НПА"),
-    ORDERS                    (  4, "04", "Приказы старые"),
-    OUTGOING_DOCUMENTS        (  5, "05", "Исходящие документы"),
-    SECRET_INCOMING_DOCUMENTS (  6, "06", "Входящие секретные"),
-    SECRET_INCOMING_ORDERS    (  7, "07", "НПА секретные"),
-    SECRET_ORDERS             (  8, "08", "Пр. старые секретные"),
-    SECRET_OUTGOING_DOCUMENTS (  9, "09", "Исходящие секретные"),
-    ORDERS_DDO                ( 10, "10", "Приказы"),
-    CONTROL                   ( 97, "97", "На контроле"),
-    SIGN                      ( 98, "98", "Подписание"),
-    APPROVE                   ( 99, "99", "Согласование");
+    ALL_JOURNALS              (  0, "",   "Все документы",        ""),
+    CITIZEN_REQUESTS          (  1, "01", "Обращения граждан",    "Обращение граждан"),
+    INCOMING_DOCUMENTS        (  2, "02", "Входящие документы",   "Входящий документ"),
+    INCOMING_ORDERS           (  3, "03", "НПА",                  "НПА"),
+    ORDERS                    (  4, "04", "Приказы старые",       "Приказ старый"),
+    OUTGOING_DOCUMENTS        (  5, "05", "Исходящие документы",  "Исходящий документ"),
+    SECRET_INCOMING_DOCUMENTS (  6, "06", "Входящие секретные",   "Входящий секретный"),
+    SECRET_INCOMING_ORDERS    (  7, "07", "НПА секретные",        "НПА секретный"),
+    SECRET_ORDERS             (  8, "08", "Пр. старые секретные", "Пр. старый секретный"),
+    SECRET_OUTGOING_DOCUMENTS (  9, "09", "Исходящие секретные",  "Исходящий секретный"),
+    ORDERS_DDO                ( 10, "10", "Приказы",              "Приказ"),
+    CONTROL                   ( 97, "97", "На контроле",          ""),
+    SIGN                      ( 98, "98", "Подписание",           "Подписание"),
+    APPROVE                   ( 99, "99", "Согласование",         "Согласование");
 
     private final String value;
     private final String name;
+    private final String single;
     private final Integer type;
 
-    Journal(final int index, final String value, final String name) {
+    Journal(final int index, final String value, final String name, final String single) {
       this.type  = index;
       this.value = value;
       this.name  = name;
+      this.single  = single;
     }
 
     public Integer getType(){
@@ -84,6 +86,9 @@ public class Fields {
     }
     public String getName() {
       return name;
+    }
+    public String getSingle() {
+      return single;
     }
 
     @Override

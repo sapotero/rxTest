@@ -173,6 +173,8 @@
     <string name="field_urgency">Срочность:</string>
     <string name="field_comment">Комментарий:</string>
     <string name="field_external_number">Номер поступившего документа:</string>
+    <string name="to_favorites">В избранное</string>
+    <string name="to_control">На контроль</string>
 
 
 </resources>

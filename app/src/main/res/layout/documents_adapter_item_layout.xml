@@ -15,6 +15,7 @@
         android:id="@+id/from_right_to_left"
         android:layout_width="240dp"
         android:layout_height="match_parent"
+        android:padding="@dimen/half_date_offset"
         android:weightSum="2">
 
         <TextView
@@ -22,20 +23,21 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@color/colorPrimary"
+            android:background="@drawable/corner_background_favorites"
             android:gravity="center"
-            android:text="В избранное"
-            android:textColor="#fff" />
+            android:text="@string/to_favorites"
+            android:textColor="@color/md_white_1000" />
 
         <TextView
             android:id="@+id/swipe_layout_card_to_favorites"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="#FF0000"
+            android:background="@drawable/corner_background_control"
             android:gravity="center"
-            android:text="На контроль"
-            android:textColor="#fff" />
+            android:text="@string/to_control"
+            android:textColor="@color/md_white_1000"
+            />
 
     </LinearLayout>
 

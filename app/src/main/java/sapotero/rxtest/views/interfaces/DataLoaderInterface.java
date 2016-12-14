@@ -176,6 +176,7 @@ public class DataLoaderInterface {
             Timber.tag(TAG).d("ERROR " + error.getMessage());
           })
     );
+    getOnControl();
 
   }
 
@@ -319,8 +320,6 @@ public class DataLoaderInterface {
           Timber.tag(TAG).d("ERROR " + error.getMessage());
           callback.onGetFoldersInfoError(error);
         });
-
-    getOnControl();
   }
 
   public void getTemplates(){
@@ -364,7 +363,7 @@ public class DataLoaderInterface {
 
     DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
     Calendar cal = Calendar.getInstance();
-    cal.add(Calendar.MONTH, -1);
+    cal.add(Calendar.HOUR, -48);
     String date = dateFormat.format(cal.getTime());
 
 
@@ -406,67 +405,6 @@ public class DataLoaderInterface {
 
   }
 
-  private void getProcessedV1(){
-
-    Timber.tag(TAG).d("getProcessed ");
-
-    String processed_folder = dataStore
-      .select(RFolderEntity.class)
-      .where(RFolderEntity.TYPE.eq("processed"))
-      .get().first().getUid();
-
-    StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-    StrictMode.setThreadPolicy(policy);
-
-
-    Retrofit retrofit = new RetrofitManager(context, HOST.get() + "/v3/", okHttpClient).process();
-    DocumentsService documentsService = retrofit.create(DocumentsService.class);
-
-    Fields.Status[] new_filter_types = Fields.Status.values();
-
-    DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-    Calendar cal = Calendar.getInstance();
-    cal.add(Calendar.MONTH, -1);
-    String date = dateFormat.format(cal.getTime());
-
-
-
-    Observable<Fields.Status> types = Observable.from(new_filter_types);
-    Observable<Documents> count = Observable
-      .from(new_filter_types)
-      .flatMap(status -> documentsService.getByFolders(LOGIN.get(), TOKEN.get(), status.getValue(), 1000, 0, processed_folder, date));
-
-
-    unsubscribe();
-    subscription.add(
-      Observable.zip( types, count, (type, docs) -> new TDmodel( type, docs.getDocuments() ))
-        .subscribeOn( Schedulers.computation() )
-        .observeOn( AndroidSchedulers.mainThread() )
-        .toList()
-        .subscribe(
-          raw -> {
-            Timber.tag(TAG).i(" RECV: %s", raw.size());
-
-            for (TDmodel data: raw) {
-              Timber.tag(TAG).i(" DocumentType: %s | %s", data.getType(), data.getDocuments().size() );
-
-              for (Document doc: data.getDocuments() ) {
-                String type = data.getType();
-                Timber.tag(TAG).d( "%s | %s", type, doc.getUid() );
-
-                jobManager.addJobInBackground(new SyncDocumentsJob( doc.getUid(), Fields.getStatus(type), processed_folder, false, true ), () -> {
-                  Timber.e("complete");
-                });
-              }
-            }
-            callback.onGetProcessedInfoSuccess();
-          },
-          error -> {
-            callback.onGetProcessedInfoError(error);
-          })
-    );
-
-  }
   private void getOnControl(){
 
     Timber.tag(TAG).d("getOnControl ");
@@ -562,7 +500,6 @@ public class DataLoaderInterface {
                 });
               }
             }
-            getProcessedV1();
             callback.onGetProcessedInfoSuccess();
           },
           error -> {

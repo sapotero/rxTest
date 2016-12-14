@@ -38,6 +38,7 @@ public abstract class  RDocument implements Persistable {
   String comment;
   String externalDocumentNumber;
   String receiptDate;
+
   Boolean viewed;
 
   @Index("changed_index")

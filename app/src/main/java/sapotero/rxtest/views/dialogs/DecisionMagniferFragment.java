@@ -1,11 +1,11 @@
 package sapotero.rxtest.views.dialogs;
 
-import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.util.TypedValue;
 import android.view.Gravity;

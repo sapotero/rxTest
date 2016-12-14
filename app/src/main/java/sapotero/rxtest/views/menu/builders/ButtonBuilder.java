@@ -11,6 +11,8 @@ import android.widget.RadioGroup;
 import javax.inject.Inject;
 
 import io.requery.Persistable;
+import io.requery.query.Expression;
+import io.requery.query.LogicalCondition;
 import io.requery.query.Scalar;
 import io.requery.query.WhereAndOr;
 import io.requery.rx.SingleEntityStore;
@@ -25,6 +27,7 @@ public class ButtonBuilder {
   @Inject SingleEntityStore<Persistable> dataStore;
 
   private final ConditionBuilder[] conditions;
+  private final ConditionBuilder item_conditions;
   private final String label;
   private boolean active;
   private Corner corner;
@@ -49,9 +52,10 @@ public class ButtonBuilder {
     NONE
   }
 
-  public ButtonBuilder(String label, ConditionBuilder[] conditions) {
+  public ButtonBuilder(String label, ConditionBuilder[] conditions, ConditionBuilder item_conditions ) {
     this.label = label;
     this.conditions = conditions;
+    this.item_conditions = item_conditions;
     this.corner = Corner.NONE;
     this.active = false;
 
@@ -62,7 +66,15 @@ public class ButtonBuilder {
   private Integer getCount() {
     int count = 0;
 
-    WhereAndOr<Scalar<Integer>> query = dataStore.count(RDocument.class).where(RDocumentEntity.ID.ne(0));
+    LogicalCondition<? extends Expression<?>, ?> query_condition;
+
+    if ( item_conditions == null ){
+      query_condition = RDocumentEntity.UID.ne("");
+    } else {
+      query_condition = item_conditions.getField();
+    }
+
+    WhereAndOr<Scalar<Integer>> query = dataStore.count(RDocument.class).where( query_condition );
 
     if ( conditions.length > 0 ){
 

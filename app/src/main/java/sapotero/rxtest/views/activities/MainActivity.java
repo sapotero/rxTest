@@ -21,7 +21,6 @@ import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.mikepenz.material_design_iconic_typeface_library.MaterialDesignIconic;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
-import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
 import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
@@ -215,6 +214,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       return false;
     });
 
+    rxSettings();
 
   }
 
@@ -259,7 +259,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   public void onResume() {
     super.onResume();
 
-    rxSettings();
   }
 
 
@@ -290,7 +289,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void drawer_build_bottom() {
-    Drawer dr = drawer
+    drawer
       .addDrawerItems(
 
         new SectionDrawerItem().withName(R.string.drawer_item_settings),
@@ -397,12 +396,14 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       )
       .build();
 
-    drawer = new DrawerBuilder()
-      .withActivity(this)
-      .withToolbar(toolbar)
-      .withActionBarDrawerToggle(true)
-      .withHeader(R.layout.drawer_header)
-      .withAccountHeader(headerResult);
+    if (drawer == null) {
+      drawer = new DrawerBuilder()
+        .withActivity(this)
+        .withToolbar(toolbar)
+        .withActionBarDrawerToggle(true)
+        .withHeader(R.layout.drawer_header)
+        .withAccountHeader(headerResult);
+    }
 
     drawer.addDrawerItems(
       new SectionDrawerItem().withName(R.string.drawer_item_journals)

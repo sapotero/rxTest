@@ -276,6 +276,7 @@ public class SyncDocumentsJob  extends BaseJob {
           decision.setDate(d.getDate());
           decision.setUrgencyText(d.getUrgencyText());
           decision.setShowPosition(d.getShowPosition());
+          decision.setSignBase64(d.getSignBase64());
 
           if ( d.getBlocks() != null && d.getBlocks().size() >= 1 ){
 

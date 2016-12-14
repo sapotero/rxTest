@@ -33,7 +33,9 @@ public enum Item {
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.INCOMING_DOCUMENTS.getValue() + "%"  ) )
     },
-    new ConditionBuilder[]{}
+    new ConditionBuilder[]{
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.INCOMING_DOCUMENTS.getValue() + "%"  ) )
+    }
   ),
 
   CITIZEN_REQUESTS ( 2, "Обращения граждан %s", new Button[]{
@@ -45,7 +47,9 @@ public enum Item {
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.CITIZEN_REQUESTS.getValue() + "%"  ) )
     },
-    new ConditionBuilder[]{}
+    new ConditionBuilder[]{
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.CITIZEN_REQUESTS.getValue() + "%"  ) )
+    }
   ),
 
   APPROVE_ASSIGN ( 3, "Подписание/Согласование %s",
@@ -70,7 +74,9 @@ public enum Item {
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like(  Fields.Journal.INCOMING_ORDERS.getValue() + "%"  ) )
     },
-    new ConditionBuilder[]{}
+    new ConditionBuilder[]{
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like(  Fields.Journal.INCOMING_ORDERS.getValue() + "%"  ) )
+    }
   ),
 
   ORDERS ( 5, "Приказы %s", new Button[]{
@@ -81,7 +87,9 @@ public enum Item {
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.ORDERS.getValue() + "%"  ) )
     },
-    new ConditionBuilder[]{}
+    new ConditionBuilder[]{
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.ORDERS.getValue() + "%"  ) )
+    }
   ),
 
   ORDERS_DDO ( 6, "Приказы ДДО %s", new Button[]{
@@ -92,7 +100,9 @@ public enum Item {
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.ORDERS_DDO.getValue()  ) )
     },
-    new ConditionBuilder[]{}
+    new ConditionBuilder[]{
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.ORDERS_DDO.getValue()  ) )
+    }
   ),
 
   IN_DOCUMENTS ( 7, "Внутренние документ %s", new Button[]{
@@ -114,6 +124,36 @@ public enum Item {
     },
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.CONTROL.eq( true ) )
+    }
+  ),
+  PROCESSED ( 9, "Обработанное %s", new Button[]{
+    Button.PERFORMANCE,
+    Button.PRIMARY_CONSIDERATION,
+    Button.VIEWED,
+    Button.ASSIGN,
+    Button.APPROVAL
+  },
+    true,
+    new ConditionBuilder[]{
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq( true ) )
+    },
+    new ConditionBuilder[]{
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq( true ) )
+    }
+  ),
+  FAVORITES ( 10, "Избранное %s", new Button[]{
+    Button.PERFORMANCE,
+    Button.PRIMARY_CONSIDERATION,
+    Button.VIEWED,
+    Button.ASSIGN,
+    Button.APPROVAL
+  },
+    true,
+    new ConditionBuilder[]{
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FAVORITES.eq( true ) )
+    },
+    new ConditionBuilder[]{
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FAVORITES.eq( true ) )
     }
   );
 
@@ -158,7 +198,9 @@ public enum Item {
 
           ButtonBuilder button = new ButtonBuilder(
             buttons[i].getFormat(),
-            buttons[i].getConditions()
+            buttons[i].getConditions(),
+            null
+//            getCountConditions()[0]
           );
 
           if (i == 0){

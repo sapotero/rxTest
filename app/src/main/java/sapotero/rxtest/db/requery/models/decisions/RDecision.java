@@ -31,6 +31,8 @@ public abstract class RDecision {
   Boolean signerIsManager;
   Boolean showPosition;
 
+  String signBase64;
+
   @Index("decision_changed_index")
   Boolean changed;
 
