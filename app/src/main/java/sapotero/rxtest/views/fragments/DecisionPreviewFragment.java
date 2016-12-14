@@ -138,7 +138,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
 
         String performerName = "";
 
-        if (user.getIsOriginal()){
+        if (user.getIsOriginal() != null && user.getIsOriginal()){
           performerName += "* ";
         }
 

@@ -18,6 +18,7 @@ import io.requery.sql.ConfigurationBuilder;
 import io.requery.sql.EntityDataStore;
 import io.requery.sql.SchemaModifier;
 import io.requery.sql.TableCreationMode;
+import sapotero.rxtest.application.config.Constant;
 import sapotero.rxtest.db.requery.models.Models;
 
 @Module
@@ -39,7 +40,8 @@ public final class RequeryDbModule {
 
     SchemaModifier schemaModifier = new SchemaModifier(configuration);
 
-    schemaModifier.createTables(TableCreationMode.DROP_CREATE);
+
+    schemaModifier.createTables(Constant.DEBUG ? TableCreationMode.CREATE_NOT_EXISTS : TableCreationMode.DROP_CREATE );
 
     return RxSupport.toReactiveStore( new EntityDataStore<Persistable>(configuration) );
   }

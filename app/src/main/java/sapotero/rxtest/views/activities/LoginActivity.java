@@ -338,7 +338,6 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
 //      stepper_loader_user_progressbar.setVisibility(View.INVISIBLE);
 //      stepper_loader_list_progressbar.setVisibility(View.VISIBLE);
 //      stepper_loader_user.setChecked(true);
-
       dataLoader.getFolders();
 
 //    }, 2000L);
@@ -403,7 +402,6 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
       stepper_loader_user_progressbar.setVisibility(View.INVISIBLE);
       stepper_loader_list_progressbar.setVisibility(View.VISIBLE);
       stepper_loader_user.setChecked(true);
-
 
       if ( Constant.DEBUG ) {
         start();

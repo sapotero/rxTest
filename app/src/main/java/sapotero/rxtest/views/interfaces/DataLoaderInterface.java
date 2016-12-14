@@ -143,9 +143,6 @@ public class DataLoaderInterface {
           data -> {
             Timber.i( "LOGIN: %s\nTOKEN: %s", LOGIN.get(), data.getAuthToken() );
             saveToken( data.getAuthToken() );
-
-            getPrimaryConsiderationUsers();
-
             callback.onAuthTokenSuccess();
           },
           error -> {
@@ -158,7 +155,9 @@ public class DataLoaderInterface {
 
 
 
-  private void getPrimaryConsiderationUsers() {
+  public void getPrimaryConsiderationUsers() {
+    Timber.e("getPrimaryConsiderationUsers");
+
     Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
     PrimaryConsiderationService primaryConsiderationService = retrofit.create(PrimaryConsiderationService.class);
 
@@ -170,14 +169,13 @@ public class DataLoaderInterface {
         .observeOn( AndroidSchedulers.mainThread() )
         .subscribe(
           users -> {
+            Timber.e("load %s", users.size());
             jobManager.addJobInBackground(new AddPrimaryConsiderationJob(users));
           },
           error -> {
             Timber.tag(TAG).d("ERROR " + error.getMessage());
           })
     );
-    getOnControl();
-
   }
 
   public void getUserInformation() {
@@ -197,6 +195,9 @@ public class DataLoaderInterface {
             // Preference<String> current_user = settings.getString("current_user");
             // String user_data = new Gson().toJson( data , UserInfo.class);
             // current_user.set( user_data );
+
+            getOnControl();
+            getPrimaryConsiderationUsers();
 
             callback.onGetUserInformationSuccess();
           },

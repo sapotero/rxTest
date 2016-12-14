@@ -1,6 +1,7 @@
 package sapotero.rxtest.views.fragments;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -25,6 +26,7 @@ import android.widget.TextView;
 
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +53,7 @@ import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.Performer;
+import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.adapters.DecisionSpinnerAdapter;
 import sapotero.rxtest.views.adapters.models.DecisionSpinnerItem;
 import sapotero.rxtest.views.dialogs.DecisionMagniferFragment;
@@ -74,15 +77,20 @@ public class InfoActivityDecisionPreviewFragment extends Fragment {
   private Preference<Integer> POSITION;
 
 
+//  @BindView(R.id.fragment_info_card_decision_preview_wrapper) RelativeLayout wrapper;
+
+
   @BindView(R.id.activity_info_decision_preview_head) LinearLayout preview_head;
 
   @BindView(R.id.activity_info_decision_preview_body) LinearLayout preview_body;
   @BindView(R.id.activity_info_decision_preview_bottom) LinearLayout preview_bottom;
+
   @BindView(R.id.activity_info_button_magnifer) ImageButton magnifer_button;
+  @BindView(R.id.activity_info_button_edit) ImageButton edit;
 
   @BindView(R.id.activity_info_decision_spinner) Spinner decision_spinner;
 
-  @BindView(R.id.signBase64) ImageView signBase64;
+//  @BindView(R.id.signBase64) ImageView signBase64;
 
 
 
@@ -186,6 +194,25 @@ public class InfoActivityDecisionPreviewFragment extends Fragment {
     }
 
     magnifer.show( getFragmentManager() , "DecisionMagniferFragment");
+  }
+
+
+  @OnClick(R.id.activity_info_button_edit)
+  public void edit(){
+
+
+    Gson gson = new Gson();
+    Decision data = decision_spinner_adapter.getItem( decision_spinner.getSelectedItemPosition() ).getDecision();
+    String json = gson.toJson(data, Decision.class);
+
+    Timber.tag("button_edit").i( json );
+
+
+    Context context = getContext();
+    Intent intent = new Intent( context , DecisionConstructorActivity.class);
+    intent.putExtra("decision", json);
+    context.startActivity(intent);
+
   }
 
 

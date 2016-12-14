@@ -159,6 +159,9 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
       Preference<String> rxStatus = rxPreferences.getString("main_menu.status");
       rxStatus.set( item.getStatusCode() );
 
+      Preference<String> rxDate = rxPreferences.getString("main_menu.date");
+      rxDate.set( item.getRegistrationDate() );
+
       Intent intent = new Intent(mContext, InfoActivity.class);
       mContext.startActivity(intent);
       Toast.makeText(mContext, " onClick : " + item.getMd5() + " \n" + item.getTitle(), Toast.LENGTH_SHORT).show();

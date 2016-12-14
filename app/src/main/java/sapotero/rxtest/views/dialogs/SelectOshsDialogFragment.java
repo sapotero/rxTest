@@ -1,11 +1,13 @@
 package sapotero.rxtest.views.dialogs;
 
+import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
@@ -64,6 +66,9 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
     PrimaryUsersAdapter adapter = new PrimaryUsersAdapter( getActivity(), people);
     ListView list = (ListView) view.findViewById(R.id.dialog_oshs_listview_users);
     list.setAdapter(adapter);
+
+    InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
+    imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
 
     list.setOnItemClickListener((parent, view12, position, id) -> {
       if ( callback != null){

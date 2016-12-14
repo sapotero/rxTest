@@ -73,14 +73,14 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   private Preference<String> STATUS_CODE;
   private Preference<Integer> POSITION;
   private Preference<String> REG_NUMBER;
+  private Preference<String> REG_DATE;
 
   private DocumentManager documentManager;
-
   private String TAG = this.getClass().getSimpleName();
-  @BindView(R.id.toolbar) Toolbar toolbar;
 
+  @BindView(R.id.toolbar) Toolbar toolbar;
   private Preference<String> HOST;
-//  private Preview preview;
+  //  private Preview preview;
   private OperationManager operationManager;
   private Fields.Status status;
   private Fields.Journal journal;
@@ -166,7 +166,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     status  = Fields.Status.findStatus(STATUS_CODE.get());
     journal = Fields.getJournalByUid( UID.get() );
 
-    toolbar.setTitle( String.format("%s - %s", journal.getName(), REG_NUMBER.get()) );
+    toolbar.setTitle( String.format("%s от %s", REG_NUMBER.get(), REG_DATE.get()) );
 
     Timber.tag("MENU").e( "STATUS CODE: %s", STATUS_CODE.get() );
     Timber.tag("MENU").e( "STATUS CODE: %s", status.getName() );
@@ -312,6 +312,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     DOCUMENT_UID = settings.getString("document.uid");
     STATUS_CODE = settings.getString("main_menu.status");
     REG_NUMBER = settings.getString("main_menu.regnumber");
+    REG_DATE = settings.getString("main_menu.date");
 
   }
 

@@ -8,7 +8,7 @@ import rx.Observable;
 import sapotero.rxtest.retrofit.models.Oshs;
 
 public interface PrimaryConsiderationService {
-  @GET("v2/oshs/primary_consideration.json")
+  @GET("/v2/oshs/primary_consideration.json")
   Observable<ArrayList<Oshs>> getUsers(
     @Query("login") String username,
     @Query("auth_token") String token

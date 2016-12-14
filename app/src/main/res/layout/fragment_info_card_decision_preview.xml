@@ -66,7 +66,7 @@
 
             <ScrollView
                 android:layout_width="match_parent"
-                android:layout_height="360dp">
+                android:layout_height="420dp">
 
                 <LinearLayout
                     android:id="@+id/activity_info_decision_preview_body"
@@ -81,7 +81,7 @@
                 android:layout_gravity="bottom"
                 android:gravity="bottom"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="64dp">
             </LinearLayout>
         </LinearLayout>
 
@@ -99,9 +99,19 @@
         <ImageView
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:id="@+id/signBase64"
+            android:id="@+id/edit"
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"/>
+
+        <ImageButton
+            android:id="@+id/activity_info_button_edit"
+            android:background="@drawable/edit_pencil"
+            android:layout_height="24dp"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="24dp"
+            android:layout_marginTop="52dp"
+            android:layout_alignStart="@+id/edit"
+            android:layout_marginStart="37dp"/>
 
     </RelativeLayout>
 

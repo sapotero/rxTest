@@ -207,7 +207,10 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
 
       public void onTextChanged(CharSequence s, int start, int before, int count) {
         Timber.tag(TAG).v( "onTextChanged" );
-        callback.onUpdateSuccess();
+
+        if (callback != null) {
+          callback.onUpdateSuccess();
+        }
       }
 
       public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -236,8 +239,12 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
         return false;
       });
 
+    Boolean familirization = false;
+    if (block.getToFamiliarization() != null) {
+      familirization = block.getToFamiliarization();
+    }
 
-    button_familiarization.setChecked( block.getToFamiliarization() );
+    button_familiarization.setChecked( familirization );
     button_familiarization.setOnCheckedChangeListener(
       (buttonView, isChecked) -> {
         Timber.tag(TAG).v( "button_familiarization ++" );
@@ -249,7 +256,12 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
       }
     );
 
-    button_report.setChecked( block.getToCopy() );
+    Boolean copy = false;
+    if (block.getToCopy() != null) {
+      copy = block.getToCopy();
+    }
+
+    button_report.setChecked( copy );
     button_report.setOnCheckedChangeListener(
       (buttonView, isChecked) -> {
         Timber.tag(TAG).v( "button_report ++" );
@@ -261,7 +273,12 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
       }
     );
 
-    hide_performers.setChecked( block.getHidePerformers() );
+    Boolean hide = false;
+    if (block.getHidePerformers() != null) {
+      hide = block.getHidePerformers();
+    }
+
+    hide_performers.setChecked( hide );
     hide_performers.setOnCheckedChangeListener(
       (buttonView, isChecked) -> {
         callback.onUpdateSuccess();
