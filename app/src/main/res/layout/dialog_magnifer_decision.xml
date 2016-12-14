@@ -54,7 +54,7 @@
 
                 <ScrollView
                     android:layout_width="match_parent"
-                    android:layout_height="430dp">
+                    android:layout_height="400dp">
 
                     <LinearLayout
                         android:id="@+id/dialog_magniger_preview_body"

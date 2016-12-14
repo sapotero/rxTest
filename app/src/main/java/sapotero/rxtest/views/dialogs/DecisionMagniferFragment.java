@@ -2,20 +2,29 @@ package sapotero.rxtest.views.dialogs;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
+import android.util.Base64;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+
+import com.f2prateek.rx.preferences.Preference;
+import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,9 +41,7 @@ import timber.log.Timber;
 public class DecisionMagniferFragment extends DialogFragment implements View.OnClickListener {
 
   private String TAG = this.getClass().getSimpleName();
-  private int font_size = 12;
 
-//  @BindView(R.id.dialog_magnifer_decision_button_cancel)  Button button_cancel;
   @BindView(R.id.dialog_magnifer_decision_seekbar_font_size) SeekBar seekbar;
 
   @BindView(R.id.dialog_magniger_preview_head)   LinearLayout preview_head;
@@ -87,11 +94,6 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
     }
 
   }
-
-//  @OnClick(R.id.dialog_magnifer_decision_button_cancel)
-//  public void close(){
-//    dismiss();
-//  }
 
   public void onDismiss(DialogInterface dialog) {
     super.onDismiss(dialog);
@@ -165,8 +167,11 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
         }
       }
 
+      SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences( getContext() );
+      RxSharedPreferences rxPreferences = RxSharedPreferences.create(preferences);
+      Preference<String> number = rxPreferences.getString("main_menu.regnumber");
 
-      printSigner( decision.getShowPosition(), decision.getSignerBlankText(), decision.getSignerPositionS(), decision.getDate(), regNumber  );
+      printSigner( decision.getShowPosition(), decision.getSignerBlankText(), decision.getSignerPositionS(), decision.getDate(), number.get(), decision.getSignBase64()  );
     }
 
     private void showEmpty(){
@@ -176,7 +181,7 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
       printLetterHead( getString(R.string.decision_blank) );
     }
 
-    private void printSigner(Boolean showPosition, String signerBlankText, String signerPositionS, String date, String registrationNumber) {
+    private void printSigner(Boolean showPosition, String signerBlankText, String signerPositionS, String date, String registrationNumber, String base64) {
 
       LinearLayout relativeSigner = new LinearLayout(context);
       relativeSigner.setOrientation(LinearLayout.VERTICAL);
@@ -237,6 +242,17 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
       dateView.setLayoutParams(dateView_params1);
       date_and_number_view.addView(dateView);
       textLabels.add( dateView );
+
+      if (base64 != null){
+        ImageView image = new ImageView(getContext());
+
+
+        byte[] decodedString = Base64.decode( base64 , Base64.DEFAULT);
+        Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+
+        image.setImageBitmap( decodedByte );
+        relativeSigner.addView( image );
+      }
 
       relativeSigner.addView( signer_view );
       relativeSigner.addView( date_and_number_view );
