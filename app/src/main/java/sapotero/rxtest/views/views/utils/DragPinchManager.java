@@ -26,8 +26,9 @@ import static com.github.barteksc.pdfviewer.util.Constants.Pinch.MINIMUM_ZOOM;
 
 public class DragPinchManager implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener, ScaleGestureDetector.OnScaleGestureListener, View.OnTouchListener {
 
-  private final Spinner spinner;
+  private Spinner spinner;
   private final Context context;
+  private DocumentLinkAdapter adapter;
   private PDFView pdfView;
   private AnimationManager animationManager;
 
@@ -51,6 +52,19 @@ public class DragPinchManager implements GestureDetector.OnGestureListener, Gest
     pdfView.setOnTouchListener(this);
 
     this.spinner = mDocumentList;
+  }
+
+  public DragPinchManager(Context context, PDFView pdfView, AnimationManager animationManager, DocumentLinkAdapter adapter) {
+    this.context = context;
+    this.pdfView = pdfView;
+    this.animationManager = animationManager;
+    this.isSwipeEnabled = false;
+    this.swipeVertical = pdfView.isSwipeVertical();
+    gestureDetector = new GestureDetector(pdfView.getContext(), this);
+    scaleGestureDetector = new ScaleGestureDetector(pdfView.getContext(), this);
+    pdfView.setOnTouchListener(this);
+
+    this.adapter = adapter;
   }
 
   public void enableDoubletap(boolean enableDoubletap) {
@@ -96,28 +110,23 @@ public class DragPinchManager implements GestureDetector.OnGestureListener, Gest
 
     Timber.tag("gestureDetector").i("filename: %s", e.toString());
 
-    DocumentLinkAdapter adapter = (DocumentLinkAdapter) spinner.getAdapter();
+    DocumentLinkAdapter _adapter = adapter;
+
+    if (spinner!= null && spinner.getAdapter() != null ) {
+      _adapter = (DocumentLinkAdapter) spinner.getAdapter();
+    }
 
     if (adapter.getCount() > 0){
-      int position = spinner.getSelectedItemPosition();
 
       Type listType = new TypeToken<ArrayList<Image>>() {}.getType();
 
       Intent intent = new Intent( context, DocumentImageFullScreenActivity.class);
       intent.putExtra( "files", new Gson().toJson( adapter.getItems(), listType ) );
-      intent.putExtra( "index", spinner.getSelectedItemPosition() );
+      intent.putExtra( "index", 0 );
       context.startActivity(intent);
-
     }
 
-    //    if (pdfView.getZoom() < pdfView.getMidZoom()) {
-    //      pdfView.zoomWithAnimation(e.getX(), e.getY(), pdfView.getMidZoom());
-    //    } else if (pdfView.getZoom() < pdfView.getMaxZoom()) {
-    //      pdfView.zoomWithAnimation(e.getX(), e.getY(), pdfView.getMaxZoom());
-    //    } else {
-    //      pdfView.resetZoomWithAnimation();
-    //    }
-    return true;
+    return false;
   }
 
   @Override

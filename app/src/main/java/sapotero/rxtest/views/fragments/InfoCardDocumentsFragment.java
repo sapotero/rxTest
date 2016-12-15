@@ -15,9 +15,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.ProgressBar;
-import android.widget.Spinner;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,6 +24,8 @@ import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.github.barteksc.pdfviewer.PDFView;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -33,7 +34,9 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -43,8 +46,6 @@ import butterknife.OnClick;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
 import okhttp3.OkHttpClient;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
@@ -54,8 +55,8 @@ import sapotero.rxtest.events.bus.FileDownloadedEvent;
 import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.views.activities.DocumentImageFullScreenActivity;
 import sapotero.rxtest.views.adapters.DocumentLinkAdapter;
-import sapotero.rxtest.views.views.utils.AnimationManager;
-import sapotero.rxtest.views.views.utils.DragPinchManager;
+import sapotero.rxtest.views.views.CircleLeftArrow;
+import sapotero.rxtest.views.views.CircleRightArrow;
 import timber.log.Timber;
 
 public class InfoCardDocumentsFragment extends Fragment implements AdapterView.OnItemClickListener, GestureDetector.OnDoubleTapListener {
@@ -77,14 +78,24 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   private PdfRenderer mPdfRenderer;
   private PdfRenderer.Page mCurrentPage;
 
-  @BindView(R.id.documents_files_progressbar) ProgressBar progressBar;
+//  @BindView(R.id.pdf_previous) Button mButtonPrevious;
+//  @BindView(R.id.pdf_next) Button     mButtonNext;
+//  @BindView(R.id.documents_files) Spinner mDocumentList;
+//  @BindView(R.id.pageInfo) TextView pageInfo;
 
-  @BindView(R.id.pdf_previous) Button mButtonPrevious;
-  @BindView(R.id.pdf_next) Button     mButtonNext;
-  @BindView(R.id.documents_files) Spinner mDocumentList;
-
-  @BindView(R.id.pageInfo) TextView pageInfo;
   @BindView(R.id.pdfView) PDFView pdfView;
+
+  @BindView(R.id.info_card_pdf_fullscreen_prev_document) CircleLeftArrow prev_document;
+  @BindView(R.id.info_card_pdf_fullscreen_next_document) CircleRightArrow next_document;
+  @BindView(R.id.info_card_pdf_fullscreen_document_counter) TextView document_counter;
+  @BindView(R.id.info_card_pdf_fullscreen_page_title)       TextView document_title;
+  @BindView(R.id.info_card_pdf_fullscreen_page_counter)     TextView page_counter;
+  @BindView(R.id.info_card_pdf_fullscreen_button) ImageButton fullscreen;
+
+  @BindView(R.id.info_card_pdf_no_files) TextView no_files;
+  @BindView(R.id.info_card_pdf_wrapper)  FrameLayout pdf_wrapper;
+
+
 
   private int index;
 
@@ -129,76 +140,143 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
     loadSettings();
 
-    DragPinchManager pinch = new DragPinchManager( getContext(), pdfView, new AnimationManager(pdfView), mDocumentList);
 
     ArrayList<Image> documents = new ArrayList<Image>();
     adapter = new DocumentLinkAdapter(mContext, documents);
-    mDocumentList.setAdapter(adapter);
+//    mDocumentList.setAdapter(adapter);
 
-    dataStore
+//    dataStore
+//      .select(RDocumentEntity.class)
+//      .where(RDocumentEntity.UID.eq(UID.get()))
+//      .get()
+//      .toObservable()
+//      .subscribeOn(Schedulers.io())
+//      .observeOn(AndroidSchedulers.mainThread())
+//      .subscribe(
+//        document -> {
+//          if (document.getImages().size() > 0){
+//            for (RImage image : document.getImages()) {
+//
+//              RImageEntity img = (RImageEntity) image;
+//
+//              Timber.tag(TAG).i("image " + img.getTitle() );
+//            }
+//          }
+//        });
+    List<RDocumentEntity> files = dataStore
       .select(RDocumentEntity.class)
       .where(RDocumentEntity.UID.eq(UID.get()))
       .get()
-      .toObservable()
-      .subscribeOn(Schedulers.io())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(
-        document -> {
-          if (document.getImages().size() > 0){
-            for (RImage image : document.getImages()) {
+      .toList();
 
-              RImageEntity img = (RImageEntity) image;
-
-              Timber.tag(TAG).i("image " + img.getTitle() );
-              adapter.add( img );
-            }
-          }
-        });
-
-
-    mDocumentList.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-      @Override
-      public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        Image image = (Image) mDocumentList.getItemAtPosition(position);
-        IMAGE = image;
-        Timber.tag(TAG).i( " setOnItemClickListener " + image.getPath() );
-
-        File file = new File(mContext.getFilesDir(), image.getMd5()+"_"+image.getTitle());
-
-        pdfView
-          .fromFile(file)
-          .enableSwipe(true)
-          .enableDoubletap(true)
-          .defaultPage(0)
-          .swipeHorizontal(false)
-          .onLoad(nbPages -> {
-            progressBar.setVisibility(View.GONE);
-          })
-          .onError(t -> progressBar.setVisibility(View.GONE))
-          .onPageChange((page, pageCount) -> {
-            updatePageInfo();
-          })
-          .enableAnnotationRendering(false)
-          .password(null)
-          .scrollHandle(null)
-          .load();
-
+    for ( RDocumentEntity document: files){
+      if (document.getImages().size() > 0){
+        for (RImage image : document.getImages()) {
+          RImageEntity img = (RImageEntity) image;
+          Timber.tag(TAG).i("image " + img.getTitle() );
+          adapter.add( img );
+        }
       }
+    }
 
-      @Override
-      public void onNothingSelected(AdapterView<?> parent) {
-
-      }
-    });
-
+//    mDocumentList.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//      @Override
+//      public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+//        Image image = (Image) mDocumentList.getItemAtPosition(position);
+//        IMAGE = image;
+//        Timber.tag(TAG).i( " setOnItemClickListener " + image.getPath() );
+//
+//        File file = new File(mContext.getFilesDir(), image.getMd5()+"_"+image.getTitle());
+//
+//        pdfView
+//          .fromFile(file)
+//          .enableSwipe(true)
+//          .enableDoubletap(true)
+//          .defaultPage(0)
+//          .swipeHorizontal(false)
+//          .onLoad(nbPages -> {
+//            progressBar.setVisibility(View.GONE);
+//          })
+//          .onError(t -> progressBar.setVisibility(View.GONE))
+//          .onPageChange((page, pageCount) -> {
+//            updatePageInfo();
+//          })
+//          .enableAnnotationRendering(false)
+//          .password(null)
+//          .scrollHandle(null)
+//          .load();
+//
+//      }
+//
+//      @Override
+//      public void onNothingSelected(AdapterView<?> parent) {
+//
+//      }
+//    });
+//
 
     index = 0;
     if (null != savedInstanceState) {
       index = savedInstanceState.getInt(STATE_CURRENT_PAGE_INDEX, 0);
     }
 
+
+
+    updateDocument();
+
     return view;
   }
+
+  public void updateDocument(){
+    if (adapter.getCount() > 0) {
+      setPdfPreview();
+      updateDocumentCount();
+      updatePageCount();
+      no_files.setVisibility(View.GONE);
+      pdf_wrapper.setVisibility(View.VISIBLE);
+    } else {
+      no_files.setVisibility(View.VISIBLE);
+      pdf_wrapper.setVisibility(View.GONE);
+    }
+  }
+
+  private void setPdfPreview() {
+    Image image = adapter.getItem(index);
+
+    document_title.setText( image.getTitle() );
+
+    File file = new File(getContext().getFilesDir(), String.format( "%s_%s", image.getMd5(), image.getTitle() ));
+
+    pdfView
+      .fromFile( file )
+      .enableSwipe(true)
+      .enableDoubletap(true)
+      .defaultPage(0)
+      .swipeHorizontal(false)
+      .onLoad(nbPages -> {
+        Timber.tag(TAG).i(" onLoad");
+      })
+      .onError(t -> {
+        Timber.tag(TAG).i(" onError");
+      })
+      .onPageChange((page, pageCount) -> {
+        Timber.tag(TAG).i(" onPageChange");
+        updatePageCount();
+      })
+      .enableAnnotationRendering(false)
+      .password(null)
+      .scrollHandle(null)
+      .load();
+  }
+
+  public void updateDocumentCount(){
+    document_counter.setText( String.format("%s из %s", index + 1, adapter.getCount()) );
+  }
+
+  public void updatePageCount(){
+    page_counter.setText( String.format("%s из %s страниц", pdfView.getCurrentPage() + 1, pdfView.getPageCount()) );
+  }
+
 
   private void setDocumentPreview( int index ) {
     if (mPdfRenderer.getPageCount() <= index) {
@@ -279,30 +357,68 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   private void updatePreview() {
     int index = mCurrentPage.getIndex();
     int pageCount = mPdfRenderer.getPageCount();
-    mButtonPrevious.setEnabled(0 != index);
-    mButtonNext.setEnabled(index + 1 < pageCount);
+//    mButtonPrevious.setEnabled(0 != index);
+//    mButtonNext.setEnabled(index + 1 < pageCount);
   }
 
-  @OnClick(R.id.pdf_previous)
-  public void previousPage(View view) {
-    try {
-      pdfView.jumpTo( pdfView.getCurrentPage() - 1 );
-      updatePageInfo();
-    } catch (NullPointerException e) {
-      e.printStackTrace();
+  @OnClick(R.id.info_card_pdf_fullscreen_prev_document)
+  public void setLeftArrowArrow() {
+    Timber.tag(TAG).i( "BEFORE %s - %s", index, adapter.getCount() );
+    if ( index <= 0 ){
+      index = adapter.getCount()-1;
+    } else {
+      index--;
     }
+    Timber.tag(TAG).i( "AFTER %s - %s", index, adapter.getCount() );
 
+    updateDocument();
   }
 
-  @OnClick(R.id.pdf_next)
-  public void nextPage(View view) {
-    try {
-      pdfView.jumpTo( pdfView.getCurrentPage() + 1 );
-      updatePageInfo();
-    } catch (NullPointerException e) {
-      e.printStackTrace();
+  @OnClick(R.id.info_card_pdf_fullscreen_next_document)
+  public void setRightArrow() {
+    Timber.tag(TAG).i( "BEFORE %s - %s", index, adapter.getCount() );
+    if ( index >= adapter.getCount()-1 ){
+      index = 0;
+    } else {
+      index++;
     }
+    Timber.tag(TAG).i( "AFTER %s - %s", index, adapter.getCount() );
+
+    updateDocument();
   }
+
+  @OnClick(R.id.info_card_pdf_fullscreen_button)
+  public void fullscreen() {
+    Type listType = new TypeToken<ArrayList<Image>>() {}.getType();
+
+    Context context = getContext();
+
+    Intent intent = new Intent( context, DocumentImageFullScreenActivity.class);
+    intent.putExtra( "files", new Gson().toJson( adapter.getItems(), listType ) );
+    intent.putExtra( "index", index );
+    context.startActivity(intent);
+  }
+
+//  @OnClick(R.id.pdf_previous)
+//  public void previousPage(View view) {
+//    try {
+//      pdfView.jumpTo( pdfView.getCurrentPage() - 1 );
+//      updatePageInfo();
+//    } catch (NullPointerException e) {
+//      e.printStackTrace();
+//    }
+//
+//  }
+
+//  @OnClick(R.id.pdf_next)
+//  public void nextPage(View view) {
+//    try {
+//      pdfView.jumpTo( pdfView.getCurrentPage() + 1 );
+//      updatePageInfo();
+//    } catch (NullPointerException e) {
+//      e.printStackTrace();
+//    }
+//  }
 
   @Override
   public void onAttach(Context context) {
@@ -315,11 +431,11 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     }
   }
 
-  private void updatePageInfo(){
-    if ( pdfView != null ){
-      pageInfo.setText( String.format(" Стр. %s/%s ", pdfView.getCurrentPage()+1 , pdfView.getPageCount()) );
-    }
-  }
+//  private void updatePageInfo(){
+//    if ( pdfView != null ){
+//      pageInfo.setText( String.format(" Стр. %s/%s ", pdfView.getCurrentPage()+1 , pdfView.getPageCount()) );
+//    }
+//  }
 
   @Override
   public void onDetach() {

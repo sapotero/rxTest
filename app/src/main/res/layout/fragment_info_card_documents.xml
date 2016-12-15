@@ -1,19 +1,10 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:tools="http://schemas.android.com/tools"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                xmlns:tools="http://schemas.android.com/tools"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
              tools:context="sapotero.rxtest.views.fragments.InfoCardDocumentsFragment">
 
-
-    <ProgressBar
-        android:id="@+id/documents_files_progressbar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="?android:attr/progressBarStyle"
-        android:indeterminate="true"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        />
 
     <LinearLayout
         android:orientation="vertical"
@@ -33,106 +24,154 @@
             android:layout_height="match_parent"
             />
 
+    </LinearLayout>
 
-        <!--<ImageView-->
-            <!--android:id="@+id/pdf_image"-->
+    <!--<LinearLayout-->
+        <!--style="?android:attr/buttonBarStyle"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:measureWithLargestChild="true"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--android:orientation="horizontal"-->
+        <!--android:background="@drawable/pdf_fullscreen"-->
+        <!--&gt;-->
+
+        <!--<Spinner-->
+            <!--android:id="@+id/documents_files"-->
+            <!--android:layout_width="0dp"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:padding="@dimen/half_date_offset"-->
+            <!--android:layout_weight="2"/>-->
+
+        <!--<TextView-->
+            <!--android:gravity="center|start"-->
+            <!--android:id="@+id/pageInfo"-->
+            <!--android:text=""-->
+            <!--android:width="40dp"-->
             <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="0dp"-->
+            <!--android:layout_height="match_parent"-->
             <!--android:layout_weight="1"-->
-            <!--android:scaleType="fitXY"-->
-            <!--android:background="@android:color/white"-->
-            <!--android:adjustViewBounds="true"-->
-            <!--android:contentDescription="pdf_image"/>-->
+            <!--android:textSize="18dp"-->
+            <!--/>-->
 
-        <!--<com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView-->
-            <!--android:id="@+id/pdf_image"-->
-            <!--android:layout_width="match_parent"-->
+
+        <!--<Button-->
+            <!--android:id="@+id/pdf_previous"-->
+            <!--style="?android:attr/buttonBarButtonStyle"-->
+            <!--android:layout_width="0dp"-->
             <!--android:layout_height="wrap_content"-->
             <!--android:layout_weight="1"-->
-            <!--android:scaleType="fitXY"-->
-            <!--android:background="@android:color/white"-->
-            <!--android:adjustViewBounds="true"-->
-            <!--android:contentDescription="pdf_image"/>-->
+            <!--android:text="@string/pdf_button_prev_page" />-->
+        <!--<Button-->
+        <!--android:id="@+id/pdf_next"-->
+        <!--style="?android:attr/buttonBarButtonStyle"-->
+        <!--android:layout_width="0dp"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_weight="1"-->
+        <!--android:text="@string/pdf_button_next_page" />-->
 
-        <!--<FrameLayout-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="580dp"-->
-            <!--android:id="@+id/doc_tmp_layout"-->
-            <!--android:layout_gravity="center"-->
-            <!--&gt;-->
+    <!--</LinearLayout>-->
 
-            <!--<ImageView-->
-                <!--android:id="@+id/empty_list_image"-->
-                <!--android:layout_width="947dp"-->
-                <!--android:layout_height="match_parent"-->
-                <!--android:src="@drawable/gerb_big"-->
-                <!--android:scaleX="0.8"-->
-                <!--android:scaleY="0.8"-->
-                <!--android:alpha="0.1"-->
-
-                <!--/>-->
-            <!--<TextView android:id="@+id/empty_list"-->
-                      <!--android:layout_width="match_parent"-->
-                      <!--android:layout_height="match_parent"-->
-                      <!--android:textSize="24dp"-->
-
-                      <!--android:layout_alignLeft="@+id/empty_list_image"-->
-                      <!--android:layout_alignTop="@+id/empty_list_image"-->
-                      <!--android:layout_alignRight="@+id/empty_list_image"-->
-                      <!--android:layout_alignBottom="@+id/empty_list_image"-->
-                      <!--android:layout_margin="1dp"-->
-                      <!--android:gravity="center"-->
-
-                      <!--android:textColor="@color/md_grey_600"-->
-                      <!--android:text="Тут будет заглушка под документ (или их отсутствие)"-->
-                <!--/>-->
-        <!--</FrameLayout>-->
-
-    </LinearLayout>
-
-    <LinearLayout
-        style="?android:attr/buttonBarStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:measureWithLargestChild="true"
-        android:layout_alignParentBottom="true"
-        android:orientation="horizontal"
+    <FrameLayout
+        android:id="@+id/info_card_pdf_wrapper"
         android:background="@drawable/pdf_fullscreen"
-        >
+        android:layout_width="match_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_height="48dp">
 
-        <Spinner
-            android:id="@+id/documents_files"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:padding="@dimen/half_date_offset"
-            android:layout_weight="2"/>
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-        <TextView
-            android:gravity="center|start"
-            android:id="@+id/pageInfo"
-            android:text=""
-            android:width="40dp"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:textSize="18dp"
-            />
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_height="match_parent"
+                android:padding="@dimen/half_date_offset"
+                android:layout_gravity="center_vertical"
+                android:layout_width="160dp"
+                android:layout_marginStart="@dimen/date_offset">
+
+                <sapotero.rxtest.views.views.CircleLeftArrow
+                    android:id="@+id/info_card_pdf_fullscreen_prev_document"
+                    android:clickable="true"
+                    android:layout_width="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="@dimen/half_date_offset"
+                    android:layout_marginEnd="@dimen/half_date_offset"
+                    android:layout_height="30dp"/>
 
 
-        <Button
-            android:id="@+id/pdf_previous"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/pdf_button_prev_page" />
-        <Button
-        android:id="@+id/pdf_next"
-        style="?android:attr/buttonBarButtonStyle"
-        android:layout_width="0dp"
+                <TextView
+                    android:text="0 из 0"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:id="@+id/info_card_pdf_fullscreen_document_counter"
+                    android:gravity="center"
+                    android:layout_weight="1"/>
+
+                <sapotero.rxtest.views.views.CircleRightArrow
+                    android:id="@+id/info_card_pdf_fullscreen_next_document"
+                    android:clickable="true"
+                    android:layout_width="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginStart="@dimen/half_date_offset"
+                    android:layout_marginEnd="@dimen/half_date_offset"
+                    android:layout_height="30dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/info_card_pdf_fullscreen_page_title"
+                    android:layout_weight="1"
+                    android:gravity="center"/>
+
+                <TextView
+                    android:text="0 из 0 страниц"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/info_card_pdf_fullscreen_page_counter"
+                    android:gravity="center"
+                    android:layout_weight="4"/>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="4">
+
+                    <ImageButton
+                        android:id="@+id/info_card_pdf_fullscreen_button"
+                        android:foreground="@drawable/card_foreground"
+                        android:background="@drawable/fullscreen"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="4"
+                        android:layout_gravity="center"
+                        />
+
+                </FrameLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/info_card_pdf_no_files"
+        android:text="@string/no_files"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="@string/pdf_button_next_page" />
+        android:textStyle="italic"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
 
-    </LinearLayout>
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
+
+
 </RelativeLayout>
