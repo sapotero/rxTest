@@ -53,6 +53,7 @@ import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.query.DBQueryBuilder;
+import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.bus.GetDocumentInfoEvent;
 import sapotero.rxtest.events.bus.MarkDocumentAsChangedJobEvent;
 import sapotero.rxtest.events.bus.UpdateDocumentJobEvent;
@@ -120,14 +121,17 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private CompositeSubscription subscriptions;
 
 //  private String total;
-  private final int SETTINGS_VIEW_TYPE_ALL = 10;
-  private final int SETTINGS_VIEW_TYPE_INCOMING_DOCUMENTS = 11;
-  private final int SETTINGS_VIEW_TYPE_CITIZEN_REQUESTS = 12;
-  private final int SETTINGS_VIEW_TYPE_INCOMING_ORDERS = 13;
-  private final int SETTINGS_VIEW_TYPE_INTERNAL = 14;
-  private final int SETTINGS_VIEW_TYPE_ORDERS = 15;
-  private final int SETTINGS_VIEW_TYPE_ORDERS_MVD = 16;
-  private final int SETTINGS_VIEW_TYPE_ORDERS_DDO = 17;
+  private final int ALL                = 0;
+  private final int INCOMING_DOCUMENTS = 1;
+  private final int CITIZEN_REQUESTS   = 2;
+  private final int APPROVE_ASSIGN     = 3;
+  private final int INCOMING_ORDERS    = 4;
+  private final int ORDERS             = 5;
+  private final int ORDERS_DDO         = 6;
+  private final int IN_DOCUMENTS       = 7;
+  private final int ON_CONTROL         = 8;
+  private final int PROCESSED          = 9;
+  private final int FAVORITES          = 10;
 
   private final int SETTINGS_VIEW_TYPE_APPROVE = 18;
   private final int SETTINGS_VIEW = 20;
@@ -235,28 +239,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       menuBuilder.build();
     }, 5000L);
 
-//    try {
-//      Process process = Runtime.getRuntime().exec("/system/bin/ls -la /storage");
-//
-//      BufferedReader reader = new BufferedReader( new InputStreamReader(process.getInputStream()) );
-//      int read;
-//      char[] buffer = new char[4096];
-//
-//      StringBuilder output = new StringBuilder();
-//      while ((read = reader.read(buffer)) > 0) {
-//        output.append(buffer, 0, read);
-//      }
-//      reader.close();
-//
-//      process.waitFor();
-//
-//      Toast.makeText (this, output.toString(), LENGTH_LONG ).show();
-//
-//    } catch (IOException | InterruptedException e) {
-//      Timber.tag("IO").w( e );
-//
-//    }
-
   }
 
   @Override
@@ -294,12 +276,14 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void setJournalType(int type) {
-    int index = Arrays.asList((getResources().getStringArray(R.array.settings_view_start_page_identifier))).indexOf(String.valueOf(type));
-    String value = Arrays.asList((getResources().getStringArray(R.array.settings_view_start_page_values))).get(index);
+//    int index = Arrays.asList((getResources().getStringArray(R.array.settings_view_start_page_identifier))).indexOf(String.valueOf(type));
+//    String value = Arrays.asList((getResources().getStringArray(R.array.settings_view_start_page_values))).get(index);
+//
+//    Integer adapter_index = document_type_adapter.findByValue(value);
+//    Timber.tag(TAG).i("value selected int: " + adapter_index);
+//    DOCUMENT_TYPE_SELECTOR.setSelection(adapter_index);
+    menuBuilder.selectJournal( type );
 
-    Integer adapter_index = document_type_adapter.findByValue(value);
-    Timber.tag(TAG).i("value selected int: " + adapter_index);
-    DOCUMENT_TYPE_SELECTOR.setSelection(adapter_index);
   }
 
   private void drawer_build_bottom() {
@@ -333,33 +317,43 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
           Timber.tag(TAG).d("drawerItem.getIdentifier(): " + drawerItem.getIdentifier());
 
           Class<?> activity = null;
+
           switch ((int) drawerItem.getIdentifier()) {
-            case SETTINGS_VIEW_TYPE_ALL:
-              setJournalType(SETTINGS_VIEW_TYPE_ALL);
+            case ALL:
+              setJournalType(ALL);
               break;
-            case SETTINGS_VIEW_TYPE_INCOMING_DOCUMENTS:
-              setJournalType(SETTINGS_VIEW_TYPE_INCOMING_DOCUMENTS);
+            case INCOMING_DOCUMENTS:
+              setJournalType(INCOMING_DOCUMENTS);
               break;
-            case SETTINGS_VIEW_TYPE_CITIZEN_REQUESTS:
-              setJournalType(SETTINGS_VIEW_TYPE_CITIZEN_REQUESTS);
+            case CITIZEN_REQUESTS:
+              setJournalType(CITIZEN_REQUESTS);
               break;
-            case SETTINGS_VIEW_TYPE_INCOMING_ORDERS:
-              setJournalType(SETTINGS_VIEW_TYPE_INCOMING_ORDERS);
+            case APPROVE_ASSIGN:
+              setJournalType(APPROVE_ASSIGN);
               break;
-            case SETTINGS_VIEW_TYPE_INTERNAL:
-              setJournalType(SETTINGS_VIEW_TYPE_INTERNAL);
+            case INCOMING_ORDERS:
+              setJournalType(INCOMING_ORDERS);
               break;
-            case SETTINGS_VIEW_TYPE_ORDERS:
-              setJournalType(SETTINGS_VIEW_TYPE_ORDERS);
+            case ORDERS:
+              setJournalType(ORDERS);
               break;
-            case SETTINGS_VIEW_TYPE_ORDERS_MVD:
-              setJournalType(SETTINGS_VIEW_TYPE_ORDERS_MVD);
+            case ORDERS_DDO:
+              setJournalType(ORDERS_DDO);
               break;
-            case SETTINGS_VIEW_TYPE_ORDERS_DDO:
-              setJournalType(SETTINGS_VIEW_TYPE_ORDERS_DDO);
+            case IN_DOCUMENTS:
+              setJournalType(IN_DOCUMENTS);
+              break;
+            case ON_CONTROL:
+              setJournalType(ON_CONTROL);
+              break;
+            case PROCESSED:
+              setJournalType(PROCESSED);
+              break;
+            case FAVORITES:
+              setJournalType(FAVORITES);
               break;
             case SETTINGS_VIEW_TYPE_APPROVE:
-              setJournalType(SETTINGS_VIEW_TYPE_APPROVE);
+              setJournalType(8);
               break;
 
             case SETTINGS_VIEW:
@@ -447,11 +441,14 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     String[] identifier = (getResources().getStringArray(R.array.settings_view_start_page_identifier));
     String[] title = (getResources().getStringArray(R.array.settings_view_start_page));
 
-
-    for (Integer i : treeMap.keySet()) {
-      Timber.tag("drawer_add_item").v(" !index " + i + " " + treeMap.get(i));
-      drawer_add_item(i, title[i], Long.valueOf(identifier[i]));
+    for(Fields.Menu menu: Fields.Menu.values() ){
+      drawer_add_item( menu.getIndex() , menu.getTitle(), Long.valueOf( menu.getIndex()) );
     }
+
+//    for (Integer i : treeMap.keySet()) {
+//      Timber.tag("drawer_add_item").v(" !index " + i + " " + treeMap.get(i));
+//      drawer_add_item(i, title[i], Long.valueOf(identifier[i]));
+//    }
 
     drawer_build_bottom();
   }

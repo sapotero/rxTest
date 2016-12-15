@@ -128,5 +128,4 @@ public class DocumentTypeAdapter extends BaseAdapter {
       return position;
     }
   }
-
 }

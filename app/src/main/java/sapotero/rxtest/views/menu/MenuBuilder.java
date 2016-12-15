@@ -33,6 +33,10 @@ public class MenuBuilder implements ItemsBuilder.Callback{
     return itemsBuilder.isVisible();
   }
 
+  public void selectJournal(int type) {
+    itemsBuilder.get(type);
+  }
+
 
   public interface Callback {
 

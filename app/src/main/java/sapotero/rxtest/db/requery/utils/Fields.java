@@ -100,6 +100,49 @@ public class Fields {
 
   }
 
+
+  public enum Menu {
+    ALL                ( 0  , "ALL"                , "Документы / Проекты" ),
+    INCOMING_DOCUMENTS ( 1  , "INCOMING_DOCUMENTS" , "Входящие документы" ),
+    CITIZEN_REQUESTS   ( 2  , "CITIZEN_REQUESTS"   , "Обращения граждан" ),
+    APPROVE_ASSIGN     ( 3  , "APPROVE_ASSIGN"     , "Подписание/Согласование" ),
+    INCOMING_ORDERS    ( 4  , "INCOMING_ORDERS"    , "НПА" ),
+    ORDERS             ( 5  , "ORDERS"             , "Приказы" ),
+    ORDERS_DDO         ( 6  , "ORDERS_DDO"         , "Приказы ДДО" ),
+    IN_DOCUMENTS       ( 7  , "IN_DOCUMENTS"       , "Внутренние документ" ),
+    ON_CONTROL         ( 8  , "ON_CONTROL"         , "На контроле" ),
+    PROCESSED          ( 9  , "PROCESSED"          , "Обработанное" ),
+    FAVORITES          ( 10 , "FAVORITES"          , "Избранное" );
+
+    private final Integer index;
+    private final String value;
+    private final String title;
+
+    Menu(final int index, final String value, final String title) {
+      this.index  = index;
+      this.value = value;
+      this.title  = title;
+    }
+
+    public Integer getIndex() {
+      return index;
+    }
+
+    public String getValue() {
+      return value;
+    }
+
+    public String getTitle() {
+      return title;
+    }
+
+    @Override
+    public String toString() {
+      return value;
+    }
+
+  }
+
   public static Status getStatus(String type ){
     Status status = null;
 

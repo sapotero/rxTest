@@ -107,6 +107,9 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
   public void next() {
     journalSpinner.setSelection( journalSpinnerAdapter.next() );
   }
+  public void get( int type ) {
+    journalSpinner.setSelection( type );
+  }
 
   public View getView() {
     return view;
