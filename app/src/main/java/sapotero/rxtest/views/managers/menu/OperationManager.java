@@ -55,9 +55,13 @@ public class OperationManager implements CommandFactory.Callback {
       .withParams( params )
       .build( operation );
 
-    remoteExecutor
-      .setCommand( command )
-      .execute();
+    Timber.tag(TAG).i("COMMAND: %s | %s", command, params);
+
+    if (command != null) {
+      remoteExecutor
+        .setCommand( command )
+        .execute();
+    }
   }
 
 

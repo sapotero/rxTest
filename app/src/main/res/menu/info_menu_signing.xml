@@ -2,15 +2,18 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/menu_info_sign_change_person"
-        app:showAsAction="ifRoom|withText"
-        android:title="@string/menu_info_change_person"/>
-    <item
         android:id="@+id/menu_info_sign_next_person"
-        app:showAsAction="ifRoom|withText"
+        app:showAsAction="always|withText"
+        android:icon="@drawable/sign"
         android:title="@string/menu_info_next_person"/>
     <item
+        android:id="@+id/menu_info_sign_change_person"
+        app:showAsAction="always|withText"
+        android:icon="@drawable/change"
+        android:title="@string/menu_info_change_person"/>
+    <item
         android:id="@+id/menu_info_sign_prev_person"
-        app:showAsAction="ifRoom|withText"
+        app:showAsAction="always|withText"
+        android:icon="@drawable/dismiss"
         android:title="@string/menu_info_prev_person"/>
 </menu>

@@ -161,9 +161,9 @@
 
     <string name="menu_info_to_the_primary_consideration">Передача первичного рассмотрения</string>
 
-    <string name="menu_info_change_person">Передача согласования / подписания</string>
-    <string name="menu_info_next_person">Следующему</string>
-    <string name="menu_info_prev_person">Предыдущему</string>
+    <string name="menu_info_change_person">Передать</string>
+    <string name="menu_info_next_person">Подписать</string>
+    <string name="menu_info_prev_person">Отклонить</string>
     <string name="magnifer">Увеличить</string>
     <string name="dialog_oshs_close">Закрыть</string>
     <string name="empty_list">Заглушка под пустой результат в выборе документов</string>
