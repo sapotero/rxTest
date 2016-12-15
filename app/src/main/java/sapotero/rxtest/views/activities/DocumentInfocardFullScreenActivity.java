@@ -37,7 +37,8 @@ public class DocumentInfocardFullScreenActivity extends AppCompatActivity {
     ButterKnife.bind(this);
     EsdApplication.getComponent(this).inject(this);
 
-    toolbar.setTitle("Просмотр документа");
+    toolbar.setContentInsetStartWithNavigation(250);
+    toolbar.setTitle("Просмотр инфокарточки");
     toolbar.setNavigationOnClickListener(v ->{
         finish();
       }

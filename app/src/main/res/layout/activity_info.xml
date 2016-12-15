@@ -66,9 +66,9 @@
                 android:id="@+id/tab_main"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:padding="@dimen/half_date_offset"
                 android:background="@drawable/corner_background"
-                />
+            />
+            <!--android:padding="@dimen/half_date_offset"-->
         </LinearLayout>
 
     </LinearLayout>
