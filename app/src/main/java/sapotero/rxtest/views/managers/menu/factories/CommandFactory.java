@@ -3,10 +3,12 @@ package sapotero.rxtest.views.managers.menu.factories;
 import android.content.Context;
 
 import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
+import sapotero.rxtest.views.managers.menu.commands.approval.ChangePerson;
 import sapotero.rxtest.views.managers.menu.commands.consideration.PrimaryConsideration;
 import sapotero.rxtest.views.managers.menu.commands.performance.DelegatePerformance;
 import sapotero.rxtest.views.managers.menu.commands.report.FromTheReport;
 import sapotero.rxtest.views.managers.menu.commands.report.ReturnToPrimaryConsideration;
+import sapotero.rxtest.views.managers.menu.commands.shared.AddToFolder;
 import sapotero.rxtest.views.managers.menu.interfaces.Command;
 import sapotero.rxtest.views.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.views.managers.menu.utils.CommandParams;
@@ -79,7 +81,11 @@ public class CommandFactory implements AbstractCommand.Callback{
     CHANGE_PERSON {
       @Override
       Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
-        return null;
+        ChangePerson command = new ChangePerson(context, document);
+        command
+          .withPerson( params.getPerson() )
+          .registerCallBack(instance);
+        return command;
       }
     },
     NEXT_PERSON {
@@ -97,7 +103,11 @@ public class CommandFactory implements AbstractCommand.Callback{
     ADD_TO_FOLDER {
       @Override
       Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
-        return null;
+        AddToFolder command = new AddToFolder(context, document);
+        command
+          .withFolder( params.getFolder() )
+          .registerCallBack(instance);
+        return command;
       }
     },
     REMOVE_FROM_FOLDER {
@@ -180,6 +190,13 @@ public class CommandFactory implements AbstractCommand.Callback{
       case "menu_info_prev_person":
         operation = Operation.PREV_PERSON;
         break;
+      case "menu_info_shared_to_favorites":
+        operation = Operation.ADD_TO_FOLDER;
+        break;
+      case "menu_info_shared_to_control":
+        operation = Operation.ADD_TO_FOLDER;
+        break;
+
       default:
         operation = Operation.INCORRECT;
         break;

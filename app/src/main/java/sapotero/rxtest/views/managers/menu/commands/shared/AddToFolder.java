@@ -6,6 +6,7 @@ import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -104,7 +105,7 @@ public class AddToFolder extends AbstractCommand {
           Timber.tag(TAG).i("error: %s", data.getMessage());
           Timber.tag(TAG).i("type: %s", data.getType());
 
-          if (callback != null){
+          if (callback != null && Objects.equals(data.getType(), "warning")){
             callback.onCommandExecuteSuccess();
           }
         },

@@ -12,6 +12,11 @@
         android:icon="@drawable/change"
         android:title="@string/menu_info_change_person"/>
     <item
+        android:id="@+id/menu_info_shared_to_favorites"
+        app:showAsAction="always|withText"
+        android:icon="@drawable/to_favorites"
+        android:title="@string/to_favorites"/>
+    <item
         android:id="@+id/menu_info_sign_prev_person"
         app:showAsAction="always|withText"
         android:icon="@drawable/dismiss"

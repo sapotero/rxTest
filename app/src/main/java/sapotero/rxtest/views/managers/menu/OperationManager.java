@@ -55,7 +55,7 @@ public class OperationManager implements CommandFactory.Callback {
       .withParams( params )
       .build( operation );
 
-    Timber.tag(TAG).i("COMMAND: %s | %s", command, params);
+    Timber.tag(TAG).i("COMMAND: %s [%s] | %s", operation, command, params);
 
     if (command != null) {
       remoteExecutor
@@ -68,6 +68,9 @@ public class OperationManager implements CommandFactory.Callback {
   @Override
   public void onCommandSuccess() {
     Timber.tag(TAG).w("onCommandSuccess");
+    if (callback != null) {
+      callback.onExecuteSuccess();
+    }
   }
 
   @Override

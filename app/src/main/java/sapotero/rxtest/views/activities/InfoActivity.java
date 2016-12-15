@@ -1,8 +1,10 @@
 package sapotero.rxtest.views.activities;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -31,11 +33,14 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.bus.MassInsertDoneEvent;
+import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.adapters.TabSigningPagerAdapter;
+import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
 import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
 import sapotero.rxtest.views.fragments.InfoActivityDecisionPreviewFragment;
 import sapotero.rxtest.views.fragments.InfoCardDocumentsFragment;
@@ -48,7 +53,7 @@ import sapotero.rxtest.views.managers.menu.OperationManager;
 import sapotero.rxtest.views.managers.menu.utils.CommandParams;
 import timber.log.Timber;
 
-public class InfoActivity extends AppCompatActivity implements InfoActivityDecisionPreviewFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, RoutePreviewFragment.OnFragmentInteractionListener, InfoCardDocumentsFragment.OnFragmentInteractionListener, InfoCardWebViewFragment.OnFragmentInteractionListener, InfoCardLinksFragment.OnFragmentInteractionListener, InfoCardFieldsFragment.OnFragmentInteractionListener, DocumentManager.Callback, OperationManager.Callback {
+public class InfoActivity extends AppCompatActivity implements InfoActivityDecisionPreviewFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, RoutePreviewFragment.OnFragmentInteractionListener, InfoCardDocumentsFragment.OnFragmentInteractionListener, InfoCardWebViewFragment.OnFragmentInteractionListener, InfoCardLinksFragment.OnFragmentInteractionListener, InfoCardFieldsFragment.OnFragmentInteractionListener, DocumentManager.Callback, OperationManager.Callback, SelectOshsDialogFragment.Callback {
 
 
   @BindView(R.id.activity_info_preview_container) LinearLayout preview_container;
@@ -84,6 +89,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   private OperationManager operationManager;
   private Fields.Status status;
   private Fields.Journal journal;
+  private SelectOshsDialogFragment oshs;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -205,8 +211,15 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
           // approval (согласование проектов документов)
           case R.id.menu_info_approval_change_person:
-            operation = "menu_info_change_person";
-            params.setPerson( "USER_UD" );
+            operation = "null";
+
+            if (oshs == null){
+              oshs = new SelectOshsDialogFragment();
+              oshs.registerCallBack( this );
+            }
+
+            oshs.show( getFragmentManager(), "SelectOshsDialogFragment");
+
             break;
           case R.id.menu_info_approval_next_person:
             operation = "menu_info_next_person";
@@ -219,8 +232,14 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
           // approval (согласование проектов документов)
           case R.id.menu_info_sign_change_person:
-            operation = "menu_info_change_person";
-            params.setPerson( "USER_UD" );
+            operation = "null";
+
+            if (oshs == null){
+              oshs = new SelectOshsDialogFragment();
+              oshs.registerCallBack( this );
+            }
+
+            oshs.show( getFragmentManager(), "SelectOshsDialogFragment");
             break;
           case R.id.menu_info_sign_next_person:
             operation = "menu_info_next_person";
@@ -243,6 +262,18 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
             startActivity(intent);
 
             break;
+          case R.id.menu_info_shared_to_favorites:
+            operation = "menu_info_shared_to_favorites";
+
+            String favorites = dataStore
+              .select(RFolderEntity.class)
+              .where(RFolderEntity.TYPE.eq("favorites"))
+              .get().first().getUid();
+
+            params.setFolder(favorites);
+            break;
+
+
           default:
             operation = "incorrect";
             break;
@@ -384,6 +415,22 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   @Override
   public void onExecuteSuccess() {
     Timber.tag("OpManagerCallback").i("onExecuteSuccess");
+
+    ProgressDialog prog= new ProgressDialog(this);//Assuming that you are using fragments.
+    prog.setTitle("Информация");
+    prog.setMessage("Операция успешно завершена");
+    prog.setCancelable(false);
+    prog.show();
+
+    dataStore
+      .update(RDocumentEntity.class)
+      .set(RDocumentEntity.FILTER, "processed")
+      .where(RDocumentEntity.UID.eq(UID.get()));
+
+    new Handler().postDelayed( () -> {
+      prog.dismiss();
+      finish();
+    }, 5000L);
   }
 
   @Override
@@ -392,4 +439,18 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   }
 
 
+
+
+  // OSHS selector
+  @Override
+  public void onSearchSuccess(Oshs user) {
+    CommandParams params = new CommandParams();
+    params.setPerson( user.getId() );
+    operationManager.execute( "menu_info_change_person", params );
+  }
+
+  @Override
+  public void onSearchError(Throwable error) {
+
+  }
 }

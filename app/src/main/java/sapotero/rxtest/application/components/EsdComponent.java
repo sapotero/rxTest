@@ -39,10 +39,12 @@ import sapotero.rxtest.views.interfaces.DocumentManager;
 import sapotero.rxtest.views.managers.db.factories.DocumentFactory;
 import sapotero.rxtest.views.managers.menu.OperationManager;
 import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
+import sapotero.rxtest.views.managers.menu.commands.approval.ChangePerson;
 import sapotero.rxtest.views.managers.menu.commands.performance.ApprovalPerformance;
 import sapotero.rxtest.views.managers.menu.commands.performance.DelegatePerformance;
 import sapotero.rxtest.views.managers.menu.commands.report.FromTheReport;
 import sapotero.rxtest.views.managers.menu.commands.report.ReturnToPrimaryConsideration;
+import sapotero.rxtest.views.managers.menu.commands.shared.AddToFolder;
 import sapotero.rxtest.views.managers.view.DecisionManager;
 import sapotero.rxtest.views.menu.builders.ButtonBuilder;
 import sapotero.rxtest.views.services.AuthService;
@@ -105,12 +107,19 @@ public interface EsdComponent {
   void inject(DecisionManager context);
 
   void inject(OperationManager context);
+
+
+
   void inject(AbstractCommand context);
 
   void inject(FromTheReport context);
   void inject(ReturnToPrimaryConsideration context);
   void inject(ApprovalPerformance context);
   void inject(DelegatePerformance context);
+  void inject(AddToFolder context);
+  void inject(ChangePerson context);
+
+
 
   Application application();
 }
