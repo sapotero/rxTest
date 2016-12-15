@@ -175,6 +175,7 @@
     <string name="field_external_number">Номер поступившего документа:</string>
     <string name="to_favorites">В избранное</string>
     <string name="to_control">На контроль</string>
+    <string name="dialog_template_title">Шаблоны резолюции</string>
 
 
 </resources>

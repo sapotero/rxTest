@@ -170,6 +170,7 @@
                         android:background="@drawable/spinner_journal_background"
                         android:padding="15dp"
                         android:layout_width="0dp"
+                        style="@style/Widget.AppCompat.Spinner.DropDown"
                         android:layout_weight="1"/>
 
                     <CheckBox

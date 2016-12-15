@@ -38,9 +38,10 @@ import sapotero.rxtest.retrofit.utils.OshsService;
 import sapotero.rxtest.views.adapters.PrimaryConsiderationAdapter;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
+import sapotero.rxtest.views.dialogs.SelectTemplateDialogFragment;
 import timber.log.Timber;
 
-public class DecisionFragment extends Fragment implements PrimaryConsiderationAdapter.Callback, SelectOshsDialogFragment.Callback {
+public class DecisionFragment extends Fragment implements PrimaryConsiderationAdapter.Callback, SelectOshsDialogFragment.Callback, SelectTemplateDialogFragment.Callback {
   private static final String LOGIN = "";
   private static final String PASSWORD = "";
 
@@ -74,9 +75,12 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   private Preference<String> HOST;
   private PrimaryConsiderationAdapter adapter;
   private SelectOshsDialogFragment oshs;
+  private SelectTemplateDialogFragment templates;
 
 
   public Callback callback;
+
+
 
   public interface Callback {
     void onUpdateSuccess();
@@ -354,6 +358,25 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   @Override
   public void onSearchError(Throwable error) {
 
+  }
+
+
+
+  @OnClick(R.id.fragment_decision_button_get_template)
+  public void template(){
+    Timber.tag("ADD template").e("CLICKED");
+
+    if (templates == null){
+      templates = new SelectTemplateDialogFragment();
+      templates.registerCallBack( this );
+    }
+
+    templates.show( getActivity().getFragmentManager(), "SelectTemplateDialogFragment");
+  }
+  @Override
+  public void onSelectTemplate(String template) {
+    Timber.tag("ADD template").e("onSelectTemplate %s", template);
+    decision_text.setText( template );
   }
 
 }

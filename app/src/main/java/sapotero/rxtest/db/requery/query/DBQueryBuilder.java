@@ -132,7 +132,6 @@ public class DBQueryBuilder {
     this.withFavorites = withFavorites;
     execute();
   }
-
   private void addToAdapterList(List<RDocumentEntity> docs) {
     ArrayList<Document> list_dosc = new ArrayList<>();
 

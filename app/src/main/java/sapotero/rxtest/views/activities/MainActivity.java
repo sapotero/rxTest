@@ -1,7 +1,9 @@
 package sapotero.rxtest.views.activities;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -32,9 +34,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -63,14 +62,13 @@ import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
 import sapotero.rxtest.views.adapters.utils.DocumentTypeAdapter;
 import sapotero.rxtest.views.adapters.utils.StatusAdapter;
+import sapotero.rxtest.views.interfaces.DataLoaderInterface;
 import sapotero.rxtest.views.menu.MenuBuilder;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import sapotero.rxtest.views.views.CircleLeftArrow;
 import sapotero.rxtest.views.views.CircleRightArrow;
 import sapotero.rxtest.views.views.MultiOrganizationSpinner;
 import timber.log.Timber;
-
-import static android.widget.Toast.LENGTH_LONG;
 
 public class MainActivity extends AppCompatActivity implements MenuBuilder.Callback {
 
@@ -145,6 +143,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private Subscription updateOrganizations;
   public MenuBuilder menuBuilder;
   private DBQueryBuilder dbQueryBuilder;
+  private DataLoaderInterface dataLoader;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -189,6 +188,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     dbQueryBuilder.printFolders();
     dbQueryBuilder.printTemplates();
 
+    dataLoader = new DataLoaderInterface(this);
+
 
 
     progressBar.setVisibility(ProgressBar.GONE);
@@ -204,7 +205,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     toolbar.setOnMenuItemClickListener(item -> {
       switch (item.getItemId()) {
         case R.id.reload:
-          tryToread();
+          updateByStatus();
 //          document_favorite_button1.setVisibility( document_favorite_button1.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
           break;
         default:
@@ -218,31 +219,44 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   }
 
-  private void tryToread() {
-    Timber.tag("IO").i( "tryToread start" );
+  private void updateByStatus() {
+    dataLoader.updateByStatus( menuBuilder.getItem() );
 
-    try {
-      Process process = Runtime.getRuntime().exec("/system/bin/ls -la /storage");
+    ProgressDialog prog= new ProgressDialog(this);//Assuming that you are using fragments.
+    prog.setTitle("please wait");
+    prog.setMessage("data is loading...");
+    prog.setCancelable(false);
+    prog.setIndeterminate(true);
+    prog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+    prog.show();
 
-      BufferedReader reader = new BufferedReader( new InputStreamReader(process.getInputStream()) );
-      int read;
-      char[] buffer = new char[4096];
+    new Handler().postDelayed( () -> {
+      prog.dismiss();
+      menuBuilder.build();
+    }, 5000L);
 
-      StringBuilder output = new StringBuilder();
-      while ((read = reader.read(buffer)) > 0) {
-        output.append(buffer, 0, read);
-      }
-      reader.close();
+//    try {
+//      Process process = Runtime.getRuntime().exec("/system/bin/ls -la /storage");
+//
+//      BufferedReader reader = new BufferedReader( new InputStreamReader(process.getInputStream()) );
+//      int read;
+//      char[] buffer = new char[4096];
+//
+//      StringBuilder output = new StringBuilder();
+//      while ((read = reader.read(buffer)) > 0) {
+//        output.append(buffer, 0, read);
+//      }
+//      reader.close();
+//
+//      process.waitFor();
+//
+//      Toast.makeText (this, output.toString(), LENGTH_LONG ).show();
+//
+//    } catch (IOException | InterruptedException e) {
+//      Timber.tag("IO").w( e );
+//
+//    }
 
-      process.waitFor();
-
-      Toast.makeText (this, output.toString(), LENGTH_LONG ).show();
-
-    } catch (IOException | InterruptedException e) {
-      Timber.tag("IO").w( e );
-
-    }
-    Timber.tag("IO").d( "tryToread end" );
   }
 
   @Override

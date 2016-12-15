@@ -109,9 +109,10 @@
             android:layout_height="24dp"
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="24dp"
+            android:foreground="@drawable/card_foreground"
+            android:layout_marginEnd="15dp"
             android:layout_marginTop="52dp"
-            android:layout_alignStart="@+id/edit"
-            android:layout_marginStart="37dp"/>
+            android:layout_alignParentEnd="true"/>
 
     </RelativeLayout>
 

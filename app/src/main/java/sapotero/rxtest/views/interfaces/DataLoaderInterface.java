@@ -24,6 +24,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.jobs.bus.AddFoldersJob;
@@ -44,7 +45,9 @@ import sapotero.rxtest.retrofit.models.documents.Documents;
 import sapotero.rxtest.retrofit.models.me.UserInfo;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.retrofit.utils.UserInfoService;
-import sapotero.rxtest.views.activities.LoginActivity;
+import sapotero.rxtest.views.menu.builders.ButtonBuilder;
+import sapotero.rxtest.views.menu.builders.ConditionBuilder;
+import sapotero.rxtest.views.menu.fields.Item;
 import sapotero.rxtest.views.utils.TDmodel;
 import timber.log.Timber;
 
@@ -96,8 +99,8 @@ public class DataLoaderInterface {
     void onGetProcessedInfoError(Throwable error);
   }
 
-  public DataLoaderInterface(LoginActivity loginActivity) {
-    this.context = loginActivity.getApplicationContext();
+  public DataLoaderInterface(Context context) {
+    this.context = context;
 
     EsdApplication.getComponent(context).inject(this);
 
@@ -509,5 +512,60 @@ public class DataLoaderInterface {
     );
 
   }
+
+
+  public void updateByStatus(Item items) {
+    ArrayList<Fields.Status> filter_types = new ArrayList<>();
+
+    for ( ButtonBuilder button: items.getButtons() ){
+      for ( ConditionBuilder condition: button.getConditions() ){
+
+        if ( condition.getField().getLeftOperand() == RDocumentEntity.FILTER ){
+          filter_types.add( Fields.getStatus( condition.getField().getRightOperand().toString() ) );
+        }
+
+
+      }
+    }
+
+
+    Retrofit retrofit = new RetrofitManager(context, HOST.get() + "/v3/", okHttpClient).process();
+    DocumentsService documentsService = retrofit.create(DocumentsService.class);
+
+    Timber.tag("updateByStatus").i( "%s ", filter_types );
+
+    Observable<Fields.Status> types = Observable.from(filter_types);
+    Observable<Documents> count = Observable
+      .from(filter_types)
+      .flatMap(status -> documentsService.getDocuments(LOGIN.get(), TOKEN.get(), status.getValue(), 1000, 0));
+
+
+    unsubscribe();
+    subscription.add(
+      Observable.zip( types, count, (type, docs) -> new TDmodel( type, docs.getDocuments() ))
+        .subscribeOn( Schedulers.computation() )
+        .observeOn( AndroidSchedulers.mainThread() )
+        .toList()
+        .subscribe(
+          raw -> {
+            Timber.tag(TAG).i(" RECV: %s", raw.size());
+
+            for (TDmodel data: raw) {
+              Timber.tag(TAG).i(" DocumentType: %s | %s", data.getType(), data.getDocuments().size() );
+
+              for (Document doc: data.getDocuments() ) {
+                String type = data.getType();
+                Timber.tag(TAG).d( "%s | %s", type, doc.getUid() );
+
+                jobManager.addJobInBackground(new SyncDocumentsJob( doc.getUid(), Fields.getStatus(type) ));
+              }
+            }
+          },
+          error -> {
+            callback.onGetDocumentsInfoError(error);
+          })
+    );
+  }
+
 
 }

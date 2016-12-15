@@ -112,7 +112,6 @@ public class MenuBuilder implements ItemsBuilder.Callback{
     );
   }
 
-
   @Override
   public void onMenuUpdate( ArrayList<ConditionBuilder> result ) {
 

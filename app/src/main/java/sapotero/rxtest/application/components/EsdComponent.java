@@ -25,6 +25,7 @@ import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OshsAutoCompleteAdapter;
 import sapotero.rxtest.views.adapters.models.DocumentTypeItem;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
+import sapotero.rxtest.views.dialogs.SelectTemplateDialogFragment;
 import sapotero.rxtest.views.fragments.DecisionFragment;
 import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
 import sapotero.rxtest.views.fragments.InfoActivityDecisionPreviewFragment;
@@ -82,6 +83,7 @@ public interface EsdComponent {
   void inject(InfoCardLinksFragment fragment);
   void inject(RoutePreviewFragment fragment);
   void inject(InfoActivityDecisionPreviewFragment fragment);
+  void inject(SelectTemplateDialogFragment fragment);
 
 
 
