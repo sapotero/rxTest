@@ -66,10 +66,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
     toolbar.setTitle("Редактор резолюции ");
     toolbar.inflateMenu(R.menu.info_decision_constructor);
-    toolbar.setNavigationOnClickListener(v -> {
-      finish();
-      }
-    );
+    toolbar.setNavigationOnClickListener( v -> manager.saveDecision() );
     toolbar.setOnMenuItemClickListener(item -> {
 
       switch (item.getItemId()){

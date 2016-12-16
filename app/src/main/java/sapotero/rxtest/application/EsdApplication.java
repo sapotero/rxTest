@@ -21,8 +21,9 @@ public final class EsdApplication extends Application {
   @Override public void onCreate() {
     super.onCreate();
 
+    Timber.plant(new Timber.DebugTree());
+
     if (Constant.DEBUG) {
-      Timber.plant(new Timber.DebugTree());
 
       if (LeakCanary.isInAnalyzerProcess(this)) {
         return;

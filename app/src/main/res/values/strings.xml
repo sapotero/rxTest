@@ -179,6 +179,8 @@
     <string name="no_files">Нет электронных образов</string>
     <string name="remove_from_favorites"> Удалить из избранного </string>
     <string name="remove_from_control">Снять отметку о контроле</string>
+    <string name="go">Перейти</string>
+    <string name="info_card_disabled">Невозможно отобразить инфокарточку</string>
 
 
 </resources>

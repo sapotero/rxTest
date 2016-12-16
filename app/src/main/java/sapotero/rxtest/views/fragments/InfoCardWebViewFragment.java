@@ -20,8 +20,11 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.requery.Persistable;
+import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.views.activities.DocumentInfocardFullScreenActivity;
 
 public class InfoCardWebViewFragment extends Fragment {
@@ -29,11 +32,13 @@ public class InfoCardWebViewFragment extends Fragment {
   @BindView(R.id.web_infocard) WebView infocard;
 
   @Inject RxSharedPreferences settings;
+  @Inject SingleEntityStore<Persistable> dataStore;
 
   private OnFragmentInteractionListener mListener;
   private Context mContext;
   private String document;
   private String TAG = this.getClass().getSimpleName();
+  private String uid;
 
   public InfoCardWebViewFragment() {
   }
@@ -85,7 +90,16 @@ public class InfoCardWebViewFragment extends Fragment {
 
     Gson gson = new Gson();
     Preference<String> data = settings.getString("document.infoCard");
-    document = data.get();
+
+    if (uid != null) {
+      RDocumentEntity doc = dataStore
+        .select(RDocumentEntity.class)
+        .where(RDocumentEntity.UID.eq(uid))
+        .get().first();
+      document = doc.getInfoCard();
+    } else {
+      document = data.get();
+    }
 
     try {
       if ( document != null ){
@@ -115,6 +129,12 @@ public class InfoCardWebViewFragment extends Fragment {
     super.onDetach();
     mListener = null;
   }
+
+  public Fragment withUid(String uid) {
+    this.uid = uid;
+    return this;
+  }
+
   public interface OnFragmentInteractionListener {
     void onFragmentInteraction(Uri uri);
   }

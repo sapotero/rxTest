@@ -48,6 +48,7 @@ public class InfoCardFieldsFragment extends Fragment {
   @BindView(R.id.field_urgency) TextView field_urgency;
   @BindView(R.id.field_comment) TextView field_comment;
   @BindView(R.id.field_external_number) TextView field_external_number;
+  private String uid;
 
   public InfoCardFieldsFragment() {
   }
@@ -86,7 +87,7 @@ public class InfoCardFieldsFragment extends Fragment {
 
     dataStore
       .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq(DOCUMENT_UID.get()))
+      .where(RDocumentEntity.UID.eq(uid == null ? DOCUMENT_UID.get() : uid ))
       .get()
       .toObservable()
       .subscribeOn(Schedulers.io())
@@ -135,6 +136,12 @@ public class InfoCardFieldsFragment extends Fragment {
     super.onDetach();
     mListener = null;
   }
+
+  public Fragment withUid(String uid) {
+    this.uid = uid;
+    return this;
+  }
+
   public interface OnFragmentInteractionListener {
     void onFragmentInteraction(Uri uri);
   }

@@ -26,9 +26,9 @@ public class ButtonBuilder {
 
   @Inject SingleEntityStore<Persistable> dataStore;
 
-  private final ConditionBuilder[] conditions;
-  private final ConditionBuilder item_conditions;
-  private final String label;
+  private ConditionBuilder[] conditions;
+  private ConditionBuilder item_conditions;
+  private String label;
   private boolean active;
   private Corner corner;
 
@@ -37,6 +37,13 @@ public class ButtonBuilder {
 
 
   private String TAG = this.getClass().getSimpleName();
+
+  public void recalculate() {
+    Timber.tag("recalculate");
+    if (view != null) {
+      view.setText( getLabel() );
+    }
+  }
 
   public interface Callback {
     void onButtonBuilderUpdate();
@@ -101,6 +108,7 @@ public class ButtonBuilder {
   }
 
   public RadioButton getView(Context context){
+
     Timber.tag(TAG).e("create new");
     view = new RadioButton(context);
 
@@ -131,6 +139,8 @@ public class ButtonBuilder {
 
     view.setOnCheckedChangeListener((buttonView, isChecked) -> {
       setActive(isChecked);
+
+      view.setText( getLabel() );
 
       if (isChecked){
         Timber.tag("setOnCheckedChangeListener").i("change");

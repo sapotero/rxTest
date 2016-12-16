@@ -101,6 +101,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment {
 
   private Unbinder unbinder;
   private Preference<String> REG_NUMBER;
+  private String uid;
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -157,6 +158,11 @@ public class InfoActivityDecisionPreviewFragment extends Fragment {
   public void onDetach() {
     super.onDetach();
     mListener = null;
+  }
+
+  public Fragment withUid(String uid) {
+    this.uid = uid;
+    return this;
   }
 
   public interface OnFragmentInteractionListener {
@@ -219,7 +225,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment {
   private Boolean documentExist(){
     Integer count = dataStore
       .count( RDocumentEntity.class )
-      .where( RDocumentEntity.UID.eq( UID.get() ) )
+      .where( RDocumentEntity.UID.eq( uid == null? UID.get() : uid ) )
       .get()
       .value();
 
@@ -240,7 +246,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment {
 
     dataStore
       .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq( UID.get() ))
+      .where(RDocumentEntity.UID.eq( uid == null? UID.get() : uid ))
       .get()
       .toObservable()
       .subscribeOn(Schedulers.io())

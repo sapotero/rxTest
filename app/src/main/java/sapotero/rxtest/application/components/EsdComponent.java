@@ -16,6 +16,7 @@ import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.activities.DocumentImageFullScreenActivity;
 import sapotero.rxtest.views.activities.DocumentInfocardFullScreenActivity;
 import sapotero.rxtest.views.activities.InfoActivity;
+import sapotero.rxtest.views.activities.InfoNoMenuActivity;
 import sapotero.rxtest.views.activities.LoginActivity;
 import sapotero.rxtest.views.activities.MainActivity;
 import sapotero.rxtest.views.activities.SettingsActivity;
@@ -40,6 +41,8 @@ import sapotero.rxtest.views.managers.db.factories.DocumentFactory;
 import sapotero.rxtest.views.managers.menu.OperationManager;
 import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.views.managers.menu.commands.approval.ChangePerson;
+import sapotero.rxtest.views.managers.menu.commands.approval.NextPerson;
+import sapotero.rxtest.views.managers.menu.commands.approval.PrevPerson;
 import sapotero.rxtest.views.managers.menu.commands.performance.ApprovalPerformance;
 import sapotero.rxtest.views.managers.menu.commands.performance.DelegatePerformance;
 import sapotero.rxtest.views.managers.menu.commands.report.FromTheReport;
@@ -68,6 +71,7 @@ public interface EsdComponent {
   void inject(DocumentImageFullScreenActivity activity);
   void inject(DocumentInfocardFullScreenActivity activity);
   void inject(SettingsTemplatesActivity activity);
+  void inject(InfoNoMenuActivity activity);
 
 
 
@@ -120,6 +124,10 @@ public interface EsdComponent {
   void inject(AddToFolder context);
   void inject(ChangePerson context);
   void inject(CheckForControl context);
+  void inject(NextPerson context);
+  void inject(PrevPerson context);
+  void inject(sapotero.rxtest.views.managers.menu.commands.signing.NextPerson context);
+  void inject(sapotero.rxtest.views.managers.menu.commands.signing.PrevPerson context);
 
 
 

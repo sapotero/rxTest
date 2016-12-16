@@ -9,11 +9,13 @@
         app:showAsAction="ifRoom|withText"
         android:title="@string/info_create_decision"/>
     <item
-        android:id="@+id/action_info_create_to_control"
-        app:showAsAction="ifRoom|withText"
-        android:title="@string/info_create_to_control"/>
+        android:id="@+id/menu_info_shared_to_favorites"
+        app:showAsAction="always|withText"
+        android:icon="@drawable/to_favorites"
+        android:title="@string/to_favorites"/>
     <item
-        android:id="@+id/action_info_create_to_favorites"
-        app:showAsAction="ifRoom|withText"
-        android:title="@string/info_create_to_favorites"/>
+        android:id="@+id/menu_info_shared_to_control"
+        app:showAsAction="always|withText"
+        android:icon="@drawable/to_control_icon"
+        android:title="@string/to_control"/>
 </menu>

@@ -4,6 +4,7 @@ import android.content.Context;
 
 import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.views.managers.menu.commands.approval.ChangePerson;
+import sapotero.rxtest.views.managers.menu.commands.approval.NextPerson;
 import sapotero.rxtest.views.managers.menu.commands.consideration.PrimaryConsideration;
 import sapotero.rxtest.views.managers.menu.commands.performance.DelegatePerformance;
 import sapotero.rxtest.views.managers.menu.commands.report.FromTheReport;
@@ -92,13 +93,23 @@ public class CommandFactory implements AbstractCommand.Callback{
     NEXT_PERSON {
       @Override
       Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
-        return null;
+        NextPerson command = new NextPerson(context, document);
+        command
+          .withPerson( "" )
+          .withPerson( "" )
+          .registerCallBack(instance);
+        return command;
       }
     },
     PREV_PERSON {
       @Override
       Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
-        return null;
+        NextPerson command = new NextPerson(context, document);
+        command
+          .withPerson( "" )
+          .withPerson( "" )
+          .registerCallBack(instance);
+        return command;
       }
     },
     ADD_TO_FOLDER {

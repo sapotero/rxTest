@@ -41,7 +41,7 @@
                 android:layout_width="400dp"
                 android:layout_height="wrap_content"
                 android:hint="@string/username_hinf"
-                android:text="admin"/>
+                android:text="rukodir"/>
         </android.support.design.widget.TextInputLayout>
 
         <android.support.design.widget.TextInputLayout

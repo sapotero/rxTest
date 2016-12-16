@@ -255,6 +255,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   public void onResume() {
     super.onResume();
     menuBuilder.build();
+    menuBuilder.getItem().recalcuate();
+    dbQueryBuilder.execute();
   }
 
 

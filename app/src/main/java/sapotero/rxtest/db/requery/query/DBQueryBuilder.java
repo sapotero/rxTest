@@ -78,53 +78,53 @@ public class DBQueryBuilder {
   }
 
   public void execute(){
+    if (conditions != null) {
+      hideEmpty();
 
-    hideEmpty();
+      progressBar.setVisibility(ProgressBar.VISIBLE);
 
-    progressBar.setVisibility(ProgressBar.VISIBLE);
+      WhereAndOr<Result<RDocumentEntity>> query = dataStore.select(RDocumentEntity.class).where(RDocumentEntity.ID.ne(0));
 
-    WhereAndOr<Result<RDocumentEntity>> query = dataStore.select(RDocumentEntity.class).where(RDocumentEntity.ID.ne(0));
+      if ( conditions.size() > 0 ){
 
-    if ( conditions.size() > 0 ){
-
-      for (ConditionBuilder condition : conditions ){
-        switch ( condition.getCondition() ){
-          case AND:
-            query = query.and( condition.getField() );
-            break;
-          case OR:
-            query = query.or( condition.getField() );
-            break;
-          default:
-            break;
+        for (ConditionBuilder condition : conditions ){
+          switch ( condition.getCondition() ){
+            case AND:
+              query = query.and( condition.getField() );
+              break;
+            case OR:
+              query = query.or( condition.getField() );
+              break;
+            default:
+              break;
+          }
         }
       }
+
+      if (withFavorites){
+        query = query.or( RDocumentEntity.FAVORITES.eq(true) );
+      }
+
+      if ( subscribe != null ){
+        subscribe.unsubscribe();
+      }
+
+      if (conditions.size() == 0){
+        addToAdapterList( new ArrayList<>() );
+      } else {
+        subscribe = query.get()
+          .toObservable()
+          .subscribeOn(Schedulers.io())
+          .observeOn( AndroidSchedulers.mainThread() )
+          .toList()
+          .subscribe(docs -> {
+            Timber.tag("loadFromDbQuery").e("docs: %s", docs.size() );
+            addToAdapterList(docs);
+          });
+      }
+
+      findOrganizations();
     }
-
-    if (withFavorites){
-      query = query.or( RDocumentEntity.FAVORITES.eq(true) );
-    }
-
-    if ( subscribe != null ){
-      subscribe.unsubscribe();
-    }
-
-    if (conditions.size() == 0){
-      addToAdapterList( new ArrayList<>() );
-    } else {
-      subscribe = query.get()
-        .toObservable()
-        .subscribeOn(Schedulers.io())
-        .observeOn( AndroidSchedulers.mainThread() )
-        .toList()
-        .subscribe(docs -> {
-          Timber.tag("loadFromDbQuery").e("docs: %s", docs.size() );
-          addToAdapterList(docs);
-        });
-    }
-
-    findOrganizations();
-
   }
 
   public void executeWithConditions(ArrayList<ConditionBuilder> conditions, boolean withFavorites) {

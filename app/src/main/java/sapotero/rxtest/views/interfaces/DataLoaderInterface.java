@@ -257,8 +257,8 @@ public class DataLoaderInterface {
 
   public void getDocumentsInfo(){
 
-    StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-    StrictMode.setThreadPolicy(policy);
+//    StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+//    StrictMode.setThreadPolicy(policy);
 
 
     Retrofit retrofit = new RetrofitManager(context, HOST.get() + "/v3/", okHttpClient).process();
@@ -512,7 +512,6 @@ public class DataLoaderInterface {
     );
 
   }
-
 
   public void updateByStatus(Item items) {
     ArrayList<Fields.Status> filter_types = new ArrayList<>();

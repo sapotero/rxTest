@@ -1,6 +1,9 @@
 package sapotero.rxtest.views.activities;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -232,8 +235,14 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
           // primary_consideration (первичное рассмотрение)
           case R.id.menu_info_to_the_primary_consideration:
-            operation = "menu_info_to_the_primary_consideration";
-            params.setPerson( "USER_UD" );
+            operation = "null";
+
+            if (oshs == null){
+              oshs = new SelectOshsDialogFragment();
+              oshs.registerCallBack( this );
+            }
+
+            oshs.show( getFragmentManager(), "SelectOshsDialogFragment");
             break;
 
           // approval (согласование проектов документов)
@@ -279,10 +288,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
             break;
 
 
-
-          case R.id.action_info_create_to_control:
-            operation = "action_info_create_to_control";
-            break;
           case R.id.action_info_create_decision:
             operation = "action_info_create_decision";
 
@@ -488,16 +493,15 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
       .set(RDocumentEntity.FILTER, "processed");
 
     if ( Objects.equals(command, "add_to_folder") ) {
-      Boolean result = false;
+      Boolean result = true;
 
-//      item.setTitle(getString( doc.isFavorites() != null && doc.isFavorites() ? R.string.remove_from_favorites : R.string.to_favorites));
       MenuItem item = toolbar.getMenu().findItem(R.id.menu_info_shared_to_favorites);
 
       if ( item.getTitle() == getString(R.string.to_favorites) ){
         item.setTitle( getString(R.string.remove_from_favorites) );
       } else {
         item.setTitle( getString(R.string.to_favorites) );
-        result = true;
+        result = false;
       }
 
       query = query.set( RDocumentEntity.FAVORITES, result );
@@ -515,6 +519,18 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
       }
 
       query = query.set( RDocumentEntity.CONTROL, result );
+    }
+
+    if ( Objects.equals(command, "change_person") ) {
+      Toast.makeText( getApplicationContext(), "Операция передачи успешно завершена", Toast.LENGTH_SHORT).show();
+    }
+
+    if ( Objects.equals(command, "next_person") ) {
+      Toast.makeText( getApplicationContext(), "Операция подписания успешно завершена", Toast.LENGTH_SHORT).show();
+    }
+
+    if ( Objects.equals(command, "prev_person") ) {
+      Toast.makeText( getApplicationContext(), "Операция отклонения успешно завершена", Toast.LENGTH_SHORT).show();
     }
 
 
@@ -545,5 +561,12 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   @Override
   public void onSearchError(Throwable error) {
 
+  }
+
+
+  public boolean isOnline() {
+    ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+    NetworkInfo netInfo = cm.getActiveNetworkInfo();
+    return netInfo != null && netInfo.isConnectedOrConnecting();
   }
 }

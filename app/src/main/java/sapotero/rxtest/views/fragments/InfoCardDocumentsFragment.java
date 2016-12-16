@@ -105,6 +105,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   private Preference<String> UID;
   private DocumentLinkAdapter adapter;
   private Preference<String> HOST;
+  private String uid;
 
 
   public InfoCardDocumentsFragment() {
@@ -165,7 +166,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 //        });
     List<RDocumentEntity> files = dataStore
       .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq(UID.get()))
+      .where(RDocumentEntity.UID.eq( uid == null ? UID.get() : uid ))
       .get()
       .toList();
 
@@ -469,6 +470,11 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   @Override
   public boolean onDoubleTapEvent(MotionEvent e) {
     return false;
+  }
+
+  public Fragment withUid(String uid) {
+    this.uid = uid;
+    return this;
   }
 
   public interface OnFragmentInteractionListener {

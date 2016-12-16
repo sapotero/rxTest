@@ -187,8 +187,7 @@ public enum Item {
           ButtonBuilder button = new ButtonBuilder(
             buttons[i].getFormat(),
             buttons[i].getConditions(),
-            null
-//            getCountConditions()[0]
+            getQueryConditions().length != 0 ? getQueryConditions()[0] : null
           );
 
           if (i == 0){
@@ -202,6 +201,10 @@ public enum Item {
           buttonsList.add( button );
         }
       }
+    } else {
+      for (ButtonBuilder button: buttonsList){
+        button.recalculate();
+      }
     }
 
     return buttonsList;
@@ -209,6 +212,12 @@ public enum Item {
 
   public Boolean isVisible(){
     return showOrganization;
+  }
+
+  public void recalcuate(){
+    for (ButtonBuilder button: buttonsList){
+      button.recalculate();
+    }
   }
 
   @Override

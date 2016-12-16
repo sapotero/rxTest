@@ -1,16 +1,58 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
               xmlns:tools="http://schemas.android.com/tools"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               tools:context="sapotero.rxtest.views.fragments.InfoCardLinksFragment"
-    >
+              android:orientation="vertical">
 
-    <Spinner
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Spinner
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/fragment_info_card_link_wrapper"
+                android:layout_weight="1"
+                >
+
+            </Spinner>
+
+            <Button
+                android:id="@+id/go"
+                android:text="@string/go"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"/>
+
+        </LinearLayout>
+
+        <WebView
+            android:id="@+id/fragment_info_card_link_webview"
+            android:padding="@dimen/date_offset"
+            android:layout_width="match_parent"
+            android:background="@drawable/default_scroll_handle_left"
+            android:layout_height="match_parent"/>
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/fragment_info_card_link_disable"
+
+        android:text="@string/info_card_disabled"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/fragment_info_card_link_wrapper"
-        >
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_centerInParent="true"
+        android:gravity="center"
 
-    </Spinner>
+        android:textAppearance="@style/TextAppearance.AppCompat.Display1"/>
 
-</FrameLayout>
+</RelativeLayout>

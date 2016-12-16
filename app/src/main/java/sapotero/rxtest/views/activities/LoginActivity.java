@@ -1,11 +1,11 @@
 package sapotero.rxtest.views.activities;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -44,7 +44,7 @@ import sapotero.rxtest.views.views.VerticalStepperFormLayout;
 import sapotero.rxtest.views.views.utils.VerticalStepperForm;
 import timber.log.Timber;
 
-public class LoginActivity extends AppCompatActivity implements VerticalStepperForm, DataLoaderInterface.Callback {
+public class LoginActivity extends Activity implements VerticalStepperForm, DataLoaderInterface.Callback {
 
   @BindView(R.id.stepper_form) VerticalStepperFormLayout stepper;
 
@@ -195,11 +195,12 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
   }
 
   private Boolean checkLogin( ) {
+    Timber.e("checkLogin");
     boolean isCorrect = false;
 
     resetLoginForm();
 
-    if( host.length() >0 && username.length() > 0 && password.length() > 0 ) {
+    if( host.length() >= 0 && username.length() >= 0 && password.length() >= 0 ) {
       isCorrect = true;
 
       button = (AppCompatButton) stepper.getRootView().findViewById(R.id.next_step);
@@ -261,6 +262,7 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
 
       @Override
       public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        Timber.e("checkLogin");
         checkLogin();
       }
 

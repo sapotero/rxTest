@@ -12,7 +12,6 @@ import android.widget.RadioGroup;
 import android.widget.Spinner;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -174,7 +173,7 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
           }
         }
 
-        Timber.e( "button conditions: %s | active: %s %s %s", Arrays.toString( b.getConditions() ), active, button.isActivated(), button.isChecked()  );
+//        Timber.e( "button conditions: %s | active: %s %s %s", Arrays.toString( b.getConditions() ), active, button.isActivated(), button.isChecked()  );
       }
 
       if (empty){
@@ -182,7 +181,7 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
 
         for (ButtonBuilder b : item.getButtons()) {
           RadioButton button = b.getButton();
-          if ( button.isChecked() ){
+          if ( button != null && button.isChecked() ){
             Collections.addAll(result, b.getConditions() );
             nil = false;
           }

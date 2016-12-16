@@ -210,6 +210,9 @@ public class SyncDocumentsJob  extends BaseJob {
         .subscribe(data -> {
           Timber.tag(TAG).v("update " + data.getTitle() );
           setData( data, document, false);
+        },
+        error -> {
+          error.printStackTrace();
         });
     }
     else {

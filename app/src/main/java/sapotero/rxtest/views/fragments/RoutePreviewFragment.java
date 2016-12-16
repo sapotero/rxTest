@@ -1,8 +1,11 @@
 package sapotero.rxtest.views.fragments;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
@@ -11,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
@@ -37,6 +41,7 @@ import sapotero.rxtest.db.requery.models.RStep;
 import sapotero.rxtest.db.requery.models.RStepEntity;
 import sapotero.rxtest.retrofit.models.document.Card;
 import sapotero.rxtest.retrofit.models.document.Person;
+import sapotero.rxtest.views.activities.InfoNoMenuActivity;
 import timber.log.Timber;
 
 public class RoutePreviewFragment extends Fragment {
@@ -48,7 +53,7 @@ public class RoutePreviewFragment extends Fragment {
 
   private Preference<String> DOCUMENT_UID;
   private OnFragmentInteractionListener mListener;
-
+  private String uid;
 
 
   @Override
@@ -57,6 +62,7 @@ public class RoutePreviewFragment extends Fragment {
 
   }
 
+  @RequiresApi(api = Build.VERSION_CODES.M)
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.fragment_route_preview, container, false);
@@ -84,16 +90,22 @@ public class RoutePreviewFragment extends Fragment {
     mListener = null;
   }
 
+  public Fragment withUid(String uid) {
+    this.uid = uid;
+    return this;
+  }
+
   public interface OnFragmentInteractionListener {
     void onFragmentInteraction(Uri uri);
   }
 
+  @RequiresApi(api = Build.VERSION_CODES.M)
   private void loadSettings() {
     DOCUMENT_UID = settings.getString("main_menu.uid");
 
     dataStore
       .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq( DOCUMENT_UID.get() ))
+      .where(RDocumentEntity.UID.eq( uid == null? DOCUMENT_UID.get() : uid  ))
       .orderBy( RDocumentEntity.ROUTE_ID.asc() )
       .get()
       .toObservable()
@@ -139,8 +151,10 @@ public class RoutePreviewFragment extends Fragment {
                   if (card.getOriginalApproval() != null) {
                     ItemBuilder item = new ItemBuilder(getContext());
 
-                    item.withName( card.getOriginalApproval() );
-                    item.withAction( String.format("%s - %s", card.getUid(), card.getFullTextApproval()) );
+                    item.withNameCallback( card.getUid() );
+                    item.withName( card.getFullTextApproval() );
+
+//                    item.withAction( String.format("%s - %s", card.getUid(), card.getFullTextApproval()) );
 
                     items.add(item);
                   }
@@ -278,18 +292,44 @@ public class RoutePreviewFragment extends Fragment {
     private String action;
     private FrameLayout nameView;
     private FrameLayout actionView;
+    private String uid;
 
     public ItemBuilder(Context context) {
       this.context = context;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     public ItemBuilder withName(String name) {
       this.name = name;
 
       nameView = new FrameLayout(context);
 
       TextView text = new TextView(context);
+
       text.setText(name);
+      text.setForeground( ContextCompat.getDrawable( getContext(), R.drawable.card_foreground ) );
+
+
+      if (uid != null){
+
+        Integer count = dataStore
+          .count(RDocumentEntity.class)
+          .where(RDocumentEntity.UID.eq(uid)).get().value();
+
+        if ( count > 0){
+          text.setTextColor( ContextCompat.getColor(getContext(), R.color.md_yellow_A400) );
+          text.setOnClickListener(v -> {
+            Toast.makeText( getContext(), "Go to Preview: "+uid, Toast.LENGTH_SHORT ).show();
+            Intent intent = new Intent(context, InfoNoMenuActivity.class);
+            intent.putExtra("UID", uid);
+            startActivity(intent);
+          });
+        }
+//        else {
+//          Toast.makeText( getContext(), "NO DOCUMENT WITH UID "+uid, Toast.LENGTH_SHORT ).show();
+//        }
+      }
+
 
       nameView.addView( text );
 
@@ -327,6 +367,9 @@ public class RoutePreviewFragment extends Fragment {
       return layout;
     }
 
+    public void withNameCallback(String uid) {
+      this.uid = uid;
+    }
   }
 
 

@@ -9,6 +9,7 @@ import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
 
 public class TabPagerAdapter extends FragmentPagerAdapter {
   private int tabs_count;
+  private String uid;
 
   public TabPagerAdapter(FragmentManager fragmentManager) {
     super(fragmentManager);
@@ -18,9 +19,9 @@ public class TabPagerAdapter extends FragmentPagerAdapter {
   public Fragment getItem(int position) {
     switch (position) {
       case 0:
-        return new InfoCardDocumentsFragment();
+        return new InfoCardDocumentsFragment().withUid(uid);
       case 1:
-        return new InfoCardWebViewFragment();
+        return new InfoCardWebViewFragment().withUid(uid);
       default:
         return null;
     }
@@ -40,5 +41,9 @@ public class TabPagerAdapter extends FragmentPagerAdapter {
   @Override
   public int getCount() {
     return 2;
+  }
+
+  public void withUid(String uid) {
+    this.uid = uid;
   }
 }
