@@ -213,6 +213,11 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
     return view;
   }
 
+  public void update() {
+    updateView();
+  }
+
+
 
   @Override
   public void onButtonBuilderUpdate() {

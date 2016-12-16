@@ -9,6 +9,7 @@ import sapotero.rxtest.views.managers.menu.commands.performance.DelegatePerforma
 import sapotero.rxtest.views.managers.menu.commands.report.FromTheReport;
 import sapotero.rxtest.views.managers.menu.commands.report.ReturnToPrimaryConsideration;
 import sapotero.rxtest.views.managers.menu.commands.shared.AddToFolder;
+import sapotero.rxtest.views.managers.menu.commands.shared.CheckForControl;
 import sapotero.rxtest.views.managers.menu.interfaces.Command;
 import sapotero.rxtest.views.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.views.managers.menu.utils.CommandParams;
@@ -25,7 +26,7 @@ public class CommandFactory implements AbstractCommand.Callback{
 
 
   public interface Callback {
-    void onCommandSuccess();
+    void onCommandSuccess(String command);
     void onCommandError();
   }
   public CommandFactory registerCallBack(Callback callback){
@@ -119,7 +120,10 @@ public class CommandFactory implements AbstractCommand.Callback{
     CHECK_FOR_CONTROL {
       @Override
       Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
-        return null;
+        CheckForControl command = new CheckForControl(context, document);
+        command
+          .registerCallBack(instance);
+        return command;
       }
     },
     SKIP_CONTROL_LABEL {
@@ -194,7 +198,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         operation = Operation.ADD_TO_FOLDER;
         break;
       case "menu_info_shared_to_control":
-        operation = Operation.ADD_TO_FOLDER;
+        operation = Operation.CHECK_FOR_CONTROL;
         break;
 
       default:
@@ -209,11 +213,11 @@ public class CommandFactory implements AbstractCommand.Callback{
 
 
   @Override
-  public void onCommandExecuteSuccess() {
+  public void onCommandExecuteSuccess(String command) {
     Timber.tag(TAG).w("onCommandExecuteSuccess" );
 
     if (callback != null){
-      callback.onCommandSuccess();
+      callback.onCommandSuccess(command);
     }
   }
 

@@ -104,7 +104,7 @@ public class PrimaryConsideration extends AbstractCommand {
           Timber.tag(TAG).i("type: %s", data.getType());
 
           if (callback != null){
-            callback.onCommandExecuteSuccess();
+            callback.onCommandExecuteSuccess(getType());
           }
         },
         error -> {

@@ -1,15 +1,14 @@
 package sapotero.rxtest.views.activities;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -21,11 +20,15 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.util.Objects;
+
 import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.requery.Persistable;
+import io.requery.query.Scalar;
+import io.requery.query.Update;
 import io.requery.rx.SingleEntityStore;
 import okhttp3.OkHttpClient;
 import rx.android.schedulers.AndroidSchedulers;
@@ -90,6 +93,8 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   private Fields.Status status;
   private Fields.Journal journal;
   private SelectOshsDialogFragment oshs;
+
+  private Menu menu;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -169,17 +174,39 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     }
     toolbar.inflateMenu(menu);
 
+
     status  = Fields.Status.findStatus(STATUS_CODE.get());
     journal = Fields.getJournalByUid( UID.get() );
 
     toolbar.setTitle( String.format("%s от %s", REG_NUMBER.get(), REG_DATE.get()) );
 
     Timber.tag("MENU").e( "STATUS CODE: %s", STATUS_CODE.get() );
-    Timber.tag("MENU").e( "STATUS CODE: %s", status.getName() );
+
+
+
+    RDocumentEntity doc = dataStore
+      .select(RDocumentEntity.class)
+      .where(RDocumentEntity.UID.eq(UID.get())).get().first();
+
+
+    for (int i = 0; i < toolbar.getMenu().size(); i++) {
+      MenuItem item = toolbar.getMenu().getItem(i);
+
+      switch ( item.getItemId() ) {
+        case R.id.menu_info_shared_to_favorites:
+          item.setTitle(getString( doc.isFavorites() != null && doc.isFavorites() ? R.string.remove_from_favorites : R.string.to_favorites));
+          break;
+        case R.id.menu_info_shared_to_control:
+          item.setTitle(getString( doc.isControl() != null && doc.isControl() ? R.string.remove_from_control : R.string.to_control));
+          break;
+      }
+    }
 
 
     toolbar.setOnMenuItemClickListener(
       item -> {
+
+
 
         String operation;
         CommandParams params = new CommandParams();
@@ -230,6 +257,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
             params.setSign( "SIGN" );
             break;
 
+
           // approval (согласование проектов документов)
           case R.id.menu_info_sign_change_person:
             operation = "null";
@@ -265,12 +293,22 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
           case R.id.menu_info_shared_to_favorites:
             operation = "menu_info_shared_to_favorites";
 
+//            item.setTitle(getString( doc.isFavorites() != null && doc.isFavorites() ? R.string.remove_from_favorites : R.string.to_favorites));
+
             String favorites = dataStore
               .select(RFolderEntity.class)
               .where(RFolderEntity.TYPE.eq("favorites"))
               .get().first().getUid();
 
             params.setFolder(favorites);
+
+
+            break;
+          case R.id.menu_info_shared_to_control:
+
+//            item.setTitle(getString( doc.isControl() != null && doc.isControl() ? R.string.remove_from_control : R.string.to_control));
+
+            operation = "menu_info_shared_to_control";
             break;
 
 
@@ -286,8 +324,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
       }
     );
   }
-
-
   private void setTabContent() {
 
     if (viewPager.getAdapter() == null) {
@@ -353,6 +389,26 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     return false;
   }
 
+//  @Override
+//  public boolean onOptionsItemSelected(MenuItem item) {
+//    Timber.tag("MENU ITEM").i("ITEM SELECTED: %s", item );
+//    /* Меняем названия менюх в зависимости от действий */
+//    RDocumentEntity doc = dataStore
+//      .select(RDocumentEntity.class)
+//      .where(RDocumentEntity.UID.eq(UID.get())).get().first();
+//
+//    switch ( item.getItemId() ) {
+//      case R.id.menu_info_shared_to_favorites:
+//        item.setTitle(getString( doc.isFavorites() != null && doc.isFavorites() ? R.string.remove_from_favorites : R.string.to_favorites));
+//        break;
+//      case R.id.menu_info_shared_to_control:
+//        item.setTitle(getString( doc.isControl() != null && doc.isControl() ? R.string.remove_from_control : R.string.to_control));
+//        break;
+//    }
+//    return super.onOptionsItemSelected(item);
+//  }
+
+
   @Override
   public void onStart() {
     super.onStart();
@@ -413,24 +469,61 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   /* OperationManager.Callback */
   @Override
-  public void onExecuteSuccess() {
-    Timber.tag("OpManagerCallback").i("onExecuteSuccess");
+  public void onExecuteSuccess(String command) {
+    Timber.tag("OpManagerCallback").i("onExecuteSuccess %s", command);
 
-    ProgressDialog prog= new ProgressDialog(this);//Assuming that you are using fragments.
-    prog.setTitle("Информация");
-    prog.setMessage("Операция успешно завершена");
-    prog.setCancelable(false);
-    prog.show();
+//    ProgressDialog prog= new ProgressDialog(this);//Assuming that you are using fragments.
+//    prog.setTitle("Информация");
+//    prog.setMessage("Операция успешно завершена");
+//    prog.setCancelable(false);
+//    prog.setIndeterminate(true);
+//    prog.setProgress(0);
+//    prog.show();
 
-    dataStore
+    Update<Scalar<Integer>> query;
+
+    query = dataStore
       .update(RDocumentEntity.class)
-      .set(RDocumentEntity.FILTER, "processed")
-      .where(RDocumentEntity.UID.eq(UID.get()));
+      .set(RDocumentEntity.PROCESSED, true)
+      .set(RDocumentEntity.FILTER, "processed");
 
-    new Handler().postDelayed( () -> {
-      prog.dismiss();
-      finish();
-    }, 5000L);
+    if ( Objects.equals(command, "add_to_folder") ) {
+      Boolean result = false;
+
+//      item.setTitle(getString( doc.isFavorites() != null && doc.isFavorites() ? R.string.remove_from_favorites : R.string.to_favorites));
+      MenuItem item = toolbar.getMenu().findItem(R.id.menu_info_shared_to_favorites);
+
+      if ( item.getTitle() == getString(R.string.to_favorites) ){
+        item.setTitle( getString(R.string.remove_from_favorites) );
+      } else {
+        item.setTitle( getString(R.string.to_favorites) );
+        result = true;
+      }
+
+      query = query.set( RDocumentEntity.FAVORITES, result );
+    }
+
+    if ( Objects.equals(command, "check_for_control") ) {
+     Boolean result = true;
+     MenuItem item = toolbar.getMenu().findItem(R.id.menu_info_shared_to_control);
+
+      if ( item.getTitle() == getString(R.string.to_control) ){
+        item.setTitle( getString(R.string.remove_from_control) );
+      } else {
+        item.setTitle( getString(R.string.to_control) );
+        result = false;
+      }
+
+      query = query.set( RDocumentEntity.CONTROL, result );
+    }
+
+
+    query.where( RDocumentEntity.UID.eq(UID.get()) ).get().value();
+
+
+//    new Handler().postDelayed( () -> {
+//      prog.dismiss();
+//    }, 5000L);
   }
 
   @Override

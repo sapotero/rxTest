@@ -145,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private int loaded = 0;
   private Toast mToast;
   private Subscription updateOrganizations;
-  public MenuBuilder menuBuilder;
+  public  MenuBuilder menuBuilder;
   private DBQueryBuilder dbQueryBuilder;
   private DataLoaderInterface dataLoader;
 
@@ -254,7 +254,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @Override
   public void onResume() {
     super.onResume();
-
+    menuBuilder.build();
   }
 
 
@@ -524,4 +524,5 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   public void onUpdateError(Throwable error) {
 
   }
+
 }

@@ -126,14 +126,8 @@ public enum Item {
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.CONTROL.eq( true ) )
     }
   ),
-  PROCESSED ( 9, "Обработанное %s", new Button[]{
-    Button.PERFORMANCE,
-    Button.PRIMARY_CONSIDERATION,
-    Button.VIEWED,
-    Button.ASSIGN,
-    Button.APPROVAL
-  },
-    true,
+  PROCESSED ( 9, "Обработанное %s", new Button[]{},
+    false,
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq( true ) )
     },
@@ -141,14 +135,8 @@ public enum Item {
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq( true ) )
     }
   ),
-  FAVORITES ( 10, "Избранное %s", new Button[]{
-    Button.PERFORMANCE,
-    Button.PRIMARY_CONSIDERATION,
-    Button.VIEWED,
-    Button.ASSIGN,
-    Button.APPROVAL
-  },
-    true,
+  FAVORITES ( 10, "Избранное %s", new Button[]{},
+    false,
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FAVORITES.eq( true ) )
     },

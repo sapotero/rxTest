@@ -101,6 +101,11 @@ public class MenuBuilder implements ItemsBuilder.Callback{
     itemsBuilder.setOrganizationsLayout( organizations );
   }
 
+  public void update() {
+    organizationsSelector.clear();
+    itemsBuilder.update();
+  }
+
   public void showPrev() {
     organizationsSelector.clear();
     itemsBuilder.prev();

@@ -29,7 +29,7 @@ public class OperationManager implements CommandFactory.Callback {
   Callback callback;
 
   public interface Callback {
-    void onExecuteSuccess();
+    void onExecuteSuccess(String command);
     void onExecuteError();
   }
 
@@ -66,10 +66,10 @@ public class OperationManager implements CommandFactory.Callback {
 
 
   @Override
-  public void onCommandSuccess() {
+  public void onCommandSuccess(String command) {
     Timber.tag(TAG).w("onCommandSuccess");
     if (callback != null) {
-      callback.onExecuteSuccess();
+      callback.onExecuteSuccess(command);
     }
   }
 

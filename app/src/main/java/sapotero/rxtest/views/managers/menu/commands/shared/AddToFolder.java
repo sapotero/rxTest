@@ -106,7 +106,7 @@ public class AddToFolder extends AbstractCommand {
           Timber.tag(TAG).i("type: %s", data.getType());
 
           if (callback != null && Objects.equals(data.getType(), "warning")){
-            callback.onCommandExecuteSuccess();
+            callback.onCommandExecuteSuccess( getType() );
           }
         },
         error -> {

@@ -17,6 +17,11 @@
         android:icon="@drawable/to_favorites"
         android:title="@string/to_favorites"/>
     <item
+        android:id="@+id/menu_info_shared_to_control"
+        app:showAsAction="always|withText"
+        android:icon="@drawable/to_control_icon"
+        android:title="@string/to_control"/>
+    <item
         android:id="@+id/menu_info_approval_prev_person"
         app:showAsAction="always|withText"
         android:icon="@drawable/dismiss"

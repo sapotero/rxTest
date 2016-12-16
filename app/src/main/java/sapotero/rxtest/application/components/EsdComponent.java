@@ -45,6 +45,7 @@ import sapotero.rxtest.views.managers.menu.commands.performance.DelegatePerforma
 import sapotero.rxtest.views.managers.menu.commands.report.FromTheReport;
 import sapotero.rxtest.views.managers.menu.commands.report.ReturnToPrimaryConsideration;
 import sapotero.rxtest.views.managers.menu.commands.shared.AddToFolder;
+import sapotero.rxtest.views.managers.menu.commands.shared.CheckForControl;
 import sapotero.rxtest.views.managers.view.DecisionManager;
 import sapotero.rxtest.views.menu.builders.ButtonBuilder;
 import sapotero.rxtest.views.services.AuthService;
@@ -118,6 +119,8 @@ public interface EsdComponent {
   void inject(DelegatePerformance context);
   void inject(AddToFolder context);
   void inject(ChangePerson context);
+  void inject(CheckForControl context);
+
 
 
 

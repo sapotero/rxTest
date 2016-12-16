@@ -9,7 +9,7 @@ public abstract class AbstractCommand implements Command, Operation {
   public Callback callback;
 
   public interface Callback {
-    void onCommandExecuteSuccess();
+    void onCommandExecuteSuccess(String command);
     void onCommandExecuteError();
   }
 
