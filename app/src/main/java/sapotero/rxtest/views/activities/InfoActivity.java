@@ -523,14 +523,20 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
     if ( Objects.equals(command, "change_person") ) {
       Toast.makeText( getApplicationContext(), "Операция передачи успешно завершена", Toast.LENGTH_SHORT).show();
+      toolbar.getMenu().clear();
+      toolbar.inflateMenu(R.menu.info_menu);
     }
 
     if ( Objects.equals(command, "next_person") ) {
       Toast.makeText( getApplicationContext(), "Операция подписания успешно завершена", Toast.LENGTH_SHORT).show();
+      toolbar.getMenu().clear();
+      toolbar.inflateMenu(R.menu.info_menu);
     }
 
     if ( Objects.equals(command, "prev_person") ) {
       Toast.makeText( getApplicationContext(), "Операция отклонения успешно завершена", Toast.LENGTH_SHORT).show();
+      toolbar.getMenu().clear();
+      toolbar.inflateMenu(R.menu.info_menu);
     }
 
 
@@ -540,6 +546,8 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 //    new Handler().postDelayed( () -> {
 //      prog.dismiss();
 //    }, 5000L);
+
+
   }
 
   @Override

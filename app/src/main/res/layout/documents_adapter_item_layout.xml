@@ -46,18 +46,42 @@
 
     <LinearLayout
         android:id="@+id/from_left_to_right"
-        android:layout_width="80dp"
+        android:layout_width="220dp"
         android:layout_height="match_parent"
-        android:weightSum="1">
+        android:orientation="vertical"
+        android:weightSum="3">
 
-        <ImageButton
-            android:id="@+id/swipe_layout_card_to_action"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@null"
+
+        <Button
+            android:id="@+id/swipe_layout_card_get_infocard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableStart="@drawable/info_card"
+            android:layout_margin="@dimen/half_date_offset"
             android:gravity="center"
-            android:src="@android:drawable/ic_dialog_map" />
+            android:layout_weight="1"
+            android:text="@string/info_card"
+            />
+        <Button
+            android:id="@+id/swipe_layout_card_get_files"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableStart="@drawable/files"
+            android:layout_margin="@dimen/half_date_offset"
+            android:gravity="center"
+            android:layout_weight="1"
+            android:text="@string/files"
+            />
+        <Button
+            android:id="@+id/swipe_layout_card_get_editor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableStart="@drawable/edit_pencil"
+            android:layout_margin="@dimen/half_date_offset"
+            android:gravity="center"
+            android:layout_weight="1"
+            android:text="@string/decision_editor"
+            />
     </LinearLayout>
 
     <!-- Top View,  Row itemView of RecyclerView -->

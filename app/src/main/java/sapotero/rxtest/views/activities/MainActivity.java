@@ -1,9 +1,7 @@
 package sapotero.rxtest.views.activities;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -192,6 +190,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     dbQueryBuilder.printFolders();
     dbQueryBuilder.printTemplates();
 
+
+
     dataLoader = new DataLoaderInterface(this);
 
 
@@ -225,19 +225,23 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   private void updateByStatus() {
     dataLoader.updateByStatus( menuBuilder.getItem() );
+    dataLoader.updateByStatus( menuBuilder.getItem() );
 
-    ProgressDialog prog= new ProgressDialog(this);//Assuming that you are using fragments.
-    prog.setTitle("please wait");
-    prog.setMessage("data is loading...");
-    prog.setCancelable(false);
-    prog.setIndeterminate(true);
-    prog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-    prog.show();
+//    ProgressDialog prog= new ProgressDialog(this);//Assuming that you are using fragments.
+//    prog.setTitle("Обновление данных");
+//    prog.setMessage("data is loading...");
+//    prog.setCancelable(false);
+//    prog.setIndeterminate(true);
+//    prog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+//    prog.show();
+//
+//    new Handler().postDelayed( () -> {
+//      prog.dismiss();
+//    }, 5000L);
 
-    new Handler().postDelayed( () -> {
-      prog.dismiss();
-      menuBuilder.build();
-    }, 5000L);
+    Toast.makeText(this, "Обновление данных...", Toast.LENGTH_SHORT).show();
+
+    menuBuilder.build();
 
   }
 
@@ -412,6 +416,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
         .withToolbar(toolbar)
         .withActionBarDrawerToggle(true)
         .withHeader(R.layout.drawer_header)
+        .withShowDrawerOnFirstLaunch(true)
         .withAccountHeader(headerResult);
     }
 

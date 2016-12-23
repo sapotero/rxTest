@@ -12,6 +12,12 @@ android {
         versionCode 1
         versionName "1.0"
     }
+
+    dexOptions {
+        preDexLibraries = false
+        additionalParameters=['--core-library']
+    }
+
     buildTypes {
         release {
             minifyEnabled true
@@ -24,6 +30,11 @@ android {
     }
     dataBinding {
         enabled = true
+    }
+
+    packagingOptions {
+        exclude 'META-INF/Sign.CP'
+        exclude 'META-INF/Digest.CP'
     }
 
 }
@@ -50,18 +61,23 @@ dependencies {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
+    provided fileTree(include: ['*.jar'], dir: '../xml_libs')
+    provided 'xalan:xalan:2.7.0'
+
+
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:24.2.1'
+    compile 'com.afollestad.material-dialogs:core:0.9.1.0'
 
     //Retrofit
-    compile 'com.squareup.retrofit2:retrofit:2.0.2'
-    compile 'com.squareup.retrofit2:adapter-rxjava:2.0.2'
-    compile 'com.squareup.retrofit2:converter-gson:2.0.0'
+    compile 'com.squareup.retrofit2:retrofit:2.1.0'
+    compile 'com.squareup.retrofit2:adapter-rxjava:2.1.0'
+    compile 'com.squareup.retrofit2:converter-gson:2.1.0'
     compile 'com.squareup.okhttp3:logging-interceptor:3.4.1'
 
     //RxAndroid
     compile 'io.reactivex:rxandroid:1.2.1'
-    compile 'io.reactivex:rxjava:1.1.6'
+    compile 'io.reactivex:rxjava:1.2.4'
     compile 'com.jakewharton.rxbinding:rxbinding:0.4.0'
     compile 'com.f2prateek.rx.preferences:rx-preferences:1.0.2'
 //    compile 'com.jakewharton.rxbinding:rxbinding-recyclerview-v7:0.4.0'
@@ -134,7 +150,7 @@ dependencies {
     compile 'com.facebook.stetho:stetho-okhttp3:1.4.1'
     /*debug*/
 
-    compile project(':org.eclipse.paho.android.service-release');
+//    compile project(':org.eclipse.paho.android.service-release');
 }
 
 dependencies {

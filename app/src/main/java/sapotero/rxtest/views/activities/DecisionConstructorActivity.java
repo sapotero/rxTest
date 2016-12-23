@@ -27,12 +27,14 @@ import sapotero.rxtest.views.adapters.models.FontItem;
 import sapotero.rxtest.views.adapters.models.UrgencyItem;
 import sapotero.rxtest.views.fragments.DecisionFragment;
 import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
+import sapotero.rxtest.views.managers.menu.OperationManager;
+import sapotero.rxtest.views.managers.menu.utils.CommandParams;
 import sapotero.rxtest.views.managers.view.DecisionManager;
 import sapotero.rxtest.views.views.DelayAutoCompleteTextView;
 import sapotero.rxtest.views.views.SpinnerWithLabel;
 import timber.log.Timber;
 
-public class DecisionConstructorActivity extends AppCompatActivity implements DecisionFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener {
+public class DecisionConstructorActivity extends AppCompatActivity implements DecisionFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, OperationManager.Callback {
 
   @Inject RxSharedPreferences settings;
 
@@ -47,6 +49,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
   private String TAG = this.getClass().getSimpleName();
   private DecisionManager manager;
+  private OperationManager operationManager;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +61,9 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     ButterKnife.bind(this);
     EsdApplication.getComponent(this).inject(this);
 
+    operationManager = new OperationManager(this);
+    operationManager.registerCallBack(this);
+
 
     toolbar.setTitleTextColor( getResources().getColor( R.color.md_grey_100 ) );
     toolbar.setSubtitleTextColor( getResources().getColor( R.color.md_grey_400 ) );
@@ -66,7 +72,50 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
     toolbar.setTitle("Редактор резолюции ");
     toolbar.inflateMenu(R.menu.info_decision_constructor);
-    toolbar.setNavigationOnClickListener( v -> manager.saveDecision() );
+    toolbar.setNavigationOnClickListener( v -> {
+
+      if ( manager.isChanged() ){
+
+        new MaterialDialog.Builder(this)
+          .title("Имеются несохранненые данные")
+          .content("Резолюция была изменена")
+          .positiveText("сохранить")
+          .onPositive(
+            (dialog, which) -> {
+              Decision new_decision = manager.getDecision();
+
+              Timber.tag(TAG).w("positive %s", new_decision.getId() );
+
+              String json = new Gson().toJson(new_decision);
+
+              CommandParams params = new CommandParams();
+              params.setSign( new_decision.getId() );
+              params.setDecision(json);
+              operationManager.execute( "save_decision", params );
+
+            }
+          )
+          .neutralText("выход")
+          .onNeutral(
+            (dialog, which) -> {
+              Timber.tag(TAG).w("nothing");
+              finish();
+            }
+          )
+          .negativeText("возврат")
+          .onNegative(
+            (dialog, which) -> {
+              Timber.tag(TAG).w("negative");
+            }
+          )
+          .show();
+
+
+      } else {
+        finish();
+      }
+
+    } );
     toolbar.setOnMenuItemClickListener(item -> {
 
       switch (item.getItemId()){
@@ -215,4 +264,13 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   }
 
 
+  @Override
+  public void onExecuteSuccess(String command) {
+
+  }
+
+  @Override
+  public void onExecuteError() {
+
+  }
 }

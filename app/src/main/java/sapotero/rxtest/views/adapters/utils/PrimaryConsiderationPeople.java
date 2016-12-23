@@ -20,13 +20,24 @@ public class PrimaryConsiderationPeople {
   }
 
   public PrimaryConsiderationPeople(Performer u) {
-    this.id = u.getPerformerId();
-    this.name = u.getPerformerText();
-    this.position = String.valueOf( u.getNumber() );
-    this.organization = u.getOrganizationText();
-    this.copy = u.getIsOriginal();
-    this.out  = false;
-    this.responsible = u.getIsResponsible();
+    if (u != null) {
+      this.id = u.getPerformerId();
+      this.name = u.getPerformerText();
+      this.position = String.valueOf( u.getNumber() );
+      this.organization = u.getOrganizationText();
+      if (u.getIsOriginal() != null) {
+        this.copy = u.getIsOriginal();
+      } else {
+        this.copy = false;
+      }
+      this.out  = false;
+
+      if (u.getIsResponsible() != null) {
+        this.responsible = u.getIsResponsible();
+      } else {
+        this.responsible = false;
+      }
+    }
   }
 
   public String getPosition() {

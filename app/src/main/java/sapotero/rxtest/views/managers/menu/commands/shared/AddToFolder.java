@@ -40,6 +40,7 @@ public class AddToFolder extends AbstractCommand {
   private Preference<String> HOST;
   private Preference<String> STATUS_CODE;
   private String folder_id;
+  private String document_id;
 
   public AddToFolder(Context context, DocumentReceiver document){
     this.context = context;
@@ -91,7 +92,7 @@ public class AddToFolder extends AbstractCommand {
       LOGIN.get(),
       TOKEN.get(),
       uids,
-      UID.get(),
+      document_id == null ? UID.get() : document_id,
       STATUS_CODE.get(),
       folder_id,
       null
@@ -121,5 +122,10 @@ public class AddToFolder extends AbstractCommand {
   @Override
   public String getType() {
     return "add_to_folder";
+  }
+
+  public AddToFolder withDocumentId(String sign) {
+    this.document_id = sign;
+    return this;
   }
 }

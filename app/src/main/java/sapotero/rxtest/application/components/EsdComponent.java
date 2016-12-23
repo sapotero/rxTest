@@ -25,6 +25,7 @@ import sapotero.rxtest.views.adapters.DecisionAdapter;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OshsAutoCompleteAdapter;
 import sapotero.rxtest.views.adapters.models.DocumentTypeItem;
+import sapotero.rxtest.views.dialogs.InfoCardDialogFragment;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
 import sapotero.rxtest.views.dialogs.SelectTemplateDialogFragment;
 import sapotero.rxtest.views.fragments.DecisionFragment;
@@ -43,6 +44,8 @@ import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.views.managers.menu.commands.approval.ChangePerson;
 import sapotero.rxtest.views.managers.menu.commands.approval.NextPerson;
 import sapotero.rxtest.views.managers.menu.commands.approval.PrevPerson;
+import sapotero.rxtest.views.managers.menu.commands.decision.AddDecision;
+import sapotero.rxtest.views.managers.menu.commands.decision.SaveDecision;
 import sapotero.rxtest.views.managers.menu.commands.performance.ApprovalPerformance;
 import sapotero.rxtest.views.managers.menu.commands.performance.DelegatePerformance;
 import sapotero.rxtest.views.managers.menu.commands.report.FromTheReport;
@@ -91,10 +94,7 @@ public interface EsdComponent {
   void inject(RoutePreviewFragment fragment);
   void inject(InfoActivityDecisionPreviewFragment fragment);
   void inject(SelectTemplateDialogFragment fragment);
-
-
-
-
+  void inject(InfoCardDialogFragment fragment);
 
   void inject(BaseJob job);
 
@@ -124,10 +124,14 @@ public interface EsdComponent {
   void inject(AddToFolder context);
   void inject(ChangePerson context);
   void inject(CheckForControl context);
+
   void inject(NextPerson context);
   void inject(PrevPerson context);
   void inject(sapotero.rxtest.views.managers.menu.commands.signing.NextPerson context);
   void inject(sapotero.rxtest.views.managers.menu.commands.signing.PrevPerson context);
+
+  void inject(SaveDecision context);
+  void inject(AddDecision context);
 
 
 

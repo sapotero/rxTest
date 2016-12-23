@@ -6,7 +6,7 @@ import rx.Observable;
 import sapotero.rxtest.retrofit.models.documents.Documents;
 
 public interface DocumentsService {
-  @GET("documents.json")
+  @GET("/v3/documents.json")
   Observable<Documents> getDocuments(
       @Query("login") String login,
       @Query("auth_token") String auth_token,
@@ -15,7 +15,7 @@ public interface DocumentsService {
       @Query("offset") Integer offset
   );
 
-  @GET("documents.json")
+  @GET("/v3/documents.json")
   Observable<Documents> getByFolders(
     @Query("login") String login,
     @Query("auth_token") String auth_token,
@@ -26,7 +26,7 @@ public interface DocumentsService {
     @Query("created_at") String created_at
   );
 
-  @GET("documents.json")
+  @GET("/v3/documents.json")
   Observable<Documents> getControl(
     @Query("login") String login,
     @Query("auth_token") String auth_token,

@@ -6,6 +6,7 @@ import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.views.managers.menu.commands.approval.ChangePerson;
 import sapotero.rxtest.views.managers.menu.commands.approval.NextPerson;
 import sapotero.rxtest.views.managers.menu.commands.consideration.PrimaryConsideration;
+import sapotero.rxtest.views.managers.menu.commands.decision.SaveDecision;
 import sapotero.rxtest.views.managers.menu.commands.performance.DelegatePerformance;
 import sapotero.rxtest.views.managers.menu.commands.report.FromTheReport;
 import sapotero.rxtest.views.managers.menu.commands.report.ReturnToPrimaryConsideration;
@@ -118,6 +119,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         AddToFolder command = new AddToFolder(context, document);
         command
           .withFolder( params.getFolder() )
+          .withDocumentId( params.getSign() )
           .registerCallBack(instance);
         return command;
       }
@@ -133,6 +135,7 @@ public class CommandFactory implements AbstractCommand.Callback{
       Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
         CheckForControl command = new CheckForControl(context, document);
         command
+          .withDocumentId( params.getSign() )
           .registerCallBack(instance);
         return command;
       }
@@ -148,7 +151,24 @@ public class CommandFactory implements AbstractCommand.Callback{
       Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
         return null;
       }
-    };
+    },
+    SAVE_DECISION {
+      @Override
+      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
+        SaveDecision command = new SaveDecision(context, document);
+        command
+          .withDecision( params.getDecision() )
+          .withDecisionId( params.getSign() )
+          .registerCallBack(instance);
+        return command;
+      }
+    },
+    NEW_DECISION {
+      @Override
+      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
+        return null;
+      }
+    },;
 
 
     abstract Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params);
@@ -174,6 +194,13 @@ public class CommandFactory implements AbstractCommand.Callback{
     Operation operation = null;
 
     switch ( operation_type ){
+      case "save_decision":
+        operation = Operation.SAVE_DECISION;
+        break;
+      case "new_decision":
+        operation = Operation.SAVE_DECISION;
+        break;
+
       // sent_to_the_report (отправлен на доклад)
       case "menu_info_from_the_report":
         operation = Operation.FROM_THE_REPORT;

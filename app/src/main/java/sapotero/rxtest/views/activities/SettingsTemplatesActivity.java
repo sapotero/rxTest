@@ -4,23 +4,23 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.ListView;
 
-import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.requery.Persistable;
+import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.models.RTemplateEntity;
 
 public class SettingsTemplatesActivity extends AppCompatActivity {
 
@@ -28,8 +28,10 @@ public class SettingsTemplatesActivity extends AppCompatActivity {
   @BindView(R.id.settings_templates_decisions_list) ListView decisions_list;
 
   @Inject RxSharedPreferences settings;
+  @Inject SingleEntityStore<Persistable> dataStore;
 
   private String TAG = this.getClass().getSimpleName();
+  private AutoCompleteTextView list;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -43,9 +45,9 @@ public class SettingsTemplatesActivity extends AppCompatActivity {
 
     toolbar.setTitle("Настройки приложения");
     toolbar.setSubtitle("шаблоны резолюции");
-    toolbar.setTitleTextColor( getResources().getColor( R.color.md_grey_100 ) );
-    toolbar.setSubtitleTextColor( getResources().getColor( R.color.md_grey_400 ) );
-    toolbar.setNavigationOnClickListener(v ->{
+    toolbar.setTitleTextColor(getResources().getColor(R.color.md_grey_100));
+    toolbar.setSubtitleTextColor(getResources().getColor(R.color.md_grey_400));
+    toolbar.setNavigationOnClickListener(v -> {
         finish();
       }
     );
@@ -57,21 +59,20 @@ public class SettingsTemplatesActivity extends AppCompatActivity {
   @Override protected void onResume() {
     super.onResume();
 
-    Preference<Set<String>> templates = settings.getStringSet("settings_templates_decisions");
-    Set<String> data = templates.get();
+      ArrayList<String> items = new ArrayList<>();
 
-    assert data != null;
-    if ( data.size() == 0 ){
-      String[] array = getResources().getStringArray(R.array.settings_templates_decisions);
 
-      List<String> list = Arrays.asList(array);
-      Set<String> set = new HashSet<>(list);
+      List<RTemplateEntity> templates = dataStore
+        .select(RTemplateEntity.class)
+        .get().toList();
 
-      templates.set( set );
-    }
+      if (templates.size() > 0) {
+        for (RTemplateEntity tmp : templates){
+          items.add( tmp.getTitle() );
+        }
+      }
 
-    List<String> template_list = new ArrayList( templates.get() );
-    ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, template_list);
+    ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.list_black_text, items);
     decisions_list.setAdapter(adapter);
 
   }

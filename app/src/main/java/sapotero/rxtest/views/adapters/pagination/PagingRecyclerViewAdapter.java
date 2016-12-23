@@ -46,7 +46,7 @@ public class PagingRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView
 
       to_contol = (TextView) itemView.findViewById(R.id.swipe_layout_card_to_control);
       to_favorites = (TextView) itemView.findViewById(R.id.swipe_layout_card_to_favorites);
-      to_actiob = (ImageButton) itemView.findViewById(R.id.swipe_layout_card_to_action);
+      to_actiob = (ImageButton) itemView.findViewById(R.id.swipe_layout_card_get_infocard);
 
       cv    = (CardView)itemView.findViewById(R.id.swipe_layout_cv);
       title = (TextView)itemView.findViewById(R.id.swipe_layout_title);

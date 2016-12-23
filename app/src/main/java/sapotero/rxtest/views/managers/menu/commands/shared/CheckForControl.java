@@ -39,6 +39,7 @@ public class CheckForControl extends AbstractCommand {
   private Preference<String> HOST;
   private Preference<String> STATUS_CODE;
   private String folder_id;
+  private String document_id;
 
   public CheckForControl(Context context, DocumentReceiver document){
     this.context = context;
@@ -86,7 +87,7 @@ public class CheckForControl extends AbstractCommand {
       LOGIN.get(),
       TOKEN.get(),
       uids,
-      UID.get(),
+      document_id == null? UID.get() : document_id,
       STATUS_CODE.get(),
       null,
       null
@@ -116,5 +117,10 @@ public class CheckForControl extends AbstractCommand {
   @Override
   public String getType() {
     return "check_for_control";
+  }
+
+  public CheckForControl withDocumentId(String sign) {
+    this.document_id = sign;
+    return this;
   }
 }

@@ -103,6 +103,7 @@ public class InfoCardWebViewFragment extends Fragment {
 
     try {
       if ( document != null ){
+
         String htmlData = "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />" + document;
         infocard.loadDataWithBaseURL("file:///android_asset/", htmlData, "text/html", "UTF-8", null);
         infocard.getSettings().setBuiltInZoomControls(true);

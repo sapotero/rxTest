@@ -6,6 +6,16 @@ public class CommandParams {
   public String label;
   public String sign;
 
+  public String getDecision() {
+    return decision;
+  }
+
+  public void setDecision(String decision) {
+    this.decision = decision;
+  }
+
+  public String decision;
+
   public CommandParams() {
   }
 

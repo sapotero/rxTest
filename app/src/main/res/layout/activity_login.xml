@@ -14,14 +14,76 @@
     android:background="@color/it_mvd_background"
     >
 
-    <ImageView
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:src="@drawable/gerb_big"
-        android:scaleX="0.8"
-        android:scaleY="0.8"
-        android:alpha="0.05"
-        />
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            >
+
+            <Button
+                android:text="LOGIN"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/AuthServiceLogin"
+                />
+            <Button
+                android:text="SIGN"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/AuthServiceSign"
+                />
+        </LinearLayout>
+
+        <CheckBox android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:text="@string/ExamplesAuthInstallCACAdES"
+                  android:id="@+id/cbExamplesInstallCA"
+                  android:checked="true"/>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/etExamplesClientPassword"
+            android:inputType="textPassword"
+            android:layout_gravity="top|center_horizontal"
+            android:singleLine="true"/>
+
+        <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/spExamplesClientList"
+            android:layout_gravity="top|center_horizontal"
+            />
+
+        <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/spExamplesServerList"
+            android:layout_gravity="top|center_horizontal"
+            />
+
+        <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/spExamplesList"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:layout_gravity="top|center_horizontal"/>
+    </LinearLayout>
+
+    <!--<ImageView-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:src="@drawable/gerb_big"-->
+        <!--android:scaleX="0.8"-->
+        <!--android:scaleY="0.8"-->
+        <!--android:alpha="0.05"-->
+        <!--/>-->
 
     <FrameLayout
         android:layout_width="440dp"
