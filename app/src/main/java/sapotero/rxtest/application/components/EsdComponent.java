@@ -96,6 +96,7 @@ public interface EsdComponent {
   void inject(SelectTemplateDialogFragment fragment);
   void inject(InfoCardDialogFragment fragment);
 
+
   void inject(BaseJob job);
 
 

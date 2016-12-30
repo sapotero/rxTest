@@ -6,6 +6,7 @@ import android.content.Context;
 import com.facebook.stetho.Stetho;
 import com.squareup.leakcanary.LeakCanary;
 
+import sapotero.rxtest.annotations.AnnotationTest;
 import sapotero.rxtest.application.components.DaggerEsdComponent;
 import sapotero.rxtest.application.components.EsdComponent;
 import sapotero.rxtest.application.config.Constant;
@@ -41,6 +42,9 @@ public final class EsdApplication extends Application {
     app = this;
 
     context=getApplicationContext();
+
+    AnnotationTest.getInstance();
+
   }
 
   public static Context getContext(){

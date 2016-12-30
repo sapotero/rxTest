@@ -7,11 +7,9 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.os.Environment;
 import android.os.IBinder;
-import android.text.InputType;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
@@ -551,27 +549,27 @@ public class AuthService extends Service {
   // идет в сервис и подписывает в другом потоке и возвращает результат
 
   // TODO: захуячить ещё один колбек на успешную подпись
-  void tryToSignIn(boolean withDialog) throws Exception {
-
-    if (withDialog){
-
-      new MaterialDialog.Builder( this )
-        .title("INPUT")
-        .content("Content")
-        .inputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD)
-        .input("text hint", "prefill", (dialog, input) -> {
-           passwordFiled = input.toString();
-        })
-        .onPositive((dialog, which) -> {
-          try {
-            tryToSignWithPassword(passwordFiled);
-          } catch (Exception e) {
-            Timber.e(e);
-          }
-        })
-        .show();
-
-    }
+  void tryToSignIn(String password) throws Exception {
+    tryToSignWithPassword(password);
+//    if (withDialog){
+//
+//      new MaterialDialog.Builder( this )
+//        .title("INPUT")
+//        .content("Content")
+//        .inputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD)
+//        .input("text hint", "prefill", (dialog, input) -> {
+//           passwordFiled = input.toString();
+//        })
+//        .onPositive((dialog, which) -> {
+//          try {
+//            tryToSignWithPassword(passwordFiled);
+//          } catch (Exception e) {
+//            Timber.e(e);
+//          }
+//        })
+//        .show();
+//
+//    }
 
   }
   void tryToSignWithPassword(String password) throws Exception {
@@ -629,7 +627,7 @@ public class AuthService extends Service {
     Timber.tag(TAG).i("RECV: AuthServiceAuthSignInEvent");
 
     try {
-      tryToSignIn(true);
+      tryToSignIn(event.password);
     } catch (Exception e) {
       Timber.e(e);
     }

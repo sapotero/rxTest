@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="@dimen/date_offset"
+    >
+
+    <TextView
+        android:text="@string/auth_attention"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView"
+        android:padding="@dimen/half_date_offset"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body2"/>
+
+    <TextView
+        android:text="@string/auth_attention_text_main"
+        android:layout_width="match_parent"
+        android:padding="@dimen/half_date_offset"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:text="@string/auth_attention_text_restrict"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/half_date_offset"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body2"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="2"
+        >
+
+        <android.support.v7.widget.AppCompatButton
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/auth_enter_cert"
+            android:layout_weight="1"
+            android:textColor="@color/md_white_1000"
+            android:background="@drawable/default_button"
+            android:id="@+id/stepper_auth_choose_cert"
+            tools:ignore="ButtonStyle"/>
+        <android.support.v7.widget.AppCompatButton
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/auth_enter_password"
+            android:layout_weight="1"
+            android:id="@+id/stepper_auth_choose_password"
+            tools:ignore="ButtonStyle"/>
+
+
+    </LinearLayout>
+
+
+</LinearLayout>

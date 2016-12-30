@@ -12,6 +12,7 @@ import java.util.Map;
 import ru.CryptoPro.JCP.JCP;
 import ru.CryptoPro.JCP.KeyStore.JCPPrivateKeyEntry;
 import ru.CryptoPro.JCSP.JCSP;
+import timber.log.Timber;
 
 public abstract class ISignData implements IHashData, IContainers {
 
@@ -154,13 +155,18 @@ public abstract class ISignData implements IHashData, IContainers {
       throw new Exception("Private key or/and certificate is null.");
     } // if
     else {
-      Log.i("ISIGN", "Certificate: " +
-        certificate.getSubjectDN());
+      Log.i("ISIGN", "Certificate: " + certificate.getSubjectDN());
     } // else
 
     callback.log("Read private key:" + privateKey);
     callback.log("Read certificate:" + certificate.getSubjectDN() + ", public key: " + certificate.getPublicKey());
 
+    Timber.e("Cert: %s", certificate );
+    Timber.e("Cert issue: %s", certificate.getIssuerDN() );
+    Timber.e("Cert issueA: %s", certificate.getIssuerDN().getName() );
+    Timber.e("Cert X500: %s", certificate.getIssuerX500Principal() );
+    Timber.e("Cert subj: %s", certificate.getSubjectDN().getName() );
+    Timber.e("Cert sign: %s", certificate.getSigAlgOID() );
   }
 
   /**

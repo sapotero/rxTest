@@ -14,67 +14,67 @@
     android:background="@color/it_mvd_background"
     >
 
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+    <!--<LinearLayout-->
+        <!--android:orientation="vertical"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content">-->
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            >
+        <!--<LinearLayout-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:orientation="vertical"-->
+            <!--&gt;-->
 
-            <Button
-                android:text="LOGIN"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/AuthServiceLogin"
-                />
-            <Button
-                android:text="SIGN"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/AuthServiceSign"
-                />
-        </LinearLayout>
+            <!--<Button-->
+                <!--android:text="LOGIN"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:id="@+id/AuthServiceLogin"-->
+                <!--/>-->
+            <!--<Button-->
+                <!--android:text="SIGN"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:id="@+id/AuthServiceSign"-->
+                <!--/>-->
+        <!--</LinearLayout>-->
 
-        <CheckBox android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:text="@string/ExamplesAuthInstallCACAdES"
-                  android:id="@+id/cbExamplesInstallCA"
-                  android:checked="true"/>
+        <!--<CheckBox android:layout_width="match_parent"-->
+                  <!--android:layout_height="wrap_content"-->
+                  <!--android:text="@string/ExamplesAuthInstallCACAdES"-->
+                  <!--android:id="@+id/cbExamplesInstallCA"-->
+                  <!--android:checked="true"/>-->
 
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/etExamplesClientPassword"
-            android:inputType="textPassword"
-            android:layout_gravity="top|center_horizontal"
-            android:singleLine="true"/>
+        <!--<EditText-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:id="@+id/etExamplesClientPassword"-->
+            <!--android:inputType="textPassword"-->
+            <!--android:layout_gravity="top|center_horizontal"-->
+            <!--android:singleLine="true"/>-->
 
-        <Spinner
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/spExamplesClientList"
-            android:layout_gravity="top|center_horizontal"
-            />
+        <!--<Spinner-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:id="@+id/spExamplesClientList"-->
+            <!--android:layout_gravity="top|center_horizontal"-->
+            <!--/>-->
 
-        <Spinner
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/spExamplesServerList"
-            android:layout_gravity="top|center_horizontal"
-            />
+        <!--<Spinner-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:id="@+id/spExamplesServerList"-->
+            <!--android:layout_gravity="top|center_horizontal"-->
+            <!--/>-->
 
-        <Spinner
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/spExamplesList"
-            android:focusable="false"
-            android:focusableInTouchMode="false"
-            android:layout_gravity="top|center_horizontal"/>
-    </LinearLayout>
+        <!--<Spinner-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:id="@+id/spExamplesList"-->
+            <!--android:focusable="false"-->
+            <!--android:focusableInTouchMode="false"-->
+            <!--android:layout_gravity="top|center_horizontal"/>-->
+    <!--</LinearLayout>-->
 
     <!--<ImageView-->
         <!--android:layout_width="match_parent"-->
@@ -86,14 +86,13 @@
         <!--/>-->
 
     <FrameLayout
-        android:layout_width="440dp"
         android:layout_height="500dp"
         android:layout_marginLeft="60dp"
         android:layout_marginTop="0dp"
         android:layout_centerInParent="true"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
-        >
+        android:layout_width="640dp">
 
         <sapotero.rxtest.views.views.VerticalStepperFormLayout
             android:id="@+id/stepper_form"

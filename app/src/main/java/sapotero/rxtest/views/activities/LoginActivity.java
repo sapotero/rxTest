@@ -11,6 +11,7 @@ import android.support.annotation.RequiresApi;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.AppCompatButton;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,13 +19,12 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
@@ -37,7 +37,6 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.io.File;
 import java.io.FileInputStream;
 import java.lang.reflect.Constructor;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -46,7 +45,6 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import okhttp3.OkHttpClient;
 import ru.CryptoPro.JCSP.support.BKSTrustStore;
 import ru.cprocsp.ACSP.tools.common.Constants;
@@ -56,7 +54,7 @@ import sapotero.rxtest.application.config.Constant;
 import sapotero.rxtest.events.bus.FileDownloadedEvent;
 import sapotero.rxtest.events.bus.MarkDocumentAsChangedJobEvent;
 import sapotero.rxtest.events.service.AuthServiceAuthEvent;
-import sapotero.rxtest.events.service.AuthServiceAuthSignInEvent;
+import sapotero.rxtest.jobs.service.AuthServiceCheckSignJob;
 import sapotero.rxtest.utils.ContainerAdapter;
 import sapotero.rxtest.utils.IHashData;
 import sapotero.rxtest.utils.ProviderType;
@@ -72,11 +70,14 @@ public class LoginActivity extends Activity implements VerticalStepperForm, Data
 
   private static int REQUEST_READWRITE_STORAGE = 0;
 
-  @BindView(R.id.spExamplesList) Spinner spExamplesList;
-  @BindView(R.id.spExamplesClientList) Spinner spClientList;
-  @BindView(R.id.spExamplesServerList) Spinner spServerList;
-  @BindView(R.id.etExamplesClientPassword) EditText etClientPin;
-  @BindView(R.id.cbExamplesInstallCA) CheckBox cbInstallCA;
+//  @BindView(R.id.spExamplesList) Spinner spExamplesList;
+//  @BindView(R.id.spExamplesClientList) Spinner spClientList;
+//  @BindView(R.id.spExamplesServerList) Spinner spServerList;
+//  @BindView(R.id.etExamplesClientPassword) EditText etClientPin;
+//  @BindView(R.id.cbExamplesInstallCA) CheckBox cbInstallCA;
+
+//  @BindView(R.id.stepper_auth_choose_cert) Button stepper_auth_choose_cert;
+//  @BindView(R.id.stepper_auth_choose_password) Button stepper_auth_choose_password;
 
   @BindView(R.id.stepper_form) VerticalStepperFormLayout stepper;
 
@@ -118,6 +119,9 @@ public class LoginActivity extends Activity implements VerticalStepperForm, Data
   private ArrayAdapter<String> containerAliasAdapter;
   private List<String> aliasesList;
   private String secret_password;
+  private MaterialDialog root;
+  private MaterialDialog.Builder root1;
+  private boolean isCorrect;
 
 //  private RelativeLayout finishLayout;
 
@@ -139,87 +143,25 @@ public class LoginActivity extends Activity implements VerticalStepperForm, Data
 
     initialize();
 
-    String[] steps = {"Авторизация", "Загрузка данных"};
-    String[] subtitles = {"введите данные", null};
+    String[] steps = {"Выбор способа авторизации", "Авторизация", "Загрузка данных"};
+//    String[] subtitles = {null, "введите данные", null};
     VerticalStepperFormLayout.Builder.newInstance(stepper, steps, this, this)
       .primaryColor( Color.RED )
       .primaryDarkColor( ContextCompat.getColor( this, R.color.md_blue_grey_200 ) )
       .displayBottomNavigation(false)
       .materialDesignInDisabledSteps(true)
       .showVerticalLineWhenStepsAreCollapsed(true)
-      .stepsSubtitles(subtitles)
+//      .stepsSubtitles(subtitles)
       .init();
 
       EventBus.getDefault().register(this);
 
-//    getSystemService( AuthService.class ).setCSP();
       AuthService.setCSP();
-//
-//    // 2. Инициализация провайдеров: CSP и java-провайдеров (Обязательная часть).
-//
-//    if (!initCSPProviders()) {
-//      Log.i(Constants.APP_LOGGER_TAG, "Couldn't initialize CSP.");
-//    }
-//    initJavaProviders();
-//    initLogger();
-//
-////    installContainers();
-//
-//    // 4. Инициируем объект для управления выбором типа
-//    // контейнера (Настройки).
-//
-//    KeyStoreType.init(this);
-//
-//    // 5. Инициируем объект для управления выбором типа
-//    // провайдера (Настройки).
-//
-//    ProviderType.init(this);
-//
-//    logJCspServices(defaultKeyStoreProvider = new JCSP());
+
 
     examplesRequireWrittenPin = getResources().getStringArray(R.array.ExampleRequireWrittenPin);
     examplesRequireServerContainer = getResources().getStringArray(R.array.ExampleRequireServerContainer);
     exampleClassesToBeExecuted = getResources().getStringArray(R.array.ExampleClasses);
-
-
-    // Создаем ArrayAdapter для использования строкового массива
-    // и способа отображения объекта.
-//    ArrayAdapter<CharSequence> examplesAdapter = ArrayAdapter.createFromResource( this, R.array.ExamplesDescription, android.R.layout.simple_spinner_item);
-//
-//    // Способ отображения.
-//
-//    examplesAdapter.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item );
-//
-//    spExamplesList.setAdapter(examplesAdapter);
-//    spExamplesList.setOnItemSelectedListener(this);
-//    // Для логирования: CSPConfig.setNeedLogBioStatistics(true);
-//
-//    aliasesList = aliases( KeyStoreType.currentType(), ProviderType.currentProviderType());
-//    containerAliasAdapter = new ArrayAdapter<String>( this, android.R.layout.simple_spinner_item, aliasesList);
-//
-//
-//    spServerList.setAdapter(containerAliasAdapter);
-//    spServerList.setOnItemSelectedListener(this);
-//    // Способ отображения.
-//
-//    containerAliasAdapter.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item);
-//
-//    spClientList.setAdapter(containerAliasAdapter);
-//    spClientList.setOnItemSelectedListener(this);
-//
-//
-//    int permissionCheck1 = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
-//    int permissionCheck2 = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-//    if (permissionCheck1 != PackageManager.PERMISSION_GRANTED || permissionCheck2 != PackageManager.PERMISSION_GRANTED) {
-//      ActivityCompat.requestPermissions(this,
-//        new String[]{
-//          Manifest.permission.WRITE_EXTERNAL_STORAGE,
-//          Manifest.permission.READ_EXTERNAL_STORAGE
-//        },
-//        REQUEST_READWRITE_STORAGE);
-//    }
-//
-
 
   }
 
@@ -232,20 +174,17 @@ public class LoginActivity extends Activity implements VerticalStepperForm, Data
     }
   }
 
-  @OnClick(R.id.AuthServiceLogin)
-  void initAuthServiceLogin(View view) {
-    Timber.tag(TAG).i("initAuthServiceLogin");
-    EventBus.getDefault().post( new AuthServiceAuthSignInEvent() );
-
-//    int exampleIndex = spExamplesList.getSelectedItemPosition();
-//    executeExample(exampleIndex, null);
-  }
-
-  @OnClick(R.id.AuthServiceSign)
-  void initAuthServiceSign(View view) {
-//    int exampleIndex = spExamplesList.getSelectedItemPosition();
-//    executeExample(exampleIndex, null);
-  }
+//  @Nullable
+//  @OnClick(R.id.stepper_auth_choose_cert)
+//  void initAuthServiceSign(View view) {
+//    Timber.tag(TAG).i("by cert");
+//  }
+//
+//  @Nullable
+//  @OnClick(R.id.stepper_auth_choose_password)
+//  void initAuthServiceLogin(View view) {
+//    Timber.tag(TAG).i("by password");
+//  }
 
 
   private static final String EXAMPLE_PACKAGE = "sapotero.rxtest.utils.";
@@ -256,20 +195,20 @@ public class LoginActivity extends Activity implements VerticalStepperForm, Data
       Constructor exampleConstructor = exampleClass.getConstructor(ContainerAdapter.class);
 
       // Клиентский контейнер (подписант, отправитель, TLS).
-      String clientAlias = (String) spClientList.getSelectedItem();
-      CharSequence clientPasswordSequence = etClientPin.getText();
+//      String clientAlias = (String) spClientList.getSelectedItem();
+//      CharSequence clientPasswordSequence = etClientPin.getText();
       char[] clientPassword = null;
 
-      if (clientPasswordSequence != null) {
-        clientPassword = clientPasswordSequence.toString().toCharArray();
-      } // if
+//      if (clientPasswordSequence != null) {
+//        clientPassword = clientPasswordSequence.toString().toCharArray();
+//      } // if
 
       // Контейнер получателя.
-      String serverAlias = (String) spServerList.getSelectedItem();
+//      String serverAlias = (String) spServerList.getSelectedItem();
 
       // Настройки примера.
 
-      ContainerAdapter adapter = new ContainerAdapter(clientAlias, secret_password != null ? secret_password.toCharArray() : clientPassword, serverAlias, null);
+      ContainerAdapter adapter = new ContainerAdapter("rukovoditel_r", secret_password != null ? secret_password.toCharArray() : clientPassword, null, null);
 
       adapter.setProviderType(ProviderType.currentProviderType());
       adapter.setResources(getResources()); // для примера установки сертификатов
@@ -321,61 +260,61 @@ public class LoginActivity extends Activity implements VerticalStepperForm, Data
 
     switch (adapterView.getId()) {
 
-      case R.id.spExamplesList: {
-
-        // Выбранный пример.
-        int selectedExample = adapterView.getSelectedItemPosition();
-        String exampleClass = exampleClassesToBeExecuted[selectedExample];
-
-        // Если пример не требует ввода пина, то блокируем поле ввода пина.
-        // Большинство примеров вообще не нуждается в указании пароля, т.к.
-        // он будет запрошен в специальном окне. Только TLS примеры требуют
-        // клиентский пароль.
-        List<String> exampleRWPClasses = Arrays.asList(examplesRequireWrittenPin);
-
-        if (!exampleRWPClasses.contains(exampleClass)) {
-          etClientPin.setText("");
-          etClientPin.setEnabled(false);
-        } // if
-        else {
-          etClientPin.setEnabled(true);
-          etClientPin.setSelected(true);
-          etClientPin.requestFocus();
-        } // else
-
-        // Если пример требует указания алиаса и пина получателя, то
-        // разблокируем поле ввода алиаса и пина получателя. Например,
-        // примеры шифрования нуждаются в них.
-
-//        List<String> exampleRSCClasses = Arrays.asList(examplesRequireServerContainer);
-//        if (!exampleRSCClasses.contains(exampleClass)) {
-//          spServerList.setEnabled(false);
+//      case R.id.spExamplesList: {
+//
+//        // Выбранный пример.
+//        int selectedExample = adapterView.getSelectedItemPosition();
+//        String exampleClass = exampleClassesToBeExecuted[selectedExample];
+//
+//        // Если пример не требует ввода пина, то блокируем поле ввода пина.
+//        // Большинство примеров вообще не нуждается в указании пароля, т.к.
+//        // он будет запрошен в специальном окне. Только TLS примеры требуют
+//        // клиентский пароль.
+//        List<String> exampleRWPClasses = Arrays.asList(examplesRequireWrittenPin);
+//
+//        if (!exampleRWPClasses.contains(exampleClass)) {
+////          etClientPin.setText("");
+////          etClientPin.setEnabled(false);
 //        } // if
 //        else {
-//          spServerList.setEnabled(true);
+////          etClientPin.setEnabled(true);
+////          etClientPin.setSelected(true);
+////          etClientPin.requestFocus();
 //        } // else
-
-        // Флаг, означающий, что выполняется CAdES пример.
-        boolean isCAdESExampleExecuting =
-          exampleClass.contains("CAdESBES") ||
-            exampleClass.contains("CAdESXLT1");
-
-        // Выполняем установку корневых сертификатов для CAdES
-        // примеров, если она не была уже произведена. Фактически,
-        // перед каждым первым выполнением CAdES примера после запуска
-        // приложения.
-
-        if (cbInstallCA.isChecked() && isCAdESExampleExecuting) {
-//          checkCAdESCACertsAndInstall();
-        } // if
-
-      }
-      break;
-
-      case R.id.spExamplesClientList: {
-        etClientPin.setText(""); // очистка
-      }
-      break;
+//
+//        // Если пример требует указания алиаса и пина получателя, то
+//        // разблокируем поле ввода алиаса и пина получателя. Например,
+//        // примеры шифрования нуждаются в них.
+//
+////        List<String> exampleRSCClasses = Arrays.asList(examplesRequireServerContainer);
+////        if (!exampleRSCClasses.contains(exampleClass)) {
+////          spServerList.setEnabled(false);
+////        } // if
+////        else {
+////          spServerList.setEnabled(true);
+////        } // else
+//
+//        // Флаг, означающий, что выполняется CAdES пример.
+//        boolean isCAdESExampleExecuting =
+//          exampleClass.contains("CAdESBES") ||
+//            exampleClass.contains("CAdESXLT1");
+//
+//        // Выполняем установку корневых сертификатов для CAdES
+//        // примеров, если она не была уже произведена. Фактически,
+//        // перед каждым первым выполнением CAdES примера после запуска
+//        // приложения.
+//
+//        if (cbInstallCA.isChecked() && isCAdESExampleExecuting) {
+////          checkCAdESCACertsAndInstall();
+//        } // if
+//
+//      }
+//      break;
+//
+//      case R.id.spExamplesClientList: {
+//        etClientPin.setText(""); // очистка
+//      }
+//      break;
 
     } // switch
 
@@ -436,12 +375,15 @@ public class LoginActivity extends Activity implements VerticalStepperForm, Data
     View view = null;
     switch (stepNumber) {
       case 0:
-        view = loginForm();
+        view = authTypeCheck();
         break;
       case 1:
-        view = loadData();
+        view = loginForm();
         break;
       case 2:
+        view = loadData();
+        break;
+      case 3:
         view = showFinal();
         break;
     }
@@ -455,23 +397,74 @@ public class LoginActivity extends Activity implements VerticalStepperForm, Data
   }
 
 
+  private View authTypeCheck() {
+    view = LayoutInflater.from(this).inflate(R.layout.stepper_auth_chooser, null);
+
+    AppCompatButton choose_cert = ButterKnife.findById(view, R.id.stepper_auth_choose_cert);
+    AppCompatButton choose_pass = ButterKnife.findById(view, R.id.stepper_auth_choose_password);
+
+    choose_cert.setOnClickListener(v -> {
+      Timber.e("cert");
+
+      root = new MaterialDialog.Builder(this)
+        .title(R.string.dialog_cert_pass_title)
+        .content(R.string.dialog_cert_description)
+        .positiveText(R.string.dialog_cert_positive)
+        .negativeText(R.string.dialog_cert_negative)
+        .cancelable(false)
+        .autoDismiss(false)
+
+
+        .inputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD)
+        .input(R.string.dialog_cert_pass_hint, R.string.dialog_cert_pass_prefill, (dialog, input) -> {
+          jobManager.addJobInBackground( new AuthServiceCheckSignJob( input.toString() ) );
+        })
+
+        .checkBoxPromptRes(R.string.dialog_cert_pass_checkbox_save, false, null)
+
+        .onPositive((dialog, which) -> {
+
+        })
+        .onNegative((dialog, which) -> dialog.hide())
+        .show();
+
+    });
+
+    choose_pass.setOnClickListener(v -> {
+      Timber.e("pass");
+      stepper.setActiveStepAsCompleted();
+      stepper.goToNextStep();
+    });
+
+    try {
+      stepper.findViewById(R.id.next_step).setVisibility(View.GONE);
+    } catch (Exception e){
+      Timber.d(e);
+    }
+
+    return view;
+  }
+
+
   public void onStepOpening(int stepNumber) {
     switch (stepNumber) {
       case 0:
-        checkLogin();
         break;
       case 1:
-        resetLoadDataForm();
+        checkLogin();
         break;
       case 2:
-//        stepper.setStepAsCompleted(2);
+        resetLoadDataForm();
+        break;
+      case 3:
         break;
     }
   }
 
+
   private Boolean checkLogin( ) {
-    Timber.e("checkLogin");
-    boolean isCorrect = false;
+//    isCorrect = false;
+
 
     resetLoginForm();
 
@@ -489,6 +482,9 @@ public class LoginActivity extends Activity implements VerticalStepperForm, Data
       String titleError = "Введите данные!";
       stepper.setActiveStepAsUncompleted(titleError);
     }
+
+    Timber.e("checkLogin result %s", isCorrect);
+
 
     return isCorrect;
   }
@@ -692,9 +688,25 @@ public class LoginActivity extends Activity implements VerticalStepperForm, Data
     printJobStat();
   }
 
-  @Subscribe(threadMode = ThreadMode.BACKGROUND)
+  @Subscribe(threadMode = ThreadMode.POSTING)
   public void onMessageEvent(AuthServiceAuthEvent event) {
     Timber.tag(TAG).i("RECV AuthServiceAuthEvent: %s %s", event.success, event.success_string );
+
+    root.dismiss();
+    isCorrect = true;
+
+    stepper.setStepAsCompleted(0);
+    stepper.setStepAsCompleted(1);
+    tryToLogin();
+    stepper.goToStep(2, true);
+
+
+//      stepper.setActiveStepAsCompleted();
+//      stepper.goToNextStep();
+//      stepper.setActiveStepAsCompleted();
+//      stepper.goToNextStep();
+
+//    root.set("DONE");
   }
 
 

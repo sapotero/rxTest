@@ -36,6 +36,7 @@ import java.util.List;
 import sapotero.rxtest.R;
 import sapotero.rxtest.views.views.utils.Animations;
 import sapotero.rxtest.views.views.utils.VerticalStepperForm;
+import timber.log.Timber;
 
 /**
  * Custom layout that implements a vertical stepper form
@@ -68,24 +69,31 @@ public class VerticalStepperFormLayout extends RelativeLayout implements View.On
   protected List<TextView> stepsSubtitlesViews;
   protected AppCompatButton confirmationButton;
   protected ProgressBar progressBar;
-  protected AppCompatImageButton previousStepButton, nextStepButton;
-  protected RelativeLayout bottomNavigation;
+  protected AppCompatImageButton previousStepButton;
 
+  protected AppCompatImageButton nextStepButton;
+
+  protected RelativeLayout bottomNavigation;
   // Data
   protected List<String> steps;
-  protected List<String> stepsSubtitles;
 
+  protected List<String> stepsSubtitles;
   // Logic
   protected int activeStep = 0;
+
   protected int numberOfSteps;
   protected boolean[] completedSteps;
-
   // Listeners and callbacks
   protected VerticalStepperForm verticalStepperFormImplementation;
 
   // Context
   protected Context context;
+
   protected Activity activity;
+  public AppCompatImageButton getNextStepButton() {
+    return nextStepButton;
+  }
+
 
   public VerticalStepperFormLayout(Context context) {
     super(context);
@@ -329,8 +337,7 @@ public class VerticalStepperFormLayout extends RelativeLayout implements View.On
       if(hideKeyboard) {
         hideSoftKeyboard();
       }
-      boolean previousStepsAreCompleted =
-        arePreviousStepsCompleted(stepNumber);
+      boolean previousStepsAreCompleted = arePreviousStepsCompleted(stepNumber);
       if (stepNumber == 0 || previousStepsAreCompleted) {
         openStep(stepNumber, restoration);
       }
@@ -631,22 +638,17 @@ public class VerticalStepperFormLayout extends RelativeLayout implements View.On
     errorIcon.setColorFilter(errorMessageTextColor);
 
     RelativeLayout stepHeader = (RelativeLayout) stepLayout.findViewById(R.id.step_header);
-    stepHeader.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        goToStep(stepNumber, false);
-      }
-    });
+    stepHeader.setOnClickListener(v -> goToStep(stepNumber, false));
+
 
     AppCompatButton nextButton = (AppCompatButton) stepLayout.findViewById(R.id.next_step);
-    setButtonColor(nextButton,
-      buttonBackgroundColor, buttonTextColor, buttonPressedBackgroundColor, buttonPressedTextColor);
-    nextButton.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        goToStep((stepNumber + 1), false);
-      }
-    });
+    setButtonColor(nextButton, buttonBackgroundColor, buttonTextColor, buttonPressedBackgroundColor, buttonPressedTextColor);
+    nextButton.setOnClickListener(v -> goToStep((stepNumber + 1), false));
+
+    if (stepNumber == 0){
+      Timber.i("ZERO");
+      nextButton.setVisibility(GONE);
+    }
 
     stepLayouts.add(stepLayout);
 
@@ -694,17 +696,9 @@ public class VerticalStepperFormLayout extends RelativeLayout implements View.On
 
   protected void scrollToStep(final int stepNumber, boolean smoothScroll) {
     if (smoothScroll) {
-      stepsScrollView.post(new Runnable() {
-        public void run() {
-          stepsScrollView.smoothScrollTo(0, stepLayouts.get(stepNumber).getTop());
-        }
-      });
+      stepsScrollView.post(() -> stepsScrollView.smoothScrollTo(0, stepLayouts.get(stepNumber).getTop()));
     } else {
-      stepsScrollView.post(new Runnable() {
-        public void run() {
-          stepsScrollView.scrollTo(0, stepLayouts.get(stepNumber).getTop());
-        }
-      });
+      stepsScrollView.post(() -> stepsScrollView.scrollTo(0, stepLayouts.get(stepNumber).getTop()));
     }
   }
 

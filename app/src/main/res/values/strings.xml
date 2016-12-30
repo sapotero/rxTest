@@ -342,6 +342,21 @@
     <string name="IntentsCertSelfSigned">Self-signed certificate</string>
     <string name="IntentsCAVersion">Version of Crypto-Pro CA:</string>
     <string name="IntentsCAAddress">Address of Crypto-Pro CA:</string>
+    <string name="auth_attention_text_restrict">Запрещается передавать и(или) распространять данную информацию вне информационных систем МВД России.</string>
+    <string name="auth_attention_text_main">Информация, обрабатываемая и хранящаяся в сервисах ИСОД МВД России, является информацией ограниченного доступа и может быть использована исключительно для выполнения служебных обязанностей сотрудниками МВД России.</string>
+    <string name="auth_attention">ВНИМАНИЕ!</string>
+    <string name="auth_enter_cert">Войти</string>
+    <string name="auth_enter_password">Войти по паролю</string>
+    <string name="dialog_pin_enter">Вход</string>
+
+
+    <string name="dialog_cert_pass_title">Вход с помощью ЭП</string>
+    <string name="dialog_cert_pass_hint">Введите ПИН-код</string>
+    <string name="dialog_cert_pass_checkbox_save">Сохранить ПИН-код</string>
+    <string name="dialog_cert_pass_prefill"></string>
+    <string name="dialog_cert_positive">Войти</string>
+    <string name="dialog_cert_negative">Отмена</string>
+    <string name="dialog_cert_description">Вставьте ключ с Вашей электронной цифрой подписью и введите ПИН-код</string>
 
     <string-array name="IntentsCAAddressList">
         <item>http://www.cryptopro.ru/certsrv/</item>

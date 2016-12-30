@@ -1,6 +1,7 @@
 package sapotero.rxtest.db.requery.utils;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import java.util.concurrent.Executors;
 
@@ -24,6 +25,7 @@ import sapotero.rxtest.db.requery.models.Models;
 @Module
 public final class RequeryDbModule {
 
+  @NonNull
   @Provides
   @Singleton
   SingleEntityStore<Persistable> provideDatabase(Context context) {

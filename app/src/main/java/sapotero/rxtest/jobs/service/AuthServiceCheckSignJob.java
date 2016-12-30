@@ -3,21 +3,24 @@ package sapotero.rxtest.jobs.service;
 import android.support.annotation.Nullable;
 
 import com.birbit.android.jobqueue.CancelReason;
-import com.birbit.android.jobqueue.Job;
 import com.birbit.android.jobqueue.Params;
 import com.birbit.android.jobqueue.RetryConstraint;
 
 import org.greenrobot.eventbus.EventBus;
 
-import sapotero.rxtest.events.bus.AddDocumentToDBTimeoutEvent;
+import sapotero.rxtest.events.service.AuthServiceAuthSignInEvent;
+import sapotero.rxtest.jobs.bus.BaseJob;
 
-public class AuthServiceCheckSignJob extends Job {
+public class AuthServiceCheckSignJob extends BaseJob {
 
-    public static final int PRIORITY = 1;
-    private String TAG = this.getClass().getSimpleName();
+  private String TAG = this.getClass().getSimpleName();
 
-    public AuthServiceCheckSignJob() {
+  public static final int PRIORITY = 10;
+  private final String password;
+
+    public AuthServiceCheckSignJob(String password) {
       super( new Params(PRIORITY).requireNetwork().persist() );
+      this.password = password;
     }
 
     @Override
@@ -27,7 +30,7 @@ public class AuthServiceCheckSignJob extends Job {
 
     @Override
     public void onRun() throws Throwable {
-      EventBus.getDefault().post( new AddDocumentToDBTimeoutEvent() );
+      EventBus.getDefault().post( new AuthServiceAuthSignInEvent(password) );
     }
 
     @Override
