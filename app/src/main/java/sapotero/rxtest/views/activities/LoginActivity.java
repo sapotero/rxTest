@@ -1,7 +1,6 @@
 package sapotero.rxtest.views.activities;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -11,6 +10,7 @@ import android.os.Handler;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.text.Editable;
 import android.text.InputType;
@@ -54,23 +54,17 @@ import sapotero.rxtest.utils.ProviderType;
 import sapotero.rxtest.views.interfaces.DataLoaderInterface;
 import sapotero.rxtest.views.services.AuthService;
 import sapotero.rxtest.views.views.LoginView;
+import sapotero.rxtest.views.views.stepper.StepperLayout;
+import sapotero.rxtest.views.views.stepper.VerificationError;
+import sapotero.rxtest.views.views.stepper.build.StepperAdapter;
 import sapotero.rxtest.views.views.utils.VerticalStepperForm;
 import timber.log.Timber;
 
 
-public class LoginActivity extends Activity implements VerticalStepperForm, DataLoaderInterface.Callback ,AdapterView.OnItemSelectedListener {
+public class LoginActivity extends AppCompatActivity implements VerticalStepperForm, DataLoaderInterface.Callback ,AdapterView.OnItemSelectedListener, StepperLayout.StepperListener {
 
 
   private static int REQUEST_READWRITE_STORAGE = 0;
-
-//  @BindView(R.id.spExamplesList) Spinner spExamplesList;
-//  @BindView(R.id.spExamplesClientList) Spinner spClientList;
-//  @BindView(R.id.spExamplesServerList) Spinner spServerList;
-//  @BindView(R.id.etExamplesClientPassword) EditText etClientPin;
-//  @BindView(R.id.cbExamplesInstallCA) CheckBox cbInstallCA;
-
-//  @BindView(R.id.stepper_auth_choose_cert) Button stepper_auth_choose_cert;
-//  @BindView(R.id.stepper_auth_choose_password) Button stepper_auth_choose_password;
 
   @BindView(R.id.stepper_form) LoginView stepper;
 
@@ -117,6 +111,9 @@ public class LoginActivity extends Activity implements VerticalStepperForm, Data
   private MaterialDialog.Builder root1;
   private boolean isCorrect;
 
+
+  private StepperLayout stepperLayout;
+
 //  private RelativeLayout finishLayout;
 
   @RequiresApi(api = Build.VERSION_CODES.M)
@@ -140,24 +137,25 @@ public class LoginActivity extends Activity implements VerticalStepperForm, Data
 
     String[] steps = {"Выбор способа авторизации", "Авторизация", "Загрузка данных"};
 
-//    String[] subtitles = {null, "введите данные", null};
     LoginView.Builder.newInstance(stepper, steps, this, this)
       .primaryColor( Color.RED )
       .primaryDarkColor( ContextCompat.getColor( this, R.color.md_blue_grey_200 ) )
       .displayBottomNavigation(false)
       .materialDesignInDisabledSteps(true)
       .showVerticalLineWhenStepsAreCollapsed(true)
-//      .stepsSubtitles(subtitles)
       .init();
 
       EventBus.getDefault().register(this);
 
       AuthService.setCSP();
 
+    stepperLayout = (StepperLayout) findViewById(R.id.stepperLayout);
+    stepperLayout.setAdapter(new StepperAdapter( getSupportFragmentManager() ) );
+    stepperLayout.setListener(this);
 
-    examplesRequireWrittenPin = getResources().getStringArray(R.array.ExampleRequireWrittenPin);
-    examplesRequireServerContainer = getResources().getStringArray(R.array.ExampleRequireServerContainer);
-    exampleClassesToBeExecuted = getResources().getStringArray(R.array.ExampleClasses);
+    new Handler().postDelayed( () -> {
+      stepperLayout.getmNextNavigationButton().performClick();
+    }, 5000L);
 
   }
 
@@ -170,31 +168,11 @@ public class LoginActivity extends Activity implements VerticalStepperForm, Data
     }
   }
 
-//  @Nullable
-//  @OnClick(R.id.stepper_auth_choose_cert)
-//  void initAuthServiceSign(View view) {
-//    Timber.tag(TAG).i("by cert");
-//  }
-//
-//  @Nullable
-//  @OnClick(R.id.stepper_auth_choose_password)
-//  void initAuthServiceLogin(View view) {
-//    Timber.tag(TAG).i("by password");
-//  }
-
-
-  private static final String EXAMPLE_PACKAGE = "sapotero.rxtest.utils.";
 
   private void check_permissions(){
-    // Here, thisActivity is the current activity
     if (ContextCompat.checkSelfPermission( this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 
-      // Should we show an explanation?
       if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
-
-        // Show an explanation to the user *asynchronously* -- don't block
-        // this thread waiting for the user's response! After the user
-        // sees the explanation, try again to request the permission.
 
       } else {
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_READWRITE_STORAGE);
@@ -672,6 +650,23 @@ public class LoginActivity extends Activity implements VerticalStepperForm, Data
   }
 
 
+  @Override
+  public void onCompleted(View completeButton) {
 
+  }
 
+  @Override
+  public void onError(VerificationError verificationError) {
+
+  }
+
+  @Override
+  public void onStepSelected(int newStepPosition) {
+
+  }
+
+  @Override
+  public void onReturn() {
+
+  }
 }

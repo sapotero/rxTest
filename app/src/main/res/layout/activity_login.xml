@@ -16,13 +16,29 @@
     >
 
 
-    <sapotero.rxtest.views.views.LoginView
-        android:id="@+id/stepper_form"
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/stepper_background"
+        android:layout_height="match_parent">
 
-        android:layout_centerVertical="true" />
+        <sapotero.rxtest.views.views.stepper.StepperLayout
+            android:layout_weight="1"
+            android:id="@+id/stepperLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            custom:ms_stepperType="tabs"
+            />
+
+        <sapotero.rxtest.views.views.LoginView
+            android:id="@+id/stepper_form"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/stepper_background"
+            android:layout_weight="1"
+            />
+
+    </LinearLayout>
 
 
 </RelativeLayout>

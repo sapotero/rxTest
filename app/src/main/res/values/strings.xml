@@ -371,5 +371,9 @@
 
     <!--CRYPTO PRO-->
 
+    <string name="ms_back">BACK</string>
+    <string name="ms_next">NEXT</string>
+    <string name="ms_complete">COMPLETE</string>
+
 
 </resources>

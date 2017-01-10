@@ -39,5 +39,16 @@
 
     <style name="ButtonBorderless" parent="Widget.AppCompat.Button.Borderless.Colored"/>
 
+    <style name="Base.MSNavBarButton" parent="Base.Widget.AppCompat.Button.Borderless">
+        <item name="android:padding">@dimen/ms_nav_bar_button_padding</item>
+        <item name="android:textSize">16sp</item>
+    </style>
 
+    <style name="MSNavBarButton" parent="Base.MSNavBarButton">
+        <item name="android:background">@drawable/ms_default_button_background</item>
+    </style>
+
+    <style name="MSStepStabsContainer">
+        <item name="android:background">@drawable/ms_tab_container_pre_lollipop_background</item>
+    </style>
 </resources>
