@@ -18,12 +18,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.events.bus.FileDownloadedEvent;
 import sapotero.rxtest.retrofit.DocumentLinkService;
@@ -84,10 +81,11 @@ public class DownloadFileJob  extends BaseJob {
     DocumentLinkService documentLinkService = retrofit.create(DocumentLinkService.class);
 
     strUrl = strUrl.replace("?expired_link=1", "");
-    Observable<DownloadLink> user = documentLinkService.getByLink(strUrl, admin, token, "1");
+    Observable<DownloadLink> file = documentLinkService.getByLink(strUrl, admin, token, "1");
 
-    user.subscribeOn(Schedulers.io())
-      .observeOn(AndroidSchedulers.mainThread())
+    file
+      .subscribeOn(Schedulers.io())
+      .observeOn(Schedulers.io())
       .subscribe(
         link -> {
           downloadFile(link);
@@ -117,15 +115,15 @@ public class DownloadFileJob  extends BaseJob {
     Retrofit retrofit = new RetrofitManager(getApplicationContext(), HOST.get(), okHttpClient).process();
     DocumentLinkService documentLinkService = retrofit.create(DocumentLinkService.class);
 
-    Call<ResponseBody> call = documentLinkService.download(new_builtUri.toString(), admin, token);
-    call.enqueue(new Callback<ResponseBody>() {
-
-      @Override
-      public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-        if (response.isSuccessful()) {
+    Observable<Response<ResponseBody>> call = documentLinkService.download(new_builtUri.toString(), admin, token);
+    call
+      .subscribeOn(Schedulers.io())
+      .observeOn(Schedulers.io())
+      .subscribe(
+        data -> {
           Timber.tag(TAG).d("server contacted and has file");
 
-          boolean writtenToDisk = writeResponseBodyToDisk(response.body());
+          boolean writtenToDisk = writeResponseBodyToDisk(data.body());
 
           if (writtenToDisk){
             EventBus.getDefault().post(new FileDownloadedEvent(fileName));
@@ -134,69 +132,57 @@ public class DownloadFileJob  extends BaseJob {
           }
 
           Timber.tag(TAG).d("file download was a success? " + writtenToDisk);
-        } else {
-          Timber.tag(TAG).d("server contact failed");
+        },
+        error -> {
+          EventBus.getDefault().post(new FileDownloadedEvent(""));
         }
-      }
-
-      @Override
-      public void onFailure(Call<ResponseBody> call, Throwable t) {
-
-      }
-    });
+      );
 
   }
 
   private boolean writeResponseBodyToDisk(ResponseBody body) {
+    File futureStudioIconFile = new File(getApplicationContext().getFilesDir(), fileName);
+
+    InputStream inputStream;
+    OutputStream outputStream;
+
     try {
-      File futureStudioIconFile = new File( getApplicationContext().getFilesDir(), fileName);
+      byte[] fileReader = new byte[4096];
 
-      InputStream inputStream = null;
-      OutputStream outputStream = null;
+      long fileSize = body.contentLength();
+      long fileSizeDownloaded = 0;
 
-      try {
-        byte[] fileReader = new byte[4096];
+      inputStream = body.byteStream();
+      outputStream = new FileOutputStream(futureStudioIconFile);
 
-        long fileSize = body.contentLength();
-        long fileSizeDownloaded = 0;
+      while (true) {
+        int read = inputStream.read(fileReader);
 
-        inputStream = body.byteStream();
-        outputStream = new FileOutputStream(futureStudioIconFile);
-
-        while (true) {
-          int read = inputStream.read(fileReader);
-
-          if (read == -1) {
-            break;
-          }
-
-          outputStream.write(fileReader, 0, read);
-
-          fileSizeDownloaded += read;
-
-          Timber.tag(TAG).d("file download: %s of %s", fileSizeDownloaded, fileSize);
+        if (read == -1) {
+          break;
         }
 
-        outputStream.flush();
+        outputStream.write(fileReader, 0, read);
 
-        return true;
-      } catch (FileNotFoundException e) {
-        e.printStackTrace();
-        return false;
-      } catch (IOException e) {
-        return false;
-      } finally {
-        if (inputStream != null) {
-          inputStream.close();
-        }
+        fileSizeDownloaded += read;
 
-        if (outputStream != null) {
-          outputStream.close();
-        }
+        Timber.tag(TAG).d("file download: %s of %s", fileSizeDownloaded, fileSize);
       }
+
+      outputStream.flush();
+
+      inputStream.close();
+      outputStream.close();
+
+      return true;
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+      return false;
     } catch (IOException e) {
       return false;
     }
+
+
   }
 
   @Override

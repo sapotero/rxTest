@@ -1,7 +1,7 @@
 package sapotero.rxtest.retrofit;
 
 import okhttp3.ResponseBody;
-import retrofit2.Call;
+import retrofit2.Response;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
@@ -21,7 +21,7 @@ public interface DocumentLinkService {
 
   @Streaming
   @GET
-  Call<ResponseBody> download(
+  Observable<Response<ResponseBody>> download(
     @Url String fileUrl,
     @Query("login") String login,
     @Query("auth_token") String auth_token

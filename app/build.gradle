@@ -150,7 +150,8 @@ dependencies {
     compile 'com.facebook.stetho:stetho-okhttp3:1.4.1'
     /*debug*/
 
-    compile 'de.halfbit:tinymachine:1.1.0'
+//    compile 'de.halfbit:tinymachine:1.1.0'
+    compile 'com.github.fcannizzaro:material-stepper:1.2.2'
 
 //    compile project(':org.eclipse.paho.android.service-release');
 }

@@ -220,7 +220,7 @@ public class InstallCAdESTestTrustCertExample implements ICAdESData {
     else {
       callback.log("** Trusted certificate has already " +
         "existed in the trust store.");
-    } // else
+    } // elseAuthServiceAuthSignInEvent
 
   }
 

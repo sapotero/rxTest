@@ -37,7 +37,6 @@ import rx.functions.Action1;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
-import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.models.documents.Document;
@@ -86,12 +85,13 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
     viewHolder.from.setText( item.getOrganization() );
 
     String number = item.getExternalDocumentNumber();
-    if (number == null){
-      SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-      RxSharedPreferences rxPreferences = RxSharedPreferences.create(preferences);
-      Preference<String> uid = rxPreferences.getString("main_menu.uid");
-      number = Fields.getJournalByUid( uid.get() ).getSingle();
-    }
+
+//    if (number == null){
+//      SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+//      RxSharedPreferences rxPreferences = RxSharedPreferences.create(preferences);
+//      Preference<String> uid = rxPreferences.getString("main_menu.uid");
+//      number = Fields.getJournalByUid( uid.get() ).getSingle();
+//    }
     viewHolder.date.setText( number + " от " + item.getRegistrationDate());
 
     viewHolder.swipeLayout.setShowMode(SwipeLayout.ShowMode.PullOut);

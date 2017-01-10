@@ -225,7 +225,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   private void updateByStatus() {
     dataLoader.updateByStatus( menuBuilder.getItem() );
-    dataLoader.updateByStatus( menuBuilder.getItem() );
+//    dataLoader.updateByStatus( menuBuilder.getItem() );
 
 //    ProgressDialog prog= new ProgressDialog(this);//Assuming that you are using fragments.
 //    prog.setTitle("Обновление данных");
@@ -416,7 +416,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
         .withToolbar(toolbar)
         .withActionBarDrawerToggle(true)
         .withHeader(R.layout.drawer_header)
-        .withShowDrawerOnFirstLaunch(true)
+//        .withShowDrawerOnFirstLaunch(true)
         .withAccountHeader(headerResult);
     }
 

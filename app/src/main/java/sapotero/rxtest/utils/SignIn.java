@@ -71,7 +71,9 @@ public class SignIn extends ISignData {
 
 
 
-    File file = new File("/sdcard/Download/22.apk");
+//    File file = new File("/storage/self/primary/Download/ACSP.apk");
+    File file = new File("/system/recovery-from-boot.p");
+
     int size = (int) file.length();
 //    byte[] bytes = new byte[size];
 

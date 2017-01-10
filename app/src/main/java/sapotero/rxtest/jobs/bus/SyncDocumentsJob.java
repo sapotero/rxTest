@@ -17,6 +17,7 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RRouteEntity;
@@ -109,8 +110,9 @@ public class SyncDocumentsJob  extends BaseJob {
       TOKEN.get()
     );
 
-    info.subscribeOn( Schedulers.io() )
-      .observeOn( Schedulers.io() )
+    info
+      .subscribeOn( Schedulers.io() )
+      .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         doc -> {
           Timber.tag(TAG).d("recv title - %s", doc.getTitle() );
@@ -163,6 +165,7 @@ public class SyncDocumentsJob  extends BaseJob {
 
     RDocumentEntity rd = new RDocumentEntity();
     rd.setUid( d.getUid() );
+    rd.setUser( LOGIN.get() );
     rd.setFilter( filter.toString() );
     rd.setMd5( d.getMd5() );
     rd.setSortKey( d.getSortKey() );
@@ -261,6 +264,7 @@ public class SyncDocumentsJob  extends BaseJob {
       rDoc.setProcessed(isProcessed);
       rDoc.setFolder(processed_folder);
       rDoc.setControl(onControl);
+      rDoc.setUser( LOGIN.get() );
 
       if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
 

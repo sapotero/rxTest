@@ -51,7 +51,7 @@ public class Fields {
   }
 
   public enum Journal {
-    ALL_JOURNALS              (  0, "",   "Все документы",        ""),
+    ALL_JOURNALS              (  0, "",   "Все документы",        " "),
     CITIZEN_REQUESTS          (  1, "01", "Обращения граждан",    "Обращение граждан"),
     INCOMING_DOCUMENTS        (  2, "02", "Входящие документы",   "Входящий документ"),
     INCOMING_ORDERS           (  3, "03", "НПА",                  "НПА"),
@@ -62,7 +62,7 @@ public class Fields {
     SECRET_ORDERS             (  8, "08", "Пр. старые секретные", "Пр. старый секретный"),
     SECRET_OUTGOING_DOCUMENTS (  9, "09", "Исходящие секретные",  "Исходящий секретный"),
     ORDERS_DDO                ( 10, "10", "Приказы",              "Приказ"),
-    CONTROL                   ( 97, "97", "На контроле",          ""),
+    CONTROL                   ( 97, "97", "На контроле",          " "),
     SIGN                      ( 98, "98", "Подписание",           "Подписание"),
     APPROVE                   ( 99, "99", "Согласование",         "Согласование");
 
@@ -172,11 +172,13 @@ public class Fields {
   public static Journal getJournalByUid(String uid ){
     Journal result = null;
 
-    for ( Journal journal: Journal.values()){
-      if (journal.getValue().startsWith( uid.substring(0, 2))) {
-        Timber.tag("JOURNAL_TYPE").d("%s == %s [%s]", journal.getValue(), uid.substring(0, 1), uid);
-        result = journal;
-        break;
+    if (uid != null) {
+      for ( Journal journal: Journal.values()){
+        if (journal.getValue().startsWith( uid.substring(0, 2))) {
+          Timber.tag("JOURNAL_TYPE").d("%s == %s [%s]", journal.getValue(), uid.substring(0, 1), uid);
+          result = journal;
+          break;
+        }
       }
     }
 

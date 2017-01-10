@@ -2,6 +2,7 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
     tools:context="sapotero.rxtest.views.activities.LoginActivity"
 
     android:layout_width="match_parent"
@@ -14,96 +15,14 @@
     android:background="@color/it_mvd_background"
     >
 
-    <!--<LinearLayout-->
-        <!--android:orientation="vertical"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content">-->
 
-        <!--<LinearLayout-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:orientation="vertical"-->
-            <!--&gt;-->
+    <sapotero.rxtest.views.views.LoginView
+        android:id="@+id/stepper_form"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/stepper_background"
 
-            <!--<Button-->
-                <!--android:text="LOGIN"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:id="@+id/AuthServiceLogin"-->
-                <!--/>-->
-            <!--<Button-->
-                <!--android:text="SIGN"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:id="@+id/AuthServiceSign"-->
-                <!--/>-->
-        <!--</LinearLayout>-->
-
-        <!--<CheckBox android:layout_width="match_parent"-->
-                  <!--android:layout_height="wrap_content"-->
-                  <!--android:text="@string/ExamplesAuthInstallCACAdES"-->
-                  <!--android:id="@+id/cbExamplesInstallCA"-->
-                  <!--android:checked="true"/>-->
-
-        <!--<EditText-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:id="@+id/etExamplesClientPassword"-->
-            <!--android:inputType="textPassword"-->
-            <!--android:layout_gravity="top|center_horizontal"-->
-            <!--android:singleLine="true"/>-->
-
-        <!--<Spinner-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:id="@+id/spExamplesClientList"-->
-            <!--android:layout_gravity="top|center_horizontal"-->
-            <!--/>-->
-
-        <!--<Spinner-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:id="@+id/spExamplesServerList"-->
-            <!--android:layout_gravity="top|center_horizontal"-->
-            <!--/>-->
-
-        <!--<Spinner-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:id="@+id/spExamplesList"-->
-            <!--android:focusable="false"-->
-            <!--android:focusableInTouchMode="false"-->
-            <!--android:layout_gravity="top|center_horizontal"/>-->
-    <!--</LinearLayout>-->
-
-    <!--<ImageView-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:src="@drawable/gerb_big"-->
-        <!--android:scaleX="0.8"-->
-        <!--android:scaleY="0.8"-->
-        <!--android:alpha="0.05"-->
-        <!--/>-->
-
-    <FrameLayout
-        android:layout_height="500dp"
-        android:layout_marginLeft="60dp"
-        android:layout_marginTop="0dp"
-        android:layout_centerInParent="true"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        android:layout_width="640dp">
-
-        <sapotero.rxtest.views.views.VerticalStepperFormLayout
-            android:id="@+id/stepper_form"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/stepper_background"
-
-            >
-        </sapotero.rxtest.views.views.VerticalStepperFormLayout>
-
-    </FrameLayout>
+        android:layout_centerVertical="true" />
 
 
 </RelativeLayout>

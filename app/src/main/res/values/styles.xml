@@ -37,5 +37,7 @@
         <item name="android:textColorSecondary">@color/md_grey_300</item>
     </style>
 
+    <style name="ButtonBorderless" parent="Widget.AppCompat.Button.Borderless.Colored"/>
+
 
 </resources>

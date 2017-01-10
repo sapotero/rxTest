@@ -1,5 +1,6 @@
 package sapotero.rxtest.views.activities;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -8,12 +9,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.RequiresApi;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.AppCompatButton;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -29,14 +30,10 @@ import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -46,8 +43,6 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import okhttp3.OkHttpClient;
-import ru.CryptoPro.JCSP.support.BKSTrustStore;
-import ru.cprocsp.ACSP.tools.common.Constants;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.application.config.Constant;
@@ -55,12 +50,10 @@ import sapotero.rxtest.events.bus.FileDownloadedEvent;
 import sapotero.rxtest.events.bus.MarkDocumentAsChangedJobEvent;
 import sapotero.rxtest.events.service.AuthServiceAuthEvent;
 import sapotero.rxtest.jobs.service.AuthServiceCheckSignJob;
-import sapotero.rxtest.utils.ContainerAdapter;
-import sapotero.rxtest.utils.IHashData;
 import sapotero.rxtest.utils.ProviderType;
 import sapotero.rxtest.views.interfaces.DataLoaderInterface;
 import sapotero.rxtest.views.services.AuthService;
-import sapotero.rxtest.views.views.VerticalStepperFormLayout;
+import sapotero.rxtest.views.views.LoginView;
 import sapotero.rxtest.views.views.utils.VerticalStepperForm;
 import timber.log.Timber;
 
@@ -79,7 +72,8 @@ public class LoginActivity extends Activity implements VerticalStepperForm, Data
 //  @BindView(R.id.stepper_auth_choose_cert) Button stepper_auth_choose_cert;
 //  @BindView(R.id.stepper_auth_choose_password) Button stepper_auth_choose_password;
 
-  @BindView(R.id.stepper_form) VerticalStepperFormLayout stepper;
+  @BindView(R.id.stepper_form) LoginView stepper;
+
 
   @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
@@ -142,10 +136,12 @@ public class LoginActivity extends Activity implements VerticalStepperForm, Data
     EsdApplication.getComponent(this).inject(this);
 
     initialize();
+    check_permissions();
 
     String[] steps = {"Выбор способа авторизации", "Авторизация", "Загрузка данных"};
+
 //    String[] subtitles = {null, "введите данные", null};
-    VerticalStepperFormLayout.Builder.newInstance(stepper, steps, this, this)
+    LoginView.Builder.newInstance(stepper, steps, this, this)
       .primaryColor( Color.RED )
       .primaryDarkColor( ContextCompat.getColor( this, R.color.md_blue_grey_200 ) )
       .displayBottomNavigation(false)
@@ -188,70 +184,23 @@ public class LoginActivity extends Activity implements VerticalStepperForm, Data
 
 
   private static final String EXAMPLE_PACKAGE = "sapotero.rxtest.utils.";
-  private void executeExample(int i, String secret_password) {
-    try {
 
-      Class exampleClass = Class.forName(EXAMPLE_PACKAGE + "SignIn");
-      Constructor exampleConstructor = exampleClass.getConstructor(ContainerAdapter.class);
+  private void check_permissions(){
+    // Here, thisActivity is the current activity
+    if (ContextCompat.checkSelfPermission( this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 
-      // Клиентский контейнер (подписант, отправитель, TLS).
-//      String clientAlias = (String) spClientList.getSelectedItem();
-//      CharSequence clientPasswordSequence = etClientPin.getText();
-      char[] clientPassword = null;
+      // Should we show an explanation?
+      if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
 
-//      if (clientPasswordSequence != null) {
-//        clientPassword = clientPasswordSequence.toString().toCharArray();
-//      } // if
+        // Show an explanation to the user *asynchronously* -- don't block
+        // this thread waiting for the user's response! After the user
+        // sees the explanation, try again to request the permission.
 
-      // Контейнер получателя.
-//      String serverAlias = (String) spServerList.getSelectedItem();
-
-      // Настройки примера.
-
-      ContainerAdapter adapter = new ContainerAdapter("rukovoditel_r", secret_password != null ? secret_password.toCharArray() : clientPassword, null, null);
-
-      adapter.setProviderType(ProviderType.currentProviderType());
-      adapter.setResources(getResources()); // для примера установки сертификатов
-
-      // Используется общее для всех хранилище корневых
-      // сертификатов cacerts.
-
-      final String trustStorePath = this.getApplicationInfo().dataDir + File.separator + BKSTrustStore.STORAGE_DIRECTORY + File.separator + BKSTrustStore.STORAGE_FILE_TRUST;
-
-      Timber.e("Example trust store: " + trustStorePath);
-
-      adapter.setTrustStoreProvider(BouncyCastleProvider.PROVIDER_NAME);
-      adapter.setTrustStoreType(BKSTrustStore.STORAGE_TYPE);
-
-      adapter.setTrustStoreStream(new FileInputStream(trustStorePath));
-      adapter.setTrustStorePassword(BKSTrustStore.STORAGE_PASSWORD);
-
-      // Выполнение примера.
-      IHashData exampleImpl = (IHashData) exampleConstructor.newInstance(adapter);
-//      exampleImpl.getResult(ca);
-
-
-
-//      logCallback.log("Prepare client thread.");
-//
-//      ClientThread clientThread = new ClientThread(logCallback, task);
-//      clientThread.setPriority(Thread.NORM_PRIORITY);
-//
-//      logCallback.log("Start client thread.");
-//
-//      clientThread.start();
-//      clientThread.join(MAX_THREAD_TIMEOUT);
-//
-//      logCallback.log("Client thread finished job.");
-
-
-    } catch (Exception e) {
-      Log.e(Constants.APP_LOGGER_TAG, e.getMessage(), e);
+      } else {
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_READWRITE_STORAGE);
+      }
     }
-
   }
-
-
 
   @Override
   public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -607,6 +556,7 @@ public class LoginActivity extends Activity implements VerticalStepperForm, Data
 
   @Override
   public void onGetDocumentsCountSuccess() {
+    Timber.tag(TAG).i("LOADED onGetDocumentsCountSuccess");
 //    new Handler().postDelayed( () -> {
 //
 //      stepper_loader_list_progressbar.setVisibility(View.INVISIBLE);
@@ -620,17 +570,22 @@ public class LoginActivity extends Activity implements VerticalStepperForm, Data
 
   @Override
   public void onGetDocumentsInfoSuccess() {
+    Timber.tag(TAG).i("LOADED onGetDocumentsInfoSuccess");
 //    dataLoader.getFavorites();
   }
 
 
   @Override
   public void onGetFoldersInfoSuccess() {
+    Timber.tag(TAG).i("LOADED onGetFoldersInfoSuccess");
+
 //    dataLoader.getTemplates();
   }
 
   @Override
   public void onGetTemplatesInfoSuccess() {
+    Timber.tag(TAG).i("LOADED onGetTemplatesInfoSuccess");
+
 //    new Handler().postDelayed( () -> {
 //
 //      stepper_loader_user_progressbar.setVisibility(View.INVISIBLE);
@@ -647,18 +602,25 @@ public class LoginActivity extends Activity implements VerticalStepperForm, Data
 
   @Override
   public void onGetFavoritesInfoSuccess() {
+    Timber.tag(TAG).i("LOADED onGetFavoritesInfoSuccess");
+
 //    dataLoader.getProcessed();
   }
 
   @Override
   public void onGetProcessedInfoSuccess() {
+    Timber.tag(TAG).i("LOADED onGetProcessedInfoSuccess");
+
 //    new Handler().postDelayed( () -> {
 //
     stepper_loader_info_progressbar.setVisibility(View.INVISIBLE);
     stepper_loader_info.setChecked(true);
 
-    stepper.setActiveStepAsCompleted();
-    stepper.goToNextStep();
+//    stepper.goToNextStep();
+    stepper.setStepAsCompleted(0);
+    stepper.setStepAsCompleted(1);
+    stepper.setStepAsCompleted(2);
+    stepper.goToStep(3, false);
 //
 //    }, 2000L);
   }

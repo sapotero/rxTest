@@ -41,7 +41,7 @@ import timber.log.Timber;
 /**
  * Custom layout that implements a vertical stepper form
  */
-public class VerticalStepperFormLayout extends RelativeLayout implements View.OnClickListener {
+public class LoginView extends RelativeLayout implements View.OnClickListener {
 
   // Style
   protected float alphaOfDisabledElements;
@@ -95,17 +95,17 @@ public class VerticalStepperFormLayout extends RelativeLayout implements View.On
   }
 
 
-  public VerticalStepperFormLayout(Context context) {
+  public LoginView(Context context) {
     super(context);
     init(context);
   }
 
-  public VerticalStepperFormLayout(Context context, AttributeSet attrs) {
+  public LoginView(Context context, AttributeSet attrs) {
     super(context, attrs);
     init(context);
   }
 
-  public VerticalStepperFormLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+  public LoginView(Context context, AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
     init(context);
   }
@@ -371,7 +371,7 @@ public class VerticalStepperFormLayout extends RelativeLayout implements View.On
    * @param verticalStepperForm instance that implements the interface "VerticalStepperForm"
    * @param activity activity where the form is
    *
-   * @deprecated use {@link Builder#newInstance(VerticalStepperFormLayout, String[], VerticalStepperForm, Activity)} instead like this:
+   * @deprecated use {@link Builder#newInstance(LoginView, String[], VerticalStepperForm, Activity)} instead like this:
    * <blockquote><pre>
    * VerticalStepperFormLayout.Builder.newInstance(verticalStepperFormLayout, stepsTitles, verticalStepperForm, activity)<br>
    *     .primaryColor(colorPrimary)<br>
@@ -418,7 +418,7 @@ public class VerticalStepperFormLayout extends RelativeLayout implements View.On
    * @param verticalStepperForm instance that implements the interface "VerticalStepperForm"
    * @param activity activity where the form is
    *
-   * @deprecated use {@link Builder#newInstance(VerticalStepperFormLayout, String[], VerticalStepperForm, Activity)} instead like this:
+   * @deprecated use {@link Builder#newInstance(LoginView, String[], VerticalStepperForm, Activity)} instead like this:
    * <blockquote><pre>
    * VerticalStepperFormLayout.Builder.newInstance(verticalStepperFormLayout, stepsTitles, verticalStepperForm, activity)<br>
    *     .buttonBackgroundColor(buttonBackgroundColor)<br>
@@ -1010,7 +1010,7 @@ public class VerticalStepperFormLayout extends RelativeLayout implements View.On
   public static class Builder {
 
     // Required parameters
-    protected VerticalStepperFormLayout verticalStepperFormLayout;
+    protected LoginView loginView;
     protected String[] steps;
     protected VerticalStepperForm verticalStepperFormImplementation;
     protected Activity activity;
@@ -1032,12 +1032,12 @@ public class VerticalStepperFormLayout extends RelativeLayout implements View.On
     protected boolean hideKeyboard = true;
     protected boolean showVerticalLineWhenStepsAreCollapsed = false;
 
-    protected Builder(VerticalStepperFormLayout stepperLayout,
+    protected Builder(LoginView stepperLayout,
                       String[] steps,
                       VerticalStepperForm stepperImplementation,
                       Activity activity) {
 
-      this.verticalStepperFormLayout = stepperLayout;
+      this.loginView = stepperLayout;
       this.steps = steps;
       this.verticalStepperFormImplementation = stepperImplementation;
       this.activity = activity;
@@ -1052,7 +1052,7 @@ public class VerticalStepperFormLayout extends RelativeLayout implements View.On
      * @param activity The activity where the form is
      * @return an instance of the builder
      */
-    public static Builder newInstance(VerticalStepperFormLayout stepperLayout,
+    public static Builder newInstance(LoginView stepperLayout,
                                       String[] stepTitles,
                                       VerticalStepperForm stepperImplementation,
                                       Activity activity) {
@@ -1235,7 +1235,7 @@ public class VerticalStepperFormLayout extends RelativeLayout implements View.On
      * Set up the form and initialize it
      */
     public void init() {
-      verticalStepperFormLayout.initialiseVerticalStepperForm(this);
+      loginView.initialiseVerticalStepperForm(this);
     }
 
   }

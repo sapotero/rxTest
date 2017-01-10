@@ -145,10 +145,6 @@ public class DataLoaderInterface {
       .concatMap( data -> auth.getUserInfo( LOGIN.get(),  TOKEN.get() ).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()) )
       .doOnNext(  info -> setCurrentUser( info.getMe().getName() ) )
 
-      // получаем данные о пользователе
-      .concatMap( data -> auth.getUserInfo( LOGIN.get(),  TOKEN.get() ).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()) )
-      .doOnNext(  info -> setCurrentUser( info.getMe().getName() ) )
-
       // получаем папки
       .concatMap( data    -> auth.getFolders( LOGIN.get(), TOKEN.get() ).subscribeOn(Schedulers.io()) )
       .doOnNext(  folders -> jobManager.addJobInBackground(new AddFoldersJob(folders)) )
@@ -231,6 +227,7 @@ public class DataLoaderInterface {
       .subscribe(
         data -> {
           Timber.tag(TAG).w( "subscribe %s", data );
+          callback.onGetProcessedInfoSuccess();
         }, error -> {
           callback.onError(error);
         }

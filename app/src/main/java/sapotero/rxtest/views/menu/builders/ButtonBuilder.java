@@ -3,6 +3,7 @@ package sapotero.rxtest.views.menu.builders;
 import android.content.Context;
 import android.graphics.drawable.StateListDrawable;
 import android.support.v4.content.ContextCompat;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
@@ -114,6 +115,7 @@ public class ButtonBuilder {
 
     view.setPadding( 32,4,32,4 );
     view.setGravity(Gravity.CENTER);
+    view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12 );
 
     RadioGroup.LayoutParams params = new RadioGroup.LayoutParams( LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT,10.0f );
 

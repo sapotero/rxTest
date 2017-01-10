@@ -29,6 +29,7 @@ public abstract class  RDocument implements Persistable {
   @Index("md5_index")
   String md5;
 
+  @Index("user_index")
   String user;
 
   Integer sortKey;

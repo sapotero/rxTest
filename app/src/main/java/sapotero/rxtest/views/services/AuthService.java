@@ -5,7 +5,6 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
-import android.os.Environment;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
@@ -19,8 +18,11 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.security.KeyStore;
 import java.security.PrivateKey;
@@ -440,32 +442,46 @@ public class AuthService extends Service {
 
     // Получаем исходную папку с контейнерами.
 
-    final String containerFolder = "/storage/emulated/0/keys";
-//    final String containerFolder =  "/mnt/sdcard/";
-
-    if (containerFolder.isEmpty()) {
-      Timber.i("Containers' directory is undefined.");
-      return;
-    } // if
-
     try {
 
-      Timber.i("Source directory: %s", containerFolder);
-      Timber.i("Source directory:" + Environment.getDataDirectory().listFiles() );
+      // Executes the command.
 
+      Process process = Runtime.getRuntime().exec("ls -la /storage/emulated/0");
+
+      BufferedReader reader = new BufferedReader( new InputStreamReader(process.getInputStream()) );
+
+      int read;
+      char[] buffer = new char[256];
+
+      StringBuilder output = new StringBuilder();
+      while ((read = reader.read(buffer)) > 0) {
+        output.append(buffer, 0, read);
+      }
+      reader.close();
+      process.waitFor();
+
+      Timber.tag("LS: ").e( output.toString() );
+
+    } catch (IOException | InterruptedException e) {
+//      throw new RuntimeException(e);
+      Timber.tag("LS fails: ").e( e.toString() );
+    }
+
+
+    try {
       // Проверяем наличие контейнеров.
       File fileCur = null;
 
       for( String sPathCur : Arrays.asList( "keys", "Alarm", "DCIM", "Movies")) {
-        fileCur = new File( "/storage/emulated/0/" , sPathCur);
+        fileCur = new File( "/storage/self/primary" , sPathCur);
         Timber.d( "file: %s | %s %s" ,fileCur.getAbsolutePath(), fileCur.isDirectory(), fileCur.canWrite() );
 
-//        if( fileCur.isDirectory() && fileCur.canWrite()) {
         if( fileCur.isDirectory() ) {
           Timber.d( fileCur.getAbsolutePath() );
         }
       }
 
+      final String containerFolder = "/storage/self/primary/keys";
 
       File sourceDirectory = new File(containerFolder);
       if (!sourceDirectory.exists()) {
@@ -584,7 +600,9 @@ public class AuthService extends Service {
 
     adapter.setProviderType(ProviderType.currentProviderType());
     adapter.setClientPassword( password.toCharArray() );
-    adapter.setResources(getResources()); // для примера установки сертификатов
+    adapter.setResources(getResources());
+
+    // для примера установки сертификатов
 
     // Используется общее для всех хранилище корневых
     // сертификатов cacerts.

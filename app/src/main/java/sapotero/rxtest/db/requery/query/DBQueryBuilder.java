@@ -138,7 +138,7 @@ public class DBQueryBuilder {
     if (docs.size() > 0) {
       for (int i = 0; i < docs.size(); i++) {
         RDocumentEntity doc = docs.get(i);
-        Timber.tag(TAG).v("addToAdapter ++ " + doc.getTitle());
+        Timber.tag(TAG).v("addToAdapter ++ " + doc.getUid());
 
         Document document = new Document();
         document.setChanged( doc.isChanged() );
