@@ -18,7 +18,6 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -34,7 +33,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -48,7 +46,6 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.application.config.Constant;
 import sapotero.rxtest.events.bus.FileDownloadedEvent;
 import sapotero.rxtest.events.bus.MarkDocumentAsChangedJobEvent;
-import sapotero.rxtest.events.service.AuthServiceAuthEvent;
 import sapotero.rxtest.jobs.service.AuthServiceCheckSignJob;
 import sapotero.rxtest.utils.ProviderType;
 import sapotero.rxtest.views.interfaces.DataLoaderInterface;
@@ -64,22 +61,16 @@ import timber.log.Timber;
 public class LoginActivity extends AppCompatActivity implements VerticalStepperForm, DataLoaderInterface.Callback ,AdapterView.OnItemSelectedListener, StepperLayout.StepperListener {
 
 
-  private static int REQUEST_READWRITE_STORAGE = 0;
-
-  @BindView(R.id.stepper_form) LoginView stepper;
-
-
   @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
   @Inject JobManager jobManager;
 
-
+  @BindView(R.id.stepper_form) LoginView stepper;
 
   private String TAG = this.getClass().getSimpleName();
 
+  private static int REQUEST_READWRITE_STORAGE = 0;
 
-
-  // login view
   private View wrapper;
   private View view;
   private TextView username;
@@ -101,20 +92,10 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
   private ProgressBar stepper_loader_list_progressbar;
   private ProgressBar stepper_loader_info_progressbar;
 
-  private String[] examplesRequireWrittenPin;
-  private String[] examplesRequireServerContainer;
-  private String[] exampleClassesToBeExecuted;
-  private ArrayAdapter<String> containerAliasAdapter;
-  private List<String> aliasesList;
-  private String secret_password;
   private MaterialDialog root;
-  private MaterialDialog.Builder root1;
   private boolean isCorrect;
 
-
   private StepperLayout stepperLayout;
-
-//  private RelativeLayout finishLayout;
 
   @RequiresApi(api = Build.VERSION_CODES.M)
   @Override
@@ -145,17 +126,17 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
       .showVerticalLineWhenStepsAreCollapsed(true)
       .init();
 
-      EventBus.getDefault().register(this);
+    EventBus.getDefault().register(this);
 
-      AuthService.setCSP();
+    AuthService.setCSP();
 
     stepperLayout = (StepperLayout) findViewById(R.id.stepperLayout);
     stepperLayout.setAdapter(new StepperAdapter( getSupportFragmentManager() ) );
     stepperLayout.setListener(this);
 
-    new Handler().postDelayed( () -> {
-      stepperLayout.getmNextNavigationButton().performClick();
-    }, 5000L);
+//    new Handler().postDelayed( () -> {
+//      stepperLayout.getmNextNavigationButton().performClick();
+//    }, 5000L);
 
   }
 
@@ -628,26 +609,26 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
     printJobStat();
   }
 
-  @Subscribe(threadMode = ThreadMode.POSTING)
-  public void onMessageEvent(AuthServiceAuthEvent event) {
-    Timber.tag(TAG).i("RECV AuthServiceAuthEvent: %s %s", event.success, event.success_string );
-
-    root.dismiss();
-    isCorrect = true;
-
-    stepper.setStepAsCompleted(0);
-    stepper.setStepAsCompleted(1);
-    tryToLogin();
-    stepper.goToStep(2, true);
-
-
-//      stepper.setActiveStepAsCompleted();
-//      stepper.goToNextStep();
-//      stepper.setActiveStepAsCompleted();
-//      stepper.goToNextStep();
-
-//    root.set("DONE");
-  }
+//  @Subscribe(threadMode = ThreadMode.POSTING)
+//  public void onMessageEvent(AuthServiceAuthEvent event) {
+//    Timber.tag(TAG).i("RECV AuthServiceAuthEvent: %s %s", event.success, event.success_string );
+//
+//    root.dismiss();
+//    isCorrect = true;
+//
+//    stepper.setStepAsCompleted(0);
+//    stepper.setStepAsCompleted(1);
+//    tryToLogin();
+//    stepper.goToStep(2, true);
+//
+//
+////      stepper.setActiveStepAsCompleted();
+////      stepper.goToNextStep();
+////      stepper.setActiveStepAsCompleted();
+////      stepper.goToNextStep();
+//
+////    root.set("DONE");
+//  }
 
 
   @Override

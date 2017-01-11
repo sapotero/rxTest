@@ -63,7 +63,7 @@ import ru.CryptoPro.JCSP.JCSP;
  * 26/09/2013
  *
  */
-class CMSSignExample extends ISignData {
+public class CMSSignExample extends ISignData {
 
   private static final String STR_CMS_OID_SIGNED = "1.2.840.113549.1.7.2";
   private static final String STR_CMS_OID_DATA = "1.2.840.113549.1.7.1";
@@ -90,7 +90,7 @@ class CMSSignExample extends ISignData {
    * подпись по атрибутам.
    * @param adapter Настройки примера.
    */
-  CMSSignExample(boolean signAttributes, ContainerAdapter adapter) {
+  public CMSSignExample(boolean signAttributes, ContainerAdapter adapter) {
 
     super(adapter, signAttributes);
     needSignAttributes = signAttributes;
@@ -117,13 +117,12 @@ class CMSSignExample extends ISignData {
 
     callback.log("Compute attached signature for message '" + MESSAGE + "' :");
 
-    // Формируем совмещенную подпись.
-    File file = new File("/sdcard/Download/cpverify");
-    int size = (int) file.length();
-    byte[] data = getBytesFromFile(file);
+//    // Формируем совмещенную подпись.
+//    File file = new File("/sdcard/Download/cpverify");
+//    int size = (int) file.length();
+//    byte[] data = getBytesFromFile(file);
 
-    byte[] signature = create(callback, data, false,
-      new PrivateKey[] {getPrivateKey()}, new Certificate[] {getCertificate()},
+    byte[] signature = create(callback, " ".getBytes(), false, new PrivateKey[] {getPrivateKey()}, new Certificate[] {getCertificate()},
       true, false);
 
     callback.log("--- SIGNATURE BEGIN ---");

@@ -13,7 +13,7 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.views.views.stepper.Step;
 import sapotero.rxtest.views.views.stepper.VerificationError;
 
-public class SecondStepFragment extends Fragment implements Step {
+public class StepperLoadDataFragment extends Fragment implements Step {
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -31,7 +31,7 @@ public class SecondStepFragment extends Fragment implements Step {
   @StringRes
   public int getName() {
     //return string resource ID for the tab title used when StepperLayout is in tabs mode
-    return R.string.username_hinf;
+    return R.string.stepper_load_data;
   }
 
   @Override

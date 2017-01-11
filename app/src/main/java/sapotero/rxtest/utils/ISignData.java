@@ -146,6 +146,7 @@ public abstract class ISignData implements IHashData, IContainers {
       privateKey = entry.getPrivateKey();
       certificate = (X509Certificate) entry.getCertificate();
 
+
     } // else
 
 
@@ -167,6 +168,26 @@ public abstract class ISignData implements IHashData, IContainers {
     Timber.e("Cert X500: %s", certificate.getIssuerX500Principal() );
     Timber.e("Cert subj: %s", certificate.getSubjectDN().getName() );
     Timber.e("Cert sign: %s", certificate.getSigAlgOID() );
+  }
+
+  public void load(boolean askPinInWindow, String storeType, String alias, char[] password) throws Exception {
+    if (privateKey != null && certificate != null) {
+      return;
+    }
+
+
+    // Загрузка контейнеров.
+
+    KeyStore keyStore = KeyStore.getInstance(storeType, JCSP.PROVIDER_NAME);
+    keyStore.load(null, null);
+
+    KeyStore.ProtectionParameter protectedParam = new KeyStore.PasswordProtection( password );
+    JCPPrivateKeyEntry entry = (JCPPrivateKeyEntry) keyStore.getEntry(alias, protectedParam);
+
+    privateKey = entry.getPrivateKey();
+    certificate = (X509Certificate) entry.getCertificate();
+
+
   }
 
   /**

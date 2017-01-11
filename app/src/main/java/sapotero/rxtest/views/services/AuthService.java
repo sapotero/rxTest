@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.os.IBinder;
+import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -19,15 +20,18 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Constructor;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.Security;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -52,13 +56,16 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.events.bus.UpdateAuthTokenEvent;
 import sapotero.rxtest.events.service.AuthServiceAuthEvent;
 import sapotero.rxtest.events.service.AuthServiceAuthSignInEvent;
+import sapotero.rxtest.events.stepper.StepperAuthDcCheckEvent;
 import sapotero.rxtest.utils.AlgorithmSelector;
+import sapotero.rxtest.utils.CMSSignExample;
 import sapotero.rxtest.utils.ContainerAdapter;
+import sapotero.rxtest.utils.GetCertificate;
 import sapotero.rxtest.utils.ICAdESData;
-import sapotero.rxtest.utils.IHashData;
 import sapotero.rxtest.utils.InstallCAdESTestTrustCertExample;
 import sapotero.rxtest.utils.KeyStoreType;
 import sapotero.rxtest.utils.LogCallback;
+import sapotero.rxtest.utils.PinCheck;
 import sapotero.rxtest.utils.ProviderServiceInfo;
 import sapotero.rxtest.utils.ProviderType;
 import timber.log.Timber;
@@ -236,7 +243,7 @@ public class AuthService extends Service {
     return initOk;
   }
 
-  public static void errorMessage(final Context context, String message) {
+  public void errorMessage(final Context context, String message) {
 
     // Окно с сообщением.
     AlertDialog.Builder dialog = new AlertDialog.Builder(context);
@@ -499,8 +506,7 @@ public class AuthService extends Service {
       // приложения.
 
       CSPTool cspTool = new CSPTool(this);
-      final String dstPath =
-        cspTool.getAppInfrastructure().getKeysDirectory() + File.separator + userName2Dir(this);
+      final String dstPath = cspTool.getAppInfrastructure().getKeysDirectory() + File.separator + userName2Dir(this);
 
       Timber.i("Destination directory: %s", dstPath);
 
@@ -558,8 +564,6 @@ public class AuthService extends Service {
 
   }
 
-  private static final String EXAMPLE_PACKAGE = "sapotero.rxtest.utils.";
-
   //TODO: переносим диалог в активити, там вызываем,
   // и хуячим еще один евент после нажатия на кнопку, который
   // идет в сервис и подписывает в другом потоке и возвращает результат
@@ -567,26 +571,6 @@ public class AuthService extends Service {
   // TODO: захуячить ещё один колбек на успешную подпись
   void tryToSignIn(String password) throws Exception {
     tryToSignWithPassword(password);
-//    if (withDialog){
-//
-//      new MaterialDialog.Builder( this )
-//        .title("INPUT")
-//        .content("Content")
-//        .inputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD)
-//        .input("text hint", "prefill", (dialog, input) -> {
-//           passwordFiled = input.toString();
-//        })
-//        .onPositive((dialog, which) -> {
-//          try {
-//            tryToSignWithPassword(passwordFiled);
-//          } catch (Exception e) {
-//            Timber.e(e);
-//          }
-//        })
-//        .show();
-//
-//    }
-
   }
   void tryToSignWithPassword(String password) throws Exception {
 
@@ -617,11 +601,33 @@ public class AuthService extends Service {
     adapter.setTrustStoreStream(new FileInputStream(trustStorePath));
     adapter.setTrustStorePassword(BKSTrustStore.STORAGE_PASSWORD);
 
-    Class exampleClass = Class.forName(EXAMPLE_PACKAGE + "SignIn");
-    Constructor exampleConstructor = exampleClass.getConstructor(ContainerAdapter.class);
+//    IHashData exampleImpl = new SignIn(adapter);
+//    exampleImpl.getResult( logCallback );
 
-    IHashData exampleImpl = (IHashData) exampleConstructor.newInstance(adapter);
-    exampleImpl.getResult(logCallback);
+
+    GetCertificate cert = new GetCertificate(adapter);
+    cert.getResult( logCallback );
+
+    CMSSignExample testSign = new CMSSignExample(true, adapter);
+    testSign.getResult(logCallback);
+
+
+    X509Certificate raw_crt = cert.getCertificate();
+
+    Timber.tag( "CRT_BASE64 str" ).d( raw_crt.toString() );
+    Timber.tag( "CRT_BASE64 SIGN" ).d(Arrays.toString(cert.getEmptySign()));
+
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    ObjectOutput out = new ObjectOutputStream(bos);
+    out.writeObject(raw_crt);
+    byte[] data = bos.toByteArray();
+    bos.close();
+
+    Timber.tag( "CRT_BASE64 bytes length" ).d(String.valueOf(data.length));
+
+
+    String crt_string = Base64.encodeToString(data, Base64.DEFAULT);
+    Timber.tag( "CRT_BASE64" ).d( crt_string );
 
   }
 
@@ -649,6 +655,63 @@ public class AuthService extends Service {
     } catch (Exception e) {
       Timber.e(e);
     }
+  }
+
+  private void checkPin(String password) throws Exception {
+
+
+
+    Timber.tag(TAG).d( "aliasesList, %s", aliasesList );
+
+    EventBus.getDefault().post( new AuthServiceAuthEvent( aliasesList.toString() ) );
+
+    ContainerAdapter adapter = new ContainerAdapter(aliasesList.get(0), null, aliasesList.get(0), null);
+
+    adapter.setProviderType(ProviderType.currentProviderType());
+    adapter.setClientPassword( password.toCharArray() );
+    adapter.setResources(getResources());
+
+
+    final String trustStorePath = this.getApplicationInfo().dataDir + File.separator + BKSTrustStore.STORAGE_DIRECTORY + File.separator + BKSTrustStore.STORAGE_FILE_TRUST;
+
+    Timber.e("Example trust store: " + trustStorePath);
+
+    adapter.setTrustStoreProvider(BouncyCastleProvider.PROVIDER_NAME);
+    adapter.setTrustStoreType(BKSTrustStore.STORAGE_TYPE);
+
+    adapter.setTrustStoreStream(new FileInputStream(trustStorePath));
+    adapter.setTrustStorePassword(BKSTrustStore.STORAGE_PASSWORD);
+
+//    IHashData exampleImpl = new SignIn(adapter);
+//    exampleImpl.getResult( logCallback );
+
+    PinCheck testSign = new PinCheck(adapter);
+    testSign.getResult(null);
+//
+//
+//    X509Certificate raw_crt = cert.getCertificate();
+//
+//    Timber.tag( "CRT_BASE64 str" ).d( raw_crt.toString() );
+//    Timber.tag( "CRT_BASE64 SIGN" ).d(Arrays.toString(cert.getEmptySign()));
+//
+//    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+//    ObjectOutput out = new ObjectOutputStream(bos);
+//    out.writeObject(raw_crt);
+//    byte[] data = bos.toByteArray();
+//    bos.close();
+//
+//    Timber.tag( "CRT_BASE64 bytes length" ).d(String.valueOf(data.length));
+//
+//
+//    String crt_string = Base64.encodeToString(data, Base64.DEFAULT);
+//    Timber.tag( "CRT_BASE64" ).d( crt_string );
+
+  }
+
+  @Subscribe(threadMode = ThreadMode.BACKGROUND)
+  public void onMessageEvent(StepperAuthDcCheckEvent event) throws Exception {
+    String token = event.pin;
+    checkPin(token);
   }
 
 

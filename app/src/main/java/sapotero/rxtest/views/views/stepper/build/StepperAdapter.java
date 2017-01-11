@@ -5,8 +5,10 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 
 import sapotero.rxtest.views.views.stepper.adapter.AbstractStepAdapter;
-import sapotero.rxtest.views.views.stepper.build.steps.FirstStepFragment;
-import sapotero.rxtest.views.views.stepper.build.steps.SecondStepFragment;
+import sapotero.rxtest.views.views.stepper.build.steps.StepperChooseAuthTypeFragment;
+import sapotero.rxtest.views.views.stepper.build.steps.StepperFinishFragment;
+import sapotero.rxtest.views.views.stepper.build.steps.StepperAuthFragment;
+import sapotero.rxtest.views.views.stepper.build.steps.StepperLoadDataFragment;
 
 
 public class StepperAdapter extends AbstractStepAdapter {
@@ -25,31 +27,31 @@ public class StepperAdapter extends AbstractStepAdapter {
 
     switch (position){
       case 0:
-        step = new FirstStepFragment();
+        step = new StepperChooseAuthTypeFragment();
         break;
       case 1:
-        step = new SecondStepFragment();
+        step = new StepperAuthFragment();
         break;
       case 2:
-        step = new FirstStepFragment();
+        step = new StepperLoadDataFragment();
+        break;
+      case 3:
+        step = new StepperFinishFragment();
         break;
       default:
-        step = new FirstStepFragment();
+        step = new StepperChooseAuthTypeFragment();
         break;
-
     }
 
-    if (step != null) {
-      Bundle b = new Bundle();
-      b.putInt(CURRENT_STEP_POSITION_KEY, position);
-      step.setArguments(b);
-    }
+    Bundle b = new Bundle();
+    b.putInt(CURRENT_STEP_POSITION_KEY, position);
+    step.setArguments(b);
 
     return step;
   }
 
   @Override
   public int getCount() {
-    return 3;
+    return 4;
   }
 }

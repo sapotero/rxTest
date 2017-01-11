@@ -371,9 +371,20 @@
 
     <!--CRYPTO PRO-->
 
-    <string name="ms_back">BACK</string>
-    <string name="ms_next">NEXT</string>
-    <string name="ms_complete">COMPLETE</string>
+    <string name="ms_back">Назад</string>
+    <string name="ms_next">Далее</string>
+    <string name="ms_complete">Завершить</string>
+
+
+    <string name="stepper_choose_auth">Выбор способа авторизации</string>
+    <string name="stepper_auth">Авторизация</string>
+    <string name="stepper_load_data">Загрузка данных</string>
+    <string name="stepper_end">Завершение</string>
+
+    <string name="stepper_auth_dc_pin">ПИН-код</string>
+
+
+
 
 
 </resources>

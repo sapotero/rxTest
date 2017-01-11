@@ -55,6 +55,8 @@ import sapotero.rxtest.views.managers.menu.commands.shared.CheckForControl;
 import sapotero.rxtest.views.managers.view.DecisionManager;
 import sapotero.rxtest.views.menu.builders.ButtonBuilder;
 import sapotero.rxtest.views.services.AuthService;
+import sapotero.rxtest.views.views.stepper.build.steps.StepperAuthFragment;
+import sapotero.rxtest.views.views.stepper.build.steps.StepperChooseAuthTypeFragment;
 
 @Singleton
 @Component(modules = {
@@ -95,6 +97,9 @@ public interface EsdComponent {
   void inject(InfoActivityDecisionPreviewFragment fragment);
   void inject(SelectTemplateDialogFragment fragment);
   void inject(InfoCardDialogFragment fragment);
+  void inject(StepperAuthFragment fragment);
+  void inject(StepperChooseAuthTypeFragment fragment);
+
 
 
   void inject(BaseJob job);

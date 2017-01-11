@@ -31,4 +31,5 @@ public interface IHashData {
   public void getResult(LogCallback callback) throws Exception;
 
 
+
 }

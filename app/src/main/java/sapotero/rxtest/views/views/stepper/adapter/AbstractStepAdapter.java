@@ -7,6 +7,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 
 import sapotero.rxtest.views.views.stepper.Step;
+import timber.log.Timber;
 
 
 public abstract class AbstractStepAdapter<T extends Fragment & Step> extends FragmentPagerAdapter {
@@ -29,6 +30,8 @@ public abstract class AbstractStepAdapter<T extends Fragment & Step> extends Fra
 
     public Step findStep(ViewPager viewPager, int position) {
         String fragmentTag =  "android:switcher:" + viewPager.getId() + ":" + this.getItemId(position);
+//        String fragmentTag =  "android:switcher:" + viewPager.getId() + ":" + this.getItemId(position);
+        Timber.tag("STEPPER FRAGMENTS").i( fragmentTag );
         return (Step) mFragmentManager.findFragmentByTag(fragmentTag);
     }
 
