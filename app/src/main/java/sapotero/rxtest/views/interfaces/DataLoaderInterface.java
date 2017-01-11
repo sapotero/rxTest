@@ -6,15 +6,22 @@ import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
+import org.greenrobot.eventbus.EventBus;
+import org.json.JSONObject;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.inject.Inject;
 
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
+import okhttp3.RequestBody;
 import retrofit2.Retrofit;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
@@ -24,6 +31,7 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
+import sapotero.rxtest.events.stepper.StepperAuthDcCheckSuccessEvent;
 import sapotero.rxtest.jobs.bus.AddFoldersJob;
 import sapotero.rxtest.jobs.bus.AddPrimaryConsiderationJob;
 import sapotero.rxtest.jobs.bus.AddTemplatesJob;
@@ -111,6 +119,35 @@ public class DataLoaderInterface {
   private void setCurrentUser( String user ){
     CURRENT_USER.set(user);
     callback.onGetUserInformationSuccess();
+  }
+
+  public void tryToSignWithDc(String sign, Callback callback){
+    Timber.tag(TAG).i("tryToSignWithDc" );
+
+    Retrofit retrofit = new RetrofitManager( context, HOST.get(), okHttpClient).process();
+    AuthService auth = retrofit.create( AuthService.class );
+
+    Map<String, Object> map = new HashMap<>();
+    map.put( "sign", sign );
+
+    RequestBody json = RequestBody.create(
+      MediaType.parse("application/json"),
+      new JSONObject( map ).toString()
+    );
+
+    auth
+      .getAuthBySign( json )
+      .subscribeOn( Schedulers.io() )
+      .observeOn( AndroidSchedulers.mainThread() )
+      .unsubscribeOn(Schedulers.io())
+      .subscribe( data -> {
+        Timber.tag(TAG).i("tryToSignWithDc: token" + data.getAuthToken());
+        Timber.tag(TAG).i("tryToSignWithDc: login" + data.getLogin());
+        EventBus.getDefault().post( new StepperAuthDcCheckSuccessEvent() );
+      });
+  }
+
+  public void tryToSignWithLogin(){
   }
 
   public void getAuthToken(){

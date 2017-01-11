@@ -1,12 +1,8 @@
 package sapotero.rxtest.utils;
 
-import org.greenrobot.eventbus.EventBus;
-
 import java.security.Signature;
 
 import ru.CryptoPro.JCSP.JCSP;
-import sapotero.rxtest.events.stepper.StepperAuthDcCheckFailEvent;
-import sapotero.rxtest.events.stepper.StepperAuthDcCheckSuccessEvent;
 import timber.log.Timber;
 
 public class PinCheck extends ISignData {
@@ -23,7 +19,8 @@ public class PinCheck extends ISignData {
     check();
   }
 
-  private void check() {
+  public Boolean check() {
+    Boolean result = false;
 
     try{
       Timber.e("Load key container to sign data.");
@@ -57,9 +54,11 @@ public class PinCheck extends ISignData {
 
       Timber.e("PinCheck sign %s", sign);
 
-      EventBus.getDefault().post( new StepperAuthDcCheckSuccessEvent() );
+      result = true;
     } catch (Exception e){
-      EventBus.getDefault().post( new StepperAuthDcCheckFailEvent() );
+      Timber.d( e );
     }
+
+    return result;
   }
 }

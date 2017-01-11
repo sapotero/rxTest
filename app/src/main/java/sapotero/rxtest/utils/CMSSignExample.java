@@ -76,12 +76,16 @@ public class CMSSignExample extends ISignData {
    */
   private StringBuffer validationResultOk = null;
   private StringBuffer validationResultError = null;
-
-  private String MESSAGE = "Test message!";
   /**
    * Количество проверенных подписей.
    */
   private int validSignatureCount = 0;
+
+  public byte[] getSignature() {
+    return signature;
+  }
+
+  public byte[] signature;
 
   /**
    * Конструктор.
@@ -115,15 +119,7 @@ public class CMSSignExample extends ISignData {
       return;
     } // if
 
-    callback.log("Compute attached signature for message '" + MESSAGE + "' :");
-
-//    // Формируем совмещенную подпись.
-//    File file = new File("/sdcard/Download/cpverify");
-//    int size = (int) file.length();
-//    byte[] data = getBytesFromFile(file);
-
-    byte[] signature = create(callback, " ".getBytes(), false, new PrivateKey[] {getPrivateKey()}, new Certificate[] {getCertificate()},
-      true, false);
+    signature = create(callback, new byte[0], false, new PrivateKey[] {getPrivateKey()}, new Certificate[] {getCertificate()}, true, false);
 
     callback.log("--- SIGNATURE BEGIN ---");
     callback.log(signature, true);
@@ -133,23 +129,8 @@ public class CMSSignExample extends ISignData {
     callback.setStatusOK();
   }
 
-  /**
-   * Создание CMS подписи на хэш данных.
-   *
-   * @param data Подписываемые данные.
-   * @param isExternalDigest True, если вместо данных
-   * передается хэш данных (например, при создании подписи
-   * формата CAdES-BES).
-   * @param certs Список сертификатов подписи подписантов.
-   * @param keys Список ключей подписантов.
-   * @param detached True, если подпись отсоединенная.
-   * @return ЭЦП CMS.
-   * @param addSignCertV2 Добавление аттрибута signingCertificateV2
-   * для получения подписи формата CAdES-BES.
-   * @throws Exception
-   */
 
-  byte[] create(LogCallback callback, byte[] data, boolean isExternalDigest, PrivateKey[] keys, Certificate[] certs, boolean detached, boolean addSignCertV2) throws Exception {
+  public byte[] create(LogCallback callback, byte[] data, boolean isExternalDigest, PrivateKey[] keys, Certificate[] certs, boolean detached, boolean addSignCertV2) throws Exception {
 
     callback.log("*** Create CMS signature" +
       (needSignAttributes ? " on signed attributes" : "") +
@@ -392,21 +373,6 @@ public class CMSSignExample extends ISignData {
 
   }
 
-  /**
-   * Попытка проверки подписи на указанном сертификате.
-   * Проверка может быть выполнена как по отсортированным
-   * подписанным аттрибутам, так и по несортированным.
-   *
-   * @param cert Сертификат для проверки.
-   * @param text Данные для проверки.
-   * @param info ЭЦП.
-   * @param eContentTypeOID Тип подписанного содержимого.
-   * @param needSortSignedAttributes True, если необходимо проверить
-   * подпись по отсортированным подписанным аттрибутам. По умолчанию
-   * подписанные аттрибуты сортируются перед кодированием.
-   * @return True, если подпись корректна.
-   * @throws Exception ошибки
-   */
   private boolean verifyOnCert(LogCallback callback, X509Certificate cert, SignerInfo info, byte[] text, OID eContentTypeOID, boolean needSortSignedAttributes) throws Exception {
 
     // Подпись.
@@ -588,14 +554,6 @@ public class CMSSignExample extends ISignData {
     return verified;
   }
 
-  /**
-   * Составление сообщения о проверке.
-   *
-   * @param checkResult Флаг, прошла ли проверка.
-   * @param signNum Номер подписи.
-   * @param certNum Номер сертификата.
-   * @param cert Сертификат.
-   */
   private void writeLog(boolean checkResult, int signNum, int certNum, X509Certificate cert) {
 
     if (checkResult) {

@@ -14,10 +14,6 @@ import android.widget.LinearLayout;
 import sapotero.rxtest.R;
 import sapotero.rxtest.views.views.stepper.util.TintUtil;
 
-
-/**
- * An indicator displaying the current position in a list of items with dots.
- */
 public class DottedProgressBar extends LinearLayout {
 
     private static final float FULL_SCALE = 1f;
@@ -80,11 +76,6 @@ public class DottedProgressBar extends LinearLayout {
         setCurrent(0, false);
     }
 
-    /**
-     * Changes the currently selected dot and updates the UI accordingly
-     * @param current the new currently selected dot
-     * @param shouldAnimate true if the change should be animated, false otherwise
-     */
     public void setCurrent(int current, boolean shouldAnimate) {
         this.mCurrent = current;
         update(shouldAnimate);

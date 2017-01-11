@@ -3,6 +3,7 @@ package sapotero.rxtest.views.views.stepper.build.steps;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
+import android.support.annotation.UiThread;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +12,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
@@ -26,12 +28,13 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.events.stepper.StepperAuthDcCheckEvent;
 import sapotero.rxtest.events.stepper.StepperAuthDcCheckFailEvent;
 import sapotero.rxtest.events.stepper.StepperAuthDcCheckSuccessEvent;
-import sapotero.rxtest.views.views.stepper.Step;
+import sapotero.rxtest.views.views.stepper.BlockingStep;
+import sapotero.rxtest.views.views.stepper.StepperLayout;
 import sapotero.rxtest.views.views.stepper.VerificationError;
 import sapotero.rxtest.views.views.stepper.util.AuthType;
 import timber.log.Timber;
 
-public class StepperAuthFragment extends Fragment implements Step {
+public class StepperAuthFragment extends Fragment implements BlockingStep {
 
   @Inject RxSharedPreferences settings;
 
@@ -41,6 +44,8 @@ public class StepperAuthFragment extends Fragment implements Step {
   private Subscription auth_type_subscription;
   private AuthType authType = AuthType.PASSWORD;
   private VerificationError error;
+  private MaterialDialog loadingDialog;
+  private StepperLayout.OnNextClickedCallback callback;
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -54,10 +59,28 @@ public class StepperAuthFragment extends Fragment implements Step {
     error = new VerificationError("error");
 
     hideAllFields();
+
     attachSettings();
+
+    prepareDialog();
+
+    if ( EventBus.getDefault().isRegistered(this) ) {
+      EventBus.getDefault().unregister(this);
+    }
     EventBus.getDefault().register(this);
 
     return view;
+  }
+
+  private void prepareDialog() {
+    if (loadingDialog == null){
+      loadingDialog = new MaterialDialog.Builder( getContext() )
+        .title(R.string.app_name)
+        .content(R.string.action_settings)
+        .cancelable(false)
+        .progress(true, 0).build();
+    }
+
   }
 
   @Override
@@ -87,25 +110,25 @@ public class StepperAuthFragment extends Fragment implements Step {
       case PASSWORD:
         break;
     }
+//    error = new VerificationError("error");
+    error = null;
 
     return error;
   }
 
   @Override
   public void onSelected() {
-    //update UI when selected
   }
 
   @Override
   public void onError(@NonNull VerificationError error) {
-    Toast.makeText( getContext(), "ERrror", Toast.LENGTH_SHORT ).show();
+    Toast.makeText( getContext(), "Errror", Toast.LENGTH_SHORT ).show();
   }
 
   private void attachSettings() {
     Preference<AuthType> auth_type = settings.getEnum("stepper.auth_type", AuthType.class);
 
     auth_type_subscription = auth_type.asObservable().subscribe(type -> {
-
       switch ( type ){
         case DS:
           authType = AuthType.DS;
@@ -136,16 +159,31 @@ public class StepperAuthFragment extends Fragment implements Step {
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(StepperAuthDcCheckSuccessEvent event) throws Exception {
-    error = null;
-    Timber.tag(TAG).d("Sign success");
+    if (callback != null) {
+      Timber.tag(TAG).d("Sign success");
+      loadingDialog.hide();
+      callback.goToNextStep();
+    }
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(StepperAuthDcCheckFailEvent event) throws Exception {
     Timber.tag(TAG).d("Sign fail");
+    loadingDialog.hide();
   }
 
 
+  @Override
+  @UiThread
+  public void onNextClicked(StepperLayout.OnNextClickedCallback callback) {
+    loadingDialog.show();
+    this.callback = callback;
+  }
 
-
+  @Override
+  @UiThread
+  public void onBackClicked(StepperLayout.OnBackClickedCallback callback) {
+    Toast.makeText(this.getContext(), "Your custom back action. Here you should cancel currently running operations", Toast.LENGTH_SHORT).show();
+    callback.goToPrevStep();
+  }
 }

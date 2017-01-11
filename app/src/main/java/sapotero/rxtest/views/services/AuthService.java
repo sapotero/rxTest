@@ -42,6 +42,7 @@ import javax.inject.Inject;
 
 import ru.CryptoPro.CAdES.CAdESConfig;
 import ru.CryptoPro.JCP.JCP;
+import ru.CryptoPro.JCP.tools.Encoder;
 import ru.CryptoPro.JCPxml.XmlInit;
 import ru.CryptoPro.JCSP.CSPConfig;
 import ru.CryptoPro.JCSP.JCSP;
@@ -57,6 +58,8 @@ import sapotero.rxtest.events.bus.UpdateAuthTokenEvent;
 import sapotero.rxtest.events.service.AuthServiceAuthEvent;
 import sapotero.rxtest.events.service.AuthServiceAuthSignInEvent;
 import sapotero.rxtest.events.stepper.StepperAuthDcCheckEvent;
+import sapotero.rxtest.events.stepper.StepperAuthDcCheckFailEvent;
+import sapotero.rxtest.events.stepper.StepperAuthDcCheckSuccessEvent;
 import sapotero.rxtest.utils.AlgorithmSelector;
 import sapotero.rxtest.utils.CMSSignExample;
 import sapotero.rxtest.utils.ContainerAdapter;
@@ -659,8 +662,6 @@ public class AuthService extends Service {
 
   private void checkPin(String password) throws Exception {
 
-
-
     Timber.tag(TAG).d( "aliasesList, %s", aliasesList );
 
     EventBus.getDefault().post( new AuthServiceAuthEvent( aliasesList.toString() ) );
@@ -682,30 +683,21 @@ public class AuthService extends Service {
     adapter.setTrustStoreStream(new FileInputStream(trustStorePath));
     adapter.setTrustStorePassword(BKSTrustStore.STORAGE_PASSWORD);
 
-//    IHashData exampleImpl = new SignIn(adapter);
-//    exampleImpl.getResult( logCallback );
+    PinCheck pinCheck = new PinCheck(adapter);
+    Boolean pinValid = pinCheck.check();
 
-    PinCheck testSign = new PinCheck(adapter);
-    testSign.getResult(null);
-//
-//
-//    X509Certificate raw_crt = cert.getCertificate();
-//
-//    Timber.tag( "CRT_BASE64 str" ).d( raw_crt.toString() );
-//    Timber.tag( "CRT_BASE64 SIGN" ).d(Arrays.toString(cert.getEmptySign()));
-//
-//    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-//    ObjectOutput out = new ObjectOutputStream(bos);
-//    out.writeObject(raw_crt);
-//    byte[] data = bos.toByteArray();
-//    bos.close();
-//
-//    Timber.tag( "CRT_BASE64 bytes length" ).d(String.valueOf(data.length));
-//
-//
-//    String crt_string = Base64.encodeToString(data, Base64.DEFAULT);
-//    Timber.tag( "CRT_BASE64" ).d( crt_string );
+    if (pinValid){
+      CMSSignExample testSign = new CMSSignExample(true, adapter);
+      testSign.getResult(logCallback);
 
+      byte[] signature = testSign.getSignature();
+      Encoder enc = new Encoder();
+      Timber.tag( "CRT_BASE64" ).d( enc.encode(signature) );
+
+      EventBus.getDefault().post( new StepperAuthDcCheckSuccessEvent() );
+    } else {
+      EventBus.getDefault().post( new StepperAuthDcCheckFailEvent() );
+    }
   }
 
   @Subscribe(threadMode = ThreadMode.BACKGROUND)

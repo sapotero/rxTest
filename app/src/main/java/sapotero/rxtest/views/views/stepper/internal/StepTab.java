@@ -38,8 +38,6 @@ public class StepTab extends RelativeLayout {
 
     private final ImageView mStepDoneIndicator;
 
-    private int mDividerWidth = StepperLayout.DEFAULT_TAB_DIVIDER_WIDTH;
-
     public StepTab(Context context) {
         this(context, null);
     }
@@ -60,20 +58,10 @@ public class StepTab extends RelativeLayout {
         mStepDivider = findViewById(R.id.ms_stepDivider);
         mStepTitle = ((TextView) findViewById(R.id.ms_stepTitle));
     }
-
-    /**
-     * Changes the visibility of the horizontal line in the tab
-     * @param show true if the line should be shown, false otherwise
-     */
     public void toggleDividerVisibility(boolean show) {
         mStepDivider.setVisibility(show ? VISIBLE : GONE);
     }
 
-    /**
-     * Updates tab's UI
-     * @param done true if the step is done and the step's number should be replaced with a <i>done</i> icon, false otherwise
-     * @param current true if the step is the current step, false otherwise
-     */
     public void updateState(final boolean done, final boolean current) {
         mStepDoneIndicator.setVisibility(done ? View.VISIBLE : View.GONE);
         mStepNumber.setVisibility(!done ? View.VISIBLE : View.GONE);
@@ -83,26 +71,14 @@ public class StepTab extends RelativeLayout {
         mStepTitle.setAlpha(done || current ? OPAQUE_ALPHA : INACTIVE_STEP_TITLE_ALPHA);
     }
 
-    /**
-     * Sets the name of the step
-     * @param title step name
-     */
     public void setStepTitle(CharSequence title) {
         mStepTitle.setText(title);
     }
 
-    /**
-     * Sets the name of the step
-     * @param title resource ID of the step name
-     */
     public void setStepTitle(@StringRes int title) {
         mStepTitle.setText(title);
     }
 
-    /**
-     * Sets the position of the step
-     * @param number step position
-     */
     public void setStepNumber(CharSequence number) {
         mStepNumber.setText(number);
     }
@@ -121,8 +97,7 @@ public class StepTab extends RelativeLayout {
     }
 
     public void setDividerWidth(int dividerWidth) {
-        this.mDividerWidth = dividerWidth;
-        mStepDivider.getLayoutParams().width = mDividerWidth != StepperLayout.DEFAULT_TAB_DIVIDER_WIDTH
+        mStepDivider.getLayoutParams().width = dividerWidth != StepperLayout.DEFAULT_TAB_DIVIDER_WIDTH
                 ? dividerWidth
                 : getResources().getDimensionPixelOffset(R.dimen.ms_step_tab_divider_length);
     }

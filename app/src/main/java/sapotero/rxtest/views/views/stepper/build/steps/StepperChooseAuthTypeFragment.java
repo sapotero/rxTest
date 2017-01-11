@@ -11,10 +11,13 @@ import android.view.ViewGroup;
 
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
+import org.greenrobot.eventbus.EventBus;
+
 import javax.inject.Inject;
 
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.events.stepper.StepperNextStepEvent;
 import sapotero.rxtest.views.views.stepper.Step;
 import sapotero.rxtest.views.views.stepper.VerificationError;
 import sapotero.rxtest.views.views.stepper.util.AuthType;
@@ -74,6 +77,7 @@ public class StepperChooseAuthTypeFragment extends Fragment implements Step, Vie
       default:
         break;
     }
+    EventBus.getDefault().post( new StepperNextStepEvent() );
   }
 
   private void setAuthType( AuthType type ){

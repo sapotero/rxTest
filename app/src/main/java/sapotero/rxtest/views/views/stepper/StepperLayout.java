@@ -18,7 +18,6 @@ import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -102,7 +101,11 @@ public class StepperLayout extends LinearLayout implements TabsContainer.TabItem
     }
 
 
-    private ViewPager mPager;
+    public ViewPager getmPager() {
+        return mPager;
+    }
+
+    public ViewPager mPager;
 
     public Button mBackNavigationButton;
     public RightNavigationButton mNextNavigationButton;
@@ -194,33 +197,16 @@ public class StepperLayout extends LinearLayout implements TabsContainer.TabItem
         this.mListener = listener;
     }
 
-    /**
-     * Sets the new step adapter and updates the stepper layout based on the new adapter.
-     *
-     * @param stepAdapter step adapter
-     */
     public void setAdapter(@NonNull AbstractStepAdapter stepAdapter) {
         this.mStepAdapter = stepAdapter;
         mPager.setAdapter(stepAdapter);
 
         mStepperType.onNewAdapter(stepAdapter);
 
-        // this is so that the fragments in the adapter can be created BEFORE the onUpdate() method call
-        new Handler().post(new Runnable() {
-            @Override
-            public void run() {
-                onUpdate(mCurrentStepPosition, false);
-            }
-        });
+        new Handler().post(() -> onUpdate(mCurrentStepPosition, false));
 
     }
 
-    /**
-     * Sets the new step adapter and updates the stepper layout based on the new adapter.
-     *
-     * @param stepAdapter         step adapter
-     * @param currentStepPosition the initial step position, must be in the range of the adapter item count
-     */
     public void setAdapter(@NonNull AbstractStepAdapter stepAdapter, @IntRange(from = 0) int currentStepPosition) {
         this.mCurrentStepPosition = currentStepPosition;
         setAdapter(stepAdapter);
@@ -277,12 +263,7 @@ public class StepperLayout extends LinearLayout implements TabsContainer.TabItem
 
         bindViews();
 
-        mPager.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                return true;
-            }
-        });
+        mPager.setOnTouchListener((view, motionEvent) -> true);
 
         initNavigation();
 
@@ -300,7 +281,6 @@ public class StepperLayout extends LinearLayout implements TabsContainer.TabItem
         mNextNavigationButton.setText(mNextButtonText);
         mCompleteNavigationButton.setText(mCompleteButtonText);
 
-        //FIXME: 16/03/16 this is a workaround for tinting TextView's compound drawables on API 16-17 - when set in XML only the default color is used...
         Drawable chevronEndDrawable = ResourcesCompat.getDrawable(getContext().getResources(), R.drawable.ic_chevron_right, null);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             mNextNavigationButton.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, chevronEndDrawable, null);
@@ -475,6 +455,7 @@ public class StepperLayout extends LinearLayout implements TabsContainer.TabItem
         mPager.setCurrentItem(newStepPosition);
         boolean isLast = isLastPosition(newStepPosition);
         boolean isFirst = newStepPosition == 0;
+
         AnimationUtil.fadeViewVisibility(mNextNavigationButton, isLast ? View.GONE : View.VISIBLE, animate);
         AnimationUtil.fadeViewVisibility(mCompleteNavigationButton, !isLast ? View.GONE : View.VISIBLE, animate);
         AnimationUtil.fadeViewVisibility(mBackNavigationButton, isFirst && !mShowBackButtonOnFirstStep ? View.GONE : View.VISIBLE, animate);

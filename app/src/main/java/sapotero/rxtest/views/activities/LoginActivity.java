@@ -46,6 +46,7 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.application.config.Constant;
 import sapotero.rxtest.events.bus.FileDownloadedEvent;
 import sapotero.rxtest.events.bus.MarkDocumentAsChangedJobEvent;
+import sapotero.rxtest.events.stepper.StepperNextStepEvent;
 import sapotero.rxtest.jobs.service.AuthServiceCheckSignJob;
 import sapotero.rxtest.utils.ProviderType;
 import sapotero.rxtest.views.interfaces.DataLoaderInterface;
@@ -96,6 +97,7 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
   private boolean isCorrect;
 
   private StepperLayout stepperLayout;
+  private StepperAdapter adapter;
 
   @RequiresApi(api = Build.VERSION_CODES.M)
   @Override
@@ -131,7 +133,8 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
     AuthService.setCSP();
 
     stepperLayout = (StepperLayout) findViewById(R.id.stepperLayout);
-    stepperLayout.setAdapter(new StepperAdapter( getSupportFragmentManager() ) );
+    adapter = new StepperAdapter( getSupportFragmentManager() );
+    stepperLayout.setAdapter( adapter );
     stepperLayout.setListener(this);
 
 //    new Handler().postDelayed( () -> {
@@ -608,6 +611,13 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
   public void onMessageEvent(FileDownloadedEvent event) {
     printJobStat();
   }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(StepperNextStepEvent event) {
+//    stepperLayout.getmPager().setCurrentItem( stepperLayout.getmPager().getCurrentItem() + 1 );
+    stepperLayout.getmNextNavigationButton().performClick();
+  }
+
 
 //  @Subscribe(threadMode = ThreadMode.POSTING)
 //  public void onMessageEvent(AuthServiceAuthEvent event) {

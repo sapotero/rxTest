@@ -2,11 +2,15 @@ package sapotero.rxtest.retrofit.Api;
 
 import java.util.ArrayList;
 
+import okhttp3.RequestBody;
+import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 import rx.Observable;
+import sapotero.rxtest.retrofit.models.AuthSignToken;
 import sapotero.rxtest.retrofit.models.AuthToken;
 import sapotero.rxtest.retrofit.models.Folder;
 import sapotero.rxtest.retrofit.models.Oshs;
@@ -19,6 +23,11 @@ public interface AuthService {
   Observable<AuthToken> getAuth(
     @Path("username") String username,
     @Query("password") String password
+  );
+
+  @POST("token/by_sign.json")
+  Observable<AuthSignToken> getAuthBySign(
+    @Body RequestBody data
   );
 
   @GET("oshs/me.json")
