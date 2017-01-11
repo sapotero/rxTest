@@ -3,7 +3,6 @@ package sapotero.rxtest.views.activities;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -11,20 +10,10 @@ import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.AppCompatButton;
-import android.text.Editable;
-import android.text.InputType;
-import android.text.TextWatcher;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.CheckBox;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
@@ -32,9 +21,6 @@ import com.f2prateek.rx.preferences.RxSharedPreferences;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -47,7 +33,6 @@ import sapotero.rxtest.application.config.Constant;
 import sapotero.rxtest.events.bus.FileDownloadedEvent;
 import sapotero.rxtest.events.bus.MarkDocumentAsChangedJobEvent;
 import sapotero.rxtest.events.stepper.StepperNextStepEvent;
-import sapotero.rxtest.jobs.service.AuthServiceCheckSignJob;
 import sapotero.rxtest.utils.ProviderType;
 import sapotero.rxtest.views.interfaces.DataLoaderInterface;
 import sapotero.rxtest.views.services.AuthService;
@@ -55,11 +40,10 @@ import sapotero.rxtest.views.views.LoginView;
 import sapotero.rxtest.views.views.stepper.StepperLayout;
 import sapotero.rxtest.views.views.stepper.VerificationError;
 import sapotero.rxtest.views.views.stepper.build.StepperAdapter;
-import sapotero.rxtest.views.views.utils.VerticalStepperForm;
 import timber.log.Timber;
 
 
-public class LoginActivity extends AppCompatActivity implements VerticalStepperForm, DataLoaderInterface.Callback ,AdapterView.OnItemSelectedListener, StepperLayout.StepperListener {
+public class LoginActivity extends AppCompatActivity implements DataLoaderInterface.Callback ,AdapterView.OnItemSelectedListener, StepperLayout.StepperListener {
 
 
   @Inject OkHttpClient okHttpClient;
@@ -72,29 +56,12 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
 
   private static int REQUEST_READWRITE_STORAGE = 0;
 
-  private View wrapper;
-  private View view;
-  private TextView username;
-  private TextView password;
-  private TextView host;
-  private ProgressBar progress;
-
-  private AppCompatButton button;
   private Preference<String> TOKEN;
   private Preference<String> LOGIN;
   private Preference<String> PASSWORD;
   private Preference<String> HOST;
 
   private DataLoaderInterface dataLoader;
-  private CheckBox stepper_loader_user;
-  private CheckBox stepper_loader_list;
-  private CheckBox stepper_loader_info;
-  private ProgressBar stepper_loader_user_progressbar;
-  private ProgressBar stepper_loader_list_progressbar;
-  private ProgressBar stepper_loader_info_progressbar;
-
-  private MaterialDialog root;
-  private boolean isCorrect;
 
   private StepperLayout stepperLayout;
   private StepperAdapter adapter;
@@ -118,15 +85,15 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
     initialize();
     check_permissions();
 
-    String[] steps = {"Выбор способа авторизации", "Авторизация", "Загрузка данных"};
-
-    LoginView.Builder.newInstance(stepper, steps, this, this)
-      .primaryColor( Color.RED )
-      .primaryDarkColor( ContextCompat.getColor( this, R.color.md_blue_grey_200 ) )
-      .displayBottomNavigation(false)
-      .materialDesignInDisabledSteps(true)
-      .showVerticalLineWhenStepsAreCollapsed(true)
-      .init();
+//    String[] steps = {"Выбор способа авторизации", "Авторизация", "Загрузка данных"};
+//
+//    LoginView.Builder.newInstance(stepper, steps, this, this)
+//      .primaryColor( Color.RED )
+//      .primaryDarkColor( ContextCompat.getColor( this, R.color.md_blue_grey_200 ) )
+//      .displayBottomNavigation(false)
+//      .materialDesignInDisabledSteps(true)
+//      .showVerticalLineWhenStepsAreCollapsed(true)
+//      .init();
 
     EventBus.getDefault().register(this);
 
@@ -254,233 +221,6 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
 
   }
 
-  public void tryToLogin() {
-    getCredentials();
-
-  }
-
-  public void getCredentials(){
-
-    wrapper.setAlpha(0.25f);
-    progress.setVisibility(View.VISIBLE);
-
-    saveSettings("");
-
-    dataLoader.getAuthToken();
-
-  }
-
-  private void saveSettings(String authToken) {
-    LOGIN.set( username.getText().toString());
-    PASSWORD.set( password.getText().toString());
-    HOST.set( host.getText().toString() );
-    TOKEN.set( authToken );
-
-    Preference<Integer> updated = settings.getInteger("updated");
-    updated.set( (int) TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()) );
-  }
-
-
-
-  public View createStepContentView(int stepNumber) {
-    View view = null;
-    switch (stepNumber) {
-      case 0:
-        view = authTypeCheck();
-        break;
-      case 1:
-        view = loginForm();
-        break;
-      case 2:
-        view = loadData();
-        break;
-      case 3:
-        view = showFinal();
-        break;
-    }
-    return view;
-  }
-
-  private View showFinal() {
-    view = LayoutInflater.from(this).inflate(R.layout.stepper_load_data, null);
-
-    return view;
-  }
-
-
-  private View authTypeCheck() {
-    view = LayoutInflater.from(this).inflate(R.layout.stepper_auth_chooser, null);
-
-    AppCompatButton choose_cert = ButterKnife.findById(view, R.id.stepper_auth_choose_cert);
-    AppCompatButton choose_pass = ButterKnife.findById(view, R.id.stepper_auth_choose_password);
-
-    choose_cert.setOnClickListener(v -> {
-      Timber.e("cert");
-
-      root = new MaterialDialog.Builder(this)
-        .title(R.string.dialog_cert_pass_title)
-        .content(R.string.dialog_cert_description)
-        .positiveText(R.string.dialog_cert_positive)
-        .negativeText(R.string.dialog_cert_negative)
-        .cancelable(false)
-        .autoDismiss(false)
-
-
-        .inputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD)
-        .input(R.string.dialog_cert_pass_hint, R.string.dialog_cert_pass_prefill, (dialog, input) -> {
-          jobManager.addJobInBackground( new AuthServiceCheckSignJob( input.toString() ) );
-        })
-
-        .checkBoxPromptRes(R.string.dialog_cert_pass_checkbox_save, false, null)
-
-        .onPositive((dialog, which) -> {
-
-        })
-        .onNegative((dialog, which) -> dialog.hide())
-        .show();
-
-    });
-
-    choose_pass.setOnClickListener(v -> {
-      Timber.e("pass");
-      stepper.setActiveStepAsCompleted();
-      stepper.goToNextStep();
-    });
-
-    try {
-      stepper.findViewById(R.id.next_step).setVisibility(View.GONE);
-    } catch (Exception e){
-      Timber.d(e);
-    }
-
-    return view;
-  }
-
-
-  public void onStepOpening(int stepNumber) {
-    switch (stepNumber) {
-      case 0:
-        break;
-      case 1:
-        checkLogin();
-        break;
-      case 2:
-        resetLoadDataForm();
-        break;
-      case 3:
-        break;
-    }
-  }
-
-
-  private Boolean checkLogin( ) {
-//    isCorrect = false;
-
-
-    resetLoginForm();
-
-    if( host.length() >= 0 && username.length() >= 0 && password.length() >= 0 ) {
-      isCorrect = true;
-
-      button = (AppCompatButton) stepper.getRootView().findViewById(R.id.next_step);
-
-      button.setOnClickListener(view ->{
-        Timber.d( "BUTTON CLICK %s", view.getId() );
-        tryToLogin();
-      });
-
-    } else {
-      String titleError = "Введите данные!";
-      stepper.setActiveStepAsUncompleted(titleError);
-    }
-
-    Timber.e("checkLogin result %s", isCorrect);
-
-
-    return isCorrect;
-  }
-
-  private void resetLoginForm() {
-    progress.setVisibility(View.GONE);
-    wrapper.setAlpha(1.0f);
-    wrapper.setBackgroundColor( getResources().getColor(R.color.transparent) );
-  }
-
-  private void resetLoadDataForm() {
-    stepper_loader_user_progressbar.setVisibility(View.INVISIBLE);
-    stepper_loader_list_progressbar.setVisibility(View.INVISIBLE);
-    stepper_loader_info_progressbar.setVisibility(View.INVISIBLE);
-
-    stepper_loader_user.setChecked(false);
-    stepper_loader_list.setChecked(false);
-    stepper_loader_info.setChecked(false);
-
-    stepper.setStepAsUncompleted(1, "");
-  }
-
-  private View loginForm() {
-
-    view = LayoutInflater.from(this).inflate(R.layout.stepper_login, null);
-    wrapper = ButterKnife.findById(view, R.id.wrapper);
-    username = ButterKnife.findById(view, R.id.stepper_login_username);
-    password = ButterKnife.findById(view, R.id.stepper_login_password);
-    host     = ButterKnife.findById(view, R.id.stepper_login_host);
-    progress = ButterKnife.findById(view, R.id.stepper_login_progress);
-
-    HOST = settings.getString("settings_username_host");
-
-    if (Objects.equals(HOST.get(), null)){
-      Timber.tag(TAG).i("EMPTY HOST");
-      HOST.set( Constant.HOST );
-    }
-
-    host.setText( HOST.get() );
-
-    TextWatcher watcher = new TextWatcher(){
-
-      @Override
-      public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-      }
-
-      @Override
-      public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-        Timber.e("checkLogin");
-        checkLogin();
-      }
-
-      @Override
-      public void afterTextChanged(Editable editable) {
-      }
-    };
-
-    username.addTextChangedListener(watcher);
-    password.addTextChangedListener(watcher);
-    host.addTextChangedListener(watcher);
-
-    return view;
-  }
-
-  private View loadData() {
-    view = LayoutInflater.from(this).inflate(R.layout.stepper_load_data, null);
-
-    stepper_loader_user = ButterKnife.findById(view, R.id.stepper_loader_user );
-    stepper_loader_list = ButterKnife.findById(view, R.id.stepper_loader_list );
-    stepper_loader_info = ButterKnife.findById(view, R.id.stepper_loader_info );
-
-    stepper_loader_user_progressbar = ButterKnife.findById(view, R.id.stepper_loader_user_progressbar );
-    stepper_loader_list_progressbar = ButterKnife.findById(view, R.id.stepper_loader_list_progressbar );
-    stepper_loader_info_progressbar = ButterKnife.findById(view, R.id.stepper_loader_info_progressbar );
-
-    stepper_loader_user_progressbar.setVisibility(View.VISIBLE);
-
-    return view;
-  }
-
-  @Override
-  public void sendData() {
-    Timber.e("SendData");
-    start();
-  }
 
   private void start() {
     Intent intent = new Intent(this, MainActivity.class);
@@ -489,18 +229,10 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
     finish();
   }
 
-  @Override
-  public void setFinalView(RelativeLayout content) {
-    View finalView = LayoutInflater.from(this).inflate(R.layout.stepper_final_view, null);
-
-    content.addView( finalView );
-  }
-
-
 
   @Override
   public void onAuthTokenSuccess() {
-    progress.setVisibility(View.GONE);
+//    progress.setVisibility(View.GONE);
     stepper.setActiveStepAsCompleted();
     stepper.goToNextStep();
     Timber.i( "LOGIN: %s\nTOKEN: %s", LOGIN.get(), TOKEN.get() );
@@ -510,9 +242,9 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
   @Override
   public void onGetUserInformationSuccess() {
     new Handler().postDelayed( () -> {
-      stepper_loader_user_progressbar.setVisibility(View.INVISIBLE);
-      stepper_loader_list_progressbar.setVisibility(View.VISIBLE);
-      stepper_loader_user.setChecked(true);
+//      stepper_loader_user_progressbar.setVisibility(View.INVISIBLE);
+//      stepper_loader_list_progressbar.setVisibility(View.VISIBLE);
+//      stepper_loader_user.setChecked(true);
     }, 2000L);
   }
 
@@ -575,8 +307,8 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
 
 //    new Handler().postDelayed( () -> {
 //
-    stepper_loader_info_progressbar.setVisibility(View.INVISIBLE);
-    stepper_loader_info.setChecked(true);
+//    stepper_loader_info_progressbar.setVisibility(View.INVISIBLE);
+//    stepper_loader_info.setChecked(true);
 
 //    stepper.goToNextStep();
     stepper.setStepAsCompleted(0);
@@ -614,31 +346,9 @@ public class LoginActivity extends AppCompatActivity implements VerticalStepperF
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(StepperNextStepEvent event) {
-//    stepperLayout.getmPager().setCurrentItem( stepperLayout.getmPager().getCurrentItem() + 1 );
     stepperLayout.getmNextNavigationButton().performClick();
   }
 
-
-//  @Subscribe(threadMode = ThreadMode.POSTING)
-//  public void onMessageEvent(AuthServiceAuthEvent event) {
-//    Timber.tag(TAG).i("RECV AuthServiceAuthEvent: %s %s", event.success, event.success_string );
-//
-//    root.dismiss();
-//    isCorrect = true;
-//
-//    stepper.setStepAsCompleted(0);
-//    stepper.setStepAsCompleted(1);
-//    tryToLogin();
-//    stepper.goToStep(2, true);
-//
-//
-////      stepper.setActiveStepAsCompleted();
-////      stepper.goToNextStep();
-////      stepper.setActiveStepAsCompleted();
-////      stepper.goToNextStep();
-//
-////    root.set("DONE");
-//  }
 
 
   @Override
