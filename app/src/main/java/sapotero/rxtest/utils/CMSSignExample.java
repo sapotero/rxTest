@@ -119,7 +119,12 @@ public class CMSSignExample extends ISignData {
       return;
     } // if
 
-    signature = create(callback, new byte[0], false, new PrivateKey[] {getPrivateKey()}, new Certificate[] {getCertificate()}, true, false);
+    byte[] bytes = new byte[4 * 256];
+
+    signature = create(callback, bytes, false, new PrivateKey[] {getPrivateKey()}, new Certificate[] {getCertificate()}, true, false);
+
+    bytes = null;
+    System.gc();
 
     callback.log("--- SIGNATURE BEGIN ---");
     callback.log(signature, true);

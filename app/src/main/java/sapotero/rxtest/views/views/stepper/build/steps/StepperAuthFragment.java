@@ -90,6 +90,10 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
       auth_type_subscription.unsubscribe();
     }
 
+    if ( EventBus.getDefault().isRegistered(this) ) {
+      EventBus.getDefault().unregister(this);
+    }
+
   }
 
   @Override

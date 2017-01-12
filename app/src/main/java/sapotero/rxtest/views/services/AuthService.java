@@ -6,12 +6,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.os.IBinder;
-import android.util.Base64;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.birbit.android.jobqueue.JobManager;
-import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -20,23 +17,18 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.Security;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -52,20 +44,14 @@ import ru.CryptoPro.ssl.util.cpSSLConfig;
 import ru.cprocsp.ACSP.tools.common.CSPTool;
 import ru.cprocsp.ACSP.tools.common.Constants;
 import ru.cprocsp.ACSP.tools.common.RawResource;
-import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.events.bus.UpdateAuthTokenEvent;
 import sapotero.rxtest.events.service.AuthServiceAuthEvent;
-import sapotero.rxtest.events.service.AuthServiceAuthSignInEvent;
 import sapotero.rxtest.events.stepper.StepperAuthDcCheckEvent;
 import sapotero.rxtest.events.stepper.StepperAuthDcCheckFailEvent;
 import sapotero.rxtest.events.stepper.StepperAuthDcCheckSuccessEvent;
 import sapotero.rxtest.utils.AlgorithmSelector;
 import sapotero.rxtest.utils.CMSSignExample;
 import sapotero.rxtest.utils.ContainerAdapter;
-import sapotero.rxtest.utils.GetCertificate;
-import sapotero.rxtest.utils.ICAdESData;
-import sapotero.rxtest.utils.InstallCAdESTestTrustCertExample;
 import sapotero.rxtest.utils.KeyStoreType;
 import sapotero.rxtest.utils.LogCallback;
 import sapotero.rxtest.utils.PinCheck;
@@ -84,18 +70,10 @@ public class AuthService extends Service {
    */
   private static Provider defaultKeyStoreProvider = null;
 
-
-  /**
-   * Флаг, означающий, установлены ли программно корневые
-   * сертификаты для примеров CAdES подписи.
-   */
-  private boolean cAdESCAInstalled = false;
-
   private LogCallback logCallback;
 
   final String TAG = AuthService.class.getSimpleName();
-  private Preference<String> TOKEN;
-  private String passwordFiled;
+
 
   public AuthService() {
   }
@@ -157,19 +135,6 @@ public class AuthService extends Service {
     Timber.tag(TAG).d("onBind");
     return null;
   }
-
-  public static void setCSP(){
-
-  }
-
-  private void saveSettings(String token) {
-
-    TOKEN.set(token);
-
-    Preference<Integer> updated = settings.getInteger("date");
-    updated.set( (int) TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis()) );
-  }
-
 
   /* ----------------------------------------- */
   private boolean initCSPProviders() {
@@ -345,7 +310,6 @@ public class AuthService extends Service {
     return defaultKeyStoreProvider;
   }
 
-
   public static String userName2Dir(Context context) throws Exception {
 
     ApplicationInfo appInfo = context.getPackageManager()
@@ -355,49 +319,6 @@ public class AuthService extends Service {
     return String.valueOf(appInfo.uid) + "." +
       String.valueOf(appInfo.uid);
   }
-
-  private void checkCAdESCACertsAndInstall() {
-
-    // Установка корневых сертификатов для CAdES примеров.
-    if (!cAdESCAInstalled) {
-
-      String message = String.format(getString(R.string.ExamplesInstallCAdESCAWarning),
-        "InstallCAdESTestTrustCertExample");
-
-      ContainerAdapter adapter = new ContainerAdapter(null, false);
-      adapter.setProviderType(ProviderType.currentProviderType());
-      adapter.setResources(getResources());
-
-      try {
-
-        ICAdESData installRootCert = new InstallCAdESTestTrustCertExample(adapter);
-
-        // Если сертификаты не установлены, сообщаем об
-        // этом и устанавливаем их.
-        if (!installRootCert.isAlreadyInstalled()) {
-
-//          // Предупреждение о выполнении установки.
-//          MainActivity.errorMessage(getActivity(), message, false, false);
-//
-//          MainActivity.getLogCallback().clear();
-//          Timber.e("*** Forced installation of CA certificates (CAdES) ***");
-
-          // Установка.
-//          installRootCert.getResult(MainActivity.getLogCallback());
-
-        } // if
-
-        cAdESCAInstalled = true;
-
-      } catch (Exception e) {
-//        MainActivity.getLogCallback().setStatusFailed();
-        Log.e(Constants.APP_LOGGER_TAG, e.getMessage(), e);
-      }
-
-    }
-
-  }
-
 
   private static List<String> aliases(String storeType, AlgorithmSelector.DefaultProviderType providerType) {
 
@@ -443,8 +364,6 @@ public class AuthService extends Service {
     return aliasesList;
 
   }
-
-
 
   private void addKey() {
 
@@ -567,98 +486,7 @@ public class AuthService extends Service {
 
   }
 
-  //TODO: переносим диалог в активити, там вызываем,
-  // и хуячим еще один евент после нажатия на кнопку, который
-  // идет в сервис и подписывает в другом потоке и возвращает результат
 
-  // TODO: захуячить ещё один колбек на успешную подпись
-  void tryToSignIn(String password) throws Exception {
-    tryToSignWithPassword(password);
-  }
-  void tryToSignWithPassword(String password) throws Exception {
-
-
-
-    Timber.tag(TAG).d( "aliasesList, %s", aliasesList );
-
-    EventBus.getDefault().post( new AuthServiceAuthEvent( aliasesList.toString() ) );
-
-    ContainerAdapter adapter = new ContainerAdapter(aliasesList.get(0), null, aliasesList.get(0), null);
-
-    adapter.setProviderType(ProviderType.currentProviderType());
-    adapter.setClientPassword( password.toCharArray() );
-    adapter.setResources(getResources());
-
-    // для примера установки сертификатов
-
-    // Используется общее для всех хранилище корневых
-    // сертификатов cacerts.
-
-    final String trustStorePath = this.getApplicationInfo().dataDir + File.separator + BKSTrustStore.STORAGE_DIRECTORY + File.separator + BKSTrustStore.STORAGE_FILE_TRUST;
-
-    Timber.e("Example trust store: " + trustStorePath);
-
-    adapter.setTrustStoreProvider(BouncyCastleProvider.PROVIDER_NAME);
-    adapter.setTrustStoreType(BKSTrustStore.STORAGE_TYPE);
-
-    adapter.setTrustStoreStream(new FileInputStream(trustStorePath));
-    adapter.setTrustStorePassword(BKSTrustStore.STORAGE_PASSWORD);
-
-//    IHashData exampleImpl = new SignIn(adapter);
-//    exampleImpl.getResult( logCallback );
-
-
-    GetCertificate cert = new GetCertificate(adapter);
-    cert.getResult( logCallback );
-
-    CMSSignExample testSign = new CMSSignExample(true, adapter);
-    testSign.getResult(logCallback);
-
-
-    X509Certificate raw_crt = cert.getCertificate();
-
-    Timber.tag( "CRT_BASE64 str" ).d( raw_crt.toString() );
-    Timber.tag( "CRT_BASE64 SIGN" ).d(Arrays.toString(cert.getEmptySign()));
-
-    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    ObjectOutput out = new ObjectOutputStream(bos);
-    out.writeObject(raw_crt);
-    byte[] data = bos.toByteArray();
-    bos.close();
-
-    Timber.tag( "CRT_BASE64 bytes length" ).d(String.valueOf(data.length));
-
-
-    String crt_string = Base64.encodeToString(data, Base64.DEFAULT);
-    Timber.tag( "CRT_BASE64" ).d( crt_string );
-
-  }
-
-
-
-
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(UpdateAuthTokenEvent event) {
-    String token = event.message;
-
-    Toast.makeText(getApplicationContext(), "SERVICE " + TOKEN, Toast.LENGTH_SHORT).show();
-
-    Timber.tag(TAG + " onMessageEvent TOKEN").v( token );
-
-    saveSettings(token);
-  }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(AuthServiceAuthSignInEvent event) {
-    Timber.tag(TAG).i("RECV: AuthServiceAuthSignInEvent");
-
-    try {
-      tryToSignIn(event.password);
-    } catch (Exception e) {
-      Timber.e(e);
-    }
-  }
 
   private void checkPin(String password) throws Exception {
 
@@ -687,12 +515,14 @@ public class AuthService extends Service {
     Boolean pinValid = pinCheck.check();
 
     if (pinValid){
-      CMSSignExample testSign = new CMSSignExample(true, adapter);
-      testSign.getResult(logCallback);
+      CMSSignExample sign = new CMSSignExample(true, adapter);
+      sign.getResult(logCallback);
 
-      byte[] signature = testSign.getSignature();
+      byte[] signature = sign.getSignature();
       Encoder enc = new Encoder();
       Timber.tag( "CRT_BASE64" ).d( enc.encode(signature) );
+
+      EventBus.getDefault().post( new StepperAuthDcCheckSuccessEvent() );
 
       EventBus.getDefault().post( new StepperAuthDcCheckSuccessEvent() );
     } else {
