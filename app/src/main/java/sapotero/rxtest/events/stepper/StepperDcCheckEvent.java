@@ -1,9 +1,9 @@
 package sapotero.rxtest.events.stepper;
 
-public class StepperAuthDcCheckEvent {
+public class StepperDcCheckEvent {
   public String pin;
 
-  public StepperAuthDcCheckEvent(String pin) {
+  public StepperDcCheckEvent(String pin) {
     this.pin = pin;
   }
 }

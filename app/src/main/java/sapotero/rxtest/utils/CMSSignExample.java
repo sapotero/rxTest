@@ -104,6 +104,9 @@ public class CMSSignExample extends ISignData {
   @Override
   public void getResult(LogCallback callback) throws Exception {
 
+    if (callback == null){
+      callback = new Callback();
+    }
     callback.log("Load key container to sign data.");
 
     // Тип контейнера по умолчанию.
@@ -638,6 +641,17 @@ public class CMSSignExample extends ISignData {
       throw new IOException("Could not completely read file "+file.getName());
     }
     return bytes;
+  }
+
+  class Callback extends LogCallback{
+
+    public Callback() {
+      super(null,null, null);
+    }
+
+    public void log(String message){
+
+    }
   }
 
 }

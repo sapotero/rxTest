@@ -7,7 +7,7 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Set;
 
-import sapotero.rxtest.views.services.AuthService;
+import sapotero.rxtest.views.services.MainService;
 
 /**
  * Служебный класс ProviderServiceInfo предназначен
@@ -80,7 +80,7 @@ public class ProviderServiceInfo {
    * @param callback Поле для вывода информации.
    */
   public static void logKeyStoreInfo(LogCallback callback) {
-    logKeyStoreInfo(callback, AuthService.getDefaultKeyStoreProvider());
+    logKeyStoreInfo(callback, MainService.getDefaultKeyStoreProvider());
   }
 
 }

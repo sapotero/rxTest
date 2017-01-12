@@ -54,7 +54,7 @@ import sapotero.rxtest.views.managers.menu.commands.shared.AddToFolder;
 import sapotero.rxtest.views.managers.menu.commands.shared.CheckForControl;
 import sapotero.rxtest.views.managers.view.DecisionManager;
 import sapotero.rxtest.views.menu.builders.ButtonBuilder;
-import sapotero.rxtest.views.services.AuthService;
+import sapotero.rxtest.views.services.MainService;
 import sapotero.rxtest.views.views.stepper.build.steps.StepperAuthFragment;
 import sapotero.rxtest.views.views.stepper.build.steps.StepperChooseAuthTypeFragment;
 
@@ -80,7 +80,7 @@ public interface EsdComponent {
 
 
 
-  void inject(AuthService service);
+  void inject(MainService service);
 
   void inject(DecisionAdapter adapter);
   void inject(DocumentsAdapter adapter);

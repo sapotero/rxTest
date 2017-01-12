@@ -9,6 +9,7 @@ import android.os.IBinder;
 import android.util.Log;
 
 import com.birbit.android.jobqueue.JobManager;
+import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -25,6 +26,7 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.Security;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -32,6 +34,9 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import io.requery.Persistable;
+import io.requery.rx.SingleEntityStore;
+import okhttp3.OkHttpClient;
 import ru.CryptoPro.CAdES.CAdESConfig;
 import ru.CryptoPro.JCP.JCP;
 import ru.CryptoPro.JCP.tools.Encoder;
@@ -44,76 +49,90 @@ import ru.CryptoPro.ssl.util.cpSSLConfig;
 import ru.cprocsp.ACSP.tools.common.CSPTool;
 import ru.cprocsp.ACSP.tools.common.Constants;
 import ru.cprocsp.ACSP.tools.common.RawResource;
+import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.events.auth.AuthDcCheckFailEvent;
+import sapotero.rxtest.events.auth.AuthDcCheckSuccessEvent;
+import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
+import sapotero.rxtest.events.auth.AuthLoginCheckSuccessEvent;
 import sapotero.rxtest.events.service.AuthServiceAuthEvent;
-import sapotero.rxtest.events.stepper.StepperAuthDcCheckEvent;
-import sapotero.rxtest.events.stepper.StepperAuthDcCheckFailEvent;
-import sapotero.rxtest.events.stepper.StepperAuthDcCheckSuccessEvent;
+import sapotero.rxtest.events.stepper.StepperDcCheckEvent;
+import sapotero.rxtest.events.stepper.StepperDcCheckFailEvent;
+import sapotero.rxtest.events.stepper.StepperDcCheckSuccesEvent;
+import sapotero.rxtest.events.stepper.StepperLoginCheckFailEvent;
+import sapotero.rxtest.events.stepper.StepperLoginCheckSuccessEvent;
 import sapotero.rxtest.utils.AlgorithmSelector;
 import sapotero.rxtest.utils.CMSSignExample;
 import sapotero.rxtest.utils.ContainerAdapter;
 import sapotero.rxtest.utils.KeyStoreType;
-import sapotero.rxtest.utils.LogCallback;
 import sapotero.rxtest.utils.PinCheck;
-import sapotero.rxtest.utils.ProviderServiceInfo;
 import sapotero.rxtest.utils.ProviderType;
+import sapotero.rxtest.views.interfaces.DataLoaderInterface;
 import timber.log.Timber;
 
-public class AuthService extends Service {
-  private static final ArrayList<String> aliasesList = new ArrayList<String>();
-  @Inject JobManager jobManager;
-  @Inject RxSharedPreferences settings;
+public class MainService extends Service {
 
+
+  final String TAG = MainService.class.getSimpleName();
+
+  @Inject OkHttpClient okHttpClient;
+  @Inject RxSharedPreferences settings;
+  @Inject JobManager jobManager;
+  @Inject SingleEntityStore<Persistable> dataStore;
+
+
+  private Preference<String> TOKEN;
+  private Preference<String> CURRENT_USER;
+  private Preference<String> LOGIN;
+  private Preference<String> PASSWORD;
+  private Preference<String> HOST;
+  private Preference<String> COUNT;
+
+  private String processed_folder;
+  private SimpleDateFormat dateFormat;
+
+  private CompositeSubscription subscription;
 
   /**
    * Java-провайдер Java CSP.
    */
+
   private static Provider defaultKeyStoreProvider = null;
-
-  private LogCallback logCallback;
-
-  final String TAG = AuthService.class.getSimpleName();
+  private static final ArrayList<String> aliasesList = new ArrayList<String>();
+  private DataLoaderInterface dataLoaderInterface;
 
 
-  public AuthService() {
+  public MainService() {
   }
 
   public void onCreate() {
     super.onCreate();
 
-    if ( !EventBus.getDefault().isRegistered(this) ){
-      EventBus.getDefault().register(this);
+    if ( EventBus.getDefault().isRegistered(this) ){
+      EventBus.getDefault().unregister(this);
     }
+    EventBus.getDefault().register(this);
+
     EsdApplication.getComponent(this).inject(this);
 
-    Timber.tag(TAG).d("onCreate");
-
-
+    dataLoaderInterface = new DataLoaderInterface(getApplicationContext());
+    // 1. Инициализация RxSharedPreferences
+//    initialize();
 
     // 2. Инициализация провайдеров: CSP и java-провайдеров (Обязательная часть).
-
     if (!initCSPProviders()) {
       Log.i(Constants.APP_LOGGER_TAG, "Couldn't initialize CSP.");
     }
     initJavaProviders();
-    initLogger();
 
-//    installContainers();
-
-    // 4. Инициируем объект для управления выбором типа
-    // контейнера (Настройки).
-
+    // 4. Инициируем объект для управления выбором типа контейнера (Настройки).
     KeyStoreType.init(this);
 
-    // 5. Инициируем объект для управления выбором типа
-    // провайдера (Настройки).
-
+    // 5. Инициируем объект для управления выбором типа провайдера (Настройки).
     ProviderType.init(this);
 
-    logJCspServices(defaultKeyStoreProvider = new JCSP());
     addKey();
-
-    List<String> aliasesList = aliases(KeyStoreType.currentType(), ProviderType.currentProviderType());
+    aliases(KeyStoreType.currentType(), ProviderType.currentProviderType());
   }
 
   public int onStartCommand(Intent intent, int flags, int startId) {
@@ -126,6 +145,12 @@ public class AuthService extends Service {
 
     if ( EventBus.getDefault().isRegistered(this) ){
       EventBus.getDefault().unregister(this);
+    }
+
+    if (dataLoaderInterface != null) {
+      if ( dataLoaderInterface.isRegistered() ){
+        dataLoaderInterface.unregister();
+      }
     }
 
     Timber.tag(TAG).d("onDestroy");
@@ -293,18 +318,6 @@ public class AuthService extends Service {
     System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
 
   }
-
-  private void initLogger() {
-    logCallback = new LogCallback(getResources(), null, null);
-    logCallback.clear();
-
-  }
-
-  private void logJCspServices(Provider provider) {
-    ProviderServiceInfo.logKeyStoreInfo(logCallback, provider);
-    ProviderServiceInfo.logServiceInfo(logCallback, provider);
-  }
-
 
   public static Provider getDefaultKeyStoreProvider() {
     return defaultKeyStoreProvider;
@@ -486,8 +499,6 @@ public class AuthService extends Service {
 
   }
 
-
-
   private void checkPin(String password) throws Exception {
 
     Timber.tag(TAG).d( "aliasesList, %s", aliasesList );
@@ -516,24 +527,45 @@ public class AuthService extends Service {
 
     if (pinValid){
       CMSSignExample sign = new CMSSignExample(true, adapter);
-      sign.getResult(logCallback);
+      sign.getResult(null);
 
       byte[] signature = sign.getSignature();
       Encoder enc = new Encoder();
       Timber.tag( "CRT_BASE64" ).d( enc.encode(signature) );
 
-      EventBus.getDefault().post( new StepperAuthDcCheckSuccessEvent() );
+      dataLoaderInterface.tryToSignWithDc( enc.encode(signature) );
 
-      EventBus.getDefault().post( new StepperAuthDcCheckSuccessEvent() );
+//
     } else {
-      EventBus.getDefault().post( new StepperAuthDcCheckFailEvent() );
+      EventBus.getDefault().post( new StepperDcCheckFailEvent() );
     }
   }
 
+
   @Subscribe(threadMode = ThreadMode.BACKGROUND)
-  public void onMessageEvent(StepperAuthDcCheckEvent event) throws Exception {
+  public void onMessageEvent(StepperDcCheckEvent event) throws Exception {
     String token = event.pin;
     checkPin(token);
+  }
+
+  @Subscribe(threadMode = ThreadMode.BACKGROUND)
+  public void onMessageEvent(AuthDcCheckSuccessEvent event) throws Exception {
+    EventBus.getDefault().post( new StepperDcCheckSuccesEvent() );
+  }
+
+  @Subscribe(threadMode = ThreadMode.BACKGROUND)
+  public void onMessageEvent(AuthDcCheckFailEvent event) throws Exception {
+    EventBus.getDefault().post( new StepperDcCheckFailEvent() );
+  }
+
+  @Subscribe(threadMode = ThreadMode.BACKGROUND)
+  public void onMessageEvent(AuthLoginCheckSuccessEvent event) throws Exception {
+    EventBus.getDefault().post( new StepperLoginCheckSuccessEvent() );
+  }
+
+  @Subscribe(threadMode = ThreadMode.BACKGROUND)
+  public void onMessageEvent(AuthLoginCheckFailEvent event) throws Exception {
+    EventBus.getDefault().post( new StepperLoginCheckFailEvent() );
   }
 
 

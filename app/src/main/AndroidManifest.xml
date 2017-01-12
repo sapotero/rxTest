@@ -46,7 +46,7 @@
         </activity>
 
         <service
-            android:name=".views.services.AuthService"
+            android:name=".views.services.MainService"
             android:enabled="true"
             android:exported="true">
         </service>

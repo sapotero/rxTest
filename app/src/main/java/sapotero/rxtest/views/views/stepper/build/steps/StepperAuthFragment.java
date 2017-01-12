@@ -25,9 +25,11 @@ import javax.inject.Inject;
 import rx.Subscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.events.stepper.StepperAuthDcCheckEvent;
-import sapotero.rxtest.events.stepper.StepperAuthDcCheckFailEvent;
-import sapotero.rxtest.events.stepper.StepperAuthDcCheckSuccessEvent;
+import sapotero.rxtest.events.stepper.StepperDcCheckEvent;
+import sapotero.rxtest.events.stepper.StepperDcCheckFailEvent;
+import sapotero.rxtest.events.stepper.StepperDcCheckSuccesEvent;
+import sapotero.rxtest.events.stepper.StepperLoginCheckFailEvent;
+import sapotero.rxtest.events.stepper.StepperLoginCheckSuccessEvent;
 import sapotero.rxtest.views.views.stepper.BlockingStep;
 import sapotero.rxtest.views.views.stepper.StepperLayout;
 import sapotero.rxtest.views.views.stepper.VerificationError;
@@ -109,7 +111,7 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
     switch ( authType ){
       case DS:
         EditText password = (EditText) stepper_auth_dc_wrapper.findViewById(R.id.stepper_auth_dc_password);
-        EventBus.getDefault().post( new StepperAuthDcCheckEvent( password.getText().toString() ) );
+        EventBus.getDefault().post( new StepperDcCheckEvent( password.getText().toString() ) );
         break;
       case PASSWORD:
         break;
@@ -161,22 +163,6 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
     stepper_auth_dc_wrapper.setVisibility(View.VISIBLE);
   }
 
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(StepperAuthDcCheckSuccessEvent event) throws Exception {
-    if (callback != null) {
-      Timber.tag(TAG).d("Sign success");
-      loadingDialog.hide();
-      callback.goToNextStep();
-    }
-  }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(StepperAuthDcCheckFailEvent event) throws Exception {
-    Timber.tag(TAG).d("Sign fail");
-    loadingDialog.hide();
-  }
-
-
   @Override
   @UiThread
   public void onNextClicked(StepperLayout.OnNextClickedCallback callback) {
@@ -190,4 +176,37 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
     Toast.makeText(this.getContext(), "Your custom back action. Here you should cancel currently running operations", Toast.LENGTH_SHORT).show();
     callback.goToPrevStep();
   }
+
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(StepperDcCheckSuccesEvent event) throws Exception {
+    Timber.tag(TAG).d("Sign success");
+    if (callback != null) {
+      loadingDialog.hide();
+      callback.goToNextStep();
+    }
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(StepperDcCheckFailEvent event) throws Exception {
+    Timber.tag(TAG).d("Sign fail");
+    loadingDialog.hide();
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(StepperLoginCheckSuccessEvent event) throws Exception {
+    Timber.tag(TAG).d("login success");
+    if (callback != null) {
+      loadingDialog.hide();
+      callback.goToNextStep();
+    }
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(StepperLoginCheckFailEvent event) throws Exception {
+    Timber.tag(TAG).d("login fail");
+    loadingDialog.hide();
+  }
+
+
 }

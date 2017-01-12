@@ -7,6 +7,8 @@ import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
@@ -31,7 +33,11 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
-import sapotero.rxtest.events.stepper.StepperAuthDcCheckSuccessEvent;
+import sapotero.rxtest.events.auth.AuthDcCheckFailEvent;
+import sapotero.rxtest.events.auth.AuthDcCheckSuccessEvent;
+import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
+import sapotero.rxtest.events.auth.AuthLoginCheckSuccessEvent;
+import sapotero.rxtest.events.stepper.StepperDcCheckEvent;
 import sapotero.rxtest.jobs.bus.AddFoldersJob;
 import sapotero.rxtest.jobs.bus.AddPrimaryConsiderationJob;
 import sapotero.rxtest.jobs.bus.AddTemplatesJob;
@@ -69,30 +75,15 @@ public class DataLoaderInterface {
   private CompositeSubscription subscription;
   private final Context context;
 
-
-  Callback callback;
-
-  public interface Callback {
-    void onAuthTokenSuccess();
-    void onGetDocumentsCountSuccess();
-    void onGetDocumentsInfoSuccess();
-    void onGetFoldersInfoSuccess();
-    void onGetTemplatesInfoSuccess();
-    void onGetFavoritesInfoSuccess();
-    void onGetProcessedInfoSuccess();
-    void onGetUserInformationSuccess();
-    void onError(Throwable error);
-  }
-
-  public void registerCallBack(Callback callback){
-    this.callback = callback;
-  }
-
-
   public DataLoaderInterface(Context context) {
     this.context = context;
 
     EsdApplication.getComponent(context).inject(this);
+
+    if ( EventBus.getDefault().isRegistered(this) ){
+      EventBus.getDefault().unregister(this);
+    }
+    EventBus.getDefault().register(this);
 
     initialize();
   }
@@ -106,6 +97,16 @@ public class DataLoaderInterface {
     CURRENT_USER = settings.getString("current_user");
   }
 
+  public void unregister(){
+    if ( isRegistered() ){
+      EventBus.getDefault().unregister(this);
+    }
+  }
+
+  public Boolean isRegistered(){
+    return EventBus.getDefault().isRegistered(this);
+  }
+
   private void unsubscribe(){
     if ( subscription != null && subscription.hasSubscriptions() ){
       subscription.unsubscribe();
@@ -113,16 +114,20 @@ public class DataLoaderInterface {
     subscription = new CompositeSubscription();
   }
 
-  private void setToken(String token ){
+  private void setToken( String token ){
     TOKEN.set(token);
   }
-  private void setCurrentUser( String user ){
-    CURRENT_USER.set(user);
-    callback.onGetUserInformationSuccess();
+
+  private void setLogin( String login ){
+    LOGIN.set(login);
   }
 
-  public void tryToSignWithDc(String sign, Callback callback){
-    Timber.tag(TAG).i("tryToSignWithDc" );
+  private void setCurrentUser( String user ){
+    CURRENT_USER.set(user);
+  }
+
+  public void tryToSignWithDc(String sign){
+    Timber.tag(TAG).i("tryToSignWithDc: %s", sign );
 
     Retrofit retrofit = new RetrofitManager( context, HOST.get(), okHttpClient).process();
     AuthService auth = retrofit.create( AuthService.class );
@@ -135,19 +140,49 @@ public class DataLoaderInterface {
       new JSONObject( map ).toString()
     );
 
+    Timber.tag(TAG).i("json: %s", json .toString());
+
     auth
       .getAuthBySign( json )
       .subscribeOn( Schedulers.io() )
       .observeOn( AndroidSchedulers.mainThread() )
-      .unsubscribeOn(Schedulers.io())
-      .subscribe( data -> {
-        Timber.tag(TAG).i("tryToSignWithDc: token" + data.getAuthToken());
-        Timber.tag(TAG).i("tryToSignWithDc: login" + data.getLogin());
-        EventBus.getDefault().post( new StepperAuthDcCheckSuccessEvent() );
-      });
+      .subscribe(
+        data -> {
+          Timber.tag(TAG).i("tryToSignWithDc: token" + data.getAuthToken());
+          Timber.tag(TAG).i("tryToSignWithDc: login" + data.getLogin());
+
+          setLogin( data.getLogin() );
+          setToken( data.getAuthToken() );
+
+          EventBus.getDefault().post( new AuthDcCheckSuccessEvent() );
+        },
+        error -> {
+          Timber.tag(TAG).i("tryToSignWithLogin error: %s" , error );
+          EventBus.getDefault().post( new AuthDcCheckFailEvent() );
+        }
+      );
   }
 
   public void tryToSignWithLogin(){
+    Retrofit retrofit = new RetrofitManager( context, HOST.get(), okHttpClient).process();
+    AuthService auth = retrofit.create( AuthService.class );
+
+    auth
+      .getAuth( LOGIN.get(), PASSWORD.get() )
+      .subscribeOn( Schedulers.io() )
+      .observeOn( AndroidSchedulers.mainThread() )
+      .unsubscribeOn(Schedulers.io())
+      .subscribe(
+        data -> {
+          Timber.tag(TAG).i("tryToSignWithLogin: token %s", data.getAuthToken());
+          setToken( data.getAuthToken() );
+          EventBus.getDefault().post( new AuthLoginCheckSuccessEvent() );
+        },
+        error -> {
+          Timber.tag(TAG).i("tryToSignWithLogin error:" , error );
+          EventBus.getDefault().post( new AuthLoginCheckFailEvent() );
+        }
+      );
   }
 
   public void getAuthToken(){
@@ -165,12 +200,12 @@ public class DataLoaderInterface {
       .subscribeOn( Schedulers.io() )
       .observeOn( AndroidSchedulers.mainThread() )
       .unsubscribeOn(Schedulers.io())
-      .doOnError( error -> callback.onError(error))
+//      .doOnError( error -> callback.onError(error))
       .doOnNext(
         data -> {
           Timber.tag(TAG).i("getAuth %s", data.getAuthToken() );
           setToken( data.getAuthToken() );
-          callback.onAuthTokenSuccess();
+//          callback.onAuthTokenSuccess();
         }
       )
 
@@ -216,7 +251,7 @@ public class DataLoaderInterface {
             jobManager.addJobInBackground( new SyncDocumentsJob(doc.getUid(), Fields.getStatus(type)) );
           }
         }
-        callback.onGetDocumentsInfoSuccess();
+//        callback.onGetDocumentsInfoSuccess();
       } )
 
       // получаем список обработанных документов по статусам
@@ -257,377 +292,20 @@ public class DataLoaderInterface {
             });
           }
         }
-        callback.onGetProcessedInfoSuccess();
+//        callback.onGetProcessedInfoSuccess();
       } )
 
 
       .subscribe(
         data -> {
           Timber.tag(TAG).w( "subscribe %s", data );
-          callback.onGetProcessedInfoSuccess();
+//          callback.onGetProcessedInfoSuccess();
         }, error -> {
-          callback.onError(error);
+//          callback.onError(error);
         }
       );
 
   }
-
-
-
-//  public void getPrimaryConsiderationUsers() {
-//    Timber.e("getPrimaryConsiderationUsers");
-//
-//    Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
-//    PrimaryConsiderationService primaryConsiderationService = retrofit.create(PrimaryConsiderationService.class);
-//
-//    Observable<ArrayList<Oshs>> info = primaryConsiderationService.getUsers( LOGIN.get(), TOKEN.get() );
-//
-//    unsubscribe();
-//    subscription.add(
-//      info.subscribeOn(Schedulers.computation())
-//        .observeOn( AndroidSchedulers.mainThread() )
-//        .subscribe(
-//          users -> {
-//            Timber.e("load %s", users.size());
-//            jobManager.addJobInBackground(new AddPrimaryConsiderationJob(users));
-//          },
-//          error -> {
-//            Timber.tag(TAG).d("ERROR " + error.getMessage());
-//          })
-//    );
-//  }
-//
-//  public void getUserInformation() {
-//    Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
-//    UserInfoService userInfoService = retrofit.create(UserInfoService.class);
-//
-//    Observable<UserInfo> info = userInfoService.load( LOGIN.get(), TOKEN.get() );
-//
-//    unsubscribe();
-//    subscription.add(
-//      info.subscribeOn(Schedulers.computation())
-//        .observeOn( AndroidSchedulers.mainThread() )
-//        .subscribe(
-//          data -> {
-//
-//            settings.getString("current_user").set( data.getMe().getName() );
-//            // Preference<String> current_user = settings.getString("current_user");
-//            // String user_data = new Gson().toJson( data , UserInfo.class);
-//            // current_user.set( user_data );
-//
-////            getOnControl();
-////            getPrimaryConsiderationUsers();
-//
-//            callback.onGetUserInformationSuccess();
-//          },
-//          error -> {
-//            Timber.tag(TAG).d("ERROR " + error.getMessage());
-//            callback.onError(error);
-//          })
-//    );
-//
-//  }
-//
-//  public void getDocumentsCount() {
-//
-//    Retrofit retrofit = new RetrofitManager(context, HOST.get() + "/v3/", okHttpClient).process();
-//    DocumentsService documentsService = retrofit.create(DocumentsService.class);
-//
-////    String[] filter_types = context.getResources().getStringArray(R.array.FILTER_TYPES_VALUE);
-//
-//    Fields.Status[] new_filter_types = Fields.Status.values();
-//
-//    unsubscribe();
-//    subscription.add(
-//      Observable
-//        .from(new_filter_types)
-//        .flatMap(status -> documentsService.getDocuments(LOGIN.get(), TOKEN.get(), status.getValue(), 0, 0))
-//        .toList()
-//        .subscribeOn( Schedulers.computation() )
-//        .observeOn( AndroidSchedulers.mainThread() )
-//        .subscribe(
-//          documents -> {
-//            int count = 0;
-//
-//            if (documents.size() > 0) {
-//              for (Documents document : documents) {
-//                if (document.getMeta() != null && document.getMeta().getTotal() != null) {
-//                  count += Integer.valueOf(document.getMeta().getTotal());
-//                }
-//              }
-//            }
-//
-//            if (count != 0) {
-//              COUNT.set(String.valueOf(count));
-//              callback.onGetDocumentsCountSuccess();
-//            }
-//
-//
-//          },
-//          error -> {
-//            callback.onError(error);
-//          }
-//        )
-//    );
-//  }
-//
-//  public void getDocumentsInfo(){
-//
-////    StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-////    StrictMode.setThreadPolicy(policy);
-//
-//
-//    Retrofit retrofit = new RetrofitManager(context, HOST.get() + "/v3/", okHttpClient).process();
-//    DocumentsService documentsService = retrofit.create(DocumentsService.class);
-//
-//    Fields.Status[] new_filter_types = Fields.Status.values();
-//
-//
-//    Observable<Fields.Status> types = Observable.from(new_filter_types);
-//    Observable<Documents> count = Observable
-//      .from(new_filter_types)
-//      .flatMap(status -> documentsService.getDocuments(LOGIN.get(), TOKEN.get(), status.getValue(), 1000, 0));
-//
-//
-//    unsubscribe();
-//    subscription.add(
-//      Observable.zip( types, count, (type, docs) -> {
-//        return new TDmodel( type, docs.getDocuments() );
-//      })
-//        .subscribeOn( Schedulers.computation() )
-//        .observeOn( AndroidSchedulers.mainThread() )
-//        .toList()
-//        .subscribe(
-//          raw -> {
-//            Timber.tag(TAG).i(" RECV: %s", raw.size());
-//
-//            for (TDmodel data: raw) {
-//              Timber.tag(TAG).i(" DocumentType: %s | %s", data.getType(), data.getDocuments().size() );
-//
-//              for (Document doc: data.getDocuments() ) {
-//                String type = data.getType();
-//                Timber.tag(TAG).d( "%s | %s", type, doc.getUid() );
-//
-//                jobManager.addJobInBackground(new SyncDocumentsJob( doc.getUid(), Fields.getStatus(type) ), () -> {
-//                  Timber.e("complete");
-//                });
-//                callback.onGetDocumentsInfoSuccess();
-//              }
-//            }
-//          },
-//          error -> {
-//            callback.onError(error);
-//          })
-//    );
-//  }
-//
-//  public void getFolders(){
-//
-//    Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
-//    FoldersService foldersService = retrofit.create(FoldersService.class);
-//
-//    Observable<ArrayList<Folder>> folder = foldersService.getFolders( LOGIN.get(), TOKEN.get() );
-//
-//    folder.subscribeOn(Schedulers.computation())
-//      .observeOn( AndroidSchedulers.mainThread() )
-//      .subscribe(
-//        folders -> {
-//          Timber.tag(TAG).w( "%s", folders );
-//          jobManager.addJobInBackground(new AddFoldersJob(folders));
-//          callback.onGetFoldersInfoSuccess();
-//        },
-//        error -> {
-//          Timber.tag(TAG).d("ERROR " + error.getMessage());
-//          callback.onError(error);
-//        });
-//  }
-//
-//  public void getTemplates(){
-//    Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
-//    TemplatesService templatesService = retrofit.create(TemplatesService.class);
-//
-//    Observable<ArrayList<Template>> template = templatesService.getTemplates( LOGIN.get(), TOKEN.get() );
-//
-//    template.subscribeOn(Schedulers.computation())
-//      .observeOn( AndroidSchedulers.mainThread() )
-//      .subscribe(
-//        templates -> {
-//          Timber.tag(TAG).w( "%s", templates );
-//          jobManager.addJobInBackground(new AddTemplatesJob(templates));
-//          callback.onGetTemplatesInfoSuccess();
-//        },
-//        error -> {
-//          Timber.tag(TAG).d("ERROR " + error.getMessage());
-//          callback.onError(error);
-//        });
-//
-//  }
-//
-//  public void getProcessed(){
-//
-//    Timber.tag(TAG).d("getProcessed ");
-//
-//    String processed_folder = dataStore
-//      .select(RFolderEntity.class)
-//      .where(RFolderEntity.TYPE.eq("processed"))
-//      .get().first().getUid();
-//
-//    StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-//    StrictMode.setThreadPolicy(policy);
-//
-//
-//    Retrofit retrofit = new RetrofitManager(context, HOST.get() + "/v3/", okHttpClient).process();
-//    DocumentsService documentsService = retrofit.create(DocumentsService.class);
-//
-//    Fields.Status[] new_filter_types = Fields.Status.values();
-//
-//    DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-//    Calendar cal = Calendar.getInstance();
-//    cal.add(Calendar.HOUR, -48);
-//    String date = dateFormat.format(cal.getTime());
-//
-//
-//
-//      Observable<Fields.Status> types = Observable.from(new_filter_types);
-//    Observable<Documents> count = Observable
-//      .from(new_filter_types)
-//      .flatMap(status -> documentsService.getByFolders(LOGIN.get(), TOKEN.get(), status.getValue(), 1000, 0, processed_folder, date));
-//
-//
-//    unsubscribe();
-//    subscription.add(
-//      Observable.zip( types, count, (type, docs) -> new TDmodel( type, docs.getDocuments() ))
-//        .subscribeOn( Schedulers.computation() )
-//        .observeOn( AndroidSchedulers.mainThread() )
-//        .toList()
-//        .subscribe(
-//          raw -> {
-//            Timber.tag(TAG).i(" RECV: %s", raw.size());
-//
-//            for (TDmodel data: raw) {
-//              Timber.tag(TAG).i(" DocumentType: %s | %s", data.getType(), data.getDocuments().size() );
-//
-//              for (Document doc: data.getDocuments() ) {
-//                String type = data.getType();
-//                Timber.tag(TAG).d( "%s | %s", type, doc.getUid() );
-//
-//                jobManager.addJobInBackground(new SyncDocumentsJob( doc.getUid(), Fields.getStatus(type), processed_folder, false, true ), () -> {
-//                  Timber.e("complete");
-//                });
-//              }
-//            }
-//            callback.onGetProcessedInfoSuccess();
-//          },
-//          error -> {
-//            callback.onError(error);
-//          })
-//    );
-//
-//  }
-//
-//  private void getOnControl(){
-//
-//    Timber.tag(TAG).d("getOnControl ");
-//
-//
-//    StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-//    StrictMode.setThreadPolicy(policy);
-//
-//
-//    Retrofit retrofit = new RetrofitManager(context, HOST.get() + "/v3/", okHttpClient).process();
-//    DocumentsService documentsService = retrofit.create(DocumentsService.class);
-//
-//    Fields.Status[] new_filter_types = Fields.Status.values();
-//
-//
-//    Observable<Fields.Status> types = Observable.from(new_filter_types);
-//    Observable<Documents> count = Observable
-//      .from(new_filter_types)
-//      .flatMap(status -> documentsService.getControl(LOGIN.get(), TOKEN.get(), status.getValue(), 1000, 0, "checked"));
-//
-//    unsubscribe();
-//    subscription.add(
-//      Observable.zip( types, count, (type, docs) -> new TDmodel( type, docs.getDocuments() ))
-//        .subscribeOn( Schedulers.computation() )
-//        .observeOn( AndroidSchedulers.mainThread() )
-//        .toList()
-//        .subscribe(
-//          raw -> {
-//            Timber.tag(TAG).i(" RECV: %s", raw.size());
-//
-//            for (TDmodel data: raw) {
-//              Timber.tag(TAG).i(" DocumentType: %s | %s", data.getType(), data.getDocuments().size() );
-//
-//              for (Document doc: data.getDocuments() ) {
-//                String type = data.getType();
-//                Timber.tag(TAG).d( "%s | %s", type, doc.getUid() );
-//
-//                jobManager.addJobInBackground(new SyncDocumentsJob( doc.getUid(), Fields.getStatus(type), true ), () -> {
-//                  Timber.e("complete");
-//                });
-//              }
-//            }
-//          },
-//          error -> {
-//            callback.onError(error);
-//          })
-//    );
-//
-//  }
-//
-//  public void getFavorites(){
-//
-//    String processed_folder = dataStore
-//      .select(RFolderEntity.class)
-//      .where(RFolderEntity.TYPE.eq("favorites"))
-//      .get().first().getUid();
-//
-//    StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-//    StrictMode.setThreadPolicy(policy);
-//
-//
-//    Retrofit retrofit = new RetrofitManager(context, HOST.get() + "/v3/", okHttpClient).process();
-//    DocumentsService documentsService = retrofit.create(DocumentsService.class);
-//
-//    Fields.Status[] new_filter_types = Fields.Status.values();
-//
-//
-//    Observable<Fields.Status> types = Observable.from(new_filter_types);
-//    Observable<Documents> count = Observable
-//      .from(new_filter_types)
-//      .flatMap(status -> documentsService.getByFolders(LOGIN.get(), TOKEN.get(), status.getValue(), 1000, 0, processed_folder, null));
-//
-//
-//    unsubscribe();
-//    subscription.add(
-//      Observable.zip( types, count, (type, docs) -> new TDmodel( type, docs.getDocuments() ))
-//        .subscribeOn( Schedulers.computation() )
-//        .observeOn( AndroidSchedulers.mainThread() )
-//        .toList()
-//        .subscribe(
-//          raw -> {
-//            Timber.tag(TAG).i(" RECV: %s", raw.size());
-//
-//            for (TDmodel data: raw) {
-//              Timber.tag(TAG).i(" DocumentType: %s | %s", data.getType(), data.getDocuments().size() );
-//
-//              for (Document doc: data.getDocuments() ) {
-//                String type = data.getType();
-//                Timber.tag(TAG).d( "%s | %s", type, doc.getUid() );
-//
-//                jobManager.addJobInBackground(new SyncDocumentsJob( doc.getUid(), Fields.getStatus(type), processed_folder, true, false ), () -> {
-//                  Timber.e("complete");
-//                });
-//              }
-//            }
-//            callback.onGetProcessedInfoSuccess();
-//          },
-//          error -> {
-//            callback.onError(error);
-//          })
-//    );
-//
-//  }
 
   public void updateByStatus(Item items) {
     ArrayList<Fields.Status> filter_types = new ArrayList<>();
@@ -644,7 +322,7 @@ public class DataLoaderInterface {
     }
 
 
-    Retrofit retrofit = new RetrofitManager(context, HOST.get() + "/v3/", okHttpClient).process();
+    Retrofit retrofit = new RetrofitManager( context, HOST.get() + "/v3/", okHttpClient).process();
     DocumentsService documentsService = retrofit.create(DocumentsService.class);
 
     Timber.tag("updateByStatus").i( "%s ", filter_types );
@@ -677,10 +355,15 @@ public class DataLoaderInterface {
             }
           },
           error -> {
-            callback.onError(error);
+//            callback.onError(error);
           })
     );
   }
 
+
+  @Subscribe(threadMode = ThreadMode.BACKGROUND)
+  public void onMessageEvent(StepperDcCheckEvent event) throws Exception {
+    String token = event.pin;
+  }
 
 }
