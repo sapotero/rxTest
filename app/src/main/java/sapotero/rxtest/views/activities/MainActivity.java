@@ -46,7 +46,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import okhttp3.OkHttpClient;
-import rx.Subscription;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
@@ -137,12 +136,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private final int SETTINGS_REJECTION_TEMPLATES = 22;
 
   public DocumentsAdapter RAdapter;
-
-  private Subscription documentQuery = null;
-  private Subscription changedQuery = null;
-  private int loaded = 0;
-  private Toast mToast;
-  private Subscription updateOrganizations;
   public  MenuBuilder menuBuilder;
   private DBQueryBuilder dbQueryBuilder;
   private DataLoaderInterface dataLoader;
@@ -169,8 +162,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       Timber.tag("ORGANIZATION_SELECTOR").i("selected");
     });
 
-
-
     menuBuilder = new MenuBuilder(this);
     menuBuilder
       .withButtonsLayout( menu_builder_buttons )
@@ -178,6 +169,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       .withOrganizationSelector( ORGANIZATION_SELECTOR )
       .withFavoritesButton( favorites_button )
       .withJournalSelector( DOCUMENT_TYPE_SELECTOR )
+      .withUser( LOGIN.get() )
       .registerCallBack(this);
     menuBuilder.build();
 
@@ -219,6 +211,11 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       return false;
     });
 
+    if (EventBus.getDefault().isRegistered(this)) {
+      EventBus.getDefault().unregister(this);
+    }
+    EventBus.getDefault().register(this);
+
     rxSettings();
 
   }
@@ -248,11 +245,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @Override
   public void onStart() {
     super.onStart();
-
-
-    if (!EventBus.getDefault().isRegistered(this)) {
-      EventBus.getDefault().register(this);
-    }
   }
 
   @Override

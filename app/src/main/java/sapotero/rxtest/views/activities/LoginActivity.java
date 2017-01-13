@@ -25,7 +25,7 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.events.bus.FileDownloadedEvent;
 import sapotero.rxtest.events.bus.MarkDocumentAsChangedJobEvent;
-import sapotero.rxtest.events.stepper.StepperNextStepEvent;
+import sapotero.rxtest.events.stepper.shared.StepperNextStepEvent;
 import sapotero.rxtest.views.interfaces.DataLoaderInterface;
 import sapotero.rxtest.views.services.MainService;
 import sapotero.rxtest.views.views.stepper.StepperLayout;
@@ -64,6 +64,10 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
     setContentView(R.layout.activity_login);
 
     EsdApplication.getComponent(this).inject(this);
+
+    if (EventBus.getDefault().isRegistered(this)) {
+      EventBus.getDefault().unregister(this);
+    }
     EventBus.getDefault().register(this);
 
     startService(new Intent(this, MainService.class));
@@ -114,102 +118,6 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
     }
 
   }
-
-//  @Override
-//  public void onAuthTokenSuccess() {
-////    progress.setVisibility(View.GONE);
-////    stepper.setActiveStepAsCompleted();
-////    stepper.goToNextStep();
-//    Timber.i( "LOGIN: %s\nTOKEN: %s", LOGIN.get(), TOKEN.get() );
-//  }
-//
-//
-//  @Override
-//  public void onGetUserInformationSuccess() {
-//    new Handler().postDelayed( () -> {
-////      stepper_loader_user_progressbar.setVisibility(View.INVISIBLE);
-////      stepper_loader_list_progressbar.setVisibility(View.VISIBLE);
-////      stepper_loader_user.setChecked(true);
-//    }, 2000L);
-//  }
-//
-//  @Override
-//  public void onGetDocumentsCountSuccess() {
-//    Timber.tag(TAG).i("LOADED onGetDocumentsCountSuccess");
-////    new Handler().postDelayed( () -> {
-////
-////      stepper_loader_list_progressbar.setVisibility(View.INVISIBLE);
-////      stepper_loader_info_progressbar.setVisibility(View.VISIBLE);
-////      stepper_loader_list.setChecked(true);
-////
-////      dataLoader.getDocumentsInfo();
-////
-////    }, 2000L);
-//  }
-//
-//  @Override
-//  public void onGetDocumentsInfoSuccess() {
-//    Timber.tag(TAG).i("LOADED onGetDocumentsInfoSuccess");
-////    dataLoader.getFavorites();
-//  }
-//
-//
-//  @Override
-//  public void onGetFoldersInfoSuccess() {
-//    Timber.tag(TAG).i("LOADED onGetFoldersInfoSuccess");
-//
-////    dataLoader.getTemplates();
-//  }
-//
-//  @Override
-//  public void onGetTemplatesInfoSuccess() {
-//    Timber.tag(TAG).i("LOADED onGetTemplatesInfoSuccess");
-//
-////    new Handler().postDelayed( () -> {
-////
-////      stepper_loader_user_progressbar.setVisibility(View.INVISIBLE);
-////      stepper_loader_list_progressbar.setVisibility(View.VISIBLE);
-////      stepper_loader_user.setChecked(true);
-////
-////
-////    }, 2000L);
-//  }
-//
-//
-//  @Override
-//  public void onGetFavoritesInfoSuccess() {
-//    Timber.tag(TAG).i("LOADED onGetFavoritesInfoSuccess");
-//
-////    dataLoader.getProcessed();
-//  }
-//
-//  @Override
-//  public void onGetProcessedInfoSuccess() {
-//    Timber.tag(TAG).i("LOADED onGetProcessedInfoSuccess");
-//
-////    new Handler().postDelayed( () -> {
-////
-////    stepper_loader_info_progressbar.setVisibility(View.INVISIBLE);
-////    stepper_loader_info.setChecked(true);
-//
-////    stepper.goToNextStep();
-////    stepper.setStepAsCompleted(0);
-////    stepper.setStepAsCompleted(1);
-////    stepper.setStepAsCompleted(2);
-////    stepper.goToStep(3, false);
-////
-////    }, 2000L);
-//  }
-//
-//  @Override
-//  public void onError(Throwable error) {
-//    Toast.makeText( this, String.format( "onError: Error %s", error.getMessage() ), Toast.LENGTH_SHORT).show();
-////    stepper.setStepAsUncompleted(0);
-////    stepper.setStepAsUncompleted(1);
-////    stepper.setStepAsUncompleted(2);
-////    stepper.goToStep(0, false);
-//  }
-
 
   /* Stepper */
   @Override

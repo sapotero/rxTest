@@ -20,16 +20,19 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.util.Objects;
+
 import javax.inject.Inject;
 
 import rx.Subscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.events.stepper.StepperDcCheckEvent;
-import sapotero.rxtest.events.stepper.StepperDcCheckFailEvent;
-import sapotero.rxtest.events.stepper.StepperDcCheckSuccesEvent;
-import sapotero.rxtest.events.stepper.StepperLoginCheckFailEvent;
-import sapotero.rxtest.events.stepper.StepperLoginCheckSuccessEvent;
+import sapotero.rxtest.events.stepper.auth.StepperDcCheckEvent;
+import sapotero.rxtest.events.stepper.auth.StepperDcCheckFailEvent;
+import sapotero.rxtest.events.stepper.auth.StepperDcCheckSuccesEvent;
+import sapotero.rxtest.events.stepper.auth.StepperLoginCheckEvent;
+import sapotero.rxtest.events.stepper.auth.StepperLoginCheckFailEvent;
+import sapotero.rxtest.events.stepper.auth.StepperLoginCheckSuccessEvent;
 import sapotero.rxtest.views.views.stepper.BlockingStep;
 import sapotero.rxtest.views.views.stepper.StepperLayout;
 import sapotero.rxtest.views.views.stepper.VerificationError;
@@ -41,13 +44,20 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
   @Inject RxSharedPreferences settings;
 
   final String TAG = this.getClass().getSimpleName();
+
+  private MaterialDialog loadingDialog;
+
   private FrameLayout stepper_auth_password_wrapper;
   private FrameLayout stepper_auth_dc_wrapper;
+
   private Subscription auth_type_subscription;
+
   private AuthType authType = AuthType.PASSWORD;
-  private VerificationError error;
-  private MaterialDialog loadingDialog;
+
+  private VerificationError error = new VerificationError("error");
+
   private StepperLayout.OnNextClickedCallback callback;
+
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -58,13 +68,7 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
     stepper_auth_password_wrapper = (FrameLayout) view.findViewById(R.id.stepper_auth_password_wrapper);
     stepper_auth_dc_wrapper       = (FrameLayout) view.findViewById(R.id.stepper_auth_dc_wrapper);
 
-    error = new VerificationError("error");
-
-    hideAllFields();
-
-    attachSettings();
-
-    prepareDialog();
+    initialize();
 
     if ( EventBus.getDefault().isRegistered(this) ) {
       EventBus.getDefault().unregister(this);
@@ -72,6 +76,21 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
     EventBus.getDefault().register(this);
 
     return view;
+  }
+
+  private void initialize() {
+    hideAllFields();
+    attachSettings();
+    prepareDialog();
+    setHostDefault();
+  }
+
+  private void setHostDefault() {
+    EditText host  = (EditText) stepper_auth_password_wrapper.findViewById(R.id.stepper_auth_host);
+    if ( Objects.equals(host.getText().toString(), "") ){
+      host.setText( settings.getString("settings_username_host").get() );
+    }
+
   }
 
   private void prepareDialog() {
@@ -85,54 +104,12 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
 
   }
 
-  @Override
-  public void onDestroy(){
-    super.onDestroy();
-    if (auth_type_subscription != null) {
-      auth_type_subscription.unsubscribe();
-    }
-
-    if ( EventBus.getDefault().isRegistered(this) ) {
-      EventBus.getDefault().unregister(this);
-    }
-
-  }
-
-  @Override
-  @StringRes
-  public int getName() {
-    //return string resource ID for the tab title used when StepperLayout is in tabs mode
-    return R.string.stepper_auth;
-  }
-
-  @Override
-  public VerificationError verifyStep() {
-
-    switch ( authType ){
-      case DS:
-        EditText password = (EditText) stepper_auth_dc_wrapper.findViewById(R.id.stepper_auth_dc_password);
-        EventBus.getDefault().post( new StepperDcCheckEvent( password.getText().toString() ) );
-        break;
-      case PASSWORD:
-        break;
-    }
-//    error = new VerificationError("error");
-    error = null;
-
-    return error;
-  }
-
-  @Override
-  public void onSelected() {
-  }
-
-  @Override
-  public void onError(@NonNull VerificationError error) {
-    Toast.makeText( getContext(), "Errror", Toast.LENGTH_SHORT ).show();
-  }
-
   private void attachSettings() {
     Preference<AuthType> auth_type = settings.getEnum("stepper.auth_type", AuthType.class);
+
+    if (auth_type.get() == null) {
+      auth_type.set( authType );
+    }
 
     auth_type_subscription = auth_type.asObservable().subscribe(type -> {
       switch ( type ){
@@ -151,6 +128,63 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
   private void hideAllFields(){
     stepper_auth_password_wrapper.setVisibility(View.GONE);
     stepper_auth_dc_wrapper.setVisibility(View.GONE);
+  }
+
+  @Override
+  public void onDestroy(){
+    super.onDestroy();
+    if (auth_type_subscription != null) {
+      auth_type_subscription.unsubscribe();
+    }
+
+    if ( EventBus.getDefault().isRegistered(this) ) {
+      EventBus.getDefault().unregister(this);
+    }
+
+  }
+
+  @Override
+  @StringRes
+  public int getName() {
+    return R.string.stepper_auth;
+  }
+
+  @Override
+  public VerificationError verifyStep() {
+
+    switch ( authType ){
+      case DS:
+        EditText password = (EditText) stepper_auth_dc_wrapper.findViewById(R.id.stepper_auth_dc_password);
+        EventBus.getDefault().post( new StepperDcCheckEvent( password.getText().toString() ) );
+        break;
+      case PASSWORD:
+        EditText login = (EditText) stepper_auth_password_wrapper.findViewById(R.id.stepper_auth_username);
+        EditText pwd   = (EditText) stepper_auth_password_wrapper.findViewById(R.id.stepper_auth_password);
+        EditText host  = (EditText) stepper_auth_password_wrapper.findViewById(R.id.stepper_auth_host);
+
+        Timber.e( "HOST: %s %s", host.getText(), Objects.equals(host.getText().toString(), "") );
+
+        EventBus.getDefault().post(
+          new StepperLoginCheckEvent(
+            login.getText().toString(),
+            pwd.getText().toString(),
+            host.getText().toString()
+          )
+        );
+        break;
+    }
+    error = null;
+
+    return error;
+  }
+
+  @Override
+  public void onSelected() {
+  }
+
+  @Override
+  public void onError(@NonNull VerificationError error) {
+    Toast.makeText( getContext(), "Errror", Toast.LENGTH_SHORT ).show();
   }
 
   private void showPassword(){
@@ -190,6 +224,11 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(StepperDcCheckFailEvent event) throws Exception {
     Timber.tag(TAG).d("Sign fail");
+
+    if (event.error != null) {
+      Toast.makeText( getContext(), event.error, Toast.LENGTH_SHORT ).show();
+    }
+
     loadingDialog.hide();
   }
 
@@ -205,6 +244,11 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(StepperLoginCheckFailEvent event) throws Exception {
     Timber.tag(TAG).d("login fail");
+
+    if (event.error != null) {
+      Toast.makeText( getContext(), event.error, Toast.LENGTH_SHORT ).show();
+    }
+
     loadingDialog.hide();
   }
 

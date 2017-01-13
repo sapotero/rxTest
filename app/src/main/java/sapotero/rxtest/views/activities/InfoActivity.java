@@ -54,12 +54,11 @@ import sapotero.rxtest.views.fragments.InfoCardFieldsFragment;
 import sapotero.rxtest.views.fragments.InfoCardLinksFragment;
 import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
 import sapotero.rxtest.views.fragments.RoutePreviewFragment;
-import sapotero.rxtest.views.interfaces.DocumentManager;
 import sapotero.rxtest.views.managers.menu.OperationManager;
 import sapotero.rxtest.views.managers.menu.utils.CommandParams;
 import timber.log.Timber;
 
-public class InfoActivity extends AppCompatActivity implements InfoActivityDecisionPreviewFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, RoutePreviewFragment.OnFragmentInteractionListener, InfoCardDocumentsFragment.OnFragmentInteractionListener, InfoCardWebViewFragment.OnFragmentInteractionListener, InfoCardLinksFragment.OnFragmentInteractionListener, InfoCardFieldsFragment.OnFragmentInteractionListener, DocumentManager.Callback, OperationManager.Callback, SelectOshsDialogFragment.Callback {
+public class InfoActivity extends AppCompatActivity implements InfoActivityDecisionPreviewFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, RoutePreviewFragment.OnFragmentInteractionListener, InfoCardDocumentsFragment.OnFragmentInteractionListener, InfoCardWebViewFragment.OnFragmentInteractionListener, InfoCardLinksFragment.OnFragmentInteractionListener, InfoCardFieldsFragment.OnFragmentInteractionListener, OperationManager.Callback, SelectOshsDialogFragment.Callback {
 
 
   @BindView(R.id.activity_info_preview_container) LinearLayout preview_container;
@@ -86,7 +85,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   private Preference<String> REG_NUMBER;
   private Preference<String> REG_DATE;
 
-  private DocumentManager documentManager;
+//  private DocumentManager documentManager;
   private String TAG = this.getClass().getSimpleName();
 
   @BindView(R.id.toolbar) Toolbar toolbar;
@@ -107,9 +106,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     setContentView(R.layout.activity_info);
     ButterKnife.bind(this);
     EsdApplication.getComponent(this).inject(this);
-
-    documentManager = new DocumentManager(this);
-    documentManager.registerCallBack(this);
 
     operationManager = new OperationManager(this);
     operationManager.registerCallBack(this);
@@ -458,18 +454,18 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     super.onResume();
   }
 
-
-  /* DocumentManager.Callback */
-  @Override
-  public void onGetStateSuccess() {
-    Timber.tag("DocumentManagerCallback").i("onGetStateSuccess");
-  }
-
-  @Override
-  public void onGetStateError() {
-    Timber.tag("DocumentManagerCallback").i("onGetStateError");
-  }
-
+//
+//  /* DocumentManager.Callback */
+//  @Override
+//  public void onGetStateSuccess() {
+//    Timber.tag("DocumentManagerCallback").i("onGetStateSuccess");
+//  }
+//
+//  @Override
+//  public void onGetStateError() {
+//    Timber.tag("DocumentManagerCallback").i("onGetStateError");
+//  }
+//
 
 
   /* OperationManager.Callback */

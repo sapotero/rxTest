@@ -5,6 +5,7 @@ import android.app.Application;
 import javax.inject.Singleton;
 
 import dagger.Component;
+import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.application.modules.EsdModule;
 import sapotero.rxtest.application.modules.SettingsModule;
 import sapotero.rxtest.db.requery.query.DBQueryBuilder;
@@ -68,6 +69,11 @@ import sapotero.rxtest.views.views.stepper.build.steps.StepperChooseAuthTypeFrag
 })
 
 public interface EsdComponent {
+
+
+
+  void inject(EsdApplication activity);
+
   void inject(LoginActivity activity);
   void inject(MainActivity  activity);
   void inject(InfoActivity  activity);

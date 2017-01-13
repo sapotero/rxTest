@@ -5,6 +5,8 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.f2prateek.rx.preferences.RxSharedPreferences;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +37,7 @@ import timber.log.Timber;
 public class DBQueryBuilder {
 
   @Inject SingleEntityStore<Persistable> dataStore;
+  @Inject RxSharedPreferences settings;
 
   private final String TAG = this.getClass().getSimpleName();
 
@@ -83,7 +86,10 @@ public class DBQueryBuilder {
 
       progressBar.setVisibility(ProgressBar.VISIBLE);
 
-      WhereAndOr<Result<RDocumentEntity>> query = dataStore.select(RDocumentEntity.class).where(RDocumentEntity.ID.ne(0));
+      WhereAndOr<Result<RDocumentEntity>> query =
+        dataStore
+          .select(RDocumentEntity.class)
+          .where(RDocumentEntity.USER.eq( settings.getString("login").get() ));
 
       if ( conditions.size() > 0 ){
 

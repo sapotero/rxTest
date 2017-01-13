@@ -3,8 +3,10 @@ package sapotero.rxtest.application;
 import android.app.Application;
 import android.content.Context;
 
-import com.facebook.stetho.Stetho;
+import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.squareup.leakcanary.LeakCanary;
+
+import javax.inject.Inject;
 
 import sapotero.rxtest.annotations.AnnotationTest;
 import sapotero.rxtest.application.components.DaggerEsdComponent;
@@ -19,6 +21,10 @@ public final class EsdApplication extends Application {
   public Application app;
   private static Context context;
 
+  private static String username;
+
+  @Inject RxSharedPreferences settings;
+
   @Override public void onCreate() {
     super.onCreate();
 
@@ -30,12 +36,12 @@ public final class EsdApplication extends Application {
         return;
       }
       LeakCanary.install(this);
-
-      Stetho.Initializer initializer = Stetho.newInitializerBuilder(this)
-        .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this))
-        .enableDumpapp(Stetho.defaultDumperPluginsProvider(getApplicationContext()))
-        .build();
-      Stetho.initialize(initializer);
+//
+//      Stetho.Initializer initializer = Stetho.newInitializerBuilder(this)
+//        .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this))
+//        .enableDumpapp(Stetho.defaultDumperPluginsProvider(getApplicationContext()))
+//        .build();
+//      Stetho.initialize(initializer);
     }
 
     mainComponent = DaggerEsdComponent.builder().esdModule(new EsdModule(this)).build();
@@ -44,7 +50,18 @@ public final class EsdApplication extends Application {
     context=getApplicationContext();
 
     AnnotationTest.getInstance();
+    getComponent(this).inject(this);
 
+    settings.getString("login").asObservable().subscribe(name -> {
+      Timber.e( "USERNAME: %s", name );
+      username = name;
+    });
+
+
+  }
+
+  public static String getUserName(){
+    return username;
   }
 
   public static Context getContext(){

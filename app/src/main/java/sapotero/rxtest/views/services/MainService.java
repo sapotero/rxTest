@@ -56,17 +56,18 @@ import sapotero.rxtest.events.auth.AuthDcCheckSuccessEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckSuccessEvent;
 import sapotero.rxtest.events.service.AuthServiceAuthEvent;
-import sapotero.rxtest.events.stepper.StepperDcCheckEvent;
-import sapotero.rxtest.events.stepper.StepperDcCheckFailEvent;
-import sapotero.rxtest.events.stepper.StepperDcCheckSuccesEvent;
-import sapotero.rxtest.events.stepper.StepperLoginCheckFailEvent;
-import sapotero.rxtest.events.stepper.StepperLoginCheckSuccessEvent;
-import sapotero.rxtest.utils.AlgorithmSelector;
-import sapotero.rxtest.utils.CMSSignExample;
-import sapotero.rxtest.utils.ContainerAdapter;
-import sapotero.rxtest.utils.KeyStoreType;
-import sapotero.rxtest.utils.PinCheck;
-import sapotero.rxtest.utils.ProviderType;
+import sapotero.rxtest.events.stepper.auth.StepperDcCheckEvent;
+import sapotero.rxtest.events.stepper.auth.StepperDcCheckFailEvent;
+import sapotero.rxtest.events.stepper.auth.StepperDcCheckSuccesEvent;
+import sapotero.rxtest.events.stepper.auth.StepperLoginCheckEvent;
+import sapotero.rxtest.events.stepper.auth.StepperLoginCheckFailEvent;
+import sapotero.rxtest.events.stepper.auth.StepperLoginCheckSuccessEvent;
+import sapotero.rxtest.utils.cryptopro.AlgorithmSelector;
+import sapotero.rxtest.utils.cryptopro.CMSSignExample;
+import sapotero.rxtest.utils.cryptopro.ContainerAdapter;
+import sapotero.rxtest.utils.cryptopro.KeyStoreType;
+import sapotero.rxtest.utils.cryptopro.PinCheck;
+import sapotero.rxtest.utils.cryptopro.ProviderType;
 import sapotero.rxtest.views.interfaces.DataLoaderInterface;
 import timber.log.Timber;
 
@@ -537,8 +538,12 @@ public class MainService extends Service {
 
 //
     } else {
-      EventBus.getDefault().post( new StepperDcCheckFailEvent() );
+      EventBus.getDefault().post( new StepperDcCheckFailEvent("Pin is invalid") );
     }
+  }
+
+  private void checkLogin(String login, String password, String host) throws Exception {
+    dataLoaderInterface.tryToSignWithLogin( login, password, host );
   }
 
 
@@ -549,13 +554,22 @@ public class MainService extends Service {
   }
 
   @Subscribe(threadMode = ThreadMode.BACKGROUND)
+  public void onMessageEvent(StepperLoginCheckEvent event) throws Exception {
+    checkLogin(
+      event.login,
+      event.password,
+      event.host
+    );
+  }
+
+  @Subscribe(threadMode = ThreadMode.BACKGROUND)
   public void onMessageEvent(AuthDcCheckSuccessEvent event) throws Exception {
     EventBus.getDefault().post( new StepperDcCheckSuccesEvent() );
   }
 
   @Subscribe(threadMode = ThreadMode.BACKGROUND)
   public void onMessageEvent(AuthDcCheckFailEvent event) throws Exception {
-    EventBus.getDefault().post( new StepperDcCheckFailEvent() );
+    EventBus.getDefault().post( new StepperDcCheckFailEvent(event.error) );
   }
 
   @Subscribe(threadMode = ThreadMode.BACKGROUND)
@@ -565,7 +579,7 @@ public class MainService extends Service {
 
   @Subscribe(threadMode = ThreadMode.BACKGROUND)
   public void onMessageEvent(AuthLoginCheckFailEvent event) throws Exception {
-    EventBus.getDefault().post( new StepperLoginCheckFailEvent() );
+    EventBus.getDefault().post( new StepperLoginCheckFailEvent(event.error) );
   }
 
 

@@ -29,6 +29,8 @@ public class MenuBuilder implements ItemsBuilder.Callback{
   private MultiOrganizationSpinner organizationsSelector;
   private CheckBox favorites;
 
+  private String user;
+
   public boolean isVisible() {
     return itemsBuilder.isVisible();
   }
@@ -63,6 +65,12 @@ public class MenuBuilder implements ItemsBuilder.Callback{
     journalSpinner = selector;
     return this;
   }
+
+  public MenuBuilder withUser(String user) {
+    this.user = user;
+    return this;
+  }
+
 
   public MenuBuilder withButtonsLayout(FrameLayout menu_builder_buttons) {
     buttons = menu_builder_buttons;
@@ -99,6 +107,8 @@ public class MenuBuilder implements ItemsBuilder.Callback{
     itemsBuilder.setFavoritesButton(favorites);
     itemsBuilder.setOrganizationSelector( organizationsSelector );
     itemsBuilder.setOrganizationsLayout( organizations );
+    itemsBuilder.setUser( user );
+
   }
 
   public void update() {

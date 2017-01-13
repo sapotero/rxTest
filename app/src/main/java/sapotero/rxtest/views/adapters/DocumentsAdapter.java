@@ -192,7 +192,7 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
         new NotificationCompat.Builder(mContext)
           .setSmallIcon( R.drawable.gerb )
           .setContentTitle("Уведомление")
-          .setContentText("Добавлена резолюция к документу " + item.getRegistrationNumber())
+          .setContentText("Добавлена резолюция к документу " + item.getUid() )
           .setDefaults(Notification.DEFAULT_ALL)
           .setCategory(Notification.CATEGORY_MESSAGE)
           .setPriority(NotificationCompat.PRIORITY_HIGH)

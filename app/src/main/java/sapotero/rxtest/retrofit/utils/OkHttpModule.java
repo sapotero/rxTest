@@ -26,7 +26,7 @@ public class OkHttpModule {
       .connectTimeout(60, TimeUnit.SECONDS)
       .addNetworkInterceptor(
         new HttpLoggingInterceptor().setLevel(
-          HttpLoggingInterceptor.Level.BODY
+          HttpLoggingInterceptor.Level.BASIC
         )
       )
       .addInterceptor( new StethoInterceptor())

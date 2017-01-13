@@ -17,7 +17,7 @@ import javax.inject.Inject;
 
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.events.stepper.StepperNextStepEvent;
+import sapotero.rxtest.events.stepper.shared.StepperNextStepEvent;
 import sapotero.rxtest.views.views.stepper.Step;
 import sapotero.rxtest.views.views.stepper.VerificationError;
 import sapotero.rxtest.views.views.stepper.util.AuthType;

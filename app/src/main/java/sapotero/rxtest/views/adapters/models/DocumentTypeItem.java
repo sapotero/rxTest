@@ -15,15 +15,19 @@ import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import sapotero.rxtest.views.menu.fields.Item;
 
+import static sapotero.rxtest.application.EsdApplication.getUserName;
+
 public class DocumentTypeItem {
   @Inject SingleEntityStore<Persistable> dataStore;
 
   private final Item item;
+  private final String user;
 
 
-  public DocumentTypeItem(Context context, Item item) {
+  public DocumentTypeItem(Context context, Item item, String user) {
     super();
     this.item = item;
+    this.user = user;
 
     EsdApplication.getComponent( context ).inject(this);
   }
@@ -35,12 +39,14 @@ public class DocumentTypeItem {
         .count(RDocumentEntity.class)
         .where( RDocumentEntity.FAVORITES.ne( true ) )
         .and( RDocumentEntity.PROCESSED.ne( true ) )
+        .and( RDocumentEntity.USER.eq( getUserName() ) )
         .get()
         .value();
 
       Integer projects = dataStore
         .count(RDocumentEntity.class)
         .where( RDocumentEntity.FILTER.eq(Fields.Status.APPROVAL.getValue() )   )
+        .and( RDocumentEntity.USER.eq( getUserName() ) )
         .or( RDocumentEntity.FILTER.eq(Fields.Status.SIGNING.getValue() )   )
         .get()
         .value();
@@ -49,7 +55,11 @@ public class DocumentTypeItem {
     } else {
       int count = 0;
 
-      WhereAndOr<Scalar<Integer>> query = dataStore.count(RDocument.class).where(RDocumentEntity.ID.ne(0));
+      WhereAndOr<Scalar<Integer>> query =
+        dataStore
+          .count(RDocument.class)
+          .where(RDocumentEntity.ID.ne(0))
+          .and( RDocumentEntity.USER.eq( user ) );
 
       if ( item.getCountConditions().length > 0 ){
 

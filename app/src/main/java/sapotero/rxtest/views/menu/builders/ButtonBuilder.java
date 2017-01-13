@@ -82,7 +82,10 @@ public class ButtonBuilder {
       query_condition = item_conditions.getField();
     }
 
-    WhereAndOr<Scalar<Integer>> query = dataStore.count(RDocument.class).where( query_condition );
+    WhereAndOr<Scalar<Integer>> query = dataStore
+      .count(RDocument.class)
+      .where( query_condition )
+      ;
 
     if ( conditions.length > 0 ){
 

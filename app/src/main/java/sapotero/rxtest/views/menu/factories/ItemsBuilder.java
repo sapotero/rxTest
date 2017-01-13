@@ -34,10 +34,15 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
   private LinearLayout organizationsLayout;
   private MultiOrganizationSpinner organizationSelector;
   private CheckBox favoritesButton;
+  private String user;
 
 
   public boolean isVisible() {
     return getSelectedItem().isVisible();
+  }
+
+  public void setUser(String user) {
+    this.user = user;
   }
 
 
@@ -93,7 +98,7 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
     List<DocumentTypeItem> document_types = new ArrayList<>();
 
     for ( Item item : Item.values()) {
-      document_types.add( new DocumentTypeItem( context, item ) );
+      document_types.add( new DocumentTypeItem( context, item, user ) );
     }
 
     journalSpinnerAdapter = new DocumentTypeAdapter(context, document_types);
