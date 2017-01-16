@@ -55,6 +55,9 @@ import sapotero.rxtest.events.auth.AuthDcCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthDcCheckSuccessEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckSuccessEvent;
+import sapotero.rxtest.events.crypto.SignDataEvent;
+import sapotero.rxtest.events.crypto.SignDataResultEvent;
+import sapotero.rxtest.events.crypto.SignDataWrongPinEvent;
 import sapotero.rxtest.events.service.AuthServiceAuthEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckFailEvent;
@@ -68,6 +71,7 @@ import sapotero.rxtest.utils.cryptopro.ContainerAdapter;
 import sapotero.rxtest.utils.cryptopro.KeyStoreType;
 import sapotero.rxtest.utils.cryptopro.PinCheck;
 import sapotero.rxtest.utils.cryptopro.ProviderType;
+import sapotero.rxtest.utils.cryptopro.wrapper.CMSSign;
 import sapotero.rxtest.views.interfaces.DataLoaderInterface;
 import timber.log.Timber;
 
@@ -117,14 +121,23 @@ public class MainService extends Service {
     EsdApplication.getComponent(this).inject(this);
 
     dataLoaderInterface = new DataLoaderInterface(getApplicationContext());
+
+    Provider[]	providers = Security.getProviders();
+
+
+
     // 1. Инициализация RxSharedPreferences
-//    initialize();
+    //    initialize();
 
     // 2. Инициализация провайдеров: CSP и java-провайдеров (Обязательная часть).
     if (!initCSPProviders()) {
       Log.i(Constants.APP_LOGGER_TAG, "Couldn't initialize CSP.");
     }
     initJavaProviders();
+
+    for (int i = 0; i != providers.length; i++) {
+      Timber.e("Name: %s |  Version: %s", providers[i].getName(), providers[i].getVersion());
+    }
 
     // 4. Инициируем объект для управления выбором типа контейнера (Настройки).
     KeyStoreType.init(this);
@@ -133,7 +146,7 @@ public class MainService extends Service {
     ProviderType.init(this);
 
     addKey();
-    aliases(KeyStoreType.currentType(), ProviderType.currentProviderType());
+    aliases( KeyStoreType.currentType(), ProviderType.currentProviderType() );
   }
 
   public int onStartCommand(Intent intent, int flags, int startId) {
@@ -301,22 +314,21 @@ public class MainService extends Service {
     CAdESConfig.setDefaultProvider(JCSP.PROVIDER_NAME);
 
     // Включаем возможность онлайновой проверки статуса сертификата.
-    System.setProperty("com.sun.security.enableCRLDP", "true");
-    System.setProperty("com.ibm.security.enableCRLDP", "true");
+//    System.setProperty("com.sun.security.enableCRLDP", "true");
 
     // Настройки TLS для генерации контейнера и выпуска сертификата
     // в УЦ 2.0, т.к. обращение к УЦ 2.0 будет выполняться по протоколу
     // HTTPS и потребуется авторизация по сертификату. Указываем тип
     // хранилища с доверенным корневым сертификатом, путь к нему и пароль.
 
-    final String trustStorePath = getApplicationInfo().dataDir + File.separator + BKSTrustStore.STORAGE_DIRECTORY + File.separator + BKSTrustStore.STORAGE_FILE_TRUST;
-
-    final String trustStorePassword = String.valueOf(BKSTrustStore.STORAGE_PASSWORD);
-    Log.d(Constants.APP_LOGGER_TAG, "Default trust store: " + trustStorePath);
-
-    System.setProperty("javax.net.ssl.trustStoreType", BKSTrustStore.STORAGE_TYPE);
-    System.setProperty("javax.net.ssl.trustStore", trustStorePath);
-    System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
+//    final String trustStorePath = getApplicationInfo().dataDir + File.separator + BKSTrustStore.STORAGE_DIRECTORY + File.separator + BKSTrustStore.STORAGE_FILE_TRUST;
+//
+//    final String trustStorePassword = String.valueOf(BKSTrustStore.STORAGE_PASSWORD);
+//    Log.d(Constants.APP_LOGGER_TAG, "Default trust store: " + trustStorePath);
+//
+//    System.setProperty("javax.net.ssl.trustStoreType", BKSTrustStore.STORAGE_TYPE);
+//    System.setProperty("javax.net.ssl.trustStore", trustStorePath);
+//    System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
 
   }
 
@@ -546,6 +558,42 @@ public class MainService extends Service {
     dataLoaderInterface.tryToSignWithLogin( login, password, host );
   }
 
+  private void getSign(String password) throws Exception {
+
+    ContainerAdapter adapter = new ContainerAdapter(aliasesList.get(0), null, aliasesList.get(0), null);
+
+    adapter.setProviderType(ProviderType.currentProviderType());
+    adapter.setClientPassword( password.toCharArray() );
+    adapter.setResources(getResources());
+
+
+    final String trustStorePath = this.getApplicationInfo().dataDir + File.separator + BKSTrustStore.STORAGE_DIRECTORY + File.separator + BKSTrustStore.STORAGE_FILE_TRUST;
+
+    adapter.setTrustStoreProvider(BouncyCastleProvider.PROVIDER_NAME);
+    adapter.setTrustStoreType(BKSTrustStore.STORAGE_TYPE);
+
+    adapter.setTrustStoreStream(new FileInputStream(trustStorePath));
+    adapter.setTrustStorePassword(BKSTrustStore.STORAGE_PASSWORD);
+
+    PinCheck pinCheck = new PinCheck(adapter);
+    Boolean pinValid = pinCheck.check();
+
+    if (pinValid){
+      CMSSign sign = new CMSSign(true, adapter, new File("/sdcard/Download/1.apk"));
+      sign.getResult(null);
+
+      byte[] signature = sign.getSignature();
+      Encoder enc = new Encoder();
+      Timber.tag( "CRT_BASE64" ).d( enc.encode(signature) );
+
+      EventBus.getDefault().post( new SignDataResultEvent( enc.encode(signature) ) );
+
+    } else {
+      EventBus.getDefault().post( new SignDataWrongPinEvent("Pin is invalid") );
+    }
+  }
+
+
 
   @Subscribe(threadMode = ThreadMode.BACKGROUND)
   public void onMessageEvent(StepperDcCheckEvent event) throws Exception {
@@ -580,6 +628,12 @@ public class MainService extends Service {
   @Subscribe(threadMode = ThreadMode.BACKGROUND)
   public void onMessageEvent(AuthLoginCheckFailEvent event) throws Exception {
     EventBus.getDefault().post( new StepperLoginCheckFailEvent(event.error) );
+  }
+
+
+  @Subscribe(threadMode = ThreadMode.BACKGROUND)
+  public void onMessageEvent(SignDataEvent event) throws Exception {
+    getSign( event.data );
   }
 
 

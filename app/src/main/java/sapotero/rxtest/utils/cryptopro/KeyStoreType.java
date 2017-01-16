@@ -57,7 +57,6 @@ public final class KeyStoreType extends ArrayResourceSelector {
         keyStoreType_ = new KeyStoreType(context);
         initiated = true;
       } catch (IOException e) {
-        ;
       }
 
     } // if

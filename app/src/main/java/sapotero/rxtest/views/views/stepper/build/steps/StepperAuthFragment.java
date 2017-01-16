@@ -252,5 +252,4 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
     loadingDialog.hide();
   }
 
-
 }

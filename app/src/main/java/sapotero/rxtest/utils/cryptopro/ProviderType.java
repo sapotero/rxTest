@@ -48,7 +48,6 @@ public class ProviderType extends ArrayResourceSelector {
         providerType_ = new ProviderType(context);
         initiated = true;
       } catch (IOException e) {
-        ;
       }
 
     } // if

@@ -16,7 +16,7 @@ public class AlgorithmSelector {
   /**
    * Возможные типы провайдеров.
    */
-  public static enum DefaultProviderType {ptUnknown, pt2001, pt2012Short, pt2012Long};
+  public enum DefaultProviderType {ptUnknown, pt2001, pt2012Short, pt2012Long}
 
   /**
    * Тип провайдера.

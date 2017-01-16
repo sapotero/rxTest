@@ -1,4 +1,4 @@
-package sapotero.rxtest.utils.cryptopro;
+package sapotero.rxtest.utils.cryptopro.wrapper;
 
 
 import java.io.File;
@@ -8,6 +8,10 @@ import java.io.InputStream;
 import java.security.Signature;
 
 import ru.CryptoPro.JCSP.JCSP;
+import sapotero.rxtest.utils.cryptopro.ContainerAdapter;
+import sapotero.rxtest.utils.cryptopro.ISignData;
+import sapotero.rxtest.utils.cryptopro.KeyStoreType;
+import sapotero.rxtest.utils.cryptopro.LogCallback;
 import timber.log.Timber;
 
 /**

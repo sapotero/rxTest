@@ -99,7 +99,6 @@ public class InstallCAdESTestTrustCertExample implements ICAdESData {
         try {
           trustStream.close();
         } catch (IOException e) {
-          ;
         }
 
       } // if

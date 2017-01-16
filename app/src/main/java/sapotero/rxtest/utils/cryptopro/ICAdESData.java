@@ -17,6 +17,6 @@ public interface ICAdESData extends IHashData {
    * @return true, если сертификаты присутствуют.
    * @throws Exception
    */
-  public boolean isAlreadyInstalled() throws Exception;
+  boolean isAlreadyInstalled() throws Exception;
 
 }

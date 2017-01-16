@@ -8,6 +8,6 @@ public interface IThreadExecuted {
    *
    * @param callback Логгер.
    */
-  public void execute(LogCallback callback);
+  void execute(LogCallback callback);
 
 }
