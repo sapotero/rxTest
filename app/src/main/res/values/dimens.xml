@@ -52,5 +52,6 @@
     <dimen name="ms_button_corner_radius">@dimen/abc_control_corner_material</dimen>
     <dimen name="ms_button_padding_horizontal">@dimen/abc_button_padding_horizontal_material</dimen>
     <dimen name="ms_button_padding_vertical">@dimen/abc_button_padding_vertical_material</dimen>
+    <dimen name="stepper_content_width">512dp</dimen>
 
 </resources>

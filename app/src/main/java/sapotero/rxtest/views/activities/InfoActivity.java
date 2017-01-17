@@ -1,9 +1,6 @@
 package sapotero.rxtest.views.activities;
 
-import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -12,9 +9,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
@@ -43,6 +44,9 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.bus.MassInsertDoneEvent;
+import sapotero.rxtest.events.crypto.SignDataEvent;
+import sapotero.rxtest.events.crypto.SignDataResultEvent;
+import sapotero.rxtest.events.crypto.SignDataWrongPinEvent;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.adapters.TabSigningPagerAdapter;
@@ -97,6 +101,8 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   private SelectOshsDialogFragment oshs;
 
   private Menu menu;
+  private MaterialDialog dialog;
+  private String SIGN;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -115,6 +121,30 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
     setPreview();
     setTabContent();
+
+
+    dialog = new MaterialDialog.Builder( this )
+      .title(R.string.app_name)
+      .cancelable(false)
+      .customView( R.layout.dialog_pin_check, true )
+      .positiveText("OK")
+      .autoDismiss(false)
+
+      .onPositive( (dialog, which) -> {
+        try {
+          EditText pass = (EditText) this.dialog.getCustomView().findViewById(R.id.dialog_pin_password);
+          pass.setVisibility(View.GONE);
+
+          this.dialog.getCustomView().findViewById(R.id.dialog_pin_progress).setVisibility(View.VISIBLE);
+          dialog.getActionButton(DialogAction.POSITIVE).setVisibility(View.GONE);
+
+          EventBus.getDefault().post( new SignDataEvent( pass.getText().toString() ) );
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }).build();
+
+
   }
 
   private void setPreview() {
@@ -255,7 +285,29 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
             break;
           case R.id.menu_info_approval_next_person:
             operation = "menu_info_next_person";
-            params.setSign( "SIGN" );
+            dialog = new MaterialDialog.Builder( this )
+              .title(R.string.app_name)
+              .cancelable(false)
+              .customView( R.layout.dialog_pin_check, true )
+              .positiveText("OK")
+              .autoDismiss(false)
+
+              .onPositive( (dialog, which) -> {
+                try {
+                  EditText pass = (EditText) this.dialog.getCustomView().findViewById(R.id.dialog_pin_password);
+                  pass.setVisibility(View.GONE);
+
+                  this.dialog.getCustomView().findViewById(R.id.dialog_pin_progress).setVisibility(View.VISIBLE);
+                  dialog.getActionButton(DialogAction.POSITIVE).setVisibility(View.GONE);
+
+                  EventBus.getDefault().post( new SignDataEvent( pass.getText().toString() ) );
+                } catch (Exception e) {
+                  e.printStackTrace();
+                }
+              }).build();
+            dialog.show();
+
+            params.setSign( SIGN );
             break;
           case R.id.menu_info_approval_prev_person:
             operation = "menu_info_prev_person";
@@ -391,26 +443,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     return false;
   }
 
-//  @Override
-//  public boolean onOptionsItemSelected(MenuItem item) {
-//    Timber.tag("MENU ITEM").i("ITEM SELECTED: %s", item );
-//    /* Меняем названия менюх в зависимости от действий */
-//    RDocumentEntity doc = dataStore
-//      .select(RDocumentEntity.class)
-//      .where(RDocumentEntity.UID.eq(UID.get())).get().first();
-//
-//    switch ( item.getItemId() ) {
-//      case R.id.menu_info_shared_to_favorites:
-//        item.setTitle(getString( doc.isFavorites() != null && doc.isFavorites() ? R.string.remove_from_favorites : R.string.to_favorites));
-//        break;
-//      case R.id.menu_info_shared_to_control:
-//        item.setTitle(getString( doc.isControl() != null && doc.isControl() ? R.string.remove_from_control : R.string.to_control));
-//        break;
-//    }
-//    return super.onOptionsItemSelected(item);
-//  }
-
-
   @Override
   public void onStart() {
     super.onStart();
@@ -453,6 +485,12 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   @Override
   protected void onResume() {
     super.onResume();
+
+    if (EventBus.getDefault().isRegistered(this)) {
+      EventBus.getDefault().unregister(this);
+    }
+    EventBus.getDefault().register(this);
+
   }
 
 //
@@ -568,10 +606,32 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   }
 
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(SignDataResultEvent event) throws Exception {
+    Timber.d("SignDataResultEvent %s", event.sign);
 
-  public boolean isOnline() {
-    ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-    NetworkInfo netInfo = cm.getActiveNetworkInfo();
-    return netInfo != null && netInfo.isConnectedOrConnecting();
+    if (event.sign != null) {
+      Toast.makeText( getApplicationContext(), event.sign, Toast.LENGTH_SHORT ).show();
+
+    }
+
+    if (dialog != null) {
+      dialog.hide();
+    }
   }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(SignDataWrongPinEvent event) throws Exception {
+    Timber.d("SignDataResultEvent %s", event.data);
+
+    if (event.data != null) {
+      Toast.makeText( getApplicationContext(), event.data, Toast.LENGTH_SHORT ).show();
+
+    }
+
+    if (dialog != null) {
+      dialog.hide();
+    }
+  }
+
 }

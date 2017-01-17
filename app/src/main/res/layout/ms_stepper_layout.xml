@@ -19,11 +19,11 @@
         android:id="@+id/ms_stepNavigation"
         android:layout_width="match_parent"
         android:layout_height="@dimen/ms_bottom_navigation_bar_height"
-        tools:background="@color/ms_bottomNavigationBackgroundColor">
+        tools:background="@color/md_grey_100">
 
+        <!--style="@style/MSNavBarButton"-->
         <Button
             android:id="@+id/ms_stepPrevButton"
-            style="@style/MSNavBarButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
@@ -32,7 +32,9 @@
             android:drawableLeft="@drawable/ic_chevron_start"
             android:drawableStart="@drawable/ic_chevron_start"
             tools:text="@string/ms_back"
-            tools:textColor="@color/ms_bottomNavigationButtonTextColor" />
+            tools:textColor="@color/ms_bottomNavigationButtonTextColor"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            />
 
         <FrameLayout
             android:layout_width="wrap_content"
@@ -59,9 +61,11 @@
 
         </FrameLayout>
 
+        <!--style="@style/MSNavBarButton"-->
         <sapotero.rxtest.views.views.stepper.internal.RightNavigationButton
             android:id="@+id/ms_stepNextButton"
-            style="@style/MSNavBarButton"
+
+            style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
@@ -73,10 +77,10 @@
             tools:textColor="@color/ms_bottomNavigationButtonTextColor"
             tools:visibility="gone" />
 
-        <!-- TODO fit on smaller devices with 320dp in width -->
+        <!--style="@style/MSNavBarButton"-->
         <sapotero.rxtest.views.views.stepper.internal.RightNavigationButton
             android:id="@+id/ms_stepCompleteButton"
-            style="@style/MSNavBarButton"
+            style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
@@ -85,7 +89,7 @@
             android:alpha="0"
             android:visibility="gone"
             tools:text="@string/ms_complete"
-            tools:textColor="@color/ms_bottomNavigationButtonTextColor"
+            tools:textColor="@color/md_red_900"
             tools:visibility="visible" />
 
     </RelativeLayout>

@@ -17,7 +17,9 @@ public class StepperFinishFragment extends Fragment implements Step {
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-    return inflater.inflate(R.layout.stepper_final_view, container, false);
+    View view = inflater.inflate(R.layout.stepper_final_view, container, false);
+
+    return view;
   }
 
   @Override
@@ -35,7 +37,6 @@ public class StepperFinishFragment extends Fragment implements Step {
 
   @Override
   public void onSelected() {
-    //update UI when selected
   }
 
   @Override

@@ -2,7 +2,7 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="sapotero.rxtest.views.activities.LoginActivity"
 
     android:layout_width="match_parent"
@@ -27,7 +27,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        custom:ms_stepperType="tabs"
+        app:ms_stepperType="tabs"
+        app:ms_completeButtonColor="@color/md_blue_600"
         android:elevation="2dp"
         android:clipToPadding="true"
         android:clipChildren="true"

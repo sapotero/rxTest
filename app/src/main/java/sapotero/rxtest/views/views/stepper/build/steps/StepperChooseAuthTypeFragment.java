@@ -8,24 +8,16 @@ import android.support.v7.widget.AppCompatButton;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.Toast;
 
-import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 
 import javax.inject.Inject;
 
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.events.crypto.SignDataEvent;
-import sapotero.rxtest.events.crypto.SignDataResultEvent;
-import sapotero.rxtest.events.crypto.SignDataWrongPinEvent;
 import sapotero.rxtest.events.stepper.shared.StepperNextStepEvent;
 import sapotero.rxtest.views.views.stepper.Step;
 import sapotero.rxtest.views.views.stepper.VerificationError;
@@ -48,10 +40,10 @@ public class StepperChooseAuthTypeFragment extends Fragment implements Step, Vie
     ds.setOnClickListener(this);
     password.setOnClickListener(this);
 
-    if ( EventBus.getDefault().isRegistered(this) ) {
-      EventBus.getDefault().unregister(this);
-    }
-    EventBus.getDefault().register(this);
+//    if ( EventBus.getDefault().isRegistered(this) ) {
+//      EventBus.getDefault().unregister(this);
+//    }
+//    EventBus.getDefault().register(this);
 
     return view;
   }
@@ -59,9 +51,9 @@ public class StepperChooseAuthTypeFragment extends Fragment implements Step, Vie
   @Override
   public void onDestroy(){
     super.onDestroy();
-    if ( EventBus.getDefault().isRegistered(this) ) {
-      EventBus.getDefault().unregister(this);
-    }
+//    if ( EventBus.getDefault().isRegistered(this) ) {
+//      EventBus.getDefault().unregister(this);
+//    }
 
   }
 
@@ -100,29 +92,8 @@ public class StepperChooseAuthTypeFragment extends Fragment implements Step, Vie
       case R.id.stepper_auth_choose_password:
         Timber.tag("StepperAuthFragment").d( "stepper_auth_choose_password" );
         setAuthType( AuthType.PASSWORD );
+        EventBus.getDefault().post( new StepperNextStepEvent() );
 
-        dialog = new MaterialDialog.Builder( getContext() )
-          .title(R.string.app_name)
-          .cancelable(false)
-          .customView( R.layout.dialog_pin_check, true )
-          .positiveText("OK")
-          .autoDismiss(false)
-
-          .onPositive( (dialog, which) -> {
-            try {
-              EditText pass = (EditText) this.dialog.getCustomView().findViewById(R.id.dialog_pin_password);
-              pass.setVisibility(View.GONE);
-
-              this.dialog.getCustomView().findViewById(R.id.dialog_pin_progress).setVisibility(View.VISIBLE);
-              dialog.getActionButton(DialogAction.POSITIVE).setVisibility(View.GONE);
-
-              EventBus.getDefault().post( new SignDataEvent( pass.getText().toString() ) );
-            } catch (Exception e) {
-              e.printStackTrace();
-            }
-          }).build();
-
-        dialog.show();
         break;
       default:
         break;
@@ -132,35 +103,5 @@ public class StepperChooseAuthTypeFragment extends Fragment implements Step, Vie
   private void setAuthType( AuthType type ){
     settings.getEnum("stepper.auth_type", AuthType.class).set( type );
   }
-
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(SignDataResultEvent event) throws Exception {
-    Timber.d("SignDataResultEvent %s", event.sign);
-
-    if (event.sign != null) {
-      Toast.makeText( getContext(), event.sign, Toast.LENGTH_SHORT ).show();
-
-    }
-
-    if (dialog != null) {
-      dialog.hide();
-    }
-  }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(SignDataWrongPinEvent event) throws Exception {
-    Timber.d("SignDataResultEvent %s", event.data);
-
-    if (event.data != null) {
-      Toast.makeText( getContext(), event.data, Toast.LENGTH_SHORT ).show();
-
-    }
-
-    if (dialog != null) {
-      dialog.hide();
-    }
-  }
-
 
 }

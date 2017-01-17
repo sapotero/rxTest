@@ -38,21 +38,22 @@
 
 
             <android.support.design.widget.TextInputLayout
-                android:layout_width="400dp"
+                android:layout_width="@dimen/stepper_content_width"
                 android:layout_height="wrap_content"
                 android:paddingTop="16dp"
                 >
                 <EditText
 
                     android:id="@+id/stepper_auth_username"
-                    android:layout_width="400dp"
+                    android:layout_width="@dimen/stepper_content_width"
                     android:layout_height="wrap_content"
                     android:hint="@string/username_hinf"
-                    android:text="rukodir"/>
+                    android:text="rukodir"
+                    style="@android:style/Widget.Material.EditText"/>
             </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout
-                android:layout_width="400dp"
+                android:layout_width="@dimen/stepper_content_width"
                 android:layout_height="wrap_content"
                 android:paddingTop="16dp"
 
@@ -67,13 +68,13 @@
             </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout
-                android:layout_width="400dp"
+                android:layout_width="@dimen/stepper_content_width"
                 android:layout_height="wrap_content"
                 android:paddingTop="16dp"
                 >
                 <EditText
                     android:id="@+id/stepper_auth_host"
-                    android:layout_width="400dp"
+                    android:layout_width="@dimen/stepper_content_width"
                     android:layout_height="wrap_content"
                     android:inputType="textPersonName"
                     android:text=""
@@ -94,7 +95,7 @@
         >
 
         <android.support.design.widget.TextInputLayout
-            android:layout_width="400dp"
+            android:layout_width="@dimen/stepper_content_width"
             android:layout_height="wrap_content"
             android:paddingTop="16dp"
 
