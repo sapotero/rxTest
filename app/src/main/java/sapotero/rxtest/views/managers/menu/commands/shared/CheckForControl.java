@@ -84,10 +84,14 @@ public class CheckForControl extends AbstractCommand {
         .where(RDocumentEntity.UID.eq(document_id))
         .get()
         .toObservable()
-        .flatMap( doc -> Observable.just( doc.isFavorites() ) )
+        .flatMap( doc -> Observable.just( doc.isControl() ) )
         .subscribe( value -> {
           Timber.tag(TAG).i("executeLocal for %s: CONTROL: %s",document_id, value);
           try {
+
+            if (value == null){
+              value = false;
+            }
 
             dataStore
               .update(RDocumentEntity.class)
@@ -160,8 +164,8 @@ public class CheckForControl extends AbstractCommand {
 
   }
 
-  public CheckForControl withDocumentId(String sign) {
-    this.document_id = sign;
+  public CheckForControl withDocumentId(String uid) {
+    this.document_id = uid;
     return this;
   }
 }

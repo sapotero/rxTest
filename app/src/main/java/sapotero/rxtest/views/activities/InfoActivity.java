@@ -363,6 +363,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 //            item.setTitle(getString( doc.isControl() != null && doc.isControl() ? R.string.remove_from_control : R.string.to_control));
 
             operation = "menu_info_shared_to_control";
+            params.setDocument( UID.get() );
             break;
 
 

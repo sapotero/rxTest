@@ -74,7 +74,7 @@
     <string name="constructor_create_to_favorites"> Редактор- В избранное </string>
 
 
-    <string name="action_settings">Settings</string>
+    <string name="action_settings">Выполняется проверка пин кода...</string>
     <string name="drawer_item_journals">Журналы</string>
     <string name="drawer_item_settings">Настройки</string>
     <string name="drawer_item_settings_account">Учетная запись/Отображение</string>

@@ -119,6 +119,7 @@ public class ButtonBuilder {
     view.setGravity(Gravity.CENTER);
     view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12 );
 
+
     RadioGroup.LayoutParams params = new RadioGroup.LayoutParams( LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT,10.0f );
 
     switch (corner){
@@ -151,6 +152,8 @@ public class ButtonBuilder {
         callback.onButtonBuilderUpdate();
       }
     });
+
+//    view.setForeground(context.getDrawable(R.drawable.ripple));
 
     return view;
   }

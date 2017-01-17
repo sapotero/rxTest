@@ -6,10 +6,10 @@
             android:shape="rectangle">
             <!--<stroke android:width="1dp" android:color="#FF000000" />-->
             <solid android:color="@color/md_grey_200" />
-            <corners
-                android:bottomRightRadius="@dimen/half_date_offset"
-                android:topRightRadius="@dimen/half_date_offset"
-                />
+            <!--<corners-->
+                <!--android:bottomRightRadius="@dimen/half_date_offset"-->
+                <!--android:topRightRadius="@dimen/half_date_offset"-->
+                <!--/>-->
         </shape>
     </item>
 
@@ -18,10 +18,10 @@
             android:shape="rectangle">
             <!--<stroke android:width="1dp" android:color="#FF000000" />-->
             <solid android:color="@color/md_light_blue_700" />
-            <corners
-                android:bottomRightRadius="@dimen/half_date_offset"
-                android:topRightRadius="@dimen/half_date_offset"
-                />
+            <!--<corners-->
+                <!--android:bottomRightRadius="@dimen/half_date_offset"-->
+                <!--android:topRightRadius="@dimen/half_date_offset"-->
+                <!--/>-->
         </shape>
     </item>
 

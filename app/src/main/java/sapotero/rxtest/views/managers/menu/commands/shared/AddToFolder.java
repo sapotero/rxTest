@@ -100,6 +100,10 @@ public class AddToFolder extends AbstractCommand {
           Timber.tag(TAG).i("executeLocal for %s: favorites: %s",document_id, value);
           try {
 
+            if (value == null){
+              value = false;
+            }
+
             dataStore
               .update(RDocumentEntity.class)
               .set( RDocumentEntity.FAVORITES, !value)

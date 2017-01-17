@@ -12,6 +12,7 @@ import sapotero.rxtest.views.managers.menu.commands.report.FromTheReport;
 import sapotero.rxtest.views.managers.menu.commands.report.ReturnToPrimaryConsideration;
 import sapotero.rxtest.views.managers.menu.commands.shared.AddToFolder;
 import sapotero.rxtest.views.managers.menu.commands.shared.CheckForControl;
+import sapotero.rxtest.views.managers.menu.commands.signing.PrevPerson;
 import sapotero.rxtest.views.managers.menu.interfaces.Command;
 import sapotero.rxtest.views.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.views.managers.menu.utils.CommandParams;
@@ -104,7 +105,6 @@ public class CommandFactory implements AbstractCommand.Callback{
         command.withHistory(histrory);
         command
           .withPerson( "" )
-          .withPerson( "" )
           .registerCallBack(instance);
         return command;
       }
@@ -112,10 +112,9 @@ public class CommandFactory implements AbstractCommand.Callback{
     PREV_PERSON {
       @Override
       Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params, OperationHistory histrory) {
-        NextPerson command = new NextPerson(context, document);
+        PrevPerson command = new PrevPerson(context, document);
         command.withHistory(histrory);
         command
-          .withPerson( "" )
           .withPerson( "" )
           .registerCallBack(instance);
         return command;
@@ -145,7 +144,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         CheckForControl command = new CheckForControl(context, document);
         command.withHistory(histrory);
         command
-          .withDocumentId( params.getSign() )
+          .withDocumentId( params.getDocument() )
           .registerCallBack(instance);
         return command;
       }
