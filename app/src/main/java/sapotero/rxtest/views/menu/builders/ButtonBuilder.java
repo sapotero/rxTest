@@ -19,7 +19,6 @@ import io.requery.query.WhereAndOr;
 import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.db.requery.models.RDocument;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import timber.log.Timber;
 
@@ -83,9 +82,9 @@ public class ButtonBuilder {
     }
 
     WhereAndOr<Scalar<Integer>> query = dataStore
-      .count(RDocument.class)
-      .where( query_condition )
-      ;
+      .count(RDocumentEntity.class)
+      .where( query_condition );
+//      .and(RDocumentEntity.USER.eq( rxPreferences.getString("current_user").get() ));
 
     if ( conditions.length > 0 ){
 

@@ -63,6 +63,28 @@ public class SkipControlLabel extends AbstractCommand {
   public void execute() {
     loadSettings();
 
+    if ( history.getConnected() ){
+      executeRemote();
+    } else {
+      executeLocal();
+    }
+  }
+
+  @Override
+  public String getType() {
+    return "skip_control_label";
+  }
+
+  @Override
+  public void executeLocal() {
+    history.add(this);
+    if ( callback != null ){
+      callback.onCommandExecuteSuccess( getType() );
+    }
+  }
+
+  @Override
+  public void executeRemote() {
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
     Retrofit retrofit = new Retrofit.Builder()
@@ -96,6 +118,7 @@ public class SkipControlLabel extends AbstractCommand {
           Timber.tag(TAG).i("error: %s", data.getMessage());
           Timber.tag(TAG).i("type: %s", data.getType());
 
+          history.remove(this);
           if (callback != null){
             callback.onCommandExecuteSuccess(getType());
           }
@@ -106,21 +129,5 @@ public class SkipControlLabel extends AbstractCommand {
           }
         }
       );
-
-  }
-
-  @Override
-  public String getType() {
-    return "skip_control_label";
-  }
-
-  @Override
-  public void executeLocal() {
-
-  }
-
-  @Override
-  public void executeRemote() {
-
   }
 }

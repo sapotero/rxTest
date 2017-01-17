@@ -56,6 +56,7 @@ import sapotero.rxtest.views.managers.menu.commands.shared.CheckForControl;
 import sapotero.rxtest.views.managers.menu.utils.OperationHistory;
 import sapotero.rxtest.views.managers.view.DecisionManager;
 import sapotero.rxtest.views.menu.builders.ButtonBuilder;
+import sapotero.rxtest.views.menu.factories.ItemsBuilder;
 import sapotero.rxtest.views.services.MainService;
 import sapotero.rxtest.views.views.stepper.build.steps.StepperAuthFragment;
 import sapotero.rxtest.views.views.stepper.build.steps.StepperChooseAuthTypeFragment;
@@ -110,6 +111,11 @@ public interface EsdComponent {
 
 
   void inject(BaseJob job);
+
+
+  void inject(ItemsBuilder context);
+
+
 
 
   void inject(DataLoaderInterface context);

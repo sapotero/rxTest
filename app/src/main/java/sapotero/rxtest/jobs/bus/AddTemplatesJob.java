@@ -33,7 +33,7 @@ public class AddTemplatesJob extends BaseJob {
 
   @Override
   public void onRun() throws Throwable {
-    Timber.tag(TAG).i( "templates: %s | %s", templates.size(), templates.get(0).getText() );
+//    Timber.tag(TAG).i( "templates: %s | %s", templates.size(), templates.get(0).getText() );
     for (Template template : templates){
       if ( !exist( template.getId()) ){
         add(template);

@@ -70,13 +70,16 @@ public class DataLoaderInterface {
   private Preference<String> PASSWORD;
   private Preference<String> HOST;
   private Preference<String> COUNT;
+  private Preference<String> CURRENT_USER_ID;
+
 
   private String processed_folder;
-  private SimpleDateFormat dateFormat;
 
+  private SimpleDateFormat dateFormat;
   private CompositeSubscription subscription;
   private final Context context;
   private static Object insrance;
+  private String currentUserId;
 
   public DataLoaderInterface(Context context) {
     this.context = context;
@@ -98,6 +101,7 @@ public class DataLoaderInterface {
     HOST     = settings.getString("settings_username_host");
     COUNT    = settings.getString("documents.count");
     CURRENT_USER = settings.getString("current_user");
+    CURRENT_USER_ID = settings.getString("current_user_id");
   }
 
   public void unregister(){
@@ -125,6 +129,11 @@ public class DataLoaderInterface {
 
   private void setCurrentUser( String user ){
     CURRENT_USER.set(user);
+  }
+
+
+  public void setCurrentUserId(String currentUserId) {
+    CURRENT_USER_ID.set(currentUserId);
   }
 
 
@@ -234,42 +243,45 @@ public class DataLoaderInterface {
     return error;
   }
 
-  private void updateDocuments(){
+  private void updateDocuments() {
 
-    Timber.tag(TAG).i("getAuthToken" );
+    Timber.tag(TAG).i("getAuthToken");
 
-    Retrofit retrofit = new RetrofitManager( context, HOST.get(), okHttpClient).process();
-    AuthService auth = retrofit.create( AuthService.class );
+    Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
+    AuthService auth = retrofit.create(AuthService.class);
     DocumentsService docService = retrofit.create(DocumentsService.class);
 
 
     unsubscribe();
     subscription.add(
 
-      Observable.just( TOKEN.get() )
-        .subscribeOn( Schedulers.io() )
-        .observeOn( AndroidSchedulers.mainThread() )
+      Observable.just(TOKEN.get())
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
         .unsubscribeOn(Schedulers.io())
 
         // получаем шаблоны
-        .concatMap( data -> auth.getTemplates( LOGIN.get(),  TOKEN.get() ).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()) )
-        .doOnNext(  templates -> jobManager.addJobInBackground(new AddTemplatesJob(templates)) )
+        .concatMap(data -> auth.getTemplates(LOGIN.get(), TOKEN.get()).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()))
+        .doOnNext(templates -> jobManager.addJobInBackground(new AddTemplatesJob(templates)))
 
         // получаем данные о пользователе
-        .concatMap( data -> auth.getUserInfo( LOGIN.get(),  TOKEN.get() ).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()) )
-        .doOnNext(  info -> setCurrentUser( info.getMe().getName() ) )
+        .concatMap(data -> auth.getUserInfo(LOGIN.get(), TOKEN.get()).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()))
+        .doOnNext(info -> {
+          setCurrentUser(info.getMe().getName());
+          setCurrentUserId(info.getMe().getId());
+        })
 
         // получаем папки
-        .concatMap( data    -> auth.getFolders( LOGIN.get(), TOKEN.get() ).subscribeOn(Schedulers.io()) )
-        .doOnNext(  folders -> jobManager.addJobInBackground(new AddFoldersJob(folders)) )
+        .concatMap(data -> auth.getFolders(LOGIN.get(), TOKEN.get()).subscribeOn(Schedulers.io()))
+        .doOnNext(folders -> jobManager.addJobInBackground(new AddFoldersJob(folders)))
 
         // получаем группу первичного рассмотрения
-        .concatMap( data  -> auth.getPrimaryConsiderationUsers( LOGIN.get(),  TOKEN.get() ).subscribeOn(Schedulers.io()) )
-        .doOnNext(  users -> jobManager.addJobInBackground(new AddPrimaryConsiderationJob(users)) )
+        .concatMap(data -> auth.getPrimaryConsiderationUsers(LOGIN.get(), TOKEN.get()).subscribeOn(Schedulers.io()))
+        .doOnNext(users -> jobManager.addJobInBackground(new AddPrimaryConsiderationJob(users)))
 
 
         // получаем список документов по статусам
-        .concatMap( data  -> {
+        .concatMap(data -> {
           Fields.Status[] new_filter_types = Fields.Status.values();
 
           Observable<Fields.Status> types = Observable.from(new_filter_types);
@@ -277,27 +289,27 @@ public class DataLoaderInterface {
             .from(new_filter_types)
             .flatMap(status -> docService.getDocuments(LOGIN.get(), TOKEN.get(), status.getValue(), 1000, 0));
 
-          return Observable.zip( types, count, (type, docs) -> new TDmodel( type, docs.getDocuments() ))
-            .subscribeOn( Schedulers.computation() )
-            .observeOn( AndroidSchedulers.mainThread() )
+          return Observable.zip(types, count, (type, docs) -> new TDmodel(type, docs.getDocuments()))
+            .subscribeOn(Schedulers.computation())
+            .observeOn(AndroidSchedulers.mainThread())
             .toList();
         })
-        .doOnNext(  raw -> {
-          for (TDmodel data: raw) {
-            Timber.tag(TAG).i(" DocumentType: %s | %s", data.getType(), data.getDocuments().size() );
+        .doOnNext(raw -> {
+          for (TDmodel data : raw) {
+            Timber.tag(TAG).i(" DocumentType: %s | %s", data.getType(), data.getDocuments().size());
 
-            for (Document doc: data.getDocuments() ) {
+            for (Document doc : data.getDocuments()) {
               String type = data.getType();
-              Timber.tag(TAG).d( "%s | %s", type, doc.getUid() );
+              Timber.tag(TAG).d("%s | %s", type, doc.getUid());
 
-              jobManager.addJobInBackground( new SyncDocumentsJob(doc.getUid(), Fields.getStatus(type)) );
+              jobManager.addJobInBackground(new SyncDocumentsJob(doc.getUid(), Fields.getStatus(type)));
             }
           }
-  //        callback.onGetDocumentsInfoSuccess();
-        } )
+          //        callback.onGetDocumentsInfoSuccess();
+        })
 
         // получаем список обработанных документов по статусам
-        .concatMap( data  -> {
+        .concatMap(data -> {
 
           processed_folder = dataStore
             .select(RFolderEntity.class)
@@ -316,34 +328,34 @@ public class DataLoaderInterface {
             .from(new_filter_types)
             .flatMap(status -> docService.getByFolders(LOGIN.get(), TOKEN.get(), status.getValue(), 1000, 0, processed_folder, date));
 
-          return Observable.zip( types, count, (type, docs) -> new TDmodel( type, docs.getDocuments() ))
-            .subscribeOn( Schedulers.computation() )
-            .observeOn( AndroidSchedulers.mainThread() )
+          return Observable.zip(types, count, (type, docs) -> new TDmodel(type, docs.getDocuments()))
+            .subscribeOn(Schedulers.computation())
+            .observeOn(AndroidSchedulers.mainThread())
             .toList();
         })
-        .doOnNext(  raw -> {
-          for (TDmodel data: raw) {
-            Timber.tag(TAG).i(" DocumentType: %s | %s", data.getType(), data.getDocuments().size() );
+        .doOnNext(raw -> {
+          for (TDmodel data : raw) {
+            Timber.tag(TAG).i(" DocumentType: %s | %s", data.getType(), data.getDocuments().size());
 
-            for (Document doc: data.getDocuments() ) {
+            for (Document doc : data.getDocuments()) {
               String type = data.getType();
-              Timber.tag(TAG).d( "%s | %s", type, doc.getUid() );
+              Timber.tag(TAG).d("%s | %s", type, doc.getUid());
 
-              jobManager.addJobInBackground(new SyncDocumentsJob( doc.getUid(), Fields.getStatus(type), processed_folder, false, true ), () -> {
+              jobManager.addJobInBackground(new SyncDocumentsJob(doc.getUid(), Fields.getStatus(type), processed_folder, false, true), () -> {
                 Timber.e("complete");
               });
             }
           }
-  //        callback.onGetProcessedInfoSuccess();
-        } )
+          //        callback.onGetProcessedInfoSuccess();
+        })
 
 
         .subscribe(
           data -> {
-            Timber.tag(TAG).w( "subscribe %s", data );
-  //          callback.onGetProcessedInfoSuccess();
+            Timber.tag(TAG).w("subscribe %s", data);
+            //          callback.onGetProcessedInfoSuccess();
           }, error -> {
-  //          callback.onError(error);
+            //          callback.onError(error);
           }
         )
     );

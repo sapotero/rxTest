@@ -38,9 +38,9 @@ public class StepperLoadDataFragment extends Fragment implements Step {
   public void onDestroy(){
     super.onDestroy();
 
-//    if ( EventBus.getDefault().isRegistered(this) ) {
-//      EventBus.getDefault().unregister(this);
-//    }
+    if ( EventBus.getDefault().isRegistered(this) ) {
+      EventBus.getDefault().unregister(this);
+    }
 
   }
 

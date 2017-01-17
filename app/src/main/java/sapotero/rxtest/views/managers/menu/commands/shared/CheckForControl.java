@@ -12,6 +12,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
@@ -60,6 +61,58 @@ public class CheckForControl extends AbstractCommand {
   public void execute() {
     loadSettings();
 
+    if ( history.getConnected() ){
+      executeRemote();
+    } else {
+      executeLocal();
+    }
+
+  }
+
+  @Override
+  public String getType() {
+    return "check_for_control";
+  }
+
+  @Override
+  public void executeLocal() {
+    try {
+      history.add(this);
+
+      dataStore
+        .select(RDocumentEntity.class)
+        .where(RDocumentEntity.UID.eq(document_id))
+        .get()
+        .toObservable()
+        .flatMap( doc -> Observable.just( doc.isFavorites() ) )
+        .subscribe( value -> {
+          Timber.tag(TAG).i("executeLocal for %s: CONTROL: %s",document_id, value);
+          try {
+
+            dataStore
+              .update(RDocumentEntity.class)
+              .set( RDocumentEntity.CONTROL, !value)
+              .where(RDocumentEntity.UID.eq(document_id))
+              .get()
+              .call();
+
+            if ( callback != null ){
+              callback.onCommandExecuteSuccess( getType() );
+            }
+
+          } catch (Exception e) {
+            Timber.tag(TAG).i("executeLocal for %s [%s]: %s", document_id, getType(), e);
+            e.printStackTrace();
+          }
+        });
+
+    } catch (Exception e) {
+      Timber.tag(TAG).i("executeLocal for %s: %s", getType(), e);
+    }
+  }
+
+  @Override
+  public void executeRemote() {
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
     Retrofit retrofit = new Retrofit.Builder()
@@ -93,34 +146,17 @@ public class CheckForControl extends AbstractCommand {
           Timber.tag(TAG).i("error: %s", data.getMessage());
           Timber.tag(TAG).i("type: %s", data.getType());
 
+          history.remove(this);
+
           if (callback != null){
             callback.onCommandExecuteSuccess(getType());
           }
         },
         error -> {
-          if ( !history.getConnected() ){
-            callback.onCommandExecuteSuccess(getType());
-          } else {
-            callback.onCommandExecuteError();
-          }
+          callback.onCommandExecuteSuccess(getType());
 
         }
       );
-
-  }
-
-  @Override
-  public String getType() {
-    return "check_for_control";
-  }
-
-  @Override
-  public void executeLocal() {
-
-  }
-
-  @Override
-  public void executeRemote() {
 
   }
 

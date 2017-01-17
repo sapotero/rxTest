@@ -11,10 +11,16 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 
+import com.f2prateek.rx.preferences.RxSharedPreferences;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.views.adapters.models.DocumentTypeItem;
 import sapotero.rxtest.views.adapters.utils.DocumentTypeAdapter;
 import sapotero.rxtest.views.menu.builders.ButtonBuilder;
@@ -24,6 +30,8 @@ import sapotero.rxtest.views.views.MultiOrganizationSpinner;
 import timber.log.Timber;
 
 public class ItemsBuilder implements ButtonBuilder.Callback {
+
+  @Inject RxSharedPreferences settings;
 
   private String TAG = this.getClass().getSimpleName();
   private final Context context;
@@ -58,6 +66,7 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
 
   public ItemsBuilder(Context context) {
     this.context = context;
+    EsdApplication.getComponent( context ).inject(this);
   }
 
   public void setSpinner(Spinner selector) {
@@ -201,6 +210,7 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
 
     Timber.e( "button conditions: %s ", favoritesButton.isChecked() );
 
+    result.add( new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.USER.eq( settings.getString("login").get() ) ) );
 
     return result;
   }

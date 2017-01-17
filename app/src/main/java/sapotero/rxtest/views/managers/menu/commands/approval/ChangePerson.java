@@ -62,6 +62,29 @@ public class ChangePerson extends AbstractCommand {
   public void execute() {
     loadSettings();
 
+    if ( history.getConnected() ){
+      executeRemote();
+    } else {
+      executeLocal();
+    }
+
+  }
+
+  @Override
+  public String getType() {
+    return "change_person";
+  }
+
+  @Override
+  public void executeLocal() {
+    history.add(this);
+    if ( callback != null ){
+      callback.onCommandExecuteSuccess( getType() );
+    }
+  }
+
+  @Override
+  public void executeRemote() {
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
     Retrofit retrofit = new Retrofit.Builder()
@@ -95,34 +118,14 @@ public class ChangePerson extends AbstractCommand {
           Timber.tag(TAG).i("error: %s", data.getMessage());
           Timber.tag(TAG).i("type: %s", data.getType());
 
+          history.remove(this);
           if (callback != null){
             callback.onCommandExecuteSuccess(getType());
           }
         },
         error -> {
-          if ( history.getConnected() ){
-            callback.onCommandExecuteSuccess(getType());
-          } else {
-            callback.onCommandExecuteError();
-          }
-
+          callback.onCommandExecuteError();
         }
       );
-
-  }
-
-  @Override
-  public String getType() {
-    return "change_person";
-  }
-
-  @Override
-  public void executeLocal() {
-
-  }
-
-  @Override
-  public void executeRemote() {
-
   }
 }
