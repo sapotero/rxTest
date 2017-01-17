@@ -53,16 +53,6 @@
                   android:text="@string/empty_list"
         />
 
-        <ProgressBar
-            style="@android:style/Widget.DeviceDefault.Light.ProgressBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/progressBar"
-            android:indeterminate="true"
-            android:layout_centerInParent="true"
-            android:layout_centerHorizontal="true"
-            />
-
     </RelativeLayout>
 
     <LinearLayout
@@ -194,8 +184,18 @@
                 android:layout_marginEnd="@dimen/half_date_offset"
                 />
 
+
         </LinearLayout>
     </LinearLayout>
+    <ProgressBar
+        style="@android:style/Widget.DeviceDefault.Light.ProgressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/progressBar"
+        android:indeterminate="true"
+        android:layout_centerInParent="true"
+        android:layout_centerHorizontal="true"
+        android:layout_weight="1"/>
 
 
 </RelativeLayout>

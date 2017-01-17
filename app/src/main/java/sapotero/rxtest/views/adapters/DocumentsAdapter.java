@@ -68,7 +68,7 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
 
     documentManager = new DocumentManager().getInstance(mContext);
 
-    operationManager = new OperationManager(mContext);
+    operationManager = OperationManager.getInstance();
   }
 
   @Override
@@ -218,7 +218,7 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
 
       CommandParams params = new CommandParams();
       params.setFolder(favorites);
-      params.setSign( item.getUid() );
+      params.setDocument( item.getUid() );
 
       operationManager.execute( "menu_info_shared_to_favorites", params );
 

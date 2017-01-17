@@ -19,8 +19,10 @@ import timber.log.Timber;
 public class OperationManager implements CommandFactory.Callback {
 
   @Inject RxSharedPreferences settings;
+
   private final String TAG = this.getClass().getSimpleName();
 
+  private static OperationManager instance;
   private final CommandFactory commandBuilder;
   private final OperationHistory histrory;
   private final RemoteExecutor remoteExecutor;
@@ -51,6 +53,12 @@ public class OperationManager implements CommandFactory.Callback {
     this.context = context;
   }
 
+  public static OperationManager getInstance() {
+    if ( instance == null) {
+      instance = new OperationManager( EsdApplication.getContext() );
+    }
+    return instance;
+  }
 
   public void execute(String operation, CommandParams params) {
     Command command = commandBuilder

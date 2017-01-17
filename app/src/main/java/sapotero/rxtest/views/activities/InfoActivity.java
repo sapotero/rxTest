@@ -107,7 +107,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     ButterKnife.bind(this);
     EsdApplication.getComponent(this).inject(this);
 
-    operationManager = new OperationManager(this);
+    operationManager = OperationManager.getInstance();
     operationManager.registerCallBack(this);
 
     loadSettings();

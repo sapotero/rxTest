@@ -78,7 +78,6 @@ public class AddToFolder extends AbstractCommand {
     } else {
       executeLocal();
     }
-
   }
 
   @Override

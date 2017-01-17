@@ -65,11 +65,6 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
 
     EsdApplication.getComponent(this).inject(this);
 
-    if (EventBus.getDefault().isRegistered(this)) {
-      EventBus.getDefault().unregister(this);
-    }
-    EventBus.getDefault().register(this);
-
     startService(new Intent(this, MainService.class));
 
     initialize();
@@ -119,13 +114,30 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
 
   }
 
+  @Override
+  public void onResume() {
+    super.onResume();
+
+    if (EventBus.getDefault().isRegistered(this)) {
+      EventBus.getDefault().unregister(this);
+    }
+    EventBus.getDefault().register(this);
+
+  }
+
+
+
   /* Stepper */
   @Override
   public void onCompleted(View completeButton) {
     Toast.makeText( getApplicationContext(), "onCompleted", Toast.LENGTH_SHORT ).show();
 
     Intent intent = new Intent(this, MainActivity.class);
-    startActivity(intent);
+//    startActivity(intent);
+    startActivityForResult(intent, 0);
+    overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
+
+
     finish();
   }
 

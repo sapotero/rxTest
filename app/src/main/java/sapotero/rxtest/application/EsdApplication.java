@@ -4,7 +4,6 @@ import android.app.Application;
 import android.content.Context;
 
 import com.f2prateek.rx.preferences.RxSharedPreferences;
-import com.squareup.leakcanary.LeakCanary;
 
 import javax.inject.Inject;
 
@@ -32,10 +31,10 @@ public final class EsdApplication extends Application {
 
     if (Constant.DEBUG) {
 
-      if (LeakCanary.isInAnalyzerProcess(this)) {
-        return;
-      }
-      LeakCanary.install(this);
+//      if (LeakCanary.isInAnalyzerProcess(this)) {
+//        return;
+//      }
+//      LeakCanary.install(this);
 //
 //      Stetho.Initializer initializer = Stetho.newInitializerBuilder(this)
 //        .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this))

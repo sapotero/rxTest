@@ -12,17 +12,25 @@
 
     android:weightSum="1"
     android:baselineAligned="false"
-    android:background="@color/it_mvd_background"
+    android:background="@color/md_grey_100"
+    android:padding="32dp"
+    android:clipChildren="true"
+    android:clipToPadding="true"
     >
 
 
     <sapotero.rxtest.views.views.stepper.StepperLayout
         android:layout_weight="1"
+        android:layout_margin="@dimen/date_offset"
+        android:background="@color/md_white_1000"
         android:id="@+id/stepperLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         custom:ms_stepperType="tabs"
+        android:elevation="2dp"
+        android:clipToPadding="true"
+        android:clipChildren="true"
         />
 
 
