@@ -53,6 +53,7 @@ import sapotero.rxtest.views.managers.menu.commands.report.FromTheReport;
 import sapotero.rxtest.views.managers.menu.commands.report.ReturnToPrimaryConsideration;
 import sapotero.rxtest.views.managers.menu.commands.shared.AddToFolder;
 import sapotero.rxtest.views.managers.menu.commands.shared.CheckForControl;
+import sapotero.rxtest.views.managers.menu.utils.OperationHistory;
 import sapotero.rxtest.views.managers.view.DecisionManager;
 import sapotero.rxtest.views.menu.builders.ButtonBuilder;
 import sapotero.rxtest.views.services.MainService;
@@ -124,6 +125,7 @@ public interface EsdComponent {
   void inject(DecisionManager context);
 
   void inject(OperationManager context);
+  void inject(OperationHistory context);
 
 
 

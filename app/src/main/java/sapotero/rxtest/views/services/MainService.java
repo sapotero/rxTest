@@ -7,10 +7,12 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
+import com.github.pwittchen.reactivenetwork.library.ReactiveNetwork;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.greenrobot.eventbus.EventBus;
@@ -49,6 +51,8 @@ import ru.CryptoPro.ssl.util.cpSSLConfig;
 import ru.cprocsp.ACSP.tools.common.CSPTool;
 import ru.cprocsp.ACSP.tools.common.Constants;
 import ru.cprocsp.ACSP.tools.common.RawResource;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.events.auth.AuthDcCheckFailEvent;
@@ -122,7 +126,7 @@ public class MainService extends Service {
 
     dataLoaderInterface = new DataLoaderInterface(getApplicationContext());
 
-    Provider[]	providers = Security.getProviders();
+    Provider[] providers = Security.getProviders();
 
 
 
@@ -147,6 +151,8 @@ public class MainService extends Service {
 
     addKey();
     aliases( KeyStoreType.currentType(), ProviderType.currentProviderType() );
+
+    isConnected();
   }
 
   public int onStartCommand(Intent intent, int flags, int startId) {
@@ -591,6 +597,17 @@ public class MainService extends Service {
     } else {
       EventBus.getDefault().post( new SignDataWrongPinEvent("Pin is invalid") );
     }
+  }
+
+  public void isConnected(){
+    ReactiveNetwork.observeInternetConnectivity()
+      .subscribeOn(Schedulers.io())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(isConnectedToInternet -> {
+        Toast.makeText( this, String.format( "Connected to inet: %s", isConnectedToInternet ), Toast.LENGTH_SHORT ).show();
+
+        settings.getBoolean("isConnectedToInternet").set( isConnectedToInternet );
+      });
   }
 
 

@@ -3,6 +3,7 @@ package sapotero.rxtest.views.managers.menu;
 import android.content.Context;
 
 import com.f2prateek.rx.preferences.RxSharedPreferences;
+import com.google.gson.Gson;
 
 import javax.inject.Inject;
 
@@ -12,15 +13,16 @@ import sapotero.rxtest.views.managers.menu.interfaces.Command;
 import sapotero.rxtest.views.managers.menu.invokers.RemoteExecutor;
 import sapotero.rxtest.views.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.views.managers.menu.utils.CommandParams;
+import sapotero.rxtest.views.managers.menu.utils.OperationHistory;
 import timber.log.Timber;
 
 public class OperationManager implements CommandFactory.Callback {
 
   @Inject RxSharedPreferences settings;
-
   private final String TAG = this.getClass().getSimpleName();
 
   private final CommandFactory commandBuilder;
+  private final OperationHistory histrory;
   private final RemoteExecutor remoteExecutor;
 
   private Context context;
@@ -40,6 +42,7 @@ public class OperationManager implements CommandFactory.Callback {
   public OperationManager(Context context) {
     EsdApplication.getComponent(context).inject(this);
 
+    histrory       = new OperationHistory(context);
     remoteExecutor = new RemoteExecutor();
 
     commandBuilder = new CommandFactory(context);
@@ -53,9 +56,10 @@ public class OperationManager implements CommandFactory.Callback {
     Command command = commandBuilder
       .withDocument( new DocumentReceiver( settings.getString("main_menu.uid").get() ) )
       .withParams( params )
+      .withHistory( histrory )
       .build( operation );
 
-    Timber.tag(TAG).i("COMMAND: %s [%s] | %s", operation, command, params);
+    Timber.tag(TAG).i("COMMAND: %s [%s] | %s", operation, command, new Gson().toJson(params) );
 
     if (command != null) {
       remoteExecutor

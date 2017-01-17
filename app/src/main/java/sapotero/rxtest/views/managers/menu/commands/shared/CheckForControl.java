@@ -3,20 +3,15 @@ package sapotero.rxtest.views.managers.menu.commands.shared;
 import android.content.Context;
 
 import com.f2prateek.rx.preferences.Preference;
-import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import java.util.ArrayList;
 
-import javax.inject.Inject;
-
-import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
@@ -24,9 +19,6 @@ import sapotero.rxtest.views.managers.menu.receivers.DocumentReceiver;
 import timber.log.Timber;
 
 public class CheckForControl extends AbstractCommand {
-
-  @Inject OkHttpClient okHttpClient;
-  @Inject RxSharedPreferences settings;
 
   private final DocumentReceiver document;
   private final Context context;
@@ -42,10 +34,10 @@ public class CheckForControl extends AbstractCommand {
   private String document_id;
 
   public CheckForControl(Context context, DocumentReceiver document){
+    super(context);
     this.context = context;
     this.document = document;
 
-    EsdApplication.getComponent(context).inject(this);
   }
 
   public String getInfo(){
@@ -106,9 +98,12 @@ public class CheckForControl extends AbstractCommand {
           }
         },
         error -> {
-          if (callback != null){
+          if ( !history.getConnected() ){
+            callback.onCommandExecuteSuccess(getType());
+          } else {
             callback.onCommandExecuteError();
           }
+
         }
       );
 
@@ -117,6 +112,16 @@ public class CheckForControl extends AbstractCommand {
   @Override
   public String getType() {
     return "check_for_control";
+  }
+
+  @Override
+  public void executeLocal() {
+
+  }
+
+  @Override
+  public void executeRemote() {
+
   }
 
   public CheckForControl withDocumentId(String sign) {

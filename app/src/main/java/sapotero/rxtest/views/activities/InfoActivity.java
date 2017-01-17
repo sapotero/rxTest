@@ -302,6 +302,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
               .get().first().getUid();
 
             params.setFolder(favorites);
+            params.setDocument( UID.get() );
 
 
             break;

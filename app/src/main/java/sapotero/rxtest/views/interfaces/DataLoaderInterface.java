@@ -1,6 +1,8 @@
 package sapotero.rxtest.views.interfaces;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 
 import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
@@ -74,6 +76,7 @@ public class DataLoaderInterface {
 
   private CompositeSubscription subscription;
   private final Context context;
+  private static Object insrance;
 
   public DataLoaderInterface(Context context) {
     this.context = context;
@@ -172,7 +175,13 @@ public class DataLoaderInterface {
           },
           error -> {
             Timber.tag(TAG).i("tryToSignWithLogin error: %s" , error );
+
             EventBus.getDefault().post( new AuthDcCheckFailEvent( error.getMessage() ) );
+
+            // если в офлайне то всё равно идём дальше
+            if ( !isOnline() ){
+              EventBus.getDefault().post( new AuthDcCheckSuccessEvent() );
+            }
           }
         )
     );
@@ -392,6 +401,12 @@ public class DataLoaderInterface {
 //            callback.onError(error);
           })
     );
+  }
+
+  public boolean isOnline() {
+    ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+    NetworkInfo netInfo = cm.getActiveNetworkInfo();
+    return netInfo != null && netInfo.isConnectedOrConnecting();
   }
 
 

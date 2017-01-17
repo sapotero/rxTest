@@ -1,10 +1,14 @@
 package sapotero.rxtest.views.managers.menu.utils;
 
-public class CommandParams {
+import java.io.Serializable;
+
+public class CommandParams implements Serializable {
   public String person;
   public String folder;
   public String label;
   public String sign;
+
+  public String document;
 
   public String getDecision() {
     return decision;
@@ -53,5 +57,13 @@ public class CommandParams {
   public CommandParams setSign(String sign) {
     this.sign = sign;
     return this;
+  }
+
+  public String getDocument() {
+    return document;
+  }
+
+  public void setDocument(String document) {
+    this.document = document;
   }
 }
