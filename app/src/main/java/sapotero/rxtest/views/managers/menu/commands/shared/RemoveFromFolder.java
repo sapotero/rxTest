@@ -36,6 +36,8 @@ public class RemoveFromFolder extends AbstractCommand {
     super(context);
     this.context = context;
     this.document = document;
+
+    queueManager.add(this);
   }
 
   public String getInfo(){
@@ -51,7 +53,7 @@ public class RemoveFromFolder extends AbstractCommand {
     TOKEN = settings.getString("token");
     UID   = settings.getString("main_menu.uid");
     HOST  = settings.getString("settings_username_host");
-    STATUS_CODE = settings.getString("main_menu.status");
+    STATUS_CODE = settings.getString("main_menu.start");
   }
   public RemoveFromFolder withFolder(String uid){
     folder_id = uid;
@@ -62,7 +64,7 @@ public class RemoveFromFolder extends AbstractCommand {
   public void execute() {
     loadSettings();
 
-    if ( history.getConnected() ){
+    if ( queueManager.getConnected() ){
       executeRemote();
     } else {
       executeLocal();
@@ -76,7 +78,7 @@ public class RemoveFromFolder extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    history.add(this);
+    queueManager.add(this);
     if ( callback != null ){
       callback.onCommandExecuteSuccess( getType() );
     }
@@ -117,7 +119,7 @@ public class RemoveFromFolder extends AbstractCommand {
           Timber.tag(TAG).i("error: %s", data.getMessage());
           Timber.tag(TAG).i("type: %s", data.getType());
 
-          history.remove(this);
+          queueManager.remove(this);
           if (callback != null){
             callback.onCommandExecuteSuccess(getType());
           }

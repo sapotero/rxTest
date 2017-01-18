@@ -51,7 +51,7 @@ public class ChangePerson extends AbstractCommand {
     TOKEN = settings.getString("token");
     UID   = settings.getString("main_menu.uid");
     HOST  = settings.getString("settings_username_host");
-    STATUS_CODE = settings.getString("main_menu.status");
+    STATUS_CODE = settings.getString("main_menu.start");
   }
   public ChangePerson withPerson(String uid){
     official_id = uid;
@@ -62,7 +62,7 @@ public class ChangePerson extends AbstractCommand {
   public void execute() {
     loadSettings();
 
-    if ( history.getConnected() ){
+    if ( queueManager.getConnected() ){
       executeRemote();
     } else {
       executeLocal();
@@ -77,7 +77,7 @@ public class ChangePerson extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    history.add(this);
+    queueManager.add(this);
     if ( callback != null ){
       callback.onCommandExecuteSuccess( getType() );
     }
@@ -118,7 +118,7 @@ public class ChangePerson extends AbstractCommand {
           Timber.tag(TAG).i("error: %s", data.getMessage());
           Timber.tag(TAG).i("type: %s", data.getType());
 
-          history.remove(this);
+          queueManager.remove(this);
           if (callback != null){
             callback.onCommandExecuteSuccess(getType());
           }

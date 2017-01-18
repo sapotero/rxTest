@@ -45,7 +45,7 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params, OperationHistory histrory) {
         FromTheReport doc = new FromTheReport(context, document);
-        doc.withHistory(histrory);
+//        doc.withHistory(histrory);
         doc.registerCallBack(instance);
         return doc;
       }
@@ -54,7 +54,7 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params, OperationHistory histrory) {
         ReturnToPrimaryConsideration doc = new ReturnToPrimaryConsideration(context, document);
-        doc.withHistory(histrory);
+//        doc.withHistory(histrory);
         doc.registerCallBack(instance);
         return doc;
       }
@@ -63,7 +63,7 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params, OperationHistory histrory) {
         DelegatePerformance command = new DelegatePerformance(context, document);
-        command.withHistory(histrory);
+//        command.withHistory(histrory);
         command
           .withPerson( params.getPerson() )
           .registerCallBack(instance);
@@ -74,7 +74,7 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params, OperationHistory histrory) {
         PrimaryConsideration command = new PrimaryConsideration(context, document);
-        command.withHistory(histrory);
+//        command.withHistory(histrory);
         command
           .withPerson( params.getPerson() )
           .registerCallBack(instance);
@@ -91,7 +91,7 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params, OperationHistory histrory) {
         ChangePerson command = new ChangePerson(context, document);
-        command.withHistory(histrory);
+//        command.withHistory(histrory);
         command
           .withPerson( params.getPerson() )
           .registerCallBack(instance);
@@ -102,7 +102,7 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params, OperationHistory histrory) {
         NextPerson command = new NextPerson(context, document);
-        command.withHistory(histrory);
+//        command.withHistory(histrory);
         command
           .withPerson( "" )
           .registerCallBack(instance);
@@ -113,7 +113,7 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params, OperationHistory histrory) {
         PrevPerson command = new PrevPerson(context, document);
-        command.withHistory(histrory);
+//        command.withHistory(histrory);
         command
           .withPerson( "" )
           .registerCallBack(instance);
@@ -124,7 +124,7 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params, OperationHistory histrory) {
         AddToFolder command = new AddToFolder(context, document);
-        command.withHistory(histrory);
+//        command.withHistory(histrory);
         command
           .withFolder( params.getFolder() )
           .withDocumentId( params.getDocument() )
@@ -142,7 +142,7 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params, OperationHistory histrory) {
         CheckForControl command = new CheckForControl(context, document);
-        command.withHistory(histrory);
+//        command.withHistory(histrory);
         command
           .withDocumentId( params.getDocument() )
           .registerCallBack(instance);
@@ -165,7 +165,7 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params, OperationHistory histrory) {
         SaveDecision command = new SaveDecision(context, document);
-        command.withHistory(histrory);
+//        command.withHistory(histrory);
         command
           .withDecision( params.getDecision() )
           .withDecisionId( params.getSign() )

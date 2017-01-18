@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -51,6 +52,7 @@ import ru.CryptoPro.ssl.util.cpSSLConfig;
 import ru.cprocsp.ACSP.tools.common.CSPTool;
 import ru.cprocsp.ACSP.tools.common.Constants;
 import ru.cprocsp.ACSP.tools.common.RawResource;
+import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
@@ -109,6 +111,7 @@ public class MainService extends Service {
   private static Provider defaultKeyStoreProvider = null;
   private static final ArrayList<String> aliasesList = new ArrayList<String>();
   private DataLoaderInterface dataLoaderInterface;
+  private String SIGN;
 
 
   public MainService() {
@@ -153,6 +156,8 @@ public class MainService extends Service {
     aliases( KeyStoreType.currentType(), ProviderType.currentProviderType() );
 
     isConnected();
+
+    getAuth();
   }
 
   public int onStartCommand(Intent intent, int flags, int startId) {
@@ -552,7 +557,9 @@ public class MainService extends Service {
       Encoder enc = new Encoder();
       Timber.tag( "CRT_BASE64" ).d( enc.encode(signature) );
 
-      dataLoaderInterface.tryToSignWithDc( enc.encode(signature) );
+      SIGN = enc.encode(signature);
+
+      dataLoaderInterface.tryToSignWithDc( SIGN );
 
 //
     } else {
@@ -607,6 +614,18 @@ public class MainService extends Service {
         Toast.makeText( this, String.format( "Connected to inet: %s", isConnectedToInternet ), Toast.LENGTH_SHORT ).show();
 
         settings.getBoolean("isConnectedToInternet").set( isConnectedToInternet );
+      });
+  }
+
+  public void getAuth(){
+    Observable
+      .interval( 10, TimeUnit.SECONDS )
+      .subscribeOn(Schedulers.io())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(interval -> {
+        if (SIGN != null) {
+          dataLoaderInterface.updateAuth(SIGN);
+        }
       });
   }
 

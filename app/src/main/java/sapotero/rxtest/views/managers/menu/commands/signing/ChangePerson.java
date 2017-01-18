@@ -51,7 +51,7 @@ public class ChangePerson extends AbstractCommand {
     TOKEN = settings.getString("token");
     UID   = settings.getString("main_menu.uid");
     HOST  = settings.getString("settings_username_host");
-    STATUS_CODE = settings.getString("main_menu.status");
+    STATUS_CODE = settings.getString("main_menu.start");
   }
   public ChangePerson withPerson(String uid){
     official_id = uid;
@@ -101,7 +101,7 @@ public class ChangePerson extends AbstractCommand {
         },
         error -> {
           if (callback != null){
-            if ( history.getConnected() ){
+            if ( queueManager.getConnected() ){
               callback.onCommandExecuteSuccess(getType());
             } else {
               callback.onCommandExecuteError();

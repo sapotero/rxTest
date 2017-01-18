@@ -39,6 +39,8 @@ public class AddToFolder extends AbstractCommand {
     super(context);
     this.context = context;
     this.document = document;
+
+    queueManager.add(this);
   }
 
   public String getInfo(){
@@ -54,7 +56,7 @@ public class AddToFolder extends AbstractCommand {
     TOKEN = settings.getString("token");
     UID   = settings.getString("main_menu.uid");
     HOST  = settings.getString("settings_username_host");
-    STATUS_CODE = settings.getString("main_menu.status");
+    STATUS_CODE = settings.getString("main_menu.start");
   }
 
   public AddToFolder withFolder(String uid){
@@ -71,9 +73,9 @@ public class AddToFolder extends AbstractCommand {
   public void execute() {
     loadSettings();
 
-    Timber.tag(TAG).i("execute for %s - %s: %s",getType(),document_id, history.getConnected());
+    Timber.tag(TAG).i("execute for %s - %s: %s",getType(),document_id, queueManager.getConnected());
 
-    if ( history.getConnected() ){
+    if ( queueManager.getConnected() ){
       executeRemote();
     } else {
       executeLocal();
@@ -88,7 +90,7 @@ public class AddToFolder extends AbstractCommand {
   @Override
   public void executeLocal() {
     try {
-      history.add(this);
+      queueManager.add(this);
 
       dataStore
         .select(RDocumentEntity.class)
@@ -159,7 +161,7 @@ public class AddToFolder extends AbstractCommand {
           Timber.tag(TAG).i("error: %s", data.getMessage());
           Timber.tag(TAG).i("type: %s", data.getType());
 
-          history.remove(this);
+          queueManager.remove(this);
 
           if (callback != null && Objects.equals(data.getType(), "warning")){
             callback.onCommandExecuteSuccess( getType() );

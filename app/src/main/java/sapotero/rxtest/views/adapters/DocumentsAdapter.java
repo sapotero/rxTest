@@ -42,31 +42,33 @@ import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.views.activities.InfoActivity;
 import sapotero.rxtest.views.dialogs.InfoCardDialogFragment;
-import sapotero.rxtest.views.managers.db.DocumentManager;
+import sapotero.rxtest.views.managers.db.managers.DBDocumentManager;
 import sapotero.rxtest.views.managers.menu.OperationManager;
 import sapotero.rxtest.views.managers.menu.utils.CommandParams;
 import timber.log.Timber;
 
 public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.SimpleViewHolder> implements Action1<List<Document>> {
 
-  private final OperationManager operationManager;
   @Inject RxSharedPreferences settings;
   @Inject JobManager jobManager;
-
+//  @Inject DocumentManager documentManager;
   @Inject SingleEntityStore<Persistable> dataStore;
+  @Inject DBDocumentManager manager;
+
+  private final OperationManager operationManager;
 
   private Context mContext;
   private List<Document> documents;
   private Oshs current_user;
   private View emptyView;
-  private DocumentManager documentManager;
 
   public DocumentsAdapter(Context context, List<Document> documents) {
     this.mContext  = context;
     this.documents = documents;
+
     EsdApplication.getComponent(context).inject(this);
 
-    documentManager = new DocumentManager().getInstance(mContext);
+//    documentManager = new InterfaceDocumentManager().getInstance(mContext);
 
     operationManager = OperationManager.getInstance();
   }
@@ -168,7 +170,7 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
       Preference<String> rxReg = rxPreferences.getString("main_menu.regnumber");
       rxReg.set( item.getRegistrationNumber() );
 
-      Preference<String> rxStatus = rxPreferences.getString("main_menu.status");
+      Preference<String> rxStatus = rxPreferences.getString("main_menu.start");
       rxStatus.set( item.getStatusCode() );
 
       Preference<String> rxDate = rxPreferences.getString("main_menu.date");
@@ -182,10 +184,12 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
 
     viewHolder.cv.setOnLongClickListener(view -> {
 
-      documentManager.get( item.getUid() ).toJson();
+
+//      documentManager.get( item.getUid() ).toJson();
 
 
-      String _title = documentManager.getDocument(item.getUid()).getTitle();
+//      String _title = documentManager.getDocument(item.getUid()).getTitle();
+      String _title = manager.get(item.getUid()).getTitle();
       Timber.e("title : %s", _title);
 
       Notification builder =
@@ -242,7 +246,7 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
     });
 
     viewHolder.get_infocard.setOnClickListener(view -> {
-      documentManager.get( item.getUid() ).toJson();
+//      manager.get( item.getUid() ).toJson();
 
       FragmentManager manager = ((Activity) mContext).getFragmentManager();
 
@@ -252,10 +256,10 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
     });
 
     viewHolder.get_files.setOnClickListener(view -> {
-      documentManager.get( item.getUid() ).toJson();
+//      manager.get( item.getUid() ).toJson();
 
 
-      String _title = documentManager.getDocument(item.getUid()).getTitle();
+      String _title = manager.get(item.getUid()).getTitle();
       Timber.e("title : %s", _title);
 
       Notification builder =
@@ -277,10 +281,10 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
     });
 
     viewHolder.get_editor.setOnClickListener(view -> {
-      documentManager.get( item.getUid() ).toJson();
+//      documentManager.get( item.getUid() ).toJson();
 
 
-      String _title = documentManager.getDocument(item.getUid()).getTitle();
+      String _title = manager.get(item.getUid()).getTitle();
       Timber.e("title : %s", _title);
 
       Notification builder =

@@ -48,6 +48,7 @@ import sapotero.rxtest.events.crypto.SignDataEvent;
 import sapotero.rxtest.events.crypto.SignDataResultEvent;
 import sapotero.rxtest.events.crypto.SignDataWrongPinEvent;
 import sapotero.rxtest.retrofit.models.Oshs;
+import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.adapters.TabSigningPagerAdapter;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
@@ -77,6 +78,9 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   @Inject RxSharedPreferences settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
+  // test
+  @Inject QueueManager queue;
+
   private byte[] CARD;
 
   private Preference<String> TOKEN;
@@ -89,7 +93,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   private Preference<String> REG_NUMBER;
   private Preference<String> REG_DATE;
 
-//  private DocumentManager documentManager;
+//  private InterfaceDocumentManager documentManager;
   private String TAG = this.getClass().getSimpleName();
 
   @BindView(R.id.toolbar) Toolbar toolbar;
@@ -123,6 +127,14 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     setTabContent();
 
 
+    buildDialog();
+
+    queue.saveToDisc();
+
+
+  }
+
+  private void buildDialog() {
     dialog = new MaterialDialog.Builder( this )
       .title(R.string.app_name)
       .cancelable(false)
@@ -143,8 +155,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
           e.printStackTrace();
         }
       }).build();
-
-
   }
 
   private void setPreview() {
@@ -285,26 +295,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
             break;
           case R.id.menu_info_approval_next_person:
             operation = "menu_info_next_person";
-            dialog = new MaterialDialog.Builder( this )
-              .title(R.string.app_name)
-              .cancelable(false)
-              .customView( R.layout.dialog_pin_check, true )
-              .positiveText("OK")
-              .autoDismiss(false)
-
-              .onPositive( (dialog, which) -> {
-                try {
-                  EditText pass = (EditText) this.dialog.getCustomView().findViewById(R.id.dialog_pin_password);
-                  pass.setVisibility(View.GONE);
-
-                  this.dialog.getCustomView().findViewById(R.id.dialog_pin_progress).setVisibility(View.VISIBLE);
-                  dialog.getActionButton(DialogAction.POSITIVE).setVisibility(View.GONE);
-
-                  EventBus.getDefault().post( new SignDataEvent( pass.getText().toString() ) );
-                } catch (Exception e) {
-                  e.printStackTrace();
-                }
-              }).build();
+            buildDialog();
             dialog.show();
 
             params.setSign( SIGN );
@@ -432,7 +423,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     TOKEN    = settings.getString("token");
     POSITION = settings.getInteger("position");
     DOCUMENT_UID = settings.getString("document.uid");
-    STATUS_CODE = settings.getString("main_menu.status");
+    STATUS_CODE = settings.getString("main_menu.start");
     REG_NUMBER = settings.getString("main_menu.regnumber");
     REG_DATE = settings.getString("main_menu.date");
 
@@ -495,7 +486,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   }
 
 //
-//  /* DocumentManager.Callback */
+//  /* InterfaceDocumentManager.Callback */
 //  @Override
 //  public void onGetStateSuccess() {
 //    Timber.tag("DocumentManagerCallback").i("onGetStateSuccess");

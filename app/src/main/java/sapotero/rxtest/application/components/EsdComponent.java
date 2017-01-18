@@ -13,6 +13,9 @@ import sapotero.rxtest.events.utils.SubscriptionsModule;
 import sapotero.rxtest.jobs.bus.BaseJob;
 import sapotero.rxtest.jobs.utils.JobModule;
 import sapotero.rxtest.retrofit.utils.OkHttpModule;
+import sapotero.rxtest.utils.queue.QueueManager;
+import sapotero.rxtest.utils.queue.utils.DbQueueManagerModule;
+import sapotero.rxtest.utils.queue.utils.QueueManagerModule;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.activities.DocumentImageFullScreenActivity;
 import sapotero.rxtest.views.activities.DocumentInfocardFullScreenActivity;
@@ -38,8 +41,9 @@ import sapotero.rxtest.views.fragments.InfoCardLinksFragment;
 import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
 import sapotero.rxtest.views.fragments.RoutePreviewFragment;
 import sapotero.rxtest.views.interfaces.DataLoaderInterface;
-import sapotero.rxtest.views.interfaces.DocumentManager;
-import sapotero.rxtest.views.managers.db.factories.DocumentFactory;
+import sapotero.rxtest.views.interfaces.InterfaceDocumentManager;
+import sapotero.rxtest.views.managers.db.managers.DBDocumentManager;
+import sapotero.rxtest.views.managers.db.utils.DBDocumentManagerModule;
 import sapotero.rxtest.views.managers.menu.OperationManager;
 import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.views.managers.menu.commands.approval.ChangePerson;
@@ -67,16 +71,18 @@ import sapotero.rxtest.views.views.stepper.build.steps.StepperChooseAuthTypeFrag
   JobModule.class,
   SubscriptionsModule.class,
   OkHttpModule.class,
-  SettingsModule.class
+  SettingsModule.class,
+  DBDocumentManagerModule.class,
+  QueueManagerModule.class,
+  DbQueueManagerModule.class
 })
 
 public interface EsdComponent {
 
-
-
   void inject(EsdApplication activity);
 
   void inject(LoginActivity activity);
+
   void inject(MainActivity  activity);
   void inject(InfoActivity  activity);
   void inject(SettingsActivity activity);
@@ -85,14 +91,16 @@ public interface EsdComponent {
   void inject(DocumentInfocardFullScreenActivity activity);
   void inject(SettingsTemplatesActivity activity);
   void inject(InfoNoMenuActivity activity);
-
-
-
   void inject(MainService service);
 
+
   void inject(DecisionAdapter adapter);
+
   void inject(DocumentsAdapter adapter);
   void inject(OshsAutoCompleteAdapter context);
+
+  void inject(DBDocumentManager context);
+  void inject(QueueManager context);
 
   void inject(DecisionFragment fragment);
   void inject(DecisionPreviewFragment fragment);
@@ -119,15 +127,15 @@ public interface EsdComponent {
 
 
   void inject(DataLoaderInterface context);
-  void inject(DocumentManager context);
+  void inject(InterfaceDocumentManager context);
 
   void inject(DocumentTypeItem context);
   void inject(ButtonBuilder context);
 
   void inject(DBQueryBuilder context);
+  void inject(DbQueueManagerModule context);
 
 
-  void inject(DocumentFactory context);
   void inject(DecisionManager context);
 
   void inject(OperationManager context);

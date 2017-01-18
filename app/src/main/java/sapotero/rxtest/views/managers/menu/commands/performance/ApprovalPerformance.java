@@ -51,7 +51,7 @@ public class ApprovalPerformance extends AbstractCommand {
     TOKEN = settings.getString("token");
     UID   = settings.getString("main_menu.uid");
     HOST  = settings.getString("settings_username_host");
-    STATUS_CODE = settings.getString("main_menu.status");
+    STATUS_CODE = settings.getString("main_menu.start");
   }
   public ApprovalPerformance withPerson(String uid){
     official_id = uid;

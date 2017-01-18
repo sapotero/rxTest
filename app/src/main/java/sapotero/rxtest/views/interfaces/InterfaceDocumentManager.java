@@ -17,7 +17,7 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import timber.log.Timber;
 
-public class DocumentManager {
+public class InterfaceDocumentManager {
 
   @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
@@ -44,12 +44,12 @@ public class DocumentManager {
     void onGetStateError();
   }
 
-  public void registerCallBack(DocumentManager.Callback callback){
+  public void registerCallBack(InterfaceDocumentManager.Callback callback){
     this.callback = callback;
     getCurrentState();
   }
 
-  public DocumentManager(Context context) {
+  public InterfaceDocumentManager(Context context) {
     this.context = context;
     EsdApplication.getComponent(context).inject(this);
     initialize();

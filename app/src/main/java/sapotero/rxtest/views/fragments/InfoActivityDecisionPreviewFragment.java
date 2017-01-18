@@ -176,7 +176,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment {
     TOKEN    = settings.getString("token");
     POSITION = settings.getInteger("position");
     DOCUMENT_UID = settings.getString("document.uid");
-    STATUS_CODE = settings.getString("main_menu.status");
+    STATUS_CODE = settings.getString("main_menu.start");
     REG_NUMBER = settings.getString("main_menu.regnumber");
 
   }

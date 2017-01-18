@@ -52,7 +52,7 @@ public class PrevPerson extends AbstractCommand {
     TOKEN = settings.getString("token");
     UID   = settings.getString("main_menu.uid");
     HOST  = settings.getString("settings_username_host");
-    STATUS_CODE = settings.getString("main_menu.status");
+    STATUS_CODE = settings.getString("main_menu.start");
   }
 
   public PrevPerson withPerson(String uid){
@@ -68,7 +68,7 @@ public class PrevPerson extends AbstractCommand {
   public void execute() {
     loadSettings();
 
-    if ( history.getConnected() ){
+    if ( queueManager.getConnected() ){
       executeRemote();
     } else {
       executeLocal();
@@ -82,7 +82,7 @@ public class PrevPerson extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    history.add(this);
+    queueManager.add(this);
     if ( callback != null ){
       callback.onCommandExecuteSuccess( getType() );
     }
@@ -123,13 +123,13 @@ public class PrevPerson extends AbstractCommand {
           Timber.tag(TAG).i("error: %s", data.getMessage());
           Timber.tag(TAG).i("type: %s", data.getType());
 
-          history.remove(this);
+          queueManager.remove(this);
           if (callback != null){
             callback.onCommandExecuteSuccess(getType());
           }
         },
         error -> {
-          if ( history.getConnected() ){
+          if ( queueManager.getConnected() ){
             callback.onCommandExecuteSuccess(getType());
           } else {
             callback.onCommandExecuteError();

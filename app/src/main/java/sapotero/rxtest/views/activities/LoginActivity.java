@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -26,6 +27,7 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.events.bus.FileDownloadedEvent;
 import sapotero.rxtest.events.bus.MarkDocumentAsChangedJobEvent;
 import sapotero.rxtest.events.stepper.shared.StepperNextStepEvent;
+import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.interfaces.DataLoaderInterface;
 import sapotero.rxtest.views.services.MainService;
 import sapotero.rxtest.views.views.stepper.StepperLayout;
@@ -37,11 +39,16 @@ import timber.log.Timber;
 public class LoginActivity extends AppCompatActivity implements StepperLayout.StepperListener {
 
 
-  @Inject OkHttpClient okHttpClient;
-  @Inject RxSharedPreferences settings;
-  @Inject JobManager jobManager;
+  @Inject
+  OkHttpClient okHttpClient;
+  @Inject
+  RxSharedPreferences settings;
+  @Inject
+  JobManager jobManager;
 
-//  @BindView(R.id.stepper_form) LoginView stepper;
+
+  // test
+  @Inject QueueManager queue;
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -70,11 +77,20 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
     initialize();
     check_permissions();
 
+    initView();
+
+    queue.start();
+
+    new Handler().postDelayed( () -> {
+      queue.stop();
+    }, 5000L);
+  }
+
+  private void initView() {
     stepperLayout = (StepperLayout) findViewById(R.id.stepperLayout);
     adapter = new StepperAdapter( getSupportFragmentManager() );
     stepperLayout.setAdapter( adapter );
     stepperLayout.setListener(this);
-
   }
 
   @Override

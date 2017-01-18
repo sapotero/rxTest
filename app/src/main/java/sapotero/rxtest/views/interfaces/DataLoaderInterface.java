@@ -144,6 +144,44 @@ public class DataLoaderInterface {
     subscription = new CompositeSubscription();
   }
 
+  public void updateAuth( String sign ){
+    Timber.tag(TAG).i("tryToSignWithDc: %s", sign );
+
+    Retrofit retrofit = new RetrofitManager( context, HOST.get(), okHttpClient).process();
+    AuthService auth = retrofit.create( AuthService.class );
+
+    Map<String, Object> map = new HashMap<>();
+    map.put( "sign", sign );
+
+    RequestBody json = RequestBody.create(
+      MediaType.parse("application/json"),
+      new JSONObject( map ).toString()
+    );
+
+    Timber.tag(TAG).i("json: %s", json .toString());
+
+    unsubscribe();
+    subscription.add(
+
+      auth
+        .getAuthBySign( json )
+        .subscribeOn( Schedulers.io() )
+        .observeOn( AndroidSchedulers.mainThread() )
+        .subscribe(
+          data -> {
+            Timber.tag(TAG).i("tryToSignWithDc: token" + data.getAuthToken());
+            Timber.tag(TAG).i("tryToSignWithDc: login" + data.getLogin());
+
+            setLogin( data.getLogin() );
+            setToken( data.getAuthToken() );
+
+          },
+          error -> {
+            Timber.tag(TAG).i("tryToSignWithLogin error: %s" , error );
+          }
+        )
+    );
+  }
 
 
 

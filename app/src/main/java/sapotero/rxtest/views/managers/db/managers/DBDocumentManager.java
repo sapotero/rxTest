@@ -1,4 +1,4 @@
-package sapotero.rxtest.views.managers.db.factories;
+package sapotero.rxtest.views.managers.db.managers;
 
 import android.content.Context;
 
@@ -31,31 +31,19 @@ import sapotero.rxtest.retrofit.models.document.Exemplar;
 import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.retrofit.models.document.Signer;
-import sapotero.rxtest.views.managers.db.builders.DBBuilder;
-import sapotero.rxtest.views.managers.db.builders.ObjectBuilder;
 import timber.log.Timber;
 
-public class DocumentFactory {
-  @Inject
-  SingleEntityStore<Persistable> dataStore;
+public class DBDocumentManager {
+  @Inject SingleEntityStore<Persistable> dataStore;
 
   private final String TAG = this.getClass().getSimpleName();
 
-  private final boolean debug;
+  public DBDocumentManager(Context context) {
 
-  private final DBBuilder fromDb;
-  private final ObjectBuilder fromJson;
-
-  public DocumentFactory(Context context) {
     EsdApplication.getComponent(context).inject(this);
-
-    this.fromDb = new DBBuilder(context);
-    this.fromJson = new ObjectBuilder(context);
-    this.debug = true;
   }
 
-
-  public RDocumentEntity fromDb(String uid) {
+  public RDocumentEntity get(String uid) {
 
     Result<RDocumentEntity> doc = dataStore
       .select(RDocumentEntity.class)
@@ -77,15 +65,11 @@ public class DocumentFactory {
       result = true;
     }
 
-    if (debug) {
-      Timber.tag(TAG).v("exist " + result);
-    }
-
     return result;
   }
 
 
-  public DocumentInfo toObject(RDocumentEntity document) {
+  public DocumentInfo toModel(RDocumentEntity document) {
 
     Timber.e("%s", document.getSigner() );
 
@@ -219,5 +203,9 @@ public class DocumentFactory {
     Timber.w( "JSON: %s", new Gson().toJson(doc, DocumentInfo.class) );
 
     return doc;
+  }
+
+  public String toJSON(RDocumentEntity document) {
+    return new Gson().toJson( toModel(document) );
   }
 }

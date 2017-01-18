@@ -88,7 +88,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
 
   @BindView(R.id.DOCUMENT_TYPE) Spinner DOCUMENT_TYPE_SELECTOR;
-//  @BindView(R.id.JOURNAL_TYPE) Spinner FILTER_TYPE_SELECTOR;
   @BindView(R.id.ORGANIZATION) MultiOrganizationSpinner ORGANIZATION_SELECTOR;
 
   @BindView(R.id.activity_main_right_button) CircleRightArrow rightArrow;
@@ -152,15 +151,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     loadSettings();
 
 
-    RAdapter = new DocumentsAdapter(this, new ArrayList<>());
-    rv.setAdapter(RAdapter);
-    GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2, GridLayoutManager.VERTICAL, false);
-    rv.setLayoutManager(gridLayoutManager);
-
-    organization_adapter = new OrganizationAdapter(this, new ArrayList<>());
-    ORGANIZATION_SELECTOR.setAdapter(organization_adapter, false, selected -> {
-      Timber.tag("ORGANIZATION_SELECTOR").i("selected");
-    });
+    initAdapters();
 
     menuBuilder = new MenuBuilder(this);
     menuBuilder
@@ -182,15 +173,32 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     dbQueryBuilder.printFolders();
     dbQueryBuilder.printTemplates();
 
-
-
     dataLoader = new DataLoaderInterface(this);
-
-
 
     progressBar.setVisibility(ProgressBar.GONE);
 
 
+    initToolbar();
+
+    initEvents();
+
+    rxSettings();
+
+  }
+
+  private void initAdapters() {
+    RAdapter = new DocumentsAdapter(this, new ArrayList<>());
+    rv.setAdapter(RAdapter);
+    GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2, GridLayoutManager.VERTICAL, false);
+    rv.setLayoutManager(gridLayoutManager);
+
+    organization_adapter = new OrganizationAdapter(this, new ArrayList<>());
+    ORGANIZATION_SELECTOR.setAdapter(organization_adapter, false, selected -> {
+      Timber.tag("ORGANIZATION_SELECTOR").i("selected");
+    });
+  }
+
+  private void initToolbar() {
     toolbar.setTitle("Все документы");
     toolbar.setTitleTextColor(getResources().getColor(R.color.md_grey_100));
     toolbar.setSubtitleTextColor(getResources().getColor(R.color.md_grey_400));
@@ -210,31 +218,17 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       }
       return false;
     });
+  }
 
+  private void initEvents() {
     if (EventBus.getDefault().isRegistered(this)) {
       EventBus.getDefault().unregister(this);
     }
     EventBus.getDefault().register(this);
-
-    rxSettings();
-
   }
 
   private void updateByStatus() {
     dataLoader.updateByStatus( menuBuilder.getItem() );
-//    dataLoader.updateByStatus( menuBuilder.getItem() );
-
-//    ProgressDialog prog= new ProgressDialog(this);//Assuming that you are using fragments.
-//    prog.setTitle("Обновление данных");
-//    prog.setMessage("data is loading...");
-//    prog.setCancelable(false);
-//    prog.setIndeterminate(true);
-//    prog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-//    prog.show();
-//
-//    new Handler().postDelayed( () -> {
-//      prog.dismiss();
-//    }, 5000L);
 
     Toast.makeText(this, "Обновление данных...", Toast.LENGTH_SHORT).show();
 
@@ -274,14 +268,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void setJournalType(int type) {
-//    int index = Arrays.asList((getResources().getStringArray(R.array.settings_view_start_page_identifier))).indexOf(String.valueOf(type));
-//    String value = Arrays.asList((getResources().getStringArray(R.array.settings_view_start_page_values))).get(index);
-//
-//    Integer adapter_index = document_type_adapter.findByValue(value);
-//    Timber.tag(TAG).i("value selected int: " + adapter_index);
-//    DOCUMENT_TYPE_SELECTOR.setSelection(adapter_index);
     menuBuilder.selectJournal( type );
-
   }
 
   private void drawer_build_bottom() {
@@ -424,6 +411,16 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     HOST = settings.getString("settings_username_host");
   }
 
+  private void drawer_add_item(int index, String title, Long identifier) {
+    Timber.tag("drawer_add_item").v(" !index " + index + " " + title);
+
+    drawer.addDrawerItems(
+      new PrimaryDrawerItem()
+        .withName(title)
+        .withIdentifier(identifier)
+    );
+  }
+
   public void rxSettings() {
     drawer_build_head();
 
@@ -452,15 +449,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     drawer_build_bottom();
   }
 
-  private void drawer_add_item(int index, String title, Long identifier) {
-    Timber.tag("drawer_add_item").v(" !index " + index + " " + title);
 
-    drawer.addDrawerItems(
-      new PrimaryDrawerItem()
-        .withName(title)
-        .withIdentifier(identifier)
-    );
-  }
 
   @OnClick(R.id.activity_main_left_button)
   public void setLeftArrowArrow() {
@@ -471,6 +460,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   public void setRightArrow() {
     menuBuilder.showNext();
   }
+
+
 
   @Subscribe(threadMode = ThreadMode.BACKGROUND)
   public void onMessageEvent(GetDocumentInfoEvent event) {

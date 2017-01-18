@@ -8,7 +8,7 @@ public class Action {
   @SerializedName("date")
   @Expose
   private String date;
-  @SerializedName("status")
+  @SerializedName("start")
   @Expose
   private String status;
   @SerializedName("comment")
@@ -36,7 +36,7 @@ public class Action {
   /**
    *
    * @return
-   * The status
+   * The start
    */
   public String getStatus() {
     return status;
@@ -45,7 +45,7 @@ public class Action {
   /**
    *
    * @param status
-   * The status
+   * The start
    */
   public void setStatus(String status) {
     this.status = status;

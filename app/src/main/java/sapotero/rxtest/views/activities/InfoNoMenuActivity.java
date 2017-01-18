@@ -49,10 +49,9 @@ import sapotero.rxtest.views.fragments.InfoCardFieldsFragment;
 import sapotero.rxtest.views.fragments.InfoCardLinksFragment;
 import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
 import sapotero.rxtest.views.fragments.RoutePreviewFragment;
-import sapotero.rxtest.views.interfaces.DocumentManager;
 import timber.log.Timber;
 
-public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivityDecisionPreviewFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, RoutePreviewFragment.OnFragmentInteractionListener, InfoCardDocumentsFragment.OnFragmentInteractionListener, InfoCardWebViewFragment.OnFragmentInteractionListener, InfoCardLinksFragment.OnFragmentInteractionListener, InfoCardFieldsFragment.OnFragmentInteractionListener, DocumentManager.Callback, SelectOshsDialogFragment.Callback {
+public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivityDecisionPreviewFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, RoutePreviewFragment.OnFragmentInteractionListener, InfoCardDocumentsFragment.OnFragmentInteractionListener, InfoCardWebViewFragment.OnFragmentInteractionListener, InfoCardLinksFragment.OnFragmentInteractionListener, InfoCardFieldsFragment.OnFragmentInteractionListener, /*InterfaceDocumentManager.Callback,*/ SelectOshsDialogFragment.Callback {
 
 
   @BindView(R.id.activity_info_preview_container) LinearLayout preview_container;
@@ -77,7 +76,7 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
   private Preference<Integer> POSITION;
 
 
-  private DocumentManager documentManager;
+//  private InterfaceDocumentManager documentManager;
   private String TAG = this.getClass().getSimpleName();
 
   @BindView(R.id.toolbar) Toolbar toolbar;
@@ -102,8 +101,8 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
 
     EsdApplication.getComponent(this).inject(this);
 
-    documentManager = new DocumentManager(this);
-    documentManager.registerCallBack(this);
+//    documentManager = new InterfaceDocumentManager(this);
+//    documentManager.registerCallBack(this);
 
     Intent intent = getIntent();
     if ( intent != null ){
@@ -211,7 +210,7 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
     TOKEN    = settings.getString("token");
     POSITION = settings.getInteger("position");
     DOCUMENT_UID = settings.getString("document.uid");
-    STATUS_CODE = settings.getString("main_menu.status");
+    STATUS_CODE = settings.getString("main_menu.start");
 
   }
 
@@ -268,16 +267,16 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
   }
 
 
-  /* DocumentManager.Callback */
-  @Override
-  public void onGetStateSuccess() {
-    Timber.tag("DocumentManagerCallback").i("onGetStateSuccess");
-  }
-
-  @Override
-  public void onGetStateError() {
-    Timber.tag("DocumentManagerCallback").i("onGetStateError");
-  }
+//  /* InterfaceDocumentManager.Callback */
+//  @Override
+//  public void onGetStateSuccess() {
+//    Timber.tag("DocumentManagerCallback").i("onGetStateSuccess");
+//  }
+//
+//  @Override
+//  public void onGetStateError() {
+//    Timber.tag("DocumentManagerCallback").i("onGetStateError");
+//  }
 
 
   @Override
