@@ -60,11 +60,10 @@ public class OperationManager implements CommandFactory.Callback {
     return instance;
   }
 
-  public void execute(String operation, CommandParams params) {
+  public void execute(CommandFactory.Operation operation, CommandParams params) {
     Command command = commandBuilder
       .withDocument( new DocumentReceiver( settings.getString("main_menu.uid").get() ) )
       .withParams( params )
-      .withHistory( histrory )
       .build( operation );
 
     Timber.tag(TAG).i("COMMAND: %s [%s] | %s", operation, command, new Gson().toJson(params) );

@@ -16,7 +16,6 @@ import sapotero.rxtest.views.managers.menu.commands.signing.PrevPerson;
 import sapotero.rxtest.views.managers.menu.interfaces.Command;
 import sapotero.rxtest.views.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.views.managers.menu.utils.CommandParams;
-import sapotero.rxtest.views.managers.menu.utils.OperationHistory;
 import timber.log.Timber;
 
 public class CommandFactory implements AbstractCommand.Callback{
@@ -26,7 +25,6 @@ public class CommandFactory implements AbstractCommand.Callback{
   private Context context;
   private CommandParams params;
   private DocumentReceiver document;
-  private OperationHistory histrory;
 
   Callback callback;
   public interface Callback {
@@ -39,11 +37,11 @@ public class CommandFactory implements AbstractCommand.Callback{
   }
 
 
-  private enum Operation {
+  public enum Operation {
 
     FROM_THE_REPORT {
       @Override
-      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params, OperationHistory histrory) {
+      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
         FromTheReport command = new FromTheReport(context, document);
 //        doc.withHistory(histrory);
         command.registerCallBack(instance);
@@ -53,7 +51,7 @@ public class CommandFactory implements AbstractCommand.Callback{
     },
     RETURN_TO_THE_PRIMARY_CONSIDERATION {
       @Override
-      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params, OperationHistory histrory) {
+      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
         ReturnToPrimaryConsideration command = new ReturnToPrimaryConsideration(context, document);
 //        doc.withHistory(histrory);
         command.registerCallBack(instance);
@@ -63,9 +61,9 @@ public class CommandFactory implements AbstractCommand.Callback{
     },
     DELEGATE_PERFORMANCE {
       @Override
-      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params, OperationHistory histrory) {
+      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
         DelegatePerformance command = new DelegatePerformance(context, document);
-//        command.withHistory(histrory);
+        command.withParams(params);
         command
           .withPerson( params.getPerson() )
           .registerCallBack(instance);
@@ -75,9 +73,9 @@ public class CommandFactory implements AbstractCommand.Callback{
     },
     TO_THE_APPROVAL_PERFORMANCE {
       @Override
-      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params, OperationHistory histrory) {
+      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
         PrimaryConsideration command = new PrimaryConsideration(context, document);
-//        command.withHistory(histrory);
+        command.withParams(params);
         command
           .withPerson( params.getPerson() )
           .registerCallBack(instance);
@@ -87,15 +85,15 @@ public class CommandFactory implements AbstractCommand.Callback{
     },
     TO_THE_PRIMARY_CONSIDERATION {
       @Override
-      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params, OperationHistory histrory) {
+      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
         return null;
       }
     },
-    CHANGE_PERSON {
+    APPROVAL_CHANGE_PERSON {
       @Override
-      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params, OperationHistory histrory) {
+      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
         ChangePerson command = new ChangePerson(context, document);
-//        command.withHistory(histrory);
+        command.withParams(params);
         command
           .withPerson( params.getPerson() )
           .registerCallBack(instance);
@@ -103,11 +101,11 @@ public class CommandFactory implements AbstractCommand.Callback{
         return command;
       }
     },
-    NEXT_PERSON {
+    APPROVAL_NEXT_PERSON {
       @Override
-      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params, OperationHistory histrory) {
+      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
         NextPerson command = new NextPerson(context, document);
-//        command.withHistory(histrory);
+        command.withParams(params);
         command
           .withPerson( "" )
           .registerCallBack(instance);
@@ -115,11 +113,47 @@ public class CommandFactory implements AbstractCommand.Callback{
         return command;
       }
     },
-    PREV_PERSON {
+    APPROVAL_PREV_PERSON {
       @Override
-      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params, OperationHistory histrory) {
+      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
         PrevPerson command = new PrevPerson(context, document);
-//        command.withHistory(histrory);
+        command.withParams(params);
+        command
+          .withPerson( "" )
+          .registerCallBack(instance);
+        command.withParams(params);
+        return command;
+      }
+    },
+    SIGNING_CHANGE_PERSON {
+      @Override
+      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
+        ChangePerson command = new ChangePerson(context, document);
+        command.withParams(params);
+        command
+          .withPerson( params.getPerson() )
+          .registerCallBack(instance);
+        command.withParams(params);
+        return command;
+      }
+    },
+    SIGNING_NEXT_PERSON {
+      @Override
+      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
+        NextPerson command = new NextPerson(context, document);
+        command.withParams(params);
+        command
+          .withPerson( "" )
+          .registerCallBack(instance);
+        command.withParams(params);
+        return command;
+      }
+    },
+    SIGNING_PREV_PERSON {
+      @Override
+      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
+        PrevPerson command = new PrevPerson(context, document);
+        command.withParams(params);
         command
           .withPerson( "" )
           .registerCallBack(instance);
@@ -129,52 +163,51 @@ public class CommandFactory implements AbstractCommand.Callback{
     },
     ADD_TO_FOLDER {
       @Override
-      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params, OperationHistory histrory) {
+      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
         AddToFolder command = new AddToFolder(context, document);
-//        command.withHistory(histrory);
+        command.withParams(params);
         command
           .withFolder( params.getFolder() )
           .withDocumentId( params.getDocument() )
           .registerCallBack(instance);
-        command.withParams(params);
         return command;
       }
     },
     REMOVE_FROM_FOLDER {
       @Override
-      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params, OperationHistory histrory) {
+      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
         return null;
       }
     },
     CHECK_FOR_CONTROL {
       @Override
-      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params, OperationHistory histrory) {
+      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
         CheckForControl command = new CheckForControl(context, document);
-//        command.withHistory(histrory);
+        command.withParams(params);
         command
           .withDocumentId( params.getDocument() )
           .registerCallBack(instance);
-        command.withParams(params);
+        
         return command;
       }
     },
     SKIP_CONTROL_LABEL {
       @Override
-      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params, OperationHistory histrory) {
+      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
         return null;
       }
     },
     INCORRECT {
       @Override
-      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params, OperationHistory histrory) {
+      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
         return null;
       }
     },
     SAVE_DECISION {
       @Override
-      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params, OperationHistory histrory) {
+      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
         SaveDecision command = new SaveDecision(context, document);
-//        command.withHistory(histrory);
+        command.withParams(params);
         command
           .withDecision( params.getDecision() )
           .withDecisionId( params.getSign() )
@@ -186,13 +219,82 @@ public class CommandFactory implements AbstractCommand.Callback{
     },
     NEW_DECISION {
       @Override
-      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params, OperationHistory histrory) {
+      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
         return null;
       }
-    },;
+    };
+
+    public static Operation getOperation(String operation_type){
+      Operation operation = Operation.INCORRECT;
+
+      switch ( operation_type ){
+        case "sapotero.rxtest.views.managers.menu.commands.decision.SaveDecision":
+          operation = Operation.SAVE_DECISION;
+          break;
+        case "sapotero.rxtest.views.managers.menu.commands.decision.AddDecision":
+          operation = Operation.NEW_DECISION;
+          break;
+
+        case "sapotero.rxtest.views.managers.menu.commands.report.ReturnToPrimaryConsideration":
+          operation = Operation.RETURN_TO_THE_PRIMARY_CONSIDERATION;
+          break;
+        // sent_to_the_report (отправлен на доклад)
+        case "sapotero.rxtest.views.managers.menu.commands.report.FromTheReport":
+          operation = Operation.FROM_THE_REPORT;
+          break;
+
+        // sent_to_the_performance (Отправлен на исполнение)
+        case "sapotero.rxtest.views.managers.menu.commands.performance.DelegatePerformance":
+          operation = Operation.DELEGATE_PERFORMANCE;
+          break;
+        case "sapotero.rxtest.views.managers.menu.commands.performance.ApprovalPerformance":
+          operation = Operation.TO_THE_APPROVAL_PERFORMANCE;
+          break;
+
+        // primary_consideration (первичное рассмотрение)
+        case "sapotero.rxtest.views.managers.menu.commands.consideration.PrimaryConsideration":
+          operation = Operation.TO_THE_PRIMARY_CONSIDERATION;
+          break;
+
+        // approval (согласование проектов документов)
+        case "sapotero.rxtest.views.managers.menu.commands.approval.ChangePerson":
+          operation = Operation.APPROVAL_CHANGE_PERSON;
+          break;
+        case "sapotero.rxtest.views.managers.menu.commands.approval.NextPerson":
+          operation = Operation.APPROVAL_NEXT_PERSON;
+          break;
+        case "sapotero.rxtest.views.managers.menu.commands.approval.PrevPerson":
+          operation = Operation.APPROVAL_PREV_PERSON;
+          break;
+
+        // approval (согласование проектов документов)
+        case "sapotero.rxtest.views.managers.menu.commands.signing.ChangePerson":
+          operation = Operation.SIGNING_CHANGE_PERSON;
+          break;
+        case "sapotero.rxtest.views.managers.menu.commands.signing.NextPerson":
+          operation = Operation.SIGNING_NEXT_PERSON;
+          break;
+        case "sapotero.rxtest.views.managers.menu.commands.signing.PrevPerson":
+          operation = Operation.SIGNING_PREV_PERSON;
+          break;
 
 
-    abstract Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params, OperationHistory histrory);
+        case "sapotero.rxtest.views.managers.menu.commands.shared.AddToFolder":
+          operation = Operation.ADD_TO_FOLDER;
+          break;
+        case "sapotero.rxtest.views.managers.menu.commands.shared.CheckForControl":
+          operation = Operation.CHECK_FOR_CONTROL;
+          break;
+
+
+        default:
+          operation = Operation.INCORRECT;
+          break;
+      }
+      return operation;
+    }
+
+    abstract Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params);
   };
 
   public CommandFactory(Context context) {
@@ -209,70 +311,8 @@ public class CommandFactory implements AbstractCommand.Callback{
     return this;
   }
 
-
-  public CommandFactory withHistory(OperationHistory histrory) {
-    this.histrory = histrory;
-    return this;
-  }
-
-  public Command build(String operation_type) {
-
-    Operation operation = null;
-
-    switch ( operation_type ){
-      case "save_decision":
-        operation = Operation.SAVE_DECISION;
-        break;
-      case "new_decision":
-        operation = Operation.SAVE_DECISION;
-        break;
-
-      // sent_to_the_report (отправлен на доклад)
-      case "menu_info_from_the_report":
-        operation = Operation.FROM_THE_REPORT;
-        break;
-      case "return_to_the_primary_consideration":
-        operation = Operation.RETURN_TO_THE_PRIMARY_CONSIDERATION;
-        break;
-
-      // sent_to_the_performance (Отправлен на исполнение)
-      case "menu_info_delegate_performance":
-        operation = Operation.DELEGATE_PERFORMANCE;
-        break;
-      case "menu_info_to_the_approval_performance":
-        operation = Operation.TO_THE_APPROVAL_PERFORMANCE;
-        break;
-
-      // primary_consideration (первичное рассмотрение)
-      case "menu_info_to_the_primary_consideration":
-        operation = Operation.TO_THE_PRIMARY_CONSIDERATION;
-        break;
-
-      // approval (согласование проектов документов)
-      case "menu_info_change_person":
-        operation = Operation.CHANGE_PERSON;
-        break;
-      case "menu_info_next_person":
-        operation = Operation.NEXT_PERSON;
-        break;
-      case "menu_info_prev_person":
-        operation = Operation.PREV_PERSON;
-        break;
-      case "menu_info_shared_to_favorites":
-        operation = Operation.ADD_TO_FOLDER;
-        break;
-      case "menu_info_shared_to_control":
-        operation = Operation.CHECK_FOR_CONTROL;
-        break;
-
-      default:
-        operation = Operation.INCORRECT;
-        break;
-    }
-
-    Command command = operation.getCommand(this, context, document, params, histrory);
-
-    return command;
+  public Command build(CommandFactory.Operation operation) {
+    return operation.getCommand(this, context, document, params);
   }
 
 

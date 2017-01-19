@@ -44,6 +44,7 @@ import sapotero.rxtest.views.activities.InfoActivity;
 import sapotero.rxtest.views.dialogs.InfoCardDialogFragment;
 import sapotero.rxtest.views.managers.db.managers.DBDocumentManager;
 import sapotero.rxtest.views.managers.menu.OperationManager;
+import sapotero.rxtest.views.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.views.managers.menu.utils.CommandParams;
 import timber.log.Timber;
 
@@ -224,7 +225,7 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
       params.setFolder(favorites);
       params.setDocument( item.getUid() );
 
-      operationManager.execute( "menu_info_shared_to_favorites", params );
+      operationManager.execute( CommandFactory.Operation.ADD_TO_FOLDER, params );
 
       Toast.makeText(view.getContext(), "Избранное " + viewHolder.title.getText().toString(), Toast.LENGTH_SHORT).show();
       viewHolder.swipeLayout.close(true);
@@ -239,7 +240,7 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
       CommandParams params = new CommandParams();
       params.setSign( item.getUid() );
 
-      operationManager.execute( "menu_info_shared_to_control", params );
+      operationManager.execute( CommandFactory.Operation.ADD_TO_FOLDER, params );
 
       Toast.makeText(view.getContext(), "Контроль " + viewHolder.title.getText().toString(), Toast.LENGTH_SHORT).show();
       viewHolder.swipeLayout.close(true);

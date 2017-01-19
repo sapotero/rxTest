@@ -14,7 +14,7 @@ import sapotero.rxtest.jobs.bus.BaseJob;
 import sapotero.rxtest.jobs.utils.JobModule;
 import sapotero.rxtest.retrofit.utils.OkHttpModule;
 import sapotero.rxtest.utils.queue.QueueManager;
-import sapotero.rxtest.utils.queue.utils.DbQueueManagerModule;
+import sapotero.rxtest.utils.queue.db.QueueDBManager;
 import sapotero.rxtest.utils.queue.utils.QueueManagerModule;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.activities.DocumentImageFullScreenActivity;
@@ -73,8 +73,7 @@ import sapotero.rxtest.views.views.stepper.build.steps.StepperChooseAuthTypeFrag
   OkHttpModule.class,
   SettingsModule.class,
   DBDocumentManagerModule.class,
-  QueueManagerModule.class,
-  DbQueueManagerModule.class
+  QueueManagerModule.class
 })
 
 public interface EsdComponent {
@@ -123,6 +122,8 @@ public interface EsdComponent {
 
   void inject(ItemsBuilder context);
 
+  void inject(QueueDBManager context);
+
 
 
 
@@ -133,7 +134,6 @@ public interface EsdComponent {
   void inject(ButtonBuilder context);
 
   void inject(DBQueryBuilder context);
-  void inject(DbQueueManagerModule context);
 
 
   void inject(DecisionManager context);

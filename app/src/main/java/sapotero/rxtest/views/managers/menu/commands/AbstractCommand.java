@@ -4,6 +4,8 @@ import android.content.Context;
 
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
+import java.io.Serializable;
+
 import javax.inject.Inject;
 
 import io.requery.Persistable;
@@ -16,14 +18,14 @@ import sapotero.rxtest.views.managers.menu.interfaces.Operation;
 import sapotero.rxtest.views.managers.menu.utils.CommandParams;
 
 
-public abstract class AbstractCommand implements Command, Operation {
+public abstract class AbstractCommand implements Serializable, Command, Operation {
 
   @Inject public OkHttpClient okHttpClient;
   @Inject public RxSharedPreferences settings;
   @Inject public SingleEntityStore<Persistable> dataStore;
   @Inject public QueueManager queueManager;
 
-  protected CommandParams params;
+  public CommandParams params;
 
   public AbstractCommand(Context context) {
     EsdApplication.getComponent(context).inject(this);

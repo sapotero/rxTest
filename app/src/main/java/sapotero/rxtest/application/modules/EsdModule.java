@@ -11,7 +11,6 @@ import sapotero.rxtest.db.requery.utils.RequeryDbModule;
 import sapotero.rxtest.events.utils.SubscriptionsModule;
 import sapotero.rxtest.jobs.utils.JobModule;
 import sapotero.rxtest.retrofit.utils.OkHttpModule;
-import sapotero.rxtest.utils.queue.utils.DbQueueManagerModule;
 import sapotero.rxtest.utils.queue.utils.QueueManagerModule;
 import sapotero.rxtest.views.managers.db.utils.DBDocumentManagerModule;
 
@@ -24,8 +23,7 @@ import sapotero.rxtest.views.managers.db.utils.DBDocumentManagerModule;
     OkHttpModule.class,
     SettingsModule.class,
     DBDocumentManagerModule.class,
-    QueueManagerModule.class,
-    DbQueueManagerModule.class
+    QueueManagerModule.class
   }
 )
 public final class EsdModule {

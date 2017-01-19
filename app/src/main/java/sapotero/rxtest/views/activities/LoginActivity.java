@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -28,7 +27,6 @@ import sapotero.rxtest.events.bus.FileDownloadedEvent;
 import sapotero.rxtest.events.bus.MarkDocumentAsChangedJobEvent;
 import sapotero.rxtest.events.stepper.shared.StepperNextStepEvent;
 import sapotero.rxtest.utils.queue.QueueManager;
-import sapotero.rxtest.views.interfaces.DataLoaderInterface;
 import sapotero.rxtest.views.services.MainService;
 import sapotero.rxtest.views.views.stepper.StepperLayout;
 import sapotero.rxtest.views.views.stepper.VerificationError;
@@ -59,8 +57,6 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
   private Preference<String> PASSWORD;
   private Preference<String> HOST;
 
-  private DataLoaderInterface dataLoader;
-
   private StepperLayout stepperLayout;
   private StepperAdapter adapter;
 
@@ -79,11 +75,8 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
 
     initView();
 
-    queue.start();
+    queue.clean();
 
-    new Handler().postDelayed( () -> {
-      queue.stop();
-    }, 5000L);
   }
 
   private void initView() {

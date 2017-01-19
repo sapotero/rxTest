@@ -60,6 +60,7 @@ import sapotero.rxtest.views.fragments.InfoCardLinksFragment;
 import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
 import sapotero.rxtest.views.fragments.RoutePreviewFragment;
 import sapotero.rxtest.views.managers.menu.OperationManager;
+import sapotero.rxtest.views.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.views.managers.menu.utils.CommandParams;
 import timber.log.Timber;
 
@@ -243,31 +244,32 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
 
 
-        String operation;
+        CommandFactory.Operation operation;
         CommandParams params = new CommandParams();
+        params.setUser( LOGIN.get() );
 
         switch ( item.getItemId() ){
           // sent_to_the_report (отправлен на доклад)
           case R.id.menu_info_from_the_report:
-            operation = "menu_info_from_the_report";
+            operation = CommandFactory.Operation.FROM_THE_REPORT;
             break;
           case R.id.return_to_the_primary_consideration:
-            operation = "return_to_the_primary_consideration";
+            operation = CommandFactory.Operation.TO_THE_PRIMARY_CONSIDERATION;
             break;
 
           // sent_to_the_report (отправлен на доклад)
           case R.id.menu_info_delegate_performance:
-            operation = "menu_info_delegate_performance";
+            operation = CommandFactory.Operation.DELEGATE_PERFORMANCE;
             params.setPerson( "USER_UD" );
             break;
           case R.id.menu_info_to_the_approval_performance:
-            operation = "menu_info_to_the_approval_performance";
+            operation = CommandFactory.Operation.TO_THE_APPROVAL_PERFORMANCE;
             params.setPerson( "USER_UD" );
             break;
 
           // primary_consideration (первичное рассмотрение)
           case R.id.menu_info_to_the_primary_consideration:
-            operation = "null";
+            operation = CommandFactory.Operation.INCORRECT;
 
             if (oshs == null){
               oshs = new SelectOshsDialogFragment();
@@ -279,7 +281,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
           // approval (согласование проектов документов)
           case R.id.menu_info_approval_change_person:
-            operation = "null";
+            operation = CommandFactory.Operation.INCORRECT;
 
             if (oshs == null){
               oshs = new SelectOshsDialogFragment();
@@ -290,21 +292,21 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
             break;
           case R.id.menu_info_approval_next_person:
-            operation = "menu_info_next_person";
+            operation = CommandFactory.Operation.APPROVAL_NEXT_PERSON;
             buildDialog();
             dialog.show();
 
             params.setSign( SIGN );
             break;
           case R.id.menu_info_approval_prev_person:
-            operation = "menu_info_prev_person";
+            operation = CommandFactory.Operation.APPROVAL_PREV_PERSON;
             params.setSign( "SIGN" );
             break;
 
 
           // approval (согласование проектов документов)
           case R.id.menu_info_sign_change_person:
-            operation = "null";
+            operation = CommandFactory.Operation.INCORRECT;
 
             if (oshs == null){
               oshs = new SelectOshsDialogFragment();
@@ -314,24 +316,24 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
             oshs.show( getFragmentManager(), "SelectOshsDialogFragment");
             break;
           case R.id.menu_info_sign_next_person:
-            operation = "menu_info_next_person";
+            operation = CommandFactory.Operation.SIGNING_NEXT_PERSON;
             params.setSign( "SIGN" );
             break;
           case R.id.menu_info_sign_prev_person:
-            operation = "menu_info_prev_person";
+            operation = CommandFactory.Operation.SIGNING_PREV_PERSON;
             params.setSign( "SIGN" );
             break;
 
 
           case R.id.action_info_create_decision:
-            operation = "action_info_create_decision";
+            operation = CommandFactory.Operation.NEW_DECISION;
 
             Intent intent = new Intent(this, DecisionConstructorActivity.class);
             startActivity(intent);
 
             break;
           case R.id.menu_info_shared_to_favorites:
-            operation = "menu_info_shared_to_favorites";
+            operation = CommandFactory.Operation.ADD_TO_FOLDER;
 
 //            item.setTitle(getString( doc.isFavorites() != null && doc.isFavorites() ? R.string.remove_from_favorites : R.string.to_favorites));
 
@@ -349,13 +351,13 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
 //            item.setTitle(getString( doc.isControl() != null && doc.isControl() ? R.string.remove_from_control : R.string.to_control));
 
-            operation = "menu_info_shared_to_control";
+            operation = CommandFactory.Operation.ADD_TO_FOLDER;
             params.setDocument( UID.get() );
             break;
 
 
           default:
-            operation = "incorrect";
+            operation = CommandFactory.Operation.CHECK_FOR_CONTROL;
             break;
         }
 
@@ -586,7 +588,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   public void onSearchSuccess(Oshs user) {
     CommandParams params = new CommandParams();
     params.setPerson( user.getId() );
-    operationManager.execute( "menu_info_change_person", params );
+    operationManager.execute( CommandFactory.Operation.APPROVAL_CHANGE_PERSON, params );
   }
 
   @Override

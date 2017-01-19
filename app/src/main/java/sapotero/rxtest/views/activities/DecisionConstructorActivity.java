@@ -28,6 +28,7 @@ import sapotero.rxtest.views.adapters.models.UrgencyItem;
 import sapotero.rxtest.views.fragments.DecisionFragment;
 import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
 import sapotero.rxtest.views.managers.menu.OperationManager;
+import sapotero.rxtest.views.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.views.managers.menu.utils.CommandParams;
 import sapotero.rxtest.views.managers.view.DecisionManager;
 import sapotero.rxtest.views.views.DelayAutoCompleteTextView;
@@ -91,7 +92,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
               CommandParams params = new CommandParams();
               params.setSign( new_decision.getId() );
               params.setDecision(json);
-              operationManager.execute( "save_decision", params );
+              operationManager.execute( CommandFactory.Operation.SAVE_DECISION, params );
 
             }
           )
