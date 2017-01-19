@@ -16,6 +16,7 @@ import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.views.managers.menu.receivers.DocumentReceiver;
+import sapotero.rxtest.views.managers.menu.utils.CommandParams;
 import timber.log.Timber;
 
 public class ApprovalPerformance extends AbstractCommand {
@@ -120,5 +121,14 @@ public class ApprovalPerformance extends AbstractCommand {
   @Override
   public void executeRemote() {
 
+  }
+
+  @Override
+  public void withParams(CommandParams params) {
+    this.params = params;
+  }
+  @Override
+  public CommandParams getParams() {
+    return params;
   }
 }

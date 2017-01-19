@@ -44,19 +44,21 @@ public class CommandFactory implements AbstractCommand.Callback{
     FROM_THE_REPORT {
       @Override
       Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params, OperationHistory histrory) {
-        FromTheReport doc = new FromTheReport(context, document);
+        FromTheReport command = new FromTheReport(context, document);
 //        doc.withHistory(histrory);
-        doc.registerCallBack(instance);
-        return doc;
+        command.registerCallBack(instance);
+        command.withParams(params);
+        return command;
       }
     },
     RETURN_TO_THE_PRIMARY_CONSIDERATION {
       @Override
       Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params, OperationHistory histrory) {
-        ReturnToPrimaryConsideration doc = new ReturnToPrimaryConsideration(context, document);
+        ReturnToPrimaryConsideration command = new ReturnToPrimaryConsideration(context, document);
 //        doc.withHistory(histrory);
-        doc.registerCallBack(instance);
-        return doc;
+        command.registerCallBack(instance);
+        command.withParams(params);
+        return command;
       }
     },
     DELEGATE_PERFORMANCE {
@@ -67,6 +69,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         command
           .withPerson( params.getPerson() )
           .registerCallBack(instance);
+        command.withParams(params);
         return command;
       }
     },
@@ -78,6 +81,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         command
           .withPerson( params.getPerson() )
           .registerCallBack(instance);
+        command.withParams(params);
         return command;
       }
     },
@@ -95,6 +99,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         command
           .withPerson( params.getPerson() )
           .registerCallBack(instance);
+        command.withParams(params);
         return command;
       }
     },
@@ -106,6 +111,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         command
           .withPerson( "" )
           .registerCallBack(instance);
+        command.withParams(params);
         return command;
       }
     },
@@ -117,6 +123,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         command
           .withPerson( "" )
           .registerCallBack(instance);
+        command.withParams(params);
         return command;
       }
     },
@@ -129,6 +136,7 @@ public class CommandFactory implements AbstractCommand.Callback{
           .withFolder( params.getFolder() )
           .withDocumentId( params.getDocument() )
           .registerCallBack(instance);
+        command.withParams(params);
         return command;
       }
     },
@@ -146,6 +154,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         command
           .withDocumentId( params.getDocument() )
           .registerCallBack(instance);
+        command.withParams(params);
         return command;
       }
     },
@@ -170,6 +179,8 @@ public class CommandFactory implements AbstractCommand.Callback{
           .withDecision( params.getDecision() )
           .withDecisionId( params.getSign() )
           .registerCallBack(instance);
+
+        command.withParams(params);
         return command;
       }
     },

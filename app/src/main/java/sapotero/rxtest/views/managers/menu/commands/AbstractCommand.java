@@ -13,6 +13,7 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.managers.menu.interfaces.Command;
 import sapotero.rxtest.views.managers.menu.interfaces.Operation;
+import sapotero.rxtest.views.managers.menu.utils.CommandParams;
 
 
 public abstract class AbstractCommand implements Command, Operation {
@@ -22,18 +23,15 @@ public abstract class AbstractCommand implements Command, Operation {
   @Inject public SingleEntityStore<Persistable> dataStore;
   @Inject public QueueManager queueManager;
 
-//  public OperationHistory queueManager;
+  protected CommandParams params;
 
   public AbstractCommand(Context context) {
     EsdApplication.getComponent(context).inject(this);
   }
 
+  public abstract void withParams(CommandParams params);
+
   public Callback callback;
-
-//  public void withHistory(OperationHistory histrory){
-//    this.queueManager = histrory;
-//  }
-
   public interface Callback {
     void onCommandExecuteSuccess(String command);
     void onCommandExecuteError();

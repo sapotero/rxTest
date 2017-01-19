@@ -128,10 +128,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
 
     buildDialog();
-
-    queue.saveToDisc();
-
-
   }
 
   private void buildDialog() {

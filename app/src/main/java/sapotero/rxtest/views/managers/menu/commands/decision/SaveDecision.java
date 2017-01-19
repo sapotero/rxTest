@@ -13,6 +13,7 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.views.managers.menu.receivers.DocumentReceiver;
+import sapotero.rxtest.views.managers.menu.utils.CommandParams;
 import timber.log.Timber;
 
 public class SaveDecision extends AbstractCommand {
@@ -114,5 +115,14 @@ public class SaveDecision extends AbstractCommand {
   @Override
   public void executeRemote() {
 
+  }
+
+  @Override
+  public void withParams(CommandParams params) {
+    this.params = params;
+  }
+  @Override
+  public CommandParams getParams() {
+    return params;
   }
 }

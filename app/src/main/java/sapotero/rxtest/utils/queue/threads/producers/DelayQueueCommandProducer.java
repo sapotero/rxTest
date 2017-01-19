@@ -1,4 +1,4 @@
-package sapotero.rxtest.utils.queue.producers;
+package sapotero.rxtest.utils.queue.threads.producers;
 
 import android.content.Context;
 

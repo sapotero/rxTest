@@ -529,7 +529,8 @@ public class MainService extends Service {
 
     EventBus.getDefault().post( new AuthServiceAuthEvent( aliasesList.toString() ) );
 
-    ContainerAdapter adapter = new ContainerAdapter(aliasesList.get(0), null, aliasesList.get(0), null);
+//    ContainerAdapter adapter = new ContainerAdapter(aliasesList.get( aliasesList.size()-1 ), null, aliasesList.get( aliasesList.size()-1 ), null);
+    ContainerAdapter adapter = new ContainerAdapter(aliasesList.get( 0 ), null, aliasesList.get( 0 ), null);
 
     adapter.setProviderType(ProviderType.currentProviderType());
     adapter.setClientPassword( password.toCharArray() );

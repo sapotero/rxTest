@@ -1,4 +1,4 @@
-package sapotero.rxtest.utils.queue.consumers;
+package sapotero.rxtest.utils.queue.threads.consumers;
 
 import android.content.Context;
 
@@ -7,13 +7,13 @@ import java.util.concurrent.BlockingQueue;
 import sapotero.rxtest.utils.queue.objects.DelayedCommand;
 import timber.log.Timber;
 
-public class DelayQueueCommandConsumer {
+public class DelayQueueAuthConsumer {
 
   private String name;
   private BlockingQueue queue;
   private volatile Boolean runnable = true;
 
-  public DelayQueueCommandConsumer(String name, BlockingQueue queue, Context context) {
+  public DelayQueueAuthConsumer(String name, BlockingQueue queue, Context context) {
     this.name = name;
     this.queue = queue;
   }
