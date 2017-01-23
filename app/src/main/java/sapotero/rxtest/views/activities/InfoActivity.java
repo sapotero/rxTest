@@ -1,20 +1,17 @@
 package sapotero.rxtest.views.activities;
 
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
@@ -44,7 +41,6 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.bus.MassInsertDoneEvent;
-import sapotero.rxtest.events.crypto.SignDataEvent;
 import sapotero.rxtest.events.crypto.SignDataResultEvent;
 import sapotero.rxtest.events.crypto.SignDataWrongPinEvent;
 import sapotero.rxtest.retrofit.models.Oshs;
@@ -81,6 +77,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   // test
   @Inject QueueManager queue;
+  @Inject OperationManager operationManager;
 
   private byte[] CARD;
 
@@ -98,9 +95,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   private String TAG = this.getClass().getSimpleName();
 
   @BindView(R.id.toolbar) Toolbar toolbar;
-  private Preference<String> HOST;
-  //  private Preview preview;
-  private OperationManager operationManager;
+
   private Fields.Status status;
   private Fields.Journal journal;
   private SelectOshsDialogFragment oshs;
@@ -118,7 +113,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     ButterKnife.bind(this);
     EsdApplication.getComponent(this).inject(this);
 
-    operationManager = OperationManager.getInstance();
     operationManager.registerCallBack(this);
 
     loadSettings();
@@ -127,36 +121,12 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     setPreview();
     setTabContent();
 
-
-    buildDialog();
   }
 
-  private void buildDialog() {
-    dialog = new MaterialDialog.Builder( this )
-      .title(R.string.app_name)
-      .cancelable(false)
-      .customView( R.layout.dialog_pin_check, true )
-      .positiveText("OK")
-      .autoDismiss(false)
-
-      .onPositive( (dialog, which) -> {
-        try {
-          EditText pass = (EditText) this.dialog.getCustomView().findViewById(R.id.dialog_pin_password);
-          pass.setVisibility(View.GONE);
-
-          this.dialog.getCustomView().findViewById(R.id.dialog_pin_progress).setVisibility(View.VISIBLE);
-          dialog.getActionButton(DialogAction.POSITIVE).setVisibility(View.GONE);
-
-          EventBus.getDefault().post( new SignDataEvent( pass.getText().toString() ) );
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-      }).build();
-  }
 
   private void setPreview() {
 
-    android.support.v4.app.FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+    FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
 
     if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL ){
       fragmentTransaction.add( R.id.activity_info_preview_container, new RoutePreviewFragment() );
@@ -220,154 +190,29 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
 
 
-    RDocumentEntity doc = dataStore
-      .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq(UID.get())).get().first();
-
-
-    for (int i = 0; i < toolbar.getMenu().size(); i++) {
-      MenuItem item = toolbar.getMenu().getItem(i);
-
-      switch ( item.getItemId() ) {
-        case R.id.menu_info_shared_to_favorites:
-          item.setTitle(getString( doc.isFavorites() != null && doc.isFavorites() ? R.string.remove_from_favorites : R.string.to_favorites));
-          break;
-        case R.id.menu_info_shared_to_control:
-          item.setTitle(getString( doc.isControl() != null && doc.isControl() ? R.string.remove_from_control : R.string.to_control));
-          break;
-      }
-    }
-
-
-    toolbar.setOnMenuItemClickListener(
-      item -> {
+//    RDocumentEntity doc = dataStore
+//      .select(RDocumentEntity.class)
+//      .where(RDocumentEntity.UID.eq(UID.get())).get().first();
+//
+//
+//    for (int i = 0; i < toolbar.getMenu().size(); i++) {
+//      MenuItem item = toolbar.getMenu().getItem(i);
+//
+//      switch ( item.getItemId() ) {
+//        case R.id.menu_info_shared_to_favorites:
+//          item.setTitle(getString( doc.isFavorites() != null && doc.isFavorites() ? R.string.remove_from_favorites : R.string.to_favorites));
+//          break;
+//        case R.id.menu_info_shared_to_control:
+//          item.setTitle(getString( doc.isControl() != null && doc.isControl() ? R.string.remove_from_control : R.string.to_control));
+//          break;
+//      }
+//    }
 
 
 
-        CommandFactory.Operation operation;
-        CommandParams params = new CommandParams();
-        params.setUser( LOGIN.get() );
-
-        switch ( item.getItemId() ){
-          // sent_to_the_report (отправлен на доклад)
-          case R.id.menu_info_from_the_report:
-            operation = CommandFactory.Operation.FROM_THE_REPORT;
-            break;
-          case R.id.return_to_the_primary_consideration:
-            operation = CommandFactory.Operation.TO_THE_PRIMARY_CONSIDERATION;
-            break;
-
-          // sent_to_the_report (отправлен на доклад)
-          case R.id.menu_info_delegate_performance:
-            operation = CommandFactory.Operation.DELEGATE_PERFORMANCE;
-            params.setPerson( "USER_UD" );
-            break;
-          case R.id.menu_info_to_the_approval_performance:
-            operation = CommandFactory.Operation.TO_THE_APPROVAL_PERFORMANCE;
-            params.setPerson( "USER_UD" );
-            break;
-
-          // primary_consideration (первичное рассмотрение)
-          case R.id.menu_info_to_the_primary_consideration:
-            operation = CommandFactory.Operation.INCORRECT;
-
-            if (oshs == null){
-              oshs = new SelectOshsDialogFragment();
-              oshs.registerCallBack( this );
-            }
-
-            oshs.show( getFragmentManager(), "SelectOshsDialogFragment");
-            break;
-
-          // approval (согласование проектов документов)
-          case R.id.menu_info_approval_change_person:
-            operation = CommandFactory.Operation.INCORRECT;
-
-            if (oshs == null){
-              oshs = new SelectOshsDialogFragment();
-              oshs.registerCallBack( this );
-            }
-
-            oshs.show( getFragmentManager(), "SelectOshsDialogFragment");
-
-            break;
-          case R.id.menu_info_approval_next_person:
-            operation = CommandFactory.Operation.APPROVAL_NEXT_PERSON;
-            buildDialog();
-            dialog.show();
-
-            params.setSign( SIGN );
-            break;
-          case R.id.menu_info_approval_prev_person:
-            operation = CommandFactory.Operation.APPROVAL_PREV_PERSON;
-            params.setSign( "SIGN" );
-            break;
-
-
-          // approval (согласование проектов документов)
-          case R.id.menu_info_sign_change_person:
-            operation = CommandFactory.Operation.INCORRECT;
-
-            if (oshs == null){
-              oshs = new SelectOshsDialogFragment();
-              oshs.registerCallBack( this );
-            }
-
-            oshs.show( getFragmentManager(), "SelectOshsDialogFragment");
-            break;
-          case R.id.menu_info_sign_next_person:
-            operation = CommandFactory.Operation.SIGNING_NEXT_PERSON;
-            params.setSign( "SIGN" );
-            break;
-          case R.id.menu_info_sign_prev_person:
-            operation = CommandFactory.Operation.SIGNING_PREV_PERSON;
-            params.setSign( "SIGN" );
-            break;
-
-
-          case R.id.action_info_create_decision:
-            operation = CommandFactory.Operation.NEW_DECISION;
-
-            Intent intent = new Intent(this, DecisionConstructorActivity.class);
-            startActivity(intent);
-
-            break;
-          case R.id.menu_info_shared_to_favorites:
-            operation = CommandFactory.Operation.ADD_TO_FOLDER;
-
-//            item.setTitle(getString( doc.isFavorites() != null && doc.isFavorites() ? R.string.remove_from_favorites : R.string.to_favorites));
-
-            String favorites = dataStore
-              .select(RFolderEntity.class)
-              .where(RFolderEntity.TYPE.eq("favorites"))
-              .get().first().getUid();
-
-            params.setFolder(favorites);
-            params.setDocument( UID.get() );
-
-
-            break;
-          case R.id.menu_info_shared_to_control:
-
-//            item.setTitle(getString( doc.isControl() != null && doc.isControl() ? R.string.remove_from_control : R.string.to_control));
-
-            operation = CommandFactory.Operation.ADD_TO_FOLDER;
-            params.setDocument( UID.get() );
-            break;
-
-
-          default:
-            operation = CommandFactory.Operation.CHECK_FOR_CONTROL;
-            break;
-        }
-
-        operationManager.execute( operation, params );
-
-        Timber.tag(TAG).i( "operation: %s", operation );
-        return false;
-      }
-    );
   }
+
+
   private void setTabContent() {
 
     if (viewPager.getAdapter() == null) {
@@ -462,11 +307,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     Toast.makeText( getApplicationContext(), event.message, Toast.LENGTH_SHORT).show();
   }
 
-//  @Subscribe(threadMode = ThreadMode.MAIN)
-//  public void onMessageEvent(SetActiveDecisonEvent event) {
-//    Decision decision = decision_adapter.getItem(event.decision);
-////    preview.show( decision );
-//  }
 
   @Override
   public void onFragmentInteraction(Uri uri) {
@@ -483,32 +323,10 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   }
 
-//
-//  /* InterfaceDocumentManager.Callback */
-//  @Override
-//  public void onGetStateSuccess() {
-//    Timber.tag("DocumentManagerCallback").i("onGetStateSuccess");
-//  }
-//
-//  @Override
-//  public void onGetStateError() {
-//    Timber.tag("DocumentManagerCallback").i("onGetStateError");
-//  }
-//
-
-
   /* OperationManager.Callback */
   @Override
   public void onExecuteSuccess(String command) {
     Timber.tag("OpManagerCallback").i("onExecuteSuccess %s", command);
-
-//    ProgressDialog prog= new ProgressDialog(this);//Assuming that you are using fragments.
-//    prog.setTitle("Информация");
-//    prog.setMessage("Операция успешно завершена");
-//    prog.setCancelable(false);
-//    prog.setIndeterminate(true);
-//    prog.setProgress(0);
-//    prog.show();
 
     Update<Scalar<Integer>> query;
 

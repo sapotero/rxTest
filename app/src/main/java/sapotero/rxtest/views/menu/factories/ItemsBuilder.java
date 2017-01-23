@@ -25,7 +25,7 @@ import sapotero.rxtest.views.adapters.models.DocumentTypeItem;
 import sapotero.rxtest.views.adapters.utils.DocumentTypeAdapter;
 import sapotero.rxtest.views.menu.builders.ButtonBuilder;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
-import sapotero.rxtest.views.menu.fields.Item;
+import sapotero.rxtest.views.menu.fields.MainMenuItem;
 import sapotero.rxtest.views.views.MultiOrganizationSpinner;
 import timber.log.Timber;
 
@@ -106,8 +106,8 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
 
     List<DocumentTypeItem> document_types = new ArrayList<>();
 
-    for ( Item item : Item.values()) {
-      document_types.add( new DocumentTypeItem( context, item, user ) );
+    for ( MainMenuItem mainMenuItem : MainMenuItem.values()) {
+      document_types.add( new DocumentTypeItem( context, mainMenuItem, user ) );
     }
 
     journalSpinnerAdapter = new DocumentTypeAdapter(context, document_types);
@@ -137,13 +137,13 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
     view.removeAllViews();
 
 
-    Item item = getSelectedItem();
-    Timber.tag(TAG).i( "CURRENT BUTTONS: %s", item.getButtons().size() );
+    MainMenuItem mainMenuItem = getSelectedItem();
+    Timber.tag(TAG).i( "CURRENT BUTTONS: %s", mainMenuItem.getMainMenuButtons().size() );
 
     RadioGroup button_group = getButtonGroupLayout(context);
 
-    if ( item.getButtons().size() > 0 ){
-      for ( ButtonBuilder button: item.getButtons() ){
+    if ( mainMenuItem.getMainMenuButtons().size() > 0 ){
+      for ( ButtonBuilder button: mainMenuItem.getMainMenuButtons() ){
         button_group.addView( button.getView(context) );
         button.registerCallBack(this);
       }
@@ -153,26 +153,26 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
     }
 
     if (organizationsLayout != null){
-      organizationsLayout.setVisibility( item.isVisible() ?  View.VISIBLE : View.GONE);
+      organizationsLayout.setVisibility( mainMenuItem.isVisible() ?  View.VISIBLE : View.GONE);
     }
 
     view.addView( button_group );
   }
 
-  public Item getSelectedItem(){
-    return journalSpinnerAdapter.getItem(journalSpinner.getSelectedItemPosition()).getItem();
+  public MainMenuItem getSelectedItem(){
+    return journalSpinnerAdapter.getItem(journalSpinner.getSelectedItemPosition()).getMainMenuItem();
   }
 
   private ArrayList<ConditionBuilder> getConditions(){
-    Item item = getSelectedItem();
+    MainMenuItem mainMenuItem = getSelectedItem();
 
     ArrayList<ConditionBuilder> result = new ArrayList<>();
 
-    Collections.addAll(result, item.getQueryConditions() );
+    Collections.addAll(result, mainMenuItem.getQueryConditions() );
 
-    if (item.getButtons().size() > 0) {
+    if (mainMenuItem.getMainMenuButtons().size() > 0) {
       Boolean empty = true;
-      for (ButtonBuilder b : item.getButtons()) {
+      for (ButtonBuilder b : mainMenuItem.getMainMenuButtons()) {
 
         RadioButton button = b.getButton();
 
@@ -193,7 +193,7 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
       if (empty){
         Boolean nil = true;
 
-        for (ButtonBuilder b : item.getButtons()) {
+        for (ButtonBuilder b : mainMenuItem.getMainMenuButtons()) {
           RadioButton button = b.getButton();
           if ( button != null && button.isChecked() ){
             Collections.addAll(result, b.getConditions() );
@@ -202,7 +202,7 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
         }
 
         if ( nil )  {
-          Collections.addAll(result, item.getButtons().get(0).getConditions() );
+          Collections.addAll(result, mainMenuItem.getMainMenuButtons().get(0).getConditions() );
         }
 
       }

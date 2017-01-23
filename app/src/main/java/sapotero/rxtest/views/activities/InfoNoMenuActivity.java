@@ -253,7 +253,7 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
 
 //  @Subscribe(threadMode = ThreadMode.MAIN)
 //  public void onMessageEvent(SetActiveDecisonEvent event) {
-//    Decision decision = decision_adapter.getItem(event.decision);
+//    Decision decision = decision_adapter.getMainMenuItem(event.decision);
 ////    preview.show( decision );
 //  }
 

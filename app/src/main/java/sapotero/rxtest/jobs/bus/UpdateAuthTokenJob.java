@@ -15,7 +15,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.events.bus.UpdateAuthTokenEvent;
 import sapotero.rxtest.retrofit.Api.AuthService;
-import sapotero.rxtest.retrofit.models.AuthToken;
+import sapotero.rxtest.retrofit.models.AuthSignToken;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import timber.log.Timber;
 
@@ -49,7 +49,7 @@ public class UpdateAuthTokenJob extends BaseJob {
     Retrofit retrofit = new RetrofitManager( getApplicationContext(), HOST.get(), okHttpClient).process();
     AuthService auth = retrofit.create( AuthService.class );
 
-    Observable<AuthToken> user = auth.getAuth( settings.getString("login").get(), settings.getString("password").get() );
+    Observable<AuthSignToken> user = auth.getAuth( settings.getString("login").get(), settings.getString("password").get() );
 
     user.subscribeOn( Schedulers.newThread() )
       .observeOn( AndroidSchedulers.mainThread() )

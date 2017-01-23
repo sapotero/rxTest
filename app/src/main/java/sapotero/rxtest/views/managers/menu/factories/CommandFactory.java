@@ -315,7 +315,6 @@ public class CommandFactory implements AbstractCommand.Callback{
     return operation.getCommand(this, context, document, params);
   }
 
-
   @Override
   public void onCommandExecuteSuccess(String command) {
     Timber.tag(TAG).w("onCommandExecuteSuccess" );

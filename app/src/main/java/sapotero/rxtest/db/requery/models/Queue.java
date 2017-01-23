@@ -14,6 +14,7 @@ public abstract class Queue {
   int _id;
 
   @Index("queue_uuid_index")
+  @Column(unique = true)
   String uuid;
 
   String  command;

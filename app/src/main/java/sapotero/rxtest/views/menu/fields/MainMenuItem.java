@@ -7,14 +7,14 @@ import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.views.menu.builders.ButtonBuilder;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 
-public enum Item {
+public enum MainMenuItem {
 
   ALL ( 0, "Документы %s / Проекты %s",
-    new Button[]{
-      Button.PROJECTS,
-      Button.PERFORMANCE,
-      Button.PRIMARY_CONSIDERATION,
-      Button.VIEWED
+    new MainMenuButton[]{
+      MainMenuButton.PROJECTS,
+      MainMenuButton.PERFORMANCE,
+      MainMenuButton.PRIMARY_CONSIDERATION,
+      MainMenuButton.VIEWED
     },
     true,
     new ConditionBuilder[]{
@@ -24,10 +24,10 @@ public enum Item {
     new ConditionBuilder[]{}
   ),
 
-  INCOMING_DOCUMENTS ( 1, "Входящие документы %s", new Button[]{
-    Button.PERFORMANCE,
-    Button.PRIMARY_CONSIDERATION,
-    Button.VIEWED
+  INCOMING_DOCUMENTS ( 1, "Входящие документы %s", new MainMenuButton[]{
+    MainMenuButton.PERFORMANCE,
+    MainMenuButton.PRIMARY_CONSIDERATION,
+    MainMenuButton.VIEWED
   },
     true,
     new ConditionBuilder[]{
@@ -38,10 +38,10 @@ public enum Item {
     }
   ),
 
-  CITIZEN_REQUESTS ( 2, "Обращения граждан %s", new Button[]{
-    Button.PERFORMANCE,
-    Button.PRIMARY_CONSIDERATION,
-    Button.VIEWED
+  CITIZEN_REQUESTS ( 2, "Обращения граждан %s", new MainMenuButton[]{
+    MainMenuButton.PERFORMANCE,
+    MainMenuButton.PRIMARY_CONSIDERATION,
+    MainMenuButton.VIEWED
   },
     true,
     new ConditionBuilder[]{
@@ -53,10 +53,10 @@ public enum Item {
   ),
 
   APPROVE_ASSIGN ( 3, "Подписание/Согласование %s",
-    new Button[]{
-      Button.APPROVAL,
-      Button.ASSIGN,
-      Button.PROCESSED
+    new MainMenuButton[]{
+      MainMenuButton.APPROVAL,
+      MainMenuButton.ASSIGN,
+      MainMenuButton.PROCESSED
     },
     true,
     new ConditionBuilder[]{
@@ -66,10 +66,10 @@ public enum Item {
     new ConditionBuilder[]{}
   ),
 
-  INCOMING_ORDERS ( 4, "НПА %s", new Button[]{
-    Button.PERFORMANCE,
-    Button.PRIMARY_CONSIDERATION,
-    Button.VIEWED
+  INCOMING_ORDERS ( 4, "НПА %s", new MainMenuButton[]{
+    MainMenuButton.PERFORMANCE,
+    MainMenuButton.PRIMARY_CONSIDERATION,
+    MainMenuButton.VIEWED
   },true,
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like(  Fields.Journal.INCOMING_ORDERS.getValue() + "%"  ) )
@@ -79,10 +79,10 @@ public enum Item {
     }
   ),
 
-  ORDERS ( 5, "Приказы %s", new Button[]{
-    Button.PERFORMANCE,
-    Button.PRIMARY_CONSIDERATION,
-    Button.VIEWED
+  ORDERS ( 5, "Приказы %s", new MainMenuButton[]{
+    MainMenuButton.PERFORMANCE,
+    MainMenuButton.PRIMARY_CONSIDERATION,
+    MainMenuButton.VIEWED
   },true,
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.ORDERS.getValue() + "%"  ) )
@@ -92,10 +92,10 @@ public enum Item {
     }
   ),
 
-  ORDERS_DDO ( 6, "Приказы ДДО %s", new Button[]{
-    Button.PERFORMANCE,
-    Button.PRIMARY_CONSIDERATION,
-    Button.VIEWED
+  ORDERS_DDO ( 6, "Приказы ДДО %s", new MainMenuButton[]{
+    MainMenuButton.PERFORMANCE,
+    MainMenuButton.PRIMARY_CONSIDERATION,
+    MainMenuButton.VIEWED
   },true,
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.ORDERS_DDO.getValue()  ) )
@@ -105,10 +105,10 @@ public enum Item {
     }
   ),
 
-  IN_DOCUMENTS ( 7, "Внутренние документ %s", new Button[]{
-    Button.PERFORMANCE,
-    Button.PRIMARY_CONSIDERATION,
-    Button.VIEWED
+  IN_DOCUMENTS ( 7, "Внутренние документ %s", new MainMenuButton[]{
+    MainMenuButton.PERFORMANCE,
+    MainMenuButton.PRIMARY_CONSIDERATION,
+    MainMenuButton.VIEWED
   },
     true,
     new ConditionBuilder[]{
@@ -117,7 +117,7 @@ public enum Item {
     new ConditionBuilder[]{}
   ),
 
-  ON_CONTROL ( 8, "На контроле %s", new Button[]{},
+  ON_CONTROL ( 8, "На контроле %s", new MainMenuButton[]{},
     false,
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.CONTROL.eq( true ) )
@@ -126,7 +126,7 @@ public enum Item {
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.CONTROL.eq( true ) )
     }
   ),
-  PROCESSED ( 9, "Обработанное %s", new Button[]{},
+  PROCESSED ( 9, "Обработанное %s", new MainMenuButton[]{},
     false,
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq( true ) )
@@ -135,7 +135,7 @@ public enum Item {
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq( true ) )
     }
   ),
-  FAVORITES ( 10, "Избранное %s", new Button[]{},
+  FAVORITES ( 10, "Избранное %s", new MainMenuButton[]{},
     false,
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FAVORITES.eq( true ) )
@@ -146,17 +146,17 @@ public enum Item {
   );
 
   private final Integer index;
-  private final Button[] buttons;
+  private final MainMenuButton[] mainMenuButtons;
   private final String name;
   private final Boolean showOrganization;
   private ConditionBuilder[] countConditions;
   private ConditionBuilder[] queryConditions;
   private final ArrayList<ButtonBuilder> buttonsList = new ArrayList<>();
 
-  Item(final int index, final String name, final Button[] buttons, Boolean showOrganizations, ConditionBuilder[] countCounditions, ConditionBuilder[] queryConditions) {
+  MainMenuItem(final int index, final String name, final MainMenuButton[] mainMenuButtons, Boolean showOrganizations, ConditionBuilder[] countCounditions, ConditionBuilder[] queryConditions) {
     this.index = index;
     this.name  = name;
-    this.buttons = buttons;
+    this.mainMenuButtons = mainMenuButtons;
     this.showOrganization = showOrganizations;
     this.countConditions = countCounditions;
     this.queryConditions = queryConditions;
@@ -178,15 +178,15 @@ public enum Item {
     return name;
   }
 
-  public ArrayList<ButtonBuilder> getButtons(){
+  public ArrayList<ButtonBuilder> getMainMenuButtons(){
 
     if ( buttonsList.size() == 0 ){
-      if ( buttons.length > 0 ){
-        for (int i = 0, length = buttons.length-1; i <= length; i++) {
+      if ( mainMenuButtons.length > 0 ){
+        for (int i = 0, length = mainMenuButtons.length-1; i <= length; i++) {
 
           ButtonBuilder button = new ButtonBuilder(
-            buttons[i].getFormat(),
-            buttons[i].getConditions(),
+            mainMenuButtons[i].getFormat(),
+            mainMenuButtons[i].getConditions(),
             getQueryConditions().length != 0 ? getQueryConditions()[0] : null
           );
 

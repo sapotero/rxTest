@@ -118,7 +118,9 @@ public class DBQueryBuilder {
       if (conditions.size() == 0){
         addToAdapterList( new ArrayList<>() );
       } else {
-        subscribe = query.get()
+        subscribe = query
+          .orderBy( RDocumentEntity.REGISTRATION_DATE.desc() )
+          .get()
           .toObservable()
           .subscribeOn(Schedulers.io())
           .observeOn( AndroidSchedulers.mainThread() )
@@ -290,48 +292,5 @@ public class DBQueryBuilder {
     return dataStore.count(RDocumentEntity.UID).where(RDocumentEntity.FAVORITES.eq(true)).get().value();
   }
 
-  public void getFavorites(){
-    dataStore
-      .select(RDocumentEntity.class)
-      .where(RDocumentEntity.FAVORITES.eq(true))
-      .get()
-      .toObservable()
-      .subscribeOn(Schedulers.io())
-      .observeOn( AndroidSchedulers.mainThread() )
-      .toList()
-      .subscribe(docs -> {
-        Timber.tag("loadFromDbQuery").e("docs: %s", docs.size() );
-        addFavoritesToAdapter(docs);
-      });
-  }
-
-  private void addFavoritesToAdapter(List<RDocumentEntity> docs) {
-    if (docs.size() > 0) {
-      for (int i = 0; i < docs.size(); i++) {
-        RDocumentEntity doc = docs.get(i);
-        Timber.tag(TAG).v("addToAdapter ++ " + doc.getTitle());
-
-        Document document = new Document();
-        document.setChanged( doc.isChanged() );
-        document.setStatusCode( doc.getFilter() );
-        document.setUid(doc.getUid());
-        document.setMd5(doc.getMd5());
-        document.setControl(doc.isControl());
-        document.setFavorites(doc.isFavorites());
-        document.setSortKey(doc.getSortKey());
-        document.setTitle(doc.getTitle());
-        document.setRegistrationNumber(doc.getRegistrationNumber());
-        document.setRegistrationDate(doc.getRegistrationDate());
-        document.setUrgency(doc.getUrgency());
-        document.setShortDescription(doc.getShortDescription());
-        document.setComment(doc.getComment());
-        document.setExternalDocumentNumber(doc.getExternalDocumentNumber());
-        document.setReceiptDate(doc.getReceiptDate());
-        document.setOrganization(doc.getOrganization());
-
-        adapter.addItem(document);
-      }
-    }
-  }
 
 }

@@ -9,6 +9,8 @@ import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
+import com.f2prateek.rx.preferences.RxSharedPreferences;
+
 import javax.inject.Inject;
 
 import io.requery.Persistable;
@@ -25,6 +27,7 @@ import timber.log.Timber;
 public class ButtonBuilder {
 
   @Inject SingleEntityStore<Persistable> dataStore;
+  @Inject RxSharedPreferences settings;
 
   private ConditionBuilder[] conditions;
   private ConditionBuilder item_conditions;
@@ -83,8 +86,8 @@ public class ButtonBuilder {
 
     WhereAndOr<Scalar<Integer>> query = dataStore
       .count(RDocumentEntity.class)
-      .where( query_condition );
-//      .and(RDocumentEntity.USER.eq( rxPreferences.getString("current_user").get() ));
+      .where( query_condition )
+      .and(RDocumentEntity.USER.eq( settings.getString("login").get() ));
 
     if ( conditions.length > 0 ){
 

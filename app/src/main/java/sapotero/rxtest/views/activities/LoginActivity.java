@@ -75,7 +75,7 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
 
     initView();
 
-    queue.clean();
+//    queue.clean();
 
   }
 

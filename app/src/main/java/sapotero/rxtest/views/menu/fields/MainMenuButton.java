@@ -4,7 +4,7 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 
-public enum Button {
+public enum MainMenuButton {
 
   PROJECTS ( 1,
     "Проекты %s" ,
@@ -17,7 +17,7 @@ public enum Button {
     "На рассмотрение %s" ,
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq(Fields.Status.SENT_TO_THE_REPORT.getValue())  ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq(Fields.Status.PRIMARY_CONSIDERATION.getValue())  ),
+      new ConditionBuilder( ConditionBuilder.Condition.OR, RDocumentEntity.FILTER.eq(Fields.Status.PRIMARY_CONSIDERATION.getValue())  ),
     }
   ),
   PRIMARY_CONSIDERATION ( 3,
@@ -60,7 +60,7 @@ public enum Button {
 
   public Boolean active;
 
-  Button( final Integer index, final String format, final ConditionBuilder[] conditions ) {
+  MainMenuButton(final Integer index, final String format, final ConditionBuilder[] conditions ) {
     this.index = index;
     this.format = format;
     this.conditions = conditions;

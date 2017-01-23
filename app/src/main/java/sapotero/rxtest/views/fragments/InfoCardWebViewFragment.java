@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Base64;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -14,7 +15,6 @@ import android.webkit.WebView;
 
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
-import com.google.gson.Gson;
 
 import javax.inject.Inject;
 
@@ -39,6 +39,8 @@ public class InfoCardWebViewFragment extends Fragment {
   private String document;
   private String TAG = this.getClass().getSimpleName();
   private String uid;
+  private Preference<String> HOST;
+  private Preference<String> UID;
 
   public InfoCardWebViewFragment() {
   }
@@ -55,11 +57,18 @@ public class InfoCardWebViewFragment extends Fragment {
     }
   }
 
+  private void loadSettings() {
+    UID  = settings.getString("main_menu.uid");
+    HOST = settings.getString("settings_username_host");
+  }
+
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.fragment_info_card_web_view, container, false);
     ButterKnife.bind(this, view);
     EsdApplication.getComponent(mContext).inject( this );
+
+    loadSettings();
 
     final GestureDetector gestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener() {
       @Override
@@ -88,23 +97,24 @@ public class InfoCardWebViewFragment extends Fragment {
 
   public void setWebView() {
 
-    Gson gson = new Gson();
-    Preference<String> data = settings.getString("document.infoCard");
+//    Gson gson = new Gson();
+//    Preference<String> data = settings.getString("document.infoCard");
 
-    if (uid != null) {
       RDocumentEntity doc = dataStore
         .select(RDocumentEntity.class)
-        .where(RDocumentEntity.UID.eq(uid))
+        .where(RDocumentEntity.UID.eq( uid == null ? UID.get() : uid ))
         .get().first();
       document = doc.getInfoCard();
-    } else {
-      document = data.get();
-    }
+//    } else {
+//      document = data.get();
+//    }
+
+
 
     try {
       if ( document != null ){
 
-        String htmlData = "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />" + document;
+        String htmlData = "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />" + new String(Base64.decode( document, Base64.DEFAULT) );
         infocard.loadDataWithBaseURL("file:///android_asset/", htmlData, "text/html", "UTF-8", null);
         infocard.getSettings().setBuiltInZoomControls(true);
         infocard.getSettings().setDisplayZoomControls(false);

@@ -22,7 +22,6 @@ public class OperationManager implements CommandFactory.Callback {
 
   private final String TAG = this.getClass().getSimpleName();
 
-  private static OperationManager instance;
   private final CommandFactory commandBuilder;
   private final OperationHistory histrory;
   private final RemoteExecutor remoteExecutor;
@@ -51,13 +50,6 @@ public class OperationManager implements CommandFactory.Callback {
     commandBuilder.registerCallBack(this);
 
     this.context = context;
-  }
-
-  public static OperationManager getInstance() {
-    if ( instance == null) {
-      instance = new OperationManager( EsdApplication.getContext() );
-    }
-    return instance;
   }
 
   public void execute(CommandFactory.Operation operation, CommandParams params) {

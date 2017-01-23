@@ -38,6 +38,7 @@ import timber.log.Timber;
 public class DecisionConstructorActivity extends AppCompatActivity implements DecisionFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, OperationManager.Callback {
 
   @Inject RxSharedPreferences settings;
+  @Inject OperationManager operationManager;
 
   @BindView(R.id.toolbar) Toolbar toolbar;
 
@@ -50,7 +51,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
   private String TAG = this.getClass().getSimpleName();
   private DecisionManager manager;
-  private OperationManager operationManager;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +62,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     ButterKnife.bind(this);
     EsdApplication.getComponent(this).inject(this);
 
-    operationManager = OperationManager.getInstance();
     operationManager.registerCallBack(this);
 
 

@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import sapotero.rxtest.R;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import sapotero.rxtest.views.menu.factories.ItemsBuilder;
-import sapotero.rxtest.views.menu.fields.Item;
+import sapotero.rxtest.views.menu.fields.MainMenuItem;
 import sapotero.rxtest.views.views.MultiOrganizationSpinner;
 import timber.log.Timber;
 
@@ -51,7 +51,7 @@ public class MenuBuilder implements ItemsBuilder.Callback{
   }
 
 
-  public Item getItem(){
+  public MainMenuItem getItem(){
     return itemsBuilder.getSelectedItem();
   }
 

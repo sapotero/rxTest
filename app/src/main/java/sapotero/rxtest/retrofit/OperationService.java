@@ -82,7 +82,7 @@ public interface OperationService{
     @Query("uids[]") ArrayList<String> uids,
     @Query("operation_data[comment]") String operation_data,
     @Query("status_code") String status_code,
-    @Query("folder") String folder_id,
+    @Query("folder_id") String folder_id,
     @Query("label") String label_id
   );
 }

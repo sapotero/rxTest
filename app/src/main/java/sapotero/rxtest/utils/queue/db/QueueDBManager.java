@@ -55,22 +55,30 @@ public class QueueDBManager {
       task.setExecuted( false );
       task.setCreatedAt((int) new Timestamp(now.getTime()).getTime());
 
+      int count = dataStore
+        .count(QueueEntity.class)
+        .where(QueueEntity.UUID.eq(params.getUuid()) )
+        .get().value();
 
-      dataStore
-        .insert(task)
-        .toObservable()
-        .subscribeOn(Schedulers.computation())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(data -> {
-        Timber.tag(TAG).v("inserted %s [ %s ]", data.getCommand(), data.getId() );
-      });
+      if (count == 0){
+        dataStore
+          .insert(task)
+          .toObservable()
+          .subscribeOn(Schedulers.computation())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe(data -> {
+            Timber.tag(TAG).v("inserted %s [ %s ]", data.getCommand(), data.getId() );
+          });
+      } else {
+        Timber.tag(TAG).v("UUID exist!");
+      }
+
 
     }
-
-    getUncompleteTasks();
   }
 
   public ArrayList<Command> getUncompleteTasks() {
+    Timber.tag(TAG).e("getUncompleteTasks");
     ArrayList<Command> tasks = new ArrayList<>();
 
     List<QueueEntity> uncompleted = dataStore
@@ -80,26 +88,33 @@ public class QueueDBManager {
 
     for ( QueueEntity task : uncompleted ) {
 
-      Timber.tag(TAG).v(" [%s]  %s", task.getCommand(), task.getParams() );
-
-      CommandParams params = new Gson().fromJson( task.getParams(), CommandParams.class );
-      String type = task.getCommand();
-
-      // FIX переделать build
-      Command command = commandFactory
-        .withDocument( new DocumentReceiver( params.getDocument() ) )
-        .withParams( params )
-        .build( CommandFactory.Operation.getOperation( task.getCommand() ) );
-
-      if (command != null) {
-        Timber.tag(TAG).v(" [%s]  %s", command.toString(), command.getParams() );
-      }
-
+      Command command = create(task);
+      Timber.tag("getUncompleteTasks").v("%s", new Gson().toJson(task) );
 
     }
 
 
     return tasks;
+  }
+
+  public Command create(QueueEntity task){
+
+    CommandParams params = new Gson().fromJson( task.getParams(), CommandParams.class );
+    String type = task.getCommand();
+
+    // FIX переделать build
+    Command command = commandFactory
+      .withDocument( new DocumentReceiver( params.getDocument() ) )
+      .withParams( params )
+      .build( CommandFactory.Operation.getOperation( task.getCommand() ) );
+
+    if (command != null) {
+      Timber.tag("create").v("Command %s", command.getParams().toString() );
+      command.execute();
+    }
+
+
+    return command;
   }
 
   public void clear(){

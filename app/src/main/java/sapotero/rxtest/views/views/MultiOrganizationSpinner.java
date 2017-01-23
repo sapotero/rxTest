@@ -53,7 +53,7 @@ public class MultiOrganizationSpinner extends TextView implements DialogInterfac
       String choices[] = new String[mAdapter.getCount()];
 
       for (int i = 0; i < choices.length; i++) {
-//        choices[i] = mAdapter.getItem(i).toString();
+//        choices[i] = mAdapter.getMainMenuItem(i).toString();
         choices[i] = mAdapter.getItem(i).getTitle();
       }
 

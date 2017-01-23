@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -51,6 +52,7 @@ import ru.CryptoPro.ssl.util.cpSSLConfig;
 import ru.cprocsp.ACSP.tools.common.CSPTool;
 import ru.cprocsp.ACSP.tools.common.Constants;
 import ru.cprocsp.ACSP.tools.common.RawResource;
+import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
@@ -110,6 +112,7 @@ public class MainService extends Service {
   private static final ArrayList<String> aliasesList = new ArrayList<String>();
   private DataLoaderInterface dataLoaderInterface;
   private String SIGN;
+  public static String user;
 
 
   public MainService() {
@@ -617,15 +620,19 @@ public class MainService extends Service {
   }
 
   public void getAuth(){
-//    Observable
-//      .interval( 10, TimeUnit.SECONDS )
-//      .subscribeOn(Schedulers.io())
-//      .observeOn(AndroidSchedulers.mainThread())
-//      .subscribe(interval -> {
-//        if (SIGN != null) {
-//          dataLoaderInterface.updateAuth(SIGN);
-//        }
-//      });
+    Observable
+      .interval( 60, TimeUnit.SECONDS )
+      .subscribeOn(Schedulers.io())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(interval -> {
+        dataLoaderInterface.updateAuth(SIGN);
+      });
+
+    settings.getString("login")
+      .asObservable()
+      .subscribe(username -> {
+        user = username;
+      });
   }
 
 

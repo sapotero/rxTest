@@ -11,7 +11,6 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 import rx.Observable;
 import sapotero.rxtest.retrofit.models.AuthSignToken;
-import sapotero.rxtest.retrofit.models.AuthToken;
 import sapotero.rxtest.retrofit.models.Folder;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.models.Template;
@@ -20,7 +19,7 @@ import sapotero.rxtest.retrofit.models.me.UserInfo;
 public interface AuthService {
 
   @PUT("token/{username}.json")
-  Observable<AuthToken> getAuth(
+  Observable<AuthSignToken> getAuth(
     @Path("username") String username,
     @Query("password") String password
   );

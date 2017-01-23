@@ -46,12 +46,13 @@ import sapotero.rxtest.jobs.bus.AddTemplatesJob;
 import sapotero.rxtest.jobs.bus.SyncDocumentsJob;
 import sapotero.rxtest.retrofit.Api.AuthService;
 import sapotero.rxtest.retrofit.DocumentsService;
+import sapotero.rxtest.retrofit.models.AuthSignToken;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.retrofit.models.documents.Documents;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.views.menu.builders.ButtonBuilder;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
-import sapotero.rxtest.views.menu.fields.Item;
+import sapotero.rxtest.views.menu.fields.MainMenuItem;
 import sapotero.rxtest.views.utils.TDmodel;
 import timber.log.Timber;
 
@@ -145,7 +146,7 @@ public class DataLoaderInterface {
   }
 
   public void updateAuth( String sign ){
-    Timber.tag(TAG).i("tryToSignWithDc: %s", sign );
+    Timber.tag(TAG).i("updateAuth: %s", sign );
 
     Retrofit retrofit = new RetrofitManager( context, HOST.get(), okHttpClient).process();
     AuthService auth = retrofit.create( AuthService.class );
@@ -160,24 +161,22 @@ public class DataLoaderInterface {
 
     Timber.tag(TAG).i("json: %s", json .toString());
 
+
+    Observable<AuthSignToken> authSubscription = sign == null ? auth.getAuth( LOGIN.get(), PASSWORD.get() ) : auth.getAuthBySign(json);
+
     unsubscribe();
     subscription.add(
 
-      auth
-        .getAuthBySign( json )
+      authSubscription
         .subscribeOn( Schedulers.io() )
         .observeOn( AndroidSchedulers.mainThread() )
         .subscribe(
           data -> {
-            Timber.tag(TAG).i("tryToSignWithDc: token" + data.getAuthToken());
-            Timber.tag(TAG).i("tryToSignWithDc: login" + data.getLogin());
-
-            setLogin( data.getLogin() );
+            Timber.tag(TAG).i("updateAuth: token" + data.getAuthToken());
             setToken( data.getAuthToken() );
-
           },
           error -> {
-            Timber.tag(TAG).i("tryToSignWithLogin error: %s" , error );
+            Timber.tag(TAG).i("updateAuth error: %s" , error );
           }
         )
     );
@@ -400,10 +399,10 @@ public class DataLoaderInterface {
 
   }
 
-  public void updateByStatus(Item items) {
+  public void updateByStatus(MainMenuItem items) {
     ArrayList<Fields.Status> filter_types = new ArrayList<>();
 
-    for ( ButtonBuilder button: items.getButtons() ){
+    for ( ButtonBuilder button: items.getMainMenuButtons() ){
       for ( ConditionBuilder condition: button.getConditions() ){
 
         if ( condition.getField().getLeftOperand() == RDocumentEntity.FILTER ){

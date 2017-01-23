@@ -13,18 +13,18 @@ import sapotero.rxtest.db.requery.models.RDocument;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
-import sapotero.rxtest.views.menu.fields.Item;
+import sapotero.rxtest.views.menu.fields.MainMenuItem;
 
 public class DocumentTypeItem {
   @Inject SingleEntityStore<Persistable> dataStore;
 
-  private final Item item;
+  private final MainMenuItem mainMenuItem;
   private final String user;
 
 
-  public DocumentTypeItem(Context context, Item item, String user) {
+  public DocumentTypeItem(Context context, MainMenuItem mainMenuItem, String user) {
     super();
-    this.item = item;
+    this.mainMenuItem = mainMenuItem;
     this.user = user;
 
     EsdApplication.getComponent( context ).inject(this);
@@ -32,7 +32,7 @@ public class DocumentTypeItem {
 
   public String getName() {
 
-    if (item.getIndex() == 0){
+    if (mainMenuItem.getIndex() == 0){
       Integer total = dataStore
         .count(RDocumentEntity.class)
         .where( RDocumentEntity.FAVORITES.ne( true ) )
@@ -49,7 +49,7 @@ public class DocumentTypeItem {
         .get()
         .value();
 
-      return String.format( item.getName(), total, projects);
+      return String.format( mainMenuItem.getName(), total, projects);
     } else {
       int count = 0;
 
@@ -59,9 +59,9 @@ public class DocumentTypeItem {
           .where(RDocumentEntity.ID.ne(0));
 //          .and( RDocumentEntity.USER.eq( user ) );
 
-      if ( item.getCountConditions().length > 0 ){
+      if ( mainMenuItem.getCountConditions().length > 0 ){
 
-        for (ConditionBuilder condition : item.getCountConditions() ){
+        for (ConditionBuilder condition : mainMenuItem.getCountConditions() ){
           switch ( condition.getCondition() ){
             case AND:
               query = query.and( condition.getField() );
@@ -77,13 +77,13 @@ public class DocumentTypeItem {
 
       count = query.get().value();
 
-      return String.format( item.getName(), count);
+      return String.format( mainMenuItem.getName(), count);
     }
 
   }
 
-  public Item getItem(){
-    return item;
+  public MainMenuItem getMainMenuItem(){
+    return mainMenuItem;
   }
 
 }

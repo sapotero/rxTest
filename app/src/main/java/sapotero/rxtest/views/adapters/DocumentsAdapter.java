@@ -52,11 +52,9 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
 
   @Inject RxSharedPreferences settings;
   @Inject JobManager jobManager;
-//  @Inject DocumentManager documentManager;
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject DBDocumentManager manager;
-
-  private final OperationManager operationManager;
+  @Inject OperationManager operationManager;
 
   private Context mContext;
   private List<Document> documents;
@@ -71,7 +69,7 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
 
 //    documentManager = new InterfaceDocumentManager().getInstance(mContext);
 
-    operationManager = OperationManager.getInstance();
+//    operationManager = OperationManager.getInstance();
   }
 
   @Override

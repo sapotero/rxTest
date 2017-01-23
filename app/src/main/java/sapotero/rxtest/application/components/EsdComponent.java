@@ -58,6 +58,8 @@ import sapotero.rxtest.views.managers.menu.commands.report.ReturnToPrimaryConsid
 import sapotero.rxtest.views.managers.menu.commands.shared.AddToFolder;
 import sapotero.rxtest.views.managers.menu.commands.shared.CheckForControl;
 import sapotero.rxtest.views.managers.menu.utils.OperationHistory;
+import sapotero.rxtest.views.managers.menu.utils.OperationManagerModule;
+import sapotero.rxtest.views.managers.toolbar.ToolbarManager;
 import sapotero.rxtest.views.managers.view.DecisionManager;
 import sapotero.rxtest.views.menu.builders.ButtonBuilder;
 import sapotero.rxtest.views.menu.factories.ItemsBuilder;
@@ -73,7 +75,8 @@ import sapotero.rxtest.views.views.stepper.build.steps.StepperChooseAuthTypeFrag
   OkHttpModule.class,
   SettingsModule.class,
   DBDocumentManagerModule.class,
-  QueueManagerModule.class
+  QueueManagerModule.class,
+  OperationManagerModule.class
 })
 
 public interface EsdComponent {
@@ -140,6 +143,7 @@ public interface EsdComponent {
 
   void inject(OperationManager context);
   void inject(OperationHistory context);
+  void inject(ToolbarManager context);
 
 
 

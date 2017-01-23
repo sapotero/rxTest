@@ -62,4 +62,9 @@ public class QueueManager {
     return isConnectedToInternet;
   }
 
+
+  public void getUncompleteTasks(){
+    Timber.e("main > getUncompleteTasks");
+    DBManager.getUncompleteTasks();
+  }
 }

@@ -56,6 +56,7 @@ import sapotero.rxtest.events.bus.MarkDocumentAsChangedJobEvent;
 import sapotero.rxtest.events.bus.UpdateDocumentJobEvent;
 import sapotero.rxtest.events.rx.InsertRxDocumentsEvent;
 import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
+import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
 import sapotero.rxtest.views.adapters.utils.DocumentTypeAdapter;
@@ -73,6 +74,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @Inject JobManager jobManager;
   @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
+
+  // test
+  @Inject QueueManager queue;
 
   @BindView(R.id.toolbar) Toolbar toolbar;
 
@@ -209,7 +213,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     toolbar.setOnMenuItemClickListener(item -> {
       switch (item.getItemId()) {
         case R.id.reload:
-          updateByStatus();
+          queue.getUncompleteTasks();
+//          updateByStatus();
 //          document_favorite_button1.setVisibility( document_favorite_button1.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
           break;
         default:
