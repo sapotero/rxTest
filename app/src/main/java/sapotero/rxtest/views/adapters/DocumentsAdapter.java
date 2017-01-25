@@ -208,9 +208,6 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
 
 
     viewHolder.to_favorites.setOnClickListener(view -> {
-//      jobManager.addJobInBackground( new UpdateDocumentJob( item.getUid(), "favorites", true ) );
-//      jobManager.addJobInBackground( new MarkDocumentAsChangedJob( item.getUid() ) );
-
       String favorites = dataStore
         .select(RFolderEntity.class)
         .where(RFolderEntity.TYPE.eq("favorites"))
@@ -225,12 +222,15 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
       Toast.makeText(view.getContext(), "Избранное " + viewHolder.title.getText().toString(), Toast.LENGTH_SHORT).show();
       viewHolder.swipeLayout.close(true);
 
-
-      item.setFavorites( !item.getFavorites() );
-      if ( !item.getFavorites() ){
-        viewHolder.favorite_label.setVisibility(View.GONE);
-      } else {
-        viewHolder.favorite_label.setVisibility(View.VISIBLE);
+      try{
+        item.setFavorites( !item.getFavorites() );
+        if ( !item.getFavorites() ){
+          viewHolder.favorite_label.setVisibility(View.GONE);
+        } else {
+          viewHolder.favorite_label.setVisibility(View.VISIBLE);
+        }
+      } catch (Exception e){
+        Timber.tag("to_favorites").v(e);
       }
     });
 
@@ -243,12 +243,17 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
       Toast.makeText(view.getContext(), "Контроль " + viewHolder.title.getText().toString(), Toast.LENGTH_SHORT).show();
       viewHolder.swipeLayout.close(true);
 
-      item.setControl( !item.getControl() );
-      if ( !item.getControl() ){
-        viewHolder.control_label.setVisibility(View.GONE);
-      } else {
-        viewHolder.control_label.setVisibility(View.VISIBLE);
+      try {
+        item.setControl( !item.getControl() );
+        if ( !item.getControl() ){
+          viewHolder.control_label.setVisibility(View.GONE);
+        } else {
+          viewHolder.control_label.setVisibility(View.VISIBLE);
+        }
+      } catch (Exception e){
+        Timber.tag("to_control").v(e);
       }
+
     });
 
     viewHolder.get_infocard.setOnClickListener(view -> {

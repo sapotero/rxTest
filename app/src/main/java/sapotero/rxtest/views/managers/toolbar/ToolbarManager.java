@@ -75,8 +75,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
 
     loadSettings();
 
-    initView();
-
     setListener();
 
     buildDialog();
@@ -219,9 +217,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
     );
   }
 
-  private void initView() {
-
-  }
 
   private void loadSettings() {
     LOGIN    = settings.getString("login");
@@ -284,22 +279,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
 
   }
 
-
-//  private Update<Scalar<Integer>> updateFavorites(Update<Scalar<Integer>> query) {
-//    Boolean result = true;
-//
-//    MenuItem item = toolbar.getMenu().findItem(R.id.menu_info_shared_to_favorites);
-//
-//    if (item.getTitle() == context.getString(R.string.to_favorites)) {
-//      item.setTitle(context.getString(R.string.remove_from_favorites));
-//    } else {
-//      item.setTitle(context.getString(R.string.to_favorites));
-//      result = false;
-//    }
-//
-//    query = query.set(RDocumentEntity.FAVORITES, result);
-//    return query;
-//  }
 
   public void add( int id, String title ){
     try {

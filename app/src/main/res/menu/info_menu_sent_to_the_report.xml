@@ -6,7 +6,17 @@
         app:showAsAction="ifRoom|withText"
         android:title="@string/menu_info_from_the_report"/>
     <item
-        android:id="@+id/return_to_the_primary_consideration"
+        android:id="@+id/menu_info_shared_to_control"
+        app:showAsAction="always|withText"
+        android:icon="@drawable/to_control_icon"
+        android:title="@string/to_control"/>
+    <item
+        android:id="@+id/menu_info_to_the_approval_performance"
         app:showAsAction="ifRoom|withText"
-        android:title="@string/return_to_the_primary_consideration"/>
+        android:title="@string/menu_info_to_the_approval_performance"/>
+    <item
+        android:id="@+id/menu_info_shared_to_favorites"
+        app:showAsAction="always|withText"
+        android:icon="@drawable/to_favorites"
+        android:title="@string/to_favorites"/>
 </menu>
