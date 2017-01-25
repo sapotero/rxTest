@@ -59,8 +59,6 @@ import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
 import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
-import sapotero.rxtest.views.adapters.utils.DocumentTypeAdapter;
-import sapotero.rxtest.views.adapters.utils.StatusAdapter;
 import sapotero.rxtest.views.interfaces.DataLoaderInterface;
 import sapotero.rxtest.views.menu.MenuBuilder;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
@@ -111,9 +109,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private Preference<String> HOST;
   private Preference<String> PASSWORD;
 
-  private StatusAdapter filter_adapter;
   private OrganizationAdapter organization_adapter;
-  private DocumentTypeAdapter document_type_adapter;
 
   private int total = 0;
 
@@ -142,7 +138,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   public  MenuBuilder menuBuilder;
   private DBQueryBuilder dbQueryBuilder;
   private DataLoaderInterface dataLoader;
-
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     setTheme(R.style.AppTheme);
@@ -214,9 +209,12 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       switch (item.getItemId()) {
         case R.id.reload:
           queue.getUncompleteTasks();
-//          updateByStatus();
-//          document_favorite_button1.setVisibility( document_favorite_button1.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
           break;
+        case R.id.main_activity_menu_reload:
+          dataLoader.updateByStatus( menuBuilder.getItem() );
+          break;
+
+
         default:
           jobManager.addJobInBackground(new UpdateAuthTokenJob());
           break;
@@ -445,11 +443,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     for(Fields.Menu menu: Fields.Menu.values() ){
       drawer_add_item( menu.getIndex() , menu.getTitle(), Long.valueOf( menu.getIndex()) );
     }
-
-//    for (Integer i : treeMap.keySet()) {
-//      Timber.tag("drawer_add_item").v(" !index " + i + " " + treeMap.get(i));
-//      drawer_add_item(i, title[i], Long.valueOf(identifier[i]));
-//    }
 
     drawer_build_bottom();
   }

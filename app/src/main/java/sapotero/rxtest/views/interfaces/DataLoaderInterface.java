@@ -209,7 +209,7 @@ public class DataLoaderInterface {
         .observeOn( AndroidSchedulers.mainThread() )
         .subscribe(
           data -> {
-            Timber.tag(TAG).i("tryToSignWithDc: token" + data.getAuthToken());
+            Timber.tag(TAG).i("tryToSignWithDc: token + " + data.getAuthToken());
             Timber.tag(TAG).i("tryToSignWithDc: login" + data.getLogin());
 
             setLogin( data.getLogin() );

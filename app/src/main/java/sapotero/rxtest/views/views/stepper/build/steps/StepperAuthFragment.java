@@ -27,6 +27,7 @@ import javax.inject.Inject;
 import rx.Subscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.application.config.Constant;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckFailEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckSuccesEvent;
@@ -57,6 +58,7 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
   private VerificationError error = new VerificationError("error");
 
   private StepperLayout.OnNextClickedCallback callback;
+  private Preference<String> host;
 
 
   @Override
@@ -106,6 +108,11 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
 
   private void attachSettings() {
     Preference<AuthType> auth_type = settings.getEnum("stepper.auth_type", AuthType.class);
+
+    host = settings.getString("settings_username_host");
+    if (host.get() == null){
+      host.set(Constant.HOST);
+    }
 
     if (auth_type.get() == null) {
       auth_type.set( authType );

@@ -1,5 +1,6 @@
 package sapotero.rxtest.views.managers.toolbar;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.Toolbar;
@@ -7,13 +8,17 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
+import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
+
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -23,17 +28,24 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
+import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.crypto.SignDataEvent;
+import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
+import sapotero.rxtest.views.activities.InfoActivity;
+import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
 import sapotero.rxtest.views.managers.menu.OperationManager;
 import sapotero.rxtest.views.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.views.managers.menu.utils.CommandParams;
+import timber.log.Timber;
 
-public class ToolbarManager {
+public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
 
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject RxSharedPreferences settings;
   @Inject OperationManager operationManager;
+
+  private final String TAG = this.getClass().getSimpleName();
 
   private Preference<String> TOKEN;
   private Preference<String> LOGIN;
@@ -47,8 +59,13 @@ public class ToolbarManager {
 
   private final Context context;
   private final Toolbar toolbar;
-  private MaterialDialog dialog;
   private String SIGN;
+  private Fields.Status status;
+  private Fields.Journal journal;
+
+  private MaterialDialog dialog;
+
+  private SelectOshsDialogFragment oshs;
 
   public ToolbarManager(Context context, Toolbar toolbar) {
     this.context = context;
@@ -69,6 +86,8 @@ public class ToolbarManager {
   }
 
   private void setListener() {
+    final Activity activity = (Activity) context;
+
     toolbar.setOnMenuItemClickListener(
       item -> {
 
@@ -110,17 +129,7 @@ public class ToolbarManager {
             break;
 
           // approval (согласование проектов документов)
-          case R.id.menu_info_approval_change_person:
-            operation = CommandFactory.Operation.INCORRECT;
-//
-//            if (oshs == null){
-//              oshs = new SelectOshsDialogFragment();
-//              oshs.registerCallBack( this );
-//            }
-//
-//            oshs.show( getFragmentManager(), "SelectOshsDialogFragment");
 
-            break;
           case R.id.menu_info_approval_next_person:
             operation = CommandFactory.Operation.APPROVAL_NEXT_PERSON;
             buildDialog();
@@ -136,14 +145,26 @@ public class ToolbarManager {
 
           // approval (согласование проектов документов)
           case R.id.menu_info_sign_change_person:
-            operation = CommandFactory.Operation.INCORRECT;
+            operation = CommandFactory.Operation.SIGNING_CHANGE_PERSON;
 
-//            if (oshs == null){
-//              oshs = new SelectOshsDialogFragment();
-//              oshs.registerCallBack( this );
-//            }
-//
-//            oshs.show( getFragmentManager(), "SelectOshsDialogFragment");
+            if (oshs == null){
+              oshs = new SelectOshsDialogFragment();
+              oshs.registerCallBack( this );
+            }
+
+
+            oshs.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
+            break;
+
+          case R.id.menu_info_approval_change_person:
+            operation = CommandFactory.Operation.APPROVAL_CHANGE_PERSON;
+
+            if (oshs == null){
+              oshs = new SelectOshsDialogFragment();
+              oshs.registerCallBack( this );
+            }
+
+            oshs.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
             break;
           case R.id.menu_info_sign_next_person:
             operation = CommandFactory.Operation.SIGNING_NEXT_PERSON;
@@ -214,11 +235,12 @@ public class ToolbarManager {
     REG_DATE = settings.getString("main_menu.date");
   }
 
-  public void invalidate() {
+  private void invalidate() {
     RDocumentEntity doc = dataStore
       .select(RDocumentEntity.class)
       .where(RDocumentEntity.UID.eq(UID.get())).get().first();
 
+    Timber.tag(TAG).v("invalidate: %s", new Gson().toJson(doc) );
 
     for (int i = 0; i < toolbar.getMenu().size(); i++) {
       MenuItem item = toolbar.getMenu().getItem(i);
@@ -230,17 +252,54 @@ public class ToolbarManager {
         case R.id.menu_info_shared_to_control:
           item.setTitle( context.getString( doc.isControl() != null && doc.isControl() ? R.string.remove_from_control : R.string.to_control));
           break;
+        default:
+          break;
       }
     }
   }
 
-  public void update( int id, String title ){
-    try {
-      toolbar.getMenu().findItem(id).setTitle(title);
-    } catch (Exception e) {
-      e.printStackTrace();
+  public void update(String command){
+
+    Timber.tag(TAG).w("update %s", command );
+
+    if ( Objects.equals(command, "change_person") ) {
+      Toast.makeText( context.getApplicationContext(), "Операция передачи успешно завершена", Toast.LENGTH_SHORT).show();
+      toolbar.getMenu().clear();
+      toolbar.inflateMenu(R.menu.info_menu);
     }
+
+    if ( Objects.equals(command, "next_person") ) {
+      Toast.makeText( context.getApplicationContext(), "Операция подписания успешно завершена", Toast.LENGTH_SHORT).show();
+      toolbar.getMenu().clear();
+      toolbar.inflateMenu(R.menu.info_menu);
+    }
+
+    if ( Objects.equals(command, "prev_person") ) {
+      Toast.makeText( context.getApplicationContext(), "Операция отклонения успешно завершена", Toast.LENGTH_SHORT).show();
+      toolbar.getMenu().clear();
+      toolbar.inflateMenu(R.menu.info_menu);
+    }
+
+    invalidate();
+
   }
+
+
+//  private Update<Scalar<Integer>> updateFavorites(Update<Scalar<Integer>> query) {
+//    Boolean result = true;
+//
+//    MenuItem item = toolbar.getMenu().findItem(R.id.menu_info_shared_to_favorites);
+//
+//    if (item.getTitle() == context.getString(R.string.to_favorites)) {
+//      item.setTitle(context.getString(R.string.remove_from_favorites));
+//    } else {
+//      item.setTitle(context.getString(R.string.to_favorites));
+//      result = false;
+//    }
+//
+//    query = query.set(RDocumentEntity.FAVORITES, result);
+//    return query;
+//  }
 
   public void add( int id, String title ){
     try {
@@ -282,4 +341,68 @@ public class ToolbarManager {
       }).build();
   }
 
+  public void init() {
+
+    toolbar.setTitleTextColor( context.getResources().getColor( R.color.md_grey_100 ) );
+    toolbar.setSubtitleTextColor( context.getResources().getColor( R.color.md_grey_400 ) );
+
+    toolbar.setContentInsetStartWithNavigation(250);
+
+    toolbar.setNavigationOnClickListener(v ->{
+      InfoActivity activity = (InfoActivity) context;
+      activity.finish();
+      }
+    );
+
+    int menu;
+
+    switch ( STATUS_CODE.get() ){
+      case "sent_to_the_report":
+        menu = R.menu.info_menu_sent_to_the_report;
+        break;
+      case "sent_to_the_performance":
+        menu = R.menu.info_menu_sent_to_the_performance;
+        break;
+      case "primary_consideration":
+        menu = R.menu.info_menu_primary_consideration;
+        break;
+      case "approval":
+        menu = R.menu.info_menu_approval;
+        break;
+      case "signing":
+        menu = R.menu.info_menu_signing;
+        break;
+      default:
+        menu = R.menu.info_menu;
+        break;
+    }
+    toolbar.inflateMenu(menu);
+
+
+    status  = Fields.Status.findStatus(STATUS_CODE.get());
+    journal = Fields.getJournalByUid( UID.get() );
+
+    toolbar.setTitle( String.format("%s от %s", REG_NUMBER.get(), REG_DATE.get()) );
+
+    Timber.tag("MENU").e( "STATUS CODE: %s", STATUS_CODE.get() );
+  }
+
+  public void hideDialog() {
+    if (dialog != null) {
+      dialog.hide();
+    }
+  }
+
+  // OSHS selector
+  @Override
+  public void onSearchSuccess(Oshs user) {
+    CommandParams params = new CommandParams();
+    params.setPerson( user.getId() );
+    operationManager.execute( CommandFactory.Operation.APPROVAL_CHANGE_PERSON, params );
+  }
+
+  @Override
+  public void onSearchError(Throwable error) {
+
+  }
 }

@@ -37,7 +37,6 @@ import rx.functions.Action1;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
-import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.views.activities.InfoActivity;
@@ -48,7 +47,7 @@ import sapotero.rxtest.views.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.views.managers.menu.utils.CommandParams;
 import timber.log.Timber;
 
-public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.SimpleViewHolder> implements Action1<List<Document>> {
+public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.SimpleViewHolder> implements Action1<List<Document>>, OperationManager.Callback {
 
   @Inject RxSharedPreferences settings;
   @Inject JobManager jobManager;
@@ -67,9 +66,7 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
 
     EsdApplication.getComponent(context).inject(this);
 
-//    documentManager = new InterfaceDocumentManager().getInstance(mContext);
-
-//    operationManager = OperationManager.getInstance();
+    operationManager.registerCallBack(this);
   }
 
   @Override
@@ -210,8 +207,8 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
     });
 
 
-    viewHolder.to_contol.setOnClickListener(view -> {
-      jobManager.addJobInBackground( new UpdateDocumentJob( item.getUid(), "favorites", true ) );
+    viewHolder.to_favorites.setOnClickListener(view -> {
+//      jobManager.addJobInBackground( new UpdateDocumentJob( item.getUid(), "favorites", true ) );
 //      jobManager.addJobInBackground( new MarkDocumentAsChangedJob( item.getUid() ) );
 
       String favorites = dataStore
@@ -227,37 +224,40 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
 
       Toast.makeText(view.getContext(), "Избранное " + viewHolder.title.getText().toString(), Toast.LENGTH_SHORT).show();
       viewHolder.swipeLayout.close(true);
+
+
+      item.setFavorites( !item.getFavorites() );
+      if ( !item.getFavorites() ){
+        viewHolder.favorite_label.setVisibility(View.GONE);
+      } else {
+        viewHolder.favorite_label.setVisibility(View.VISIBLE);
+      }
     });
 
-    viewHolder.to_favorites.setOnClickListener(view -> {
-
-      jobManager.addJobInBackground( new UpdateDocumentJob( item.getUid(), "control", true ) );
-//      jobManager.addJobInBackground( new MarkDocumentAsChangedJob( item.getUid() ) );
-
-
+    viewHolder.to_control.setOnClickListener(view -> {
       CommandParams params = new CommandParams();
       params.setSign( item.getUid() );
 
-      operationManager.execute( CommandFactory.Operation.ADD_TO_FOLDER, params );
+      operationManager.execute( CommandFactory.Operation.CHECK_FOR_CONTROL, params );
 
       Toast.makeText(view.getContext(), "Контроль " + viewHolder.title.getText().toString(), Toast.LENGTH_SHORT).show();
       viewHolder.swipeLayout.close(true);
+
+      item.setControl( !item.getControl() );
+      if ( !item.getControl() ){
+        viewHolder.control_label.setVisibility(View.GONE);
+      } else {
+        viewHolder.control_label.setVisibility(View.VISIBLE);
+      }
     });
 
     viewHolder.get_infocard.setOnClickListener(view -> {
-//      manager.get( item.getUid() ).toJson();
-
       FragmentManager manager = ((Activity) mContext).getFragmentManager();
-
       new InfoCardDialogFragment().withUid( item.getUid() ).show( manager, "InfoCardDialogFragment" );
-
       viewHolder.swipeLayout.close(true);
     });
 
     viewHolder.get_files.setOnClickListener(view -> {
-//      manager.get( item.getUid() ).toJson();
-
-
       String _title = manager.get(item.getUid()).getTitle();
       Timber.e("title : %s", _title);
 
@@ -380,7 +380,7 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
 
   //  ViewHolder Class
 
-  public class SimpleViewHolder extends RecyclerView.ViewHolder {
+  class SimpleViewHolder extends RecyclerView.ViewHolder {
     private Button get_infocard;
     private Button get_files;
     private Button get_editor;
@@ -389,8 +389,8 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
     private TextView control_label;
     private TextView favorite_label;
     private SwipeLayout swipeLayout;
+    private TextView to_control;
     private TextView to_favorites;
-    private TextView to_contol;
 
     private TextView wait_for_sync;
 
@@ -403,8 +403,8 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
       super(itemView);
       swipeLayout = (SwipeLayout) itemView.findViewById(R.id.swipe);
 
-      to_contol = (TextView) itemView.findViewById(R.id.swipe_layout_card_to_control);
-      to_favorites = (TextView) itemView.findViewById(R.id.swipe_layout_card_to_favorites);
+      to_favorites = (TextView) itemView.findViewById(R.id.swipe_layout_card_to_control);
+      to_control = (TextView) itemView.findViewById(R.id.swipe_layout_card_to_favorites);
 
       get_infocard = (Button) itemView.findViewById(R.id.swipe_layout_card_get_infocard);
       get_files    = (Button) itemView.findViewById(R.id.swipe_layout_card_get_files);
@@ -424,8 +424,43 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
       control_label.setVisibility(View.GONE);
     }
 
-    public void setControl() {
+    public void showControl() {
       control_label.setVisibility(View.VISIBLE);
     }
+    public void hideControl() {
+      control_label.setVisibility(View.GONE);
+    }
+  }
+
+  /* OperationManager.Callback */
+  @Override
+  public void onExecuteSuccess(String command) {
+    Timber.tag("OpManagerAdapter").i("onExecuteSuccess %s", command);
+
+//    switch ( command ){
+//      case "check_for_control":
+//        if ( doc.isControl() ){
+//          sharedViewHolder.getHolder().control_label.setVisibility(View.VISIBLE);
+//        } else {
+//          sharedViewHolder.getHolder().control_label.setVisibility(View.GONE);
+//        }
+//        break;
+//      case "add_to_folder":
+//        if ( doc.isControl() ){
+//          sharedViewHolder.getHolder().favorite_label.setVisibility(View.VISIBLE);
+//        } else {
+//          sharedViewHolder.getHolder().favorite_label.setVisibility(View.GONE);
+//        }
+//        break;
+//      default:
+//        break;
+//    }
+
+
+  }
+
+  @Override
+  public void onExecuteError() {
+    Timber.tag("OpManagerAdapter").i("onExecuteSuccess");
   }
 }

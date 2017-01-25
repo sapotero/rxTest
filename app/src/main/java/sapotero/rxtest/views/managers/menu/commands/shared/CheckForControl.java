@@ -32,7 +32,6 @@ public class CheckForControl extends AbstractCommand {
   private Preference<String> UID;
   private Preference<String> HOST;
   private Preference<String> STATUS_CODE;
-  private String folder_id;
   private String document_id;
 
   public CheckForControl(Context context, DocumentReceiver document){
@@ -81,40 +80,45 @@ public class CheckForControl extends AbstractCommand {
     try {
       queueManager.add(this);
 
-      dataStore
-        .select(RDocumentEntity.class)
-        .where(RDocumentEntity.UID.eq(document_id))
-        .get()
-        .toObservable()
-        .flatMap( doc -> Observable.just( doc.isControl() ) )
-        .subscribe( value -> {
-          Timber.tag(TAG).i("executeLocal for %s: CONTROL: %s",document_id, value);
-          try {
-
-            if (value == null){
-              value = false;
-            }
-
-            dataStore
-              .update(RDocumentEntity.class)
-              .set( RDocumentEntity.CONTROL, !value)
-              .where(RDocumentEntity.UID.eq(document_id))
-              .get()
-              .call();
-
-            if ( callback != null ){
-              callback.onCommandExecuteSuccess( getType() );
-            }
-
-          } catch (Exception e) {
-            Timber.tag(TAG).i("executeLocal for %s [%s]: %s", document_id, getType(), e);
-            e.printStackTrace();
-          }
-        });
+      updateControl();
 
     } catch (Exception e) {
       Timber.tag(TAG).i("executeLocal for %s: %s", getType(), e);
     }
+  }
+
+  private void updateControl() {
+    dataStore
+      .select(RDocumentEntity.class)
+      .where(RDocumentEntity.UID.eq( document_id ))
+      .get()
+      .toObservable()
+      .flatMap( doc -> Observable.just( doc.isControl() ) )
+      .subscribe( value -> {
+        Timber.tag(TAG).i("executeLocal for %s: CONTROL: %s",document_id, value);
+        try {
+
+          if (value == null){
+            value = false;
+          }
+
+          dataStore
+            .update(RDocumentEntity.class)
+            .set( RDocumentEntity.CONTROL, !value)
+            .set( RDocumentEntity.PROCESSED, true)
+            .where(RDocumentEntity.UID.eq( document_id ))
+            .get()
+            .call();
+
+          if ( callback != null ){
+            callback.onCommandExecuteSuccess( getType() );
+          }
+
+        } catch (Exception e) {
+          Timber.tag(TAG).i("executeLocal for %s [%s]: %s", document_id, getType(), e);
+          e.printStackTrace();
+        }
+      });
   }
 
   @Override
@@ -138,7 +142,7 @@ public class CheckForControl extends AbstractCommand {
       LOGIN.get(),
       TOKEN.get(),
       uids,
-      document_id == null? UID.get() : document_id,
+      document_id == null ? UID.get() : document_id,
       STATUS_CODE.get(),
       null,
       null
@@ -152,6 +156,7 @@ public class CheckForControl extends AbstractCommand {
           Timber.tag(TAG).i("error: %s", data.getMessage());
           Timber.tag(TAG).i("type: %s", data.getType());
 
+          updateControl();
           queueManager.remove(this);
 
           if (callback != null){

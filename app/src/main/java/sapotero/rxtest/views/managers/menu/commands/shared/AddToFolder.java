@@ -93,36 +93,7 @@ public class AddToFolder extends AbstractCommand {
     try {
       queueManager.add(this);
 
-      dataStore
-        .select(RDocumentEntity.class)
-        .where(RDocumentEntity.UID.eq(document_id))
-        .get()
-        .toObservable()
-        .flatMap( doc -> Observable.just( doc.isFavorites() ) )
-        .subscribe( value -> {
-          Timber.tag(TAG).i("executeLocal for %s: favorites: %s",document_id, value);
-          try {
-
-            if (value == null){
-              value = false;
-            }
-
-            dataStore
-              .update(RDocumentEntity.class)
-              .set( RDocumentEntity.FAVORITES, !value)
-              .where(RDocumentEntity.UID.eq(document_id))
-              .get()
-              .call();
-
-            if ( callback != null ){
-              callback.onCommandExecuteSuccess( getType() );
-            }
-
-          } catch (Exception e) {
-            Timber.tag(TAG).i("executeLocal for %s [%s]: %s", document_id, getType(), e);
-            e.printStackTrace();
-          }
-        });
+      updateFavorites();
 
     } catch (Exception e) {
       Timber.tag(TAG).i("executeLocal for %s: %s", getType(), e);
@@ -164,6 +135,8 @@ public class AddToFolder extends AbstractCommand {
 
           queueManager.remove(this);
 
+          updateFavorites();
+
           if (callback != null && Objects.equals(data.getType(), "warning")){
             callback.onCommandExecuteSuccess( getType() );
           }
@@ -174,6 +147,40 @@ public class AddToFolder extends AbstractCommand {
           }
         }
       );
+  }
+
+  private void updateFavorites() {
+    dataStore
+      .select(RDocumentEntity.class)
+      .where(RDocumentEntity.UID.eq(document_id))
+      .get()
+      .toObservable()
+      .flatMap( doc -> Observable.just( doc.isFavorites() ) )
+      .subscribe( value -> {
+        Timber.tag(TAG).i("executeLocal for %s: favorites: %s",document_id, value);
+        try {
+
+          if (value == null){
+            value = false;
+          }
+
+          dataStore
+            .update(RDocumentEntity.class)
+            .set( RDocumentEntity.FAVORITES, !value)
+            .set( RDocumentEntity.PROCESSED, true)
+            .where(RDocumentEntity.UID.eq(document_id))
+            .get()
+            .call();
+
+          if ( callback != null ){
+            callback.onCommandExecuteSuccess( getType() );
+          }
+
+        } catch (Exception e) {
+          Timber.tag(TAG).i("executeLocal for %s [%s]: %s", document_id, getType(), e);
+          e.printStackTrace();
+        }
+      });
   }
 
   @Override

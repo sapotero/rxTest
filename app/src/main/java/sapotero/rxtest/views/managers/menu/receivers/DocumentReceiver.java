@@ -8,4 +8,7 @@ public class DocumentReceiver {
     uid = active_uid;
   }
 
+  public String getUid() {
+    return uid;
+  }
 }
