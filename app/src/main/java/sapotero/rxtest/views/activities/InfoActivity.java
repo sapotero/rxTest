@@ -23,6 +23,7 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
 import okhttp3.OkHttpClient;
@@ -173,7 +174,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   }
 
-
   private void loadSettings() {
     LOGIN    = settings.getString("login");
     UID      = settings.getString("main_menu.uid");
@@ -185,6 +185,16 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     REG_NUMBER = settings.getString("main_menu.regnumber");
     REG_DATE = settings.getString("main_menu.date");
 
+  }
+
+  @OnClick(R.id.activity_info_left_button)
+  public void prev(){
+    Timber.tag(TAG).v("prev document");
+  } 
+
+  @OnClick(R.id.activity_info_right_button)
+  public void next(){
+    Timber.tag(TAG).v("next document");
   }
 
   @Override
