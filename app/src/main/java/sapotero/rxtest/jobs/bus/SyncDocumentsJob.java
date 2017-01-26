@@ -116,6 +116,7 @@ public class SyncDocumentsJob  extends BaseJob {
       .subscribe(
         doc -> {
           Timber.tag(TAG).d("recv title - %s", doc.getTitle() );
+          Timber.tag(TAG).d("actions - %s", new Gson().toJson( doc.getOperations() ) );
           update( doc, exist(doc.getUid()) );
 
           

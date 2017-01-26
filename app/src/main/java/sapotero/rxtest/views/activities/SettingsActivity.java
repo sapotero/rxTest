@@ -60,6 +60,8 @@ public class SettingsActivity extends AppCompatActivity {
       fragmentTransaction.add(R.id.settings_view_fragment, new SettingsViewFragment());
     fragmentTransaction.commit();
     }
+
+    // FIX добавить сортировку документов по настройкам
   }
 
   @Override protected void onResume() {

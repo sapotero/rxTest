@@ -452,7 +452,7 @@ public class DataLoaderInterface {
     );
   }
 
-  public boolean isOnline() {
+  private boolean isOnline() {
     ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
     NetworkInfo netInfo = cm.getActiveNetworkInfo();
     return netInfo != null && netInfo.isConnectedOrConnecting();

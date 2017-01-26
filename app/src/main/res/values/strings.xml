@@ -66,7 +66,7 @@
 
 
     <string name="info_create_decision"> Создать резолюцию </string>
-    <string name="info_edit_decision"> Создать резолюцию </string>
+    <string name="info_edit_decision"> Редактировать </string>
     <string name="info_create_no_answer"> Без ответа </string>
     <string name="info_create_to_control"> Добавить отметку о контроле </string>
     <string name="info_create_to_favorites"> Добавить в избранное </string>
@@ -75,7 +75,7 @@
     <string name="constructor_create_to_favorites"> Редактор- В избранное </string>
 
 
-    <string name="action_settings">Выполняется проверка пин кода...</string>
+    <string name="action_settings">Выполняется проверка пин кода…</string>
     <string name="drawer_item_journals">Журналы</string>
     <string name="drawer_item_settings">Настройки</string>
     <string name="drawer_item_settings_account">Учетная запись/Отображение</string>

@@ -621,7 +621,7 @@ public class MainService extends Service {
 
   public void getAuth(){
     Observable
-      .interval( 10, TimeUnit.SECONDS )
+      .interval( 3600, TimeUnit.SECONDS )
       .subscribeOn(Schedulers.io())
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(interval -> {

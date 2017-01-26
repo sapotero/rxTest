@@ -119,7 +119,7 @@ public class DBQueryBuilder {
         addToAdapterList( new ArrayList<>() );
       } else {
         subscribe = query
-          .orderBy( RDocumentEntity.REGISTRATION_DATE.desc() )
+          .orderBy( RDocumentEntity.SORT_KEY.desc() )
           .get()
           .toObservable()
           .subscribeOn(Schedulers.io())
@@ -183,6 +183,7 @@ public class DBQueryBuilder {
   private void showEmpty(){
     documents_empty_list.setVisibility(View.VISIBLE);
   }
+
   private void hideEmpty(){
     documents_empty_list.setVisibility(View.GONE);
   }
@@ -289,7 +290,11 @@ public class DBQueryBuilder {
   }
 
   public int getFavoritesCount(){
-    return dataStore.count(RDocumentEntity.UID).where(RDocumentEntity.FAVORITES.eq(true)).get().value();
+    return dataStore
+      .count(RDocumentEntity.UID)
+      .where(RDocumentEntity.USER.eq( settings.getString("login").get() ))
+      .and(RDocumentEntity.FAVORITES.eq(true))
+      .get().value();
   }
 
 

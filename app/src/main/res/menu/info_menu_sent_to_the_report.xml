@@ -2,9 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/menu_info_from_the_report"
-        app:showAsAction="ifRoom|withText"
-        android:title="@string/menu_info_from_the_report"/>
+        android:id="@+id/action_info_create_decision"
+        app:showAsAction="always|withText"
+        android:icon="@drawable/add_decision"
+        android:enabled="false"
+        android:title="@string/info_create_decision"/>
     <item
         android:id="@+id/menu_info_shared_to_control"
         app:showAsAction="always|withText"
@@ -13,6 +15,7 @@
     <item
         android:id="@+id/menu_info_to_the_approval_performance"
         app:showAsAction="ifRoom|withText"
+        android:icon="@drawable/sign"
         android:title="@string/menu_info_to_the_approval_performance"/>
     <item
         android:id="@+id/menu_info_shared_to_favorites"

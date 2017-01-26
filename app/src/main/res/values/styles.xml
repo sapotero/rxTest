@@ -12,6 +12,7 @@
     <style name="AppTheme" parent="MaterialDrawerTheme.Light.DarkToolbar.ActionBar.TranslucentStatus">
     <!--<style name="AppTheme" parent="MaterialDrawerTheme.Light.DarkToolbar.TranslucentStatus">-->
         <!-- Customize your theme here. -->
+        <item name="android:actionMenuTextAppearance">@style/customActionBar</item>
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
@@ -50,5 +51,9 @@
 
     <style name="MSStepStabsContainer">
         <item name="android:background">@drawable/ms_tab_container_pre_lollipop_background</item>
+    </style>
+
+    <style name="customActionBar" parent="@android:style/TextAppearance.Material.Widget.ActionBar.Menu">
+        <item name="android:textSize">12sp</item>
     </style>
 </resources>

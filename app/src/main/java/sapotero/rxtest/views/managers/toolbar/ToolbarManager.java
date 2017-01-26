@@ -32,7 +32,6 @@ import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.crypto.SignDataEvent;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
-import sapotero.rxtest.views.activities.InfoActivity;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
 import sapotero.rxtest.views.managers.menu.OperationManager;
 import sapotero.rxtest.views.managers.menu.factories.CommandFactory;
@@ -66,6 +65,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
   private MaterialDialog dialog;
 
   private SelectOshsDialogFragment oshs;
+  private int decision_count;
 
   public ToolbarManager(Context context, Toolbar toolbar) {
     this.context = context;
@@ -78,8 +78,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
     setListener();
 
     buildDialog();
-
-    invalidate();
 
   }
 
@@ -97,10 +95,10 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
 
         switch ( item.getItemId() ){
           // sent_to_the_report (отправлен на доклад)
-          case R.id.menu_info_from_the_report:
-            operation = CommandFactory.Operation.FROM_THE_REPORT;
-            break;
-          case R.id.return_to_the_primary_consideration:
+//          case R.id.menu_info_from_the_report:
+//            operation = CommandFactory.Operation.FROM_THE_REPORT;
+//            break;
+          case R.id.menu_info_to_the_primary_consideration:
             operation = CommandFactory.Operation.TO_THE_PRIMARY_CONSIDERATION;
             break;
 
@@ -115,18 +113,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
             break;
 
           // primary_consideration (первичное рассмотрение)
-          case R.id.menu_info_to_the_primary_consideration:
-            operation = CommandFactory.Operation.INCORRECT;
-
-//            if (oshs == null){
-//              oshs = new SelectOshsDialogFragment();
-//              oshs.registerCallBack( this );
-//            }
-//
-//            oshs.show( getFragmentManager(), "SelectOshsDialogFragment");
-            break;
-
-          // approval (согласование проектов документов)
 
           case R.id.menu_info_approval_next_person:
             operation = CommandFactory.Operation.APPROVAL_NEXT_PERSON;
@@ -237,6 +223,36 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
 
     Timber.tag(TAG).v("invalidate: %s", new Gson().toJson(doc) );
 
+
+    // проверяем, сколько есть резолюций у документа
+    // если она одна, то показываем кнопки Подписать/Отклонить
+    // если несколько, то показываем редактировать - для редактирования текущей
+    // если нет - то показываем создать
+    //FIX в обработанных - изменить резолюции на поручения
+
+
+    decision_count = doc.getDecisions().size();
+
+    switch ( decision_count ){
+      case 0:
+        try {
+          toolbar.getMenu().findItem( R.id.menu_info_decision_sign ).setVisible(false);
+          toolbar.getMenu().findItem( R.id.menu_info_decision_reject).setVisible(false);
+          toolbar.getMenu().findItem( R.id.menu_info_decision_create).setVisible(true);
+        } catch (Exception e) {
+          Timber.tag(TAG).v(e);
+        }
+        break;
+      default:
+        try {
+          Timber.tag(TAG).v( "item: %s", toolbar.getMenu().getItem(1).getItemId() );
+          toolbar.getMenu().findItem( R.id.menu_info_decision_create ).setVisible(false);
+        } catch (Exception e) {
+          Timber.tag(TAG).v(e);
+        }
+        break;
+    }
+
     for (int i = 0; i < toolbar.getMenu().size(); i++) {
       MenuItem item = toolbar.getMenu().getItem(i);
 
@@ -328,7 +344,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
     toolbar.setContentInsetStartWithNavigation(250);
 
     toolbar.setNavigationOnClickListener(v ->{
-      InfoActivity activity = (InfoActivity) context;
+      Activity activity = (Activity) context;
       activity.finish();
       }
     );
@@ -351,6 +367,10 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
       case "signing":
         menu = R.menu.info_menu_signing;
         break;
+      case "processed":
+        menu = R.menu.info_menu;
+        break;
+
       default:
         menu = R.menu.info_menu;
         break;
@@ -364,6 +384,9 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
     toolbar.setTitle( String.format("%s от %s", REG_NUMBER.get(), REG_DATE.get()) );
 
     Timber.tag("MENU").e( "STATUS CODE: %s", STATUS_CODE.get() );
+
+    invalidate();
+
   }
 
   public void hideDialog() {

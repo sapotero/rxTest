@@ -101,9 +101,10 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
       Timber.d( "item.getSigner() %s - %s", item.getSigner().getId(), item.getSigner().getOrganisation() );
     }
 
-
+    // FIX добавить отображение ОжидаетСинхронизации
+    // FIX отображать срочность поверх всего во фрагменте
     if (item.getChanged() != null){
-      viewHolder.wait_for_sync.setVisibility(  item.getChanged() ? View.VISIBLE : View.GONE );
+//      viewHolder.wait_for_sync.setVisibility(  item.getChanged() ? View.VISIBLE : View.GONE );
     }
 
     if ( item.getControl() != null && item.getControl() ){

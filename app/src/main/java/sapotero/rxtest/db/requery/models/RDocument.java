@@ -17,7 +17,7 @@ import sapotero.rxtest.db.requery.models.exemplars.RExemplar;
 import sapotero.rxtest.db.requery.models.images.RImage;
 
 @Entity
-public abstract class  RDocument implements Persistable {
+public abstract class RDocument implements Persistable {
   @Key
   @Generated
   int _id;
@@ -76,29 +76,22 @@ public abstract class  RDocument implements Persistable {
 
 
   @OneToMany(mappedBy = "document")
-//  @OneToMany(mappedBy = "document", cascade = {CascadeAction.DELETE, CascadeAction.SAVE})
-    Set<RDecision> decisions;
-
-//  @OneToMany(mappedBy = "document", cascade = {CascadeAction.DELETE, CascadeAction.SAVE})
+  Set<RDecision> decisions;
 
   @OneToMany(mappedBy = "document")
   Set<RExemplar> exemplars;
 
-//  @OneToMany(mappedBy = "document", cascade = {CascadeAction.DELETE, CascadeAction.SAVE})
-
   @OneToMany(mappedBy = "document")
   Set<RImage> images;
-
-//  @OneToMany(mappedBy = "document", cascade = {CascadeAction.DELETE, CascadeAction.SAVE})
 
   @OneToMany(mappedBy = "document")
   Set<RControlLabels> controlLabels;
 
-  String links;
-
   @ForeignKey
   @OneToOne
   RRoute route;
+
+  String links;
 
 //  exemplars: Тип массив структур Экземпляры документа,
 //  decisions: Тип массив структур Резолюции документа,
@@ -106,5 +99,6 @@ public abstract class  RDocument implements Persistable {
 //  control_labels: Тип массив структур Контрольные отметки,
 //  links: Тип массив. Массив UID связанных документов,
 //  route: Тип структура Маршрут прохождения документа
+//  operations: Операции по документу
 
 }

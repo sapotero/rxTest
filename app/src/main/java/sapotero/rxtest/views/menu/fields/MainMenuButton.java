@@ -17,7 +17,7 @@ public enum MainMenuButton {
     "На рассмотрение %s" ,
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq(Fields.Status.SENT_TO_THE_REPORT.getValue())  ),
-      new ConditionBuilder( ConditionBuilder.Condition.OR, RDocumentEntity.FILTER.eq(Fields.Status.PRIMARY_CONSIDERATION.getValue())  ),
+      new ConditionBuilder( ConditionBuilder.Condition.OR, RDocumentEntity.FILTER.eq(Fields.Status.SENT_TO_THE_PERFORMANCE.getValue())  ),
     }
   ),
   PRIMARY_CONSIDERATION ( 3,
