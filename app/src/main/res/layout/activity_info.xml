@@ -7,28 +7,41 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="sapotero.rxtest.views.activities.InfoActivity">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:paddingTop="@dimen/half_date_offset"
-        android:transitionName="actionBar"
-        android:minHeight="?attr/actionBarSize"
-        android:background="@drawable/toolbar_background"
-        app:navigationIcon="?attr/homeAsUpIndicator"
-        app:theme="@style/ToolbarColoredBackArrow"
-        android:theme="@style/AlertDialog.AppCompat.Light"
-        android:elevation="8dp"/>
+    <sapotero.rxtest.views.views.CircleLeftArrow
+        android:clickable="true"
+        android:layout_width="54dp"
+        android:layout_height="54dp"
+        android:id="@+id/activity_info_left_button"
+        android:padding="4dp"
+        android:layout_marginTop="440dp"
+        android:layout_marginStart="@dimen/half_date_offset"
+        />
+
+    <sapotero.rxtest.views.views.CircleRightArrow
+        android:clickable="true"
+        android:layout_width="54dp"
+        android:layout_height="54dp"
+        android:id="@+id/activity_info_right_button"
+        android:padding="4dp"
+        android:layout_marginTop="440dp"
+        android:layout_marginEnd="@dimen/half_date_offset"
+        android:layout_alignParentEnd="true"
+        />
 
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingBottom="@dimen/activity_vertical_margin"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin"
+        android:padding="@dimen/activity_vertical_margin"
+
+        android:layout_marginStart="64dp"
+        android:layout_marginEnd="64dp"
+
         android:layout_below="@+id/toolbar">
+        <!--@dimen/activity_horizontal_margin" -->
+
+
+        <!--android:layout_marginStart="@dimen/half_date_offset"-->
 
 
         <LinearLayout
@@ -51,7 +64,7 @@
             android:orientation="vertical"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="4"
+            android:layout_weight="80.53"
             android:weightSum="1">
 
             <android.support.design.widget.TabLayout
@@ -67,10 +80,23 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@drawable/corner_background"
-            />
+                />
             <!--android:padding="@dimen/half_date_offset"-->
         </LinearLayout>
 
     </LinearLayout>
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:paddingTop="@dimen/half_date_offset"
+        android:transitionName="actionBar"
+        android:minHeight="?attr/actionBarSize"
+        android:background="@drawable/toolbar_background"
+        app:navigationIcon="?attr/homeAsUpIndicator"
+        app:theme="@style/ToolbarColoredBackArrow"
+        android:theme="@style/AlertDialog.AppCompat.Light"
+        android:elevation="8dp"/>
 
 </RelativeLayout>

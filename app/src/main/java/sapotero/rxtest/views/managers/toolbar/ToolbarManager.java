@@ -239,6 +239,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
           toolbar.getMenu().findItem( R.id.menu_info_decision_sign ).setVisible(false);
           toolbar.getMenu().findItem( R.id.menu_info_decision_reject).setVisible(false);
           toolbar.getMenu().findItem( R.id.menu_info_decision_create).setVisible(true);
+          toolbar.getMenu().findItem( R.id.menu_info_decision_edit).setVisible(false);
         } catch (Exception e) {
           Timber.tag(TAG).v(e);
         }
@@ -247,6 +248,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
         try {
           Timber.tag(TAG).v( "item: %s", toolbar.getMenu().getItem(1).getItemId() );
           toolbar.getMenu().findItem( R.id.menu_info_decision_create ).setVisible(false);
+          toolbar.getMenu().findItem( R.id.menu_info_decision_edit).setVisible(true);
         } catch (Exception e) {
           Timber.tag(TAG).v(e);
         }

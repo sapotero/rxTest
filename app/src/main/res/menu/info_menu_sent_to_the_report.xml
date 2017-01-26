@@ -2,11 +2,17 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/action_info_create_decision"
+        android:id="@+id/menu_info_decision_create"
         app:showAsAction="always|withText"
         android:icon="@drawable/add_decision"
         android:enabled="false"
         android:title="@string/info_create_decision"/>
+    <item
+        android:id="@+id/menu_info_decision_edit"
+        app:showAsAction="always|withText"
+        android:icon="@drawable/edit_pencil"
+        android:title="@string/info_edit_decision"/>
+
     <item
         android:id="@+id/menu_info_shared_to_control"
         app:showAsAction="always|withText"

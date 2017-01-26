@@ -11,6 +11,11 @@
         app:showAsAction="always|withText"
         android:icon="@drawable/sign"
         android:title="@string/info_create_decision"/>
+    <item
+        android:id="@+id/menu_info_decision_edit"
+        app:showAsAction="always|withText"
+        android:icon="@drawable/edit_pencil"
+        android:title="@string/info_edit_decision"/>
 
     <item
         android:id="@+id/action_info_create_decision"
