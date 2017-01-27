@@ -2,6 +2,7 @@ package sapotero.rxtest.views.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -35,6 +36,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -45,20 +47,24 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.requery.Persistable;
+import io.requery.rx.SingleEntityStore;
 import okhttp3.OkHttpClient;
+import ru.shmakinv.android.widget.material.searchview.SearchView;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.query.DBQueryBuilder;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.bus.GetDocumentInfoEvent;
-import sapotero.rxtest.events.bus.MarkDocumentAsChangedJobEvent;
 import sapotero.rxtest.events.bus.UpdateDocumentJobEvent;
 import sapotero.rxtest.events.rx.InsertRxDocumentsEvent;
 import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
 import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
+import sapotero.rxtest.views.adapters.SearchResultAdapter;
 import sapotero.rxtest.views.interfaces.DataLoaderInterface;
 import sapotero.rxtest.views.menu.MenuBuilder;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
@@ -67,11 +73,12 @@ import sapotero.rxtest.views.views.CircleRightArrow;
 import sapotero.rxtest.views.views.MultiOrganizationSpinner;
 import timber.log.Timber;
 
-public class MainActivity extends AppCompatActivity implements MenuBuilder.Callback {
+public class MainActivity extends AppCompatActivity implements MenuBuilder.Callback, SearchView.OnVisibilityChangeListener {
 
   @Inject JobManager jobManager;
   @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
+  @Inject SingleEntityStore<Persistable> dataStore;
 
   // test
   @Inject QueueManager queue;
@@ -98,6 +105,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @BindView(R.id.favorites_button) CheckBox favorites_button;
 
   @BindView(R.id.documents_empty_list) TextView documents_empty_list;
+//  @BindView(R.id.searchBar) MaterialSearchBar searchBar;
 
 
 
@@ -134,10 +142,14 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private final int SETTINGS_DECISION_TEMPLATES = 21;
   private final int SETTINGS_REJECTION_TEMPLATES = 22;
 
-  public DocumentsAdapter RAdapter;
+  public  DocumentsAdapter RAdapter;
   public  MenuBuilder menuBuilder;
   private DBQueryBuilder dbQueryBuilder;
   private DataLoaderInterface dataLoader;
+  private SearchView searchView;
+  private MainActivity context;
+
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     setTheme(R.style.AppTheme);
@@ -149,6 +161,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     EsdApplication.getComponent(this).inject(this);
     loadSettings();
 
+    context = this;
 
     initAdapters();
 
@@ -183,7 +196,37 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     rxSettings();
 
+    initSearch();
+
   }
+
+  private void initSearch() {
+    searchView = SearchView.getInstance(this);
+    searchView.setOnVisibilityChangeListener(this);
+    searchView.setQuery("", false);
+    searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+      @Override
+      public boolean onQueryTextSubmit(@NonNull String query) {
+        Timber.v("onQueryTextSubmit %s", query);
+        return false;
+      }
+
+      @Override
+      public void onQueryTextChanged(@NonNull String newText) {
+        Timber.v("onQueryTextChanged %s", newText);
+        if (newText.length() > 2){
+          List<RDocumentEntity> docList = dataStore
+            .select(RDocumentEntity.class)
+            .where(RDocumentEntity.REGISTRATION_NUMBER.like("%" + newText + "%"))
+            .get().toList();
+          SearchResultAdapter adapter = new SearchResultAdapter( context, docList );
+          searchView.setSuggestionAdapter( adapter );
+        }
+
+      }
+    });
+  }
+
 
   private void initAdapters() {
     RAdapter = new DocumentsAdapter(this, new ArrayList<>());
@@ -213,14 +256,16 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
         case R.id.main_activity_menu_reload:
           dataLoader.updateByStatus( menuBuilder.getItem() );
           break;
-
-
+        case R.id.action_search:
+          searchView.onOptionsItemSelected(getFragmentManager(), item);
+          break;
         default:
           jobManager.addJobInBackground(new UpdateAuthTokenJob());
           break;
       }
       return false;
     });
+
   }
 
   private void initEvents() {
@@ -259,7 +304,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     if (subscriptions != null) {
       subscriptions.unsubscribe();
     }
-
   }
 
   @Override
@@ -484,12 +528,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   }
 
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(MarkDocumentAsChangedJobEvent event) {
-    Timber.tag("JOBS").i( "MarkDocumentAsChangedJobEvent ++ "  );
-  }
-
-
 
   /* MenuBuilder.Callback */
   @Override
@@ -513,4 +551,15 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   }
 
+
+
+  @Override
+  public void onShow() {
+    Timber.v("onShow");
+  }
+
+  @Override
+  public void onDismiss() {
+    Timber.v("onDismiss");
+  }
 }

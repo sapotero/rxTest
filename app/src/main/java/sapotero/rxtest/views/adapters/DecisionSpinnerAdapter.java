@@ -14,12 +14,12 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.views.adapters.models.DecisionSpinnerItem;
 
 public class DecisionSpinnerAdapter extends BaseAdapter {
-  private int template;
   private List<DecisionSpinnerItem> decisions;
+  private LayoutInflater inflter;
+  private int template;
   private Context context;
   private int filterCount[];
   private String[] filterName;
-  private LayoutInflater inflter;
 
   private TextView count;
   private TextView name;

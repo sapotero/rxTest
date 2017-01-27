@@ -18,12 +18,6 @@
         android:title="@string/info_edit_decision"/>
 
     <item
-        android:id="@+id/action_info_create_decision"
-        app:showAsAction="always|withText"
-        android:icon="@drawable/add_decision"
-        android:enabled="false"
-        android:title="@string/info_edit_decision"/>
-    <item
         android:id="@+id/menu_info_shared_to_control"
         app:showAsAction="always|withText"
         android:icon="@drawable/to_control_icon"

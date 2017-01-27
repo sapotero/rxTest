@@ -12,21 +12,6 @@
     android:background="@color/it_mvd_background">
 
 
-
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
-
-
-
-        android:paddingTop="@dimen/half_date_offset"
-        android:transitionName="actionBar"
-        android:minHeight="?attr/actionBarSize"
-        android:background="@drawable/toolbar_background"
-
-        android:elevation="8dp"/>
-
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -174,7 +159,6 @@
                 />
 
             <android.support.v7.widget.RecyclerView
-
             android:id="@+id/documentsRecycleView"
             android:scrollbars="vertical"
                 android:layout_width="match_parent"
@@ -207,5 +191,15 @@
         android:layout_centerHorizontal="true"
         android:layout_weight="1"/>
 
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:paddingTop="@dimen/half_date_offset"
+        android:transitionName="actionBar"
+        android:minHeight="?attr/actionBarSize"
+        android:background="@drawable/toolbar_background"
+
+        android:elevation="8dp"/>
 
 </RelativeLayout>

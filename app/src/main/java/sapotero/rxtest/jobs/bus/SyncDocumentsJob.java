@@ -9,8 +9,6 @@ import com.birbit.android.jobqueue.RetryConstraint;
 import com.f2prateek.rx.preferences.Preference;
 import com.google.gson.Gson;
 
-import org.greenrobot.eventbus.EventBus;
-
 import java.util.Objects;
 
 import retrofit2.Retrofit;
@@ -30,7 +28,6 @@ import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.db.requery.models.exemplars.RExemplarEntity;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
-import sapotero.rxtest.events.bus.MarkDocumentAsChangedJobEvent;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.ControlLabel;
@@ -224,10 +221,6 @@ public class SyncDocumentsJob  extends BaseJob {
     }
   }
 
-  private void complete_task(String uid) {
-    EventBus.getDefault().post( new MarkDocumentAsChangedJobEvent( uid ) );
-  }
-
   private void setData(RDocumentEntity documentEntity, DocumentInfo document, boolean md5Equal){
 
     if (!md5Equal){
@@ -410,8 +403,6 @@ public class SyncDocumentsJob  extends BaseJob {
 
       rDoc.setFilter( filter.toString() );
 
-      complete_task( rDoc.getUid() );
-
       dataStore.update(rDoc)
         .toObservable()
         .subscribeOn( Schedulers.io() )
@@ -426,7 +417,6 @@ public class SyncDocumentsJob  extends BaseJob {
         );
     } else {
       Timber.tag(TAG).v("MD5 equal");
-      complete_task( document.getUid() );
     }
   }
 

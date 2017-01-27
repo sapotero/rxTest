@@ -92,7 +92,7 @@ public class CommandFactory implements AbstractCommand.Callback{
     APPROVAL_CHANGE_PERSON {
       @Override
       Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
-        ChangePerson command = new ChangePerson(context, document);
+        sapotero.rxtest.views.managers.menu.commands.signing.ChangePerson command = new sapotero.rxtest.views.managers.menu.commands.signing.ChangePerson(context, document);
         command.withParams(params);
         command
           .withPerson( params.getPerson() )

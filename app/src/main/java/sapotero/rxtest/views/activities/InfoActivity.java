@@ -190,7 +190,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   @OnClick(R.id.activity_info_left_button)
   public void prev(){
     Timber.tag(TAG).v("prev document");
-  } 
+  }
 
   @OnClick(R.id.activity_info_right_button)
   public void next(){

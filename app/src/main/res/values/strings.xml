@@ -66,6 +66,7 @@
 
 
     <string name="info_create_decision"> Создать резолюцию </string>
+    <string name="info_create_decision_processed"> Создать поручение </string>
     <string name="info_edit_decision"> Редактировать </string>
     <string name="info_create_no_answer"> Без ответа </string>
     <string name="info_create_to_control"> Добавить отметку о контроле </string>

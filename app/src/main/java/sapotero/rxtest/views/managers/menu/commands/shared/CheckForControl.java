@@ -105,7 +105,6 @@ public class CheckForControl extends AbstractCommand {
           dataStore
             .update(RDocumentEntity.class)
             .set( RDocumentEntity.CONTROL, !value)
-            .set( RDocumentEntity.PROCESSED, true)
             .where(RDocumentEntity.UID.eq( document_id ))
             .get()
             .call();

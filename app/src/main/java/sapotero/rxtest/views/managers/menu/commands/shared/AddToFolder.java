@@ -167,7 +167,6 @@ public class AddToFolder extends AbstractCommand {
           dataStore
             .update(RDocumentEntity.class)
             .set( RDocumentEntity.FAVORITES, !value)
-            .set( RDocumentEntity.PROCESSED, true)
             .where(RDocumentEntity.UID.eq(document_id))
             .get()
             .call();

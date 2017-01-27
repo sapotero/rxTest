@@ -24,14 +24,12 @@ import okhttp3.OkHttpClient;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.events.bus.FileDownloadedEvent;
-import sapotero.rxtest.events.bus.MarkDocumentAsChangedJobEvent;
 import sapotero.rxtest.events.stepper.shared.StepperNextStepEvent;
 import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.services.MainService;
 import sapotero.rxtest.views.views.stepper.StepperLayout;
 import sapotero.rxtest.views.views.stepper.VerificationError;
 import sapotero.rxtest.views.views.stepper.build.StepperAdapter;
-import timber.log.Timber;
 
 
 public class LoginActivity extends AppCompatActivity implements StepperLayout.StepperListener {
@@ -165,11 +163,6 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
     Toast.makeText( getApplicationContext(), "onReturn", Toast.LENGTH_SHORT ).show();
   }
 
-  /* Events */
-  @Subscribe(threadMode = ThreadMode.BACKGROUND)
-  public void onMessageEvent(MarkDocumentAsChangedJobEvent event) {
-    Timber.tag(TAG).v( "JOB TOTAL %s", event.uid );
-  }
 
   @Subscribe(threadMode = ThreadMode.BACKGROUND)
   public void onMessageEvent(FileDownloadedEvent event) {

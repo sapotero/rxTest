@@ -56,4 +56,6 @@
     <style name="customActionBar" parent="@android:style/TextAppearance.Material.Widget.ActionBar.Menu">
         <item name="android:textSize">12sp</item>
     </style>
+
+
 </resources>
