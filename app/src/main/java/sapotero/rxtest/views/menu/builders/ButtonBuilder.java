@@ -11,12 +11,14 @@ import android.widget.RadioGroup;
 
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import io.requery.Persistable;
 import io.requery.query.Expression;
 import io.requery.query.LogicalCondition;
-import io.requery.query.Scalar;
+import io.requery.query.Result;
 import io.requery.query.WhereAndOr;
 import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.R;
@@ -40,6 +42,7 @@ public class ButtonBuilder {
 
 
   private String TAG = this.getClass().getSimpleName();
+  private List<RDocumentEntity> docs;
 
   public void recalculate() {
     Timber.tag("recalculate");
@@ -84,8 +87,8 @@ public class ButtonBuilder {
       query_condition = item_conditions.getField();
     }
 
-    WhereAndOr<Scalar<Integer>> query = dataStore
-      .count(RDocumentEntity.class)
+    WhereAndOr<Result<RDocumentEntity>> query = dataStore
+      .select(RDocumentEntity.class)
       .where( query_condition )
       .and(RDocumentEntity.USER.eq( settings.getString("login").get() ));
 
@@ -105,7 +108,23 @@ public class ButtonBuilder {
       }
     }
 
-    count = query.get().value();
+    docs = query.get().toList();
+    count = 0;
+
+    //FIX дико медленно, но работает, переделать
+
+    if ( settings.getBoolean("settings_view_type_show_without_project").get() ){
+      count = docs.size();
+    } else {
+      for (RDocumentEntity doc: docs) {
+        if (doc.getDecisions().size() > 0){
+          count++;
+        }
+      }
+    }
+
+
+
     return count;
   }
 

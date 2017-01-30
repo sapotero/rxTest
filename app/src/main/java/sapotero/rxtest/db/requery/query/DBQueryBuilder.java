@@ -127,7 +127,22 @@ public class DBQueryBuilder {
           .toList()
           .subscribe(docs -> {
             Timber.tag("loadFromDbQuery").e("docs: %s", docs.size() );
-            addToAdapterList(docs);
+            List<RDocumentEntity> new_docs = new ArrayList<>();
+
+            for (RDocumentEntity d:docs) {
+
+              //resolved если включена настройка "Отображать документы без резолюции"
+              if ( settings.getBoolean("settings_view_type_show_without_project").get() ){
+                new_docs.add(d);
+              } else {
+                if (d.getDecisions().size() > 0){
+                  new_docs.add(d);
+                }
+              }
+
+            }
+
+            addToAdapterList(new_docs);
           });
       }
 
