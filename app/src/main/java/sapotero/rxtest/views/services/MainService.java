@@ -61,6 +61,7 @@ import sapotero.rxtest.events.auth.AuthDcCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthDcCheckSuccessEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckSuccessEvent;
+import sapotero.rxtest.events.bus.UpdateAuthTokenEvent;
 import sapotero.rxtest.events.crypto.SignDataEvent;
 import sapotero.rxtest.events.crypto.SignDataResultEvent;
 import sapotero.rxtest.events.crypto.SignDataWrongPinEvent;
@@ -619,7 +620,7 @@ public class MainService extends Service {
 
   public void getAuth(){
     Observable
-      .interval( 3600, TimeUnit.SECONDS )
+      .just( 3600, TimeUnit.SECONDS )
       .subscribeOn(Schedulers.io())
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(interval -> {
@@ -648,6 +649,11 @@ public class MainService extends Service {
       event.password,
       event.host
     );
+  }
+
+  @Subscribe(threadMode = ThreadMode.BACKGROUND)
+  public void onMessageEvent(UpdateAuthTokenEvent event) throws Exception {
+    getAuth();
   }
 
   @Subscribe(threadMode = ThreadMode.BACKGROUND)

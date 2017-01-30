@@ -71,7 +71,7 @@ public class DataLoaderInterface {
   private Preference<String> LOGIN;
   private Preference<String> PASSWORD;
   private Preference<String> HOST;
-  private Preference<String> COUNT;
+  private Preference<Integer> COUNT;
   private Preference<String> CURRENT_USER_ID;
 
 
@@ -101,7 +101,7 @@ public class DataLoaderInterface {
     PASSWORD = settings.getString("password");
     TOKEN    = settings.getString("token");
     HOST     = settings.getString("settings_username_host");
-    COUNT    = settings.getString("documents.count");
+    COUNT    = settings.getInteger("documents.count");
     CURRENT_USER = settings.getString("current_user");
     CURRENT_USER_ID = settings.getString("current_user_id");
   }
@@ -221,7 +221,7 @@ public class DataLoaderInterface {
             updateDocuments();
           },
           error -> {
-            Timber.tag(TAG).i("tryToSignWithLogin error: %s" , error );
+            Timber.tag(TAG).i("tryToSignWithDc error: %s" , error );
 
             EventBus.getDefault().post( new AuthDcCheckFailEvent( error.getMessage() ) );
 
@@ -289,6 +289,7 @@ public class DataLoaderInterface {
     AuthService auth = retrofit.create(AuthService.class);
     DocumentsService docService = retrofit.create(DocumentsService.class);
 
+    COUNT.set(0);
 
     unsubscribe();
     subscription.add(
@@ -329,7 +330,7 @@ public class DataLoaderInterface {
           Observable<Fields.Status> types = Observable.from(new_filter_types);
           Observable<Documents> count = Observable
             .from(new_filter_types)
-            .flatMap(status -> docService.getDocuments(LOGIN.get(), TOKEN.get(), status.getValue(), 1000, 0));
+            .flatMap(status -> docService.getDocuments(LOGIN.get(), TOKEN.get(), status.getValue(), 500, 0));
 
           return Observable.zip(types, count, (type, docs) -> new TDmodel(type, docs.getDocuments()))
             .subscribeOn(Schedulers.computation())
@@ -339,6 +340,8 @@ public class DataLoaderInterface {
         .doOnNext(raw -> {
           for (TDmodel data : raw) {
             Timber.tag(TAG).i(" DocumentType: %s | %s", data.getType(), data.getDocuments().size());
+
+            COUNT.set( COUNT.get() + data.getDocuments().size());
 
             for (Document doc : data.getDocuments()) {
               String type = data.getType();
@@ -405,56 +408,91 @@ public class DataLoaderInterface {
   }
 
   public void updateByStatus(MainMenuItem items) {
-    ArrayList<Fields.Status> filter_types = new ArrayList<>();
 
-    for ( ButtonBuilder button: items.getMainMenuButtons() ){
-      for ( ConditionBuilder condition: button.getConditions() ){
+    String sign = null;
 
-        if ( condition.getField().getLeftOperand() == RDocumentEntity.FILTER ){
-          filter_types.add( Fields.getStatus( condition.getField().getRightOperand().toString() ) );
-        }
+    Retrofit retrofit = new RetrofitManager( context, HOST.get(), okHttpClient).process();
+    AuthService auth = retrofit.create( AuthService.class );
+
+    Map<String, Object> map = new HashMap<>();
+    map.put( "sign", sign );
+
+    RequestBody json = RequestBody.create(
+      MediaType.parse("application/json"),
+      new JSONObject( map ).toString()
+    );
+
+    Timber.tag(TAG).i("json: %s", json .toString());
 
 
-      }
-    }
-
-
-    Retrofit retrofit = new RetrofitManager( context, HOST.get() + "/v3/", okHttpClient).process();
-    DocumentsService documentsService = retrofit.create(DocumentsService.class);
-
-    Timber.tag("updateByStatus").i( "%s ", filter_types );
-
-    Observable<Fields.Status> types = Observable.from(filter_types);
-    Observable<Documents> count = Observable
-      .from(filter_types)
-      .flatMap(status -> documentsService.getDocuments(LOGIN.get(), TOKEN.get(), status.getValue(), 1000, 0));
-
+    Observable<AuthSignToken> authSubscription = auth.getAuth( LOGIN.get(), PASSWORD.get() );
 
     unsubscribe();
     subscription.add(
-      Observable.zip( types, count, (type, docs) -> new TDmodel( type, docs.getDocuments() ))
-        .subscribeOn( Schedulers.computation() )
+
+      authSubscription
+        .subscribeOn( Schedulers.io() )
         .observeOn( AndroidSchedulers.mainThread() )
-        .toList()
         .subscribe(
-          raw -> {
-            Timber.tag(TAG).i(" RECV: %s", raw.size());
+          token -> {
+            Timber.tag(TAG).i("updateAuth: token" + token.getAuthToken());
+            setToken( token.getAuthToken() );
 
-            for (TDmodel data: raw) {
-              Timber.tag(TAG).i(" DocumentType: %s | %s", data.getType(), data.getDocuments().size() );
+            ArrayList<Fields.Status> filter_types = new ArrayList<>();
 
-              for (Document doc: data.getDocuments() ) {
-                String type = data.getType();
-                Timber.tag(TAG).d( "%s | %s", type, doc.getUid() );
+            for ( ButtonBuilder button: items.getMainMenuButtons() ){
+              for ( ConditionBuilder condition: button.getConditions() ){
 
-                jobManager.addJobInBackground(new SyncDocumentsJob( doc.getUid(), Fields.getStatus(type) ));
+                if ( condition.getField().getLeftOperand() == RDocumentEntity.FILTER ){
+                  filter_types.add( Fields.getStatus( condition.getField().getRightOperand().toString() ) );
+                }
+
+
               }
             }
+
+
+            Retrofit retrofits = new RetrofitManager( context, HOST.get() + "/v3/", okHttpClient).process();
+            DocumentsService documentsService = retrofits.create(DocumentsService.class);
+
+            Timber.tag("updateByStatus").i( "%s ", filter_types );
+
+            Observable<Fields.Status> types = Observable.from(filter_types);
+            Observable<Documents> count = Observable
+              .from(filter_types)
+              .flatMap(status -> documentsService.getDocuments(LOGIN.get(), TOKEN.get(), status.getValue(), 1000, 0));
+
+              Observable.zip( types, count, (type, docs) -> new TDmodel( type, docs.getDocuments() ))
+                .subscribeOn( Schedulers.computation() )
+                .observeOn( AndroidSchedulers.mainThread() )
+                .toList()
+                .subscribe(
+                  raw -> {
+                    Timber.tag(TAG).i(" RECV: %s", raw.size());
+
+                    for (TDmodel data: raw) {
+                      Timber.tag(TAG).i(" DocumentType: %s | %s", data.getType(), data.getDocuments().size() );
+
+                      for (Document doc: data.getDocuments() ) {
+                        String type = data.getType();
+                        Timber.tag(TAG).d( "%s | %s", type, doc.getUid() );
+
+                        jobManager.addJobInBackground(new SyncDocumentsJob( doc.getUid(), Fields.getStatus(type) ));
+                      }
+                    }
+                  },
+                  error -> {
+                    Timber.e(error);
+                  });
+
           },
           error -> {
-//            callback.onError(error);
-          })
+            Timber.tag(TAG).i("updateAuth error: %s" , error );
+          }
+        )
     );
+
+
   }
 
   private boolean isOnline() {

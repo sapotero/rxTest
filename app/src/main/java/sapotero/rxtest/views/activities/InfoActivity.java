@@ -2,12 +2,14 @@ package sapotero.rxtest.views.activities;
 
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -37,6 +39,7 @@ import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.bus.MassInsertDoneEvent;
 import sapotero.rxtest.events.crypto.SignDataResultEvent;
 import sapotero.rxtest.events.crypto.SignDataWrongPinEvent;
+import sapotero.rxtest.events.rx.ShowSnackEvent;
 import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.adapters.TabSigningPagerAdapter;
@@ -58,6 +61,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   @BindView(R.id.tab_main) ViewPager viewPager;
   @BindView(R.id.tabs) TabLayout tabLayout;
+  @BindView(R.id.activity_info_wrapper) View wrapper;
 
 
   @Inject JobManager jobManager;
@@ -287,5 +291,12 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
     toolbarManager.hideDialog();
   }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(ShowSnackEvent event) throws Exception {
+    Snackbar.make( wrapper, event.message, Snackbar.LENGTH_LONG ).show();
+  }
+
+
 
 }

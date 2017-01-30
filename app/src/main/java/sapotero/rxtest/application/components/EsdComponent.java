@@ -66,6 +66,7 @@ import sapotero.rxtest.views.menu.factories.ItemsBuilder;
 import sapotero.rxtest.views.services.MainService;
 import sapotero.rxtest.views.views.stepper.build.steps.StepperAuthFragment;
 import sapotero.rxtest.views.views.stepper.build.steps.StepperChooseAuthTypeFragment;
+import sapotero.rxtest.views.views.stepper.build.steps.StepperLoadDataFragment;
 
 @Singleton
 @Component(modules = {
@@ -104,6 +105,7 @@ public interface EsdComponent {
   void inject(DBDocumentManager context);
   void inject(QueueManager context);
 
+  void inject(StepperLoadDataFragment fragment);
   void inject(DecisionFragment fragment);
   void inject(DecisionPreviewFragment fragment);
   void inject(InfoCardWebViewFragment fragment);

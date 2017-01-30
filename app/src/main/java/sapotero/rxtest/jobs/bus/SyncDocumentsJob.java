@@ -9,6 +9,8 @@ import com.birbit.android.jobqueue.RetryConstraint;
 import com.f2prateek.rx.preferences.Preference;
 import com.google.gson.Gson;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.Objects;
 
 import retrofit2.Retrofit;
@@ -28,6 +30,7 @@ import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.db.requery.models.exemplars.RExemplarEntity;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
+import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.ControlLabel;
@@ -116,7 +119,8 @@ public class SyncDocumentsJob  extends BaseJob {
           Timber.tag(TAG).d("actions - %s", new Gson().toJson( doc.getOperations() ) );
           update( doc, exist(doc.getUid()) );
 
-          
+          EventBus.getDefault().post( new StepperLoadDocumentEvent(doc.getUid()) );
+
           if ( doc.getImages() != null && doc.getImages().size() > 0 && ( isFavorites != null && !isFavorites ) ){
 
             for (Image image : doc.getImages()) {

@@ -29,6 +29,7 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.crypto.SignDataEvent;
+import sapotero.rxtest.events.rx.ShowSnackEvent;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
 import sapotero.rxtest.views.managers.menu.OperationManager;
@@ -298,7 +299,11 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
     Timber.tag(TAG).w("update %s", command );
 
     if ( Objects.equals(command, "change_person") ) {
-      Toast.makeText( context.getApplicationContext(), "Операция передачи успешно завершена", Toast.LENGTH_SHORT).show();
+//      Toast.makeText( context.getApplicationContext(), "Операция передачи успешно завершена", Toast.LENGTH_SHORT).show();
+//      Snackbar.make( , "Операция передачи успешно завершена", Snackbar.LENGTH_SHORT).show();
+
+      EventBus.getDefault().post( new ShowSnackEvent("Операция передачи успешно завершена") );
+
       toolbar.getMenu().clear();
       toolbar.inflateMenu(R.menu.info_menu);
     }

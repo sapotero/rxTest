@@ -2,7 +2,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <android.support.v7.preference.PreferenceCategory
-        android:title="Настройки отображения">
+        android:title="Настройки главного окна">
 
         <ListPreference
             android:key="settings_view_start_page"
@@ -20,17 +20,18 @@
             android:entries="@array/settings_view_start_page"
             android:entryValues="@array/settings_view_start_page_values" />
         <CheckBoxPreference
+            android:key="settings_view_type_show_without_project"
+            android:title="Отображать документы без резолюции"
+            android:defaultValue="false" />
+
+        <CheckBoxPreference
             android:key="settings_view_hide_first"
             android:title="Не отображать статус «Первичное рассмотрение»"
-            android:defaultValue="false" />
-        <CheckBoxPreference
-            android:key="settings_view_type_show_without_project"
-            android:title="Отображать документы без проекта резолюции"
-            android:defaultValue="false" />
-        <CheckBoxPreference
-            android:key="settings_view_hide_buttons"
-            android:title="Не отображать «Прошу доложить» и «Прошу ознакомить»"
-            android:defaultValue="false" />
+            android:defaultValue="true" />
+    </android.support.v7.preference.PreferenceCategory>
+
+    <android.support.v7.preference.PreferenceCategory
+    android:title="Настройки резолюции">
         <CheckBoxPreference
             android:key="settings_view_show_urgency"
             android:title="Отображать настройки срочности"
@@ -39,14 +40,25 @@
             android:key="settings_view_only_urgent"
             android:title="C одним типом «Срочно»"
             android:defaultValue="false" />
+
+        <CheckBoxPreference
+            android:key="settings_view_show_decision_date_update"
+            android:title="Обновлять автоматически дату резолюции"
+            android:defaultValue="true" />
+        <CheckBoxPreference
+            android:key="settings_view_show_decision_change_font"
+            android:title="Возможность выбора размера шрифта"
+            android:defaultValue="true" />
+
+
         <CheckBoxPreference
             android:key="settings_view_show_origin"
             android:title="Отображать настройки подлинника"
             android:defaultValue="false" />
-        <!--<EditTextPreference-->
-            <!--android:key="settings_view_time"-->
-            <!--android:position="Время показа уведомления"-->
-            <!--android:defaultValue="0" />-->
+        <CheckBoxPreference
+            android:key="settings_view_show_change_signer"
+            android:title="Возможность смены подписавшего резолюцию для статуса «На рассмотрение»"
+            android:defaultValue="true" />
 
     </android.support.v7.preference.PreferenceCategory>
 

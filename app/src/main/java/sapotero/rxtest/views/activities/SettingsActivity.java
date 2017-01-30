@@ -15,7 +15,7 @@ import butterknife.ButterKnife;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.views.fragments.SettingsUserFragment;
+import sapotero.rxtest.views.fragments.SettingsMainFragment;
 import sapotero.rxtest.views.fragments.SettingsViewFragment;
 import timber.log.Timber;
 
@@ -56,8 +56,8 @@ public class SettingsActivity extends AppCompatActivity {
 
     if (savedInstanceState == null) {
       FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-      fragmentTransaction.add(R.id.settings_user_fragment, new SettingsUserFragment() );
       fragmentTransaction.add(R.id.settings_view_fragment, new SettingsViewFragment());
+      fragmentTransaction.add(R.id.settings_user_fragment, new SettingsMainFragment() );
     fragmentTransaction.commit();
     }
 

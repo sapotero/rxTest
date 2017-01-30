@@ -59,7 +59,6 @@ import sapotero.rxtest.db.requery.query.DBQueryBuilder;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.bus.GetDocumentInfoEvent;
 import sapotero.rxtest.events.bus.UpdateDocumentJobEvent;
-import sapotero.rxtest.events.rx.InsertRxDocumentsEvent;
 import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
 import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
@@ -218,6 +217,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
           List<RDocumentEntity> docList = dataStore
             .select(RDocumentEntity.class)
             .where(RDocumentEntity.REGISTRATION_NUMBER.like("%" + newText + "%"))
+            .or(RDocumentEntity.SHORT_DESCRIPTION.like("%" + newText + "%"))
             .get().toList();
           SearchResultAdapter adapter = new SearchResultAdapter( context, docList );
           searchView.setSuggestionAdapter( adapter );
@@ -510,10 +510,10 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     Toast.makeText(getApplicationContext(), event.message, Toast.LENGTH_SHORT).show();
   }
 
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(InsertRxDocumentsEvent event) {
-    Toast.makeText(getApplicationContext(), event.message, Toast.LENGTH_SHORT).show();
-  }
+//  @Subscribe(threadMode = ThreadMode.MAIN)
+//  public void onMessageEvent(InsertRxDocumentsEvent event) {
+////    Toast.makeText(getApplicationContext(), event.message, Toast.LENGTH_SHORT).show();
+//  }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(UpdateDocumentJobEvent event) {
