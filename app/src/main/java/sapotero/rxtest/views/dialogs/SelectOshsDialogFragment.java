@@ -23,7 +23,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.db.requery.models.RPrimaryConsiderationEntity;
+import sapotero.rxtest.db.requery.models.RFavoriteUserEntity;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.views.adapters.OshsAutoCompleteAdapter;
 import sapotero.rxtest.views.adapters.PrimaryUsersAdapter;
@@ -79,13 +79,13 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
     });
 
       dataStore
-      .select(RPrimaryConsiderationEntity.class)
+      .select(RFavoriteUserEntity.class)
       .get()
       .toObservable()
-      .observeOn(AndroidSchedulers.mainThread())
       .subscribeOn(Schedulers.io())
-      .subscribe( user -> {
-        Timber.tag("PrimaryUsersAdapter").e( "%s - %s", user.getId(), user.getName() );
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe( user -> {
+        Timber.tag("FavoriteUser").e( "%s - %s", user.getId(), user.getName() );
         adapter.add( new PrimaryConsiderationPeople( user.getUid(), user.getName(), user.getPosition(), user.getOrganization() ) );
       });
 

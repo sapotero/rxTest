@@ -157,8 +157,6 @@ public class MainService extends Service {
     aliases( KeyStoreType.currentType(), ProviderType.currentProviderType() );
 
     isConnected();
-
-    getAuth();
   }
 
   public int onStartCommand(Intent intent, int flags, int startId) {

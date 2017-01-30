@@ -40,6 +40,7 @@ import sapotero.rxtest.events.auth.AuthDcCheckSuccessEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckSuccessEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckEvent;
+import sapotero.rxtest.jobs.bus.AddFavoriteUsersJob;
 import sapotero.rxtest.jobs.bus.AddFoldersJob;
 import sapotero.rxtest.jobs.bus.AddPrimaryConsiderationJob;
 import sapotero.rxtest.jobs.bus.AddTemplatesJob;
@@ -315,6 +316,10 @@ public class DataLoaderInterface {
         // получаем группу первичного рассмотрения
         .concatMap(data -> auth.getPrimaryConsiderationUsers(LOGIN.get(), TOKEN.get()).subscribeOn(Schedulers.io()))
         .doOnNext(users -> jobManager.addJobInBackground(new AddPrimaryConsiderationJob(users)))
+
+        // получаем группу Избранное(МП)
+        .concatMap(data -> auth.getFavoriteUsers(LOGIN.get(), TOKEN.get()).subscribeOn(Schedulers.io()))
+        .doOnNext(users -> jobManager.addJobInBackground(new AddFavoriteUsersJob(users)))
 
 
         // получаем список документов по статусам

@@ -47,6 +47,13 @@ public interface AuthService {
     @Query("auth_token") String token
   );
 
+
+  @GET("/v2/oshs.json")
+  Observable<ArrayList<Oshs>> getFavoriteUsers(
+    @Query("login") String username,
+    @Query("auth_token") String token
+  );
+
   @GET("v3/folders.json")
   Observable<ArrayList<Folder>> getFolders(
     @Query("login") String username,
