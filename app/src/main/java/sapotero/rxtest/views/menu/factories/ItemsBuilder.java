@@ -20,7 +20,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.views.adapters.models.DocumentTypeItem;
 import sapotero.rxtest.views.adapters.utils.DocumentTypeAdapter;
 import sapotero.rxtest.views.menu.builders.ButtonBuilder;
@@ -207,10 +206,10 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
 
       }
     }
-
-    Timber.e( "button conditions: %s ", favoritesButton.isChecked() );
-
-    result.add( new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.USER.eq( settings.getString("login").get() ) ) );
+//
+//    Timber.e( "button conditions: %s ", favoritesButton.isChecked() );
+//
+//    result.add( new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.USER.eq( settings.getString("login").get() ) ) );
 
     return result;
   }

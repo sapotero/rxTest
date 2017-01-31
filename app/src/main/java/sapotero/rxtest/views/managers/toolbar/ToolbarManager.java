@@ -2,6 +2,7 @@ package sapotero.rxtest.views.managers.toolbar;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,6 +32,7 @@ import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.crypto.SignDataEvent;
 import sapotero.rxtest.events.rx.ShowSnackEvent;
 import sapotero.rxtest.retrofit.models.Oshs;
+import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
 import sapotero.rxtest.views.managers.menu.OperationManager;
 import sapotero.rxtest.views.managers.menu.factories.CommandFactory;
@@ -158,14 +160,21 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
             params.setSign( "SIGN" );
             break;
 
+          case R.id.menu_info_decision_create:
+            operation = CommandFactory.Operation.NEW_DECISION;
 
-//          case R.id.action_info_create_decision:
-//            operation = CommandFactory.Operation.NEW_DECISION;
-//
-//            Intent intent = new Intent(context, DecisionConstructorActivity.class);
-//            context.startActivity(intent);
-//
-//            break;
+            Intent create_intent = new Intent(context, DecisionConstructorActivity.class);
+            context.startActivity(create_intent);
+
+            break;
+
+          case R.id.menu_info_decision_edit:
+            operation = CommandFactory.Operation.NEW_DECISION;
+
+            Intent edit_intent = new Intent(context, DecisionConstructorActivity.class);
+            context.startActivity(edit_intent);
+
+            break;
           case R.id.menu_info_shared_to_favorites:
             operation = CommandFactory.Operation.ADD_TO_FOLDER;
 
@@ -228,7 +237,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
     // если несколько, то показываем редактировать - для редактирования текущей
     // если нет - то показываем кнопку создать
 
-    decision_count = doc.getDecisions().size();
+    decision_count = doc.getDecisions().toList().size();
 
     switch ( decision_count ){
       case 0:
@@ -248,6 +257,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
     // Если документ обработан - то изменяем резолюции на поручения
     if( doc.isProcessed() && Objects.equals(doc.getFilter(), Fields.Status.PROCESSED.getValue())){
       try {
+        //настройка
         toolbar.getMenu().findItem( R.id.menu_info_decision_create).setTitle( context.getString( R.string.info_create_decision_processed ) );
       } catch (Exception e) {
         Timber.tag(TAG).v(e);
@@ -268,6 +278,15 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
           break;
       }
     }
+
+    try {
+      if ( !settings.getBoolean("settings_view_show_create_decision_post").get() ){
+        toolbar.getMenu().findItem( R.id.menu_info_decision_create).setVisible(false);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
   }
 
   //REFACTOR переделать это

@@ -30,6 +30,7 @@ import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
 import sapotero.rxtest.views.adapters.models.OrganizationItem;
+import sapotero.rxtest.views.menu.MenuBuilder;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import sapotero.rxtest.views.views.MultiOrganizationSpinner;
 import timber.log.Timber;
@@ -50,6 +51,7 @@ public class DBQueryBuilder {
   private OrganizationAdapter organizationAdapter;
   private MultiOrganizationSpinner organizationSelector;
   private Boolean withFavorites;
+  private MenuBuilder menuBuilder;
 
   public DBQueryBuilder(Context context) {
     this.context = context;
@@ -131,13 +133,19 @@ public class DBQueryBuilder {
 
             for (RDocumentEntity d:docs) {
 
-              //resolved если включена настройка "Отображать документы без резолюции"
+              //настройка
+              // если включена настройка "Отображать документы без резолюции"
               if ( settings.getBoolean("settings_view_type_show_without_project").get() ){
                 new_docs.add(d);
               } else {
-                if (d.getDecisions().size() > 0){
+                if ( menuBuilder.getItem().isShowAnyWay() ){
                   new_docs.add(d);
+                } else {
+                  if (d.getDecisions().toList().size() > 0){
+                    new_docs.add(d);
+                  }
                 }
+
               }
 
             }
@@ -313,4 +321,8 @@ public class DBQueryBuilder {
   }
 
 
+  public DBQueryBuilder withItem(MenuBuilder menuBuilder) {
+    this.menuBuilder = menuBuilder;
+    return this;
+  }
 }

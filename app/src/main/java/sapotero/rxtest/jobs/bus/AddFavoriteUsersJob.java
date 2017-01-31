@@ -33,11 +33,15 @@ public class AddFavoriteUsersJob extends BaseJob {
 
   @Override
   public void onRun() throws Throwable {
-    Timber.tag(TAG).i( "users: %s | %s", users.size(), users.get(0).getName() );
-    for (Oshs user : users){
-      if ( !exist( user.getId()) ){
-        add(user);
+    try {
+      Timber.tag(TAG).i( "users: %s | %s", users.size(), users.get(0).getName() );
+      for (Oshs user : users){
+        if ( !exist( user.getId()) ){
+          add(user);
+        }
       }
+    } catch (Exception e) {
+      e.printStackTrace();
     }
 
   }

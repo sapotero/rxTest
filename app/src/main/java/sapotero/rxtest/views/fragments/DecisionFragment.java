@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RadioGroup;
 import android.widget.Switch;
 import android.widget.ToggleButton;
 
@@ -42,8 +43,6 @@ import sapotero.rxtest.views.dialogs.SelectTemplateDialogFragment;
 import timber.log.Timber;
 
 public class DecisionFragment extends Fragment implements PrimaryConsiderationAdapter.Callback, SelectOshsDialogFragment.Callback, SelectTemplateDialogFragment.Callback {
-  private static final String LOGIN = "";
-  private static final String PASSWORD = "";
 
   private OnFragmentInteractionListener mListener;
 
@@ -60,8 +59,9 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   @BindView(R.id.fragment_decision_linear_people) LinearLayout people_view;
 
   @BindView(R.id.fragment_decision_hide_performers) CheckBox hide_performers;
-  // @BindView(R.id.fragment_decision_hide_number) CheckBox hide_number;
 
+  @BindView(R.id.decision_report_action) RadioGroup buttons;
+//  settings_view_hide_buttons
   @BindView(R.id.fragment_decision_text_before) ToggleButton fragment_decision_text_before;
 
   private String TAG = this.getClass().getSimpleName();
@@ -289,6 +289,14 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
       }
     );
 
+
+    // настройка settings_view_hide_buttons
+    if (settings.getBoolean("settings_view_hide_buttons").get()){
+      button_familiarization.setVisibility(View.GONE);
+      button_report.setVisibility(View.GONE);
+      buttons.setVisibility(View.GONE);
+    }
+
     Timber.e(" ArrayList<PrimaryConsiderationPeople> people = new ArrayList<>(); ");
 
 
@@ -352,7 +360,9 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     adapter.add( new PrimaryConsiderationPeople( user.getId(), user.getName(), user.getPosition(), user.getOrganization()) );
     updateUsers();
 
-    callback.onUpdateSuccess();
+    if (callback != null) {
+      callback.onUpdateSuccess();
+    }
   }
 
   @Override

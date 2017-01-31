@@ -180,7 +180,7 @@ public class DecisionManager implements DecisionInterface, DecisionBuilder.Callb
       dec.getBlocks().addAll(list);
     }
 
-
+      //FIX DECISION
     dec.setDocument(document);
 
 //    RDecisionEntity temp = dataStore.update(dec).toBlocking().value();

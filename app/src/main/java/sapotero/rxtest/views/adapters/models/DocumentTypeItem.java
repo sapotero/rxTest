@@ -2,6 +2,8 @@ package sapotero.rxtest.views.adapters.models;
 
 import android.content.Context;
 
+import com.f2prateek.rx.preferences.RxSharedPreferences;
+
 import javax.inject.Inject;
 
 import io.requery.Persistable;
@@ -17,6 +19,7 @@ import sapotero.rxtest.views.menu.fields.MainMenuItem;
 
 public class DocumentTypeItem {
   @Inject SingleEntityStore<Persistable> dataStore;
+  @Inject RxSharedPreferences settings;
 
   private final MainMenuItem mainMenuItem;
   private final String user;
@@ -56,7 +59,8 @@ public class DocumentTypeItem {
       WhereAndOr<Scalar<Integer>> query =
         dataStore
           .count(RDocument.class)
-          .where(RDocumentEntity.ID.ne(0));
+          .where( RDocumentEntity.USER.eq( settings.getString("login").get() ) );
+
 //          .and( RDocumentEntity.USER.eq( user ) );
 
       if ( mainMenuItem.getCountConditions().length > 0 ){

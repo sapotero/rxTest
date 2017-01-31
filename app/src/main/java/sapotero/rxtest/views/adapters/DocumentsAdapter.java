@@ -79,7 +79,7 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
   public void onBindViewHolder(final SimpleViewHolder viewHolder, final int position) {
     final Document item = documents.get(position);
 
-    viewHolder.title.setText(item.getShortDescription() );
+    viewHolder.title.setText(item.getRegistrationNumber() );
     viewHolder.from.setText( item.getOrganization() );
 
     String number = item.getExternalDocumentNumber();

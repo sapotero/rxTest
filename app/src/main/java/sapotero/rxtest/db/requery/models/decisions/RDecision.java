@@ -13,10 +13,13 @@ import sapotero.rxtest.db.requery.models.RDocument;
 
 @Entity
 public abstract class RDecision {
+
+  @Index("decision_id")
   @Key
   @Generated
   int id;
 
+  @Index("decision_uid")
   String uid;
   String letterhead;
   String signer;
@@ -36,6 +39,7 @@ public abstract class RDecision {
   @Index("decision_changed_index")
   Boolean changed;
 
+  @Index("decision_doc_index")
   @ManyToOne
   RDocument document;
 

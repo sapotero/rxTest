@@ -34,38 +34,42 @@
                 android:orientation="horizontal"
                 android:paddingTop="@dimen/date_offset"
                 android:paddingBottom="@dimen/date_offset"
-                android:weightSum="1">
+                android:weightSum="2">
 
-                <FrameLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="0.97"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="0dp"
-                    android:paddingTop="0dp"
-                    android:paddingBottom="0dp"
-                    >
+                <!--<FrameLayout-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_height="match_parent"-->
+                    <!--android:layout_weight="0.97"-->
+                    <!--android:paddingStart="16dp"-->
+                    <!--android:paddingEnd="0dp"-->
+                    <!--android:paddingTop="0dp"-->
+                    <!--android:paddingBottom="0dp"-->
+                    <!--&gt;-->
 
                     <Button
                         android:id="@+id/fragment_decision_button_get_template"
                         android:paddingStart="16dp"
                         android:paddingEnd="16dp"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/fragment_decision_button_get_template"
                         android:textColor="@color/md_grey_400"
                         android:foreground="@drawable/button_foreground"
                         android:background="@drawable/button_border"
                         android:layout_gravity="center_vertical|start"
-                        android:elevation="0dp"/>
-                </FrameLayout>
+                        android:minHeight="@dimen/date_offset"
+                        android:elevation="0dp"
+                        android:layout_weight="1"
+                        />
+                <!--</FrameLayout>-->
 
                 <RadioGroup
                     android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:orientation="horizontal"
                     android:id="@+id/decision_report_action"
                     android:padding="8dp"
+                    android:layout_weight="1"
                     android:layout_gravity="end">
 
                     <Switch

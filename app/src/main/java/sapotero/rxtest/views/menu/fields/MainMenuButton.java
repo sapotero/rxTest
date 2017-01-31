@@ -60,6 +60,10 @@ public enum MainMenuButton {
 
   public Boolean active;
 
+  public Integer getIndex() {
+    return index;
+  }
+
   MainMenuButton(final Integer index, final String format, final ConditionBuilder[] conditions ) {
     this.index = index;
     this.format = format;

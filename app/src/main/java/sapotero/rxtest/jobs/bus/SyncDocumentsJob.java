@@ -243,7 +243,7 @@ public class SyncDocumentsJob  extends BaseJob {
 
       Timber.tag(TAG).v("setData " + rDoc.getRegistrationNumber() );
       Timber.tag(TAG).v("getImages " + document.getImages().size() );
-      Timber.tag(TAG).v("getDecisions " + rDoc.getDecisions().size() );
+      Timber.tag(TAG).v("getDecisions " + rDoc.getDecisions().toList().size() );
       Timber.tag(TAG).v("getExemplars " + rDoc.getExemplars().size() );
       Timber.tag(TAG).v("getControlLabels " + rDoc.getControlLabels().size() );
 
@@ -320,9 +320,9 @@ public class SyncDocumentsJob  extends BaseJob {
 
           }
 
-
+          //FIX DECISION
           decision.setDocument(rDoc);
-          rDoc.getDecisions().add(decision);
+          rDoc.getDecisions().toList().add(decision);
         }
       }
 

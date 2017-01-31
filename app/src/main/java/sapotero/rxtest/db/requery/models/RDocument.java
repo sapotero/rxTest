@@ -11,6 +11,7 @@ import io.requery.Key;
 import io.requery.OneToMany;
 import io.requery.OneToOne;
 import io.requery.Persistable;
+import io.requery.query.MutableResult;
 import sapotero.rxtest.db.requery.models.control_labels.RControlLabels;
 import sapotero.rxtest.db.requery.models.decisions.RDecision;
 import sapotero.rxtest.db.requery.models.exemplars.RExemplar;
@@ -18,6 +19,7 @@ import sapotero.rxtest.db.requery.models.images.RImage;
 
 @Entity
 public abstract class RDocument implements Persistable {
+  @Index("document_id")
   @Key
   @Generated
   int _id;
@@ -74,9 +76,8 @@ public abstract class RDocument implements Persistable {
   @Index("expired_index")
   Boolean expired;
 
-
   @OneToMany(mappedBy = "document")
-  Set<RDecision> decisions;
+  MutableResult<RDecision> decisions;
 
   @OneToMany(mappedBy = "document")
   Set<RExemplar> exemplars;

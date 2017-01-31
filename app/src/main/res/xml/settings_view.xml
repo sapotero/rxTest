@@ -19,37 +19,47 @@
             android:defaultValue="@array/empty_array"
             android:entries="@array/settings_view_start_page"
             android:entryValues="@array/settings_view_start_page_values" />
+
         <CheckBoxPreference
             android:key="settings_view_type_show_without_project"
             android:title="Отображать документы без резолюции"
             android:defaultValue="false" />
-
+        <!--*-->
         <CheckBoxPreference
-            android:key="settings_view_hide_first"
+            android:key="settings_view_hide_primary_consideration"
             android:title="Не отображать статус «Первичное рассмотрение»"
             android:defaultValue="true" />
+        <!--*-->
     </android.support.v7.preference.PreferenceCategory>
 
     <android.support.v7.preference.PreferenceCategory
     android:title="Настройки резолюции">
+        <SwitchPreference
+            android:key="settings_view_hide_buttons"
+            android:title="Не отображать кнопки «Прошу доложить» и «Прошу ознакомить»"
+            android:defaultValue="false" />
+        <!--*-->
         <CheckBoxPreference
             android:key="settings_view_show_urgency"
             android:title="Отображать настройки срочности"
             android:defaultValue="false" />
+        <!--*-->
         <CheckBoxPreference
             android:key="settings_view_only_urgent"
             android:title="C одним типом «Срочно»"
             android:defaultValue="false" />
+        <!--*-->
 
         <CheckBoxPreference
             android:key="settings_view_show_decision_date_update"
             android:title="Обновлять автоматически дату резолюции"
             android:defaultValue="true" />
+
         <CheckBoxPreference
             android:key="settings_view_show_decision_change_font"
             android:title="Возможность выбора размера шрифта"
             android:defaultValue="true" />
-
+        <!--*-->
 
         <CheckBoxPreference
             android:key="settings_view_show_origin"
@@ -58,6 +68,34 @@
         <CheckBoxPreference
             android:key="settings_view_show_change_signer"
             android:title="Возможность смены подписавшего резолюцию для статуса «На рассмотрение»"
+            android:defaultValue="true"
+            />
+
+
+
+    </android.support.v7.preference.PreferenceCategory>
+
+    <android.support.v7.preference.PreferenceCategory
+        android:title="Настройки операций">
+        <SwitchPreference
+            android:key="settings_view_show_create_decision_post"
+            android:title="Показывать кнопку «Создать поручение»"
+            android:defaultValue="false" />
+        <SwitchPreference
+            android:key="settings_view_show_comment_post"
+            android:title="Показывать комментарий при отклонении"
+            android:defaultValue="true" />
+        <SwitchPreference
+            android:key="settings_view_show_actions_confirm"
+            android:title="Показывать подтверждения о действиях с документом"
+            android:defaultValue="true" />
+        <SwitchPreference
+            android:key="settings_view_show_sign_confirm"
+            android:title="Показывать подтверждения о подписании документа/резолюции"
+            android:defaultValue="true" />
+        <SwitchPreference
+            android:key="settings_view_show_control_confirm"
+            android:title="Показывать подтверждения о постановке на контроль документов для раздела «Обращение граждан»"
             android:defaultValue="true" />
 
     </android.support.v7.preference.PreferenceCategory>

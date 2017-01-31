@@ -121,6 +121,9 @@ public class StepperLoadDataFragment extends Fragment implements Step {
       Toast.makeText( getContext(), "Режим работы: оффлайн", Toast.LENGTH_SHORT ).show();
     }
 
+    //TEST убрать после тестирования
+    error = null;
+
     return error;
   }
 

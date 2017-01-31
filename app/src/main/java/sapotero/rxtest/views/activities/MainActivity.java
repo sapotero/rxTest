@@ -177,6 +177,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     dbQueryBuilder = new DBQueryBuilder(this)
       .withAdapter( RAdapter )
+      .withItem(menuBuilder)
       .withOrganizationsAdapter( organization_adapter )
       .withEmptyView( documents_empty_list )
       .withProgressBar( progressBar );
@@ -213,10 +214,11 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       @Override
       public void onQueryTextChanged(@NonNull String newText) {
         Timber.v("onQueryTextChanged %s", newText);
-        if (newText.length() > 2){
+        if (newText.length() > 1){
           List<RDocumentEntity> docList = dataStore
             .select(RDocumentEntity.class)
             .where(RDocumentEntity.REGISTRATION_NUMBER.like("%" + newText + "%"))
+            .or(RDocumentEntity.SHORT_DESCRIPTION.like("%" + newText + "%"))
             .or(RDocumentEntity.SHORT_DESCRIPTION.like("%" + newText + "%"))
             .get().toList();
           SearchResultAdapter adapter = new SearchResultAdapter( context, docList );
@@ -241,7 +243,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void initToolbar() {
-    toolbar.setTitle("Все документы");
+    toolbar.setTitle("СЕРВИС ЭЛЕКТРОННОГО ДОКУМЕНТООБОРОТА");
+    toolbar.setSubtitle("МВД России");
     toolbar.setTitleTextColor(getResources().getColor(R.color.md_grey_100));
     toolbar.setSubtitleTextColor(getResources().getColor(R.color.md_grey_400));
 
@@ -254,7 +257,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
           queue.getUncompleteTasks();
           break;
         case R.id.main_activity_menu_reload:
-          dataLoader.updateByStatus( menuBuilder.getItem() );
+          updateByStatus();
           break;
         case R.id.action_search:
           searchView.onOptionsItemSelected(getFragmentManager(), item);

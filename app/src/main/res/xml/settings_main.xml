@@ -4,20 +4,15 @@
     <android.support.v7.preference.PreferenceCategory
         android:title="Настройки операций">
         <SwitchPreference
-            android:key="settings_view_hide_buttons"
-            android:title="Не отображать кнопки «Прошу доложить» и «Прошу ознакомить»"
-            android:defaultValue="false" />
-
-        <SwitchPreference
-            android:key="settings_view_show_comment_prev"
+            android:key="settings_view_show_create_decision_post"
             android:title="Показывать кнопку «Создать поручение»"
             android:defaultValue="false" />
         <SwitchPreference
-            android:key="settings_view_show_comment_prev"
+            android:key="settings_view_show_comment_post"
             android:title="Показывать комментарий при отклонении"
             android:defaultValue="true" />
         <SwitchPreference
-            android:key="settings_view_show_sign_confirm"
+            android:key="settings_view_show_actions_confirm"
             android:title="Показывать подтверждения о действиях с документом"
             android:defaultValue="true" />
         <SwitchPreference

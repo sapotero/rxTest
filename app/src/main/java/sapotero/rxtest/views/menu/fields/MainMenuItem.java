@@ -1,11 +1,13 @@
 package sapotero.rxtest.views.menu.fields;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.views.menu.builders.ButtonBuilder;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
+import timber.log.Timber;
 
 public enum MainMenuItem {
 
@@ -21,8 +23,8 @@ public enum MainMenuItem {
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FAVORITES.ne(false) ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.ne(true) )
     },
-    new ConditionBuilder[]{}
-  ),
+    new ConditionBuilder[]{},
+    true),
 
   INCOMING_DOCUMENTS ( 1, "Входящие документы %s", new MainMenuButton[]{
     MainMenuButton.PERFORMANCE,
@@ -35,8 +37,8 @@ public enum MainMenuItem {
     },
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.INCOMING_DOCUMENTS.getValue() + "%"  ) )
-    }
-  ),
+    },
+    false),
 
   CITIZEN_REQUESTS ( 2, "Обращения граждан %s", new MainMenuButton[]{
     MainMenuButton.PERFORMANCE,
@@ -49,8 +51,8 @@ public enum MainMenuItem {
     },
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.CITIZEN_REQUESTS.getValue() + "%"  ) )
-    }
-  ),
+    },
+    false),
 
   APPROVE_ASSIGN ( 3, "Подписание/Согласование %s",
     new MainMenuButton[]{
@@ -63,8 +65,8 @@ public enum MainMenuItem {
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq( Fields.Status.SIGNING.getValue()  ) ),
       new ConditionBuilder( ConditionBuilder.Condition.OR,  RDocumentEntity.FILTER.eq( Fields.Status.APPROVAL.getValue() ) )
     },
-    new ConditionBuilder[]{}
-  ),
+    new ConditionBuilder[]{},
+    true),
 
   INCOMING_ORDERS ( 4, "НПА %s", new MainMenuButton[]{
     MainMenuButton.PERFORMANCE,
@@ -76,8 +78,8 @@ public enum MainMenuItem {
     },
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like(  Fields.Journal.INCOMING_ORDERS.getValue() + "%"  ) )
-    }
-  ),
+    },
+    false),
 
   ORDERS ( 5, "Приказы %s", new MainMenuButton[]{
     MainMenuButton.PERFORMANCE,
@@ -89,8 +91,8 @@ public enum MainMenuItem {
     },
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.ORDERS.getValue() + "%"  ) )
-    }
-  ),
+    },
+    false),
 
   ORDERS_DDO ( 6, "Приказы ДДО %s", new MainMenuButton[]{
     MainMenuButton.PERFORMANCE,
@@ -98,24 +100,26 @@ public enum MainMenuItem {
     MainMenuButton.VIEWED
   },true,
     new ConditionBuilder[]{
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.ORDERS_DDO.getValue()  ) )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.ORDERS_DDO.getValue()+ "%"  ) )
     },
     new ConditionBuilder[]{
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.ORDERS_DDO.getValue()  ) )
-    }
-  ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.ORDERS_DDO.getValue()+ "%"  ) )
+    },
+    false),
 
-  IN_DOCUMENTS ( 7, "Внутренние документ %s", new MainMenuButton[]{
+  IN_DOCUMENTS ( 7, "Внутренние документы %s", new MainMenuButton[]{
     MainMenuButton.PERFORMANCE,
     MainMenuButton.PRIMARY_CONSIDERATION,
     MainMenuButton.VIEWED
   },
     true,
     new ConditionBuilder[]{
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.ORDERS.getValue()+ "%"  ) )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.OUTGOING_DOCUMENTS.getValue()+ "%"  ) )
     },
-    new ConditionBuilder[]{}
-  ),
+    new ConditionBuilder[]{
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.OUTGOING_DOCUMENTS.getValue()+ "%"  ) )
+    },
+    false),
 
   ON_CONTROL ( 8, "На контроле %s", new MainMenuButton[]{},
     false,
@@ -124,8 +128,8 @@ public enum MainMenuItem {
     },
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.CONTROL.eq( true ) )
-    }
-  ),
+    },
+    true),
   PROCESSED ( 9, "Обработанное %s", new MainMenuButton[]{},
     false,
     new ConditionBuilder[]{
@@ -133,8 +137,8 @@ public enum MainMenuItem {
     },
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq( true ) )
-    }
-  ),
+    },
+    true),
   FAVORITES ( 10, "Избранное %s", new MainMenuButton[]{},
     false,
     new ConditionBuilder[]{
@@ -142,24 +146,32 @@ public enum MainMenuItem {
     },
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FAVORITES.eq( true ) )
-    }
+    },
+    true
   );
 
+  private static final String TAG = "MainMenuItem";
   private final Integer index;
   private final MainMenuButton[] mainMenuButtons;
   private final String name;
   private final Boolean showOrganization;
-  private ConditionBuilder[] countConditions;
-  private ConditionBuilder[] queryConditions;
+  private final ConditionBuilder[] countConditions;
+  private final ConditionBuilder[] queryConditions;
+  private final boolean showAnyWay;
   private final ArrayList<ButtonBuilder> buttonsList = new ArrayList<>();
 
-  MainMenuItem(final int index, final String name, final MainMenuButton[] mainMenuButtons, Boolean showOrganizations, ConditionBuilder[] countCounditions, ConditionBuilder[] queryConditions) {
+  MainMenuItem(final int index, final String name, final MainMenuButton[] mainMenuButtons, Boolean showOrganizations, ConditionBuilder[] countCounditions, ConditionBuilder[] queryConditions, boolean showAnyWay) {
     this.index = index;
     this.name  = name;
     this.mainMenuButtons = mainMenuButtons;
     this.showOrganization = showOrganizations;
     this.countConditions = countCounditions;
     this.queryConditions = queryConditions;
+    this.showAnyWay = showAnyWay;
+  }
+
+  public boolean isShowAnyWay() {
+    return showAnyWay;
   }
 
   public Integer getIndex(){
@@ -179,15 +191,22 @@ public enum MainMenuItem {
   }
 
   public ArrayList<ButtonBuilder> getMainMenuButtons(){
+    Timber.tag(TAG).e("getMainMenuButtons %s", buttonsList);
 
     if ( buttonsList.size() == 0 ){
+
+      Timber.tag(TAG).e("buttonsList.size() == 0");
+
       if ( mainMenuButtons.length > 0 ){
         for (int i = 0, length = mainMenuButtons.length-1; i <= length; i++) {
+
+          Timber.tag("CMP").e( "length: %s", Arrays.toString(getQueryConditions()));
 
           ButtonBuilder button = new ButtonBuilder(
             mainMenuButtons[i].getFormat(),
             mainMenuButtons[i].getConditions(),
-            getQueryConditions().length != 0 ? getQueryConditions()[0] : null
+            getQueryConditions(),
+            isShowAnyWay()
           );
 
           if (i == 0){
@@ -201,8 +220,10 @@ public enum MainMenuItem {
           buttonsList.add( button );
         }
       }
-    } else {
+    }
+    else {
       for (ButtonBuilder button: buttonsList){
+        Timber.tag(TAG).e("getMainMenuButtons else recalcuate");
         button.recalculate();
       }
     }
@@ -215,6 +236,7 @@ public enum MainMenuItem {
   }
 
   public void recalcuate(){
+    Timber.tag(TAG).e("recalcuate");
     for (ButtonBuilder button: buttonsList){
       button.recalculate();
     }

@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
 import android.widget.ProgressBar;
 
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -175,12 +176,24 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
     List<UrgencyItem> urgency = new ArrayList<>();
 
-    urgency.add(new UrgencyItem("Нет", ""));
-    urgency.add(new UrgencyItem("Весьма срочно", "Весьма срочно"));
-    urgency.add(new UrgencyItem("Крайне срочно", "Крайне срочно"));
-    urgency.add(new UrgencyItem("Няшная срочность", "Няшная срочность"));
-    urgency.add(new UrgencyItem("Очень срочно", "Очень срочно"));
-    urgency.add(new UrgencyItem("Срочно", "Срочно"));
+
+    // настройка
+    if (!settings.getBoolean("settings_view_show_urgency").get()){
+      urgency_selector.setVisibility(View.GONE);
+    }
+    // настройка
+    if (settings.getBoolean("settings_view_only_urgent").get()){
+      urgency.add(new UrgencyItem("Нет", ""));
+      urgency.add(new UrgencyItem("Срочно", "Срочно"));
+      urgency_selector.setVisibility(View.VISIBLE);
+    } else {
+      urgency.add(new UrgencyItem("Весьма срочно", "Весьма срочно"));
+      urgency.add(new UrgencyItem("Крайне срочно", "Крайне срочно"));
+      urgency.add(new UrgencyItem("Няшная срочность", "Няшная срочность"));
+      urgency.add(new UrgencyItem("Очень срочно", "Очень срочно"));
+      urgency.add(new UrgencyItem("Срочно", "Срочно"));
+    }
+
 
 
     urgency_selector.setItems(urgency);
@@ -190,17 +203,24 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
 
 
-    List<FontItem> fonts = new ArrayList<>();
-    fonts.add(new FontItem("12", "12"));
-    fonts.add(new FontItem("13", "13"));
-    fonts.add(new FontItem("14", "14"));
-    fonts.add(new FontItem("15", "15"));
-    fonts.add(new FontItem("16", "16"));
+    // настройка
+    if (settings.getBoolean("settings_view_show_decision_change_font").get()){
+      List<FontItem> fonts = new ArrayList<>();
+      fonts.add(new FontItem("12", "12"));
+      fonts.add(new FontItem("13", "13"));
+      fonts.add(new FontItem("14", "14"));
+      fonts.add(new FontItem("15", "15"));
+      fonts.add(new FontItem("16", "16"));
 
-    font_selector.setItems(fonts);
-    font_selector.setOnItemSelectedListener((item, selectedIndex) -> {
-      Timber.e("%s - %s", item.getLabel(), item.getValue());
-    });
+      font_selector.setItems(fonts);
+      font_selector.setOnItemSelectedListener((item, selectedIndex) -> {
+        Timber.e("%s - %s", item.getLabel(), item.getValue());
+      });
+    } else {
+      font_selector.setVisibility(View.GONE);
+    }
+
+
 
     Decision raw_decision = null;
     Gson gson = new Gson();
