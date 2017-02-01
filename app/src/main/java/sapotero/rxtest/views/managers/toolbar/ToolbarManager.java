@@ -237,7 +237,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
     // если несколько, то показываем редактировать - для редактирования текущей
     // если нет - то показываем кнопку создать
 
-    decision_count = doc.getDecisions().toList().size();
+    decision_count = doc.getDecisions().size();
 
     switch ( decision_count ){
       case 0:

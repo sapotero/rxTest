@@ -4,6 +4,7 @@ import android.content.Context;
 import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 
 import java.util.ArrayList;
@@ -138,10 +139,13 @@ public class MenuBuilder implements ItemsBuilder.Callback{
 
     view = new FrameLayout(context);
 
+    RadioGroup tmp_view = itemsBuilder.getView();
+
+    int index_selected = tmp_view.indexOfChild(tmp_view.findViewById(tmp_view.getCheckedRadioButtonId()));
+    Timber.tag(TAG).i( "checked: %s", index_selected );
+
     buttons.removeAllViews();
-    buttons.addView( itemsBuilder.getView() );
-
-
+    buttons.addView( tmp_view );
 
 
     callback.onMenuBuilderUpdate( result );

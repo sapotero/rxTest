@@ -257,10 +257,10 @@ public class InfoActivityDecisionPreviewFragment extends Fragment {
 
         preview.showEmpty();
 
-        if ( doc.getDecisions().toList().size() > 0 ){
+        if ( doc.getDecisions().size() > 0 ){
 
           decision_spinner_adapter.clear();
-          decision_spinner_adapter.add( new DecisionSpinnerItem(null, "Всего резолюций", doc.getDecisions().toList().size() ) );
+          decision_spinner_adapter.add( new DecisionSpinnerItem(null, "Всего резолюций", doc.getDecisions().size() ) );
 //
 //          desigions_recycler_view.setLayoutManager(new LinearLayoutManager(this));
 //          decisions_list = new ArrayList<>();

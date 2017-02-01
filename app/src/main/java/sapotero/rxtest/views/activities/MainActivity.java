@@ -182,8 +182,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       .withEmptyView( documents_empty_list )
       .withProgressBar( progressBar );
 
-    dbQueryBuilder.printFolders();
-    dbQueryBuilder.printTemplates();
+//    dbQueryBuilder.printFolders();
+//    dbQueryBuilder.printTemplates();
 
     dataLoader = new DataLoaderInterface(this);
 
@@ -535,17 +535,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   /* MenuBuilder.Callback */
   @Override
   public void onMenuBuilderUpdate(ArrayList<ConditionBuilder> conditions) {
-
-    for ( ConditionBuilder condition: conditions ) {
-      Timber.tag(TAG).i( "++ %s", condition.toString() );
-    }
-
-
     menuBuilder.setFavorites( dbQueryBuilder.getFavoritesCount() );
-
-
-    Timber.tag(TAG).i( "visible: %s, pressed: %s", menuBuilder.getItem().isVisible(), favorites_button.isChecked() );
-
     dbQueryBuilder.executeWithConditions( conditions, menuBuilder.getItem().isVisible() && favorites_button.isChecked() );
   }
 

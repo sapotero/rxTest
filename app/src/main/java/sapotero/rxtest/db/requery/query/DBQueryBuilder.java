@@ -15,13 +15,15 @@ import javax.inject.Inject;
 
 import io.requery.Persistable;
 import io.requery.query.Result;
+import io.requery.query.Scalar;
 import io.requery.query.Tuple;
 import io.requery.query.WhereAndOr;
 import io.requery.rx.SingleEntityStore;
-import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.models.RDocument;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
 import sapotero.rxtest.db.requery.models.RSignerEntity;
@@ -47,7 +49,7 @@ public class DBQueryBuilder {
   private ArrayList<ConditionBuilder> conditions;
   private ProgressBar progressBar;
   private TextView documents_empty_list;
-  private Subscription subscribe;
+  private CompositeSubscription subscribe;
   private OrganizationAdapter organizationAdapter;
   private MultiOrganizationSpinner organizationSelector;
   private Boolean withFavorites;
@@ -93,15 +95,23 @@ public class DBQueryBuilder {
           .select(RDocumentEntity.class)
           .where(RDocumentEntity.USER.eq( settings.getString("login").get() ));
 
+      WhereAndOr<Scalar<Integer>> queryCount =
+        dataStore
+          .count(RDocument.class)
+          .where(RDocumentEntity.USER.eq( settings.getString("login").get() ));
+
       if ( conditions.size() > 0 ){
 
         for (ConditionBuilder condition : conditions ){
+          Timber.tag(TAG).i( "++ %s", condition.toString() );
           switch ( condition.getCondition() ){
             case AND:
               query = query.and( condition.getField() );
+              queryCount = queryCount.and( condition.getField() );
               break;
             case OR:
               query = query.or( condition.getField() );
+              queryCount = queryCount.or( condition.getField() );
               break;
             default:
               break;
@@ -113,15 +123,16 @@ public class DBQueryBuilder {
         query = query.or( RDocumentEntity.FAVORITES.eq(true) );
       }
 
-      if ( subscribe != null ){
-        subscribe.unsubscribe();
-      }
 
+      unsubscribe();
       if (conditions.size() == 0){
         addToAdapterList( new ArrayList<>() );
       } else {
-        subscribe = query
-          .orderBy( RDocumentEntity.SORT_KEY.desc() )
+
+        Timber.v( "queryCount: %s", queryCount.get().value() );
+        subscribe.add(
+          query
+          .orderBy( RDocumentEntity.SORT_KEY.asc() )
           .get()
           .toObservable()
           .subscribeOn(Schedulers.io())
@@ -141,7 +152,7 @@ public class DBQueryBuilder {
                 if ( menuBuilder.getItem().isShowAnyWay() ){
                   new_docs.add(d);
                 } else {
-                  if (d.getDecisions().toList().size() > 0){
+                  if (d.getDecisions().size() > 0){
                     new_docs.add(d);
                   }
                 }
@@ -151,10 +162,20 @@ public class DBQueryBuilder {
             }
 
             addToAdapterList(new_docs);
-          });
+          })
+        );
       }
 
       findOrganizations();
+    }
+  }
+
+  private void unsubscribe() {
+    if (subscribe == null) {
+      subscribe = new CompositeSubscription();
+    }
+    if (subscribe != null && subscribe.hasSubscriptions()) {
+      subscribe.clear();
     }
   }
 
@@ -169,7 +190,7 @@ public class DBQueryBuilder {
     if (docs.size() > 0) {
       for (int i = 0; i < docs.size(); i++) {
         RDocumentEntity doc = docs.get(i);
-        Timber.tag(TAG).v("addToAdapter ++ " + doc.getUid());
+//        Timber.tag(TAG).v("addToAdapter ++ " + doc.getUid());
 
         Document document = new Document();
         document.setChanged( doc.isChanged() );
@@ -315,7 +336,7 @@ public class DBQueryBuilder {
   public int getFavoritesCount(){
     return dataStore
       .count(RDocumentEntity.UID)
-      .where(RDocumentEntity.USER.eq( settings.getString("login").get() ))
+      .where(RDocumentEntity.USER.eq( settings.getString("login").get() ) )
       .and(RDocumentEntity.FAVORITES.eq(true))
       .get().value();
   }

@@ -103,7 +103,7 @@ public class DBDocumentManager {
       doc.setSigner(signer);
     }
 
-    if (document.getDecisions().toList().size() >= 1) {
+    if (document.getDecisions().size() >= 1) {
       ArrayList<Decision> decisions_list = new ArrayList<Decision>();
 
 

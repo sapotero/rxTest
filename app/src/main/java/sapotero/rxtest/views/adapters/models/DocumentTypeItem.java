@@ -11,7 +11,6 @@ import io.requery.query.Scalar;
 import io.requery.query.WhereAndOr;
 import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.db.requery.models.RDocument;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
@@ -33,6 +32,7 @@ public class DocumentTypeItem {
     EsdApplication.getComponent( context ).inject(this);
   }
 
+  // Главное меню
   public String getName() {
 
     if (mainMenuItem.getIndex() == 0){
@@ -40,14 +40,12 @@ public class DocumentTypeItem {
         .count(RDocumentEntity.class)
         .where( RDocumentEntity.FAVORITES.ne( true ) )
         .and( RDocumentEntity.PROCESSED.ne( true ) )
-//        .and( RDocumentEntity.USER.eq( getUserName() ) )
         .get()
         .value();
 
       Integer projects = dataStore
         .count(RDocumentEntity.class)
         .where( RDocumentEntity.FILTER.eq(Fields.Status.APPROVAL.getValue() )   )
-//        .and( RDocumentEntity.USER.eq( getUserName() ) )
         .or( RDocumentEntity.FILTER.eq(Fields.Status.SIGNING.getValue() )   )
         .get()
         .value();
@@ -58,10 +56,8 @@ public class DocumentTypeItem {
 
       WhereAndOr<Scalar<Integer>> query =
         dataStore
-          .count(RDocument.class)
+          .count(RDocumentEntity.class)
           .where( RDocumentEntity.USER.eq( settings.getString("login").get() ) );
-
-//          .and( RDocumentEntity.USER.eq( user ) );
 
       if ( mainMenuItem.getCountConditions().length > 0 ){
 

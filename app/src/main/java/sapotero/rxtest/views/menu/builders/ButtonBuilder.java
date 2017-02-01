@@ -41,6 +41,7 @@ public class ButtonBuilder {
   private ConditionBuilder[] conditions;
   private ConditionBuilder[] item_conditions;
   private boolean showDecisionForse;
+  private Integer index;
   private String label;
   private boolean active;
   private Corner corner;
@@ -61,7 +62,7 @@ public class ButtonBuilder {
   }
 
   public interface Callback {
-    void onButtonBuilderUpdate();
+    void onButtonBuilderUpdate(Integer index);
   }
   public void registerCallBack(Callback callback){
     this.callback = callback;
@@ -74,11 +75,12 @@ public class ButtonBuilder {
     NONE
   }
 
-  public ButtonBuilder(String label, ConditionBuilder[] conditions, ConditionBuilder[] item_conditions, boolean showDecisionForse) {
+  public ButtonBuilder(String label, ConditionBuilder[] conditions, ConditionBuilder[] item_conditions, boolean showDecisionForse, Integer index) {
     this.label = label;
     this.conditions = conditions;
     this.item_conditions = item_conditions;
     this.showDecisionForse = showDecisionForse;
+    this.index = index;
     this.corner = Corner.NONE;
     this.active = false;
 
@@ -91,6 +93,7 @@ public class ButtonBuilder {
     if ( settings.getBoolean("settings_view_type_show_without_project").get() ){
       getCountWithoutDecisons();
     } else {
+      // для некоторых журналов показываем всё независимо от настроек
       if (showDecisionForse){
         getCountWithoutDecisons();
       } else {
@@ -177,21 +180,23 @@ public class ButtonBuilder {
   }
 
   private void getCountWithoutDecisons() {
-    LogicalCondition<? extends Expression<?>, ?> query_condition;
-//
-//    if ( item_conditions == null ){
-//      query_condition = RDocumentEntity.UID.ne("");
-//    } else {
-//      query_condition = item_conditions.getField();
-//    }
 
     WhereAndOr<Scalar<Integer>> query = dataStore
       .count(RDocumentEntity.class)
       .where( RDocumentEntity.USER.eq( settings.getString("login").get() ) );
 
+    ArrayList<ConditionBuilder> temp_conditions = new ArrayList<>();
+
     if ( item_conditions.length > 0 ){
 
       for (ConditionBuilder condition : item_conditions ){
+        temp_conditions.add(condition);
+
+//        Timber.tag("item_conditions").v("%s %s %s | %s"
+//          , condition.getField().getLeftOperand()
+//          , condition.getField().getOperator()
+//          , condition.getField().getRightOperand()
+//          , condition.getCondition());
         switch ( condition.getCondition() ){
           case AND:
             query = query.and( condition.getField() );
@@ -205,8 +210,14 @@ public class ButtonBuilder {
       }
     }
     if ( conditions.length > 0 ){
-
       for (ConditionBuilder condition : conditions ){
+        temp_conditions.add(condition);
+
+//        Timber.tag("conditions").v("%s %s %s | %s"
+//          , condition.getField().getLeftOperand()
+//          , condition.getField().getOperator()
+//          , condition.getField().getRightOperand()
+//          , condition.getCondition());
         switch ( condition.getCondition() ){
           case AND:
             query = query.and( condition.getField() );
@@ -219,6 +230,27 @@ public class ButtonBuilder {
         }
       }
     }
+
+    if ( temp_conditions.size() > 0 ) {
+      for (ConditionBuilder condition : temp_conditions) {
+        Timber.tag("temp_conditions").v("%s %s %s | %s"
+          , condition.getField().getLeftOperand()
+          , condition.getField().getOperator()
+          , condition.getField().getRightOperand()
+          , condition.getCondition());
+      }
+    }
+
+    Integer count = dataStore
+      .count(RDocumentEntity.class)
+      .where(RDocumentEntity.USER.eq(settings.getString("login").get()))
+      .and(RDocumentEntity.UID.like("01%"))
+      .and(RDocumentEntity.FILTER.eq("sent_to_the_report"))
+      .or( RDocumentEntity.FILTER.eq("sent_to_the_performance"))
+      .get().value();
+
+    Timber.w("MANUAL COUNT: %s", count);
+
     view.setText( String.format( label, query.get().value() ) );
   }
 
@@ -232,6 +264,7 @@ public class ButtonBuilder {
     view = new RadioButton(context);
 
     view.setPadding( 32,4,32,4 );
+
     view.setGravity(Gravity.CENTER);
     view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12 );
 
@@ -271,13 +304,14 @@ public class ButtonBuilder {
     getCount();
 
     view.setOnCheckedChangeListener((buttonView, isChecked) -> {
+      Timber.tag("setOnCheckedChangeListener").i("change");
       setActive(isChecked);
 
-      getCount();
+//      getCount();
 
       if (isChecked){
         Timber.tag("setOnCheckedChangeListener").i("change");
-        callback.onButtonBuilderUpdate();
+        callback.onButtonBuilderUpdate(index);
       }
     });
 

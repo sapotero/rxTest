@@ -51,7 +51,7 @@ public class Fields {
   }
 
   public enum Journal {
-    ALL_JOURNALS              (  0, "",   "Все документы",        " "),
+    ALL_JOURNALS              (  0, "90",   "Все документы",        " "),
     CITIZEN_REQUESTS          (  1, "01", "Обращения граждан",    "Обращение граждан"),
     INCOMING_DOCUMENTS        (  2, "02", "Входящие документы",   "Входящий документ"),
     INCOMING_ORDERS           (  3, "03", "НПА",                  "НПА"),

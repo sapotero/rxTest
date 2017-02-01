@@ -235,7 +235,7 @@ public class DataLoaderInterface {
   }
 
   public void tryToSignWithLogin(String login, String password, String host){
-
+    Timber.v("tryToSignWithLogin");
     if ( validateHost( host ) ){
       EventBus.getDefault().post( new AuthLoginCheckFailEvent("Wrong Host address") );
       return;
@@ -264,7 +264,7 @@ public class DataLoaderInterface {
             updateDocuments();
           },
           error -> {
-            Timber.tag(TAG).i("tryToSignWithLogin error:" , error );
+            Timber.tag(TAG).i("tryToSignWithLogin error: %s" , error );
             EventBus.getDefault().post( new AuthLoginCheckFailEvent(error.getMessage()) );
           }
         )

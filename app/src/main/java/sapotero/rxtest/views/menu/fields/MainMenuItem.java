@@ -206,7 +206,8 @@ public enum MainMenuItem {
             mainMenuButtons[i].getFormat(),
             mainMenuButtons[i].getConditions(),
             getQueryConditions(),
-            isShowAnyWay()
+            isShowAnyWay(),
+            mainMenuButtons[i].getIndex()
           );
 
           if (i == 0){

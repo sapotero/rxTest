@@ -37,7 +37,7 @@ import rx.functions.Action1;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
-import sapotero.rxtest.retrofit.models.Oshs;
+import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.views.activities.InfoActivity;
 import sapotero.rxtest.views.dialogs.InfoCardDialogFragment;
@@ -57,15 +57,12 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
 
   private Context mContext;
   private List<Document> documents;
-  private Oshs current_user;
-  private View emptyView;
 
   public DocumentsAdapter(Context context, List<Document> documents) {
     this.mContext  = context;
     this.documents = documents;
 
     EsdApplication.getComponent(context).inject(this);
-
     operationManager.registerCallBack(this);
   }
 
@@ -79,27 +76,41 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
   public void onBindViewHolder(final SimpleViewHolder viewHolder, final int position) {
     final Document item = documents.get(position);
 
-    viewHolder.title.setText(item.getRegistrationNumber() );
-    viewHolder.from.setText( item.getOrganization() );
+    viewHolder.title.setText( item.getShortDescription() );
+
+    //resolved https://tasks.n-core.ru/browse/MVDESD-12625
+    //  На плитке Обращения и НПА не показывать строку "Без организации", если её действительно нет(
+//    Timber.d("start with: %s %s", item.getUid().startsWith( Fields.Journal.INCOMING_ORDERS.getValue() ), item.getUid().startsWith( Fields.Journal.CITIZEN_REQUESTS.getValue() ));
+    if(
+      item.getUid().startsWith( Fields.Journal.INCOMING_ORDERS.getValue() ) ||
+        item.getUid().startsWith( Fields.Journal.CITIZEN_REQUESTS.getValue() )
+      ){
+
+      if ( item.getOrganization().toLowerCase().contains("без организации") ){
+        Timber.d("empty organization" );
+        viewHolder.from.setText("");
+      }
+
+    } else {
+      viewHolder.from.setText( item.getOrganization() );
+    }
 
     String number = item.getExternalDocumentNumber();
 
-//    if (number == null){
+    if (number == null){
 //      SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
 //      RxSharedPreferences rxPreferences = RxSharedPreferences.create(preferences);
 //      Preference<String> uid = rxPreferences.getString("main_menu.uid");
 //      number = Fields.getJournalByUid( uid.get() ).getSingle();
-//    }
-    viewHolder.date.setText( number + " от " + item.getRegistrationDate());
+      number = item.getRegistrationNumber();
+    }
+//    viewHolder.date.setText( number + " от " + item.getRegistrationDate());
+    viewHolder.date.setText( item.getTitle() );
 
     viewHolder.swipeLayout.setShowMode(SwipeLayout.ShowMode.PullOut);
 
     viewHolder.swipeLayout.addDrag(SwipeLayout.DragEdge.Left,  viewHolder.swipeLayout.findViewById(R.id.from_left_to_right));
     viewHolder.swipeLayout.addDrag(SwipeLayout.DragEdge.Right, viewHolder.swipeLayout.findViewById(R.id.from_right_to_left));
-
-    if (item.getSigner() != null){
-      Timber.d( "item.getSigner() %s - %s", item.getSigner().getId(), item.getSigner().getOrganisation() );
-    }
 
     // FIX добавить отображение ОжидаетСинхронизации
     // FIX отображать срочность поверх всего во фрагменте
@@ -119,12 +130,6 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
     } else {
       viewHolder.favorite_label.setVisibility(View.GONE);
     }
-
-//    if ( item.get != null && item.getFavorites() ){
-//      Timber.d( "item.getFavorites() " + item.getFavorites().toString() );
-//      viewHolder.favorite_label.setVisibility(View.VISIBLE);
-//    }
-
 
     viewHolder.swipeLayout.addSwipeListener(new SwipeLayout.SwipeListener() {
       @Override
@@ -319,11 +324,8 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
     } else {
       viewHolder.badge.setVisibility(View.GONE);
     }
-    Timber.tag("view " + item.getRegistrationNumber() + " " + item.getTitle());
 
-
-    // mItemManger is member in RecyclerSwipeAdapter Class
-    mItemManger.bindView(viewHolder.itemView, position);
+    mItemManger.bindView( viewHolder.itemView, position );
 
   }
 

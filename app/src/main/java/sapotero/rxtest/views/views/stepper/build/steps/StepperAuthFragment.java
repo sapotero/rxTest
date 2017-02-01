@@ -169,8 +169,6 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
         EditText pwd   = (EditText) stepper_auth_password_wrapper.findViewById(R.id.stepper_auth_password);
         EditText host  = (EditText) stepper_auth_password_wrapper.findViewById(R.id.stepper_auth_host);
 
-        Timber.e( "HOST: %s %s", host.getText(), Objects.equals(host.getText().toString(), "") );
-
         EventBus.getDefault().post(
           new StepperLoginCheckEvent(
             login.getText().toString(),
@@ -207,7 +205,9 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
   @Override
   @UiThread
   public void onNextClicked(StepperLayout.OnNextClickedCallback callback) {
-    loadingDialog.show();
+    if (authType != AuthType.PASSWORD){
+      loadingDialog.show();
+    }
     this.callback = callback;
   }
 

@@ -1,5 +1,9 @@
 package sapotero.rxtest.views.menu.fields;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
@@ -9,15 +13,17 @@ public enum MainMenuButton {
   PROJECTS ( 1,
     "Проекты %s" ,
     new ConditionBuilder[]{
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq( Fields.Status.APPROVAL.getValue() )  ),
-      new ConditionBuilder( ConditionBuilder.Condition.OR,  RDocumentEntity.FILTER.eq( Fields.Status.SIGNING.getValue() )  )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in( ButtonStatus.getProject() )  ),
+//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq( Fields.Status.APPROVAL.getValue() )  ),
+//      new ConditionBuilder( ConditionBuilder.Condition.OR,  RDocumentEntity.FILTER.eq( Fields.Status.SIGNING.getValue() )  )
     }
   ),
   PERFORMANCE ( 2,
     "На рассмотрение %s" ,
     new ConditionBuilder[]{
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq(Fields.Status.SENT_TO_THE_REPORT.getValue())  ),
-      new ConditionBuilder( ConditionBuilder.Condition.OR, RDocumentEntity.FILTER.eq(Fields.Status.SENT_TO_THE_PERFORMANCE.getValue())  ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in( ButtonStatus.getPerformance() )  ),
+//      new ConditionBuilder( ConditionBuilder.Condition.OR, RDocumentEntity.FILTER.eq(Fields.Status.SENT_TO_THE_REPORT.getValue())  ),
+//      new ConditionBuilder( ConditionBuilder.Condition.OR, RDocumentEntity.FILTER.eq(Fields.Status.SENT_TO_THE_PERFORMANCE.getValue())  ),
     }
   ),
   PRIMARY_CONSIDERATION ( 3,
@@ -58,16 +64,11 @@ public enum MainMenuButton {
   public final String format;
   public final ConditionBuilder[] conditions;
 
-  public Boolean active;
-
-  public Integer getIndex() {
-    return index;
-  }
-
   MainMenuButton(final Integer index, final String format, final ConditionBuilder[] conditions ) {
     this.index = index;
     this.format = format;
     this.conditions = conditions;
+    Holder.MAP.put( String.valueOf(index), this);
   }
 
   public ConditionBuilder[] getConditions() {
@@ -77,4 +78,38 @@ public enum MainMenuButton {
   public String getFormat() {
     return format;
   }
+
+  public Integer getIndex() {
+    return index;
+  }
+
+  private static class Holder {
+    static Map<String, MainMenuButton> MAP = new HashMap<>();
+  }
+
+  public static MainMenuButton getByIndex(int index){
+    MainMenuButton item = Holder.MAP.get( String.valueOf(index) );
+
+    if( item == null ) {
+      throw new IllegalStateException(String.format("Unsupported type %s.", index));
+    }
+
+    return item;
+  }
+
+  private static class ButtonStatus {
+    private static ArrayList<String> getPerformance(){
+      ArrayList<String> projectArray = new ArrayList<String>();
+      projectArray.add( Fields.Status.SENT_TO_THE_REPORT.getValue() );
+      projectArray.add( Fields.Status.SENT_TO_THE_PERFORMANCE.getValue() );
+      return projectArray;
+    }
+    private static ArrayList<String> getProject(){
+      ArrayList<String> projectArray = new ArrayList<String>();
+      projectArray.add( Fields.Status.APPROVAL.getValue() );
+      projectArray.add( Fields.Status.SIGNING.getValue());
+      return projectArray;
+    }
+  }
+
 }

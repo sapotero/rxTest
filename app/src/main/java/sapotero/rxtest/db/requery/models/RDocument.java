@@ -11,7 +11,6 @@ import io.requery.Key;
 import io.requery.OneToMany;
 import io.requery.OneToOne;
 import io.requery.Persistable;
-import io.requery.query.MutableResult;
 import sapotero.rxtest.db.requery.models.control_labels.RControlLabels;
 import sapotero.rxtest.db.requery.models.decisions.RDecision;
 import sapotero.rxtest.db.requery.models.exemplars.RExemplar;
@@ -77,7 +76,7 @@ public abstract class RDocument implements Persistable {
   Boolean expired;
 
   @OneToMany(mappedBy = "document")
-  MutableResult<RDecision> decisions;
+  Set<RDecision> decisions;
 
   @OneToMany(mappedBy = "document")
   Set<RExemplar> exemplars;

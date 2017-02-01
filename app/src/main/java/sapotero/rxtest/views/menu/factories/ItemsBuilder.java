@@ -5,7 +5,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -24,6 +23,7 @@ import sapotero.rxtest.views.adapters.models.DocumentTypeItem;
 import sapotero.rxtest.views.adapters.utils.DocumentTypeAdapter;
 import sapotero.rxtest.views.menu.builders.ButtonBuilder;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
+import sapotero.rxtest.views.menu.fields.MainMenuButton;
 import sapotero.rxtest.views.menu.fields.MainMenuItem;
 import sapotero.rxtest.views.views.MultiOrganizationSpinner;
 import timber.log.Timber;
@@ -34,7 +34,7 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
 
   private String TAG = this.getClass().getSimpleName();
   private final Context context;
-  private FrameLayout view;
+  private RadioGroup view;
   private Spinner journalSpinner;
   private DocumentTypeAdapter journalSpinnerAdapter;
   private Callback callback;
@@ -42,6 +42,7 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
   private MultiOrganizationSpinner organizationSelector;
   private CheckBox favoritesButton;
   private String user;
+  private Integer index;
 
 
   public boolean isVisible() {
@@ -97,7 +98,7 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
     this.favoritesButton = favoritesButton;
     this.favoritesButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
       Timber.tag("checkbox").i( "checked: %s", isChecked );
-      onButtonBuilderUpdate();
+      onButtonBuilderUpdate(index);
     });
   }
 
@@ -123,14 +124,14 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
     journalSpinner.setSelection( type );
   }
 
-  public View getView() {
+  public RadioGroup getView() {
     return view;
   }
 
 
   private void updateView() {
     if (view == null){
-      view = new FrameLayout(context);
+      view = new RadioGroup(context);
     }
 
     view.removeAllViews();
@@ -148,7 +149,7 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
       }
       ((RadioButton) button_group.getChildAt(0)).setChecked(true);
     } else {
-      onButtonBuilderUpdate();
+      onButtonBuilderUpdate(index);
     }
 
     if (organizationsLayout != null){
@@ -168,44 +169,46 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
     ArrayList<ConditionBuilder> result = new ArrayList<>();
 
     Collections.addAll(result, mainMenuItem.getQueryConditions() );
+    Collections.addAll(result, MainMenuButton.getByIndex(index).getConditions() );
 
-    if (mainMenuItem.getMainMenuButtons().size() > 0) {
-      Boolean empty = true;
-      for (ButtonBuilder b : mainMenuItem.getMainMenuButtons()) {
-
-        RadioButton button = b.getButton();
-
-        Boolean active = false;
-
-        if (button != null){
-          active =  button.isPressed();
-
-          if ( active ){
-            empty = false;
-            Collections.addAll(result, b.getConditions());
-          }
-        }
-
-//        Timber.e( "button conditions: %s | active: %s %s %s", Arrays.toString( b.getConditions() ), active, button.isActivated(), button.isChecked()  );
-      }
-
-      if (empty){
-        Boolean nil = true;
-
-        for (ButtonBuilder b : mainMenuItem.getMainMenuButtons()) {
-          RadioButton button = b.getButton();
-          if ( button != null && button.isChecked() ){
-            Collections.addAll(result, b.getConditions() );
-            nil = false;
-          }
-        }
-
-        if ( nil )  {
-          Collections.addAll(result, mainMenuItem.getMainMenuButtons().get(0).getConditions() );
-        }
-
-      }
-    }
+    Timber.tag(TAG).v( MainMenuButton.getByIndex(index).getFormat() );
+//    if (mainMenuItem.getMainMenuButtons().size() > 0) {
+//      Boolean empty = true;
+//      for (ButtonBuilder b : mainMenuItem.getMainMenuButtons()) {
+//
+//        RadioButton button = b.getButton();
+//
+//        Boolean active = false;
+//
+//        if (button != null){
+//          active =  button.isPressed();
+//
+//          if ( active ){
+//            empty = false;
+//            Collections.addAll(result, b.getConditions());
+//          }
+//        }
+//
+////        Timber.e( "button conditions: %s | active: %s %s %s", Arrays.toString( b.getConditions() ), active, button.isActivated(), button.isChecked()  );
+//      }
+//
+//      if (empty){
+//        Boolean nil = true;
+//
+//        for (ButtonBuilder b : mainMenuItem.getMainMenuButtons()) {
+//          RadioButton button = b.getButton();
+//          if ( button != null && button.isChecked() ){
+//            Collections.addAll(result, b.getConditions() );
+//            nil = false;
+//          }
+//        }
+//
+//        if ( nil )  {
+//          Collections.addAll(result, mainMenuItem.getMainMenuButtons().get(0).getConditions() );
+//        }
+//
+//      }
+//    }
 //
 //    Timber.e( "button conditions: %s ", favoritesButton.isChecked() );
 //
@@ -233,7 +236,8 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
 
 
   @Override
-  public void onButtonBuilderUpdate() {
+  public void onButtonBuilderUpdate(Integer index) {
+    this.index = index;
     Timber.tag(TAG).i( "onButtonBuilderUpdate" );
     callback.onMenuUpdate( getConditions() );
   }

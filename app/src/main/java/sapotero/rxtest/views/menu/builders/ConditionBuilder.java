@@ -10,7 +10,6 @@ public class ConditionBuilder {
     AND,
     OR,
     LIKE;
-
   }
 
   private final Condition condition;
