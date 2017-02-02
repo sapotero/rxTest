@@ -32,8 +32,8 @@ import sapotero.rxtest.views.managers.menu.OperationManager;
 import sapotero.rxtest.views.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.views.managers.menu.utils.CommandParams;
 import sapotero.rxtest.views.managers.view.DecisionManager;
-import sapotero.rxtest.views.views.DelayAutoCompleteTextView;
-import sapotero.rxtest.views.views.SpinnerWithLabel;
+import sapotero.rxtest.views.custom.DelayAutoCompleteTextView;
+import sapotero.rxtest.views.custom.SpinnerWithLabel;
 import timber.log.Timber;
 
 public class DecisionConstructorActivity extends AppCompatActivity implements DecisionFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, OperationManager.Callback {

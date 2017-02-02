@@ -50,7 +50,6 @@ import butterknife.OnClick;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
 import okhttp3.OkHttpClient;
-import ru.shmakinv.android.widget.material.searchview.SearchView;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
@@ -64,12 +63,13 @@ import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
 import sapotero.rxtest.views.adapters.SearchResultAdapter;
+import sapotero.rxtest.views.custom.CircleLeftArrow;
+import sapotero.rxtest.views.custom.CircleRightArrow;
+import sapotero.rxtest.views.custom.OrganizationSpinner;
+import sapotero.rxtest.views.custom.SearchView.SearchView;
 import sapotero.rxtest.views.interfaces.DataLoaderInterface;
 import sapotero.rxtest.views.menu.MenuBuilder;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
-import sapotero.rxtest.views.views.CircleLeftArrow;
-import sapotero.rxtest.views.views.CircleRightArrow;
-import sapotero.rxtest.views.views.MultiOrganizationSpinner;
 import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity implements MenuBuilder.Callback, SearchView.OnVisibilityChangeListener {
@@ -96,7 +96,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
 
   @BindView(R.id.DOCUMENT_TYPE) Spinner DOCUMENT_TYPE_SELECTOR;
-  @BindView(R.id.ORGANIZATION) MultiOrganizationSpinner ORGANIZATION_SELECTOR;
+  @BindView(R.id.ORGANIZATION)
+  OrganizationSpinner ORGANIZATION_SELECTOR;
 
   @BindView(R.id.activity_main_right_button) CircleRightArrow rightArrow;
 
@@ -213,16 +214,69 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
       @Override
       public void onQueryTextChanged(@NonNull String newText) {
-        Timber.v("onQueryTextChanged %s", newText);
-        if (newText.length() > 1){
-          List<RDocumentEntity> docList = dataStore
-            .select(RDocumentEntity.class)
-            .where(RDocumentEntity.REGISTRATION_NUMBER.like("%" + newText + "%"))
-            .or(RDocumentEntity.SHORT_DESCRIPTION.like("%" + newText + "%"))
-            .or(RDocumentEntity.SHORT_DESCRIPTION.like("%" + newText + "%"))
-            .get().toList();
-          SearchResultAdapter adapter = new SearchResultAdapter( context, docList );
+        if (newText.length() >= 1){
+          Timber.v("onQueryTextChanged %s | %s", newText, searchView.getSelected() );
+
+          ArrayList<List<RDocumentEntity>> result = new ArrayList<>();
+
+          // TEST
+          //requery не умеет делать OR( u=1 and a=2 ) OR ( u=1 and a=3 )
+          if ( searchView.getSelected() != null ){
+
+            boolean[] selected = searchView.getSelected();
+
+            for (int i = 0; i < selected.length; i++) {
+              Timber.v("onQueryTextChanged %s | %s", i, selected[i] );
+              if ( selected[i] ) {
+                switch (i) {
+                  case 0:
+                    result.add(
+                      dataStore
+                        .select(RDocumentEntity.class)
+                        .where( RDocumentEntity.USER.eq( settings.getString("login").get() ) )
+                        .and(RDocumentEntity.REGISTRATION_NUMBER.like("%" + newText + "%")).get().toList()
+                    );
+                    // .and(RDocumentEntity.REGISTRATION_NUMBER.like("%" + newText + "%"));
+                    break;
+                  case 1:
+                    result.add(
+                      dataStore
+                        .select(RDocumentEntity.class)
+                        .where( RDocumentEntity.USER.eq( settings.getString("login").get() ) )
+                        .and(RDocumentEntity.SHORT_DESCRIPTION.like("%" + newText + "%")).get().toList()
+                    );
+                    // query = query.and(RDocumentEntity.SHORT_DESCRIPTION.like("%" + newText + "%"));
+                    break;
+                  case 2:
+                    result.add(
+                      dataStore
+                        .select(RDocumentEntity.class)
+                        .where( RDocumentEntity.USER.eq( settings.getString("login").get() ) )
+                        .and(RDocumentEntity.EXTERNAL_DOCUMENT_NUMBER.like("%" + newText + "%")).get().toList()
+                    );
+                    // query = query.and(RDocumentEntity.EXTERNAL_DOCUMENT_NUMBER.like("%" + newText + "%"));
+                    break;
+                  default:
+                    break;
+                }
+              }
+            }
+          }
+
+          ArrayList<RDocumentEntity> docs = new ArrayList<>();
+
+
+          for (List<RDocumentEntity> list: result) {
+            Timber.tag(TAG).v("count: %s", list.size());
+            for ( RDocumentEntity doc : list ){
+              docs.add( doc );
+            }
+          }
+
+
+          SearchResultAdapter adapter = new SearchResultAdapter( context, docs );
           searchView.setSuggestionAdapter( adapter );
+
         }
 
       }
@@ -428,8 +482,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       .withHeaderBackground(R.drawable.header)
       .addProfiles(
         new ProfileDrawerItem()
-          .withName( settings.getString("current_user").get() )
-          .withEmail( settings.getString("current_user").get() )
+          .withName( settings.getString("login").get() )
+          .withEmail( settings.getString("login").get() )
           .withSetSelected(true)
 //          .withEmail("admin_id")
           .withIcon(R.drawable.gerb)

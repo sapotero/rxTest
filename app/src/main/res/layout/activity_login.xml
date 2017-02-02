@@ -19,7 +19,7 @@
     >
 
 
-    <sapotero.rxtest.views.views.stepper.StepperLayout
+    <sapotero.rxtest.views.custom.stepper.StepperLayout
         android:layout_weight="1"
         android:layout_margin="@dimen/date_offset"
         android:background="@color/md_white_1000"

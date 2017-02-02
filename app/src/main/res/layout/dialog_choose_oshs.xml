@@ -20,7 +20,7 @@
                  android:layout_margin="@dimen/date_offset"
         >
 
-        <sapotero.rxtest.views.views.DelayAutoCompleteTextView
+        <sapotero.rxtest.views.custom.DelayAutoCompleteTextView
             android:id="@+id/user_autocomplete_field"
             android:inputType="textCapSentences"
             android:layout_width="match_parent"

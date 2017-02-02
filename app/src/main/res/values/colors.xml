@@ -318,4 +318,11 @@
     <color name="ms_bottomNavigationButtonTextColor">@color/ms_material_grey_400</color>
     <color name="ms_bottomNavigationBackgroundColor">#FFFFFF</color>
     <color name="ms_defaultButtonBackgroundColor">#15000000</color>
+
+
+
+    <color name="searchview_background">@color/md_white_1000</color>
+    <color name="searchview_text_query">@color/md_grey_900</color>
+    <color name="searchview_text_highlight">@color/md_red_300</color>
+    <color name="searchview_divider">@color/md_red_600</color>
 </resources>

@@ -8,7 +8,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="sapotero.rxtest.views.activities.InfoActivity">
 
-    <sapotero.rxtest.views.views.CircleLeftArrow
+    <sapotero.rxtest.views.custom.CircleLeftArrow
         android:clickable="true"
         android:layout_width="54dp"
         android:layout_height="54dp"
@@ -18,7 +18,7 @@
         android:layout_marginStart="@dimen/half_date_offset"
         />
 
-    <sapotero.rxtest.views.views.CircleRightArrow
+    <sapotero.rxtest.views.custom.CircleRightArrow
         android:clickable="true"
         android:layout_width="54dp"
         android:layout_height="54dp"
@@ -76,7 +76,7 @@
 
             </android.support.design.widget.TabLayout>
 
-            <sapotero.rxtest.views.views.ViewPagerFixed
+            <sapotero.rxtest.views.custom.ViewPagerFixed
                 android:id="@+id/tab_main"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"

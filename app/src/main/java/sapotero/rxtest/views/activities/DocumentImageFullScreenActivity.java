@@ -22,8 +22,8 @@ import butterknife.OnClick;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.retrofit.models.document.Image;
-import sapotero.rxtest.views.views.CircleLeftArrow;
-import sapotero.rxtest.views.views.CircleRightArrow;
+import sapotero.rxtest.views.custom.CircleLeftArrow;
+import sapotero.rxtest.views.custom.CircleRightArrow;
 import timber.log.Timber;
 
 public class DocumentImageFullScreenActivity extends AppCompatActivity {

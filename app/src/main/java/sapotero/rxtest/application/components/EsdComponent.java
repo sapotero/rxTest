@@ -64,9 +64,9 @@ import sapotero.rxtest.views.managers.view.DecisionManager;
 import sapotero.rxtest.views.menu.builders.ButtonBuilder;
 import sapotero.rxtest.views.menu.factories.ItemsBuilder;
 import sapotero.rxtest.views.services.MainService;
-import sapotero.rxtest.views.views.stepper.build.steps.StepperAuthFragment;
-import sapotero.rxtest.views.views.stepper.build.steps.StepperChooseAuthTypeFragment;
-import sapotero.rxtest.views.views.stepper.build.steps.StepperLoadDataFragment;
+import sapotero.rxtest.views.custom.stepper.build.steps.StepperAuthFragment;
+import sapotero.rxtest.views.custom.stepper.build.steps.StepperChooseAuthTypeFragment;
+import sapotero.rxtest.views.custom.stepper.build.steps.StepperLoadDataFragment;
 
 @Singleton
 @Component(modules = {

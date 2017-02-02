@@ -169,7 +169,7 @@
                         android:layout_gravity="end|center_vertical"
                         android:layout_width="211dp">
 
-                        <sapotero.rxtest.views.views.SpinnerWithLabel
+                        <sapotero.rxtest.views.custom.SpinnerWithLabel
                             android:id="@+id/head_font_selector"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"

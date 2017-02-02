@@ -91,7 +91,7 @@
                         android:gravity="start|center_vertical"
                         >
 
-                        <sapotero.rxtest.views.views.SpinnerWithLabel
+                        <sapotero.rxtest.views.custom.SpinnerWithLabel
                             android:id="@+id/urgency_selector"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
@@ -113,7 +113,7 @@
                         android:layout_gravity="end|center_vertical"
                         >
 
-                        <sapotero.rxtest.views.views.SpinnerWithLabel
+                        <sapotero.rxtest.views.custom.SpinnerWithLabel
                             android:id="@+id/head_font_selector"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -172,7 +172,7 @@
                         android:gravity="bottom"
                         android:layout_width="match_parent">
 
-                        <sapotero.rxtest.views.views.DelayAutoCompleteTextView
+                        <sapotero.rxtest.views.custom.DelayAutoCompleteTextView
                             android:layout_gravity="bottom"
                             android:gravity="bottom"
                             android:id="@+id/fragment_decision_autocomplete_field"

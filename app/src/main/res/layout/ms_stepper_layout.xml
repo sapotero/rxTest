@@ -3,13 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical">
 
-    <sapotero.rxtest.views.views.stepper.internal.TabsContainer
+    <sapotero.rxtest.views.custom.stepper.internal.TabsContainer
         android:id="@+id/ms_stepTabsContainer"
         style="@style/MSStepStabsContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <sapotero.rxtest.views.views.stepper.internal.NonSwipeableViewPager
+    <sapotero.rxtest.views.custom.stepper.internal.NonSwipeableViewPager
         android:id="@+id/ms_stepPager"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -41,14 +41,14 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true">
 
-            <sapotero.rxtest.views.views.stepper.internal.DottedProgressBar
+            <sapotero.rxtest.views.custom.stepper.internal.DottedProgressBar
                 android:id="@+id/ms_stepDottedProgressBar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:visibility="gone" />
 
-            <sapotero.rxtest.views.views.stepper.internal.ColorableProgressBar
+            <sapotero.rxtest.views.custom.stepper.internal.ColorableProgressBar
                 android:id="@+id/ms_stepProgressBar"
                 style="@style/Widget.AppCompat.ProgressBar.Horizontal"
                 android:layout_width="@dimen/ms_progress_bar_width"
@@ -62,7 +62,7 @@
         </FrameLayout>
 
         <!--style="@style/MSNavBarButton"-->
-        <sapotero.rxtest.views.views.stepper.internal.RightNavigationButton
+        <sapotero.rxtest.views.custom.stepper.internal.RightNavigationButton
             android:id="@+id/ms_stepNextButton"
 
             style="@style/Widget.AppCompat.Button.Borderless"
@@ -78,7 +78,7 @@
             tools:visibility="gone" />
 
         <!--style="@style/MSNavBarButton"-->
-        <sapotero.rxtest.views.views.stepper.internal.RightNavigationButton
+        <sapotero.rxtest.views.custom.stepper.internal.RightNavigationButton
             android:id="@+id/ms_stepCompleteButton"
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="wrap_content"

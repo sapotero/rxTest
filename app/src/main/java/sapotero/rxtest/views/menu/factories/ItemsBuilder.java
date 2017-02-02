@@ -25,7 +25,7 @@ import sapotero.rxtest.views.menu.builders.ButtonBuilder;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import sapotero.rxtest.views.menu.fields.MainMenuButton;
 import sapotero.rxtest.views.menu.fields.MainMenuItem;
-import sapotero.rxtest.views.views.MultiOrganizationSpinner;
+import sapotero.rxtest.views.custom.OrganizationSpinner;
 import timber.log.Timber;
 
 public class ItemsBuilder implements ButtonBuilder.Callback {
@@ -39,7 +39,7 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
   private DocumentTypeAdapter journalSpinnerAdapter;
   private Callback callback;
   private LinearLayout organizationsLayout;
-  private MultiOrganizationSpinner organizationSelector;
+  private OrganizationSpinner organizationSelector;
   private CheckBox favoritesButton;
   private String user;
   private Integer index;
@@ -90,7 +90,7 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
     this.organizationsLayout = organizationsLayout;
   }
 
-  public void setOrganizationSelector(MultiOrganizationSpinner organizationSelector) {
+  public void setOrganizationSelector(OrganizationSpinner organizationSelector) {
     this.organizationSelector = organizationSelector;
   }
 

@@ -54,4 +54,9 @@
     <dimen name="ms_button_padding_vertical">@dimen/abc_button_padding_vertical_material</dimen>
     <dimen name="stepper_content_width">512dp</dimen>
 
+    <dimen name="searchview_side_margins">4dp</dimen>
+    <dimen name="searchview_padding_horizontal_button_action">16dp</dimen>
+    <dimen name="searchview_height_region_search">48dp</dimen>
+    <dimen name="searchview_height_divider">1dp</dimen>
+
 </resources>

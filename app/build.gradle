@@ -180,11 +180,12 @@ dependencies {
     compile 'com.github.barteksc:android-pdf-viewer:2.3.0'
     compile 'com.afollestad.material-dialogs:core:0.9.1.0'
 
-    // поиск
-    compile 'com.github.VyacheslavShmakin:material-searchview:1.0.9'
-
     // экран загрузки
     compile 'com.github.HotBitmapGG:RingProgressBar:V1.2.2'
+
+    //searchView
+    compile 'com.andkulikov:transitionseverywhere:1.6.2'
+    compile 'com.github.johnkil.android-robototextview:robototextview:2.5.0'
 
     /*debug*/
     debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5'
@@ -202,7 +203,9 @@ dependencies {
 }
 
 dependencies {
-    compile 'com.android.support:support-v4:24.+'
+    compile 'com.android.support:support-v4:24.2.1'
+    compile 'com.android.support.test.espresso:espresso-core:2.2.2'
+    compile 'com.android.support:appcompat-v7:24.2.1'
 }
 allprojects {
     repositories {

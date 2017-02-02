@@ -92,7 +92,7 @@
                     android:layout_marginTop="16dp"
                     android:weightSum="1">
 
-                    <sapotero.rxtest.views.views.MultiOrganizationSpinner
+                    <sapotero.rxtest.views.custom.OrganizationSpinner
                         android:layout_height="match_parent"
                         android:id="@+id/ORGANIZATION"
                         android:minWidth="300dp"
@@ -146,7 +146,7 @@
             android:layout_weight="10"
             android:weightSum="10">
 
-            <sapotero.rxtest.views.views.CircleLeftArrow
+            <sapotero.rxtest.views.custom.CircleLeftArrow
                 android:clickable="true"
                 android:layout_width="wrap_content"
                 android:layout_height="70dp"
@@ -167,7 +167,7 @@
                 android:layout_weight="8"
                 />
 
-            <sapotero.rxtest.views.views.CircleRightArrow
+            <sapotero.rxtest.views.custom.CircleRightArrow
                 android:clickable="true"
                 android:layout_width="wrap_content"
                 android:layout_height="70dp"

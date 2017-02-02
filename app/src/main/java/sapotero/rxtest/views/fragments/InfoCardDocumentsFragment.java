@@ -52,8 +52,8 @@ import sapotero.rxtest.events.bus.FileDownloadedEvent;
 import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.views.activities.DocumentImageFullScreenActivity;
 import sapotero.rxtest.views.adapters.DocumentLinkAdapter;
-import sapotero.rxtest.views.views.CircleLeftArrow;
-import sapotero.rxtest.views.views.CircleRightArrow;
+import sapotero.rxtest.views.custom.CircleLeftArrow;
+import sapotero.rxtest.views.custom.CircleRightArrow;
 import timber.log.Timber;
 
 public class InfoCardDocumentsFragment extends Fragment implements AdapterView.OnItemClickListener, GestureDetector.OnDoubleTapListener {

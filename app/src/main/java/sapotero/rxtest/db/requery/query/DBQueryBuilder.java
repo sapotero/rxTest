@@ -34,7 +34,7 @@ import sapotero.rxtest.views.adapters.OrganizationAdapter;
 import sapotero.rxtest.views.adapters.models.OrganizationItem;
 import sapotero.rxtest.views.menu.MenuBuilder;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
-import sapotero.rxtest.views.views.MultiOrganizationSpinner;
+import sapotero.rxtest.views.custom.OrganizationSpinner;
 import timber.log.Timber;
 
 public class DBQueryBuilder {
@@ -51,7 +51,7 @@ public class DBQueryBuilder {
   private TextView documents_empty_list;
   private CompositeSubscription subscribe;
   private OrganizationAdapter organizationAdapter;
-  private MultiOrganizationSpinner organizationSelector;
+  private OrganizationSpinner organizationSelector;
   private Boolean withFavorites;
   private MenuBuilder menuBuilder;
 
@@ -74,7 +74,7 @@ public class DBQueryBuilder {
     return this;
   }
 
-  public DBQueryBuilder withOrganizationSelector(MultiOrganizationSpinner organization_selector) {
+  public DBQueryBuilder withOrganizationSelector(OrganizationSpinner organization_selector) {
     this.organizationSelector = organization_selector;
     return this;
   }

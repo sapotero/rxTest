@@ -27,20 +27,17 @@ import sapotero.rxtest.events.bus.FileDownloadedEvent;
 import sapotero.rxtest.events.stepper.shared.StepperNextStepEvent;
 import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.services.MainService;
-import sapotero.rxtest.views.views.stepper.StepperLayout;
-import sapotero.rxtest.views.views.stepper.VerificationError;
-import sapotero.rxtest.views.views.stepper.build.StepperAdapter;
+import sapotero.rxtest.views.custom.stepper.StepperLayout;
+import sapotero.rxtest.views.custom.stepper.VerificationError;
+import sapotero.rxtest.views.custom.stepper.build.StepperAdapter;
 
 
 public class LoginActivity extends AppCompatActivity implements StepperLayout.StepperListener {
 
 
-  @Inject
-  OkHttpClient okHttpClient;
-  @Inject
-  RxSharedPreferences settings;
-  @Inject
-  JobManager jobManager;
+  @Inject OkHttpClient okHttpClient;
+  @Inject RxSharedPreferences settings;
+  @Inject JobManager jobManager;
 
 
   // test

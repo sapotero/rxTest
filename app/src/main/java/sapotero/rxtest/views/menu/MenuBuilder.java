@@ -13,7 +13,7 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import sapotero.rxtest.views.menu.factories.ItemsBuilder;
 import sapotero.rxtest.views.menu.fields.MainMenuItem;
-import sapotero.rxtest.views.views.MultiOrganizationSpinner;
+import sapotero.rxtest.views.custom.OrganizationSpinner;
 import timber.log.Timber;
 
 public class MenuBuilder implements ItemsBuilder.Callback{
@@ -27,7 +27,7 @@ public class MenuBuilder implements ItemsBuilder.Callback{
   private LinearLayout organizations;
 
   private String TAG = this.getClass().getSimpleName();
-  private MultiOrganizationSpinner organizationsSelector;
+  private OrganizationSpinner organizationsSelector;
   private CheckBox favorites;
 
   private String user;
@@ -83,7 +83,7 @@ public class MenuBuilder implements ItemsBuilder.Callback{
     return this;
   }
 
-  public MenuBuilder withOrganizationSelector(MultiOrganizationSpinner organizationsSelector) {
+  public MenuBuilder withOrganizationSelector(OrganizationSpinner organizationsSelector) {
     this.organizationsSelector = organizationsSelector;
     return this;
   }
