@@ -77,9 +77,6 @@ public class InfoActivityDecisionPreviewFragment extends Fragment {
   private Preference<Integer> POSITION;
 
 
-//  @BindView(R.id.fragment_info_card_decision_preview_wrapper) RelativeLayout wrapper;
-
-
   @BindView(R.id.activity_info_decision_preview_head) LinearLayout preview_head;
 
   @BindView(R.id.activity_info_decision_preview_body) LinearLayout preview_body;
@@ -89,9 +86,6 @@ public class InfoActivityDecisionPreviewFragment extends Fragment {
   @BindView(R.id.activity_info_button_edit) ImageButton edit;
 
   @BindView(R.id.activity_info_decision_spinner) Spinner decision_spinner;
-
-//  @BindView(R.id.signBase64) ImageView signBase64;
-
 
 
   private ArrayList<DecisionSpinnerItem> decisionSpinnerItems  = new ArrayList<>();;
@@ -435,7 +429,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment {
     private String TAG = this.getClass().getSimpleName();
     private String reg_number;
 
-    public Preview(Context context) {
+    Preview(Context context) {
       this.context = context;
     }
 
@@ -451,8 +445,9 @@ public class InfoActivityDecisionPreviewFragment extends Fragment {
       if( decision.getLetterhead() != null ) {
         printLetterHead(decision.getLetterhead());
       }
+      Timber.tag("getUrgencyText").v("%s",  decision.getUrgencyText() );
       if( decision.getUrgencyText() != null ){
-        printUrgency( decision.getUrgencyText().toString() );
+        printUrgency(decision.getUrgencyText());
       }
 
       if( decision.getBlocks().size() > 0 ){
@@ -575,7 +570,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment {
       urgencyView.setTextColor( ContextCompat.getColor(context, R.color.md_black_1000) );
 
       LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-      params.setMargins(0,0,0,10);
+      params.setMargins(0,2,0,2);
       urgencyView.setLayoutParams(params);
 
       preview_head.addView( urgencyView );
