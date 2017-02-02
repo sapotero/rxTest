@@ -56,7 +56,7 @@ public class InterfaceDocumentManager {
   }
 
   private void initialize() {
-    UID = settings.getString("main_menu.uid");
+    UID = settings.getString("activity_main_menu.uid");
   }
 
   private void unsubscribe(){

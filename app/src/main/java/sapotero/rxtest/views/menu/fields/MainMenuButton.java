@@ -1,6 +1,7 @@
 package sapotero.rxtest.views.menu.fields;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,7 +30,7 @@ public enum MainMenuButton {
   PRIMARY_CONSIDERATION ( 3,
     "Первичное рассмотрение %s" ,
     new ConditionBuilder[]{
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq(Fields.Status.PRIMARY_CONSIDERATION.getValue())  ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in(Arrays.asList(Fields.Status.PRIMARY_CONSIDERATION.getValue()))  ),
     }
   ),
   VIEWED ( 4,
@@ -41,12 +42,12 @@ public enum MainMenuButton {
   ASSIGN ( 5,
     "На подпись %s" ,
     new ConditionBuilder[]{
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq(Fields.Status.SIGNING.getValue())  ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in(Arrays.asList(Fields.Status.SIGNING.getValue())  ) ),
     }
   ),
   APPROVAL ( 6, "На согласование %s" ,
     new ConditionBuilder[]{
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq(Fields.Status.APPROVAL.getValue())  ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in(Arrays.asList(Fields.Status.APPROVAL.getValue()) ) ),
     }
   ),
   PROCESSED ( 7, "Обработанные %s" ,
@@ -97,14 +98,14 @@ public enum MainMenuButton {
     return item;
   }
 
-  private static class ButtonStatus {
-    private static ArrayList<String> getPerformance(){
+  public static class ButtonStatus {
+    public static ArrayList<String> getPerformance(){
       ArrayList<String> projectArray = new ArrayList<String>();
       projectArray.add( Fields.Status.SENT_TO_THE_REPORT.getValue() );
       projectArray.add( Fields.Status.SENT_TO_THE_PERFORMANCE.getValue() );
       return projectArray;
     }
-    private static ArrayList<String> getProject(){
+    public static ArrayList<String> getProject(){
       ArrayList<String> projectArray = new ArrayList<String>();
       projectArray.add( Fields.Status.APPROVAL.getValue() );
       projectArray.add( Fields.Status.SIGNING.getValue());

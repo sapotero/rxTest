@@ -32,9 +32,9 @@ import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
 import sapotero.rxtest.views.adapters.models.OrganizationItem;
+import sapotero.rxtest.views.custom.OrganizationSpinner;
 import sapotero.rxtest.views.menu.MenuBuilder;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
-import sapotero.rxtest.views.custom.OrganizationSpinner;
 import timber.log.Timber;
 
 public class DBQueryBuilder {
@@ -126,43 +126,20 @@ public class DBQueryBuilder {
 
       unsubscribe();
       if (conditions.size() == 0){
-        addToAdapterList( new ArrayList<>() );
+        addList( new ArrayList<>() );
       } else {
+
+
 
         Timber.v( "queryCount: %s", queryCount.get().value() );
         subscribe.add(
           query
-          .orderBy( RDocumentEntity.SORT_KEY.asc() )
+          .orderBy( RDocumentEntity.SORT_KEY.desc() )
           .get()
-          .toObservable()
+          .toSelfObservable()
           .subscribeOn(Schedulers.io())
           .observeOn( AndroidSchedulers.mainThread() )
-          .toList()
-          .subscribe(docs -> {
-            Timber.tag("loadFromDbQuery").e("docs: %s", docs.size() );
-            List<RDocumentEntity> new_docs = new ArrayList<>();
-
-            for (RDocumentEntity d:docs) {
-
-              //настройка
-              // если включена настройка "Отображать документы без резолюции"
-              if ( settings.getBoolean("settings_view_type_show_without_project").get() ){
-                new_docs.add(d);
-              } else {
-                if ( menuBuilder.getItem().isShowAnyWay() ){
-                  new_docs.add(d);
-                } else {
-                  if (d.getDecisions().size() > 0){
-                    new_docs.add(d);
-                  }
-                }
-
-              }
-
-            }
-
-            addToAdapterList(new_docs);
-          })
+          .subscribe(this::add, this::error)
         );
       }
 
@@ -170,11 +147,43 @@ public class DBQueryBuilder {
     }
   }
 
+  private void error(Throwable error) {
+    Timber.tag(TAG).e(error);
+  }
+
+  public void add(Result<RDocumentEntity> docs){
+    docs
+      .toObservable()
+      .subscribeOn(Schedulers.io())
+      .observeOn( AndroidSchedulers.mainThread() )
+      .toList()
+      .subscribe( doc -> {
+        addList(doc);
+//        Timber.tag("add").e("doc: %s", doc.getId() );
+
+        //настройка
+        // если включена настройка "Отображать документы без резолюции"
+//        if ( settings.getBoolean("settings_view_type_show_without_project").get() ){
+//          addOne(doc);
+//        } else {
+//          if ( menuBuilder.getItem().isShowAnyWay() ){
+//            addOne(doc);
+//          } else {
+//            if (doc.getDecisions().size() > 0){
+//              addOne(doc);
+//            }
+//          }
+//
+//        }
+      }, this::error);
+
+  }
+
   private void unsubscribe() {
     if (subscribe == null) {
       subscribe = new CompositeSubscription();
     }
-    if (subscribe != null && subscribe.hasSubscriptions()) {
+    if (subscribe.hasSubscriptions()) {
       subscribe.clear();
     }
   }
@@ -184,13 +193,13 @@ public class DBQueryBuilder {
     this.withFavorites = withFavorites;
     execute();
   }
-  private void addToAdapterList(List<RDocumentEntity> docs) {
+  private void addList(List<RDocumentEntity> docs) {
     ArrayList<Document> list_dosc = new ArrayList<>();
 
     if (docs.size() > 0) {
       for (int i = 0; i < docs.size(); i++) {
         RDocumentEntity doc = docs.get(i);
-//        Timber.tag(TAG).v("addToAdapter ++ " + doc.getUid());
+        Timber.tag(TAG).v("addToAdapter ++ " + doc.getUid());
 
         Document document = new Document();
         document.setChanged( doc.isChanged() );
@@ -218,10 +227,33 @@ public class DBQueryBuilder {
       showEmpty();
     }
 
+    progressBar.setVisibility(ProgressBar.GONE);
     adapter.setDocuments(list_dosc);
+
+
+  }
+
+  private void addOne(RDocumentEntity _document) {
     progressBar.setVisibility(ProgressBar.GONE);
 
-
+    Document document = new Document();
+    document.setChanged( _document.isChanged() );
+    document.setStatusCode( _document.getFilter() );
+    document.setUid(_document.getUid());
+    document.setMd5(_document.getMd5());
+    document.setControl(_document.isControl());
+    document.setFavorites(_document.isFavorites());
+    document.setSortKey(_document.getSortKey());
+    document.setTitle(_document.getTitle());
+    document.setRegistrationNumber(_document.getRegistrationNumber());
+    document.setRegistrationDate(_document.getRegistrationDate());
+    document.setUrgency(_document.getUrgency());
+    document.setShortDescription(_document.getShortDescription());
+    document.setComment(_document.getComment());
+    document.setExternalDocumentNumber(_document.getExternalDocumentNumber());
+    document.setReceiptDate(_document.getReceiptDate());
+    document.setOrganization(_document.getOrganization());
+    adapter.addItem(document);
   }
 
   private void showEmpty(){

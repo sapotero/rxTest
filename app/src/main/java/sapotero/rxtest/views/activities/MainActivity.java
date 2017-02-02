@@ -282,7 +282,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     });
   }
 
-
   private void initAdapters() {
     RAdapter = new DocumentsAdapter(this, new ArrayList<>());
     rv.setAdapter(RAdapter);
@@ -303,11 +302,12 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     toolbar.setContentInsetStartWithNavigation(250);
 
-    toolbar.inflateMenu(R.menu.main_menu);
+    toolbar.inflateMenu(R.menu.activity_main_menu);
     toolbar.setOnMenuItemClickListener(item -> {
       switch (item.getItemId()) {
         case R.id.reload:
           queue.getUncompleteTasks();
+          updateByStatus();
           break;
         case R.id.main_activity_menu_reload:
           updateByStatus();

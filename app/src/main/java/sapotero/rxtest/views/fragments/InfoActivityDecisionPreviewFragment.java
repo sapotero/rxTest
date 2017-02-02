@@ -165,13 +165,13 @@ public class InfoActivityDecisionPreviewFragment extends Fragment {
 
   private void loadSettings() {
     LOGIN    = settings.getString("login");
-    UID      = settings.getString("main_menu.uid");
+    UID      = settings.getString("activity_main_menu.uid");
     PASSWORD = settings.getString("password");
     TOKEN    = settings.getString("token");
     POSITION = settings.getInteger("position");
     DOCUMENT_UID = settings.getString("document.uid");
-    STATUS_CODE = settings.getString("main_menu.start");
-    REG_NUMBER = settings.getString("main_menu.regnumber");
+    STATUS_CODE = settings.getString("activity_main_menu.start");
+    REG_NUMBER = settings.getString("activity_main_menu.regnumber");
 
   }
 
@@ -353,13 +353,13 @@ public class InfoActivityDecisionPreviewFragment extends Fragment {
 //
 //    DocumentService documentService = retrofit.create( DocumentService.class );
 //
-//    Observable<DocumentInfo> main_menu = documentService.getInfo(
+//    Observable<DocumentInfo> activity_main_menu = documentService.getInfo(
 //      UID.get(),
 //      LOGIN.get(),
 //      TOKEN.get()
 //    );
 //
-//    main_menu.subscribeOn( Schedulers.newThread() )
+//    activity_main_menu.subscribeOn( Schedulers.newThread() )
 //      .observeOn( AndroidSchedulers.mainThread() )
 //      .subscribe(
 //        data -> {
@@ -442,10 +442,13 @@ public class InfoActivityDecisionPreviewFragment extends Fragment {
     private void show( Decision decision ){
       clear();
 
+      Timber.tag("getUrgencyText").v("%s", decision.getUrgencyText() );
+      Timber.tag("getLetterhead").v("%s",  decision.getLetterhead() );
+
       if( decision.getLetterhead() != null ) {
         printLetterHead(decision.getLetterhead());
       }
-      Timber.tag("getUrgencyText").v("%s",  decision.getUrgencyText() );
+
       if( decision.getUrgencyText() != null ){
         printUrgency(decision.getUrgencyText());
       }

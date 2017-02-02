@@ -169,7 +169,7 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
 
       SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences( getContext() );
       RxSharedPreferences rxPreferences = RxSharedPreferences.create(preferences);
-      Preference<String> number = rxPreferences.getString("main_menu.regnumber");
+      Preference<String> number = rxPreferences.getString("activity_main_menu.regnumber");
 
       printSigner( decision.getShowPosition(), decision.getSignerBlankText(), decision.getSignerPositionS(), decision.getDate(), number.get(), decision.getSignBase64()  );
     }

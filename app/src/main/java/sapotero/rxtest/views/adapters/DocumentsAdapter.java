@@ -100,7 +100,7 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
     if (number == null){
 //      SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
 //      RxSharedPreferences rxPreferences = RxSharedPreferences.create(preferences);
-//      Preference<String> uid = rxPreferences.getString("main_menu.uid");
+//      Preference<String> uid = rxPreferences.getString("activity_main_menu.uid");
 //      number = Fields.getJournalByUid( uid.get() ).getSingle();
       number = item.getRegistrationNumber();
     }
@@ -166,16 +166,16 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
       Preference<Integer> rxPosition = rxPreferences.getInteger("position");
       rxPosition.set(position);
 
-      Preference<String> rxUid = rxPreferences.getString("main_menu.uid");
+      Preference<String> rxUid = rxPreferences.getString("activity_main_menu.uid");
       rxUid.set( item.getUid() );
 
-      Preference<String> rxReg = rxPreferences.getString("main_menu.regnumber");
+      Preference<String> rxReg = rxPreferences.getString("activity_main_menu.regnumber");
       rxReg.set( item.getRegistrationNumber() );
 
-      Preference<String> rxStatus = rxPreferences.getString("main_menu.start");
+      Preference<String> rxStatus = rxPreferences.getString("activity_main_menu.start");
       rxStatus.set( item.getStatusCode() );
 
-      Preference<String> rxDate = rxPreferences.getString("main_menu.date");
+      Preference<String> rxDate = rxPreferences.getString("activity_main_menu.date");
       rxDate.set( item.getRegistrationDate() );
 
       Intent intent = new Intent(mContext, InfoActivity.class);
@@ -351,14 +351,15 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
 
   public void addItem(Document document) {
     documents.add(document);
-    notifyDataSetChanged();
-//    notifyItemInserted(documents.size());
+    notifyItemInserted(documents.size());
   }
 
   public void setDocuments(ArrayList<Document> docs) {
-    documents = docs;
-    notifyDataSetChanged();
-//    notifyItemInserted(documents.size());
+    clear();
+    for (Document d: docs) {
+      addItem(d);
+    }
+//    notifyDataSetChanged();
   }
 
   public void clear(){

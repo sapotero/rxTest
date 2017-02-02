@@ -55,7 +55,7 @@ public class AddFoldersJob extends BaseJob {
       .subscribeOn(Schedulers.newThread())
       .observeOn(Schedulers.newThread())
       .subscribe(u -> {
-        Timber.tag(TAG).v("update " + u.getTitle() );
+        Timber.tag(TAG).v("add " + u.getTitle() );
       });
   }
 

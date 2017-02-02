@@ -83,7 +83,7 @@ public class InfoCardFieldsFragment extends Fragment {
 
 
   private void loadSettings() {
-    Preference<String> DOCUMENT_UID = settings.getString("main_menu.uid");
+    Preference<String> DOCUMENT_UID = settings.getString("activity_main_menu.uid");
 
     dataStore
       .select(RDocumentEntity.class)

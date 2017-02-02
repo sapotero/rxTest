@@ -101,7 +101,7 @@ public class RoutePreviewFragment extends Fragment {
 
   @RequiresApi(api = Build.VERSION_CODES.M)
   private void loadSettings() {
-    DOCUMENT_UID = settings.getString("main_menu.uid");
+    DOCUMENT_UID = settings.getString("activity_main_menu.uid");
 
     dataStore
       .select(RDocumentEntity.class)

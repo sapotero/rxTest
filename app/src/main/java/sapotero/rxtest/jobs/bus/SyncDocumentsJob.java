@@ -213,7 +213,7 @@ public class SyncDocumentsJob  extends BaseJob {
         .subscribeOn( Schedulers.io() )
         .observeOn( Schedulers.io() )
         .subscribe(data -> {
-          Timber.tag(TAG).v("update " + data.getTitle() );
+          Timber.tag(TAG).v("add " + data.getTitle() );
           setData( data, document, false);
         },
         error -> {

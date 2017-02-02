@@ -109,7 +109,7 @@ public class DecisionManager implements DecisionInterface, DecisionBuilder.Callb
 
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
     RxSharedPreferences rxPreferences = RxSharedPreferences.create(preferences);
-    Preference<String> uid = rxPreferences.getString("main_menu.uid");
+    Preference<String> uid = rxPreferences.getString("activity_main_menu.uid");
 
     Timber.tag(TAG).w("[%s] -  %s:%s ", uid.get(), d.getId(), d.getLetterhead() );
 
@@ -183,11 +183,11 @@ public class DecisionManager implements DecisionInterface, DecisionBuilder.Callb
       //FIX DECISION
     dec.setDocument(document);
 
-//    RDecisionEntity temp = dataStore.update(dec).toBlocking().value();
+//    RDecisionEntity temp = dataStore.add(dec).toBlocking().value();
     Subscription temp = dataStore
       .update(dec)
       .subscribe( data ->{
-        Timber.tag(TAG).w( "update : %s", data.getBlocks().isEmpty() );
+        Timber.tag(TAG).w( "add : %s", data.getBlocks().isEmpty() );
       }, error -> {
         Timber.e( String.valueOf(error.getStackTrace()) );
       });

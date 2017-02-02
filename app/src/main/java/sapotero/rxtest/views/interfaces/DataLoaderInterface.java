@@ -16,7 +16,9 @@ import org.json.JSONObject;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -80,8 +82,6 @@ public class DataLoaderInterface {
   private SimpleDateFormat dateFormat;
   private CompositeSubscription subscription;
   private final Context context;
-  private static Object insrance;
-  private String currentUserId;
 
   public DataLoaderInterface(Context context) {
     this.context = context;
@@ -139,12 +139,20 @@ public class DataLoaderInterface {
   }
 
 
-  private void unsubscribe(){
-    if ( subscription != null && subscription.hasSubscriptions() ){
-      subscription.unsubscribe();
-    }
-    subscription = new CompositeSubscription();
+  public void setPassword(String password) {
+    PASSWORD.set(password);
   }
+
+  private void unsubscribe(){
+    if ( subscription == null ){
+      subscription = new CompositeSubscription();
+    }
+    if (subscription.hasSubscriptions()){
+      subscription.clear();
+    }
+  }
+
+
 
   public void updateAuth( String sign ){
     Timber.tag(TAG).i("updateAuth: %s", sign );
@@ -182,8 +190,6 @@ public class DataLoaderInterface {
         )
     );
   }
-
-
 
   public void tryToSignWithDc(String sign){
     Timber.tag(TAG).i("tryToSignWithDc: %s", sign );
@@ -234,38 +240,39 @@ public class DataLoaderInterface {
     );
   }
 
-  public void tryToSignWithLogin(String login, String password, String host){
+  public void tryToSignWithLogin(String login, String password, String host) {
     Timber.v("tryToSignWithLogin");
-    if ( validateHost( host ) ){
-      EventBus.getDefault().post( new AuthLoginCheckFailEvent("Wrong Host address") );
+    if (validateHost(host)) {
+      EventBus.getDefault().post(new AuthLoginCheckFailEvent("Wrong Host address"));
       return;
     }
 
-    Retrofit retrofit = new RetrofitManager( context, host, okHttpClient).process();
-    AuthService auth = retrofit.create( AuthService.class );
+    Retrofit retrofit = new RetrofitManager(context, host, okHttpClient).process();
+    AuthService auth = retrofit.create(AuthService.class);
 
     unsubscribe();
     subscription.add(
       auth
-        .getAuth( login, password )
-        .subscribeOn( Schedulers.io() )
-        .observeOn( AndroidSchedulers.mainThread() )
+        .getAuth(login, password)
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
         .unsubscribeOn(Schedulers.io())
         .subscribe(
           data -> {
             Timber.tag(TAG).i("tryToSignWithLogin: token %s", data.getAuthToken());
 
-            setHost( host );
-            setLogin( login );
-            setToken( data.getAuthToken() );
+            setHost(host);
+            setLogin(login);
+            setPassword(password);
+            setToken(data.getAuthToken());
 
-            EventBus.getDefault().post( new AuthLoginCheckSuccessEvent() );
+            EventBus.getDefault().post(new AuthLoginCheckSuccessEvent());
 
             updateDocuments();
           },
           error -> {
-            Timber.tag(TAG).i("tryToSignWithLogin error: %s" , error );
-            EventBus.getDefault().post( new AuthLoginCheckFailEvent(error.getMessage()) );
+            Timber.tag(TAG).i("tryToSignWithLogin error: %s", error);
+            EventBus.getDefault().post(new AuthLoginCheckFailEvent(error.getMessage()));
           }
         )
     );
@@ -442,12 +449,16 @@ public class DataLoaderInterface {
 
             for ( ButtonBuilder button: items.getMainMenuButtons() ){
               for ( ConditionBuilder condition: button.getConditions() ){
-
                 if ( condition.getField().getLeftOperand() == RDocumentEntity.FILTER ){
-                  filter_types.add( Fields.getStatus( condition.getField().getRightOperand().toString() ) );
+//                  List<String> tmp = (ArrayList<String>) condition.getField().getRightOperand();
+                  List<String> tmp = new ArrayList<>((Collection<? extends String>) condition.getField().getRightOperand());
+
+                  Timber.tag(TAG).w("list: %s", tmp);
+
+                  for (String str: tmp) {
+                    filter_types.add( Fields.getStatus( str ) );
+                  }
                 }
-
-
               }
             }
 
@@ -495,16 +506,15 @@ public class DataLoaderInterface {
 
   }
 
+
   private boolean isOnline() {
     ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
     NetworkInfo netInfo = cm.getActiveNetworkInfo();
     return netInfo != null && netInfo.isConnectedOrConnecting();
   }
 
-
   @Subscribe(threadMode = ThreadMode.BACKGROUND)
   public void onMessageEvent(StepperDcCheckEvent event) throws Exception {
     String token = event.pin;
   }
-
 }

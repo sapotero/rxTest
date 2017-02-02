@@ -97,7 +97,7 @@ public class InfoCardLinksFragment extends Fragment {
   private void loadSettings() {
     Timber.e( " loadSettings");
 
-      Preference<String> DOCUMENT_UID = settings.getString("main_menu.uid");
+      Preference<String> DOCUMENT_UID = settings.getString("activity_main_menu.uid");
 
       RDocumentEntity doc = dataStore
         .select(RDocumentEntity.class)

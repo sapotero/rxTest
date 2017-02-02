@@ -92,7 +92,7 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity {
   }
 
   private void updateUrgency() {
-    String uuid = settings.getString("main_menu.uid").get();
+    String uuid = settings.getString("activity_main_menu.uid").get();
     String condition = dataStore
       .select(RDocumentEntity.class)
       .where(RDocumentEntity.UID.eq(uuid)).get().first().getUrgency();

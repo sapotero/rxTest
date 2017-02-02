@@ -214,14 +214,14 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
 
   private void loadSettings() {
     LOGIN    = settings.getString("login");
-    UID      = settings.getString("main_menu.uid");
+    UID      = settings.getString("activity_main_menu.uid");
     PASSWORD = settings.getString("password");
     TOKEN    = settings.getString("token");
     POSITION = settings.getInteger("position");
     DOCUMENT_UID = settings.getString("document.uid");
-    STATUS_CODE = settings.getString("main_menu.start");
-    REG_NUMBER = settings.getString("main_menu.regnumber");
-    REG_DATE = settings.getString("main_menu.date");
+    STATUS_CODE = settings.getString("activity_main_menu.start");
+    REG_NUMBER = settings.getString("activity_main_menu.regnumber");
+    REG_DATE = settings.getString("activity_main_menu.date");
   }
 
   private void invalidate() {
@@ -315,7 +315,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
 
   public void update(String command){
 
-    Timber.tag(TAG).w("update %s", command );
+    Timber.tag(TAG).w("add %s", command );
 
     if ( Objects.equals(command, "change_person") ) {
 //      Toast.makeText( context.getApplicationContext(), "Операция передачи успешно завершена", Toast.LENGTH_SHORT).show();

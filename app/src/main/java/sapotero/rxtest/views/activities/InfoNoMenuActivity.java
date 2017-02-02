@@ -210,7 +210,7 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
     TOKEN    = settings.getString("token");
     POSITION = settings.getInteger("position");
     DOCUMENT_UID = settings.getString("document.uid");
-    STATUS_CODE = settings.getString("main_menu.start");
+    STATUS_CODE = settings.getString("activity_main_menu.start");
 
   }
 

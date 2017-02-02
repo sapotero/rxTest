@@ -51,9 +51,9 @@ public class NextPerson extends AbstractCommand {
   private void loadSettings(){
     LOGIN = settings.getString("login");
     TOKEN = settings.getString("token");
-    UID   = settings.getString("main_menu.uid");
+    UID   = settings.getString("activity_main_menu.uid");
     HOST  = settings.getString("settings_username_host");
-    STATUS_CODE = settings.getString("main_menu.start");
+    STATUS_CODE = settings.getString("activity_main_menu.start");
   }
   public NextPerson withPerson(String uid){
     this.official_id = uid;

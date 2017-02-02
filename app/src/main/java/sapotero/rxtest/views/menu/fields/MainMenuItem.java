@@ -62,8 +62,8 @@ public enum MainMenuItem {
     },
     true,
     new ConditionBuilder[]{
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq( Fields.Status.SIGNING.getValue()  ) ),
-      new ConditionBuilder( ConditionBuilder.Condition.OR,  RDocumentEntity.FILTER.eq( Fields.Status.APPROVAL.getValue() ) )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in( MainMenuButton.ButtonStatus.getProject() ) ),
+//      new ConditionBuilder( ConditionBuilder.Condition.OR,  RDocumentEntity.FILTER.eq( Fields.Status.APPROVAL.getValue() ) )
     },
     new ConditionBuilder[]{},
     true),

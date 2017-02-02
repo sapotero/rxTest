@@ -49,17 +49,17 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapte
       Preference<Integer> rxPosition = rxPreferences.getInteger("position");
       rxPosition.set(position);
 
-      Preference<String> rxUid = rxPreferences.getString("main_menu.uid");
+      Preference<String> rxUid = rxPreferences.getString("activity_main_menu.uid");
       rxUid.set( doc.getUid() );
 
-      Preference<String> rxReg = rxPreferences.getString("main_menu.regnumber");
+      Preference<String> rxReg = rxPreferences.getString("activity_main_menu.regnumber");
       rxReg.set( doc.getRegistrationNumber() );
 
-      Preference<String> rxStatus = rxPreferences.getString("main_menu.start");
+      Preference<String> rxStatus = rxPreferences.getString("activity_main_menu.start");
       rxStatus.set( doc.getFilter() );
 
 
-      Preference<String> rxDate = rxPreferences.getString("main_menu.date");
+      Preference<String> rxDate = rxPreferences.getString("activity_main_menu.date");
       rxDate.set( doc.getRegistrationDate() );
 
       Intent intent = new Intent(context, InfoActivity.class);
