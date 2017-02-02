@@ -273,7 +273,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
             }
           }
 
-
           SearchResultAdapter adapter = new SearchResultAdapter( context, docs );
           searchView.setSuggestionAdapter( adapter );
 

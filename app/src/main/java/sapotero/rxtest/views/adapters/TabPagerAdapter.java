@@ -8,7 +8,6 @@ import sapotero.rxtest.views.fragments.InfoCardDocumentsFragment;
 import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
 
 public class TabPagerAdapter extends FragmentPagerAdapter {
-  private int tabs_count;
   private String uid;
 
   public TabPagerAdapter(FragmentManager fragmentManager) {

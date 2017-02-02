@@ -26,52 +26,6 @@
 
     </LinearLayout>
 
-    <!--<LinearLayout-->
-        <!--style="?android:attr/buttonBarStyle"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:measureWithLargestChild="true"-->
-        <!--android:layout_alignParentBottom="true"-->
-        <!--android:orientation="horizontal"-->
-        <!--android:background="@drawable/pdf_fullscreen"-->
-        <!--&gt;-->
-
-        <!--<Spinner-->
-            <!--android:id="@+id/documents_files"-->
-            <!--android:layout_width="0dp"-->
-            <!--android:layout_height="match_parent"-->
-            <!--android:padding="@dimen/half_date_offset"-->
-            <!--android:layout_weight="2"/>-->
-
-        <!--<TextView-->
-            <!--android:gravity="center|start"-->
-            <!--android:id="@+id/pageInfo"-->
-            <!--android:text=""-->
-            <!--android:width="40dp"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="match_parent"-->
-            <!--android:layout_weight="1"-->
-            <!--android:textSize="18dp"-->
-            <!--/>-->
-
-
-        <!--<Button-->
-            <!--android:id="@+id/pdf_previous"-->
-            <!--style="?android:attr/buttonBarButtonStyle"-->
-            <!--android:layout_width="0dp"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_weight="1"-->
-            <!--android:text="@string/pdf_button_prev_page" />-->
-        <!--<Button-->
-        <!--android:id="@+id/pdf_next"-->
-        <!--style="?android:attr/buttonBarButtonStyle"-->
-        <!--android:layout_width="0dp"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_weight="1"-->
-        <!--android:text="@string/pdf_button_next_page" />-->
-
-    <!--</LinearLayout>-->
-
     <FrameLayout
         android:id="@+id/info_card_pdf_wrapper"
         android:background="@drawable/pdf_fullscreen"
@@ -172,6 +126,19 @@
         android:layout_centerHorizontal="true"
 
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
+
+    <TextView
+        android:id="@+id/fragment_info_card_urgency_title"
+        android:visibility="gone"
+        android:text="Срочно"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:paddingTop="@dimen/half_date_offset"
+        android:paddingRight="@dimen/date_offset"
+        android:textColor="@color/md_red_500"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"/>
 
 
 </RelativeLayout>

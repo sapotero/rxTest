@@ -92,6 +92,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   @BindView(R.id.info_card_pdf_no_files) TextView no_files;
   @BindView(R.id.info_card_pdf_wrapper)  FrameLayout pdf_wrapper;
 
+  @BindView(R.id.fragment_info_card_urgency_title) TextView urgency;
 
 
   private int index;
@@ -142,13 +143,18 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     ArrayList<Image> documents = new ArrayList<Image>();
     adapter = new DocumentLinkAdapter(mContext, documents);
 
-    List<RDocumentEntity> files = dataStore
+    List<RDocumentEntity> doc = dataStore
       .select(RDocumentEntity.class)
       .where(RDocumentEntity.UID.eq( uid == null ? UID.get() : uid ))
       .get()
       .toList();
 
-    for ( RDocumentEntity document: files){
+    //resolved https://tasks.n-core.ru/browse/MVDESD-12626 - срочность
+    for ( RDocumentEntity document: doc){
+      if ( document.getUrgency() != null ){
+        urgency.setVisibility(View.VISIBLE);
+      }
+
       if (document.getImages().size() > 0){
         for (RImage image : document.getImages()) {
           RImageEntity img = (RImageEntity) image;

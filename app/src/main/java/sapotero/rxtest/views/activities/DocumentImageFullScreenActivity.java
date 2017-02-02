@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
 import android.widget.TextView;
 
 import com.f2prateek.rx.preferences.RxSharedPreferences;
@@ -19,8 +20,11 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.requery.Persistable;
+import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.views.custom.CircleLeftArrow;
 import sapotero.rxtest.views.custom.CircleRightArrow;
@@ -28,17 +32,18 @@ import timber.log.Timber;
 
 public class DocumentImageFullScreenActivity extends AppCompatActivity {
 
-  @BindView(R.id.document_image_toolbar) Toolbar toolbar;
-  @BindView(R.id.document_image_fullscreen) PDFView pdfView;
+  @BindView(R.id.document_image_toolbar)       Toolbar toolbar;
+  @BindView(R.id.document_image_fullscreen)    PDFView pdfView;
+  @BindView(R.id.document_image_urgency_title) TextView urgency;
 
-  @BindView(R.id.pdf_fullscreen_prev_document) CircleLeftArrow prev_document;
-  @BindView(R.id.pdf_fullscreen_next_document) CircleRightArrow next_document;
-
+  @BindView(R.id.pdf_fullscreen_prev_document)    CircleLeftArrow prev_document;
+  @BindView(R.id.pdf_fullscreen_next_document)    CircleRightArrow next_document;
   @BindView(R.id.pdf_fullscreen_document_counter) TextView document_counter;
   @BindView(R.id.pdf_fullscreen_page_counter)     TextView page_counter;
 
 
   @Inject RxSharedPreferences settings;
+  @Inject SingleEntityStore<Persistable> dataStore;
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -70,6 +75,10 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity {
       Timber.tag(TAG).d("FILES: %s", files.size() );
     }
 
+    updateUrgency();
+
+
+
     updateDocument();
 
     toolbar.setTitleTextColor(getResources().getColor(R.color.md_grey_100));
@@ -80,6 +89,18 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity {
       }
     );
 
+  }
+
+  private void updateUrgency() {
+    String uuid = settings.getString("main_menu.uid").get();
+    String condition = dataStore
+      .select(RDocumentEntity.class)
+      .where(RDocumentEntity.UID.eq(uuid)).get().first().getUrgency();
+
+    //resolved https://tasks.n-core.ru/browse/MVDESD-12626 - срочность
+    if (condition != null) {
+      urgency.setVisibility(View.VISIBLE);
+    }
   }
 
   public void updateDocument(){
