@@ -152,6 +152,8 @@ public class DBQueryBuilder {
   }
 
   public void add(Result<RDocumentEntity> docs){
+    //FIX переделать добавление документов в адаптер из базы
+    
     docs
       .toObservable()
       .subscribeOn(Schedulers.io())
