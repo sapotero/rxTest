@@ -347,5 +347,4 @@ public class Document implements Serializable {
         this.viewed = viewed;
     }
 
-
 }

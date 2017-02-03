@@ -237,6 +237,7 @@ public enum MainMenuItem {
   }
 
   public void recalcuate(){
+
     Timber.tag(TAG).e("recalcuate");
     for (ButtonBuilder button: buttonsList){
       button.recalculate();

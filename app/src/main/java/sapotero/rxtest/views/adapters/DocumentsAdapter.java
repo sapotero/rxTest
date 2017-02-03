@@ -1,5 +1,6 @@
 package sapotero.rxtest.views.adapters;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.Notification;
@@ -25,19 +26,27 @@ import com.daimajia.swipe.adapters.RecyclerSwipeAdapter;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
+import rx.Observable;
 import rx.functions.Action1;
+import rx.subjects.PublishSubject;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
+import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.views.activities.InfoActivity;
 import sapotero.rxtest.views.dialogs.InfoCardDialogFragment;
@@ -45,6 +54,7 @@ import sapotero.rxtest.views.managers.db.managers.DBDocumentManager;
 import sapotero.rxtest.views.managers.menu.OperationManager;
 import sapotero.rxtest.views.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.views.managers.menu.utils.CommandParams;
+import sapotero.rxtest.views.menu.MenuBuilder;
 import timber.log.Timber;
 
 public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.SimpleViewHolder> implements Action1<List<Document>>, OperationManager.Callback {
@@ -57,13 +67,58 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
 
   private Context mContext;
   private List<Document> documents;
+  private ObservableDocumentList real_docs;
+  private MenuBuilder mainMenu;
 
+  private static class ObservableDocumentList<T> {
+
+    protected final List<T> list;
+    protected final PublishSubject<T> onAdd;
+
+    public ObservableDocumentList() {
+      this.list = new ArrayList<T>();
+      this.onAdd = PublishSubject.create();
+    }
+    public void add(T value) {
+      list.add(value);
+      onAdd.onNext(value);
+    }
+    public void clear() {
+      list.clear();
+    }
+
+    public Observable<T> getObservable() {
+      return onAdd;
+    }
+  }
+
+  @SuppressLint("NewApi")
   public DocumentsAdapter(Context context, List<Document> documents) {
     this.mContext  = context;
     this.documents = documents;
 
+    real_docs = new ObservableDocumentList();
+
+    populateDocs(documents);
+
+    real_docs.getObservable()
+      .debounce(1000, TimeUnit.MILLISECONDS)
+      .subscribe( data -> {
+        Timber.e("FROM UPDATE STREAM");
+        if (mainMenu != null) {
+          EventBus.getDefault().post(new UpdateCountEvent());
+//          mainMenu.updateCount();
+        }
+      });
+
     EsdApplication.getComponent(context).inject(this);
     operationManager.registerCallBack(this);
+  }
+
+  private void populateDocs(List<Document> documents) {
+    for (int i = 0; i < documents.size(); i++) {
+      real_docs.add(documents.get(i));
+    }
   }
 
   @Override
@@ -349,23 +404,25 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
     notifyDataSetChanged();
   }
 
-  public void addItem(Document document) {
-    documents.add(document);
-    notifyItemInserted(documents.size());
-  }
-
-  public void setDocuments(ArrayList<Document> docs) {
-    clear();
-    for (Document d: docs) {
-      addItem(d);
-    }
-//    notifyDataSetChanged();
-  }
-
-  public void clear(){
-    documents.clear();
-    notifyDataSetChanged();
-  }
+//  public void addItem(Document document) {
+//
+//    Timber.v("keys %s | hasKey: %s | uid: %s", Holder.MAP.keySet(), Holder.MAP.containsKey(document.getRegistrationNumber()), document.getRegistrationNumber() );
+//
+//    if ( !Holder.MAP.containsKey( document.getRegistrationNumber()) ){
+//      Holder.MAP.put( document.getRegistrationNumber(), document );
+//      documents.add(0, document);
+//      notifyItemInserted(0);
+//    }
+//
+//  }
+//
+//  public void setDocuments(ArrayList<Document> docs) {
+//    clear();
+//    for (Document d: docs) {
+//      addItem(d);
+//    }
+////    notifyDataSetChanged();
+//  }
 
   public Integer getPositionByUid(String uid) {
     Document document = null;
@@ -385,6 +442,49 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
 
     return position;
 
+  }
+
+  public void clear(){
+    notifyItemRangeRemoved(0, documents.size());
+    Holder.MAP.clear();
+    documents.clear();
+    real_docs.clear();
+//    notifyDataSetChanged();
+  }
+
+  public void addItem(Document document) {
+    if ( !Holder.MAP.containsKey( document.getUid()) ){
+      Holder.MAP.put( document.getUid(), document );
+      documents.add(document);
+      real_docs.add(document);
+      notifyItemInserted(documents.size());
+      this.mainMenu = mainMenu;
+    }
+  }
+
+  public void setDocuments(ArrayList<Document> list_dosc, RecyclerView recyclerView) {
+    Timber.e("setDocuments %s", list_dosc.size());
+    documents = list_dosc;
+    notifyDataSetChanged();
+//    boolean new_document = false;
+//
+//    for (int i = 0; i < documents.size(); i++) {
+//      if ( Objects.equals(document.getUid(), documents.get(i).getUid()) ){
+//        new_document = true;
+//      }
+//    }
+//
+//    if (new_document){
+//      documents.add(document);
+//      notifyItemInserted(documents.size());
+//    }
+//
+//    for (Document doc: documents) {
+//      if ( Objects.equals(doc.getUid(), document.getUid()) ){
+//        documents.add(document);
+//        notifyItemInserted(documents.size());
+//      }
+//    }
   }
 
   //  ViewHolder Class
@@ -471,5 +571,9 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
   @Override
   public void onExecuteError() {
     Timber.tag("OpManagerAdapter").i("onExecuteSuccess");
+  }
+
+  private static class Holder {
+    static Map<String, Document> MAP = new HashMap<>();
   }
 }

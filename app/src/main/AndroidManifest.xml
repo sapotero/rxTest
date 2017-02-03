@@ -27,12 +27,14 @@
             </intent-filter>
         </activity>
         <activity
+            android:exported="true"
             android:name=".views.activities.MainActivity"
             android:screenOrientation="landscape">
         </activity>
         <activity
             android:name=".views.activities.InfoActivity"
-            android:screenOrientation="landscape">
+            android:screenOrientation="landscape"
+            >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".views.activities.MainActivity"/>
@@ -51,23 +53,16 @@
             android:exported="true">
         </service>
 
-        <activity android:name=".views.activities.SettingsActivity">
+        <activity android:screenOrientation="landscape" android:name=".views.activities.SettingsActivity">
         </activity>
-        <activity android:name=".views.activities.DecisionConstructorActivity">
+        <activity android:screenOrientation="landscape" android:name=".views.activities.DecisionConstructorActivity">
         </activity>
-        <activity android:name=".views.activities.DocumentImageFullScreenActivity">
+        <activity android:screenOrientation="landscape" android:name=".views.activities.DocumentImageFullScreenActivity">
         </activity>
-        <activity android:name=".views.activities.DocumentInfocardFullScreenActivity">
+        <activity android:screenOrientation="landscape" android:name=".views.activities.DocumentInfocardFullScreenActivity">
         </activity>
-        <activity android:name=".views.activities.SettingsTemplatesActivity">
+        <activity android:screenOrientation="landscape" android:name=".views.activities.SettingsTemplatesActivity">
         </activity>
-
-        <provider
-            android:name=".utils.DBSearchFinder"
-            android:authorities="DBSearchFinder"
-            android:enabled="true"
-            android:exported="true">
-        </provider>
     </application>
 
 </manifest>

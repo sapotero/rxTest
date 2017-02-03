@@ -32,12 +32,22 @@ public class MenuBuilder implements ItemsBuilder.Callback{
 
   private String user;
 
+  private ArrayList<ConditionBuilder> result;
+
+  public ArrayList<ConditionBuilder> getResult() {
+    return result;
+  }
+
   public boolean isVisible() {
     return itemsBuilder.isVisible();
   }
 
   public void selectJournal(int type) {
     itemsBuilder.get(type);
+  }
+
+  public void updateCount() {
+    itemsBuilder.getSelectedItem().recalcuate();
   }
 
 
@@ -134,6 +144,8 @@ public class MenuBuilder implements ItemsBuilder.Callback{
 
   @Override
   public void onMenuUpdate( ArrayList<ConditionBuilder> result ) {
+
+    this.result = result;
 
     Timber.tag(TAG).i( "onMenuUpdate" );
 

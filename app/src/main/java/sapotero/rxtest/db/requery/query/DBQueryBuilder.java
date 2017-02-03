@@ -1,6 +1,7 @@
 package sapotero.rxtest.db.requery.query;
 
 import android.content.Context;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -54,6 +55,7 @@ public class DBQueryBuilder {
   private OrganizationSpinner organizationSelector;
   private Boolean withFavorites;
   private MenuBuilder menuBuilder;
+  private RecyclerView recyclerView;
 
   public DBQueryBuilder(Context context) {
     this.context = context;
@@ -125,16 +127,16 @@ public class DBQueryBuilder {
 
 
       unsubscribe();
+      adapter.clear();
       if (conditions.size() == 0){
-        addList( new ArrayList<>() );
+        showEmpty();
       } else {
-
 
 
         Timber.v( "queryCount: %s", queryCount.get().value() );
         subscribe.add(
           query
-          .orderBy( RDocumentEntity.SORT_KEY.desc() )
+          .orderBy( RDocumentEntity.SORT_KEY.asc() )
           .get()
           .toSelfObservable()
           .subscribeOn(Schedulers.io())
@@ -152,31 +154,50 @@ public class DBQueryBuilder {
   }
 
   public void add(Result<RDocumentEntity> docs){
+
+    docs
+      .toObservable()
+      .subscribeOn(Schedulers.io())
+      .observeOn( AndroidSchedulers.mainThread() )
+      .subscribe( doc -> {
+        Timber.tag("add").e("doc: %s", doc.getId() );
+//        addOne(doc);
+
+        // настройка
+        // если включена настройка "Отображать документы без резолюции"
+        if ( settings.getBoolean("settings_view_type_show_without_project").get() ){
+          addOne(doc);
+        } else {
+          if ( menuBuilder.getItem().isShowAnyWay() ){
+            addOne(doc);
+          } else {
+            if (doc.getDecisions().size() > 0){
+              addOne(doc);
+            }
+          }
+
+        }
+      }, this::error);
+
+  }
+  public void addList(Result<RDocumentEntity> docs){
+
     //FIX переделать добавление документов в адаптер из базы
-    
     docs
       .toObservable()
       .subscribeOn(Schedulers.io())
       .observeOn( AndroidSchedulers.mainThread() )
       .toList()
-      .subscribe( doc -> {
-        addList(doc);
+      .subscribe( list -> {
 //        Timber.tag("add").e("doc: %s", doc.getId() );
-
-        //настройка
-        // если включена настройка "Отображать документы без резолюции"
-//        if ( settings.getBoolean("settings_view_type_show_without_project").get() ){
-//          addOne(doc);
-//        } else {
-//          if ( menuBuilder.getItem().isShowAnyWay() ){
-//            addOne(doc);
-//          } else {
-//            if (doc.getDecisions().size() > 0){
-//              addOne(doc);
-//            }
-//          }
+//
+//        if ( menuBuilder.getResult() != null ){
+//          ArrayList<ConditionBuilder> tmp_conditions = menuBuilder.getResult();
 //
 //        }
+
+        addList(list, recyclerView);
+
       }, this::error);
 
   }
@@ -195,7 +216,7 @@ public class DBQueryBuilder {
     this.withFavorites = withFavorites;
     execute();
   }
-  private void addList(List<RDocumentEntity> docs) {
+  private void addList(List<RDocumentEntity> docs, RecyclerView recyclerView) {
     ArrayList<Document> list_dosc = new ArrayList<>();
 
     if (docs.size() > 0) {
@@ -230,13 +251,15 @@ public class DBQueryBuilder {
     }
 
     progressBar.setVisibility(ProgressBar.GONE);
-    adapter.setDocuments(list_dosc);
+    adapter.setDocuments(list_dosc, this.recyclerView);
 
 
   }
 
   private void addOne(RDocumentEntity _document) {
     progressBar.setVisibility(ProgressBar.GONE);
+
+//    Timber.tag(TAG).v("addToAdapter %s\n%s\n%s", _document.getUid(), _document.getUser(), _document.getFilter() );
 
     Document document = new Document();
     document.setChanged( _document.isChanged() );
@@ -255,10 +278,12 @@ public class DBQueryBuilder {
     document.setExternalDocumentNumber(_document.getExternalDocumentNumber());
     document.setReceiptDate(_document.getReceiptDate());
     document.setOrganization(_document.getOrganization());
+
     adapter.addItem(document);
   }
 
   private void showEmpty(){
+    progressBar.setVisibility(ProgressBar.GONE);
     documents_empty_list.setVisibility(View.VISIBLE);
   }
 
@@ -378,6 +403,11 @@ public class DBQueryBuilder {
 
   public DBQueryBuilder withItem(MenuBuilder menuBuilder) {
     this.menuBuilder = menuBuilder;
+    return this;
+  }
+
+  public DBQueryBuilder withRecycleView(RecyclerView recyclerView) {
+    this.recyclerView = recyclerView;
     return this;
   }
 }

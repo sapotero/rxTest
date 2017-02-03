@@ -58,6 +58,7 @@ import sapotero.rxtest.db.requery.query.DBQueryBuilder;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.bus.GetDocumentInfoEvent;
 import sapotero.rxtest.events.bus.UpdateDocumentJobEvent;
+import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
 import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
@@ -181,6 +182,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       .withItem(menuBuilder)
       .withOrganizationsAdapter( organization_adapter )
       .withEmptyView( documents_empty_list )
+      .withRecycleView(rv)
       .withProgressBar( progressBar );
 
 //    dbQueryBuilder.printFolders();
@@ -581,7 +583,11 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     View view = a.itemView.findViewById(field);
     view.setVisibility(visibility);
+  }
 
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(UpdateCountEvent event) {
+    menuBuilder.updateCount();
   }
 
 
