@@ -12,6 +12,7 @@ public class Fields {
     PRIMARY_CONSIDERATION   ("primary_consideration",   "Первичное рассмотрение"),
     APPROVAL                ("approval",                "Согласование проектов документов"),
     SIGNING                 ("signing",                 "Подписание проектов документов"),
+    LINK                    ("link",                    "Связанный документ"),
     PROCESSED               ("processed",               "Рассмотренные");
 
     private final String value;

@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
+import com.github.pwittchen.reactivenetwork.library.ReactiveNetwork;
 import com.mikepenz.material_design_iconic_typeface_library.MaterialDesignIconic;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
@@ -50,6 +51,8 @@ import butterknife.OnClick;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
 import okhttp3.OkHttpClient;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
@@ -201,7 +204,23 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     initSearch();
 
+    isConnected();
+
   }
+  public void isConnected(){
+    ReactiveNetwork.observeInternetConnectivity()
+      .subscribeOn(Schedulers.io())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(isConnectedToInternet -> {
+        try {
+          toolbar.getMenu().findItem(R.id.online).setTitle( isConnectedToInternet ? "В сети" : "Не в сети" );
+          toolbar.getMenu().findItem(R.id.online).setIcon( isConnectedToInternet  ? R.drawable.icon_online : R.drawable.icon_offline );
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      });
+  }
+
 
   private void initSearch() {
     searchView = SearchView.getInstance(this);
@@ -249,15 +268,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
                     );
                     // query = query.and(RDocumentEntity.SHORT_DESCRIPTION.like("%" + newText + "%"));
                     break;
-                  case 2:
-                    result.add(
-                      dataStore
-                        .select(RDocumentEntity.class)
-                        .where( RDocumentEntity.USER.eq( settings.getString("login").get() ) )
-                        .and(RDocumentEntity.EXTERNAL_DOCUMENT_NUMBER.like("%" + newText + "%")).get().toList()
-                    );
-                    // query = query.and(RDocumentEntity.EXTERNAL_DOCUMENT_NUMBER.like("%" + newText + "%"));
-                    break;
                   default:
                     break;
                 }
@@ -299,8 +309,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private void initToolbar() {
     toolbar.setTitle("СЕРВИС ЭЛЕКТРОННОГО ДОКУМЕНТООБОРОТА");
     toolbar.setSubtitle("МВД России");
-    toolbar.setTitleTextColor(getResources().getColor(R.color.md_grey_100));
-    toolbar.setSubtitleTextColor(getResources().getColor(R.color.md_grey_400));
+    toolbar.setTitleTextColor(getResources().getColor(R.color.md_white_1000));
+    toolbar.setSubtitleTextColor(getResources().getColor(R.color.md_white_1000));
+
 
     toolbar.setContentInsetStartWithNavigation(250);
 
@@ -350,9 +361,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @Override
   public void onResume() {
     super.onResume();
-    menuBuilder.build();
-    menuBuilder.getItem().recalcuate();
-    dbQueryBuilder.execute();
+//    menuBuilder.build();
+//    menuBuilder.getItem().recalcuate();
+//    dbQueryBuilder.execute();
   }
 
 
@@ -478,15 +489,16 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void drawer_build_head() {
+
+
     AccountHeader headerResult = new AccountHeaderBuilder()
       .withActivity(this)
       .withHeaderBackground(R.drawable.header)
       .addProfiles(
         new ProfileDrawerItem()
-          .withName( settings.getString("login").get() )
-          .withEmail( settings.getString("login").get() )
+          .withName(  settings.getString("current_user_organization").get() )
+          .withEmail( settings.getString("current_user").get() )
           .withSetSelected(true)
-//          .withEmail("admin_id")
           .withIcon(R.drawable.gerb)
       )
       .withOnAccountHeaderListener(

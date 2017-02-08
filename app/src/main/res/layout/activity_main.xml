@@ -191,6 +191,16 @@
         android:layout_centerHorizontal="true"
         android:layout_weight="1"/>
 
+    <!--<android.support.v7.widget.Toolbar-->
+        <!--android:id="@+id/toolbar"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="80dp"-->
+        <!--android:paddingTop="@dimen/half_date_offset"-->
+        <!--android:transitionName="actionBar"-->
+        <!--android:minHeight="?attr/actionBarSize"-->
+        <!--android:background="@drawable/toolbar_background"-->
+        <!--android:theme="@style/AlertDialog.AppCompat.Light"-->
+        <!--android:elevation="8dp"/>-->
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
@@ -199,7 +209,9 @@
         android:transitionName="actionBar"
         android:minHeight="?attr/actionBarSize"
         android:background="@drawable/toolbar_background"
-
+        app:navigationIcon="?attr/homeAsUpIndicator"
+        app:theme="@style/ToolbarColoredBackArrow"
+        android:theme="@style/AlertDialog.AppCompat.Light"
         android:elevation="8dp"/>
 
 </RelativeLayout>

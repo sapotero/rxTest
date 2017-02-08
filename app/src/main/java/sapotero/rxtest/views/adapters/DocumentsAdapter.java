@@ -32,7 +32,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -44,7 +46,11 @@ import rx.functions.Action1;
 import rx.subjects.PublishSubject;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
+import sapotero.rxtest.db.requery.models.RLinks;
+import sapotero.rxtest.db.requery.models.RLinksEntity;
+import sapotero.rxtest.db.requery.models.RSignerEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.retrofit.models.documents.Document;
@@ -66,9 +72,14 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
   @Inject OperationManager operationManager;
 
   private Context mContext;
-  private List<Document> documents;
+  private List<RDocumentEntity> documents;
   private ObservableDocumentList real_docs;
   private MenuBuilder mainMenu;
+
+  @Override
+  public void call(List<Document> documents) {
+
+  }
 
   private static class ObservableDocumentList<T> {
 
@@ -93,7 +104,7 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
   }
 
   @SuppressLint("NewApi")
-  public DocumentsAdapter(Context context, List<Document> documents) {
+  public DocumentsAdapter(Context context, List<RDocumentEntity> documents) {
     this.mContext  = context;
     this.documents = documents;
 
@@ -115,7 +126,7 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
     operationManager.registerCallBack(this);
   }
 
-  private void populateDocs(List<Document> documents) {
+  private void populateDocs(List<RDocumentEntity> documents) {
     for (int i = 0; i < documents.size(); i++) {
       real_docs.add(documents.get(i));
     }
@@ -129,7 +140,7 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
 
   @Override
   public void onBindViewHolder(final SimpleViewHolder viewHolder, final int position) {
-    final Document item = documents.get(position);
+    final RDocumentEntity item = documents.get(position);
 
     viewHolder.title.setText( item.getShortDescription() );
 
@@ -137,13 +148,20 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
     //  На плитке Обращения и НПА не показывать строку "Без организации", если её действительно нет(
 //    Timber.d("start with: %s %s", item.getUid().startsWith( Fields.Journal.INCOMING_ORDERS.getValue() ), item.getUid().startsWith( Fields.Journal.CITIZEN_REQUESTS.getValue() ));
     if(
-      item.getUid().startsWith( Fields.Journal.INCOMING_ORDERS.getValue() ) ||
-        item.getUid().startsWith( Fields.Journal.CITIZEN_REQUESTS.getValue() )
+          item.getUid().startsWith( Fields.Journal.INCOMING_ORDERS.getValue() )
+      ||  item.getUid().startsWith( Fields.Journal.CITIZEN_REQUESTS.getValue() )
+
       ){
 
       if ( item.getOrganization().toLowerCase().contains("без организации") ){
         Timber.d("empty organization" );
         viewHolder.from.setText("");
+      } else {
+        Timber.e( "SIGNER %s", item.getSigner() );
+        if ( item.getSigner() != null ){
+          RSignerEntity signer = (RSignerEntity) item.getSigner();
+          viewHolder.from.setText( signer.getOrganisation() );
+        }
       }
 
     } else {
@@ -153,14 +171,41 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
     String number = item.getExternalDocumentNumber();
 
     if (number == null){
-//      SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-//      RxSharedPreferences rxPreferences = RxSharedPreferences.create(preferences);
-//      Preference<String> uid = rxPreferences.getString("activity_main_menu.uid");
-//      number = Fields.getJournalByUid( uid.get() ).getSingle();
       number = item.getRegistrationNumber();
     }
-//    viewHolder.date.setText( number + " от " + item.getRegistrationDate());
+
     viewHolder.date.setText( item.getTitle() );
+
+//    Timber.tag("Status LINKS").e("filter: %s | %s | %s", item.getFilter(), Fields.Status.SIGNING.getValue(), Fields.Status.APPROVAL.getValue() );
+    if( Objects.equals(item.getFilter(), Fields.Status.SIGNING.getValue()) ||  Objects.equals(item.getFilter(), Fields.Status.APPROVAL.getValue()) ){
+
+      Timber.tag("Status LINKS").e("size: %s", item.getLinks().size() );
+
+      if ( item.getLinks().size() >= 1){
+
+        try {
+          Set<RLinks> links = item.getLinks();
+
+          ArrayList<RLinks> arrayList = new ArrayList<RLinks>();
+          for (RLinks str : links) {
+            arrayList.add(str);
+          }
+
+          RLinksEntity _link = (RLinksEntity) arrayList.get(0);
+          Timber.tag("Status LINKS").e("size > 0 | first: %s", _link.getUid() );
+
+          RDocumentEntity doc = dataStore
+            .select(RDocumentEntity.class)
+            .where(RDocumentEntity.UID.eq( _link.getUid() ))
+            .get().first();
+
+          viewHolder.date.setText( item.getTitle() + " на " + doc.getRegistrationNumber() );
+        } catch (NoSuchElementException e) {
+          e.printStackTrace();
+        }
+      }
+
+    }
 
     viewHolder.swipeLayout.setShowMode(SwipeLayout.ShowMode.PullOut);
 
@@ -169,18 +214,18 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
 
     // FIX добавить отображение ОжидаетСинхронизации
     // FIX отображать срочность поверх всего во фрагменте
-    if (item.getChanged() != null){
+    if (item.isChanged() != null){
 //      viewHolder.wait_for_sync.setVisibility(  item.getChanged() ? View.VISIBLE : View.GONE );
     }
 
-    if ( item.getControl() != null && item.getControl() ){
-      Timber.d( "item.getControl() %s",  item.getControl().toString() );
+    if ( item.isControl() != null && item.isControl() ){
+      Timber.d( "item.getControl() %s",  item.isControl().toString() );
       viewHolder.control_label.setVisibility(View.VISIBLE);
     } else {
       viewHolder.control_label.setVisibility(View.GONE);
     }
-    if ( item.getFavorites() != null && item.getFavorites() ){
-      Timber.d( "item.getFavorites() %s", item.getFavorites().toString() );
+    if ( item.isFavorites() != null && item.isFavorites() ){
+      Timber.d( "item.getFavorites() %s", item.isFavorites().toString() );
       viewHolder.favorite_label.setVisibility(View.VISIBLE);
     } else {
       viewHolder.favorite_label.setVisibility(View.GONE);
@@ -228,7 +273,7 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
       rxReg.set( item.getRegistrationNumber() );
 
       Preference<String> rxStatus = rxPreferences.getString("activity_main_menu.start");
-      rxStatus.set( item.getStatusCode() );
+      rxStatus.set( item.getFilter() );
 
       Preference<String> rxDate = rxPreferences.getString("activity_main_menu.date");
       rxDate.set( item.getRegistrationDate() );
@@ -284,8 +329,8 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
       viewHolder.swipeLayout.close(true);
 
       try{
-        item.setFavorites( !item.getFavorites() );
-        if ( !item.getFavorites() ){
+        item.setFavorites( !item.isFavorites() );
+        if ( !item.isFavorites() ){
           viewHolder.favorite_label.setVisibility(View.GONE);
         } else {
           viewHolder.favorite_label.setVisibility(View.VISIBLE);
@@ -305,8 +350,8 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
       viewHolder.swipeLayout.close(true);
 
       try {
-        item.setControl( !item.getControl() );
-        if ( !item.getControl() ){
+        item.setControl( !item.isControl() );
+        if ( !item.isControl() ){
           viewHolder.control_label.setVisibility(View.GONE);
         } else {
           viewHolder.control_label.setVisibility(View.VISIBLE);
@@ -394,15 +439,15 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
     return R.id.swipe;
   }
 
-  public Document getItem(int position) {
+  public RDocumentEntity getItem(int position) {
     return this.documents.get(position);
   }
 
-  @Override
-  public void call(List<Document> documents) {
-    this.documents = documents;
-    notifyDataSetChanged();
-  }
+//  @Override
+//  public void call(ArrayList<Document> documents) {
+//    this.documents = documents;
+//    notifyDataSetChanged();
+//  }
 
 //  public void addItem(Document document) {
 //
@@ -425,13 +470,13 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
 //  }
 
   public Integer getPositionByUid(String uid) {
-    Document document = null;
+    RDocumentEntity document = null;
 
     Log.d( "getPositionByUid", " UpdateDocumentJob " + uid );
 
     int position = -1;
 
-    for (Document doc: documents) {
+    for (RDocumentEntity doc: documents) {
       position++;
 
       if (Objects.equals(doc.getUid(), uid)){
@@ -452,17 +497,16 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
 //    notifyDataSetChanged();
   }
 
-  public void addItem(Document document) {
+  public void addItem(RDocumentEntity document) {
     if ( !Holder.MAP.containsKey( document.getUid()) ){
       Holder.MAP.put( document.getUid(), document );
       documents.add(document);
       real_docs.add(document);
       notifyItemInserted(documents.size());
-      this.mainMenu = mainMenu;
     }
   }
 
-  public void setDocuments(ArrayList<Document> list_dosc, RecyclerView recyclerView) {
+  public void setDocuments(List<RDocumentEntity> list_dosc, RecyclerView recyclerView) {
     Timber.e("setDocuments %s", list_dosc.size());
     documents = list_dosc;
     notifyDataSetChanged();
@@ -574,6 +618,6 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
   }
 
   private static class Holder {
-    static Map<String, Document> MAP = new HashMap<>();
+    static Map<String, RDocumentEntity> MAP = new HashMap<>();
   }
 }

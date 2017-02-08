@@ -16,7 +16,6 @@ import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.views.fragments.SettingsViewFragment;
-import timber.log.Timber;
 
 
 public class SettingsActivity extends AppCompatActivity {
@@ -60,20 +59,21 @@ public class SettingsActivity extends AppCompatActivity {
     fragmentTransaction.commit();
     }
 
+
+
     // FIX добавить сортировку документов по настройкам
   }
 
   @Override protected void onResume() {
     super.onResume();
-
-    subscriptions = new CompositeSubscription();
-
-    Timber.tag(TAG).i( " settings_username_host - " + settings.getString("settings_username_host").get() );
+//    MenuItem item = menu.findItem(R.id.menu_my_item);
   }
 
   @Override protected void onPause() {
     super.onPause();
-    subscriptions.unsubscribe();
+    if (subscriptions != null){
+      subscriptions.unsubscribe();
+    }
   }
 
 }

@@ -95,12 +95,14 @@ public class DBQueryBuilder {
       WhereAndOr<Result<RDocumentEntity>> query =
         dataStore
           .select(RDocumentEntity.class)
-          .where(RDocumentEntity.USER.eq( settings.getString("login").get() ));
+          .where(RDocumentEntity.USER.eq( settings.getString("login").get() ))
+          .and(RDocumentEntity.FILTER.ne("link"));
 
       WhereAndOr<Scalar<Integer>> queryCount =
         dataStore
           .count(RDocument.class)
-          .where(RDocumentEntity.USER.eq( settings.getString("login").get() ));
+          .where(RDocumentEntity.USER.eq( settings.getString("login").get() ))
+          .and(RDocumentEntity.FILTER.ne("link"));
 
       if ( conditions.size() > 0 ){
 
@@ -219,39 +221,39 @@ public class DBQueryBuilder {
   private void addList(List<RDocumentEntity> docs, RecyclerView recyclerView) {
     ArrayList<Document> list_dosc = new ArrayList<>();
 
-    if (docs.size() > 0) {
-      for (int i = 0; i < docs.size(); i++) {
-        RDocumentEntity doc = docs.get(i);
-        Timber.tag(TAG).v("addToAdapter ++ " + doc.getUid());
-
-        Document document = new Document();
-        document.setChanged( doc.isChanged() );
-        document.setStatusCode( doc.getFilter() );
-        document.setUid(doc.getUid());
-        document.setMd5(doc.getMd5());
-        document.setControl(doc.isControl());
-        document.setFavorites(doc.isFavorites());
-        document.setSortKey(doc.getSortKey());
-        document.setTitle(doc.getTitle());
-        document.setRegistrationNumber(doc.getRegistrationNumber());
-        document.setRegistrationDate(doc.getRegistrationDate());
-        document.setUrgency(doc.getUrgency());
-        document.setShortDescription(doc.getShortDescription());
-        document.setComment(doc.getComment());
-        document.setExternalDocumentNumber(doc.getExternalDocumentNumber());
-        document.setReceiptDate(doc.getReceiptDate());
-        document.setOrganization(doc.getOrganization());
-
-        list_dosc.add(document);
-      }
-    }
+//    if (docs.size() > 0) {
+//      for (int i = 0; i < docs.size(); i++) {
+//        RDocumentEntity doc = docs.get(i);
+//        Timber.tag(TAG).v("addToAdapter ++ " + doc.getUid());
+//
+//        Document document = new Document();
+//        document.setChanged( doc.isChanged() );
+//        document.setStatusCode( doc.getFilter() );
+//        document.setUid(doc.getUid());
+//        document.setMd5(doc.getMd5());
+//        document.setControl(doc.isControl());
+//        document.setFavorites(doc.isFavorites());
+//        document.setSortKey(doc.getSortKey());
+//        document.setTitle(doc.getTitle());
+//        document.setRegistrationNumber(doc.getRegistrationNumber());
+//        document.setRegistrationDate(doc.getRegistrationDate());
+//        document.setUrgency(doc.getUrgency());
+//        document.setShortDescription(doc.getShortDescription());
+//        document.setComment(doc.getComment());
+//        document.setExternalDocumentNumber(doc.getExternalDocumentNumber());
+//        document.setReceiptDate(doc.getReceiptDate());
+//        document.setOrganization(doc.getOrganization());
+//
+//        list_dosc.add(document);
+//      }
+//    }
 
     if ( list_dosc.size() == 0 ){
       showEmpty();
     }
 
     progressBar.setVisibility(ProgressBar.GONE);
-    adapter.setDocuments(list_dosc, this.recyclerView);
+    adapter.setDocuments(docs, this.recyclerView);
 
 
   }
@@ -260,26 +262,35 @@ public class DBQueryBuilder {
     progressBar.setVisibility(ProgressBar.GONE);
 
 //    Timber.tag(TAG).v("addToAdapter %s\n%s\n%s", _document.getUid(), _document.getUser(), _document.getFilter() );
+//
+//    Document document = new Document();
+//    document.setChanged( _document.isChanged() );
+//    document.setStatusCode( _document.getFilter() );
+//    document.setUid(_document.getUid());
+//    document.setMd5(_document.getMd5());
+//    document.setControl(_document.isControl());
+//    document.setFavorites(_document.isFavorites());
+//    document.setSortKey(_document.getSortKey());
+//    document.setTitle(_document.getTitle());
+//    document.setRegistrationNumber(_document.getRegistrationNumber());
+//    document.setRegistrationDate(_document.getRegistrationDate());
+//    document.setUrgency(_document.getUrgency());
+//    document.setShortDescription(_document.getShortDescription());
+//    document.setComment(_document.getComment());
+//    document.setExternalDocumentNumber(_document.getExternalDocumentNumber());
+//    document.setReceiptDate(_document.getReceiptDate());
+//    document.setOrganization(_document.getOrganization());
+//
+//    RSignerEntity _r_signer = (RSignerEntity) _document.getSigner();
+//    Signer signer = new Signer();
+//    signer.setId(_r_signer.getUid());
+//    signer.setName(_r_signer.getName());
+//    signer.setOrganisation(_r_signer.getOrganisation());
+//    signer.setType(_r_signer.getType());
+//
+//    document.setSigner( signer );
 
-    Document document = new Document();
-    document.setChanged( _document.isChanged() );
-    document.setStatusCode( _document.getFilter() );
-    document.setUid(_document.getUid());
-    document.setMd5(_document.getMd5());
-    document.setControl(_document.isControl());
-    document.setFavorites(_document.isFavorites());
-    document.setSortKey(_document.getSortKey());
-    document.setTitle(_document.getTitle());
-    document.setRegistrationNumber(_document.getRegistrationNumber());
-    document.setRegistrationDate(_document.getRegistrationDate());
-    document.setUrgency(_document.getUrgency());
-    document.setShortDescription(_document.getShortDescription());
-    document.setComment(_document.getComment());
-    document.setExternalDocumentNumber(_document.getExternalDocumentNumber());
-    document.setReceiptDate(_document.getReceiptDate());
-    document.setOrganization(_document.getOrganization());
-
-    adapter.addItem(document);
+    adapter.addItem(_document);
   }
 
   private void showEmpty(){

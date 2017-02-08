@@ -29,6 +29,9 @@ import sapotero.rxtest.views.adapters.DecisionAdapter;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OshsAutoCompleteAdapter;
 import sapotero.rxtest.views.adapters.models.DocumentTypeItem;
+import sapotero.rxtest.views.custom.stepper.build.steps.StepperAuthFragment;
+import sapotero.rxtest.views.custom.stepper.build.steps.StepperChooseAuthTypeFragment;
+import sapotero.rxtest.views.custom.stepper.build.steps.StepperLoadDataFragment;
 import sapotero.rxtest.views.dialogs.InfoCardDialogFragment;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
 import sapotero.rxtest.views.dialogs.SelectTemplateDialogFragment;
@@ -40,6 +43,7 @@ import sapotero.rxtest.views.fragments.InfoCardFieldsFragment;
 import sapotero.rxtest.views.fragments.InfoCardLinksFragment;
 import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
 import sapotero.rxtest.views.fragments.RoutePreviewFragment;
+import sapotero.rxtest.views.fragments.SettingsViewFragment;
 import sapotero.rxtest.views.interfaces.DataLoaderInterface;
 import sapotero.rxtest.views.interfaces.InterfaceDocumentManager;
 import sapotero.rxtest.views.managers.db.managers.DBDocumentManager;
@@ -64,9 +68,6 @@ import sapotero.rxtest.views.managers.view.DecisionManager;
 import sapotero.rxtest.views.menu.builders.ButtonBuilder;
 import sapotero.rxtest.views.menu.factories.ItemsBuilder;
 import sapotero.rxtest.views.services.MainService;
-import sapotero.rxtest.views.custom.stepper.build.steps.StepperAuthFragment;
-import sapotero.rxtest.views.custom.stepper.build.steps.StepperChooseAuthTypeFragment;
-import sapotero.rxtest.views.custom.stepper.build.steps.StepperLoadDataFragment;
 
 @Singleton
 @Component(modules = {
@@ -81,6 +82,10 @@ import sapotero.rxtest.views.custom.stepper.build.steps.StepperLoadDataFragment;
 })
 
 public interface EsdComponent {
+
+
+
+  void inject(SettingsViewFragment activity);
 
   void inject(EsdApplication activity);
 

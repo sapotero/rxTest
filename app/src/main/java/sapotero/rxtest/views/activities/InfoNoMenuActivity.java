@@ -125,11 +125,12 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
 
     android.support.v4.app.FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
 
-    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL ){
-      fragmentTransaction.add( R.id.activity_info_preview_container, new RoutePreviewFragment().withUid(UID) );
-    } else {
+    // FIX всегда отображаем резолюции
+//    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL ){
+//      fragmentTransaction.add( R.id.activity_info_preview_container, new RoutePreviewFragment().withUid(UID) );
+//    } else {
       fragmentTransaction.add( R.id.activity_info_preview_container, new InfoActivityDecisionPreviewFragment().withUid(UID) );
-    }
+//    }
 
     fragmentTransaction.commit();
   }

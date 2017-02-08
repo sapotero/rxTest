@@ -14,7 +14,6 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
-import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -67,6 +66,12 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
 
   private SelectOshsDialogFragment oshs;
   private int decision_count;
+  private RDocumentEntity doc;
+
+  // FIX переделать
+  // пока глобальная переменная чтобы иметь возможность в диалогах
+  // использовать операцию с параметрами без заморочек
+//  private CommandFactory.Operation operation;
 
   public ToolbarManager(Context context, Toolbar toolbar) {
     this.context = context;
@@ -87,8 +92,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
 
     toolbar.setOnMenuItemClickListener(
       item -> {
-
-
 
         CommandFactory.Operation operation;
         CommandParams params = new CommandParams();
@@ -116,11 +119,18 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
           // primary_consideration (первичное рассмотрение)
 
           case R.id.menu_info_approval_next_person:
-            operation = CommandFactory.Operation.APPROVAL_NEXT_PERSON;
-            buildDialog();
-            dialog.show();
-
-            params.setSign( SIGN );
+            if ( settings.getBoolean("settings_view_show_control_confirm").get() ){
+              operation = CommandFactory.Operation.INCORRECT;
+              showNextDialog(true);
+            } else {
+              operation = CommandFactory.Operation.APPROVAL_NEXT_PERSON;
+              params.setSign( "SIGN" );
+            }
+//            operation = CommandFactory.Operation.APPROVAL_NEXT_PERSON;
+//            buildDialog();
+//            dialog.show();
+//
+//            params.setSign( SIGN );
             break;
           case R.id.menu_info_approval_prev_person:
             operation = CommandFactory.Operation.APPROVAL_PREV_PERSON;
@@ -152,8 +162,16 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
             oshs.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
             break;
           case R.id.menu_info_sign_next_person:
-            operation = CommandFactory.Operation.SIGNING_NEXT_PERSON;
-            params.setSign( "SIGN" );
+
+            if ( settings.getBoolean("settings_view_show_control_confirm").get() ){
+              operation = CommandFactory.Operation.INCORRECT;
+              showNextDialog(false);
+            } else {
+              operation = CommandFactory.Operation.SIGNING_NEXT_PERSON;
+              params.setSign( "SIGN" );
+            }
+
+
             break;
           case R.id.menu_info_sign_prev_person:
             operation = CommandFactory.Operation.SIGNING_PREV_PERSON;
@@ -191,11 +209,18 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
 
             break;
           case R.id.menu_info_shared_to_control:
+            // настройка
+            // Показывать подтверждения о постановке на контроль документов для раздела «Обращение граждан»
 
-//            item.setTitle(getString( doc.isControl() != null && doc.isControl() ? R.string.remove_from_control : R.string.to_control));
+            if ( settings.getBoolean("settings_view_show_control_confirm").get() ){
+              operation = CommandFactory.Operation.INCORRECT;
 
-            operation = CommandFactory.Operation.CHECK_FOR_CONTROL;
-            params.setDocument( UID.get() );
+              showToControlDialog();
+
+            } else {
+              operation = CommandFactory.Operation.CHECK_FOR_CONTROL;
+              params.setDocument( UID.get() );
+            }
             break;
 
 
@@ -211,7 +236,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
     );
   }
 
-
   private void loadSettings() {
     LOGIN    = settings.getString("login");
     UID      = settings.getString("activity_main_menu.uid");
@@ -225,11 +249,13 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
   }
 
   private void invalidate() {
-    RDocumentEntity doc = dataStore
+    Timber.tag(TAG).v("invalidate");
+
+    doc = dataStore
       .select(RDocumentEntity.class)
       .where(RDocumentEntity.UID.eq(UID.get())).get().first();
 
-    Timber.tag(TAG).v("invalidate: %s", new Gson().toJson(doc) );
+//    Timber.tag(TAG).v("invalidate: %s", new Gson().toJson(doc) );
 
 
     // проверяем, сколько есть резолюций у документа
@@ -257,7 +283,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
     // Если документ обработан - то изменяем резолюции на поручения
     if( doc.isProcessed() && Objects.equals(doc.getFilter(), Fields.Status.PROCESSED.getValue())){
       try {
-        //настройка
+
         toolbar.getMenu().findItem( R.id.menu_info_decision_create).setTitle( context.getString( R.string.info_create_decision_processed ) );
       } catch (Exception e) {
         Timber.tag(TAG).v(e);
@@ -279,6 +305,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
       }
     }
 
+    //настройка
     try {
       if ( !settings.getBoolean("settings_view_show_create_decision_post").get() ){
         toolbar.getMenu().findItem( R.id.menu_info_decision_create).setVisible(false);
@@ -440,6 +467,86 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
   public void hideDialog() {
     if (dialog != null) {
       dialog.hide();
+    }
+  }
+
+  private void showToControlDialog() {
+    try {
+      if ( UID.get().startsWith( Fields.Journal.CITIZEN_REQUESTS.getValue() )){
+        new MaterialDialog.Builder( context )
+          .title(   doc.isControl() ? R.string.dialog_to_control_negative      : R.string.dialog_to_control_positive      )
+          .content( doc.isControl() ? R.string.dialog_to_control_body_negative : R.string.dialog_to_control_body_positive )
+          .cancelable(true)
+          .positiveText(R.string.approve)
+          .negativeText(R.string.cancel)
+          .onPositive((dialog1, which) -> {
+            CommandFactory.Operation operation = CommandFactory.Operation.CHECK_FOR_CONTROL;
+
+            CommandParams params = new CommandParams();
+            params.setUser( LOGIN.get() );
+            params.setDocument( UID.get() );
+
+            operationManager.execute( operation, params );
+          })
+          .autoDismiss(true)
+          .build().show();
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  private void showNextDialog(Boolean isApproval) {
+    try {
+      if ( UID.get().startsWith( Fields.Journal.CITIZEN_REQUESTS.getValue() )){
+        new MaterialDialog.Builder( context )
+          .content( isApproval ? R.string.dialog_approve_body : R.string.dialog_sign_body)
+          .cancelable(true)
+          .positiveText(R.string.yes)
+          .negativeText(R.string.no)
+          .onPositive((dialog1, which) -> {
+
+            CommandFactory.Operation operation;
+            operation = isApproval ? CommandFactory.Operation.APPROVAL_NEXT_PERSON: CommandFactory.Operation.SIGNING_NEXT_PERSON;
+
+            CommandParams params = new CommandParams();
+            params.setUser( LOGIN.get() );
+            params.setDocument( UID.get() );
+
+            operationManager.execute( operation, params );
+          })
+          .autoDismiss(true)
+          .build().show();
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  private void showPrevDialog(Boolean isApproval) {
+    try {
+      if ( UID.get().startsWith( Fields.Journal.CITIZEN_REQUESTS.getValue() )){
+        new MaterialDialog.Builder( context )
+          .content( isApproval ? R.string.dialog_approve_body : R.string.dialog_sign_body)
+          .cancelable(true)
+          .positiveText(R.string.yes)
+          .negativeText(R.string.no)
+          .onPositive((dialog1, which) -> {
+
+            CommandFactory.Operation operation;
+            operation = isApproval ? CommandFactory.Operation.APPROVAL_NEXT_PERSON: CommandFactory.Operation.SIGNING_NEXT_PERSON;
+
+            CommandParams params = new CommandParams();
+            params.setUser( LOGIN.get() );
+            params.setDocument( UID.get() );
+
+            operationManager.execute( operation, params );
+          })
+          .autoDismiss(true)
+          .build().show();
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
     }
   }
 

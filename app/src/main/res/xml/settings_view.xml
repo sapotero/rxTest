@@ -90,10 +90,6 @@
             android:title="Показывать подтверждения о действиях с документом"
             android:defaultValue="true" />
         <SwitchPreference
-            android:key="settings_view_show_sign_confirm"
-            android:title="Показывать подтверждения о подписании документа/резолюции"
-            android:defaultValue="true" />
-        <SwitchPreference
             android:key="settings_view_show_control_confirm"
             android:title="Показывать подтверждения о постановке на контроль документов для раздела «Обращение граждан»"
             android:defaultValue="true" />

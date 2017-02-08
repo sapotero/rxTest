@@ -52,6 +52,7 @@ import sapotero.rxtest.retrofit.DocumentsService;
 import sapotero.rxtest.retrofit.models.AuthSignToken;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.retrofit.models.documents.Documents;
+import sapotero.rxtest.retrofit.models.v2.V2UserInfo;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.views.menu.builders.ButtonBuilder;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
@@ -70,6 +71,7 @@ public class DataLoaderInterface {
 
   private Preference<String> TOKEN;
   private Preference<String> CURRENT_USER;
+  private Preference<String> CURRENT_USER_ORGANIZATION;
   private Preference<String> LOGIN;
   private Preference<String> PASSWORD;
   private Preference<String> HOST;
@@ -104,6 +106,7 @@ public class DataLoaderInterface {
     COUNT    = settings.getInteger("documents.count");
     CURRENT_USER = settings.getString("current_user");
     CURRENT_USER_ID = settings.getString("current_user_id");
+    CURRENT_USER_ORGANIZATION = settings.getString("current_user_organization");
   }
 
   public void unregister(){
@@ -300,22 +303,46 @@ public class DataLoaderInterface {
 
     unsubscribe();
     subscription.add(
+      // получаем данные о пользователе
+      auth.getUserInfoV2(LOGIN.get(), TOKEN.get())
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(
+          data -> {
+
+            try {
+              V2UserInfo user = data.get(0);
+              setCurrentUser(user.getName());
+              setCurrentUserId(user.getId());
+              setCurrentUserOrganization(user.getOrganization());
+            } catch (Exception e) {
+              e.printStackTrace();
+            }
+          },
+          error -> {
+            Timber.tag("USER_INFO").e( "ERROR: %s", error);
+          })
+    );
+
+    subscription.add(
 
       Observable.just(TOKEN.get())
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .unsubscribeOn(Schedulers.io())
-
         // получаем шаблоны
         .concatMap(data -> auth.getTemplates(LOGIN.get(), TOKEN.get()).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()))
         .doOnNext(templates -> jobManager.addJobInBackground(new AddTemplatesJob(templates)))
 
         // получаем данные о пользователе
-        .concatMap(data -> auth.getUserInfo(LOGIN.get(), TOKEN.get()).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()))
-        .doOnNext(info -> {
-          setCurrentUser(info.getMe().getName());
-          setCurrentUserId(info.getMe().getId());
-        })
+//        .concatMap(data -> auth.getUserInfo(LOGIN.get(), TOKEN.get()).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()))
+//        .doOnNext(info -> {
+//          setCurrentUser(info.getMe().getName());
+//          setCurrentUserId(info.getMe().getId());
+//          setCurrentUserId(info.getMe().getId());
+//        })
+
+
 
         // получаем папки
         .concatMap(data -> auth.getFolders(LOGIN.get(), TOKEN.get()).subscribeOn(Schedulers.io()))
@@ -412,6 +439,10 @@ public class DataLoaderInterface {
         )
     );
 
+  }
+
+  private void setCurrentUserOrganization(String organization) {
+    CURRENT_USER_ORGANIZATION.set(organization);
   }
 
   public void updateByStatus(MainMenuItem items) {

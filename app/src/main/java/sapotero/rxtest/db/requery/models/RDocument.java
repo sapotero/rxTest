@@ -91,7 +91,9 @@ public abstract class RDocument implements Persistable {
   @OneToOne
   RRoute route;
 
-  String links;
+//  String links;
+  @OneToMany(mappedBy = "document")
+  Set<RLinks> links;
 
 //  exemplars: Тип массив структур Экземпляры документа,
 //  decisions: Тип массив структур Резолюции документа,

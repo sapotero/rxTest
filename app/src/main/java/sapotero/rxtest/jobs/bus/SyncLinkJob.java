@@ -44,13 +44,9 @@ import sapotero.rxtest.retrofit.models.document.Signer;
 import sapotero.rxtest.retrofit.models.document.Step;
 import timber.log.Timber;
 
-public class SyncDocumentsJob  extends BaseJob {
+public class SyncLinkJob extends BaseJob {
 
   public static final int PRIORITY = 1;
-  private Boolean onControl;
-  private Boolean isProcessed;
-  private Boolean isFavorites;
-  private String processed_folder;
 
   private Preference<String> LOGIN = null;
   private Preference<String> TOKEN = null;
@@ -60,29 +56,11 @@ public class SyncDocumentsJob  extends BaseJob {
   private String uid;
   private String TAG = this.getClass().getSimpleName();
 
-  public SyncDocumentsJob(String uid, Fields.Status filter) {
+  public SyncLinkJob(String uid) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
-    this.filter = filter;
-    this.isFavorites = false;
-    this.isProcessed = false;
-    this.processed_folder = "";
-  }
+    this.filter = Fields.Status.LINK;
 
-  public SyncDocumentsJob(String uid, Fields.Status filter, String processed_folder, Boolean isFavorites, Boolean isProcessed) {
-    super( new Params(PRIORITY).requireNetwork().persist() );
-    this.uid = uid;
-    this.filter = filter;
-    this.processed_folder = processed_folder;
-    this.isFavorites = isFavorites;
-    this.isProcessed = isProcessed;
-  }
-
-  public SyncDocumentsJob(String uid, Fields.Status filter, boolean control) {
-    super( new Params(PRIORITY).requireNetwork().persist() );
-    this.uid = uid;
-    this.filter = filter;
-    this.onControl = control;
   }
 
   @Override
@@ -122,19 +100,9 @@ public class SyncDocumentsJob  extends BaseJob {
 
           EventBus.getDefault().post( new StepperLoadDocumentEvent(doc.getUid()) );
 
-          if ( doc.getImages() != null && doc.getImages().size() > 0 && ( isFavorites != null && !isFavorites ) ){
-
+          if ( doc.getImages() != null && doc.getImages().size() > 0 ){
             for (Image image : doc.getImages()) {
-
               jobManager.addJobInBackground( new DownloadFileJob(HOST.get(), image.getPath(), image.getMd5()+"_"+image.getTitle()) );
-            }
-
-          }
-
-          if ( doc.getLinks() != null && doc.getLinks().size() > 0 ){
-
-            for (String link: doc.getLinks()) {
-              jobManager.addJobInBackground( new SyncLinkJob( link ) );
             }
 
           }
@@ -192,8 +160,8 @@ public class SyncDocumentsJob  extends BaseJob {
 
     rd.setFavorites(true);
     rd.setProcessed(true);
-    rd.setFolder(processed_folder);
-    rd.setControl(onControl);
+    rd.setFolder("");
+    rd.setControl(false);
 
     if ( d.getSigner().getOrganisation() != null && !Objects.equals(d.getSigner().getOrganisation(), "")){
       rd.setOrganization( d.getSigner().getOrganisation() );
@@ -267,10 +235,10 @@ public class SyncDocumentsJob  extends BaseJob {
         rDoc.setSigner( signer );
       }
 
-      rDoc.setFavorites(isFavorites);
-      rDoc.setProcessed(isProcessed);
-      rDoc.setFolder(processed_folder);
-      rDoc.setControl(onControl);
+      rDoc.setFavorites(false);
+      rDoc.setProcessed(false);
+      rDoc.setControl(false);
+      rDoc.setFolder("");
       rDoc.setUser( LOGIN.get() );
 
       if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
