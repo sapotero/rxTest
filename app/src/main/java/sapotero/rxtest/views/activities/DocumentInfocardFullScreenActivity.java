@@ -3,6 +3,7 @@ package sapotero.rxtest.views.activities;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Base64;
 import android.webkit.WebView;
 
 import com.f2prateek.rx.preferences.Preference;
@@ -13,8 +14,11 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.requery.Persistable;
+import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import timber.log.Timber;
 
 public class DocumentInfocardFullScreenActivity extends AppCompatActivity {
@@ -24,6 +28,7 @@ public class DocumentInfocardFullScreenActivity extends AppCompatActivity {
 
 
   @Inject RxSharedPreferences settings;
+  @Inject SingleEntityStore<Persistable> dataStore;
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -53,10 +58,26 @@ public class DocumentInfocardFullScreenActivity extends AppCompatActivity {
     Preference<String> data = settings.getString("document.infoCard");
     String document = data.get();
 
-    String htmlData = "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />" + document;
-    webview.loadDataWithBaseURL("file:///android_asset/", htmlData, "text/html", "UTF-8", null);
-    webview.getSettings().setBuiltInZoomControls(true);
-    webview.getSettings().setDisplayZoomControls(true);
+    Preference<String> UID = settings.getString("activity_main_menu.uid");
+
+    RDocumentEntity doc = dataStore
+      .select(RDocumentEntity.class)
+      .where(RDocumentEntity.UID.eq( UID.get() ))
+      .get().first();
+    document = doc.getInfoCard();
+
+    try {
+      if ( document != null ){
+
+        String htmlData = "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />" + new String(Base64.decode( document, Base64.DEFAULT) );
+        webview.loadDataWithBaseURL("file:///android_asset/", htmlData, "text/html", "UTF-8", null);
+        webview.getSettings().setBuiltInZoomControls(true);
+        webview.getSettings().setDisplayZoomControls(true);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
 
   }
 

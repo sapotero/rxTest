@@ -5,9 +5,9 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 
 import sapotero.rxtest.views.custom.stepper.adapter.AbstractStepAdapter;
+import sapotero.rxtest.views.custom.stepper.build.steps.StepperAuthFragment;
 import sapotero.rxtest.views.custom.stepper.build.steps.StepperChooseAuthTypeFragment;
 import sapotero.rxtest.views.custom.stepper.build.steps.StepperFinishFragment;
-import sapotero.rxtest.views.custom.stepper.build.steps.StepperAuthFragment;
 import sapotero.rxtest.views.custom.stepper.build.steps.StepperLoadDataFragment;
 
 
@@ -22,7 +22,7 @@ public class StepperAdapter extends AbstractStepAdapter {
   @Override
   public Fragment createStep(int position) {
 
-    Fragment step = null;
+    Fragment step;
 
 
     switch (position){

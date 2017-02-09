@@ -26,14 +26,14 @@ import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.views.adapters.OshsAutoCompleteAdapter;
 import sapotero.rxtest.views.adapters.models.FontItem;
 import sapotero.rxtest.views.adapters.models.UrgencyItem;
+import sapotero.rxtest.views.custom.DelayAutoCompleteTextView;
+import sapotero.rxtest.views.custom.SpinnerWithLabel;
 import sapotero.rxtest.views.fragments.DecisionFragment;
 import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
 import sapotero.rxtest.views.managers.menu.OperationManager;
 import sapotero.rxtest.views.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.views.managers.menu.utils.CommandParams;
 import sapotero.rxtest.views.managers.view.DecisionManager;
-import sapotero.rxtest.views.custom.DelayAutoCompleteTextView;
-import sapotero.rxtest.views.custom.SpinnerWithLabel;
 import timber.log.Timber;
 
 public class DecisionConstructorActivity extends AppCompatActivity implements DecisionFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, OperationManager.Callback {
@@ -92,6 +92,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
               CommandParams params = new CommandParams();
               params.setSign( new_decision.getId() );
               params.setDecision(json);
+
               operationManager.execute( CommandFactory.Operation.SAVE_DECISION, params );
 
             }
@@ -123,50 +124,84 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
         case R.id.action_constructor_add_block:
           manager.getDecisionBuilder().addBlock();
           break;
-        case R.id.action_constructor_save:
-          Timber.e("CHANGED: %s", manager.isChanged() );
 
-          manager.saveDecision();
+        case R.id.action_constructor_next:
+          Decision approve = new Decision();
+          approve.setApproved(true);
+          approve.setBlocks(null);
+          Timber.tag("DECISION").e("approve: %s", new Gson().toJson(approve) );
 
-
-          break;
-        case R.id.action_constructor_close:
-
-          if ( manager.isChanged() ){
-//            new RejectDecisionFragment().show( getFragmentManager(), "SaveDialog");
-
-            new MaterialDialog.Builder(this)
-              .title("Имеются несохранненые данные")
-              .content("Резолюция была изменена")
-              .positiveText("сохранить")
-              .onPositive(
-                (dialog, which) -> {
-                  Decision new_decision = manager.getDecision();
-
-                  Timber.tag(TAG).w("positive %s", new_decision.getId() );
-                }
-              )
-              .neutralText("выход")
-              .onNeutral(
-                (dialog, which) -> {
-                  Timber.tag(TAG).w("nothing");
-                  finish();
-                }
-              )
-              .negativeText("возврат")
-              .onNegative(
-                (dialog, which) -> {
-                  Timber.tag(TAG).w("negative");
-                }
-              )
-              .show();
-
-
+          // настройка
+          // Показывать подтверждения о действиях с документом
+          if ( settings.getBoolean("settings_view_show_actions_confirm").get() ){
+            showNextDialog();
           } else {
-            finish();
+            // operation = CommandFactory.Operation.APPROVAL_PREV_PERSON;
           }
 
-        break;
+          break;
+        case R.id.action_constructor_prev:
+          Decision reject = new Decision();
+          reject.setApproved(false);
+          reject.setCanceled(true);
+          reject.setBlocks(null);
+
+          Timber.tag("DECISION").e("reject: %s", new Gson().toJson(reject) );
+
+          // настройка
+          // Показывать подтверждения о действиях с документом
+          if ( settings.getBoolean("settings_view_show_actions_confirm").get() ){
+            showPrevDialog();
+          } else {
+            // operation = CommandFactory.Operation.APPROVAL_PREV_PERSON;
+          }
+
+          break;
+
+
+
+//        case R.id.action_constructor_save:
+//          Timber.e("CHANGED: %s", manager.isChanged() );
+//
+//          manager.saveDecision();
+//          break;
+//        case R.id.action_constructor_close:
+//
+//          if ( manager.isChanged() ){
+////            new RejectDecisionFragment().show( getFragmentManager(), "SaveDialog");
+//
+//            new MaterialDialog.Builder(this)
+//              .title("Имеются несохранненые данные")
+//              .content("Резолюция была изменена")
+//              .positiveText("сохранить")
+//              .onPositive(
+//                (dialog, which) -> {
+//                  Decision new_decision = manager.getDecision();
+//
+//                  Timber.tag(TAG).w("positive %s", new_decision.getId() );
+//                }
+//              )
+//              .neutralText("выход")
+//              .onNeutral(
+//                (dialog, which) -> {
+//                  Timber.tag(TAG).w("nothing");
+//                  finish();
+//                }
+//              )
+//              .negativeText("возврат")
+//              .onNegative(
+//                (dialog, which) -> {
+//                  Timber.tag(TAG).w("negative");
+//                }
+//              )
+//              .show();
+//
+//
+//          } else {
+//            finish();
+//          }
+//
+//        break;
         default:
           break;
       }
@@ -234,13 +269,13 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       Timber.tag(TAG).v( "getIntent ++" + raw_decision);
       if (raw_decision == null) {
         raw_decision = new Decision();
-        raw_decision.setLetterhead("TEST");
+        raw_decision.setLetterhead("Бланк резолюции");
         raw_decision.setShowPosition(true);
-        raw_decision.setSignerPositionS("--");
-        raw_decision.setSignerBlankText("---");
-        raw_decision.setUrgencyText("URGENCY");
-        raw_decision.setId("---");
-        raw_decision.setDate("---");
+        raw_decision.setSignerPositionS("");
+        raw_decision.setSignerBlankText("");
+        raw_decision.setUrgencyText("");
+        raw_decision.setId("");
+        raw_decision.setDate("");
         raw_decision.setBlocks(new ArrayList<>());
         Timber.tag(TAG).v( "raw_decision" + gson.toJson( raw_decision, Decision.class ) );
       }
@@ -293,4 +328,52 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   public void onExecuteError() {
 
   }
+
+
+  private void showPrevDialog() {
+
+    MaterialDialog.Builder prev_dialog = new MaterialDialog.Builder(this)
+      .content(R.string.decision_reject_body)
+      .cancelable(true)
+      .positiveText(R.string.yes)
+      .negativeText(R.string.no)
+      .onPositive((dialog1, which) -> {
+
+//        CommandFactory.Operation operation;
+//        operation = isApproval ? CommandFactory.Operation.APPROVAL_PREV_PERSON : CommandFactory.Operation.SIGNING_PREV_PERSON;
+//
+//        CommandParams params = new CommandParams();
+//        params.setUser(LOGIN.get());
+//        params.setSign("Sign");
+
+//        operationManager.execute(operation, params);
+      })
+      .autoDismiss(true);
+
+    prev_dialog.build().show();
+  }
+
+  private void showNextDialog() {
+
+    MaterialDialog.Builder prev_dialog = new MaterialDialog.Builder(this)
+      .content(R.string.decision_approve_body)
+      .cancelable(true)
+      .positiveText(R.string.yes)
+      .negativeText(R.string.no)
+      .onPositive((dialog1, which) -> {
+
+//        CommandFactory.Operation operation;
+//        operation = isApproval ? CommandFactory.Operation.APPROVAL_PREV_PERSON : CommandFactory.Operation.SIGNING_PREV_PERSON;
+//
+//        CommandParams params = new CommandParams();
+//        params.setUser(LOGIN.get());
+//        params.setSign("Sign");
+
+//        operationManager.execute(operation, params);
+      })
+      .autoDismiss(true);
+
+    prev_dialog.build().show();
+  }
+
 }

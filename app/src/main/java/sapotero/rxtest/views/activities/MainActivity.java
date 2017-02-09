@@ -71,7 +71,7 @@ import sapotero.rxtest.views.custom.CircleLeftArrow;
 import sapotero.rxtest.views.custom.CircleRightArrow;
 import sapotero.rxtest.views.custom.OrganizationSpinner;
 import sapotero.rxtest.views.custom.SearchView.SearchView;
-import sapotero.rxtest.views.interfaces.DataLoaderInterface;
+import sapotero.rxtest.views.interfaces.DataLoaderManager;
 import sapotero.rxtest.views.menu.MenuBuilder;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import timber.log.Timber;
@@ -149,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   public  DocumentsAdapter RAdapter;
   public  MenuBuilder menuBuilder;
   private DBQueryBuilder dbQueryBuilder;
-  private DataLoaderInterface dataLoader;
+  private DataLoaderManager dataLoader;
   private SearchView searchView;
   private MainActivity context;
 
@@ -191,7 +191,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 //    dbQueryBuilder.printFolders();
 //    dbQueryBuilder.printTemplates();
 
-    dataLoader = new DataLoaderInterface(this);
+    dataLoader = new DataLoaderManager(this);
 
     progressBar.setVisibility(ProgressBar.GONE);
 

@@ -20,14 +20,11 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.util.Objects;
-
 import javax.inject.Inject;
 
 import rx.Subscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.application.config.Constant;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckFailEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckSuccesEvent;
@@ -88,10 +85,11 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
   }
 
   private void setHostDefault() {
-    EditText host  = (EditText) stepper_auth_password_wrapper.findViewById(R.id.stepper_auth_host);
-    if ( Objects.equals(host.getText().toString(), "") ){
-      host.setText( settings.getString("settings_username_host").get() );
-    }
+  // EditText host  = (EditText) stepper_auth_password_wrapper.findViewById(R.id.stepper_auth_host);
+  // if ( Objects.equals(host.getText().toString(), "") ){
+  //   host.setText( settings.getString("settings_username_host").get() );
+  // }
+//    settings.getString("settings_username_host").get()
 
   }
 
@@ -110,8 +108,9 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
     Preference<AuthType> auth_type = settings.getEnum("stepper.auth_type", AuthType.class);
 
     host = settings.getString("settings_username_host");
+
     if (host.get() == null){
-      host.set(Constant.HOST);
+      host.set( settings.getString("settings_default_host").get() );
     }
 
     if (auth_type.get() == null) {
@@ -167,13 +166,13 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
       case PASSWORD:
         EditText login = (EditText) stepper_auth_password_wrapper.findViewById(R.id.stepper_auth_username);
         EditText pwd   = (EditText) stepper_auth_password_wrapper.findViewById(R.id.stepper_auth_password);
-        EditText host  = (EditText) stepper_auth_password_wrapper.findViewById(R.id.stepper_auth_host);
+//        EditText host  = (EditText) stepper_auth_password_wrapper.findViewById(R.id.stepper_auth_host);
 
         EventBus.getDefault().post(
           new StepperLoginCheckEvent(
             login.getText().toString(),
             pwd.getText().toString(),
-            host.getText().toString()
+            host.get()
           )
         );
         break;

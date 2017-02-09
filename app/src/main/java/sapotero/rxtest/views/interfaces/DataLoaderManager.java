@@ -42,6 +42,7 @@ import sapotero.rxtest.events.auth.AuthDcCheckSuccessEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckSuccessEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckEvent;
+import sapotero.rxtest.jobs.bus.AddAssistantJob;
 import sapotero.rxtest.jobs.bus.AddFavoriteUsersJob;
 import sapotero.rxtest.jobs.bus.AddFoldersJob;
 import sapotero.rxtest.jobs.bus.AddPrimaryConsiderationJob;
@@ -60,7 +61,7 @@ import sapotero.rxtest.views.menu.fields.MainMenuItem;
 import sapotero.rxtest.views.utils.TDmodel;
 import timber.log.Timber;
 
-public class DataLoaderInterface {
+public class DataLoaderManager {
 
   private final String TAG = this.getClass().getSimpleName();
 
@@ -85,7 +86,7 @@ public class DataLoaderInterface {
   private CompositeSubscription subscription;
   private final Context context;
 
-  public DataLoaderInterface(Context context) {
+  public DataLoaderManager(Context context) {
     this.context = context;
 
     EsdApplication.getComponent(context).inject(this);
@@ -356,6 +357,10 @@ public class DataLoaderInterface {
         .concatMap(data -> auth.getFavoriteUsers(LOGIN.get(), TOKEN.get()).subscribeOn(Schedulers.io()))
         .doOnNext(users -> jobManager.addJobInBackground(new AddFavoriteUsersJob(users)))
 
+        // Доработка api для возврата ВРИО/по поручению
+        // https://tasks.n-core.ru/browse/MVDESD-11453
+        .concatMap(data -> auth.getAssistant(LOGIN.get(), TOKEN.get(), CURRENT_USER_ID.get()).subscribeOn(Schedulers.io()))
+        .doOnNext(users -> jobManager.addJobInBackground(new AddAssistantJob(users)))
 
         // получаем список документов по статусам
         .concatMap(data -> {

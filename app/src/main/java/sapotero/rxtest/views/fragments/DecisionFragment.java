@@ -10,11 +10,10 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.RadioGroup;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.birbit.android.jobqueue.JobManager;
@@ -38,8 +37,10 @@ import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.retrofit.utils.OshsService;
 import sapotero.rxtest.views.adapters.PrimaryConsiderationAdapter;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
+import sapotero.rxtest.views.custom.SpinnerWithLabel;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
 import sapotero.rxtest.views.dialogs.SelectTemplateDialogFragment;
+import sapotero.rxtest.views.managers.menu.factories.CommandFactory;
 import timber.log.Timber;
 
 public class DecisionFragment extends Fragment implements PrimaryConsiderationAdapter.Callback, SelectOshsDialogFragment.Callback, SelectTemplateDialogFragment.Callback {
@@ -58,11 +59,13 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
 
   @BindView(R.id.fragment_decision_linear_people) LinearLayout people_view;
 
-  @BindView(R.id.fragment_decision_hide_performers) CheckBox hide_performers;
+  @BindView(R.id.fragment_decision_hide_performers) Switch hide_performers;
 
-  @BindView(R.id.decision_report_action) RadioGroup buttons;
-//  settings_view_hide_buttons
+//  @BindView(R.id.decision_report_action) RadioGroup buttons;
+  @BindView(R.id.head_font_selector) SpinnerWithLabel textSelector;
   @BindView(R.id.fragment_decision_text_before) ToggleButton fragment_decision_text_before;
+//  @BindView(R.id.head_font_selector_wrapper) TextInputLayout head_font_selector_wrapper;
+
 
   private String TAG = this.getClass().getSimpleName();
   private Context mContext;
@@ -79,8 +82,6 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
 
 
   public Callback callback;
-
-
 
   public interface Callback {
     void onUpdateSuccess();
@@ -100,9 +101,15 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
 
   private void updateUsers(){
     people_view.removeAllViews();
-    for (int i = 0; i < adapter.getCount(); i++) {
-      View item = adapter.getView(i, null, null);
-      people_view.addView(item);
+    if ( adapter.getCount() > 0 ) {
+      for (int i = 0; i < adapter.getCount(); i++) {
+        View item = adapter.getView(i, null, null);
+        people_view.addView(item);
+      }
+    } else {
+      TextView empty_view = new TextView(getContext());
+      empty_view.setText("Нет исполнителей");
+      people_view.addView(empty_view);
     }
   }
 
@@ -166,10 +173,14 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     HOST = settings.getString("settings_username_host");
   }
 
-  @OnClick(R.id.fragment_decision_button_add_people)
-  public void add(){
-    Timber.tag("ADD PEOPLE").e("CLICKED");
+//  @OnClick(R.id.fragment_decision_button_add_people)
+//  public void add(){
+//    Timber.tag("ADD PEOPLE").e("CLICKED");
+//
+//    showAddOshsDialog();
+//  }
 
+  private void showAddOshsDialog() {
     if (oshs == null){
       oshs = new SelectOshsDialogFragment();
       oshs.registerCallBack( this );
@@ -180,7 +191,9 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
 
   @OnClick(R.id.fragment_decision_text_before)
   public void text(){
-    callback.onUpdateSuccess();
+    if (callback != null) {
+      callback.onUpdateSuccess();
+    }
   }
 
   @Override
@@ -226,19 +239,18 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
 
     card_toolbar.setOnMenuItemClickListener(
       item -> {
-        String operation;
 
         switch ( item.getItemId() ){
           case R.id.decision_card_action_delete:
-            operation = "decision_card_action_delete";
             getActivity().getSupportFragmentManager().beginTransaction().remove(this).commit();
             break;
+          case R.id.decision_card_user_add:
+            showAddOshsDialog();
+            break;
           default:
-            operation = "incorrect";
             break;
         }
 
-        Timber.tag(TAG).i( operation );
         getActivity().getSupportFragmentManager().popBackStack();
         return false;
       });
@@ -256,7 +268,9 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
           button_report.setChecked(false);
           button_familiarization.setChecked(true);
         }
-        callback.onUpdateSuccess();
+        if (callback != null) {
+          callback.onUpdateSuccess();
+        }
       }
     );
 
@@ -273,7 +287,9 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
           button_familiarization.setChecked(false);
           button_report.setChecked(true);
         }
-        callback.onUpdateSuccess();
+        if (callback != null) {
+          callback.onUpdateSuccess();
+        }
       }
     );
 
@@ -285,16 +301,26 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     hide_performers.setChecked( hide );
     hide_performers.setOnCheckedChangeListener(
       (buttonView, isChecked) -> {
-        callback.onUpdateSuccess();
+        if (callback != null) {
+          callback.onUpdateSuccess();
+        }
       }
     );
 
 
-    // настройка settings_view_hide_buttons
+    // настройка
+    // Не отображать кнопки «Прошу доложить» и «Прошу ознакомить»
     if (settings.getBoolean("settings_view_hide_buttons").get()){
       button_familiarization.setVisibility(View.GONE);
       button_report.setVisibility(View.GONE);
-      buttons.setVisibility(View.GONE);
+//      buttons.setVisibility(View.GONE);
+    }
+
+    // настройка
+    // Возможность выбора размера шрифта
+    if (settings.getBoolean("settings_view_show_decision_change_font").get()){
+//      textSelector.setVisibility(View.VISIBLE);
+//      head_font_selector_wrapper.setVisibility(View.VISIBLE);
     }
 
     Timber.e(" ArrayList<PrimaryConsiderationPeople> people = new ArrayList<>(); ");
@@ -345,7 +371,9 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   @Override
   public void onChange() {
     updateUsers();
-    callback.onUpdateSuccess();
+    if (callback != null) {
+      callback.onUpdateSuccess();
+    }
   }
 
   @Override
@@ -354,7 +382,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   }
 
   @Override
-  public void onSearchSuccess(Oshs user) {
+  public void onSearchSuccess(Oshs user, CommandFactory.Operation operation) {
     Timber.tag("FROM DIALOG").i( "[%s] %s | %s", user.getId(), user.getName(), user.getOrganization());
 
     adapter.add( new PrimaryConsiderationPeople( user.getId(), user.getName(), user.getPosition(), user.getOrganization()) );

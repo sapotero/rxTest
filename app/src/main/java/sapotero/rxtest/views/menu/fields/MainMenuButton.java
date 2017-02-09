@@ -102,7 +102,7 @@ public enum MainMenuButton {
     public static ArrayList<String> getPerformance(){
       ArrayList<String> projectArray = new ArrayList<String>();
       projectArray.add( Fields.Status.SENT_TO_THE_REPORT.getValue() );
-      projectArray.add( Fields.Status.SENT_TO_THE_PERFORMANCE.getValue() );
+//      projectArray.add( Fields.Status.SENT_TO_THE_PERFORMANCE.getValue() );
       return projectArray;
     }
     public static ArrayList<String> getProject(){

@@ -55,7 +55,7 @@
 
         <activity android:screenOrientation="landscape" android:name=".views.activities.SettingsActivity">
         </activity>
-        <activity android:screenOrientation="landscape" android:name=".views.activities.DecisionConstructorActivity">
+        <activity android:screenOrientation="landscape" android:exported="true" android:name=".views.activities.DecisionConstructorActivity">
         </activity>
         <activity android:screenOrientation="landscape" android:name=".views.activities.DocumentImageFullScreenActivity">
         </activity>

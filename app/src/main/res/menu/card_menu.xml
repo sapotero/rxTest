@@ -5,6 +5,12 @@
     tools:context="net.taptools.android.sportshistory.PlayerProfileActivity">
 
     <item
+        android:id="@+id/decision_card_user_add"
+        app:showAsAction="ifRoom|withText"
+        android:icon="@drawable/add_person"
+        android:title="@string/decision_add_people"/>
+
+    <item
         android:id="@+id/decision_card_action_delete"
         app:showAsAction="ifRoom|withText"
         android:title="@string/decision_create_no_answer"/>

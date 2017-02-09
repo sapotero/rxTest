@@ -67,21 +67,21 @@
                     android:text="123456"/>
             </android.support.design.widget.TextInputLayout>
 
-            <android.support.design.widget.TextInputLayout
-                android:layout_width="@dimen/stepper_content_width"
-                android:layout_height="wrap_content"
-                android:paddingTop="16dp"
-                >
-                <EditText
-                    android:id="@+id/stepper_auth_host"
-                    android:layout_width="@dimen/stepper_content_width"
-                    android:layout_height="wrap_content"
-                    android:inputType="textPersonName"
-                    android:text=""
-                    android:hint="@string/host_hint"
-                    android:ems="10"
-                    />
-            </android.support.design.widget.TextInputLayout>
+            <!--<android.support.design.widget.TextInputLayout-->
+                <!--android:layout_width="@dimen/stepper_content_width"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:paddingTop="16dp"-->
+                <!--&gt;-->
+                <!--<EditText-->
+                    <!--android:id="@+id/stepper_auth_host"-->
+                    <!--android:layout_width="@dimen/stepper_content_width"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:inputType="textPersonName"-->
+                    <!--android:text=""-->
+                    <!--android:hint="@string/host_hint"-->
+                    <!--android:ems="10"-->
+                    <!--/>-->
+            <!--</android.support.design.widget.TextInputLayout>-->
         </LinearLayout>
 
     </FrameLayout>

@@ -7,13 +7,34 @@
     <item
         android:id="@+id/action_constructor_add_block"
         app:showAsAction="ifRoom|withText"
+        android:icon="@drawable/add_decision"
         android:title="@string/constructor_add_block"/>
     <item
-        android:id="@+id/action_constructor_save"
+        android:id="@+id/action_constructor_next"
         app:showAsAction="ifRoom|withText"
-        android:title="@string/constructor_save"/>
+        android:icon="@drawable/sign"
+        android:title="@string/menu_info_next_person"/>
+    <!--<item-->
+        <!--android:id="@+id/action_constructor_save"-->
+        <!--app:showAsAction="ifRoom|withText"-->
+        <!--android:title="@string/constructor_save"/>-->
+    <!--<item-->
+        <!--android:id="@+id/action_constructor_close"-->
+        <!--app:showAsAction="ifRoom|withText"-->
+        <!--android:title="@string/constructor_close"/>-->
     <item
-        android:id="@+id/action_constructor_close"
+        android:id="@+id/menu_info_shared_to_favorites"
+        app:showAsAction="always|withText"
+        android:icon="@drawable/to_favorites"
+        android:title="@string/to_favorites"/>
+    <item
+        android:id="@+id/menu_info_shared_to_control"
+        app:showAsAction="always|withText"
+        android:icon="@drawable/to_control_icon"
+        android:title="@string/to_control"/>
+    <item
+        android:id="@+id/action_constructor_prev"
         app:showAsAction="ifRoom|withText"
-        android:title="@string/constructor_close"/>
+        android:icon="@drawable/dismiss"
+        android:title="@string/menu_info_prev_person"/>
 </menu>

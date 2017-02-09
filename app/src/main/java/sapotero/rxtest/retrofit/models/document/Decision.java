@@ -19,9 +19,14 @@ public class Decision implements Serializable {
     @SerializedName("approved")
     @Expose
     private Boolean approved;
+    @SerializedName("canceled")
+    @Expose
+    private Boolean canceled;
+
     @SerializedName("signer")
     @Expose
     private String signer;
+
     @SerializedName("signer_id")
     @Expose
     private String signerId;
@@ -62,8 +67,16 @@ public class Decision implements Serializable {
     @Expose
     private List<Block> blocks = new ArrayList<Block>();
 
+    public Boolean getCanceled() {
+        return canceled;
+    }
+
+    public void setCanceled(Boolean canceled) {
+        this.canceled = canceled;
+    }
+
     /**
-     * 
+     *
      * @return
      *     The id
      */

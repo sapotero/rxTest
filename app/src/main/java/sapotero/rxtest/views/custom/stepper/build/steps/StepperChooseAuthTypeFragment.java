@@ -1,5 +1,6 @@
 package sapotero.rxtest.views.custom.stepper.build.steps;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
@@ -8,6 +9,7 @@ import android.support.v7.widget.AppCompatButton;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
@@ -19,6 +21,7 @@ import javax.inject.Inject;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.events.stepper.shared.StepperNextStepEvent;
+import sapotero.rxtest.views.activities.SettingsActivity;
 import sapotero.rxtest.views.custom.stepper.Step;
 import sapotero.rxtest.views.custom.stepper.VerificationError;
 import sapotero.rxtest.views.custom.stepper.util.AuthType;
@@ -36,6 +39,12 @@ public class StepperChooseAuthTypeFragment extends Fragment implements Step, Vie
 
     AppCompatButton ds       = (AppCompatButton) view.findViewById( R.id.stepper_auth_choose_cert );
     AppCompatButton password = (AppCompatButton) view.findViewById( R.id.stepper_auth_choose_password );
+
+    TextView settings = (TextView) view.findViewById( R.id.stepper_auth_settings );
+    settings.setOnClickListener(v -> {
+      Intent intent = new Intent(getContext(), SettingsActivity.class);
+      startActivity(intent);
+    });
 
     ds.setOnClickListener(this);
     password.setOnClickListener(this);

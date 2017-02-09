@@ -79,7 +79,7 @@ import sapotero.rxtest.utils.cryptopro.KeyStoreType;
 import sapotero.rxtest.utils.cryptopro.PinCheck;
 import sapotero.rxtest.utils.cryptopro.ProviderType;
 import sapotero.rxtest.utils.cryptopro.wrapper.CMSSign;
-import sapotero.rxtest.views.interfaces.DataLoaderInterface;
+import sapotero.rxtest.views.interfaces.DataLoaderManager;
 import timber.log.Timber;
 
 public class MainService extends Service {
@@ -111,7 +111,7 @@ public class MainService extends Service {
 
   private static Provider defaultKeyStoreProvider = null;
   private static final ArrayList<String> aliasesList = new ArrayList<String>();
-  private DataLoaderInterface dataLoaderInterface;
+  private DataLoaderManager dataLoaderInterface;
   private String SIGN;
   public static String user;
 
@@ -129,7 +129,7 @@ public class MainService extends Service {
 
     EsdApplication.getComponent(this).inject(this);
 
-    dataLoaderInterface = new DataLoaderInterface(getApplicationContext());
+    dataLoaderInterface = new DataLoaderManager(getApplicationContext());
 
     Provider[] providers = Security.getProviders();
 

@@ -12,9 +12,18 @@ public class CommandParams implements Serializable {
   public String decision;
   public String user;
   public String uuid;
+  public String comment;
 
   public CommandParams() {
     setUuid( UUID.randomUUID().toString() );
+  }
+
+  public String getComment() {
+    return comment;
+  }
+
+  public void setComment(String comment) {
+    this.comment = comment;
   }
 
   public String getUser() {

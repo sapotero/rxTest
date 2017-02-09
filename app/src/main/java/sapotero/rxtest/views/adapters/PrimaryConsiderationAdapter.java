@@ -9,13 +9,20 @@ import android.widget.Button;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.f2prateek.rx.preferences.RxSharedPreferences;
+
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+
 import sapotero.rxtest.R;
+import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.views.adapters.models.PrimaryConsiderationAdapterViewModel;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 
 public class PrimaryConsiderationAdapter extends BaseAdapter {
+
+  @Inject RxSharedPreferences settings;
 
   private Context context;
   private final ArrayList<PrimaryConsiderationPeople> items;
@@ -26,6 +33,7 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
   public PrimaryConsiderationAdapter(Context context, ArrayList<PrimaryConsiderationPeople> items) {
     this.items = items;
     this.context = context;
+    EsdApplication.getComponent(context).inject( this );
   }
 
   private PrimaryConsiderationAdapter.Callback callback;
@@ -54,8 +62,12 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
 
       viewHolder.copy        = (Switch) view.findViewById(R.id.copy);
       viewHolder.responsible = (Switch) view.findViewById(R.id.responsible);
-      viewHolder.out         = (Switch) view.findViewById(R.id.out);
 
+      // настройка
+      // Отображать настройки подлинника
+      if (settings.getBoolean("settings_view_show_origin").get()){
+        viewHolder.copy.setVisibility(View.VISIBLE);
+      }
       view.setTag(viewHolder);
     } else {
       viewHolder = (ViewHolder) view.getTag();
@@ -69,7 +81,6 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
     viewHolder.name.setText( user.getName() );
     viewHolder.copy.setChecked( user.isCopy() );
     viewHolder.responsible.setChecked( user.isResponsible() );
-    viewHolder.out.setChecked( user.isOut() );
 
     viewHolder.remove.setOnClickListener(v -> {
 
@@ -96,7 +107,13 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
         u.setCopy(false);
       }
       user.setCopy( viewHolder.copy.isChecked() );
-      callback.onChange();
+
+
+      updateView();
+
+      if (callback != null) {
+        callback.onChange();
+      }
     });
 
     viewHolder.responsible.setOnClickListener(v -> {
@@ -109,11 +126,6 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
       updateView();
     });
 
-    viewHolder.out.setOnClickListener(v -> {
-      user.setOut( viewHolder.out.isChecked() );
-    });
-
-
     return view;
 
 
@@ -124,7 +136,6 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
       ViewHolder viewholder = check.getViewholder();
       viewholder.copy.setChecked( check.getUser().isCopy() );
       viewholder.responsible.setChecked( check.getUser().isResponsible() );
-      viewholder.out.setChecked( check.getUser().isOut() );
     }
   }
 
@@ -140,7 +151,6 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
     public Button remove;
     public Switch copy;
     public Switch responsible;
-    public Switch out;
   }
 
   @Override

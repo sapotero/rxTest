@@ -28,6 +28,7 @@ import sapotero.rxtest.views.activities.SettingsTemplatesActivity;
 import sapotero.rxtest.views.adapters.DecisionAdapter;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OshsAutoCompleteAdapter;
+import sapotero.rxtest.views.adapters.PrimaryConsiderationAdapter;
 import sapotero.rxtest.views.adapters.models.DocumentTypeItem;
 import sapotero.rxtest.views.custom.stepper.build.steps.StepperAuthFragment;
 import sapotero.rxtest.views.custom.stepper.build.steps.StepperChooseAuthTypeFragment;
@@ -44,7 +45,7 @@ import sapotero.rxtest.views.fragments.InfoCardLinksFragment;
 import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
 import sapotero.rxtest.views.fragments.RoutePreviewFragment;
 import sapotero.rxtest.views.fragments.SettingsViewFragment;
-import sapotero.rxtest.views.interfaces.DataLoaderInterface;
+import sapotero.rxtest.views.interfaces.DataLoaderManager;
 import sapotero.rxtest.views.interfaces.InterfaceDocumentManager;
 import sapotero.rxtest.views.managers.db.managers.DBDocumentManager;
 import sapotero.rxtest.views.managers.db.utils.DBDocumentManagerModule;
@@ -105,6 +106,8 @@ public interface EsdComponent {
   void inject(DecisionAdapter adapter);
 
   void inject(DocumentsAdapter adapter);
+  void inject(PrimaryConsiderationAdapter adapter);
+
   void inject(OshsAutoCompleteAdapter context);
 
   void inject(DBDocumentManager context);
@@ -137,7 +140,7 @@ public interface EsdComponent {
 
 
 
-  void inject(DataLoaderInterface context);
+  void inject(DataLoaderManager context);
   void inject(InterfaceDocumentManager context);
 
   void inject(DocumentTypeItem context);

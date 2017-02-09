@@ -1,46 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<FrameLayout android:layout_height="match_parent" android:layout_width="match_parent"
-             xmlns:android="http://schemas.android.com/apk/res/android">
+<LinearLayout android:layout_height="wrap_content" android:layout_width="match_parent"
+              xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="horizontal">
 
-    <LinearLayout
 
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        >
-
-        <LinearLayout
-            android:orientation="vertical"
+        <TextView
+            android:id="@+id/primary_name"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:paddingStart="@dimen/date_offset"
-            >
+            android:layout_gravity="center_vertical"
+            android:gravity="center_vertical"
 
-            <TextView
-                android:id="@+id/primary_name"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:layout_gravity="center_vertical"
-                android:gravity="center_vertical"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:text="asdasdas"
+            />
 
-                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                android:text="asdasdas"/>
-
-            <!--<TextView-->
-                <!--android:id="@+id/primary_title"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="match_parent"-->
-                <!--android:layout_weight="1"-->
-                <!--/>-->
-
-        </LinearLayout>
 
         <Switch
             android:id="@+id/copy"
             android:text="@string/primary_people_copy"
+            android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             />
@@ -61,21 +41,13 @@
             android:layout_height="match_parent"
             />
 
-        <Switch
-            android:id="@+id/out"
-            android:text="@string/primary_people_out"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            />
-
         <Button
             android:id="@+id/remove_user"
             android:text="@string/cross"
             android:textColor="@color/md_red_600"
             android:layout_width="40dp"
             android:layout_height="wrap_content"
-            android:padding="@dimen/half_date_offset"
+            android:paddingStart="@dimen/half_date_offset"
             style="@style/Widget.AppCompat.Button.Borderless.Colored"/>
 
-    </LinearLayout>
-</FrameLayout>
+</LinearLayout>

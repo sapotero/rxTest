@@ -2,6 +2,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <android.support.v7.preference.PreferenceCategory
+        android:title="Настройки доступа">
+        <EditTextPreference
+            android:key="settings_default_host"
+            android:title="Домен"
+            android:defaultValue="http://mobile.sed.a-soft.org/"/>
+    </android.support.v7.preference.PreferenceCategory>
+
+    <android.support.v7.preference.PreferenceCategory
         android:title="Настройки главного окна">
 
         <ListPreference

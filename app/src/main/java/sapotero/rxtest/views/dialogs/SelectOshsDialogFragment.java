@@ -29,6 +29,7 @@ import sapotero.rxtest.views.adapters.OshsAutoCompleteAdapter;
 import sapotero.rxtest.views.adapters.PrimaryUsersAdapter;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 import sapotero.rxtest.views.custom.DelayAutoCompleteTextView;
+import sapotero.rxtest.views.managers.menu.factories.CommandFactory;
 import timber.log.Timber;
 
 public class SelectOshsDialogFragment extends DialogFragment implements View.OnClickListener {
@@ -42,9 +43,10 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
   @BindView(R.id.pb_loading_indicator) ProgressBar indicator;
 
   SelectOshsDialogFragment.Callback callback;
+  private CommandFactory.Operation operation;
 
   public interface Callback {
-    void onSearchSuccess(Oshs user);
+    void onSearchSuccess(Oshs user, CommandFactory.Operation operation);
     void onSearchError(Throwable error);
   }
   public void registerCallBack(SelectOshsDialogFragment.Callback callback){
@@ -54,8 +56,25 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
 
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
+    operation = CommandFactory.Operation.INCORRECT;
     EsdApplication.getComponent( getActivity() ).inject( this );
-    getDialog().setTitle("Title!");
+
+    Bundle bundle = getArguments();
+    if (bundle != null) {
+      String _operation = bundle.getString("operation");
+      if ( _operation != null ){
+        switch ( _operation ){
+          case "approve":
+            operation = CommandFactory.Operation.APPROVAL_CHANGE_PERSON;
+            break;
+          case "sign":
+            operation = CommandFactory.Operation.SIGNING_CHANGE_PERSON;
+            break;
+          default:
+            break;
+        }
+      }
+    }
 
     View view = inflater.inflate(R.layout.dialog_choose_oshs, null);
     view.findViewById(R.id.dialog_oshs_add).setOnClickListener(this);
@@ -73,7 +92,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
     list.setOnItemClickListener((parent, view12, position, id) -> {
       if ( callback != null){
         Oshs user = (Oshs) adapter.getOshs(position);
-        callback.onSearchSuccess( user );
+        callback.onSearchSuccess( user, operation );
         dismiss();
       }
     });
@@ -108,7 +127,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
 
         if ( callback != null){
           Oshs user = (Oshs) adapterView.getItemAtPosition(position);
-          callback.onSearchSuccess( user );
+          callback.onSearchSuccess( user, operation);
         }
         dismiss();
       }

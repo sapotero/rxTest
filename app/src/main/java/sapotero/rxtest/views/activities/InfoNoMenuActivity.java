@@ -49,6 +49,7 @@ import sapotero.rxtest.views.fragments.InfoCardFieldsFragment;
 import sapotero.rxtest.views.fragments.InfoCardLinksFragment;
 import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
 import sapotero.rxtest.views.fragments.RoutePreviewFragment;
+import sapotero.rxtest.views.managers.menu.factories.CommandFactory;
 import timber.log.Timber;
 
 public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivityDecisionPreviewFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, RoutePreviewFragment.OnFragmentInteractionListener, InfoCardDocumentsFragment.OnFragmentInteractionListener, InfoCardWebViewFragment.OnFragmentInteractionListener, InfoCardLinksFragment.OnFragmentInteractionListener, InfoCardFieldsFragment.OnFragmentInteractionListener, /*InterfaceDocumentManager.Callback,*/ SelectOshsDialogFragment.Callback {
@@ -281,7 +282,7 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
 
 
   @Override
-  public void onSearchSuccess(Oshs user) {
+  public void onSearchSuccess(Oshs user, CommandFactory.Operation operation) {
 
   }
 

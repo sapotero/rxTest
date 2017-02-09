@@ -111,6 +111,7 @@
     <string name="document_empty_list"> Нет документов для отображения </string>
     <string name="document_empty_list_error"> Произошла ошибка во время загрузки документов</string>
     <string name="host_hint">Хост</string>
+    <string name="comment_hint">Комментарий</string>
 
     <string name="stepper_fragment_login">Авторизация</string>
     <string name="stepper_fragment_load_documents">Пользователь</string>
@@ -146,10 +147,11 @@
     <string name="fragment_decision_hide_number">Не отображать номер блока</string>
     <string name="fragment_decision_hide_performers">Скрыть исполнителей</string>
     <string name="fragment_decision_button_add_people">Добавить исполнителя</string>
-    <string name="fragment_decision_button_get_template">Нажмите для выбора шаблона резолюции</string>
+    <!--<string name="fragment_decision_button_get_template">Нажмите для выбора шаблона резолюции</string>-->
+    <string name="fragment_decision_button_get_template">Ш</string>
     <string name="decision_text">Текст резолюции</string>
 
-    <string name="hint_decision_size">Шрифт текста</string>
+    <string name="hint_decision_size">Шрифт</string>
     <string name="constructor_add_block">Добавить блок</string>
     <string name="constructor_save">Сохранить</string>
     <string name="constructor_close">Закрыть</string>
@@ -165,6 +167,7 @@
 
     <string name="menu_info_change_person">Передать</string>
     <string name="menu_info_next_person">Подписать</string>
+    <string name="menu_info_sign_next_person">Согласовать</string>
     <string name="menu_info_prev_person">Отклонить</string>
     <string name="magnifer">Увеличить</string>
     <string name="dialog_oshs_close">Закрыть</string>
@@ -223,12 +226,193 @@
     <string name="searchview_text_hint">Hint</string>
 
     <string name="dialog_to_control_positive">Подтверждение постановки на контроль</string>
-    <string name="dialog_to_control_body_positive">Документ будет отмечен к постановке на контроль с простановкой на электронный образ штампа контроля</string>
+    <string name="dialog_to_control_body_positive">Документ будет отмечен к постановке на контроль с проставлением на электронный образ штампа контроля</string>
 
     <string name="dialog_to_control_negative">Подтверждение снятия отметки о контроле</string>
     <string name="dialog_to_control_body_negative">Отметка о контроле будет снята</string>
 
-    <string name="dialog_approve_body">Согласовать документ?</string>
-    <string name="dialog_sign_body">Согласовать документ?</string>
+    <string name="dialog_approve_body">Подписать документ?</string>
+    <string name="dialog_sign_body"> Согласовать документ?</string>
+    <string name="dialog_reject_body"> Отклонить документ?</string>
+    <string name="dialog_empty_value"></string>
+
+    <string name="decision_approve_body">Подписать данную резолюцию?</string>
+    <string name="decision_reject_body"> Отклонить данную резолюцию?</string>
+
+    <string name="decision_add_people">\u2000Добавить исполнителя</string>
+
+
+
+    <!-- //FIX ПОЧИСТИТЬ ЭТО-->
+    <!--CRYPTO PRO-->
+
+
+    <string name="ContainerTab">Containers</string>
+    <string name="ExamplesTab">Examples</string>
+    <string name="SettingsTab">Settings</string>
+    <string name="IntentsTab">Intents</string>
+
+    <string name="ContainerGenKeyPair">Create container (signature key)</string>
+    <string name="ContainerGenKeyPairDH">Create container (exchange key)</string>
+    <string name="ContainerChangePassAndCopy">Create container and change pin</string>
+    <string name="ContainerRemoveOneContainer">Delete container</string>
+    <string name="ContainerRemoveContainers">Delete all containers</string>
+    <string name="ContainerContainerName">Container:</string>
+    <string name="ContainerCA14Button">CA 1.4</string>
+    <string name="ContainerCA15Button">CA 1.5</string>
+    <string name="ContainerCA20Button">CA 2.0 (default password: 123)</string>
+    <string name="ContainerContainerNameIsNull">Error! Container alias not set.</string>
+    <string name="ContainerContainerNameExists">Error! Container exists.</string>
+
+    <string name="ContainerMoveLabel">Copy containers from:</string>
+    <string name="ContainerDefaultPath">/mnt/sdcard/keys</string>
+
+    <string name="StatusField">Status</string>
+    <string name="StatusUnknown">unknown</string>
+    <string name="StatusOK">done</string>
+    <string name="StatusError">failed</string>
+    <string name="SettingsCopy">Copy</string>
+
+    <string name="SettingsKeyStoreType">Key store type:</string>
+    <string name="SettingsProviderType">Provider type:</string>
+    <string name="SettingsKeyAlgorithm">KeyAlgorithm:</string>
+
+    <string name="ExamplesExampleName">Example:</string>
+    <string name="ExamplesClientName">Client container:</string>
+    <string name="ExamplesClientPassword">Client password:</string>
+    <string name="ExamplesServerName">Recipient container:</string>
+    <string name="ExamplesServerPassword">Recipient password:</string>
+    <string name="ExamplesExecute">Execute</string>
+
+    <string name="ExamplesInstallCAdESCAWarning">
+        You have chosen CAdES example which requires CA certificates to being installed.
+        A special example %s will install the certificates. You can also install the
+        certificates using Settings > Security on your device. Press Execute to fulfil
+        the example.
+    </string>
+
+    <string name="ExamplesAuthInstallCACAdES">Automatically install CA certificates</string>
+    <string name="ContainerAboutTestContainer" formatted="false">Container: %s, password: %s</string>
+
+    <string-array name="providerTypes">
+        <item>GOST R 34.10&#8211;2001</item>
+        <item>GOST R 34.10&#8211;2012 (256)</item>
+        <item>GOST R 34.10&#8211;2012 (512)</item>
+    </string-array>
+
+    <string-array name="ExamplesDescription">
+        <item>Check certificate status (online)</item>
+        <item>Show certificate content</item>
+        <item>Hash some data</item>
+        <item>Sign some data</item>
+        <item>Create and verify plain signature</item>
+        <item>Create and verify CMS signature</item>
+        <item>Create and verify CMS signature with attributes</item>
+        <item>Create and verify XML signature</item>
+        <item>Install trusted test root certificates</item>
+        <item>Create and verify CAdES-BES signature</item>
+        <item>Create and verify CAdES-X Long Type 1 signature</item>
+        <item>Encrypt and decrypt data using agree key</item>
+        <item>Encrypt and decrypt data using session key</item>
+        <item>Encrypt and decrypt Enveloped CMS (KeyTransport)</item>
+        <item>Encrypt and decrypt Enveloped CMS (KeyAgreement)</item>
+        <item>Establish TLS connection</item>
+        <item>Establish TLS connection with client auth</item>
+        <item>Establish TLS connection (apache http 4)</item>
+        <item>Establish TLS connection with client auth (apache http 4)</item>
+    </string-array>
+
+    <string-array name="ExampleClasses">
+        <item>CheckCertStatusExample</item>
+        <item>PrintCertificateContentExample</item>
+        <item>HashExample</item>
+        <item>SignExample</item>
+        <item>VerifyExample</item>
+        <item>CMSSimpleSignExample</item>
+        <item>CMSWithAttributesSignExample</item>
+        <item>XMLSignVerifyExample</item>
+        <item>InstallCAdESTestTrustCertExample</item>
+        <item>CAdESBESSignVerifyExample</item>
+        <item>CAdESXLT1SignVerifyExample</item>
+        <item>ClassicEncryptDecryptExample</item>
+        <item>SessionEncryptDecryptExample</item>
+        <item>TransportEnvelopedCMSExample</item>
+        <item>AgreementEnvelopedCMSExample</item>
+        <item>TLSSimpleExample</item>
+        <item>TLSClientAuthExample</item>
+        <item>HttpTLSSimpleExample</item>
+        <item>HttpTLSClientAuthExample</item>
+    </string-array>
+
+    <string-array name="ExampleRequireWrittenPin">
+        <item>TLSClientAuthExample</item>
+        <item>HttpTLSClientAuthExample</item>
+    </string-array>
+
+    <string-array name="ExampleRequireServerContainer">
+        <item>ClassicEncryptDecryptExample</item>
+        <item>SessionEncryptDecryptExample</item>
+        <item>TransportEnvelopedCMSExample</item>
+        <item>AgreementEnvelopedCMSExample</item>
+    </string-array>
+
+    <!-- Интенты -->
+
+    <string name="IntentsIntentCopyContainer">Copy container</string>
+    <string name="IntentsIntentCertSource">Take certificate from:</string>
+    <string name="IntentsIntentCertSourceChain">Use certificate chain</string>
+    <string name="IntentsIntentInstallCertInContainer">Install certificate</string>
+    <string name="IntentsIntentSignData">Sign data</string>
+    <string name="IntentsIntentVerifySignature">Verify signature</string>
+    <string name="IntentsIntentBuildChain">Build chain</string>
+    <string name="IntentsIntentGenerate">Create key container</string>
+
+    <string name="IntentsSignatureAlias">Alias of container to make signature:</string>
+    <string name="IntentsSignatureData">Data to sign:</string>
+    <string name="IntentsSignatureDetached">Detached signature</string>
+    <string name="IntentsSignatureCAdESLong">Produce CAdES-X Long Type 1</string>
+
+    <string name="IntentsStorageKind">Storage kind:</string>
+    <string name="IntentsObjectAlias">Build chain for object with alias:</string>
+    <string name="IntentsVerifyAsDefault">Verify with default type</string>
+
+    <string-array name="IntentsStorageList">
+        <item>Personal</item>
+        <item>Intermediate</item>
+        <item>Trust</item>
+        <item>AddressBook</item>
+    </string-array>
+
+    <string-array name="IntentsIntentCertSourceList">
+        <item>file path entered in intent</item>
+        <!--
+        <item>content passed as intent parameter</item>
+        <item>file path passed as intent parameter</item>
+        -->
+    </string-array>
+
+    <string name="IntentsContainerType">Container type:</string>
+    <string name="IntentsContainerAlias">Container alias:</string>
+    <string name="IntentsKeyAlgorithm2001">GOST R 34.10&#8211;2001</string>
+    <string name="IntentsKeyAlgorithm2012256">GOST R 34.10&#8211;2012&#8211;256</string>
+    <string name="IntentsKeyAlgorithm2012512">GOST R 34.10&#8211;2012&#8211;512</string>
+    <string name="IntentsKeyExchange">Exchange key</string>
+    <string name="IntentsCertSelfSigned">Self-signed certificate</string>
+    <string name="IntentsCAVersion">Version of Crypto-Pro CA:</string>
+    <string name="IntentsCAAddress">Address of Crypto-Pro CA:</string>
+    <string name="settings">Настройки</string>
+
+    <string-array name="IntentsCAAddressList">
+        <item>http://www.cryptopro.ru/certsrv/</item>
+        <item>https://www.cryptopro.ru:5555/ui/</item>
+    </string-array>
+
+    <string-array name="IntentsCAVersionList">
+        <item>1.3&#8211;1.4</item>
+        <item>1.5</item>
+    </string-array>
+
+
+    <!--CRYPTO PRO-->
 
 </resources>

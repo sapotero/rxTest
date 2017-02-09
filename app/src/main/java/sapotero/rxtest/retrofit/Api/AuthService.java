@@ -10,6 +10,7 @@ import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 import rx.Observable;
+import sapotero.rxtest.retrofit.models.Assistant;
 import sapotero.rxtest.retrofit.models.AuthSignToken;
 import sapotero.rxtest.retrofit.models.Folder;
 import sapotero.rxtest.retrofit.models.Oshs;
@@ -18,6 +19,13 @@ import sapotero.rxtest.retrofit.models.me.UserInfo;
 import sapotero.rxtest.retrofit.models.v2.V2UserInfo;
 
 public interface AuthService {
+
+  @GET("classifiers/assistants.json")
+  Observable<ArrayList<Assistant>> getAssistant(
+    @Query("login") String username,
+    @Query("auth_token") String token,
+    @Query("head_id") String head
+  );
 
   @PUT("token/{username}.json")
   Observable<AuthSignToken> getAuth(

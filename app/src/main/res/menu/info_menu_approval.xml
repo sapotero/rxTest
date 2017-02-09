@@ -5,7 +5,7 @@
         android:id="@+id/menu_info_approval_next_person"
         app:showAsAction="always|withText"
         android:icon="@drawable/sign"
-        android:title="@string/menu_info_next_person"/>
+        android:title="@string/menu_info_sign_next_person"/>
     <item
         android:id="@+id/menu_info_approval_change_person"
         app:showAsAction="always|withText"
