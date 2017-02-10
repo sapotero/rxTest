@@ -4,19 +4,23 @@ import android.content.Context;
 
 import com.f2prateek.rx.preferences.Preference;
 
+import java.util.ArrayList;
+import java.util.Objects;
+
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import sapotero.rxtest.retrofit.DocumentService;
+import sapotero.rxtest.retrofit.OperationService;
+import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.views.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.views.managers.menu.utils.CommandParams;
 import timber.log.Timber;
 
-public class SaveDecision extends AbstractCommand {
+public class RejectDecision extends AbstractCommand {
 
   private final DocumentReceiver document;
   private final Context context;
@@ -28,10 +32,9 @@ public class SaveDecision extends AbstractCommand {
   private Preference<String> UID;
   private Preference<String> HOST;
   private Preference<String> STATUS_CODE;
-  private String decision;
-  private String decision_id;
+  private String folder_id;
 
-  public SaveDecision(Context context, DocumentReceiver document){
+  public RejectDecision(Context context, DocumentReceiver document){
     super(context);
     this.context = context;
     this.document = document;
@@ -52,12 +55,8 @@ public class SaveDecision extends AbstractCommand {
     HOST  = settings.getString("settings_username_host");
     STATUS_CODE = settings.getString("activity_main_menu.start");
   }
-  public SaveDecision withDecision(String decision){
-    this.decision = decision;
-    return this;
-  }
-  public SaveDecision withDecisionId(String decision_id){
-    this.decision_id = decision_id;
+  public RejectDecision withFolder(String uid){
+    folder_id = uid;
     return this;
   }
 
@@ -74,22 +73,31 @@ public class SaveDecision extends AbstractCommand {
       .client( okHttpClient )
       .build();
 
-    DocumentService operationService = retrofit.create( DocumentService.class );
+    OperationService operationService = retrofit.create( OperationService.class );
 
-    Observable<String> info = operationService.update(
-      decision_id,
+    ArrayList<String> uids = new ArrayList<>();
+    uids.add( UID.get() );
+
+    Observable<OperationResult> info = operationService.shared(
+      getType(),
       LOGIN.get(),
       TOKEN.get(),
-      decision
+      uids,
+      UID.get(),
+      STATUS_CODE.get(),
+      folder_id,
+      null
     );
 
     info.subscribeOn( Schedulers.computation() )
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         data -> {
-          Timber.tag(TAG).i("ok: %s", data);
+          Timber.tag(TAG).i("ok: %s", data.getOk());
+          Timber.tag(TAG).i("error: %s", data.getMessage());
+          Timber.tag(TAG).i("type: %s", data.getType());
 
-          if (callback != null ){
+          if (callback != null && Objects.equals(data.getType(), "warning")){
             callback.onCommandExecuteSuccess( getType() );
           }
         },
@@ -102,9 +110,11 @@ public class SaveDecision extends AbstractCommand {
 
   }
 
+
+
   @Override
   public String getType() {
-    return "save_decision";
+    return "add_decision";
   }
 
   @Override
@@ -121,6 +131,7 @@ public class SaveDecision extends AbstractCommand {
   public void withParams(CommandParams params) {
     this.params = params;
   }
+
   @Override
   public CommandParams getParams() {
     return params;

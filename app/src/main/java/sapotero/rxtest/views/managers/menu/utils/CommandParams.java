@@ -3,19 +3,30 @@ package sapotero.rxtest.views.managers.menu.utils;
 import java.io.Serializable;
 import java.util.UUID;
 
+import sapotero.rxtest.retrofit.models.document.Decision;
+
 public class CommandParams implements Serializable {
   public String person;
   public String folder;
   public String label;
   public String sign;
   public String document;
-  public String decision;
-  public String user;
+  public Decision decision;
+  public String decisionId;
   public String uuid;
+  public String user;
   public String comment;
 
   public CommandParams() {
     setUuid( UUID.randomUUID().toString() );
+  }
+
+  public String getDecisionId() {
+    return decisionId;
+  }
+
+  public void setDecisionId(String decisionId) {
+    this.decisionId = decisionId;
   }
 
   public String getComment() {
@@ -42,11 +53,11 @@ public class CommandParams implements Serializable {
     return uuid;
   }
 
-  public String getDecision() {
+  public Decision getDecision() {
     return decision;
   }
 
-  public void setDecision(String decision) {
+  public void setDecision(Decision decision) {
     this.decision = decision;
   }
 

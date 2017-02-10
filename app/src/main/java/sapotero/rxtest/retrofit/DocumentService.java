@@ -18,7 +18,7 @@ public interface DocumentService {
   );
 
   @PUT("/v2/decisions/{decision}.json")
-  Observable<String> saveDecision(
+  Observable<String> update(
     @Path("decision") String decision,
     @Query("login") String login,
     @Query("auth_token") String auth_token,
@@ -31,4 +31,5 @@ public interface DocumentService {
     @Query("auth_token") String auth_token,
     @Body String body
   );
+
 }

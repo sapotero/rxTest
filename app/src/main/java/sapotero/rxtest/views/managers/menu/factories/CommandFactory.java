@@ -6,7 +6,7 @@ import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.views.managers.menu.commands.approval.ChangePerson;
 import sapotero.rxtest.views.managers.menu.commands.approval.NextPerson;
 import sapotero.rxtest.views.managers.menu.commands.consideration.PrimaryConsideration;
-import sapotero.rxtest.views.managers.menu.commands.decision.SaveDecision;
+import sapotero.rxtest.views.managers.menu.commands.decision.ApproveDecision;
 import sapotero.rxtest.views.managers.menu.commands.performance.DelegatePerformance;
 import sapotero.rxtest.views.managers.menu.commands.report.FromTheReport;
 import sapotero.rxtest.views.managers.menu.commands.report.ReturnToPrimaryConsideration;
@@ -206,18 +206,39 @@ public class CommandFactory implements AbstractCommand.Callback{
     SAVE_DECISION {
       @Override
       Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
-        SaveDecision command = new SaveDecision(context, document);
+//        SaveDecision command = new SaveDecision(context, document);
+//        command.withParams(params);
+//        command
+//          .withDecision( params.getDecision() )
+//          .withDecisionId( params.getSign() )
+//          .registerCallBack(instance);
+//
+//        command.withParams(params);
+//        return command;
+        return null;
+      }
+    },
+    NEW_DECISION {
+      @Override
+      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
+        return null;
+      }
+    },
+    APPROVE_DECISION {
+      @Override
+      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
+        ApproveDecision command = new ApproveDecision(context, document);
         command.withParams(params);
         command
           .withDecision( params.getDecision() )
-          .withDecisionId( params.getSign() )
+          .withDecisionId( params.getDecisionId() )
           .registerCallBack(instance);
 
         command.withParams(params);
         return command;
       }
     },
-    NEW_DECISION {
+    REJECT_DECISION {
       @Override
       Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
         return null;
@@ -233,6 +254,12 @@ public class CommandFactory implements AbstractCommand.Callback{
           break;
         case "sapotero.rxtest.views.managers.menu.commands.decision.AddDecision":
           operation = Operation.NEW_DECISION;
+          break;
+        case "sapotero.rxtest.views.managers.menu.commands.decision.ApproveDecision":
+          operation = Operation.APPROVE_DECISION;
+          break;
+        case "sapotero.rxtest.views.managers.menu.commands.decision.RejectDecision":
+          operation = Operation.REJECT_DECISION;
           break;
 
         case "sapotero.rxtest.views.managers.menu.commands.report.ReturnToPrimaryConsideration":

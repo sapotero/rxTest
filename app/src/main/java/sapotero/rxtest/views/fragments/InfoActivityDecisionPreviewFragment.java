@@ -220,6 +220,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment {
     Timber.tag("button_edit").i( json );
 
 
+
+
     Context context = getContext();
     Intent intent = new Intent( context , DecisionConstructorActivity.class);
     intent.putExtra("decision", json);
@@ -260,6 +262,9 @@ public class InfoActivityDecisionPreviewFragment extends Fragment {
       .subscribe(doc -> {
 
         Timber.tag("loadFromDb").i( "loaded %s", doc.getId() );
+
+        Preference<String> documentNumber = settings.getString("document.number");
+        documentNumber.set( doc.getRegistrationNumber() );
 
         preview.showEmpty();
 

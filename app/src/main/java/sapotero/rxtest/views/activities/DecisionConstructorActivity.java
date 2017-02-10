@@ -52,6 +52,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
   private String TAG = this.getClass().getSimpleName();
   private DecisionManager manager;
+  private Decision raw_decision;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -89,11 +90,10 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
               String json = new Gson().toJson(new_decision);
 
-              CommandParams params = new CommandParams();
-              params.setSign( new_decision.getId() );
-              params.setDecision(json);
-
-              operationManager.execute( CommandFactory.Operation.SAVE_DECISION, params );
+//              CommandParams params = new CommandParams();
+//              params.setSign( new_decision.getId() );
+//              params.setDecision(json);
+//              operationManager.execute( CommandFactory.Operation.SAVE_DECISION, params );
 
             }
           )
@@ -126,11 +126,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
           break;
 
         case R.id.action_constructor_next:
-          Decision approve = new Decision();
-          approve.setApproved(true);
-          approve.setBlocks(null);
-          Timber.tag("DECISION").e("approve: %s", new Gson().toJson(approve) );
-
           // настройка
           // Показывать подтверждения о действиях с документом
           if ( settings.getBoolean("settings_view_show_actions_confirm").get() ){
@@ -163,7 +158,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 //        case R.id.action_constructor_save:
 //          Timber.e("CHANGED: %s", manager.isChanged() );
 //
-//          manager.saveDecision();
+//          manager.update();
 //          break;
 //        case R.id.action_constructor_close:
 //
@@ -257,7 +252,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
 
 
-    Decision raw_decision = null;
+    raw_decision = null;
     Gson gson = new Gson();
 
     Intent intent = getIntent();
@@ -362,14 +357,19 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       .negativeText(R.string.no)
       .onPositive((dialog1, which) -> {
 
-//        CommandFactory.Operation operation;
-//        operation = isApproval ? CommandFactory.Operation.APPROVAL_PREV_PERSON : CommandFactory.Operation.SIGNING_PREV_PERSON;
-//
-//        CommandParams params = new CommandParams();
-//        params.setUser(LOGIN.get());
-//        params.setSign("Sign");
+        Decision approve = new Decision();
+        approve.setApproved(true);
+        approve.setBlocks(null);
+        Timber.tag("DECISION").e("approve: %s | %s", new Gson().toJson(approve), raw_decision.getId() );
 
-//        operationManager.execute(operation, params);
+        CommandFactory.Operation operation;
+        operation =CommandFactory.Operation.APPROVE_DECISION;
+
+        CommandParams params = new CommandParams();
+        params.setDecisionId( raw_decision.getId() );
+        params.setDecision( approve );
+
+        operationManager.execute(operation, params);
       })
       .autoDismiss(true);
 
