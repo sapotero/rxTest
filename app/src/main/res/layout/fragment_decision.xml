@@ -48,6 +48,7 @@
                 android:layout_marginTop="-56dp"
                 android:layout_marginEnd="64dp"
                 android:layout_gravity="center|right"
+                android:id="@+id/fragment_decision_button_wrapper"
                 >
 
                 <LinearLayout

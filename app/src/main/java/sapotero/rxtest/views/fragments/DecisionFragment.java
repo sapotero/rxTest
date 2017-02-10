@@ -63,9 +63,11 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   @BindView(R.id.fragment_decision_hide_performers) CheckBox hide_performers;
   @BindView(R.id.fragment_decision_font_size) Spinner hintSpinner;
 
-//  @BindView(R.id.decision_report_action) RadioGroup buttons;
+  @BindView(R.id.fragment_decision_button_wrapper) LinearLayout buttons;
+  //  @BindView(R.id.decision_report_action) RadioGroup buttons;
 //  @BindView(R.id.head_font_selector) SpinnerWithLabel textSelector;
   @BindView(R.id.fragment_decision_text_before) ToggleButton fragment_decision_text_before;
+
 //  @BindView(R.id.head_font_selector_wrapper) TextInputLayout head_font_selector_wrapper;
 
 
@@ -228,7 +230,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     if (settings.getBoolean("settings_view_hide_buttons").get()){
       button_familiarization.setVisibility(View.GONE);
       button_report.setVisibility(View.GONE);
-//      buttons.setVisibility(View.GONE);
+      buttons.setVisibility(View.GONE);
     }
 
     // настройка

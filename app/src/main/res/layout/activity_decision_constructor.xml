@@ -43,12 +43,11 @@
             >
 
             <ScrollView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:clipToPadding="false"
                 style="@android:style/Widget.Material.Light.ScrollView"
-                android:fillViewport="true"
-                >
+                android:clipToPadding="true"
+                android:fillViewport="true">
 
                 <RelativeLayout
                     android:orientation="vertical"

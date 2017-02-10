@@ -203,7 +203,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
       block.setToFamiliarization(false);
     }
 
-//    text += block.getNumber().toString() + ". ";
+    text += block.getNumber().toString() + ". ";
     text += block.getAppealText();
 
     Timber.tag(TAG).i( " setAppealText" + text );
