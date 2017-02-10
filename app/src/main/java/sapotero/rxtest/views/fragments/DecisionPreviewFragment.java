@@ -35,6 +35,7 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.Performer;
+import sapotero.rxtest.views.managers.toolbar.ToolbarManager;
 import sapotero.rxtest.views.managers.view.interfaces.DecisionInterface;
 import timber.log.Timber;
 
@@ -55,12 +56,15 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
   private View view;
   private String TAG = this.getClass().getSimpleName();
   public Decision decision;
+  private ToolbarManager toolbarManager;
 
   public DecisionPreviewFragment() {
   }
 
   public static DecisionPreviewFragment newInstance(String param1, String param2) {
     DecisionPreviewFragment fragment = new DecisionPreviewFragment();
+
+
     return fragment;
   }
 

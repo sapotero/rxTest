@@ -8,14 +8,14 @@ public class DecisionSpinnerItem {
   private String name;
   private String date;
 
-  public DecisionSpinnerItem(Decision raw_decision, String name, String date) {
-    this.decision = raw_decision;
+  public DecisionSpinnerItem(Decision decision, String name, String date) {
+    this.decision = decision;
     this.name = name;
     this.date = date;
   }
 
-  public DecisionSpinnerItem(Decision raw_decision, String name, int size) {
-    this.decision = raw_decision;
+  public DecisionSpinnerItem(Decision decision, String name, int size) {
+    this.decision = decision;
     this.name = name;
     this.date = String.valueOf(size);
   }

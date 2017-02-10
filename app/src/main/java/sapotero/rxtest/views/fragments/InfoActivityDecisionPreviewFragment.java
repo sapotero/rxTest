@@ -1,5 +1,6 @@
 package sapotero.rxtest.views.fragments;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -57,22 +58,25 @@ import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.adapters.DecisionSpinnerAdapter;
 import sapotero.rxtest.views.adapters.models.DecisionSpinnerItem;
 import sapotero.rxtest.views.dialogs.DecisionMagniferFragment;
+import sapotero.rxtest.views.managers.toolbar.ToolbarManager;
 import timber.log.Timber;
 
 import static com.mikepenz.iconics.Iconics.TAG;
 
+@SuppressLint("ValidFragment")
 public class InfoActivityDecisionPreviewFragment extends Fragment {
 
+  private ToolbarManager toolbarManager;
   @Inject RxSharedPreferences settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   private OnFragmentInteractionListener mListener;
-  private Preference<String> DOCUMENT_UID;
 
+  private Preference<String> DOCUMENT_UID;
+  private Preference<String> UID;
   private Preference<String> TOKEN;
   private Preference<String> LOGIN;
   private Preference<String> PASSWORD;
-  private Preference<String> UID;
   private Preference<String> STATUS_CODE;
   private Preference<Integer> POSITION;
 
@@ -96,6 +100,14 @@ public class InfoActivityDecisionPreviewFragment extends Fragment {
   private Unbinder unbinder;
   private Preference<String> REG_NUMBER;
   private String uid;
+
+  public InfoActivityDecisionPreviewFragment() {
+  }
+
+
+  public InfoActivityDecisionPreviewFragment(ToolbarManager toolbarManager) {
+    this.toolbarManager = toolbarManager;
+  }
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -323,12 +335,6 @@ public class InfoActivityDecisionPreviewFragment extends Fragment {
             decision_spinner_adapter.add( new DecisionSpinnerItem(null, "Нет резолюций", 0 ) );
             preview.showEmpty();
           }
-
-//          desigions_recycler_view.setLayoutManager(new LinearLayoutManager(this));
-//          RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
-//          itemAnimator.setAddDuration(10);
-//          itemAnimator.setRemoveDuration(10);
-//          desigions_recycler_view.setItemAnimator(itemAnimator);
 
         } else {
           Timber.e("no decisions");

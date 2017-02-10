@@ -127,7 +127,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL ){
       fragmentTransaction.add( R.id.activity_info_preview_container, new RoutePreviewFragment() );
     } else {
-      fragmentTransaction.add( R.id.activity_info_preview_container, new InfoActivityDecisionPreviewFragment() );
+      fragmentTransaction.add( R.id.activity_info_preview_container, new InfoActivityDecisionPreviewFragment(toolbarManager) );
     }
 
     fragmentTransaction.commit();

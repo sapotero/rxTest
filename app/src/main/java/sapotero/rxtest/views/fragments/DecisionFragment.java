@@ -10,9 +10,11 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.Switch;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -37,7 +39,6 @@ import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.retrofit.utils.OshsService;
 import sapotero.rxtest.views.adapters.PrimaryConsiderationAdapter;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
-import sapotero.rxtest.views.custom.SpinnerWithLabel;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
 import sapotero.rxtest.views.dialogs.SelectTemplateDialogFragment;
 import sapotero.rxtest.views.managers.menu.factories.CommandFactory;
@@ -54,15 +55,16 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   @BindView(R.id.card_toolbar)  Toolbar  card_toolbar;
   @BindView(R.id.decision_text) EditText decision_text;
 
-  @BindView(R.id.fragment_decision_button_familiarization) Switch button_familiarization;
-  @BindView(R.id.fragment_decision_button_report) Switch button_report;
+  @BindView(R.id.fragment_decision_button_familiarization) ToggleButton button_familiarization;
+  @BindView(R.id.fragment_decision_button_report) ToggleButton button_report;
 
   @BindView(R.id.fragment_decision_linear_people) LinearLayout people_view;
 
-  @BindView(R.id.fragment_decision_hide_performers) Switch hide_performers;
+  @BindView(R.id.fragment_decision_hide_performers) CheckBox hide_performers;
+  @BindView(R.id.fragment_decision_font_size) Spinner hintSpinner;
 
 //  @BindView(R.id.decision_report_action) RadioGroup buttons;
-  @BindView(R.id.head_font_selector) SpinnerWithLabel textSelector;
+//  @BindView(R.id.head_font_selector) SpinnerWithLabel textSelector;
   @BindView(R.id.fragment_decision_text_before) ToggleButton fragment_decision_text_before;
 //  @BindView(R.id.head_font_selector_wrapper) TextInputLayout head_font_selector_wrapper;
 
@@ -99,103 +101,6 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     return new DecisionFragment();
   }
 
-  private void updateUsers(){
-    people_view.removeAllViews();
-    if ( adapter.getCount() > 0 ) {
-      for (int i = 0; i < adapter.getCount(); i++) {
-        View item = adapter.getView(i, null, null);
-        people_view.addView(item);
-      }
-    } else {
-      TextView empty_view = new TextView(getContext());
-      empty_view.setText("Нет исполнителей");
-      people_view.addView(empty_view);
-    }
-  }
-
-  public interface OnFragmentInteractionListener {
-    void onFragmentInteraction(Uri uri);
-  }
-
-  public Block getBlock(){
-
-    String appealText = "";
-    if (button_report.isChecked()) {
-      appealText = button_report.getTextOn().toString();
-    } else if (button_familiarization.isChecked()) {
-      appealText = button_familiarization.getTextOn().toString();
-    }
-
-    Block block = new Block();
-    block.setNumber(number);
-    block.setText( decision_text.getText().toString() );
-    block.setAppealText( appealText );
-    block.setTextBefore( fragment_decision_text_before.isChecked() );
-    block.setHidePerformers( hide_performers.isChecked() );
-    block.setToCopy(false);
-    block.setToFamiliarization(false);
-
-    if ( adapter.getCount() > 0 ){
-      ArrayList<Performer> performers = new ArrayList<>();
-
-      for (int i = 0; i < adapter.getCount(); i++) {
-        Performer p = new Performer();
-        PrimaryConsiderationPeople item = adapter.getItem(i);
-
-        p.setPerformerId( item.getId() );
-        p.setIsResponsible( item.isResponsible() );
-        p.setIsOriginal( item.isCopy() );
-        p.setPerformerId( item.getId() );
-        p.setPerformerText( item.getName() );
-        p.setOrganizationText( item.getOrganization() );
-        p.setNumber( i );
-
-        performers.add(p);
-      }
-
-      block.setPerformers( performers );
-    }
-
-    return block;
-  }
-
-  public void setNumber( int number){
-    card_toolbar.setTitle("Блок " + number);
-  }
-
-  private void loadSettings() {
-    Preference<String> _username = settings.getString("login");
-    login = _username.get();
-
-    Preference<String> _token = settings.getString("token");
-    token = _token.get();
-
-    HOST = settings.getString("settings_username_host");
-  }
-
-//  @OnClick(R.id.fragment_decision_button_add_people)
-//  public void add(){
-//    Timber.tag("ADD PEOPLE").e("CLICKED");
-//
-//    showAddOshsDialog();
-//  }
-
-  private void showAddOshsDialog() {
-    if (oshs == null){
-      oshs = new SelectOshsDialogFragment();
-      oshs.registerCallBack( this );
-    }
-
-    oshs.show( getActivity().getFragmentManager(), "SelectOshsDialogFragment");
-  }
-
-  @OnClick(R.id.fragment_decision_text_before)
-  public void text(){
-    if (callback != null) {
-      callback.onUpdateSuccess();
-    }
-  }
-
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -216,6 +121,16 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     EsdApplication.getComponent(mContext).inject( this );
 
     loadSettings();
+
+    ArrayList<String> arrayStrings = new ArrayList<>();
+
+    arrayStrings.add("13");
+    arrayStrings.add("14");
+    arrayStrings.add("15");
+
+    ArrayAdapter<String> tmp_adapter = new ArrayAdapter<>(mContext, R.layout.simple_spinner_item, arrayStrings);
+//    hintSpinner.setAdapter(new HintSpinnerAdapter( tmp_adapter, R.layout.hint_row_item, mContext));
+    hintSpinner.setAdapter(tmp_adapter);
 
     card_toolbar.inflateMenu(R.menu.card_menu);
     card_toolbar.setTitle("Блок " + number );
@@ -398,8 +313,6 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
 
   }
 
-
-
   @OnClick(R.id.fragment_decision_button_get_template)
   public void template(){
     Timber.tag("ADD template").e("CLICKED");
@@ -411,10 +324,110 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
 
     templates.show( getActivity().getFragmentManager(), "SelectTemplateDialogFragment");
   }
+
+
+
   @Override
   public void onSelectTemplate(String template) {
     Timber.tag("ADD template").e("onSelectTemplate %s", template);
     decision_text.setText( template );
+
+  }
+  private void updateUsers(){
+    people_view.removeAllViews();
+    if ( adapter.getCount() > 0 ) {
+      for (int i = 0; i < adapter.getCount(); i++) {
+        View item = adapter.getView(i, null, null);
+        people_view.addView(item);
+      }
+    } else {
+      TextView empty_view = new TextView(getContext());
+      empty_view.setText("Нет исполнителей");
+      empty_view.setPadding(0,8,0,16);
+      people_view.addView(empty_view);
+    }
   }
 
+  public interface OnFragmentInteractionListener {
+    void onFragmentInteraction(Uri uri);
+  }
+
+  public Block getBlock(){
+
+    String appealText = "";
+    if (button_report.isChecked()) {
+      appealText = button_report.getTextOn().toString();
+    } else if (button_familiarization.isChecked()) {
+      appealText = button_familiarization.getTextOn().toString();
+    }
+
+    Block block = new Block();
+    block.setNumber(number);
+    block.setText( decision_text.getText().toString() );
+    block.setAppealText( appealText );
+    block.setTextBefore( fragment_decision_text_before.isChecked() );
+    block.setHidePerformers( hide_performers.isChecked() );
+    block.setToCopy(false);
+    block.setToFamiliarization(false);
+
+    if ( adapter.getCount() > 0 ){
+      ArrayList<Performer> performers = new ArrayList<>();
+
+      for (int i = 0; i < adapter.getCount(); i++) {
+        Performer p = new Performer();
+        PrimaryConsiderationPeople item = adapter.getItem(i);
+
+        p.setPerformerId( item.getId() );
+        p.setIsResponsible( item.isResponsible() );
+        p.setIsOriginal( item.isCopy() );
+        p.setPerformerId( item.getId() );
+        p.setPerformerText( item.getName() );
+        p.setOrganizationText( item.getOrganization() );
+        p.setNumber( i );
+
+        performers.add(p);
+      }
+
+      block.setPerformers( performers );
+    }
+
+    return block;
+  }
+
+  public void setNumber( int number){
+    card_toolbar.setTitle("Блок " + number);
+  }
+
+  private void loadSettings() {
+    Preference<String> _username = settings.getString("login");
+    login = _username.get();
+
+    Preference<String> _token = settings.getString("token");
+    token = _token.get();
+
+    HOST = settings.getString("settings_username_host");
+  }
+
+  @OnClick(R.id.fragment_decision_button_add_people)
+  public void add(){
+    Timber.tag("ADD PEOPLE").e("CLICKED");
+
+    showAddOshsDialog();
+  }
+
+  private void showAddOshsDialog() {
+    if (oshs == null){
+      oshs = new SelectOshsDialogFragment();
+      oshs.registerCallBack( this );
+    }
+
+    oshs.show( getActivity().getFragmentManager(), "SelectOshsDialogFragment");
+  }
+
+  @OnClick(R.id.fragment_decision_text_before)
+  public void text(){
+    if (callback != null) {
+      callback.onUpdateSuccess();
+    }
+  }
 }
