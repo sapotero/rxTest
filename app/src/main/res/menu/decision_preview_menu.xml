@@ -1,0 +1,19 @@
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="net.taptools.android.sportshistory.PlayerProfileActivity">
+
+    <group>
+        <item
+            android:id="@+id/decision_preview_magnifer"
+            android:icon="@drawable/add_person"
+        android:title="@string/decision_preview_magnifer"/>
+        <!--app:showAsAction="ifRoom|withText"-->
+
+        <item
+            android:id="@+id/decision_preview_edit"
+            android:title="@string/decision_preview_edit"/>
+        <!--app:showAsAction="ifRoom|withText"-->
+    </group>
+</menu>

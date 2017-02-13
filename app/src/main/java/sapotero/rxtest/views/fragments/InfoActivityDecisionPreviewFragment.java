@@ -11,10 +11,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.Toolbar;
 import android.util.Base64;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -90,6 +92,9 @@ public class InfoActivityDecisionPreviewFragment extends Fragment {
   @BindView(R.id.activity_info_button_edit) ImageButton edit;
 
   @BindView(R.id.activity_info_decision_spinner) Spinner decision_spinner;
+  @BindView(R.id.activity_info_decision_preview_toolbar) Toolbar decision_toolbar;
+
+
 
 
   private ArrayList<DecisionSpinnerItem> decisionSpinnerItems  = new ArrayList<>();;
@@ -125,24 +130,53 @@ public class InfoActivityDecisionPreviewFragment extends Fragment {
     loadSettings();
     loadDocument();
 
+    setAdapter();
+
+    decision_toolbar.inflateMenu(R.menu.decision_preview_menu);
+    decision_toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+      @Override
+      public boolean onMenuItemClick(MenuItem item) {
+        switch ( item.getItemId() ){
+          case R.id.decision_preview_magnifer:
+            magnifer();
+            break;
+          case R.id.decision_preview_edit:
+            edit();
+            break;
+          default:
+            break;
+        }
+        return false;
+      }
+    });
+
+    preview = new Preview(getContext());
+    return view;
+  }
+
+  private void setAdapter() {
     decision_spinner_adapter = new DecisionSpinnerAdapter(getContext(), decisionSpinnerItems);
     decision_spinner.setAdapter(decision_spinner_adapter);
     decision_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
       @Override
       public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
         if (position > 0){
-          Timber.tag(TAG).w( "name: %s", decision_spinner_adapter.getItem(position).getName() );
+          Timber.tag(TAG).w( "decision id: %s", decision_spinner_adapter.getItem(position).getDecision().getId() );
           preview.show( decision_spinner_adapter.getItem(position).getDecision() );
+          settings.getString("decision.active.id").set( decision_spinner_adapter.getItem(position).getDecision().getId() );
         }
       }
 
       @Override
       public void onNothingSelected(AdapterView<?> adapterView) {
+        try {
+          preview.show( decision_spinner_adapter.getItem(0).getDecision() );
+          settings.getString("decision.active.id").set( decision_spinner_adapter.getItem(0).getDecision().getId() );
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
       }
     });
-
-    preview = new Preview(getContext());
-    return view;
   }
 
   @Override public void onDestroyView() {

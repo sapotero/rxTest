@@ -360,13 +360,14 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
         Decision approve = new Decision();
         approve.setApproved(true);
         approve.setBlocks(null);
-        Timber.tag("DECISION").e("approve: %s | %s", new Gson().toJson(approve), raw_decision.getId() );
+
+        Timber.tag("DECISION").e("approve: %s | %s", new Gson().toJson(approve), settings.getString("decision.active.id").get() );
 
         CommandFactory.Operation operation;
         operation =CommandFactory.Operation.APPROVE_DECISION;
 
         CommandParams params = new CommandParams();
-        params.setDecisionId( raw_decision.getId() );
+        params.setDecisionId( settings.getString("decision.active.id").get() );
         params.setDecision( approve );
 
         operationManager.execute(operation, params);

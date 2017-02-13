@@ -15,7 +15,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -87,7 +86,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   @BindView(R.id.info_card_pdf_fullscreen_document_counter) TextView document_counter;
   @BindView(R.id.info_card_pdf_fullscreen_page_title)       TextView document_title;
   @BindView(R.id.info_card_pdf_fullscreen_page_counter)     TextView page_counter;
-  @BindView(R.id.info_card_pdf_fullscreen_button) ImageButton fullscreen;
+  @BindView(R.id.info_card_pdf_fullscreen_button) FrameLayout fullscreen;
 
   @BindView(R.id.info_card_pdf_no_files) TextView no_files;
   @BindView(R.id.info_card_pdf_wrapper)  FrameLayout pdf_wrapper;

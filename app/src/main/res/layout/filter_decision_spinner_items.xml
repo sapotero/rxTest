@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:orientation="horizontal"
-              android:padding="12dp"
+              android:padding="16dp"
               android:layout_height="wrap_content">
 
     <TextView
@@ -23,6 +23,7 @@
         android:minWidth="@dimen/date_offset"
         android:textColor="@color/md_grey_600"
         android:layout_alignParentEnd="true"
+        android:layout_marginEnd="@dimen/date_offset"
         />
 
 </RelativeLayout>

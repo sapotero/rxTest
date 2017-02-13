@@ -28,6 +28,7 @@
         android:layout_height="match_parent"
         android:layout_below="@+id/toolbar"
         android:layout_alignParentStart="true"
+        android:padding="@dimen/half_date_offset"
 
         android:background="@color/md_grey_200"
         >
@@ -37,10 +38,10 @@
             android:orientation="vertical"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:layout_width="800sp"
             android:background="@color/md_white_1000"
-            android:elevation="@dimen/half_date_offset"
-            >
+            android:layout_margin="@dimen/date_offset"
+            android:elevation="2dp"
+            android:layout_width="700sp">
 
             <ScrollView
                 android:layout_width="match_parent"
@@ -52,16 +53,12 @@
                 <RelativeLayout
                     android:orientation="vertical"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:id="@+id/decision_constructor_decision_preview"
                     >
                 </RelativeLayout>
             </ScrollView>
         </LinearLayout>
-
-        <Space
-            android:layout_height="match_parent"
-            android:layout_width="8sp"/>
 
         <ScrollView
             android:layout_width="match_parent"
@@ -76,79 +73,6 @@
                 android:background="@drawable/card_border_white"
                 >
 
-
-                <android.support.v7.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="@dimen/half_date_offset"
-                    android:layout_marginEnd="@dimen/half_date_offset"
-                    android:layout_marginTop="@dimen/half_date_offset"
-                    app:cardBackgroundColor="@color/md_white_1000"
-                    android:elevation="4sp"
-                    app:cardUseCompatPadding="true"
-                    app:cardElevation="4sp"
-                    app:cardPreventCornerOverlap="true"
-                    app:cardCornerRadius="2dp"
-                    >
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="vertical">
-
-
-                        <TextView
-                            android:paddingStart="@dimen/date_offset"
-                            android:paddingEnd="@dimen/date_offset"
-                            android:paddingTop="@dimen/half_date_offset"
-                            android:text="Настройки"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
-                            />
-
-                        <LinearLayout
-                            android:orientation="horizontal"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:padding="@dimen/date_offset"
-                            >
-
-                            <android.support.design.widget.TextInputLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:longClickable="false"
-                                android:gravity="start|center_vertical"
-                                android:layout_weight="1">
-
-                                <sapotero.rxtest.views.custom.SpinnerWithLabel
-                                    android:id="@+id/urgency_selector"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:hint="@string/hint_urgency" />
-
-                            </android.support.design.widget.TextInputLayout>
-
-                            <android.support.design.widget.TextInputLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:longClickable="false"
-                                android:layout_gravity="end|center_vertical"
-                                android:layout_weight="1">
-
-                                <sapotero.rxtest.views.custom.SpinnerWithLabel
-                                    android:id="@+id/head_font_selector"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:hint="@string/hint_head_font_size" />
-                            </android.support.design.widget.TextInputLayout>
-
-                        </LinearLayout>
-
-                    </LinearLayout>
-
-
-                </android.support.v7.widget.CardView>
-
                 <!--<ScrollView-->
                     <!--android:layout_width="match_parent"-->
 
@@ -158,6 +82,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
+                        android:paddingTop="6dp"
                         >
 
                          <!--main view. -->
@@ -184,9 +109,9 @@
                         android:layout_marginEnd="@dimen/half_date_offset"
                         android:layout_marginTop="@dimen/half_date_offset"
                         app:cardBackgroundColor="@color/md_white_1000"
-                        android:elevation="4sp"
+                        android:elevation="2sp"
                         app:cardUseCompatPadding="true"
-                        app:cardElevation="4sp"
+                        app:cardElevation="2sp"
                         app:cardPreventCornerOverlap="true"
                         app:cardCornerRadius="2dp"
                         >
@@ -200,7 +125,7 @@
                                 android:paddingStart="@dimen/date_offset"
                                 android:paddingEnd="@dimen/date_offset"
                                 android:paddingTop="@dimen/half_date_offset"
-                                android:text="Ещё Настройки"
+                                android:text="Настройки"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
@@ -245,6 +170,43 @@
                                     android:layout_gravity="center|end"
                                     android:gravity="center|end"
                                     android:foregroundGravity="center|right"/>
+
+                            </LinearLayout>
+                            <LinearLayout
+                                android:orientation="horizontal"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:padding="@dimen/date_offset"
+                                >
+
+                                <android.support.design.widget.TextInputLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:longClickable="false"
+                                    android:gravity="start|center_vertical"
+                                    android:layout_weight="1">
+
+                                    <sapotero.rxtest.views.custom.SpinnerWithLabel
+                                        android:id="@+id/urgency_selector"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="match_parent"
+                                        android:hint="@string/hint_urgency" />
+
+                                </android.support.design.widget.TextInputLayout>
+
+                                <android.support.design.widget.TextInputLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:longClickable="false"
+                                    android:layout_gravity="end|center_vertical"
+                                    android:layout_weight="1">
+
+                                    <sapotero.rxtest.views.custom.SpinnerWithLabel
+                                        android:id="@+id/head_font_selector"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:hint="@string/hint_head_font_size" />
+                                </android.support.design.widget.TextInputLayout>
 
                             </LinearLayout>
 

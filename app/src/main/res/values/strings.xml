@@ -403,6 +403,8 @@
     <string name="IntentsCAVersion">Version of Crypto-Pro CA:</string>
     <string name="IntentsCAAddress">Address of Crypto-Pro CA:</string>
     <string name="settings">Настройки</string>
+    <string name="decision_preview_magnifer">Увеличить</string>
+    <string name="decision_preview_edit">Редактировать</string>
 
     <string-array name="IntentsCAAddressList">
         <item>http://www.cryptopro.ru/certsrv/</item>

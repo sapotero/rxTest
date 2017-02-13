@@ -28,10 +28,15 @@
 
     <FrameLayout
         android:id="@+id/info_card_pdf_wrapper"
-        android:background="@drawable/pdf_fullscreen"
         android:layout_width="match_parent"
         android:layout_alignParentBottom="true"
         android:layout_height="48dp">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/md_grey_100"
+            />
 
         <LinearLayout
             android:orientation="horizontal"
@@ -97,15 +102,16 @@
                 <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:id="@+id/info_card_pdf_fullscreen_button"
+                    android:foreground="@drawable/card_foreground"
                     android:layout_weight="4">
 
                     <ImageButton
-                        android:id="@+id/info_card_pdf_fullscreen_button"
-                        android:foreground="@drawable/card_foreground"
                         android:background="@drawable/fullscreen"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="4"
+                        android:padding="@dimen/half_date_offset"
                         android:layout_gravity="center"
                         />
 
