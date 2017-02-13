@@ -24,8 +24,8 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
   private OrganizationAdapter mAdapter;
   private boolean[] mOldSelection;
   private boolean[] mSelected;
-  private String mDefaultText;
-  private String mAllText = "Организации";
+  private String mDefaultText = "Выберите организацию";
+  private String mAllText = "Выберите организацию";
   private boolean mAllSelected;
   private MultiSpinnerListener mListener;
 
@@ -204,8 +204,8 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
 
 //    setText(String.format(spinnerText, selected));
 
-    if (spinnerText.length() > 40){
-      spinnerText = spinnerText.toString().substring(0,37) + "...";
+    if (spinnerText.length() > 80){
+      spinnerText = spinnerText.toString().substring(0,77) + "...";
     }
 
     setText( spinnerText );

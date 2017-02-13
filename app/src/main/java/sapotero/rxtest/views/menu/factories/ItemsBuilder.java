@@ -238,9 +238,13 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
 
   @Override
   public void onButtonBuilderUpdate(Integer index) {
-    this.index = index;
-    Timber.tag(TAG).i( "onButtonBuilderUpdate" );
-    callback.onMenuUpdate( getConditions() );
+    try {
+      this.index = index;
+      Timber.tag(TAG).i( "onButtonBuilderUpdate" );
+      callback.onMenuUpdate( getConditions() );
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
 }

@@ -9,7 +9,7 @@
     android:clipToPadding="false"
     tools:context=".views.activities.MainActivity"
     android:gravity="center"
-    android:background="@color/it_mvd_background">
+    android:background="@color/md_grey_200">
 
 
     <RelativeLayout
@@ -45,99 +45,128 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/toolbar">
-        <!--android:gravity="center_vertical"-->
-        <!--android:paddingTop="@dimen/half_date_offset"-->
 
-        <LinearLayout
-            android:id="@+id/activity_main_menu"
-            android:orientation="horizontal"
+        <!--Панелька с менюхами-->
+        <android.support.v7.widget.CardView
             android:layout_width="match_parent"
-            android:paddingLeft="@dimen/date_offset"
-            android:paddingRight="@dimen/date_offset"
-            android:layout_marginTop="@dimen/date_offset"
-            android:layout_gravity="center_horizontal"
-            android:layout_height="120dp">
-            <!--android:background="@color/md_grey_200"-->
-            <!--&lt;!&ndash;android:elevation="4dp"&ndash;&gt;-->
-
-            <Spinner
-                android:layout_height="match_parent"
-                android:id="@+id/DOCUMENT_TYPE"
-                android:padding="1dp"
-                android:background="@drawable/spinner_document_type"
-                android:layout_width="350dp"
-                android:minWidth="300dp"/>
-            <!--android:layout_gravity="center_horizontal"-->
+            android:layout_height="wrap_content">
 
             <LinearLayout
+                android:id="@+id/activity_main_menu"
                 android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_gravity="center_horizontal"
+                android:layout_height="106dp">
 
-                <FrameLayout
-                    android:id="@+id/activity_main_menu_builder_buttons"
-                    android:layout_width="match_parent"
-                    android:layout_height="32dp"
-                    android:layout_weight="1"
-                    >
-
-                </FrameLayout>
 
                 <LinearLayout
-                    android:id="@+id/activity_main_menu_builder_organization"
-                    android:orientation="horizontal"
+                    android:orientation="vertical"
                     android:layout_width="match_parent"
-                    android:layout_height="32dp"
-                    android:layout_weight="1"
-                    android:layout_marginTop="16dp"
-                    android:weightSum="1">
-
-                    <sapotero.rxtest.views.custom.OrganizationSpinner
-                        android:layout_height="match_parent"
-                        android:id="@+id/ORGANIZATION"
-                        android:minWidth="300dp"
-                        android:background="@color/md_grey_100"
-                        android:padding="15dp"
-                        android:layout_marginLeft="2dp"
-
-                        android:layout_marginBottom="4dp"
-                        android:layout_marginRight="4dp"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"/>
-                    <!--android:background="@drawable/spinner_journal_background"-->
-
-                    <CheckBox
-                        android:id="@+id/favorites_button"
-                        android:button="@android:color/transparent"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:text = "@string/favorites_template"
-                        android:textColor="@color/text_selector"
-                        android:layout_marginLeft="2dp"
-                        android:layout_marginBottom="4dp"
-                        android:layout_marginRight="4dp"
-                        android:background="@drawable/button_corner_all"
-                        />
-                    <!---->
+                    android:layout_height="match_parent">
 
 
-                    <!--<Spinner-->
+                    <LinearLayout
+                        android:id="@+id/activity_main_menu_builder_organization"
+                        android:orientation="horizontal"
+                        android:layout_height="56dp"
+                        android:layout_width="match_parent"
+                        >
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center"
+                            android:paddingStart="32dp"
+                            android:paddingEnd="@dimen/half_date_offset"
+                            android:src="@drawable/organizations"
+                            />
+
+                        <Spinner
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:id="@+id/DOCUMENT_TYPE"
+                            android:minWidth="400dp"
+                            android:background="@null"
+                            android:drawableEnd="@drawable/drop_down_vector"
+                            android:drawablePadding="@dimen/date_offset"
+                            />
+                        <Space
+                            android:layout_width="240dp"
+                            android:layout_height="match_parent"/>
+
+                        <sapotero.rxtest.views.custom.OrganizationSpinner
+                            android:layout_gravity="center|end"
+                            android:gravity="center|end"
+                            android:layout_marginTop="4dp"
+                            android:drawableEnd="@drawable/drop_down_vector"
+                            android:drawablePadding="@dimen/date_offset"
+                            android:layout_height="match_parent"
+                            android:id="@+id/ORGANIZATION"
+                            android:width="600dp"
+                            android:background="@color/md_white_1000"
+                            android:padding="8dp"
+                            android:layout_width="wrap_content"
+                            />
+                        <!--android:background="@drawable/spinner_journal_background"-->
+
+
+                        <!---->
+
+
+                        <!--<Spinner-->
                         <!--android:layout_width="match_parent"-->
                         <!--android:layout_height="match_parent"-->
                         <!--android:id="@+id/JOURNAL_TYPE"-->
                         <!--android:background="@drawable/spinner_journal_background"-->
                         <!--android:padding="3dp"-->
                         <!--/>-->
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="wrap_content"
+                        android:layout_height="2dp"
+                        android:background="@color/md_grey_100"
+                        />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+
+                        <FrameLayout
+                            android:id="@+id/activity_main_menu_builder_buttons"
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_weight="1"
+                            >
+
+                        </FrameLayout>
+                        <CheckBox
+                            android:paddingEnd="@dimen/date_offset"
+                            android:paddingStart="@dimen/date_offset"
+                            android:id="@+id/favorites_button"
+                            android:button="@android:color/transparent"
+                            android:layout_width="wrap_content"
+                            android:textSize="12sp"
+                            android:layout_height="match_parent"
+                            android:text = "@string/favorites_template"
+                            android:textColor="@color/text_selector"
+                            android:background="@drawable/toggle_selector_button"
+                            android:foreground="@drawable/card_foreground"
+                        />
+
+                    </LinearLayout>
+
 
                 </LinearLayout>
+
+                <!--android:layout_gravity="center_horizontal"-->
+
+                <!--android:layout_margin="2dp"-->
+
+
             </LinearLayout>
-
-            <!--android:layout_gravity="center_horizontal"-->
-
-            <!--android:layout_margin="2dp"-->
-
-
-        </LinearLayout>
+        </android.support.v7.widget.CardView>
 
         <LinearLayout
             android:orientation="horizontal"
@@ -145,6 +174,9 @@
             android:layout_height="0dp"
             android:layout_weight="10"
             android:weightSum="10">
+            <!--android:paddingTop="@dimen/half_date_offset"-->
+            <!--android:paddingStart="@dimen/date_offset"-->
+            <!--android:paddingEnd="@dimen/date_offset"-->
 
             <sapotero.rxtest.views.custom.CircleLeftArrow
                 android:clickable="true"
@@ -156,6 +188,7 @@
                 android:layout_marginTop="224dp"
                 android:layout_marginStart="@dimen/half_date_offset"
                 android:layout_marginEnd="@dimen/half_date_offset"
+                android:visibility="gone"
                 />
 
             <android.support.v7.widget.RecyclerView
@@ -163,7 +196,7 @@
             android:scrollbars="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginTop="8dp"
+                android:padding="@dimen/date_offset"
                 android:layout_weight="8"
                 />
 
@@ -176,6 +209,7 @@
                 android:layout_marginTop="224dp"
                 android:layout_marginStart="@dimen/half_date_offset"
                 android:layout_marginEnd="@dimen/half_date_offset"
+                android:visibility="gone"
                 />
 
 
@@ -191,16 +225,6 @@
         android:layout_centerHorizontal="true"
         android:layout_weight="1"/>
 
-    <!--<android.support.v7.widget.Toolbar-->
-        <!--android:id="@+id/toolbar"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="80dp"-->
-        <!--android:paddingTop="@dimen/half_date_offset"-->
-        <!--android:transitionName="actionBar"-->
-        <!--android:minHeight="?attr/actionBarSize"-->
-        <!--android:background="@drawable/toolbar_background"-->
-        <!--android:theme="@style/AlertDialog.AppCompat.Light"-->
-        <!--android:elevation="8dp"/>-->
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
@@ -212,6 +236,6 @@
         app:navigationIcon="?attr/homeAsUpIndicator"
         app:theme="@style/ToolbarColoredBackArrow"
         android:theme="@style/AlertDialog.AppCompat.Light"
-        android:elevation="8dp"/>
+        android:elevation="2dp"/>
 
 </RelativeLayout>

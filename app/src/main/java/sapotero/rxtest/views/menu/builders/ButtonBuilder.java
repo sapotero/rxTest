@@ -2,6 +2,8 @@ package sapotero.rxtest.views.menu.builders;
 
 import android.content.Context;
 import android.graphics.drawable.StateListDrawable;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.support.v4.content.ContextCompat;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -258,10 +260,12 @@ public class ButtonBuilder {
 //    return String.format( label, getCount() );
 //  }
 
+  @RequiresApi(api = Build.VERSION_CODES.M)
   public RadioButton getView(Context context){
 
     Timber.tag(TAG).e("create new");
     view = new RadioButton(context);
+
 
     view.setPadding( 32,4,32,4 );
 
@@ -271,24 +275,29 @@ public class ButtonBuilder {
 
     RadioGroup.LayoutParams params = new RadioGroup.LayoutParams( LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT,10.0f );
 
-    switch (corner){
-      case LEFT:
-        view.setBackgroundResource( R.drawable.button_corner_left );
-        params.setMargins(4,4,0,4);
-        break;
-      case RIGHT:
-        view.setBackgroundResource( R.drawable.button_corner_right );
-        params.setMargins(0,4,4,4);
-        break;
-      case NONE:
-        view.setBackgroundResource( R.drawable.button_corner_none );
-        params.setMargins(0,4,0,4);
-        break;
-    }
+//    switch (corner){
+//      case LEFT:
+//        view.setBackgroundResource( R.drawable.button_corner_left );
+//        params.setMargins(4,4,0,4);
+//        break;
+//      case RIGHT:
+//        view.setBackgroundResource( R.drawable.button_corner_right );
+//        params.setMargins(0,4,4,4);
+//        break;
+//      case NONE:
+//        view.setBackgroundResource( R.drawable.button_corner_none );
+//        params.setMargins(0,4,0,4);
+//        break;
+//    }
 
     view.setButtonDrawable(new StateListDrawable());
     view.setTextColor( ContextCompat.getColorStateList( context, R.color.text_selector ) );
     view.setLayoutParams( params );
+    view.setButtonDrawable( ContextCompat.getDrawable(context, R.drawable.toggle_selector_button) );
+    view.setTextColor( context.getResources().getColor(R.color.md_grey_600) );
+
+    view.setForeground( context.getDrawable(R.drawable.card_foreground) );
+    view.setBackground( ContextCompat.getDrawable(context, R.drawable.toggle_selector_button) );
 
     view.setText( String.format( label, 0) );
 

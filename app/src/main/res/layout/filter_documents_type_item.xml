@@ -2,8 +2,11 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:orientation="horizontal"
-              android:padding="8dp"
+              android:padding="4sp"
               android:layout_height="wrap_content">
+
+    <!--android:drawableStart="@drawable/edit_pencil_black"-->
+    <!--android:drawablePadding="@dimen/date_offset"-->
 
     <TextView
         android:id="@+id/document_type_name"
@@ -13,7 +16,6 @@
         android:text=""
         android:textSize="20sp"
         android:textColor="@color/md_grey_700"
-        android:layout_marginStart="48dp"
         />
     <!--android:layout_margin="@dimen/half_date_offset"-->
 
