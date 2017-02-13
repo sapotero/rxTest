@@ -92,7 +92,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   private ToolbarManager toolbarManager;
   private Fields.Journal journal;
-  private Fields.Status status;
+  private Fields.Status  status;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -110,7 +110,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
     loadSettings();
 
-    status  = Fields.Status.findStatus(STATUS_CODE.get());
+    status  = Fields.Status.findStatus( STATUS_CODE.get() );
     journal = Fields.getJournalByUid( UID.get() );
 
     setTabContent();
@@ -121,10 +121,11 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
 
   private void setPreview() {
-
     FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
 
-    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL ){
+    Timber.tag("INFO").v( "JOURNAL: %s | STATUS: %s", journal.getName(), status.getName() );
+
+    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || status == Fields.Status.PROCESSED ){
       fragmentTransaction.add( R.id.activity_info_preview_container, new RoutePreviewFragment() );
     } else {
       fragmentTransaction.add( R.id.activity_info_preview_container, new InfoActivityDecisionPreviewFragment(toolbarManager) );

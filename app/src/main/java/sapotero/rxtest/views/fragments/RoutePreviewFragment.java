@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -161,6 +162,8 @@ public class RoutePreviewFragment extends Fragment {
                 }
 
               }
+
+
               if ( r_step.getPeople() != null ){
                 Timber.tag("people").e(" %s", r_step.getPeople() );
 
@@ -172,15 +175,17 @@ public class RoutePreviewFragment extends Fragment {
                   if ( user.getOfficialId() != null && user.getOfficialName()!= null ) {
                     ItemBuilder item = new ItemBuilder(getContext());
 
-                    Timber.tag("people").w("[ %s ] %s", user.getOfficialId(), user.getOfficialName() );
-
                     item.withName( user.getOfficialName());
 
+                    if ( user.getSignPng() != null ){
+                      Timber.tag("SIGN+").e("assigned!");
+                      item.withSign();
+                    }
 
 
                     if (user.getActions() != null && user.getActions().size() > 0) {
-                      Timber.tag("people").w("%s - %s", user.getActions().get(0).getDate(), user.getActions().get(0).getComment() );
-                      item.withAction( String.format( "%s - %s", user.getActions().get(0).getDate(), user.getActions().get(0).getStatus()  ) );
+                      Timber.tag("actions").w("%s", new Gson().toJson( user.getActions()));
+                      item.withAction( String.format( "%s - %s", user.getActions().get(user.getActions().size()-1).getDate(), user.getActions().get(user.getActions().size()-1).getStatus()  ) );
                     }
                     items.add( item );
                   }
@@ -233,7 +238,7 @@ public class RoutePreviewFragment extends Fragment {
     private final Context context;
     private String title;
     private ArrayList<ItemBuilder> items;
-    private FrameLayout titleView;
+    private LinearLayout titleView;
 
     public PanelBuilder(Context context) {
       this.context = context;
@@ -242,11 +247,14 @@ public class RoutePreviewFragment extends Fragment {
     public PanelBuilder withTitle(String title) {
       this.title = title;
 
-      titleView = new FrameLayout(context);
-      titleView.setBackground( ContextCompat.getDrawable( getContext() ,R.drawable.panel_builder_title) );
+      titleView = new LinearLayout(context);
+//      titleView.setBackground( ContextCompat.getDrawable( getContext() ,R.drawable.panel_builder_title) );
 
       TextView text = new TextView(context);
+      text.setTextColor( ContextCompat.getColor(context, R.color.md_grey_300) );
+      text.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
       text.setText(title);
+      text.setPadding(16,0,0,0);
 
       titleView.addView( text );
 
@@ -271,7 +279,7 @@ public class RoutePreviewFragment extends Fragment {
       if (items != null && items.size() > 0) {
         LinearLayout itemsLayout = new LinearLayout(context);
         itemsLayout.setOrientation(LinearLayout.VERTICAL);
-        itemsLayout.setBackground( ContextCompat.getDrawable( getContext() ,R.drawable.panel_builder_body) );
+//        itemsLayout.setBackground( ContextCompat.getDrawable( getContext() ,R.drawable.panel_builder_body) );
 
         for ( ItemBuilder item: items ){
           itemsLayout.addView( item.build() );
@@ -293,6 +301,7 @@ public class RoutePreviewFragment extends Fragment {
     private FrameLayout nameView;
     private FrameLayout actionView;
     private String uid;
+    private boolean withSign = false;
 
     public ItemBuilder(Context context) {
       this.context = context;
@@ -305,9 +314,11 @@ public class RoutePreviewFragment extends Fragment {
       nameView = new FrameLayout(context);
 
       TextView text = new TextView(context);
+      text.setTextColor( context.getColor(R.color.md_grey_700) );
+      text.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
 
       text.setText(name);
-      text.setForeground( ContextCompat.getDrawable( getContext(), R.drawable.card_foreground ) );
+//      text.setForeground( ContextCompat.getDrawable( getContext(), R.drawable.card_foreground ) );
 
 
       if (uid != null){
@@ -336,6 +347,7 @@ public class RoutePreviewFragment extends Fragment {
       return this;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     public ItemBuilder withAction(String action) {
       this.action = action;
 
@@ -343,6 +355,8 @@ public class RoutePreviewFragment extends Fragment {
 
 
       TextView text = new TextView(context);
+      text.setTextColor( context.getColor(R.color.md_grey_400) );
+      text.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
       text.setText(action);
 
       actionView.addView( text );
@@ -354,8 +368,8 @@ public class RoutePreviewFragment extends Fragment {
     public LinearLayout build(){
       LinearLayout layout = new LinearLayout(context);
       layout.setOrientation(LinearLayout.VERTICAL);
-      layout.setBackground( ContextCompat.getDrawable( getContext() ,R.drawable.panel_builder_item) );
-      layout.setPadding(4,4,4,4);
+//      layout.setBackground( ContextCompat.getDrawable( getContext() ,R.drawable.panel_builder_item) );
+      layout.setPadding(16,20,0,20);
 
       if (name != null){
         layout.addView( nameView );
@@ -363,12 +377,28 @@ public class RoutePreviewFragment extends Fragment {
       if (action != null){
         layout.addView( actionView );
       }
+      if (withSign){
+        View view = new View(context);
+        view.setMinimumHeight(1);
+        view.setBackground( ContextCompat.getDrawable(context, R.color.md_green_500) );
+        layout.addView( view );
+      }
+
+//      View delimiter = new View(context);
+//      delimiter.setMinimumHeight(1);
+//      delimiter.setBackground( ContextCompat.getDrawable(context, R.color.md_grey_300) );
+//      layout.addView(delimiter);
 
       return layout;
     }
 
     public void withNameCallback(String uid) {
       this.uid = uid;
+    }
+
+    public ItemBuilder withSign() {
+      withSign = true;
+      return this;
     }
   }
 

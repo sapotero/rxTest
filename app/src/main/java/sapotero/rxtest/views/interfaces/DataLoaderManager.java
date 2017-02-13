@@ -245,7 +245,7 @@ public class DataLoaderManager {
   }
 
   public void tryToSignWithLogin(String login, String password, String host) {
-    Timber.v("tryToSignWithLogin");
+    Timber.v("tryToSignWithLogin %s", host);
     if (validateHost(host)) {
       EventBus.getDefault().post(new AuthLoginCheckFailEvent("Wrong Host address"));
       return;

@@ -8,9 +8,11 @@ public class Action {
   @SerializedName("date")
   @Expose
   private String date;
-  @SerializedName("start")
+
+  @SerializedName("status")
   @Expose
   private String status;
+
   @SerializedName("comment")
   @Expose
   private String comment;
