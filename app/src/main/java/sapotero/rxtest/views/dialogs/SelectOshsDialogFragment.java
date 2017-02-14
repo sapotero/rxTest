@@ -11,6 +11,8 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
+import com.google.gson.Gson;
+
 import java.util.ArrayList;
 
 import javax.inject.Inject;
@@ -50,6 +52,8 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
   private ArrayList<String> user_ids;
 
   public void setIgnoreUsers(ArrayList<String> users) {
+    Timber.tag("setIgnoreUsers").e("users %s", new Gson().toJson(users) );
+    user_ids = new ArrayList<>();
     user_ids = users;
   }
 

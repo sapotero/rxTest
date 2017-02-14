@@ -87,6 +87,7 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
       if (items.indexOf( user ) != -1 ){
         items.remove(position);
 
+
         for ( PrimaryConsiderationAdapterViewModel check: checked ) {
           if ( check.getUser() == user ){
             checked.remove(check);

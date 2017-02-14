@@ -5,6 +5,8 @@ import android.content.Context;
 import com.f2prateek.rx.preferences.Preference;
 import com.google.gson.Gson;
 
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -76,13 +78,19 @@ public class ApproveDecision extends AbstractCommand {
       .client( okHttpClient )
       .build();
 
+
+    RequestBody json = RequestBody.create(
+      MediaType.parse("application/json"),
+      new Gson().toJson( params.getDecision() )
+    );
+
     DocumentService operationService = retrofit.create( DocumentService.class );
 
     Observable<String> info = operationService.update(
       decisionId,
       LOGIN.get(),
       TOKEN.get(),
-      new Gson().toJson(decision)
+      json
     );
 
     info.subscribeOn( Schedulers.computation() )

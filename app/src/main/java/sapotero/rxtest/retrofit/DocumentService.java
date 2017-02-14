@@ -1,5 +1,6 @@
 package sapotero.rxtest.retrofit;
 
+import okhttp3.RequestBody;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
@@ -22,7 +23,7 @@ public interface DocumentService {
     @Path("decision") String decision,
     @Query("login") String login,
     @Query("auth_token") String auth_token,
-    @Body String body
+    @Body RequestBody data
   );
 
   @POST("/v2/decisions.json")
