@@ -173,7 +173,7 @@
     <string name="menu_info_prev_person">Отклонить</string>
     <string name="magnifer">Увеличить</string>
     <string name="dialog_oshs_close">Закрыть</string>
-    <string name="empty_list">Заглушка под пустой результат в выборе документов</string>
+    <string name="empty_list">В этом журнале документы отсутствуют</string>
     <string name="route">Маршрут прохождения документа</string>
     <string name="field_created_at">Дата создания:</string>
     <string name="field_short_description">Краткое содержание:</string>

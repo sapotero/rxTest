@@ -25,6 +25,7 @@ import javax.inject.Inject;
 import rx.Subscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.application.config.Constant;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckFailEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckSuccesEvent;
@@ -110,7 +111,7 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
     host = settings.getString("settings_username_host");
 
     if (host.get() == null){
-      host.set( settings.getString("settings_default_host").get() );
+      host.set(Constant.HOST);
     }
 
     if (auth_type.get() == null) {

@@ -262,79 +262,6 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     return view;
   }
 
-  @Override
-  public void onAttach(Context context) {
-    super.onAttach(context);
-    mContext = context;
-    if (context instanceof OnFragmentInteractionListener) {
-      mListener = (OnFragmentInteractionListener) context;
-    } else {
-      throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
-    }
-  }
-
-  @Override
-  public void onDetach() {
-    super.onDetach();
-//    ((DecisionConstructorActivity)getActivity()).getDecisionManager().remove(this);
-    mListener = null;
-  }
-
-  @Override
-  public void onRemove() {
-    updateUsers();
-  }
-
-  @Override
-  public void onChange() {
-    updateUsers();
-    if (callback != null) {
-      callback.onUpdateSuccess();
-    }
-  }
-
-  @Override
-  public void onAttrChange() {
-    callback.onUpdateSuccess();
-  }
-
-  @Override
-  public void onSearchSuccess(Oshs user, CommandFactory.Operation operation) {
-    Timber.tag("FROM DIALOG").i( "[%s] %s | %s", user.getId(), user.getName(), user.getOrganization());
-
-    adapter.add( new PrimaryConsiderationPeople( user.getId(), user.getName(), user.getPosition(), user.getOrganization()) );
-    updateUsers();
-
-    if (callback != null) {
-      callback.onUpdateSuccess();
-    }
-  }
-
-  @Override
-  public void onSearchError(Throwable error) {
-
-  }
-
-  @OnClick(R.id.fragment_decision_button_get_template)
-  public void template(){
-    Timber.tag("ADD template").e("CLICKED");
-
-    if (templates == null){
-      templates = new SelectTemplateDialogFragment();
-      templates.registerCallBack( this );
-    }
-
-    templates.show( getActivity().getFragmentManager(), "SelectTemplateDialogFragment");
-  }
-
-
-
-  @Override
-  public void onSelectTemplate(String template) {
-    Timber.tag("ADD template").e("onSelectTemplate %s", template);
-    decision_text.setText( template );
-
-  }
   private void updateUsers(){
     people_view.removeAllViews();
     if ( adapter.getCount() > 0 ) {
@@ -349,11 +276,10 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
       people_view.addView(empty_view);
     }
   }
-
   public interface OnFragmentInteractionListener {
+
     void onFragmentInteraction(Uri uri);
   }
-
   public Block getBlock(){
 
     String appealText = "";
@@ -410,6 +336,91 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     HOST = settings.getString("settings_username_host");
   }
 
+  private void showAddOshsDialog() {
+    if (oshs == null){
+      oshs = new SelectOshsDialogFragment();
+      oshs.registerCallBack( this );
+    }
+
+    // если есть люди из dialog как исполнители
+    if ( adapter.getCount() > 0 ){
+      ArrayList<String> users = new ArrayList<>();
+
+      for (PrimaryConsiderationPeople user: adapter.getAll()) {
+        users.add( user.getId() );
+      }
+
+      oshs.setIgnoreUsers( users );
+    }
+    oshs.show( getActivity().getFragmentManager(), "SelectOshsDialogFragment");
+  }
+
+  @Override
+  public void onAttach(Context context) {
+    super.onAttach(context);
+    mContext = context;
+    if (context instanceof OnFragmentInteractionListener) {
+      mListener = (OnFragmentInteractionListener) context;
+    } else {
+      throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
+    }
+  }
+
+  @Override
+  public void onDetach() {
+    super.onDetach();
+    mListener = null;
+  }
+
+  @Override
+  public void onRemove() {
+    updateUsers();
+  }
+
+  @Override
+  public void onChange() {
+    updateUsers();
+    if (callback != null) {
+      callback.onUpdateSuccess();
+    }
+  }
+
+  @Override
+  public void onAttrChange() {
+    callback.onUpdateSuccess();
+  }
+
+  @Override
+  public void onSearchSuccess(Oshs user, CommandFactory.Operation operation) {
+    Timber.tag("FROM DIALOG").i( "[%s] %s | %s", user.getId(), user.getName(), user.getOrganization());
+
+    adapter.add( new PrimaryConsiderationPeople( user.getId(), user.getName(), user.getPosition(), user.getOrganization()) );
+    updateUsers();
+
+    if (callback != null) {
+      callback.onUpdateSuccess();
+    }
+  }
+
+  @Override
+  public void onSearchError(Throwable error) {
+
+  }
+
+
+
+  @OnClick(R.id.fragment_decision_button_get_template)
+  public void template(){
+    Timber.tag("ADD template").e("CLICKED");
+
+    if (templates == null){
+      templates = new SelectTemplateDialogFragment();
+      templates.registerCallBack( this );
+    }
+
+    templates.show( getActivity().getFragmentManager(), "SelectTemplateDialogFragment");
+  }
+
   @OnClick(R.id.fragment_decision_button_add_people)
   public void add(){
     Timber.tag("ADD PEOPLE").e("CLICKED");
@@ -417,19 +428,17 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     showAddOshsDialog();
   }
 
-  private void showAddOshsDialog() {
-    if (oshs == null){
-      oshs = new SelectOshsDialogFragment();
-      oshs.registerCallBack( this );
-    }
-
-    oshs.show( getActivity().getFragmentManager(), "SelectOshsDialogFragment");
-  }
-
   @OnClick(R.id.fragment_decision_text_before)
   public void text(){
     if (callback != null) {
       callback.onUpdateSuccess();
     }
+  }
+
+  @Override
+  public void onSelectTemplate(String template) {
+    Timber.tag("ADD template").e("onSelectTemplate %s", template);
+    decision_text.setText( template );
+
   }
 }

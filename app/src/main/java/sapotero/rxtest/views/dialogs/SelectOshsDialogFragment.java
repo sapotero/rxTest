@@ -18,6 +18,8 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.requery.Persistable;
+import io.requery.query.Result;
+import io.requery.query.WhereAndOr;
 import io.requery.rx.SingleEntityStore;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -44,6 +46,12 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
 
   SelectOshsDialogFragment.Callback callback;
   private CommandFactory.Operation operation;
+  private PrimaryUsersAdapter adapter;
+  private ArrayList<String> user_ids;
+
+  public void setIgnoreUsers(ArrayList<String> users) {
+    user_ids = users;
+  }
 
   public interface Callback {
     void onSearchSuccess(Oshs user, CommandFactory.Operation operation);
@@ -82,7 +90,9 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
 
 
     ArrayList<PrimaryConsiderationPeople> people = new ArrayList<>();
-    PrimaryUsersAdapter adapter = new PrimaryUsersAdapter( getActivity(), people);
+
+    adapter = new PrimaryUsersAdapter( getActivity(), people);
+
     ListView list = (ListView) view.findViewById(R.id.dialog_oshs_listview_users);
     list.setAdapter(adapter);
 
@@ -91,15 +101,22 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
 
     list.setOnItemClickListener((parent, view12, position, id) -> {
       if ( callback != null){
-        Oshs user = (Oshs) adapter.getOshs(position);
+        Oshs user = adapter.getOshs(position);
         callback.onSearchSuccess( user, operation );
         dismiss();
       }
     });
 
+    WhereAndOr<Result<RFavoriteUserEntity>> query =
       dataStore
-      .select(RFavoriteUserEntity.class)
-      .get()
+        .select(RFavoriteUserEntity.class)
+        .where(RFavoriteUserEntity.UID.ne(""));
+
+    if (user_ids != null){
+      query = query.and(RFavoriteUserEntity.UID.notIn(user_ids));
+    }
+
+    query.get()
       .toObservable()
       .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())

@@ -181,32 +181,18 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
 
 
     String text = "";
-    String appealText;
-    String number;
-    boolean toFamiliarization = block.getToFamiliarization() == null ? false : block.getToFamiliarization();
 
-    if ( block.getAppealText() != null ){
-      appealText = block.getAppealText();
-    } else {
-      appealText = "";
-    }
-
-    if ( block.getNumber() != null ){
-      number = block.getNumber().toString();
-    } else {
-      number = "1";
-    }
-
-
-
-    if (toFamiliarization){
+    if ( block.getToFamiliarization() != null && block.getToFamiliarization() ){
       block.setToFamiliarization(false);
     }
 
-    text += block.getNumber().toString() + ". ";
-    text += block.getAppealText();
+    if ( decision.getShowPosition() != null && decision.getShowPosition() ){
+      text += block.getNumber().toString() + ". ";
+    }
 
-    Timber.tag(TAG).i( " setAppealText" + text );
+    if (block.getAppealText() != null) {
+      text += block.getAppealText();
+    }
 
     TextView blockAppealView = new TextView( getActivity() );
     blockAppealView.setGravity(Gravity.CENTER);

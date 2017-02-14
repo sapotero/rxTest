@@ -16,7 +16,6 @@ import android.util.Base64;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -133,21 +132,18 @@ public class InfoActivityDecisionPreviewFragment extends Fragment {
     setAdapter();
 
     decision_toolbar.inflateMenu(R.menu.decision_preview_menu);
-    decision_toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-      @Override
-      public boolean onMenuItemClick(MenuItem item) {
-        switch ( item.getItemId() ){
-          case R.id.decision_preview_magnifer:
-            magnifer();
-            break;
-          case R.id.decision_preview_edit:
-            edit();
-            break;
-          default:
-            break;
-        }
-        return false;
+    decision_toolbar.setOnMenuItemClickListener(item -> {
+      switch ( item.getItemId() ){
+        case R.id.decision_preview_magnifer:
+          magnifer();
+          break;
+        case R.id.decision_preview_edit:
+          edit();
+          break;
+        default:
+          break;
       }
+      return false;
     });
 
     preview = new Preview(getContext());
@@ -162,8 +158,9 @@ public class InfoActivityDecisionPreviewFragment extends Fragment {
       public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
         if (position > 0){
           Timber.tag(TAG).w( "decision id: %s", decision_spinner_adapter.getItem(position).getDecision().getId() );
-          preview.show( decision_spinner_adapter.getItem(position).getDecision() );
           settings.getString("decision.active.id").set( decision_spinner_adapter.getItem(position).getDecision().getId() );
+          preview.show( decision_spinner_adapter.getItem(position).getDecision() );
+          toolbarManager.setEditDecisionMenuItemVisible( !decision_spinner_adapter.getItem(position).getDecision().getApproved() );
         }
       }
 
@@ -171,7 +168,14 @@ public class InfoActivityDecisionPreviewFragment extends Fragment {
       public void onNothingSelected(AdapterView<?> adapterView) {
         try {
           preview.show( decision_spinner_adapter.getItem(0).getDecision() );
-          settings.getString("decision.active.id").set( decision_spinner_adapter.getItem(0).getDecision().getId() );
+          if (decision_spinner_adapter.getCount() > 0){
+            try {
+              settings.getString("decision.active.id").set( decision_spinner_adapter.getItem(1).getDecision().getId() );
+              toolbarManager.setEditDecisionMenuItemVisible( !decision_spinner_adapter.getItem(1).getDecision().getApproved() );
+            } catch (Exception e) {
+              e.printStackTrace();
+            }
+          }
         } catch (Exception e) {
           e.printStackTrace();
         }
@@ -330,6 +334,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment {
             raw_decision.setSignerIsManager(decision.isSignerIsManager());
             raw_decision.setShowPosition(decision.isShowPosition());
             raw_decision.setSignBase64(decision.getSignBase64());
+            raw_decision.setApproved(decision.isApproved());
 
 
             for (RBlock rBlock: decision.getBlocks()) {
@@ -370,9 +375,12 @@ public class InfoActivityDecisionPreviewFragment extends Fragment {
 //           если есть резолюции, то отобразить первую
           if ( decision_spinner_adapter.size() > 0 ) {
             preview.show( decision_spinner_adapter.getItem(1).getDecision() );
+            settings.getString("decision.active.id").set( decision_spinner_adapter.getItem(1).getDecision().getId() );
+            toolbarManager.setEditDecisionMenuItemVisible(false);
           } else {
             decision_spinner_adapter.add( new DecisionSpinnerItem(null, "Нет резолюций", 0 ) );
             preview.showEmpty();
+            toolbarManager.setEditDecisionMenuItemVisible(false);
           }
 
         } else {
@@ -380,6 +388,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment {
           decision_spinner_adapter.add( new DecisionSpinnerItem(null, "Нет резолюций", 0 ) );
           magnifer_button.setVisibility(View.GONE);
           preview.showEmpty();
+          toolbarManager.setEditDecisionMenuItemVisible(false);
         }
 
       });

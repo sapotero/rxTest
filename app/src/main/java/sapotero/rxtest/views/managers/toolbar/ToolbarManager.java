@@ -31,6 +31,7 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.crypto.SignDataEvent;
+import sapotero.rxtest.events.decision.ShowDecisionConstructor;
 import sapotero.rxtest.events.rx.ShowSnackEvent;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
@@ -227,10 +228,15 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
             break;
 
           case R.id.menu_info_decision_edit:
-            operation = CommandFactory.Operation.NEW_DECISION;
+            EventBus.getDefault().post( new ShowDecisionConstructor() );
 
-            Intent edit_intent = new Intent(context, DecisionConstructorActivity.class);
-            context.startActivity(edit_intent);
+//            intent.putExtra("decision", json);
+
+            operation = CommandFactory.Operation.INCORRECT;
+//            operation = CommandFactory.Operation.NEW_DECISION;
+//
+//            Intent edit_intent = new Intent(context, DecisionConstructorActivity.class);
+//            context.startActivity(edit_intent);
 
             break;
           case R.id.menu_info_shared_to_favorites:
@@ -373,6 +379,19 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
     }
     try {
       toolbar.getMenu().findItem( R.id.menu_info_decision_create).setVisible(true);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  public void setEditDecisionMenuItemVisible(boolean visible){
+    Timber.e("setEditDecisionMenuItemVisible %s", visible);
+    try {
+      if (visible){
+        toolbar.getMenu().findItem( R.id.menu_info_decision_edit).setVisible(true);
+      } else {
+        toolbar.getMenu().findItem( R.id.menu_info_decision_edit).setVisible(false);
+      }
     } catch (Exception e) {
       e.printStackTrace();
     }

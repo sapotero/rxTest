@@ -155,7 +155,7 @@ public class RoutePreviewFragment extends Fragment {
                     item.withNameCallback( card.getUid() );
                     item.withName( card.getFullTextApproval() );
 
-//                    item.withAction( String.format("%s - %s", card.getUid(), card.getFullTextApproval()) );
+                    item.withAction( String.format("%s - %s", card.getUid(), card.getFullTextApproval()) );
 
                     items.add(item);
                   }
@@ -306,6 +306,7 @@ public class RoutePreviewFragment extends Fragment {
     public ItemBuilder(Context context) {
       this.context = context;
     }
+
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     public ItemBuilder withName(String name) {

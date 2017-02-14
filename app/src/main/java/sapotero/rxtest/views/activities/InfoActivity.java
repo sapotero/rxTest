@@ -1,5 +1,6 @@
 package sapotero.rxtest.views.activities;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -39,6 +40,7 @@ import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.bus.MassInsertDoneEvent;
 import sapotero.rxtest.events.crypto.SignDataResultEvent;
 import sapotero.rxtest.events.crypto.SignDataWrongPinEvent;
+import sapotero.rxtest.events.decision.ShowDecisionConstructor;
 import sapotero.rxtest.events.rx.ShowSnackEvent;
 import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
@@ -296,6 +298,13 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(ShowSnackEvent event) throws Exception {
     Snackbar.make( wrapper, event.message, Snackbar.LENGTH_LONG ).show();
+  }
+
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(ShowDecisionConstructor event) throws Exception {
+    Intent intent = new Intent( this, DecisionConstructorActivity.class);
+    this.startActivity(intent);
   }
 
 

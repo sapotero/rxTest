@@ -134,7 +134,6 @@ public class DBQueryBuilder {
         showEmpty();
       } else {
 
-
         Timber.v( "queryCount: %s", queryCount.get().value() );
         subscribe.add(
           query
@@ -147,6 +146,8 @@ public class DBQueryBuilder {
         );
       }
 
+
+
       findOrganizations();
     }
   }
@@ -157,11 +158,13 @@ public class DBQueryBuilder {
 
   public void add(Result<RDocumentEntity> docs){
 
+    showEmpty();
     docs
       .toObservable()
       .subscribeOn(Schedulers.io())
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe( doc -> {
+        hideEmpty();
         Timber.tag("add").e("doc: %s", doc.getId() );
 //        addOne(doc);
 

@@ -4,6 +4,7 @@ import sapotero.rxtest.retrofit.models.document.Performer;
 
 public class PrimaryConsiderationPeople {
 
+  private String uid;
   private String id;
   private String name;
   private String position;
@@ -39,6 +40,7 @@ public class PrimaryConsiderationPeople {
       }
     }
   }
+
 
   public String getPosition() {
     return position;

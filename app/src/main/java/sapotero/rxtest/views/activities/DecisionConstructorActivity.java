@@ -19,10 +19,20 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.requery.Persistable;
+import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.db.requery.models.decisions.RBlock;
+import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
+import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
+import sapotero.rxtest.db.requery.models.decisions.RPerformer;
+import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.retrofit.models.Oshs;
+import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
+import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.views.adapters.OshsAutoCompleteAdapter;
 import sapotero.rxtest.views.adapters.models.FontItem;
 import sapotero.rxtest.views.adapters.models.UrgencyItem;
@@ -40,6 +50,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
   @Inject RxSharedPreferences settings;
   @Inject OperationManager operationManager;
+  @Inject SingleEntityStore<Persistable> dataStore;
 
   @BindView(R.id.toolbar) Toolbar toolbar;
 
@@ -65,6 +76,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     EsdApplication.getComponent(this).inject(this);
 
     operationManager.registerCallBack(this);
+
+
 
 
     toolbar.setTitleTextColor( getResources().getColor( R.color.md_grey_100 ) );
@@ -263,16 +276,9 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
       Timber.tag(TAG).v( "getIntent ++" + raw_decision);
       if (raw_decision == null) {
-        raw_decision = new Decision();
-        raw_decision.setLetterhead("Бланк резолюции");
-        raw_decision.setShowPosition(true);
-        raw_decision.setSignerPositionS("");
-        raw_decision.setSignerBlankText("");
-        raw_decision.setUrgencyText("");
-        raw_decision.setId("");
-        raw_decision.setDate("");
-        raw_decision.setBlocks(new ArrayList<>());
-        Timber.tag(TAG).v( "raw_decision" + gson.toJson( raw_decision, Decision.class ) );
+
+        loadDecision();
+
       }
     }
 
@@ -292,6 +298,83 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
 
 
+
+  }
+
+  private void loadDecision() {
+    String decision_id = settings.getString("decision.active.id").get();
+
+    RDecisionEntity d = dataStore
+      .select(RDecisionEntity.class)
+      .where(RDocumentEntity.UID.eq(decision_id))
+      .get().firstOrNull();
+
+    if (d != null) {
+      raw_decision = new Decision();
+
+      raw_decision.setId( d.getUid() );
+      raw_decision.setLetterhead(d.getLetterhead());
+      raw_decision.setApproved(d.isApproved());
+      raw_decision.setSigner(d.getSigner());
+      raw_decision.setSignerId(d.getSignerId());
+      raw_decision.setAssistantId(d.getAssistantId());
+      raw_decision.setSignerBlankText(d.getSignerBlankText());
+      raw_decision.setSignerIsManager(d.isSignerIsManager());
+      raw_decision.setComment(d.getComment());
+      raw_decision.setDate(d.getDate());
+      raw_decision.setUrgencyText(d.getUrgencyText());
+      raw_decision.setShowPosition(d.isShowPosition());
+
+      if ( d.getBlocks() != null && d.getBlocks().size() >= 1 ){
+
+        ArrayList<Block> list = new ArrayList<>();
+
+        for (RBlock _block: d.getBlocks() ) {
+
+          RBlockEntity b = (RBlockEntity) _block;
+          Block block = new Block();
+          block.setNumber(b.getNumber());
+          block.setText(b.getText());
+          block.setAppealText(b.getAppealText());
+          block.setTextBefore(b.isTextBefore());
+          block.setHidePerformers(b.isHidePerformers());
+          block.setToCopy(b.isToCopy());
+          block.setToFamiliarization(b.isToFamiliarization());
+
+          if ( b.getPerformers() != null && b.getPerformers().size() >= 1 ) {
+
+            for (RPerformer _performer : b.getPerformers()) {
+
+              RPerformerEntity p = (RPerformerEntity) _performer;
+              Performer performer = new Performer();
+
+              performer.setNumber(p.getNumber());
+              performer.setPerformerId(p.getPerformerId());
+              performer.setPerformerType(p.getPerformerType());
+              performer.setPerformerText(p.getPerformerText());
+              performer.setOrganizationText(p.getOrganizationText());
+              performer.setIsOriginal(p.isIsOriginal());
+              performer.setIsResponsible(p.isIsResponsible());
+
+              block.getPerformers().add(performer);
+            }
+          }
+
+
+          list.add(block);
+        }
+        raw_decision.setBlocks(list);
+      }
+    } else {
+      raw_decision = new Decision();
+      raw_decision.setLetterhead("Бланк резолюции");
+      raw_decision.setShowPosition(true);
+      raw_decision.setSignerPositionS("");
+      raw_decision.setSignerBlankText("");
+      raw_decision.setUrgencyText("");
+      raw_decision.setId("");
+      raw_decision.setDate("");
+      raw_decision.setBlocks(new ArrayList<>());    }
 
   }
 

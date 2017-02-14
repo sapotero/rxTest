@@ -57,7 +57,7 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
       view = inflater.inflate(R.layout.primary_people, parent, false);
 
       viewHolder = new ViewHolder();
-      viewHolder.name     = (TextView) view.findViewById(R.id.primary_name);
+      viewHolder.name   = (TextView) view.findViewById(R.id.primary_name);
       viewHolder.remove = (Button)   view.findViewById(R.id.remove_user);
 
       viewHolder.copy        = (Switch) view.findViewById(R.id.copy);
@@ -156,6 +156,10 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
   @Override
   public int getCount() {
     return items.size();
+  }
+
+  public ArrayList<PrimaryConsiderationPeople> getAll() {
+    return items;
   }
 
   public PrimaryConsiderationPeople getItem(int i){
