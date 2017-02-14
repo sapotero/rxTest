@@ -3,7 +3,10 @@ package sapotero.rxtest.views.managers.menu.commands.decision;
 import android.content.Context;
 
 import com.f2prateek.rx.preferences.Preference;
+import com.google.gson.Gson;
 
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -76,11 +79,16 @@ public class SaveDecision extends AbstractCommand {
 
     DocumentService operationService = retrofit.create( DocumentService.class );
 
+    RequestBody json = RequestBody.create(
+      MediaType.parse("application/json"),
+      new Gson().toJson( params.getDecision() )
+    );
+
     Observable<String> info = operationService.update(
       decision_id,
       LOGIN.get(),
       TOKEN.get(),
-      decision
+      json
     );
 
     info.subscribeOn( Schedulers.computation() )
