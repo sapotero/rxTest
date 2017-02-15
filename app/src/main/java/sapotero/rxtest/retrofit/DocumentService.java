@@ -18,9 +18,9 @@ public interface DocumentService {
       @Query("auth_token") String auth_token
   );
 
-  @PUT("/v2/decisions/{decision}.json")
-  Observable<String> update(
-    @Path("decision") String decision,
+  @PUT("/v2/decisions/{decision_id}.json")
+  Observable<Object> update(
+    @Path("decision_id") String decision_id,
     @Query("login") String login,
     @Query("auth_token") String auth_token,
     @Body RequestBody data
@@ -30,7 +30,7 @@ public interface DocumentService {
   Observable<String> newDecision(
     @Query("login") String login,
     @Query("auth_token") String auth_token,
-    @Body String body
+    @Body RequestBody body
   );
 
 }

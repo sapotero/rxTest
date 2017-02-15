@@ -89,7 +89,7 @@ public class SaveDecision extends AbstractCommand {
     Timber.tag(TAG).e("DECISION");
     Timber.tag(TAG).e("%s", decision_json);
 
-    Observable<String> info = operationService.update(
+    Observable<Object> info = operationService.update(
       decision_id,
       LOGIN.get(),
       TOKEN.get(),

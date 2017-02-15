@@ -59,6 +59,7 @@ public class SyncDocumentsJob  extends BaseJob {
   private Fields.Status filter;
   private String uid;
   private String TAG = this.getClass().getSimpleName();
+  private DocumentInfo document;
 
   public SyncDocumentsJob(String uid, Fields.Status filter) {
     super( new Params(PRIORITY).requireNetwork().persist() );
@@ -116,9 +117,11 @@ public class SyncDocumentsJob  extends BaseJob {
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         doc -> {
+          document = doc;
           Timber.tag(TAG).d("recv title - %s", doc.getTitle() );
           Timber.tag(TAG).d("actions - %s", new Gson().toJson( doc.getOperations() ) );
-          update( doc, exist(doc.getUid()) );
+
+          update( exist(doc.getUid()) );
 
           EventBus.getDefault().post( new StepperLoadDocumentEvent(doc.getUid()) );
 
@@ -157,9 +160,6 @@ public class SyncDocumentsJob  extends BaseJob {
       .count(RDocumentEntity.UID)
       .where(RDocumentEntity.UID.eq(uid))
       .get().value();
-
-
-
 
     if( count != 0 ){
       result = true;
@@ -212,31 +212,25 @@ public class SyncDocumentsJob  extends BaseJob {
     return dataStore.insert( rd ).toObservable();
   }
 
-  private void update(DocumentInfo document, Boolean exist){
+  private void update(Boolean exist){
 
 
     Timber.tag(TAG).d("create title - %s | %s", document.getTitle(), filter.toString() );
 
-    if (!exist){
+    if (exist) {
+      updateDocumentInfo();
+    } else {
       create(document)
         .subscribeOn( Schedulers.io() )
-        .observeOn( Schedulers.io() )
-        .subscribe(data -> {
-          Timber.tag(TAG).v("add " + data.getTitle() );
-          setData( data, document, false);
-        },
-        error -> {
-          error.printStackTrace();
-        });
-    }
-    else {
-      setData(null, document, true);
+        .observeOn( AndroidSchedulers.mainThread() )
+        .subscribe(
+          this::createNewDocument,
+          Throwable::printStackTrace
+        );
     }
   }
 
-  private void setData(RDocumentEntity documentEntity, DocumentInfo document, boolean md5Equal){
-
-    if (!md5Equal){
+  private void createNewDocument(RDocumentEntity documentEntity){
 
       RDocumentEntity rDoc;
 
@@ -250,7 +244,7 @@ public class SyncDocumentsJob  extends BaseJob {
           .first();
       }
 
-      Timber.tag(TAG).v("setData " + rDoc.getRegistrationNumber() );
+      Timber.tag(TAG).v("createNewDocument " + rDoc.getRegistrationNumber() );
       Timber.tag(TAG).v("getImages " + document.getImages().size() );
       Timber.tag(TAG).v("getDecisions " + rDoc.getDecisions().size() );
       Timber.tag(TAG).v("getExemplars " + rDoc.getExemplars().size() );
@@ -434,8 +428,196 @@ public class SyncDocumentsJob  extends BaseJob {
             error.printStackTrace();
           }
         );
+  }
+
+  private void updateDocumentInfo(){
+
+
+    RDocumentEntity doc = dataStore
+      .select(RDocumentEntity.class)
+      .where(RDocumentEntity.UID.eq(uid))
+      .get().first();
+
+    if ( !Objects.equals( document.getMd5(), doc.getMd5() ) ){
+      Timber.tag("MD5").d("not equal %s - %s",document.getMd5(), doc.getMd5() );
+
+      doc.setMd5( document.getMd5() );
+
+      if (document.getSigner() != null){
+        RSignerEntity signer = (RSignerEntity) doc.getSigner();
+        signer.setUid( document.getSigner().getId() );
+        signer.setName( document.getSigner().getName() );
+        signer.setOrganisation( document.getSigner().getOrganisation() );
+        signer.setType( document.getSigner().getType() );
+      }
+
+      doc.setFavorites(isFavorites);
+      doc.setProcessed(isProcessed);
+      doc.setFolder(processed_folder);
+      doc.setControl(onControl);
+      doc.setUser( LOGIN.get() );
+
+      if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
+        doc.getDecisions().clear();
+        for (Decision d: document.getDecisions() ) {
+
+          RDecisionEntity decision = new RDecisionEntity();
+          decision.setUid( d.getId() );
+          decision.setLetterhead(d.getLetterhead());
+          decision.setApproved(d.getApproved());
+          decision.setSigner(d.getSigner());
+          decision.setSignerId(d.getSignerId());
+          decision.setAssistantId(d.getAssistantId());
+          decision.setSignerBlankText(d.getSignerBlankText());
+          decision.setSignerIsManager(d.getSignerIsManager());
+          decision.setComment(d.getComment());
+          decision.setDate(d.getDate());
+          decision.setUrgencyText(d.getUrgencyText());
+          decision.setShowPosition(d.getShowPosition());
+          decision.setSignBase64(d.getSignBase64());
+
+          if ( d.getBlocks() != null && d.getBlocks().size() >= 1 ){
+
+            for (Block b: d.getBlocks() ) {
+              RBlockEntity block = new RBlockEntity();
+              block.setNumber(b.getNumber());
+              block.setText(b.getText());
+              block.setAppealText(b.getAppealText());
+              block.setTextBefore(b.getTextBefore());
+              block.setHidePerformers(b.getHidePerformers());
+              block.setToCopy(b.getToCopy());
+              block.setToFamiliarization(b.getToFamiliarization());
+
+              if ( b.getPerformers() != null && b.getPerformers().size() >= 1 ) {
+
+                for (Performer p : b.getPerformers()) {
+                  RPerformerEntity performer = new RPerformerEntity();
+
+                  performer.setNumber(p.getNumber());
+                  performer.setPerformerId(p.getPerformerId());
+                  performer.setPerformerType(p.getPerformerType());
+                  performer.setPerformerText(p.getPerformerText());
+                  performer.setOrganizationText(p.getOrganizationText());
+                  performer.setIsOriginal(p.getIsOriginal());
+                  performer.setIsResponsible(p.getIsResponsible());
+
+                  performer.setBlock(block);
+                  block.getPerformers().add(performer);
+                }
+              }
+
+
+              block.setDecision(decision);
+              decision.getBlocks().add(block);
+            }
+
+          }
+
+          //FIX DECISION
+          decision.setDocument(doc);
+          doc.getDecisions().add(decision);
+        }
+      }
+
+      if ( document.getRoute() != null  ){
+        RRouteEntity route = (RRouteEntity) doc.getRoute();
+        route.setText( document.getRoute().getTitle() );
+
+
+        for (Step step: document.getRoute().getSteps() ) {
+
+          RStepEntity r_step = new RStepEntity();
+          r_step.setTitle( step.getTitle() );
+          r_step.setNumber( step.getNumber() );
+
+          if ( step.getPeople() != null && step.getPeople().size() > 0 ){
+            r_step.setPeople(  new Gson().toJson( step.getPeople() )  );
+          }
+          if ( step.getCards() != null && step.getCards().size() > 0 ){
+            r_step.setCards(  new Gson().toJson( step.getCards() )  );
+          }
+          if ( step.getAnotherApprovals() != null && step.getAnotherApprovals().size() > 0 ){
+            r_step.setAnother_approvals(  new Gson().toJson( step.getAnotherApprovals() )  );
+          }
+
+          route.getSteps().add( r_step );
+        }
+
+      }
+
+      if ( document.getExemplars() != null && document.getExemplars().size() >= 1 ){
+        doc.getExemplars().clear();
+        for (Exemplar e: document.getExemplars() ) {
+          RExemplarEntity exemplar = new RExemplarEntity();
+          exemplar.setNumber(String.valueOf(e.getNumber()));
+          exemplar.setIsOriginal(e.getIsOriginal());
+          exemplar.setStatusCode(e.getStatusCode());
+          exemplar.setAddressedToId(e.getAddressedToId());
+          exemplar.setAddressedToName(e.getAddressedToName());
+          exemplar.setDate(e.getDate());
+          exemplar.setDocument(doc);
+          doc.getExemplars().add(exemplar);
+        }
+      }
+
+      if ( document.getImages() != null && document.getImages().size() >= 1 ){
+        doc.getImages().clear();
+        for (Image i: document.getImages() ) {
+          RImageEntity image = new RImageEntity();
+          image.setTitle(i.getTitle());
+          image.setNumber(i.getNumber());
+          image.setMd5(i.getMd5());
+          image.setSize(i.getSize());
+          image.setPath(i.getPath());
+          image.setContentType(i.getContentType());
+          image.setSigned(i.getSigned());
+          image.setDocument(doc);
+          doc.getImages().add(image);
+        }
+      }
+
+      if ( document.getControlLabels() != null && document.getControlLabels().size() >= 1 ){
+        doc.getControlLabels().clear();
+        for (ControlLabel l: document.getControlLabels() ) {
+          RControlLabelsEntity label = new RControlLabelsEntity();
+          label.setCreatedAt(l.getCreatedAt());
+          label.setOfficialId(l.getOfficialId());
+          label.setOfficialName(l.getOfficialName());
+          label.setSkippedOfficialId(l.getSkippedOfficialId());
+          label.setSkippedOfficialName(l.getSkippedOfficialName());
+          label.setState(l.getState());
+          label.setDocument(doc);
+          doc.getControlLabels().add(label);
+        }
+      }
+
+      if ( document.getLinks() != null){
+        doc.getLinks().clear();
+        for (String _link: document.getLinks()) {
+          RLinksEntity link = new RLinksEntity();
+          link.setUid(_link);
+          doc.getLinks().add(link);
+        }
+      }
+
+      if ( document.getInfoCard() != null){
+        doc.setInfoCard( document.getInfoCard() );
+      }
+
+      dataStore
+        .update( doc )
+        .subscribeOn( Schedulers.io() )
+        .observeOn( AndroidSchedulers.mainThread() )
+        .subscribe(
+          result -> {
+            Timber.tag("MD5").d("updateDocumentInfo " + result.getMd5());
+          },
+          error ->{
+            error.printStackTrace();
+          }
+        );
     } else {
-      Timber.tag(TAG).v("MD5 equal");
+      Timber.tag("MD5").d("equal");
     }
   }
 

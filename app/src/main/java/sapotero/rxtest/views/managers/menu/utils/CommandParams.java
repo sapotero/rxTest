@@ -3,7 +3,7 @@ package sapotero.rxtest.views.managers.menu.utils;
 import java.io.Serializable;
 import java.util.UUID;
 
-import sapotero.rxtest.retrofit.models.document.Decision;
+import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 
 public class CommandParams implements Serializable {
   public String person;
@@ -11,7 +11,7 @@ public class CommandParams implements Serializable {
   public String label;
   public String sign;
   public String document;
-  public Decision decision;
+  public RDecisionEntity decision;
   public String decisionId;
   public String uuid;
   public String user;
@@ -53,11 +53,11 @@ public class CommandParams implements Serializable {
     return uuid;
   }
 
-  public Decision getDecision() {
+  public RDecisionEntity getDecision() {
     return decision;
   }
 
-  public void setDecision(Decision decision) {
+  public void setDecision(RDecisionEntity decision) {
     this.decision = decision;
   }
 

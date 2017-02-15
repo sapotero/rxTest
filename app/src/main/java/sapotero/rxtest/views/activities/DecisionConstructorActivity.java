@@ -64,6 +64,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   private String TAG = this.getClass().getSimpleName();
   private DecisionManager manager;
   private Decision raw_decision;
+  private RDecisionEntity rDecisionEntity;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -304,32 +305,32 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   private void loadDecision() {
     String decision_id = settings.getString("decision.active.id").get();
 
-    RDecisionEntity d = dataStore
+    rDecisionEntity = dataStore
       .select(RDecisionEntity.class)
       .where(RDocumentEntity.UID.eq(decision_id))
       .get().firstOrNull();
 
-    if (d != null) {
+    if (rDecisionEntity != null) {
       raw_decision = new Decision();
 
-      raw_decision.setId( d.getUid() );
-      raw_decision.setLetterhead(d.getLetterhead());
-      raw_decision.setApproved(d.isApproved());
-      raw_decision.setSigner(d.getSigner());
-      raw_decision.setSignerId(d.getSignerId());
-      raw_decision.setAssistantId(d.getAssistantId());
-      raw_decision.setSignerBlankText(d.getSignerBlankText());
-      raw_decision.setSignerIsManager(d.isSignerIsManager());
-      raw_decision.setComment(d.getComment());
-      raw_decision.setDate(d.getDate());
-      raw_decision.setUrgencyText(d.getUrgencyText());
-      raw_decision.setShowPosition(d.isShowPosition());
+      raw_decision.setId( rDecisionEntity.getUid() );
+      raw_decision.setLetterhead(rDecisionEntity.getLetterhead());
+      raw_decision.setApproved(rDecisionEntity.isApproved());
+      raw_decision.setSigner(rDecisionEntity.getSigner());
+      raw_decision.setSignerId(rDecisionEntity.getSignerId());
+      raw_decision.setAssistantId(rDecisionEntity.getAssistantId());
+      raw_decision.setSignerBlankText(rDecisionEntity.getSignerBlankText());
+      raw_decision.setSignerIsManager(rDecisionEntity.isSignerIsManager());
+      raw_decision.setComment(rDecisionEntity.getComment());
+      raw_decision.setDate(rDecisionEntity.getDate());
+      raw_decision.setUrgencyText(rDecisionEntity.getUrgencyText());
+      raw_decision.setShowPosition(rDecisionEntity.isShowPosition());
 
-      if ( d.getBlocks() != null && d.getBlocks().size() >= 1 ){
+      if ( rDecisionEntity.getBlocks() != null && rDecisionEntity.getBlocks().size() >= 1 ){
 
         ArrayList<Block> list = new ArrayList<>();
 
-        for (RBlock _block: d.getBlocks() ) {
+        for (RBlock _block: rDecisionEntity.getBlocks() ) {
 
           RBlockEntity b = (RBlockEntity) _block;
           Block block = new Block();
@@ -452,7 +453,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
         CommandParams params = new CommandParams();
         params.setDecisionId( settings.getString("decision.active.id").get() );
-        params.setDecision( raw_decision );
+        params.setDecision( rDecisionEntity );
 
         operationManager.execute(operation, params);
       })

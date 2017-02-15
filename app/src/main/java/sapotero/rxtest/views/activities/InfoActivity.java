@@ -259,13 +259,13 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   /* OperationManager.Callback */
   @Override
   public void onExecuteSuccess(String command) {
-    Timber.tag("OpManagerCallback").i("onExecuteSuccess %s", command);
+    Timber.tag(TAG).i("OperationManager.onExecuteSuccess %s", command);
     toolbarManager.update(command);
   }
 
   @Override
   public void onExecuteError() {
-    Timber.tag("OpManagerCallback").i("onExecuteSuccess");
+    Timber.tag(TAG).i("OperationManager.onExecuteError");
   }
 
 

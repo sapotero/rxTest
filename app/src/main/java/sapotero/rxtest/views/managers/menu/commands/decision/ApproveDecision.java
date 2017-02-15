@@ -13,8 +13,11 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
+import sapotero.rxtest.db.requery.utils.DecisionConverter;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Decision;
+import sapotero.rxtest.retrofit.models.wrapper.DecisionWrapper;
 import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.views.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.views.managers.menu.utils.CommandParams;
@@ -32,7 +35,7 @@ public class ApproveDecision extends AbstractCommand {
   private Preference<String> UID;
   private Preference<String> HOST;
   private Preference<String> STATUS_CODE;
-  private Decision decision;
+  private RDecisionEntity decision;
   private String decisionId;
 
   public ApproveDecision(Context context, DocumentReceiver document){
@@ -56,7 +59,7 @@ public class ApproveDecision extends AbstractCommand {
     HOST  = settings.getString("settings_username_host");
     STATUS_CODE = settings.getString("activity_main_menu.start");
   }
-  public ApproveDecision withDecision(Decision decision){
+  public ApproveDecision withDecision(RDecisionEntity decision){
     this.decision = decision;
     return this;
   }
@@ -78,20 +81,27 @@ public class ApproveDecision extends AbstractCommand {
       .client( okHttpClient )
       .build();
 
+    Decision formated_decision = DecisionConverter.formatDecision( decision );
+    formated_decision.setApproved(true);
 
-    String decision_json = new Gson().toJson(params.getDecision());
+    DecisionWrapper wrapper = new DecisionWrapper();
+    wrapper.setDecision(formated_decision);
+
+    String json_d = new Gson().toJson( wrapper );
+    Timber.w("decision_json: %s", json_d);
+
+
     RequestBody json = RequestBody.create(
       MediaType.parse("application/json"),
-      decision_json
+      json_d
     );
 
     Timber.tag(TAG).e("DECISION");
-    Timber.tag(TAG).e("%s", decision_json);
     Timber.tag(TAG).e("%s", json);
 
     DocumentService operationService = retrofit.create( DocumentService.class );
 
-    Observable<String> info = operationService.update(
+    Observable<Object> info = operationService.update(
       decisionId,
       LOGIN.get(),
       TOKEN.get(),
@@ -121,9 +131,10 @@ public class ApproveDecision extends AbstractCommand {
 
 
 
+
   @Override
   public String getType() {
-    return "add_decision";
+    return "approve_decision";
   }
 
   @Override

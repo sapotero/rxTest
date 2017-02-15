@@ -87,9 +87,7 @@ public class DownloadFileJob  extends BaseJob {
       .subscribeOn(Schedulers.io())
       .observeOn(Schedulers.io())
       .subscribe(
-        link -> {
-          downloadFile(link);
-        },
+        this::downloadFile,
         error -> {
           EventBus.getDefault().post(new FileDownloadedEvent(""));
         }
@@ -147,7 +145,7 @@ public class DownloadFileJob  extends BaseJob {
     OutputStream outputStream;
 
     try {
-      byte[] fileReader = new byte[131072];
+      byte[] fileReader = new byte[1048576];
 
       long fileSize = body.contentLength();
       long fileSizeDownloaded = 0;
@@ -169,9 +167,6 @@ public class DownloadFileJob  extends BaseJob {
         Timber.tag(TAG).d("file download: %s of %s", fileSizeDownloaded, fileSize);
       }
 
-      Timber.tag(TAG).d("file download: DONE");
-
-//      EventBus.getDefault().post(new FileDownloadedEvent(""));
       outputStream.flush();
 
       inputStream.close();

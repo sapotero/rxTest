@@ -7,6 +7,7 @@ import sapotero.rxtest.views.managers.menu.commands.approval.ChangePerson;
 import sapotero.rxtest.views.managers.menu.commands.approval.NextPerson;
 import sapotero.rxtest.views.managers.menu.commands.consideration.PrimaryConsideration;
 import sapotero.rxtest.views.managers.menu.commands.decision.ApproveDecision;
+import sapotero.rxtest.views.managers.menu.commands.decision.RejectDecision;
 import sapotero.rxtest.views.managers.menu.commands.performance.DelegatePerformance;
 import sapotero.rxtest.views.managers.menu.commands.report.FromTheReport;
 import sapotero.rxtest.views.managers.menu.commands.report.ReturnToPrimaryConsideration;
@@ -241,7 +242,15 @@ public class CommandFactory implements AbstractCommand.Callback{
     REJECT_DECISION {
       @Override
       Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
-        return null;
+        RejectDecision command = new RejectDecision(context, document);
+        command.withParams(params);
+        command
+          .withDecision( params.getDecision() )
+          .withDecisionId( params.getDecisionId() )
+          .registerCallBack(instance);
+
+        command.withParams(params);
+        return command;
       }
     };
 

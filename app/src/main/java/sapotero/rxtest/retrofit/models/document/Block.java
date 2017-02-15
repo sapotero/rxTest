@@ -18,7 +18,7 @@ public class Block implements Serializable{
     private String text;
     @SerializedName("appeal_text")
     @Expose
-    private String appealText;
+    private String appealText = "";
     @SerializedName("text_before")
     @Expose
     private Boolean textBefore;
@@ -38,6 +38,18 @@ public class Block implements Serializable{
     @SerializedName("indentation")
     @Expose
     private String indentation = "1";
+
+    @SerializedName("font_size")
+    @Expose
+    private String fontSize = "10";
+
+    public String getFontSize() {
+        return fontSize;
+    }
+
+    public void setFontSize(String fontSize) {
+        this.fontSize = fontSize;
+    }
 
     public String getIndentation() {
         return indentation;

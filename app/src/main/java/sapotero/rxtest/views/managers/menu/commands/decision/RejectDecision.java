@@ -3,18 +3,21 @@ package sapotero.rxtest.views.managers.menu.commands.decision;
 import android.content.Context;
 
 import com.f2prateek.rx.preferences.Preference;
+import com.google.gson.Gson;
 
-import java.util.ArrayList;
-import java.util.Objects;
-
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import sapotero.rxtest.retrofit.OperationService;
-import sapotero.rxtest.retrofit.models.OperationResult;
+import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
+import sapotero.rxtest.db.requery.utils.DecisionConverter;
+import sapotero.rxtest.retrofit.DocumentService;
+import sapotero.rxtest.retrofit.models.document.Decision;
+import sapotero.rxtest.retrofit.models.wrapper.DecisionWrapper;
 import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.views.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.views.managers.menu.utils.CommandParams;
@@ -33,6 +36,8 @@ public class RejectDecision extends AbstractCommand {
   private Preference<String> HOST;
   private Preference<String> STATUS_CODE;
   private String folder_id;
+  private RDecisionEntity decision;
+  private String decisionId;
 
   public RejectDecision(Context context, DocumentReceiver document){
     super(context);
@@ -55,8 +60,12 @@ public class RejectDecision extends AbstractCommand {
     HOST  = settings.getString("settings_username_host");
     STATUS_CODE = settings.getString("activity_main_menu.start");
   }
-  public RejectDecision withFolder(String uid){
-    folder_id = uid;
+  public RejectDecision withDecision(RDecisionEntity decision){
+    this.decision = decision;
+    return this;
+  }
+  public RejectDecision withDecisionId(String decisionId){
+    this.decisionId = decisionId;
     return this;
   }
 
@@ -69,52 +78,61 @@ public class RejectDecision extends AbstractCommand {
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( HOST.get() + "v3/operations/" )
+      .baseUrl( HOST.get() )
       .client( okHttpClient )
       .build();
 
-    OperationService operationService = retrofit.create( OperationService.class );
+    Decision formated_decision = DecisionConverter.formatDecision( decision );
+    formated_decision.setApproved(false);
 
-    ArrayList<String> uids = new ArrayList<>();
-    uids.add( UID.get() );
+    DecisionWrapper wrapper = new DecisionWrapper();
+    wrapper.setDecision(formated_decision);
 
-    Observable<OperationResult> info = operationService.shared(
-      getType(),
+    String json_d = new Gson().toJson( wrapper );
+    Timber.w("decision_json: %s", json_d);
+
+
+    RequestBody json = RequestBody.create(
+      MediaType.parse("application/json"),
+      json_d
+    );
+
+    Timber.tag(TAG).e("DECISION");
+    Timber.tag(TAG).e("%s", json);
+
+    DocumentService operationService = retrofit.create( DocumentService.class );
+
+    Observable<Object> info = operationService.update(
+      decisionId,
       LOGIN.get(),
       TOKEN.get(),
-      uids,
-      UID.get(),
-      STATUS_CODE.get(),
-      folder_id,
-      null
+      json
     );
 
     info.subscribeOn( Schedulers.computation() )
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         data -> {
-          Timber.tag(TAG).i("ok: %s", data.getOk());
-          Timber.tag(TAG).i("error: %s", data.getMessage());
-          Timber.tag(TAG).i("type: %s", data.getType());
+          Timber.tag(TAG).i("ok: %s", data);
 
-          if (callback != null && Objects.equals(data.getType(), "warning")){
+          if (callback != null ){
             callback.onCommandExecuteSuccess( getType() );
           }
         },
         error -> {
+          Timber.tag(TAG).i("error: %s", error);
           if (callback != null){
             callback.onCommandExecuteError();
           }
         }
       );
-
   }
 
 
 
   @Override
   public String getType() {
-    return "add_decision";
+    return "reject_decision";
   }
 
   @Override

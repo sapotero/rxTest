@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
@@ -60,18 +61,21 @@ import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.adapters.DecisionSpinnerAdapter;
 import sapotero.rxtest.views.adapters.models.DecisionSpinnerItem;
 import sapotero.rxtest.views.dialogs.DecisionMagniferFragment;
+import sapotero.rxtest.views.managers.menu.OperationManager;
+import sapotero.rxtest.views.managers.menu.factories.CommandFactory;
+import sapotero.rxtest.views.managers.menu.utils.CommandParams;
 import sapotero.rxtest.views.managers.toolbar.ToolbarManager;
 import timber.log.Timber;
 
-import static com.mikepenz.iconics.Iconics.TAG;
 
 @SuppressLint("ValidFragment")
-public class InfoActivityDecisionPreviewFragment extends Fragment {
+public class InfoActivityDecisionPreviewFragment extends Fragment implements OperationManager.Callback {
 
-  private ToolbarManager toolbarManager;
   @Inject RxSharedPreferences settings;
   @Inject SingleEntityStore<Persistable> dataStore;
+  @Inject OperationManager operationManager;
 
+  private ToolbarManager toolbarManager;
   private OnFragmentInteractionListener mListener;
 
   private Preference<String> DOCUMENT_UID;
@@ -104,9 +108,11 @@ public class InfoActivityDecisionPreviewFragment extends Fragment {
   private DecisionSpinnerAdapter decision_spinner_adapter;
   private Preview preview;
 
-  private Unbinder unbinder;
+  private Unbinder binder;
   private Preference<String> REG_NUMBER;
   private String uid;
+  private RDecisionEntity current_decision;
+  private String TAG = this.getClass().getSimpleName();
 
   public InfoActivityDecisionPreviewFragment() {
   }
@@ -114,6 +120,34 @@ public class InfoActivityDecisionPreviewFragment extends Fragment {
 
   public InfoActivityDecisionPreviewFragment(ToolbarManager toolbarManager) {
     this.toolbarManager = toolbarManager;
+  }
+
+  // Approve current decision
+  @OnClick(R.id.activity_info_decision_preview_next_person)
+  public void decision_preview_next(){
+
+    CommandFactory.Operation operation;
+    operation =CommandFactory.Operation.APPROVE_DECISION;
+
+    CommandParams params = new CommandParams();
+    params.setDecisionId( current_decision.getUid() );
+    params.setDecision( current_decision );
+
+    operationManager.execute(operation, params);
+  }
+
+  // Reject current decision
+  @OnClick(R.id.activity_info_decision_preview_prev_person)
+  public void decision_preview_prev(){
+
+    CommandFactory.Operation operation;
+    operation =CommandFactory.Operation.REJECT_DECISION;
+
+    CommandParams params = new CommandParams();
+    params.setDecisionId( current_decision.getUid() );
+    params.setDecision( current_decision );
+
+    operationManager.execute(operation, params);
   }
 
   @Override
@@ -127,7 +161,9 @@ public class InfoActivityDecisionPreviewFragment extends Fragment {
     View view = inflater.inflate(R.layout.fragment_info_card_decision_preview, container, false);
 
     EsdApplication.getComponent( getContext() ).inject(this);
-    unbinder = ButterKnife.bind(this, view);
+    binder = ButterKnife.bind(this, view);
+
+    operationManager.registerCallBack(this);
 
     loadSettings();
     loadDocument();
@@ -156,28 +192,23 @@ public class InfoActivityDecisionPreviewFragment extends Fragment {
   private void setAdapter() {
     decision_spinner_adapter = new DecisionSpinnerAdapter(getContext(), settings.getString("current_user_id").get() , decisionSpinnerItems);
     decision_spinner.setAdapter(decision_spinner_adapter);
+
     decision_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
       @Override
       public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-        if (position > 0){
-          Timber.tag(TAG).w( "decision id: %s", decision_spinner_adapter.getItem(position).getDecision().getId() );
-          settings.getString("decision.active.id").set( decision_spinner_adapter.getItem(position).getDecision().getUid() );
-          preview.show( decision_spinner_adapter.getItem(position).getDecision() );
-          toolbarManager.setEditDecisionMenuItemVisible( !decision_spinner_adapter.getItem(position).getDecision().isApproved() );
-
-          updateVisibility( decision_spinner_adapter.getItem(position).getDecision().isApproved() );
-
+        if ( decision_spinner_adapter.getCount() > 0 ) {
+          Timber.tag(TAG).e("onItemSelected %s %s ", position, id);
+          current_decision = decision_spinner_adapter.getItem(position).getDecision();
+          displayDecision();
         }
       }
 
       @Override
       public void onNothingSelected(AdapterView<?> adapterView) {
         if ( decision_spinner_adapter.getCount() > 0 ){
-          preview.show( decision_spinner_adapter.getItem(0).getDecision() );
-          settings.getString("decision.active.id").set( decision_spinner_adapter.getItem(0).getDecision().getUid() );
-          toolbarManager.setEditDecisionMenuItemVisible( !decision_spinner_adapter.getItem(0).getDecision().isApproved() );
-          updateVisibility(decision_spinner_adapter.getItem(0).getDecision().isApproved());
-
+          current_decision = decision_spinner_adapter.getItem(0).getDecision();
+          Timber.tag(TAG).e("onNothingSelected");
+          displayDecision();
         }
       }
     });
@@ -196,7 +227,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment {
 
   @Override public void onDestroyView() {
     super.onDestroyView();
-    unbinder.unbind();
+    binder.unbind();
   }
 
   @Override
@@ -379,29 +410,29 @@ public class InfoActivityDecisionPreviewFragment extends Fragment {
 
 //           если есть резолюции, то отобразить первую
           if ( decision_spinner_adapter.size() > 0 ) {
-            displayFirstElement();
-          } else {
-            decision_spinner_adapter.add( new DecisionSpinnerItem(null, "Нет резолюций", 0 ) );
-            preview.showEmpty();
-            toolbarManager.setEditDecisionMenuItemVisible(false);
+            current_decision = decision_spinner_adapter.getItem(0).getDecision();
+            Timber.tag(TAG).e("decision_spinner_adapter > 0");
+            displayDecision();
           }
-
         } else {
           Timber.e("no decisions");
-          decision_spinner_adapter.add( new DecisionSpinnerItem(null, "Нет резолюций", 0 ) );
           magnifer_button.setVisibility(View.GONE);
-          preview.showEmpty();
           toolbarManager.setEditDecisionMenuItemVisible(false);
+          preview.showEmpty();
+          EventBus.getDefault().post( new HasNoActiveDecisionConstructor() );
+          decision_spinner_adapter.add( new DecisionSpinnerItem(null, "Нет резолюций", 0 ) );
         }
 
       });
   }
 
-  private void displayFirstElement() {
-    preview.show( decision_spinner_adapter.getItem(0).getDecision() );
-    settings.getString("decision.active.id").set( decision_spinner_adapter.getItem(0).getDecision().getUid() );
-    toolbarManager.setEditDecisionMenuItemVisible( !decision_spinner_adapter.getItem(0).getDecision().isApproved() );
-    updateVisibility(decision_spinner_adapter.getItem(0).getDecision().isApproved());
+  private void displayDecision() {
+    if (current_decision != null) {
+      preview.show( current_decision );
+      settings.getString("decision.active.id").set( current_decision.getUid() );
+      toolbarManager.setEditDecisionMenuItemVisible( !current_decision.isApproved() );
+      updateVisibility(current_decision.isApproved());
+    }
   }
 
   private void loadFromJson(){
@@ -756,5 +787,27 @@ public class InfoActivityDecisionPreviewFragment extends Fragment {
     public String getRegNumber() {
       return reg_number;
     }
+  }
+
+
+  @Override
+  public void onExecuteSuccess(String command) {
+    Timber.tag(TAG).i("OperationManager.onExecuteSuccess %s", command);
+    switch (command ){
+      case "approve_decision":
+        current_decision.setApproved(true);
+        displayDecision();
+        Snackbar.make( getView(), "Резолюция утверждена", Snackbar.LENGTH_LONG ).show();
+        break;
+      case "reject_decision":
+        Snackbar.make( getView(), "Резолюция отклонена", Snackbar.LENGTH_LONG ).show();
+      default:
+        break;
+    }
+  }
+
+  @Override
+  public void onExecuteError() {
+    Timber.tag(TAG).i("OperationManager.onExecuteError");
   }
 }
