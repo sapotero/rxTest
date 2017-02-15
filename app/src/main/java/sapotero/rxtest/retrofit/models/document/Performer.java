@@ -28,6 +28,45 @@ public class Performer {
     @Expose
     private Boolean isResponsible;
 
+    @SerializedName("is_group")
+    @Expose
+    private Boolean isGroup = false;
+    @SerializedName("is_organization")
+    @Expose
+    private Boolean isOrganization = false;
+
+    public Boolean getOriginal() {
+        return isOriginal;
+    }
+
+    public void setOriginal(Boolean original) {
+        isOriginal = original;
+    }
+
+    public Boolean getResponsible() {
+        return isResponsible;
+    }
+
+    public void setResponsible(Boolean responsible) {
+        isResponsible = responsible;
+    }
+
+    public Boolean getGroup() {
+        return isGroup;
+    }
+
+    public void setGroup(Boolean group) {
+        isGroup = group;
+    }
+
+    public Boolean getOrganization() {
+        return isOrganization;
+    }
+
+    public void setOrganization(Boolean organization) {
+        isOrganization = organization;
+    }
+
     /**
      * 
      * @return

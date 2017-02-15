@@ -79,10 +79,15 @@ public class ApproveDecision extends AbstractCommand {
       .build();
 
 
+    String decision_json = new Gson().toJson(params.getDecision());
     RequestBody json = RequestBody.create(
       MediaType.parse("application/json"),
-      new Gson().toJson( params.getDecision() )
+      decision_json
     );
+
+    Timber.tag(TAG).e("DECISION");
+    Timber.tag(TAG).e("%s", decision_json);
+    Timber.tag(TAG).e("%s", json);
 
     DocumentService operationService = retrofit.create( DocumentService.class );
 

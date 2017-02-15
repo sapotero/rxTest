@@ -4,10 +4,11 @@ package sapotero.rxtest.retrofit.models.document;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Block {
+public class Block implements Serializable{
 
     @SerializedName("number")
     @Expose
@@ -33,6 +34,18 @@ public class Block {
     @SerializedName("performers")
     @Expose
     private List<Performer> performers = new ArrayList<Performer>();
+
+    @SerializedName("indentation")
+    @Expose
+    private String indentation = "1";
+
+    public String getIndentation() {
+        return indentation;
+    }
+
+    public void setIndentation(String indentation) {
+        this.indentation = indentation;
+    }
 
     /**
      * 

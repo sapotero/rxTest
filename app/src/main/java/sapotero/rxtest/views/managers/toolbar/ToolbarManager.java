@@ -521,6 +521,14 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
 
   }
 
+  public void showCreateDecisionButton() {
+    try {
+      toolbar.getMenu().findItem( R.id.menu_info_decision_create).setVisible(true);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
   public void hideDialog() {
     if (dialog != null) {
       dialog.hide();

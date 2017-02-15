@@ -1,30 +1,30 @@
 package sapotero.rxtest.views.adapters.models;
 
-import sapotero.rxtest.retrofit.models.document.Decision;
+import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 
 public class DecisionSpinnerItem {
 
-  private Decision decision;
+  private RDecisionEntity decision;
   private String name;
   private String date;
 
-  public DecisionSpinnerItem(Decision decision, String name, String date) {
+  public DecisionSpinnerItem(RDecisionEntity decision, String name, String date) {
     this.decision = decision;
     this.name = name;
     this.date = date;
   }
 
-  public DecisionSpinnerItem(Decision decision, String name, int size) {
+  public DecisionSpinnerItem(RDecisionEntity decision, String name, int size) {
     this.decision = decision;
     this.name = name;
     this.date = String.valueOf(size);
   }
 
-  public Decision getDecision() {
+  public RDecisionEntity getDecision() {
     return decision;
   }
 
-  public void setDecision(Decision decision) {
+  public void setDecision(RDecisionEntity decision) {
     this.decision = decision;
   }
 
@@ -43,4 +43,6 @@ public class DecisionSpinnerItem {
   public void setName(String name) {
     this.name = name;
   }
+
+
 }

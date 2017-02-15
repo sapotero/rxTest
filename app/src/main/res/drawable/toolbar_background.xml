@@ -16,7 +16,7 @@
         <bitmap
             android:gravity="left"
             android:src="@drawable/gerb_white_cut"
-            android:alpha="0.1"
+            android:alpha="0.2"
             android:height="72dp"
             android:width="72dp"/>
     </item>

@@ -440,18 +440,19 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       .negativeText(R.string.no)
       .onPositive((dialog1, which) -> {
 
-        Decision approve = new Decision();
-        approve.setApproved(true);
-        approve.setBlocks(null);
+//        Decision approve = new Decision();
+//        approve.setApproved(true);
+//        approve.setBlocks(null);
+//        Timber.tag("DECISION").e("approve: %s | %s", new Gson().toJson(approve), settings.getString("decision.active.id").get() );
 
-        Timber.tag("DECISION").e("approve: %s | %s", new Gson().toJson(approve), settings.getString("decision.active.id").get() );
+        raw_decision.setApproved(true);
 
         CommandFactory.Operation operation;
         operation =CommandFactory.Operation.APPROVE_DECISION;
 
         CommandParams params = new CommandParams();
         params.setDecisionId( settings.getString("decision.active.id").get() );
-        params.setDecision( approve );
+        params.setDecision( raw_decision );
 
         operationManager.execute(operation, params);
       })

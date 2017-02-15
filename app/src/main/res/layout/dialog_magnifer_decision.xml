@@ -25,6 +25,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:max="9"
+            android:padding="@dimen/half_date_offset"
             android:progress="2"
             tools:targetApi="n"/>
 

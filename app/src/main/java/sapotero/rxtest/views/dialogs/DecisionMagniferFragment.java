@@ -27,14 +27,16 @@ import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import sapotero.rxtest.R;
-import sapotero.rxtest.retrofit.models.document.Block;
-import sapotero.rxtest.retrofit.models.document.Decision;
-import sapotero.rxtest.retrofit.models.document.Performer;
+import sapotero.rxtest.db.requery.models.decisions.RBlock;
+import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
+import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
+import sapotero.rxtest.db.requery.models.decisions.RPerformer;
+import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.views.adapters.models.DecisionSpinnerItem;
 import timber.log.Timber;
 
@@ -134,7 +136,7 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
       preview_bottom.removeAllViews();
     };
 
-    private void show( Decision decision ){
+    private void show(RDecisionEntity decision ){
       clear();
 
       if( decision.getLetterhead() != null ) {
@@ -145,22 +147,23 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
       }
 
       if( decision.getBlocks().size() > 0 ){
-        List<Block> blocks = decision.getBlocks();
-        for (Block block: blocks){
+
+        for (RBlock b: decision.getBlocks()){
+          RBlockEntity block = (RBlockEntity) b;
           Timber.tag("block").v( block.getText() );
           printAppealText( block );
 
-          Boolean f = block.getToFamiliarization();
+          Boolean f = block.isToFamiliarization();
           if (f == null)
             f = false;
 
-          if ( block.getTextBefore() ){
+          if ( block.isTextBefore() ){
             printBlockText( block.getText() );
-            if (!block.getHidePerformers())
+            if (!block.isHidePerformers())
               printBlockPerformers( block.getPerformers(), f, block.getNumber() );
 
           } else {
-            if (!block.getHidePerformers())
+            if (!block.isHidePerformers())
               printBlockPerformers( block.getPerformers(), f, block.getNumber() );
             printBlockText( block.getText() );
           }
@@ -171,7 +174,7 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
       RxSharedPreferences rxPreferences = RxSharedPreferences.create(preferences);
       Preference<String> number = rxPreferences.getString("activity_main_menu.regnumber");
 
-      printSigner( decision.getShowPosition(), decision.getSignerBlankText(), decision.getSignerPositionS(), decision.getDate(), number.get(), decision.getSignBase64()  );
+      printSigner( decision.isShowPosition(), decision.getSignerBlankText(), decision.getSignerPositionS(), decision.getDate(), number.get(), decision.getSignBase64()  );
     }
 
     private void showEmpty(){
@@ -307,12 +310,12 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
       preview_body.addView( block_view );
     }
 
-    private void printAppealText( Block block ) {
+    private void printAppealText(RBlockEntity block ) {
 
       String text = "";
       String appealText;
       String number;
-      boolean toFamiliarization = block.getToFamiliarization() == null ? false : block.getToFamiliarization();
+      boolean toFamiliarization = block.isToFamiliarization() == null ? false : block.isToFamiliarization();
 
       if ( block.getAppealText() != null ){
         appealText = block.getAppealText().toString();
@@ -344,7 +347,7 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
       preview_body.addView( blockAppealView );
     }
 
-    private void printBlockPerformers(List<Performer> performers, Boolean toFamiliarization, Integer number) {
+    private void printBlockPerformers(Set<RPerformer> performers, Boolean toFamiliarization, Integer number) {
 
       boolean numberPrinted = false;
       LinearLayout users_view = new LinearLayout(context);
@@ -352,8 +355,9 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
       users_view.setPadding(40,5,5,5);
 
       if( performers.size() > 0 ){
-        List<Performer> users = performers;
-        for (Performer user: users){
+
+        for (RPerformer u: performers){
+          RPerformerEntity user = (RPerformerEntity) u;
 
           String performerName = "";
 

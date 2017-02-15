@@ -9,11 +9,13 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import sapotero.rxtest.R;
 import sapotero.rxtest.views.adapters.models.DecisionSpinnerItem;
 
 public class DecisionSpinnerAdapter extends BaseAdapter {
+  private final String current_user;
   private List<DecisionSpinnerItem> decisions;
   private LayoutInflater inflter;
   private int template;
@@ -28,8 +30,8 @@ public class DecisionSpinnerAdapter extends BaseAdapter {
 
   private ArrayList<DecisionSpinnerItem> suggestions = new ArrayList<>();
 
-  public DecisionSpinnerAdapter(Context context, List<DecisionSpinnerItem> filters) {
-
+  public DecisionSpinnerAdapter(Context context, String current_user,  List<DecisionSpinnerItem> filters) {
+    this.current_user = current_user;
     this.context = context;
     this.decisions = filters;
     this.inflter = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -85,5 +87,18 @@ public class DecisionSpinnerAdapter extends BaseAdapter {
 
   public void clear() {
     this.decisions.clear();
+  }
+
+
+  public boolean hasActiveDecision() {
+    Boolean result = false;
+
+    for ( DecisionSpinnerItem decision: decisions ) {
+      if (!decision.getDecision().isApproved() && Objects.equals(decision.getDecision().getSignerId(), current_user)){
+        result = true;
+      }
+    }
+
+    return result;
   }
 }

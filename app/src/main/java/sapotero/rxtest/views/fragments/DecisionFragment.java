@@ -134,7 +134,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
 //    hintSpinner.setAdapter(new HintSpinnerAdapter( tmp_adapter, R.layout.hint_row_item, mContext));
     hintSpinner.setAdapter(tmp_adapter);
 
-    card_toolbar.inflateMenu(R.menu.card_menu);
+    card_toolbar.inflateMenu(R.menu.decision_fragment_menu);
     card_toolbar.setTitle("Блок " + number );
     decision_text.setText( block.getText() );
     decision_text.addTextChangedListener(new TextWatcher() {

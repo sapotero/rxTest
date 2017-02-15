@@ -40,6 +40,7 @@ import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.bus.MassInsertDoneEvent;
 import sapotero.rxtest.events.crypto.SignDataResultEvent;
 import sapotero.rxtest.events.crypto.SignDataWrongPinEvent;
+import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
 import sapotero.rxtest.events.decision.ShowDecisionConstructor;
 import sapotero.rxtest.events.rx.ShowSnackEvent;
 import sapotero.rxtest.utils.queue.QueueManager;
@@ -306,6 +307,13 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     Intent intent = new Intent( this, DecisionConstructorActivity.class);
     this.startActivity(intent);
   }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(HasNoActiveDecisionConstructor event) throws Exception {
+    toolbarManager.showCreateDecisionButton();
+  }
+
+
 
 
 
