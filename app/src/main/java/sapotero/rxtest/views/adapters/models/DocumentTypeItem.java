@@ -14,6 +14,7 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
+import sapotero.rxtest.views.menu.fields.MainMenuButton;
 import sapotero.rxtest.views.menu.fields.MainMenuItem;
 
 public class DocumentTypeItem {
@@ -40,6 +41,8 @@ public class DocumentTypeItem {
         .count(RDocumentEntity.class)
         .where( RDocumentEntity.FAVORITES.ne( true ) )
         .and( RDocumentEntity.PROCESSED.ne( true ) )
+        .and( RDocumentEntity.FILTER.in( MainMenuButton.ButtonStatus.forAllDocuments() )   )
+        .and( RDocumentEntity.USER.eq( settings.getString("login").get() ) )
         .get()
         .value();
 
@@ -47,6 +50,7 @@ public class DocumentTypeItem {
         .count(RDocumentEntity.class)
         .where( RDocumentEntity.FILTER.eq(Fields.Status.APPROVAL.getValue() )   )
         .or( RDocumentEntity.FILTER.eq(Fields.Status.SIGNING.getValue() )   )
+        .and( RDocumentEntity.USER.eq( settings.getString("login").get() ) )
         .get()
         .value();
 

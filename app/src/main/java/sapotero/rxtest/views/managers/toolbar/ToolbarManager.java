@@ -10,7 +10,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -32,8 +31,9 @@ import sapotero.rxtest.db.requery.models.RFolderEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.crypto.SignDataEvent;
 import sapotero.rxtest.events.decision.ShowDecisionConstructor;
-import sapotero.rxtest.events.rx.ShowSnackEvent;
+import sapotero.rxtest.events.view.ApproveDecisionEvent;
 import sapotero.rxtest.events.view.RemoveDocumentFromAdapterEvent;
+import sapotero.rxtest.events.view.ShowSnackEvent;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
@@ -116,17 +116,29 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
 //            operation = CommandFactory.Operation.FROM_THE_REPORT;
 //            break;
           case R.id.menu_info_to_the_primary_consideration:
-            operation = CommandFactory.Operation.TO_THE_PRIMARY_CONSIDERATION;
+
+            if (oshs == null){
+              oshs = new SelectOshsDialogFragment();
+
+              Bundle bundle = new Bundle();
+              bundle.putString("operation", "to_the_primary_consideration");
+              oshs.setArguments(bundle);
+
+              oshs.registerCallBack( this );
+            }
+
+            oshs.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
+            operation = CommandFactory.Operation.INCORRECT;
             break;
 
           // sent_to_the_report (отправлен на доклад)
           case R.id.menu_info_delegate_performance:
             operation = CommandFactory.Operation.DELEGATE_PERFORMANCE;
-            params.setPerson( "USER_UD" );
+            params.setPerson( settings.getString("current_user_id").get() );
             break;
           case R.id.menu_info_to_the_approval_performance:
-            operation = CommandFactory.Operation.TO_THE_APPROVAL_PERFORMANCE;
-            params.setPerson( "USER_UD" );
+            operation = CommandFactory.Operation.FROM_THE_REPORT;
+            params.setPerson( settings.getString("current_user_id").get() );
             break;
 
           // primary_consideration (первичное рассмотрение)
@@ -241,9 +253,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
 
             break;
           case R.id.menu_info_shared_to_favorites:
-            operation = CommandFactory.Operation.ADD_TO_FOLDER;
-
-//            item.setTitle(getString( doc.isFavorites() != null && doc.isFavorites() ? R.string.remove_from_favorites : R.string.to_favorites));
+            operation = !doc.isFavorites() ? CommandFactory.Operation.ADD_TO_FOLDER: CommandFactory.Operation.REMOVE_FROM_FOLDER;
 
             String favorites = dataStore
               .select(RFolderEntity.class)
@@ -363,16 +373,16 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
 
   //REFACTOR переделать это
   private void processEmptyDecisions() {
-    try {
-      toolbar.getMenu().findItem( R.id.menu_info_decision_sign  ).setVisible(false);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    try {
-      toolbar.getMenu().findItem( R.id.menu_info_decision_reject).setVisible(false);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+//    try {
+//      toolbar.getMenu().findItem( R.id.menu_info_decision_sign  ).setVisible(false);
+//    } catch (Exception e) {
+//      e.printStackTrace();
+//    }
+//    try {
+//      toolbar.getMenu().findItem( R.id.menu_info_decision_reject).setVisible(false);
+//    } catch (Exception e) {
+//      e.printStackTrace();
+//    }
     try {
       toolbar.getMenu().findItem( R.id.menu_info_decision_edit  ).setVisible(false);
     } catch (Exception e) {
@@ -403,9 +413,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
     Timber.tag(TAG).w("add %s", command );
 
     if ( Objects.equals(command, "change_person") ) {
-//      Toast.makeText( context.getApplicationContext(), "Операция передачи успешно завершена", Toast.LENGTH_SHORT).show();
-//      Snackbar.make( , "Операция передачи успешно завершена", Snackbar.LENGTH_SHORT).show();
-
       EventBus.getDefault().post( new ShowSnackEvent("Операция передачи успешно завершена") );
 
       toolbar.getMenu().clear();
@@ -415,18 +422,43 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
     }
 
     if ( Objects.equals(command, "next_person") ) {
-      Toast.makeText( context.getApplicationContext(), "Операция подписания успешно завершена", Toast.LENGTH_SHORT).show();
       toolbar.getMenu().clear();
       toolbar.inflateMenu(R.menu.info_menu);
       EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
     }
 
     if ( Objects.equals(command, "prev_person") ) {
-      Toast.makeText( context.getApplicationContext(), "Операция отклонения успешно завершена", Toast.LENGTH_SHORT).show();
       toolbar.getMenu().clear();
       toolbar.inflateMenu(R.menu.info_menu);
       EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
     }
+
+    if ( Objects.equals(command, "to_the_primary_consideration") ) {
+      toolbar.getMenu().clear();
+      toolbar.inflateMenu(R.menu.info_menu);
+      EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
+    }
+
+
+    if ( Objects.equals(command, "approve_decision") ) {
+      toolbar.getMenu().clear();
+      toolbar.inflateMenu(R.menu.info_menu);
+      EventBus.getDefault().post( new ApproveDecisionEvent() );
+    }
+
+    if ( Objects.equals(command, "from_the_report") ) {
+      toolbar.getMenu().clear();
+      toolbar.inflateMenu(R.menu.info_menu);
+      EventBus.getDefault().post( new ShowSnackEvent("Операция исполнения без ответа успешно завершена") );
+      EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
+    }
+
+
+
+
+
+
+
 
     invalidate();
 

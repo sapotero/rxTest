@@ -9,7 +9,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
@@ -33,6 +32,8 @@ import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -57,6 +58,7 @@ import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RPerformer;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
+import sapotero.rxtest.events.view.ApproveDecisionEvent;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.adapters.DecisionSpinnerAdapter;
 import sapotero.rxtest.views.adapters.models.DecisionSpinnerItem;
@@ -69,7 +71,7 @@ import timber.log.Timber;
 
 
 @SuppressLint("ValidFragment")
-public class InfoActivityDecisionPreviewFragment extends Fragment implements OperationManager.Callback {
+public class InfoActivityDecisionPreviewFragment extends Fragment{
 
   @Inject RxSharedPreferences settings;
   @Inject SingleEntityStore<Persistable> dataStore;
@@ -163,8 +165,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Ope
     EsdApplication.getComponent( getContext() ).inject(this);
     binder = ButterKnife.bind(this, view);
 
-    operationManager.registerCallBack(this);
-
+//    operationManager.registerCallBack(this);
+    initEvents();
     loadSettings();
     loadDocument();
 
@@ -251,6 +253,10 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Ope
   @Override public void onDestroyView() {
     super.onDestroyView();
     binder.unbind();
+
+    if (EventBus.getDefault().isRegistered(this)) {
+      EventBus.getDefault().unregister(this);
+    }
   }
 
   @Override
@@ -819,25 +825,19 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Ope
     }
   }
 
-
-  @Override
-  public void onExecuteSuccess(String command) {
-    Timber.tag(TAG).i("OperationManager.onExecuteSuccess %s", command);
-    switch (command ){
-      case "approve_decision":
-        current_decision.setApproved(true);
-        displayDecision();
-        Snackbar.make( getView(), "Резолюция утверждена", Snackbar.LENGTH_LONG ).show();
-        break;
-      case "reject_decision":
-        Snackbar.make( getView(), "Резолюция отклонена", Snackbar.LENGTH_LONG ).show();
-      default:
-        break;
+  private void initEvents() {
+    Timber.tag(TAG).v("initEvents");
+    if (EventBus.getDefault().isRegistered(this)) {
+      EventBus.getDefault().unregister(this);
     }
+    EventBus.getDefault().register(this);
   }
 
-  @Override
-  public void onExecuteError() {
-    Timber.tag(TAG).i("OperationManager.onExecuteError");
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(ApproveDecisionEvent event) throws Exception {
+    Timber.d("SignDataResultEvent");
+    current_decision.setApproved(true);
+    displayDecision();
   }
+
 }

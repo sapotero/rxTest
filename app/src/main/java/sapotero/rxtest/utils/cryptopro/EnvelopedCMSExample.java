@@ -74,7 +74,7 @@ public class EnvelopedCMSExample extends IEncryptDecryptData {
     PrivateKey signerPrivateKey = cmsSign.getPrivateKey();
     X509Certificate signerCertificate = cmsSign.getCertificate();
 
-    callback.log("Compute attached signature for message '" + MESSAGE + "' :");
+    callback.log("Compute attached signature for uis '" + MESSAGE + "' :");
 
     // Формирование совмещенной CMS подписи.
     byte[] signCms = cmsSign.create(callback,

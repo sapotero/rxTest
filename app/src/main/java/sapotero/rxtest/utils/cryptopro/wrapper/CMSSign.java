@@ -291,9 +291,9 @@ public class CMSSign extends ISignData {
 
         cms.signerInfos.elements[i].signedAttrs.elements[k].values.elements[0] = time.getElement();
 
-        // message-digest
+        // uis-digest
 
-        callback.log("Add message-digest.");
+        callback.log("Add uis-digest.");
 
         k += 1;
         cms.signerInfos.elements[i].signedAttrs.elements[k] = new Attribute(new OID(STR_CMS_OID_DIGEST_ATTR).value, new Attribute_values(1));
@@ -491,7 +491,7 @@ public class CMSSign extends ISignData {
           "equal to eContentType OID.");
       } // if
 
-      // Проверка аттрибута message-digest.
+      // Проверка аттрибута uis-digest.
       final Asn1ObjectIdentifier messageDigestOid =
         new Asn1ObjectIdentifier((new OID(STR_CMS_OID_DIGEST_ATTR)).value);
 
@@ -506,7 +506,7 @@ public class CMSSign extends ISignData {
       } // for
 
       if (messageDigestAttr == null) {
-        throw new Exception("message-digest attribute is not presented.");
+        throw new Exception("uis-digest attribute is not presented.");
       } // if
 
       final Asn1Type open = messageDigestAttr.values.elements[0];
@@ -518,7 +518,7 @@ public class CMSSign extends ISignData {
         algorithmSelector.getDigestAlgorithmName());
 
       if (!Array.toHexString(dm).equals(Array.toHexString(md))) {
-        throw new Exception("Verification of message-digest attribute failed.");
+        throw new Exception("Verification of uis-digest attribute failed.");
       } // if
 
       // Проверка аттрибута signing-time.

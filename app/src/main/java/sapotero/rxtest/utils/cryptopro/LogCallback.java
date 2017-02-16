@@ -92,7 +92,7 @@ public class LogCallback {
 
   /* Запись сообщения в поле.
    *
-   * @param message Сообщение.
+   * @param uis Сообщение.
    * @param base64 True, если нужно конвертировать
    * в base64.
    */

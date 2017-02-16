@@ -82,6 +82,9 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
           case "sign":
             operation = CommandFactory.Operation.SIGNING_CHANGE_PERSON;
             break;
+          case "to_the_primary_consideration":
+            operation = CommandFactory.Operation.TO_THE_PRIMARY_CONSIDERATION;
+            break;
           default:
             break;
         }

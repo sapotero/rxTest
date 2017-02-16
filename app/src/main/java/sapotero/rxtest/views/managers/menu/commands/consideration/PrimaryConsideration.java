@@ -12,6 +12,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
@@ -39,10 +41,6 @@ public class PrimaryConsideration extends AbstractCommand {
     this.document = document;
   }
 
-  public String getInfo(){
-    return null;
-  }
-
   public void registerCallBack(Callback callback){
     this.callback = callback;
   }
@@ -62,6 +60,45 @@ public class PrimaryConsideration extends AbstractCommand {
   @Override
   public void execute() {
     loadSettings();
+
+    if ( queueManager.getConnected() ){
+      executeRemote();
+    } else {
+      executeLocal();
+    }
+    update();
+
+  }
+
+  private void update() {
+    try {
+      dataStore
+        .update(RDocumentEntity.class)
+        .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue() )
+        .set( RDocumentEntity.PROCESSED, true)
+        .where(RDocumentEntity.UID.eq(UID.get()))
+        .get()
+        .call();
+    } catch (Exception e) {
+      Timber.tag(TAG).e( e );
+    }
+  }
+
+  @Override
+  public String getType() {
+    return "to_the_primary_consideration";
+  }
+
+  @Override
+  public void executeLocal() {
+    queueManager.add(this);
+    if ( callback != null ){
+      callback.onCommandExecuteSuccess( getType() );
+    }
+  }
+
+  @Override
+  public void executeRemote() {
 
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
@@ -98,35 +135,28 @@ public class PrimaryConsideration extends AbstractCommand {
           if (callback != null){
             callback.onCommandExecuteSuccess(getType());
           }
+
+          update();
+
+
         },
         error -> {
           if (callback != null){
-            callback.onCommandExecuteError();
+            if ( queueManager.getConnected() ){
+              callback.onCommandExecuteSuccess(getType());
+            } else {
+              callback.onCommandExecuteError();
+            }
           }
         }
       );
-
-  }
-
-  @Override
-  public String getType() {
-    return "to_the_primary_consideration";
-  }
-
-  @Override
-  public void executeLocal() {
-
-  }
-
-  @Override
-  public void executeRemote() {
-
   }
 
   @Override
   public void withParams(CommandParams params) {
     this.params = params;
   }
+
   @Override
   public CommandParams getParams() {
     return params;

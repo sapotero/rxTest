@@ -1,4 +1,4 @@
-package sapotero.rxtest.events.rx;
+package sapotero.rxtest.events.view;
 
 /**
  * Created by sapotero on 30.01.17.

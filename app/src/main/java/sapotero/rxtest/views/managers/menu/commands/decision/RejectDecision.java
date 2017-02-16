@@ -75,6 +75,57 @@ public class RejectDecision extends AbstractCommand {
   public void execute() {
     loadSettings();
 
+    if ( queueManager.getConnected() ){
+      executeRemote();
+    } else {
+      executeLocal();
+    }
+    update();
+
+  }
+
+  public void update() {
+    try {
+      RDocumentEntity document = (RDocumentEntity) decision.getDocument();
+      String decision_uid = decision.getUid();
+      String document_uid = document.getUid();
+
+      dataStore
+        .update(RDocumentEntity.class)
+        .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue())
+        .where(RDocumentEntity.UID.eq( document_uid ))
+        .get()
+        .call();
+
+      dataStore
+        .update(RDecisionEntity.class)
+        .set( RDecisionEntity.APPROVED, false)
+        .where(RDecisionEntity.UID.eq( decision_uid ))
+        .get()
+        .call();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+
+
+  @Override
+  public String getType() {
+    return "reject_decision";
+  }
+
+  @Override
+  public void executeLocal() {
+    queueManager.add(this);
+    if ( callback != null ){
+      callback.onCommandExecuteSuccess( getType() );
+    }
+  }
+
+  @Override
+  public void executeRemote() {
+
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
     Retrofit retrofit = new Retrofit.Builder()
@@ -122,11 +173,7 @@ public class RejectDecision extends AbstractCommand {
             callback.onCommandExecuteSuccess( getType() );
           }
 
-          try {
-            updateDocument();
-          } catch (Exception e) {
-            Timber.tag(TAG).v("error: %s", e);
-          }
+          update();
         },
         error -> {
           Timber.tag(TAG).i("error: %s", error);
@@ -135,43 +182,6 @@ public class RejectDecision extends AbstractCommand {
           }
         }
       );
-  }
-
-  public void updateDocument() throws Exception {
-    RDocumentEntity document = (RDocumentEntity) decision.getDocument();
-    String decision_uid = decision.getUid();
-    String document_uid = document.getUid();
-
-    dataStore
-      .update(RDocumentEntity.class)
-      .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue())
-      .where(RDocumentEntity.UID.eq( document_uid ))
-      .get()
-      .call();
-
-    dataStore
-      .update(RDecisionEntity.class)
-      .set( RDecisionEntity.APPROVED, false)
-      .where(RDecisionEntity.UID.eq( decision_uid ))
-      .get()
-      .call();
-  }
-
-
-
-  @Override
-  public String getType() {
-    return "reject_decision";
-  }
-
-  @Override
-  public void executeLocal() {
-
-  }
-
-  @Override
-  public void executeRemote() {
-
   }
 
   @Override

@@ -5,6 +5,7 @@ import android.content.Context;
 import com.f2prateek.rx.preferences.Preference;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
@@ -12,6 +13,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
@@ -32,6 +34,7 @@ public class RemoveFromFolder extends AbstractCommand {
   private Preference<String> HOST;
   private Preference<String> STATUS_CODE;
   private String folder_id;
+  private String document_id;
 
   public RemoveFromFolder(Context context, DocumentReceiver document){
     super(context);
@@ -56,8 +59,14 @@ public class RemoveFromFolder extends AbstractCommand {
     HOST  = settings.getString("settings_username_host");
     STATUS_CODE = settings.getString("activity_main_menu.start");
   }
+
   public RemoveFromFolder withFolder(String uid){
     folder_id = uid;
+    return this;
+  }
+
+  public RemoveFromFolder withDocumentId(String uid) {
+    this.document_id = uid;
     return this;
   }
 
@@ -65,11 +74,14 @@ public class RemoveFromFolder extends AbstractCommand {
   public void execute() {
     loadSettings();
 
+    Timber.tag(TAG).i("execute for %s - %s: %s",getType(),document_id, queueManager.getConnected());
+
     if ( queueManager.getConnected() ){
       executeRemote();
     } else {
       executeLocal();
     }
+    updateFavorites();
   }
 
   @Override
@@ -87,8 +99,6 @@ public class RemoveFromFolder extends AbstractCommand {
 
   @Override
   public void executeRemote() {
-    Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
-
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
@@ -106,7 +116,7 @@ public class RemoveFromFolder extends AbstractCommand {
       LOGIN.get(),
       TOKEN.get(),
       uids,
-      UID.get(),
+      document_id == null ? UID.get() : document_id,
       STATUS_CODE.get(),
       folder_id,
       null
@@ -121,8 +131,11 @@ public class RemoveFromFolder extends AbstractCommand {
           Timber.tag(TAG).i("type: %s", data.getType());
 
           queueManager.remove(this);
-          if (callback != null){
-            callback.onCommandExecuteSuccess(getType());
+
+          updateFavorites();
+
+          if (callback != null && Objects.equals(data.getType(), "warning")){
+            callback.onCommandExecuteSuccess( getType() );
           }
         },
         error -> {
@@ -131,7 +144,23 @@ public class RemoveFromFolder extends AbstractCommand {
           }
         }
       );
+  }
 
+  private void updateFavorites() {
+    try {
+      dataStore
+        .update(RDocumentEntity.class)
+        .set( RDocumentEntity.FAVORITES, false)
+        .where(RDocumentEntity.UID.eq(document_id))
+        .get()
+        .call();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    if ( callback != null ){
+      callback.onCommandExecuteSuccess( getType() );
+    }
   }
 
   @Override

@@ -67,6 +67,7 @@ public class CheckForControl extends AbstractCommand {
     } else {
       executeLocal();
     }
+    updateControl();
 
   }
 
@@ -77,47 +78,23 @@ public class CheckForControl extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    try {
-      queueManager.add(this);
-
-      updateControl();
-
-    } catch (Exception e) {
-      Timber.tag(TAG).i("executeLocal for %s: %s", getType(), e);
+    queueManager.add(this);
+    if ( callback != null ){
+      callback.onCommandExecuteSuccess( getType() );
     }
   }
 
   private void updateControl() {
-    dataStore
-      .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq( document_id ))
-      .get()
-      .toObservable()
-      .flatMap( doc -> Observable.just( doc.isControl() ) )
-      .subscribe( value -> {
-        Timber.tag(TAG).i("executeLocal for %s: CONTROL: %s",document_id, value);
-        try {
-
-          if (value == null){
-            value = false;
-          }
-
-          dataStore
-            .update(RDocumentEntity.class)
-            .set( RDocumentEntity.CONTROL, !value)
-            .where(RDocumentEntity.UID.eq( document_id ))
-            .get()
-            .call();
-
-          if ( callback != null ){
-            callback.onCommandExecuteSuccess( getType() );
-          }
-
-        } catch (Exception e) {
-          Timber.tag(TAG).i("executeLocal for %s [%s]: %s", document_id, getType(), e);
-          e.printStackTrace();
-        }
-      });
+    try {
+      dataStore
+        .update(RDocumentEntity.class)
+        .set( RDocumentEntity.CONTROL, true)
+        .where(RDocumentEntity.UID.eq( document_id ))
+        .get()
+        .call();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   @Override

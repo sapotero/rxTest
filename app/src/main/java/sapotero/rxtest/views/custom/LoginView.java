@@ -184,7 +184,7 @@ public class LoginView extends RelativeLayout implements View.OnClickListener {
 
   /**
    * Set the active step as not completed
-   * @param errorMessage Error message that will be displayed (null for no message)
+   * @param errorMessage Error uis that will be displayed (null for no uis)
    */
   public void setActiveStepAsUncompleted(String errorMessage) {
     setStepAsUncompleted(activeStep, errorMessage);
@@ -231,7 +231,7 @@ public class LoginView extends RelativeLayout implements View.OnClickListener {
   /**
    * Set the step as not completed
    * @param stepNumber the step number (counting from 0)
-   * @param errorMessage Error message that will be displayed (null for no message)
+   * @param errorMessage Error uis that will be displayed (null for no uis)
    */
   public void setStepAsUncompleted(int stepNumber, String errorMessage) {
     completedSteps[stepNumber] = false;
@@ -1172,8 +1172,8 @@ public class LoginView extends RelativeLayout implements View.OnClickListener {
     }
 
     /**
-     * Set the error message color
-     * @param errorMessageTextColor error message color
+     * Set the error uis color
+     * @param errorMessageTextColor error uis color
      * @return the builder instance
      */
     public Builder errorMessageTextColor(int errorMessageTextColor) {

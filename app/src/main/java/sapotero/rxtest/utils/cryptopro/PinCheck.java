@@ -7,7 +7,7 @@ import timber.log.Timber;
 
 public class PinCheck extends ISignData {
 
-  private String MESSAGE = "Test message!";
+  private String MESSAGE = "Test uis!";
 
 
   public PinCheck(ContainerAdapter adapter) {
@@ -49,7 +49,7 @@ public class PinCheck extends ISignData {
 
       // Формируем подпись.
 
-      Timber.e("Compute signature for message '%s'", MESSAGE);
+      Timber.e("Compute signature for uis '%s'", MESSAGE);
       byte[] sign = sn.sign();
 
       Timber.e("PinCheck sign %s", sign);

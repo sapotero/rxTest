@@ -1,15 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item
-        android:id="@+id/menu_info_decision_sign"
-        app:showAsAction="always|withText"
-        android:icon="@drawable/sign"
-        android:title="@string/menu_info_next_person"/>
+
     <item
         android:id="@+id/menu_info_decision_create"
         app:showAsAction="always|withText"
-        android:icon="@drawable/sign"
+        android:icon="@drawable/add_decision"
+        android:enabled="false"
         android:title="@string/info_create_decision"/>
     <item
         android:id="@+id/menu_info_decision_edit"
@@ -26,15 +23,10 @@
         android:id="@+id/menu_info_to_the_primary_consideration"
         app:showAsAction="always|withText"
         android:icon="@drawable/change"
-        android:title="@string/menu_info_change_person"/>
+        android:title="@string/menu_info_to_the_primary_consideration"/>
     <item
         android:id="@+id/menu_info_shared_to_favorites"
         app:showAsAction="always|withText"
         android:icon="@drawable/to_favorites"
         android:title="@string/to_favorites"/>
-    <item
-        android:id="@+id/menu_info_decision_reject"
-        app:showAsAction="always|withText"
-        android:icon="@drawable/dismiss"
-        android:title="@string/menu_info_prev_person"/>
 </menu>

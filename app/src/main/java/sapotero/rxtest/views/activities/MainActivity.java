@@ -642,7 +642,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
 //  @Subscribe(threadMode = ThreadMode.MAIN)
 //  public void onMessageEvent(InsertRxDocumentsEvent event) {
-////    Toast.makeText(getApplicationContext(), event.message, Toast.LENGTH_SHORT).show();
+////    Toast.makeText(getApplicationContext(), event.uis, Toast.LENGTH_SHORT).show();
 //  }
 
 //  @Subscribe(threadMode = ThreadMode.MAIN)

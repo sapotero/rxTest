@@ -23,7 +23,7 @@ import timber.log.Timber;
  */
 public class SignIn extends ISignData {
 
-  private String MESSAGE = "Test message!";
+  private String MESSAGE = "Test uis!";
 
   /**
    * Конструктор.
@@ -91,7 +91,7 @@ public class SignIn extends ISignData {
 
     // Формируем подпись.
 
-    Timber.e("Compute signature for message '%s'", MESSAGE);
+    Timber.e("Compute signature for uis '%s'", MESSAGE);
 
     byte[] sign = sn.sign();
 

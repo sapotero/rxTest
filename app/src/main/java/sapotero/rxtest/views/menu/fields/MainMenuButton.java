@@ -111,6 +111,14 @@ public enum MainMenuButton {
       projectArray.add( Fields.Status.SIGNING.getValue());
       return projectArray;
     }
+    public static ArrayList<String> forAllDocuments(){
+      ArrayList<String> projectArray = new ArrayList<String>();
+      projectArray.add( Fields.Status.APPROVAL.getValue() );
+      projectArray.add( Fields.Status.SIGNING.getValue());
+      projectArray.add( Fields.Status.SENT_TO_THE_REPORT.getValue());
+      projectArray.add( Fields.Status.PRIMARY_CONSIDERATION.getValue());;
+      return projectArray;
+    }
   }
 
 }

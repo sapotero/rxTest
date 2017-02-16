@@ -8,11 +8,13 @@ import sapotero.rxtest.views.managers.menu.commands.approval.NextPerson;
 import sapotero.rxtest.views.managers.menu.commands.consideration.PrimaryConsideration;
 import sapotero.rxtest.views.managers.menu.commands.decision.ApproveDecision;
 import sapotero.rxtest.views.managers.menu.commands.decision.RejectDecision;
+import sapotero.rxtest.views.managers.menu.commands.performance.ApprovalPerformance;
 import sapotero.rxtest.views.managers.menu.commands.performance.DelegatePerformance;
 import sapotero.rxtest.views.managers.menu.commands.report.FromTheReport;
 import sapotero.rxtest.views.managers.menu.commands.report.ReturnToPrimaryConsideration;
 import sapotero.rxtest.views.managers.menu.commands.shared.AddToFolder;
 import sapotero.rxtest.views.managers.menu.commands.shared.CheckForControl;
+import sapotero.rxtest.views.managers.menu.commands.shared.RemoveFromFolder;
 import sapotero.rxtest.views.managers.menu.commands.signing.PrevPerson;
 import sapotero.rxtest.views.managers.menu.interfaces.Command;
 import sapotero.rxtest.views.managers.menu.receivers.DocumentReceiver;
@@ -75,7 +77,7 @@ public class CommandFactory implements AbstractCommand.Callback{
     TO_THE_APPROVAL_PERFORMANCE {
       @Override
       Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
-        PrimaryConsideration command = new PrimaryConsideration(context, document);
+        ApprovalPerformance command = new ApprovalPerformance(context, document);
         command.withParams(params);
         command
           .withPerson( params.getPerson() )
@@ -87,7 +89,13 @@ public class CommandFactory implements AbstractCommand.Callback{
     TO_THE_PRIMARY_CONSIDERATION {
       @Override
       Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
-        return null;
+        PrimaryConsideration command = new PrimaryConsideration(context, document);
+        command.withParams(params);
+        command
+          .withPerson( params.getPerson() )
+          .registerCallBack(instance);
+        command.withParams(params);
+        return command;
       }
     },
     APPROVAL_CHANGE_PERSON {
@@ -177,7 +185,13 @@ public class CommandFactory implements AbstractCommand.Callback{
     REMOVE_FROM_FOLDER {
       @Override
       Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
-        return null;
+        RemoveFromFolder command = new RemoveFromFolder(context, document);
+        command.withParams(params);
+        command
+          .withFolder( params.getFolder() )
+          .withDocumentId( params.getDocument() )
+          .registerCallBack(instance);
+        return command;
       }
     },
     CHECK_FOR_CONTROL {
