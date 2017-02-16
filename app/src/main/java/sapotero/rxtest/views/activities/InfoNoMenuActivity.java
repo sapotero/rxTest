@@ -90,6 +90,7 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
   private Menu menu;
   private String UID;
   private RDocumentEntity doc;
+  private boolean showInfoCard = false;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -108,6 +109,12 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
     Intent intent = getIntent();
     if ( intent != null ){
       UID = getIntent().getExtras().getString("UID");
+
+      try {
+        showInfoCard = getIntent().getExtras().getBoolean("CARD");
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
 
       doc = dataStore
         .select(RDocumentEntity.class)
@@ -173,15 +180,26 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
           Timber.e( "%s - %s ", folder.getType(), folder.getTitle() );
         });
 
-      if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL ){
-        TabSigningPagerAdapter adapter = new TabSigningPagerAdapter( getSupportFragmentManager() );
-        adapter.withUid(UID);
-        viewPager.setAdapter(adapter);
-      } else {
+      if ( showInfoCard ){
+
+        // для перехода по ссылкам из блока Согласование письмами
         TabPagerAdapter adapter = new TabPagerAdapter ( getSupportFragmentManager() );
         adapter.withUid(UID);
         viewPager.setAdapter(adapter);
+
+      } else{
+        if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL ){
+          TabSigningPagerAdapter adapter = new TabSigningPagerAdapter( getSupportFragmentManager() );
+          adapter.withUid(UID);
+          viewPager.setAdapter(adapter);
+        } else {
+          TabPagerAdapter adapter = new TabPagerAdapter ( getSupportFragmentManager() );
+          adapter.withUid(UID);
+          viewPager.setAdapter(adapter);
+        }
       }
+
+
       viewPager.setOffscreenPageLimit(10);
 
       tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -252,12 +270,6 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
   public void onMessageEvent(MassInsertDoneEvent event) {
     Toast.makeText( getApplicationContext(), event.message, Toast.LENGTH_SHORT).show();
   }
-
-//  @Subscribe(threadMode = ThreadMode.MAIN)
-//  public void onMessageEvent(SetActiveDecisonEvent event) {
-//    Decision decision = decision_adapter.getMainMenuItem(event.decision);
-////    preview.show( decision );
-//  }
 
   @Override
   public void onFragmentInteraction(Uri uri) {

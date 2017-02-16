@@ -219,10 +219,16 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Ope
     next_person_button.setVisibility(approved ? View.GONE : View.VISIBLE);
     prev_person_button.setVisibility(approved ? View.GONE : View.VISIBLE);
 
+    showDecisionCardTollbarMenuItems(true);
+
     // FIX для ссылок
-    if (toolbarManager == null) {
+    if (current_decision == null) {
       next_person_button.setVisibility( !approved ? View.INVISIBLE : View.GONE);
       prev_person_button.setVisibility( !approved ? View.INVISIBLE : View.GONE);
+    }
+
+    if (approved){
+      decision_toolbar.getMenu().findItem(R.id.decision_preview_edit).setVisible(false);
     }
 
     approved_text.setVisibility(!approved ? View.GONE : View.VISIBLE);
@@ -230,6 +236,15 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Ope
     if ( !decision_spinner_adapter.hasActiveDecision() ){
       Timber.tag(TAG).e("NO ACTIVE DECISION");
       EventBus.getDefault().post( new HasNoActiveDecisionConstructor() );
+    }
+  }
+
+  private void showDecisionCardTollbarMenuItems(boolean visible) {
+    try {
+      decision_toolbar.getMenu().findItem(R.id.decision_preview_magnifer).setVisible(visible);
+      decision_toolbar.getMenu().findItem(R.id.decision_preview_edit).setVisible(visible);
+    } catch (Exception e) {
+      e.printStackTrace();
     }
   }
 
@@ -431,6 +446,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Ope
           preview.showEmpty();
           EventBus.getDefault().post( new HasNoActiveDecisionConstructor() );
           decision_spinner_adapter.add( new DecisionSpinnerItem(null, "Нет резолюций", 0 ) );
+
+          showDecisionCardTollbarMenuItems(false);
         }
 
       });

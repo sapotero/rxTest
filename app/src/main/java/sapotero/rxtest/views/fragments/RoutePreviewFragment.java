@@ -16,7 +16,6 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
@@ -41,6 +40,7 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RRouteEntity;
 import sapotero.rxtest.db.requery.models.RStep;
 import sapotero.rxtest.db.requery.models.RStepEntity;
+import sapotero.rxtest.retrofit.models.document.AnotherApproval;
 import sapotero.rxtest.retrofit.models.document.Card;
 import sapotero.rxtest.retrofit.models.document.Person;
 import sapotero.rxtest.views.activities.InfoNoMenuActivity;
@@ -156,7 +156,7 @@ public class RoutePreviewFragment extends Fragment {
                     item.withNameCallback( card.getUid() );
                     item.withName( card.getFullTextApproval() );
 
-                    item.withAction( String.format("%s - %s", card.getUid(), card.getFullTextApproval()) );
+                    item.withAction( card.getOriginalApproval() );
 
                     items.add(item);
                   }
@@ -197,6 +197,24 @@ public class RoutePreviewFragment extends Fragment {
               }
               if ( r_step.getAnother_approvals() != null ){
                 Timber.tag("another_approvals").e(" %s", r_step.getAnother_approvals() );
+
+                AnotherApproval[] anotherApprovals = new Gson().fromJson( r_step.getAnother_approvals(), AnotherApproval[].class );
+
+                for (AnotherApproval user: anotherApprovals){
+                  valid = true;
+
+                  if ( user.getOfficialName() != null || user.getComment()!= null ) {
+                    ItemBuilder item = new ItemBuilder(getContext());
+
+                    item.withName( user.getOfficialName());
+
+                    if (user.getComment() != null ) {
+                      item.withAction( user.getComment() );
+                    }
+                    items.add( item );
+                  }
+                }
+
               }
 
               if (valid){
@@ -324,34 +342,9 @@ public class RoutePreviewFragment extends Fragment {
       TextView text = new TextView(context);
       text.setTextColor( context.getColor(R.color.md_grey_600) );
       text.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
-
       text.setText(name);
-//      text.setForeground( ContextCompat.getDrawable( getContext(), R.drawable.card_foreground ) );
-
-
-      if (uid != null){
-
-        Integer count = dataStore
-          .count(RDocumentEntity.class)
-          .where(RDocumentEntity.UID.eq(uid)).get().value();
-
-        if ( count > 0){
-          text.setTextColor( ContextCompat.getColor(getContext(), R.color.md_yellow_A400) );
-          text.setOnClickListener(v -> {
-            Toast.makeText( getContext(), "Go to Preview: "+uid, Toast.LENGTH_SHORT ).show();
-            Intent intent = new Intent(context, InfoNoMenuActivity.class);
-            intent.putExtra("UID", uid);
-            startActivity(intent);
-          });
-        }
-//        else {
-//          Toast.makeText( getContext(), "NO DOCUMENT WITH UID "+uid, Toast.LENGTH_SHORT ).show();
-//        }
-      }
-
 
       nameView.addView( text );
-
 
       return this;
     }
@@ -377,7 +370,7 @@ public class RoutePreviewFragment extends Fragment {
     public LinearLayout build(){
       LinearLayout layout = new LinearLayout(context);
       layout.setOrientation(LinearLayout.VERTICAL);
-//      layout.setBackground( ContextCompat.getDrawable( getContext() ,R.drawable.panel_builder_item) );
+
       layout.setPadding(16,20,0,16);
 
       if (name != null){
@@ -403,6 +396,21 @@ public class RoutePreviewFragment extends Fragment {
       final_layout.addView(icon);
       final_layout.addView(layout);
 
+      if ( uid != null ){
+
+        TypedValue typedValue = new TypedValue();
+        context.getTheme().resolveAttribute(R.attr.selectableItemBackground, typedValue, true);
+
+        final_layout.setClickable(true);
+        final_layout.setBackgroundResource(typedValue.resourceId);
+
+        final_layout.setOnClickListener(v -> {
+          Intent intent = new Intent(context, InfoNoMenuActivity.class);
+          intent.putExtra( "UID", uid );
+          intent.putExtra( "CARD", true );
+          startActivity(intent);
+        });
+      }
 
       return final_layout;
     }

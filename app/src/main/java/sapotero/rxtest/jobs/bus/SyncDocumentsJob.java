@@ -34,6 +34,7 @@ import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Block;
+import sapotero.rxtest.retrofit.models.document.Card;
 import sapotero.rxtest.retrofit.models.document.ControlLabel;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
@@ -140,6 +141,18 @@ public class SyncDocumentsJob  extends BaseJob {
               jobManager.addJobInBackground( new SyncLinkJob( link ) );
             }
 
+          }
+
+          if ( doc.getRoute() != null && doc.getRoute().getSteps().size() > 0 ){
+            for (Step step: doc.getRoute().getSteps() ) {
+              if ( step.getCards() != null && step.getCards().size() > 0){
+                for (Card card: step.getCards() ) {
+                  if (card.getUid() != null) {
+                    jobManager.addJobInBackground( new SyncLinkJob( card.getUid() ) );
+                  }
+                }
+              }
+            }
           }
         },
         error -> {

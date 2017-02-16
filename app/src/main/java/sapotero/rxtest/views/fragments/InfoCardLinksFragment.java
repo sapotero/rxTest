@@ -19,6 +19,7 @@ import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import java.util.ArrayList;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 
@@ -130,34 +131,30 @@ public class InfoCardLinksFragment extends Fragment {
 
       if ( doc.getLinks() != null ){
 
-        Set<RLinks> links = doc.getLinks();
-        ArrayList<String> _links = new ArrayList<String>();
-
-        for (RLinks _l: links) {
-          RLinksEntity _tmp = (RLinksEntity) _l;
-
-          RDocumentEntity _doc = dataStore
-            .select(RDocumentEntity.class)
-            .where(RDocumentEntity.UID.eq( _tmp.getUid() ))
-            .get().first();
-
-          adapter.add( new Link( _doc.getUid(), _doc.getTitle() ) );
-        }
-
         if (doc.getLinks().size() == 0){
-//          RLinksEntity empty_link = new RLinksEntity();
-//          empty_link.setUid("Нет связанных документов");
-
           adapter.add( new Link( "0", "Нет связанных документов" ) );
-//          _links.add( empty_link );
           goButton.setEnabled(false);
           disable.setVisibility(View.VISIBLE);
+        } else {
+
+          try {
+            Set<RLinks> links = doc.getLinks();
+            ArrayList<String> _links = new ArrayList<String>();
+
+            for (RLinks _l: links) {
+              RLinksEntity _tmp = (RLinksEntity) _l;
+
+              RDocumentEntity _doc = dataStore
+                .select(RDocumentEntity.class)
+                .where(RDocumentEntity.UID.eq( _tmp.getUid() ))
+                .get().first();
+
+              adapter.add( new Link( _doc.getUid(), _doc.getTitle() ) );
+            }
+          } catch (NoSuchElementException e) {
+            e.printStackTrace();
+          }
         }
-
-//        adapter.clear();
-//        adapter.addAll(_links);
-
-//        ArrayAdapter adapter = new ArrayAdapter(getContext(), android.R.layout.simple_spinner_item, _links);
 
         wrapper.setAdapter( adapter );
 
