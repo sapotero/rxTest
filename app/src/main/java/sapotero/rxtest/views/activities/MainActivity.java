@@ -206,7 +206,16 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     isConnected();
 
+    setFirstRunFalse();
+
   }
+
+  private void setFirstRunFalse() {
+    if ( settings.getString("is_first_run").get() == null ){
+      settings.getString("is_first_run").set("false");
+    }
+  }
+
   public void isConnected(){
     ReactiveNetwork.observeInternetConnectivity()
       .subscribeOn(Schedulers.io())

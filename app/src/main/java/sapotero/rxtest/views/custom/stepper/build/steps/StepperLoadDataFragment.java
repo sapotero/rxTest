@@ -121,8 +121,15 @@ public class StepperLoadDataFragment extends Fragment implements Step {
       Toast.makeText( getContext(), "Режим работы: оффлайн", Toast.LENGTH_SHORT ).show();
     }
 
-    //TEST убрать после тестирования
-    error = null;
+    if ( settings.getString("is_first_run").get() != null ){
+      error = null;
+    } else {
+      error = new VerificationError("Дождитесь окончания загрузки");
+
+      if ( mRingProgressBar.getProgress() >= 99 ){
+        error = null;
+      }
+    }
 
     return error;
   }

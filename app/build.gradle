@@ -39,7 +39,7 @@ android {
         develop {
             applicationId "sapotero.rxtest"
             versionCode 15
-            versionName "1.0.9"
+            versionName "1.10.0"
         }
     }
 
@@ -51,7 +51,7 @@ android {
             def buildType = variant.variantData.variantConfiguration.buildType.name
             def version = variant.versionName
             def date = new Date();
-            def formattedDate = date.format('dd.MM.YYYY:HH-mm')
+            def formattedDate = date.format('dd.MM.YYYY_HH-mm')
 
 //            def newApkName = project + SEP + flavor + SEP + buildType + SEP + version + SEP + formattedDate + ".apk"
             def newApkName = project + SEP + buildType + SEP + version + SEP + formattedDate + ".apk"

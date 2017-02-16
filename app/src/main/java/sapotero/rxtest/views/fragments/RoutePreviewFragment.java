@@ -2,6 +2,7 @@ package sapotero.rxtest.views.fragments;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -251,8 +252,9 @@ public class RoutePreviewFragment extends Fragment {
 //      titleView.setBackground( ContextCompat.getDrawable( getContext() ,R.drawable.panel_builder_title) );
 
       TextView text = new TextView(context);
-      text.setTextColor( ContextCompat.getColor(context, R.color.md_grey_300) );
+      text.setTextColor( ContextCompat.getColor(context, R.color.md_grey_900) );
       text.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
+      text.setPaintFlags( Paint.FAKE_BOLD_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG );
       text.setText(title);
       text.setPadding(16,0,0,0);
 
@@ -288,6 +290,11 @@ public class RoutePreviewFragment extends Fragment {
         layout.addView(itemsLayout);
       }
 
+      View delimiter = new View(context);
+      delimiter.setMinimumHeight(1);
+      delimiter.setBackground( ContextCompat.getDrawable(context, R.color.md_grey_300) );
+      layout.addView(delimiter);
+
       return layout;
     }
 
@@ -315,7 +322,7 @@ public class RoutePreviewFragment extends Fragment {
       nameView = new FrameLayout(context);
 
       TextView text = new TextView(context);
-      text.setTextColor( context.getColor(R.color.md_grey_700) );
+      text.setTextColor( context.getColor(R.color.md_grey_600) );
       text.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
 
       text.setText(name);
@@ -345,6 +352,7 @@ public class RoutePreviewFragment extends Fragment {
 
       nameView.addView( text );
 
+
       return this;
     }
 
@@ -357,7 +365,7 @@ public class RoutePreviewFragment extends Fragment {
 
       TextView text = new TextView(context);
       text.setTextColor( context.getColor(R.color.md_grey_400) );
-      text.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
+      text.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
       text.setText(action);
 
       actionView.addView( text );
@@ -370,7 +378,7 @@ public class RoutePreviewFragment extends Fragment {
       LinearLayout layout = new LinearLayout(context);
       layout.setOrientation(LinearLayout.VERTICAL);
 //      layout.setBackground( ContextCompat.getDrawable( getContext() ,R.drawable.panel_builder_item) );
-      layout.setPadding(16,20,0,20);
+      layout.setPadding(16,20,0,16);
 
       if (name != null){
         layout.addView( nameView );
@@ -385,12 +393,18 @@ public class RoutePreviewFragment extends Fragment {
         layout.addView( view );
       }
 
-//      View delimiter = new View(context);
-//      delimiter.setMinimumHeight(1);
-//      delimiter.setBackground( ContextCompat.getDrawable(context, R.color.md_grey_300) );
-//      layout.addView(delimiter);
+      LinearLayout final_layout = new LinearLayout(context);
+      layout.setOrientation(LinearLayout.VERTICAL);
 
-      return layout;
+      TextView icon = new TextView(context);
+      icon.setCompoundDrawablesWithIntrinsicBounds(R.drawable.user, 0, 0, 0);
+      icon.setPadding(0, action != null ? 32 : 20,0,0);
+
+      final_layout.addView(icon);
+      final_layout.addView(layout);
+
+
+      return final_layout;
     }
 
     public void withNameCallback(String uid) {

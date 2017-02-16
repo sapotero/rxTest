@@ -125,7 +125,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Ope
   // Approve current decision
   @OnClick(R.id.activity_info_decision_preview_next_person)
   public void decision_preview_next(){
-
+    Timber.tag(TAG).v("decision_preview_next");
     CommandFactory.Operation operation;
     operation =CommandFactory.Operation.APPROVE_DECISION;
 
@@ -139,7 +139,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Ope
   // Reject current decision
   @OnClick(R.id.activity_info_decision_preview_prev_person)
   public void decision_preview_prev(){
-
+    Timber.tag(TAG).v("decision_preview_prev");
     CommandFactory.Operation operation;
     operation =CommandFactory.Operation.REJECT_DECISION;
 
@@ -215,8 +215,16 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Ope
   }
 
   private void updateVisibility(Boolean approved) {
+
     next_person_button.setVisibility(approved ? View.GONE : View.VISIBLE);
     prev_person_button.setVisibility(approved ? View.GONE : View.VISIBLE);
+
+    // FIX для ссылок
+    if (toolbarManager == null) {
+      next_person_button.setVisibility( !approved ? View.INVISIBLE : View.GONE);
+      prev_person_button.setVisibility( !approved ? View.INVISIBLE : View.GONE);
+    }
+
     approved_text.setVisibility(!approved ? View.GONE : View.VISIBLE);
 
     if ( !decision_spinner_adapter.hasActiveDecision() ){
@@ -269,7 +277,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Ope
 
   @OnClick(R.id.activity_info_button_magnifer)
   public void magnifer(){
-
+    Timber.tag(TAG).v("magnifer");
     DecisionSpinnerItem decision;
     DecisionMagniferFragment magnifer = new DecisionMagniferFragment();
 
@@ -286,7 +294,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Ope
   @OnClick(R.id.activity_info_button_edit)
   public void edit(){
 
-
+    Timber.tag(TAG).v("edit");
     Gson gson = new Gson();
     RDecisionEntity data = decision_spinner_adapter.getItem( decision_spinner.getSelectedItemPosition() ).getDecision();
 //    String json = gson.toJson(data, Decision.class);
@@ -417,7 +425,9 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Ope
         } else {
           Timber.e("no decisions");
           magnifer_button.setVisibility(View.GONE);
-          toolbarManager.setEditDecisionMenuItemVisible(false);
+          if (toolbarManager != null) {
+            toolbarManager.setEditDecisionMenuItemVisible(false);
+          }
           preview.showEmpty();
           EventBus.getDefault().post( new HasNoActiveDecisionConstructor() );
           decision_spinner_adapter.add( new DecisionSpinnerItem(null, "Нет резолюций", 0 ) );
@@ -427,10 +437,13 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Ope
   }
 
   private void displayDecision() {
+    Timber.tag(TAG).v("displayDecision");
     if (current_decision != null) {
       preview.show( current_decision );
       settings.getString("decision.active.id").set( current_decision.getUid() );
-      toolbarManager.setEditDecisionMenuItemVisible( !current_decision.isApproved() );
+      if (toolbarManager != null) {
+        toolbarManager.setEditDecisionMenuItemVisible( !current_decision.isApproved() );
+      }
       updateVisibility(current_decision.isApproved());
     }
   }
