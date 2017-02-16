@@ -12,6 +12,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
@@ -105,6 +107,8 @@ public class PrevPerson extends AbstractCommand {
           if (callback != null){
             callback.onCommandExecuteSuccess(getType());
           }
+
+          update();
         },
         error -> {
           if (callback != null){
@@ -117,6 +121,20 @@ public class PrevPerson extends AbstractCommand {
         }
       );
 
+  }
+
+  private void update() {
+    try {
+      dataStore
+        .update(RDocumentEntity.class)
+        .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue() )
+        .set( RDocumentEntity.PROCESSED, true)
+        .where(RDocumentEntity.UID.eq(UID.get()))
+        .get()
+        .call();
+    } catch (Exception e) {
+      Timber.tag(TAG).e( e );
+    }
   }
 
   @Override

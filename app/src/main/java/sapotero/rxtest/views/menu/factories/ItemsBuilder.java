@@ -1,6 +1,8 @@
 package sapotero.rxtest.views.menu.factories;
 
 import android.content.Context;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -73,6 +75,7 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
     journalSpinner = selector;
 
     journalSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+      @RequiresApi(api = Build.VERSION_CODES.M)
       @Override
       public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
         Timber.tag(TAG).w( journalSpinnerAdapter.getItem(position).getName() );
@@ -130,6 +133,7 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
   }
 
 
+  @RequiresApi(api = Build.VERSION_CODES.M)
   private void updateView() {
     if (view == null){
       view = new RadioGroup(context);

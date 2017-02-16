@@ -33,6 +33,7 @@ import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.crypto.SignDataEvent;
 import sapotero.rxtest.events.decision.ShowDecisionConstructor;
 import sapotero.rxtest.events.rx.ShowSnackEvent;
+import sapotero.rxtest.events.view.RemoveDocumentFromAdapterEvent;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
@@ -409,18 +410,22 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
 
       toolbar.getMenu().clear();
       toolbar.inflateMenu(R.menu.info_menu);
+
+      EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
     }
 
     if ( Objects.equals(command, "next_person") ) {
       Toast.makeText( context.getApplicationContext(), "Операция подписания успешно завершена", Toast.LENGTH_SHORT).show();
       toolbar.getMenu().clear();
       toolbar.inflateMenu(R.menu.info_menu);
+      EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
     }
 
     if ( Objects.equals(command, "prev_person") ) {
       Toast.makeText( context.getApplicationContext(), "Операция отклонения успешно завершена", Toast.LENGTH_SHORT).show();
       toolbar.getMenu().clear();
       toolbar.inflateMenu(R.menu.info_menu);
+      EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
     }
 
     invalidate();

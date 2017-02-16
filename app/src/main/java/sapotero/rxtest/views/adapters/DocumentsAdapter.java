@@ -1,8 +1,6 @@
 package sapotero.rxtest.views.adapters;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.FragmentManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -16,13 +14,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.birbit.android.jobqueue.JobManager;
-import com.daimajia.swipe.SwipeLayout;
-import com.daimajia.swipe.adapters.RecyclerSwipeAdapter;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
@@ -47,7 +42,6 @@ import rx.subjects.PublishSubject;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.models.RFolderEntity;
 import sapotero.rxtest.db.requery.models.RLinks;
 import sapotero.rxtest.db.requery.models.RLinksEntity;
 import sapotero.rxtest.db.requery.models.RSignerEntity;
@@ -55,15 +49,12 @@ import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.views.activities.InfoActivity;
-import sapotero.rxtest.views.dialogs.InfoCardDialogFragment;
 import sapotero.rxtest.views.managers.db.managers.DBDocumentManager;
 import sapotero.rxtest.views.managers.menu.OperationManager;
-import sapotero.rxtest.views.managers.menu.factories.CommandFactory;
-import sapotero.rxtest.views.managers.menu.utils.CommandParams;
 import sapotero.rxtest.views.menu.MenuBuilder;
 import timber.log.Timber;
 
-public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.SimpleViewHolder> implements Action1<List<Document>>, OperationManager.Callback {
+public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.SimpleViewHolder> implements Action1<List<Document>>, OperationManager.Callback {
 
   @Inject RxSharedPreferences settings;
   @Inject JobManager jobManager;
@@ -75,9 +66,49 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
   private List<RDocumentEntity> documents;
   private ObservableDocumentList real_docs;
   private MenuBuilder mainMenu;
+  private String TAG = this.getClass().getSimpleName();
 
   @Override
   public void call(List<Document> documents) {
+
+  }
+
+  public void hideItem(String uid) {
+    Timber.tag(TAG).v("hideItem: %s", uid);
+
+
+    Timber.tag(TAG).v("total documents: %s", documents.size());
+
+    int index = -1;
+    for (int i = 0; i <documents.size()-1 ; i++) {
+      RDocumentEntity doc = documents.get(i);
+      Timber.tag(TAG).v("test: %s | %s", doc.getUid(), uid);
+
+      if ( Objects.equals(doc.getUid(), uid) ){
+        index = i;
+        break;
+      }
+    }
+    Timber.tag(TAG).v("index: %s", index);
+
+    if ( Holder.MAP.containsKey( uid ) ){
+      Holder.MAP.remove( uid );
+      Timber.tag(TAG).v("has item");
+//      if (index != -1){
+//        Timber.tag(TAG).v("removed");
+//
+//        RDocumentEntity document = Holder.MAP.get(uid);
+//        documents.remove(document);
+//        real_docs.add(document);
+//        notifyItemRemoved(index);
+//      }
+      documents.remove(index);
+    }
+
+    Timber.tag(TAG).v("total documents: %s", documents.size());
+
+
+    notifyDataSetChanged();
 
   }
 
@@ -117,8 +148,7 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
       .subscribe( data -> {
         Timber.e("FROM UPDATE STREAM");
         if (mainMenu != null) {
-          EventBus.getDefault().post(new UpdateCountEvent());
-//          mainMenu.updateCount();
+          EventBus.getDefault().postSticky(new UpdateCountEvent());
         }
       });
 
@@ -207,10 +237,10 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
 
     }
 
-    viewHolder.swipeLayout.setShowMode(SwipeLayout.ShowMode.PullOut);
-
-    viewHolder.swipeLayout.addDrag(SwipeLayout.DragEdge.Left,  viewHolder.swipeLayout.findViewById(R.id.from_left_to_right));
-    viewHolder.swipeLayout.addDrag(SwipeLayout.DragEdge.Right, viewHolder.swipeLayout.findViewById(R.id.from_right_to_left));
+//    viewHolder.swipeLayout.setShowMode(SwipeLayout.ShowMode.PullOut);
+//
+//    viewHolder.swipeLayout.addDrag(SwipeLayout.DragEdge.Left,  viewHolder.swipeLayout.findViewById(R.id.from_left_to_right));
+//    viewHolder.swipeLayout.addDrag(SwipeLayout.DragEdge.Right, viewHolder.swipeLayout.findViewById(R.id.from_right_to_left));
 
     // FIX добавить отображение ОжидаетСинхронизации
     // FIX отображать срочность поверх всего во фрагменте
@@ -231,33 +261,6 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
       viewHolder.favorite_label.setVisibility(View.GONE);
     }
 
-    viewHolder.swipeLayout.addSwipeListener(new SwipeLayout.SwipeListener() {
-      @Override
-      public void onClose(SwipeLayout layout) {
-      }
-
-      @Override
-      public void onUpdate(SwipeLayout layout, int leftOffset, int topOffset) {
-      }
-
-      @Override
-      public void onStartOpen(SwipeLayout layout) {
-
-      }
-
-      @Override
-      public void onOpen(SwipeLayout layout) {
-      }
-
-      @Override
-      public void onStartClose(SwipeLayout layout) {
-
-      }
-
-      @Override
-      public void onHandRelease(SwipeLayout layout, float xvel, float yvel) {
-      }
-    });
 
     viewHolder.cv.setOnClickListener(view -> {
 
@@ -281,7 +284,7 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
       Intent intent = new Intent(mContext, InfoActivity.class);
       mContext.startActivity(intent);
       Toast.makeText(mContext, " onClick : " + item.getMd5() + " \n" + item.getTitle(), Toast.LENGTH_SHORT).show();
-      viewHolder.swipeLayout.close(true);
+//      viewHolder.swipeLayout.close(true);
     });
 
     viewHolder.cv.setOnLongClickListener(view -> {
@@ -312,120 +315,12 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
       return true;
     });
 
-
-    viewHolder.to_favorites.setOnClickListener(view -> {
-      String favorites = dataStore
-        .select(RFolderEntity.class)
-        .where(RFolderEntity.TYPE.eq("favorites"))
-        .get().first().getUid();
-
-      CommandParams params = new CommandParams();
-      params.setFolder(favorites);
-      params.setDocument( item.getUid() );
-
-      operationManager.execute( CommandFactory.Operation.ADD_TO_FOLDER, params );
-
-      Toast.makeText(view.getContext(), "Избранное " + viewHolder.title.getText().toString(), Toast.LENGTH_SHORT).show();
-      viewHolder.swipeLayout.close(true);
-
-      try{
-        item.setFavorites( !item.isFavorites() );
-        if ( !item.isFavorites() ){
-          viewHolder.favorite_label.setVisibility(View.GONE);
-        } else {
-          viewHolder.favorite_label.setVisibility(View.VISIBLE);
-        }
-      } catch (Exception e){
-        Timber.tag("to_favorites").v(e);
-      }
-    });
-
-    viewHolder.to_control.setOnClickListener(view -> {
-      CommandParams params = new CommandParams();
-      params.setSign( item.getUid() );
-
-      operationManager.execute( CommandFactory.Operation.CHECK_FOR_CONTROL, params );
-
-      Toast.makeText(view.getContext(), "Контроль " + viewHolder.title.getText().toString(), Toast.LENGTH_SHORT).show();
-      viewHolder.swipeLayout.close(true);
-
-      try {
-        item.setControl( !item.isControl() );
-        if ( !item.isControl() ){
-          viewHolder.control_label.setVisibility(View.GONE);
-        } else {
-          viewHolder.control_label.setVisibility(View.VISIBLE);
-        }
-      } catch (Exception e){
-        Timber.tag("to_control").v(e);
-      }
-
-    });
-
-    viewHolder.get_infocard.setOnClickListener(view -> {
-      FragmentManager manager = ((Activity) mContext).getFragmentManager();
-      new InfoCardDialogFragment().withUid( item.getUid() ).show( manager, "InfoCardDialogFragment" );
-      viewHolder.swipeLayout.close(true);
-    });
-
-    viewHolder.get_files.setOnClickListener(view -> {
-      String _title = manager.get(item.getUid()).getTitle();
-      Timber.e("title : %s", _title);
-
-      Notification builder =
-        new NotificationCompat.Builder(mContext)
-          .setSmallIcon( R.drawable.gerb )
-          .setContentTitle("Уведомление FILES")
-          .setContentText("Добавлена резолюция к документу " + item.getRegistrationNumber())
-          .setDefaults(Notification.DEFAULT_ALL)
-          .setCategory(Notification.CATEGORY_MESSAGE)
-          .setPriority(NotificationCompat.PRIORITY_HIGH)
-          .addAction( 1 , "Утвердить", null)
-          .addAction( 0 ,  "Отклонить", null)
-          .build();
-
-      NotificationManager notificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
-      notificationManager.notify(0, builder);
-
-      viewHolder.swipeLayout.close(true);
-    });
-
-    viewHolder.get_editor.setOnClickListener(view -> {
-//      documentManager.get( item.getUid() ).toJson();
-
-
-      String _title = manager.get(item.getUid()).getTitle();
-      Timber.e("title : %s", _title);
-
-      Notification builder =
-        new NotificationCompat.Builder(mContext)
-          .setSmallIcon( R.drawable.gerb )
-          .setContentTitle("Уведомление EDITOR")
-          .setContentText("Добавлена резолюция к документу " + item.getRegistrationNumber())
-          .setDefaults(Notification.DEFAULT_ALL)
-          .setCategory(Notification.CATEGORY_MESSAGE)
-          .setPriority(NotificationCompat.PRIORITY_HIGH)
-          .addAction( 1 , "Утвердить", null)
-          .addAction( 0 ,  "Отклонить", null)
-          .build();
-
-      NotificationManager notificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
-      notificationManager.notify(0, builder);
-
-      viewHolder.swipeLayout.close(true);
-    });
-
-
-
-
     if ( item.getUrgency() != null ){
       viewHolder.badge.setVisibility(View.VISIBLE);
       viewHolder.badge.setText( item.getUrgency() );
     } else {
       viewHolder.badge.setVisibility(View.GONE);
     }
-
-    mItemManger.bindView( viewHolder.itemView, position );
 
   }
 
@@ -434,40 +329,11 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
     return documents == null ? 0 : documents.size();
   }
 
-  @Override
-  public int getSwipeLayoutResourceId(int position) {
-    return R.id.swipe;
-  }
 
   public RDocumentEntity getItem(int position) {
     return this.documents.get(position);
   }
 
-//  @Override
-//  public void call(ArrayList<Document> documents) {
-//    this.documents = documents;
-//    notifyDataSetChanged();
-//  }
-
-//  public void addItem(Document document) {
-//
-//    Timber.v("keys %s | hasKey: %s | uid: %s", Holder.MAP.keySet(), Holder.MAP.containsKey(document.getRegistrationNumber()), document.getRegistrationNumber() );
-//
-//    if ( !Holder.MAP.containsKey( document.getRegistrationNumber()) ){
-//      Holder.MAP.put( document.getRegistrationNumber(), document );
-//      documents.add(0, document);
-//      notifyItemInserted(0);
-//    }
-//
-//  }
-//
-//  public void setDocuments(ArrayList<Document> docs) {
-//    clear();
-//    for (Document d: docs) {
-//      addItem(d);
-//    }
-////    notifyDataSetChanged();
-//  }
 
   public Integer getPositionByUid(String uid) {
     RDocumentEntity document = null;
@@ -510,40 +376,15 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
     Timber.e("setDocuments %s", list_dosc.size());
     documents = list_dosc;
     notifyDataSetChanged();
-//    boolean new_document = false;
-//
-//    for (int i = 0; i < documents.size(); i++) {
-//      if ( Objects.equals(document.getUid(), documents.get(i).getUid()) ){
-//        new_document = true;
-//      }
-//    }
-//
-//    if (new_document){
-//      documents.add(document);
-//      notifyItemInserted(documents.size());
-//    }
-//
-//    for (Document doc: documents) {
-//      if ( Objects.equals(doc.getUid(), document.getUid()) ){
-//        documents.add(document);
-//        notifyItemInserted(documents.size());
-//      }
-//    }
+
   }
 
   //  ViewHolder Class
 
   class SimpleViewHolder extends RecyclerView.ViewHolder {
-    private Button get_infocard;
-    private Button get_files;
-    private Button get_editor;
-
     private TextView badge;
     private TextView control_label;
     private TextView favorite_label;
-    private SwipeLayout swipeLayout;
-    private TextView to_control;
-    private TextView to_favorites;
 
     private TextView wait_for_sync;
 
@@ -554,14 +395,6 @@ public class DocumentsAdapter extends RecyclerSwipeAdapter<DocumentsAdapter.Simp
 
     public SimpleViewHolder(View itemView) {
       super(itemView);
-      swipeLayout = (SwipeLayout) itemView.findViewById(R.id.swipe);
-
-      to_favorites = (TextView) itemView.findViewById(R.id.swipe_layout_card_to_control);
-      to_control = (TextView) itemView.findViewById(R.id.swipe_layout_card_to_favorites);
-
-      get_infocard = (Button) itemView.findViewById(R.id.swipe_layout_card_get_infocard);
-      get_files    = (Button) itemView.findViewById(R.id.swipe_layout_card_get_files);
-      get_editor   = (Button) itemView.findViewById(R.id.swipe_layout_card_get_editor);
 
 
       cv    = (CardView)itemView.findViewById(R.id.swipe_layout_cv);

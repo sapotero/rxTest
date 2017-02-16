@@ -1,248 +1,145 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.daimajia.swipe.SwipeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                                xmlns:swipe="http://schemas.android.com/apk/res-auto"
-                                xmlns:card_view="http://schemas.android.com/tools"
-                                android:id="@+id/swipe"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
+<android.support.v7.widget.CardView
+    android:id="@+id/swipe_layout_cv"
+    android:layout_width="wrap_content"
+    android:layout_height="250dp"
+    android:clickable="true"
+    android:layout_margin="@dimen/half_date_offset"
+    app:cardElevation="2dp"
+    android:foreground="@drawable/card_foreground"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-                                swipe:leftEdgeSwipeOffset="0dp"
-                                swipe:rightEdgeSwipeOffset="0dp">
-
-    <!--Bottom View For Right to Left-->
-
-    <LinearLayout
-        android:id="@+id/from_right_to_left"
-        android:layout_width="240dp"
-        android:layout_height="match_parent"
-        android:padding="@dimen/half_date_offset"
-        android:weightSum="2">
-
-        <TextView
-            android:id="@+id/swipe_layout_card_to_control"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@drawable/corner_background_favorites"
-            android:gravity="center"
-            android:text="@string/to_favorites"
-            android:textColor="@color/md_white_1000" />
-
-        <TextView
-            android:id="@+id/swipe_layout_card_to_favorites"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@drawable/corner_background_control"
-            android:gravity="center"
-            android:text="@string/to_control"
-            android:textColor="@color/md_white_1000"
-            />
-
-    </LinearLayout>
-
-
-    <!-- Another Bottom View For Left to Right -->
-
-    <LinearLayout
-        android:id="@+id/from_left_to_right"
-        android:layout_width="220dp"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:weightSum="3">
-
-
-        <Button
-            android:id="@+id/swipe_layout_card_get_infocard"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:drawableStart="@drawable/info_card"
-            android:layout_margin="@dimen/half_date_offset"
-            android:gravity="center"
-            android:layout_weight="1"
-            android:text="@string/info_card"
-            />
-        <Button
-            android:id="@+id/swipe_layout_card_get_files"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:drawableStart="@drawable/files"
-            android:layout_margin="@dimen/half_date_offset"
-            android:gravity="center"
-            android:layout_weight="1"
-            android:text="@string/files"
-            />
-        <Button
-            android:id="@+id/swipe_layout_card_get_editor"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:drawableStart="@drawable/edit_pencil"
-            android:layout_margin="@dimen/half_date_offset"
-            android:gravity="center"
-            android:layout_weight="1"
-            android:text="@string/decision_editor"
-            />
-    </LinearLayout>
-
-    <!-- Top View,  Row itemView of RecyclerView -->
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:background="?android:selectableItemBackground"
-        android:elevation="10dp"
-        android:layout_height="250dp"
-        android:orientation="vertical"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true">
 
-        android:clipToPadding="false"
-        android:padding="8dp">
+        <TextView
+            android:id="@+id/favorite_label"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:text="@string/favorites"
+            android:textColor="@color/md_white_1000"
+            android:gravity="top|end"
+            android:paddingTop="0dp"
+            android:paddingRight="4dp"
+            android:textSize="24sp"
+            android:background="@drawable/badge_favorite" />
 
-
-        <android.support.v7.widget.CardView
-            android:id="@+id/swipe_layout_cv"
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/swipe_layout_title"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            card_view:cardUseCompatPadding="true"
-            android:outlineProvider="bounds"
-
-            card_view:cardElevation="16dp"
-            card_view:cardCornerRadius="16dp"
-            android:clickable="true"
-            android:foreground="@drawable/card_foreground"
-            >
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true">
-
-                <TextView
-                    android:id="@+id/favorite_label"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentTop="true"
-                    android:text="@string/favorites"
-                    android:textColor="@color/md_white_1000"
-                    android:gravity="top|end"
-                    android:paddingTop="0dp"
-                    android:paddingRight="4dp"
-                    android:textSize="24sp"
-                    android:background="@drawable/badge_favorite" />
-
-                <TextView
-                    android:id="@+id/swipe_layout_title"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp"
-                    android:textAppearance="?android:attr/textAppearanceLarge"
-                    android:layout_alignParentTop="true"
-                    android:layout_alignParentStart="true"
-                    android:maxLines="2"
-                    android:ellipsize="end"
-                    />
+            android:padding="16dp"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"
+            android:maxLines="2"
+            android:ellipsize="end"
+            />
 
 
-                <TextView
-                    android:id="@+id/swipe_layout_urgency_badge"
-                    android:text="ttttttttttttt"
-                    android:textColor="@color/md_grey_100"
-                    android:layout_marginStart="@dimen/date_offset"
-                    android:padding="@dimen/half_date_offset"
-                    android:gravity="center_horizontal|center_vertical"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/urgency_badge"
-                    android:layout_alignBottom="@+id/horizontal_line"
-                    android:layout_marginBottom="@dimen/date_offset"
+        <TextView
+            android:id="@+id/swipe_layout_urgency_badge"
+            android:text="ttttttttttttt"
+            android:textColor="@color/md_grey_100"
+            android:layout_marginStart="@dimen/date_offset"
+            android:padding="@dimen/half_date_offset"
+            android:gravity="center_horizontal|center_vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/urgency_badge"
+            android:layout_alignBottom="@+id/horizontal_line"
+            android:layout_marginBottom="@dimen/date_offset"
 
-                    />
+            />
 
-                <TextView
-                    android:id="@+id/swipe_layout_md5"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:layout_alignParentEnd="false"
-                    />
+        <TextView
+            android:id="@+id/swipe_layout_md5"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:layout_alignParentEnd="false"
+            />
 
-                <View
-                    android:id="@+id/horizontal_line"
-                    android:layout_width="550dp"
-                    android:layout_centerHorizontal="true"
-                    android:layout_height="1dp"
-                    android:layout_above="@+id/swipe_layout_from"
-                    android:background="@color/md_grey_200" />
+        <View
+            android:id="@+id/horizontal_line"
+            android:layout_width="550dp"
+            android:layout_centerHorizontal="true"
+            android:layout_height="1dp"
+            android:layout_above="@+id/swipe_layout_from"
+            android:background="@color/md_grey_200" />
 
-                <TextView
-                    android:id="@+id/swipe_layout_from"
+        <TextView
+            android:id="@+id/swipe_layout_from"
 
-                    android:paddingStart="@dimen/date_offset"
-                    android:paddingEnd="@dimen/date_offset"
-                    android:paddingBottom="@dimen/half_date_offset"
-                    android:paddingTop="@dimen/date_offset"
+            android:paddingStart="@dimen/date_offset"
+            android:paddingEnd="@dimen/date_offset"
+            android:paddingBottom="@dimen/half_date_offset"
+            android:paddingTop="@dimen/date_offset"
 
-                    android:maxLines="1"
-                    android:ellipsize="end"
-                    android:singleLine="true"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:singleLine="true"
 
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:layout_above="@+id/swipe_layout_date"
-                    android:layout_alignParentStart="true"/>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_above="@+id/swipe_layout_date"
+            android:layout_alignParentStart="true"/>
 
-                <TextView
-                    android:id="@+id/swipe_layout_date"
+        <TextView
+            android:id="@+id/swipe_layout_date"
 
-                    android:paddingStart="@dimen/date_offset"
-                    android:paddingEnd="0sp"
-                    android:paddingBottom="@dimen/half_date_offset"
+            android:paddingStart="@dimen/date_offset"
+            android:paddingEnd="0sp"
+            android:paddingBottom="@dimen/half_date_offset"
 
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:layout_alignParentBottom="true"
-                    android:layout_alignParentStart="true"/>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"/>
 
 
 
-                <TextView
-                    android:id="@+id/control_label"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentBottom="true"
-                    android:text="@string/control"
-                    android:textColor="@color/md_white_1000"
-                    android:gravity="bottom|end"
-                    android:paddingBottom="2dp"
-                    android:paddingRight="6dp"
-                    android:textSize="24sp"
-                    android:background="@drawable/badge_control"
-                    />
+        <TextView
+            android:id="@+id/control_label"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:text="@string/control"
+            android:textColor="@color/md_white_1000"
+            android:gravity="bottom|end"
+            android:paddingBottom="2dp"
+            android:paddingRight="6dp"
+            android:textSize="24sp"
+            android:background="@drawable/badge_control"
+            />
 
-                <TextView
-                    android:text="@string/wait_for_sync"
-                    android:drawableStart="@drawable/clock_1"
-                    android:textColor="@color/md_red_400"
-                    android:textSize="16sp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+        <TextView
+            android:text="@string/wait_for_sync"
+            android:drawableStart="@drawable/clock_1"
+            android:textColor="@color/md_red_400"
+            android:textSize="16sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
 
-                    android:visibility="gone"
+            android:visibility="gone"
 
-                    android:layout_alignParentBottom="true"
-                    android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
 
-                    android:paddingBottom="@dimen/half_date_offset"
-                    android:paddingRight="48dp"
-                    android:id="@+id/wait_for_sync"
-                    />
-                <!--android:layout_alignParentBottom="true"-->
+            android:paddingBottom="@dimen/half_date_offset"
+            android:paddingRight="48dp"
+            android:id="@+id/wait_for_sync"
+            />
+        <!--android:layout_alignParentBottom="true"-->
 
-            </RelativeLayout>
+    </RelativeLayout>
 
-        </android.support.v7.widget.CardView>
-
-    </LinearLayout>
-
-</com.daimajia.swipe.SwipeLayout>
+</android.support.v7.widget.CardView>

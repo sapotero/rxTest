@@ -67,6 +67,7 @@ public class DBQueryBuilder {
     return this;
   }
 
+
   public DBQueryBuilder withEmptyView(TextView documents_empty_list) {
     this.documents_empty_list = documents_empty_list;
     return this;

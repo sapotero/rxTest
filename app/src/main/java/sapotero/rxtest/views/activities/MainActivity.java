@@ -7,7 +7,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -39,7 +38,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -60,8 +58,8 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.query.DBQueryBuilder;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.bus.GetDocumentInfoEvent;
-import sapotero.rxtest.events.bus.UpdateDocumentJobEvent;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
+import sapotero.rxtest.events.view.RemoveDocumentFromAdapterEvent;
 import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
 import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
@@ -146,12 +144,14 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private final int SETTINGS_DECISION_TEMPLATES = 21;
   private final int SETTINGS_REJECTION_TEMPLATES = 22;
 
-  public  DocumentsAdapter RAdapter;
+  public DocumentsAdapter RAdapter;
   public  MenuBuilder menuBuilder;
   private DBQueryBuilder dbQueryBuilder;
   private DataLoaderManager dataLoader;
   private SearchView searchView;
   private MainActivity context;
+
+  final int TYPE_ITEM = 1;
 
 
   @Override
@@ -187,9 +187,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       .withEmptyView( documents_empty_list )
       .withRecycleView(rv)
       .withProgressBar( progressBar );
-
-//    dbQueryBuilder.printFolders();
-//    dbQueryBuilder.printTemplates();
 
     dataLoader = new DataLoaderManager(this);
 
@@ -304,10 +301,54 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void initAdapters() {
+
+//    ActivityMainBinding mActivityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+//    setSupportActionBar(mActivityMainBinding.toolbar);
+//
+//    List<ViewHolderInfo> viewHolderInfoList = new ArrayList<>();
+//    viewHolderInfoList.add(new ViewHolderInfo(R.layout.new_documents_adapter_item_layout, TYPE_ITEM));
+//
+//
+//    mActivityMainBinding.documentsRecycleView.setLayoutManager(new LinearLayoutManager(this));
+//
+//    List<RDocumentEntity> dataset = dataStore.select(RDocumentEntity.class).get().toList();
+//      RAdapter = new RxDataSource<RDocumentEntity>(dataset);
+//
+//
+//    RAdapter
+//      .<NewDocumentsAdapterItemLayoutBinding>bindRecyclerView(mActivityMainBinding.documentsRecycleView, R.layout.documents_adapter_item_layout)
+//      .subscribe(viewHolder -> {
+//        NewDocumentsAdapterItemLayoutBinding b = viewHolder.getViewDataBinding();
+//        RDocumentEntity item = viewHolder.getItem();
+//        b.swipeLayoutTitle.setText(String.valueOf(item));
+//      });
+//
+//    RAdapter.bindRecyclerView(mActivityMainBinding.documentsRecycleView, viewHolderInfoList, new OnGetItemViewType() {
+//      @Override public int getItemViewType(int position) {
+//        if (position % 2 == 0)
+//        {
+//          return TYPE_ITEM;
+//        }
+//        return TYPE_ITEM;
+//      }
+//    }).subscribe(vH -> {
+//      final ViewDataBinding b = vH.getViewDataBinding();
+//
+//      NewDocumentsAdapterItemLayoutBinding hB = (NewDocumentsAdapterItemLayoutBinding) b;
+//      hB.swipeLayoutTitle.setText( vH.getItem().getShortDescription() );
+//
+//    });
+//
+//    RAdapter.updateAdapter();
+
+
     RAdapter = new DocumentsAdapter(this, new ArrayList<>());
     rv.setAdapter(RAdapter);
     GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2, GridLayoutManager.VERTICAL, false);
     rv.setLayoutManager(gridLayoutManager);
+
+
+
 
     organization_adapter = new OrganizationAdapter(this, new ArrayList<>());
     ORGANIZATION_SELECTOR.setAdapter(organization_adapter, false, selected -> {
@@ -316,6 +357,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void initToolbar() {
+
+
     toolbar.setTitle("СЕРВИС ЭЛЕКТРОННОГО ДОКУМЕНТООБОРОТА");
     toolbar.setSubtitle("МВД России");
     toolbar.setTitleTextColor(getResources().getColor(R.color.md_white_1000));
@@ -347,6 +390,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void initEvents() {
+    Timber.tag(TAG).v("initEvents");
     if (EventBus.getDefault().isRegistered(this)) {
       EventBus.getDefault().unregister(this);
     }
@@ -370,6 +414,13 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @Override
   public void onResume() {
     super.onResume();
+
+    initEvents();
+
+    Timber.tag(TAG).v("onResume");
+    menuBuilder.getItem().recalcuate();
+
+
 //    menuBuilder.build();
 //    menuBuilder.getItem().recalcuate();
 //    dbQueryBuilder.execute();
@@ -594,22 +645,29 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 ////    Toast.makeText(getApplicationContext(), event.message, Toast.LENGTH_SHORT).show();
 //  }
 
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(UpdateDocumentJobEvent event) {
-    int position = RAdapter.getPositionByUid(event.uid);
-    RecyclerView.ViewHolder a = rv.findViewHolderForAdapterPosition(position);
-
-    int visibility = event.value ? View.VISIBLE : View.GONE;
-    int field = Objects.equals(event.field, "control") ? R.id.control_label : R.id.favorite_label;
-
-    View view = a.itemView.findViewById(field);
-    view.setVisibility(visibility);
-  }
+//  @Subscribe(threadMode = ThreadMode.MAIN)
+//  public void onMessageEvent(UpdateDocumentJobEvent event) {
+//    int position = RAdapter.getPositionByUid(event.uid);
+//    RecyclerView.ViewHolder a = rv.findViewHolderForAdapterPosition(position);
+//
+//    int visibility = event.value ? View.VISIBLE : View.GONE;
+//    int field = Objects.equals(event.field, "control") ? R.id.control_label : R.id.favorite_label;
+//
+//    View view = a.itemView.findViewById(field);
+//    view.setVisibility(visibility);
+//  }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(UpdateCountEvent event) {
-    menuBuilder.updateCount();
   }
+
+  @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(RemoveDocumentFromAdapterEvent event) {
+    Timber.tag(TAG).v("RemoveDocumentFromAdapterEvent %s", event.uid );
+    RAdapter.hideItem(event.uid);
+  }
+
+
 
 
   /* MenuBuilder.Callback */

@@ -116,8 +116,9 @@ dependencies {
     //RxAndroid
     compile 'io.reactivex:rxandroid:1.2.1'
     compile 'io.reactivex:rxjava:1.2.4'
-    compile 'com.jakewharton.rxbinding:rxbinding:0.4.0'
+    compile 'com.exallium.rxrecyclerview:lib:2.1.2'
     compile 'com.f2prateek.rx.preferences:rx-preferences:1.0.2'
+//    compile 'com.jakewharton.rxbinding:rxbinding:0.4.0'
 //    compile 'com.jakewharton.rxbinding:rxbinding-recyclerview-v7:0.4.0'
 //    compile 'com.jakewharton.rxbinding:rxbinding-appcompat-v7:0.4.0'
 
@@ -186,6 +187,8 @@ dependencies {
     //searchView
     compile 'com.andkulikov:transitionseverywhere:1.6.2'
     compile 'com.github.johnkil.android-robototextview:robototextview:2.5.0'
+
+
 
     /*debug*/
     debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5'

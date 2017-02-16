@@ -48,6 +48,7 @@ public class MenuBuilder implements ItemsBuilder.Callback{
 
   public void updateCount() {
     itemsBuilder.getSelectedItem().recalcuate();
+    update();
   }
 
 
