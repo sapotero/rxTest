@@ -85,6 +85,10 @@ public class ApproveDecision extends AbstractCommand {
 
 
   public void update() {
+    if (callback != null ){
+      callback.onCommandExecuteSuccess( getType() );
+    }
+
     try {
       RDocumentEntity document = (RDocumentEntity) decision.getDocument();
       String decision_uid = decision.getUid();
@@ -103,11 +107,6 @@ public class ApproveDecision extends AbstractCommand {
         .where(RDecisionEntity.UID.eq( decision_uid ))
         .get()
         .call();
-
-      if (callback != null ){
-        callback.onCommandExecuteSuccess( getType() );
-      }
-
     } catch (Exception e) {
       e.printStackTrace();
     }

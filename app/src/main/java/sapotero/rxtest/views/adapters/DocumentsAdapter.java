@@ -54,7 +54,7 @@ import sapotero.rxtest.views.managers.menu.OperationManager;
 import sapotero.rxtest.views.menu.MenuBuilder;
 import timber.log.Timber;
 
-public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.SimpleViewHolder> implements Action1<List<Document>>, OperationManager.Callback {
+public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.SimpleViewHolder> implements Action1<List<Document>> {
 
   @Inject RxSharedPreferences settings;
   @Inject JobManager jobManager;
@@ -153,7 +153,6 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Simp
       });
 
     EsdApplication.getComponent(context).inject(this);
-    operationManager.registerCallBack(this);
   }
 
   private void populateDocs(List<RDocumentEntity> documents) {
@@ -360,7 +359,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Simp
     Holder.MAP.clear();
     documents.clear();
     real_docs.clear();
-//    notifyDataSetChanged();
+    notifyDataSetChanged();
   }
 
   public void addItem(RDocumentEntity document) {
@@ -416,38 +415,6 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Simp
     public void hideControl() {
       control_label.setVisibility(View.GONE);
     }
-  }
-
-  /* OperationManager.Callback */
-  @Override
-  public void onExecuteSuccess(String command) {
-    Timber.tag("OpManagerAdapter").i("onExecuteSuccess %s", command);
-
-//    switch ( command ){
-//      case "check_for_control":
-//        if ( doc.isControl() ){
-//          sharedViewHolder.getHolder().control_label.setVisibility(View.VISIBLE);
-//        } else {
-//          sharedViewHolder.getHolder().control_label.setVisibility(View.GONE);
-//        }
-//        break;
-//      case "add_to_folder":
-//        if ( doc.isControl() ){
-//          sharedViewHolder.getHolder().favorite_label.setVisibility(View.VISIBLE);
-//        } else {
-//          sharedViewHolder.getHolder().favorite_label.setVisibility(View.GONE);
-//        }
-//        break;
-//      default:
-//        break;
-//    }
-
-
-  }
-
-  @Override
-  public void onExecuteError() {
-    Timber.tag("OpManagerAdapter").i("onExecuteSuccess");
   }
 
   private static class Holder {

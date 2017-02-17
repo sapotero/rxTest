@@ -58,7 +58,8 @@ import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RPerformer;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
-import sapotero.rxtest.events.view.ApproveDecisionEvent;
+import sapotero.rxtest.events.decision.ApproveDecisionEvent;
+import sapotero.rxtest.events.decision.RejectDecisionEvent;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.adapters.DecisionSpinnerAdapter;
 import sapotero.rxtest.views.adapters.models.DecisionSpinnerItem;
@@ -835,8 +836,15 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(ApproveDecisionEvent event) throws Exception {
-    Timber.d("SignDataResultEvent");
+    Timber.d("ApproveDecisionEvent");
     current_decision.setApproved(true);
+    displayDecision();
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(RejectDecisionEvent event) throws Exception {
+    Timber.d("RejectDecisionEvent");
+    current_decision.setApproved(false);
     displayDecision();
   }
 

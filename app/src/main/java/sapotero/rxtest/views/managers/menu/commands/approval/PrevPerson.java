@@ -131,7 +131,6 @@ public class PrevPerson extends AbstractCommand {
           if (callback != null){
             callback.onCommandExecuteSuccess(getType());
           }
-          update();
         },
         error -> {
           if ( queueManager.getConnected() ){

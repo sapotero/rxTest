@@ -130,16 +130,12 @@ public class NextPerson extends AbstractCommand {
           if (callback != null){
             callback.onCommandExecuteSuccess(getType());
           }
-          update();
 
         },
         error -> {
-          if ( queueManager.getConnected() ){
-            callback.onCommandExecuteSuccess(getType());
-          } else {
+          if (callback != null){
             callback.onCommandExecuteError();
           }
-
         }
       );
 

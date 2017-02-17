@@ -85,6 +85,11 @@ public class RejectDecision extends AbstractCommand {
   }
 
   public void update() {
+
+    if (callback != null ){
+      callback.onCommandExecuteSuccess( getType() );
+    }
+
     try {
       RDocumentEntity document = (RDocumentEntity) decision.getDocument();
       String decision_uid = decision.getUid();

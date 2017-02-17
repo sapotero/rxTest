@@ -147,7 +147,9 @@ public class ChangePerson extends AbstractCommand {
           }
         },
         error -> {
-          callback.onCommandExecuteError();
+          if (callback != null){
+            callback.onCommandExecuteError();
+          }
         }
       );
   }

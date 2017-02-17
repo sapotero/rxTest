@@ -420,6 +420,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     Timber.tag(TAG).v("onResume");
     menuBuilder.getItem().recalcuate();
 
+    RAdapter.notifyDataSetChanged();
+
 
 //    menuBuilder.build();
 //    menuBuilder.getItem().recalcuate();

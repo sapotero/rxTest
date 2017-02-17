@@ -12,6 +12,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
@@ -59,6 +61,31 @@ public class FromTheReport extends AbstractCommand {
   public void execute() {
     loadSettings();
 
+
+    if ( queueManager.getConnected() ){
+      executeRemote();
+    } else {
+      executeLocal();
+    }
+    update();
+
+  }
+
+  @Override
+  public String getType() {
+    return "from_the_report";
+  }
+
+  @Override
+  public void executeLocal() {
+    queueManager.add(this);
+    if ( callback != null ){
+      callback.onCommandExecuteSuccess( getType() );
+    }
+  }
+
+  @Override
+  public void executeRemote() {
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
     Retrofit retrofit = new Retrofit.Builder()
@@ -90,6 +117,8 @@ public class FromTheReport extends AbstractCommand {
           Timber.tag(TAG).i("error: %s", data.getMessage());
           Timber.tag(TAG).i("type: %s", data.getType());
 
+
+          queueManager.remove(this);
           if (callback != null){
             callback.onCommandExecuteSuccess(getType());
           }
@@ -100,23 +129,26 @@ public class FromTheReport extends AbstractCommand {
           }
         }
       );
-
   }
 
-  @Override
-  public String getType() {
-    return "from_the_report";
+  private void update() {
+    try {
+      dataStore
+        .update(RDocumentEntity.class)
+        .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue() )
+        .set( RDocumentEntity.PROCESSED, true)
+        .where(RDocumentEntity.UID.eq(UID.get()))
+        .get()
+        .call();
+
+      if (callback != null ){
+        callback.onCommandExecuteSuccess( getType() );
+      }
+    } catch (Exception e) {
+      Timber.tag(TAG).e( e );
+    }
   }
 
-  @Override
-  public void executeLocal() {
-
-  }
-
-  @Override
-  public void executeRemote() {
-
-  }
 
   @Override
   public void withParams(CommandParams params) {

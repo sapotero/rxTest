@@ -82,6 +82,7 @@ public class AddToFolder extends AbstractCommand {
       executeLocal();
     }
     updateFavorites();
+
   }
 
   @Override
@@ -91,9 +92,13 @@ public class AddToFolder extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    queueManager.add(this);
-    if ( callback != null ){
-      callback.onCommandExecuteSuccess( getType() );
+    try {
+      queueManager.add(this);
+
+      updateFavorites();
+
+    } catch (Exception e) {
+      Timber.tag(TAG).i("executeLocal for %s: %s", getType(), e);
     }
   }
 
@@ -147,20 +152,35 @@ public class AddToFolder extends AbstractCommand {
   }
 
   private void updateFavorites() {
-    try {
-      dataStore
-        .update(RDocumentEntity.class)
-        .set( RDocumentEntity.FAVORITES, true)
-        .where(RDocumentEntity.UID.eq(document_id))
-        .get()
-        .call();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    dataStore
+      .select(RDocumentEntity.class)
+      .where(RDocumentEntity.UID.eq(document_id))
+      .get()
+      .toObservable()
+      .flatMap( doc -> Observable.just( doc.isFavorites() ) )
+      .subscribe( value -> {
+        Timber.tag(TAG).i("executeLocal for %s: favorites: %s",document_id, value);
+        try {
 
-    if ( callback != null ){
-      callback.onCommandExecuteSuccess( getType() );
-    }
+          if (value == null){
+            value = false;
+          }
+
+          dataStore
+            .update(RDocumentEntity.class)
+            .set( RDocumentEntity.FAVORITES, !value)
+            .where(RDocumentEntity.UID.eq(document_id))
+            .get()
+            .call();
+
+          if ( callback != null ){
+            callback.onCommandExecuteSuccess( getType() );
+          }
+
+        } catch (Exception e) {
+          Timber.tag(TAG).e("error executeLocal for %s [%s]: %s", document_id, getType(), e);
+        }
+      });
   }
 
   @Override

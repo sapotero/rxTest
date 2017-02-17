@@ -30,8 +30,9 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.crypto.SignDataEvent;
+import sapotero.rxtest.events.decision.ApproveDecisionEvent;
+import sapotero.rxtest.events.decision.RejectDecisionEvent;
 import sapotero.rxtest.events.decision.ShowDecisionConstructor;
-import sapotero.rxtest.events.view.ApproveDecisionEvent;
 import sapotero.rxtest.events.view.RemoveDocumentFromAdapterEvent;
 import sapotero.rxtest.events.view.ShowSnackEvent;
 import sapotero.rxtest.retrofit.models.Oshs;
@@ -412,30 +413,35 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
 
     Timber.tag(TAG).w("add %s", command );
 
-    if ( Objects.equals(command, "change_person") ) {
-      EventBus.getDefault().post( new ShowSnackEvent("Операция передачи успешно завершена") );
+    if ( Objects.equals(command, "check_for_control") ) {
+      EventBus.getDefault().post( new ShowSnackEvent("Отметки для постановки на контроль успешно обновлены.") );
+    }
 
+    if ( Objects.equals(command, "change_person") ) {
       toolbar.getMenu().clear();
       toolbar.inflateMenu(R.menu.info_menu);
-
+      EventBus.getDefault().post( new ShowSnackEvent("Операция передачи успешно завершена") );
       EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
     }
 
     if ( Objects.equals(command, "next_person") ) {
       toolbar.getMenu().clear();
       toolbar.inflateMenu(R.menu.info_menu);
+      EventBus.getDefault().post( new ShowSnackEvent("Операция подписания успешно завершена") );
       EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
     }
 
     if ( Objects.equals(command, "prev_person") ) {
       toolbar.getMenu().clear();
       toolbar.inflateMenu(R.menu.info_menu);
+      EventBus.getDefault().post( new ShowSnackEvent("Операция отклонения успешно завершена") );
       EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
     }
 
     if ( Objects.equals(command, "to_the_primary_consideration") ) {
       toolbar.getMenu().clear();
       toolbar.inflateMenu(R.menu.info_menu);
+      EventBus.getDefault().post( new ShowSnackEvent("Операция передачи первичного рассмотрения успешно завершена") );
       EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
     }
 
@@ -443,7 +449,15 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
     if ( Objects.equals(command, "approve_decision") ) {
       toolbar.getMenu().clear();
       toolbar.inflateMenu(R.menu.info_menu);
+      EventBus.getDefault().post( new ShowSnackEvent("Резолюция утверждена") );
       EventBus.getDefault().post( new ApproveDecisionEvent() );
+    }
+
+    if ( Objects.equals(command, "reject_decision") ) {
+      toolbar.getMenu().clear();
+      toolbar.inflateMenu(R.menu.info_menu);
+      EventBus.getDefault().post( new ShowSnackEvent("Резолюция отклонена") );
+      EventBus.getDefault().post( new RejectDecisionEvent() );
     }
 
     if ( Objects.equals(command, "from_the_report") ) {

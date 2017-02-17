@@ -79,6 +79,9 @@ public class PrimaryConsideration extends AbstractCommand {
         .where(RDocumentEntity.UID.eq(UID.get()))
         .get()
         .call();
+      if ( callback != null ){
+        callback.onCommandExecuteSuccess( getType() );
+      }
     } catch (Exception e) {
       Timber.tag(TAG).e( e );
     }
@@ -135,18 +138,10 @@ public class PrimaryConsideration extends AbstractCommand {
           if (callback != null){
             callback.onCommandExecuteSuccess(getType());
           }
-
-          update();
-
-
         },
         error -> {
-          if (callback != null){
-            if ( queueManager.getConnected() ){
-              callback.onCommandExecuteSuccess(getType());
-            } else {
-              callback.onCommandExecuteError();
-            }
+          if ( callback != null ){
+            callback.onCommandExecuteError();
           }
         }
       );

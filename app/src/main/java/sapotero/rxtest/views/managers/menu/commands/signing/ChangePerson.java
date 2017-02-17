@@ -61,6 +61,47 @@ public class ChangePerson extends AbstractCommand {
   public void execute() {
     loadSettings();
 
+    if ( queueManager.getConnected() ){
+      executeRemote();
+    } else {
+      executeLocal();
+    }
+    update();
+
+  }
+
+  private void update() {
+    try {
+      dataStore
+        .update(RDocumentEntity.class)
+        .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue() )
+        .set( RDocumentEntity.PROCESSED, true)
+        .where(RDocumentEntity.UID.eq(UID.get()))
+        .get()
+        .call();
+      if (callback != null){
+        callback.onCommandExecuteSuccess(getType());
+      }
+    } catch (Exception e) {
+      Timber.tag(TAG).e( e );
+    }
+  }
+
+  @Override
+  public String getType() {
+    return "change_person";
+  }
+
+  @Override
+  public void executeLocal() {
+    queueManager.add(this);
+    if ( callback != null ){
+      callback.onCommandExecuteSuccess( getType() );
+    }
+  }
+
+  @Override
+  public void executeRemote() {
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
     Retrofit retrofit = new Retrofit.Builder()
@@ -102,43 +143,10 @@ public class ChangePerson extends AbstractCommand {
         },
         error -> {
           if (callback != null){
-            if ( queueManager.getConnected() ){
-              callback.onCommandExecuteSuccess(getType());
-            } else {
-              callback.onCommandExecuteError();
-            }
+            callback.onCommandExecuteError();
           }
         }
       );
-
-  }
-
-  private void update() {
-    try {
-      dataStore
-        .update(RDocumentEntity.class)
-        .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue() )
-        .set( RDocumentEntity.PROCESSED, true)
-        .where(RDocumentEntity.UID.eq(UID.get()))
-        .get()
-        .call();
-    } catch (Exception e) {
-      Timber.tag(TAG).e( e );
-    }
-  }
-
-  @Override
-  public String getType() {
-    return "change_person";
-  }
-
-  @Override
-  public void executeLocal() {
-
-  }
-
-  @Override
-  public void executeRemote() {
 
   }
 

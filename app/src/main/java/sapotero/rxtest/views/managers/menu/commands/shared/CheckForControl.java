@@ -78,22 +78,13 @@ public class CheckForControl extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    queueManager.add(this);
-    if ( callback != null ){
-      callback.onCommandExecuteSuccess( getType() );
-    }
-  }
-
-  private void updateControl() {
     try {
-      dataStore
-        .update(RDocumentEntity.class)
-        .set( RDocumentEntity.CONTROL, true)
-        .where(RDocumentEntity.UID.eq( document_id ))
-        .get()
-        .call();
+      queueManager.add(this);
+
+      updateControl();
+
     } catch (Exception e) {
-      e.printStackTrace();
+      Timber.tag(TAG).i("executeLocal for %s: %s", getType(), e);
     }
   }
 
@@ -140,11 +131,48 @@ public class CheckForControl extends AbstractCommand {
           }
         },
         error -> {
-          callback.onCommandExecuteSuccess(getType());
-
+          if (callback != null){
+            callback.onCommandExecuteError();
+          }
         }
       );
 
+  }
+
+  private void updateControl() {
+    dataStore
+      .select(RDocumentEntity.class)
+      .where(RDocumentEntity.UID.eq( document_id ))
+      .get()
+      .toObservable()
+      .flatMap( doc -> Observable.just( doc.isControl() ) )
+      .subscribe(
+        value -> {
+          Timber.tag(TAG).i("executeLocal for %s: CONTROL: %s",document_id, value);
+          try {
+
+            if (value == null){
+              value = false;
+            }
+
+            dataStore
+              .update(RDocumentEntity.class)
+              .set( RDocumentEntity.CONTROL, !value)
+              .where(RDocumentEntity.UID.eq(document_id))
+              .get()
+              .call();
+
+            if ( callback != null ){
+              callback.onCommandExecuteSuccess( getType() );
+            }
+
+          } catch (Exception e) {
+            Timber.tag(TAG).e("error executeLocal for %s [%s]: %s", document_id, getType(), e);
+          }
+        },
+        error -> {
+          Timber.tag(TAG).i("error %s",error);
+        });
   }
 
   public CheckForControl withDocumentId(String uid) {
