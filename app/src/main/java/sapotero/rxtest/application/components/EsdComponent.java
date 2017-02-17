@@ -45,8 +45,8 @@ import sapotero.rxtest.views.fragments.InfoCardLinksFragment;
 import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
 import sapotero.rxtest.views.fragments.RoutePreviewFragment;
 import sapotero.rxtest.views.fragments.SettingsViewFragment;
-import sapotero.rxtest.views.interfaces.DataLoaderManager;
-import sapotero.rxtest.views.interfaces.InterfaceDocumentManager;
+import sapotero.rxtest.views.managers.CurrentDocumentManager;
+import sapotero.rxtest.views.managers.DataLoaderManager;
 import sapotero.rxtest.views.managers.db.managers.DBDocumentManager;
 import sapotero.rxtest.views.managers.db.utils.DBDocumentManagerModule;
 import sapotero.rxtest.views.managers.menu.OperationManager;
@@ -141,7 +141,7 @@ public interface EsdComponent {
 
 
   void inject(DataLoaderManager context);
-  void inject(InterfaceDocumentManager context);
+  void inject(CurrentDocumentManager context);
 
   void inject(DocumentTypeItem context);
   void inject(ButtonBuilder context);

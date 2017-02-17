@@ -69,7 +69,7 @@ import sapotero.rxtest.views.custom.CircleLeftArrow;
 import sapotero.rxtest.views.custom.CircleRightArrow;
 import sapotero.rxtest.views.custom.OrganizationSpinner;
 import sapotero.rxtest.views.custom.SearchView.SearchView;
-import sapotero.rxtest.views.interfaces.DataLoaderManager;
+import sapotero.rxtest.views.managers.DataLoaderManager;
 import sapotero.rxtest.views.menu.MenuBuilder;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import timber.log.Timber;

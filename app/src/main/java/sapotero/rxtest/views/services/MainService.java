@@ -79,7 +79,7 @@ import sapotero.rxtest.utils.cryptopro.KeyStoreType;
 import sapotero.rxtest.utils.cryptopro.PinCheck;
 import sapotero.rxtest.utils.cryptopro.ProviderType;
 import sapotero.rxtest.utils.cryptopro.wrapper.CMSSign;
-import sapotero.rxtest.views.interfaces.DataLoaderManager;
+import sapotero.rxtest.views.managers.DataLoaderManager;
 import timber.log.Timber;
 
 public class MainService extends Service {

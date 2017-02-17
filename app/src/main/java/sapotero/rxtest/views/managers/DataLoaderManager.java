@@ -1,4 +1,4 @@
-package sapotero.rxtest.views.interfaces;
+package sapotero.rxtest.views.managers;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -364,7 +364,7 @@ public class DataLoaderManager {
 
         // получаем список документов по статусам
         .concatMap(data -> {
-          Fields.Status[] new_filter_types = Fields.Status.values();
+          Fields.Status[] new_filter_types = Fields.Status.INDEX;
 
           Observable<Fields.Status> types = Observable.from(new_filter_types);
           Observable<Documents> count = Observable

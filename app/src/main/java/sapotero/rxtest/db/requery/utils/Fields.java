@@ -35,7 +35,7 @@ public class Fields {
       return value;
     }
 
-    public static Status[] INDEX = new Status[] { SENT_TO_THE_REPORT, SENT_TO_THE_PERFORMANCE, PRIMARY_CONSIDERATION, APPROVAL, SIGNING, PROCESSED };
+    public static Status[] INDEX = new Status[] { SENT_TO_THE_REPORT, PRIMARY_CONSIDERATION, APPROVAL, SIGNING };
 
     public static Status findStatus( String string){
       Status status = null;

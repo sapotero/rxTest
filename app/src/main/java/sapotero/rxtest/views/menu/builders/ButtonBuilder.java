@@ -23,16 +23,14 @@ import io.requery.Persistable;
 import io.requery.query.Expression;
 import io.requery.query.LogicalCondition;
 import io.requery.query.Scalar;
-import io.requery.query.Tuple;
 import io.requery.query.WhereAndOr;
 import io.requery.rx.SingleEntityStore;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
+import sapotero.rxtest.db.requery.utils.Fields;
 import timber.log.Timber;
 
 public class ButtonBuilder {
@@ -110,75 +108,118 @@ public class ButtonBuilder {
     LogicalCondition<? extends Expression<?>, ?> query_condition;
 
     unsubscribe();
-    subscription.add(
 
-      dataStore
-        .select(RDecisionEntity.DOCUMENT_ID)
-        .distinct()
-        .get()
-        .toObservable()
-        .subscribeOn(Schedulers.computation())
-        .observeOn(AndroidSchedulers.mainThread())
-        .toList()
-        .subscribe( data -> {
+    WhereAndOr<Scalar<Integer>> query = dataStore
+      .count(RDocumentEntity.class)
+      .join(RDecisionEntity.class)
+      .on(RDecisionEntity.DOCUMENT_ID.eq(RDocumentEntity.ID))
+      .where(RDocumentEntity.USER.eq(settings.getString("login").get()))
+      .and(RDocumentEntity.FILTER.ne(Fields.Status.LINK.getValue()));
 
-            // FIX медленно, но работает, оставить если согласуют
-            ArrayList<Integer> result = new ArrayList<>();
-            for ( Tuple item: data) {
-            result.add( item.get(0) );
-          }
-            Timber.tag(TAG).w("TOTAL: %s", result.size());
+    if ( item_conditions.length > 0 ){
 
-            WhereAndOr<Scalar<Integer>> querys = dataStore
-              .count(RDocumentEntity.class )
-              .where( RDocumentEntity.USER.eq( settings.getString("login").get() ) );
+      for (ConditionBuilder condition : item_conditions ){
+        switch ( condition.getCondition() ){
+          case AND:
+            query = query.and( condition.getField() );
+            break;
+          case OR:
+            query = query.or( condition.getField() );
+            break;
+          default:
+            break;
+        }
+      }
+    }
+    if ( conditions.length > 0 ){
 
-          if ( item_conditions.length > 0 ){
-
-              for (ConditionBuilder condition : item_conditions ){
-                switch ( condition.getCondition() ){
-                  case AND:
-                    querys = querys.and( condition.getField() );
-                    break;
-                  case OR:
-                    querys = querys.or( condition.getField() );
-                    break;
-                  default:
-                    break;
-                }
-              }
-            }
-            if ( conditions.length > 0 ){
-
-              for (ConditionBuilder condition : conditions ){
-                switch ( condition.getCondition() ){
-                  case AND:
-                    querys = querys.and( condition.getField() );
-                    break;
-                  case OR:
-                    querys = querys.or( condition.getField() );
-                    break;
-                  default:
-                    break;
-                }
-              }
-            }
+      for (ConditionBuilder condition : conditions ){
+        switch ( condition.getCondition() ){
+          case AND:
+            query = query.and( condition.getField() );
+            break;
+          case OR:
+            query = query.or( condition.getField() );
+            break;
+          default:
+            break;
+        }
+      }
+    }
 
 
-            Integer docs_count = querys
-              .and(RDocumentEntity.ID.in(result))
-              .get()
-              .value();
 
-          view.setText( String.format( label, docs_count ) );
+    view.setText( String.format( label, query.get().value() ) );
+//    subscription.add(
+//
+//      query
 
-        },
-          error -> {
-            Timber.e(error);
-          }
-        )
-
-    );
+//      dataStore
+//        .select(RDecisionEntity.DOCUMENT_ID)
+//        .distinct()
+//        .get()
+//        .toObservable()
+//        .subscribeOn(Schedulers.computation())
+//        .observeOn(AndroidSchedulers.mainThread())
+//        .toList()
+//        .subscribe( data -> {
+//
+//            // FIX медленно, но работает, оставить если согласуют
+//            ArrayList<Integer> result = new ArrayList<>();
+//            for ( Tuple item: data) {
+//            result.add( item.get(0) );
+//          }
+//            Timber.tag(TAG).w("TOTAL: %s", result.size());
+//
+//            WhereAndOr<Scalar<Integer>> querys = dataStore
+//              .count(RDocumentEntity.class )
+//              .where( RDocumentEntity.USER.eq( settings.getString("login").get() ) );
+//
+//          if ( item_conditions.length > 0 ){
+//
+//              for (ConditionBuilder condition : item_conditions ){
+//                switch ( condition.getCondition() ){
+//                  case AND:
+//                    querys = querys.and( condition.getField() );
+//                    break;
+//                  case OR:
+//                    querys = querys.or( condition.getField() );
+//                    break;
+//                  default:
+//                    break;
+//                }
+//              }
+//            }
+//            if ( conditions.length > 0 ){
+//
+//              for (ConditionBuilder condition : conditions ){
+//                switch ( condition.getCondition() ){
+//                  case AND:
+//                    querys = querys.and( condition.getField() );
+//                    break;
+//                  case OR:
+//                    querys = querys.or( condition.getField() );
+//                    break;
+//                  default:
+//                    break;
+//                }
+//              }
+//            }
+//
+//
+//            Integer docs_count = querys
+//              .and(RDocumentEntity.ID.in(result))
+//              .get()
+//              .value();
+//
+//          view.setText( String.format( label, docs_count ) );
+//
+//        },
+//          error -> {
+//            Timber.e(error);
+//          }
+//        )
+//    );
   }
 
   private void getCountWithoutDecisons() {
@@ -194,11 +235,6 @@ public class ButtonBuilder {
       for (ConditionBuilder condition : item_conditions ){
         temp_conditions.add(condition);
 
-//        Timber.tag("item_conditions").v("%s %s %s | %s"
-//          , condition.getField().getLeftOperand()
-//          , condition.getField().getOperator()
-//          , condition.getField().getRightOperand()
-//          , condition.getCondition());
         switch ( condition.getCondition() ){
           case AND:
             query = query.and( condition.getField() );

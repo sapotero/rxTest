@@ -1,4 +1,4 @@
-package sapotero.rxtest.views.interfaces;
+package sapotero.rxtest.views.managers;
 
 import android.content.Context;
 
@@ -17,7 +17,7 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import timber.log.Timber;
 
-public class InterfaceDocumentManager {
+public class CurrentDocumentManager {
 
   @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
@@ -44,12 +44,12 @@ public class InterfaceDocumentManager {
     void onGetStateError();
   }
 
-  public void registerCallBack(InterfaceDocumentManager.Callback callback){
+  public void registerCallBack(CurrentDocumentManager.Callback callback){
     this.callback = callback;
     getCurrentState();
   }
 
-  public InterfaceDocumentManager(Context context) {
+  public CurrentDocumentManager(Context context) {
     this.context = context;
     EsdApplication.getComponent(context).inject(this);
     initialize();

@@ -24,7 +24,7 @@ public enum MainMenuItem {
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.ne(true) )
     },
     new ConditionBuilder[]{},
-    true),
+    true, false),
 
   INCOMING_DOCUMENTS ( 1, "Входящие документы %s", new MainMenuButton[]{
     MainMenuButton.PERFORMANCE,
@@ -38,7 +38,7 @@ public enum MainMenuItem {
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.INCOMING_DOCUMENTS.getValue() + "%"  ) )
     },
-    false),
+    false, false),
 
   CITIZEN_REQUESTS ( 2, "Обращения граждан %s", new MainMenuButton[]{
     MainMenuButton.PERFORMANCE,
@@ -52,7 +52,7 @@ public enum MainMenuItem {
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.CITIZEN_REQUESTS.getValue() + "%"  ) )
     },
-    false),
+    false, false),
 
   APPROVE_ASSIGN ( 3, "Подписание/Согласование %s",
     new MainMenuButton[]{
@@ -66,7 +66,7 @@ public enum MainMenuItem {
 //      new ConditionBuilder( ConditionBuilder.Condition.OR,  RDocumentEntity.FILTER.eq( Fields.Status.APPROVAL.getValue() ) )
     },
     new ConditionBuilder[]{},
-    true),
+    true, true),
 
   INCOMING_ORDERS ( 4, "НПА %s", new MainMenuButton[]{
     MainMenuButton.PERFORMANCE,
@@ -79,7 +79,7 @@ public enum MainMenuItem {
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like(  Fields.Journal.INCOMING_ORDERS.getValue() + "%"  ) )
     },
-    false),
+    false, false),
 
   ORDERS ( 5, "Приказы %s", new MainMenuButton[]{
     MainMenuButton.PERFORMANCE,
@@ -92,7 +92,7 @@ public enum MainMenuItem {
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.ORDERS.getValue() + "%"  ) )
     },
-    false),
+    false, false),
 
   ORDERS_DDO ( 6, "Приказы ДДО %s", new MainMenuButton[]{
     MainMenuButton.PERFORMANCE,
@@ -105,7 +105,7 @@ public enum MainMenuItem {
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.ORDERS_DDO.getValue()+ "%"  ) )
     },
-    false),
+    false, false),
 
   IN_DOCUMENTS ( 7, "Внутренние документы %s", new MainMenuButton[]{
     MainMenuButton.PERFORMANCE,
@@ -119,35 +119,41 @@ public enum MainMenuItem {
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.OUTGOING_DOCUMENTS.getValue()+ "%"  ) )
     },
-    false),
+    false, false),
 
   ON_CONTROL ( 8, "На контроле %s", new MainMenuButton[]{},
-    false,
+    true,
     new ConditionBuilder[]{
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.CONTROL.eq( true ) )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.CONTROL.eq( true ) ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.ne( Fields.Status.LINK.getValue() ) ),
     },
     new ConditionBuilder[]{
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.CONTROL.eq( true ) )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.CONTROL.eq( true ) ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.ne( Fields.Status.LINK.getValue() ) ),
     },
-    true),
+    true, true),
   PROCESSED ( 9, "Обработанное %s", new MainMenuButton[]{},
-    false,
+    true,
     new ConditionBuilder[]{
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq( true ) )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq( true ) ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.ne( Fields.Status.LINK.getValue() ) ),
     },
     new ConditionBuilder[]{
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq( true ) )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq( true ) ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.ne( Fields.Status.LINK.getValue() ) ),
     },
-    true),
+    true, true),
   FAVORITES ( 10, "Избранное %s", new MainMenuButton[]{},
-    false,
+    true,
     new ConditionBuilder[]{
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FAVORITES.eq( true ) )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FAVORITES.eq( true ) ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.ne( Fields.Status.LINK.getValue() ) ),
     },
     new ConditionBuilder[]{
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FAVORITES.eq( true ) )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FAVORITES.eq( true ) ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.ne( Fields.Status.LINK.getValue() ) ),
     },
-    true
+    true, true
   );
 
   private static final String TAG = "MainMenuItem";
@@ -160,7 +166,9 @@ public enum MainMenuItem {
   private final boolean showAnyWay;
   private final ArrayList<ButtonBuilder> buttonsList = new ArrayList<>();
 
-  MainMenuItem(final int index, final String name, final MainMenuButton[] mainMenuButtons, Boolean showOrganizations, ConditionBuilder[] countCounditions, ConditionBuilder[] queryConditions, boolean showAnyWay) {
+  private final boolean processed;
+
+  MainMenuItem(final int index, final String name, final MainMenuButton[] mainMenuButtons, Boolean showOrganizations, ConditionBuilder[] countCounditions, ConditionBuilder[] queryConditions, boolean showAnyWay, boolean processed) {
     this.index = index;
     this.name  = name;
     this.mainMenuButtons = mainMenuButtons;
@@ -168,6 +176,11 @@ public enum MainMenuItem {
     this.countConditions = countCounditions;
     this.queryConditions = queryConditions;
     this.showAnyWay = showAnyWay;
+    this.processed = processed;
+  }
+
+  public boolean isProcessed() {
+    return processed;
   }
 
   public boolean isShowAnyWay() {

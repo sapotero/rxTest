@@ -52,7 +52,7 @@ import sapotero.rxtest.views.fragments.RoutePreviewFragment;
 import sapotero.rxtest.views.managers.menu.factories.CommandFactory;
 import timber.log.Timber;
 
-public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivityDecisionPreviewFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, RoutePreviewFragment.OnFragmentInteractionListener, InfoCardDocumentsFragment.OnFragmentInteractionListener, InfoCardWebViewFragment.OnFragmentInteractionListener, InfoCardLinksFragment.OnFragmentInteractionListener, InfoCardFieldsFragment.OnFragmentInteractionListener, /*InterfaceDocumentManager.Callback,*/ SelectOshsDialogFragment.Callback {
+public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivityDecisionPreviewFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, RoutePreviewFragment.OnFragmentInteractionListener, InfoCardDocumentsFragment.OnFragmentInteractionListener, InfoCardWebViewFragment.OnFragmentInteractionListener, InfoCardLinksFragment.OnFragmentInteractionListener, InfoCardFieldsFragment.OnFragmentInteractionListener, /*CurrentDocumentManager.Callback,*/ SelectOshsDialogFragment.Callback {
 
 
   @BindView(R.id.activity_info_preview_container) LinearLayout preview_container;
@@ -77,7 +77,7 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
   private Preference<Integer> POSITION;
 
 
-//  private InterfaceDocumentManager documentManager;
+//  private CurrentDocumentManager documentManager;
   private String TAG = this.getClass().getSimpleName();
 
   @BindView(R.id.toolbar) Toolbar toolbar;
@@ -103,7 +103,7 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
 
     EsdApplication.getComponent(this).inject(this);
 
-//    documentManager = new InterfaceDocumentManager(this);
+//    documentManager = new CurrentDocumentManager(this);
 //    documentManager.registerCallBack(this);
 
     Intent intent = getIntent();
@@ -281,7 +281,7 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
   }
 
 
-//  /* InterfaceDocumentManager.Callback */
+//  /* CurrentDocumentManager.Callback */
 //  @Override
 //  public void onGetStateSuccess() {
 //    Timber.tag("DocumentManagerCallback").i("onGetStateSuccess");

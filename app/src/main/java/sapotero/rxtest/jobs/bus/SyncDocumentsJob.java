@@ -203,9 +203,12 @@ public class SyncDocumentsJob  extends BaseJob {
     rd.setReceiptDate( d.getReceiptDate() );
     rd.setViewed( d.getViewed() );
 
-    rd.setFavorites(true);
-    rd.setProcessed(true);
+    rd.setFavorites(false);
+    rd.setProcessed(false);
     rd.setFolder(processed_folder);
+    if ( processed_folder != "" ){
+      rd.setProcessed(true);
+    }
     rd.setControl(onControl);
 
     if ( d.getSigner().getOrganisation() != null && !Objects.equals(d.getSigner().getOrganisation(), "")){
@@ -277,6 +280,11 @@ public class SyncDocumentsJob  extends BaseJob {
       rDoc.setFavorites(isFavorites);
       rDoc.setProcessed(isProcessed);
       rDoc.setFolder(processed_folder);
+
+      if ( processed_folder != "" && isProcessed ){
+        rDoc.setProcessed(true);
+      }
+
       rDoc.setControl(onControl);
       rDoc.setUser( LOGIN.get() );
 

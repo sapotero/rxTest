@@ -26,9 +26,8 @@ import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocument;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.models.RFolderEntity;
 import sapotero.rxtest.db.requery.models.RSignerEntity;
-import sapotero.rxtest.db.requery.models.RTemplateEntity;
+import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
@@ -91,21 +90,28 @@ public class DBQueryBuilder {
     if (conditions != null) {
       hideEmpty();
 
+      conditions.add(  new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.ne(Fields.Status.LINK.getValue()) ) );
+
+      Timber.v( "executeWithConditions: %s", conditions.size() );
+      for (ConditionBuilder condition : conditions ) {
+        Timber.tag(TAG).i(":: %s", condition.toString());
+      }
+
+
       progressBar.setVisibility(ProgressBar.VISIBLE);
 
       WhereAndOr<Result<RDocumentEntity>> query =
         dataStore
           .select(RDocumentEntity.class)
-          .where(RDocumentEntity.USER.eq( settings.getString("login").get() ))
-          .and(RDocumentEntity.FILTER.ne("link"));
+          .where(RDocumentEntity.USER.eq( settings.getString("login").get() ));
 
       WhereAndOr<Scalar<Integer>> queryCount =
         dataStore
           .count(RDocument.class)
-          .where(RDocumentEntity.USER.eq( settings.getString("login").get() ))
-          .and(RDocumentEntity.FILTER.ne("link"));
+          .where(RDocumentEntity.USER.eq( settings.getString("login").get() ));
 
       if ( conditions.size() > 0 ){
+
 
         for (ConditionBuilder condition : conditions ){
           Timber.tag(TAG).i( "++ %s", condition.toString() );
@@ -188,22 +194,13 @@ public class DBQueryBuilder {
   }
   public void addList(Result<RDocumentEntity> docs){
 
-    //FIX переделать добавление документов в адаптер из базы
     docs
       .toObservable()
       .subscribeOn(Schedulers.io())
       .observeOn( AndroidSchedulers.mainThread() )
       .toList()
       .subscribe( list -> {
-//        Timber.tag("add").e("doc: %s", doc.getId() );
-//
-//        if ( menuBuilder.getResult() != null ){
-//          ArrayList<ConditionBuilder> tmp_conditions = menuBuilder.getResult();
-//
-//        }
-
         addList(list, recyclerView);
-
       }, this::error);
 
   }
@@ -218,39 +215,13 @@ public class DBQueryBuilder {
   }
 
   public void executeWithConditions(ArrayList<ConditionBuilder> conditions, boolean withFavorites) {
+
     this.conditions = conditions;
     this.withFavorites = withFavorites;
     execute();
   }
   private void addList(List<RDocumentEntity> docs, RecyclerView recyclerView) {
     ArrayList<Document> list_dosc = new ArrayList<>();
-
-//    if (docs.size() > 0) {
-//      for (int i = 0; i < docs.size(); i++) {
-//        RDocumentEntity doc = docs.get(i);
-//        Timber.tag(TAG).v("addToAdapter ++ " + doc.getUid());
-//
-//        Document document = new Document();
-//        document.setChanged( doc.isChanged() );
-//        document.setStatusCode( doc.getFilter() );
-//        document.setUid(doc.getUid());
-//        document.setMd5(doc.getMd5());
-//        document.setControl(doc.isControl());
-//        document.setFavorites(doc.isFavorites());
-//        document.setSortKey(doc.getSortKey());
-//        document.setTitle(doc.getTitle());
-//        document.setRegistrationNumber(doc.getRegistrationNumber());
-//        document.setRegistrationDate(doc.getRegistrationDate());
-//        document.setUrgency(doc.getUrgency());
-//        document.setShortDescription(doc.getShortDescription());
-//        document.setComment(doc.getComment());
-//        document.setExternalDocumentNumber(doc.getExternalDocumentNumber());
-//        document.setReceiptDate(doc.getReceiptDate());
-//        document.setOrganization(doc.getOrganization());
-//
-//        list_dosc.add(document);
-//      }
-//    }
 
     if ( list_dosc.size() == 0 ){
       showEmpty();
@@ -259,41 +230,10 @@ public class DBQueryBuilder {
     progressBar.setVisibility(ProgressBar.GONE);
     adapter.setDocuments(docs, this.recyclerView);
 
-
   }
 
   private void addOne(RDocumentEntity _document) {
     progressBar.setVisibility(ProgressBar.GONE);
-
-//    Timber.tag(TAG).v("addToAdapter %s\n%s\n%s", _document.getUid(), _document.getUser(), _document.getFilter() );
-//
-//    Document document = new Document();
-//    document.setChanged( _document.isChanged() );
-//    document.setStatusCode( _document.getFilter() );
-//    document.setUid(_document.getUid());
-//    document.setMd5(_document.getMd5());
-//    document.setControl(_document.isControl());
-//    document.setFavorites(_document.isFavorites());
-//    document.setSortKey(_document.getSortKey());
-//    document.setTitle(_document.getTitle());
-//    document.setRegistrationNumber(_document.getRegistrationNumber());
-//    document.setRegistrationDate(_document.getRegistrationDate());
-//    document.setUrgency(_document.getUrgency());
-//    document.setShortDescription(_document.getShortDescription());
-//    document.setComment(_document.getComment());
-//    document.setExternalDocumentNumber(_document.getExternalDocumentNumber());
-//    document.setReceiptDate(_document.getReceiptDate());
-//    document.setOrganization(_document.getOrganization());
-//
-//    RSignerEntity _r_signer = (RSignerEntity) _document.getSigner();
-//    Signer signer = new Signer();
-//    signer.setId(_r_signer.getUid());
-//    signer.setName(_r_signer.getName());
-//    signer.setOrganisation(_r_signer.getOrganisation());
-//    signer.setType(_r_signer.getType());
-//
-//    document.setSigner( signer );
-
     adapter.addItem(_document);
   }
 
@@ -304,31 +244,6 @@ public class DBQueryBuilder {
 
   private void hideEmpty(){
     documents_empty_list.setVisibility(View.GONE);
-  }
-
-  public void printFolders() {
-    dataStore
-      .select(RFolderEntity.class)
-      .get()
-      .toObservable()
-      .observeOn( Schedulers.io() )
-      .subscribeOn( AndroidSchedulers.mainThread() )
-      .subscribe( folder ->{
-        Timber.tag("FOLDERS").i(" %s - %s", folder.getUid(), folder.getTitle() );
-      });
-  }
-
-  public void printTemplates() {
-    dataStore
-      .select(RTemplateEntity.class)
-      .get()
-      .toObservable()
-      .observeOn( Schedulers.io() )
-      .subscribeOn( AndroidSchedulers.mainThread() )
-      .subscribe( template ->{
-        Timber.tag("TEMPLATES").i(" %s - %s", template.getUid(), template.getTitle() );
-      });
-
   }
 
   private void findOrganizations() {
@@ -412,6 +327,7 @@ public class DBQueryBuilder {
       .count(RDocumentEntity.UID)
       .where(RDocumentEntity.USER.eq( settings.getString("login").get() ) )
       .and(RDocumentEntity.FAVORITES.eq(true))
+      .and(RDocumentEntity.FILTER.ne("link"))
       .get().value();
   }
 

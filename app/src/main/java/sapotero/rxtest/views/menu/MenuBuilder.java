@@ -148,6 +148,12 @@ public class MenuBuilder implements ItemsBuilder.Callback{
 
     this.result = result;
 
+    Timber.tag(TAG).v( "onMenuUpdate: %s", result.size() );
+    for (ConditionBuilder condition : result ) {
+      Timber.tag(TAG).i("|| %s", condition.toString());
+    }
+
+
     Timber.tag(TAG).i( "onMenuUpdate" );
 
     view = new FrameLayout(context);

@@ -174,50 +174,17 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
     ArrayList<ConditionBuilder> result = new ArrayList<>();
 
     Collections.addAll(result, mainMenuItem.getQueryConditions() );
-    Collections.addAll(result, MainMenuButton.getByIndex(index).getConditions() );
+    if ( !mainMenuItem.isProcessed() ){
+      Collections.addAll(result, MainMenuButton.getByIndex(index).getConditions() );
+    }
+
+    Timber.tag(TAG).v( "onMenuUpdate: %s", result.size() );
+    for (ConditionBuilder condition : result ) {
+      Timber.tag(TAG).i("** %s", condition.toString());
+    }
+
 
     Timber.tag(TAG).v( MainMenuButton.getByIndex(index).getFormat() );
-//    if (mainMenuItem.getMainMenuButtons().size() > 0) {
-//      Boolean empty = true;
-//      for (ButtonBuilder b : mainMenuItem.getMainMenuButtons()) {
-//
-//        RadioButton button = b.getButton();
-//
-//        Boolean active = false;
-//
-//        if (button != null){
-//          active =  button.isPressed();
-//
-//          if ( active ){
-//            empty = false;
-//            Collections.addAll(result, b.getConditions());
-//          }
-//        }
-//
-////        Timber.e( "button conditions: %s | active: %s %s %s", Arrays.toString( b.getConditions() ), active, button.isActivated(), button.isChecked()  );
-//      }
-//
-//      if (empty){
-//        Boolean nil = true;
-//
-//        for (ButtonBuilder b : mainMenuItem.getMainMenuButtons()) {
-//          RadioButton button = b.getButton();
-//          if ( button != null && button.isChecked() ){
-//            Collections.addAll(result, b.getConditions() );
-//            nil = false;
-//          }
-//        }
-//
-//        if ( nil )  {
-//          Collections.addAll(result, mainMenuItem.getMainMenuButtons().get(0).getConditions() );
-//        }
-//
-//      }
-//    }
-//
-//    Timber.e( "button conditions: %s ", favoritesButton.isChecked() );
-//
-//    result.add( new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.USER.eq( settings.getString("login").get() ) ) );
 
     return result;
   }
@@ -234,6 +201,7 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
     return view;
   }
 
+  @RequiresApi(api = Build.VERSION_CODES.M)
   public void update() {
     updateView();
   }
