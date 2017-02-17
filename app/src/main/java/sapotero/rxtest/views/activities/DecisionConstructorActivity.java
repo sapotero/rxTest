@@ -6,7 +6,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.widget.ProgressBar;
+import android.widget.Button;
+import android.widget.EditText;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
@@ -41,8 +42,8 @@ import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.views.adapters.OshsAutoCompleteAdapter;
 import sapotero.rxtest.views.adapters.models.FontItem;
 import sapotero.rxtest.views.adapters.models.UrgencyItem;
-import sapotero.rxtest.views.custom.DelayAutoCompleteTextView;
 import sapotero.rxtest.views.custom.SpinnerWithLabel;
+import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
 import sapotero.rxtest.views.fragments.DecisionFragment;
 import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
 import sapotero.rxtest.views.managers.menu.OperationManager;
@@ -51,7 +52,7 @@ import sapotero.rxtest.views.managers.menu.utils.CommandParams;
 import sapotero.rxtest.views.managers.view.DecisionManager;
 import timber.log.Timber;
 
-public class DecisionConstructorActivity extends AppCompatActivity implements DecisionFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, OperationManager.Callback {
+public class DecisionConstructorActivity extends AppCompatActivity implements DecisionFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, OperationManager.Callback, SelectOshsDialogFragment.Callback {
 
   @Inject RxSharedPreferences settings;
   @Inject OperationManager operationManager;
@@ -59,17 +60,24 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
   @BindView(R.id.toolbar) Toolbar toolbar;
 
-  @BindView(R.id.fragment_decision_autocomplete_field) DelayAutoCompleteTextView user_autocomplete;
-  @BindView(R.id.fragment_decision_autocomplete_field_loading_indicator) ProgressBar indicator;
+//  @BindView(R.id.fragment_decision_autocomplete_field) DelayAutoCompleteTextView user_autocomplete;
+//  @BindView(R.id.fragment_decision_autocomplete_field_loading_indicator) ProgressBar indicator;
 
   @BindView(R.id.urgency_selector) SpinnerWithLabel<UrgencyItem> urgency_selector;
   @BindView(R.id.head_font_selector) SpinnerWithLabel<FontItem> font_selector;
+  @BindView(R.id.signer_oshs_selector) EditText signer_oshs_selector;
+
+  @BindView(R.id.sign_as_current_user) Button sign_as_current_user;
+
+
 
 
   private String TAG = this.getClass().getSimpleName();
   private DecisionManager manager;
   private Decision raw_decision;
   private RDecisionEntity rDecisionEntity;
+  private OshsAutoCompleteAdapter user_autocomplete_adapter;
+  private SelectOshsDialogFragment dialogFragment;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -103,7 +111,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
           .positiveText("сохранить")
           .onPositive(
             (dialog, which) -> {
-              Decision new_decision = manager.getDecision();
+              RDecisionEntity new_decision = manager.getrDecisionEntity();
 
               Timber.tag(TAG).w("positive %s", new_decision.getId() );
 
@@ -253,22 +261,40 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       }
     }
 
-    manager = new DecisionManager(this, getSupportFragmentManager(), raw_decision);
+    manager = new DecisionManager(this, getSupportFragmentManager(), rDecisionEntity);
     manager.build();
 
-    user_autocomplete.setThreshold(2);
-    user_autocomplete.setAdapter( new OshsAutoCompleteAdapter(this) );
-    user_autocomplete.setLoadingIndicator( indicator );
-    user_autocomplete.setOnItemClickListener(
-      (adapterView, view1, position, id) -> {
-        Oshs user = (Oshs) adapterView.getItemAtPosition(position);
-        user_autocomplete.setText( String.format("%s - %s", user.getName(), user.getOrganization() ) );
-//        manager.setSigner( user );
-      }
-    );
 
 
+    Oshs decision_signer = new Oshs();
+    decision_signer.setId( rDecisionEntity.getSignerId() );
+    decision_signer.setName( rDecisionEntity.getSigner() );
 
+//    user_autocomplete_adapter = new OshsAutoCompleteAdapter(this);
+//    user_autocomplete_adapter.setSigner( decision_signer );
+//
+//    user_autocomplete.setThreshold(2);
+//    user_autocomplete.setAdapter( user_autocomplete_adapter );
+//    user_autocomplete.setLoadingIndicator( indicator );
+//    user_autocomplete.setOnItemClickListener(
+//      (adapterView, view1, position, id) -> {
+//        Oshs user = (Oshs) adapterView.getItemAtPosition(position);
+//        user_autocomplete.setText( String.format("%s - %s", user.getName(), user.getOrganization() ) );
+////        manager.setSigner( user );
+//      }
+//    );
+//    user_autocomplete.setText( String.format("%s", user_autocomplete_adapter.getUser().getName() ) );
+//    user_autocomplete.onFilterComplete(0);
+    signer_oshs_selector.setOnClickListener(v -> {
+      dialogFragment = new SelectOshsDialogFragment();
+      dialogFragment.registerCallBack( this );
+      dialogFragment.show( getFragmentManager(), "SelectOshsDialogFragment");
+    });
+
+    sign_as_current_user.setOnClickListener(v -> {
+      rDecisionEntity.setSignerId( settings.getString("current_user_id").get() );
+      rDecisionEntity.setSigner( settings.getString("current_user").get() );
+    });
 
   }
 
@@ -349,7 +375,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
   }
 
-
   @Override
   public void onFragmentInteraction(Uri uri) {
   }
@@ -368,25 +393,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   }
 
 
-
-
-  @Override
-  public void onExecuteSuccess(String command) {
-    if ( Objects.equals(command, "approve_decision") ) {
-      finish();
-      EventBus.getDefault().post( new ApproveDecisionEvent() );
-    }
-
-    if ( Objects.equals(command, "reject_decision") ) {
-      finish();
-      EventBus.getDefault().post( new RejectDecisionEvent() );
-    }
-  }
-
-  @Override
-  public void onExecuteError() {
-
-  }
 
 
   private void showPrevDialog() {
@@ -436,4 +442,32 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     prev_dialog.build().show();
   }
 
+  @Override
+  public void onExecuteSuccess(String command) {
+    if ( Objects.equals(command, "approve_decision") ) {
+      finish();
+      EventBus.getDefault().post( new ApproveDecisionEvent() );
+    }
+
+    if ( Objects.equals(command, "reject_decision") ) {
+      finish();
+      EventBus.getDefault().post( new RejectDecisionEvent() );
+    }
+  }
+
+
+  @Override
+  public void onExecuteError() {
+
+  }
+
+  @Override
+  public void onSearchSuccess(Oshs user, CommandFactory.Operation operation) {
+    Timber.tag(TAG).e("USER: %s", new Gson().toJson(user) );
+  }
+
+  @Override
+  public void onSearchError(Throwable error) {
+
+  }
 }
