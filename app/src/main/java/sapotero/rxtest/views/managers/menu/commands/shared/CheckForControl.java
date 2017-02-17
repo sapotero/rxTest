@@ -123,7 +123,6 @@ public class CheckForControl extends AbstractCommand {
           Timber.tag(TAG).i("error: %s", data.getMessage());
           Timber.tag(TAG).i("type: %s", data.getType());
 
-          updateControl();
           queueManager.remove(this);
 
           if (callback != null){

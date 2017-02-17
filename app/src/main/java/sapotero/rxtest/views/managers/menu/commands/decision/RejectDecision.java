@@ -174,7 +174,7 @@ public class RejectDecision extends AbstractCommand {
         data -> {
           Timber.tag(TAG).i("ok: %s", data);
 
-          if (callback != null ){
+          if (callback != null){
             callback.onCommandExecuteSuccess( getType() );
           }
 

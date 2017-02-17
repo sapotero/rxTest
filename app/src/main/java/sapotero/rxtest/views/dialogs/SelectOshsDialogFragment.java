@@ -75,6 +75,8 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
     if (bundle != null) {
       String _operation = bundle.getString("operation");
       if ( _operation != null ){
+        Timber.e("OPERATION: %s", _operation);
+
         switch ( _operation ){
           case "approve":
             operation = CommandFactory.Operation.APPROVAL_CHANGE_PERSON;
@@ -82,7 +84,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
           case "sign":
             operation = CommandFactory.Operation.SIGNING_CHANGE_PERSON;
             break;
-          case "to_the_primary_consideration":
+          case "primary_consideration":
             operation = CommandFactory.Operation.TO_THE_PRIMARY_CONSIDERATION;
             break;
           default:
@@ -151,6 +153,10 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
 
         if ( callback != null){
           Oshs user = (Oshs) adapterView.getItemAtPosition(position);
+
+
+          Timber.e("setOnItemClickListener OPERATION: %s", operation.toString());
+
           callback.onSearchSuccess( user, operation);
         }
         dismiss();

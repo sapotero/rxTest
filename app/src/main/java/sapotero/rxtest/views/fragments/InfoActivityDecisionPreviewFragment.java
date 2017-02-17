@@ -57,8 +57,8 @@ import sapotero.rxtest.db.requery.models.decisions.RDecision;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RPerformer;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
-import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
 import sapotero.rxtest.events.decision.ApproveDecisionEvent;
+import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
 import sapotero.rxtest.events.decision.RejectDecisionEvent;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.adapters.DecisionSpinnerAdapter;
@@ -319,16 +319,9 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
     Timber.tag(TAG).v("edit");
     Gson gson = new Gson();
     RDecisionEntity data = decision_spinner_adapter.getItem( decision_spinner.getSelectedItemPosition() ).getDecision();
-//    String json = gson.toJson(data, Decision.class);
-
-//    Timber.tag("button_edit").i( json );
-
-
-
 
     Context context = getContext();
     Intent intent = new Intent( context , DecisionConstructorActivity.class);
-//    intent.putExtra("decision", json);
     context.startActivity(intent);
 
   }
@@ -375,65 +368,9 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
         if ( doc.getDecisions().size() > 0 ){
 
           decision_spinner_adapter.clear();
-//          decision_spinner_adapter.add( new DecisionSpinnerItem(null, "Всего резолюций", doc.getDecisions().size() ) );
-//
-//          desigions_recycler_view.setLayoutManager(new LinearLayoutManager(this));
-//          decisions_list = new ArrayList<>();
 
-
-
-          for (RDecision rDecision: doc.getDecisions()) {
-//            Decision raw_decision = new Decision();
-//
+          for (RDecision rDecision: doc.getDecisions()) {//
             RDecisionEntity decision = (RDecisionEntity) rDecision;
-//
-//            raw_decision.setId( String.valueOf(decision.getUid()) );
-//            raw_decision.setLetterhead(decision.getLetterhead());
-//            raw_decision.setSigner(decision.getSigner());
-//            raw_decision.setSignerId(decision.getSignerId());
-//            raw_decision.setAssistantId(decision.getAssistantId());
-//            raw_decision.setSignerBlankText(decision.getSignerBlankText());
-//            raw_decision.setComment(decision.getComment());
-//            raw_decision.setDate(decision.getDate());
-//            raw_decision.setApproved(decision.isApproved());
-//            raw_decision.setUrgencyText(decision.getUrgencyText());
-//            raw_decision.setSignerIsManager(decision.isSignerIsManager());
-//            raw_decision.setShowPosition(decision.isShowPosition());
-//            raw_decision.setSignBase64(decision.getSignBase64());
-//            raw_decision.setApproved(decision.isApproved());
-//
-//
-//            for (RBlock rBlock: decision.getBlocks()) {
-//              RBlockEntity block = (RBlockEntity) rBlock;
-//              Block raw_block = new Block();
-//
-//              raw_block.setNumber(block.getNumber());
-//              raw_block.setText(block.getText());
-//              raw_block.setAppealText(block.getAppealText());
-//              raw_block.setTextBefore(block.isTextBefore());
-//              raw_block.setHidePerformers(block.isHidePerformers());
-//              raw_block.setToCopy(block.isToCopy());
-//              raw_block.setToFamiliarization(block.isToFamiliarization());
-//
-//              for (RPerformer rPerformer: block.getPerformers()) {
-//                RPerformerEntity performer = (RPerformerEntity) rPerformer;
-//                Performer raw_performer = new Performer();
-//
-//                raw_performer.setNumber(performer.getNumber());
-//                raw_performer.setPerformerId(performer.getPerformerId());
-//                raw_performer.setPerformerType(performer.getPerformerType());
-//                raw_performer.setPerformerText(performer.getPerformerText());
-//                raw_performer.setOrganizationText(performer.getOrganizationText());
-//                raw_performer.setIsOriginal(performer.isIsOriginal());
-//                raw_performer.setIsResponsible(performer.isIsResponsible());
-//
-//                raw_block.getPerformers().add(raw_performer);
-//              }
-//
-//              raw_decision.getBlocks().add(raw_block);
-//            }
-
-
             decision_spinner_adapter.add( new DecisionSpinnerItem( decision, decision.getSignerBlankText(), decision.getDate() ) );
 
           }
@@ -462,6 +399,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
 
   private void displayDecision() {
     Timber.tag(TAG).v("displayDecision");
+
     if (current_decision != null) {
       preview.show( current_decision );
       settings.getString("decision.active.id").set( current_decision.getUid() );
@@ -470,6 +408,10 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
       }
       updateVisibility(current_decision.isApproved());
     }
+
+//    if ( !decision_spinner_adapter.hasActiveDecision() ){
+//      toolbarManager.showAsProcessed();
+//    }
   }
 
   private void loadFromJson(){
@@ -846,6 +788,13 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
     Timber.d("RejectDecisionEvent");
     current_decision.setApproved(false);
     displayDecision();
+    hideButtons();
+  }
+
+
+  private void hideButtons() {
+    next_person_button.setVisibility( View.INVISIBLE );
+    prev_person_button.setVisibility( View.INVISIBLE );
   }
 
 }

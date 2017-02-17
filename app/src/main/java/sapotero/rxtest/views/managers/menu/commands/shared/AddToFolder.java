@@ -137,8 +137,6 @@ public class AddToFolder extends AbstractCommand {
 
           queueManager.remove(this);
 
-          updateFavorites();
-
           if (callback != null && Objects.equals(data.getType(), "warning")){
             callback.onCommandExecuteSuccess( getType() );
           }

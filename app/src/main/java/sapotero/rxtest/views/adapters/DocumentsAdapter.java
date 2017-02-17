@@ -102,7 +102,9 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Simp
 //        real_docs.add(document);
 //        notifyItemRemoved(index);
 //      }
-      documents.remove(index);
+      if ( documents.get(index).isProcessed() ){
+        documents.remove(index);
+      }
     }
 
     Timber.tag(TAG).v("total documents: %s", documents.size());

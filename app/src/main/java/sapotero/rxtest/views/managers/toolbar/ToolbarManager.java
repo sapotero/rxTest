@@ -118,17 +118,15 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
 //            break;
           case R.id.menu_info_to_the_primary_consideration:
 
-            if (oshs == null){
-              oshs = new SelectOshsDialogFragment();
+            Timber.v("primary_consideration");
 
-              Bundle bundle = new Bundle();
-              bundle.putString("operation", "to_the_primary_consideration");
-              oshs.setArguments(bundle);
+            SelectOshsDialogFragment dialogFragment = new SelectOshsDialogFragment();
+            Bundle bundle1 = new Bundle();
+            bundle1.putString("operation", "primary_consideration");
+            dialogFragment.setArguments(bundle1);
+            dialogFragment.registerCallBack( this );
+            dialogFragment.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
 
-              oshs.registerCallBack( this );
-            }
-
-            oshs.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
             operation = CommandFactory.Operation.INCORRECT;
             break;
 
@@ -172,7 +170,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
 
           // approval (согласование проектов документов)
           case R.id.menu_info_approval_change_person:
-            operation = CommandFactory.Operation.APPROVAL_CHANGE_PERSON;
+            operation = CommandFactory.Operation.INCORRECT;
 
             if (oshs == null){
               oshs = new SelectOshsDialogFragment();
@@ -335,12 +333,11 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
         break;
     }
 
-    //FIX в обработанных - изменить резолюции на поручения
     // Если документ обработан - то изменяем резолюции на поручения
-    if( doc.isProcessed() && Objects.equals(doc.getFilter(), Fields.Status.PROCESSED.getValue())){
+    if( doc.isProcessed() ){
       try {
-
-        toolbar.getMenu().findItem( R.id.menu_info_decision_create).setTitle( context.getString( R.string.info_create_decision_processed ) );
+        toolbar.getMenu().findItem( R.id.menu_info_decision_edit).setVisible(false);
+        toolbar.getMenu().findItem( R.id.menu_info_decision_create).setVisible(true);
       } catch (Exception e) {
         Timber.tag(TAG).v(e);
       }
@@ -411,7 +408,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
 
   public void update(String command){
 
-    Timber.tag(TAG).w("add %s", command );
+    Timber.tag(TAG).w("update %s", command );
 
     if ( Objects.equals(command, "check_for_control") ) {
       EventBus.getDefault().post( new ShowSnackEvent("Отметки для постановки на контроль успешно обновлены.") );
@@ -421,28 +418,36 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
       toolbar.getMenu().clear();
       toolbar.inflateMenu(R.menu.info_menu);
       EventBus.getDefault().post( new ShowSnackEvent("Операция передачи успешно завершена") );
-      EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
+      if ( !doc.isProcessed() ){
+        EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
+      }
     }
 
     if ( Objects.equals(command, "next_person") ) {
       toolbar.getMenu().clear();
       toolbar.inflateMenu(R.menu.info_menu);
       EventBus.getDefault().post( new ShowSnackEvent("Операция подписания успешно завершена") );
-      EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
+      if ( !doc.isProcessed() ){
+        EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
+      }
     }
 
     if ( Objects.equals(command, "prev_person") ) {
       toolbar.getMenu().clear();
       toolbar.inflateMenu(R.menu.info_menu);
       EventBus.getDefault().post( new ShowSnackEvent("Операция отклонения успешно завершена") );
-      EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
+      if ( !doc.isProcessed() ){
+        EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
+      }
     }
 
     if ( Objects.equals(command, "to_the_primary_consideration") ) {
       toolbar.getMenu().clear();
       toolbar.inflateMenu(R.menu.info_menu);
       EventBus.getDefault().post( new ShowSnackEvent("Операция передачи первичного рассмотрения успешно завершена") );
-      EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
+      if ( !doc.isProcessed() ){
+        EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
+      }
     }
 
 
@@ -456,7 +461,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
     if ( Objects.equals(command, "reject_decision") ) {
       toolbar.getMenu().clear();
       toolbar.inflateMenu(R.menu.info_menu);
-      EventBus.getDefault().post( new ShowSnackEvent("Резолюция отклонена") );
+//      EventBus.getDefault().post( new ShowSnackEvent("Резолюция отклонена") );
       EventBus.getDefault().post( new RejectDecisionEvent() );
     }
 
@@ -637,6 +642,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
 
   private void showPrevDialog(Boolean isApproval) {
     String comment = "";
+    CommandParams params = new CommandParams();
 
     MaterialDialog.Builder prev_dialog = new MaterialDialog.Builder(context)
       .content(R.string.dialog_reject_body)
@@ -648,7 +654,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
         CommandFactory.Operation operation;
         operation = isApproval ? CommandFactory.Operation.APPROVAL_PREV_PERSON : CommandFactory.Operation.SIGNING_PREV_PERSON;
 
-        CommandParams params = new CommandParams();
+
         params.setUser(LOGIN.get());
         params.setSign("Sign");
 
@@ -665,7 +671,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
       if ( settings.getBoolean("settings_view_show_comment_post").get() ){
         prev_dialog.inputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES )
           .input(R.string.comment_hint, R.string.dialog_empty_value, (dialog12, input) -> {
-            settings.getString("prev_dialog_comment").set((String) input);
+            settings.getString("prev_dialog_comment").set( input.toString() );
+            params.setComment( input.toString() );
           });
       }
 
@@ -678,11 +685,27 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
   public void onSearchSuccess(Oshs user, CommandFactory.Operation operation) {
     CommandParams params = new CommandParams();
     params.setPerson( user.getId() );
-    operationManager.execute( CommandFactory.Operation.APPROVAL_CHANGE_PERSON, params );
+    operationManager.execute( operation, params );
   }
 
   @Override
   public void onSearchError(Throwable error) {
 
+  }
+
+  public void showAsProcessed() {
+    toolbar.getMenu().clear();
+    toolbar.inflateMenu(R.menu.info_menu);
+    EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
+
+    //настройка
+    try {
+
+      if ( !settings.getBoolean("settings_view_show_create_decision_post").get() ){
+        toolbar.getMenu().findItem( R.id.menu_info_decision_create).setVisible(false);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 }

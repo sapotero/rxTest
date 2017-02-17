@@ -12,8 +12,11 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.google.gson.Gson;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -29,6 +32,8 @@ import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RPerformer;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
+import sapotero.rxtest.events.decision.ApproveDecisionEvent;
+import sapotero.rxtest.events.decision.RejectDecisionEvent;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
@@ -145,72 +150,37 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
           if ( settings.getBoolean("settings_view_show_actions_confirm").get() ){
             showNextDialog();
           } else {
-            // operation = CommandFactory.Operation.APPROVAL_PREV_PERSON;
+
+            CommandFactory.Operation operation;
+            operation =CommandFactory.Operation.APPROVE_DECISION;
+
+            CommandParams params = new CommandParams();
+            params.setDecisionId( rDecisionEntity.getUid() );
+            params.setDecision( rDecisionEntity );
+
+            operationManager.execute(operation, params);
           }
 
           break;
         case R.id.action_constructor_prev:
-          Decision reject = new Decision();
-          reject.setApproved(false);
-          reject.setCanceled(true);
-          reject.setBlocks(null);
-
-          Timber.tag("DECISION").e("reject: %s", new Gson().toJson(reject) );
 
           // настройка
           // Показывать подтверждения о действиях с документом
           if ( settings.getBoolean("settings_view_show_actions_confirm").get() ){
             showPrevDialog();
           } else {
-            // operation = CommandFactory.Operation.APPROVAL_PREV_PERSON;
+            CommandFactory.Operation operation;
+            operation =CommandFactory.Operation.REJECT_DECISION;
+
+            CommandParams params = new CommandParams();
+            params.setDecisionId( rDecisionEntity.getUid() );
+            params.setDecision( rDecisionEntity );
+
+            operationManager.execute(operation, params);
           }
 
           break;
 
-
-
-//        case R.id.action_constructor_save:
-//          Timber.e("CHANGED: %s", manager.isChanged() );
-//
-//          manager.update();
-//          break;
-//        case R.id.action_constructor_close:
-//
-//          if ( manager.isChanged() ){
-////            new RejectDecisionFragment().show( getFragmentManager(), "SaveDialog");
-//
-//            new MaterialDialog.Builder(this)
-//              .title("Имеются несохранненые данные")
-//              .content("Резолюция была изменена")
-//              .positiveText("сохранить")
-//              .onPositive(
-//                (dialog, which) -> {
-//                  Decision new_decision = manager.getDecision();
-//
-//                  Timber.tag(TAG).w("positive %s", new_decision.getId() );
-//                }
-//              )
-//              .neutralText("выход")
-//              .onNeutral(
-//                (dialog, which) -> {
-//                  Timber.tag(TAG).w("nothing");
-//                  finish();
-//                }
-//              )
-//              .negativeText("возврат")
-//              .onNegative(
-//                (dialog, which) -> {
-//                  Timber.tag(TAG).w("negative");
-//                }
-//              )
-//              .show();
-//
-//
-//          } else {
-//            finish();
-//          }
-//
-//        break;
         default:
           break;
       }
@@ -398,9 +368,19 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   }
 
 
+
+
   @Override
   public void onExecuteSuccess(String command) {
+    if ( Objects.equals(command, "approve_decision") ) {
+      finish();
+      EventBus.getDefault().post( new ApproveDecisionEvent() );
+    }
 
+    if ( Objects.equals(command, "reject_decision") ) {
+      finish();
+      EventBus.getDefault().post( new RejectDecisionEvent() );
+    }
   }
 
   @Override
@@ -417,15 +397,14 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       .positiveText(R.string.yes)
       .negativeText(R.string.no)
       .onPositive((dialog1, which) -> {
+        CommandFactory.Operation operation;
+        operation =CommandFactory.Operation.REJECT_DECISION;
 
-//        CommandFactory.Operation operation;
-//        operation = isApproval ? CommandFactory.Operation.APPROVAL_PREV_PERSON : CommandFactory.Operation.SIGNING_PREV_PERSON;
-//
-//        CommandParams params = new CommandParams();
-//        params.setUser(LOGIN.get());
-//        params.setSign("Sign");
+        CommandParams params = new CommandParams();
+        params.setDecisionId( rDecisionEntity.getUid() );
+        params.setDecision( rDecisionEntity );
 
-//        operationManager.execute(operation, params);
+        operationManager.execute(operation, params);
       })
       .autoDismiss(true);
 
@@ -440,11 +419,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       .positiveText(R.string.yes)
       .negativeText(R.string.no)
       .onPositive((dialog1, which) -> {
-
-//        Decision approve = new Decision();
-//        approve.setApproved(true);
-//        approve.setBlocks(null);
-//        Timber.tag("DECISION").e("approve: %s | %s", new Gson().toJson(approve), settings.getString("decision.active.id").get() );
 
         raw_decision.setApproved(true);
 

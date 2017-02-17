@@ -93,10 +93,14 @@ public class DecisionSpinnerAdapter extends BaseAdapter {
   public boolean hasActiveDecision() {
     Boolean result = false;
 
-    for ( DecisionSpinnerItem decision: decisions ) {
-      if (!decision.getDecision().isApproved() && Objects.equals(decision.getDecision().getSignerId(), current_user)){
-        result = true;
+    try {
+      for ( DecisionSpinnerItem decision: decisions ) {
+        if (!decision.getDecision().isApproved() && Objects.equals(decision.getDecision().getSignerId(), current_user)){
+          result = true;
+        }
       }
+    } catch (Exception e) {
+      e.printStackTrace();
     }
 
     return result;
