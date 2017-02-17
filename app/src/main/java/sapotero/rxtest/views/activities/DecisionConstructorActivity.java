@@ -111,16 +111,14 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
           .positiveText("сохранить")
           .onPositive(
             (dialog, which) -> {
-              RDecisionEntity new_decision = manager.getrDecisionEntity();
 
-              Timber.tag(TAG).w("positive %s", new_decision.getId() );
+              CommandParams params = new CommandParams();
+              params.setDecisionId( rDecisionEntity.getUid() );
+              params.setDecision( rDecisionEntity );
 
-              String json = new Gson().toJson(new_decision);
+              operationManager.execute( CommandFactory.Operation.SAVE_DECISION, params );
 
-//              CommandParams params = new CommandParams();
-//              params.setSign( new_decision.getId() );
-//              params.setDecision(json);
-//              operationManager.execute( CommandFactory.Operation.SAVE_DECISION, params );
+              finish();
 
             }
           )
@@ -261,7 +259,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       }
     }
 
-    manager = new DecisionManager(this, getSupportFragmentManager(), rDecisionEntity);
+    manager = new DecisionManager(this, getSupportFragmentManager(), raw_decision);
     manager.build();
 
 
@@ -294,6 +292,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     sign_as_current_user.setOnClickListener(v -> {
       rDecisionEntity.setSignerId( settings.getString("current_user_id").get() );
       rDecisionEntity.setSigner( settings.getString("current_user").get() );
+      signer_oshs_selector.setText( rDecisionEntity.getSigner() );
     });
 
   }
@@ -464,6 +463,12 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   @Override
   public void onSearchSuccess(Oshs user, CommandFactory.Operation operation) {
     Timber.tag(TAG).e("USER: %s", new Gson().toJson(user) );
+
+
+    rDecisionEntity.setSignerId( user.getId() );
+    rDecisionEntity.setSigner( user.getName() );
+
+    signer_oshs_selector.setText( rDecisionEntity.getSigner() );
   }
 
   @Override

@@ -8,6 +8,7 @@ import sapotero.rxtest.views.managers.menu.commands.approval.NextPerson;
 import sapotero.rxtest.views.managers.menu.commands.consideration.PrimaryConsideration;
 import sapotero.rxtest.views.managers.menu.commands.decision.ApproveDecision;
 import sapotero.rxtest.views.managers.menu.commands.decision.RejectDecision;
+import sapotero.rxtest.views.managers.menu.commands.decision.SaveDecision;
 import sapotero.rxtest.views.managers.menu.commands.performance.ApprovalPerformance;
 import sapotero.rxtest.views.managers.menu.commands.performance.DelegatePerformance;
 import sapotero.rxtest.views.managers.menu.commands.report.FromTheReport;
@@ -221,16 +222,15 @@ public class CommandFactory implements AbstractCommand.Callback{
     SAVE_DECISION {
       @Override
       Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
-//        SaveDecision command = new SaveDecision(context, document);
-//        command.withParams(params);
-//        command
-//          .withDecision( params.getDecision() )
-//          .withDecisionId( params.getSign() )
-//          .registerCallBack(instance);
-//
-//        command.withParams(params);
-//        return command;
-        return null;
+        SaveDecision command = new SaveDecision(context, document);
+        command.withParams(params);
+        command
+          .withDecision( params.getDecision() )
+          .withDecisionId( params.getDecisionId() )
+          .registerCallBack(instance);
+
+        command.withParams(params);
+        return command;
       }
     },
     NEW_DECISION {
