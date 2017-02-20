@@ -35,7 +35,8 @@ public class QueueDBManager {
     EsdApplication.getComponent(context).inject(this);
 
     this.context = context;
-    this.commandFactory = new CommandFactory(context);
+//    this.commandFactory = new CommandFactory(context);
+    this.commandFactory = CommandFactory.getInstance();
   }
 
   public void add(Command command){

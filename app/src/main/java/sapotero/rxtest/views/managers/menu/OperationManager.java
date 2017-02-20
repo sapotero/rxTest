@@ -3,7 +3,6 @@ package sapotero.rxtest.views.managers.menu;
 import android.content.Context;
 
 import com.f2prateek.rx.preferences.RxSharedPreferences;
-import com.google.gson.Gson;
 
 import javax.inject.Inject;
 
@@ -22,7 +21,7 @@ public class OperationManager implements CommandFactory.Callback {
 
   private final String TAG = this.getClass().getSimpleName();
 
-  private final CommandFactory commandBuilder;
+  private  CommandFactory commandBuilder;
   private final OperationHistory histrory;
   private final RemoteExecutor remoteExecutor;
 
@@ -56,12 +55,17 @@ public class OperationManager implements CommandFactory.Callback {
 
     Timber.tag(TAG).i("execute start");
 
+    commandBuilder = new CommandFactory( EsdApplication.getContext() );
+    commandBuilder.registerCallBack(this);
+
     Command command = commandBuilder
       .withDocument( new DocumentReceiver( settings.getString("activity_main_menu.uid").get() ) )
       .withParams( params )
       .build( operation );
 
-    Timber.tag(TAG).i("COMMAND: %s [%s] | %s", operation, command, new Gson().toJson(params) );
+    Timber.tag(TAG).i("command get");
+
+//    Timber.tag(TAG).i("COMMAND: %s [%s] | %s", operation, command, new Gson().toJson(params) );
 
     if (command != null) {
       remoteExecutor

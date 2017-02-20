@@ -2,6 +2,7 @@ package sapotero.rxtest.views.managers.menu.factories;
 
 import android.content.Context;
 
+import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.views.managers.menu.commands.approval.ChangePerson;
 import sapotero.rxtest.views.managers.menu.commands.approval.NextPerson;
@@ -24,14 +25,22 @@ import sapotero.rxtest.views.managers.menu.utils.CommandParams;
 import timber.log.Timber;
 
 public class CommandFactory implements AbstractCommand.Callback{
+  private static CommandFactory instance;
   private final String TAG = this.getClass().getSimpleName();
 
-  private CommandFactory instance;
   private Context context;
   private CommandParams params;
   private DocumentReceiver document;
 
   Callback callback;
+
+  public static CommandFactory getInstance() {
+    if (instance == null){
+      instance = new CommandFactory(EsdApplication.getContext());
+    }
+    return instance;
+  }
+
   public interface Callback {
     void onCommandSuccess(String command);
     void onCommandError();
@@ -363,6 +372,8 @@ public class CommandFactory implements AbstractCommand.Callback{
   };
 
   public CommandFactory(Context context) {
+
+
     this.context = context;
   }
 
@@ -380,7 +391,11 @@ public class CommandFactory implements AbstractCommand.Callback{
 
   public Command build(CommandFactory.Operation operation) {
     Timber.tag(TAG).w("build" );
-    return operation.getCommand(this, context, document, params);
+
+    Command command = operation.getCommand(this, context, document, params);
+
+    Timber.tag("CommandFactory").w("after build" );
+    return command;
   }
 
   @Override

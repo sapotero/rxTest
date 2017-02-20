@@ -90,28 +90,31 @@ public class RejectDecision extends AbstractCommand {
       callback.onCommandExecuteSuccess( getType() );
     }
 
-    try {
-      RDocumentEntity document = (RDocumentEntity) decision.getDocument();
-      String decision_uid = decision.getUid();
-      String document_uid = document.getUid();
+    if (params.getActiveDecision()){
+      try {
+        RDocumentEntity document = (RDocumentEntity) decision.getDocument();
+        String decision_uid = decision.getUid();
+        String document_uid = document.getUid();
 
-      dataStore
-        .update(RDocumentEntity.class)
-        .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue())
-        .where(RDocumentEntity.UID.eq( document_uid ))
-        .get()
-        .call();
+        dataStore
+          .update(RDocumentEntity.class)
+          .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue())
+          .where(RDocumentEntity.UID.eq( document_uid ))
+          .get()
+          .call();
 
-      dataStore
-        .update(RDecisionEntity.class)
-        .set( RDecisionEntity.APPROVED, false)
-        .where(RDecisionEntity.UID.eq( decision_uid ))
-        .get()
-        .call();
+        dataStore
+          .update(RDecisionEntity.class)
+          .set( RDecisionEntity.APPROVED, false)
+          .where(RDecisionEntity.UID.eq( decision_uid ))
+          .get()
+          .call();
 
-    } catch (Exception e) {
-      e.printStackTrace();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
     }
+
   }
 
 

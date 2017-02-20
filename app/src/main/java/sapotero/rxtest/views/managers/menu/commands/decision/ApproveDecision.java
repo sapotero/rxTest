@@ -85,29 +85,33 @@ public class ApproveDecision extends AbstractCommand {
 
 
   public void update() {
-    try {
-//      RDocumentEntity document_ = (RDocumentEntity) decision.getDocument();
-      String decision_uid = decision.getUid();
-      String document_uid = document.getUid();
+    if (callback != null ){
+      callback.onCommandExecuteSuccess( getType() );
+    }
 
-      dataStore
-        .update(RDocumentEntity.class)
-        .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue())
-        .where(RDocumentEntity.UID.eq( document_uid ))
-        .get()
-        .call();
+    if ( params.getActiveDecision() ){
+      try {
+        RDocumentEntity document = (RDocumentEntity) decision.getDocument();
+        String decision_uid = decision.getUid();
+        String document_uid = document.getUid();
 
-      dataStore
-        .update(RDecisionEntity.class)
-        .set( RDecisionEntity.APPROVED, true)
-        .where(RDecisionEntity.UID.eq( decision_uid ))
-        .get()
-        .call();
-      if (callback != null ){
-        callback.onCommandExecuteSuccess( getType() );
+        dataStore
+          .update(RDocumentEntity.class)
+          .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue())
+          .where(RDocumentEntity.UID.eq( document_uid ))
+          .get()
+          .call();
+
+        dataStore
+          .update(RDecisionEntity.class)
+          .set( RDecisionEntity.APPROVED, true)
+          .where(RDecisionEntity.UID.eq( decision_uid ))
+          .get()
+          .call();
+
+      } catch (Exception e) {
+        e.printStackTrace();
       }
-    } catch (Exception e) {
-      e.printStackTrace();
     }
   }
 
