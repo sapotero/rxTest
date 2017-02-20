@@ -48,6 +48,10 @@ public class DecisionManager implements DecisionInterface, DecisionBuilder.Callb
   private final DecisionBuilder decision_builder;
 
   private final String TAG = this.getClass().getSimpleName();
+  private String urgency;
+  private String date;
+  private String signerId;
+  private String signer;
 
   public DecisionManager(Context context, FragmentManager supportFragmentManager, Decision decision) {
 
@@ -219,5 +223,22 @@ public class DecisionManager implements DecisionInterface, DecisionBuilder.Callb
   @Override
   public void onUpdateError(Throwable error) {
 
+  }
+
+  public void setUrgency(String urgency) {
+    decision.setUrgencyText(urgency);
+  }
+
+
+  public void setDate(String date) {
+    decision.setDate(date);
+  }
+
+  public void setSignerId(String signerId) {
+    decision.setSignerId(signerId);
+  }
+
+  public void setSigner(String signer) {
+    decision.setSigner(signer);
   }
 }

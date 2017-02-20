@@ -72,6 +72,7 @@ import sapotero.rxtest.views.custom.SearchView.SearchView;
 import sapotero.rxtest.views.managers.DataLoaderManager;
 import sapotero.rxtest.views.menu.MenuBuilder;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
+import sapotero.rxtest.views.services.MainService;
 import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity implements MenuBuilder.Callback, SearchView.OnVisibilityChangeListener {
@@ -395,6 +396,12 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       EventBus.getDefault().unregister(this);
     }
     EventBus.getDefault().register(this);
+
+
+    Intent serviceIntent = new Intent(this, MainService.class);
+    if(startService(serviceIntent) != null) {
+      Toast.makeText(getBaseContext(), "Service is already running", Toast.LENGTH_SHORT).show();
+    }
   }
 
   private void updateByStatus() {

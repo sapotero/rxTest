@@ -86,7 +86,7 @@ public class ApproveDecision extends AbstractCommand {
 
   public void update() {
     try {
-      RDocumentEntity document = (RDocumentEntity) decision.getDocument();
+//      RDocumentEntity document_ = (RDocumentEntity) decision.getDocument();
       String decision_uid = decision.getUid();
       String document_uid = document.getUid();
 
@@ -138,6 +138,7 @@ public class ApproveDecision extends AbstractCommand {
 
     Decision formated_decision = DecisionConverter.formatDecision( decision );
     formated_decision.setApproved(true);
+    formated_decision.setDocumentUid(null);
 
     DecisionWrapper wrapper = new DecisionWrapper();
     wrapper.setDecision(formated_decision);

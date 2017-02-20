@@ -232,7 +232,9 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
             break;
 
           case R.id.menu_info_decision_create:
-            operation = CommandFactory.Operation.NEW_DECISION;
+            operation = CommandFactory.Operation.INCORRECT;
+
+            settings.getString("decision.active.id").set(null);
 
             Intent create_intent = new Intent(context, DecisionConstructorActivity.class);
             context.startActivity(create_intent);

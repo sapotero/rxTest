@@ -128,27 +128,34 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
   // Approve current decision
   @OnClick(R.id.activity_info_decision_preview_next_person)
   public void decision_preview_next(){
-    Timber.tag(TAG).v("decision_preview_next");
+    Timber.tag(TAG).v("decision_preview_next start");
+
     CommandFactory.Operation operation;
     operation =CommandFactory.Operation.APPROVE_DECISION;
 
     CommandParams params = new CommandParams();
+
     params.setDecisionId( current_decision.getUid() );
     params.setDecision( current_decision );
+    params.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
 
     operationManager.execute(operation, params);
+
+    Timber.tag(TAG).v("decision_preview_next end");
   }
 
   // Reject current decision
   @OnClick(R.id.activity_info_decision_preview_prev_person)
   public void decision_preview_prev(){
     Timber.tag(TAG).v("decision_preview_prev");
+
     CommandFactory.Operation operation;
     operation =CommandFactory.Operation.REJECT_DECISION;
 
     CommandParams params = new CommandParams();
     params.setDecisionId( current_decision.getUid() );
     params.setDecision( current_decision );
+    params.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
 
     operationManager.execute(operation, params);
   }

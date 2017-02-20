@@ -67,6 +67,49 @@ public class Decision implements Serializable {
     @Expose
     private List<Block> blocks = new ArrayList<Block>();
 
+  @SerializedName("document_uid")
+  @Expose
+  private String documentUid = "";
+
+  @SerializedName("performers_font_size")
+  @Expose
+  private String performersFontSize = "12";
+
+  @SerializedName("letterhead_font_size")
+  @Expose
+  private String letterheadFontSize = "15";
+
+  @SerializedName("sign")
+  @Expose
+  private String sign = "";
+
+
+  public String getPerformersFontSize() {
+    return performersFontSize;
+  }
+
+  public void setPerformersFontSize(String performersFontSize) {
+    this.performersFontSize = performersFontSize;
+  }
+
+  public String getLetterheadFontSize() {
+    return letterheadFontSize;
+  }
+
+  public void setLetterheadFontSize(String letterheadFontSize) {
+    this.letterheadFontSize = letterheadFontSize;
+  }
+
+  public String getDocumentUid() {
+        return documentUid;
+    }
+
+    public void setDocumentUid(String documentUid) {
+        this.documentUid = documentUid;
+    }
+
+
+
     public Boolean getCanceled() {
         return canceled;
     }

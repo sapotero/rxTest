@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.UUID;
 
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
+import sapotero.rxtest.retrofit.models.document.Decision;
 
 public class CommandParams implements Serializable {
   public String person;
@@ -16,6 +17,16 @@ public class CommandParams implements Serializable {
   public String uuid;
   public String user;
   public String comment;
+  public Decision decisionModel;
+  public Boolean activeDecision;
+
+  public Boolean getActiveDecision() {
+    return activeDecision;
+  }
+
+  public void setActiveDecision(Boolean activeDecision) {
+    this.activeDecision = activeDecision;
+  }
 
   public CommandParams() {
     setUuid( UUID.randomUUID().toString() );
@@ -103,5 +114,13 @@ public class CommandParams implements Serializable {
 
   public void setDocument(String document) {
     this.document = document;
+  }
+
+  public void setDecisionModel(Decision decisionModel) {
+    this.decisionModel = decisionModel;
+  }
+
+  public Decision getDecisionModel() {
+    return decisionModel;
   }
 }

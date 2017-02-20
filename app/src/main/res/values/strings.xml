@@ -406,6 +406,8 @@
     <string name="settings">Настройки</string>
     <string name="decision_preview_magnifer">Увеличить</string>
     <string name="decision_preview_edit">Редактировать</string>
+    <string name="date_hint">Дата</string>
+    <string name="sign_as_current_user">Лично</string>
 
     <string-array name="IntentsCAAddressList">
         <item>http://www.cryptopro.ru/certsrv/</item>

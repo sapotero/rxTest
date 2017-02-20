@@ -65,6 +65,7 @@ import sapotero.rxtest.events.bus.UpdateAuthTokenEvent;
 import sapotero.rxtest.events.crypto.SignDataEvent;
 import sapotero.rxtest.events.crypto.SignDataResultEvent;
 import sapotero.rxtest.events.crypto.SignDataWrongPinEvent;
+import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.service.AuthServiceAuthEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckFailEvent;
@@ -72,6 +73,7 @@ import sapotero.rxtest.events.stepper.auth.StepperDcCheckSuccesEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckFailEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckSuccessEvent;
+import sapotero.rxtest.events.view.UpdateCurrentInfoActivityEvent;
 import sapotero.rxtest.utils.cryptopro.AlgorithmSelector;
 import sapotero.rxtest.utils.cryptopro.CMSSignExample;
 import sapotero.rxtest.utils.cryptopro.ContainerAdapter;
@@ -680,6 +682,14 @@ public class MainService extends Service {
   @Subscribe(threadMode = ThreadMode.BACKGROUND)
   public void onMessageEvent(SignDataEvent event) throws Exception {
     getSign( event.data );
+  }
+
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(UpdateDocumentEvent event) throws Exception {
+    EventBus.getDefault().post( new UpdateCurrentInfoActivityEvent() );
+    dataLoaderInterface.updateDocument(event.uid);
+
   }
 
 

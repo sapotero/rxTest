@@ -27,7 +27,7 @@ public interface DocumentService {
   );
 
   @POST("/v2/decisions.json")
-  Observable<String> newDecision(
+  Observable<Object> create(
     @Query("login") String login,
     @Query("auth_token") String auth_token,
     @Body RequestBody body

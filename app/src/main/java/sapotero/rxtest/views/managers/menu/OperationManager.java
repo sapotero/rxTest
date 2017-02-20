@@ -53,6 +53,9 @@ public class OperationManager implements CommandFactory.Callback {
   }
 
   public void execute(CommandFactory.Operation operation, CommandParams params) {
+
+    Timber.tag(TAG).i("execute start");
+
     Command command = commandBuilder
       .withDocument( new DocumentReceiver( settings.getString("activity_main_menu.uid").get() ) )
       .withParams( params )
@@ -65,6 +68,7 @@ public class OperationManager implements CommandFactory.Callback {
         .setCommand( command )
         .execute();
     }
+    Timber.tag(TAG).i("execute end");
   }
 
 

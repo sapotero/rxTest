@@ -6,6 +6,7 @@ import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.views.managers.menu.commands.approval.ChangePerson;
 import sapotero.rxtest.views.managers.menu.commands.approval.NextPerson;
 import sapotero.rxtest.views.managers.menu.commands.consideration.PrimaryConsideration;
+import sapotero.rxtest.views.managers.menu.commands.decision.AddDecision;
 import sapotero.rxtest.views.managers.menu.commands.decision.ApproveDecision;
 import sapotero.rxtest.views.managers.menu.commands.decision.RejectDecision;
 import sapotero.rxtest.views.managers.menu.commands.decision.SaveDecision;
@@ -236,7 +237,14 @@ public class CommandFactory implements AbstractCommand.Callback{
     NEW_DECISION {
       @Override
       Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
-        return null;
+        AddDecision command = new AddDecision(context, document);
+        command.withParams(params);
+        command
+          .withDecisionId( params.getDecisionId() )
+          .registerCallBack(instance);
+
+        command.withParams(params);
+        return command;
       }
     },
     APPROVE_DECISION {
@@ -256,14 +264,21 @@ public class CommandFactory implements AbstractCommand.Callback{
     REJECT_DECISION {
       @Override
       Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
+        Timber.tag("CommandFactory").w("REJECT_DECISION start" );
+
         RejectDecision command = new RejectDecision(context, document);
+        Timber.tag("CommandFactory").w("REJECT_DECISION create" );
         command.withParams(params);
+        Timber.tag("CommandFactory").w("REJECT_DECISION params" );
         command
           .withDecision( params.getDecision() )
           .withDecisionId( params.getDecisionId() )
           .registerCallBack(instance);
 
+        Timber.tag("CommandFactory").w("REJECT_DECISION after register callback" );
+
         command.withParams(params);
+        Timber.tag("CommandFactory").w("REJECT_DECISION after params" );
         return command;
       }
     };
@@ -352,16 +367,19 @@ public class CommandFactory implements AbstractCommand.Callback{
   }
 
   public CommandFactory withDocument(DocumentReceiver doc) {
+    Timber.tag(TAG).w("withDocument" );
     document = doc;
     return this;
   }
 
   public CommandFactory withParams(CommandParams params) {
+    Timber.tag(TAG).w("withParams" );
     this.params = params;
     return this;
   }
 
   public Command build(CommandFactory.Operation operation) {
+    Timber.tag(TAG).w("build" );
     return operation.getCommand(this, context, document, params);
   }
 

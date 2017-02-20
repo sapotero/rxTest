@@ -7,6 +7,7 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.views.managers.menu.OperationManager;
 
 
@@ -17,6 +18,6 @@ public final class OperationManagerModule {
   @Provides
   @Singleton
   OperationManager provideOperationManager(Context context) {
-    return new OperationManager(context);
+    return new OperationManager( EsdApplication.getContext() );
   }
 }

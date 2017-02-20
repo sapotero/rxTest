@@ -3,6 +3,7 @@ package sapotero.rxtest.views.activities;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentTransaction;
@@ -14,6 +15,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
@@ -43,6 +45,7 @@ import sapotero.rxtest.events.crypto.SignDataWrongPinEvent;
 import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
 import sapotero.rxtest.events.decision.ShowDecisionConstructor;
 import sapotero.rxtest.events.view.ShowSnackEvent;
+import sapotero.rxtest.events.view.UpdateCurrentInfoActivityEvent;
 import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.adapters.TabSigningPagerAdapter;
@@ -96,6 +99,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   private ToolbarManager toolbarManager;
   private Fields.Journal journal;
   private Fields.Status  status;
+  private MaterialDialog.Builder loadingDialog;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -118,6 +122,10 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
     setTabContent();
     setPreview();
+
+    loadingDialog = new MaterialDialog.Builder(this)
+      .title("Обновление данных...")
+      .progress(true, 0);
 
 
   }
@@ -244,6 +252,9 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   protected void onResume() {
     super.onResume();
 
+    operationManager.registerCallBack(null);
+    operationManager.registerCallBack(this);
+
     if (EventBus.getDefault().isRegistered(this)) {
       EventBus.getDefault().unregister(this);
     }
@@ -313,8 +324,23 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     toolbarManager.showCreateDecisionButton();
   }
 
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(UpdateCurrentInfoActivityEvent event) throws Exception {
 
+    Timber.d("UpdateCurrentInfoActivityEvent");
+    loadingDialog.show();
 
+    new Handler().postDelayed(this::restart, 5000);
+
+  }
+
+  private void restart() {
+    Intent intent = getIntent();
+    intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+    overridePendingTransition(0, 0);
+    finish();
+    startActivity(intent);
+  }
 
 
 }

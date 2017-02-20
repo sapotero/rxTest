@@ -3,6 +3,7 @@ package sapotero.rxtest.views.managers;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Handler;
 
 import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
@@ -552,5 +553,11 @@ public class DataLoaderManager {
   @Subscribe(threadMode = ThreadMode.BACKGROUND)
   public void onMessageEvent(StepperDcCheckEvent event) throws Exception {
     String token = event.pin;
+  }
+
+  public void updateDocument(String uid) {
+    new Handler().postDelayed( () -> {
+      jobManager.addJobInBackground(new SyncDocumentsJob( uid, null ));
+    }, 2000L);
   }
 }

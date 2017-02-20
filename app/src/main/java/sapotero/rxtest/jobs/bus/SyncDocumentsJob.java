@@ -154,6 +154,7 @@ public class SyncDocumentsJob  extends BaseJob {
               }
             }
           }
+
         },
         error -> {
           error.printStackTrace();
@@ -230,8 +231,9 @@ public class SyncDocumentsJob  extends BaseJob {
 
   private void update(Boolean exist){
 
-
-    Timber.tag(TAG).d("create title - %s | %s", document.getTitle(), filter.toString() );
+    if (filter != null) {
+      Timber.tag(TAG).d("create title - %s | %s", document.getTitle(), filter.toString() );
+    }
 
     if (exist) {
       updateDocumentInfo();
@@ -435,7 +437,10 @@ public class SyncDocumentsJob  extends BaseJob {
         rDoc.setInfoCard( document.getInfoCard() );
       }
 
-      rDoc.setFilter( filter.toString() );
+      if (filter != null){
+        rDoc.setFilter( filter.toString() );
+      }
+
 
       dataStore.update(rDoc)
         .toObservable()

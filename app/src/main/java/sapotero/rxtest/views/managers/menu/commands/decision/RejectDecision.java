@@ -108,6 +108,7 @@ public class RejectDecision extends AbstractCommand {
         .where(RDecisionEntity.UID.eq( decision_uid ))
         .get()
         .call();
+
     } catch (Exception e) {
       e.printStackTrace();
     }

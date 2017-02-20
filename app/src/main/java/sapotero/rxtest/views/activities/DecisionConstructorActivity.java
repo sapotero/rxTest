@@ -15,7 +15,9 @@ import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
 
@@ -27,7 +29,6 @@ import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RBlock;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
@@ -39,7 +40,6 @@ import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.Performer;
-import sapotero.rxtest.views.adapters.OshsAutoCompleteAdapter;
 import sapotero.rxtest.views.adapters.models.FontItem;
 import sapotero.rxtest.views.adapters.models.UrgencyItem;
 import sapotero.rxtest.views.custom.SpinnerWithLabel;
@@ -66,8 +66,10 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   @BindView(R.id.urgency_selector) SpinnerWithLabel<UrgencyItem> urgency_selector;
   @BindView(R.id.head_font_selector) SpinnerWithLabel<FontItem> font_selector;
   @BindView(R.id.signer_oshs_selector) EditText signer_oshs_selector;
-
   @BindView(R.id.sign_as_current_user) Button sign_as_current_user;
+
+  @BindView(R.id.decision_constructor_decision_comment) EditText decision_comment;
+  @BindView(R.id.decision_constructor_decision_date)    EditText decision_date;
 
 
 
@@ -76,7 +78,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   private DecisionManager manager;
   private Decision raw_decision;
   private RDecisionEntity rDecisionEntity;
-  private OshsAutoCompleteAdapter user_autocomplete_adapter;
   private SelectOshsDialogFragment dialogFragment;
 
   @Override
@@ -88,8 +89,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
     ButterKnife.bind(this);
     EsdApplication.getComponent(this).inject(this);
-
-    operationManager.registerCallBack(this);
 
 
 
@@ -112,11 +111,23 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
           .onPositive(
             (dialog, which) -> {
 
-              CommandParams params = new CommandParams();
-              params.setDecisionId( rDecisionEntity.getUid() );
-              params.setDecision( rDecisionEntity );
+              operationManager.registerCallBack(null);
 
-              operationManager.execute( CommandFactory.Operation.SAVE_DECISION, params );
+              Decision decision = manager.getDecision();
+
+              CommandParams params = new CommandParams();
+              params.setDecisionModel( decision );
+
+              decision.setDocumentUid( settings.getString("activity_main_menu.uid").get() );
+
+              if (rDecisionEntity != null) {
+                params.setDecision( rDecisionEntity );
+                params.setDecisionId( rDecisionEntity.getUid() );
+              }
+
+              CommandFactory.Operation operation = rDecisionEntity == null ? CommandFactory.Operation.NEW_DECISION: CommandFactory.Operation.SAVE_DECISION;
+
+              operationManager.execute( operation, params );
 
               finish();
 
@@ -157,6 +168,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
             showNextDialog();
           } else {
 
+            operationManager.registerCallBack(this);
+
             CommandFactory.Operation operation;
             operation =CommandFactory.Operation.APPROVE_DECISION;
 
@@ -175,6 +188,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
           if ( settings.getBoolean("settings_view_show_actions_confirm").get() ){
             showPrevDialog();
           } else {
+            operationManager.registerCallBack(this);
+
             CommandFactory.Operation operation;
             operation =CommandFactory.Operation.REJECT_DECISION;
 
@@ -216,9 +231,10 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
 
 
+
     urgency_selector.setItems(urgency);
     urgency_selector.setOnItemSelectedListener((item, selectedIndex) -> {
-//      manager.setUrgency( item.getLabel() );
+      manager.setUrgency( item.getLabel() );
     });
 
 
@@ -264,25 +280,11 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
 
 
-    Oshs decision_signer = new Oshs();
-    decision_signer.setId( rDecisionEntity.getSignerId() );
-    decision_signer.setName( rDecisionEntity.getSigner() );
 
-//    user_autocomplete_adapter = new OshsAutoCompleteAdapter(this);
-//    user_autocomplete_adapter.setSigner( decision_signer );
-//
-//    user_autocomplete.setThreshold(2);
-//    user_autocomplete.setAdapter( user_autocomplete_adapter );
-//    user_autocomplete.setLoadingIndicator( indicator );
-//    user_autocomplete.setOnItemClickListener(
-//      (adapterView, view1, position, id) -> {
-//        Oshs user = (Oshs) adapterView.getItemAtPosition(position);
-//        user_autocomplete.setText( String.format("%s - %s", user.getName(), user.getOrganization() ) );
-////        manager.setSigner( user );
-//      }
-//    );
-//    user_autocomplete.setText( String.format("%s", user_autocomplete_adapter.getUser().getName() ) );
-//    user_autocomplete.onFilterComplete(0);
+    Oshs decision_signer = new Oshs();
+    decision_signer.setId( settings.getString("current_user_id").get() );
+    decision_signer.setName( settings.getString("current_user").get() );
+
     signer_oshs_selector.setOnClickListener(v -> {
       dialogFragment = new SelectOshsDialogFragment();
       dialogFragment.registerCallBack( this );
@@ -290,11 +292,61 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     });
 
     sign_as_current_user.setOnClickListener(v -> {
-      rDecisionEntity.setSignerId( settings.getString("current_user_id").get() );
-      rDecisionEntity.setSigner( settings.getString("current_user").get() );
-      signer_oshs_selector.setText( rDecisionEntity.getSigner() );
+      if (rDecisionEntity != null) {
+        rDecisionEntity.setSignerId( settings.getString("current_user_id").get() );
+        rDecisionEntity.setSigner( settings.getString("current_user").get() );
+        signer_oshs_selector.setText( rDecisionEntity.getSigner() );
+      } else {
+        signer_oshs_selector.setText( raw_decision.getSigner() );
+      }
     });
 
+    if ( rDecisionEntity != null ){
+      decision_signer.setId( rDecisionEntity.getSignerId() );
+      decision_signer.setName( rDecisionEntity.getSigner() );
+      decision_comment.setText( rDecisionEntity.getComment() );
+      signer_oshs_selector.setText( rDecisionEntity.getSigner() );
+    }
+
+    if ( raw_decision.getUrgencyText() != null ){
+      urgency_selector.setSelection( 0 );
+      manager.setUrgency("");
+    }
+
+    if ( rDecisionEntity != null && rDecisionEntity.getDate() != null ){
+      decision_date.setText( rDecisionEntity.getDate() );
+      manager.setDate( rDecisionEntity.getDate() );
+    } else {
+      SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+      Calendar cal = Calendar.getInstance();
+      String date = dateFormat.format(cal.getTime());
+      decision_date.setEnabled(false);
+      decision_date.setFocusable(false);
+      decision_date.setText( date );
+      manager.setDate( date );
+    }
+
+    // настройка
+    if ( settings.getBoolean("settings_view_show_decision_date_update").get() ){
+      SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+      Calendar cal = Calendar.getInstance();
+      String date = dateFormat.format(cal.getTime());
+      decision_date.setEnabled(false);
+      decision_date.setFocusable(false);
+      decision_date.setText( date );
+      manager.setDate( date );
+    }
+
+
+
+  }
+
+  @Override
+  protected void onResume() {
+    super.onPostResume();
+
+    operationManager.registerCallBack(null);
+    operationManager.registerCallBack(this);
   }
 
   private void loadDecision() {
@@ -302,7 +354,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
     rDecisionEntity = dataStore
       .select(RDecisionEntity.class)
-      .where(RDocumentEntity.UID.eq(decision_id))
+      .where(RDecisionEntity.UID.eq(decision_id))
       .get().firstOrNull();
 
     if (rDecisionEntity != null) {
@@ -320,6 +372,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       raw_decision.setDate(rDecisionEntity.getDate());
       raw_decision.setUrgencyText(rDecisionEntity.getUrgencyText());
       raw_decision.setShowPosition(rDecisionEntity.isShowPosition());
+
+      Timber.tag(TAG).e("getUrgencyText: %s", rDecisionEntity.getUrgencyText() );
 
       if ( rDecisionEntity.getBlocks() != null && rDecisionEntity.getBlocks().size() >= 1 ){
 
@@ -362,15 +416,22 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
         raw_decision.setBlocks(list);
       }
     } else {
+
+      SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+      Calendar cal = Calendar.getInstance();
+      String date = dateFormat.format(cal.getTime());
+
       raw_decision = new Decision();
       raw_decision.setLetterhead("Бланк резолюции");
       raw_decision.setShowPosition(true);
-      raw_decision.setSignerPositionS("");
-      raw_decision.setSignerBlankText("");
+      raw_decision.setSignerId( settings.getString("current_user_id").get() );
+      raw_decision.setSigner( settings.getString("current_user").get() );
       raw_decision.setUrgencyText("");
-      raw_decision.setId("");
-      raw_decision.setDate("");
-      raw_decision.setBlocks(new ArrayList<>());    }
+      raw_decision.setId(null);
+      raw_decision.setDate( date );
+      raw_decision.setBlocks(new ArrayList<>());
+
+    }
 
   }
 
@@ -464,11 +525,15 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   public void onSearchSuccess(Oshs user, CommandFactory.Operation operation) {
     Timber.tag(TAG).e("USER: %s", new Gson().toJson(user) );
 
+    if (rDecisionEntity != null) {
+      rDecisionEntity.setSignerId( user.getId() );
+      rDecisionEntity.setSigner( user.getName() );
+    }
 
-    rDecisionEntity.setSignerId( user.getId() );
-    rDecisionEntity.setSigner( user.getName() );
+    manager.setSignerId(user.getId());
+    manager.setSigner(user.getName());
 
-    signer_oshs_selector.setText( rDecisionEntity.getSigner() );
+    signer_oshs_selector.setText( user.getName() );
   }
 
   @Override
