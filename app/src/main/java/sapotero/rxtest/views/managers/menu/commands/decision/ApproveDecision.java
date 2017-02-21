@@ -19,6 +19,7 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecision;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.utils.DecisionConverter;
+import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.wrapper.DecisionWrapper;
@@ -88,6 +89,38 @@ public class ApproveDecision extends AbstractCommand {
   }
 
 
+  public void update() {
+
+    if (callback != null ){
+      callback.onCommandExecuteSuccess( getType() );
+    }
+
+    if (params.getActiveDecision()){
+      try {
+
+        String decision_uid = decision.getUid();
+
+        dataStore
+          .update(RDecisionEntity.class)
+          .set( RDecisionEntity.APPROVED, true)
+          .where(RDecisionEntity.UID.eq( decision_uid )).get().call();
+
+        if ( !hasActiveDecision() ){
+          dataStore
+            .update(RDocumentEntity.class)
+            .set( RDocumentEntity.PROCESSED, true)
+            .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue() )
+            .set( RDocumentEntity.MD5, "" )
+            .where(RDocumentEntity.UID.eq( document.getUid() )).get().call();
+        }
+
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+
+  }
+
   private Boolean hasActiveDecision(){
     RDocumentEntity doc = dataStore
       .select(RDocumentEntity.class)
@@ -106,37 +139,9 @@ public class ApproveDecision extends AbstractCommand {
       }
     }
 
+    Timber.tag(TAG).e("hasActiveDecision : %s", result);
+
     return result;
-  }
-
-  public void update() {
-
-    if (callback != null ){
-      callback.onCommandExecuteSuccess( getType() );
-    }
-
-    if (params.getActiveDecision()){
-      try {
-
-        String decision_uid = decision.getUid();
-
-        dataStore
-          .update(RDecisionEntity.class)
-          .set( RDecisionEntity.APPROVED, true)
-          .where(RDecisionEntity.UID.eq( decision_uid ));
-
-        if ( !hasActiveDecision() ){
-          dataStore
-            .update(RDocumentEntity.class)
-            .set( RDocumentEntity.PROCESSED, true)
-            .where(RDocumentEntity.UID.eq( document.getUid() ));
-        }
-
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    }
-
   }
 
   @Override

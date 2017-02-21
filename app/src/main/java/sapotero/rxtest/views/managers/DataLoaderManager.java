@@ -14,6 +14,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -29,6 +30,7 @@ import io.requery.rx.SingleEntityStore;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
+import retrofit2.Call;
 import retrofit2.Retrofit;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
@@ -559,5 +561,26 @@ public class DataLoaderManager {
     new Handler().postDelayed( () -> {
       jobManager.addJobInBackground(new SyncDocumentsJob( uid, null ));
     }, 2000L);
+  }
+
+  public Boolean checkSedAvailibility() {
+
+    Boolean result = false;
+    try {
+
+      Retrofit retrofit = new RetrofitManager( context, HOST.get(), okHttpClient).process();
+      AuthService auth = retrofit.create( AuthService.class );
+
+      Call<AuthSignToken> token = auth.getSimpleAuth(LOGIN.get(), PASSWORD.get());
+
+
+      AuthSignToken data = token.execute().body();
+      result  = true;
+    } catch (IOException error) {
+      Timber.tag(TAG).i("checkSedAvailibility error: %s" , error );
+    }
+
+    return result;
+
   }
 }

@@ -615,9 +615,16 @@ public class MainService extends Service {
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(isConnectedToInternet -> {
         Toast.makeText( this, String.format( "Connected to inet: %s", isConnectedToInternet ), Toast.LENGTH_SHORT ).show();
-
         settings.getBoolean("isConnectedToInternet").set( isConnectedToInternet );
+
+        if ( isConnectedToInternet ){
+          checkSedAvailibility();
+        }
       });
+  }
+
+  private void checkSedAvailibility() {
+//    dataLoaderInterface.updateByStatus( MainMenuItem.ALL );
   }
 
   public void getAuth(){

@@ -3,6 +3,7 @@ package sapotero.rxtest.retrofit.Api;
 import java.util.ArrayList;
 
 import okhttp3.RequestBody;
+import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
@@ -29,6 +30,12 @@ public interface AuthService {
 
   @PUT("token/{username}.json")
   Observable<AuthSignToken> getAuth(
+    @Path("username") String username,
+    @Query("password") String password
+  );
+
+  @PUT("token/{username}.json")
+  Call<AuthSignToken> getSimpleAuth(
     @Path("username") String username,
     @Query("password") String password
   );

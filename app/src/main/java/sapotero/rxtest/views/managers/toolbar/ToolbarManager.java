@@ -449,7 +449,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
 
     if ( Objects.equals(command, "approve_decision") ) {
 
-      if ( hasActiveDecision() ){
+      if ( !hasActiveDecision() ){
         toolbar.getMenu().clear();
         toolbar.inflateMenu(R.menu.info_menu);
       } else {
@@ -461,7 +461,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
 
     if ( Objects.equals(command, "reject_decision") ) {
 
-      if ( hasActiveDecision() ){
+      if ( !hasActiveDecision() ){
         toolbar.getMenu().clear();
         toolbar.inflateMenu(R.menu.info_menu);
       }
@@ -504,6 +504,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
         }
       }
     }
+
+    Timber.tag(TAG).e("hasActiveDecision : %s", result);
 
     return result;
   }
@@ -687,6 +689,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
         if (settings.getString("prev_dialog_comment").get() != null) {
           params.setComment("Sign");
         }
+
+        params.setComment( dialog1.getInputEditText().getText().toString() );
         operationManager.execute(operation, params);
       })
       .autoDismiss(true);

@@ -19,6 +19,7 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecision;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.utils.DecisionConverter;
+import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.wrapper.DecisionWrapper;
@@ -106,6 +107,9 @@ public class RejectDecision extends AbstractCommand {
       }
     }
 
+    Timber.tag(TAG).e("hasActiveDecision : %s", result);
+
+
     return result;
   }
 
@@ -129,7 +133,8 @@ public class RejectDecision extends AbstractCommand {
         if ( !hasActiveDecision() ){
           dataStore
             .update(RDocumentEntity.class)
-            .set( RDocumentEntity.PROCESSED, true)
+            .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue() )
+            .set( RDocumentEntity.MD5, "" )
             .where(RDocumentEntity.UID.eq( document.getUid() ));
         }
 
