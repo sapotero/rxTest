@@ -147,12 +147,15 @@ public class Fields {
   public static Status getStatus(String type ){
     Status status = null;
 
+
     for ( Status value: Status.values()){
-      if ( Objects.equals(type, value.toString()) ){
+      if ( Objects.equals(type, value.getValue()) ){
         status = value;
         break;
       }
     }
+
+    Timber.e("getStatus: %s | %s", type, status );
 
     return status;
   }

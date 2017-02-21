@@ -495,7 +495,12 @@ public class DataLoaderManager {
                   Timber.tag(TAG).w("list: %s", tmp);
 
                   for (String str: tmp) {
-                    filter_types.add( Fields.getStatus( str ) );
+                    Fields.Status _status = Fields.getStatus(str);
+
+                    if (_status != null) {
+                      filter_types.add( _status );
+                    }
+
                   }
                 }
               }
@@ -532,7 +537,7 @@ public class DataLoaderManager {
                     }
                   },
                   error -> {
-                    Timber.e(error);
+                    Timber.e("zip error: %s", error);
                   });
 
           },

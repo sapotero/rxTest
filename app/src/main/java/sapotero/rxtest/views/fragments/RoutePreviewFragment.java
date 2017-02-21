@@ -379,18 +379,20 @@ public class RoutePreviewFragment extends Fragment {
       if (action != null){
         layout.addView( actionView );
       }
-      if (withSign){
-        View view = new View(context);
-        view.setMinimumHeight(1);
-        view.setBackground( ContextCompat.getDrawable(context, R.color.md_green_500) );
-        layout.addView( view );
-      }
 
       LinearLayout final_layout = new LinearLayout(context);
       layout.setOrientation(LinearLayout.VERTICAL);
 
       TextView icon = new TextView(context);
       icon.setCompoundDrawablesWithIntrinsicBounds(R.drawable.user, 0, 0, 0);
+
+
+      // resolved https://tasks.n-core.ru/browse/MVDESD-12651
+      // В маршруте прохождения добавить изображение штампа подписи
+      if( withSign ){
+        icon.setCompoundDrawablesWithIntrinsicBounds(R.drawable.verified_user, 0, 0, 0);
+      }
+
       icon.setPadding(0, action != null ? 32 : 20,0,0);
 
       final_layout.addView(icon);

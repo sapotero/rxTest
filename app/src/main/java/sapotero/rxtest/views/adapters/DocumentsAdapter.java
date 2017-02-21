@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -45,6 +46,8 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RLinks;
 import sapotero.rxtest.db.requery.models.RLinksEntity;
 import sapotero.rxtest.db.requery.models.RSignerEntity;
+import sapotero.rxtest.db.requery.models.decisions.RDecision;
+import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.retrofit.models.documents.Document;
@@ -236,6 +239,22 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Simp
         }
       }
 
+    }
+
+    // resolved https://tasks.n-core.ru/browse/MVDESD-12625
+    //  Номер документа на плитке выделять красным.
+    //  Красным документ должен подсвечиваться, только тогда,
+    //  когда создаём проект резолюции.
+    //  В подписавших резолюцию должен быть Министр.
+
+    if ( item.getDecisions().size() >= 1){
+      for (RDecision dec: item.getDecisions()){
+        RDecisionEntity decision = (RDecisionEntity) dec;
+        if ( decision.isRed() != null && decision.isRed() && !decision.isApproved() ){
+          viewHolder.from.setTextColor( ContextCompat.getColor(mContext, R.color.md_red_600 ) );
+          break;
+        }
+      }
     }
 
 //    viewHolder.swipeLayout.setShowMode(SwipeLayout.ShowMode.PullOut);

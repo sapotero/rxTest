@@ -309,6 +309,7 @@ public class SyncDocumentsJob  extends BaseJob {
           decision.setUrgencyText(d.getUrgencyText());
           decision.setShowPosition(d.getShowPosition());
           decision.setSignBase64(d.getSignBase64());
+          decision.setRed(d.getRed());
 
           if ( d.getBlocks() != null && d.getBlocks().size() >= 1 ){
 
@@ -502,6 +503,7 @@ public class SyncDocumentsJob  extends BaseJob {
           decision.setUrgencyText(d.getUrgencyText());
           decision.setShowPosition(d.getShowPosition());
           decision.setSignBase64(d.getSignBase64());
+          decision.setRed(d.getRed());
 
           if ( d.getBlocks() != null && d.getBlocks().size() >= 1 ){
 

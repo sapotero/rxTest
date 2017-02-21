@@ -33,6 +33,7 @@ public abstract class RDecision {
   Boolean approved;
   Boolean signerIsManager;
   Boolean showPosition;
+  Boolean red;
 
   String signBase64;
 
