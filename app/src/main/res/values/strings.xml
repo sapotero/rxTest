@@ -241,6 +241,8 @@
     <string name="decision_approve_body">Подписать данную резолюцию?</string>
     <string name="decision_reject_body"> Отклонить данную резолюцию?</string>
 
+    <string name="document_from_the_report"> Исполнить без ответа</string>
+
     <!--<string name="decision_add_people">\u2000Добавить исполнителя</string>-->
     <string name="decision_add_people">Добавить исполнителя</string>
 

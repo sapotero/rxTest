@@ -128,12 +128,18 @@ public class NextPerson extends AbstractCommand {
     ArrayList<String> uids = new ArrayList<>();
     uids.add( UID.get() );
 
+
+    String comment = null;
+    if ( params.getComment() != null ){
+      comment = params.getComment();
+    }
+
     Observable<OperationResult> info = operationService.sign(
       getType(),
       LOGIN.get(),
       TOKEN.get(),
       uids,
-      UID.get(),
+      comment,
       STATUS_CODE.get(),
       official_id,
       sign

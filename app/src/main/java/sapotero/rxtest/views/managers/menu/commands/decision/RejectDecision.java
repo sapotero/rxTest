@@ -175,6 +175,11 @@ public class RejectDecision extends AbstractCommand {
     Decision formated_decision = DecisionConverter.formatDecision( decision );
     formated_decision.setApproved(false);
     formated_decision.setCanceled(true);
+    formated_decision.setDocumentUid(null);
+
+    if (params.getComment() != null){
+      formated_decision.setComment( String.format( "Причина отклонения: %s", params.getComment() ) );
+    }
 
     DecisionWrapper wrapper = new DecisionWrapper();
     wrapper.setDecision(formated_decision);

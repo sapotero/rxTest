@@ -139,12 +139,19 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
             params.setPerson( settings.getString("current_user_id").get() );
             break;
           case R.id.menu_info_to_the_approval_performance:
-            operation = CommandFactory.Operation.FROM_THE_REPORT;
-            params.setPerson( settings.getString("current_user_id").get() );
+
+            // настройка
+            // Показывать подтверждения о действиях с документом
+            if ( settings.getBoolean("settings_view_show_actions_confirm").get() ){
+              operation = CommandFactory.Operation.INCORRECT;
+              showFromTheReportDialog();
+            } else {
+              operation = CommandFactory.Operation.FROM_THE_REPORT;
+              params.setPerson( settings.getString("current_user_id").get() );
+            }
             break;
 
           // primary_consideration (первичное рассмотрение)
-
           case R.id.menu_info_approval_next_person:
 
             // настройка
@@ -297,6 +304,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
     );
   }
 
+
+
   private void loadSettings() {
     LOGIN    = settings.getString("login");
     UID      = settings.getString("activity_main_menu.uid");
@@ -325,14 +334,14 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
 
     decision_count = doc.getDecisions().size();
 
-    switch ( decision_count ){
+    switch (decision_count) {
       case 0:
         processEmptyDecisions();
         break;
       default:
         try {
-          toolbar.getMenu().findItem( R.id.menu_info_decision_create ).setVisible(false);
-          toolbar.getMenu().findItem( R.id.menu_info_decision_edit).setVisible(true);
+          toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(false);
+          toolbar.getMenu().findItem(R.id.menu_info_decision_edit).setVisible(true);
         } catch (Exception e) {
           Timber.tag(TAG).v(e);
         }
@@ -340,10 +349,10 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
     }
 
     // Если документ обработан - то изменяем резолюции на поручения
-    if( doc.isProcessed() ){
+    if (doc.isProcessed()) {
       try {
-        toolbar.getMenu().findItem( R.id.menu_info_decision_edit).setVisible(false);
-        toolbar.getMenu().findItem( R.id.menu_info_decision_create).setVisible(true);
+        toolbar.getMenu().findItem(R.id.menu_info_decision_edit).setVisible(false);
+        toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(true);
       } catch (Exception e) {
         Timber.tag(TAG).v(e);
       }
@@ -352,12 +361,12 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
     for (int i = 0; i < toolbar.getMenu().size(); i++) {
       MenuItem item = toolbar.getMenu().getItem(i);
 
-      switch ( item.getItemId() ) {
+      switch (item.getItemId()) {
         case R.id.menu_info_shared_to_favorites:
-          item.setTitle( context.getString( doc.isFavorites() != null && doc.isFavorites() ? R.string.remove_from_favorites : R.string.to_favorites));
+          item.setTitle(context.getString(doc.isFavorites() != null && doc.isFavorites() ? R.string.remove_from_favorites : R.string.to_favorites));
           break;
         case R.id.menu_info_shared_to_control:
-          item.setTitle( context.getString( doc.isControl() != null && doc.isControl() ? R.string.remove_from_control : R.string.to_control));
+          item.setTitle(context.getString(doc.isControl() != null && doc.isControl() ? R.string.remove_from_control : R.string.to_control));
           break;
         default:
           break;
@@ -366,13 +375,22 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
 
     //настройка
     try {
-      if ( !settings.getBoolean("settings_view_show_create_decision_post").get() ){
-        toolbar.getMenu().findItem( R.id.menu_info_decision_create).setVisible(false);
+      if (!settings.getBoolean("settings_view_show_create_decision_post").get()) {
+        toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(false);
       }
     } catch (Exception e) {
       e.printStackTrace();
     }
 
+    if (Objects.equals(doc.getFilter(), Fields.Status.SIGNING.getValue()) || Objects.equals(doc.getFilter(), Fields.Status.APPROVAL.getValue())) {
+      // resolved https://tasks.n-core.ru/browse/MVDESD-12765
+      // убрать кнопку "К" у проектов из раздела на согласование("на подписание" её также быть не должно)
+      try {
+        toolbar.getMenu().findItem(R.id.menu_info_shared_to_control).setVisible(false);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
   }
 
   //REFACTOR переделать это
@@ -707,6 +725,42 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
 
 
     prev_dialog.build().show();
+  }
+
+
+  private void showFromTheReportDialog() {
+
+    CommandParams params = new CommandParams();
+
+    MaterialDialog.Builder fromTheReportDialog = new MaterialDialog.Builder(context)
+      .content(R.string.document_from_the_report)
+      .cancelable(true)
+      .positiveText(R.string.yes)
+      .negativeText(R.string.no)
+      .onPositive((dialog1, which) -> {
+
+        CommandFactory.Operation operation;
+
+        operation = CommandFactory.Operation.FROM_THE_REPORT;
+        params.setPerson( settings.getString("current_user_id").get() );
+        params.setComment( dialog1.getInputEditText().getText().toString() );
+
+        operationManager.execute(operation, params);
+      })
+      .autoDismiss(true);
+
+    // настройка
+    // Показывать комментарий при отклонении
+    if ( settings.getBoolean("settings_view_show_comment_post").get() ){
+      fromTheReportDialog.inputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES )
+        .input(R.string.comment_hint, R.string.dialog_empty_value, (dialog12, input) -> {
+          settings.getString("prev_dialog_comment").set( input.toString() );
+          params.setComment( input.toString() );
+        });
+    }
+
+
+    fromTheReportDialog.build().show();
   }
 
   // OSHS selector

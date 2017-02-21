@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
 import android.util.Base64;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -27,6 +28,7 @@ import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.google.gson.Gson;
@@ -130,17 +132,47 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
   public void decision_preview_next(){
     Timber.tag(TAG).v("decision_preview_next start");
 
-    CommandFactory.Operation operation;
-    operation =CommandFactory.Operation.APPROVE_DECISION;
+    if ( settings.getBoolean("settings_view_show_actions_confirm").get() ){
+      // resolved https://tasks.n-core.ru/browse/MVDESD-12765
+      // выводить подтверждение при подписании резолюции
 
-    CommandParams params = new CommandParams();
+        MaterialDialog.Builder prev_dialog = new MaterialDialog.Builder( getContext() )
+          .content(R.string.decision_approve_body)
+          .cancelable(true)
+          .positiveText(R.string.yes)
+          .negativeText(R.string.no)
+          .onPositive((dialog1, which) -> {
 
-    params.setDecisionId( current_decision.getUid() );
-    params.setDecision( current_decision );
-    params.setDocument( settings.getString("activity_main_menu.uid").get() );
-    params.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
+            CommandFactory.Operation operation = CommandFactory.Operation.APPROVE_DECISION;
 
-    operationManager.execute(operation, params);
+            CommandParams params = new CommandParams();
+
+            params.setDecisionId( current_decision.getUid() );
+            params.setDecision( current_decision );
+            params.setDocument( settings.getString("activity_main_menu.uid").get() );
+            params.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
+
+            operationManager.execute(operation, params);
+
+          })
+          .autoDismiss(true);
+
+        prev_dialog.build().show();
+
+    } else {
+      CommandFactory.Operation operation;
+      operation =CommandFactory.Operation.APPROVE_DECISION;
+
+      CommandParams params = new CommandParams();
+
+      params.setDecisionId( current_decision.getUid() );
+      params.setDecision( current_decision );
+      params.setDocument( settings.getString("activity_main_menu.uid").get() );
+      params.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
+
+      operationManager.execute(operation, params);
+    }
+
 
     Timber.tag(TAG).v("decision_preview_next end");
   }
@@ -150,15 +182,53 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
   public void decision_preview_prev(){
     Timber.tag(TAG).v("decision_preview_prev");
 
-    CommandFactory.Operation operation;
-    operation =CommandFactory.Operation.REJECT_DECISION;
+    // resolved https://tasks.n-core.ru/browse/MVDESD-12765
+    // Добавить ввод комментариев на "Отклонить резолюцию" и "без ответа"
 
-    CommandParams params = new CommandParams();
-    params.setDecisionId( current_decision.getUid() );
-    params.setDecision( current_decision );
-    params.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
+    if ( settings.getBoolean("settings_view_show_comment_post").get() ){
 
-    operationManager.execute(operation, params);
+      MaterialDialog.Builder prev_dialog = new MaterialDialog.Builder( getContext() )
+        .content(R.string.decision_reject_body)
+        .cancelable(true)
+        .positiveText(R.string.yes)
+        .negativeText(R.string.no)
+        .onPositive((dialog1, which) -> {
+
+          CommandFactory.Operation operation =CommandFactory.Operation.REJECT_DECISION;
+
+          CommandParams commandParams = new CommandParams();
+          commandParams.setDecisionId( current_decision.getUid() );
+          commandParams.setDecision( current_decision );
+          commandParams.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
+          commandParams.setComment( dialog1.getInputEditText().getText().toString() );
+
+          operationManager.execute(operation, commandParams);
+        })
+        .autoDismiss(true);
+
+      // настройка
+      // Показывать комментарий при отклонении
+      if ( settings.getBoolean("settings_view_show_comment_post").get() ){
+        prev_dialog.inputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES )
+          .input(R.string.comment_hint, R.string.dialog_empty_value, (dialog12, input) -> {});
+      }
+
+
+      prev_dialog.build().show();
+
+    } else {
+
+      CommandFactory.Operation operation;
+      operation =CommandFactory.Operation.REJECT_DECISION;
+
+      CommandParams params = new CommandParams();
+      params.setDecisionId( current_decision.getUid() );
+      params.setDecision( current_decision );
+      params.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
+
+      operationManager.execute(operation, params);
+    }
+
   }
 
   @Override

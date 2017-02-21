@@ -89,9 +89,10 @@
             android:key="settings_view_show_create_decision_post"
             android:title="Показывать кнопку «Создать поручение»"
             android:defaultValue="false" />
+        <!-- // resolved https://tasks.n-core.ru/browse/MVDESD-12765-->
         <SwitchPreference
             android:key="settings_view_show_comment_post"
-            android:title="Показывать комментарий при отклонении"
+            android:title="Показывать комментарий при отклонении документа/резолюции/без ответа"
             android:defaultValue="true" />
         <SwitchPreference
             android:key="settings_view_show_actions_confirm"

@@ -107,7 +107,7 @@ public class NextPerson extends AbstractCommand {
     ArrayList<String> uids = new ArrayList<>();
     uids.add( UID.get() );
 
-    String comment = "";
+    String comment = null;
     if ( params.getComment() != null ){
       comment = params.getComment();
     }

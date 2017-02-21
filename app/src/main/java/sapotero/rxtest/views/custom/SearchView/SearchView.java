@@ -93,7 +93,12 @@ public class SearchView extends BaseRestoreInstanceFragment implements DialogInt
         spinner.setAdapter(adapter, false, onSelectedListener );
 
         boolean[] selectedItems = new boolean[adapter.getCount()];
+
+        // resolved https://tasks.n-core.ru/browse/MVDESD-12765
+        // по умолчанию ставим все галки
         selectedItems[0] = true;
+        selectedItems[1] = true;
+
         spinner.setSelected(selectedItems);
 
         return dialogLayout;
