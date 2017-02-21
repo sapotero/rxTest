@@ -17,7 +17,6 @@ import javax.inject.Inject;
 import io.requery.Persistable;
 import io.requery.query.Result;
 import io.requery.query.Scalar;
-import io.requery.query.Tuple;
 import io.requery.query.WhereAndOr;
 import io.requery.rx.SingleEntityStore;
 import rx.android.schedulers.AndroidSchedulers;
@@ -249,9 +248,12 @@ public class DBQueryBuilder {
     Timber.i( "findOrganizations" );
     organizationAdapter.clear();
 
-    WhereAndOr<Result<Tuple>> query = dataStore
-      .select(RDocumentEntity.SIGNER_ID)
-      .where(RDocumentEntity.ID.ne(0));
+    WhereAndOr<Result<RSignerEntity>> query = dataStore
+      .select(RSignerEntity.class)
+      .distinct()
+      .join(RDocumentEntity.class)
+      .on( RDocumentEntity.SIGNER_ID.eq(RSignerEntity.ID) )
+      .where(RDocumentEntity.USER.eq( settings.getString("login").get() ));
 
     if ( conditions.size() > 0 ){
 
@@ -269,55 +271,46 @@ public class DBQueryBuilder {
       }
     }
 
-    final ArrayList<Integer> ids = new ArrayList<Integer>();
-
-    query.get()
+    query
+      .get()
       .toObservable()
       .subscribeOn(Schedulers.io())
       .observeOn(AndroidSchedulers.mainThread())
       .toList()
-      .flatMap( signers_ids -> {
+      .subscribe(
+
+        signers -> {
 
 
-        if (signers_ids.size() > 0){
-          for ( Tuple _id : signers_ids) {
-            ids.add( _id.get(0) );
-          }
-        }
+          // resolved https://tasks.n-core.ru/browse/MVDESD-12625
+          // Фильтр по организациям.
 
-        Timber.tag("signers_ids").i("signers_ids: %s", ids );
+          HashMap< String, Integer> organizations = new HashMap< String, Integer>();
 
-        return dataStore
-          .select( RSignerEntity.ORGANISATION )
-          .where( RSignerEntity.ID.in( ids ) )
-          .get().toObservable().toList();
-      })
-      .subscribe(signers -> {
+          for (RSignerEntity signer: signers){
+            String key = signer.getOrganisation();
 
-        HashMap< String, Integer> organizations = new HashMap< String, Integer>();
+            if ( !organizations.containsKey( key ) ){
+              organizations.put(key, 0);
+            }
 
-        for (Tuple signer: signers){
-          String key = signer.get(0).toString();
+            Integer value = organizations.get(key);
+            value += 1;
 
-          if ( !organizations.containsKey( key ) ){
-            organizations.put(key, 0);
+            organizations.put( key, value  );
           }
 
-          Integer value = organizations.get(key);
-          value += 1;
+          for ( String organization: organizations.keySet()) {
+            Timber.d( "org:  %s | %s", organization, organizations.get(organization) );
+            organizationAdapter.add( new OrganizationItem( organization, organizations.get(organization)) );
+          }
 
-          organizations.put( key, value  );
+        },
+        error -> {
+          Timber.tag("ERROR").e(error);
         }
 
-        for ( String organization: organizations.keySet()) {
-          Timber.d( "org:  %s | %s", organization, organizations.get(organization) );
-          organizationAdapter.add( new OrganizationItem( organization, organizations.get(organization)) );
-        }
-
-      },
-      error -> {
-        Timber.tag("ERROR").e(error);
-      });
+      );
 
   }
 
