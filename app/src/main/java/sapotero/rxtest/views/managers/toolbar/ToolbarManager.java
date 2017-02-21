@@ -28,6 +28,8 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
+import sapotero.rxtest.db.requery.models.decisions.RDecision;
+import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.crypto.SignDataEvent;
 import sapotero.rxtest.events.decision.ApproveDecisionEvent;
@@ -72,6 +74,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
   private SelectOshsDialogFragment oshs;
   private int decision_count;
   private RDocumentEntity doc;
+  private Preference<String> CURRENT_USER_ID;
 
   // FIX переделать
   // пока глобальная переменная чтобы иметь возможность в диалогах
@@ -304,6 +307,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
     STATUS_CODE = settings.getString("activity_main_menu.start");
     REG_NUMBER = settings.getString("activity_main_menu.regnumber");
     REG_DATE = settings.getString("activity_main_menu.date");
+    CURRENT_USER_ID = settings.getString("current_user_id");
   }
 
   private void invalidate() {
@@ -373,16 +377,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
 
   //REFACTOR переделать это
   private void processEmptyDecisions() {
-//    try {
-//      toolbar.getMenu().findItem( R.id.menu_info_decision_sign  ).setVisible(false);
-//    } catch (Exception e) {
-//      e.printStackTrace();
-//    }
-//    try {
-//      toolbar.getMenu().findItem( R.id.menu_info_decision_reject).setVisible(false);
-//    } catch (Exception e) {
-//      e.printStackTrace();
-//    }
     try {
       toolbar.getMenu().findItem( R.id.menu_info_decision_edit  ).setVisible(false);
     } catch (Exception e) {
@@ -454,15 +448,23 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
 
 
     if ( Objects.equals(command, "approve_decision") ) {
-      toolbar.getMenu().clear();
-      toolbar.inflateMenu(R.menu.info_menu);
-      EventBus.getDefault().post( new ShowSnackEvent("Резолюция утверждена") );
+
+      if ( hasActiveDecision() ){
+        toolbar.getMenu().clear();
+        toolbar.inflateMenu(R.menu.info_menu);
+      } else {
+        invalidate();
+      }
+//      EventBus.getDefault().post( new ShowSnackEvent("Резолюция утверждена") );
       EventBus.getDefault().post( new ApproveDecisionEvent() );
     }
 
     if ( Objects.equals(command, "reject_decision") ) {
-      toolbar.getMenu().clear();
-      toolbar.inflateMenu(R.menu.info_menu);
+
+      if ( hasActiveDecision() ){
+        toolbar.getMenu().clear();
+        toolbar.inflateMenu(R.menu.info_menu);
+      }
 //      EventBus.getDefault().post( new ShowSnackEvent("Резолюция отклонена") );
       EventBus.getDefault().post( new RejectDecisionEvent() );
     }
@@ -483,6 +485,27 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
 
     invalidate();
 
+  }
+
+  private Boolean hasActiveDecision(){
+    RDocumentEntity doc = dataStore
+      .select(RDocumentEntity.class)
+      .where(RDocumentEntity.UID.eq( UID.get() ))
+      .get().firstOrNull();
+
+    Boolean result = false;
+
+    if (doc != null && doc.getDecisions().size() > 0){
+      for (RDecision _decision : doc.getDecisions()){
+        RDecisionEntity decision = (RDecisionEntity) _decision;
+
+        if (!decision.isApproved() && Objects.equals(decision.getSignerId(), CURRENT_USER_ID.get())){
+          result = true;
+        }
+      }
+    }
+
+    return result;
   }
 
 
@@ -695,19 +718,4 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
 
   }
 
-  public void showAsProcessed() {
-    toolbar.getMenu().clear();
-    toolbar.inflateMenu(R.menu.info_menu);
-    EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
-
-    //настройка
-    try {
-
-      if ( !settings.getBoolean("settings_view_show_create_decision_post").get() ){
-        toolbar.getMenu().findItem( R.id.menu_info_decision_create).setVisible(false);
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
 }

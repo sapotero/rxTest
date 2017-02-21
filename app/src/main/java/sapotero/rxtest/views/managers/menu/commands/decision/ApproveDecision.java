@@ -5,6 +5,8 @@ import android.content.Context;
 import com.f2prateek.rx.preferences.Preference;
 import com.google.gson.Gson;
 
+import java.util.Objects;
+
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Retrofit;
@@ -14,9 +16,9 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.db.requery.models.decisions.RDecision;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.utils.DecisionConverter;
-import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.wrapper.DecisionWrapper;
@@ -39,6 +41,7 @@ public class ApproveDecision extends AbstractCommand {
   private Preference<String> STATUS_CODE;
   private RDecisionEntity decision;
   private String decisionId;
+  private Preference<String> CURRENT_USER_ID;
 
   public ApproveDecision(Context context, DocumentReceiver document){
     super(context);
@@ -60,6 +63,7 @@ public class ApproveDecision extends AbstractCommand {
     UID   = settings.getString("activity_main_menu.uid");
     HOST  = settings.getString("settings_username_host");
     STATUS_CODE = settings.getString("activity_main_menu.start");
+    CURRENT_USER_ID = settings.getString("current_user_id");
   }
   public ApproveDecision withDecision(RDecisionEntity decision){
     this.decision = decision;
@@ -84,35 +88,55 @@ public class ApproveDecision extends AbstractCommand {
   }
 
 
+  private Boolean hasActiveDecision(){
+    RDocumentEntity doc = dataStore
+      .select(RDocumentEntity.class)
+      .where(RDocumentEntity.UID.eq( document.getUid() ))
+      .get().firstOrNull();
+
+    Boolean result = false;
+
+    if (doc != null && doc.getDecisions().size() > 0){
+      for (RDecision _decision : doc.getDecisions()){
+        RDecisionEntity decision = (RDecisionEntity) _decision;
+
+        if (!decision.isApproved() && Objects.equals(decision.getSignerId(), CURRENT_USER_ID.get())){
+          result = true;
+        }
+      }
+    }
+
+    return result;
+  }
+
   public void update() {
+
     if (callback != null ){
       callback.onCommandExecuteSuccess( getType() );
     }
 
-    if ( params.getActiveDecision() ){
+    if (params.getActiveDecision()){
       try {
-        RDocumentEntity document = (RDocumentEntity) decision.getDocument();
-        String decision_uid = decision.getUid();
-        String document_uid = document.getUid();
 
-        dataStore
-          .update(RDocumentEntity.class)
-          .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue())
-          .where(RDocumentEntity.UID.eq( document_uid ))
-          .get()
-          .call();
+        String decision_uid = decision.getUid();
 
         dataStore
           .update(RDecisionEntity.class)
           .set( RDecisionEntity.APPROVED, true)
-          .where(RDecisionEntity.UID.eq( decision_uid ))
-          .get()
-          .call();
+          .where(RDecisionEntity.UID.eq( decision_uid ));
+
+        if ( !hasActiveDecision() ){
+          dataStore
+            .update(RDocumentEntity.class)
+            .set( RDocumentEntity.PROCESSED, true)
+            .where(RDocumentEntity.UID.eq( document.getUid() ));
+        }
 
       } catch (Exception e) {
         e.printStackTrace();
       }
     }
+
   }
 
   @Override
@@ -178,6 +202,7 @@ public class ApproveDecision extends AbstractCommand {
             callback.onCommandExecuteSuccess( getType() );
           }
           update();
+//          EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
         },
         error -> {
           Timber.tag(TAG).i("error: %s", error);

@@ -5,6 +5,8 @@ import android.content.Context;
 import com.f2prateek.rx.preferences.Preference;
 import com.google.gson.Gson;
 
+import org.greenrobot.eventbus.EventBus;
+
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Retrofit;
@@ -15,6 +17,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.utils.DecisionConverter;
+import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.wrapper.DecisionWrapper;
@@ -136,7 +139,8 @@ public class SaveDecision extends AbstractCommand {
     wrapper.setDecision(formated_decision);
 
     Decision _decision = params.getDecisionModel();
-    _decision.setDocumentUid( formated_decision.getDocumentUid() );
+//    _decision.setDocumentUid( document.getUid() );
+    _decision.setDocumentUid( null );
 
     String json_d = new Gson().toJson( wrapper );
     String json_m = new Gson().toJson( _decision );
@@ -171,6 +175,8 @@ public class SaveDecision extends AbstractCommand {
             callback.onCommandExecuteSuccess( getType() );
           }
           update();
+
+          EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
         },
         error -> {
           Timber.tag(TAG).i("error: %s", error);

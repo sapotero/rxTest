@@ -136,11 +136,13 @@ public enum MainMenuItem {
     true,
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq( true ) ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.ne( Fields.Status.LINK.getValue() ) ),
+      new ConditionBuilder( ConditionBuilder.Condition.OR, RDocumentEntity.FILTER.eq( Fields.Status.PROCESSED.getValue() )  ),
+//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.ne( Fields.Status.LINK.getValue() ) ),
     },
     new ConditionBuilder[]{
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq( true ) ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.ne( Fields.Status.LINK.getValue() ) ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq( Fields.Status.PROCESSED.getValue() )  ),
+      new ConditionBuilder( ConditionBuilder.Condition.OR, RDocumentEntity.PROCESSED.eq( true ) ),
+//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.ne( Fields.Status.LINK.getValue() ) ),
     },
     true, true),
   FAVORITES ( 10, "Избранное %s", new MainMenuButton[]{},
