@@ -12,7 +12,6 @@ import io.requery.query.WhereAndOr;
 import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import sapotero.rxtest.views.menu.fields.MainMenuButton;
@@ -65,11 +64,11 @@ public class DocumentTypeItem {
       // настройка
       // если включена настройка "Отображать документы без резолюции"
       WhereAndOr<Scalar<Integer>> query;
-      if ( !settings.getBoolean("settings_view_type_show_without_project").get() && !mainMenuItem.isProcessed() ){
+      if ( settings.getBoolean("settings_view_type_show_without_project").get() && !mainMenuItem.isProcessed() ){
         query = dataStore
           .count(RDocumentEntity.class)
-          .join(RDecisionEntity.class)
-          .on(RDecisionEntity.DOCUMENT_ID.eq(RDocumentEntity.ID))
+//          .join(RDecisionEntity.class)
+//          .on(RDecisionEntity.DOCUMENT_ID.eq(RDocumentEntity.ID))
           .where(RDocumentEntity.USER.eq(settings.getString("login").get()))
           .and(RDocumentEntity.FILTER.ne(Fields.Status.LINK.getValue()));
 

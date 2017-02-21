@@ -13,6 +13,7 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
@@ -134,8 +135,9 @@ public class FromTheReport extends AbstractCommand {
     try {
       dataStore
         .update(RDocumentEntity.class)
-//        .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue() )
+        .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue() )
         .set( RDocumentEntity.PROCESSED, true)
+        .set( RDocumentEntity.MD5, "" )
         .where(RDocumentEntity.UID.eq(UID.get()))
         .get()
         .call();

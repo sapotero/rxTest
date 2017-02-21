@@ -93,6 +93,7 @@ public class ChangePerson extends AbstractCommand {
       dataStore
         .update(RDocumentEntity.class)
         .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue() )
+        .set( RDocumentEntity.MD5, "" )
         .set( RDocumentEntity.PROCESSED, true)
         .where(RDocumentEntity.UID.eq(UID.get()))
         .get()

@@ -15,7 +15,8 @@ public enum MainMenuButton {
     "Проекты %s" ,
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in( ButtonStatus.getProject() )  ),
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq( Fields.Status.APPROVAL.getValue() )  ),
+//  new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq( Fields.Status.APPROVAL.getValue() )  ),
+
 //      new ConditionBuilder( ConditionBuilder.Condition.OR,  RDocumentEntity.FILTER.eq( Fields.Status.SIGNING.getValue() )  )
     }
   ),
@@ -23,6 +24,7 @@ public enum MainMenuButton {
     "На рассмотрение %s" ,
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in( ButtonStatus.getPerformance() )  ),
+//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.ne(Fields.Status.LINK.getValue() ) ),
 //      new ConditionBuilder( ConditionBuilder.Condition.OR, RDocumentEntity.FILTER.eq(Fields.Status.SENT_TO_THE_REPORT.getValue())  ),
 //      new ConditionBuilder( ConditionBuilder.Condition.OR, RDocumentEntity.FILTER.eq(Fields.Status.SENT_TO_THE_PERFORMANCE.getValue())  ),
     }
@@ -36,8 +38,10 @@ public enum MainMenuButton {
   VIEWED ( 4,
     "Рассмотренные %s" ,
     new ConditionBuilder[]{
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(true)  ),
-//      new ConditionBuilder( ConditionBuilder.Condition.OR, RDocumentEntity.FILTER.eq( Fields.Status.PROCESSED.getValue() )  ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq(Fields.Status.PROCESSED.getValue() ) ),
+//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.ne(Fields.Status.LINK.getValue() ) ),
+//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(true)  ),
+//      new ConditionBuilder( ConditionBuilder.Condition.OR, RDocumentEntity.FILTER.in(Arrays.asList(Fields.Status.PROCESSED.getValue() ) ) ),
     }
   ),
   ASSIGN ( 5,
@@ -53,7 +57,7 @@ public enum MainMenuButton {
   ),
   PROCESSED ( 7, "Обработанные %s" ,
     new ConditionBuilder[]{
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(true)  ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in(Arrays.asList(Fields.Status.PROCESSED.getValue() ) ) ),
 //      new ConditionBuilder( ConditionBuilder.Condition.OR, RDocumentEntity.FILTER.eq( Fields.Status.PROCESSED.getValue() )  ),
     }
   ),
@@ -121,14 +125,7 @@ public enum MainMenuButton {
       projectArray.add( Fields.Status.PRIMARY_CONSIDERATION.getValue());;
       return projectArray;
     }
-    public static ArrayList<String> forProcessed(){
-      ArrayList<String> projectArray = new ArrayList<String>();
-      projectArray.add( Fields.Status.PROCESSED.getValue() );
-      projectArray.add( Fields.Status.SIGNING.getValue());
-      projectArray.add( Fields.Status.SENT_TO_THE_REPORT.getValue());
-      projectArray.add( Fields.Status.PRIMARY_CONSIDERATION.getValue());;
-      return projectArray;
-    }
+
   }
 
 }

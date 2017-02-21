@@ -137,6 +137,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
 
     params.setDecisionId( current_decision.getUid() );
     params.setDecision( current_decision );
+    params.setDocument( settings.getString("activity_main_menu.uid").get() );
     params.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
 
     operationManager.execute(operation, params);
@@ -554,11 +555,11 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
 
           if ( block.isTextBefore() ){
             printBlockText( block.getText() );
-            if (!block.isHidePerformers())
+            if ( block.isHidePerformers() != null && !block.isHidePerformers())
               printBlockPerformers( _performers, f, block.getNumber() );
 
           } else {
-            if (!block.isHidePerformers())
+            if ( block.isHidePerformers() != null && !block.isHidePerformers())
               printBlockPerformers( _performers, f, block.getNumber() );
             printBlockText( block.getText() );
           }

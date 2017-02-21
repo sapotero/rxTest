@@ -27,7 +27,6 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocument;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RSignerEntity;
-import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
@@ -90,12 +89,12 @@ public class DBQueryBuilder {
     if (conditions != null) {
       hideEmpty();
 
-      conditions.add(  new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.ne(Fields.Status.LINK.getValue()) ) );
+//      conditions.add(  new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.ne(Fields.Status.LINK.getValue()) ) );
 
-      Timber.v( "executeWithConditions: %s", conditions.size() );
-      for (ConditionBuilder condition : conditions ) {
-        Timber.tag(TAG).i(":: %s", condition.toString());
-      }
+//      Timber.v( "executeWithConditions: %s", conditions.size() );
+//      for (ConditionBuilder condition : conditions ) {
+//        Timber.tag(TAG).i(":: %s", condition.toString());
+//      }
 
 
       progressBar.setVisibility(ProgressBar.VISIBLE);

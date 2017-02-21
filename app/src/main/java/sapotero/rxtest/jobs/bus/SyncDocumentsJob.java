@@ -285,6 +285,7 @@ public class SyncDocumentsJob  extends BaseJob {
 
       if ( processed_folder != "" && isProcessed ){
         rDoc.setProcessed(true);
+        rDoc.setFilter( Fields.Status.PROCESSED.getValue() );
       }
 
       rDoc.setControl(onControl);

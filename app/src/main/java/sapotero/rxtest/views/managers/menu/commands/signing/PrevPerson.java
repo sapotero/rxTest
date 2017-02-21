@@ -86,6 +86,7 @@ public class PrevPerson extends AbstractCommand {
         .update(RDocumentEntity.class)
         .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue() )
         .set( RDocumentEntity.PROCESSED, true)
+        .set( RDocumentEntity.MD5, "" )
         .where(RDocumentEntity.UID.eq(UID.get()))
         .get()
         .call();

@@ -108,18 +108,23 @@ public class PrevPerson extends AbstractCommand {
     ArrayList<String> uids = new ArrayList<>();
     uids.add( UID.get() );
 
+    String comment = "";
+    if ( params.getComment() != null ){
+      comment = params.getComment();
+    }
+
     Observable<OperationResult> info = operationService.approval(
       getType(),
       LOGIN.get(),
       TOKEN.get(),
       uids,
-      UID.get(),
+      comment,
       STATUS_CODE.get(),
       official_id,
       sign
     );
 
-    info.subscribeOn( Schedulers.computation() )
+    info.subscribeOn( Schedulers.computation() )//        .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue() )
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         data -> {
@@ -149,6 +154,7 @@ public class PrevPerson extends AbstractCommand {
         .update(RDocumentEntity.class)
         .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue() )
         .set( RDocumentEntity.PROCESSED, true)
+        .set( RDocumentEntity.MD5, "" )
         .where(RDocumentEntity.UID.eq(UID.get()))
         .get()
         .call();
