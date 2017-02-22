@@ -241,22 +241,6 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Simp
 
     }
 
-    // resolved https://tasks.n-core.ru/browse/MVDESD-12625
-    //  Номер документа на плитке выделять красным.
-    //  Красным документ должен подсвечиваться, только тогда,
-    //  когда создаём проект резолюции.
-    //  В подписавших резолюцию должен быть Министр.
-
-    if ( item.getDecisions().size() >= 1){
-      for (RDecision dec: item.getDecisions()){
-        RDecisionEntity decision = (RDecisionEntity) dec;
-        if ( decision.isRed() != null && decision.isRed() && !decision.isApproved() ){
-          viewHolder.from.setTextColor( ContextCompat.getColor(mContext, R.color.md_red_600 ) );
-          break;
-        }
-      }
-    }
-
 //    viewHolder.swipeLayout.setShowMode(SwipeLayout.ShowMode.PullOut);
 //
 //    viewHolder.swipeLayout.addDrag(SwipeLayout.DragEdge.Left,  viewHolder.swipeLayout.findViewById(R.id.from_left_to_right));
@@ -342,6 +326,29 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Simp
       viewHolder.badge.setVisibility(View.GONE);
     }
 
+    // resolved https://tasks.n-core.ru/browse/MVDESD-12625
+    //  Номер документа на плитке выделять красным.
+    //  Красным документ должен подсвечиваться, только тогда,
+    //  когда создаём проект резолюции.
+    //  В подписавших резолюцию должен быть Министр.
+
+    if ( item.getDecisions().size() >= 1){
+      for (RDecision dec: item.getDecisions()){
+        RDecisionEntity decision = (RDecisionEntity) dec;
+        if ( decision.isRed() != null && decision.isRed() && !decision.isApproved() ){
+//          viewHolder.from.setTextColor( ContextCompat.getColor(mContext, R.color.md_red_600 ) );
+//          viewHolder.date.setTextColor( ContextCompat.getColor(mContext, R.color.md_red_600) );
+//          viewHolder.title.setTextColor( ContextCompat.getColor(mContext, R.color.md_white_1000 ) );
+//          viewHolder.title.setBackgroundColor( ContextCompat.getColor(mContext, R.color.md_red_300 ) );
+          viewHolder.cv.setBackground( ContextCompat.getDrawable(mContext, R.drawable.top_border) );
+          break;
+        }
+      }
+    } else {
+//      viewHolder.cv.setBackground( null );
+      viewHolder.cv.setBackground( ContextCompat.getDrawable(mContext, R.color.md_white_1000 ) );
+    }
+
   }
 
   @Override
@@ -421,10 +428,10 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Simp
       title = (TextView)itemView.findViewById(R.id.swipe_layout_title);
       badge = (TextView)itemView.findViewById(R.id.swipe_layout_urgency_badge);
       from  = (TextView)itemView.findViewById(R.id.swipe_layout_from);
-      date   = (TextView)itemView.findViewById(R.id.swipe_layout_date);
-      favorite_label   = (TextView)itemView.findViewById(R.id.favorite_label);
-      control_label   = (TextView)itemView.findViewById(R.id.control_label);
-      wait_for_sync   = (TextView)itemView.findViewById(R.id.wait_for_sync);
+      date  = (TextView)itemView.findViewById(R.id.swipe_layout_date);
+      favorite_label = (TextView)itemView.findViewById(R.id.favorite_label);
+      control_label  = (TextView)itemView.findViewById(R.id.control_label);
+      wait_for_sync  = (TextView)itemView.findViewById(R.id.wait_for_sync);
 
       favorite_label.setVisibility(View.GONE);
       control_label.setVisibility(View.GONE);

@@ -138,11 +138,13 @@ public class DBQueryBuilder {
       if (conditions.size() == 0){
         showEmpty();
       } else {
+        // resolved https://tasks.n-core.ru/browse/MVDESD-12625
+        // *11) * Все избранные документы отображать в начале списка
 
         Timber.v( "queryCount: %s", queryCount.get().value() );
         subscribe.add(
           query
-          .orderBy( RDocumentEntity.SORT_KEY.asc() )
+          .orderBy( RDocumentEntity.FAVORITES.desc() )
           .get()
           .toSelfObservable()
           .subscribeOn(Schedulers.io())

@@ -6,6 +6,7 @@
     android:clickable="true"
     android:layout_margin="@dimen/half_date_offset"
     app:cardElevation="2dp"
+
     android:foreground="@drawable/card_foreground"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
@@ -28,6 +29,10 @@
             android:paddingRight="4dp"
             android:textSize="24sp"
             android:background="@drawable/badge_favorite" />
+
+        <!--android:background="@color/md_red_A700"-->
+        <!--android:textColor="@color/md_white_1000"-->
+        <!--android:background="@drawable/top_border"-->
 
         <TextView
             android:id="@+id/swipe_layout_title"
