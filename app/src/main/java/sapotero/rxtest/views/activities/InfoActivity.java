@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -24,6 +25,8 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.inject.Inject;
 
 import butterknife.BindView;
@@ -32,6 +35,7 @@ import butterknife.OnClick;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
 import okhttp3.OkHttpClient;
+import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
@@ -46,6 +50,7 @@ import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
 import sapotero.rxtest.events.decision.ShowDecisionConstructor;
 import sapotero.rxtest.events.view.ShowSnackEvent;
 import sapotero.rxtest.events.view.UpdateCurrentInfoActivityEvent;
+import sapotero.rxtest.jobs.bus.SyncDocumentsJob;
 import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.adapters.TabSigningPagerAdapter;
@@ -93,6 +98,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   private Preference<String> REG_DATE;
 
   private String TAG = this.getClass().getSimpleName();
+  private CompositeSubscription subscription;
 
   @BindView(R.id.toolbar) Toolbar toolbar;
 
@@ -126,7 +132,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     loadingDialog = new MaterialDialog.Builder(this)
       .title("Обновление данных...")
       .progress(true, 0);
-
 
   }
 
@@ -239,8 +244,24 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     if ( subscriptions != null && subscriptions.hasSubscriptions() ){
       subscriptions.unsubscribe();
     }
-
     finish();
+  }
+
+  @Override
+  protected void onSaveInstanceState(Bundle outState) {
+    super.onSaveInstanceState(outState);
+
+    removeFragments();
+  }
+
+  private void removeFragments() {
+    FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+
+    for (Fragment fragment : getSupportFragmentManager().getFragments()){
+      ft.remove(fragment);
+    }
+
+    ft.commit();
   }
 
   @Override
@@ -259,6 +280,8 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
       EventBus.getDefault().unregister(this);
     }
     EventBus.getDefault().register(this);
+
+    updateCurrent();
 
   }
 
@@ -340,6 +363,29 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     overridePendingTransition(0, 0);
     finish();
     startActivity(intent);
+  }
+
+  public void updateCurrent(){
+    unsubscribe();
+
+    subscription.add(
+      Observable
+        .interval( 10, TimeUnit.SECONDS )
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(interval -> {
+          jobManager.addJobInBackground(new SyncDocumentsJob( UID.get(), status ));
+        })
+    );
+  }
+
+  private void unsubscribe(){
+    if ( subscription == null ){
+      subscription = new CompositeSubscription();
+    }
+    if (subscription.hasSubscriptions()){
+      subscription.clear();
+    }
   }
 
 

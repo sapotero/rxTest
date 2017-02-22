@@ -21,9 +21,14 @@ import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.google.gson.Gson;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 
 import javax.inject.Inject;
@@ -40,6 +45,7 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RRouteEntity;
 import sapotero.rxtest.db.requery.models.RStep;
 import sapotero.rxtest.db.requery.models.RStepEntity;
+import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.retrofit.models.document.AnotherApproval;
 import sapotero.rxtest.retrofit.models.document.Card;
 import sapotero.rxtest.retrofit.models.document.Person;
@@ -53,9 +59,11 @@ public class RoutePreviewFragment extends Fragment {
 
   @BindView(R.id.fragment_route_wrapper) LinearLayout wrapper;
 
+
   private Preference<String> DOCUMENT_UID;
   private OnFragmentInteractionListener mListener;
   private String uid;
+  private String TAG = this.getClass().getSimpleName();
 
 
   @Override
@@ -73,6 +81,8 @@ public class RoutePreviewFragment extends Fragment {
     ButterKnife.bind(view);
 
     loadSettings();
+    initEvents();
+
     return view;
   }
 
@@ -99,6 +109,14 @@ public class RoutePreviewFragment extends Fragment {
 
   public interface OnFragmentInteractionListener {
     void onFragmentInteraction(Uri uri);
+  }
+
+  @Override
+  public void onDestroy() {
+    super.onDestroy();
+    if ( EventBus.getDefault().isRegistered(this) ){
+      EventBus.getDefault().unregister(this);
+    }
   }
 
   @RequiresApi(api = Build.VERSION_CODES.M)
@@ -134,7 +152,8 @@ public class RoutePreviewFragment extends Fragment {
               RStepEntity r_step = (RStepEntity) step;
 
 
-              PanelBuilder panel = new PanelBuilder(getContext()).withTitle( r_step.getTitle() );
+              PanelBuilder panel = new PanelBuilder( getContext() ).withTitle( r_step.getTitle() );
+
 
               ArrayList<ItemBuilder> items = new ArrayList<ItemBuilder>();
 
@@ -228,6 +247,7 @@ public class RoutePreviewFragment extends Fragment {
 
             if (hashMap.values().size() > 0){
               LinearLayout wrapper = (LinearLayout) getView().findViewById(R.id.fragment_route_wrapper);
+              wrapper.removeAllViews();
 
               Map<Integer, PanelBuilder> map = new TreeMap<>(hashMap);
 
@@ -258,6 +278,7 @@ public class RoutePreviewFragment extends Fragment {
     private String title;
     private ArrayList<ItemBuilder> items;
     private LinearLayout titleView;
+    private LinearLayout layout;
 
     public PanelBuilder(Context context) {
       this.context = context;
@@ -266,7 +287,7 @@ public class RoutePreviewFragment extends Fragment {
     public PanelBuilder withTitle(String title) {
       this.title = title;
 
-      titleView = new LinearLayout(context);
+      titleView = new LinearLayout( context );
 //      titleView.setBackground( ContextCompat.getDrawable( getContext() ,R.drawable.panel_builder_title) );
 
       TextView text = new TextView(context);
@@ -286,7 +307,7 @@ public class RoutePreviewFragment extends Fragment {
     }
 
     public LinearLayout build(){
-      LinearLayout layout = new LinearLayout(context);
+      layout = new LinearLayout(context);
       layout.setOrientation(LinearLayout.VERTICAL);
 
       layout.setPadding(4,8,4,8);
@@ -316,6 +337,11 @@ public class RoutePreviewFragment extends Fragment {
       return layout;
     }
 
+    public void clear() {
+      if (layout != null) {
+        layout.removeAllViews();
+      }
+    }
   }
 
   class ItemBuilder{
@@ -424,6 +450,24 @@ public class RoutePreviewFragment extends Fragment {
     public ItemBuilder withSign() {
       withSign = true;
       return this;
+    }
+  }
+
+
+  private void initEvents() {
+    Timber.tag(TAG).v("initEvents");
+    if (EventBus.getDefault().isRegistered(this)) {
+      EventBus.getDefault().unregister(this);
+    }
+    EventBus.getDefault().register(this);
+  }
+
+  @RequiresApi(api = Build.VERSION_CODES.M)
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(UpdateCurrentDocumentEvent event) throws Exception {
+    Timber.tag(TAG).w("UpdateCurrentDocumentEvent %s", event.uid);
+    if (Objects.equals(event.uid, DOCUMENT_UID.get())){
+      loadSettings();
     }
   }
 

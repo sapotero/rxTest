@@ -195,10 +195,9 @@ public class DBQueryBuilder {
           organization = "Без организации";
         }
 
-        if ( ids.size() == 0 || ids.contains(organization) ){
+        if ( ids.size() >= 1 || ids.contains(organization) ){
           addDocument(doc);
         }
-
 
 
       }, this::error);

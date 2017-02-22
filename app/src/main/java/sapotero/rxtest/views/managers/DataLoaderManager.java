@@ -8,6 +8,7 @@ import android.os.Handler;
 import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
+import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -484,33 +485,41 @@ public class DataLoaderManager {
             Timber.tag(TAG).i("updateAuth: token" + token.getAuthToken());
             setToken( token.getAuthToken() );
 
-            ArrayList<Fields.Status> filter_types = new ArrayList<>();
+            ArrayList<Fields.Status> filter_types = null;
+            try {
+              filter_types = new ArrayList<>();
 
-            for ( ButtonBuilder button: items.getMainMenuButtons() ){
-              for ( ConditionBuilder condition: button.getConditions() ){
-                if ( condition.getField().getLeftOperand() == RDocumentEntity.FILTER ){
-//                  List<String> tmp = (ArrayList<String>) condition.getField().getRightOperand();
-                  List<String> tmp = new ArrayList<>((Collection<? extends String>) condition.getField().getRightOperand());
+              for ( ButtonBuilder button: items.getMainMenuButtons() ){
+                for ( ConditionBuilder condition: button.getConditions() ){
+                  if ( condition.getField().getLeftOperand() == RDocumentEntity.FILTER ){
+  //                  List<String> tmp = (ArrayList<String>) condition.getField().getRightOperand();
+                    List<String> tmp = new ArrayList<>((Collection<? extends String>) condition.getField().getRightOperand());
 
-                  Timber.tag(TAG).w("list: %s", tmp);
+                    Timber.tag(TAG).w("list: %s", tmp);
 
-                  for (String str: tmp) {
-                    Fields.Status _status = Fields.getStatus(str);
+                    for (String str: tmp) {
+                      Fields.Status _status = Fields.getStatus(str);
 
-                    if (_status != null) {
-                      filter_types.add( _status );
+                      if (_status != null) {
+                        filter_types.add( _status );
+                        Timber.tag(TAG).w("list: add %s", _status);
+                      }
+
                     }
-
                   }
                 }
               }
+
+              Timber.tag(TAG).w("filters: %s", new Gson().toJson(filter_types));
+            } catch (Exception e) {
+              Timber.tag(TAG).w("filters error %s", e);
             }
 
 
             Retrofit retrofits = new RetrofitManager( context, HOST.get() + "/v3/", okHttpClient).process();
             DocumentsService documentsService = retrofits.create(DocumentsService.class);
 
-            Timber.tag("updateByStatus").i( "%s ", filter_types );
+//            Timber.tag("updateByStatus").i( "%s ", filter_types );
 
             Observable<Fields.Status> types = Observable.from(filter_types);
             Observable<Documents> count = Observable

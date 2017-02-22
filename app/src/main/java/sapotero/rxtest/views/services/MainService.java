@@ -82,6 +82,7 @@ import sapotero.rxtest.utils.cryptopro.PinCheck;
 import sapotero.rxtest.utils.cryptopro.ProviderType;
 import sapotero.rxtest.utils.cryptopro.wrapper.CMSSign;
 import sapotero.rxtest.views.managers.DataLoaderManager;
+import sapotero.rxtest.views.menu.fields.MainMenuItem;
 import timber.log.Timber;
 
 public class MainService extends Service {
@@ -618,7 +619,7 @@ public class MainService extends Service {
         settings.getBoolean("isConnectedToInternet").set( isConnectedToInternet );
 
         if ( isConnectedToInternet ){
-          checkSedAvailibility();
+          updateAll();
         }
       });
   }
@@ -640,6 +641,16 @@ public class MainService extends Service {
       .asObservable()
       .subscribe(username -> {
         user = username;
+      });
+  }
+
+  public void updateAll(){
+    Observable
+      .interval( 30, TimeUnit.SECONDS )
+      .subscribeOn(Schedulers.io())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(interval -> {
+        dataLoaderInterface.updateByStatus(MainMenuItem.ALL);
       });
   }
 

@@ -38,6 +38,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -62,6 +63,7 @@ import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.events.decision.ApproveDecisionEvent;
 import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
 import sapotero.rxtest.events.decision.RejectDecisionEvent;
+import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.adapters.DecisionSpinnerAdapter;
 import sapotero.rxtest.views.adapters.models.DecisionSpinnerItem;
@@ -867,6 +869,14 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
     current_decision.setApproved(false);
     displayDecision();
     hideButtons();
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(UpdateCurrentDocumentEvent event) throws Exception {
+    Timber.tag(TAG).w("UpdateCurrentDocumentEvent %s", event.uid);
+    if (Objects.equals(event.uid, UID.get())){
+      loadDocument();
+    }
   }
 
 
