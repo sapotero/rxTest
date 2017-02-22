@@ -28,16 +28,14 @@
   padding: 1px 5px;
 }
 .tab-content {
-    border: 1px solid #c2d3da;
     border-radius: 4px;
-    margin-bottom: 20px;
     padding: 20px 20px 1px;
     overflow: visible;
 }
 
 h2{
-    margin-bottom: 20px;
-    /* padding: 0 20px; */
+    margin-top: 20px;
+    padding: 0 20px;
     font-size: 20px;
     font-weight: normal;
 }

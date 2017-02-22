@@ -336,7 +336,6 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Simp
       for (RDecision dec: item.getDecisions()){
         RDecisionEntity decision = (RDecisionEntity) dec;
         if ( decision.isRed() != null && decision.isRed() && !decision.isApproved() ){
-//          viewHolder.from.setTextColor( ContextCompat.getColor(mContext, R.color.md_red_600 ) );
 //          viewHolder.date.setTextColor( ContextCompat.getColor(mContext, R.color.md_red_600) );
 //          viewHolder.title.setTextColor( ContextCompat.getColor(mContext, R.color.md_white_1000 ) );
 //          viewHolder.title.setBackgroundColor( ContextCompat.getColor(mContext, R.color.md_red_300 ) );

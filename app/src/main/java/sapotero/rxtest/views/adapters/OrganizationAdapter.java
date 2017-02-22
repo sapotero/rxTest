@@ -78,4 +78,17 @@ public class OrganizationAdapter extends BaseAdapter {
     this.organizations = new ArrayList<>();
     notifyDataSetChanged();
   }
+
+//  public Boolean has( int id ){
+//    Boolean result = false;
+//
+//    for (OrganizationItem item: organizations ) {
+//      if (item.getId() == id){
+//        result = true;
+//        break;
+//      }
+//    }
+//
+//    return  result;
+//  }
 }

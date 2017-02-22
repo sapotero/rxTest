@@ -185,6 +185,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       .withAdapter( RAdapter )
       .withItem(menuBuilder)
       .withOrganizationsAdapter( organization_adapter )
+      .withOrganizationSelector( ORGANIZATION_SELECTOR )
       .withEmptyView( documents_empty_list )
       .withRecycleView(rv)
       .withProgressBar( progressBar );
@@ -352,8 +353,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
 
     organization_adapter = new OrganizationAdapter(this, new ArrayList<>());
-    ORGANIZATION_SELECTOR.setAdapter(organization_adapter, false, selected -> {
-      Timber.tag("ORGANIZATION_SELECTOR").i("selected");
+    ORGANIZATION_SELECTOR.setAdapter(organization_adapter, true, selected -> {
+      dbQueryBuilder.execute(false);
     });
   }
 

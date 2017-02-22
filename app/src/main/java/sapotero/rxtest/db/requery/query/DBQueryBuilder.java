@@ -11,6 +11,7 @@ import com.f2prateek.rx.preferences.RxSharedPreferences;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -84,7 +85,8 @@ public class DBQueryBuilder {
     return this;
   }
 
-  public void execute(){
+  public void execute(Boolean refreshSpinner){
+
     if (conditions != null) {
       hideEmpty();
 
@@ -94,6 +96,10 @@ public class DBQueryBuilder {
 //      for (ConditionBuilder condition : conditions ) {
 //        Timber.tag(TAG).i(":: %s", condition.toString());
 //      }
+
+      if (refreshSpinner){
+        findOrganizations();
+      }
 
 
       progressBar.setVisibility(ProgressBar.VISIBLE);
@@ -141,6 +147,7 @@ public class DBQueryBuilder {
         // resolved https://tasks.n-core.ru/browse/MVDESD-12625
         // *11) * Все избранные документы отображать в начале списка
 
+
         Timber.v( "queryCount: %s", queryCount.get().value() );
         subscribe.add(
           query
@@ -152,10 +159,6 @@ public class DBQueryBuilder {
           .subscribe(this::add, this::error)
         );
       }
-
-
-
-      findOrganizations();
     }
   }
 
@@ -172,26 +175,52 @@ public class DBQueryBuilder {
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe( doc -> {
         hideEmpty();
-        Timber.tag("add").e("doc: %s", doc.getId() );
-//        addOne(doc);
 
-        // настройка
-        // если включена настройка "Отображать документы без резолюции"
-        if ( settings.getBoolean("settings_view_type_show_without_project").get() ){
-          addOne(doc);
-        } else {
-          if ( menuBuilder.getItem().isShowAnyWay() ){
-            addOne(doc);
-          } else {
-            if (doc.getDecisions().size() > 0){
-              addOne(doc);
-            }
+        RSignerEntity signer = (RSignerEntity) doc.getSigner();
+
+        boolean[] selected_index = organizationSelector.getSelected();
+        ArrayList<String> ids = new ArrayList<>();
+
+        for (int i = 0; i < selected_index.length; i++) {
+          if ( selected_index[i] ){
+            ids.add( organizationAdapter.getItem(i).getName() );
           }
-
         }
+
+        // resolved https://tasks.n-core.ru/browse/MVDESD-12625
+        // *1) *Фильтр по организациям.
+
+        String organization = signer.getOrganisation();
+        if (Objects.equals(organization, "") || organization == null){
+          organization = "Без организации";
+        }
+
+        if ( ids.size() == 0 || ids.contains(organization) ){
+          addDocument(doc);
+        }
+
+
+
       }, this::error);
 
   }
+
+  private void addDocument(RDocumentEntity doc) {
+    // настройка
+    // если включена настройка "Отображать документы без резолюции"
+    if ( settings.getBoolean("settings_view_type_show_without_project").get() ){
+      addOne(doc);
+    } else {
+      if ( menuBuilder.getItem().isShowAnyWay() ){
+        addOne(doc);
+      } else {
+        if (doc.getDecisions().size() > 0){
+          addOne(doc);
+        }
+      }
+    }
+  }
+
   public void addList(Result<RDocumentEntity> docs){
 
     docs
@@ -218,7 +247,7 @@ public class DBQueryBuilder {
 
     this.conditions = conditions;
     this.withFavorites = withFavorites;
-    execute();
+    execute(true);
   }
   private void addList(List<RDocumentEntity> docs, RecyclerView recyclerView) {
     ArrayList<Document> list_dosc = new ArrayList<>();
@@ -249,6 +278,7 @@ public class DBQueryBuilder {
   private void findOrganizations() {
     Timber.i( "findOrganizations" );
     organizationAdapter.clear();
+    organizationSelector.clear();
 
     WhereAndOr<Result<RSignerEntity>> query = dataStore
       .select(RSignerEntity.class)
@@ -289,6 +319,7 @@ public class DBQueryBuilder {
 
           HashMap< String, Integer> organizations = new HashMap< String, Integer>();
 
+
           for (RSignerEntity signer: signers){
             String key = signer.getOrganisation();
 
@@ -304,7 +335,7 @@ public class DBQueryBuilder {
 
           for ( String organization: organizations.keySet()) {
             Timber.d( "org:  %s | %s", organization, organizations.get(organization) );
-            organizationAdapter.add( new OrganizationItem( organization, organizations.get(organization)) );
+            organizationAdapter.add( new OrganizationItem( organization, organizations.get(organization) ) );
           }
 
         },

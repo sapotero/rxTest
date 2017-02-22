@@ -3,6 +3,7 @@ package sapotero.rxtest.views.adapters.models;
 import java.util.Objects;
 
 public class OrganizationItem {
+  private int id;
   private String name;
   private Integer count;
 

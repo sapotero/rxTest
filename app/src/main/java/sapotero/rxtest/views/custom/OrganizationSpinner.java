@@ -73,6 +73,7 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
 
       builder.setNeutralButton(android.R.string.selectAll, (dialog, which) -> {
         mOldSelection = new boolean[mAdapter.getCount()];
+
         for (int i = 0; i < mOldSelection.length; i++) {
           mOldSelection[i] = true;
           mSelected[i] = true;
@@ -124,7 +125,7 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
       mOldSelection = new boolean[mAdapter.getCount()];
       mSelected = new boolean[mAdapter.getCount()];
       for (int i = 0; i < mSelected.length; i++) {
-        mOldSelection[i] = false;
+        mOldSelection[i] = true;
         mSelected[i] = allSelected;
       }
 
@@ -139,7 +140,13 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
   }
 
   public void clear() {
-    mSelected = new boolean[mAdapter.getCount()];
+    mSelected = new boolean[mOldSelection.length];
+
+    for (int i = 0; i < mSelected.length; i++) {
+      mOldSelection[i] = true;
+      mSelected[i] = true;
+    }
+
     refreshSpinner();
   }
 
