@@ -45,11 +45,15 @@ public class PreviewBuilder implements DecisionInterface {
       bundle.putString("decision", gson.toJson( getNewDecision() , Decision.class) );
     }
 
-    FragmentTransaction transaction = fragmentManger.beginTransaction();
-    preview = new DecisionPreviewFragment();
-    preview.setArguments(bundle);
-    transaction.add( R.id.decision_constructor_decision_preview, preview, DecisionPreviewFragment.class.getSimpleName() );
-    transaction.commit();
+    if (preview == null){
+      FragmentTransaction transaction = fragmentManger.beginTransaction();
+      preview = new DecisionPreviewFragment();
+      preview.setArguments(bundle);
+      transaction.add( R.id.decision_constructor_decision_preview, preview, DecisionPreviewFragment.class.getSimpleName() );
+      transaction.commit();
+    } else {
+      preview.update();
+    }
 
   }
 
@@ -59,6 +63,7 @@ public class PreviewBuilder implements DecisionInterface {
   }
 
   public void update() {
+
     if (preview != null){
       preview.setDecision(decision);
       preview.update();

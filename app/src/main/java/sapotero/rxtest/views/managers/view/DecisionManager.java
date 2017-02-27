@@ -52,6 +52,7 @@ public class DecisionManager implements DecisionInterface, DecisionBuilder.Callb
   private String date;
   private String signerId;
   private String signer;
+  private CharSequence comment;
 
   public DecisionManager(Context context, FragmentManager supportFragmentManager, Decision decision) {
 
@@ -209,6 +210,7 @@ public class DecisionManager implements DecisionInterface, DecisionBuilder.Callb
   @Override
   public void setDecision(Decision _decision_) {
     decision = _decision_;
+    preview_builder.setDecision(_decision_);
   }
 
   /* DecisionBuilder.Callback */
@@ -240,5 +242,52 @@ public class DecisionManager implements DecisionInterface, DecisionBuilder.Callb
 
   public void setSigner(String signer) {
     decision.setSigner(signer);
+  }
+
+  public boolean allSignersSet() {
+    Boolean result = true;
+
+
+
+    if ( decision.getBlocks().size() > 0 ){
+      for (Block block : decision.getBlocks()){
+        if (block.getPerformers().size() == 0){
+          result = false;
+          break;
+        }
+      }
+    }
+
+    if ( decision.getBlocks().size() <= 0 ){
+      result = false;
+    }
+
+    return result  ;
+  }
+
+  public boolean hasBlocks() {
+    Boolean result = true;
+
+    if ( decision.getBlocks().size() == 0 ){
+      result = false;
+    }
+
+    return result  ;
+  }
+
+  public boolean hasSigner() {
+    Boolean result = true;
+
+    if (decision.getSigner() == null || decision.getSignerId() == null){
+      result = false;
+    }
+
+    return result  ;
+  }
+
+  public void setComment(CharSequence comment) {
+    this.comment = comment;
+    decision.setComment( comment.toString() );
+    update();
   }
 }

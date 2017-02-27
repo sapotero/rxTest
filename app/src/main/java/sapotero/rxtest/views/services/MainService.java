@@ -630,7 +630,7 @@ public class MainService extends Service {
 
   public void getAuth(){
     Observable
-      .just( 3600, TimeUnit.SECONDS )
+      .interval( 3600, TimeUnit.SECONDS )
       .subscribeOn(Schedulers.io())
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(interval -> {
@@ -645,13 +645,23 @@ public class MainService extends Service {
   }
 
   public void updateAll(){
-    Observable
-      .interval( 30, TimeUnit.SECONDS )
-      .subscribeOn(Schedulers.io())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(interval -> {
-        dataLoaderInterface.updateByStatus(MainMenuItem.ALL);
-      });
+    if ( subscription == null ){
+      subscription = new CompositeSubscription();
+    }
+
+    if ( subscription.hasSubscriptions() ){
+      subscription.unsubscribe();
+
+      subscription.add(
+        Observable
+          .interval( 30, TimeUnit.SECONDS )
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe(interval -> {
+            dataLoaderInterface.updateByStatus(MainMenuItem.ALL);
+          })
+      );
+    }
   }
 
 

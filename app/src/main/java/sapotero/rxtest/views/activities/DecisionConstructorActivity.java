@@ -5,13 +5,18 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -34,6 +39,7 @@ import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RPerformer;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
+import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.decision.ApproveDecisionEvent;
 import sapotero.rxtest.events.decision.RejectDecisionEvent;
 import sapotero.rxtest.retrofit.models.Oshs;
@@ -68,6 +74,9 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   @BindView(R.id.signer_oshs_selector) EditText signer_oshs_selector;
   @BindView(R.id.sign_as_current_user) Button sign_as_current_user;
 
+
+  @BindView(R.id.select_oshs_wrapper) LinearLayout select_oshs_wrapper;
+
   @BindView(R.id.decision_constructor_decision_comment) EditText decision_comment;
   @BindView(R.id.decision_constructor_decision_date)    EditText decision_date;
 
@@ -79,6 +88,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   private Decision raw_decision;
   private RDecisionEntity rDecisionEntity;
   private SelectOshsDialogFragment dialogFragment;
+  private Fields.Status status;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -89,6 +99,9 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
     ButterKnife.bind(this);
     EsdApplication.getComponent(this).inject(this);
+
+    Preference<String> STATUS_CODE = settings.getString("activity_main_menu.start");
+    status  = Fields.Status.findStatus( STATUS_CODE.get() );
 
 
 
@@ -102,51 +115,108 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     toolbar.inflateMenu(R.menu.info_decision_constructor);
     toolbar.setNavigationOnClickListener( v -> {
 
+
+      Gson gson = new GsonBuilder().setPrettyPrinting().create();
+      String json = gson.toJson( manager.getDecision() );
+      Timber.tag(TAG).w("DECISION: %s", json );
+
+
       if ( manager.isChanged() ){
+        Boolean showSaveDialog = true;
 
-        new MaterialDialog.Builder(this)
-          .title("Имеются несохранненые данные")
-          .content("Резолюция была изменена")
-          .positiveText("сохранить")
-          .onPositive(
-            (dialog, which) -> {
-
-              operationManager.registerCallBack(null);
-
-              Decision decision = manager.getDecision();
-
-              CommandParams params = new CommandParams();
-              params.setDecisionModel( decision );
-
-              decision.setDocumentUid( settings.getString("activity_main_menu.uid").get() );
-
-              if (rDecisionEntity != null) {
-                params.setDecision( rDecisionEntity );
-                params.setDecisionId( rDecisionEntity.getUid() );
+        if ( !manager.allSignersSet() ) {
+          showSaveDialog = false;
+          new MaterialDialog.Builder(this)
+            .title("Внимание")
+            .content("Укажите хотя бы одного подписавшего")
+            .positiveText("Ок")
+            .onPositive(
+              (dialog, which) -> {
+                dialog.dismiss();
               }
+            )
+            .show();
+        }
 
-              CommandFactory.Operation operation = rDecisionEntity == null ? CommandFactory.Operation.NEW_DECISION: CommandFactory.Operation.SAVE_DECISION;
+        if ( showSaveDialog && !manager.hasBlocks() ) {
+          showSaveDialog = false;
+          new MaterialDialog.Builder(this)
+            .title("Внимание")
+            .content("Необходимо добавить хотя бы один блок")
+            .positiveText("Ок")
+            .onPositive(
+              (dialog, which) -> {
+                dialog.dismiss();
+              }
+            )
+            .show();
 
-              operationManager.execute( operation, params );
+        }
 
-              finish();
+        if ( showSaveDialog && !manager.hasSigner() ) {
+          showSaveDialog = false;
+          new MaterialDialog.Builder(this)
+            .title("Внимание")
+            .content("Необходимо выбрать подписавшего")
+            .positiveText("Ок")
+            .onPositive(
+              (dialog, which) -> {
+                dialog.dismiss();
+              }
+            )
+            .show();
+        }
 
-            }
-          )
-          .neutralText("выход")
-          .onNeutral(
-            (dialog, which) -> {
-              Timber.tag(TAG).w("nothing");
-              finish();
-            }
-          )
-          .negativeText("возврат")
-          .onNegative(
-            (dialog, which) -> {
-              Timber.tag(TAG).w("negative");
-            }
-          )
-          .show();
+
+        if (showSaveDialog){
+          new MaterialDialog.Builder(this)
+            .title("Имеются несохранненые данные")
+            .content("Резолюция была изменена")
+            .positiveText("сохранить")
+            .onPositive(
+              (dialog, which) -> {
+
+                operationManager.registerCallBack(null);
+
+//                manager.getDecisionBuilder().build();
+
+                Decision decision = manager.getDecision();
+
+                CommandParams params = new CommandParams();
+                params.setDecisionModel( decision );
+
+                decision.setDocumentUid( settings.getString("activity_main_menu.uid").get() );
+
+                if (rDecisionEntity != null) {
+                  params.setDecision( rDecisionEntity );
+                  params.setDecisionId( rDecisionEntity.getUid() );
+                }
+
+                CommandFactory.Operation operation = rDecisionEntity == null ? CommandFactory.Operation.NEW_DECISION: CommandFactory.Operation.SAVE_DECISION;
+
+                operationManager.execute( operation, params );
+
+                finish();
+
+              }
+            )
+            .neutralText("выход")
+            .onNeutral(
+              (dialog, which) -> {
+                Timber.tag(TAG).w("nothing");
+                finish();
+              }
+            )
+            .negativeText("возврат")
+            .onNegative(
+              (dialog, which) -> {
+                Timber.tag(TAG).w("negative");
+              }
+            )
+            .show();
+        }
+
+
 
 
       } else {
@@ -279,17 +349,9 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     manager.build();
 
 
-
-
     Oshs decision_signer = new Oshs();
     decision_signer.setId( settings.getString("current_user_id").get() );
     decision_signer.setName( settings.getString("current_user").get() );
-
-    signer_oshs_selector.setOnClickListener(v -> {
-      dialogFragment = new SelectOshsDialogFragment();
-      dialogFragment.registerCallBack( this );
-      dialogFragment.show( getFragmentManager(), "SelectOshsDialogFragment");
-    });
 
     sign_as_current_user.setOnClickListener(v -> {
       if (rDecisionEntity != null) {
@@ -306,6 +368,10 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       decision_signer.setName( rDecisionEntity.getSigner() );
       decision_comment.setText( rDecisionEntity.getComment() );
       signer_oshs_selector.setText( rDecisionEntity.getSigner() );
+    } else {
+      raw_decision.setSignerId( settings.getString("current_user_id").get() );
+      raw_decision.setSigner( settings.getString("current_user").get() );
+      signer_oshs_selector.setText( raw_decision.getSigner() );
     }
 
     if ( raw_decision.getUrgencyText() != null ){
@@ -338,6 +404,26 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     }
 
 
+    if ( status == Fields.Status.SENT_TO_THE_REPORT ){
+      select_oshs_wrapper.setVisibility(View.GONE);
+    }
+
+    decision_comment.addTextChangedListener(new TextWatcher() {
+      @Override
+      public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+      }
+
+      @Override
+      public void onTextChanged(CharSequence s, int start, int before, int count) {
+        manager.setComment(s);
+      }
+
+      @Override
+      public void afterTextChanged(Editable s) {
+
+      }
+    });
 
   }
 
@@ -350,11 +436,12 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   }
 
   private void loadDecision() {
-    String decision_id = settings.getString("decision.active.id").get();
+//    settings.getInteger("decision.active.id").set( current_decision.getId() );
+    Integer decision_id = settings.getInteger("decision.active.id").get();
 
     rDecisionEntity = dataStore
       .select(RDecisionEntity.class)
-      .where(RDecisionEntity.UID.eq(decision_id))
+      .where(RDecisionEntity.ID.eq(decision_id))
       .get().firstOrNull();
 
     if (rDecisionEntity != null) {
@@ -530,10 +617,17 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       rDecisionEntity.setSigner( user.getName() );
     }
 
+    if ( user.getAssistantId() != null ){
+      rDecisionEntity.setAssistantId( user.getAssistantId() );
+    }
+
     manager.setSignerId(user.getId());
     manager.setSigner(user.getName());
 
     signer_oshs_selector.setText( user.getName() );
+
+//    manager.setDecision( DecisionConverter.formatDecision(rDecisionEntity) );
+    manager.update();
   }
 
   @Override

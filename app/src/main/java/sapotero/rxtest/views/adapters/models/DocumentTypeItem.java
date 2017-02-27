@@ -42,9 +42,9 @@ public class DocumentTypeItem {
 
       Integer total = dataStore
         .count(RDocumentEntity.class)
-        .where( RDocumentEntity.FAVORITES.ne( true ) )
-        .and( RDocumentEntity.PROCESSED.ne( true ) )
-        .and( RDocumentEntity.FILTER.in( MainMenuButton.ButtonStatus.forAllDocuments() )   )
+//        .where( RDocumentEntity.FAVORITES.ne( true ) )
+//        .and( RDocumentEntity.PROCESSED.ne( true ) )
+        .where( RDocumentEntity.FILTER.in( MainMenuButton.ButtonStatus.forAllDocuments() )   )
         .and( RDocumentEntity.USER.eq( settings.getString("login").get() ) )
         .get()
         .value();
@@ -57,7 +57,7 @@ public class DocumentTypeItem {
         .get()
         .value();
 
-      return String.format( mainMenuItem.getName(), total, projects);
+      return String.format( mainMenuItem.getName(), total-projects, projects);
     } else {
       int count = 0;
 

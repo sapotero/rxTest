@@ -26,7 +26,7 @@ public class DecisionBuilder implements DecisionInterface, BlockFactory.Callback
   public DecisionBuilder(FragmentManager fragmentManger, Decision decision) {
     this.fragmentManger = fragmentManger;
     this.decision = decision;
-    this.block_builder = new BlockFactory( fragmentManger, decision );
+    this.block_builder = new BlockFactory( fragmentManger, this.decision );
 
     this.block_builder.registerCallBack(this);
   }
@@ -43,7 +43,7 @@ public class DecisionBuilder implements DecisionInterface, BlockFactory.Callback
   /* DecisionInterface */
   @Override
   public Decision getDecision() {
-    return null;
+    return decision;
   }
 
   @Override

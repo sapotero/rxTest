@@ -42,6 +42,7 @@ import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
 import sapotero.rxtest.views.dialogs.SelectTemplateDialogFragment;
 import sapotero.rxtest.views.managers.menu.factories.CommandFactory;
+import sapotero.rxtest.views.managers.view.builders.BlockFactory;
 import timber.log.Timber;
 
 public class DecisionFragment extends Fragment implements PrimaryConsiderationAdapter.Callback, SelectOshsDialogFragment.Callback, SelectTemplateDialogFragment.Callback {
@@ -85,6 +86,11 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
 
 
   public Callback callback;
+  private BlockFactory blockFactory;
+
+  public void setBlockFactory(BlockFactory blockFactory) {
+    this.blockFactory = blockFactory;
+  }
 
   public interface Callback {
     void onUpdateSuccess();
@@ -158,6 +164,14 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
 
         switch ( item.getItemId() ){
           case R.id.decision_card_action_delete:
+
+            if (blockFactory != null) {
+              blockFactory.remove(this);
+
+              if (callback != null) {
+                callback.onUpdateSuccess();
+              }
+            }
             getActivity().getSupportFragmentManager().beginTransaction().remove(this).commit();
             break;
           case R.id.decision_card_user_add:
@@ -322,7 +336,11 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   }
 
   public void setNumber( int number){
-    card_toolbar.setTitle("Блок " + number);
+    this.number = number;
+
+    if (card_toolbar != null) {
+      card_toolbar.setTitle("Блок " + number);
+    }
   }
 
   private void loadSettings() {
@@ -393,7 +411,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   public void onSearchSuccess(Oshs user, CommandFactory.Operation operation) {
     Timber.tag("FROM DIALOG").i( "[%s] %s | %s", user.getId(), user.getName(), user.getOrganization());
 
-    adapter.add( new PrimaryConsiderationPeople( user.getId(), user.getName(), user.getPosition(), user.getOrganization()) );
+    adapter.add( new PrimaryConsiderationPeople( user.getId(), user.getName(), user.getPosition(), user.getOrganization(), null) );
     updateUsers();
 
     if (callback != null) {

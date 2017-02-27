@@ -49,7 +49,7 @@
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="40sp"
+            android:layout_height="48dp"
             android:id="@+id/decision_preview_sign_text"
             android:layout_weight="1"
 

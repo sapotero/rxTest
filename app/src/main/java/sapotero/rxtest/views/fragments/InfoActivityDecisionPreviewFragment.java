@@ -38,6 +38,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 
@@ -240,18 +241,29 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
   }
 
   @Override
+  public void onResume() {
+    super.onResume();
+    initEvents();
+    loadSettings();
+    loadDocument();
+  }
+
+
+  @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.fragment_info_card_decision_preview, container, false);
 
     EsdApplication.getComponent( getContext() ).inject(this);
     binder = ButterKnife.bind(this, view);
 
-//    operationManager.registerCallBack(this);
-    initEvents();
-    loadSettings();
-    loadDocument();
-
+    initToolBar();
     setAdapter();
+
+    preview = new Preview(getContext());
+    return view;
+  }
+
+  private void initToolBar() {
 
     decision_toolbar.inflateMenu(R.menu.decision_preview_menu);
     decision_toolbar.setOnMenuItemClickListener(item -> {
@@ -267,9 +279,6 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
       }
       return false;
     });
-
-    preview = new Preview(getContext());
-    return view;
   }
 
   private void setAdapter() {
@@ -400,8 +409,19 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
     Gson gson = new Gson();
     RDecisionEntity data = decision_spinner_adapter.getItem( decision_spinner.getSelectedItemPosition() ).getDecision();
 
+
+    Timber.tag(TAG).v("DECISION");
+    Timber.tag(TAG).v("%s", data);
+
+
     Context context = getContext();
     Intent intent = new Intent( context , DecisionConstructorActivity.class);
+    Bundle bundle = intent.getExtras();
+
+//    if (current_decision != null) {
+//      bundle.putString( "decision", gson.toJson( DecisionConverter.formatDecision(current_decision), Decision.class)  );
+//    }
+
     context.startActivity(intent);
 
   }
@@ -482,7 +502,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
 
     if (current_decision != null) {
       preview.show( current_decision );
-      settings.getString("decision.active.id").set( current_decision.getUid() );
+      settings.getInteger("decision.active.id").set( current_decision.getId() );
       if (toolbarManager != null) {
         toolbarManager.setEditDecisionMenuItemVisible( !current_decision.isApproved() );
       }
@@ -610,29 +630,31 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
       if( decision.getBlocks().size() > 0 ){
 
 
-        Set<RBlock> blocks = decision.getBlocks();
-//        List<Block> blocks = decision.getBlocks();
+        Set<RBlock> _blocks = decision.getBlocks();
+
+        ArrayList<RBlockEntity> blocks = new ArrayList<>();
+        for (RBlock b: _blocks){
+          blocks.add( (RBlockEntity) b );
+        }
+
+        Collections.sort(blocks, (o1, o2) -> o1.getNumber().compareTo( o2.getNumber() ));
 
 
         for (RBlock b: blocks){
           RBlockEntity block = (RBlockEntity) b;
-          Timber.tag("block").v( block.getText() );
+
+          Timber.tag("showPosition").v( "ShowPosition: %s", block.getAppealText() );
+
           printAppealText( block );
-
-          Boolean f = block.isToFamiliarization();
-          if (f == null)
-            f = false;
-
-          Set<RPerformer> _performers = block.getPerformers();
 
           if ( block.isTextBefore() ){
             printBlockText( block.getText() );
             if ( block.isHidePerformers() != null && !block.isHidePerformers())
-              printBlockPerformers( _performers, f, block.getNumber() );
+              printBlockPerformers( block );
 
           } else {
             if ( block.isHidePerformers() != null && !block.isHidePerformers())
-              printBlockPerformers( _performers, f, block.getNumber() );
+              printBlockPerformers( block );
             printBlockText( block.getText() );
           }
 
@@ -773,32 +795,14 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
       preview_body.addView( block_view );
     }
 
-    private void printAppealText(RBlockEntity block ) {
+    private void printAppealText(RBlock _block ) {
 
+      RBlockEntity block = (RBlockEntity) _block;
       String text = "";
-      String appealText;
-      String number;
-      boolean toFamiliarization = block.isToFamiliarization() == null ? false : block.isToFamiliarization();
 
-      if ( block.getAppealText() != null ){
-        appealText = block.getAppealText().toString();
-      } else {
-        appealText = "";
+      if (block.getAppealText() != null && !Objects.equals(block.getAppealText(), "")) {
+          text += block.getNumber().toString() + ". " + block.getAppealText();
       }
-
-      if ( block.getNumber() != null ){
-        number = block.getNumber().toString();
-      } else {
-        number = "1";
-      }
-
-
-
-      if (toFamiliarization){
-        text += number + ". ";
-        block.setToFamiliarization(false);
-      }
-      text += appealText;
 
       TextView blockAppealView = new TextView(context);
       blockAppealView.setGravity(Gravity.CENTER);
@@ -809,29 +813,34 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
       preview_body.addView( blockAppealView );
     }
 
-    private void printBlockPerformers(Set<RPerformer> performers, Boolean toFamiliarization, Integer number) {
+    private void printBlockPerformers(RBlock _block ) {
+
+      RBlockEntity block = (RBlockEntity) _block;
 
       boolean numberPrinted = false;
       LinearLayout users_view = new LinearLayout(context);
       users_view.setOrientation(LinearLayout.VERTICAL);
       users_view.setPadding(40,5,5,5);
 
-      if( performers.size() > 0 ){
+      if( block.getPerformers().size() > 0 ){
+        for (RPerformer _user: block.getPerformers()){
 
-//        List<Performer> users = performers;
-        for (RPerformer u: performers){
-
-          RPerformerEntity user = (RPerformerEntity) u;
+          RPerformerEntity user = (RPerformerEntity) _user;
           String performerName = "";
 
-          if (toFamiliarization && !numberPrinted){
-            performerName += number.toString() + ". ";
+          if ( block.getAppealText() == null && !numberPrinted ){
+            performerName += block.getNumber().toString() + ". ";
             numberPrinted = true;
-          } else {
-            performerName += user.getPerformerText();
           }
 
-          TextView performer_view = new TextView(context);
+          performerName += user.getPerformerText();
+
+          if (user.isIsOriginal() != null && user.isIsOriginal()){
+            performerName += " *";
+          }
+
+
+          TextView performer_view = new TextView( getActivity() );
           performer_view.setText( performerName );
           performer_view.setTextColor( Color.BLACK );
           users_view.addView(performer_view);

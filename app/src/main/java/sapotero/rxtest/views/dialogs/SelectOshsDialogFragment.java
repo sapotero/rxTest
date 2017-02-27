@@ -8,9 +8,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
+import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -27,7 +29,9 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.models.RAssistantEntity;
 import sapotero.rxtest.db.requery.models.RFavoriteUserEntity;
+import sapotero.rxtest.db.requery.models.RPrimaryConsiderationEntity;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.views.adapters.OshsAutoCompleteAdapter;
 import sapotero.rxtest.views.adapters.PrimaryUsersAdapter;
@@ -38,24 +42,41 @@ import timber.log.Timber;
 
 public class SelectOshsDialogFragment extends DialogFragment implements View.OnClickListener {
 
-
+  @Inject RxSharedPreferences settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   private String TAG = this.getClass().getSimpleName();
 
   @BindView(R.id.user_autocomplete_field) DelayAutoCompleteTextView title;
   @BindView(R.id.pb_loading_indicator) ProgressBar indicator;
+  @BindView(R.id.oshs_wrapper) FrameLayout oshs_wrapper;
 
   SelectOshsDialogFragment.Callback callback;
   private CommandFactory.Operation operation;
   private PrimaryUsersAdapter adapter;
   private ArrayList<String> user_ids;
+  private boolean showWithAssistant = false;
+  private boolean withPrimaryConsideration = false;
+  private boolean withOutSearch = false;
 
   public void setIgnoreUsers(ArrayList<String> users) {
     Timber.tag("setIgnoreUsers").e("users %s", new Gson().toJson(users) );
     user_ids = new ArrayList<>();
     user_ids = users;
   }
+
+  public void showWithAssistant(boolean show) {
+    showWithAssistant = show;
+  }
+
+  public void withPrimaryConsideration(boolean primaryConsideration) {
+    this.withPrimaryConsideration = primaryConsideration;
+  }
+
+  public void withOutSearch(boolean withOutSearch) {
+    this.withOutSearch = withOutSearch;
+  }
+
 
   public interface Callback {
     void onSearchSuccess(Oshs user, CommandFactory.Operation operation);
@@ -95,7 +116,9 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
 
     View view = inflater.inflate(R.layout.dialog_choose_oshs, null);
     view.findViewById(R.id.dialog_oshs_add).setOnClickListener(this);
-    view.findViewById(R.id.dialog_oshs_cancel).setOnClickListener(this);
+    view.findViewById(R.id.dialog_oshs_cancel).setOnClickListener(v -> {
+      dismiss();
+    });
 
 
     ArrayList<PrimaryConsiderationPeople> people = new ArrayList<>();
@@ -116,28 +139,61 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
       }
     });
 
-    WhereAndOr<Result<RFavoriteUserEntity>> query =
+    if (showWithAssistant){
       dataStore
-        .select(RFavoriteUserEntity.class)
-        .where(RFavoriteUserEntity.UID.ne(""));
-
-    if (user_ids != null){
-      query = query.and(RFavoriteUserEntity.UID.notIn(user_ids));
-    }
-
-    query.get()
-      .toObservable()
-      .subscribeOn(Schedulers.io())
+        .select(RAssistantEntity.class).get().toObservable()
+        .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe( user -> {
-        Timber.tag("FavoriteUser").e( "%s - %s", user.getId(), user.getName() );
-        adapter.add( new PrimaryConsiderationPeople( user.getUid(), user.getName(), user.getPosition(), user.getOrganization() ) );
-      });
+          adapter.add( new PrimaryConsiderationPeople( user.getHeadId(), user.getTitle(), "", "", user.getAssistantId() ) );
+        });
+    }
+
+    if (withPrimaryConsideration){
+      WhereAndOr<Result<RPrimaryConsiderationEntity>> query = dataStore
+        .select(RPrimaryConsiderationEntity.class)
+        .where(RPrimaryConsiderationEntity.UID.ne( settings.getString("current_user_id").get() ));
+
+      query.get()
+        .toObservable()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe( user -> {
+          adapter.add( new PrimaryConsiderationPeople( user.getUid(), user.getName(), user.getPosition(), user.getOrganization(), null) );
+        });
+    } else {
+
+      WhereAndOr<Result<RFavoriteUserEntity>> query =
+        dataStore
+          .select(RFavoriteUserEntity.class)
+          .where(RFavoriteUserEntity.UID.ne(""));
+
+      if (user_ids != null){
+        query = query.and(RFavoriteUserEntity.UID.notIn(user_ids));
+      }
+
+
+      query.get()
+        .toObservable()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe( user -> {
+          Timber.tag("FavoriteUser").e( "%s - %s", user.getId(), user.getName() );
+          adapter.add( new PrimaryConsiderationPeople( user.getUid(), user.getName(), user.getPosition(), user.getOrganization(), null) );
+        });
+    }
+
 
     // подпихнуть в автокомлпитер
     // обноаить превьюху
 
     ButterKnife.bind(this, view);
+
+    if (withOutSearch){
+      oshs_wrapper.setVisibility(View.GONE);
+      title.setEnabled(false);
+      title.setFocusable(false);
+    }
 
     title.setText("");
 

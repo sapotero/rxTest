@@ -76,6 +76,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
       Gson gson = new Gson();
       decision = gson.fromJson(getArguments().getString("decision"), Decision.class);
     }
+
   }
 
   @Override
@@ -93,6 +94,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
   }
 
   private void updateView() {
+
     decision_preview_head.setText("");
     decision_preview_body.removeAllViews();
     decision_preview_sign_text.removeAllViews();
@@ -104,53 +106,57 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
   }
 
   private void updateData() {
-    if( decision.getBlocks().size() > 0 ){
+    Timber.tag("ERROR").w("size: %s", decision.getBlocks().size() );
+    if( decision.getBlocks() != null && decision.getBlocks().size() > 0 ){
       List<Block> blocks = decision.getBlocks();
+
+//      Collections.sort(blocks, (o1, o2) -> o1.getNumber().compareTo( o2.getNumber() ));
+
       for (Block block: blocks){
         Timber.tag("block").v( block.getText() );
         Timber.tag("block").v(String.valueOf(block.getNumber()));
         Timber.tag("block").v(String.valueOf(block.getHidePerformers()));
         setAppealText( block );
 
-        Boolean toFamiliarization = block.getToFamiliarization();
-        if (toFamiliarization == null){
-          toFamiliarization = false;
-        }
 
-        if ( block.getTextBefore() ){
+        if ( block.getTextBefore() != null && block.getTextBefore() ){
           setBlockText( block.getText() );
-          if (!block.getHidePerformers())
-            setBlockPerformers( block.getPerformers(), toFamiliarization, block.getNumber() );
+
+          if (!block.getHidePerformers()){
+            setBlockPerformers( block );
+          }
         } else {
-          if (!block.getHidePerformers())
-            setBlockPerformers( block.getPerformers(), toFamiliarization, block.getNumber() );
+          if (!block.getHidePerformers()) {
+            setBlockPerformers( block );
+          }
           setBlockText( block.getText() );
         }
       }
     }
   }
 
-  private void setBlockPerformers(List<Performer> performers, Boolean toFamiliarization, Integer number) {
+  private void setBlockPerformers(Block block) {
 
     boolean numberPrinted = false;
+
     LinearLayout users_view = new LinearLayout( getActivity() );
     users_view.setOrientation(LinearLayout.VERTICAL);
     users_view.setPadding(40,5,5,5);
 
-    if( performers.size() > 0 ){
-      for (Performer user: performers){
+    if( block.getPerformers().size() > 0 ){
+      for (Performer user: block.getPerformers()){
 
         String performerName = "";
 
-        if (user.getIsOriginal() != null && user.getIsOriginal()){
-          performerName += "* ";
+        if ( block.getAppealText() == null && !numberPrinted ){
+          performerName += block.getNumber().toString() + ". ";
+          numberPrinted = true;
         }
 
-        if (toFamiliarization && !numberPrinted){
-          performerName += number.toString() + ". ";
-          numberPrinted = true;
-        } else {
-          performerName += user.getPerformerText();
+        performerName += user.getPerformerText();
+
+        if (user.getIsOriginal() != null && user.getIsOriginal()){
+          performerName += " *";
         }
 
 
@@ -182,15 +188,16 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
 
     String text = "";
 
-    if ( block.getToFamiliarization() != null && block.getToFamiliarization() ){
-      block.setToFamiliarization(false);
-    }
+    if (block.getAppealText() != null && !Objects.equals(block.getAppealText(), "")) {
 
-    if ( decision.getShowPosition() != null && decision.getShowPosition() ){
-      text += block.getNumber().toString() + ". ";
-    }
+      if ( block.getToFamiliarization() != null && block.getToFamiliarization() ){
+        block.setToFamiliarization(false);
+      }
 
-    if (block.getAppealText() != null) {
+      if ( decision.getShowPosition() != null && decision.getShowPosition() ){
+        text += block.getNumber().toString() + ". ";
+      }
+
       text += block.getAppealText();
     }
 

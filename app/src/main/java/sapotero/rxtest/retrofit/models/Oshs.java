@@ -37,9 +37,22 @@ public class Oshs implements Serializable {
   @SerializedName("gender")
   @Expose
   private String gender;
+
+  @SerializedName("assistant_id")
+  @Expose
+  private String assistantId;
+
   @SerializedName("image")
   @Expose
-  private Object image;
+  private String image;
+
+  public String getAssistantId() {
+    return assistantId;
+  }
+
+  public void setAssistantId(String assistantId) {
+    this.assistantId = assistantId;
+  }
 
   /**
    *
@@ -226,7 +239,7 @@ public class Oshs implements Serializable {
    * @return
    * The image
    */
-  public Object getImage() {
+  public String getImage() {
     return image;
   }
 
@@ -235,7 +248,7 @@ public class Oshs implements Serializable {
    * @param image
    * The image
    */
-  public void setImage(Object image) {
+  public void setImage(String image) {
     this.image = image;
   }
 

@@ -45,6 +45,7 @@ public class BlockFactory implements DecisionInterface, DecisionFragment.Callbac
   }
 
   public void build() {
+
     if (decision!= null && decision.getBlocks().size() > 0) {
       for (Block block : decision.getBlocks()) {
         add(block);
@@ -60,6 +61,7 @@ public class BlockFactory implements DecisionInterface, DecisionFragment.Callbac
 
     FragmentTransaction transaction = fragmentManger.beginTransaction();
     DecisionFragment fragment = new DecisionFragment();
+    fragment.setBlockFactory(this);
     fragment.registerCallBack(this);
 
     Block block = new Block();
@@ -73,6 +75,7 @@ public class BlockFactory implements DecisionInterface, DecisionFragment.Callbac
     transaction.commit();
 
     blocks.add( fragment );
+    decision.getBlocks().add( block );
   }
 
   private void add(Block block) {
@@ -81,6 +84,7 @@ public class BlockFactory implements DecisionInterface, DecisionFragment.Callbac
 
     FragmentTransaction transaction = fragmentManger.beginTransaction();
     DecisionFragment fragment = new DecisionFragment();
+    fragment.setBlockFactory(this);
     fragment.registerCallBack(this);
 
     bundle.putInt( "number", ++index );
@@ -91,16 +95,28 @@ public class BlockFactory implements DecisionInterface, DecisionFragment.Callbac
     transaction.add(R.id.decisions_container, fragment );
     transaction.commit();
 
+
     blocks.add( fragment );
+//    decision.getBlocks().add( block );
   }
 
   public void remove( DecisionFragment fragment ){
-    try{
-      --index;
+    --index;
+
+    if (blocks.contains(fragment)){
+      decision.getBlocks().remove( fragment.getBlock() );
       blocks.remove( fragment );
-    } catch (Exception e){
-      Timber.tag(TAG).e( e );
     }
+
+    recalculate();
+  }
+
+  private void recalculate() {
+    for (int i = 0; i < blocks.size(); i++) {
+      blocks.get(i).setNumber(i+1);
+    }
+
+    index = blocks.size();
   }
 
   @Override

@@ -94,11 +94,11 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
     buildDialog();
 
     // FIX починить и убрать из релиза
-    getFirtForLenovo();
+    getFirstForLenovo();
 
   }
 
-  private void getFirtForLenovo() {
+  private void getFirstForLenovo() {
     doc = dataStore
       .select(RDocumentEntity.class)
       .where(RDocumentEntity.UID.eq(UID.get())).get().first();
@@ -127,6 +127,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
             Bundle bundle1 = new Bundle();
             bundle1.putString("operation", "primary_consideration");
             dialogFragment.setArguments(bundle1);
+            dialogFragment.withPrimaryConsideration(true);
+            dialogFragment.withOutSearch(true);
             dialogFragment.registerCallBack( this );
             dialogFragment.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
 
@@ -322,7 +324,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
   private void invalidate() {
     Timber.tag(TAG).v("invalidate");
 
-    getFirtForLenovo();
+    getFirstForLenovo();
 
 //    Timber.tag(TAG).v("invalidate: %s", new Gson().toJson(doc) );
 

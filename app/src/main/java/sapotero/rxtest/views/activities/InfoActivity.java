@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -241,28 +240,32 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
       EventBus.getDefault().unregister(this);
     }
 
-    if ( subscriptions != null && subscriptions.hasSubscriptions() ){
-      subscriptions.unsubscribe();
-    }
+    unsubscribe();
+
     finish();
   }
-
-  @Override
-  protected void onSaveInstanceState(Bundle outState) {
-    super.onSaveInstanceState(outState);
-
-    removeFragments();
-  }
-
-  private void removeFragments() {
-    FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-
-    for (Fragment fragment : getSupportFragmentManager().getFragments()){
-      ft.remove(fragment);
-    }
-
-    ft.commit();
-  }
+//
+//  @Override
+//  protected void onSaveInstanceState(Bundle outState) {
+//    super.onSaveInstanceState(outState);
+//
+//
+//    try {
+//      removeFragments();
+//    } catch (Exception e) {
+//      e.printStackTrace();
+//    }
+//  }
+//
+//  private void removeFragments() {
+//    FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+//
+//    for (Fragment fragment : getSupportFragmentManager().getFragments()){
+//      ft.remove(fragment);
+//    }
+//
+//    ft.commit();
+//  }
 
   @Override
   public void onFragmentInteraction(Uri uri) {
@@ -383,8 +386,9 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     if ( subscription == null ){
       subscription = new CompositeSubscription();
     }
+
     if (subscription.hasSubscriptions()){
-      subscription.clear();
+      subscription.unsubscribe();
     }
   }
 

@@ -30,10 +30,10 @@ public class DecisionSpinnerAdapter extends BaseAdapter {
 
   private ArrayList<DecisionSpinnerItem> suggestions = new ArrayList<>();
 
-  public DecisionSpinnerAdapter(Context context, String current_user,  List<DecisionSpinnerItem> filters) {
+  public DecisionSpinnerAdapter(Context context, String current_user,  List<DecisionSpinnerItem> decisions) {
     this.current_user = current_user;
     this.context = context;
-    this.decisions = filters;
+    this.decisions = decisions;
     this.inflter = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
   }
 

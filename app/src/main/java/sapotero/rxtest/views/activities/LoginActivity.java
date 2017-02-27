@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.preference.PreferenceManager;
 import android.view.View;
 import android.widget.Toast;
 
@@ -26,10 +27,10 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.events.bus.FileDownloadedEvent;
 import sapotero.rxtest.events.stepper.shared.StepperNextStepEvent;
 import sapotero.rxtest.utils.queue.QueueManager;
-import sapotero.rxtest.views.services.MainService;
 import sapotero.rxtest.views.custom.stepper.StepperLayout;
 import sapotero.rxtest.views.custom.stepper.VerificationError;
 import sapotero.rxtest.views.custom.stepper.build.StepperAdapter;
+import sapotero.rxtest.views.services.MainService;
 
 
 public class LoginActivity extends AppCompatActivity implements StepperLayout.StepperListener {
@@ -106,6 +107,8 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
     PASSWORD = settings.getString("password");
     TOKEN    = settings.getString("token");
     HOST     = settings.getString("settings_username_host");
+
+    PreferenceManager.setDefaultValues(this, R.xml.settings_view, false);
   }
 
   @Override

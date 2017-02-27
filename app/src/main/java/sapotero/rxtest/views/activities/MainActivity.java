@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
 import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -23,7 +24,6 @@ import com.mikepenz.material_design_iconic_typeface_library.MaterialDesignIconic
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.DrawerBuilder;
-import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
 import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -49,6 +50,7 @@ import butterknife.OnClick;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
 import okhttp3.OkHttpClient;
+import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
@@ -59,6 +61,7 @@ import sapotero.rxtest.db.requery.query.DBQueryBuilder;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.bus.GetDocumentInfoEvent;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
+import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.events.view.RemoveDocumentFromAdapterEvent;
 import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
 import sapotero.rxtest.utils.queue.QueueManager;
@@ -89,6 +92,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   @BindView(R.id.documentsRecycleView) RecyclerView rv;
   @BindView(R.id.progressBar) ProgressBar progressBar;
+  @BindView(R.id.activity_main_update_progressbar) ProgressBar update_progressbar;
 
   @BindView(R.id.activity_main_menu) LinearLayout activity_main_menu;
 
@@ -115,19 +119,20 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private String TAG = MainActivity.class.getSimpleName();
 
   private Preference<String> TOKEN;
-
   private Preference<String> LOGIN;
   private Preference<String> HOST;
   private Preference<String> PASSWORD;
+  private Preference<Integer> COUNT;
+
+  private int loaded = 0;
 
   private OrganizationAdapter organization_adapter;
 
   private int total = 0;
-
   private DrawerBuilder drawer;
-  private CompositeSubscription subscriptions;
 
-//  private String total;
+  private CompositeSubscription subscriptions;
+  //  private String total;
   private final int ALL                = 0;
   private final int INCOMING_DOCUMENTS = 1;
   private final int CITIZEN_REQUESTS   = 2;
@@ -138,21 +143,22 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private final int IN_DOCUMENTS       = 7;
   private final int ON_CONTROL         = 8;
   private final int PROCESSED          = 9;
-  private final int FAVORITES          = 10;
 
+  private final int FAVORITES          = 10;
   private final int SETTINGS_VIEW_TYPE_APPROVE = 18;
   private final int SETTINGS_VIEW = 20;
   private final int SETTINGS_DECISION_TEMPLATES = 21;
-  private final int SETTINGS_REJECTION_TEMPLATES = 22;
 
+  private final int SETTINGS_REJECTION_TEMPLATES = 22;
   public DocumentsAdapter RAdapter;
   public  MenuBuilder menuBuilder;
   private DBQueryBuilder dbQueryBuilder;
   private DataLoaderManager dataLoader;
   private SearchView searchView;
-  private MainActivity context;
 
+  private MainActivity context;
   final int TYPE_ITEM = 1;
+  private CompositeSubscription subscription;
 
 
   @Override
@@ -243,7 +249,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
       @Override
       public void onQueryTextChanged(@NonNull String newText) {
-        if (newText.length() >= 1){
+        if (newText != null && newText.length() >= 1){
           Timber.v("onQueryTextChanged %s | %s", newText, searchView.getSelected() );
 
           ArrayList<List<RDocumentEntity>> result = new ArrayList<>();
@@ -375,6 +381,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
         case R.id.reload:
           queue.getUncompleteTasks();
           updateByStatus();
+          updateProgressBar();
           break;
         case R.id.main_activity_menu_reload:
           updateByStatus();
@@ -389,6 +396,44 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       return false;
     });
 
+  }
+
+  private void updateProgressBar() {
+    dropLoadProgress(true);
+
+    subscription.add(
+    Observable
+      .interval( 1, TimeUnit.SECONDS)
+      .subscribeOn(AndroidSchedulers.mainThread())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe( data-> {
+        int value = update_progressbar.getProgress();
+        update_progressbar.setProgress( value + 1 );
+
+        Timber.tag(TAG).w("TICK %s > %s = %s", getLoadedDocumentsPercent() , value, getLoadedDocumentsPercent() > value);
+        if ( getLoadedDocumentsPercent() >= value  && getLoadedDocumentsPercent() > 0){
+          subscription.unsubscribe();
+        }
+
+
+      })
+    );
+  }
+
+  private void dropLoadProgress(Boolean visible) {
+    loaded = 0;
+    if ( update_progressbar != null){
+      update_progressbar.setProgress(0);
+      update_progressbar.setVisibility(visible ? View.VISIBLE : View.GONE);
+    }
+
+    if (subscription == null){
+      subscription = new CompositeSubscription();
+    }
+
+    if (subscription.hasSubscriptions()){
+      subscription.unsubscribe();
+    }
   }
 
   private void initEvents() {
@@ -429,11 +474,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     menuBuilder.getItem().recalcuate();
 
     RAdapter.notifyDataSetChanged();
+    dropLoadProgress(false);
 
-
-//    menuBuilder.build();
-//    menuBuilder.getItem().recalcuate();
-//    dbQueryBuilder.execute();
   }
 
 
@@ -458,6 +500,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void drawer_build_bottom() {
+    String version = "1.12.0";
+
     drawer
       .addDrawerItems(
 
@@ -472,15 +516,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
           .withIcon(MaterialDesignIconic.Icon.gmi_comment_edit)
           .withIdentifier(SETTINGS_DECISION_TEMPLATES),
         new SecondaryDrawerItem()
-          .withName(R.string.drawer_item_settings_templates_off)
-          .withIcon(MaterialDesignIconic.Icon.gmi_comment_list)
-          .withIdentifier(SETTINGS_REJECTION_TEMPLATES),
-
-        new DividerDrawerItem(),
-        new SecondaryDrawerItem()
-          .withName(R.string.drawer_item_debug)
-          .withIcon(MaterialDesignIconic.Icon.gmi_developer_board)
-          .withIdentifier(99)
+          .withName("Версия приложения: " + version )
+          .withSelectable(false)
       )
       .withOnDrawerItemClickListener(
         (view, position, drawerItem) -> {
@@ -537,7 +574,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
               activity = SettingsTemplatesActivity.class;
               break;
             default:
-              activity = SettingsActivity.class;
+              activity = null;
               break;
           }
 
@@ -596,6 +633,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     PASSWORD = settings.getString("password");
     TOKEN = settings.getString("token");
     HOST = settings.getString("settings_username_host");
+    COUNT = settings.getInteger("documents.count");
   }
 
   private void drawer_add_item(int index, String title, Long identifier) {
@@ -678,8 +716,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
 
-
-
   /* MenuBuilder.Callback */
   @Override
   public void onMenuBuilderUpdate(ArrayList<ConditionBuilder> conditions) {
@@ -702,5 +738,37 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @Override
   public void onDismiss() {
     Timber.v("onDismiss");
+  }
+
+
+  /* DOCUMENT COUNT UPDATE */
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(StepperLoadDocumentEvent event) throws Exception {
+    loaded++;
+
+    int perc = getLoadedDocumentsPercent();
+
+    if (update_progressbar != null) {
+      if ( update_progressbar.getProgress() < perc ){
+        update_progressbar.setProgress( perc );
+      }
+    }
+
+    if ( update_progressbar != null && perc == 100f ){
+      update_progressbar.setVisibility(View.GONE);
+    }
+  }
+
+  private int getLoadedDocumentsPercent() {
+    if ( COUNT.get() == null ){
+      COUNT.set(1);
+    }
+
+    float result = 100f * loaded / COUNT.get();
+    if (result > 100 ){
+      result = 100f;
+    }
+
+    return (int) Math.ceil(result);
   }
 }

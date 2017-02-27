@@ -4,7 +4,8 @@ import sapotero.rxtest.retrofit.models.document.Performer;
 
 public class PrimaryConsiderationPeople {
 
-  private String uid;
+  private String assistantId = null;
+
   private String id;
   private String name;
   private String position;
@@ -13,16 +14,18 @@ public class PrimaryConsiderationPeople {
   private boolean out  = false;
   private boolean responsible = false;
 
-  public PrimaryConsiderationPeople(String id, String name, String position, String organization) {
+  public PrimaryConsiderationPeople(String id, String name, String position, String organization, String assistantId) {
     this.id = id;
     this.name = name;
     this.position = position;
     this.organization = organization;
+    this.assistantId = assistantId;
   }
 
   public PrimaryConsiderationPeople(Performer u) {
     if (u != null) {
       this.id = u.getPerformerId();
+
       this.name = u.getPerformerText();
       this.position = String.valueOf( u.getNumber() );
       this.organization = u.getOrganizationText();
@@ -39,6 +42,15 @@ public class PrimaryConsiderationPeople {
         this.responsible = false;
       }
     }
+  }
+
+  private String uid;
+  public String getAssistantId() {
+    return assistantId;
+  }
+
+  public void setAssistantId(String assistantId) {
+    this.assistantId = assistantId;
   }
 
 

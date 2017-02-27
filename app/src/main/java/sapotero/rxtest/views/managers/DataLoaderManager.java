@@ -8,7 +8,6 @@ import android.os.Handler;
 import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
-import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -17,11 +16,8 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -38,7 +34,6 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.auth.AuthDcCheckFailEvent;
@@ -59,8 +54,6 @@ import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.retrofit.models.documents.Documents;
 import sapotero.rxtest.retrofit.models.v2.V2UserInfo;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
-import sapotero.rxtest.views.menu.builders.ButtonBuilder;
-import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import sapotero.rxtest.views.menu.fields.MainMenuItem;
 import sapotero.rxtest.views.utils.TDmodel;
 import timber.log.Timber;
@@ -455,106 +448,170 @@ public class DataLoaderManager {
   }
 
   public void updateByStatus(MainMenuItem items) {
-
-    String sign = null;
-
-    Retrofit retrofit = new RetrofitManager( context, HOST.get(), okHttpClient).process();
-    AuthService auth = retrofit.create( AuthService.class );
-
-    Map<String, Object> map = new HashMap<>();
-    map.put( "sign", sign );
-
-    RequestBody json = RequestBody.create(
-      MediaType.parse("application/json"),
-      new JSONObject( map ).toString()
-    );
-
-    Timber.tag(TAG).i("json: %s", json .toString());
-
-
-    Observable<AuthSignToken> authSubscription = auth.getAuth( LOGIN.get(), PASSWORD.get() );
+    Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
+    AuthService auth = retrofit.create(AuthService.class);
 
     unsubscribe();
     subscription.add(
-
-      authSubscription
+      auth.getAuth( LOGIN.get(), PASSWORD.get() )
         .subscribeOn( Schedulers.io() )
         .observeOn( AndroidSchedulers.mainThread() )
         .subscribe(
           token -> {
             Timber.tag(TAG).i("updateAuth: token" + token.getAuthToken());
-            setToken( token.getAuthToken() );
-
-            ArrayList<Fields.Status> filter_types = null;
-            try {
-              filter_types = new ArrayList<>();
-
-              for ( ButtonBuilder button: items.getMainMenuButtons() ){
-                for ( ConditionBuilder condition: button.getConditions() ){
-                  if ( condition.getField().getLeftOperand() == RDocumentEntity.FILTER ){
-  //                  List<String> tmp = (ArrayList<String>) condition.getField().getRightOperand();
-                    List<String> tmp = new ArrayList<>((Collection<? extends String>) condition.getField().getRightOperand());
-
-                    Timber.tag(TAG).w("list: %s", tmp);
-
-                    for (String str: tmp) {
-                      Fields.Status _status = Fields.getStatus(str);
-
-                      if (_status != null) {
-                        filter_types.add( _status );
-                        Timber.tag(TAG).w("list: add %s", _status);
-                      }
-
-                    }
-                  }
-                }
-              }
-
-              Timber.tag(TAG).w("filters: %s", new Gson().toJson(filter_types));
-            } catch (Exception e) {
-              Timber.tag(TAG).w("filters error %s", e);
-            }
-
-
-            Retrofit retrofits = new RetrofitManager( context, HOST.get() + "/v3/", okHttpClient).process();
-            DocumentsService documentsService = retrofits.create(DocumentsService.class);
-
-//            Timber.tag("updateByStatus").i( "%s ", filter_types );
-
-            Observable<Fields.Status> types = Observable.from(filter_types);
-            Observable<Documents> count = Observable
-              .from(filter_types)
-              .flatMap(status -> documentsService.getDocuments(LOGIN.get(), TOKEN.get(), status.getValue(), 1000, 0));
-
-              Observable.zip( types, count, (type, docs) -> new TDmodel( type, docs.getDocuments() ))
-                .subscribeOn( Schedulers.computation() )
-                .observeOn( AndroidSchedulers.mainThread() )
-                .toList()
-                .subscribe(
-                  raw -> {
-                    Timber.tag(TAG).i(" RECV: %s", raw.size());
-
-                    for (TDmodel data: raw) {
-                      Timber.tag(TAG).i(" DocumentType: %s | %s", data.getType(), data.getDocuments().size() );
-
-                      for (Document doc: data.getDocuments() ) {
-                        String type = data.getType();
-                        Timber.tag(TAG).d( "%s | %s", type, doc.getUid() );
-
-                        jobManager.addJobInBackground(new SyncDocumentsJob( doc.getUid(), Fields.getStatus(type) ));
-                      }
-                    }
-                  },
-                  error -> {
-                    Timber.e("zip error: %s", error);
-                  });
-
+            setToken(token.getAuthToken());
+            updateDocuments();
           },
           error -> {
-            Timber.tag(TAG).i("updateAuth error: %s" , error );
+            Timber.tag("getAuth").e( "ERROR: %s", error);
           }
         )
     );
+//
+//    String sign = null;
+//
+//    Retrofit retrofit = new RetrofitManager( context, HOST.get(), okHttpClient).process();
+//    AuthService auth = retrofit.create( AuthService.class );
+//    DocumentsService docService = retrofit.create(DocumentsService.class);
+//
+//    Map<String, Object> map = new HashMap<>();
+//    map.put( "sign", sign );
+//
+//    RequestBody json = RequestBody.create(
+//      MediaType.parse("application/json"),
+//      new JSONObject( map ).toString()
+//    );
+//
+//    ArrayList<Fields.Status> filter_types = null;
+//    try {
+//      filter_types = new ArrayList<>();
+//
+//      for ( ButtonBuilder button: items.getMainMenuButtons() ){
+//        for ( ConditionBuilder condition: button.getConditions() ){
+//          if ( condition.getField().getLeftOperand() == RDocumentEntity.FILTER ){
+//            List<String> tmp = new ArrayList<>((Collection<? extends String>) condition.getField().getRightOperand());
+//
+//            Timber.tag(TAG).w("list: %s", tmp);
+//
+//            for (String str: tmp) {
+//              Fields.Status _status = Fields.getStatus(str);
+//
+//              if (_status != null) {
+//                filter_types.add( _status );
+//                Timber.tag(TAG).w("list: add %s", _status);
+//              }
+//
+//            }
+//          }
+//        }
+//      }
+//
+//      Timber.tag(TAG).w("filters: %s", new Gson().toJson(filter_types));
+//    } catch (Exception e) {
+//      Timber.tag(TAG).w("filters error %s", e);
+//    }
+//
+//
+//    processed_folder = dataStore
+//        .select(RFolderEntity.class)
+//        .where(RFolderEntity.TYPE.eq("processed"))
+//        .get().first().getUid();
+//
+//      dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+//      Calendar cal = Calendar.getInstance();
+//      cal.add(Calendar.HOUR, -48);
+//      String date = dateFormat.format(cal.getTime());
+//
+//      Fields.Status[] new_filter_types = Fields.Status.values();
+//
+//    unsubscribe();
+//
+//      Observable<Fields.Status> typesz = Observable.from(new_filter_types);
+//      Observable<Documents> count = Observable
+//        .from(new_filter_types)
+//        .flatMap(status -> docService.getByFolders(LOGIN.get(), TOKEN.get(), status.getValue(), 1000, 0, processed_folder, date));
+//
+//    subscription.add(
+//      Observable.zip(typesz, count, (type, docs) -> new TDmodel(type, docs.getDocuments()))
+//        .subscribeOn(Schedulers.computation())
+//        .observeOn(AndroidSchedulers.mainThread())
+//        .toList()
+//        .subscribe(
+//          raw -> {
+//            for (TDmodel data : raw) {
+//              Timber.tag(TAG).i(" DocumentType: %s | %s", data.getType(), data.getDocuments().size());
+//
+//              for (Document doc : data.getDocuments()) {
+//                String type = data.getType();
+//                Timber.tag(TAG).d("%s | %s", type, doc.getUid());
+//
+//                jobManager.addJobInBackground(new SyncDocumentsJob(doc.getUid(), Fields.getStatus(type), processed_folder, false, true));
+//              }
+//            }
+//          },
+//          error -> {
+//            Timber.tag(TAG).i("updateAuth error: %s" , error );
+//          })
+//    );
+//
+//
+//    Observable<AuthSignToken> authSubscription = auth.getAuth( LOGIN.get(), PASSWORD.get() );
+//
+//
+//    ArrayList<Fields.Status> finalFilter_types = filter_types;
+//    subscription.add(
+//
+//      authSubscription
+//        .subscribeOn( Schedulers.io() )
+//        .observeOn( AndroidSchedulers.mainThread() )
+//        // получаем список обработанных документов по статусам
+//        .subscribe(
+//          token -> {
+//            Timber.tag(TAG).i("updateAuth: token" + token.getAuthToken());
+//            setToken( token.getAuthToken() );
+//
+//
+//            Retrofit retrofits = new RetrofitManager( context, HOST.get() + "/v3/", okHttpClient).process();
+//            DocumentsService documentsService = retrofits.create(DocumentsService.class);
+//
+////            Timber.tag("updateByStatus").i( "%s ", filter_types );
+//
+//            Observable<Fields.Status> types = Observable.from(finalFilter_types);
+//            Observable<Documents> counts = Observable
+//              .from(finalFilter_types)
+//              .flatMap(status -> documentsService.getDocuments(LOGIN.get(), TOKEN.get(), status.getValue(), 1000, 0));
+//
+//              Observable.zip( types, counts, (type, docs) -> new TDmodel( type, docs.getDocuments() ))
+//                .subscribeOn( Schedulers.computation() )
+//                .observeOn( AndroidSchedulers.mainThread() )
+//                .toList()
+//                .subscribe(
+//                  raw -> {
+//                    Timber.tag(TAG).i(" RECV: %s", raw.size());
+//
+//                    for (TDmodel data: raw) {
+//                      Timber.tag(TAG).i(" DocumentType: %s | %s", data.getType(), data.getDocuments().size() );
+//
+//                      for (Document doc: data.getDocuments() ) {
+//                        String type = data.getType();
+//                        Timber.tag(TAG).d( "%s | %s", type, doc.getUid() );
+//
+//                        jobManager.addJobInBackground(new SyncDocumentsJob( doc.getUid(), Fields.getStatus(type) ));
+//                      }
+//                    }
+//
+//                    Timber.tag(TAG).w("UPDATE COMPLETE");
+//                  },
+//                  error -> {
+//                    Timber.e("zip error: %s", error);
+//                  });
+//
+//          },
+//          error -> {
+//            Timber.tag(TAG).i("updateAuth error: %s" , error );
+//          }
+//        )
+//    );
 
 
   }

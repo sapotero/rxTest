@@ -31,12 +31,12 @@
         <CheckBoxPreference
             android:key="settings_view_type_show_without_project"
             android:title="Отображать документы без резолюции"
-            android:defaultValue="false" />
+            android:defaultValue="true" />
         <!--*-->
         <CheckBoxPreference
             android:key="settings_view_hide_primary_consideration"
             android:title="Не отображать статус «Первичное рассмотрение»"
-            android:defaultValue="true" />
+            android:defaultValue="false" />
         <!--*-->
     </android.support.v7.preference.PreferenceCategory>
 
@@ -72,7 +72,7 @@
         <CheckBoxPreference
             android:key="settings_view_show_origin"
             android:title="Отображать настройки подлинника"
-            android:defaultValue="false" />
+            android:defaultValue="true" />
         <CheckBoxPreference
             android:key="settings_view_show_change_signer"
             android:title="Возможность смены подписавшего резолюцию для статуса «На рассмотрение»"

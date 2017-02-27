@@ -11,7 +11,6 @@ import com.f2prateek.rx.preferences.RxSharedPreferences;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -191,13 +190,21 @@ public class DBQueryBuilder {
         // *1) *Фильтр по организациям.
 
         String organization = signer.getOrganisation();
-        if (Objects.equals(organization, "") || organization == null){
-          organization = "Без организации";
+//        if (Objects.equals(organization, "") || organization == null){
+//          organization = "Без организации";
+//        }
+
+        if (selected_index.length == 0){
+          addDocument(doc);
+        } else {
+          if ( ids.contains(organization) || withFavorites && doc.isFavorites() ){
+            addDocument(doc);
+          }
         }
 
-        if ( ids.size() >= 1 || ids.contains(organization) ){
-          addDocument(doc);
-        }
+//        if ( ids.size() >= 1 ||  ){
+//          addDocument(doc);
+//        }
 
 
       }, this::error);

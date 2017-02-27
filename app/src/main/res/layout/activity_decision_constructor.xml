@@ -48,6 +48,7 @@
                 android:layout_height="match_parent"
                 style="@android:style/Widget.Material.Light.ScrollView"
                 android:clipToPadding="true"
+
                 android:fillViewport="true">
 
                 <RelativeLayout
@@ -143,6 +144,7 @@
                                 >
 
                                 <LinearLayout
+                                    android:id="@+id/select_oshs_wrapper"
                                     android:orientation="horizontal"
                                     android:layout_width="match_parent"
                                     android:padding="@dimen/half_date_offset"

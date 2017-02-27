@@ -22,8 +22,8 @@ import javax.inject.Inject;
 
 import io.netopen.hotbitmapgg.library.view.RingProgressBar;
 import rx.Observable;
-import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckFailEvent;
@@ -46,7 +46,7 @@ public class StepperLoadDataFragment extends Fragment implements Step {
   private Preference<Boolean> IS_CONNECTED;
 
   private VerificationError error;
-  private Subscription subscription;
+  private CompositeSubscription subscription;
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -66,11 +66,16 @@ public class StepperLoadDataFragment extends Fragment implements Step {
       Timber.tag(TAG).v( "mRingProgressBar value: complete");
     });
 
-    if (subscription != null) {
+    if (subscription == null){
+      subscription = new CompositeSubscription();
+    }
+
+    if (subscription.hasSubscriptions()){
       subscription.unsubscribe();
     }
 
-    subscription = Observable
+    subscription.add(
+      Observable
       .interval( 2, TimeUnit.SECONDS)
       .subscribeOn(AndroidSchedulers.mainThread())
       .observeOn(AndroidSchedulers.mainThread())
@@ -85,7 +90,8 @@ public class StepperLoadDataFragment extends Fragment implements Step {
           EventBus.getDefault().post( new StepperNextStepEvent() );
         }
 
-      });
+      })
+    );
 
     error = new VerificationError("Подождите загрузки документов");
 

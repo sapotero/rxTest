@@ -6,7 +6,6 @@
         android:id="@+id/menu_info_decision_create"
         app:showAsAction="always|withText"
         android:icon="@drawable/add_decision"
-        android:enabled="false"
         android:title="@string/info_create_decision"/>
     <item
         android:id="@+id/menu_info_decision_edit"
