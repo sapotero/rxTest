@@ -105,6 +105,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   private Fields.Journal journal;
   private Fields.Status  status;
   private MaterialDialog.Builder loadingDialog;
+  private Preference<Boolean> IS_PROCESSED;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -140,7 +141,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
     Timber.tag("INFO").v( "JOURNAL: %s | STATUS: %s", journal.getName(), status.getName() );
 
-    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || status == Fields.Status.PROCESSED ){
+    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || IS_PROCESSED.get()  ){
       fragmentTransaction.add( R.id.activity_info_preview_container, new RoutePreviewFragment() );
     } else {
       fragmentTransaction.add( R.id.activity_info_preview_container, new InfoActivityDecisionPreviewFragment(toolbarManager) );
@@ -153,7 +154,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
     if (viewPager.getAdapter() == null) {
 
-      Timber.tag(TAG).e("setTabContent %s | %s -> %s", status, STATUS_CODE.get(), Fields.Status.findStatus(STATUS_CODE.get()) );
+      Timber.tag(TAG).e("IS_PROCESSED.get() %s | %s -> %s", status, STATUS_CODE.get(), IS_PROCESSED.get() );
 
       dataStore
         .select(RFolderEntity.class)
@@ -164,7 +165,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
           Timber.e( "%s - %s ", folder.getType(), folder.getTitle() );
         });
 
-      if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL ){
+      if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || IS_PROCESSED.get()  ){
         TabSigningPagerAdapter adapter = new TabSigningPagerAdapter( getSupportFragmentManager() );
         viewPager.setAdapter(adapter);
       } else {
@@ -202,6 +203,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     POSITION = settings.getInteger("position");
     DOCUMENT_UID = settings.getString("document.uid");
     STATUS_CODE = settings.getString("activity_main_menu.start");
+    IS_PROCESSED = settings.getBoolean("activity_main_menu.from_sign");
     REG_NUMBER = settings.getString("activity_main_menu.regnumber");
     REG_DATE = settings.getString("activity_main_menu.date");
 

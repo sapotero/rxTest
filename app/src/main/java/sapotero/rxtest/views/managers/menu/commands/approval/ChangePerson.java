@@ -94,6 +94,7 @@ public class ChangePerson extends AbstractCommand {
         .update(RDocumentEntity.class)
         .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue() )
         .set( RDocumentEntity.MD5, "" )
+        .set( RDocumentEntity.FROM_SIGN, true)
         .set( RDocumentEntity.PROCESSED, true)
         .where(RDocumentEntity.UID.eq(UID.get()))
         .get()

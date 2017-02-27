@@ -281,6 +281,8 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Simp
 
       Preference<String> rxStatus = rxPreferences.getString("activity_main_menu.start");
       rxStatus.set( item.getFilter() );
+      Preference<Boolean> rxProcessed = rxPreferences.getBoolean("activity_main_menu.from_sign");
+      rxProcessed.set( item.isFromSign() );
 
       Preference<String> rxDate = rxPreferences.getString("activity_main_menu.date");
       rxDate.set( item.getRegistrationDate() );

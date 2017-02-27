@@ -48,7 +48,7 @@
                     android:layout_width="@dimen/stepper_content_width"
                     android:layout_height="wrap_content"
                     android:hint="@string/username_hinf"
-                    android:text="admin"
+                    android:text="rukovod"
                     style="@android:style/Widget.Material.EditText"/>
             </android.support.design.widget.TextInputLayout>
 
