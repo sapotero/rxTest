@@ -23,6 +23,7 @@ import org.greenrobot.eventbus.EventBus;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -89,6 +90,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   private RDecisionEntity rDecisionEntity;
   private SelectOshsDialogFragment dialogFragment;
   private Fields.Status status;
+  private final DecisionConstructorActivity activity = (DecisionConstructorActivity) this;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -113,6 +115,9 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
     toolbar.setTitle("Редактор резолюции ");
     toolbar.inflateMenu(R.menu.info_decision_constructor);
+
+
+
     toolbar.setNavigationOnClickListener( v -> {
 
 
@@ -197,6 +202,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
                 operationManager.execute( operation, params );
 
                 finish();
+//                activity.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
 
               }
             )
@@ -205,6 +211,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
               (dialog, which) -> {
                 Timber.tag(TAG).w("nothing");
                 finish();
+//                activity.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
               }
             )
             .negativeText("возврат")
@@ -221,6 +228,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
       } else {
         finish();
+//        activity.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
       }
 
     } );
@@ -497,9 +505,11 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
             }
           }
 
-
+          Collections.sort(block.getPerformers(), (o1, o2) -> o1.getNumber().compareTo( o2.getNumber() ));
           list.add(block);
         }
+
+        Collections.sort(list, (o1, o2) -> o1.getNumber().compareTo( o2.getNumber() ));
         raw_decision.setBlocks(list);
       }
     } else {
@@ -593,11 +603,14 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   public void onExecuteSuccess(String command) {
     if ( Objects.equals(command, "approve_decision") ) {
       finish();
+//      activity.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
       EventBus.getDefault().post( new ApproveDecisionEvent() );
     }
 
     if ( Objects.equals(command, "reject_decision") ) {
       finish();
+//      activity.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+
       EventBus.getDefault().post( new RejectDecisionEvent() );
     }
   }

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
@@ -141,8 +142,9 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
 
 
     Intent intent = new Intent(this, MainActivity.class);
-    startActivityForResult(intent, 0);
-    overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
+
+    Bundle bundle = ActivityOptionsCompat.makeCustomAnimation(this, android.R.anim.fade_in, android.R.anim.fade_out).toBundle();
+    startActivity(intent, bundle);
 
     finish();
 

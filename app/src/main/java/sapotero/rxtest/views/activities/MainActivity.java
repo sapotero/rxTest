@@ -3,6 +3,7 @@ package sapotero.rxtest.views.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -585,7 +586,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
           if (activity != null) {
             Intent intent = new Intent(this, activity);
-            startActivity(intent);
+            Bundle bundle = ActivityOptionsCompat.makeCustomAnimation(this, android.R.anim.fade_in, android.R.anim.fade_out).toBundle();
+            startActivity(intent, bundle);
           }
 
           return false;

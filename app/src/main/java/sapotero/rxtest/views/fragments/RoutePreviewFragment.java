@@ -2,7 +2,7 @@ package sapotero.rxtest.views.fragments;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -291,9 +291,9 @@ public class RoutePreviewFragment extends Fragment {
 //      titleView.setBackground( ContextCompat.getDrawable( getContext() ,R.drawable.panel_builder_title) );
 
       TextView text = new TextView(context);
-      text.setTextColor( ContextCompat.getColor(context, R.color.md_grey_900) );
+      text.setTextColor( ContextCompat.getColor(context, R.color.md_grey_600) );
       text.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
-      text.setPaintFlags( Paint.FAKE_BOLD_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG );
+      text.setTypeface( Typeface.create("sans-serif", Typeface.NORMAL) );
       text.setText(title);
       text.setPadding(16,0,0,0);
 
@@ -366,8 +366,9 @@ public class RoutePreviewFragment extends Fragment {
       nameView = new FrameLayout(context);
 
       TextView text = new TextView(context);
-      text.setTextColor( context.getColor(R.color.md_grey_600) );
+      text.setTextColor( context.getColor(R.color.md_grey_900) );
       text.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
+      text.setTypeface( Typeface.create("sans-serif", Typeface.NORMAL) );
       text.setText(name);
 
       nameView.addView( text );
@@ -383,8 +384,9 @@ public class RoutePreviewFragment extends Fragment {
 
 
       TextView text = new TextView(context);
-      text.setTextColor( context.getColor(R.color.md_grey_400) );
+      text.setTextColor( context.getColor(R.color.md_grey_600) );
       text.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
+      text.setTypeface( Typeface.create("sans-serif", Typeface.NORMAL) );
       text.setText(action);
 
       actionView.addView( text );

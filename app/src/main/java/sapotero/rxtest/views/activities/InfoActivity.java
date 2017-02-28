@@ -112,6 +112,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
     setTheme(R.style.AppTheme);
     super.onCreate(savedInstanceState);
+
     setContentView(R.layout.activity_info);
     ButterKnife.bind(this);
     EsdApplication.getComponent(this).inject(this);
@@ -344,7 +345,9 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(ShowDecisionConstructor event) throws Exception {
     Intent intent = new Intent( this, DecisionConstructorActivity.class);
-    this.startActivity(intent);
+    InfoActivity activity = (InfoActivity) this;
+    activity.startActivity(intent);
+//    activity.overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)

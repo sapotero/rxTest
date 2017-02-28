@@ -30,7 +30,6 @@
 
         <item name="preferenceTheme"> @style/PreferenceThemeOverlay.v14.Material </item>
         <item name="android:windowFullscreen">true</item>
-
     </style>
 
     <style name="ToolbarColoredBackArrow" parent="AppTheme">

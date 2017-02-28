@@ -3,6 +3,7 @@ package sapotero.rxtest.views.fragments;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -21,6 +22,7 @@ import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -110,7 +112,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
     if( decision.getBlocks() != null && decision.getBlocks().size() > 0 ){
       List<Block> blocks = decision.getBlocks();
 
-//      Collections.sort(blocks, (o1, o2) -> o1.getNumber().compareTo( o2.getNumber() ));
+      Collections.sort(blocks, (o1, o2) -> o1.getNumber().compareTo( o2.getNumber() ));
 
       for (Block block: blocks){
         Timber.tag("block").v( block.getText() );
@@ -155,14 +157,18 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
 
         performerName += user.getPerformerText();
 
+        performerName = performerName.replaceAll( "\\(.+\\)", "" );
+
         if (user.getIsOriginal() != null && user.getIsOriginal()){
           performerName += " *";
         }
 
 
+
         TextView performer_view = new TextView( getActivity() );
         performer_view.setText( performerName );
         performer_view.setTextColor( Color.BLACK );
+        performer_view.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
         users_view.addView(performer_view);
       }
     }
@@ -175,10 +181,12 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
     TextView block_view = new TextView( getActivity() );
     block_view.setText( text );
     block_view.setTextColor( Color.BLACK );
+    block_view.setTypeface( Typeface.create("sans-serif-light", Typeface.NORMAL) );
 
     LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
     params.setMargins(0, 10, 0, 10);
     block_view.setLayoutParams(params);
+
 
     decision_preview_body.addView( block_view );
   }
@@ -206,6 +214,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
     blockAppealView.setText( text );
     blockAppealView.setTextColor( Color.BLACK );
     blockAppealView.setTextSize( TypedValue.COMPLEX_UNIT_SP, 12 );
+    blockAppealView.setTypeface( Typeface.create("sans-serif", Typeface.NORMAL) );
 
     decision_preview_body.addView( blockAppealView );
   }
@@ -230,6 +239,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
 
   private void updateSignLetterhead() {
     decision_preview_head.setText( decision.getLetterhead() );
+    decision_preview_head.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
   }
 
   public void onButtonPressed(Uri uri) {

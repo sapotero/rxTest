@@ -249,7 +249,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
             settings.getString("decision.active.id").set(null);
 
             Intent create_intent = new Intent(context, DecisionConstructorActivity.class);
-            context.startActivity(create_intent);
+            activity.startActivity(create_intent);
+//            activity.overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
 
             break;
 
@@ -581,6 +582,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
     toolbar.setNavigationOnClickListener(v ->{
       Activity activity = (Activity) context;
       activity.finish();
+//      activity.overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
+//      activity.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
       }
     );
 

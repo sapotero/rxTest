@@ -799,6 +799,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
       TextView block_view = new TextView(context);
       block_view.setText( text );
       block_view.setTextColor( Color.BLACK );
+      block_view.setTypeface( Typeface.create("sans-serif-light", Typeface.NORMAL) );
 
       LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
       params.setMargins(0, 10, 0, 10);

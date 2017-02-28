@@ -52,6 +52,7 @@ import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.views.activities.InfoActivity;
+import sapotero.rxtest.views.activities.MainActivity;
 import sapotero.rxtest.views.managers.db.managers.DBDocumentManager;
 import sapotero.rxtest.views.managers.menu.OperationManager;
 import sapotero.rxtest.views.menu.MenuBuilder;
@@ -177,6 +178,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Simp
     final RDocumentEntity item = documents.get(position);
 
     viewHolder.title.setText( item.getShortDescription() );
+    viewHolder.subtitle.setText( item.getComment() );
 
     //resolved https://tasks.n-core.ru/browse/MVDESD-12625
     //  На плитке Обращения и НПА не показывать строку "Без организации", если её действительно нет(
@@ -288,7 +290,11 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Simp
       rxDate.set( item.getRegistrationDate() );
 
       Intent intent = new Intent(mContext, InfoActivity.class);
-      mContext.startActivity(intent);
+
+      MainActivity activity = (MainActivity) mContext;
+      activity.startActivity(intent);
+//      activity.overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
+
       Toast.makeText(mContext, " onClick : " + item.getMd5() + " \n" + item.getTitle(), Toast.LENGTH_SHORT).show();
 //      viewHolder.swipeLayout.close(true);
     });
@@ -410,6 +416,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Simp
   //  ViewHolder Class
 
   class SimpleViewHolder extends RecyclerView.ViewHolder {
+    private TextView subtitle;
     private TextView badge;
     private TextView control_label;
     private TextView favorite_label;
@@ -427,6 +434,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Simp
 
       cv    = (CardView)itemView.findViewById(R.id.swipe_layout_cv);
       title = (TextView)itemView.findViewById(R.id.swipe_layout_title);
+      subtitle = (TextView)itemView.findViewById(R.id.swipe_layout_subtitle);
       badge = (TextView)itemView.findViewById(R.id.swipe_layout_urgency_badge);
       from  = (TextView)itemView.findViewById(R.id.swipe_layout_from);
       date  = (TextView)itemView.findViewById(R.id.swipe_layout_date);
@@ -438,12 +446,6 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Simp
       control_label.setVisibility(View.GONE);
     }
 
-    public void showControl() {
-      control_label.setVisibility(View.VISIBLE);
-    }
-    public void hideControl() {
-      control_label.setVisibility(View.GONE);
-    }
   }
 
   private static class Holder {
