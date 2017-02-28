@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -105,6 +106,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
 
   @BindView(R.id.activity_info_decision_spinner) Spinner decision_spinner;
   @BindView(R.id.activity_info_decision_preview_toolbar) Toolbar decision_toolbar;
+  @BindView(R.id.activity_info_decision_preview_magnifer) ImageButton magnifer;
 
   @BindView(R.id.activity_info_decision_preview_next_person) Button next_person_button;
   @BindView(R.id.activity_info_decision_preview_prev_person) Button prev_person_button;
@@ -129,6 +131,12 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
   public InfoActivityDecisionPreviewFragment(ToolbarManager toolbarManager) {
     this.toolbarManager = toolbarManager;
   }
+
+  @OnClick(R.id.activity_info_decision_preview_magnifer)
+  public void expandView(){
+    magnifer();
+  }
+
 
   // Approve current decision
   @OnClick(R.id.activity_info_decision_preview_next_person)
@@ -395,7 +403,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
     if ( decision_spinner_adapter.size() > 0 ){
       decision = decision_spinner_adapter.getItem( decision_spinner.getSelectedItemPosition() );
       magnifer.setDecision( decision );
-      magnifer.setRegNumber( preview.getRegNumber() );
+      magnifer.setRegNumber( REG_NUMBER.get() );
     }
 
     magnifer.show( getFragmentManager() , "DecisionMagniferFragment");
@@ -693,6 +701,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
         TextView signerPositionView = new TextView(context);
         signerPositionView.setText( signerPositionS );
         signerPositionView.setTextColor( Color.BLACK );
+        signerPositionView.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
         signerPositionView.setGravity( Gravity.END );
         signer_view.addView( signerPositionView );
       }
@@ -700,6 +709,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
       signerBlankTextView.setText( signerBlankText );
       signerBlankTextView.setTextColor( Color.BLACK );
       signerBlankTextView.setGravity( Gravity.END);
+      signerBlankTextView.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
       signer_view.addView( signerBlankTextView );
 
 
@@ -712,6 +722,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
       TextView numberView = new TextView(context);
       numberView.setText( "№ " + registrationNumber );
       numberView.setTextColor( Color.BLACK );
+      numberView.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
       LinearLayout.LayoutParams numberViewParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f);
       numberView.setLayoutParams(numberViewParams);
       date_and_number_view.addView(numberView);
@@ -768,6 +779,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
       letterHead.setGravity(Gravity.CENTER);
       letterHead.setText( letterhead );
       letterHead.setTextColor( Color.BLACK );
+      letterHead.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
       preview_head.addView( letterHead );
 
       TextView delimiter = new TextView(context);
@@ -839,10 +851,16 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
             performerName += " *";
           }
 
+          performerName = performerName.replaceAll( "\\(.+\\)", "" );
+
 
           TextView performer_view = new TextView( getActivity() );
           performer_view.setText( performerName );
           performer_view.setTextColor( Color.BLACK );
+          performer_view.setPaintFlags( Paint.ANTI_ALIAS_FLAG );
+          performer_view.setGravity(Gravity.CENTER);
+          performer_view.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
+
           users_view.addView(performer_view);
         }
       }

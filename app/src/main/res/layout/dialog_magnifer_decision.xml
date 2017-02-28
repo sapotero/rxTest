@@ -7,12 +7,7 @@
     android:layout_height="wrap_content"
 
     style="@style/Theme.AppCompat.Dialog"
-    >
 
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
         android:paddingTop="24dp"
         android:paddingBottom="16dp"
         android:paddingStart="24dp"
@@ -24,17 +19,17 @@
             style="@android:style/Widget.Material.SeekBar.Discrete"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:max="9"
+            android:max="14"
             android:padding="@dimen/half_date_offset"
-            android:progress="2"
+            android:progress="4"
             tools:targetApi="n"/>
 
 
         <RelativeLayout
             android:orientation="vertical"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:weightSum="3"
-            android:layout_width="600dp">
+            android:layout_width="700dp">
 
             <LinearLayout
                 android:id="@+id/desigion_view_root"
@@ -43,7 +38,7 @@
                 android:layout_width="match_parent"
                 android:padding="@dimen/date_offset"
                 android:layout_below="@+id/textView4"
-                android:layout_height="620dp">
+                android:layout_height="match_parent">
 
                 <LinearLayout
                     android:id="@+id/dialog_magniger_preview_head"
@@ -55,7 +50,9 @@
 
                 <ScrollView
                     android:layout_width="match_parent"
-                    android:layout_height="400dp">
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    >
 
                     <LinearLayout
                         android:id="@+id/dialog_magniger_preview_body"
@@ -70,15 +67,11 @@
                     android:layout_gravity="bottom"
                     android:gravity="bottom"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+                    android:layout_height="64dp">
                 </LinearLayout>
             </LinearLayout>
 
         </RelativeLayout>
-
-
-
-    </LinearLayout>
 
 
 </LinearLayout>
