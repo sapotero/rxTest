@@ -162,10 +162,11 @@
     <string name="menu_info_from_the_report">Возврата с доклада</string>
     <string name="return_to_the_primary_consideration">Отклонить</string>
 
-    <string name="menu_info_delegate_performance">Передать</string>
+    <string name="menu_info_delegate_performance">Передать подписание</string>
+    <string name="menu_info_delegate_sign">Передать согласование</string>
     <string name="menu_info_to_the_approval_performance">Без ответа</string>
 
-    <string name="menu_info_to_the_primary_consideration">Передача первичного рассмотрения</string>
+    <string name="menu_info_to_the_primary_consideration">Передать</string>
 
     <string name="menu_info_change_person">Передать</string>
     <string name="menu_info_next_person">Подписать</string>
@@ -410,6 +411,8 @@
     <string name="decision_preview_edit">Редактировать</string>
     <string name="date_hint">Дата</string>
     <string name="sign_as_current_user">Лично</string>
+    <string name="favorites_text"> Избранное </string>
+    <string name="control_text"> На контроле </string>
 
     <string-array name="IntentsCAAddressList">
         <item>http://www.cryptopro.ru/certsrv/</item>

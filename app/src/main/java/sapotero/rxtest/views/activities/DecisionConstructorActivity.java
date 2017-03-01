@@ -102,7 +102,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     ButterKnife.bind(this);
     EsdApplication.getComponent(this).inject(this);
 
-    Preference<String> STATUS_CODE = settings.getString("activity_main_menu.start");
+    Preference<String> STATUS_CODE = settings.getString("activity_main_menu.star");
     status  = Fields.Status.findStatus( STATUS_CODE.get() );
 
 

@@ -273,7 +273,7 @@ public class CommandFactory implements AbstractCommand.Callback{
     REJECT_DECISION {
       @Override
       Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
-        Timber.tag("CommandFactory").w("REJECT_DECISION start" );
+        Timber.tag("CommandFactory").w("REJECT_DECISION star" );
 
         RejectDecision command = new RejectDecision(context, document);
         Timber.tag("CommandFactory").w("REJECT_DECISION create" );

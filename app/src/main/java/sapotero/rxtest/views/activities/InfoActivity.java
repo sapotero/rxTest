@@ -203,7 +203,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     TOKEN    = settings.getString("token");
     POSITION = settings.getInteger("position");
     DOCUMENT_UID = settings.getString("document.uid");
-    STATUS_CODE = settings.getString("activity_main_menu.start");
+    STATUS_CODE = settings.getString("activity_main_menu.star");
     IS_PROCESSED = settings.getBoolean("activity_main_menu.from_sign");
     REG_NUMBER = settings.getString("activity_main_menu.regnumber");
     REG_DATE = settings.getString("activity_main_menu.date");

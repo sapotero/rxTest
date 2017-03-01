@@ -25,7 +25,7 @@ public class CommandProducer implements Runnable, AutoCloseable {
 
   private void processCommand() {
     try {
-      Timber.tag("CommandProducer").e( "start: %s", command.toString() );
+      Timber.tag("CommandProducer").e( "star: %s", command.toString() );
       Thread.sleep(5000);
     } catch (InterruptedException e) {
       e.printStackTrace();

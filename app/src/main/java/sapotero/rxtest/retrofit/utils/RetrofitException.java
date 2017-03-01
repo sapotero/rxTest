@@ -29,7 +29,7 @@ public class RetrofitException extends RuntimeException {
   public enum Kind {
     /** An {@link IOException} occurred while communicating to the server. */
     NETWORK,
-    /** A non-200 HTTP start code was received from the server. */
+    /** A non-200 HTTP star code was received from the server. */
     HTTP,
     /**
      * An internal error occurred while attempting to execute a request. It is best practice to
@@ -56,7 +56,7 @@ public class RetrofitException extends RuntimeException {
     return url;
   }
 
-  /** Response object containing start code, headers, body, etc. */
+  /** Response object containing star code, headers, body, etc. */
   public Response getResponse() {
     return response;
   }

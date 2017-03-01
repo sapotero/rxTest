@@ -10,7 +10,7 @@
         android:id="@+id/menu_info_approval_change_person"
         app:showAsAction="always|withText"
         android:icon="@drawable/change"
-        android:title="@string/menu_info_change_person"/>
+        android:title= "@string/menu_info_delegate_sign"/>
     <item
         android:id="@+id/menu_info_shared_to_favorites"
         app:showAsAction="always|withText"

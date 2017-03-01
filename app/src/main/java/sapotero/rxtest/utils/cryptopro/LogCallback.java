@@ -54,7 +54,7 @@ public class LogCallback {
     logger = log;
     showStatus = status;
 
-    statusFieldValue = "start";
+    statusFieldValue = "star";
     statusUnknown = "unknow";
     statusOK = "ok";
     statusFailed = "failed";

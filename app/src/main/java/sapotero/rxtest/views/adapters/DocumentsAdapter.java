@@ -182,7 +182,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Simp
 
     //resolved https://tasks.n-core.ru/browse/MVDESD-12625
     //  На плитке Обращения и НПА не показывать строку "Без организации", если её действительно нет(
-//    Timber.d("start with: %s %s", item.getUid().startsWith( Fields.Journal.INCOMING_ORDERS.getValue() ), item.getUid().startsWith( Fields.Journal.CITIZEN_REQUESTS.getValue() ));
+//    Timber.d("star with: %s %s", item.getUid().startsWith( Fields.Journal.INCOMING_ORDERS.getValue() ), item.getUid().startsWith( Fields.Journal.CITIZEN_REQUESTS.getValue() ));
     if(
           item.getUid().startsWith( Fields.Journal.INCOMING_ORDERS.getValue() )
       ||  item.getUid().startsWith( Fields.Journal.CITIZEN_REQUESTS.getValue() )
@@ -281,7 +281,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Simp
       Preference<String> rxReg = rxPreferences.getString("activity_main_menu.regnumber");
       rxReg.set( item.getRegistrationNumber() );
 
-      Preference<String> rxStatus = rxPreferences.getString("activity_main_menu.start");
+      Preference<String> rxStatus = rxPreferences.getString("activity_main_menu.star");
       rxStatus.set( item.getFilter() );
       Preference<Boolean> rxProcessed = rxPreferences.getBoolean("activity_main_menu.from_sign");
       rxProcessed.set( item.isFromSign() );

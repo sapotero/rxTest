@@ -64,7 +64,7 @@ public class RejectDecision extends AbstractCommand {
     TOKEN = settings.getString("token");
     UID   = settings.getString("activity_main_menu.uid");
     HOST  = settings.getString("settings_username_host");
-    STATUS_CODE = settings.getString("activity_main_menu.start");
+    STATUS_CODE = settings.getString("activity_main_menu.star");
     CURRENT_USER_ID = settings.getString("current_user_id");
   }
   public RejectDecision withDecision(RDecisionEntity decision){

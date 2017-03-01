@@ -150,6 +150,7 @@
                                 android:textColor="@color/text_selector"
                                 android:background="@drawable/toggle_selector_button"
                                 android:foreground="@drawable/card_foreground"
+                                android:visibility="gone"
                             />
 
                         </LinearLayout>

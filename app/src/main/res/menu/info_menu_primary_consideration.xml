@@ -22,7 +22,7 @@
         android:id="@+id/menu_info_to_the_primary_consideration"
         app:showAsAction="always|withText"
         android:icon="@drawable/change"
-        android:title="@string/menu_info_to_the_primary_consideration"/>
+        android:title="@string/menu_info_change_person"/>
     <item
         android:id="@+id/menu_info_shared_to_favorites"
         app:showAsAction="always|withText"

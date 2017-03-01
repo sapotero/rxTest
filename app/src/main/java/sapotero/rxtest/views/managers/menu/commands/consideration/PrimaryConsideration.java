@@ -50,7 +50,7 @@ public class PrimaryConsideration extends AbstractCommand {
     TOKEN = settings.getString("token");
     UID   = settings.getString("activity_main_menu.uid");
     HOST  = settings.getString("settings_username_host");
-    STATUS_CODE = settings.getString("activity_main_menu.start");
+    STATUS_CODE = settings.getString("activity_main_menu.star");
   }
   public PrimaryConsideration withPerson(String uid){
     official_id = uid;

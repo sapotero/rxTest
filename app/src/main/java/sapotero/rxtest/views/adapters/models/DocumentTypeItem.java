@@ -51,8 +51,7 @@ public class DocumentTypeItem {
 
       Integer projects = dataStore
         .count(RDocumentEntity.class)
-        .where( RDocumentEntity.FILTER.eq(Fields.Status.APPROVAL.getValue() )   )
-        .or( RDocumentEntity.FILTER.eq(Fields.Status.SIGNING.getValue() )   )
+        .where( RDocumentEntity.FILTER.in( MainMenuButton.ButtonStatus.getProject() )   )
         .and( RDocumentEntity.USER.eq( settings.getString("login").get() ) )
         .get()
         .value();

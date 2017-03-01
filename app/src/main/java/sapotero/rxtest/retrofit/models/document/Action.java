@@ -38,7 +38,7 @@ public class Action {
   /**
    *
    * @return
-   * The start
+   * The star
    */
   public String getStatus() {
     return status;
@@ -47,7 +47,7 @@ public class Action {
   /**
    *
    * @param status
-   * The start
+   * The star
    */
   public void setStatus(String status) {
     this.status = status;

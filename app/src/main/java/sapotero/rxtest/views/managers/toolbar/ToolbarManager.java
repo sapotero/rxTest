@@ -316,7 +316,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
     TOKEN    = settings.getString("token");
     POSITION = settings.getInteger("position");
     DOCUMENT_UID = settings.getString("document.uid");
-    STATUS_CODE = settings.getString("activity_main_menu.start");
+    STATUS_CODE = settings.getString("activity_main_menu.star");
     REG_NUMBER = settings.getString("activity_main_menu.regnumber");
     REG_DATE = settings.getString("activity_main_menu.date");
     CURRENT_USER_ID = settings.getString("current_user_id");

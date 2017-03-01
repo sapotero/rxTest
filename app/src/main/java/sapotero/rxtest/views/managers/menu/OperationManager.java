@@ -53,7 +53,7 @@ public class OperationManager implements CommandFactory.Callback {
 
   public void execute(CommandFactory.Operation operation, CommandParams params) {
 
-    Timber.tag(TAG).i("execute start");
+    Timber.tag(TAG).i("execute star");
 
     commandBuilder = new CommandFactory( EsdApplication.getContext() );
     commandBuilder.registerCallBack(this);

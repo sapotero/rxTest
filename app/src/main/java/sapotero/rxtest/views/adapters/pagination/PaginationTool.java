@@ -15,7 +15,7 @@ import rx.subscriptions.Subscriptions;
 
 public class PaginationTool {
 
-  // for first start of items loading then on RecyclerView there are not items and no scrolling
+  // for first star of items loading then on RecyclerView there are not items and no scrolling
   private static final int EMPTY_LIST_ITEMS_COUNT = 0;
   // default limit for requests
   private static final int DEFAULT_LIMIT = 50;

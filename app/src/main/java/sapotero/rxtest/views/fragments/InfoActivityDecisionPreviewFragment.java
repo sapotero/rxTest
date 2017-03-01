@@ -141,7 +141,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
   // Approve current decision
   @OnClick(R.id.activity_info_decision_preview_next_person)
   public void decision_preview_next(){
-    Timber.tag(TAG).v("decision_preview_next start");
+    Timber.tag(TAG).v("decision_preview_next star");
 
     if ( settings.getBoolean("settings_view_show_actions_confirm").get() ){
       // resolved https://tasks.n-core.ru/browse/MVDESD-12765
@@ -389,7 +389,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
     TOKEN    = settings.getString("token");
     POSITION = settings.getInteger("position");
     DOCUMENT_UID = settings.getString("document.uid");
-    STATUS_CODE = settings.getString("activity_main_menu.start");
+    STATUS_CODE = settings.getString("activity_main_menu.star");
     REG_NUMBER = settings.getString("activity_main_menu.regnumber");
 
   }
@@ -455,7 +455,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
   }
 
   private void loadFromDb() {
-    Timber.tag("loadFromDb").v("start");
+    Timber.tag("loadFromDb").v("star");
 
     dataStore
       .select(RDocumentEntity.class)

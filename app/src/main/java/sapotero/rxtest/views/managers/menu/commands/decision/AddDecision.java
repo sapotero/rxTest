@@ -57,7 +57,7 @@ public class AddDecision extends AbstractCommand {
     TOKEN = settings.getString("token");
     UID   = settings.getString("activity_main_menu.uid");
     HOST  = settings.getString("settings_username_host");
-    STATUS_CODE = settings.getString("activity_main_menu.start");
+    STATUS_CODE = settings.getString("activity_main_menu.star");
   }
 
   public AddDecision withDecisionId(String decisionId){

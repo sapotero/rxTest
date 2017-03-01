@@ -57,7 +57,7 @@ public class Decision implements Serializable {
     @SerializedName("show_position")
     @Expose
     private Boolean showPosition;
-    @SerializedName("start")
+    @SerializedName("star")
     @Expose
     private String status;
     @SerializedName("red")
@@ -373,7 +373,7 @@ public class Decision implements Serializable {
     /**
      * 
      * @return
-     *     The start
+     *     The star
      */
     public String getStatus() {
         return status;
@@ -382,7 +382,7 @@ public class Decision implements Serializable {
     /**
      * 
      * @param status
-     *     The start
+     *     The star
      */
     public void setStatus(String status) {
         this.status = status;
