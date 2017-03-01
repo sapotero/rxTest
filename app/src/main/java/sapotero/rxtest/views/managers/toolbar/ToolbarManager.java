@@ -339,7 +339,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
       default:
         try {
           toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(false);
-          toolbar.getMenu().findItem(R.id.menu_info_decision_edit).setVisible(true);
+          toolbar.getMenu().findItem(R.id.menu_info_decision_edit).setVisible(false);
         } catch (Exception e) {
           Timber.tag(TAG).v(e);
         }
@@ -409,7 +409,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
     Timber.e("setEditDecisionMenuItemVisible %s", visible);
     try {
       if (visible){
-        toolbar.getMenu().findItem( R.id.menu_info_decision_edit).setVisible(true);
+        toolbar.getMenu().findItem( R.id.menu_info_decision_edit).setVisible(false);
       } else {
         toolbar.getMenu().findItem( R.id.menu_info_decision_edit).setVisible(false);
       }
