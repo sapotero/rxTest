@@ -207,7 +207,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
             sign.withoutSearch(true);
             sign.registerCallBack( this );
             sign.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
-            
+
           break;
 
           case R.id.menu_info_sign_next_person:

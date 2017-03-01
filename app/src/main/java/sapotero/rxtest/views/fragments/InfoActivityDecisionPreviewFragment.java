@@ -16,8 +16,10 @@ import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.util.Base64;
 import android.util.TypedValue;
+import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -100,6 +102,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
 
   @BindView(R.id.activity_info_decision_preview_body) LinearLayout preview_body;
   @BindView(R.id.activity_info_decision_preview_bottom) LinearLayout preview_bottom;
+  @BindView(R.id.desigion_view_root) LinearLayout desigion_view_root;
 
   @BindView(R.id.activity_info_button_magnifer) ImageButton magnifer_button;
   @BindView(R.id.activity_info_button_edit) ImageButton edit;
@@ -123,6 +126,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
   private String uid;
   private RDecisionEntity current_decision;
   private String TAG = this.getClass().getSimpleName();
+  private GestureDetector gestureDetector;
 
   public InfoActivityDecisionPreviewFragment() {
   }
@@ -256,6 +260,25 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
     loadDocument();
   }
 
+  public class GestureListener extends
+    GestureDetector.SimpleOnGestureListener {
+
+    @Override
+    public boolean onDown(MotionEvent e) {
+      return true;
+    }
+
+    @Override
+    public boolean onDoubleTap(MotionEvent e) {
+      Timber.tag("GestureListener").w("DOUBLE TAP");
+
+      if ( !current_decision.isApproved() ){
+        edit();
+      }
+
+      return true;
+    }
+  }
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -266,6 +289,21 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
 
     initToolBar();
     setAdapter();
+
+    gestureDetector = new GestureDetector( getContext(),new GestureListener() );
+
+    desigion_view_root.setOnTouchListener(new View.OnTouchListener() {
+      @Override
+      public boolean onTouch(View v, MotionEvent event) {
+        return gestureDetector.onTouchEvent(event);
+      }
+    });
+    preview_body.setOnTouchListener(new View.OnTouchListener() {
+      @Override
+      public boolean onTouch(View v, MotionEvent event) {
+        return gestureDetector.onTouchEvent(event);
+      }
+    });
 
     preview = new Preview(getContext());
     return view;

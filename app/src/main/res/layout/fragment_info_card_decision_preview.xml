@@ -67,14 +67,16 @@
             android:layout_gravity="bottom"
             />
 
+        <!--android:background="@drawable/corner_background"-->
         <LinearLayout
                 android:id="@+id/desigion_view_root"
-                android:background="@drawable/corner_background"
+
                 android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:padding="@dimen/date_offset"
+
                 >
 
 
@@ -107,6 +109,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"/>
+
                 </ScrollView>
 
                 <LinearLayout
