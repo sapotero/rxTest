@@ -73,6 +73,7 @@ public class BlockFactory implements DecisionInterface, DecisionFragment.Callbac
 
     transaction.add(R.id.decisions_container, fragment );
     transaction.commit();
+    
 
     blocks.add( fragment );
     decision.getBlocks().add( block );

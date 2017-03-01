@@ -116,6 +116,10 @@ dependencies {
     //RxAndroid
     compile 'io.reactivex:rxandroid:1.2.1'
     compile 'io.reactivex:rxjava:1.2.4'
+
+//    compile 'io.reactivex:rxandroid:1.2.1'
+//    compile 'io.reactivex.rxjava2:rxjava:2.x.y'
+
     compile 'com.exallium.rxrecyclerview:lib:2.1.2'
     compile 'com.f2prateek.rx.preferences:rx-preferences:1.0.2'
 //    compile 'com.jakewharton.rxbinding:rxbinding:0.4.0'
@@ -178,7 +182,7 @@ dependencies {
 
     compile 'com.davemorrissey.labs:subsampling-scale-image-view:3.6.0'
 
-    compile 'com.github.barteksc:android-pdf-viewer:2.3.0'
+    compile 'com.github.barteksc:android-pdf-viewer:2.4.0'
     compile 'com.afollestad.material-dialogs:core:0.9.1.0'
 
     // экран загрузки

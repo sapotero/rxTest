@@ -213,12 +213,7 @@ public class SearchView extends BaseRestoreInstanceFragment implements DialogInt
         updateCloseVoiceState(mQuery);
         if (mSpeechRecognized) {
             mSpeechRecognized = false;
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    setQuery(mQuery, true);
-                }
-            }, SPEECH_RECOGNITION_DELAY);
+            new Handler().postDelayed(() -> setQuery(mQuery, true), SPEECH_RECOGNITION_DELAY);
         }
     }
 

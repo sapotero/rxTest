@@ -180,6 +180,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
       setPdfPreview();
       updateDocumentCount();
       updatePageCount();
+
       no_files.setVisibility(View.GONE);
       pdf_wrapper.setVisibility(View.VISIBLE);
     } else {
@@ -215,6 +216,10 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
       .password(null)
       .scrollHandle(null)
       .load();
+
+    pdfView.resetZoomWithAnimation();
+
+    Timber.tag(TAG).e("OPTIMAL %s %s", pdfView.getOptimalPageWidth(), pdfView.getOptimalPageHeight());
   }
 
   public void updateDocumentCount(){

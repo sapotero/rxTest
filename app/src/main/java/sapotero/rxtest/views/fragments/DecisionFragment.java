@@ -1,8 +1,14 @@
 package sapotero.rxtest.views.fragments;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -13,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -24,6 +31,7 @@ import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -47,14 +55,14 @@ import timber.log.Timber;
 
 public class DecisionFragment extends Fragment implements PrimaryConsiderationAdapter.Callback, SelectOshsDialogFragment.Callback, SelectTemplateDialogFragment.Callback {
 
-  private OnFragmentInteractionListener mListener;
-
   @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
   @Inject JobManager jobManager;
 
   @BindView(R.id.card_toolbar)  Toolbar  card_toolbar;
   @BindView(R.id.decision_text) EditText decision_text;
+  @BindView(R.id.fragment_decision_record) ImageView speakButton;
+
 
   @BindView(R.id.fragment_decision_button_familiarization) ToggleButton button_familiarization;
   @BindView(R.id.fragment_decision_button_report) ToggleButton button_report;
@@ -70,6 +78,12 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   //  @BindView(R.id.head_font_selector) SpinnerWithLabel textSelector;
   //  @BindView(R.id.head_font_selector_wrapper) TextInputLayout head_font_selector_wrapper;
 
+
+  public  static final int  RECOGNIZER_CODE = 777;
+  private static final long SPEECH_RECOGNITION_DELAY = 300L;
+  protected String mQuery = null;
+
+  private OnFragmentInteractionListener mListener;
 
   private String TAG = this.getClass().getSimpleName();
   private Context mContext;
@@ -87,6 +101,9 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
 
   public Callback callback;
   private BlockFactory blockFactory;
+  private SpeechRecognizer speechRecognizer;
+  private boolean mSpeechRecognized = false;
+  private int mSelection = -1;
 
   public void setBlockFactory(BlockFactory blockFactory) {
     this.blockFactory = blockFactory;
@@ -128,6 +145,15 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     EsdApplication.getComponent(mContext).inject( this );
 
     loadSettings();
+
+    speakButton.setOnClickListener(v -> {
+      Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+      intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+      startActivityForResult(intent, RECOGNIZER_CODE);
+//      speechRecognizer.startListening(intent);
+    });
+//    speechRecognizer = SpeechRecognizer.createSpeechRecognizer( getContext() );
+//    speechRecognizer.setRecognitionListener(new Listener());
 
     ArrayList<String> arrayStrings = new ArrayList<>();
 
@@ -370,6 +396,39 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
       oshs.setIgnoreUsers( users );
     }
     oshs.show( getActivity().getFragmentManager(), "SelectOshsDialogFragment");
+  }
+
+  @Override
+  public void onResume() {
+    super.onResume();
+
+    if (mSpeechRecognized) {
+      mSpeechRecognized = false;
+      new Handler().postDelayed(() -> setQuery(mQuery, true), SPEECH_RECOGNITION_DELAY);
+    }
+  }
+  public void setQuery(@NonNull String query, boolean submit) {
+    this.mQuery = query;
+    this.mSelection = query.length();
+
+    if (decision_text == null) {
+      return;
+    }
+    decision_text.setText(query);
+    decision_text.setSelection(mSelection);
+
+  }
+
+  @Override
+  public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    if (requestCode == RECOGNIZER_CODE && resultCode == Activity.RESULT_OK) {
+      List<String> results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+      if (results != null && results.size() > 0) {
+        mQuery = results.get(0) ;
+        mSpeechRecognized = true;
+      }
+    }
+    super.onActivityResult(requestCode, resultCode, data);
   }
 
   @Override

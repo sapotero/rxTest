@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.f2prateek.rx.preferences.Preference;
@@ -77,6 +78,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
 
   @BindView(R.id.select_oshs_wrapper) LinearLayout select_oshs_wrapper;
+  @BindView(R.id.activity_decision_constructor_scroll_wrapper) ScrollView scroll;
+
 
   @BindView(R.id.decision_constructor_decision_comment) EditText decision_comment;
   @BindView(R.id.decision_constructor_decision_date)    EditText decision_date;
@@ -237,6 +240,9 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       switch (item.getItemId()){
         case R.id.action_constructor_add_block:
           manager.getDecisionBuilder().addBlock();
+
+//          scroll.fullScroll(ScrollView.FOCUS_DOWN);
+
           break;
 
         case R.id.action_constructor_next:

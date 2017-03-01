@@ -152,7 +152,7 @@ public class DBQueryBuilder {
           query
           .orderBy( RDocumentEntity.FAVORITES.desc() )
           .get()
-          .toSelfObservable()
+            .toSelfObservable()
           .subscribeOn(Schedulers.io())
           .observeOn( AndroidSchedulers.mainThread() )
           .subscribe(this::add, this::error)
