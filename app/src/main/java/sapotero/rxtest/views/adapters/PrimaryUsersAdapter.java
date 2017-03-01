@@ -8,6 +8,8 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 import sapotero.rxtest.R;
 import sapotero.rxtest.retrofit.models.Oshs;
@@ -55,6 +57,11 @@ public class PrimaryUsersAdapter extends BaseAdapter {
     notifyDataSetChanged();
   }
 
+  public void addAll(ArrayList<PrimaryConsiderationPeople> users) {
+    items.addAll(users);
+    notifyDataSetChanged();
+  }
+
   public Oshs getOshs(int position){
 
     PrimaryConsiderationPeople item = items.get(position);
@@ -86,6 +93,20 @@ public class PrimaryUsersAdapter extends BaseAdapter {
   @Override
   public long getItemId(int position) {
     return 0;
+  }
+
+  @Override
+  public void notifyDataSetChanged() {
+    Collections.sort(items, new Comparator<PrimaryConsiderationPeople>() {
+      @Override
+      public int compare(PrimaryConsiderationPeople a, PrimaryConsiderationPeople b)
+      {
+
+        return  a.getName().compareTo( b.getName() );
+      }
+    });
+
+    super.notifyDataSetChanged();
   }
 
 }

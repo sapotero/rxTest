@@ -128,7 +128,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
             bundle1.putString("operation", "primary_consideration");
             dialogFragment.setArguments(bundle1);
             dialogFragment.withPrimaryConsideration(true);
-            dialogFragment.withOutSearch(true);
+            dialogFragment.withoutSearch(true);
             dialogFragment.registerCallBack( this );
             dialogFragment.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
 
@@ -184,35 +184,30 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
           case R.id.menu_info_approval_change_person:
             operation = CommandFactory.Operation.INCORRECT;
 
-            if (oshs == null){
-              oshs = new SelectOshsDialogFragment();
-
-              Bundle bundle = new Bundle();
-              bundle.putString("operation", "approve");
-              oshs.setArguments(bundle);
-
-              oshs.registerCallBack( this );
-            }
-
-            oshs.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
+            SelectOshsDialogFragment approveDialogFragment = new SelectOshsDialogFragment();
+            Bundle approveBundle = new Bundle();
+            approveBundle.putString("operation", "approve");
+            approveDialogFragment.setArguments(approveBundle);
+            approveDialogFragment.withPrimaryConsideration(true);
+            approveDialogFragment.withoutSearch(true);
+            approveDialogFragment.registerCallBack( this );
+            approveDialogFragment.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
+//
             break;
 
           case R.id.menu_info_sign_change_person:
           // operation = CommandFactory.Operation.APPROVAL_CHANGE_PERSON;
           operation = CommandFactory.Operation.INCORRECT;
 
-          if (oshs == null){
-              oshs = new SelectOshsDialogFragment();
-
-              Bundle bundle = new Bundle();
-              bundle.putString("operation", "sign");
-              oshs.setArguments(bundle);
-
-              oshs.registerCallBack( this );
-            }
-
-
-          oshs.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
+            SelectOshsDialogFragment sign = new SelectOshsDialogFragment();
+            Bundle signBundle = new Bundle();
+            signBundle.putString("operation", "sign");
+            sign.setArguments(signBundle);
+            sign.withPrimaryConsideration(true);
+            sign.withoutSearch(true);
+            sign.registerCallBack( this );
+            sign.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
+            
           break;
 
           case R.id.menu_info_sign_next_person:

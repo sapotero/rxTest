@@ -80,7 +80,6 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
     ((TextView) convertView.findViewById(R.id.user_organization)).setText(getItem(position).getOrganization());
 
 
-
     return convertView;
   }
 

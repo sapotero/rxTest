@@ -414,6 +414,8 @@
     <string name="favorites_text"> Избранное </string>
     <string name="control_text"> На контроле </string>
 
+    <string name="primary_consideration_oshs_dialog_yes"> Передать документ </string>
+
     <string-array name="IntentsCAAddressList">
         <item>http://www.cryptopro.ru/certsrv/</item>
         <item>https://www.cryptopro.ru:5555/ui/</item>

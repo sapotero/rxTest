@@ -1,16 +1,18 @@
 package sapotero.rxtest.views.dialogs;
 
-import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.google.gson.Gson;
@@ -57,7 +59,10 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
   private ArrayList<String> user_ids;
   private boolean showWithAssistant = false;
   private boolean withPrimaryConsideration = false;
-  private boolean withOutSearch = false;
+  private boolean withoutSearch = false;
+
+  private PrimaryConsiderationPeople user = null;
+  private OshsAutoCompleteAdapter autocomplete_adapter;
 
   public void setIgnoreUsers(ArrayList<String> users) {
     Timber.tag("setIgnoreUsers").e("users %s", new Gson().toJson(users) );
@@ -73,8 +78,8 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
     this.withPrimaryConsideration = primaryConsideration;
   }
 
-  public void withOutSearch(boolean withOutSearch) {
-    this.withOutSearch = withOutSearch;
+  public void withoutSearch(boolean withOutSearch) {
+    this.withoutSearch = withOutSearch;
   }
 
 
@@ -87,6 +92,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
   }
 
 
+  @RequiresApi(api = Build.VERSION_CODES.M)
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
     operation = CommandFactory.Operation.INCORRECT;
@@ -115,10 +121,33 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
     }
 
     View view = inflater.inflate(R.layout.dialog_choose_oshs, null);
-    view.findViewById(R.id.dialog_oshs_add).setOnClickListener(this);
+    view.findViewById(R.id.dialog_oshs_add).setOnClickListener( v ->{
+      if ( callback != null && user != null ) {
+
+        Oshs oshs = new Oshs();
+        oshs.setId( user.getId() );
+        oshs.setOrganization( user.getOrganization() );
+        oshs.setAssistantId( user.getAssistantId() );
+        oshs.setPosition( user.getPosition() );
+        oshs.setName( user.getName() );
+
+        Timber.e("setOnItemClickListener OPERATION: %s", operation.toString());
+        callback.onSearchSuccess(oshs, operation);
+        dismiss();
+
+      } else {
+        Toast.makeText( getContext(), "Выберете исполнителя!", Toast.LENGTH_SHORT ).show();
+      }
+    });
     view.findViewById(R.id.dialog_oshs_cancel).setOnClickListener(v -> {
       dismiss();
     });
+
+//    view.findViewById(R.id.user_autocomplete_field).clearFocus();
+
+    if ( withoutSearch ){
+      ((Button) view.findViewById(R.id.dialog_oshs_add)).setText( R.string.primary_consideration_oshs_dialog_yes );
+    }
 
 
     ArrayList<PrimaryConsiderationPeople> people = new ArrayList<>();
@@ -128,14 +157,22 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
     ListView list = (ListView) view.findViewById(R.id.dialog_oshs_listview_users);
     list.setAdapter(adapter);
 
-    InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
-    imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
-
     list.setOnItemClickListener((parent, view12, position, id) -> {
-      if ( callback != null){
-        Oshs user = adapter.getOshs(position);
-        callback.onSearchSuccess( user, operation );
-        dismiss();
+      if ( withoutSearch || withPrimaryConsideration ){
+        user = adapter.getItem(position);
+
+        if (user != null) {
+          title.setAdapter(null);
+          indicator.setVisibility(View.GONE);
+          title.setText( user.getName() );
+        }
+
+      } else {
+        if (callback != null) {
+          Oshs user = adapter.getOshs(position);
+          callback.onSearchSuccess(user, operation);
+          dismiss();
+        }
       }
     });
 
@@ -144,8 +181,15 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
         .select(RAssistantEntity.class).get().toObservable()
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
+//        .toList()
         .subscribe( user -> {
-          adapter.add( new PrimaryConsiderationPeople( user.getHeadId(), user.getTitle(), "", "", user.getAssistantId() ) );
+//          ArrayList<PrimaryConsiderationPeople> users = new ArrayList<>();
+//
+//          for (RAssistantEntity assistant: assistants) {
+//            users.add( new PrimaryConsiderationPeople( assistant.getHeadId(), assistant.getTitle(), "", "", assistant.getAssistantId() ) );
+//          }
+//          adapter.addAll(users);
+           adapter.add( new PrimaryConsiderationPeople( user.getHeadId(), user.getTitle(), "", "", user.getAssistantId() ) );
         });
     }
 
@@ -158,8 +202,17 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
         .toObservable()
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
+//        .toList()
         .subscribe( user -> {
-          adapter.add( new PrimaryConsiderationPeople( user.getUid(), user.getName(), user.getPosition(), user.getOrganization(), null) );
+//
+//          ArrayList<PrimaryConsiderationPeople> users = new ArrayList<>();
+//
+//          for (RPrimaryConsiderationEntity primary: primaries) {
+//            users.add( new PrimaryConsiderationPeople( primary.getUid(), primary.getName(), primary.getPosition(), primary.getOrganization(), null) );
+//          }
+//          adapter.addAll(users);
+
+           adapter.add( new PrimaryConsiderationPeople( user.getUid(), user.getName(), user.getPosition(), user.getOrganization(), null) );
         });
     } else {
 
@@ -177,9 +230,16 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
         .toObservable()
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
+//        .toList()
         .subscribe( user -> {
-          Timber.tag("FavoriteUser").e( "%s - %s", user.getId(), user.getName() );
-          adapter.add( new PrimaryConsiderationPeople( user.getUid(), user.getName(), user.getPosition(), user.getOrganization(), null) );
+//          ArrayList<PrimaryConsiderationPeople> users = new ArrayList<>();
+//
+//          for (RFavoriteUserEntity favorite: favorites) {
+//            users.add( new PrimaryConsiderationPeople( favorite.getUid(), favorite.getName(), favorite.getPosition(), favorite.getOrganization(), null) );
+//          }
+//          adapter.addAll(users);
+
+           adapter.add( new PrimaryConsiderationPeople( user.getUid(), user.getName(), user.getPosition(), user.getOrganization(), null) );
         });
     }
 
@@ -189,35 +249,39 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
 
     ButterKnife.bind(this, view);
 
-    if (withOutSearch){
-      oshs_wrapper.setVisibility(View.GONE);
-      title.setEnabled(false);
-      title.setFocusable(false);
-    }
 
     title.setText("");
 
     title.setThreshold(2);
-    title.setAdapter( new OshsAutoCompleteAdapter(getActivity()) );
+    autocomplete_adapter = new OshsAutoCompleteAdapter(getActivity());
+    title.setAdapter( autocomplete_adapter );
     title.setLoadingIndicator( indicator );
 
+    if (withoutSearch){
+//      oshs_wrapper.setVisibility(View.GONE);
+//      title.setEnabled(false);
+      title.setFocusable(false);
+    }
+
+    if ( !withoutSearch || !withPrimaryConsideration ){
+
+      title.setOnItemClickListener(
+        (adapterView, view1, position, id) -> {
+//          title.setText("");
+
+          if ( callback != null){
+            Oshs user = (Oshs) adapterView.getItemAtPosition(position);
 
 
-    title.setOnItemClickListener(
-      (adapterView, view1, position, id) -> {
-        title.setText("");
+            Timber.e("setOnItemClickListener OPERATION: %s", operation.toString());
 
-        if ( callback != null){
-          Oshs user = (Oshs) adapterView.getItemAtPosition(position);
-
-
-          Timber.e("setOnItemClickListener OPERATION: %s", operation.toString());
-
-          callback.onSearchSuccess( user, operation);
+            callback.onSearchSuccess( user, operation);
+          }
+          dismiss();
         }
-        dismiss();
-      }
-    );
+      );
+    }
+
     return view;
   }
 
@@ -230,6 +294,8 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
     super.onCancel(dialog);
     Timber.tag(TAG).i( "onCancel");
   }
+
+
 
   @Override
   public void onClick(View v) {

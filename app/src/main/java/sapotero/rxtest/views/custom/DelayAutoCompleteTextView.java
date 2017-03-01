@@ -3,10 +3,13 @@ package sapotero.rxtest.views.custom;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
+import android.text.Editable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.ProgressBar;
+
+import sapotero.rxtest.views.adapters.OshsAutoCompleteAdapter;
 
 public class DelayAutoCompleteTextView extends AutoCompleteTextView {
 
@@ -19,7 +22,15 @@ public class DelayAutoCompleteTextView extends AutoCompleteTextView {
   private final Handler mHandler = new Handler(){
     @Override
     public void handleMessage(Message msg) {
-      DelayAutoCompleteTextView.super.performFiltering((CharSequence) msg.obj, msg.arg1);
+      OshsAutoCompleteAdapter adapter = (OshsAutoCompleteAdapter) DelayAutoCompleteTextView.super.getAdapter();
+
+      if (adapter != null && adapter.getFilter() != null){
+        DelayAutoCompleteTextView.super.performFiltering((CharSequence) msg.obj, msg.arg1);
+      } else {
+        if (mLoadingIndicator != null) {
+          mLoadingIndicator.setVisibility(View.GONE);
+        }
+      }
     }
   };
 
@@ -50,5 +61,17 @@ public class DelayAutoCompleteTextView extends AutoCompleteTextView {
       mLoadingIndicator.setVisibility(View.GONE);
     }
     super.onFilterComplete(count);
+  }
+
+  @Override
+  protected void replaceText(CharSequence text) {
+    Editable currentText = getText();
+    super.replaceText(currentText);
+  }
+
+  public void hideIndicator() {
+    if (mLoadingIndicator != null) {
+      mLoadingIndicator.setVisibility(View.GONE);
+    }
   }
 }
