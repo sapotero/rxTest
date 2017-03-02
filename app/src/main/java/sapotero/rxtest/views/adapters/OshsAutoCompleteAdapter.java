@@ -16,7 +16,6 @@ import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -119,15 +118,25 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
       }};
   }
 
-  private List<Oshs> findOshs(Context context, String OshsTitle) throws IOException {
+  private List<Oshs> findOshs(Context context, String term) throws IOException {
 
     Retrofit retrofit = new RetrofitManager( context, HOST.get() + "/v2/", okHttpClient).process();
     OshsAdapterService documentsService = retrofit.create( OshsAdapterService.class );
-    Call<Oshs[]> call = documentsService.find(login.get(), token.get(), OshsTitle);
+    Call<Oshs[]> call = documentsService.find(login.get(), token.get(), term);
 
     Oshs[] data = call.execute().body();
 
-    return new ArrayList<>(Arrays.asList(data));
+    ArrayList<Oshs> result = new ArrayList<>();
+
+    if (data != null && data.length > 0){
+      for (Oshs oshs : data) {
+        if (!oshs.getIsGroup() && !oshs.getIsOrganization()) {
+          result.add(oshs);
+        }
+      }
+    }
+
+    return result;
   }
 
   private void loadSettings(){

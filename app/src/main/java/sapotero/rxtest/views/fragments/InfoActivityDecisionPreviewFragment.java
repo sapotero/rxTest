@@ -282,7 +282,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
         Context context = getContext();
         Intent create_intent = new Intent(context, DecisionConstructorActivity.class);
         context.startActivity(create_intent);
-        
+
       }
 
       return true;

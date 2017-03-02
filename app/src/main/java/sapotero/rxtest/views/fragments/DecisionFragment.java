@@ -380,10 +380,8 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   }
 
   private void showAddOshsDialog() {
-    if (oshs == null){
-      oshs = new SelectOshsDialogFragment();
-      oshs.registerCallBack( this );
-    }
+    oshs = new SelectOshsDialogFragment();
+    oshs.registerCallBack( this );
 
     // если есть люди из dialog как исполнители
     if ( adapter.getCount() > 0 ){
