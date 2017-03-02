@@ -1,58 +1,89 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="sapotero.rxtest.views.fragments.DecisionPreviewFragment"
 
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
     <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        tools:context="sapotero.rxtest.views.fragments.DecisionPreviewFragment"
+        android:id="@+id/desigion_view_root"
 
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginStart="@dimen/half_date_offset"
-        android:layout_marginEnd="22sp"
-        android:weightSum="8"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:padding="@dimen/date_offset"
-        >
-        <!--android:background="@drawable/card_border_white"-->
-        <!--android:layout_marginBottom="@dimen/date_offset"-->
 
-        <TextView
-            android:text="Бланк резолюции"
-            android:textStyle="bold"
-            android:gravity="center|center_vertical|top"
+        >
+
+        <LinearLayout
+            android:id="@+id/decision_preview_head"
+            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/decision_preview_head"
-            android:layout_weight="1"
-            />
-        <View
-            android:gravity="center|center_vertical"
-            android:layout_width="match_parent"
-            android:layout_height="1sp"
-            android:background="@color/md_grey_100"
-            android:layout_margin="@dimen/date_offset"
-            />
+            >
+            <!--android:layout_height="64dp"-->
+
+        </LinearLayout>
 
         <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="450dp"
-            android:layout_weight="6">
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:fillViewport="true">
 
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
                 android:id="@+id/decision_preview_body"
-                android:orientation="vertical">
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"/>
 
-            </LinearLayout>
         </ScrollView>
 
-        <FrameLayout
+        <LinearLayout
+            android:id="@+id/decision_preview_bottom"
+            android:orientation="vertical"
+            android:layout_gravity="bottom"
+            android:gravity="bottom"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:id="@+id/decision_preview_sign_text"
-            android:layout_weight="1"
+            android:layout_height="64dp">
+        </LinearLayout>
+    </LinearLayout>
 
-            />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/md_grey_100"
+        android:padding="@dimen/half_date_offset"
+        />
+
+    <LinearLayout
+        android:id="@+id/fragment_decision_preview_button_wrapper"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        >
+
+        <Button
+            android:id="@+id/fragment_decision_preview_next_person"
+            android:text="@string/menu_info_next_person"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:drawableStart="@drawable/sign_small"
+            style="@style/Widget.AppCompat.Button.Borderless"/>
+
+        <Button
+            android:id="@+id/fragment_decision_preview_prev_person"
+            android:text="@string/menu_info_prev_person"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableStart="@drawable/close_small"
+            android:layout_weight="1"
+            style="@style/Widget.AppCompat.Button.Borderless"/>
 
     </LinearLayout>
+
+
+</LinearLayout>

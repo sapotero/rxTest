@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<LinearLayout android:layout_height="wrap_content" android:layout_width="match_parent"
-              xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="horizontal">
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:orientation="horizontal"
+    >
 
 
         <TextView
@@ -11,16 +14,14 @@
             android:layout_weight="1"
             android:layout_gravity="center_vertical"
             android:gravity="center_vertical"
-
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-            android:text="asdasdas"
+            android:textSize="16sp"
+            android:fontFamily="sans-serif"
             />
 
 
         <Switch
-            android:id="@+id/copy"
+            android:id="@+id/responsible"
             android:text="@string/primary_people_copy"
-            android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             />
@@ -29,13 +30,14 @@
             android:layout_width="5dp"
             android:layout_height="match_parent"
             />
-
         <Switch
-            android:id="@+id/responsible"
+            android:id="@+id/copy"
             android:text="@string/primary_people_responsible"
+            android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             />
+
         <Space
             android:layout_width="5dp"
             android:layout_height="match_parent"

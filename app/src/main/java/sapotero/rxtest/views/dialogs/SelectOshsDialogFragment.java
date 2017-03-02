@@ -149,6 +149,11 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
       ((Button) view.findViewById(R.id.dialog_oshs_add)).setText( R.string.primary_consideration_oshs_dialog_yes );
     }
 
+    if ( showWithAssistant ){
+      ((Button) view.findViewById(R.id.dialog_oshs_add)).setText( R.string.approve );
+    }
+
+
 
     ArrayList<PrimaryConsiderationPeople> people = new ArrayList<>();
 

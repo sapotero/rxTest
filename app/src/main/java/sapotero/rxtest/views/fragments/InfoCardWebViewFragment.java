@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.widget.RelativeLayout;
 
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
@@ -32,6 +33,8 @@ import sapotero.rxtest.views.adapters.utils.OnSwipeTouchListener;
 public class InfoCardWebViewFragment extends Fragment {
 
   @BindView(R.id.web_infocard) WebView infocard;
+  @BindView(R.id.fragment_info_card_web_wrapper) RelativeLayout wrapper;
+
 
   @Inject RxSharedPreferences settings;
   @Inject SingleEntityStore<Persistable> dataStore;
@@ -69,9 +72,6 @@ public class InfoCardWebViewFragment extends Fragment {
     View view = inflater.inflate(R.layout.fragment_info_card_web_view, container, false);
     ButterKnife.bind(this, view);
     EsdApplication.getComponent(mContext).inject( this );
-
-    view.setOnTouchListener( new OnSwipeTouchListener( getContext() ) );
-
     loadSettings();
 
     final GestureDetector gestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener() {
@@ -87,6 +87,8 @@ public class InfoCardWebViewFragment extends Fragment {
     });
 
     infocard.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
+
+    wrapper.setOnTouchListener( new OnSwipeTouchListener( getContext() ) );
 
     setWebView();
 

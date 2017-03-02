@@ -8,16 +8,18 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.text.InputType;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.google.gson.Gson;
 
@@ -30,6 +32,7 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.R;
@@ -37,6 +40,9 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.Performer;
+import sapotero.rxtest.views.managers.menu.OperationManager;
+import sapotero.rxtest.views.managers.menu.factories.CommandFactory;
+import sapotero.rxtest.views.managers.menu.utils.CommandParams;
 import sapotero.rxtest.views.managers.toolbar.ToolbarManager;
 import sapotero.rxtest.views.managers.view.interfaces.DecisionInterface;
 import timber.log.Timber;
@@ -45,14 +51,20 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
 
   @Inject RxSharedPreferences settings;
   @Inject SingleEntityStore<Persistable> dataStore;
+  @Inject OperationManager operationManager;
 
   private OnFragmentInteractionListener mListener;
   private Context mContext;
 
-  @BindView(R.id.decision_preview_sign_text) FrameLayout decision_preview_sign_text;
-  @BindView(R.id.decision_preview_head) TextView decision_preview_head;
+  @BindView(R.id.decision_preview_bottom) LinearLayout decision_preview_bottom;
+  @BindView(R.id.decision_preview_head)   LinearLayout decision_preview_head;
+  @BindView(R.id.decision_preview_body)   LinearLayout decision_preview_body;
+  @BindView(R.id.fragment_decision_preview_button_wrapper)   LinearLayout wrapper;
 
-  @BindView(R.id.decision_preview_body) LinearLayout decision_preview_body;
+  @BindView(R.id.fragment_decision_preview_next_person) Button next_person_button;
+  @BindView(R.id.fragment_decision_preview_prev_person) Button prev_person_button;
+
+
 
 
   private View view;
@@ -92,16 +104,146 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
       updateView();
     }
 
+    updateVisibility();
+
     return view;
   }
 
-  private void updateView() {
+  private void updateVisibility() {
+    if (decision == null || decision.getId() == null){
+      wrapper.setVisibility(View.GONE);
+    } else {
+      next_person_button.setVisibility(View.VISIBLE);
+      prev_person_button.setVisibility(View.VISIBLE);
+    }
+//
+//    showDecisionCardTollbarMenuItems(true);
+//
+//    // FIX для ссылок
+//    if (current_decision == null) {
+//      next_person_button.setVisibility( !approved ? View.INVISIBLE : View.GONE);
+//      prev_person_button.setVisibility( !approved ? View.INVISIBLE : View.GONE);
+//    }
+  }
 
-    decision_preview_head.setText("");
+  // Approve current decision
+  @OnClick(R.id.fragment_decision_preview_next_person)
+  public void decision_preview_next(){
+    Timber.tag(TAG).v("decision_preview_next star");
+
+    if ( settings.getBoolean("settings_view_show_actions_confirm").get() ){
+      // resolved https://tasks.n-core.ru/browse/MVDESD-12765
+      // выводить подтверждение при подписании резолюции
+
+      MaterialDialog.Builder prev_dialog = new MaterialDialog.Builder( getContext() )
+        .content(R.string.decision_approve_body)
+        .cancelable(true)
+        .positiveText(R.string.yes)
+        .negativeText(R.string.no)
+        .onPositive((dialog1, which) -> {
+
+          CommandFactory.Operation operation = CommandFactory.Operation.APPROVE_DECISION;
+
+          CommandParams params = new CommandParams();
+
+          params.setDecisionId( decision.getId() );
+          params.setDecisionModel( decision );
+          params.setDocument( settings.getString("activity_main_menu.uid").get() );
+
+          operationManager.execute(operation, params);
+
+        })
+        .autoDismiss(true);
+
+      prev_dialog.build().show();
+
+    } else {
+      CommandFactory.Operation operation;
+      operation =CommandFactory.Operation.APPROVE_DECISION;
+
+      CommandParams params = new CommandParams();
+
+      params.setDecisionId( decision.getId() );
+      params.setDecisionModel( decision );
+      params.setDocument( settings.getString("activity_main_menu.uid").get() );
+
+      operationManager.execute(operation, params);
+    }
+
+
+    Timber.tag(TAG).v("decision_preview_next end");
+  }
+
+  // Reject current decision
+  @OnClick(R.id.fragment_decision_preview_prev_person)
+  public void decision_preview_prev(){
+    Timber.tag(TAG).v("decision_preview_prev");
+
+    // resolved https://tasks.n-core.ru/browse/MVDESD-12765
+    // Добавить ввод комментариев на "Отклонить резолюцию" и "без ответа"
+
+    if ( settings.getBoolean("settings_view_show_comment_post").get() ){
+
+      MaterialDialog.Builder prev_dialog = new MaterialDialog.Builder( getContext() )
+        .content(R.string.decision_reject_body)
+        .cancelable(true)
+        .positiveText(R.string.yes)
+        .negativeText(R.string.no)
+        .onPositive((dialog1, which) -> {
+
+          CommandFactory.Operation operation =CommandFactory.Operation.REJECT_DECISION;
+
+          CommandParams commandParams = new CommandParams();
+          commandParams.setDecisionId( decision.getId() );
+          commandParams.setDecisionModel( decision );
+          commandParams.setComment( dialog1.getInputEditText().getText().toString() );
+
+          operationManager.execute(operation, commandParams);
+        })
+        .autoDismiss(true);
+
+      // настройка
+      // Показывать комментарий при отклонении
+      if ( settings.getBoolean("settings_view_show_comment_post").get() ){
+        prev_dialog.inputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES )
+          .input(R.string.comment_hint, R.string.dialog_empty_value, (dialog12, input) -> {});
+      }
+
+
+      prev_dialog.build().show();
+
+    } else {
+
+      CommandFactory.Operation operation;
+      operation =CommandFactory.Operation.REJECT_DECISION;
+
+      CommandParams params = new CommandParams();
+      params.setDecisionId( decision.getId() );
+      params.setDecisionModel( decision );
+      params.setDocument( settings.getString("activity_main_menu.uid").get() );
+
+      operationManager.execute(operation, params);
+    }
+
+  }
+
+  private void clear(){
+    decision_preview_head.removeAllViews();
     decision_preview_body.removeAllViews();
-    decision_preview_sign_text.removeAllViews();
+    decision_preview_bottom.removeAllViews();
+  };
 
-    updateSignLetterhead();
+  private void showEmpty(){
+    Timber.tag(TAG).d( "showEmpty" );
+
+    clear();
+    updateSignLetterhead( getString(R.string.decision_blank) );
+  }
+
+  private void updateView() {
+    clear();
+
+    updateSignLetterhead(null);
     updateUrgency();
     updateSignText();
     updateData();
@@ -237,9 +379,27 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
     }
   }
 
-  private void updateSignLetterhead() {
-    decision_preview_head.setText( decision.getLetterhead() );
-    decision_preview_head.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
+  private void updateSignLetterhead(String text) {
+    Context context = getContext();
+
+    TextView letterHead = new TextView(context);
+    letterHead.setGravity(Gravity.CENTER);
+    letterHead.setText( text == null ? decision.getLetterhead() : text );
+    letterHead.setTextColor( Color.BLACK );
+    letterHead.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
+    decision_preview_head.addView( letterHead );
+
+    TextView delimiter = new TextView(context);
+    delimiter.setGravity(Gravity.CENTER);
+    delimiter.setHeight(1);
+    delimiter.setWidth(400);
+    delimiter.setBackgroundColor( ContextCompat.getColor(context, R.color.md_blue_grey_200) );
+
+    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+    params.setMargins(50, 10, 50, 10);
+    delimiter.setLayoutParams(params);
+
+    decision_preview_head.addView( delimiter );
   }
 
   public void onButtonPressed(Uri uri) {
@@ -313,7 +473,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
     relativeSigner.addView( signer_view );
     relativeSigner.addView( date_and_number_view );
 
-    decision_preview_sign_text.addView( relativeSigner );
+    decision_preview_bottom.addView( relativeSigner );
 
 
   }

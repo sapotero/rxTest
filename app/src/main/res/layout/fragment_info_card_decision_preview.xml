@@ -36,7 +36,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:id="@+id/activity_info_decision_spinner"
-                android:padding="@dimen/half_date_offset"
+                android:paddingTop="4sp"
+                android:paddingBottom="@dimen/half_date_offset"
+                android:paddingStart="@dimen/half_date_offset"
+                android:paddingEnd="@dimen/half_date_offset"
                 android:layout_weight="1"
                 android:layout_gravity="top"
                 />

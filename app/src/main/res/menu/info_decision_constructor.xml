@@ -13,6 +13,7 @@
         android:id="@+id/action_constructor_next"
         app:showAsAction="ifRoom|withText"
         android:icon="@drawable/sign"
+        android:visible="false"
         android:title="@string/menu_info_next_person"/>
     <!--<item-->
         <!--android:id="@+id/action_constructor_save"-->
@@ -36,5 +37,6 @@
         android:id="@+id/action_constructor_prev"
         app:showAsAction="ifRoom|withText"
         android:icon="@drawable/dismiss"
+        android:visible="false"
         android:title="@string/menu_info_prev_person"/>
 </menu>

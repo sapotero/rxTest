@@ -119,7 +119,7 @@ public class RejectDecision extends AbstractCommand {
       callback.onCommandExecuteSuccess( getType() );
     }
 
-    if (params.getActiveDecision()){
+    if (params.getActiveDecision() != null && params.getActiveDecision()){
       try {
 
         String decision_uid = decision.getUid();
@@ -172,7 +172,14 @@ public class RejectDecision extends AbstractCommand {
       .client( okHttpClient )
       .build();
 
-    Decision formated_decision = DecisionConverter.formatDecision( decision );
+    Decision formated_decision;
+
+    if ( params.getDecisionModel() != null ){
+      formated_decision = params.getDecisionModel();
+    } else {
+      formated_decision = DecisionConverter.formatDecision( decision );
+    }
+
     formated_decision.setApproved(false);
     formated_decision.setCanceled(true);
     formated_decision.setDocumentUid(null);

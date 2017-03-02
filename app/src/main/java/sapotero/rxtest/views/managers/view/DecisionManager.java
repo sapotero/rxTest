@@ -53,6 +53,7 @@ public class DecisionManager implements DecisionInterface, DecisionBuilder.Callb
   private String signerId;
   private String signer;
   private CharSequence comment;
+  private String assistantId;
 
   public DecisionManager(Context context, FragmentManager supportFragmentManager, Decision decision) {
 
@@ -289,5 +290,14 @@ public class DecisionManager implements DecisionInterface, DecisionBuilder.Callb
     this.comment = comment;
     decision.setComment( comment.toString() );
     update();
+  }
+
+  public void setAssistantId(String assistantId) {
+    this.assistantId = assistantId;
+    decision.setAssistantId( assistantId );
+  }
+
+  public String getAssistantId() {
+    return assistantId;
   }
 }

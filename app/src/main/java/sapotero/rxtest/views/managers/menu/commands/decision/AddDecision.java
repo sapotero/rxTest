@@ -131,6 +131,7 @@ public class AddDecision extends AbstractCommand {
     Decision decision = params.getDecisionModel();
     decision.setLetterheadFontSize("15");
     decision.setPerformersFontSize("12");
+    decision.setLetterhead(null);
 
     String json_m = new Gson().toJson( decision );
 

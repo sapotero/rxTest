@@ -1,7 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <set xmlns:android="http://schemas.android.com/apk/res/android"
      android:shareInterpolator="false">
-    <translate android:fromXDelta="0%" android:toXDelta="-100%"
-               android:fromYDelta="0%" android:toYDelta="0%"
-               android:duration="100"/>
+    <translate
+        android:interpolator="@android:anim/decelerate_interpolator"
+        android:fromXDelta="0%"
+        android:toXDelta="0%"
+        android:fromYDelta="0%"
+        android:toYDelta="0%"
+        android:duration="600"/>
+
+    <alpha
+        android:duration="600"
+        android:fromAlpha="1.0"
+        android:toAlpha="0.57" >
+    </alpha>
+
 </set>

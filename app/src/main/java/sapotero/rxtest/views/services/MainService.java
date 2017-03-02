@@ -651,17 +651,17 @@ public class MainService extends Service {
 
     if ( subscription.hasSubscriptions() ){
       subscription.unsubscribe();
-
-      subscription.add(
-        Observable
-          .interval( 30, TimeUnit.SECONDS )
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(interval -> {
-            dataLoaderInterface.updateByStatus(MainMenuItem.ALL);
-          })
-      );
     }
+
+    subscription.add(
+      Observable
+        .interval( 30, TimeUnit.SECONDS )
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(interval -> {
+          dataLoaderInterface.updateByStatus(MainMenuItem.ALL);
+        })
+    );
   }
 
 

@@ -367,6 +367,14 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     decision_signer.setId( settings.getString("current_user_id").get() );
     decision_signer.setName( settings.getString("current_user").get() );
 
+    signer_oshs_selector.setOnClickListener(v -> {
+      dialogFragment = new SelectOshsDialogFragment();
+      dialogFragment.registerCallBack( this );
+      dialogFragment.withoutSearch(true);
+      dialogFragment.showWithAssistant(true);
+      dialogFragment.show( getFragmentManager(), "SelectOshsDialogFragment");
+    });
+
     sign_as_current_user.setOnClickListener(v -> {
       if (rDecisionEntity != null) {
         rDecisionEntity.setSignerId( settings.getString("current_user_id").get() );
@@ -634,10 +642,14 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     if (rDecisionEntity != null) {
       rDecisionEntity.setSignerId( user.getId() );
       rDecisionEntity.setSigner( user.getName() );
+
+      if ( user.getAssistantId() != null ){
+        rDecisionEntity.setAssistantId( user.getAssistantId() );
+      }
     }
 
     if ( user.getAssistantId() != null ){
-      rDecisionEntity.setAssistantId( user.getAssistantId() );
+      manager.setAssistantId(user.getAssistantId());
     }
 
     manager.setSignerId(user.getId());

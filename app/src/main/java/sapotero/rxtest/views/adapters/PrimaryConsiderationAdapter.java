@@ -78,7 +78,7 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
       checked.add( new PrimaryConsiderationAdapterViewModel(position, viewHolder, user) );
     }
 
-    viewHolder.name.setText( user.getName() );
+    viewHolder.name.setText( user.getName().replaceAll( "\\(.+\\)", "" ) );
     viewHolder.copy.setChecked( user.isCopy() );
     viewHolder.responsible.setChecked( user.isResponsible() );
 
