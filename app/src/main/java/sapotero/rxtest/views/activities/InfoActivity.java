@@ -84,6 +84,10 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   @Inject QueueManager queue;
   @Inject OperationManager operationManager;
 
+  private static final int SWIPE_MIN_DISTANCE = 120;
+  private static final int SWIPE_MAX_OFF_PATH = 250;
+  private static final int SWIPE_THRESHOLD_VELOCITY = 200;
+
   private byte[] CARD;
 
   private Preference<String> TOKEN;
@@ -193,7 +197,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
     tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
     tabLayout.setupWithViewPager(viewPager);
-
   }
 
   private void loadSettings() {
@@ -365,6 +368,8 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   }
 
+
+
   private void restart() {
     Intent intent = getIntent();
     intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
@@ -396,6 +401,4 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
       subscription.unsubscribe();
     }
   }
-
-
 }

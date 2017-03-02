@@ -24,7 +24,7 @@
         android:background="@drawable/toolbar_background"
         android:theme="@style/AlertDialog.AppCompat.Light"/>
 
-    <com.github.barteksc.pdfviewer.PDFView
+    <sapotero.rxtest.views.custom.pdf.PDFView
         android:id="@+id/document_image_fullscreen"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -42,7 +42,7 @@
             android:padding="@dimen/date_offset"
             android:textAppearance="@style/TextAppearance.AppCompat.Large"/>
 
-    </com.github.barteksc.pdfviewer.PDFView>
+    </sapotero.rxtest.views.custom.pdf.PDFView>
 
     <FrameLayout
         android:background="@drawable/pdf_fullscreen"

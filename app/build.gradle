@@ -39,7 +39,7 @@ android {
         develop {
             applicationId "sapotero.rxtest"
             versionCode 15
-            versionName "1.12.0"
+            versionName "1.12.1"
         }
     }
 
@@ -182,7 +182,8 @@ dependencies {
 
     compile 'com.davemorrissey.labs:subsampling-scale-image-view:3.6.0'
 
-    compile 'com.github.barteksc:android-pdf-viewer:2.4.0'
+//    compile 'com.github.barteksc:android-pdf-viewer:2.4.0'
+    compile 'com.github.barteksc:pdfium-android:1.5.0'
     compile 'com.afollestad.material-dialogs:core:0.9.1.0'
 
     // экран загрузки

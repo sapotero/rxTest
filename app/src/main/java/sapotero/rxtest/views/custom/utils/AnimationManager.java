@@ -7,7 +7,7 @@ import android.graphics.PointF;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Scroller;
 
-import com.github.barteksc.pdfviewer.PDFView;
+import sapotero.rxtest.views.custom.pdf.PDFView;
 
 public class AnimationManager {
 

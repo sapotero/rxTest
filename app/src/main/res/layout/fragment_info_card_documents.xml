@@ -18,7 +18,7 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentBottom="true">
 
-        <com.github.barteksc.pdfviewer.PDFView
+        <sapotero.rxtest.views.custom.pdf.PDFView
             android:id="@+id/pdfView"
             android:layout_width="match_parent"
             android:layout_height="0dp"

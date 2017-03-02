@@ -38,6 +38,7 @@ import sapotero.rxtest.db.requery.models.RLinksEntity;
 import sapotero.rxtest.views.activities.InfoNoMenuActivity;
 import sapotero.rxtest.views.adapters.LinkAdapter;
 import sapotero.rxtest.views.adapters.models.Link;
+import sapotero.rxtest.views.adapters.utils.OnSwipeTouchListener;
 import timber.log.Timber;
 
 public class InfoCardLinksFragment extends Fragment {
@@ -84,6 +85,8 @@ public class InfoCardLinksFragment extends Fragment {
 
     EsdApplication.getComponent(mContext).inject( this );
     ButterKnife.bind(this, view);
+
+    view.setOnTouchListener( new OnSwipeTouchListener( getContext() ) );
 
     adapter = new LinkAdapter(getContext(), new ArrayList<Link>());
 

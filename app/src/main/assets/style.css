@@ -27,6 +27,17 @@
 .table-bordered th, .infocard .table-bordered td {
   padding: 1px 5px;
 }
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+tr:nth-child(1) {
+    background-color: #42A5F5;
+    color: rgba(255,255,255,.87);
+    padding: 10px 15px 11px !important;
+}
+
 .tab-content {
     border-radius: 4px;
     padding: 20px 20px 1px;

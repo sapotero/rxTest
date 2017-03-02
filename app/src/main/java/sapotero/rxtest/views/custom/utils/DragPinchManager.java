@@ -9,7 +9,6 @@ import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.widget.Spinner;
 
-import com.github.barteksc.pdfviewer.PDFView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -19,10 +18,11 @@ import java.util.ArrayList;
 import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.views.activities.DocumentImageFullScreenActivity;
 import sapotero.rxtest.views.adapters.DocumentLinkAdapter;
+import sapotero.rxtest.views.custom.pdf.PDFView;
 import timber.log.Timber;
 
-import static com.github.barteksc.pdfviewer.util.Constants.Pinch.MAXIMUM_ZOOM;
-import static com.github.barteksc.pdfviewer.util.Constants.Pinch.MINIMUM_ZOOM;
+import static sapotero.rxtest.views.custom.pdf.util.Constants.Pinch.MAXIMUM_ZOOM;
+import static sapotero.rxtest.views.custom.pdf.util.Constants.Pinch.MINIMUM_ZOOM;
 
 public class DragPinchManager implements GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener, ScaleGestureDetector.OnScaleGestureListener, View.OnTouchListener {
 

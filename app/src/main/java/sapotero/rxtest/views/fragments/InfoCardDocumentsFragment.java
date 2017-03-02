@@ -2,10 +2,8 @@ package sapotero.rxtest.views.fragments;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.pdf.PdfRenderer;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.ParcelFileDescriptor;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -21,7 +19,6 @@ import android.widget.Toast;
 import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
-import com.github.barteksc.pdfviewer.PDFView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -53,6 +50,7 @@ import sapotero.rxtest.views.activities.DocumentImageFullScreenActivity;
 import sapotero.rxtest.views.adapters.DocumentLinkAdapter;
 import sapotero.rxtest.views.custom.CircleLeftArrow;
 import sapotero.rxtest.views.custom.CircleRightArrow;
+import sapotero.rxtest.views.custom.pdf.PDFView;
 import timber.log.Timber;
 
 public class InfoCardDocumentsFragment extends Fragment implements AdapterView.OnItemClickListener, GestureDetector.OnDoubleTapListener {
@@ -69,15 +67,6 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
   // for PDF
   private static final String STATE_CURRENT_PAGE_INDEX = "current_page_index";
-  private ParcelFileDescriptor mFileDescriptor;
-
-  private PdfRenderer mPdfRenderer;
-  private PdfRenderer.Page mCurrentPage;
-
-//  @BindView(R.id.pdf_previous) MainMenuButton mButtonPrevious;
-//  @BindView(R.id.pdf_next) MainMenuButton     mButtonNext;
-//  @BindView(R.id.documents_files) Spinner mDocumentList;
-//  @BindView(R.id.pageInfo) TextView pageInfo;
 
   @BindView(R.id.pdfView) PDFView pdfView;
 
@@ -137,7 +126,6 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     EsdApplication.getComponent(mContext).inject( this );
 
     loadSettings();
-
 
     ArrayList<Image> documents = new ArrayList<Image>();
     adapter = new DocumentLinkAdapter(mContext, documents);
@@ -218,6 +206,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
       .load();
 
     pdfView.resetZoomWithAnimation();
+
 
     Timber.tag(TAG).e("OPTIMAL %s %s", pdfView.getOptimalPageWidth(), pdfView.getOptimalPageHeight());
   }

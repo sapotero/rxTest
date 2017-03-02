@@ -6,6 +6,8 @@ import android.view.MotionEvent;
 
 public class ViewPagerFixed extends android.support.v4.view.ViewPager {
 
+  private Boolean swipeable = false;
+
   public ViewPagerFixed(Context context) {
     super(context);
   }
@@ -14,23 +16,25 @@ public class ViewPagerFixed extends android.support.v4.view.ViewPager {
     super(context, attrs);
   }
 
+  public void setSwipeable(Boolean swipeable) {
+    this.swipeable = swipeable;
+  }
+
+
   @Override
-  public boolean onTouchEvent(MotionEvent ev) {
-    try {
-      return super.onTouchEvent(ev);
-    } catch (IllegalArgumentException ex) {
-      ex.printStackTrace();
+  public boolean onTouchEvent(MotionEvent event) {
+    if (this.swipeable) {
+      return super.onTouchEvent(event);
     }
     return false;
   }
 
   @Override
-  public boolean onInterceptTouchEvent(MotionEvent ev) {
-    try {
-      return super.onInterceptTouchEvent(ev);
-    } catch (IllegalArgumentException ex) {
-      ex.printStackTrace();
+  public boolean onInterceptTouchEvent(MotionEvent event) {
+    if (this.swipeable) {
+      return super.onInterceptTouchEvent(event);
     }
+
     return false;
   }
 }

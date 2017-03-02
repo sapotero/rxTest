@@ -24,6 +24,7 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.views.adapters.utils.OnSwipeTouchListener;
 
 public class InfoCardFieldsFragment extends Fragment {
 
@@ -69,6 +70,8 @@ public class InfoCardFieldsFragment extends Fragment {
     View view = inflater.inflate(R.layout.fragment_info_card_fields, container, false);
     ButterKnife.bind(this, view);
     EsdApplication.getComponent(mContext).inject( this );
+
+    view.setOnTouchListener( new OnSwipeTouchListener( getContext() ) );
 
     loadSettings();
 

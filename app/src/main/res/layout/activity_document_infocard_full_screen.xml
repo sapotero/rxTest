@@ -1,45 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/activity_document_image_full_screen"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="sapotero.rxtest.views.activities.DocumentImageFullScreenActivity"
-    android:orientation="vertical"
-    android:background="@color/md_white_1000">
+    android:orientation="vertical">
 
-    <!--<android.support.v7.widget.Toolbar-->
-        <!--android:id="@+id/document_image_toolbar"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:background="?attr/colorPrimary"-->
-        <!--android:elevation="8dp"-->
-        <!--android:minHeight="?attr/actionBarSize"-->
-        <!--android:transitionName="actionBar"-->
-        <!--app:navigationIcon="?attr/homeAsUpIndicator"-->
-        <!--app:theme="@style/ToolbarColoredBackArrow"-->
-        <!--android:theme="@style/AlertDialog.AppCompat.Light"/>-->
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/document_image_toolbar"
+        <LinearLayout
+
+        android:id="@+id/activity_document_image_full_screen"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
-        android:paddingTop="@dimen/half_date_offset"
-        android:transitionName="actionBar"
-        android:minHeight="?attr/actionBarSize"
-        android:background="@drawable/toolbar_background"
-        app:navigationIcon="?attr/homeAsUpIndicator"
-        app:theme="@style/ToolbarColoredBackArrow"
-        android:theme="@style/AlertDialog.AppCompat.Light"
-        android:elevation="8dp"/>
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@color/md_grey_50">
 
-
-        <WebView
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/document_image_toolbar"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/fullscreen_web_infocard"
-            android:layout_margin="@dimen/date_offset">
+            android:layout_height="80dp"
+            android:paddingTop="@dimen/half_date_offset"
+            android:transitionName="actionBar"
+            android:minHeight="?attr/actionBarSize"
+            android:background="@drawable/toolbar_background"
+            app:navigationIcon="?attr/homeAsUpIndicator"
+            app:theme="@style/ToolbarColoredBackArrow"
+            android:theme="@style/AlertDialog.AppCompat.Light"
+            android:elevation="8dp"/>
 
-        </WebView>
-</LinearLayout>
+
+            <WebView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/fullscreen_web_infocard"
+                android:layout_margin="@dimen/date_offset">
+
+            </WebView>
+        </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="24dp"
+        >
+
+        <Button
+            android:id="@+id/zoom_out"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_weight="1"
+            android:background="@drawable/minus"
+            android:foreground="@drawable/card_foreground"
+            style="@style/Widget.AppCompat.Button"/>
+
+        <Button
+            android:id="@+id/zoom_in"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@drawable/plus"
+            android:layout_weight="1"
+            android:foreground="@drawable/card_foreground"
+            style="@style/Widget.AppCompat.Button"/>
+    </LinearLayout>
+
+</RelativeLayout>

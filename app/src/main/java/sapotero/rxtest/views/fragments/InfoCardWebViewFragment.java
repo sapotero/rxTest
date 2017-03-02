@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 
 import com.f2prateek.rx.preferences.Preference;
@@ -26,6 +27,7 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.views.activities.DocumentInfocardFullScreenActivity;
+import sapotero.rxtest.views.adapters.utils.OnSwipeTouchListener;
 
 public class InfoCardWebViewFragment extends Fragment {
 
@@ -67,6 +69,8 @@ public class InfoCardWebViewFragment extends Fragment {
     View view = inflater.inflate(R.layout.fragment_info_card_web_view, container, false);
     ButterKnife.bind(this, view);
     EsdApplication.getComponent(mContext).inject( this );
+
+    view.setOnTouchListener( new OnSwipeTouchListener( getContext() ) );
 
     loadSettings();
 
@@ -116,12 +120,23 @@ public class InfoCardWebViewFragment extends Fragment {
 
         String htmlData = "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />" + new String(Base64.decode( document, Base64.DEFAULT) );
         infocard.loadDataWithBaseURL("file:///android_asset/", htmlData, "text/html", "UTF-8", null);
-        infocard.getSettings().setBuiltInZoomControls(true);
-        infocard.getSettings().setDisplayZoomControls(false);
+        infocard.getSettings().setBuiltInZoomControls(false);
+        infocard.getSettings().setDisplayZoomControls(true);
       }
     } catch (Exception e) {
       e.printStackTrace();
     }
+
+    final WebSettings webSettings = infocard.getSettings();
+    webSettings.setRenderPriority(WebSettings.RenderPriority.HIGH);
+    webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+    webSettings.setAppCacheEnabled(false);
+    webSettings.setBlockNetworkImage(true);
+    webSettings.setLoadsImagesAutomatically(true);
+    webSettings.setGeolocationEnabled(false);
+    webSettings.setNeedInitialFocus(false);
+    webSettings.setSaveFormData(false);
+
   }
 
   @Override
