@@ -21,6 +21,10 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 
+import org.greenrobot.eventbus.EventBus;
+
+import sapotero.rxtest.events.view.ShowNextDocumentEvent;
+import sapotero.rxtest.events.view.ShowPrevDocumentEvent;
 import sapotero.rxtest.views.custom.pdf.scroll.ScrollHandle;
 import timber.log.Timber;
 
@@ -229,19 +233,21 @@ class DragPinchManager implements GestureDetector.OnGestureListener, GestureDete
   }
 
   private void onSwipeRight() {
-      Timber.tag(TAG).e("onSwipeRight");
+    Timber.tag(TAG).e("onSwipeRight");
+    EventBus.getDefault().post( new ShowPrevDocumentEvent());
   }
 
   private void onSwipeLeft() {
-      Timber.tag(TAG).e("onSwipeLeft");
+    Timber.tag(TAG).e("onSwipeLeft");
+    EventBus.getDefault().post( new ShowNextDocumentEvent());
   }
 
   private void onSwipeTop() {
-      Timber.tag(TAG).e("onSwipeTop");
+    Timber.tag(TAG).e("onSwipeTop");
   }
 
   private void onSwipeBottom() {
-      Timber.tag(TAG).e("onSwipeBottom");
+    Timber.tag(TAG).e("onSwipeBottom");
   }
 
 }

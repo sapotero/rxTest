@@ -275,19 +275,12 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Simp
       Preference<Integer> rxPosition = rxPreferences.getInteger("position");
       rxPosition.set(position);
 
-      Preference<String> rxUid = rxPreferences.getString("activity_main_menu.uid");
-      rxUid.set( item.getUid() );
-
-      Preference<String> rxReg = rxPreferences.getString("activity_main_menu.regnumber");
-      rxReg.set( item.getRegistrationNumber() );
-
-      Preference<String> rxStatus = rxPreferences.getString("activity_main_menu.star");
-      rxStatus.set( item.getFilter() );
-      Preference<Boolean> rxProcessed = rxPreferences.getBoolean("activity_main_menu.from_sign");
-      rxProcessed.set( item.isFromSign() );
-
-      Preference<String> rxDate = rxPreferences.getString("activity_main_menu.date");
-      rxDate.set( item.getRegistrationDate() );
+      settings.getString("activity_main_menu.uid").set( item.getUid() );
+      settings.getInteger("activity_main_menu.position").set( viewHolder.getAdapterPosition() );
+      settings.getString("activity_main_menu.regnumber").set( item.getRegistrationNumber() );
+      settings.getString("activity_main_menu.star").set( item.getFilter() );
+      settings.getBoolean("activity_main_menu.from_sign").set( item.isFromSign() );
+      settings.getString("activity_main_menu.date").set( item.getRegistrationDate() );
 
       Intent intent = new Intent(mContext, InfoActivity.class);
 
@@ -365,7 +358,60 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Simp
 
 
   public RDocumentEntity getItem(int position) {
-    return this.documents.get(position);
+    if ( documents.size() == 0 ){
+      return null;
+    }
+
+    if ( documents.size() < position ){
+      return null;
+    }
+
+    return documents.get(position);
+  }
+
+  public void getNextFromPosition(int position) {
+
+    position += 1;
+
+    if ( position >= documents.size() ){
+      position = 0;
+    }
+
+    Timber.tag(TAG).e("position: %s", position);
+
+    RDocumentEntity item = documents.get(position);
+
+    settings.getInteger("activity_main_menu.position").set(position);
+    settings.getString("activity_main_menu.uid").set( item.getUid() );
+    settings.getString("activity_main_menu.regnumber").set( item.getRegistrationNumber() );
+    settings.getString("activity_main_menu.star").set( item.getFilter() );
+    settings.getBoolean("activity_main_menu.from_sign").set( item.isFromSign() );
+    settings.getString("activity_main_menu.date").set( item.getRegistrationDate() );
+
+  }
+
+  public void getPrevFromPosition(int position) {
+    position -= 1;
+
+
+    if ( position < 0 ){
+      position = documents.size() - 1;
+    }
+    if ( position == documents.size() ){
+      position = 0;
+    }
+
+    Timber.tag(TAG).e("position: %s", position);
+
+
+    RDocumentEntity item = documents.get(position);
+
+    settings.getInteger("activity_main_menu.position").set(position);
+    settings.getString("activity_main_menu.uid").set( item.getUid() );
+    settings.getString("activity_main_menu.regnumber").set( item.getRegistrationNumber() );
+    settings.getString("activity_main_menu.star").set( item.getFilter() );
+    settings.getBoolean("activity_main_menu.from_sign").set( item.isFromSign() );
+    settings.getString("activity_main_menu.date").set( item.getRegistrationDate() );
   }
 
 

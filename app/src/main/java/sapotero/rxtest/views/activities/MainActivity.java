@@ -151,7 +151,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private final int SETTINGS_DECISION_TEMPLATES = 21;
 
   private final int SETTINGS_REJECTION_TEMPLATES = 22;
-  public DocumentsAdapter RAdapter;
+  public static DocumentsAdapter RAdapter;
   public  MenuBuilder menuBuilder;
   private DBQueryBuilder dbQueryBuilder;
   private DataLoaderManager dataLoader;

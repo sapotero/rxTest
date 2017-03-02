@@ -47,6 +47,8 @@ import sapotero.rxtest.events.crypto.SignDataResultEvent;
 import sapotero.rxtest.events.crypto.SignDataWrongPinEvent;
 import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
 import sapotero.rxtest.events.decision.ShowDecisionConstructor;
+import sapotero.rxtest.events.view.ShowNextDocumentEvent;
+import sapotero.rxtest.events.view.ShowPrevDocumentEvent;
 import sapotero.rxtest.events.view.ShowSnackEvent;
 import sapotero.rxtest.events.view.UpdateCurrentInfoActivityEvent;
 import sapotero.rxtest.jobs.bus.SyncDocumentsJob;
@@ -367,6 +369,38 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     new Handler().postDelayed(this::restart, 5000);
 
   }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(ShowPrevDocumentEvent event) throws Exception {
+    try {
+      InfoActivity activity = (InfoActivity) this;
+      Intent intent = new Intent(this, InfoActivity.class);
+
+      MainActivity.RAdapter.getPrevFromPosition(settings.getInteger("activity_main_menu.position").get());
+
+      activity.startActivity(intent);
+      activity.overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
+      finish();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(ShowNextDocumentEvent event){
+    try {
+      InfoActivity activity = (InfoActivity) this;
+      Intent intent = new Intent( this, InfoActivity.class);
+
+      MainActivity.RAdapter.getNextFromPosition( settings.getInteger("activity_main_menu.position").get() );
+      activity.startActivity(intent);
+      activity.overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
+      finish();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
 
 
 

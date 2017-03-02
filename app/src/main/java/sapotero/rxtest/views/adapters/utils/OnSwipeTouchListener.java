@@ -5,6 +5,10 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 
+import org.greenrobot.eventbus.EventBus;
+
+import sapotero.rxtest.events.view.ShowNextDocumentEvent;
+import sapotero.rxtest.events.view.ShowPrevDocumentEvent;
 import timber.log.Timber;
 
 public class OnSwipeTouchListener implements View.OnTouchListener {
@@ -71,10 +75,12 @@ public class OnSwipeTouchListener implements View.OnTouchListener {
 
   private void onSwipeRight() {
     Timber.tag(TAG).e("onSwipeRight");
+    EventBus.getDefault().post( new ShowPrevDocumentEvent());
   }
 
   private void onSwipeLeft() {
     Timber.tag(TAG).e("onSwipeLeft");
+    EventBus.getDefault().post( new ShowNextDocumentEvent());
   }
 
   private void onSwipeTop() {
