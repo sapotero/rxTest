@@ -154,10 +154,10 @@ public class NextPerson extends AbstractCommand {
           Timber.tag(TAG).i("ok: %s", data.getOk());
           Timber.tag(TAG).i("error: %s", data.getMessage());
           Timber.tag(TAG).i("type: %s", data.getType());
-
-          if (callback != null){
-            callback.onCommandExecuteSuccess(getType());
-          }
+//
+//          if (callback != null){
+//            callback.onCommandExecuteSuccess(getType());
+//          }
 
           update();
         },

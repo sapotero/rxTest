@@ -47,6 +47,7 @@ import sapotero.rxtest.events.crypto.SignDataResultEvent;
 import sapotero.rxtest.events.crypto.SignDataWrongPinEvent;
 import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
 import sapotero.rxtest.events.decision.ShowDecisionConstructor;
+import sapotero.rxtest.events.utils.NoDocumentsEvent;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.events.view.ShowPrevDocumentEvent;
 import sapotero.rxtest.events.view.ShowSnackEvent;
@@ -371,7 +372,16 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(NoDocumentsEvent event) throws Exception {
+    finish();
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(ShowPrevDocumentEvent event) throws Exception {
+    showPrevDocument();
+  }
+
+  private void showPrevDocument() {
     try {
       InfoActivity activity = (InfoActivity) this;
       Intent intent = new Intent(this, InfoActivity.class);
@@ -388,6 +398,10 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(ShowNextDocumentEvent event){
+    showNextDocument();
+  }
+
+  private void showNextDocument() {
     try {
       InfoActivity activity = (InfoActivity) this;
       Intent intent = new Intent( this, InfoActivity.class);
@@ -400,8 +414,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
       e.printStackTrace();
     }
   }
-
-
 
 
   private void restart() {

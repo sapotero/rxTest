@@ -125,9 +125,9 @@ public class FromTheReport extends AbstractCommand {
 
 
           queueManager.remove(this);
-          if (callback != null){
-            callback.onCommandExecuteSuccess(getType());
-          }
+//          if (callback != null){
+//            callback.onCommandExecuteSuccess(getType());
+//          }
         },
         error -> {
           if (callback != null){

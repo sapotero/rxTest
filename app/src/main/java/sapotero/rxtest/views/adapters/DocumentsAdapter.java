@@ -52,6 +52,7 @@ import sapotero.rxtest.db.requery.models.decisions.RDecision;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
+import sapotero.rxtest.events.utils.NoDocumentsEvent;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.views.activities.InfoActivity;
 import sapotero.rxtest.views.activities.MainActivity;
@@ -388,45 +389,57 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
     position += 1;
 
-    if ( position >= documents.size() ){
-      position = 0;
+    if ( documents.size() == 0 ){
+      Timber.e("noDocuments %s", documents.size());
+      EventBus.getDefault().post( new NoDocumentsEvent() );
+    } else {
+
+      if (position >= documents.size()) {
+        position = 0;
+      }
+
+      Timber.tag(TAG).e("position: %s", position);
+
+      RDocumentEntity item = documents.get(position);
+
+      settings.getInteger("activity_main_menu.position").set(position);
+      settings.getString("activity_main_menu.uid").set(item.getUid());
+      settings.getString("activity_main_menu.regnumber").set(item.getRegistrationNumber());
+      settings.getString("activity_main_menu.star").set(item.getFilter());
+      settings.getBoolean("activity_main_menu.from_sign").set(item.isFromSign());
+      settings.getString("activity_main_menu.date").set(item.getRegistrationDate());
     }
-
-    Timber.tag(TAG).e("position: %s", position);
-
-    RDocumentEntity item = documents.get(position);
-
-    settings.getInteger("activity_main_menu.position").set(position);
-    settings.getString("activity_main_menu.uid").set( item.getUid() );
-    settings.getString("activity_main_menu.regnumber").set( item.getRegistrationNumber() );
-    settings.getString("activity_main_menu.star").set( item.getFilter() );
-    settings.getBoolean("activity_main_menu.from_sign").set( item.isFromSign() );
-    settings.getString("activity_main_menu.date").set( item.getRegistrationDate() );
 
   }
 
   public void getPrevFromPosition(int position) {
     position -= 1;
 
+    if ( documents.size() == 0 ){
+      Timber.e("noDocuments %s", documents.size());
+      EventBus.getDefault().post( new NoDocumentsEvent() );
+    } else {
+      if ( position < 0 ){
+        position = documents.size() - 1;
+      }
+      if ( position == documents.size() ){
+        position = 0;
+      }
 
-    if ( position < 0 ){
-      position = documents.size() - 1;
+      Timber.tag(TAG).e("position: %s", position);
+
+
+      RDocumentEntity item = documents.get(position);
+
+      settings.getInteger("activity_main_menu.position").set(position);
+      settings.getString("activity_main_menu.uid").set( item.getUid() );
+      settings.getString("activity_main_menu.regnumber").set( item.getRegistrationNumber() );
+      settings.getString("activity_main_menu.star").set( item.getFilter() );
+      settings.getBoolean("activity_main_menu.from_sign").set( item.isFromSign() );
+      settings.getString("activity_main_menu.date").set( item.getRegistrationDate() );
     }
-    if ( position == documents.size() ){
-      position = 0;
-    }
-
-    Timber.tag(TAG).e("position: %s", position);
 
 
-    RDocumentEntity item = documents.get(position);
-
-    settings.getInteger("activity_main_menu.position").set(position);
-    settings.getString("activity_main_menu.uid").set( item.getUid() );
-    settings.getString("activity_main_menu.regnumber").set( item.getRegistrationNumber() );
-    settings.getString("activity_main_menu.star").set( item.getFilter() );
-    settings.getBoolean("activity_main_menu.from_sign").set( item.isFromSign() );
-    settings.getString("activity_main_menu.date").set( item.getRegistrationDate() );
   }
 
 

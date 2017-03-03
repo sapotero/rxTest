@@ -36,6 +36,7 @@ import sapotero.rxtest.events.decision.ApproveDecisionEvent;
 import sapotero.rxtest.events.decision.RejectDecisionEvent;
 import sapotero.rxtest.events.decision.ShowDecisionConstructor;
 import sapotero.rxtest.events.view.RemoveDocumentFromAdapterEvent;
+import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.events.view.ShowSnackEvent;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
@@ -449,6 +450,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
       if ( !doc.isProcessed() ){
         EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
       }
+
     }
 
     if ( Objects.equals(command, "next_person") ) {
@@ -458,6 +460,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
       if ( !doc.isProcessed() ){
         EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
       }
+      EventBus.getDefault().post( new ShowNextDocumentEvent() );
     }
 
     if ( Objects.equals(command, "prev_person") ) {
@@ -467,6 +470,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
       if ( !doc.isProcessed() ){
         EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
       }
+      EventBus.getDefault().post( new ShowNextDocumentEvent() );
     }
 
     if ( Objects.equals(command, "to_the_primary_consideration") ) {
@@ -476,6 +480,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
       if ( !doc.isProcessed() ){
         EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
       }
+      EventBus.getDefault().post( new ShowNextDocumentEvent() );
     }
 
 
@@ -489,6 +494,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
       }
 //      EventBus.getDefault().post( new ShowSnackEvent("Резолюция утверждена") );
       EventBus.getDefault().post( new ApproveDecisionEvent() );
+      EventBus.getDefault().post( new ShowNextDocumentEvent() );
     }
 
     if ( Objects.equals(command, "reject_decision") ) {
@@ -499,6 +505,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
       }
 //      EventBus.getDefault().post( new ShowSnackEvent("Резолюция отклонена") );
       EventBus.getDefault().post( new RejectDecisionEvent() );
+      EventBus.getDefault().post( new ShowNextDocumentEvent() );
+
     }
 
     if ( Objects.equals(command, "from_the_report") ) {
@@ -506,14 +514,10 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
       toolbar.inflateMenu(R.menu.info_menu);
       EventBus.getDefault().post( new ShowSnackEvent("Операция исполнения без ответа успешно завершена") );
       EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
+      EventBus.getDefault().post( new ShowNextDocumentEvent() );
     }
 
-
-
-
-
-
-
+    // допилить удаление документов после операций
 
     invalidate();
 

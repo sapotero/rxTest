@@ -151,9 +151,9 @@ public class ChangePerson extends AbstractCommand {
           Timber.tag(TAG).i("type: %s", data.getType());
 
           queueManager.remove(this);
-          if (callback != null){
-            callback.onCommandExecuteSuccess(getType());
-          }
+//          if (callback != null){
+//            callback.onCommandExecuteSuccess(getType());
+//          }
         },
         error -> {
           if (callback != null){
