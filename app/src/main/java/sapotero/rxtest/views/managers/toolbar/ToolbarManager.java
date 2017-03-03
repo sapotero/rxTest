@@ -347,7 +347,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
     }
 
     // Если документ обработан - то изменяем резолюции на поручения
-    if (doc.isProcessed()) {
+    if ( doc.isProcessed() != null || doc.isFromProcessedFolder() != null ) {
       try {
         toolbar.getMenu().findItem(R.id.menu_info_decision_edit).setVisible(false);
         toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(true);
@@ -371,16 +371,32 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
       }
     }
 
+
+
+    if (doc!= null && doc.isFromFavoritesFolder() != null && doc.isFromFavoritesFolder() ){
+      toolbar.getMenu().clear();
+      toolbar.inflateMenu(R.menu.info_menu);
+
+      try {
+        toolbar.getMenu().findItem(R.id.menu_info_decision_edit).setVisible(false);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+
+
+    }
     //настройка
     try {
-      if (!settings.getBoolean("settings_view_show_create_decision_post").get()) {
-        toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(false);
+      if (!settings.getBoolean("settings_view_show_create_decision_post").get() && doc.isFromFavoritesFolder() != null && doc.isFromFavoritesFolder() ) {
+        if ( doc.isFromFavoritesFolder() != null && !doc.isFromFavoritesFolder() ){
+          toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(false);
+        }
       }
     } catch (Exception e) {
       e.printStackTrace();
     }
 
-    if (Objects.equals(doc.getFilter(), Fields.Status.SIGNING.getValue()) || Objects.equals(doc.getFilter(), Fields.Status.APPROVAL.getValue())) {
+    if (Objects.equals(doc.getFilter(), Fields.Status.SIGNING.getValue()) || Objects.equals(doc.getFilter(), Fields.Status.APPROVAL.getValue()) || doc.isFromFavoritesFolder() != null && doc.isFromFavoritesFolder() ) {
       // resolved https://tasks.n-core.ru/browse/MVDESD-12765
       // убрать кнопку "К" у проектов из раздела на согласование("на подписание" её также быть не должно)
       try {

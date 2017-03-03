@@ -111,7 +111,8 @@ public class ButtonBuilder {
       .count(RDocumentEntity.class)
 //      .join(RDecisionEntity.class)
 //      .on(RDecisionEntity.DOCUMENT_ID.eq(RDocumentEntity.ID))
-      .where(RDocumentEntity.USER.eq(settings.getString("login").get()));
+      .where(RDocumentEntity.USER.eq(settings.getString("login").get()))
+      .and(RDocumentEntity.FROM_LINKS.eq(false));
 //      .and(RDocumentEntity.FILTER.ne(Fields.Status.LINK.getValue()));
 
     if ( item_conditions.length > 0 ){
@@ -155,7 +156,8 @@ public class ButtonBuilder {
 
     WhereAndOr<Scalar<Integer>> query = dataStore
       .count(RDocumentEntity.class)
-      .where( RDocumentEntity.USER.eq( settings.getString("login").get() ) );
+      .where( RDocumentEntity.USER.eq( settings.getString("login").get() ) )
+      .and(RDocumentEntity.FROM_LINKS.eq(false));
 
     ArrayList<ConditionBuilder> temp_conditions = new ArrayList<>();
 
@@ -225,21 +227,6 @@ public class ButtonBuilder {
 
 
     RadioGroup.LayoutParams params = new RadioGroup.LayoutParams( LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT,10.0f );
-
-//    switch (corner){
-//      case LEFT:
-//        view.setBackgroundResource( R.drawable.button_corner_left );
-//        params.setMargins(4,4,0,4);
-//        break;
-//      case RIGHT:
-//        view.setBackgroundResource( R.drawable.button_corner_right );
-//        params.setMargins(0,4,4,4);
-//        break;
-//      case NONE:
-//        view.setBackgroundResource( R.drawable.button_corner_none );
-//        params.setMargins(0,4,0,4);
-//        break;
-//    }
 
     view.setButtonDrawable(new StateListDrawable());
     view.setTextColor( ContextCompat.getColorStateList( context, R.color.text_selector ) );

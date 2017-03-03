@@ -31,7 +31,6 @@ import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.db.requery.models.exemplars.RExemplarEntity;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
-import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Block;
@@ -46,13 +45,11 @@ import sapotero.rxtest.retrofit.models.document.Signer;
 import sapotero.rxtest.retrofit.models.document.Step;
 import timber.log.Timber;
 
-public class SyncDocumentsJob  extends BaseJob {
+public class SyncFavoritesDocumentsJob extends BaseJob {
 
   public static final int PRIORITY = 1;
-  private Boolean onControl;
-  private Boolean isProcessed;
-  private Boolean isFavorites;
-  private String processed_folder;
+
+  private String favorites_folder;
 
   private Preference<String> LOGIN = null;
   private Preference<String> TOKEN = null;
@@ -63,29 +60,12 @@ public class SyncDocumentsJob  extends BaseJob {
   private String TAG = this.getClass().getSimpleName();
   private DocumentInfo document;
 
-  public SyncDocumentsJob(String uid, Fields.Status filter) {
-    super( new Params(PRIORITY).requireNetwork().persist() );
-    this.uid = uid;
-    this.filter = filter;
-    this.isFavorites = false;
-    this.isProcessed = false;
-    this.processed_folder = "";
-  }
 
-  public SyncDocumentsJob(String uid, Fields.Status filter, String processed_folder, Boolean isFavorites, Boolean isProcessed) {
+  public SyncFavoritesDocumentsJob(String uid, Fields.Status filter, String favorites_folder) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
     this.filter = filter;
-    this.processed_folder = processed_folder;
-    this.isFavorites = isFavorites;
-    this.isProcessed = isProcessed;
-  }
-
-  public SyncDocumentsJob(String uid, Fields.Status filter, boolean control) {
-    super( new Params(PRIORITY).requireNetwork().persist() );
-    this.uid = uid;
-    this.filter = filter;
-    this.onControl = control;
+    this.favorites_folder = favorites_folder;
   }
 
   @Override
@@ -125,12 +105,8 @@ public class SyncDocumentsJob  extends BaseJob {
 
           update( exist(doc.getUid()) );
 
-          EventBus.getDefault().post( new StepperLoadDocumentEvent(doc.getUid()) );
-
-          if ( doc.getImages() != null && doc.getImages().size() > 0 && ( isFavorites != null && !isFavorites ) ){
-
+          if ( doc.getImages() != null && doc.getImages().size() > 0 ){
             for (Image image : doc.getImages()) {
-
               jobManager.addJobInBackground( new DownloadFileJob(HOST.get(), image.getPath(), image.getMd5()+"_"+image.getTitle()) );
             }
 
@@ -173,7 +149,7 @@ public class SyncDocumentsJob  extends BaseJob {
 
     Integer count = dataStore
       .count(RDocumentEntity.UID)
-      .where(RDocumentEntity.UID.eq(uid))
+      .where(RDocumentEntity.UID.eq("p"+uid))
       .get().value();
 
     if( count != 0 ){
@@ -190,8 +166,7 @@ public class SyncDocumentsJob  extends BaseJob {
 
 
     RDocumentEntity rd = new RDocumentEntity();
-    rd.setUid( d.getUid() );
-    rd.setFromLinks( false );
+    rd.setUid( "p"+ d.getUid() );
     rd.setUser( LOGIN.get() );
     rd.setFilter( filter.toString() );
     rd.setMd5( d.getMd5() );
@@ -205,15 +180,10 @@ public class SyncDocumentsJob  extends BaseJob {
     rd.setExternalDocumentNumber( d.getExternalDocumentNumber() );
     rd.setReceiptDate( d.getReceiptDate() );
     rd.setViewed( d.getViewed() );
-    rd.setChanged( false );
 
-    rd.setFavorites(false);
-    rd.setProcessed(false);
-    rd.setFolder(processed_folder);
-    if ( processed_folder != "" ){
-      rd.setProcessed(true);
-    }
-    rd.setControl(onControl);
+    rd.setFolder(favorites_folder);
+    rd.setFromFavoritesFolder(true);
+    rd.setFavorites(true);
 
     if ( d.getSigner().getOrganisation() != null && !Objects.equals(d.getSigner().getOrganisation(), "")){
       rd.setOrganization( d.getSigner().getOrganisation() );
@@ -260,7 +230,7 @@ public class SyncDocumentsJob  extends BaseJob {
       } else {
         rDoc = dataStore
           .select(RDocumentEntity.class)
-          .where(RDocumentEntity.UID.eq( document.getUid() ))
+          .where(RDocumentEntity.UID.eq( "p"+document.getUid() ))
           .get()
           .first();
       }
@@ -282,19 +252,10 @@ public class SyncDocumentsJob  extends BaseJob {
         rDoc.setSigner( signer );
       }
 
-      rDoc.setFavorites(isFavorites);
-      rDoc.setProcessed(isProcessed);
-      rDoc.setFolder(processed_folder);
-
-      if ( processed_folder != "" && isProcessed ){
-        rDoc.setProcessed(true);
-        rDoc.setFilter( Fields.Status.PROCESSED.getValue() );
-      }
-
-      rDoc.setControl(onControl);
+      rDoc.setFolder(favorites_folder);
+      rDoc.setFromFavoritesFolder(true);
+      rDoc.setFavorites(true);
       rDoc.setUser( LOGIN.get() );
-      rDoc.setFromLinks( false );
-      rDoc.setChanged( false );
 
       if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
 
@@ -468,7 +429,7 @@ public class SyncDocumentsJob  extends BaseJob {
 
     RDocumentEntity doc = dataStore
       .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq(uid))
+      .where(RDocumentEntity.UID.eq("p"+uid))
       .get().first();
 
     if ( !Objects.equals( document.getMd5(), doc.getMd5() ) ){
@@ -484,13 +445,10 @@ public class SyncDocumentsJob  extends BaseJob {
         signer.setType( document.getSigner().getType() );
       }
 
-      doc.setFavorites(isFavorites);
-      doc.setProcessed(isProcessed);
-      doc.setFolder(processed_folder);
-      doc.setControl(onControl);
+      doc.setFromFavoritesFolder(true);
+      doc.setFavorites(true);
+      doc.setFolder(favorites_folder);
       doc.setUser( LOGIN.get() );
-      doc.setFromLinks( false );
-      doc.setChanged( false );
 
       if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
         doc.getDecisions().clear();
@@ -653,7 +611,7 @@ public class SyncDocumentsJob  extends BaseJob {
           }
         );
 
-      EventBus.getDefault().post( new UpdateCurrentDocumentEvent( doc.getUid() ) );
+      EventBus.getDefault().post( new UpdateCurrentDocumentEvent( "p"+doc.getUid() ) );
     } else {
       Timber.tag("MD5").d("equal");
     }

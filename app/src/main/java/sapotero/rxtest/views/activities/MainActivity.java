@@ -76,6 +76,7 @@ import sapotero.rxtest.views.custom.SearchView.SearchView;
 import sapotero.rxtest.views.managers.DataLoaderManager;
 import sapotero.rxtest.views.menu.MenuBuilder;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
+import sapotero.rxtest.views.menu.fields.MainMenuItem;
 import sapotero.rxtest.views.services.MainService;
 import timber.log.Timber;
 
@@ -311,53 +312,10 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   private void initAdapters() {
 
-//    ActivityMainBinding mActivityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
-//    setSupportActionBar(mActivityMainBinding.toolbar);
-//
-//    List<ViewHolderInfo> viewHolderInfoList = new ArrayList<>();
-//    viewHolderInfoList.add(new ViewHolderInfo(R.layout.new_documents_adapter_item_layout, TYPE_ITEM));
-//
-//
-//    mActivityMainBinding.documentsRecycleView.setLayoutManager(new LinearLayoutManager(this));
-//
-//    List<RDocumentEntity> dataset = dataStore.select(RDocumentEntity.class).get().toList();
-//      RAdapter = new RxDataSource<RDocumentEntity>(dataset);
-//
-//
-//    RAdapter
-//      .<NewDocumentsAdapterItemLayoutBinding>bindRecyclerView(mActivityMainBinding.documentsRecycleView, R.layout.documents_adapter_item_layout)
-//      .subscribe(viewHolder -> {
-//        NewDocumentsAdapterItemLayoutBinding b = viewHolder.getViewDataBinding();
-//        RDocumentEntity item = viewHolder.getItem();
-//        b.swipeLayoutTitle.setText(String.valueOf(item));
-//      });
-//
-//    RAdapter.bindRecyclerView(mActivityMainBinding.documentsRecycleView, viewHolderInfoList, new OnGetItemViewType() {
-//      @Override public int getItemViewType(int position) {
-//        if (position % 2 == 0)
-//        {
-//          return TYPE_ITEM;
-//        }
-//        return TYPE_ITEM;
-//      }
-//    }).subscribe(vH -> {
-//      final ViewDataBinding b = vH.getViewDataBinding();
-//
-//      NewDocumentsAdapterItemLayoutBinding hB = (NewDocumentsAdapterItemLayoutBinding) b;
-//      hB.swipeLayoutTitle.setText( vH.getItem().getShortDescription() );
-//
-//    });
-//
-//    RAdapter.updateAdapter();
-
-
     RAdapter = new DocumentsAdapter(this, new ArrayList<>());
     rv.setAdapter(RAdapter);
     GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2, GridLayoutManager.VERTICAL, false);
     rv.setLayoutManager(gridLayoutManager);
-
-
-
 
     organization_adapter = new OrganizationAdapter(this, new ArrayList<>());
     ORGANIZATION_SELECTOR.setAdapter(organization_adapter, true, selected -> {
@@ -382,10 +340,10 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
         case R.id.reload:
           queue.getUncompleteTasks();
           updateByStatus();
-          updateProgressBar();
-          break;
-        case R.id.main_activity_menu_reload:
-          updateByStatus();
+
+          if (menuBuilder.getItem() != MainMenuItem.PROCESSED || menuBuilder.getItem() != MainMenuItem.FAVORITES ){
+            updateProgressBar();
+          }
           break;
         case R.id.action_search:
           searchView.onOptionsItemSelected(getFragmentManager(), item);

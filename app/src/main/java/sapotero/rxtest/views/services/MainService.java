@@ -655,7 +655,7 @@ public class MainService extends Service {
 
     subscription.add(
       Observable
-        .interval( 30, TimeUnit.SECONDS )
+        .interval( 90, TimeUnit.SECONDS )
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(interval -> {

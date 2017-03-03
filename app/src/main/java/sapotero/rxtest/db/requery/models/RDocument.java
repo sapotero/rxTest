@@ -72,6 +72,19 @@ public abstract class RDocument implements Persistable {
   @Index("processed_index")
   Boolean processed;
 
+
+  // из папки обработанное
+  @Index("fromProcessedFolder_index")
+  Boolean fromProcessedFolder;
+
+  // из папки избранное
+  @Index("fromFavoritesFolder_index")
+  Boolean fromFavoritesFolder;
+
+  // из папки обработанное
+  @Index("fromLinks_index")
+  Boolean fromLinks;
+
   @Index("expired_index")
   Boolean expired;
 

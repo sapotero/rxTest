@@ -10,6 +10,7 @@ import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.util.AttributeSet;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
@@ -20,7 +21,8 @@ import sapotero.rxtest.views.adapters.models.OrganizationItem;
 
 public class OrganizationSpinner extends TextView implements DialogInterface.OnMultiChoiceClickListener {
 
-//  private SpinnerAdapter mAdapter;
+  private final LayoutInflater inflater;
+  //  private SpinnerAdapter mAdapter;
   private OrganizationAdapter mAdapter;
   private boolean[] mOldSelection;
   private boolean[] mSelected;
@@ -31,14 +33,16 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
 
   public OrganizationSpinner(Context context) {
     super(context);
-  }
-
-  public OrganizationSpinner(Context context, AttributeSet attr) {
-    this(context, attr, R.attr.spinnerStyle);
+    inflater = (LayoutInflater) context.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
   }
 
   public OrganizationSpinner(Context context, AttributeSet attr, int defStyle) {
     super(context, attr, defStyle);
+    inflater = (LayoutInflater) context.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
+  }
+
+  public OrganizationSpinner(Context context, AttributeSet attr) {
+    this(context, attr, R.attr.spinnerStyle);
   }
 
   public void onClick(DialogInterface dialog, int which, boolean isChecked) {

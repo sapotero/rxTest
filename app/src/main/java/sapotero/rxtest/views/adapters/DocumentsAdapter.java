@@ -243,28 +243,28 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Simp
 
     }
 
-//    viewHolder.swipeLayout.setShowMode(SwipeLayout.ShowMode.PullOut);
-//
-//    viewHolder.swipeLayout.addDrag(SwipeLayout.DragEdge.Left,  viewHolder.swipeLayout.findViewById(R.id.from_left_to_right));
-//    viewHolder.swipeLayout.addDrag(SwipeLayout.DragEdge.Right, viewHolder.swipeLayout.findViewById(R.id.from_right_to_left));
-
-    // FIX добавить отображение ОжидаетСинхронизации
-    // FIX отображать срочность поверх всего во фрагменте
-    if (item.isChanged() != null){
-//      viewHolder.wait_for_sync.setVisibility(  item.getChanged() ? View.VISIBLE : View.GONE );
+    if ( item.isChanged() != null && item.isChanged() ){
+      viewHolder.sync_label.setVisibility(View.VISIBLE);
+    } else {
+      viewHolder.sync_label.setVisibility(View.GONE);
     }
 
     if ( item.isControl() != null && item.isControl() ){
-      Timber.d( "item.getControl() %s",  item.isControl().toString() );
       viewHolder.control_label.setVisibility(View.VISIBLE);
     } else {
       viewHolder.control_label.setVisibility(View.GONE);
     }
-    if ( item.isFavorites() != null && item.isFavorites() ){
-      Timber.d( "item.getFavorites() %s", item.isFavorites().toString() );
+
+    if ( item.isFavorites() != null && item.isFavorites() ){;
       viewHolder.favorite_label.setVisibility(View.VISIBLE);
     } else {
       viewHolder.favorite_label.setVisibility(View.GONE);
+    }
+
+    if ( item.isFromFavoritesFolder() != null && item.isFromFavoritesFolder() ){
+      viewHolder.lock_label.setVisibility(View.VISIBLE);
+    } else {
+      viewHolder.lock_label.setVisibility(View.GONE);
     }
 
 
@@ -462,6 +462,8 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Simp
   //  ViewHolder Class
 
   class SimpleViewHolder extends RecyclerView.ViewHolder {
+    private TextView sync_label;
+    private TextView lock_label;
     private TextView subtitle;
     private TextView badge;
     private TextView control_label;
@@ -485,7 +487,9 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Simp
       from  = (TextView)itemView.findViewById(R.id.swipe_layout_from);
       date  = (TextView)itemView.findViewById(R.id.swipe_layout_date);
       favorite_label = (TextView)itemView.findViewById(R.id.favorite_label);
+      sync_label = (TextView)itemView.findViewById(R.id.sync_label);
       control_label  = (TextView)itemView.findViewById(R.id.control_label);
+      lock_label  = (TextView)itemView.findViewById(R.id.lock_label);
       wait_for_sync  = (TextView)itemView.findViewById(R.id.wait_for_sync);
 
       favorite_label.setVisibility(View.GONE);

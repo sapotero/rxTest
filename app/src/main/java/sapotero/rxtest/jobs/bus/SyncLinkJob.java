@@ -162,6 +162,7 @@ public class SyncLinkJob extends BaseJob {
     rd.setProcessed(true);
     rd.setFolder("");
     rd.setControl(false);
+    rd.setFromLinks(true);
 
     if ( d.getSigner().getOrganisation() != null && !Objects.equals(d.getSigner().getOrganisation(), "")){
       rd.setOrganization( d.getSigner().getOrganisation() );
@@ -239,6 +240,7 @@ public class SyncLinkJob extends BaseJob {
       rDoc.setProcessed(false);
       rDoc.setControl(false);
       rDoc.setFolder("");
+      rDoc.setFromLinks(true);
       rDoc.setUser( LOGIN.get() );
 
       if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){

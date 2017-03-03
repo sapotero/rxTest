@@ -153,6 +153,7 @@ public class NextPerson extends AbstractCommand {
         .set( RDocumentEntity.PROCESSED, true)
         .set( RDocumentEntity.FROM_SIGN, true)
         .set( RDocumentEntity.MD5, "" )
+        .set( RDocumentEntity.CHANGED, true)
         .where(RDocumentEntity.UID.eq(UID.get()))
         .get()
         .call();

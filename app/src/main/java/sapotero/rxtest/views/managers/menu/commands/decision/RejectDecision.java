@@ -127,7 +127,6 @@ public class RejectDecision extends AbstractCommand {
         dataStore
           .update(RDecisionEntity.class)
           .set( RDecisionEntity.APPROVED, false)
-          .set( RDocumentEntity.MD5, "" )
           .where(RDecisionEntity.UID.eq( decision_uid ));
 
         if ( !hasActiveDecision() ){
@@ -135,6 +134,7 @@ public class RejectDecision extends AbstractCommand {
             .update(RDocumentEntity.class)
             .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue() )
             .set( RDocumentEntity.MD5, "" )
+            .set( RDocumentEntity.CHANGED, true)
             .where(RDocumentEntity.UID.eq( document.getUid() ));
         }
 

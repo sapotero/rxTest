@@ -8,7 +8,7 @@ public class Fields {
 
   public enum Status {
     SENT_TO_THE_REPORT      ("sent_to_the_report",      "Отправлен на исполнение"),
-    SENT_TO_THE_PERFORMANCE ("sent_to_the_performance", "Отправлен на доклад"),
+//    SENT_TO_THE_PERFORMANCE ("sent_to_the_performance", "Отправлен на доклад"),
     PRIMARY_CONSIDERATION   ("primary_consideration",   "Первичное рассмотрение"),
     APPROVAL                ("approval",                "Согласование проектов документов"),
     SIGNING                 ("signing",                 "Подписание проектов документов"),
@@ -176,7 +176,13 @@ public class Fields {
   public static Journal getJournalByUid(String uid ){
     Journal result = null;
 
+
     if (uid != null) {
+
+      if (uid.startsWith("p")){
+        uid = uid.substring(1, uid.length()-1 );
+      }
+
       for ( Journal journal: Journal.values()){
         if (journal.getValue().startsWith( uid.substring(0, 2))) {
           Timber.tag("JOURNAL_TYPE").d("%s == %s [%s]", journal.getValue(), uid.substring(0, 1), uid);
