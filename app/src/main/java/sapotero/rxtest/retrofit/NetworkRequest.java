@@ -29,7 +29,7 @@ public class NetworkRequest {
     // Specify a scheduler (Scheduler.newThread(), Scheduler.immediate(), ...)
     // We choose Scheduler.io() to perform network request in a thread pool
     return observable.subscribeOn(Schedulers.io())
-        // Observe result in the main thread to be able to add UI
+        // Observe result in the main thread to be able to addByOne UI
         .observeOn(AndroidSchedulers.mainThread())
         // Set callbacks actions
         .subscribe(onAction, onError);

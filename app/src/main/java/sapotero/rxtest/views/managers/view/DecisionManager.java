@@ -189,11 +189,11 @@ public class DecisionManager implements DecisionInterface, DecisionBuilder.Callb
       //FIX DECISION
     dec.setDocument(document);
 
-//    RDecisionEntity temp = dataStore.add(dec).toBlocking().value();
+//    RDecisionEntity temp = dataStore.addByOne(dec).toBlocking().value();
     Subscription temp = dataStore
       .update(dec)
       .subscribe( data ->{
-        Timber.tag(TAG).w( "add : %s", data.getBlocks().isEmpty() );
+        Timber.tag(TAG).w( "addByOne : %s", data.getBlocks().isEmpty() );
       }, error -> {
         Timber.e( String.valueOf(error.getStackTrace()) );
       });

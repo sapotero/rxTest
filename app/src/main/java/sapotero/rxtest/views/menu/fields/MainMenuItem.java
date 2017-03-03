@@ -22,7 +22,7 @@ public enum MainMenuItem {
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FAVORITES.ne(false) ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.ne(true) ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_LINKS.eq( false ) )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_LINKS.eq( false ) ),
     },
     new ConditionBuilder[]{},
     true, false),
@@ -218,6 +218,14 @@ public enum MainMenuItem {
 
   public String getName(){
     return name;
+  }
+
+  public MainMenuButton[] getButtons(){
+    return mainMenuButtons;
+  }
+
+  public ArrayList<ButtonBuilder> getButtonList(){
+    return buttonsList;
   }
 
   public ArrayList<ButtonBuilder> getMainMenuButtons(){

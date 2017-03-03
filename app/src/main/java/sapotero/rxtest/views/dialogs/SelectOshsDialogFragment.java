@@ -191,7 +191,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
 //          ArrayList<PrimaryConsiderationPeople> users = new ArrayList<>();
 //
 //          for (RAssistantEntity assistant: assistants) {
-//            users.add( new PrimaryConsiderationPeople( assistant.getHeadId(), assistant.getTitle(), "", "", assistant.getAssistantId() ) );
+//            users.addByOne( new PrimaryConsiderationPeople( assistant.getHeadId(), assistant.getTitle(), "", "", assistant.getAssistantId() ) );
 //          }
 //          adapter.addAll(users);
            adapter.add( new PrimaryConsiderationPeople( user.getHeadId(), user.getTitle(), "", "", user.getAssistantId() ) );
@@ -213,7 +213,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
 //          ArrayList<PrimaryConsiderationPeople> users = new ArrayList<>();
 //
 //          for (RPrimaryConsiderationEntity primary: primaries) {
-//            users.add( new PrimaryConsiderationPeople( primary.getUid(), primary.getName(), primary.getPosition(), primary.getOrganization(), null) );
+//            users.addByOne( new PrimaryConsiderationPeople( primary.getUid(), primary.getName(), primary.getPosition(), primary.getOrganization(), null) );
 //          }
 //          adapter.addAll(users);
 
@@ -240,7 +240,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
 //          ArrayList<PrimaryConsiderationPeople> users = new ArrayList<>();
 //
 //          for (RFavoriteUserEntity favorite: favorites) {
-//            users.add( new PrimaryConsiderationPeople( favorite.getUid(), favorite.getName(), favorite.getPosition(), favorite.getOrganization(), null) );
+//            users.addByOne( new PrimaryConsiderationPeople( favorite.getUid(), favorite.getName(), favorite.getPosition(), favorite.getOrganization(), null) );
 //          }
 //          adapter.addAll(users);
 

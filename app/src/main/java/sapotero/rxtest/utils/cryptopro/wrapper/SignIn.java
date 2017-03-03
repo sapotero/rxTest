@@ -85,7 +85,7 @@ public class SignIn extends ISignData {
     byte[] data = getBytesFromFile(file);
     Timber.e("%s %s %s", file.getAbsoluteFile(), size, data.length);
 
-//    sn.add( MESSAGE.getBytes() );
+//    sn.addByOne( MESSAGE.getBytes() );
 
     sn.update(data);
 

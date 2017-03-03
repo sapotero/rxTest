@@ -98,7 +98,7 @@ public class BlockFactory implements DecisionInterface, DecisionFragment.Callbac
 
 
     blocks.add( fragment );
-//    decision.getBlocks().add( block );
+//    decision.getBlocks().addByOne( block );
   }
 
   public void remove( DecisionFragment fragment ){

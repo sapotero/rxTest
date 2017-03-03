@@ -38,14 +38,11 @@ public class DocumentTypeItem {
 
     if (mainMenuItem.getIndex() == 0){
 
-
-
       Integer total = dataStore
         .count(RDocumentEntity.class)
-//        .where( RDocumentEntity.FAVORITES.ne( true ) )
-//        .and( RDocumentEntity.PROCESSED.ne( true ) )
         .where( RDocumentEntity.FILTER.in( MainMenuButton.ButtonStatus.forAllDocuments() )   )
         .and( RDocumentEntity.USER.eq( settings.getString("login").get() ) )
+        .and( RDocumentEntity.PROCESSED.eq( false ) )
         .get()
         .value();
 
@@ -56,7 +53,7 @@ public class DocumentTypeItem {
         .get()
         .value();
 
-      return String.format( mainMenuItem.getName(), total-projects, projects);
+      return String.format( mainMenuItem.getName(), total, projects);
     } else {
       int count = 0;
 
@@ -66,8 +63,6 @@ public class DocumentTypeItem {
       if ( settings.getBoolean("settings_view_type_show_without_project").get() && !mainMenuItem.isProcessed() ){
         query = dataStore
           .count(RDocumentEntity.class)
-//          .join(RDecisionEntity.class)
-//          .on(RDecisionEntity.DOCUMENT_ID.eq(RDocumentEntity.ID))
           .where(RDocumentEntity.USER.eq(settings.getString("login").get()))
           .and(RDocumentEntity.FILTER.ne(Fields.Status.LINK.getValue()));
 

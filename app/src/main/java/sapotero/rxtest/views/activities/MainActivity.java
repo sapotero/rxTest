@@ -665,8 +665,12 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 //    view.setVisibility(visibility);
 //  }
 
-  @Subscribe(threadMode = ThreadMode.MAIN)
+
+  @Subscribe( threadMode = ThreadMode.MAIN)
   public void onMessageEvent(UpdateCountEvent event) {
+    Timber.tag(TAG).v("UpdateCountEvent");
+    menuBuilder.getItem().recalcuate();
+    menuBuilder.getItem().getMainMenuButtons();
   }
 
   @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)

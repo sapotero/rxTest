@@ -15,6 +15,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -55,10 +57,9 @@ import sapotero.rxtest.views.activities.InfoActivity;
 import sapotero.rxtest.views.activities.MainActivity;
 import sapotero.rxtest.views.managers.db.managers.DBDocumentManager;
 import sapotero.rxtest.views.managers.menu.OperationManager;
-import sapotero.rxtest.views.menu.MenuBuilder;
 import timber.log.Timber;
 
-public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.SimpleViewHolder> implements Action1<List<Document>> {
+public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.DocumentViewHolder> implements Action1<List<Document>> {
 
   @Inject RxSharedPreferences settings;
   @Inject JobManager jobManager;
@@ -69,8 +70,10 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Simp
   private Context mContext;
   private List<RDocumentEntity> documents;
   private ObservableDocumentList real_docs;
-  private MenuBuilder mainMenu;
+
   private String TAG = this.getClass().getSimpleName();
+
+  private int lastPosition = -1;
 
   @Override
   public void call(List<Document> documents) {
@@ -84,7 +87,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Simp
     Timber.tag(TAG).v("total documents: %s", documents.size());
 
     int index = -1;
-    for (int i = 0; i <documents.size()-1 ; i++) {
+    for (int i = 0; i <documents.size() ; i++) {
       RDocumentEntity doc = documents.get(i);
       Timber.tag(TAG).v("test: %s | %s", doc.getUid(), uid);
 
@@ -103,18 +106,21 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Simp
 //
 //        RDocumentEntity document = Holder.MAP.get(uid);
 //        documents.remove(document);
-//        real_docs.add(document);
+//        real_docs.addByOne(document);
 //        notifyItemRemoved(index);
 //      }
       if ( documents.get(index).isProcessed() ){
         documents.remove(index);
+        notifyItemRemoved(index);
+      } else {
+        notifyDataSetChanged();
       }
     }
 
     Timber.tag(TAG).v("total documents: %s", documents.size());
 
 
-    notifyDataSetChanged();
+
 
   }
 
@@ -153,9 +159,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Simp
       .debounce(1000, TimeUnit.MILLISECONDS)
       .subscribe( data -> {
         Timber.e("FROM UPDATE STREAM");
-        if (mainMenu != null) {
-          EventBus.getDefault().postSticky(new UpdateCountEvent());
-        }
+        EventBus.getDefault().post(new UpdateCountEvent());
       });
 
     EsdApplication.getComponent(context).inject(this);
@@ -168,13 +172,13 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Simp
   }
 
   @Override
-  public SimpleViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+  public DocumentViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
     View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.documents_adapter_item_layout, parent, false);
-    return new SimpleViewHolder(view);
+    return new DocumentViewHolder(view);
   }
 
   @Override
-  public void onBindViewHolder(final SimpleViewHolder viewHolder, final int position) {
+  public void onBindViewHolder(final DocumentViewHolder viewHolder, final int position) {
     final RDocumentEntity item = documents.get(position);
 
     viewHolder.title.setText( item.getShortDescription() );
@@ -212,7 +216,6 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Simp
 
     viewHolder.date.setText( item.getTitle() );
 
-//    Timber.tag("Status LINKS").e("filter: %s | %s | %s", item.getFilter(), Fields.Status.SIGNING.getValue(), Fields.Status.APPROVAL.getValue() );
     if( Objects.equals(item.getFilter(), Fields.Status.SIGNING.getValue()) ||  Objects.equals(item.getFilter(), Fields.Status.APPROVAL.getValue()) ){
 
       Timber.tag("Status LINKS").e("size: %s", item.getLinks().size() );
@@ -349,6 +352,18 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Simp
       viewHolder.cv.setBackground( ContextCompat.getDrawable(mContext, R.color.md_white_1000 ) );
     }
 
+
+
+//    setAnimation(viewHolder.itemView, position);
+
+  }
+
+  private void setAnimation(View viewToAnimate, int position){
+
+
+
+    Animation animation = AnimationUtils.loadAnimation(mContext, R.anim.fade_in);
+    viewToAnimate.startAnimation(animation);
   }
 
   @Override
@@ -436,7 +451,6 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Simp
   }
 
   public void clear(){
-    notifyItemRangeRemoved(0, documents.size());
     Holder.MAP.clear();
     documents.clear();
     real_docs.clear();
@@ -459,9 +473,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Simp
 
   }
 
-  //  ViewHolder Class
-
-  class SimpleViewHolder extends RecyclerView.ViewHolder {
+  class DocumentViewHolder extends RecyclerView.ViewHolder {
     private TextView sync_label;
     private TextView lock_label;
     private TextView subtitle;
@@ -476,7 +488,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Simp
     private TextView date;
     private TextView from;
 
-    public SimpleViewHolder(View itemView) {
+    public DocumentViewHolder(View itemView) {
       super(itemView);
 
 

@@ -613,7 +613,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
 //
 //            List<Decision> decisions_list = new ArrayList<>();
 //            for (Decision decision: data.getDecisions()) {
-//              decisions_list.add(decision);
+//              decisions_list.addByOne(decision);
 //            }
 //
 //            decision_adapter = new DecisionAdapter(decisions_list, this, desigions_recycler_view);

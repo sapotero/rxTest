@@ -481,14 +481,14 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
 //        signerPositionView.setTextColor( Color.BLACK );
 //        signerPositionView.setGravity( Gravity.END );
 //        signer_view.addView( signerPositionView );
-//        textLabels.add( signerPositionView );
+//        textLabels.addByOne( signerPositionView );
 //      }
 //      TextView signerBlankTextView = new TextView(context);
 //      signerBlankTextView.setText( signerBlankText );
 //      signerBlankTextView.setTextColor( Color.BLACK );
 //      signerBlankTextView.setGravity( Gravity.END);
 //      signer_view.addView( signerBlankTextView );
-//      textLabels.add( signerBlankTextView );
+//      textLabels.addByOne( signerBlankTextView );
 //
 //
 //
@@ -503,7 +503,7 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
 //      numberView.setLayoutParams(numberViewParams);
 //      date_and_number_view.addView(numberView);
 //
-//      textLabels.add( numberView );
+//      textLabels.addByOne( numberView );
 //
 //      TextView dateView = new TextView(context);
 //      dateView.setText( date );
@@ -517,7 +517,7 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
 //      LinearLayout.LayoutParams dateView_params1 = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f);
 //      dateView.setLayoutParams(dateView_params1);
 //      date_and_number_view.addView(dateView);
-//      textLabels.add( dateView );
+//      textLabels.addByOne( dateView );
 //
 //      if (base64 != null){
 //        ImageView image = new ImageView(getContext());
@@ -579,7 +579,7 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
 //      params.setMargins(0, 10, 0, 10);
 //      block_view.setLayoutParams(params);
 //
-//      textLabels.add( block_view );
+//      textLabels.addByOne( block_view );
 //      preview_body.addView( block_view );
 //    }
 //
@@ -616,7 +616,7 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
 //      blockAppealView.setTextColor( Color.BLACK );
 //      blockAppealView.setTextSize( TypedValue.COMPLEX_UNIT_SP, 12 );
 //
-//      textLabels.add( blockAppealView );
+//      textLabels.addByOne( blockAppealView );
 //      preview_body.addView( blockAppealView );
 //    }
 //
@@ -645,7 +645,7 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
 //          performer_view.setText( performerName );
 //          performer_view.setTextColor( Color.BLACK );
 //          users_view.addView(performer_view);
-//          textLabels.add( performer_view );
+//          textLabels.addByOne( performer_view );
 //        }
 //      }
 //

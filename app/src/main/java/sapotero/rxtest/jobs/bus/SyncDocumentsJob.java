@@ -640,23 +640,27 @@ public class SyncDocumentsJob  extends BaseJob {
         doc.setInfoCard( document.getInfoCard() );
       }
 
-      dataStore
-        .update( doc )
-        .subscribeOn( Schedulers.io() )
-        .observeOn( AndroidSchedulers.mainThread() )
-        .subscribe(
-          result -> {
-            Timber.tag("MD5").d("updateDocumentInfo " + result.getMd5());
-          },
-          error ->{
-            error.printStackTrace();
-          }
-        );
 
       EventBus.getDefault().post( new UpdateCurrentDocumentEvent( doc.getUid() ) );
     } else {
       Timber.tag("MD5").d("equal");
+      doc.setFilter( filter.toString() );
+      doc.setChanged(false);
+      doc.setProcessed(false);
     }
+
+    dataStore
+      .update( doc )
+      .subscribeOn( Schedulers.io() )
+      .observeOn( AndroidSchedulers.mainThread() )
+      .subscribe(
+        result -> {
+          Timber.tag("MD5").d("updateDocumentInfo " + result.getMd5());
+        },
+        error ->{
+          error.printStackTrace();
+        }
+      );
   }
 
   @Override

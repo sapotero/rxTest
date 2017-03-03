@@ -73,6 +73,10 @@ public class ButtonBuilder {
     NONE
   }
 
+  public Integer getIndex() {
+    return index;
+  }
+
   public ButtonBuilder(String label, ConditionBuilder[] conditions, ConditionBuilder[] item_conditions, boolean showDecisionForse, Integer index) {
     this.label = label;
     this.conditions = conditions;

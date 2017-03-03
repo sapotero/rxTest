@@ -65,7 +65,7 @@ public class AddFavoriteUsersJob extends BaseJob {
       .subscribeOn(Schedulers.computation())
       .observeOn(Schedulers.computation())
       .subscribe(u -> {
-        Timber.tag(TAG).v("add " + u.getName() );
+        Timber.tag(TAG).v("addByOne " + u.getName() );
       });
   }
 

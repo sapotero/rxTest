@@ -51,7 +51,7 @@ class CacheManager {
             // If cache too big, remove and recycle
             makeAFreeSpace();
 
-            // Then add part
+            // Then addByOne part
             activeCache.offer(part);
         }
     }
@@ -85,7 +85,7 @@ class CacheManager {
                 thumbnails.remove(0).getRenderedBitmap().recycle();
             }
 
-            // Then add thumbnail
+            // Then addByOne thumbnail
             thumbnails.add(part);
         }
 

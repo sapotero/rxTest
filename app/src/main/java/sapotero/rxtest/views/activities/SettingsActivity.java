@@ -55,7 +55,7 @@ public class SettingsActivity extends AppCompatActivity {
     if (savedInstanceState == null) {
       FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
       fragmentTransaction.add(R.id.settings_view_fragment, new SettingsViewFragment());
-//      fragmentTransaction.add(R.id.settings_user_fragment, new SettingsMainFragment() );
+//      fragmentTransaction.addByOne(R.id.settings_user_fragment, new SettingsMainFragment() );
     fragmentTransaction.commit();
     }
 

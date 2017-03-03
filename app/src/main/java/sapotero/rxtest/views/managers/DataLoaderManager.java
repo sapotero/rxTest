@@ -16,6 +16,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,6 +57,8 @@ import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.retrofit.models.documents.Documents;
 import sapotero.rxtest.retrofit.models.v2.V2UserInfo;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
+import sapotero.rxtest.views.menu.builders.ButtonBuilder;
+import sapotero.rxtest.views.menu.fields.MainMenuButton;
 import sapotero.rxtest.views.menu.fields.MainMenuItem;
 import sapotero.rxtest.views.utils.TDmodel;
 import timber.log.Timber;
@@ -224,7 +227,7 @@ public class DataLoaderManager {
 
             EventBus.getDefault().post( new AuthDcCheckSuccessEvent() );
 
-            updateDocuments();
+            updateDocuments(null);
           },
           error -> {
             Timber.tag(TAG).i("tryToSignWithDc error: %s" , error );
@@ -268,7 +271,7 @@ public class DataLoaderManager {
 
             EventBus.getDefault().post(new AuthLoginCheckSuccessEvent());
 
-            updateDocuments();
+            updateDocuments(null);
           },
           error -> {
             Timber.tag(TAG).i("tryToSignWithLogin error: %s", error);
@@ -288,7 +291,7 @@ public class DataLoaderManager {
     return error;
   }
 
-  private void updateDocuments() {
+  private void updateDocuments(MainMenuItem items) {
 
     Timber.tag(TAG).i("getAuthToken");
 
@@ -361,7 +364,42 @@ public class DataLoaderManager {
 
         // получаем список документов по статусам
         .concatMap(data -> {
-          Fields.Status[] new_filter_types = Fields.Status.INDEX;
+//          Fields.Status[] new_filter_types = Fields.Status.INDEX;
+
+          ArrayList<Fields.Status> new_filter_types = new ArrayList<Fields.Status>();
+
+          if (items == null){
+            new_filter_types.add( Fields.Status.SENT_TO_THE_REPORT );
+            new_filter_types.add( Fields.Status.PRIMARY_CONSIDERATION );
+            new_filter_types.add( Fields.Status.APPROVAL );
+            new_filter_types.add( Fields.Status.SIGNING );
+          } else {
+            if (items.getButtons() != null && items.getButtons().length > 0){
+
+              ArrayList<ButtonBuilder> getButtonList = items.getButtonList();
+
+              if (getButtonList != null && getButtonList.size() > 0){
+
+                for (ButtonBuilder builder: getButtonList) {
+                  if ( builder.isActive() ){
+                    Timber.tag(TAG).d("ACTIVE BUTTON INDEX: %s", builder.getIndex() );
+                    Timber.tag(TAG).d("ACTIVE BUTTON: %s", MainMenuButton.getByIndex( builder.getIndex() ).toString() );
+
+                    MainMenuButton button = MainMenuButton.getByIndex(builder.getIndex());
+
+                    if (button != null) {
+                      getButtonType(new_filter_types, button);
+                    }
+                  }
+                }
+              } else {
+                for (MainMenuButton button: items.getButtons() ) {
+                  getButtonType(new_filter_types, button);
+                }
+              }
+
+            }
+          }
 
           Observable<Fields.Status> types = Observable.from(new_filter_types);
           Observable<Documents> count = Observable
@@ -390,14 +428,31 @@ public class DataLoaderManager {
         .subscribe(
           data -> {
             Timber.tag(TAG).w("subscribe %s", data);
-            updateFavorites();
-            updateProcessed();
           }, error -> {
             //          callback.onError(error);
           }
         )
     );
 
+  }
+
+  private void getButtonType(ArrayList<Fields.Status> new_filter_types, MainMenuButton button) {
+    switch (button){
+      case APPROVAL:
+        new_filter_types.add( Fields.Status.APPROVAL );
+        break;
+      case PRIMARY_CONSIDERATION:
+        new_filter_types.add( Fields.Status.PRIMARY_CONSIDERATION );
+        break;
+      case ASSIGN:
+        new_filter_types.add( Fields.Status.SIGNING );
+        break;
+      case PERFORMANCE:
+        new_filter_types.add( Fields.Status.SENT_TO_THE_REPORT );
+        break;
+      default:
+        break;
+    }
   }
 
   private void setCurrentUserOrganization(String organization) {
@@ -523,13 +578,13 @@ public class DataLoaderManager {
           );
         break;
       default:
-        updateByDefault(auth);
+        updateByDefault(auth, items);
         break;
     }
 
   }
 
-  private void updateByDefault(AuthService auth) {
+  private void updateByDefault(AuthService auth, MainMenuItem items) {
     unsubscribe();
     subscription.add(
       auth.getAuth( LOGIN.get(), PASSWORD.get() )
@@ -539,7 +594,7 @@ public class DataLoaderManager {
           token -> {
             Timber.tag(TAG).i("updateAuth: token" + token.getAuthToken());
             setToken(token.getAuthToken());
-            updateDocuments();
+            updateDocuments(items);
           },
           error -> {
             Timber.tag("getAuth").e( "ERROR: %s", error);

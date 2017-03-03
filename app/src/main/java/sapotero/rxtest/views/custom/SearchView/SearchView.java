@@ -87,7 +87,7 @@ public class SearchView extends BaseRestoreInstanceFragment implements DialogInt
         adapter = new ArrayAdapter<>(getActivity().getApplicationContext(), android.R.layout.simple_spinner_item);
         adapter.add("Рег. номер");
         adapter.add("Краткое содержание");
-//        adapter.add("Номер поступившего");
+//        adapter.addByOne("Номер поступившего");
 
         spinner = (MultiSpinner) dialogLayout.findViewById(R.id.search_spinner);
         spinner.setAdapter(adapter, false, onSelectedListener );

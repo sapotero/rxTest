@@ -87,14 +87,7 @@ public class DBQueryBuilder {
   public void execute(Boolean refreshSpinner){
 
     if (conditions != null) {
-      hideEmpty();
 
-//      conditions.add(  new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.ne(Fields.Status.LINK.getValue()) ) );
-
-//      Timber.v( "executeWithConditions: %s", conditions.size() );
-//      for (ConditionBuilder condition : conditions ) {
-//        Timber.tag(TAG).i(":: %s", condition.toString());
-//      }
 
       if (refreshSpinner){
         findOrganizations();
@@ -137,43 +130,88 @@ public class DBQueryBuilder {
         query = query.or( RDocumentEntity.FAVORITES.eq(true) );
       }
 
+      Integer count = queryCount.get().value();
+      if ( count != null || count != 0 ){
+        hideEmpty();
+      }
 
       unsubscribe();
       adapter.clear();
-      if (conditions.size() == 0){
+
+      if (count == 0){
         showEmpty();
       } else {
-        // resolved https://tasks.n-core.ru/browse/MVDESD-12625
-        // *11) * Все избранные документы отображать в начале списка
-
-
-        Timber.v( "queryCount: %s", queryCount.get().value() );
+        Timber.v( "queryCount: %s", count );
         subscribe.add(
           query
-          .orderBy( RDocumentEntity.FAVORITES.desc() )
-          .get()
+            .orderBy( RDocumentEntity.SORT_KEY.desc() )
+            .get()
             .toSelfObservable()
-          .subscribeOn(Schedulers.io())
-          .observeOn( AndroidSchedulers.mainThread() )
-          .subscribe(this::add, this::error)
+            .subscribeOn(Schedulers.io())
+            .observeOn( AndroidSchedulers.mainThread() )
+            .subscribe(this::addByOne, this::error)
         );
       }
+
+
     }
   }
+
+//
+//  private void addMany(List<RDocumentEntity> results) {
+//
+//    Timber.tag(TAG).i( "results: %s", results.size() );
+//
+//    if ( results.size() > 0) {
+//      hideEmpty();
+//
+//      for (RDocumentEntity doc: results) {
+//        Timber.tag(TAG).i( "mass add doc: %s", doc );
+//
+//        if (doc != null) {
+//          RSignerEntity signer = (RSignerEntity) doc.getSigner();
+//
+//          boolean[] selected_index = organizationSelector.getSelected();
+//          ArrayList<String> ids = new ArrayList<>();
+//
+//          for (int i = 0; i < selected_index.length; i++) {
+//            if ( selected_index[i] ){
+//              ids.add( organizationAdapter.getItem(i).getName() );
+//            }          }
+//
+//          // resolved https://tasks.n-core.ru/browse/MVDESD-12625
+//          // *1) *Фильтр по организациям.
+//          String organization = signer.getOrganisation();
+//
+//          if (selected_index.length == 0){
+//            addDocument(doc);
+//          } else {
+//            if ( ids.contains(organization) || withFavorites && doc.isFavorites() ){
+//              addDocument(doc);
+//            }
+//          }
+//        }
+//      }
+//
+//    } else {
+//      showEmpty();
+//    }
+//  }
 
   private void error(Throwable error) {
     Timber.tag(TAG).e(error);
   }
 
-  public void add(Result<RDocumentEntity> docs){
+  public void addByOne(Result<RDocumentEntity> docs){
 
-    showEmpty();
+
+
     docs
       .toObservable()
       .subscribeOn(Schedulers.io())
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe( doc -> {
-        hideEmpty();
+
 
         RSignerEntity signer = (RSignerEntity) doc.getSigner();
 
@@ -188,11 +226,7 @@ public class DBQueryBuilder {
 
         // resolved https://tasks.n-core.ru/browse/MVDESD-12625
         // *1) *Фильтр по организациям.
-
         String organization = signer.getOrganisation();
-//        if (Objects.equals(organization, "") || organization == null){
-//          organization = "Без организации";
-//        }
 
         if (selected_index.length == 0){
           addDocument(doc);
@@ -201,11 +235,6 @@ public class DBQueryBuilder {
             addDocument(doc);
           }
         }
-
-//        if ( ids.size() >= 1 ||  ){
-//          addDocument(doc);
-//        }
-
 
       }, this::error);
 

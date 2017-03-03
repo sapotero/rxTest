@@ -191,7 +191,7 @@ public class SyncLinkJob extends BaseJob {
         .subscribeOn( Schedulers.io() )
         .observeOn( Schedulers.io() )
         .subscribe(data -> {
-          Timber.tag(TAG).v("add " + data.getTitle() );
+          Timber.tag(TAG).v("addByOne " + data.getTitle() );
           setData( data, document, false);
         },
         error -> {
@@ -205,19 +205,20 @@ public class SyncLinkJob extends BaseJob {
 
   private void setData(RDocumentEntity documentEntity, DocumentInfo document, boolean md5Equal){
 
+    RDocumentEntity rDoc;
+
+    if (documentEntity != null){
+      rDoc = documentEntity;
+    } else {
+      rDoc = dataStore
+        .select(RDocumentEntity.class)
+        .where(RDocumentEntity.UID.eq( document.getUid() ))
+        .get()
+        .first();
+    }
+
     if (!md5Equal){
 
-      RDocumentEntity rDoc;
-
-      if (documentEntity != null){
-        rDoc = documentEntity;
-      } else {
-        rDoc = dataStore
-          .select(RDocumentEntity.class)
-          .where(RDocumentEntity.UID.eq( document.getUid() ))
-          .get()
-          .first();
-      }
 
       Timber.tag(TAG).v("setData " + rDoc.getRegistrationNumber() );
       Timber.tag(TAG).v("getImages " + document.getImages().size() );
@@ -391,22 +392,26 @@ public class SyncLinkJob extends BaseJob {
       }
 
       rDoc.setFilter( filter.toString() );
-
-      dataStore.update(rDoc)
-        .toObservable()
-        .subscribeOn( Schedulers.io() )
-        .observeOn( Schedulers.io() )
-        .subscribe(
-          result -> {
-            Timber.tag(TAG).d("updated " + result.getUid());
-          },
-          error ->{
-            error.printStackTrace();
-          }
-        );
     } else {
       Timber.tag(TAG).v("MD5 equal");
+      rDoc.setFilter( filter.toString() );
+      rDoc.setChanged(false);
+      rDoc.setProcessed(false);
     }
+
+    dataStore
+      .update(rDoc)
+      .toObservable()
+      .subscribeOn( Schedulers.io() )
+      .observeOn( Schedulers.io() )
+      .subscribe(
+        result -> {
+          Timber.tag(TAG).d("updated %s",result.getUid());
+        },
+        error ->{
+          Timber.tag(TAG).d("error %s ", error);
+        }
+      );
   }
 
   @Override

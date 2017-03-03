@@ -80,7 +80,7 @@ public class StepperChooseAuthTypeFragment extends Fragment implements Step, Vie
 
   @Override
   public void onSelected() {
-    //add UI when selected
+    //addByOne UI when selected
   }
 
   @Override

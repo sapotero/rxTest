@@ -24,6 +24,7 @@ public enum MainMenuButton {
     "На рассмотрение %s" ,
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in( ButtonStatus.getPerformance() )  ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_LINKS.eq( false  ) ),
 //      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.ne(Fields.Status.LINK.getValue() ) ),
 //      new ConditionBuilder( ConditionBuilder.Condition.OR, RDocumentEntity.FILTER.eq(Fields.Status.SENT_TO_THE_REPORT.getValue())  ),
 //      new ConditionBuilder( ConditionBuilder.Condition.OR, RDocumentEntity.FILTER.eq(Fields.Status.SENT_TO_THE_PERFORMANCE.getValue())  ),
@@ -95,20 +96,19 @@ public enum MainMenuButton {
   }
 
   public static MainMenuButton getByIndex(int index){
-    MainMenuButton item = Holder.MAP.get( String.valueOf(index) );
 
-    if( item == null ) {
-      throw new IllegalStateException(String.format("Unsupported type %s.", index));
-    }
+//    if( item == null ) {
+//      throw new IllegalStateException(String.format("Unsupported type %s.", index));
+//    }
 
-    return item;
+    return Holder.MAP.get( String.valueOf(index) );
   }
 
   public static class ButtonStatus {
     public static ArrayList<String> getPerformance(){
       ArrayList<String> projectArray = new ArrayList<String>();
       projectArray.add( Fields.Status.SENT_TO_THE_REPORT.getValue() );
-//      projectArray.add( Fields.Status.SENT_TO_THE_PERFORMANCE.getValue() );
+//      projectArray.addByOne( Fields.Status.SENT_TO_THE_PERFORMANCE.getValue() );
       return projectArray;
     }
     public static ArrayList<String> getProject(){
@@ -119,8 +119,6 @@ public enum MainMenuButton {
     }
     public static ArrayList<String> forAllDocuments(){
       ArrayList<String> projectArray = new ArrayList<String>();
-      projectArray.add( Fields.Status.APPROVAL.getValue() );
-      projectArray.add( Fields.Status.SIGNING.getValue());
       projectArray.add( Fields.Status.SENT_TO_THE_REPORT.getValue());
       projectArray.add( Fields.Status.PRIMARY_CONSIDERATION.getValue());;
       return projectArray;

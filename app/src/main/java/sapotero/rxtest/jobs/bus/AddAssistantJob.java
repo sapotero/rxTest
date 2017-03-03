@@ -57,7 +57,7 @@ public class AddAssistantJob extends BaseJob {
       .subscribeOn(Schedulers.computation())
       .observeOn(Schedulers.computation())
       .subscribe(u -> {
-        Timber.tag(TAG).v("add " + u.getTitle() );
+        Timber.tag(TAG).v("addByOne " + u.getTitle() );
       });
   }
 
