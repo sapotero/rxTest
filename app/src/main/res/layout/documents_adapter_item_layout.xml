@@ -4,9 +4,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/swipe_layout_cv"
     android:layout_width="match_parent"
-    android:layout_height="250dp"
+    android:layout_height="270dp"
     android:clickable="true"
-    android:layout_margin="@dimen/half_date_offset"
+    android:layout_marginTop="16dp"
+    android:layout_marginStart="@dimen/half_date_offset"
+    android:layout_marginEnd="@dimen/half_date_offset"
     app:cardElevation="2dp"
     android:foreground="@drawable/card_foreground"
     android:background="@color/md_grey_50"
@@ -22,7 +24,7 @@
             android:id="@+id/swipe_layout_title_wrapper"
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
 
             android:layout_weight="1"
             >
@@ -31,7 +33,7 @@
                 android:id="@+id/swipe_layout_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="16dp"
+                android:paddingTop="24dp"
                 android:paddingBottom="8sp"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
@@ -166,7 +168,7 @@
                 android:textStyle="normal"
                 android:textSize="16sp"
 
-                android:layout_alignParentStart="true"/>
+                />
 
             <TextView
                 android:id="@+id/swipe_layout_from"
@@ -183,8 +185,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:layout_above="@+id/swipe_layout_date"
-                android:layout_alignParentStart="true"
 
                 android:textSize="16sp"
                 android:fontFamily="sans-serif-light"

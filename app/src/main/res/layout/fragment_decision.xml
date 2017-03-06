@@ -66,7 +66,7 @@
                         android:text="@string/fragment_decision_familiarize"
                         android:textOff="@string/fragment_decision_familiarize"
                         android:textOn="@string/fragment_decision_familiarize"
-                        android:id="@+id/fragment_decision_button_familiarization">
+                        android:id="@+id/fragment_decision_button_ask_to_acquaint">
                     </ToggleButton>
                     <Space
                         android:layout_width="16dp"
@@ -81,7 +81,7 @@
                         android:text="@string/fragment_decision_report"
                         android:textOff="@string/fragment_decision_report"
                         android:textOn="@string/fragment_decision_report"
-                        android:id="@+id/fragment_decision_button_report">
+                        android:id="@+id/fragment_decision_button_ask_to_report">
                     </ToggleButton>
 
                 </LinearLayout>

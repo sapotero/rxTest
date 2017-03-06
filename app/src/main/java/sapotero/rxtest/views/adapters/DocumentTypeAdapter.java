@@ -1,4 +1,4 @@
-package sapotero.rxtest.views.adapters.utils;
+package sapotero.rxtest.views.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;

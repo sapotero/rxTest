@@ -103,6 +103,13 @@
                                 android:background="@color/md_white_1000"
                                 android:padding="8dp"
                                 android:layout_width="wrap_content"
+
+                                android:text=""
+                                android:textSize="16sp"
+                                android:fontFamily="sans-serif-light"
+                                android:textStyle="normal"
+                                android:textColor="@color/md_grey_700"
+
                                 />
                             <!--android:background="@drawable/spinner_journal_background"-->
 
@@ -202,8 +209,11 @@
                 android:scrollbars="vertical"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:padding="@dimen/date_offset"
                     android:layout_weight="8"
+                    android:paddingStart="@dimen/date_offset"
+                    android:paddingEnd="@dimen/date_offset"
+                    android:paddingTop="0dp"
+                    android:paddingBottom="0dp"
                     />
 
                 <sapotero.rxtest.views.custom.CircleRightArrow

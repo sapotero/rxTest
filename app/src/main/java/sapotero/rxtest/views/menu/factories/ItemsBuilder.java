@@ -22,7 +22,7 @@ import javax.inject.Inject;
 
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.views.adapters.models.DocumentTypeItem;
-import sapotero.rxtest.views.adapters.utils.DocumentTypeAdapter;
+import sapotero.rxtest.views.adapters.DocumentTypeAdapter;
 import sapotero.rxtest.views.menu.builders.ButtonBuilder;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import sapotero.rxtest.views.menu.fields.MainMenuButton;

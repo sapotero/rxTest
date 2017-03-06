@@ -12,7 +12,7 @@ import android.widget.Spinner;
 import java.util.ArrayList;
 
 import sapotero.rxtest.R;
-import sapotero.rxtest.views.adapters.utils.DocumentTypeAdapter;
+import sapotero.rxtest.views.adapters.DocumentTypeAdapter;
 import sapotero.rxtest.views.custom.OrganizationSpinner;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import sapotero.rxtest.views.menu.factories.ItemsBuilder;

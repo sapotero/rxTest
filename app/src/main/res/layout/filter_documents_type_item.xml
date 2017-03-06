@@ -14,8 +14,10 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:text=""
-        android:textSize="20sp"
-        android:textColor="@color/md_grey_700"
+        android:textSize="24sp"
+        android:fontFamily="sans-serif-light"
+        android:textStyle="normal"
+        android:textColor="@color/md_grey_900"
         />
     <!--android:layout_margin="@dimen/half_date_offset"-->
 

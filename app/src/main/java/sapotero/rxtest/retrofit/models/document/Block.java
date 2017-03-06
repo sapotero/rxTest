@@ -35,6 +35,15 @@ public class Block implements Serializable{
     @Expose
     private List<Performer> performers = new ArrayList<Performer>();
 
+
+    @SerializedName("ask_to_report")
+    @Expose
+    private Boolean askToReport  = false ;
+
+    @SerializedName("ask_to_acquaint")
+    @Expose
+    private Boolean askToAcquaint = false;
+
     @SerializedName("indentation")
     @Expose
     private String indentation = "1";
@@ -42,6 +51,22 @@ public class Block implements Serializable{
     @SerializedName("font_size")
     @Expose
     private String fontSize = "10";
+
+    public Boolean getAskToReport() {
+        return askToReport;
+    }
+
+    public void setAskToReport(Boolean askToReport) {
+        this.askToReport = askToReport;
+    }
+
+    public Boolean getAskToAcquaint() {
+        return askToAcquaint;
+    }
+
+    public void setAskToAcquaint(Boolean askToAcquaint) {
+        this.askToAcquaint = askToAcquaint;
+    }
 
     public String getFontSize() {
         return fontSize;

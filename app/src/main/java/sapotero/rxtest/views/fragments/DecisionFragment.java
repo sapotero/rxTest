@@ -64,8 +64,8 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   @BindView(R.id.fragment_decision_record) ImageView speakButton;
 
 
-  @BindView(R.id.fragment_decision_button_familiarization) ToggleButton button_familiarization;
-  @BindView(R.id.fragment_decision_button_report) ToggleButton button_report;
+  @BindView(R.id.fragment_decision_button_ask_to_acquaint) ToggleButton button_ask_to_acquaint;
+  @BindView(R.id.fragment_decision_button_ask_to_report) ToggleButton button_ask_to_report;
 
   @BindView(R.id.fragment_decision_linear_people) LinearLayout people_view;
 
@@ -104,6 +104,9 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   private SpeechRecognizer speechRecognizer;
   private boolean mSpeechRecognized = false;
   private int mSelection = -1;
+
+  private boolean forReport   = false;
+  private boolean forAcquaint = false;
 
   public void setBlockFactory(BlockFactory blockFactory) {
     this.blockFactory = blockFactory;
@@ -211,18 +214,36 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
         return false;
       });
 
-    Boolean familirization = false;
-    if (block.getToFamiliarization() != null) {
-      familirization = block.getToFamiliarization();
+//    Boolean familirization = false;
+//    if (block.getToFamiliarization() != null) {
+//      familirization = block.getToFamiliarization();
+//    }
+//
+//    Boolean copy = false;
+//    if (block.getToCopy() != null) {
+//      copy = block.getToCopy();
+//    }
+
+
+    if (block.getAppealText() != null) {
+      forReport   = block.getAppealText().contains("дол");
+      forAcquaint = block.getAppealText().contains("озн");
     }
 
-    button_familiarization.setChecked( familirization );
-    button_familiarization.setOnCheckedChangeListener(
+    Timber.tag(TAG).v( " appeal text: %s | %s %s", block.getAppealText(),forReport, forAcquaint );
+
+    button_ask_to_acquaint.setChecked( forAcquaint );
+    button_ask_to_acquaint.setOnCheckedChangeListener(
       (buttonView, isChecked) -> {
-        Timber.tag(TAG).v( "button_familiarization ++" );
+        Timber.tag(TAG).v( "button_ask_to_acquaint ++" );
         if (isChecked){
-          button_report.setChecked(false);
-          button_familiarization.setChecked(true);
+          button_ask_to_report.setChecked(false);
+          button_ask_to_acquaint.setChecked(true);
+          block.setAskToReport(false);
+          block.setAskToAcquaint(true);
+
+          forReport   = false;
+          forAcquaint = true;
         }
         if (callback != null) {
           callback.onUpdateSuccess();
@@ -230,18 +251,19 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
       }
     );
 
-    Boolean copy = false;
-    if (block.getToCopy() != null) {
-      copy = block.getToCopy();
-    }
 
-    button_report.setChecked( copy );
-    button_report.setOnCheckedChangeListener(
+    button_ask_to_report.setChecked( forReport );
+    button_ask_to_report.setOnCheckedChangeListener(
       (buttonView, isChecked) -> {
-        Timber.tag(TAG).v( "button_report ++" );
+        Timber.tag(TAG).v( "button_ask_to_report ++" );
         if (isChecked){
-          button_familiarization.setChecked(false);
-          button_report.setChecked(true);
+          button_ask_to_acquaint.setChecked(false);
+          button_ask_to_report.setChecked(true);
+          block.setAskToReport(true);
+          block.setAskToAcquaint(false);
+
+          forReport   = true;
+          forAcquaint = false;
         }
         if (callback != null) {
           callback.onUpdateSuccess();
@@ -267,8 +289,8 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     // настройка
     // Не отображать кнопки «Прошу доложить» и «Прошу ознакомить»
     if (settings.getBoolean("settings_view_hide_buttons").get()){
-      button_familiarization.setVisibility(View.GONE);
-      button_report.setVisibility(View.GONE);
+      button_ask_to_acquaint.setVisibility(View.GONE);
+      button_ask_to_report.setVisibility(View.GONE);
       buttons.setVisibility(View.GONE);
     }
 
@@ -316,16 +338,16 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     }
   }
   public interface OnFragmentInteractionListener {
-
     void onFragmentInteraction(Uri uri);
   }
+
   public Block getBlock(){
 
     String appealText = "";
-    if (button_report.isChecked()) {
-      appealText = button_report.getTextOn().toString();
-    } else if (button_familiarization.isChecked()) {
-      appealText = button_familiarization.getTextOn().toString();
+    if (button_ask_to_report.isChecked()) {
+      appealText = button_ask_to_report.getTextOn().toString();
+    } else if (button_ask_to_acquaint.isChecked()) {
+      appealText = button_ask_to_acquaint.getTextOn().toString();
     }
 
     Block block = new Block();
@@ -336,6 +358,8 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     block.setHidePerformers( hide_performers.isChecked() );
     block.setToCopy(false);
     block.setToFamiliarization(false);
+    block.setAskToAcquaint(forAcquaint);
+    block.setAskToReport(forReport);
 
     if ( adapter.getCount() > 0 ){
       ArrayList<Performer> performers = new ArrayList<>();

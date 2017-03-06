@@ -1,6 +1,7 @@
 package sapotero.rxtest.views.menu.builders;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.graphics.drawable.StateListDrawable;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
@@ -213,10 +214,6 @@ public class ButtonBuilder {
     view.setText( String.format( label, query.get().value() ) );
   }
 
-//  public String getLabel() {
-//    return String.format( label, getCount() );
-//  }
-
   @RequiresApi(api = Build.VERSION_CODES.M)
   public RadioButton getView(Context context){
 
@@ -227,7 +224,9 @@ public class ButtonBuilder {
     view.setPadding( 32,4,32,4 );
 
     view.setGravity(Gravity.CENTER);
-    view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 12 );
+    view.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16 );
+    view.setTypeface( Typeface.create("sans-serif-light", Typeface.NORMAL) );
+    view.setTextColor( context.getResources().getColor(R.color.md_grey_600) );
 
 
     RadioGroup.LayoutParams params = new RadioGroup.LayoutParams( LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT,10.0f );
@@ -235,13 +234,15 @@ public class ButtonBuilder {
     view.setButtonDrawable(new StateListDrawable());
     view.setTextColor( ContextCompat.getColorStateList( context, R.color.text_selector ) );
     view.setLayoutParams( params );
+    view.setClickable(true);
     view.setButtonDrawable( ContextCompat.getDrawable(context, R.drawable.toggle_selector_button) );
-    view.setTextColor( context.getResources().getColor(R.color.md_grey_600) );
 
-    view.setForeground( context.getDrawable(R.drawable.card_foreground) );
     view.setBackground( ContextCompat.getDrawable(context, R.drawable.toggle_selector_button) );
+    view.setForeground( context.getDrawable(R.drawable.card_foreground) );
 
     view.setText( String.format( label, 0) );
+
+
 
     // настройка показывать первичное рассмотрение
     if ( settings.getBoolean("settings_view_hide_primary_consideration").get() ){
@@ -303,4 +304,5 @@ public class ButtonBuilder {
     }
 //    subscription = new CompositeSubscription();
   }
+
 }

@@ -260,18 +260,24 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
         Timber.tag("block").v( block.getText() );
         Timber.tag("block").v(String.valueOf(block.getNumber()));
         Timber.tag("block").v(String.valueOf(block.getHidePerformers()));
-        setAppealText( block );
 
+        Boolean isOnlyOneBlock = false;
+
+        if (blocks.size() == 1){
+          isOnlyOneBlock = true;
+        }
+
+        setAppealText( block, isOnlyOneBlock );
 
         if ( block.getTextBefore() != null && block.getTextBefore() ){
           setBlockText( block.getText() );
 
           if (!block.getHidePerformers()){
-            setBlockPerformers( block );
+            setBlockPerformers( block, isOnlyOneBlock );
           }
         } else {
           if (!block.getHidePerformers()) {
-            setBlockPerformers( block );
+            setBlockPerformers( block, isOnlyOneBlock );
           }
           setBlockText( block.getText() );
         }
@@ -279,7 +285,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
     }
   }
 
-  private void setBlockPerformers(Block block) {
+  private void setBlockPerformers(Block block, Boolean isOnlyOneBlock) {
 
     boolean numberPrinted = false;
 
@@ -292,7 +298,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
 
         String performerName = "";
 
-        if ( block.getAppealText() == null && !numberPrinted ){
+        if ( block.getAppealText() == null && !numberPrinted && !isOnlyOneBlock  ){
           performerName += block.getNumber().toString() + ". ";
           numberPrinted = true;
         }
@@ -310,6 +316,8 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
         TextView performer_view = new TextView( getActivity() );
         performer_view.setText( performerName );
         performer_view.setTextColor( Color.BLACK );
+        performer_view.setPaintFlags( Paint.ANTI_ALIAS_FLAG );
+        performer_view.setGravity(Gravity.CENTER);
         performer_view.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
         users_view.addView(performer_view);
       }
@@ -333,30 +341,24 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
     decision_preview_body.addView( block_view );
   }
 
-  private void setAppealText(Block block) {
-
+  private void setAppealText(Block block, Boolean isOnlyOneBlock) {
 
     String text = "";
 
     if (block.getAppealText() != null && !Objects.equals(block.getAppealText(), "")) {
 
-      if ( block.getToFamiliarization() != null && block.getToFamiliarization() ){
-        block.setToFamiliarization(false);
-      }
-
-      if ( decision.getShowPosition() != null && decision.getShowPosition() ){
+      if (!isOnlyOneBlock ){
         text += block.getNumber().toString() + ". ";
       }
 
       text += block.getAppealText();
     }
 
-    TextView blockAppealView = new TextView( getActivity() );
+    TextView blockAppealView = new TextView( getContext() );
     blockAppealView.setGravity(Gravity.CENTER);
     blockAppealView.setText( text );
     blockAppealView.setTextColor( Color.BLACK );
     blockAppealView.setTextSize( TypedValue.COMPLEX_UNIT_SP, 12 );
-    blockAppealView.setTypeface( Typeface.create("sans-serif", Typeface.NORMAL) );
 
     decision_preview_body.addView( blockAppealView );
   }
