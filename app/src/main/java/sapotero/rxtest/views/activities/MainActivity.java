@@ -1,8 +1,11 @@
 package sapotero.rxtest.views.activities;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -105,8 +108,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
 
   @BindView(R.id.DOCUMENT_TYPE) Spinner DOCUMENT_TYPE_SELECTOR;
-  @BindView(R.id.ORGANIZATION)
-  OrganizationSpinner ORGANIZATION_SELECTOR;
+  @BindView(R.id.ORGANIZATION) OrganizationSpinner ORGANIZATION_SELECTOR;
 
   @BindView(R.id.activity_main_right_button) CircleRightArrow rightArrow;
 
@@ -152,7 +154,10 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private final int SETTINGS_DECISION_TEMPLATES = 21;
 
   private final int SETTINGS_REJECTION_TEMPLATES = 22;
+
+  @SuppressLint("StaticFieldLeak")
   public static DocumentsAdapter RAdapter;
+
   public  MenuBuilder menuBuilder;
   private DBQueryBuilder dbQueryBuilder;
   private DataLoaderManager dataLoader;
@@ -670,13 +675,14 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   public void onMessageEvent(UpdateCountEvent event) {
     Timber.tag(TAG).v("UpdateCountEvent");
     menuBuilder.getItem().recalcuate();
-    menuBuilder.getItem().getMainMenuButtons();
   }
 
+  @RequiresApi(api = Build.VERSION_CODES.M)
   @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
   public void onMessageEvent(RemoveDocumentFromAdapterEvent event) {
     Timber.tag(TAG).v("RemoveDocumentFromAdapterEvent %s", event.uid );
     RAdapter.hideItem(event.uid);
+    menuBuilder.update();
   }
 
 

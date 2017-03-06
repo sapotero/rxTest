@@ -12,10 +12,11 @@ import android.widget.Spinner;
 import java.util.ArrayList;
 
 import sapotero.rxtest.R;
+import sapotero.rxtest.views.adapters.utils.DocumentTypeAdapter;
+import sapotero.rxtest.views.custom.OrganizationSpinner;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import sapotero.rxtest.views.menu.factories.ItemsBuilder;
 import sapotero.rxtest.views.menu.fields.MainMenuItem;
-import sapotero.rxtest.views.custom.OrganizationSpinner;
 import timber.log.Timber;
 
 public class MenuBuilder implements ItemsBuilder.Callback{
@@ -129,7 +130,11 @@ public class MenuBuilder implements ItemsBuilder.Callback{
   @RequiresApi(api = Build.VERSION_CODES.M)
   public void update() {
     organizationsSelector.clear();
-    itemsBuilder.update();
+
+    //test update adapter
+    int index = journalSpinner.getSelectedItemPosition();
+    DocumentTypeAdapter tmp_adapter = (DocumentTypeAdapter) journalSpinner.getAdapter();
+
   }
 
   public void showPrev() {

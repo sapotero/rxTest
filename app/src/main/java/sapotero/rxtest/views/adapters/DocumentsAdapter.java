@@ -88,6 +88,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     Timber.tag(TAG).v("total documents: %s", documents.size());
 
     int index = -1;
+
     for (int i = 0; i <documents.size() ; i++) {
       RDocumentEntity doc = documents.get(i);
       Timber.tag(TAG).v("test: %s | %s", doc.getUid(), uid);
@@ -102,20 +103,21 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     if ( Holder.MAP.containsKey( uid ) ){
       Holder.MAP.remove( uid );
       Timber.tag(TAG).v("has item");
-//      if (index != -1){
-//        Timber.tag(TAG).v("removed");
-//
-//        RDocumentEntity document = Holder.MAP.get(uid);
-//        documents.remove(document);
-//        real_docs.addByOne(document);
-//        notifyItemRemoved(index);
-//      }
-      if ( documents.get(index).isProcessed() ){
+
+      if (index != -1){
+        Timber.tag(TAG).v("removed");
+
         documents.remove(index);
-        notifyItemRemoved(index);
-      } else {
         notifyDataSetChanged();
       }
+
+//      if ( documents.get(index).isProcessed() ){
+//        documents.remove(index);
+//        notifyItemRemoved(index);
+//      } else {
+//        notifyDataSetChanged();
+//      }
+
     }
 
     Timber.tag(TAG).v("total documents: %s", documents.size());
@@ -265,7 +267,12 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       viewHolder.favorite_label.setVisibility(View.GONE);
     }
 
-    if ( item.isFromFavoritesFolder() != null && item.isFromFavoritesFolder() ){
+
+    // если обработаное - то ничего нельзя делать
+    if (
+      item.isFromFavoritesFolder() != null && item.isFromFavoritesFolder() ||
+      item.isFromProcessedFolder() != null && item.isFromProcessedFolder()
+      ){
       viewHolder.lock_label.setVisibility(View.VISIBLE);
     } else {
       viewHolder.lock_label.setVisibility(View.GONE);

@@ -684,6 +684,11 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
 
       if( decision.getBlocks().size() > 0 ){
 
+        Boolean isOnlyOneBlock = false;
+
+        if (decision.getBlocks().size() == 1){
+          isOnlyOneBlock = true;
+        }
 
         Set<RBlock> _blocks = decision.getBlocks();
 
@@ -705,11 +710,11 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
           if ( block.isTextBefore() ){
             printBlockText( block.getText() );
             if ( block.isHidePerformers() != null && !block.isHidePerformers())
-              printBlockPerformers( block );
+              printBlockPerformers( block, isOnlyOneBlock );
 
           } else {
             if ( block.isHidePerformers() != null && !block.isHidePerformers())
-              printBlockPerformers( block );
+              printBlockPerformers( block, isOnlyOneBlock );
             printBlockText( block.getText() );
           }
 
@@ -873,7 +878,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
       preview_body.addView( blockAppealView );
     }
 
-    private void printBlockPerformers(RBlock _block ) {
+    private void printBlockPerformers(RBlock _block, Boolean isOnlyOneBlock) {
 
       RBlockEntity block = (RBlockEntity) _block;
 
@@ -888,7 +893,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
           RPerformerEntity user = (RPerformerEntity) _user;
           String performerName = "";
 
-          if ( block.getAppealText() == null && !numberPrinted ){
+          if ( block.getAppealText() == null && !numberPrinted && !isOnlyOneBlock ){
             performerName += block.getNumber().toString() + ". ";
             numberPrinted = true;
           }

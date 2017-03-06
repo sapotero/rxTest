@@ -57,6 +57,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.auth.AuthDcCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthDcCheckSuccessEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
@@ -66,6 +67,7 @@ import sapotero.rxtest.events.crypto.SignDataEvent;
 import sapotero.rxtest.events.crypto.SignDataResultEvent;
 import sapotero.rxtest.events.crypto.SignDataWrongPinEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
+import sapotero.rxtest.events.document.UpdateUnprocessedDocumentsEvent;
 import sapotero.rxtest.events.service.AuthServiceAuthEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckFailEvent;
@@ -711,6 +713,29 @@ public class MainService extends Service {
   public void onMessageEvent(SignDataEvent event) throws Exception {
     getSign( event.data );
   }
+
+  @Subscribe(threadMode = ThreadMode.BACKGROUND)
+  public void onMessageEvent(UpdateUnprocessedDocumentsEvent event) throws Exception {
+
+    dataStore
+      .select(RDocumentEntity.UID)
+      .where( RDocumentEntity.CHANGED.eq(true) )
+      .get()
+      .toObservable()
+      .subscribeOn(Schedulers.io())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(
+        doc -> {
+          String uid = doc.get(0).toString();
+          Timber.tag("Service[unproc]").e("unprocessed - %s", uid );
+        dataLoaderInterface.updateDocument( uid );
+        }, error -> {
+          Timber.tag("Service[unproc]").e("error %s", error);
+        }
+      );
+  }
+
+
 
 
   @Subscribe(threadMode = ThreadMode.MAIN)

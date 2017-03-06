@@ -112,4 +112,7 @@ public class DocumentTypeItem {
     return mainMenuItem;
   }
 
+  public void invalidate() {
+    getName();
+  }
 }

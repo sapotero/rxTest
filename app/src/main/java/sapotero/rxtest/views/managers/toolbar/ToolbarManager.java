@@ -447,9 +447,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
       toolbar.getMenu().clear();
       toolbar.inflateMenu(R.menu.info_menu);
       EventBus.getDefault().post( new ShowSnackEvent("Операция передачи успешно завершена") );
-      if ( !doc.isProcessed() ){
-        EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
-      }
+      EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
 
     }
 
@@ -457,9 +455,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
       toolbar.getMenu().clear();
       toolbar.inflateMenu(R.menu.info_menu);
       EventBus.getDefault().post( new ShowSnackEvent("Операция подписания успешно завершена") );
-      if ( !doc.isProcessed() ){
-        EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
-      }
+      EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
       EventBus.getDefault().post( new ShowNextDocumentEvent() );
     }
 
@@ -467,9 +463,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
       toolbar.getMenu().clear();
       toolbar.inflateMenu(R.menu.info_menu);
       EventBus.getDefault().post( new ShowSnackEvent("Операция отклонения успешно завершена") );
-      if ( !doc.isProcessed() ){
-        EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
-      }
+      EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
       EventBus.getDefault().post( new ShowNextDocumentEvent() );
     }
 
@@ -477,10 +471,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
       toolbar.getMenu().clear();
       toolbar.inflateMenu(R.menu.info_menu);
       EventBus.getDefault().post( new ShowSnackEvent("Операция передачи первичного рассмотрения успешно завершена") );
-      if ( !doc.isProcessed() ){
-        EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
-      }
       EventBus.getDefault().post( new ShowNextDocumentEvent() );
+      EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
     }
 
 
@@ -491,6 +483,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
         toolbar.inflateMenu(R.menu.info_menu);
       } else {
         invalidate();
+        EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
       }
 //      EventBus.getDefault().post( new ShowSnackEvent("Резолюция утверждена") );
       EventBus.getDefault().post( new ApproveDecisionEvent() );
@@ -513,8 +506,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
       toolbar.getMenu().clear();
       toolbar.inflateMenu(R.menu.info_menu);
       EventBus.getDefault().post( new ShowSnackEvent("Операция исполнения без ответа успешно завершена") );
-      EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
       EventBus.getDefault().post( new ShowNextDocumentEvent() );
+      EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
     }
 
     // допилить удаление документов после операций

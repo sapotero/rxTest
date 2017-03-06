@@ -20,6 +20,8 @@ public class DocumentTypeAdapter extends BaseAdapter {
   private LayoutInflater inflter;
 
   private int mPos;
+  private View view;
+  private TextView text;
 
   public DocumentTypeAdapter(Context context, List<DocumentTypeItem> organizations) {
 
@@ -46,7 +48,7 @@ public class DocumentTypeAdapter extends BaseAdapter {
   @Override
   public View getView(int position, View convertView, ViewGroup parent) {
 
-    View view = convertView;
+    view = convertView;
     if (view == null) {
       view = inflter.inflate(R.layout.filter_documents_type_item, parent, false);
     }
@@ -56,8 +58,8 @@ public class DocumentTypeAdapter extends BaseAdapter {
     DocumentTypeItem item = getItem(position);
 
 
-
-    ( (TextView) view.findViewById(R.id.document_type_name)  ).setText( item.getName()  );
+    text = ( (TextView) view.findViewById(R.id.document_type_name)  );
+    text.setText( item.getName()  );
 //    ( (TextView) view.findViewById(R.id.document_type_count) ).setText( item.getValue() );
 
     return view;
@@ -127,5 +129,16 @@ public class DocumentTypeAdapter extends BaseAdapter {
     } else {
       return position;
     }
+  }
+
+  public void invalidate() {
+    clear();
+    addAll(documents);
+    notifyDataSetChanged();
+  }
+
+  private void addAll(List<DocumentTypeItem> documents) {
+    this.documents.clear();
+    this.documents = documents;
   }
 }

@@ -113,11 +113,11 @@ public enum MainMenuItem {
   },true,
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.ORDERS_DDO.getValue()+ "%"  ) ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_LINKS.eq( false ) )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_LINKS.ne( true ) ),
     },
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.ORDERS_DDO.getValue()+ "%"  ) ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_LINKS.eq( false ) )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_LINKS.ne( true ) ),
     },
     false, false),
 
@@ -152,11 +152,11 @@ public enum MainMenuItem {
     true,
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_PROCESSED_FOLDER.eq( true ) ),
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.ne( Fields.Status.LINK.getValue() ) ),
+      new ConditionBuilder( ConditionBuilder.Condition.OR, RDocumentEntity.PROCESSED.eq(true) ),
     },
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_PROCESSED_FOLDER.eq( true ) ),
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.ne( Fields.Status.LINK.getValue() ) ),
+      new ConditionBuilder( ConditionBuilder.Condition.OR, RDocumentEntity.PROCESSED.eq(true) ),
     },
     true, true),
   FAVORITES ( 10, "Избранное %s", new MainMenuButton[]{},
@@ -280,6 +280,8 @@ public enum MainMenuItem {
     for (ButtonBuilder button: buttonsList){
       button.recalculate();
     }
+
+
   }
 
   @Override

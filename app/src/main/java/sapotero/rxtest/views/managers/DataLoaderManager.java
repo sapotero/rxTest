@@ -41,6 +41,7 @@ import sapotero.rxtest.events.auth.AuthDcCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthDcCheckSuccessEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckSuccessEvent;
+import sapotero.rxtest.events.document.UpdateUnprocessedDocumentsEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckEvent;
 import sapotero.rxtest.jobs.bus.AddAssistantJob;
 import sapotero.rxtest.jobs.bus.AddFavoriteUsersJob;
@@ -388,6 +389,7 @@ public class DataLoaderManager {
                     MainMenuButton button = MainMenuButton.getByIndex(builder.getIndex());
 
                     if (button != null) {
+
                       getButtonType(new_filter_types, button);
                     }
                   }
@@ -400,6 +402,8 @@ public class DataLoaderManager {
 
             }
           }
+
+          Timber.tag(TAG).d("new_filter_types: %s", new_filter_types );
 
           Observable<Fields.Status> types = Observable.from(new_filter_types);
           Observable<Documents> count = Observable
@@ -428,12 +432,17 @@ public class DataLoaderManager {
         .subscribe(
           data -> {
             Timber.tag(TAG).w("subscribe %s", data);
+            updateUnprocessed();
           }, error -> {
             //          callback.onError(error);
           }
         )
     );
 
+  }
+
+  private void updateUnprocessed() {
+    EventBus.getDefault().post( new UpdateUnprocessedDocumentsEvent() );
   }
 
   private void getButtonType(ArrayList<Fields.Status> new_filter_types, MainMenuButton button) {
@@ -451,6 +460,10 @@ public class DataLoaderManager {
         new_filter_types.add( Fields.Status.SENT_TO_THE_REPORT );
         break;
       default:
+        new_filter_types.add( Fields.Status.SENT_TO_THE_REPORT );
+        new_filter_types.add( Fields.Status.SIGNING );
+        new_filter_types.add( Fields.Status.PRIMARY_CONSIDERATION );
+        new_filter_types.add( Fields.Status.APPROVAL );
         break;
     }
   }
@@ -594,7 +607,7 @@ public class DataLoaderManager {
           token -> {
             Timber.tag(TAG).i("updateAuth: token" + token.getAuthToken());
             setToken(token.getAuthToken());
-            updateDocuments(items);
+            updateDocuments( MainMenuItem.ALL );
           },
           error -> {
             Timber.tag("getAuth").e( "ERROR: %s", error);
