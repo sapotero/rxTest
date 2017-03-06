@@ -426,8 +426,13 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     }
 
 
+
+
     if ( status == Fields.Status.SENT_TO_THE_REPORT ){
-      select_oshs_wrapper.setVisibility(View.GONE);
+      // настройка
+      if ( !settings.getBoolean("settings_view_show_change_signer").get() ){
+        select_oshs_wrapper.setVisibility(View.GONE);
+      }
     }
 
     decision_comment.addTextChangedListener(new TextWatcher() {
@@ -446,6 +451,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
       }
     });
+
+
 
   }
 
@@ -638,10 +645,15 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   @Override
   public void onSearchSuccess(Oshs user, CommandFactory.Operation operation) {
     Timber.tag(TAG).e("USER: %s", new Gson().toJson(user) );
+    String name = user.getName();
+
+    if (!name.endsWith(")")){
+      name = String.format(" %s (%s)", user.getName(), user.getOrganization() );
+    }
 
     if (rDecisionEntity != null) {
       rDecisionEntity.setSignerId( user.getId() );
-      rDecisionEntity.setSigner( user.getName() );
+      rDecisionEntity.setSigner( name );
 
       if ( user.getAssistantId() != null ){
         rDecisionEntity.setAssistantId( user.getAssistantId() );
@@ -653,9 +665,9 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     }
 
     manager.setSignerId(user.getId());
-    manager.setSigner(user.getName());
+    manager.setSigner(name);
 
-    signer_oshs_selector.setText( user.getName() );
+    signer_oshs_selector.setText( name );
 
 //    manager.setDecision( DecisionConverter.formatDecision(rDecisionEntity) );
     manager.update();

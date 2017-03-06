@@ -210,10 +210,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="8"
-                    android:paddingStart="@dimen/date_offset"
-                    android:paddingEnd="@dimen/date_offset"
-                    android:paddingTop="0dp"
-                    android:paddingBottom="0dp"
                     />
 
                 <sapotero.rxtest.views.custom.CircleRightArrow

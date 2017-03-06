@@ -72,6 +72,7 @@ import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
 import sapotero.rxtest.views.adapters.SearchResultAdapter;
+import sapotero.rxtest.views.adapters.decorators.GridSpacingItemDecoration;
 import sapotero.rxtest.views.custom.CircleLeftArrow;
 import sapotero.rxtest.views.custom.CircleRightArrow;
 import sapotero.rxtest.views.custom.OrganizationSpinner;
@@ -316,11 +317,17 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void initAdapters() {
+    int columnCount = 2;
+    int spacing = 32;
+
+    GridLayoutManager gridLayoutManager = new GridLayoutManager(this, columnCount, GridLayoutManager.VERTICAL, false);
 
     RAdapter = new DocumentsAdapter(this, new ArrayList<>());
-    rv.setAdapter(RAdapter);
-    GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2, GridLayoutManager.VERTICAL, false);
+
+    rv.addItemDecoration(new GridSpacingItemDecoration(columnCount, spacing, true));
     rv.setLayoutManager(gridLayoutManager);
+    rv.setAdapter(RAdapter);
+
 
     organization_adapter = new OrganizationAdapter(this, new ArrayList<>());
     ORGANIZATION_SELECTOR.setAdapter(organization_adapter, true, selected -> {
