@@ -120,6 +120,10 @@ public class ButtonBuilder {
       .and(RDocumentEntity.FROM_LINKS.eq(false));
 //      .and(RDocumentEntity.FILTER.ne(Fields.Status.LINK.getValue()));
 
+    if (index == 0){
+      query = query.or(RDocumentEntity.FROM_PROCESSED_FOLDER.eq(true));
+    }
+
     if ( item_conditions.length > 0 ){
 
       for (ConditionBuilder condition : item_conditions ){

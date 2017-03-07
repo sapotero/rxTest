@@ -99,7 +99,7 @@ public class DBQueryBuilder {
       WhereAndOr<Result<RDocumentEntity>> query =
         dataStore
           .select(RDocumentEntity.class)
-          .where(RDocumentEntity.USER.eq( settings.getString("login").get() ));
+          .where(RDocumentEntity.USER.eq( settings.getString("login").get() ) );
 
       WhereAndOr<Scalar<Integer>> queryCount =
         dataStore

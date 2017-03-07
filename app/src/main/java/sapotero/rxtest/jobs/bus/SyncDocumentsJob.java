@@ -190,6 +190,8 @@ public class SyncDocumentsJob  extends BaseJob {
 
 
     RDocumentEntity rd = new RDocumentEntity();
+    rd.setFromProcessedFolder( false );
+    rd.setFromFavoritesFolder( false );
     rd.setUid( d.getUid() );
     rd.setFromLinks( false );
     rd.setUser( LOGIN.get() );
@@ -297,6 +299,9 @@ public class SyncDocumentsJob  extends BaseJob {
       rDoc.setUser( LOGIN.get() );
       rDoc.setFromLinks( false );
       rDoc.setChanged( false );
+
+      rDoc.setFromProcessedFolder( false );
+      rDoc.setFromFavoritesFolder( false );
 
       if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
 
@@ -493,6 +498,8 @@ public class SyncDocumentsJob  extends BaseJob {
       doc.setControl(onControl);
       doc.setUser( LOGIN.get() );
       doc.setFromLinks( false );
+      doc.setFromProcessedFolder( false );
+      doc.setFromFavoritesFolder( false );
       doc.setChanged( false );
 
       if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){

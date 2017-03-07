@@ -277,7 +277,11 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
                       dataStore
                         .select(RDocumentEntity.class)
                         .where( RDocumentEntity.USER.eq( settings.getString("login").get() ) )
-                        .and(RDocumentEntity.REGISTRATION_NUMBER.like("%" + newText + "%")).get().toList()
+                        .and(RDocumentEntity.REGISTRATION_NUMBER.like("%" + newText + "%"))
+                        .and(RDocumentEntity.FROM_PROCESSED_FOLDER.eq(false) )
+                        .get().toList()
+
+
                     );
                     // .and(RDocumentEntity.REGISTRATION_NUMBER.like("%" + newText + "%"));
                     break;
@@ -286,7 +290,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
                       dataStore
                         .select(RDocumentEntity.class)
                         .where( RDocumentEntity.USER.eq( settings.getString("login").get() ) )
-                        .and(RDocumentEntity.SHORT_DESCRIPTION.like("%" + newText + "%")).get().toList()
+                        .and(RDocumentEntity.SHORT_DESCRIPTION.like("%" + newText + "%"))
+                        .and(RDocumentEntity.FROM_PROCESSED_FOLDER.eq(false) )
+                        .get().toList()
                     );
                     // query = query.and(RDocumentEntity.SHORT_DESCRIPTION.like("%" + newText + "%"));
                     break;
