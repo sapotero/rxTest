@@ -848,7 +848,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
 
     private void printBlockText(String text) {
       TextView block_view = new TextView(context);
-      block_view.setText( text );
+      block_view.setText( "\u00A0     " + text );
       block_view.setTextColor( Color.BLACK );
       block_view.setTypeface( Typeface.create("sans-serif-light", Typeface.NORMAL) );
 

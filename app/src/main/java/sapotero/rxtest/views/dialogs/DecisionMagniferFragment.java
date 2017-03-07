@@ -18,7 +18,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -35,6 +34,7 @@ import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RPerformer;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
+import sapotero.rxtest.db.requery.utils.DecisionConverter;
 import sapotero.rxtest.views.adapters.models.DecisionSpinnerItem;
 import timber.log.Timber;
 
@@ -118,6 +118,7 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
     this.regNumber = regNumber;
   }
 
+
   public class Preview{
 
     private final Context context;
@@ -150,6 +151,11 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
 
       if( decision.getBlocks().size() > 0 ){
 
+        Boolean isOnlyOneBlock = false;
+
+        if (decision.getBlocks().size() == 1){
+          isOnlyOneBlock = true;
+        }
 
         Set<RBlock> _blocks = decision.getBlocks();
 
@@ -166,66 +172,64 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
 
           Timber.tag("showPosition").v( "ShowPosition: %s", block.getAppealText() );
 
-          printAppealText( block );
+          printAppealText( block, isOnlyOneBlock );
 
           if ( block.isTextBefore() ){
             printBlockText( block.getText() );
             if ( block.isHidePerformers() != null && !block.isHidePerformers())
-              printBlockPerformers( block );
+              printBlockPerformers( block, isOnlyOneBlock );
 
           } else {
             if ( block.isHidePerformers() != null && !block.isHidePerformers())
-              printBlockPerformers( block );
+              printBlockPerformers( block, isOnlyOneBlock );
             printBlockText( block.getText() );
           }
 
         }
       }
 
-      printSigner( decision.isShowPosition(), decision.getSignerBlankText(), decision.getSignerPositionS(), decision.getDate(), regNumber, decision.getSignBase64()  );
+      printSigner( decision, regNumber );
     }
 
-    private void showEmpty(){
-      Timber.tag(TAG).d( "showEmpty" );
 
-      clear();
-      printLetterHead( getString(R.string.decision_blank) );
-    }
 
-    private void printSigner(Boolean showPosition, String signerBlankText, String signerPositionS, String date, String registrationNumber, String base64) {
+    private void printSigner(RDecisionEntity decision, String registrationNumber) {
+
+//      Timber.tag(TAG).i("DECISION\n%s", new Gson().toJson(decision));
 
       LinearLayout relativeSigner = new LinearLayout(context);
       relativeSigner.setOrientation(LinearLayout.VERTICAL);
       relativeSigner.setVerticalGravity( Gravity.BOTTOM );
       relativeSigner.setPadding(0,0,0,0);
-//      relativeSigner.setMinimumHeight(350);
       LinearLayout.LayoutParams relativeSigner_params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
       relativeSigner_params.height = LinearLayout.LayoutParams.WRAP_CONTENT;
       relativeSigner.setLayoutParams( relativeSigner_params );
 
 
+      LinearLayout.LayoutParams viewsLayotuParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
 
 
       LinearLayout signer_view = new LinearLayout(context);
-      signer_view.setOrientation(LinearLayout.VERTICAL);
-//      signer_view.setPadding(0,0,0,0);
+      signer_view.setOrientation(LinearLayout.HORIZONTAL);
 
-      if ( showPosition ){
+      if ( decision.isShowPosition() != null && decision.isShowPosition() ){
         TextView signerPositionView = new TextView(context);
-        signerPositionView.setText( signerPositionS );
+        signerPositionView.setText( decision.getSignerPositionS() );
         signerPositionView.setTextColor( Color.BLACK );
         signerPositionView.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
         signerPositionView.setGravity( Gravity.END );
         signer_view.addView( signerPositionView );
-        textLabels.add( signerPositionView );
+        textLabels.add(signerPositionView);
       }
+
       TextView signerBlankTextView = new TextView(context);
-      signerBlankTextView.setText( signerBlankText );
+      signerBlankTextView.setText( DecisionConverter.formatName( decision.getSignerBlankText() ) );
       signerBlankTextView.setTextColor( Color.BLACK );
       signerBlankTextView.setGravity( Gravity.END);
       signerBlankTextView.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
+      signerBlankTextView.setLayoutParams(viewsLayotuParams);
       signer_view.addView( signerBlankTextView );
-      textLabels.add( signerBlankTextView );
+
 
 
 
@@ -237,31 +241,25 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
       numberView.setText( "№ " + registrationNumber );
       numberView.setTextColor( Color.BLACK );
       numberView.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
-      LinearLayout.LayoutParams numberViewParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f);
-      numberView.setLayoutParams(numberViewParams);
-      date_and_number_view.addView(numberView);
-      textLabels.add( numberView );
+      numberView.setLayoutParams(viewsLayotuParams);
+      numberView.setGravity( Gravity.END );
 
       TextView dateView = new TextView(context);
-      dateView.setText( date );
-      dateView.setGravity( Gravity.END );
+      dateView.setText( decision.getDate() );
+      dateView.setGravity( Gravity.START );
       dateView.setTextColor( Color.BLACK );
-      RelativeLayout.LayoutParams dateView_params = new RelativeLayout.LayoutParams(
-        RelativeLayout.LayoutParams.MATCH_PARENT,
-        RelativeLayout.LayoutParams.WRAP_CONTENT);
-      dateView_params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-      dateView.setLayoutParams(dateView_params);
-      LinearLayout.LayoutParams dateView_params1 = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f);
-      dateView.setLayoutParams(dateView_params1);
+      dateView.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
+      dateView.setLayoutParams(viewsLayotuParams);
+
       date_and_number_view.addView(dateView);
-      textLabels.add( dateView );
+      date_and_number_view.addView(numberView);
 
 
-      if (base64 != null){
+      if (decision.getSignBase64() != null){
         ImageView image = new ImageView(getContext());
 
 
-        byte[] decodedString = Base64.decode( base64 , Base64.DEFAULT);
+        byte[] decodedString = Base64.decode( decision.getSignBase64() , Base64.DEFAULT);
         Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
 
         image.setImageBitmap( decodedByte );
@@ -270,6 +268,11 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
 
       relativeSigner.addView( signer_view );
       relativeSigner.addView( date_and_number_view );
+
+      textLabels.add(numberView);
+      textLabels.add(dateView);
+      textLabels.add(signerBlankTextView);
+
 
 
       preview_bottom.addView( relativeSigner );
@@ -286,8 +289,8 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
       LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
       params.setMargins(0,2,0,2);
       urgencyView.setLayoutParams(params);
-      textLabels.add( urgencyView );
 
+      textLabels.add(urgencyView);
       preview_head.addView( urgencyView );
     }
 
@@ -298,40 +301,49 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
       letterHead.setTextColor( Color.BLACK );
       letterHead.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
       preview_head.addView( letterHead );
-      textLabels.add( letterHead );
 
-//      TextView delimiter = new TextView(context);
-//      delimiter.setGravity(Gravity.CENTER);
-//      delimiter.setHeight(1);
-//      delimiter.setBackgroundColor( ContextCompat.getColor(context, R.color.md_blue_grey_200) );
-//
-//      LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-//      params.setMargins(50, 10, 50, 10);
-//      delimiter.setLayoutParams(params);
-//
-//      preview_head.addView( delimiter );
+      TextView delimiter = new TextView(context);
+      delimiter.setGravity(Gravity.CENTER);
+      delimiter.setHeight(1);
+      delimiter.setWidth(400);
+      delimiter.setBackgroundColor( ContextCompat.getColor(context, R.color.md_blue_grey_200) );
+
+      LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+      params.setMargins(50, 10, 50, 10);
+      delimiter.setLayoutParams(params);
+
+      textLabels.add(letterHead);
+
+      preview_head.addView( delimiter );
     }
 
     private void printBlockText(String text) {
       TextView block_view = new TextView(context);
-      block_view.setText( text );
+      block_view.setText( "\u00A0     " + text );
       block_view.setTextColor( Color.BLACK );
+      block_view.setTypeface( Typeface.create("sans-serif-light", Typeface.NORMAL) );
 
       LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
       params.setMargins(0, 10, 0, 10);
       block_view.setLayoutParams(params);
-      textLabels.add( block_view );
+
+      textLabels.add(block_view);
 
       preview_body.addView( block_view );
     }
 
-    private void printAppealText(RBlock _block ) {
+    private void printAppealText(RBlock _block, Boolean isOnlyOneBlock) {
 
       RBlockEntity block = (RBlockEntity) _block;
       String text = "";
 
       if (block.getAppealText() != null && !Objects.equals(block.getAppealText(), "")) {
-        text += block.getNumber().toString() + ". " + block.getAppealText();
+
+        if (!isOnlyOneBlock ){
+          text += block.getNumber().toString() + ". ";
+        }
+
+        text += block.getAppealText();
       }
 
       TextView blockAppealView = new TextView(context);
@@ -339,12 +351,13 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
       blockAppealView.setText( text );
       blockAppealView.setTextColor( Color.BLACK );
       blockAppealView.setTextSize( TypedValue.COMPLEX_UNIT_SP, 12 );
-      textLabels.add( blockAppealView );
+
+      textLabels.add(blockAppealView);
 
       preview_body.addView( blockAppealView );
     }
 
-    private void printBlockPerformers(RBlock _block ) {
+    private void printBlockPerformers(RBlock _block, Boolean isOnlyOneBlock) {
 
       RBlockEntity block = (RBlockEntity) _block;
 
@@ -359,18 +372,18 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
           RPerformerEntity user = (RPerformerEntity) _user;
           String performerName = "";
 
-          if ( block.getAppealText() == null && !numberPrinted ){
+          if ( block.getAppealText() == null && !numberPrinted && !isOnlyOneBlock ){
             performerName += block.getNumber().toString() + ". ";
             numberPrinted = true;
           }
 
-          performerName += user.getPerformerText();
+          performerName += DecisionConverter.formatName( user.getPerformerText() );
 
-          if (user.isIsOriginal() != null && user.isIsOriginal()){
+          if (user.isIsResponsible() != null && user.isIsResponsible()){
             performerName += " *";
           }
 
-          performerName = performerName.replaceAll( "\\(.+\\)", "" );
+//          performerName = performerName.replaceAll( "\\(.+\\)", "" );
 
 
           TextView performer_view = new TextView( getActivity() );
@@ -379,7 +392,8 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
           performer_view.setPaintFlags( Paint.ANTI_ALIAS_FLAG );
           performer_view.setGravity(Gravity.CENTER);
           performer_view.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
-          textLabels.add( performer_view );
+
+          textLabels.add(performer_view);
 
           users_view.addView(performer_view);
         }
@@ -394,265 +408,5 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
       return reg_number;
     }
   }
-//  public class Preview{
-//
-//    private final Context context;
-//    private String TAG = this.getClass().getSimpleName();
-//
-//    public Preview(Context context) {
-//      this.context = context;
-//    }
-//
-//    private void clear(){
-//      preview_head.removeAllViews();
-//      preview_body.removeAllViews();
-//      preview_bottom.removeAllViews();
-//    };
-//
-//    private void show(RDecisionEntity decision ){
-//      clear();
-//
-//      if( decision.getLetterhead() != null ) {
-//        printLetterHead(decision.getLetterhead());
-//      }
-//      if( decision.getUrgencyText() != null ){
-//        printUrgency( decision.getUrgencyText().toString() );
-//      }
-//
-//      if( decision.getBlocks().size() > 0 ){
-//
-//        for (RBlock b: decision.getBlocks()){
-//          RBlockEntity block = (RBlockEntity) b;
-//          Timber.tag("block").v( block.getText() );
-//          printAppealText( block );
-//
-//          Boolean f = block.isToFamiliarization();
-//          if (f == null)
-//            f = false;
-//
-//          if ( block.isTextBefore() ){
-//            printBlockText( block.getText() );
-//            if (!block.isHidePerformers())
-//              printBlockPerformers( block.getPerformers(), f, block.getNumber() );
-//
-//          } else {
-//            if (!block.isHidePerformers())
-//              printBlockPerformers( block.getPerformers(), f, block.getNumber() );
-//            printBlockText( block.getText() );
-//          }
-//        }
-//      }
-//
-//      SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences( getContext() );
-//      RxSharedPreferences rxPreferences = RxSharedPreferences.create(preferences);
-//      Preference<String> number = rxPreferences.getString("activity_main_menu.regnumber");
-//
-//      printSigner( decision.isShowPosition(), decision.getSignerBlankText(), decision.getSignerPositionS(), decision.getDate(), number.get(), decision.getSignBase64()  );
-//    }
-//
-//    private void showEmpty(){
-//      Timber.tag(TAG).d( "showEmpty" );
-//
-//      clear();
-//      printLetterHead( getString(R.string.decision_blank) );
-//    }
-//
-//    private void printSigner(Boolean showPosition, String signerBlankText, String signerPositionS, String date, String registrationNumber, String base64) {
-//
-//      LinearLayout relativeSigner = new LinearLayout(context);
-//      relativeSigner.setOrientation(LinearLayout.VERTICAL);
-//      relativeSigner.setVerticalGravity( Gravity.BOTTOM );
-//      relativeSigner.setPadding(0,0,0,0);
-////      relativeSigner.setMinimumHeight(350);
-//      LinearLayout.LayoutParams relativeSigner_params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-//      relativeSigner_params.height = LinearLayout.LayoutParams.WRAP_CONTENT;
-//      relativeSigner.setLayoutParams( relativeSigner_params );
-//
-//
-//
-//
-//      LinearLayout signer_view = new LinearLayout(context);
-//      signer_view.setOrientation(LinearLayout.VERTICAL);
-////      signer_view.setPadding(0,0,0,0);
-//
-//      if ( showPosition ){
-//        TextView signerPositionView = new TextView(context);
-//        signerPositionView.setText( signerPositionS );
-//        signerPositionView.setTextColor( Color.BLACK );
-//        signerPositionView.setGravity( Gravity.END );
-//        signer_view.addView( signerPositionView );
-//        textLabels.addByOne( signerPositionView );
-//      }
-//      TextView signerBlankTextView = new TextView(context);
-//      signerBlankTextView.setText( signerBlankText );
-//      signerBlankTextView.setTextColor( Color.BLACK );
-//      signerBlankTextView.setGravity( Gravity.END);
-//      signer_view.addView( signerBlankTextView );
-//      textLabels.addByOne( signerBlankTextView );
-//
-//
-//
-//
-//      LinearLayout date_and_number_view = new LinearLayout(context);
-//      date_and_number_view.setOrientation(LinearLayout.HORIZONTAL);
-//
-//      TextView numberView = new TextView(context);
-//      numberView.setText( "№ " + registrationNumber );
-//      numberView.setTextColor( Color.BLACK );
-//      LinearLayout.LayoutParams numberViewParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f);
-//      numberView.setLayoutParams(numberViewParams);
-//      date_and_number_view.addView(numberView);
-//
-//      textLabels.addByOne( numberView );
-//
-//      TextView dateView = new TextView(context);
-//      dateView.setText( date );
-//      dateView.setGravity( Gravity.END );
-//      dateView.setTextColor( Color.BLACK );
-//      RelativeLayout.LayoutParams dateView_params = new RelativeLayout.LayoutParams(
-//        RelativeLayout.LayoutParams.MATCH_PARENT,
-//        RelativeLayout.LayoutParams.WRAP_CONTENT);
-//      dateView_params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-//      dateView.setLayoutParams(dateView_params);
-//      LinearLayout.LayoutParams dateView_params1 = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f);
-//      dateView.setLayoutParams(dateView_params1);
-//      date_and_number_view.addView(dateView);
-//      textLabels.addByOne( dateView );
-//
-//      if (base64 != null){
-//        ImageView image = new ImageView(getContext());
-//
-//
-//        byte[] decodedString = Base64.decode( base64 , Base64.DEFAULT);
-//        Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-//
-//        image.setImageBitmap( decodedByte );
-//        relativeSigner.addView( image );
-//      }
-//
-//      relativeSigner.addView( signer_view );
-//      relativeSigner.addView( date_and_number_view );
-//
-//
-//      preview_bottom.addView( relativeSigner );
-//    }
-//
-//    private void printUrgency(String urgency) {
-//      TextView urgencyView = new TextView(context);
-//      urgencyView.setGravity(Gravity.RIGHT);
-//      urgencyView.setAllCaps(true);
-//      urgencyView.setPaintFlags( Paint.UNDERLINE_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG | Paint.FAKE_BOLD_TEXT_FLAG );
-//      urgencyView.setText( urgency );
-//      urgencyView.setTextColor( ContextCompat.getColor(context, R.color.md_black_1000) );
-//
-//      LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-//      params.setMargins(0,0,0,10);
-//      urgencyView.setLayoutParams(params);
-//
-//      preview_head.addView( urgencyView );
-//    }
-//
-//    private void printLetterHead(String letterhead) {
-//      TextView letterHead = new TextView(context);
-//      letterHead.setGravity(Gravity.CENTER);
-//      letterHead.setText( letterhead );
-//      letterHead.setTextColor( Color.BLACK );
-//      preview_head.addView( letterHead );
-//
-//      TextView delimiter = new TextView(context);
-//      delimiter.setGravity(Gravity.CENTER);
-//      delimiter.setHeight(1);
-//      delimiter.setWidth(400);
-//      delimiter.setBackgroundColor( ContextCompat.getColor(context, R.color.md_blue_grey_200) );
-//
-//      LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-//      params.setMargins(50, 10, 50, 10);
-//      delimiter.setLayoutParams(params);
-//    }
-//
-//    private void printBlockText(String text) {
-//      TextView block_view = new TextView(context);
-//      block_view.setText( text );
-//      block_view.setTextColor( Color.BLACK );
-//
-//      LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-//      params.setMargins(0, 10, 0, 10);
-//      block_view.setLayoutParams(params);
-//
-//      textLabels.addByOne( block_view );
-//      preview_body.addView( block_view );
-//    }
-//
-//    private void printAppealText(RBlockEntity block ) {
-//
-//      String text = "";
-//      String appealText;
-//      String number;
-//      boolean toFamiliarization = block.isToFamiliarization() == null ? false : block.isToFamiliarization();
-//
-//      if ( block.getAppealText() != null ){
-//        appealText = block.getAppealText().toString();
-//      } else {
-//        appealText = "";
-//      }
-//
-//      if ( block.getNumber() != null ){
-//        number = block.getNumber().toString();
-//      } else {
-//        number = "1";
-//      }
-//
-//
-//
-//      if (toFamiliarization){
-//        text += number + ". ";
-//        block.setToFamiliarization(false);
-//      }
-//      text += appealText;
-//
-//      TextView blockAppealView = new TextView(context);
-//      blockAppealView.setGravity(Gravity.CENTER);
-//      blockAppealView.setText( text );
-//      blockAppealView.setTextColor( Color.BLACK );
-//      blockAppealView.setTextSize( TypedValue.COMPLEX_UNIT_SP, 12 );
-//
-//      textLabels.addByOne( blockAppealView );
-//      preview_body.addView( blockAppealView );
-//    }
-//
-//    private void printBlockPerformers(Set<RPerformer> performers, Boolean toFamiliarization, Integer number) {
-//
-//      boolean numberPrinted = false;
-//      LinearLayout users_view = new LinearLayout(context);
-//      users_view.setOrientation(LinearLayout.VERTICAL);
-//      users_view.setPadding(40,5,5,5);
-//
-//      if( performers.size() > 0 ){
-//
-//        for (RPerformer u: performers){
-//          RPerformerEntity user = (RPerformerEntity) u;
-//
-//          String performerName = "";
-//
-//          if (toFamiliarization && !numberPrinted){
-//            performerName += number.toString() + ". ";
-//            numberPrinted = true;
-//          } else {
-//            performerName += user.getPerformerText();
-//          }
-//
-//          TextView performer_view = new TextView(context);
-//          performer_view.setText( performerName );
-//          performer_view.setTextColor( Color.BLACK );
-//          users_view.addView(performer_view);
-//          textLabels.addByOne( performer_view );
-//        }
-//      }
-//
-//
-//      preview_body.addView( users_view );
-//    }
-//
-//
-//  }
+
 }

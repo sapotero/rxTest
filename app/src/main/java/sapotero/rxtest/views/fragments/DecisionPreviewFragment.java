@@ -329,7 +329,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
 
   private void setBlockText(String text) {
     TextView block_view = new TextView( getActivity() );
-    block_view.setText( text );
+    block_view.setText( "\u00A0     " + text );
     block_view.setTextColor( Color.BLACK );
     block_view.setTypeface( Typeface.create("sans-serif-light", Typeface.NORMAL) );
 
@@ -434,6 +434,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
       signerPositionView.setText( decision.getSignerPositionS() );
       signerPositionView.setTextColor( Color.BLACK );
       signerPositionView.setGravity( Gravity.END );
+      signerPositionView.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
       signer_view.addView( signerPositionView );
     }
 
@@ -441,6 +442,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
     signerBlankTextView.setText( DecisionConverter.formatName(decision.getSignerBlankText()) );
     signerBlankTextView.setTextColor( Color.BLACK );
     signerBlankTextView.setGravity( Gravity.END);
+    signerBlankTextView.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
     signer_view.addView( signerBlankTextView );
 
 
@@ -456,11 +458,13 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
     LinearLayout.LayoutParams numberViewParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f);
     numberView.setLayoutParams(numberViewParams);
     numberView.setGravity( Gravity.END );
+    numberView.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
 
     TextView dateView = new TextView(getActivity());
     dateView.setText( decision.getDate() );
     dateView.setGravity( Gravity.START );
     dateView.setTextColor( Color.BLACK );
+    dateView.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
 
     RelativeLayout.LayoutParams dateView_params = new RelativeLayout.LayoutParams(
       RelativeLayout.LayoutParams.MATCH_PARENT,
