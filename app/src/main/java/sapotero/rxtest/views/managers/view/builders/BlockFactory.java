@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import sapotero.rxtest.R;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
+import sapotero.rxtest.views.adapters.PrimaryConsiderationAdapter;
 import sapotero.rxtest.views.fragments.DecisionFragment;
 import sapotero.rxtest.views.managers.view.interfaces.DecisionInterface;
 import timber.log.Timber;
@@ -148,11 +149,30 @@ public class BlockFactory implements DecisionInterface, DecisionFragment.Callbac
   /* DecisionFragment.Callback */
 
   @Override
-  public void onUpdateSuccess() {
+  public void onUpdateSuccess(int lastUpdated) {
 
     Decision _temp_dec = getDecision();
-    Timber.tag(TAG).i("TEMP: %s / %s", _temp_dec.getBlocks().size(), decision.getBlocks().size() );
+    int originCount = 0;
 
+    for (DecisionFragment block: blocks) {
+      PrimaryConsiderationAdapter adapter = block.getPerformerAdapter();
+      if ( adapter.hasOriginal() ) {
+        originCount++;
+      }
+    }
+    Timber.tag("BlockF.onUpdateSuccess").i("lastUpdated %s | originCount %s", lastUpdated, originCount);
+
+    if ( originCount > 1 && lastUpdated != -1 ){
+
+      for (DecisionFragment block: blocks) {
+        Timber.tag("BlockF.block").i("num %s", block.getNumber());
+        if ( block.getNumber() != lastUpdated ) {
+          Timber.tag("dropAll").i("num %s", block.getNumber());
+          block.dropAllOriginal();
+        }
+      }
+
+    }
 
 
     Timber.tag(TAG).i("onUpdateSuccess");

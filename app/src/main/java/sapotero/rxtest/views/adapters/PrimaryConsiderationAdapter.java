@@ -19,6 +19,7 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.views.adapters.models.PrimaryConsiderationAdapterViewModel;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
+import timber.log.Timber;
 
 public class PrimaryConsiderationAdapter extends BaseAdapter {
 
@@ -36,15 +37,45 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
     EsdApplication.getComponent(context).inject( this );
   }
 
-  private PrimaryConsiderationAdapter.Callback callback;
+  private Callback callback;
+
   public interface Callback {
     void onRemove();
     void onChange();
-    void onAttrChange();
   }
 
-  public void registerCallBack(PrimaryConsiderationAdapter.Callback callback){
+  public void registerCallBack(Callback callback){
     this.callback = callback;
+  }
+
+  public boolean hasOriginal() {
+    Boolean result = false;
+
+    if (items.size() > 0){
+      for (PrimaryConsiderationPeople user: items) {
+        if ( user.isOriginal() ){
+          result = true;
+        }
+      }
+    }
+    return result;
+  }
+
+  public void dropAllOriginal() {
+    Timber.tag("Adapter").i("size: %s", items.size() );
+    if (items.size() > 0){
+      for (PrimaryConsiderationPeople user: items) {
+        user.setOriginal(false);
+      }
+    }
+
+    if (checked.size() > 0){
+      for (PrimaryConsiderationAdapterViewModel vm: checked) {
+        vm.getViewholder().is_original.setChecked(false);
+      }
+    }
+
+    notifyDataSetChanged();
   }
 
 
@@ -60,27 +91,29 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
       viewHolder.name   = (TextView) view.findViewById(R.id.primary_name);
       viewHolder.remove = (Button)   view.findViewById(R.id.remove_user);
 
-      viewHolder.copy        = (Switch) view.findViewById(R.id.copy);
-      viewHolder.responsible = (Switch) view.findViewById(R.id.responsible);
+      viewHolder.is_responsible = (Switch) view.findViewById(R.id.is_responsible);
+      viewHolder.is_original    = (Switch) view.findViewById(R.id.is_original);
 
       // настройка
       // Отображать настройки подлинника
       if (settings.getBoolean("settings_view_show_origin").get()){
-        viewHolder.copy.setVisibility(View.VISIBLE);
+        viewHolder.is_responsible.setVisibility(View.VISIBLE);
       }
       view.setTag(viewHolder);
+
     } else {
       viewHolder = (ViewHolder) view.getTag();
     }
     PrimaryConsiderationPeople user = getItem(position);
 
-    if ( !checked.contains(viewHolder) ){
-      checked.add( new PrimaryConsiderationAdapterViewModel(position, viewHolder, user) );
+    PrimaryConsiderationAdapterViewModel checked_view = new PrimaryConsiderationAdapterViewModel(position, viewHolder, user);
+    if ( !checked.contains(checked_view) ){
+      checked.add( checked_view );
     }
 
     viewHolder.name.setText( user.getName().replaceAll( "\\(.+\\)", "" ) );
-    viewHolder.copy.setChecked( user.isCopy() );
-    viewHolder.responsible.setChecked( user.isResponsible() );
+    viewHolder.is_responsible.setChecked( user.isResponsible() );
+    viewHolder.is_original.setChecked( user.isOriginal() );
 
     viewHolder.remove.setOnClickListener(v -> {
 
@@ -95,34 +128,40 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
           }
         }
 
-        callback.onRemove();
+        if (callback != null) {
+          callback.onRemove();
+        }
       }
 
       notifyDataSetChanged();
     });
 
 
-    viewHolder.copy.setOnClickListener(v -> {
-
-      for (PrimaryConsiderationPeople u : items){
-        u.setCopy(false);
-      }
-      user.setCopy( viewHolder.copy.isChecked() );
-
-
-      updateView();
-
-      if (callback != null) {
-        callback.onChange();
-      }
-    });
-
-    viewHolder.responsible.setOnClickListener(v -> {
+    viewHolder.is_responsible.setOnClickListener(v -> {
 
       for (PrimaryConsiderationPeople u : items){
         u.setResponsible(false);
       }
-      user.setResponsible( viewHolder.responsible.isChecked() );
+      user.setResponsible( viewHolder.is_responsible.isChecked() );
+
+      if (callback != null) {
+        callback.onChange();
+      }
+
+      updateView();
+    });
+
+    viewHolder.is_original.setOnClickListener(v -> {
+
+      for (PrimaryConsiderationPeople u : items){
+        u.setOriginal(false);
+      }
+      user.setOriginal( viewHolder.is_original.isChecked() );
+
+
+      if (callback != null) {
+        callback.onChange();
+      }
 
       updateView();
     });
@@ -133,11 +172,13 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
   }
 
   private void updateView() {
+
     for ( PrimaryConsiderationAdapterViewModel check: checked ) {
       ViewHolder viewholder = check.getViewholder();
-      viewholder.copy.setChecked( check.getUser().isCopy() );
-      viewholder.responsible.setChecked( check.getUser().isResponsible() );
+      viewholder.is_responsible.setChecked( check.getUser().isResponsible() );
+      viewholder.is_original.setChecked( check.getUser().isOriginal() );
     }
+
   }
 
   public void add(PrimaryConsiderationPeople user) {
@@ -150,8 +191,8 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
   public static class ViewHolder {
     public TextView name;
     public Button remove;
-    public Switch copy;
-    public Switch responsible;
+    public Switch is_responsible;
+    public Switch is_original;
   }
 
   @Override

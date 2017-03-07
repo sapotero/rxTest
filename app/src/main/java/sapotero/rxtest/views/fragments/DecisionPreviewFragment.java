@@ -37,6 +37,7 @@ import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.utils.DecisionConverter;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.Performer;
@@ -298,20 +299,19 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
 
         String performerName = "";
 
-        if ( block.getAppealText() == null && !numberPrinted && !isOnlyOneBlock  ){
+        Timber.tag("TEST").w("null? - %s | %s", block.getAppealText() == null, block.getAppealText() );
+        Timber.tag("TEST").w("user %s", new Gson().toJson( user ) );
+
+        if (Objects.equals(block.getAppealText(), "") && !numberPrinted && !isOnlyOneBlock  ){
           performerName += block.getNumber().toString() + ". ";
           numberPrinted = true;
         }
 
-        performerName += user.getPerformerText();
+        performerName += DecisionConverter.formatName( user.getPerformerText() );
 
-        performerName = performerName.replaceAll( "\\(.+\\)", "" );
-
-        if (user.getIsOriginal() != null && user.getIsOriginal()){
+        if (user.getIsResponsible() != null && user.getIsResponsible()){
           performerName += " *";
         }
-
-
 
         TextView performer_view = new TextView( getActivity() );
         performer_view.setText( performerName );
@@ -412,7 +412,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
 
   public void updateSignText() {
 
-    Timber.tag(TAG).i( "++++++++++" + decision.toString() );
+    Timber.tag(TAG).i( "DecisionPreviewUpdate\n%s", new Gson().toJson(decision) );
 
     LinearLayout relativeSigner = new LinearLayout( getActivity() );
     relativeSigner.setOrientation(LinearLayout.VERTICAL);
@@ -436,8 +436,9 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
       signerPositionView.setGravity( Gravity.END );
       signer_view.addView( signerPositionView );
     }
+
     TextView signerBlankTextView = new TextView(getActivity());
-    signerBlankTextView.setText( decision.getSignerBlankText() );
+    signerBlankTextView.setText( DecisionConverter.formatName(decision.getSignerBlankText()) );
     signerBlankTextView.setTextColor( Color.BLACK );
     signerBlankTextView.setGravity( Gravity.END);
     signer_view.addView( signerBlankTextView );
@@ -454,11 +455,11 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
     numberView.setTextColor( Color.BLACK );
     LinearLayout.LayoutParams numberViewParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f);
     numberView.setLayoutParams(numberViewParams);
-    date_and_number_view.addView(numberView);
+    numberView.setGravity( Gravity.END );
 
     TextView dateView = new TextView(getActivity());
     dateView.setText( decision.getDate() );
-    dateView.setGravity( Gravity.END );
+    dateView.setGravity( Gravity.START );
     dateView.setTextColor( Color.BLACK );
 
     RelativeLayout.LayoutParams dateView_params = new RelativeLayout.LayoutParams(
@@ -470,7 +471,9 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
     dateView.setLayoutParams(dateView_params);
     LinearLayout.LayoutParams dateView_params1 = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f);
     dateView.setLayoutParams(dateView_params1);
+
     date_and_number_view.addView(dateView);
+    date_and_number_view.addView(numberView);
 
     relativeSigner.addView( signer_view );
     relativeSigner.addView( date_and_number_view );
@@ -495,11 +498,11 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
 
   public void update() {
     try{
-      Timber.tag(TAG).w( "UPDATE: %s", decision.getBlocks().get(0).getText() );
+//      Timber.tag(TAG).w( "UPDATE: %s", decision.getBlocks().get(0).getText() );
       updateView();
     }
     catch (Error e){
-      Timber.tag(TAG).w( String.valueOf(e.getStackTrace()) );
+      Timber.tag(TAG).w( e );
     }
 
   }

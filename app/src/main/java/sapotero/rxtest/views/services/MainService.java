@@ -233,7 +233,7 @@ public class MainService extends Service {
          * Подробности в logcat.
          */
         case CSPConfig.CSP_INIT_COPY_RESOURCES:
-          errorMessage(getApplicationContext(), "Couldn't copy CSP resources.");
+          errorMessage(getApplicationContext(), "Couldn't is_responsible CSP resources.");
           break;
 
         /**
@@ -509,7 +509,7 @@ public class MainService extends Service {
             if (!RawResource.writeStreamToFile(
               srcCurrentContainerFile,
               dstContainer.getPath(), srcCurrentContainerFile.getName())) {
-              Timber.i("\tCouldn't copy file: %s", srcCurrentContainerFile.getName());
+              Timber.i("\tCouldn't is_responsible file: %s", srcCurrentContainerFile.getName());
             } // if
             else {
               Timber.i("\tFile %s was copied successfully", srcCurrentContainerFile.getName());

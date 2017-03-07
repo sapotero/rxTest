@@ -10,9 +10,8 @@ public class PrimaryConsiderationPeople {
   private String name;
   private String position;
   private String organization;
-  private boolean copy = false;
-  private boolean out  = false;
-  private boolean responsible = false;
+  private boolean isOriginal = false;
+  private boolean isResponsible = false;
 
   public PrimaryConsiderationPeople(String id, String name, String position, String organization, String assistantId) {
     this.id = id;
@@ -30,16 +29,15 @@ public class PrimaryConsiderationPeople {
       this.position = String.valueOf( u.getNumber() );
       this.organization = u.getOrganizationText();
       if (u.getIsOriginal() != null) {
-        this.copy = u.getIsOriginal();
+        this.isOriginal = u.getIsOriginal();
       } else {
-        this.copy = false;
+        this.isOriginal = false;
       }
-      this.out  = false;
 
       if (u.getIsResponsible() != null) {
-        this.responsible = u.getIsResponsible();
+        this.isResponsible = u.getIsResponsible();
       } else {
-        this.responsible = false;
+        this.isResponsible = false;
       }
     }
   }
@@ -86,27 +84,19 @@ public class PrimaryConsiderationPeople {
     this.organization = organization;
   }
 
-  public boolean isCopy() {
-    return copy;
+  public boolean isOriginal() {
+    return isOriginal;
   }
 
-  public void setCopy(boolean copy) {
-    this.copy = copy;
-  }
-
-  public boolean isOut() {
-    return out;
-  }
-
-  public void setOut(boolean out) {
-    this.out = out;
+  public void setOriginal(boolean original) {
+    this.isOriginal = original;
   }
 
   public boolean isResponsible() {
-    return responsible;
+    return isResponsible;
   }
 
   public void setResponsible(boolean responsible) {
-    this.responsible = responsible;
+    this.isResponsible = responsible;
   }
 }

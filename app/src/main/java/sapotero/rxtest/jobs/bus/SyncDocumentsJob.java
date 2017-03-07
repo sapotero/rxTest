@@ -193,7 +193,9 @@ public class SyncDocumentsJob  extends BaseJob {
     rd.setUid( d.getUid() );
     rd.setFromLinks( false );
     rd.setUser( LOGIN.get() );
-    rd.setFilter( filter.toString() );
+    if (filter != null) {
+      rd.setFilter( filter.toString() );
+    }
     rd.setMd5( d.getMd5() );
     rd.setSortKey( d.getSortKey() );
     rd.setTitle( d.getTitle() );
@@ -306,6 +308,7 @@ public class SyncDocumentsJob  extends BaseJob {
           decision.setApproved(d.getApproved());
           decision.setSigner(d.getSigner());
           decision.setSignerId(d.getSignerId());
+          decision.setSignerPositionS(d.getSignerPositionS());
           decision.setAssistantId(d.getAssistantId());
           decision.setSignerBlankText(d.getSignerBlankText());
           decision.setSignerIsManager(d.getSignerIsManager());
@@ -503,6 +506,7 @@ public class SyncDocumentsJob  extends BaseJob {
           decision.setSigner(d.getSigner());
           decision.setSignerId(d.getSignerId());
           decision.setAssistantId(d.getAssistantId());
+          decision.setSignerPositionS(d.getSignerPositionS());
           decision.setSignerBlankText(d.getSignerBlankText());
           decision.setSignerIsManager(d.getSignerIsManager());
           decision.setComment(d.getComment());
@@ -644,7 +648,9 @@ public class SyncDocumentsJob  extends BaseJob {
       EventBus.getDefault().post( new UpdateCurrentDocumentEvent( doc.getUid() ) );
     } else {
       Timber.tag("MD5").d("equal");
-      doc.setFilter( filter.toString() );
+      if (filter != null) {
+        doc.setFilter( filter.toString() );
+      }
       doc.setChanged(false);
       doc.setProcessed(false);
     }

@@ -27,7 +27,6 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -64,6 +63,7 @@ import sapotero.rxtest.db.requery.models.decisions.RDecision;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RPerformer;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
+import sapotero.rxtest.db.requery.utils.DecisionConverter;
 import sapotero.rxtest.events.decision.ApproveDecisionEvent;
 import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
 import sapotero.rxtest.events.decision.RejectDecisionEvent;
@@ -705,7 +705,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
 
           Timber.tag("showPosition").v( "ShowPosition: %s", block.getAppealText() );
 
-          printAppealText( block );
+          printAppealText( block, isOnlyOneBlock );
 
           if ( block.isTextBefore() ){
             printBlockText( block.getText() );
@@ -721,7 +721,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
         }
       }
 
-      printSigner( decision.isShowPosition(), decision.getSignerBlankText(), decision.getSignerPositionS(), decision.getDate(), REG_NUMBER.get(), decision.getSignBase64()  );
+      printSigner( decision, REG_NUMBER.get() );
     }
 
     private void showEmpty(){
@@ -731,37 +731,40 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
       printLetterHead( getString(R.string.decision_blank) );
     }
 
-    private void printSigner(Boolean showPosition, String signerBlankText, String signerPositionS, String date, String registrationNumber, String base64) {
+    private void printSigner(RDecisionEntity decision, String registrationNumber) {
+
+//      Timber.tag(TAG).i("DECISION\n%s", new Gson().toJson(decision));
 
       LinearLayout relativeSigner = new LinearLayout(context);
       relativeSigner.setOrientation(LinearLayout.VERTICAL);
       relativeSigner.setVerticalGravity( Gravity.BOTTOM );
       relativeSigner.setPadding(0,0,0,0);
-//      relativeSigner.setMinimumHeight(350);
       LinearLayout.LayoutParams relativeSigner_params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
       relativeSigner_params.height = LinearLayout.LayoutParams.WRAP_CONTENT;
       relativeSigner.setLayoutParams( relativeSigner_params );
 
 
+      LinearLayout.LayoutParams viewsLayotuParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
 
 
       LinearLayout signer_view = new LinearLayout(context);
-      signer_view.setOrientation(LinearLayout.VERTICAL);
-//      signer_view.setPadding(0,0,0,0);
+      signer_view.setOrientation(LinearLayout.HORIZONTAL);
 
-      if ( showPosition ){
+      if ( decision.isShowPosition() != null && decision.isShowPosition() ){
         TextView signerPositionView = new TextView(context);
-        signerPositionView.setText( signerPositionS );
+        signerPositionView.setText( decision.getSignerPositionS() );
         signerPositionView.setTextColor( Color.BLACK );
         signerPositionView.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
         signerPositionView.setGravity( Gravity.END );
         signer_view.addView( signerPositionView );
       }
+
       TextView signerBlankTextView = new TextView(context);
-      signerBlankTextView.setText( signerBlankText );
+      signerBlankTextView.setText( DecisionConverter.formatName( decision.getSignerBlankText() ) );
       signerBlankTextView.setTextColor( Color.BLACK );
       signerBlankTextView.setGravity( Gravity.END);
       signerBlankTextView.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
+      signerBlankTextView.setLayoutParams(viewsLayotuParams);
       signer_view.addView( signerBlankTextView );
 
 
@@ -775,29 +778,25 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
       numberView.setText( "№ " + registrationNumber );
       numberView.setTextColor( Color.BLACK );
       numberView.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
-      LinearLayout.LayoutParams numberViewParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f);
-      numberView.setLayoutParams(numberViewParams);
-      date_and_number_view.addView(numberView);
+      numberView.setLayoutParams(viewsLayotuParams);
+      numberView.setGravity( Gravity.END );
 
       TextView dateView = new TextView(context);
-      dateView.setText( date );
-      dateView.setGravity( Gravity.END );
+      dateView.setText( decision.getDate() );
+      dateView.setGravity( Gravity.START );
       dateView.setTextColor( Color.BLACK );
-      RelativeLayout.LayoutParams dateView_params = new RelativeLayout.LayoutParams(
-        RelativeLayout.LayoutParams.MATCH_PARENT,
-        RelativeLayout.LayoutParams.WRAP_CONTENT);
-      dateView_params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-      dateView.setLayoutParams(dateView_params);
-      LinearLayout.LayoutParams dateView_params1 = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f);
-      dateView.setLayoutParams(dateView_params1);
+      dateView.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
+      dateView.setLayoutParams(viewsLayotuParams);
+
       date_and_number_view.addView(dateView);
+      date_and_number_view.addView(numberView);
 
 
-      if (base64 != null){
+      if (decision.getSignBase64() != null){
         ImageView image = new ImageView(getContext());
 
 
-        byte[] decodedString = Base64.decode( base64 , Base64.DEFAULT);
+        byte[] decodedString = Base64.decode( decision.getSignBase64() , Base64.DEFAULT);
         Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
 
         image.setImageBitmap( decodedByte );
@@ -860,13 +859,18 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
       preview_body.addView( block_view );
     }
 
-    private void printAppealText(RBlock _block ) {
+    private void printAppealText(RBlock _block, Boolean isOnlyOneBlock) {
 
       RBlockEntity block = (RBlockEntity) _block;
       String text = "";
 
       if (block.getAppealText() != null && !Objects.equals(block.getAppealText(), "")) {
-          text += block.getNumber().toString() + ". " + block.getAppealText();
+
+        if (!isOnlyOneBlock ){
+          text += block.getNumber().toString() + ". ";
+        }
+
+        text += block.getAppealText();
       }
 
       TextView blockAppealView = new TextView(context);
@@ -898,13 +902,13 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
             numberPrinted = true;
           }
 
-          performerName += user.getPerformerText();
+          performerName += DecisionConverter.formatName( user.getPerformerText() );
 
-          if (user.isIsOriginal() != null && user.isIsOriginal()){
+          if (user.isIsResponsible() != null && user.isIsResponsible()){
             performerName += " *";
           }
 
-          performerName = performerName.replaceAll( "\\(.+\\)", "" );
+//          performerName = performerName.replaceAll( "\\(.+\\)", "" );
 
 
           TextView performer_view = new TextView( getActivity() );

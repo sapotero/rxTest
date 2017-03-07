@@ -93,7 +93,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   private RDecisionEntity rDecisionEntity;
   private SelectOshsDialogFragment dialogFragment;
   private Fields.Status status;
-  private final DecisionConstructorActivity activity = (DecisionConstructorActivity) this;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -363,10 +362,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     manager.build();
 
 
-    Oshs decision_signer = new Oshs();
-    decision_signer.setId( settings.getString("current_user_id").get() );
-    decision_signer.setName( settings.getString("current_user").get() );
-
     signer_oshs_selector.setOnClickListener(v -> {
       dialogFragment = new SelectOshsDialogFragment();
       dialogFragment.registerCallBack( this );
@@ -376,18 +371,31 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     });
 
     sign_as_current_user.setOnClickListener(v -> {
+      Timber.tag(TAG).e( "%s | %s", rDecisionEntity == null, raw_decision == null );
+
       if (rDecisionEntity != null) {
         rDecisionEntity.setSignerId( settings.getString("current_user_id").get() );
         rDecisionEntity.setSigner( settings.getString("current_user").get() );
         signer_oshs_selector.setText( rDecisionEntity.getSigner() );
       } else {
-        signer_oshs_selector.setText( raw_decision.getSigner() );
+        manager.setSigner( settings.getString("current_user").get() );
+        manager.setSignerId( settings.getString("current_user_id").get() );
+        manager.setSignerBlankText( settings.getString("current_user").get() );
+
+        raw_decision.setSigner( settings.getString("current_user").get() );
+        raw_decision.setSignerId( settings.getString("current_user_id").get() );
+        raw_decision.setSignerBlankText( settings.getString("current_user").get() );
+
+        signer_oshs_selector.setText( settings.getString("current_user").get() );
+
+        manager.update();
       }
+
     });
 
     if ( rDecisionEntity != null ){
-      decision_signer.setId( rDecisionEntity.getSignerId() );
-      decision_signer.setName( rDecisionEntity.getSigner() );
+      manager.setSigner( rDecisionEntity.getSigner() );
+      manager.setSignerId( rDecisionEntity.getSignerId() );
       decision_comment.setText( rDecisionEntity.getComment() );
       signer_oshs_selector.setText( rDecisionEntity.getSigner() );
     } else {
@@ -646,6 +654,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   public void onSearchSuccess(Oshs user, CommandFactory.Operation operation) {
     Timber.tag(TAG).e("USER: %s", new Gson().toJson(user) );
     String name = user.getName();
+
+    manager.setSignerBlankText( name );
 
     if (!name.endsWith(")")){
       name = String.format(" %s (%s)", user.getName(), user.getOrganization() );

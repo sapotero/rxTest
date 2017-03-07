@@ -7,6 +7,7 @@ import android.support.v4.app.FragmentTransaction;
 import com.google.gson.Gson;
 
 import sapotero.rxtest.R;
+import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
 import sapotero.rxtest.views.managers.view.interfaces.DecisionInterface;
@@ -59,6 +60,11 @@ public class PreviewBuilder implements DecisionInterface {
 
   private Decision getNewDecision() {
     Decision empty_decision = new Decision();
+
+    Block block = new Block();
+    block.setNumber(1);
+
+    empty_decision.getBlocks().add( block );
     return empty_decision;
   }
 
@@ -73,7 +79,7 @@ public class PreviewBuilder implements DecisionInterface {
   /* DecisionInterface */
   @Override
   public Decision getDecision() {
-    return null;
+    return decision;
   }
 
   @Override

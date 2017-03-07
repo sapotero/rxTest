@@ -269,6 +269,7 @@ public class SyncFavoritesDocumentsJob extends BaseJob {
           decision.setSignerId(d.getSignerId());
           decision.setAssistantId(d.getAssistantId());
           decision.setSignerBlankText(d.getSignerBlankText());
+          decision.setSignerPositionS(d.getSignerPositionS());
           decision.setSignerIsManager(d.getSignerIsManager());
           decision.setComment(d.getComment());
           decision.setDate(d.getDate());
@@ -462,6 +463,7 @@ public class SyncFavoritesDocumentsJob extends BaseJob {
           decision.setSignerId(d.getSignerId());
           decision.setAssistantId(d.getAssistantId());
           decision.setSignerBlankText(d.getSignerBlankText());
+          decision.setSignerPositionS(d.getSignerPositionS());
           decision.setSignerIsManager(d.getSignerIsManager());
           decision.setComment(d.getComment());
           decision.setDate(d.getDate());

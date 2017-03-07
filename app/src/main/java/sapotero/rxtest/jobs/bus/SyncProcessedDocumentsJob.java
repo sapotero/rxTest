@@ -268,6 +268,7 @@ public class SyncProcessedDocumentsJob extends BaseJob {
           decision.setAssistantId(d.getAssistantId());
           decision.setSignerBlankText(d.getSignerBlankText());
           decision.setSignerIsManager(d.getSignerIsManager());
+          decision.setSignerPositionS(d.getSignerPositionS());
           decision.setComment(d.getComment());
           decision.setDate(d.getDate());
           decision.setUrgencyText(d.getUrgencyText());
@@ -460,6 +461,7 @@ public class SyncProcessedDocumentsJob extends BaseJob {
           decision.setAssistantId(d.getAssistantId());
           decision.setSignerBlankText(d.getSignerBlankText());
           decision.setSignerIsManager(d.getSignerIsManager());
+          decision.setSignerPositionS(d.getSignerPositionS());
           decision.setComment(d.getComment());
           decision.setDate(d.getDate());
           decision.setUrgencyText(d.getUrgencyText());

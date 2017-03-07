@@ -20,8 +20,9 @@
 
 
         <Switch
-            android:id="@+id/responsible"
+            android:id="@+id/is_original"
             android:text="@string/primary_people_copy"
+            android:checked="false"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             />
@@ -31,9 +32,10 @@
             android:layout_height="match_parent"
             />
         <Switch
-            android:id="@+id/copy"
+            android:id="@+id/is_responsible"
             android:text="@string/primary_people_responsible"
             android:visibility="gone"
+            android:checked="false"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             />

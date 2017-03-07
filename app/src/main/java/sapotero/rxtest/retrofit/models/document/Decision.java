@@ -27,6 +27,10 @@ public class Decision implements Serializable {
     @Expose
     private String signer;
 
+    @SerializedName("signer_text")
+    @Expose
+    private String signerText;
+
     @SerializedName("signer_id")
     @Expose
     private String signerId;
@@ -83,6 +87,14 @@ public class Decision implements Serializable {
   @Expose
   private String sign = "";
 
+
+  public String getSignerText() {
+    return signerText;
+  }
+
+  public void setSignerText(String signerText) {
+    this.signerText = signerText;
+  }
 
   public String getPerformersFontSize() {
     return performersFontSize;
@@ -187,6 +199,7 @@ public class Decision implements Serializable {
      *     The signer
      */
     public void setSigner(String signer) {
+        setSignerText(signer);
         this.signer = signer;
     }
 

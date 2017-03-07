@@ -54,6 +54,7 @@ public class DecisionManager implements DecisionInterface, DecisionBuilder.Callb
   private String signer;
   private CharSequence comment;
   private String assistantId;
+  private String signerBlankText;
 
   public DecisionManager(Context context, FragmentManager supportFragmentManager, Decision decision) {
 
@@ -299,5 +300,10 @@ public class DecisionManager implements DecisionInterface, DecisionBuilder.Callb
 
   public String getAssistantId() {
     return assistantId;
+  }
+
+  public void setSignerBlankText(String signerBlankText) {
+    this.signerBlankText = signerBlankText;
+    decision.setSignerBlankText(signerBlankText);
   }
 }

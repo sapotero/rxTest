@@ -8,6 +8,7 @@ import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.Performer;
+import timber.log.Timber;
 
 
 public class DecisionConverter {
@@ -65,4 +66,18 @@ public class DecisionConverter {
     return formated_decision;
   }
 
+  public static String formatName(String name){
+
+    try {
+      String[] split = name.split(" ");
+
+      if (split.length >= 1 ){
+        name = String.format("%s %s", split[1], split[0] );
+      }
+    } catch (Exception error) {
+      Timber.tag("DecisionConverter").e(error);
+    }
+
+    return name;
+  }
 }

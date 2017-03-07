@@ -495,7 +495,7 @@ public class DataLoaderManager {
       .from(new_filter_types)
       .flatMap(status -> docService.getByFolders(LOGIN.get(), TOKEN.get(), status.getValue(), 500, 0, processed_folder, date));
 
-    unsubscribe();
+//    unsubscribe();
     subscription.add(
         Observable.zip(types, count, (type, docs) -> new TDmodel(type, docs.getDocuments()))
           .subscribeOn(Schedulers.computation())
@@ -533,7 +533,7 @@ public class DataLoaderManager {
       .where(RFolderEntity.TYPE.eq("favorites"))
       .get().first().getUid();
 
-    unsubscribe();
+//    unsubscribe();
     subscription.add(
       docService.getByFolders(LOGIN.get(), TOKEN.get(), null, 500, 0, favorites_folder, null)
         .subscribeOn( Schedulers.io() )
@@ -608,6 +608,8 @@ public class DataLoaderManager {
             Timber.tag(TAG).i("updateAuth: token" + token.getAuthToken());
             setToken(token.getAuthToken());
             updateDocuments( MainMenuItem.ALL );
+            updateProcessed();
+            updateFavorites();
           },
           error -> {
             Timber.tag("getAuth").e( "ERROR: %s", error);

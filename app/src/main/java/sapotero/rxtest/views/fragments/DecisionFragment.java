@@ -107,13 +107,28 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
 
   private boolean forReport   = false;
   private boolean forAcquaint = false;
+  private int oldSize = 0;
+  private int lastUpdate = -1;
 
   public void setBlockFactory(BlockFactory blockFactory) {
     this.blockFactory = blockFactory;
   }
 
+  public PrimaryConsiderationAdapter getPerformerAdapter() {
+    return adapter;
+  }
+
+  public int getNumber() {
+    return number;
+  }
+
+  public void dropAllOriginal() {
+    Timber.tag("Block").i("number %s", block.getNumber());
+    adapter.dropAllOriginal();
+  }
+
   public interface Callback {
-    void onUpdateSuccess();
+    void onUpdateSuccess(int number);
     void onUpdateError(Throwable error);
   }
 
@@ -177,7 +192,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
         Timber.tag(TAG).v( "onTextChanged" );
 
         if (callback != null) {
-          callback.onUpdateSuccess();
+          callback.onUpdateSuccess(lastUpdate);
         }
       }
 
@@ -198,7 +213,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
               blockFactory.remove(this);
 
               if (callback != null) {
-                callback.onUpdateSuccess();
+                callback.onUpdateSuccess(lastUpdate);
               }
             }
             getActivity().getSupportFragmentManager().beginTransaction().remove(this).commit();
@@ -219,9 +234,9 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
 //      familirization = block.getToFamiliarization();
 //    }
 //
-//    Boolean copy = false;
+//    Boolean is_responsible = false;
 //    if (block.getToCopy() != null) {
-//      copy = block.getToCopy();
+//      is_responsible = block.getToCopy();
 //    }
 
 
@@ -246,7 +261,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
           forAcquaint = true;
         }
         if (callback != null) {
-          callback.onUpdateSuccess();
+          callback.onUpdateSuccess(lastUpdate);
         }
       }
     );
@@ -266,7 +281,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
           forAcquaint = false;
         }
         if (callback != null) {
-          callback.onUpdateSuccess();
+          callback.onUpdateSuccess(lastUpdate);
         }
       }
     );
@@ -280,7 +295,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     hide_performers.setOnCheckedChangeListener(
       (buttonView, isChecked) -> {
         if (callback != null) {
-          callback.onUpdateSuccess();
+          callback.onUpdateSuccess(lastUpdate);
         }
       }
     );
@@ -318,25 +333,44 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
 
     adapter = new PrimaryConsiderationAdapter( getContext(), people);
     adapter.registerCallBack(this);
-    updateUsers();
+    addUsersToView();
 
     return view;
   }
 
   private void updateUsers(){
-    people_view.removeAllViews();
+
     if ( adapter.getCount() > 0 ) {
-      for (int i = 0; i < adapter.getCount(); i++) {
-        View item = adapter.getView(i, null, null);
-        people_view.addView(item);
+      if ( oldSize != adapter.getCount() ){
+        addUsersToView();
       }
+      for ( PrimaryConsiderationPeople user : adapter.getAll()) {
+        if (user.isOriginal()){
+          lastUpdate = number;
+        }
+      }
+
     } else {
+      lastUpdate = -1;
+      people_view.removeAllViews();
       TextView empty_view = new TextView(getContext());
       empty_view.setText("Нет исполнителей");
       empty_view.setPadding(0,8,0,16);
       people_view.addView(empty_view);
     }
+
   }
+
+  private void addUsersToView() {
+    people_view.removeAllViews();
+    oldSize = adapter.getCount();
+
+    for (int i = 0; i < adapter.getCount(); i++) {
+      View item = adapter.getView(i, null, people_view);
+      people_view.addView(item);
+    }
+  }
+
   public interface OnFragmentInteractionListener {
     void onFragmentInteraction(Uri uri);
   }
@@ -370,7 +404,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
 
         p.setPerformerId( item.getId() );
         p.setIsResponsible( item.isResponsible() );
-        p.setIsOriginal( item.isCopy() );
+        p.setIsOriginal( item.isOriginal() );
         p.setPerformerId( item.getId() );
         p.setPerformerText( item.getName() );
         p.setOrganizationText( item.getOrganization() );
@@ -473,20 +507,19 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   @Override
   public void onRemove() {
     updateUsers();
+    if (callback != null) {
+      callback.onUpdateSuccess(lastUpdate);
+    }
   }
 
   @Override
   public void onChange() {
     updateUsers();
     if (callback != null) {
-      callback.onUpdateSuccess();
+      callback.onUpdateSuccess(lastUpdate);
     }
   }
 
-  @Override
-  public void onAttrChange() {
-    callback.onUpdateSuccess();
-  }
 
   @Override
   public void onSearchSuccess(Oshs user, CommandFactory.Operation operation) {
@@ -496,7 +529,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     updateUsers();
 
     if (callback != null) {
-      callback.onUpdateSuccess();
+      callback.onUpdateSuccess(lastUpdate);
     }
   }
 
@@ -529,7 +562,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   @OnClick(R.id.fragment_decision_text_before)
   public void text(){
     if (callback != null) {
-      callback.onUpdateSuccess();
+      callback.onUpdateSuccess(lastUpdate);
     }
   }
 
