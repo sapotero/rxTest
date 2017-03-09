@@ -16,11 +16,9 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
-import sapotero.rxtest.db.requery.utils.DecisionConverter;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Decision;
-import sapotero.rxtest.retrofit.models.wrapper.DecisionWrapper;
 import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.views.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.views.managers.menu.utils.CommandParams;
@@ -101,19 +99,19 @@ public class SaveDecision extends AbstractCommand {
       .client( okHttpClient )
       .build();
 
-    Decision formated_decision = DecisionConverter.formatDecision( decision );
-
-    DecisionWrapper wrapper = new DecisionWrapper();
-    wrapper.setDecision(formated_decision);
+//    Decision formated_decision = DecisionConverter.formatDecision( decision );
+//
+//    DecisionWrapper wrapper = new DecisionWrapper();
+//    wrapper.setDecision(formated_decision);
 
     Decision _decision = params.getDecisionModel();
 //    _decision.setDocumentUid( document.getUid() );
     _decision.setDocumentUid( null );
 
-    String json_d = new Gson().toJson( wrapper );
+//    String json_d = new Gson().toJson( wrapper );
     String json_m = new Gson().toJson( _decision );
 
-    Timber.w("decision_json: %s", json_d);
+//    Timber.w("decision_json: %s", json_d);
     Timber.w("decision_json_m: %s", json_m);
 
     RequestBody json = RequestBody.create(

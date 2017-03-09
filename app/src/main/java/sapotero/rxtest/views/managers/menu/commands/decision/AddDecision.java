@@ -116,7 +116,7 @@ public class AddDecision extends AbstractCommand {
 
     String json_m = new Gson().toJson( decision );
 
-    Timber.w("decision_json_m: %s", json_m);
+//    Timber.w("decision_json_m: %s", json_m);
 
     RequestBody json = RequestBody.create(
       MediaType.parse("application/json"),

@@ -3,6 +3,7 @@ package sapotero.rxtest.utils.queue.threads;
 import android.content.Context;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Executors;
@@ -50,18 +51,23 @@ public class QueueSupervisor {
 
 
   public Command create(QueueEntity task){
+    Command command = null;
 
-    CommandParams params = new Gson().fromJson( task.getParams(), CommandParams.class );
+    try {
+      CommandParams params = new Gson().fromJson( task.getParams(), CommandParams.class );
 
-    Command command = commandFactory
-      .withDocument( new DocumentReceiver( params.getDocument() ) )
-      .withParams( params )
-      .build( CommandFactory.Operation.getOperation( task.getCommand() ) );
+      command = commandFactory
+        .withDocument( new DocumentReceiver( params.getDocument() ) )
+        .withParams( params )
+        .build( CommandFactory.Operation.getOperation( task.getCommand() ) );
 
-    if (command != null) {
-      Timber.tag(TAG).v("create command %s", command.getParams().toString() );
+      if (command != null) {
+        Timber.tag(TAG).v("create command %s", command.getParams().toString() );
+      }
+
+    } catch (JsonSyntaxException error) {
+      Timber.tag(TAG).v("create command error %s", error );
     }
-
 
     return command;
   }

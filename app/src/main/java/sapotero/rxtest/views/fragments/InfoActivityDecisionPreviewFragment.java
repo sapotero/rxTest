@@ -164,7 +164,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
             CommandParams params = new CommandParams();
 
             params.setDecisionId( current_decision.getUid() );
-            params.setDecision( current_decision );
+            params.setDecisionModel( DecisionConverter.formatDecision(current_decision) );
+
             params.setDocument( settings.getString("activity_main_menu.uid").get() );
             params.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
 
@@ -182,7 +183,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
       CommandParams params = new CommandParams();
 
       params.setDecisionId( current_decision.getUid() );
-      params.setDecision( current_decision );
+//      params.setDecision( current_decision );
+      params.setDecisionModel( DecisionConverter.formatDecision(current_decision) );
       params.setDocument( settings.getString("activity_main_menu.uid").get() );
       params.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
 
@@ -214,7 +216,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
 
           CommandParams commandParams = new CommandParams();
           commandParams.setDecisionId( current_decision.getUid() );
-          commandParams.setDecision( current_decision );
+//          commandParams.setDecision( current_decision );
+          commandParams.setDecisionModel( DecisionConverter.formatDecision(current_decision) );
           commandParams.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
           commandParams.setComment( dialog1.getInputEditText().getText().toString() );
 
@@ -239,7 +242,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
 
       CommandParams params = new CommandParams();
       params.setDecisionId( current_decision.getUid() );
-      params.setDecision( current_decision );
+//      params.setDecision( current_decision );
+      params.setDecisionModel( DecisionConverter.formatDecision(current_decision) );
       params.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
 
       operationManager.execute(operation, params);

@@ -235,7 +235,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         SaveDecision command = new SaveDecision(context, document);
         command.withParams(params);
         command
-          .withDecision( params.getDecision() )
+//          .withDecision( params.getDecision() )
           .withDecisionId( params.getDecisionId() )
           .registerCallBack(instance);
 
@@ -262,7 +262,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         ApproveDecision command = new ApproveDecision(context, document);
         command.withParams(params);
         command
-          .withDecision( params.getDecision() )
+//          .withDecision( params.getDecision() )
           .withDecisionId( params.getDecisionId() )
           .registerCallBack(instance);
 
@@ -280,7 +280,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         command.withParams(params);
         Timber.tag("CommandFactory").w("REJECT_DECISION params" );
         command
-          .withDecision( params.getDecision() )
+//          .withDecision( params.getDecision() )
           .withDecisionId( params.getDecisionId() )
           .registerCallBack(instance);
 

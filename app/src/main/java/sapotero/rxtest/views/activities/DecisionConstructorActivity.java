@@ -41,6 +41,7 @@ import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RPerformer;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
+import sapotero.rxtest.db.requery.utils.DecisionConverter;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.decision.ApproveDecisionEvent;
 import sapotero.rxtest.events.decision.RejectDecisionEvent;
@@ -195,7 +196,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
                 decision.setDocumentUid( settings.getString("activity_main_menu.uid").get() );
 
                 if (rDecisionEntity != null) {
-                  params.setDecision( rDecisionEntity );
+//                  params.setDecision( rDecisionEntity );
+                  params.setDecisionModel( DecisionConverter.formatDecision(rDecisionEntity) );
                   params.setDecisionId( rDecisionEntity.getUid() );
                 }
 
@@ -258,8 +260,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
             CommandParams params = new CommandParams();
             params.setDecisionId( rDecisionEntity.getUid() );
-            params.setDecision( rDecisionEntity );
-
+//            params.setDecision( rDecisionEntity );
+            params.setDecisionModel( DecisionConverter.formatDecision(rDecisionEntity) );
             operationManager.execute(operation, params);
           }
 
@@ -278,8 +280,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
             CommandParams params = new CommandParams();
             params.setDecisionId( rDecisionEntity.getUid() );
-            params.setDecision( rDecisionEntity );
-
+//            params.setDecision( rDecisionEntity );
+            params.setDecisionModel( DecisionConverter.formatDecision(rDecisionEntity) );
             operationManager.execute(operation, params);
           }
 
@@ -594,7 +596,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
         CommandParams params = new CommandParams();
         params.setDecisionId( rDecisionEntity.getUid() );
-        params.setDecision( rDecisionEntity );
+//        params.setDecision( rDecisionEntity );
+        params.setDecisionModel( DecisionConverter.formatDecision(rDecisionEntity) );
 
         operationManager.execute(operation, params);
       })
@@ -619,7 +622,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
         CommandParams params = new CommandParams();
         params.setDecisionId( settings.getString("decision.active.id").get() );
-        params.setDecision( rDecisionEntity );
+//        params.setDecision( rDecisionEntity );
+        params.setDecisionModel( DecisionConverter.formatDecision(rDecisionEntity) );
 
         operationManager.execute(operation, params);
       })

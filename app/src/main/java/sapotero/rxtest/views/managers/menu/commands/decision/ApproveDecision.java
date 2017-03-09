@@ -18,7 +18,6 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecision;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
-import sapotero.rxtest.db.requery.utils.DecisionConverter;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Decision;
@@ -167,12 +166,13 @@ public class ApproveDecision extends AbstractCommand {
       .client( okHttpClient )
       .build();
 
-    Decision formated_decision = DecisionConverter.formatDecision( decision );
-    formated_decision.setApproved(true);
-    formated_decision.setDocumentUid(null);
+    Decision _decision = params.getDecisionModel();
+//    _decision.setDocumentUid( document.getUid() );
+    _decision.setDocumentUid( null );
+    _decision.setApproved(true);
 
     DecisionWrapper wrapper = new DecisionWrapper();
-    wrapper.setDecision(formated_decision);
+    wrapper.setDecision(_decision);
 
     String json_d = new Gson().toJson( wrapper );
     Timber.w("decision_json: %s", json_d);
