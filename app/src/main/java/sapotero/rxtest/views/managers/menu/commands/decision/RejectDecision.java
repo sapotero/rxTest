@@ -79,14 +79,7 @@ public class RejectDecision extends AbstractCommand {
   @Override
   public void execute() {
     loadSettings();
-
-    if ( queueManager.getConnected() ){
-      executeRemote();
-    } else {
-      executeLocal();
-    }
-    update();
-
+    queueManager.add(this);
   }
 
   private Boolean hasActiveDecision(){
@@ -154,15 +147,19 @@ public class RejectDecision extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    queueManager.add(this);
+
+    queueManager.setExecutedLocal(this);
+
     if ( callback != null ){
       callback.onCommandExecuteSuccess( getType() );
     }
+
+    update();
   }
 
   @Override
   public void executeRemote() {
-
+    loadSettings();
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
     Retrofit retrofit = new Retrofit.Builder()
@@ -222,9 +219,7 @@ public class RejectDecision extends AbstractCommand {
             callback.onCommandExecuteSuccess( getType() );
           }
 
-          update();
-
-//          EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
+          queueManager.setExecutedRemote(this);
         },
         error -> {
           Timber.tag(TAG).i("error: %s", error);

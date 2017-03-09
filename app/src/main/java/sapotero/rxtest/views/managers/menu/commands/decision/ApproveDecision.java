@@ -77,15 +77,7 @@ public class ApproveDecision extends AbstractCommand {
 
   @Override
   public void execute() {
-    loadSettings();
-
-    if ( queueManager.getConnected() ){
-      executeRemote();
-    } else {
-      executeLocal();
-    }
-    update();
-
+    queueManager.add(this);
   }
 
 
@@ -151,14 +143,20 @@ public class ApproveDecision extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    queueManager.add(this);
+    loadSettings();
+
+    update();
+
     if ( callback != null ){
       callback.onCommandExecuteSuccess( getType() );
     }
+
+    queueManager.setExecutedLocal(this);
   }
 
   @Override
   public void executeRemote() {
+    loadSettings();
 
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
@@ -206,8 +204,7 @@ public class ApproveDecision extends AbstractCommand {
           if (callback != null ){
             callback.onCommandExecuteSuccess( getType() );
           }
-          update();
-//          EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
+          queueManager.setExecutedRemote(this);
         },
         error -> {
           Timber.tag(TAG).i("error: %s", error);

@@ -43,7 +43,6 @@ public class QueueSupervisor {
 
     commandPool = new ThreadPoolExecutor(2, 30, 60, TimeUnit.SECONDS, new ArrayBlockingQueue<>(2), threadFactory, rejectionHandler);
 
-
     SuperVisor monitor = new SuperVisor(commandPool, 3);
     Thread monitorThread = new Thread(monitor);
     monitorThread.start();

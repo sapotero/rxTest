@@ -63,15 +63,7 @@ public class ChangePerson extends AbstractCommand {
 
   @Override
   public void execute() {
-    loadSettings();
-
-    if ( queueManager.getConnected() ){
-      executeRemote();
-    } else {
-      executeLocal();
-    }
-    update();
-
+    queueManager.add(this);
   }
 
   @Override
@@ -81,36 +73,31 @@ public class ChangePerson extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    queueManager.add(this);
-    if ( callback != null ){
+    loadSettings();
+
+    int count = dataStore
+      .update(RDocumentEntity.class)
+      .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue() )
+      .set( RDocumentEntity.MD5, "" )
+      .set( RDocumentEntity.FROM_SIGN, true)
+      .set( RDocumentEntity.PROCESSED, true)
+      .set( RDocumentEntity.CHANGED, true)
+      .where(RDocumentEntity.UID.eq(UID.get()))
+      .get()
+      .value();
+
+    queueManager.setExecutedLocal(this);
+
+    if (callback != null ){
       callback.onCommandExecuteSuccess( getType() );
     }
 
   }
 
-  private void update() {
-    try {
-      dataStore
-        .update(RDocumentEntity.class)
-        .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue() )
-        .set( RDocumentEntity.MD5, "" )
-        .set( RDocumentEntity.FROM_SIGN, true)
-        .set( RDocumentEntity.PROCESSED, true)
-        .set( RDocumentEntity.CHANGED, true)
-        .where(RDocumentEntity.UID.eq(UID.get()))
-        .get()
-        .call();
-
-      if (callback != null ){
-        callback.onCommandExecuteSuccess( getType() );
-      }
-    } catch (Exception e) {
-      Timber.tag(TAG).e( e );
-    }
-  }
-
   @Override
   public void executeRemote() {
+    loadSettings();
+
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
     Retrofit retrofit = new Retrofit.Builder()
@@ -150,10 +137,7 @@ public class ChangePerson extends AbstractCommand {
           Timber.tag(TAG).i("error: %s", data.getMessage());
           Timber.tag(TAG).i("type: %s", data.getType());
 
-          queueManager.remove(this);
-//          if (callback != null){
-//            callback.onCommandExecuteSuccess(getType());
-//          }
+          queueManager.setExecutedRemote(this);
         },
         error -> {
           if (callback != null){

@@ -4,7 +4,6 @@ import android.content.Context;
 
 import com.f2prateek.rx.preferences.Preference;
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -67,21 +66,17 @@ public class AddDecision extends AbstractCommand {
 
   @Override
   public void execute() {
-    loadSettings();
-
-    if ( queueManager.getConnected() ){
-      executeRemote();
-    } else {
-      executeLocal();
-    }
-    update();
-
+    queueManager.add(this);
   }
 
+  @Override
+  public String getType() {
+    return "add_decision";
+  }
 
-  public void update() {
-    try {
-//      RDocumentEntity document = (RDocumentEntity) decision.getDocument();
+  @Override
+  public void executeLocal() {
+    //      RDocumentEntity document = (RDocumentEntity) decision.getDocument();
 //      String decision_uid = decision.getUid();
 //      String document_uid = document.getUid();
 //
@@ -94,29 +89,15 @@ public class AddDecision extends AbstractCommand {
 //
 //      dataStore
 //        .update(decision).toObservable().subscribe();
-      if (callback != null ){
-        callback.onCommandExecuteSuccess( getType() );
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
-  @Override
-  public String getType() {
-    return "add_decision";
-  }
-
-  @Override
-  public void executeLocal() {
-    queueManager.add(this);
-    if ( callback != null ){
+    if (callback != null ){
       callback.onCommandExecuteSuccess( getType() );
     }
+    queueManager.setExecutedLocal(this);
   }
 
   @Override
   public void executeRemote() {
+    loadSettings();
 
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
@@ -157,24 +138,13 @@ public class AddDecision extends AbstractCommand {
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         data -> {
-          String data_JSON = new Gson().toJson(data);
-
-          Timber.tag(TAG).i("new id: %s", data_JSON );
-
-          try {
-            Decision new_decision = new Gson().fromJson( data_JSON, Decision.class );
-            Timber.tag(TAG).i("new decision: %s", new_decision );
-          } catch (JsonSyntaxException e) {
-            e.printStackTrace();
-          }
 
           if (callback != null ){
             callback.onCommandExecuteSuccess( getType() );
+            EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
           }
 
-          EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
-
-          update();
+          queueManager.setExecutedRemote(this);
         },
         error -> {
           Timber.tag(TAG).i("error: %s", error);

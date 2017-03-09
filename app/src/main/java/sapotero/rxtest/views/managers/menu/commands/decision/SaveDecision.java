@@ -73,39 +73,7 @@ public class SaveDecision extends AbstractCommand {
 
   @Override
   public void execute() {
-    loadSettings();
-
-    if ( queueManager.getConnected() ){
-      executeRemote();
-    } else {
-      executeLocal();
-    }
-    update();
-
-  }
-
-
-  public void update() {
-    try {
-//      RDocumentEntity document = (RDocumentEntity) decision.getDocument();
-//      String decision_uid = decision.getUid();
-//      String document_uid = document.getUid();
-//
-//      dataStore
-//        .update(RDocumentEntity.class)
-//        .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue())
-//        .where(RDocumentEntity.UID.eq( document_uid ))
-//        .get()
-//        .call();
-//
-//      dataStore
-//        .update(decision).toObservable().subscribe();
-      if (callback != null ){
-        callback.onCommandExecuteSuccess( getType() );
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    queueManager.add(this);
   }
 
   @Override
@@ -115,10 +83,10 @@ public class SaveDecision extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    queueManager.add(this);
     if ( callback != null ){
       callback.onCommandExecuteSuccess( getType() );
     }
+    queueManager.setExecutedLocal(this);
   }
 
   @Override
@@ -173,10 +141,10 @@ public class SaveDecision extends AbstractCommand {
 
           if (callback != null ){
             callback.onCommandExecuteSuccess( getType() );
+            EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
           }
-          update();
+          queueManager.setExecutedRemote(this);
 
-          EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
         },
         error -> {
           Timber.tag(TAG).i("error: %s", error);
