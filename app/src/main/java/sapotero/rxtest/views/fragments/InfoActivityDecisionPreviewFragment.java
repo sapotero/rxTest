@@ -41,6 +41,7 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -524,11 +525,18 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
 
           decision_spinner_adapter.clear();
 
-          for (RDecision rDecision: doc.getDecisions()) {//
-            RDecisionEntity decision = (RDecisionEntity) rDecision;
-            decision_spinner_adapter.add( new DecisionSpinnerItem( decision, decision.getSignerBlankText(), decision.getDate() ) );
+          List<DecisionSpinnerItem> unsorterd_decisions = new ArrayList<DecisionSpinnerItem>();
 
+
+          for (RDecision rDecision: doc.getDecisions()) {
+            RDecisionEntity decision = (RDecisionEntity) rDecision;
+            unsorterd_decisions.add( new DecisionSpinnerItem( decision, decision.getSignerBlankText(), decision.getDate() ) );
           }
+
+          Collections.sort(unsorterd_decisions, (o1, o2) -> o1.getDecision().getUid().compareTo( o2.getDecision().getUid() ));
+
+          decision_spinner_adapter.addAll( unsorterd_decisions );
+
 
 //           если есть резолюции, то отобразить первую
           if ( decision_spinner_adapter.size() > 0 ) {

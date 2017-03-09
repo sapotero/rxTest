@@ -52,6 +52,11 @@ public class DecisionSpinnerAdapter extends BaseAdapter {
     notifyDataSetChanged();
   }
 
+  public void addAll(List<DecisionSpinnerItem> items) {
+    decisions = items;
+    notifyDataSetChanged();
+  }
+
 
   @Override
   public long getItemId(int position) {
