@@ -82,39 +82,18 @@ public class AddToFolder extends AbstractCommand {
   public void executeLocal() {
     loadSettings();
 
-    dataStore
-      .select(RDocumentEntity.class)
+    Integer count = dataStore
+      .update(RDocumentEntity.class)
+      .set( RDocumentEntity.FAVORITES, true)
       .where(RDocumentEntity.UID.eq(document_id))
-      .get()
-      .toObservable()
-      .flatMap( doc -> Observable.just( doc.isFavorites() ) )
-      .subscribe( value -> {
-        Timber.tag(TAG).i("executeLocal for %s: favorites: %s",document_id, value);
-        try {
+      .get().value();
+    Timber.tag(TAG).w( "updated: %s", count );
 
-          if (value == null){
-            value = false;
-          }
+    queueManager.setExecutedLocal(this);
 
-          dataStore
-            .update(RDocumentEntity.class)
-            .set( RDocumentEntity.FAVORITES, !value)
-            .where(RDocumentEntity.UID.eq(document_id))
-            .get()
-            .call();
-
-
-          queueManager.setExecutedLocal(this);
-
-          if ( callback != null ){
-            callback.onCommandExecuteSuccess( getType() );
-          }
-
-
-        } catch (Exception e) {
-          Timber.tag(TAG).e("error executeLocal for %s [%s]: %s", document_id, getType(), e);
-        }
-      });
+    if ( callback != null ){
+      callback.onCommandExecuteSuccess( getType() );
+    }
   }
 
   @Override

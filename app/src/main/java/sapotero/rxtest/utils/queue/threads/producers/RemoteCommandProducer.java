@@ -14,7 +14,6 @@ public class RemoteCommandProducer implements Runnable, AutoCloseable {
   private String TAG = this.getClass().getSimpleName();
 
   public RemoteCommandProducer(Command command, Context context) {
-    Timber.tag(TAG).d( "command: %s", command.toString() );
 
     this.command = command;
     this.context = context;
@@ -26,9 +25,11 @@ public class RemoteCommandProducer implements Runnable, AutoCloseable {
   @Override
   public void run() {
     Timber.tag(TAG).i("start run");
-    remoteExecutor
-      .setCommand( command )
-      .execute();
+    if (command != null) {
+      remoteExecutor
+        .setCommand( command )
+        .execute();
+    }
   }
 
   @Override

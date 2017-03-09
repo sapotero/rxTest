@@ -6,7 +6,6 @@ import com.f2prateek.rx.preferences.Preference;
 
 import java.util.ArrayList;
 
-import io.requery.query.Scalar;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -83,11 +82,12 @@ public class RemoveFromFolder extends AbstractCommand {
   public void executeLocal() {
     loadSettings();
 
-    Scalar<Integer> count = dataStore
+    Integer count = dataStore
       .update(RDocumentEntity.class)
       .set( RDocumentEntity.FAVORITES, false)
       .where(RDocumentEntity.UID.eq(document_id))
-      .get();
+      .get().value();
+    Timber.tag(TAG).w( "updated: %s", count );
 
     queueManager.setExecutedLocal(this);
 

@@ -14,7 +14,6 @@ public class LocalCommandProducer implements Runnable, AutoCloseable {
   private String TAG = this.getClass().getSimpleName();
 
   public LocalCommandProducer(Command command, Context context) {
-    Timber.tag(TAG).d( "command: %s", command.toString() );
 
     this.command = command;
     this.context = context;
@@ -26,9 +25,11 @@ public class LocalCommandProducer implements Runnable, AutoCloseable {
   @Override
   public void run() {
     Timber.tag(TAG).i("start run");
-    localExecutor
-      .setCommand( command )
-      .execute();
+    if (command != null) {
+      localExecutor
+        .setCommand( command )
+        .execute();
+    }
   }
 
   @Override

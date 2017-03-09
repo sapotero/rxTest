@@ -11,10 +11,10 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import sapotero.rxtest.db.requery.models.queue.QueueEntity;
+import sapotero.rxtest.utils.queue.threads.handlers.ThreadRejectedExecutionHandler;
 import sapotero.rxtest.utils.queue.threads.producers.LocalCommandProducer;
 import sapotero.rxtest.utils.queue.threads.producers.RemoteCommandProducer;
 import sapotero.rxtest.utils.queue.threads.utils.SuperVisor;
-import sapotero.rxtest.utils.queue.utils.RejectedExecutionHandlerImpl;
 import sapotero.rxtest.views.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.views.managers.menu.interfaces.Command;
 import sapotero.rxtest.views.managers.menu.receivers.DocumentReceiver;
@@ -22,8 +22,6 @@ import sapotero.rxtest.views.managers.menu.utils.CommandParams;
 import timber.log.Timber;
 
 public class QueueSupervisor {
-
-
 
   private final Context context;
   private final CommandFactory commandFactory;
@@ -40,10 +38,10 @@ public class QueueSupervisor {
 
   private void start() {
 
-    RejectedExecutionHandlerImpl rejectionHandler = new RejectedExecutionHandlerImpl();
+    ThreadRejectedExecutionHandler rejectionHandler = new ThreadRejectedExecutionHandler();
     ThreadFactory threadFactory = Executors.defaultThreadFactory();
 
-    commandPool = new ThreadPoolExecutor(2, 4, 10, TimeUnit.SECONDS, new ArrayBlockingQueue<>(2), threadFactory, rejectionHandler);
+    commandPool = new ThreadPoolExecutor(2, 30, 60, TimeUnit.SECONDS, new ArrayBlockingQueue<>(2), threadFactory, rejectionHandler);
 
 
     SuperVisor monitor = new SuperVisor(commandPool, 3);
@@ -51,9 +49,6 @@ public class QueueSupervisor {
     monitorThread.start();
   }
 
-  public void stop(){
-    commandPool.shutdown();
-  }
 
   public Command create(QueueEntity task){
 
