@@ -67,7 +67,7 @@ import sapotero.rxtest.views.managers.menu.OperationManager;
 import sapotero.rxtest.views.managers.toolbar.ToolbarManager;
 import timber.log.Timber;
 
-public class InfoActivity extends AppCompatActivity implements InfoActivityDecisionPreviewFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, RoutePreviewFragment.OnFragmentInteractionListener, InfoCardDocumentsFragment.OnFragmentInteractionListener, InfoCardWebViewFragment.OnFragmentInteractionListener, InfoCardLinksFragment.OnFragmentInteractionListener, InfoCardFieldsFragment.OnFragmentInteractionListener, OperationManager.Callback{
+public class InfoActivity extends AppCompatActivity implements InfoActivityDecisionPreviewFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, RoutePreviewFragment.OnFragmentInteractionListener, InfoCardDocumentsFragment.OnFragmentInteractionListener, InfoCardWebViewFragment.OnFragmentInteractionListener, InfoCardLinksFragment.OnFragmentInteractionListener, InfoCardFieldsFragment.OnFragmentInteractionListener{
 
 
   @BindView(R.id.activity_info_preview_container) LinearLayout preview_container;
@@ -124,10 +124,24 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     ButterKnife.bind(this);
     EsdApplication.getComponent(this).inject(this);
 
-    operationManager.registerCallBack(this);
+
+
+
+
+  }
+
+  private void initInfoActivity() {
+    if (EventBus.getDefault().isRegistered(this)) {
+      EventBus.getDefault().unregister(this);
+    }
+    EventBus.getDefault().register(this);
 
     toolbarManager = new ToolbarManager( this, toolbar);
     toolbarManager.init();
+
+    loadingDialog = new MaterialDialog.Builder(this)
+      .title("Обновление данных...")
+      .progress(true, 0);
 
     loadSettings();
 
@@ -136,26 +150,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
     setTabContent();
     setPreview();
-
-    loadingDialog = new MaterialDialog.Builder(this)
-      .title("Обновление данных...")
-      .progress(true, 0);
-
-  }
-
-
-  private void setPreview() {
-    FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-
-    Timber.tag("INFO").v( "JOURNAL: %s | STATUS: %s", journal.getName(), status.getName() );
-
-    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || IS_PROCESSED.get()  ){
-      fragmentTransaction.add( R.id.activity_info_preview_container, new RoutePreviewFragment() );
-    } else {
-      fragmentTransaction.add( R.id.activity_info_preview_container, new InfoActivityDecisionPreviewFragment(toolbarManager) );
-    }
-
-    fragmentTransaction.commit();
   }
 
   private void setTabContent() {
@@ -166,7 +160,8 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
       dataStore
         .select(RFolderEntity.class)
-        .get().toObservable()
+        .get()
+        .toObservable()
         .observeOn(Schedulers.io())
         .subscribeOn(AndroidSchedulers.mainThread())
         .subscribe( folder -> {
@@ -200,6 +195,20 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
     tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
     tabLayout.setupWithViewPager(viewPager);
+  }
+
+  private void setPreview() {
+    FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+
+    Timber.tag("INFO").v( "JOURNAL: %s | STATUS: %s", journal.getName(), status.getName() );
+
+    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || IS_PROCESSED.get()  ){
+      fragmentTransaction.add( R.id.activity_info_preview_container, new RoutePreviewFragment() );
+    } else {
+      fragmentTransaction.add( R.id.activity_info_preview_container, new InfoActivityDecisionPreviewFragment(toolbarManager) );
+    }
+
+    fragmentTransaction.commit();
   }
 
   private void loadSettings() {
@@ -253,28 +262,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
     finish();
   }
-//
-//  @Override
-//  protected void onSaveInstanceState(Bundle outState) {
-//    super.onSaveInstanceState(outState);
-//
-//
-//    try {
-//      removeFragments();
-//    } catch (Exception e) {
-//      e.printStackTrace();
-//    }
-//  }
-//
-//  private void removeFragments() {
-//    FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-//
-//    for (Fragment fragment : getSupportFragmentManager().getFragments()){
-//      ft.remove(fragment);
-//    }
-//
-//    ft.commit();
-//  }
+
 
   @Override
   public void onFragmentInteraction(Uri uri) {
@@ -285,14 +273,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   protected void onResume() {
     super.onResume();
 
-    operationManager.registerCallBack(null);
-    operationManager.registerCallBack(this);
-
-    if (EventBus.getDefault().isRegistered(this)) {
-      EventBus.getDefault().unregister(this);
-    }
-    EventBus.getDefault().register(this);
-
+    initInfoActivity();
     updateCurrent();
 
   }
@@ -301,23 +282,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   public void onMessageEvent(MassInsertDoneEvent event) {
     Toast.makeText( getApplicationContext(), event.message, Toast.LENGTH_SHORT).show();
   }
-
-  /* OperationManager.Callback */
-  @Override
-  public void onExecuteSuccess(String command) {
-    Timber.tag(TAG).i("OperationManager.onExecuteSuccess %s", command);
-    toolbarManager.update(command);
-  }
-
-  @Override
-  public void onExecuteError() {
-    Timber.tag(TAG).i("OperationManager.onExecuteError");
-  }
-
-
-
-
-
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(SignDataResultEvent event) throws Exception {
@@ -426,6 +390,8 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   public void updateCurrent(){
     unsubscribe();
+
+//    jobManager.addJobInBackground(new SyncDocumentsJob( UID.get(), status ));
 
     subscription.add(
       Observable

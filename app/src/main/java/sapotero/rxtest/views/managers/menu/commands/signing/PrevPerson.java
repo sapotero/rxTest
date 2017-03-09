@@ -153,6 +153,8 @@ public class PrevPerson extends AbstractCommand {
           Timber.tag(TAG).i("error: %s", data.getMessage());
           Timber.tag(TAG).i("type: %s", data.getType());
 
+          queueManager.remove(this);
+
 //          if (callback != null){
 //            callback.onCommandExecuteSuccess(getType());
 //          }

@@ -5,7 +5,6 @@ import android.content.Context;
 import com.f2prateek.rx.preferences.Preference;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
@@ -95,8 +94,6 @@ public class AddToFolder extends AbstractCommand {
     try {
       queueManager.add(this);
 
-      updateFavorites();
-
     } catch (Exception e) {
       Timber.tag(TAG).i("executeLocal for %s: %s", getType(), e);
     }
@@ -137,9 +134,6 @@ public class AddToFolder extends AbstractCommand {
 
           queueManager.remove(this);
 
-          if (callback != null && Objects.equals(data.getType(), "warning")){
-            callback.onCommandExecuteSuccess( getType() );
-          }
         },
         error -> {
           if (callback != null){
@@ -171,6 +165,8 @@ public class AddToFolder extends AbstractCommand {
             .get()
             .call();
 
+
+          // 2 time
           if ( callback != null ){
             callback.onCommandExecuteSuccess( getType() );
           }

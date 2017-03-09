@@ -55,9 +55,6 @@ public class OperationManager implements CommandFactory.Callback {
 
     Timber.tag(TAG).i("execute star");
 
-    commandBuilder = new CommandFactory( EsdApplication.getContext() );
-    commandBuilder.registerCallBack(this);
-
     Command command = commandBuilder
       .withDocument( new DocumentReceiver( settings.getString("activity_main_menu.uid").get() ) )
       .withParams( params )

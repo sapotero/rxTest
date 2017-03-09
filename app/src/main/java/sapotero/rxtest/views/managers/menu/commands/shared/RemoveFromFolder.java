@@ -5,7 +5,6 @@ import android.content.Context;
 import com.f2prateek.rx.preferences.Preference;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
@@ -81,7 +80,9 @@ public class RemoveFromFolder extends AbstractCommand {
     } else {
       executeLocal();
     }
+
     updateFavorites();
+
   }
 
   @Override
@@ -92,9 +93,6 @@ public class RemoveFromFolder extends AbstractCommand {
   @Override
   public void executeLocal() {
     queueManager.add(this);
-    if ( callback != null ){
-      callback.onCommandExecuteSuccess( getType() );
-    }
   }
 
   @Override
@@ -132,11 +130,6 @@ public class RemoveFromFolder extends AbstractCommand {
 
           queueManager.remove(this);
 
-          updateFavorites();
-
-          if (callback != null && Objects.equals(data.getType(), "warning")){
-            callback.onCommandExecuteSuccess( getType() );
-          }
         },
         error -> {
           if (callback != null){

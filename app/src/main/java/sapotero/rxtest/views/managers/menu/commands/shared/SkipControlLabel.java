@@ -81,9 +81,6 @@ public class SkipControlLabel extends AbstractCommand {
   @Override
   public void executeLocal() {
     queueManager.add(this);
-    if ( callback != null ){
-      callback.onCommandExecuteSuccess( getType() );
-    }
   }
 
   @Override
@@ -122,9 +119,6 @@ public class SkipControlLabel extends AbstractCommand {
           Timber.tag(TAG).i("type: %s", data.getType());
 
           queueManager.remove(this);
-          if (callback != null){
-            callback.onCommandExecuteSuccess(getType());
-          }
         },
         error -> {
           if (callback != null){

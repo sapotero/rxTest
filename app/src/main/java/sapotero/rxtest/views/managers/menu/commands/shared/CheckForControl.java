@@ -81,8 +81,6 @@ public class CheckForControl extends AbstractCommand {
     try {
       queueManager.add(this);
 
-      updateControl();
-
     } catch (Exception e) {
       Timber.tag(TAG).i("executeLocal for %s: %s", getType(), e);
     }
@@ -124,10 +122,6 @@ public class CheckForControl extends AbstractCommand {
           Timber.tag(TAG).i("type: %s", data.getType());
 
           queueManager.remove(this);
-
-          if (callback != null){
-            callback.onCommandExecuteSuccess(getType());
-          }
         },
         error -> {
           if (callback != null){

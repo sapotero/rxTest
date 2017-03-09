@@ -32,8 +32,6 @@ import sapotero.rxtest.db.requery.models.decisions.RDecision;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.crypto.SignDataEvent;
-import sapotero.rxtest.events.decision.ApproveDecisionEvent;
-import sapotero.rxtest.events.decision.RejectDecisionEvent;
 import sapotero.rxtest.events.decision.ShowDecisionConstructor;
 import sapotero.rxtest.events.view.RemoveDocumentFromAdapterEvent;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
@@ -46,7 +44,7 @@ import sapotero.rxtest.views.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.views.managers.menu.utils.CommandParams;
 import timber.log.Timber;
 
-public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
+public class ToolbarManager  implements SelectOshsDialogFragment.Callback, OperationManager.Callback {
 
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject RxSharedPreferences settings;
@@ -77,12 +75,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
   private RDocumentEntity doc;
   private Preference<String> CURRENT_USER_ID;
 
-  // FIX переделать
-  // пока глобальная переменная чтобы иметь возможность в диалогах
-  // использовать операцию с параметрами без заморочек
-//  private CommandFactory.Operation operation;
-
-  public ToolbarManager(Context context, Toolbar toolbar) {
+  public ToolbarManager (Context context, Toolbar toolbar) {
     this.context = context;
     this.toolbar = toolbar;
     EsdApplication.getComponent(context).inject(this);
@@ -93,6 +86,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
     setListener();
 
     buildDialog();
+
+    operationManager.registerCallBack(this);
 
     // FIX починить и убрать из релиза
     getFirstForLenovo();
@@ -439,81 +434,92 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
 
     Timber.tag(TAG).w("update %s", command );
 
-    if ( Objects.equals(command, "check_for_control") ) {
-      EventBus.getDefault().post( new ShowSnackEvent("Отметки для постановки на контроль успешно обновлены.") );
-    }
-
-    if ( Objects.equals(command, "change_person") ) {
-      toolbar.getMenu().clear();
-      toolbar.inflateMenu(R.menu.info_menu);
-      EventBus.getDefault().post( new ShowSnackEvent("Операция передачи успешно завершена") );
-      EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
-
-    }
-
-    if ( Objects.equals(command, "next_person") ) {
-      toolbar.getMenu().clear();
-      toolbar.inflateMenu(R.menu.info_menu);
-      EventBus.getDefault().post( new ShowSnackEvent("Операция подписания успешно завершена") );
-      EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
-      EventBus.getDefault().post( new ShowNextDocumentEvent() );
-    }
-
-    if ( Objects.equals(command, "prev_person") ) {
-      toolbar.getMenu().clear();
-      toolbar.inflateMenu(R.menu.info_menu);
-      EventBus.getDefault().post( new ShowSnackEvent("Операция отклонения успешно завершена") );
-      EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
-      EventBus.getDefault().post( new ShowNextDocumentEvent() );
-    }
-
-    if ( Objects.equals(command, "to_the_primary_consideration") ) {
-      toolbar.getMenu().clear();
-      toolbar.inflateMenu(R.menu.info_menu);
-      EventBus.getDefault().post( new ShowSnackEvent("Операция передачи первичного рассмотрения успешно завершена") );
-      EventBus.getDefault().post( new ShowNextDocumentEvent() );
-      EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
-    }
-
-
-    if ( Objects.equals(command, "approve_decision") ) {
-
-      if ( !hasActiveDecision() ){
-        toolbar.getMenu().clear();
-        toolbar.inflateMenu(R.menu.info_menu);
-      } else {
+    switch (command){
+      case "check_for_control":
+        EventBus.getDefault().post( new ShowSnackEvent("Отметки для постановки на контроль успешно обновлены.") );
         invalidate();
-        EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
-      }
-//      EventBus.getDefault().post( new ShowSnackEvent("Резолюция утверждена") );
-      EventBus.getDefault().post( new ApproveDecisionEvent() );
-      EventBus.getDefault().post( new ShowNextDocumentEvent() );
-    }
-
-    if ( Objects.equals(command, "reject_decision") ) {
-
-      if ( !hasActiveDecision() ){
+        break;
+      case "add_to_folder":
+        EventBus.getDefault().post( new ShowSnackEvent("Добавление в избранное.") );
+        invalidate();
+        break;
+      case "remove_from_folder":
+        EventBus.getDefault().post( new ShowSnackEvent("Удаление из избранного.") );
+        invalidate();
+        break;
+      default:
         toolbar.getMenu().clear();
         toolbar.inflateMenu(R.menu.info_menu);
-      }
-//      EventBus.getDefault().post( new ShowSnackEvent("Резолюция отклонена") );
-      EventBus.getDefault().post( new RejectDecisionEvent() );
-      EventBus.getDefault().post( new ShowNextDocumentEvent() );
-
+        EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
+        EventBus.getDefault().post( new ShowNextDocumentEvent() );
+        break;
     }
+//
+//    if ( Objects.equals(command, "check_for_control") || Objects.equals(command, "add_to_folder") ) {
+//      EventBus.getDefault().post( new ShowSnackEvent("Отметки для постановки на контроль успешно обновлены.") );
+//      invalidate();
+//    } else {
+//      if ( Objects.equals(command, "change_person") ) {
+//        toolbar.getMenu().clear();
+//        toolbar.inflateMenu(R.menu.info_menu);
+////        EventBus.getDefault().post( new ShowSnackEvent("Операция передачи успешно завершена") );
+//
+//
+//      }
+//
+//      if ( Objects.equals(command, "next_person") ) {
+//        toolbar.getMenu().clear();
+//        toolbar.inflateMenu(R.menu.info_menu);
+////        EventBus.getDefault().post( new ShowSnackEvent("Операция подписания успешно завершена") );
+//
+//
+//      }
+//
+//      if ( Objects.equals(command, "prev_person") ) {
+//        toolbar.getMenu().clear();
+//        toolbar.inflateMenu(R.menu.info_menu);
+////        EventBus.getDefault().post( new ShowSnackEvent("Операция отклонения успешно завершена") );
+//      }
+//
+//      if ( Objects.equals(command, "to_the_primary_consideration") ) {
+//        toolbar.getMenu().clear();
+//        toolbar.inflateMenu(R.menu.info_menu);
+////        EventBus.getDefault().post( new ShowSnackEvent("Операция передачи первичного рассмотрения успешно завершена") );
+//      }
+//
+//
+//      if ( Objects.equals(command, "approve_decision") ) {
+//
+//        if ( !hasActiveDecision() ){
+//          toolbar.getMenu().clear();
+//          toolbar.inflateMenu(R.menu.info_menu);
+//        } else {
+//          invalidate();
+//        }
+////      EventBus.getDefault().post( new ShowSnackEvent("Резолюция утверждена") );
+////        EventBus.getDefault().post( new ApproveDecisionEvent() );
+//      }
+//
+//      if ( Objects.equals(command, "reject_decision") ) {
+//
+//        if ( !hasActiveDecision() ){
+//          toolbar.getMenu().clear();
+//          toolbar.inflateMenu(R.menu.info_menu);
+//        }
+////      EventBus.getDefault().post( new ShowSnackEvent("Резолюция отклонена") );
+////        EventBus.getDefault().post( new RejectDecisionEvent() );
+//
+//      }
+//
+//      if ( Objects.equals(command, "from_the_report") ) {
+//        toolbar.getMenu().clear();
+//        toolbar.inflateMenu(R.menu.info_menu);
+////        EventBus.getDefault().post( new ShowSnackEvent("Операция исполнения без ответа успешно завершена") );
+//      }
 
-    if ( Objects.equals(command, "from_the_report") ) {
-      toolbar.getMenu().clear();
-      toolbar.inflateMenu(R.menu.info_menu);
-      EventBus.getDefault().post( new ShowSnackEvent("Операция исполнения без ответа успешно завершена") );
-      EventBus.getDefault().post( new ShowNextDocumentEvent() );
-      EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
-    }
 
-    // допилить удаление документов после операций
 
-    invalidate();
-
+//    }
   }
 
   private Boolean hasActiveDecision(){
@@ -779,6 +785,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
   // OSHS selector
   @Override
   public void onSearchSuccess(Oshs user, CommandFactory.Operation operation) {
+    Timber.tag("onSearchSuccess").i("user: %s", user.getName());
     CommandParams params = new CommandParams();
     params.setPerson( user.getId() );
     operationManager.execute( operation, params );
@@ -789,4 +796,37 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback {
 
   }
 
+
+
+  /* OperationManager.Callback */
+  @Override
+  public void onExecuteSuccess(String command) {
+    Timber.tag(TAG).w("update %s", command );
+
+    switch (command){
+      case "check_for_control":
+        EventBus.getDefault().post( new ShowSnackEvent("Отметки для постановки на контроль успешно обновлены.") );
+        invalidate();
+        break;
+      case "add_to_folder":
+        EventBus.getDefault().post( new ShowSnackEvent("Добавление в избранное.") );
+        invalidate();
+        break;
+      case "remove_from_folder":
+        EventBus.getDefault().post( new ShowSnackEvent("Удаление из избранного.") );
+        invalidate();
+        break;
+      default:
+        toolbar.getMenu().clear();
+        toolbar.inflateMenu(R.menu.info_menu);
+        EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
+        EventBus.getDefault().post( new ShowNextDocumentEvent() );
+        break;
+    }
+  }
+
+  @Override
+  public void onExecuteError() {
+
+  }
 }
