@@ -4,9 +4,12 @@ import android.content.Context;
 
 import com.github.pwittchen.reactivenetwork.library.ReactiveNetwork;
 
+import java.util.List;
+
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.models.queue.QueueEntity;
 import sapotero.rxtest.utils.queue.db.QueueDBManager;
 import sapotero.rxtest.utils.queue.threads.QueueSupervisor;
 import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
@@ -15,10 +18,8 @@ import timber.log.Timber;
 
 public class QueueManager {
 
-
-
   private final Context context;
-  private final QueueDBManager DBManager;
+  private final QueueDBManager dBManager;
   private QueueSupervisor supervisor;
 
   private Boolean isConnectedToInternet = false;
@@ -30,20 +31,14 @@ public class QueueManager {
     isConnectedToInternet();
 
     supervisor = new QueueSupervisor(context);
-    DBManager  = new QueueDBManager(context);
-
-
+    dBManager = new QueueDBManager(context);
   }
-
 
   public void add(Command command){
-    DBManager.add( command );
-    supervisor.add(command);
+    dBManager.add( command );
+//    supervisor.add(command);
   }
 
-  public void clean(){
-    DBManager.clear();
-  }
 
   public void remove(AbstractCommand command) {
     Timber.e("remove %s", command);
@@ -62,9 +57,35 @@ public class QueueManager {
     return isConnectedToInternet;
   }
 
-
   public void getUncompleteTasks(){
     Timber.e("main > getUncompleteTasks");
-    DBManager.getUncompleteTasks();
+
+    List<QueueEntity> uncompleteLocalTasks  = dBManager.getUncompleteLocalTasks();
+    List<QueueEntity> uncompleteRemoteTasks = dBManager.getUncompleteRemoteTasks();
+
+    if ( uncompleteLocalTasks.size() > 0 ){
+      for ( QueueEntity command : uncompleteLocalTasks ) {
+        supervisor.add(command, true);
+      }
+    }
+
+    if ( uncompleteRemoteTasks.size() > 0 ){
+      for ( QueueEntity command : uncompleteRemoteTasks ) {
+        supervisor.add(command, false);
+      }
+    }
+
+  }
+
+  public void setExecutedLocal(Command command) {
+    dBManager.setExecutedLocal(command);
+  }
+
+  public void setExecutedRemote(Command command) {
+    dBManager.setExecutedRemote(command);
+  }
+
+  public void removeAll() {
+    dBManager.removeAll();
   }
 }

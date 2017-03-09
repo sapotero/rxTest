@@ -39,8 +39,6 @@ public class AddToFolder extends AbstractCommand {
     super(context);
     this.context = context;
     this.document = document;
-
-    queueManager.add(this);
   }
 
   public String getInfo(){
@@ -71,17 +69,8 @@ public class AddToFolder extends AbstractCommand {
 
   @Override
   public void execute() {
-    loadSettings();
-
     Timber.tag(TAG).i("execute for %s - %s: %s",getType(),document_id, queueManager.getConnected());
-
-    if ( queueManager.getConnected() ){
-      executeRemote();
-    } else {
-      executeLocal();
-    }
-    updateFavorites();
-
+    queueManager.add(this);
   }
 
   @Override
@@ -91,16 +80,47 @@ public class AddToFolder extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    try {
-      queueManager.add(this);
+    loadSettings();
 
-    } catch (Exception e) {
-      Timber.tag(TAG).i("executeLocal for %s: %s", getType(), e);
-    }
+    dataStore
+      .select(RDocumentEntity.class)
+      .where(RDocumentEntity.UID.eq(document_id))
+      .get()
+      .toObservable()
+      .flatMap( doc -> Observable.just( doc.isFavorites() ) )
+      .subscribe( value -> {
+        Timber.tag(TAG).i("executeLocal for %s: favorites: %s",document_id, value);
+        try {
+
+          if (value == null){
+            value = false;
+          }
+
+          dataStore
+            .update(RDocumentEntity.class)
+            .set( RDocumentEntity.FAVORITES, !value)
+            .where(RDocumentEntity.UID.eq(document_id))
+            .get()
+            .call();
+
+
+          queueManager.setExecutedLocal(this);
+
+          if ( callback != null ){
+            callback.onCommandExecuteSuccess( getType() );
+          }
+
+
+        } catch (Exception e) {
+          Timber.tag(TAG).e("error executeLocal for %s [%s]: %s", document_id, getType(), e);
+        }
+      });
   }
 
   @Override
   public void executeRemote() {
+    loadSettings();
+
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
@@ -132,8 +152,7 @@ public class AddToFolder extends AbstractCommand {
           Timber.tag(TAG).i("error: %s", data.getMessage());
           Timber.tag(TAG).i("type: %s", data.getType());
 
-          queueManager.remove(this);
-
+          queueManager.setExecutedRemote(this);
         },
         error -> {
           if (callback != null){
@@ -143,39 +162,6 @@ public class AddToFolder extends AbstractCommand {
       );
   }
 
-  private void updateFavorites() {
-    dataStore
-      .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq(document_id))
-      .get()
-      .toObservable()
-      .flatMap( doc -> Observable.just( doc.isFavorites() ) )
-      .subscribe( value -> {
-        Timber.tag(TAG).i("executeLocal for %s: favorites: %s",document_id, value);
-        try {
-
-          if (value == null){
-            value = false;
-          }
-
-          dataStore
-            .update(RDocumentEntity.class)
-            .set( RDocumentEntity.FAVORITES, !value)
-            .where(RDocumentEntity.UID.eq(document_id))
-            .get()
-            .call();
-
-
-          // 2 time
-          if ( callback != null ){
-            callback.onCommandExecuteSuccess( getType() );
-          }
-
-        } catch (Exception e) {
-          Timber.tag(TAG).e("error executeLocal for %s [%s]: %s", document_id, getType(), e);
-        }
-      });
-  }
 
   @Override
   public void withParams(CommandParams params) {

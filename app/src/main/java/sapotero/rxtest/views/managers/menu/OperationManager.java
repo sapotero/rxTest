@@ -9,7 +9,7 @@ import javax.inject.Inject;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.views.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.views.managers.menu.interfaces.Command;
-import sapotero.rxtest.views.managers.menu.invokers.RemoteExecutor;
+import sapotero.rxtest.views.managers.menu.invokers.OperationExecutor;
 import sapotero.rxtest.views.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.views.managers.menu.utils.CommandParams;
 import sapotero.rxtest.views.managers.menu.utils.OperationHistory;
@@ -23,7 +23,7 @@ public class OperationManager implements CommandFactory.Callback {
 
   private  CommandFactory commandBuilder;
   private final OperationHistory histrory;
-  private final RemoteExecutor remoteExecutor;
+  private final OperationExecutor operationExecutor;
 
   private Context context;
   private String uid;
@@ -42,8 +42,8 @@ public class OperationManager implements CommandFactory.Callback {
   public OperationManager(Context context) {
     EsdApplication.getComponent(context).inject(this);
 
-    histrory       = new OperationHistory(context);
-    remoteExecutor = new RemoteExecutor();
+    histrory          = new OperationHistory(context);
+    operationExecutor = new OperationExecutor();
 
     commandBuilder = new CommandFactory(context);
     commandBuilder.registerCallBack(this);
@@ -53,7 +53,7 @@ public class OperationManager implements CommandFactory.Callback {
 
   public void execute(CommandFactory.Operation operation, CommandParams params) {
 
-    Timber.tag(TAG).i("execute star");
+    Timber.tag(TAG).i("execute start");
 
     Command command = commandBuilder
       .withDocument( new DocumentReceiver( settings.getString("activity_main_menu.uid").get() ) )
@@ -62,13 +62,12 @@ public class OperationManager implements CommandFactory.Callback {
 
     Timber.tag(TAG).i("command get");
 
-//    Timber.tag(TAG).i("COMMAND: %s [%s] | %s", operation, command, new Gson().toJson(params) );
-
     if (command != null) {
-      remoteExecutor
+      operationExecutor
         .setCommand( command )
         .execute();
     }
+
     Timber.tag(TAG).i("execute end");
   }
 

@@ -1,4 +1,4 @@
-package sapotero.rxtest.db.requery.models;
+package sapotero.rxtest.db.requery.models.queue;
 
 import io.requery.Column;
 import io.requery.Entity;
@@ -13,7 +13,7 @@ public abstract class Queue {
   @Generated
   int _id;
 
-  @Index("queue_uuid_index")
+  @Index("db_queue_uuid_index")
   @Column(unique = true)
   String uuid;
 
@@ -21,9 +21,15 @@ public abstract class Queue {
   String  params;
 
   @Column(value="false")
+  Boolean local;
+
+  @Column(value="false")
+  Boolean remote;
+
+  @Column(value="false")
   Boolean executed;
 
-  @Index("queue_createdAt_index")
+  @Index("db_queue_createdAt_index")
   int  createdAt;
 
 }

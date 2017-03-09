@@ -6,6 +6,7 @@ import com.f2prateek.rx.preferences.Preference;
 
 import java.util.ArrayList;
 
+import io.requery.query.Scalar;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -39,8 +40,6 @@ public class RemoveFromFolder extends AbstractCommand {
     super(context);
     this.context = context;
     this.document = document;
-
-    queueManager.add(this);
   }
 
   public String getInfo(){
@@ -71,18 +70,8 @@ public class RemoveFromFolder extends AbstractCommand {
 
   @Override
   public void execute() {
-    loadSettings();
-
     Timber.tag(TAG).i("execute for %s - %s: %s",getType(),document_id, queueManager.getConnected());
-
-    if ( queueManager.getConnected() ){
-      executeRemote();
-    } else {
-      executeLocal();
-    }
-
-    updateFavorites();
-
+    queueManager.add(this);
   }
 
   @Override
@@ -92,22 +81,34 @@ public class RemoveFromFolder extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    queueManager.add(this);
+    loadSettings();
+
+    Scalar<Integer> count = dataStore
+      .update(RDocumentEntity.class)
+      .set( RDocumentEntity.FAVORITES, false)
+      .where(RDocumentEntity.UID.eq(document_id))
+      .get();
+
+
+    if ( callback != null ){
+      callback.onCommandExecuteSuccess( getType() );
+    }
   }
 
   @Override
   public void executeRemote() {
+    loadSettings();
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( HOST.get() + "v3/operations/" )
-      .client( okHttpClient )
+      .baseUrl(HOST.get() + "v3/operations/")
+      .client(okHttpClient)
       .build();
 
-    OperationService operationService = retrofit.create( OperationService.class );
+    OperationService operationService = retrofit.create(OperationService.class);
 
     ArrayList<String> uids = new ArrayList<>();
-    uids.add( UID.get() );
+    uids.add(UID.get());
 
     Observable<OperationResult> info = operationService.shared(
       getType(),
@@ -120,8 +121,8 @@ public class RemoveFromFolder extends AbstractCommand {
       null
     );
 
-    info.subscribeOn( Schedulers.computation() )
-      .observeOn( AndroidSchedulers.mainThread() )
+    info.subscribeOn(Schedulers.computation())
+      .observeOn(AndroidSchedulers.mainThread())
       .subscribe(
         data -> {
           Timber.tag(TAG).i("ok: %s", data.getOk());
@@ -132,28 +133,11 @@ public class RemoveFromFolder extends AbstractCommand {
 
         },
         error -> {
-          if (callback != null){
+          if (callback != null) {
             callback.onCommandExecuteError();
           }
         }
       );
-  }
-
-  private void updateFavorites() {
-    try {
-      dataStore
-        .update(RDocumentEntity.class)
-        .set( RDocumentEntity.FAVORITES, false)
-        .where(RDocumentEntity.UID.eq(document_id))
-        .get()
-        .call();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
-    if ( callback != null ){
-      callback.onCommandExecuteSuccess( getType() );
-    }
   }
 
   @Override

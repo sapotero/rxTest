@@ -5,7 +5,6 @@ import android.content.Context;
 import com.google.gson.Gson;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -17,10 +16,8 @@ import io.requery.rx.SingleEntityStore;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.db.requery.models.QueueEntity;
-import sapotero.rxtest.views.managers.menu.factories.CommandFactory;
+import sapotero.rxtest.db.requery.models.queue.QueueEntity;
 import sapotero.rxtest.views.managers.menu.interfaces.Command;
-import sapotero.rxtest.views.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.views.managers.menu.utils.CommandParams;
 import timber.log.Timber;
 
@@ -28,15 +25,12 @@ public class QueueDBManager {
   @Inject SingleEntityStore<Persistable> dataStore;
 
   private final Context context;
-  private final CommandFactory commandFactory;
   private String TAG = this.getClass().getSimpleName();
 
   public QueueDBManager(Context context) {
     EsdApplication.getComponent(context).inject(this);
 
     this.context = context;
-//    this.commandFactory = new CommandFactory(context);
-    this.commandFactory = CommandFactory.getInstance();
   }
 
   public void add(Command command){
@@ -45,23 +39,21 @@ public class QueueDBManager {
 
       CommandParams params = command.getParams();
 
-      Gson gson = new Gson();
-      Calendar calendar  = Calendar.getInstance();
-      Date now = calendar.getTime();
+      if ( params.getUuid() != null && !exist( params.getUuid() ) ){
 
-      QueueEntity task = new QueueEntity();
-      task.setUuid( params.getUuid() );
-      task.setCommand( command.getClass().getCanonicalName() );
-      task.setParams(  gson.toJson(params) );
-      task.setExecuted( false );
-      task.setCreatedAt((int) new Timestamp(now.getTime()).getTime());
+        Gson gson = new Gson();
+        Calendar calendar  = Calendar.getInstance();
+        Date now = calendar.getTime();
 
-      int count = dataStore
-        .count(QueueEntity.class)
-        .where(QueueEntity.UUID.eq(params.getUuid()) )
-        .get().value();
+        QueueEntity task = new QueueEntity();
+        task.setUuid( params.getUuid() );
+        task.setCommand( command.getClass().getCanonicalName() );
+        task.setParams(  gson.toJson(params) );
+        task.setExecuted( false );
+        task.setLocal( false );
+        task.setRemote( false );
+        task.setCreatedAt((int) new Timestamp(now.getTime()).getTime());
 
-      if (count == 0){
         dataStore
           .insert(task)
           .toObservable()
@@ -73,56 +65,72 @@ public class QueueDBManager {
       } else {
         Timber.tag(TAG).v("UUID exist!");
       }
-
-
     }
   }
 
-  public ArrayList<Command> getUncompleteTasks() {
-    Timber.tag(TAG).e("getUncompleteTasks");
-    ArrayList<Command> tasks = new ArrayList<>();
+  private Boolean exist(String uuid) {
+    return dataStore
+          .count(QueueEntity.class)
+          .where(QueueEntity.UUID.eq( uuid ) )
+          .get().value() > 0;
+  }
 
-    List<QueueEntity> uncompleted = dataStore
+  public List<QueueEntity> getUncompleteRemoteTasks() {
+    return dataStore
       .select(QueueEntity.class)
-      .where(QueueEntity.EXECUTED.eq(false))
+      .where(QueueEntity.REMOTE.eq(false))
+      .and( QueueEntity.LOCAL.eq(true) )
       .get().toList();
-
-    for ( QueueEntity task : uncompleted ) {
-
-      Command command = create(task);
-      Timber.tag("getUncompleteTasks").v("%s", new Gson().toJson(task) );
-
-    }
-
-
-    return tasks;
   }
 
-  public Command create(QueueEntity task){
-
-    CommandParams params = new Gson().fromJson( task.getParams(), CommandParams.class );
-    String type = task.getCommand();
-
-    // FIX переделать build
-    Command command = commandFactory
-      .withDocument( new DocumentReceiver( params.getDocument() ) )
-      .withParams( params )
-      .build( CommandFactory.Operation.getOperation( task.getCommand() ) );
-
-    if (command != null) {
-      Timber.tag("create").v("Command %s", command.getParams().toString() );
-      command.execute();
-    }
-
-
-    return command;
+  public List<QueueEntity> getUncompleteLocalTasks() {
+    return dataStore
+      .select(QueueEntity.class)
+      .where(QueueEntity.LOCAL.eq(false))
+      .get().toList();
   }
 
-  public void clear(){
-    Integer count = dataStore
+  public void setExecutedLocal(Command command) {
+    if (command != null && command.getParams() != null) {
+      CommandParams params = command.getParams();
+
+      if ( params.getUuid() != null && exist( params.getUuid() ) ){
+        int count = dataStore
+          .update(QueueEntity.class)
+          .set( QueueEntity.LOCAL, true )
+          .get()
+          .value();
+
+        if ( count > 0 ){
+          Timber.tag(TAG).i( "[%s] - updated local", params.getUuid() );
+        }
+      }
+    }
+  }
+
+  public void setExecutedRemote(Command command) {
+    if (command != null && command.getParams() != null) {
+      CommandParams params = command.getParams();
+
+      if ( params.getUuid() != null && exist( params.getUuid() ) ){
+        int count = dataStore
+          .update(QueueEntity.class)
+          .set( QueueEntity.REMOTE, true )
+          .get()
+          .value();
+
+        if ( count > 0 ){
+          Timber.tag(TAG).i( "[%s] - updated local", params.getUuid() );
+        }
+      }
+    }
+  }
+
+  public void removeAll() {
+    int count = dataStore
       .delete(QueueEntity.class)
-      .where(QueueEntity.EXECUTED.eq(false))
+      .where(QueueEntity.UUID.ne(""))
       .get().value();
-    Timber.tag(TAG).d( "Deleted: %s", count );
+    Timber.tag(TAG).i("DELETED: %s", count);
   }
 }

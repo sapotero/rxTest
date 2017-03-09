@@ -5,6 +5,17 @@
     tools:context="net.taptools.android.sportshistory.PlayerProfileActivity">
 
     <item
+        android:id="@+id/removeQueue"
+        app:showAsAction="always|withText"
+        android:icon="@drawable/dismiss"
+        android:title=""/>
+    <item
+        android:id="@+id/checkQueue"
+        app:showAsAction="always|withText"
+        android:icon="@drawable/repeat"
+        android:title=""/>
+
+    <item
         android:id="@+id/online"
         app:showAsAction="always|withText"
         android:icon="@drawable/icon_offline"

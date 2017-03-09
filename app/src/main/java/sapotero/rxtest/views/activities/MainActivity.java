@@ -355,8 +355,16 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     toolbar.inflateMenu(R.menu.activity_main_menu);
     toolbar.setOnMenuItemClickListener(item -> {
       switch (item.getItemId()) {
-        case R.id.reload:
+
+        case R.id.removeQueue:
+          queue.removeAll();
+          break;
+        case R.id.checkQueue:
           queue.getUncompleteTasks();
+          break;
+
+        case R.id.reload:
+
           updateByStatus();
 
           if (menuBuilder.getItem() != MainMenuItem.PROCESSED || menuBuilder.getItem() != MainMenuItem.FAVORITES ){
