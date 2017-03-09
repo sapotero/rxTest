@@ -21,6 +21,7 @@ public class QueueManager {
   private final Context context;
   private final QueueDBManager dBManager;
   private QueueSupervisor supervisor;
+  private final String TAG = this.getClass().getSimpleName();
 
   private Boolean isConnectedToInternet = false;
 
@@ -36,12 +37,11 @@ public class QueueManager {
 
   public void add(Command command){
     dBManager.add( command );
-//    supervisor.add(command);
   }
 
 
   public void remove(AbstractCommand command) {
-    Timber.e("remove %s", command);
+    Timber.tag(TAG).e("remove %s", command);
   }
 
   private void isConnectedToInternet() {
@@ -58,10 +58,11 @@ public class QueueManager {
   }
 
   public void getUncompleteTasks(){
-    Timber.e("main > getUncompleteTasks");
 
     List<QueueEntity> uncompleteLocalTasks  = dBManager.getUncompleteLocalTasks();
     List<QueueEntity> uncompleteRemoteTasks = dBManager.getUncompleteRemoteTasks();
+
+    Timber.tag(TAG).e("getUncompleteTasks\nlocal: %s\nremote: %s\n", uncompleteLocalTasks.size(), uncompleteRemoteTasks.size() );
 
     if ( uncompleteLocalTasks.size() > 0 ){
       for ( QueueEntity command : uncompleteLocalTasks ) {

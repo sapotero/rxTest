@@ -38,8 +38,6 @@ public class CheckForControl extends AbstractCommand {
     super(context);
     this.context = context;
     this.document = document;
-
-    queueManager.add(this);
   }
 
   public String getInfo(){
@@ -60,14 +58,10 @@ public class CheckForControl extends AbstractCommand {
 
   @Override
   public void execute() {
-    loadSettings();
 
-    if ( queueManager.getConnected() ){
-      executeRemote();
-    } else {
-      executeLocal();
-    }
-    updateControl();
+
+    Timber.tag(TAG).i("execute for %s - %s",getType(),document_id);
+    queueManager.add(this);
 
   }
 
@@ -78,16 +72,49 @@ public class CheckForControl extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    try {
-      queueManager.add(this);
+    loadSettings();
 
-    } catch (Exception e) {
-      Timber.tag(TAG).i("executeLocal for %s: %s", getType(), e);
-    }
+    dataStore
+      .select(RDocumentEntity.class)
+      .where(RDocumentEntity.UID.eq( document_id ))
+      .get()
+      .toObservable()
+      .flatMap( doc -> Observable.just( doc.isControl() ) )
+      .subscribe(
+        value -> {
+          Timber.tag(TAG).i("executeLocal for %s: CONTROL: %s",document_id, value);
+          try {
+
+            if (value == null){
+              value = false;
+            }
+
+            dataStore
+              .update(RDocumentEntity.class)
+              .set( RDocumentEntity.CONTROL, !value)
+              .where(RDocumentEntity.UID.eq(document_id))
+              .get()
+              .call();
+
+            queueManager.setExecutedLocal(this);
+            if ( callback != null ){
+              callback.onCommandExecuteSuccess( getType() );
+            }
+
+          } catch (Exception e) {
+            Timber.tag(TAG).e("error executeLocal for %s [%s]: %s", document_id, getType(), e);
+          }
+        },
+        error -> {
+          Timber.tag(TAG).i("error %s",error);
+        });
+
   }
 
   @Override
   public void executeRemote() {
+    loadSettings();
+
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
     Retrofit retrofit = new Retrofit.Builder()
@@ -121,7 +148,7 @@ public class CheckForControl extends AbstractCommand {
           Timber.tag(TAG).i("error: %s", data.getMessage());
           Timber.tag(TAG).i("type: %s", data.getType());
 
-          queueManager.remove(this);
+          queueManager.setExecutedRemote(this);
         },
         error -> {
           if (callback != null){
@@ -130,42 +157,6 @@ public class CheckForControl extends AbstractCommand {
         }
       );
 
-  }
-
-  private void updateControl() {
-    dataStore
-      .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq( document_id ))
-      .get()
-      .toObservable()
-      .flatMap( doc -> Observable.just( doc.isControl() ) )
-      .subscribe(
-        value -> {
-          Timber.tag(TAG).i("executeLocal for %s: CONTROL: %s",document_id, value);
-          try {
-
-            if (value == null){
-              value = false;
-            }
-
-            dataStore
-              .update(RDocumentEntity.class)
-              .set( RDocumentEntity.CONTROL, !value)
-              .where(RDocumentEntity.UID.eq(document_id))
-              .get()
-              .call();
-
-            if ( callback != null ){
-              callback.onCommandExecuteSuccess( getType() );
-            }
-
-          } catch (Exception e) {
-            Timber.tag(TAG).e("error executeLocal for %s [%s]: %s", document_id, getType(), e);
-          }
-        },
-        error -> {
-          Timber.tag(TAG).i("error %s",error);
-        });
   }
 
   public CheckForControl withDocumentId(String uid) {

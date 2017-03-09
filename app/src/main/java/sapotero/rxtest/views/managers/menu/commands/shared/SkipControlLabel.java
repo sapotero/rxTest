@@ -37,8 +37,6 @@ public class SkipControlLabel extends AbstractCommand {
     super(context);
     this.context = context;
     this.document = document;
-
-    queueManager.add(this);
   }
 
   public String getInfo(){
@@ -64,13 +62,7 @@ public class SkipControlLabel extends AbstractCommand {
 
   @Override
   public void execute() {
-    loadSettings();
-
-    if ( queueManager.getConnected() ){
-      executeRemote();
-    } else {
-      executeLocal();
-    }
+    queueManager.add(this);
   }
 
   @Override
@@ -80,11 +72,13 @@ public class SkipControlLabel extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    queueManager.add(this);
+    loadSettings();
+    queueManager.setExecutedLocal(this);
   }
 
   @Override
   public void executeRemote() {
+    loadSettings();
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
     Retrofit retrofit = new Retrofit.Builder()
@@ -118,7 +112,7 @@ public class SkipControlLabel extends AbstractCommand {
           Timber.tag(TAG).i("error: %s", data.getMessage());
           Timber.tag(TAG).i("type: %s", data.getType());
 
-          queueManager.remove(this);
+          queueManager.setExecutedRemote(this);
         },
         error -> {
           if (callback != null){

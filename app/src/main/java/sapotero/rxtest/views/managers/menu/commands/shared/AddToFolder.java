@@ -69,7 +69,7 @@ public class AddToFolder extends AbstractCommand {
 
   @Override
   public void execute() {
-    Timber.tag(TAG).i("execute for %s - %s: %s",getType(),document_id, queueManager.getConnected());
+    Timber.tag(TAG).i("execute for %s - %s",getType(),document_id);
     queueManager.add(this);
   }
 

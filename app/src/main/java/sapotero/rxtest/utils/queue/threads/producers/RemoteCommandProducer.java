@@ -31,15 +31,6 @@ public class RemoteCommandProducer implements Runnable, AutoCloseable {
       .execute();
   }
 
-  private void processCommand() {
-    try {
-      Timber.tag(TAG).e( "star: %s", command.toString() );
-      Thread.sleep(5000);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
-  }
-
   @Override
   public void close() throws Exception {
     Timber.tag(TAG).e( "close" );

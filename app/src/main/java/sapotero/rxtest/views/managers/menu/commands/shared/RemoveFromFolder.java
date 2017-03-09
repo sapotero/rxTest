@@ -89,6 +89,8 @@ public class RemoveFromFolder extends AbstractCommand {
       .where(RDocumentEntity.UID.eq(document_id))
       .get();
 
+    queueManager.setExecutedLocal(this);
+
 
     if ( callback != null ){
       callback.onCommandExecuteSuccess( getType() );
@@ -129,7 +131,7 @@ public class RemoveFromFolder extends AbstractCommand {
           Timber.tag(TAG).i("error: %s", data.getMessage());
           Timber.tag(TAG).i("type: %s", data.getType());
 
-          queueManager.remove(this);
+          queueManager.setExecutedRemote(this);
 
         },
         error -> {
