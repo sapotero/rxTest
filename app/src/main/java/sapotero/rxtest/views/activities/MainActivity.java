@@ -28,6 +28,7 @@ import com.mikepenz.material_design_iconic_typeface_library.MaterialDesignIconic
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.DrawerBuilder;
+import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
 import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
@@ -91,7 +92,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @Inject RxSharedPreferences settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
-  // test
   @Inject QueueManager queue;
 
   @BindView(R.id.toolbar) Toolbar toolbar;
@@ -153,6 +153,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private final int SETTINGS_VIEW_TYPE_APPROVE = 18;
   private final int SETTINGS_VIEW = 20;
   private final int SETTINGS_DECISION_TEMPLATES = 21;
+  private final int SETTINGS_LOG = 99;
 
   private final int SETTINGS_REJECTION_TEMPLATES = 22;
 
@@ -502,7 +503,11 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
           .withIdentifier(SETTINGS_DECISION_TEMPLATES),
         new SecondaryDrawerItem()
           .withName("Версия приложения: " + version )
-          .withSelectable(false)
+          .withSelectable(false),
+        new DividerDrawerItem(),
+        new SecondaryDrawerItem()
+          .withIdentifier(SETTINGS_LOG)
+          .withName("Лог")
       )
       .withOnDrawerItemClickListener(
         (view, position, drawerItem) -> {
@@ -557,6 +562,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
               break;
             case SETTINGS_REJECTION_TEMPLATES:
               activity = SettingsTemplatesActivity.class;
+              break;
+            case SETTINGS_LOG:
+              activity = LogActivity.class;
               break;
             default:
               activity = null;

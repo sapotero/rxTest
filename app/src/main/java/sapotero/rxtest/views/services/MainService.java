@@ -83,6 +83,7 @@ import sapotero.rxtest.utils.cryptopro.KeyStoreType;
 import sapotero.rxtest.utils.cryptopro.PinCheck;
 import sapotero.rxtest.utils.cryptopro.ProviderType;
 import sapotero.rxtest.utils.cryptopro.wrapper.CMSSign;
+import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.managers.DataLoaderManager;
 import sapotero.rxtest.views.menu.fields.MainMenuItem;
 import timber.log.Timber;
@@ -97,6 +98,7 @@ public class MainService extends Service {
   @Inject JobManager jobManager;
   @Inject SingleEntityStore<Persistable> dataStore;
 
+  @Inject QueueManager queue;
 
   private Preference<String> TOKEN;
   private Preference<String> CURRENT_USER;
@@ -655,6 +657,8 @@ public class MainService extends Service {
       subscription.unsubscribe();
     }
 
+
+
     subscription.add(
       Observable
         .interval( 120, TimeUnit.SECONDS )
@@ -662,6 +666,17 @@ public class MainService extends Service {
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(interval -> {
           dataLoaderInterface.updateByStatus(MainMenuItem.ALL);
+
+        })
+    );
+
+    subscription.add(
+      Observable
+        .interval( 10, TimeUnit.SECONDS )
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(interval -> {
+          queue.getUncompleteTasks();
         })
     );
   }

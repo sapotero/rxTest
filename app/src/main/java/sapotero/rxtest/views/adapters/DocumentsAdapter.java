@@ -76,6 +76,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
   private int lastPosition = -1;
 
+
   @Override
   public void call(List<Document> documents) {
 

@@ -21,6 +21,7 @@ import sapotero.rxtest.views.activities.DocumentImageFullScreenActivity;
 import sapotero.rxtest.views.activities.DocumentInfocardFullScreenActivity;
 import sapotero.rxtest.views.activities.InfoActivity;
 import sapotero.rxtest.views.activities.InfoNoMenuActivity;
+import sapotero.rxtest.views.activities.LogActivity;
 import sapotero.rxtest.views.activities.LoginActivity;
 import sapotero.rxtest.views.activities.MainActivity;
 import sapotero.rxtest.views.activities.SettingsActivity;
@@ -86,6 +87,7 @@ public interface EsdComponent {
 
 
 
+  void inject(LogActivity activity);
   void inject(SettingsViewFragment activity);
 
   void inject(EsdApplication activity);

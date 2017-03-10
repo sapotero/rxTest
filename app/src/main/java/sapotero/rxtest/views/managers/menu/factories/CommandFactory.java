@@ -62,6 +62,11 @@ public class CommandFactory implements AbstractCommand.Callback{
         command.withParams(params);
         return command;
       }
+
+      @Override
+      public String getRussinaName() {
+        return "Возврат с доклада";
+      }
     },
     RETURN_TO_THE_PRIMARY_CONSIDERATION {
       @Override
@@ -71,6 +76,10 @@ public class CommandFactory implements AbstractCommand.Callback{
         command.registerCallBack(instance);
         command.withParams(params);
         return command;
+      }
+      @Override
+      public String getRussinaName() {
+        return "Отклонения документа с возвратом на первичное рассмотрение";
       }
     },
     DELEGATE_PERFORMANCE {
@@ -84,6 +93,10 @@ public class CommandFactory implements AbstractCommand.Callback{
         command.withParams(params);
         return command;
       }
+      @Override
+      public String getRussinaName() {
+        return "Передача исполнения";
+      }
     },
     TO_THE_APPROVAL_PERFORMANCE {
       @Override
@@ -95,6 +108,10 @@ public class CommandFactory implements AbstractCommand.Callback{
           .registerCallBack(instance);
         command.withParams(params);
         return command;
+      }
+      @Override
+      public String getRussinaName() {
+        return "Исполнение без ответа";
       }
     },
     TO_THE_PRIMARY_CONSIDERATION {
@@ -108,6 +125,10 @@ public class CommandFactory implements AbstractCommand.Callback{
         command.withParams(params);
         return command;
       }
+      @Override
+      public String getRussinaName() {
+        return "Передачи первичного рассмотрения";
+      }
     },
     APPROVAL_CHANGE_PERSON {
       @Override
@@ -119,6 +140,10 @@ public class CommandFactory implements AbstractCommand.Callback{
           .registerCallBack(instance);
         command.withParams(params);
         return command;
+      }
+      @Override
+      public String getRussinaName() {
+        return "Передача согласования";
       }
     },
     APPROVAL_NEXT_PERSON {
@@ -132,6 +157,10 @@ public class CommandFactory implements AbstractCommand.Callback{
         command.withParams(params);
         return command;
       }
+      @Override
+      public String getRussinaName() {
+        return "Передача согласования документа следующему в маршруте ДЛ";
+      }
     },
     APPROVAL_PREV_PERSON {
       @Override
@@ -143,6 +172,10 @@ public class CommandFactory implements AbstractCommand.Callback{
           .registerCallBack(instance);
         command.withParams(params);
         return command;
+      }
+      @Override
+      public String getRussinaName() {
+        return "Передача согласования документа предыдущему в маршруте ДЛ";
       }
     },
     SIGNING_CHANGE_PERSON {
@@ -156,6 +189,10 @@ public class CommandFactory implements AbstractCommand.Callback{
         command.withParams(params);
         return command;
       }
+      @Override
+      public String getRussinaName() {
+        return "Передача подписания";
+      }
     },
     SIGNING_NEXT_PERSON {
       @Override
@@ -167,6 +204,10 @@ public class CommandFactory implements AbstractCommand.Callback{
           .registerCallBack(instance);
         command.withParams(params);
         return command;
+      }
+      @Override
+      public String getRussinaName() {
+        return "Передача подписания документа предыдущему в маршруте ДЛ";
       }
     },
     SIGNING_PREV_PERSON {
@@ -180,6 +221,10 @@ public class CommandFactory implements AbstractCommand.Callback{
         command.withParams(params);
         return command;
       }
+      @Override
+      public String getRussinaName() {
+        return "Передача подписания документа предыдущему в маршруте ДЛ";
+      }
     },
     ADD_TO_FOLDER {
       @Override
@@ -191,6 +236,10 @@ public class CommandFactory implements AbstractCommand.Callback{
           .withDocumentId( params.getDocument() )
           .registerCallBack(instance);
         return command;
+      }
+      @Override
+      public String getRussinaName() {
+        return "Добавление в избранное";
       }
     },
     REMOVE_FROM_FOLDER {
@@ -204,6 +253,10 @@ public class CommandFactory implements AbstractCommand.Callback{
           .registerCallBack(instance);
         return command;
       }
+      @Override
+      public String getRussinaName() {
+        return "Удаление из избранного";
+      }
     },
     CHECK_FOR_CONTROL {
       @Override
@@ -216,17 +269,29 @@ public class CommandFactory implements AbstractCommand.Callback{
         
         return command;
       }
+      @Override
+      public String getRussinaName() {
+        return "Установка/удаление отметки о необходимости постановки на контроль";
+      }
     },
     SKIP_CONTROL_LABEL {
       @Override
       Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
         return null;
       }
+      @Override
+      public String getRussinaName() {
+        return "Установка/удаление отметки о необходимости постановки на контроль";
+      }
     },
     INCORRECT {
       @Override
       Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
         return null;
+      }
+      @Override
+      public String getRussinaName() {
+        return "Операция заглушка для тестов";
       }
     },
     SAVE_DECISION {
@@ -242,6 +307,10 @@ public class CommandFactory implements AbstractCommand.Callback{
         command.withParams(params);
         return command;
       }
+      @Override
+      public String getRussinaName() {
+        return "Сохранение резолюции";
+      }
     },
     NEW_DECISION {
       @Override
@@ -254,6 +323,10 @@ public class CommandFactory implements AbstractCommand.Callback{
 
         command.withParams(params);
         return command;
+      }
+      @Override
+      public String getRussinaName() {
+        return "Создание резолюции";
       }
     },
     APPROVE_DECISION {
@@ -268,6 +341,10 @@ public class CommandFactory implements AbstractCommand.Callback{
 
         command.withParams(params);
         return command;
+      }
+      @Override
+      public String getRussinaName() {
+        return "Подписание резолюции";
       }
     },
     REJECT_DECISION {
@@ -289,6 +366,10 @@ public class CommandFactory implements AbstractCommand.Callback{
         command.withParams(params);
         Timber.tag("CommandFactory").w("REJECT_DECISION after params" );
         return command;
+      }
+      @Override
+      public String getRussinaName() {
+        return "Отклонение резолюции";
       }
     };
 
@@ -369,6 +450,7 @@ public class CommandFactory implements AbstractCommand.Callback{
     }
 
     abstract Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params);
+    public abstract String getRussinaName();
   };
 
   public CommandFactory(Context context) {

@@ -4,9 +4,8 @@ import android.content.Context;
 
 import com.google.gson.Gson;
 
-import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -42,8 +41,10 @@ public class QueueDBManager {
       if ( params.getUuid() != null && !exist( params.getUuid() ) ){
 
         Gson gson = new Gson();
-        Calendar calendar  = Calendar.getInstance();
-        Date now = calendar.getTime();
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy в HH:mm");
+        Calendar cal = Calendar.getInstance();
+        String date = dateFormat.format(cal.getTime());
 
         QueueEntity task = new QueueEntity();
         task.setUuid( params.getUuid() );
@@ -52,7 +53,7 @@ public class QueueDBManager {
         task.setExecuted( false );
         task.setLocal( false );
         task.setRemote( false );
-        task.setCreatedAt((int) new Timestamp(now.getTime()).getTime());
+        task.setCreatedAt( date );
 
         dataStore
           .insert(task)

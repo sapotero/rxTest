@@ -8,11 +8,13 @@
         android:id="@+id/removeQueue"
         app:showAsAction="always|withText"
         android:icon="@drawable/dismiss"
+        android:visible="false"
         android:title=""/>
     <item
         android:id="@+id/checkQueue"
         app:showAsAction="always|withText"
         android:icon="@drawable/repeat"
+        android:visible="false"
         android:title=""/>
 
     <item

@@ -28,14 +28,13 @@
             </intent-filter>
         </activity>
         <activity
-            android:exported="true"
             android:name=".views.activities.MainActivity"
+            android:exported="true"
             android:screenOrientation="landscape">
         </activity>
         <activity
             android:name=".views.activities.InfoActivity"
-            android:screenOrientation="landscape"
-            >
+            android:screenOrientation="landscape">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".views.activities.MainActivity"/>
@@ -54,15 +53,28 @@
             android:exported="true">
         </service>
 
-        <activity android:screenOrientation="landscape" android:name=".views.activities.SettingsActivity">
+        <activity
+            android:name=".views.activities.SettingsActivity"
+            android:screenOrientation="landscape">
         </activity>
-        <activity android:screenOrientation="landscape" android:exported="true" android:name=".views.activities.DecisionConstructorActivity">
+        <activity
+            android:name=".views.activities.DecisionConstructorActivity"
+            android:exported="true"
+            android:screenOrientation="landscape">
         </activity>
-        <activity android:screenOrientation="landscape" android:name=".views.activities.DocumentImageFullScreenActivity">
+        <activity
+            android:name=".views.activities.DocumentImageFullScreenActivity"
+            android:screenOrientation="landscape">
         </activity>
-        <activity android:screenOrientation="landscape" android:name=".views.activities.DocumentInfocardFullScreenActivity">
+        <activity
+            android:name=".views.activities.DocumentInfocardFullScreenActivity"
+            android:screenOrientation="landscape">
         </activity>
-        <activity android:screenOrientation="landscape" android:name=".views.activities.SettingsTemplatesActivity">
+        <activity
+            android:name=".views.activities.SettingsTemplatesActivity"
+            android:screenOrientation="landscape">
+        </activity>
+        <activity android:name=".views.activities.LogActivity">
         </activity>
     </application>
 

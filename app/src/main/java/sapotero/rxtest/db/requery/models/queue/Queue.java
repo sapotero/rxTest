@@ -30,6 +30,6 @@ public abstract class Queue {
   Boolean executed;
 
   @Index("db_queue_createdAt_index")
-  int  createdAt;
+  String  createdAt;
 
 }

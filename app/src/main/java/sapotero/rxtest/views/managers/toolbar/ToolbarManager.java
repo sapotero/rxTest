@@ -806,15 +806,12 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     switch (command){
       case "check_for_control":
         EventBus.getDefault().post( new ShowSnackEvent("Отметки для постановки на контроль успешно обновлены.") );
-        invalidate();
         break;
       case "add_to_folder":
         EventBus.getDefault().post( new ShowSnackEvent("Добавление в избранное.") );
-        invalidate();
         break;
       case "remove_from_folder":
         EventBus.getDefault().post( new ShowSnackEvent("Удаление из избранного.") );
-        invalidate();
         break;
       default:
         toolbar.getMenu().clear();
@@ -823,6 +820,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         EventBus.getDefault().post( new ShowNextDocumentEvent() );
         break;
     }
+
+    invalidate();
   }
 
   @Override

@@ -9,7 +9,6 @@ import android.webkit.WebView;
 
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
-import com.google.gson.Gson;
 
 import javax.inject.Inject;
 
@@ -75,30 +74,42 @@ public class DocumentInfocardFullScreenActivity extends AppCompatActivity {
   }
 
   private void setDocument() {
-    Gson gson = new Gson();
-    Preference<String> data = settings.getString("document.infoCard");
-    String document = data.get();
-
     Preference<String> UID = settings.getString("activity_main_menu.uid");
 
-    RDocumentEntity doc = dataStore
+    dataStore
       .select(RDocumentEntity.class)
       .where(RDocumentEntity.UID.eq( UID.get() ))
-      .get().first();
-    document = doc.getInfoCard();
+      .get()
+      .toSelfObservable()
+      .subscribe(
+        data -> {
+          RDocumentEntity doc;
 
-    try {
-      if ( document != null ){
+          if (data != null) {
+            doc = data.firstOrNull();
 
-        String htmlData = "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />" + new String(Base64.decode( document, Base64.DEFAULT) );
-        webview.loadDataWithBaseURL("file:///android_asset/", htmlData, "text/html", "UTF-8", null);
-        webview.getSettings().setBuiltInZoomControls(false);
-        webview.getSettings().setDisplayZoomControls(false);
-        webview.setBackgroundColor( getResources().getColor(R.color.md_grey_50) );
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+            String card = doc.getInfoCard();
+
+            try {
+              if ( card != null ){
+
+                String htmlData = "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />" + new String(Base64.decode( card, Base64.DEFAULT) );
+                webview.loadDataWithBaseURL("file:///android_asset/", htmlData, "text/html", "UTF-8", null);
+                webview.getSettings().setBuiltInZoomControls(false);
+                webview.getSettings().setDisplayZoomControls(false);
+                webview.setBackgroundColor( getResources().getColor(R.color.md_grey_50) );
+              }
+            } catch (Exception e) {
+              e.printStackTrace();
+            }
+
+          }
+        },
+        error -> {
+          Timber.tag(TAG).e(error);
+        }
+      );
+
 
     webSettings = webview.getSettings();
     webSettings.setDefaultFontSize(FONT_SIZE);

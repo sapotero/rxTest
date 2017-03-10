@@ -223,7 +223,6 @@
     <string name="stepper_auth_dc_pin">ПИН-код</string>
 
 
-
     <string name="searchview_image_back">Back</string>
     <string name="searchview_voice_cancel">Voice Cancel</string>
     <string name="searchview_text_hint">Hint</string>
@@ -246,7 +245,6 @@
 
     <!--<string name="decision_add_people">\u2000Добавить исполнителя</string>-->
     <string name="decision_add_people">Добавить исполнителя</string>
-
 
 
     <!-- //FIX ПОЧИСТИТЬ ЭТО-->
