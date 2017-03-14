@@ -44,6 +44,11 @@ public class LogActivity extends AppCompatActivity {
     ButterKnife.bind(this);
     EsdApplication.getComponent(this).inject(this);
 
+  }
+
+  @Override
+  protected void onResume() {
+    super.onResume();
     populateView();
   }
 

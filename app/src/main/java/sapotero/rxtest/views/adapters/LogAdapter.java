@@ -1,6 +1,7 @@
 package sapotero.rxtest.views.adapters;
 
 import android.content.Context;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -50,8 +51,10 @@ public class LogAdapter extends RecyclerView.Adapter<LogAdapter.QueueViewHolder>
       viewHolder.id.setText( item.getUuid() );
       viewHolder.date.setText( item.getCreatedAt() );
       viewHolder.title.setText( operation.getRussinaName() );
-      viewHolder.remote.setChecked( item.isRemote() );
-      viewHolder.local.setChecked( item.isLocal() );
+      viewHolder.remote.setText( item.isRemote() ? "Выполнено" : "Не выполнено" );
+      viewHolder.remote.setTextColor(ContextCompat.getColor(mContext, item.isRemote() ? R.color.md_green_600 : R.color.md_red_600 ));
+
+      viewHolder.operation.setChecked( item.isLocal() );
 
       viewHolder.cv.setOnClickListener(view -> {
         Toast.makeText(mContext, " onClick : " + item.getUuid(), Toast.LENGTH_SHORT).show();
@@ -89,8 +92,8 @@ public class LogAdapter extends RecyclerView.Adapter<LogAdapter.QueueViewHolder>
     private TextView date;
     private CardView cv;
     private TextView title;
-    private CheckBox local;
-    private CheckBox remote;
+    private CheckBox operation;
+    private TextView remote;
 
     public QueueViewHolder(View itemView) {
       super(itemView);
@@ -98,8 +101,8 @@ public class LogAdapter extends RecyclerView.Adapter<LogAdapter.QueueViewHolder>
       id     = (TextView)itemView.findViewById(R.id.log_operation_id);
       date   = (TextView)itemView.findViewById(R.id.log_operation_date);
       title  = (TextView)itemView.findViewById(R.id.log_operation_name);
-      local  = (CheckBox)itemView.findViewById(R.id.log_executed_local);
-      remote = (CheckBox)itemView.findViewById(R.id.log_executed_remote);
+      remote = (TextView)itemView.findViewById(R.id.log_executed_remote);
+      operation = (CheckBox)itemView.findViewById(R.id.log_executed_operation);
     }
   }
 
