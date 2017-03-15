@@ -66,6 +66,7 @@ import sapotero.rxtest.db.requery.query.DBQueryBuilder;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.bus.GetDocumentInfoEvent;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
+import sapotero.rxtest.events.service.UpdateAllDocumentsEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.events.view.RemoveDocumentFromAdapterEvent;
 import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
@@ -228,6 +229,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     if ( settings.getString("is_first_run").get() == null ){
       settings.getString("is_first_run").set("false");
     }
+
+    EventBus.getDefault().post( new UpdateAllDocumentsEvent());
   }
 
   public void isConnected(){

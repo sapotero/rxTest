@@ -89,6 +89,7 @@ public class SaveDecision extends AbstractCommand {
 
   @Override
   public void executeRemote() {
+    loadSettings();
 
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 

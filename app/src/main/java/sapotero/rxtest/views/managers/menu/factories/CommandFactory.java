@@ -6,7 +6,7 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.views.managers.menu.commands.approval.ChangePerson;
 import sapotero.rxtest.views.managers.menu.commands.approval.NextPerson;
-import sapotero.rxtest.views.managers.menu.commands.consideration.PrimaryConsideration;
+import sapotero.rxtest.views.managers.menu.commands.primary_consideration.PrimaryConsideration;
 import sapotero.rxtest.views.managers.menu.commands.decision.AddDecision;
 import sapotero.rxtest.views.managers.menu.commands.decision.ApproveDecision;
 import sapotero.rxtest.views.managers.menu.commands.decision.RejectDecision;

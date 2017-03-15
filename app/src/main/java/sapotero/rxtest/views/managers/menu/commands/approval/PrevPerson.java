@@ -19,6 +19,7 @@ import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.views.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.views.managers.menu.utils.CommandParams;
+import sapotero.rxtest.views.services.MainService;
 import timber.log.Timber;
 
 public class PrevPerson extends AbstractCommand {
@@ -118,6 +119,12 @@ public class PrevPerson extends AbstractCommand {
     String comment = null;
     if ( params.getComment() != null ){
       comment = params.getComment();
+    }
+
+    try {
+      sign = MainService.getFakeSign( context, "12341234" );
+    } catch (Exception e) {
+      e.printStackTrace();
     }
 
     Observable<OperationResult> info = operationService.approval(

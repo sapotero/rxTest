@@ -69,6 +69,7 @@ import sapotero.rxtest.events.crypto.SignDataWrongPinEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateUnprocessedDocumentsEvent;
 import sapotero.rxtest.events.service.AuthServiceAuthEvent;
+import sapotero.rxtest.events.service.UpdateAllDocumentsEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckFailEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckSuccesEvent;
@@ -138,6 +139,9 @@ public class MainService extends Service {
 
     dataLoaderInterface = new DataLoaderManager(getApplicationContext());
 
+
+    settings.getBoolean("SIGN_WITH_DC").set( false );
+
     Provider[] providers = Security.getProviders();
 
 
@@ -151,17 +155,17 @@ public class MainService extends Service {
     }
     initJavaProviders();
 
-    for (int i = 0; i != providers.length; i++) {
-      Timber.e("Name: %s |  Version: %s", providers[i].getName(), providers[i].getVersion());
-    }
-
     // 4. Инициируем объект для управления выбором типа контейнера (Настройки).
     KeyStoreType.init(this);
 
     // 5. Инициируем объект для управления выбором типа провайдера (Настройки).
     ProviderType.init(this);
 
-    addKey();
+
+    if ( settings.getString("is_first_run").get() == null ) {
+      addKey();
+    }
+
     aliases( KeyStoreType.currentType(), ProviderType.currentProviderType() );
 
     isConnected();
@@ -403,8 +407,6 @@ public class MainService extends Service {
       }
     }
 
-
-
     return aliasesList;
 
   }
@@ -567,6 +569,9 @@ public class MainService extends Service {
 
       SIGN = enc.encode(signature);
 
+      settings.getString("START_UP_SIGN").set( SIGN );
+      settings.getBoolean("SIGN_WITH_DC").set( true );
+
       dataLoaderInterface.tryToSignWithDc( SIGN );
 
 //
@@ -614,6 +619,41 @@ public class MainService extends Service {
     }
   }
 
+  public static String getFakeSign(Context context, String password) throws Exception {
+
+    ContainerAdapter adapter = new ContainerAdapter(aliasesList.get(0), null, aliasesList.get(0), null);
+
+    adapter.setProviderType(ProviderType.currentProviderType());
+    adapter.setClientPassword( password.toCharArray() );
+    adapter.setResources( context.getResources());
+
+
+    String newtrustStorePath = context.getApplicationInfo().dataDir + File.separator + BKSTrustStore.STORAGE_DIRECTORY + File.separator + BKSTrustStore.STORAGE_FILE_TRUST;
+
+    adapter.setTrustStoreProvider(BouncyCastleProvider.PROVIDER_NAME);
+    adapter.setTrustStoreType(BKSTrustStore.STORAGE_TYPE);
+
+    adapter.setTrustStoreStream(new FileInputStream(newtrustStorePath));
+    adapter.setTrustStorePassword(BKSTrustStore.STORAGE_PASSWORD);
+
+    PinCheck pinCheck = new PinCheck(adapter);
+    Boolean pinValid = pinCheck.check();
+
+    String result = "";
+
+    if (pinValid) {
+      CMSSign sign = new CMSSign(true, adapter, null);
+      sign.getResult(null);
+
+      byte[] signature = sign.getSignature();
+      Encoder enc = new Encoder();
+      result = enc.encode(signature);
+    }
+
+    return result;
+
+  }
+
   public void isConnected(){
     ReactiveNetwork.observeInternetConnectivity()
       .subscribeOn(Schedulers.io())
@@ -657,28 +697,28 @@ public class MainService extends Service {
       subscription.unsubscribe();
     }
 
+    if ( settings.getString("is_first_run").get() != null ){
+      subscription.add(
+        Observable
+          .interval( 120, TimeUnit.SECONDS )
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe(interval -> {
+            dataLoaderInterface.updateByStatus(MainMenuItem.ALL);
 
+          })
+      );
 
-    subscription.add(
-      Observable
-        .interval( 120, TimeUnit.SECONDS )
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(interval -> {
-          dataLoaderInterface.updateByStatus(MainMenuItem.ALL);
-
-        })
-    );
-
-    subscription.add(
-      Observable
-        .interval( 10, TimeUnit.SECONDS )
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(interval -> {
-          queue.getUncompleteTasks();
-        })
-    );
+      subscription.add(
+        Observable
+          .interval( 10, TimeUnit.SECONDS )
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe(interval -> {
+            queue.getUncompleteTasks();
+          })
+      );
+    }
   }
 
 
@@ -753,11 +793,21 @@ public class MainService extends Service {
 
 
 
-  @Subscribe(threadMode = ThreadMode.MAIN)
+  @Subscribe(threadMode = ThreadMode.BACKGROUND)
   public void onMessageEvent(UpdateDocumentEvent event) throws Exception {
     EventBus.getDefault().post( new UpdateCurrentInfoActivityEvent() );
     dataLoaderInterface.updateDocument(event.uid);
+  }
 
+  @Subscribe(threadMode = ThreadMode.BACKGROUND)
+  public void onMessageEvent(UpdateAllDocumentsEvent event) throws Exception {
+    EventBus.getDefault().post( new UpdateCurrentInfoActivityEvent() );
+    updateAll();
+    try {
+      Timber.tag("SIGN").w( "%s", getFakeSign( getApplicationContext(), "123456" ) );
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
 

@@ -26,6 +26,7 @@ import sapotero.rxtest.retrofit.models.wrapper.DecisionWrapper;
 import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.views.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.views.managers.menu.utils.CommandParams;
+import sapotero.rxtest.views.services.MainService;
 import timber.log.Timber;
 
 public class RejectDecision extends AbstractCommand {
@@ -180,6 +181,16 @@ public class RejectDecision extends AbstractCommand {
     formated_decision.setApproved(false);
     formated_decision.setCanceled(true);
     formated_decision.setDocumentUid(null);
+
+    String sign = null;
+
+    try {
+      sign = MainService.getFakeSign( context, "12341234" );
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    formated_decision.setSign(sign);
+
 
     if (params.getComment() != null){
       formated_decision.setComment( String.format( "Причина отклонения: %s", params.getComment() ) );

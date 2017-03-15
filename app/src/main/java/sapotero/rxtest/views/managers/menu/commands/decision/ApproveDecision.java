@@ -25,6 +25,7 @@ import sapotero.rxtest.retrofit.models.wrapper.DecisionWrapper;
 import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.views.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.views.managers.menu.utils.CommandParams;
+import sapotero.rxtest.views.services.MainService;
 import timber.log.Timber;
 
 public class ApproveDecision extends AbstractCommand {
@@ -166,10 +167,19 @@ public class ApproveDecision extends AbstractCommand {
       .client( okHttpClient )
       .build();
 
+    String sign = null;
+
+    try {
+      sign = MainService.getFakeSign( context, "12341234" );
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
     Decision _decision = params.getDecisionModel();
 //    _decision.setDocumentUid( document.getUid() );
     _decision.setDocumentUid( null );
     _decision.setApproved(true);
+    _decision.setSign( sign );
 
     DecisionWrapper wrapper = new DecisionWrapper();
     wrapper.setDecision(_decision);

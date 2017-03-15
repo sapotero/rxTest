@@ -803,6 +803,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   public void onExecuteSuccess(String command) {
     Timber.tag(TAG).w("update %s", command );
 
+    toolbar.getMenu().clear();
+
     switch (command){
       case "check_for_control":
         EventBus.getDefault().post( new ShowSnackEvent("Отметки для постановки на контроль успешно обновлены.") );
@@ -814,7 +816,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         EventBus.getDefault().post( new ShowSnackEvent("Удаление из избранного.") );
         break;
       default:
-        toolbar.getMenu().clear();
+
         toolbar.inflateMenu(R.menu.info_menu);
         EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
         EventBus.getDefault().post( new ShowNextDocumentEvent() );

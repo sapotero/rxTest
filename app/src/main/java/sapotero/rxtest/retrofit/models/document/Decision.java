@@ -85,7 +85,15 @@ public class Decision implements Serializable {
 
   @SerializedName("sign")
   @Expose
-  private String sign = "";
+  private String sign = null;
+
+  public String getSign() {
+    return sign;
+  }
+
+  public void setSign(String sign) {
+    this.sign = sign;
+  }
 
 
   public String getSignerText() {

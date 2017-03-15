@@ -61,6 +61,7 @@ import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.views.menu.builders.ButtonBuilder;
 import sapotero.rxtest.views.menu.fields.MainMenuButton;
 import sapotero.rxtest.views.menu.fields.MainMenuItem;
+import sapotero.rxtest.views.services.MainService;
 import sapotero.rxtest.views.utils.TDmodel;
 import timber.log.Timber;
 
@@ -559,9 +560,28 @@ public class DataLoaderManager {
 
     Timber.tag(TAG).e("UPDATE BY STATUS: %s", items.getName() );
 
+    String sign = "";
+
+    try {
+      sign = MainService.getFakeSign(context, "12341234");
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    Map<String, Object> map = new HashMap<>();
+    map.put( "sign", sign );
+
+    RequestBody json = RequestBody.create(
+      MediaType.parse("application/json"),
+      new JSONObject( map ).toString()
+    );
+
+    Observable<AuthSignToken> authSubscription = settings.getBoolean("SIGN_WITH_DC").get() == null ? auth.getAuth( LOGIN.get(), PASSWORD.get() ) : auth.getAuthBySign(json);
+
+
     switch ( items ){
       case FAVORITES:
-        auth.getAuth( LOGIN.get(), PASSWORD.get() )
+        authSubscription
           .subscribeOn( Schedulers.io() )
           .observeOn( AndroidSchedulers.mainThread() )
           .subscribe(
@@ -576,7 +596,7 @@ public class DataLoaderManager {
           );
         break;
       case PROCESSED:
-        auth.getAuth( LOGIN.get(), PASSWORD.get() )
+        authSubscription
           .subscribeOn( Schedulers.io() )
           .observeOn( AndroidSchedulers.mainThread() )
           .subscribe(
@@ -591,16 +611,16 @@ public class DataLoaderManager {
           );
         break;
       default:
-        updateByDefault(auth, items);
+        updateByDefault(authSubscription, items);
         break;
     }
 
   }
 
-  private void updateByDefault(AuthService auth, MainMenuItem items) {
+  private void updateByDefault(Observable<AuthSignToken> auth, MainMenuItem items) {
     unsubscribe();
     subscription.add(
-      auth.getAuth( LOGIN.get(), PASSWORD.get() )
+      auth
         .subscribeOn( Schedulers.io() )
         .observeOn( AndroidSchedulers.mainThread() )
         .subscribe(
