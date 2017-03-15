@@ -1,4 +1,4 @@
-package sapotero.rxtest.views.managers.menu.commands.consideration;
+package sapotero.rxtest.views.managers.menu.commands.primary_consideration;
 
 import android.content.Context;
 
