@@ -34,6 +34,7 @@ public class PrevPerson extends AbstractCommand {
   private Preference<String> UID;
   private Preference<String> HOST;
   private Preference<String> STATUS_CODE;
+  private Preference<String> PIN;
   private String official_id;
   private String sign;
 
@@ -57,6 +58,7 @@ public class PrevPerson extends AbstractCommand {
     UID   = settings.getString("activity_main_menu.uid");
     HOST  = settings.getString("settings_username_host");
     STATUS_CODE = settings.getString("activity_main_menu.star");
+    PIN = settings.getString("PIN");
   }
   public PrevPerson withPerson(String uid){
     this.official_id = uid;
@@ -122,7 +124,7 @@ public class PrevPerson extends AbstractCommand {
     }
 
     try {
-      sign = MainService.getFakeSign( context, "12341234" );
+      sign = MainService.getFakeSign( context, PIN.get(), null );
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -150,7 +152,7 @@ public class PrevPerson extends AbstractCommand {
         },
         error -> {
           if (callback != null){
-            callback.onCommandExecuteError();
+            callback.onCommandExecuteError(getType());
           }
         }
       );

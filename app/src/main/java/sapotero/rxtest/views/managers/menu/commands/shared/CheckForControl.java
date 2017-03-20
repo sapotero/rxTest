@@ -32,6 +32,7 @@ public class CheckForControl extends AbstractCommand {
   private Preference<String> UID;
   private Preference<String> HOST;
   private Preference<String> STATUS_CODE;
+  private Preference<String> PIN;
   private String document_id;
 
   public CheckForControl(Context context, DocumentReceiver document){
@@ -54,11 +55,11 @@ public class CheckForControl extends AbstractCommand {
     UID   = settings.getString("activity_main_menu.uid");
     HOST  = settings.getString("settings_username_host");
     STATUS_CODE = settings.getString("activity_main_menu.star");
+    PIN = settings.getString("PIN");
   }
 
   @Override
   public void execute() {
-
 
     Timber.tag(TAG).i("execute for %s - %s",getType(),document_id);
     queueManager.add(this);
@@ -103,10 +104,16 @@ public class CheckForControl extends AbstractCommand {
 
           } catch (Exception e) {
             Timber.tag(TAG).e("error executeLocal for %s [%s]: %s", document_id, getType(), e);
+            if ( callback != null ){
+              callback.onCommandExecuteError(getType());
+            }
           }
         },
         error -> {
           Timber.tag(TAG).i("error %s",error);
+          if ( callback != null ){
+            callback.onCommandExecuteError(getType());
+          }
         });
 
   }
@@ -152,7 +159,7 @@ public class CheckForControl extends AbstractCommand {
         },
         error -> {
           if (callback != null){
-            callback.onCommandExecuteError();
+            callback.onCommandExecuteError(getType());
           }
         }
       );

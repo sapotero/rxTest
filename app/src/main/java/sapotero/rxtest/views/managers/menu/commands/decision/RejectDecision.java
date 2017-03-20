@@ -41,6 +41,7 @@ public class RejectDecision extends AbstractCommand {
   private Preference<String> UID;
   private Preference<String> HOST;
   private Preference<String> STATUS_CODE;
+  private Preference<String> PIN;
   private String folder_id;
   private RDecisionEntity decision;
   private String decisionId;
@@ -67,6 +68,7 @@ public class RejectDecision extends AbstractCommand {
     HOST  = settings.getString("settings_username_host");
     STATUS_CODE = settings.getString("activity_main_menu.star");
     CURRENT_USER_ID = settings.getString("current_user_id");
+    PIN = settings.getString("PIN");
   }
   public RejectDecision withDecision(RDecisionEntity decision){
     this.decision = decision;
@@ -185,7 +187,7 @@ public class RejectDecision extends AbstractCommand {
     String sign = null;
 
     try {
-      sign = MainService.getFakeSign( context, "12341234" );
+      sign = MainService.getFakeSign( context, PIN.get(), null );
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -235,7 +237,7 @@ public class RejectDecision extends AbstractCommand {
         error -> {
           Timber.tag(TAG).i("error: %s", error);
           if (callback != null){
-            callback.onCommandExecuteError();
+            callback.onCommandExecuteError(getType());
           }
         }
       );

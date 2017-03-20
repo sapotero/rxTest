@@ -34,6 +34,7 @@ public class ChangePerson extends AbstractCommand {
   private Preference<String> UID;
   private Preference<String> HOST;
   private Preference<String> STATUS_CODE;
+  private Preference<String> PIN;
   private String official_id;
 
   public ChangePerson(Context context, DocumentReceiver document){
@@ -56,6 +57,7 @@ public class ChangePerson extends AbstractCommand {
     UID   = settings.getString("activity_main_menu.uid");
     HOST  = settings.getString("settings_username_host");
     STATUS_CODE = settings.getString("activity_main_menu.star");
+    PIN = settings.getString("PIN");
   }
   public ChangePerson withPerson(String uid){
     official_id = uid;
@@ -121,7 +123,7 @@ public class ChangePerson extends AbstractCommand {
     String sign = null;
 
     try {
-      sign = MainService.getFakeSign( context, "12341234" );
+      sign = MainService.getFakeSign( context, PIN.get(), null );
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -149,7 +151,7 @@ public class ChangePerson extends AbstractCommand {
         },
         error -> {
           if (callback != null){
-            callback.onCommandExecuteError();
+            callback.onCommandExecuteError(getType());
           }
         }
       );

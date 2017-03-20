@@ -28,8 +28,6 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
-import sapotero.rxtest.db.requery.models.decisions.RDecision;
-import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.crypto.SignDataEvent;
 import sapotero.rxtest.events.decision.ShowDecisionConstructor;
@@ -61,6 +59,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   private Preference<Integer> POSITION;
   private Preference<String> REG_NUMBER;
   private Preference<String> REG_DATE;
+  private Preference<String> PIN;
 
   private final Context context;
   private final Toolbar toolbar;
@@ -311,23 +310,45 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     REG_NUMBER = settings.getString("activity_main_menu.regnumber");
     REG_DATE = settings.getString("activity_main_menu.date");
     CURRENT_USER_ID = settings.getString("current_user_id");
+    PIN = settings.getString("PIN");
   }
 
   private void invalidate() {
-    Timber.tag(TAG).v("invalidate");
-
     getFirstForLenovo();
 
-//    Timber.tag(TAG).v("invalidate: %s", new Gson().toJson(doc) );
 
+    toolbar.getMenu().clear();
 
-    // проверяем, сколько есть резолюций у документа
-    // если она одна, то показываем кнопки Подписать/Отклонить
-    // если несколько, то показываем редактировать - для редактирования текущей
-    // если нет - то показываем кнопку создать
+    int menu;
+
+    switch ( STATUS_CODE.get() ){
+      case "sent_to_the_report":
+        menu = R.menu.info_menu_sent_to_the_report;
+        break;
+      case "sent_to_the_performance":
+        menu = R.menu.info_menu_sent_to_the_performance;
+        break;
+      case "primary_consideration":
+        menu = R.menu.info_menu_primary_consideration;
+        break;
+      case "approval":
+        menu = R.menu.info_menu_approval;
+        break;
+      case "signing":
+        menu = R.menu.info_menu_signing;
+        break;
+      case "processed":
+        menu = R.menu.info_menu;
+        break;
+
+      default:
+        menu = R.menu.info_menu;
+        break;
+    }
+    toolbar.inflateMenu(menu);
+
 
     decision_count = doc.getDecisions().size();
-
     switch (decision_count) {
       case 0:
         processEmptyDecisions();
@@ -430,122 +451,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     }
   }
 
-  public void update(String command){
-
-    Timber.tag(TAG).w("update %s", command );
-
-    switch (command){
-      case "check_for_control":
-        EventBus.getDefault().post( new ShowSnackEvent("Отметки для постановки на контроль успешно обновлены.") );
-        invalidate();
-        break;
-      case "add_to_folder":
-        EventBus.getDefault().post( new ShowSnackEvent("Добавление в избранное.") );
-        invalidate();
-        break;
-      case "remove_from_folder":
-        EventBus.getDefault().post( new ShowSnackEvent("Удаление из избранного.") );
-        invalidate();
-        break;
-      default:
-        toolbar.getMenu().clear();
-        toolbar.inflateMenu(R.menu.info_menu);
-        EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
-        EventBus.getDefault().post( new ShowNextDocumentEvent() );
-        break;
-    }
-//
-//    if ( Objects.equals(command, "check_for_control") || Objects.equals(command, "add_to_folder") ) {
-//      EventBus.getDefault().post( new ShowSnackEvent("Отметки для постановки на контроль успешно обновлены.") );
-//      invalidate();
-//    } else {
-//      if ( Objects.equals(command, "change_person") ) {
-//        toolbar.getMenu().clear();
-//        toolbar.inflateMenu(R.menu.info_menu);
-////        EventBus.getDefault().post( new ShowSnackEvent("Операция передачи успешно завершена") );
-//
-//
-//      }
-//
-//      if ( Objects.equals(command, "next_person") ) {
-//        toolbar.getMenu().clear();
-//        toolbar.inflateMenu(R.menu.info_menu);
-////        EventBus.getDefault().post( new ShowSnackEvent("Операция подписания успешно завершена") );
-//
-//
-//      }
-//
-//      if ( Objects.equals(command, "prev_person") ) {
-//        toolbar.getMenu().clear();
-//        toolbar.inflateMenu(R.menu.info_menu);
-////        EventBus.getDefault().post( new ShowSnackEvent("Операция отклонения успешно завершена") );
-//      }
-//
-//      if ( Objects.equals(command, "to_the_primary_consideration") ) {
-//        toolbar.getMenu().clear();
-//        toolbar.inflateMenu(R.menu.info_menu);
-////        EventBus.getDefault().post( new ShowSnackEvent("Операция передачи первичного рассмотрения успешно завершена") );
-//      }
-//
-//
-//      if ( Objects.equals(command, "approve_decision") ) {
-//
-//        if ( !hasActiveDecision() ){
-//          toolbar.getMenu().clear();
-//          toolbar.inflateMenu(R.menu.info_menu);
-//        } else {
-//          invalidate();
-//        }
-////      EventBus.getDefault().post( new ShowSnackEvent("Резолюция утверждена") );
-////        EventBus.getDefault().post( new ApproveDecisionEvent() );
-//      }
-//
-//      if ( Objects.equals(command, "reject_decision") ) {
-//
-//        if ( !hasActiveDecision() ){
-//          toolbar.getMenu().clear();
-//          toolbar.inflateMenu(R.menu.info_menu);
-//        }
-////      EventBus.getDefault().post( new ShowSnackEvent("Резолюция отклонена") );
-////        EventBus.getDefault().post( new RejectDecisionEvent() );
-//
-//      }
-//
-//      if ( Objects.equals(command, "from_the_report") ) {
-//        toolbar.getMenu().clear();
-//        toolbar.inflateMenu(R.menu.info_menu);
-////        EventBus.getDefault().post( new ShowSnackEvent("Операция исполнения без ответа успешно завершена") );
-//      }
-
-
-
-//    }
-  }
-
-  private Boolean hasActiveDecision(){
-    RDocumentEntity doc = dataStore
-      .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq( UID.get() ))
-      .get().firstOrNull();
-
-    Boolean result = false;
-
-    if (doc != null && doc.getDecisions().size() > 0){
-      for (RDecision _decision : doc.getDecisions()){
-        RDecisionEntity decision = (RDecisionEntity) _decision;
-
-        if (!decision.isApproved() && Objects.equals(decision.getSignerId(), CURRENT_USER_ID.get())){
-          result = true;
-        }
-      }
-    }
-
-    Timber.tag(TAG).e("hasActiveDecision : %s", result);
-
-    return result;
-  }
-
-
   public void add( int id, String title ){
     try {
       toolbar.getMenu().add(Menu.NONE, id, Menu.NONE ,title);
@@ -600,35 +505,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 //      activity.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
       }
     );
-
-    int menu;
-
-    switch ( STATUS_CODE.get() ){
-      case "sent_to_the_report":
-        menu = R.menu.info_menu_sent_to_the_report;
-        break;
-      case "sent_to_the_performance":
-        menu = R.menu.info_menu_sent_to_the_performance;
-        break;
-      case "primary_consideration":
-        menu = R.menu.info_menu_primary_consideration;
-        break;
-      case "approval":
-        menu = R.menu.info_menu_approval;
-        break;
-      case "signing":
-        menu = R.menu.info_menu_signing;
-        break;
-      case "processed":
-        menu = R.menu.info_menu;
-        break;
-
-      default:
-        menu = R.menu.info_menu;
-        break;
-    }
-    toolbar.inflateMenu(menu);
-
 
     status  = Fields.Status.findStatus(STATUS_CODE.get());
     journal = Fields.getJournalByUid( UID.get() );
@@ -803,8 +679,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   public void onExecuteSuccess(String command) {
     Timber.tag(TAG).w("update %s", command );
 
-    toolbar.getMenu().clear();
-
     switch (command){
       case "check_for_control":
         EventBus.getDefault().post( new ShowSnackEvent("Отметки для постановки на контроль успешно обновлены.") );
@@ -819,6 +693,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
         toolbar.inflateMenu(R.menu.info_menu);
         EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
+//        EventBus.getDefault().post( new RemoveDocumentFromAdapterEvent( UID.get() ) );
         EventBus.getDefault().post( new ShowNextDocumentEvent() );
         break;
     }

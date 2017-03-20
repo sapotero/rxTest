@@ -167,8 +167,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private SearchView searchView;
 
   private MainActivity context;
-  final int TYPE_ITEM = 1;
   private CompositeSubscription subscription;
+
+  static Map<String, Boolean> IS_HIDDEN = new HashMap<>();
 
 
   @Override
@@ -713,8 +714,14 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
   public void onMessageEvent(RemoveDocumentFromAdapterEvent event) {
     Timber.tag(TAG).v("RemoveDocumentFromAdapterEvent %s", event.uid );
-    RAdapter.hideItem(event.uid);
+
+    if ( !IS_HIDDEN.containsKey(event.uid) ){
+      IS_HIDDEN.put(event.uid, true);
+      RAdapter.hideItem(event.uid);
+    }
+
     menuBuilder.update();
+
   }
 
 

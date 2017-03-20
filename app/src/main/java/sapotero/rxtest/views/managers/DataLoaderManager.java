@@ -563,7 +563,7 @@ public class DataLoaderManager {
     String sign = "";
 
     try {
-      sign = MainService.getFakeSign(context, "12341234");
+      sign = MainService.getFakeSign(context, "12341234", null);
     } catch (Exception e) {
       e.printStackTrace();
     }

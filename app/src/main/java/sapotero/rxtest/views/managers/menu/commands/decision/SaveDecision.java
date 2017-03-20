@@ -36,6 +36,7 @@ public class SaveDecision extends AbstractCommand {
   private Preference<String> UID;
   private Preference<String> HOST;
   private Preference<String> STATUS_CODE;
+  private Preference<String> PIN;
   private RDecisionEntity decision;
   private String decisionId;
 
@@ -59,6 +60,7 @@ public class SaveDecision extends AbstractCommand {
     UID   = settings.getString("activity_main_menu.uid");
     HOST  = settings.getString("settings_username_host");
     STATUS_CODE = settings.getString("activity_main_menu.star");
+    PIN = settings.getString("PIN");
   }
   public SaveDecision withDecision(RDecisionEntity decision){
     this.decision = decision;
@@ -148,7 +150,7 @@ public class SaveDecision extends AbstractCommand {
         error -> {
           Timber.tag(TAG).i("error: %s", error);
           if (callback != null){
-            callback.onCommandExecuteError();
+            callback.onCommandExecuteError(getType());
           }
         }
       );

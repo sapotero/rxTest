@@ -12,7 +12,6 @@ import javax.inject.Inject;
 
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.queue.QueueEntity;
@@ -50,16 +49,17 @@ public class QueueDBManager {
         task.setUuid( params.getUuid() );
         task.setCommand( command.getClass().getCanonicalName() );
         task.setParams(  gson.toJson(params) );
-        task.setExecuted( false );
         task.setLocal( false );
         task.setRemote( false );
+        task.setWithError( false );
+        task.setRunning( false );
         task.setCreatedAt( date );
 
         dataStore
           .insert(task)
           .toObservable()
           .subscribeOn(Schedulers.computation())
-          .observeOn(AndroidSchedulers.mainThread())
+          .subscribeOn(Schedulers.computation())
           .subscribe(data -> {
             Timber.tag(TAG).v("inserted %s [ %s ]", data.getCommand(), data.getId() );
           });
@@ -76,19 +76,27 @@ public class QueueDBManager {
           .get().value() > 0;
   }
 
+  public List<QueueEntity> getUncompleteLocalTasks() {
+    return dataStore
+      .select(QueueEntity.class)
+      .where(QueueEntity.LOCAL.eq(false))
+      .and(QueueEntity.RUNNING.eq(false))
+      .and(QueueEntity.WITH_ERROR.eq(false))
+      .limit(4)
+      .get()
+      .toList();
+  }
+
   public List<QueueEntity> getUncompleteRemoteTasks() {
     return dataStore
       .select(QueueEntity.class)
       .where(QueueEntity.REMOTE.eq(false))
       .and( QueueEntity.LOCAL.eq(true) )
-      .get().toList();
-  }
-
-  public List<QueueEntity> getUncompleteLocalTasks() {
-    return dataStore
-      .select(QueueEntity.class)
-      .where(QueueEntity.LOCAL.eq(false))
-      .get().toList();
+      .and(QueueEntity.RUNNING.eq(false))
+      .and(QueueEntity.WITH_ERROR.eq(false))
+      .limit(4)
+      .get()
+      .toList();
   }
 
   public void setExecutedLocal(Command command) {
@@ -99,6 +107,8 @@ public class QueueDBManager {
         int count = dataStore
           .update(QueueEntity.class)
           .set( QueueEntity.LOCAL, true )
+          .set( QueueEntity.RUNNING, false )
+          .where( QueueEntity.UUID.eq( params.getUuid() ) )
           .get()
           .value();
 
@@ -117,11 +127,13 @@ public class QueueDBManager {
         int count = dataStore
           .update(QueueEntity.class)
           .set( QueueEntity.REMOTE, true )
+          .set( QueueEntity.RUNNING, false )
+          .where( QueueEntity.UUID.eq( params.getUuid() ) )
           .get()
           .value();
 
         if ( count > 0 ){
-          Timber.tag(TAG).i( "[%s] - updated local", params.getUuid() );
+          Timber.tag(TAG).i( "[%s] - updated remote", params.getUuid() );
         }
       }
     }
@@ -133,5 +145,26 @@ public class QueueDBManager {
       .where(QueueEntity.UUID.ne(""))
       .get().value();
     Timber.tag(TAG).i("DELETED: %s", count);
+  }
+
+
+
+  public void setAsRunning(String uuid) {
+    updateRunningStatus(uuid, true);
+  }
+
+  private void updateRunningStatus(String uuid, Boolean running){
+    if ( uuid != null ) {
+      int count = dataStore
+        .update(QueueEntity.class)
+        .set(   QueueEntity.RUNNING, running )
+        .where( QueueEntity.UUID.eq( uuid ) )
+        .get()
+        .value();
+
+      if ( count > 0 ){
+        Timber.tag(TAG).i( "[%s] - setAsRunning", uuid );
+      }
+    }
   }
 }

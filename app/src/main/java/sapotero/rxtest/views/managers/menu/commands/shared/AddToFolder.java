@@ -32,6 +32,7 @@ public class AddToFolder extends AbstractCommand {
   private Preference<String> UID;
   private Preference<String> HOST;
   private Preference<String> STATUS_CODE;
+  private Preference<String> PIN;
   private String folder_id;
   private String document_id;
 
@@ -55,6 +56,7 @@ public class AddToFolder extends AbstractCommand {
     UID   = settings.getString("activity_main_menu.uid");
     HOST  = settings.getString("settings_username_host");
     STATUS_CODE = settings.getString("activity_main_menu.star");
+    PIN = settings.getString("PIN");
   }
 
   public AddToFolder withFolder(String uid){
@@ -135,7 +137,7 @@ public class AddToFolder extends AbstractCommand {
         },
         error -> {
           if (callback != null){
-            callback.onCommandExecuteError();
+            callback.onCommandExecuteError(getType());
           }
         }
       );

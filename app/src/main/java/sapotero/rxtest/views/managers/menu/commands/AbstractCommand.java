@@ -36,7 +36,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
   public Callback callback;
   public interface Callback {
     void onCommandExecuteSuccess(String command);
-    void onCommandExecuteError();
+    void onCommandExecuteError(String type);
   }
 
 }

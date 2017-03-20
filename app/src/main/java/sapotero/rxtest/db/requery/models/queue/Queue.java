@@ -27,7 +27,10 @@ public abstract class Queue {
   Boolean remote;
 
   @Column(value="false")
-  Boolean executed;
+  Boolean running;
+
+  @Column(value="false")
+  Boolean withError;
 
   @Index("db_queue_createdAt_index")
   String  createdAt;

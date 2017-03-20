@@ -490,7 +490,7 @@ public class CommandFactory implements AbstractCommand.Callback{
   }
 
   @Override
-  public void onCommandExecuteError() {
+  public void onCommandExecuteError(String type) {
     Timber.tag(TAG).w("onCommandExecuteError");
 
     if (callback != null){

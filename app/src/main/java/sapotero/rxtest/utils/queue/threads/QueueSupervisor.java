@@ -26,7 +26,7 @@ public class QueueSupervisor {
 
   private final Context context;
   private final CommandFactory commandFactory;
-  private ThreadPoolExecutor commandPool;
+  private ThreadPoolExecutor   commandPool;
   private String TAG = this.getClass().getSimpleName();
 
   public QueueSupervisor(Context context) {
@@ -42,9 +42,9 @@ public class QueueSupervisor {
     ThreadRejectedExecutionHandler rejectionHandler = new ThreadRejectedExecutionHandler();
     ThreadFactory threadFactory = Executors.defaultThreadFactory();
 
-    commandPool = new ThreadPoolExecutor(2, 30, 60, TimeUnit.SECONDS, new ArrayBlockingQueue<>(2), threadFactory, rejectionHandler);
+    commandPool = new ThreadPoolExecutor(8, 30, 60, TimeUnit.SECONDS, new ArrayBlockingQueue<>(2), threadFactory, rejectionHandler);
 
-    SuperVisor monitor = new SuperVisor(commandPool, 3);
+    SuperVisor monitor = new SuperVisor(commandPool, 5);
     Thread monitorThread = new Thread(monitor);
     monitorThread.start();
   }
@@ -72,6 +72,13 @@ public class QueueSupervisor {
     return command;
   }
 
+  public void addLocal(QueueEntity command){
+    add(command, true);
+  }
+
+  public void addRemote(QueueEntity command){
+    add(command, false);
+  }
 
   public void add(QueueEntity command, boolean executeLocal) {
     Runnable producedCommand;
@@ -81,6 +88,7 @@ public class QueueSupervisor {
     } else {
       producedCommand = new RemoteCommandProducer( create(command), context);
     }
+
     Timber.tag(TAG).i("local %s | %s", executeLocal, producedCommand.toString() );
 
     commandPool.execute( producedCommand );

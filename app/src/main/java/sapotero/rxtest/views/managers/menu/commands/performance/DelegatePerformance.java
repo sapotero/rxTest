@@ -31,6 +31,7 @@ public class DelegatePerformance extends AbstractCommand {
   private Preference<String> UID;
   private Preference<String> HOST;
   private Preference<String> STATUS_CODE;
+  private Preference<String> PIN;
   private String official_id;
 
   public DelegatePerformance(Context context, DocumentReceiver document){
@@ -53,6 +54,7 @@ public class DelegatePerformance extends AbstractCommand {
     UID   = settings.getString("activity_main_menu.uid");
     HOST  = settings.getString("settings_username_host");
     STATUS_CODE = settings.getString("activity_main_menu.star");
+    PIN = settings.getString("PIN");
   }
 
   public DelegatePerformance withPerson(String uid){
@@ -102,7 +104,7 @@ public class DelegatePerformance extends AbstractCommand {
         },
         error -> {
           if (callback != null){
-            callback.onCommandExecuteError();
+            callback.onCommandExecuteError(getType());
           }
         }
       );

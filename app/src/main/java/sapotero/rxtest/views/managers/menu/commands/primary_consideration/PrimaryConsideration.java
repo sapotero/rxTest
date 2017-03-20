@@ -33,6 +33,7 @@ public class PrimaryConsideration extends AbstractCommand {
   private Preference<String> UID;
   private Preference<String> HOST;
   private Preference<String> STATUS_CODE;
+  private Preference<String> PIN;
   private String official_id;
 
   public PrimaryConsideration(Context context, DocumentReceiver document){
@@ -51,6 +52,7 @@ public class PrimaryConsideration extends AbstractCommand {
     UID   = settings.getString("activity_main_menu.uid");
     HOST  = settings.getString("settings_username_host");
     STATUS_CODE = settings.getString("activity_main_menu.star");
+    PIN = settings.getString("PIN");
   }
   public PrimaryConsideration withPerson(String uid){
     official_id = uid;
@@ -128,7 +130,7 @@ public class PrimaryConsideration extends AbstractCommand {
         },
         error -> {
           if ( callback != null ){
-            callback.onCommandExecuteError();
+            callback.onCommandExecuteError(getType());
           }
         }
       );

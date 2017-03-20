@@ -32,7 +32,7 @@ public class QueueManager {
     isConnectedToInternet();
 
     supervisor = new QueueSupervisor(context);
-    dBManager = new QueueDBManager(context);
+    dBManager  = new QueueDBManager(context);
   }
 
   public void add(Command command){
@@ -66,13 +66,15 @@ public class QueueManager {
 
     if ( uncompleteLocalTasks.size() > 0 ){
       for ( QueueEntity command : uncompleteLocalTasks ) {
-        supervisor.add(command, true);
+        dBManager.setAsRunning(command.getUuid());
+        supervisor.addLocal(command);
       }
     }
 
     if ( uncompleteRemoteTasks.size() > 0 ){
       for ( QueueEntity command : uncompleteRemoteTasks ) {
-        supervisor.add(command, false);
+        dBManager.setAsRunning(command.getUuid());
+        supervisor.addRemote(command);
       }
     }
 

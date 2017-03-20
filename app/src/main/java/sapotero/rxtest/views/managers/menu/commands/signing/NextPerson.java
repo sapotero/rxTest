@@ -4,7 +4,9 @@ import android.content.Context;
 
 import com.f2prateek.rx.preferences.Preference;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Set;
 
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
@@ -13,6 +15,8 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.db.requery.models.images.RImage;
+import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
@@ -34,6 +38,7 @@ public class NextPerson extends AbstractCommand {
   private Preference<String> UID;
   private Preference<String> HOST;
   private Preference<String> STATUS_CODE;
+  private Preference<String> PIN;
   private String official_id;
   private String sign;
 
@@ -57,6 +62,7 @@ public class NextPerson extends AbstractCommand {
     UID   = settings.getString("activity_main_menu.uid");
     HOST  = settings.getString("settings_username_host");
     STATUS_CODE = settings.getString("activity_main_menu.star");
+    PIN = settings.getString("PIN");
   }
   public NextPerson withPerson(String uid){
     this.official_id = uid;
@@ -125,7 +131,7 @@ public class NextPerson extends AbstractCommand {
     }
 
     try {
-      sign = MainService.getFakeSign( context, "12341234" );
+      sign = MainService.getFakeSign( context, PIN.get(), null );
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -149,11 +155,40 @@ public class NextPerson extends AbstractCommand {
           Timber.tag(TAG).i("error: %s", data.getMessage());
           Timber.tag(TAG).i("type: %s", data.getType());
 
-          queueManager.setExecutedRemote(this);
+          RDocumentEntity doc = getDocument(UID.get());
+          if (doc != null) {
+
+            Set<RImage> images = doc.getImages();
+            if (images != null && images.size() > 0) {
+              for (RImage img: images) {
+                RImageEntity image = (RImageEntity) img;
+
+                File file = new File( context.getFilesDir(), String.format( "%s_%s", image.getMd5(), image.getTitle() ));
+
+                String file_sign = null;
+
+                try {
+                  file_sign = MainService.getFakeSign( context, PIN.get(), file );
+                } catch (Exception e) {
+                  e.printStackTrace();
+                }
+
+                if (file_sign != null) {
+                  Timber.tag("APPROVE/NEXT").e("SIGN: %s", file_sign);
+                }
+
+
+              }
+            }
+            queueManager.setExecutedRemote(this);
+
+          } else {
+            queueManager.setExecutedRemote(this);
+          }
         },
         error -> {
           if (callback != null ){
-            callback.onCommandExecuteError();
+            callback.onCommandExecuteError(getType());
           }
 
 
@@ -169,5 +204,9 @@ public class NextPerson extends AbstractCommand {
   @Override
   public CommandParams getParams() {
     return params;
+  }
+
+  private RDocumentEntity getDocument(String uid){
+    return dataStore.select(RDocumentEntity.class).where(RDocumentEntity.UID.eq(uid)).get().firstOrNull();
   }
 }

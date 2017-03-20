@@ -38,7 +38,7 @@ public class DownloadFileJob  extends BaseJob {
   private String fileName;
   private Preference<String> HOST;
 
-  public DownloadFileJob(String host, String strUrl, String fileName) {
+  DownloadFileJob(String host, String strUrl, String fileName) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.host = host;
     this.strUrl = strUrl;
@@ -145,7 +145,7 @@ public class DownloadFileJob  extends BaseJob {
     OutputStream outputStream;
 
     try {
-      byte[] fileReader = new byte[1024];
+      byte[] fileReader = new byte[1024*64];
 
       long fileSize = body.contentLength();
       long fileSizeDownloaded = 0;
@@ -185,7 +185,7 @@ public class DownloadFileJob  extends BaseJob {
 
   @Override
   protected RetryConstraint shouldReRunOnThrowable(Throwable throwable, int runCount, int maxRunCount) {
-    return RetryConstraint.createExponentialBackoff(runCount, 1000);
+    return RetryConstraint.createExponentialBackoff(runCount, 1);
   }
   @Override
   protected void onCancel(@CancelReason int cancelReason, @Nullable Throwable throwable) {

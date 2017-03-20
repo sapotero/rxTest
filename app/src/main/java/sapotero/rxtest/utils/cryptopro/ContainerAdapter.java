@@ -308,4 +308,7 @@ public class ContainerAdapter {
 
   }
 
+  public void clear() {
+
+  }
 }
