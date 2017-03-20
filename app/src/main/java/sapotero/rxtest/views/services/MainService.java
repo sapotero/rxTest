@@ -87,6 +87,7 @@ import sapotero.rxtest.utils.cryptopro.ProviderType;
 import sapotero.rxtest.utils.cryptopro.wrapper.CMSSign;
 import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.managers.DataLoaderManager;
+import sapotero.rxtest.views.menu.fields.MainMenuItem;
 import timber.log.Timber;
 
 public class MainService extends Service {
@@ -122,7 +123,6 @@ public class MainService extends Service {
   private DataLoaderManager dataLoaderInterface;
   private String SIGN;
   public static String user;
-
 
   public MainService() {
   }
@@ -167,6 +167,7 @@ public class MainService extends Service {
     aliases( KeyStoreType.currentType(), ProviderType.currentProviderType() );
 
     isConnected();
+
   }
 
   public int onStartCommand(Intent intent, int flags, int startId) {
@@ -705,28 +706,28 @@ public class MainService extends Service {
       subscription.unsubscribe();
     }
 
-//    if ( settings.getString("is_first_run").get() != null ){
-//      subscription.add(
-//        Observable
-//          .interval( 120, TimeUnit.SECONDS )
-//          .subscribeOn(Schedulers.io())
-//          .observeOn(AndroidSchedulers.mainThread())
-//          .subscribe(interval -> {
-//            dataLoaderInterface.updateByStatus(MainMenuItem.ALL);
-//
-//          })
-//      );
-//
-//      subscription.add(
-//        Observable
-//          .interval( 10, TimeUnit.SECONDS )
-//          .subscribeOn(Schedulers.io())
-//          .observeOn(AndroidSchedulers.mainThread())
-//          .subscribe(interval -> {
-//            queue.getUncompleteTasks();
-//          })
-//      );
-//    }
+    if ( settings.getString("is_first_run").get() != null ){
+      subscription.add(
+        Observable
+          .interval( 120, TimeUnit.SECONDS )
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe(interval -> {
+            dataLoaderInterface.updateByStatus(MainMenuItem.ALL);
+
+          })
+      );
+
+      subscription.add(
+        Observable
+          .interval( 10, TimeUnit.SECONDS )
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe(interval -> {
+            queue.getUncompleteTasks();
+          })
+      );
+    }
   }
 
 

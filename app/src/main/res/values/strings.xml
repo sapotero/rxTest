@@ -413,6 +413,8 @@
     <string name="control_text"> На контроле </string>
 
     <string name="primary_consideration_oshs_dialog_yes"> Передать документ </string>
+    <string name="error_csp_not_installed"> Внимание! </string>
+    <string name="error_csp_not_installed_body">Приложение "CryptoPro CSP" не установленно на устройстве.\nУстановите его и перезапустите СЭД.</string>
 
     <string-array name="IntentsCAAddressList">
         <item>http://www.cryptopro.ru/certsrv/</item>

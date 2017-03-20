@@ -12,6 +12,7 @@ import android.support.v7.preference.PreferenceManager;
 import android.view.View;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
@@ -65,15 +66,46 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
 
     EsdApplication.getComponent(this).inject(this);
 
-    startService(new Intent(this, MainService.class));
 
-    initialize();
-    check_permissions();
+    if( appInstalled("ru.cprocsp.ACSP") ) {
 
-    initView();
+      startService(new Intent(this, MainService.class));
+
+      initialize();
+      check_permissions();
+
+      initView();
+
+    } else {
+
+      new MaterialDialog.Builder(this)
+        .title(R.string.error_csp_not_installed)
+        .content(R.string.error_csp_not_installed_body)
+        .positiveText(R.string.yes)
+        .autoDismiss(false)
+        .onPositive((dialog, which) -> {
+          finish();
+        })
+        .show();
+    }
+
+
 
 //    queue.clean();
 
+  }
+
+  private boolean appInstalled(String uri) {
+    PackageManager pm = getPackageManager();
+
+    Boolean result = false;
+    try {
+      pm.getPackageInfo(uri, PackageManager.GET_ACTIVITIES);
+      result = true;
+    } catch (PackageManager.NameNotFoundException e) {
+    }
+
+    return result;
   }
 
   private void initView() {
