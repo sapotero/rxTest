@@ -10,8 +10,12 @@ public class CommandParams implements Serializable {
   public String folder;
   public String label;
   public String sign;
+
+  public String imageId;
+  public String filePath;
+
   public String document;
-//  public RDecisionEntity decision;
+
   public String decisionId;
   public String uuid;
   public String user;
@@ -19,6 +23,22 @@ public class CommandParams implements Serializable {
   public Decision decisionModel;
   public Boolean activeDecision;
 
+
+  public String getFilePath() {
+    return filePath;
+  }
+
+  public void setFilePath(String filePath) {
+    this.filePath = filePath;
+  }
+
+  public String getImageId() {
+    return imageId;
+  }
+
+  public void setImageId(String imageId) {
+    this.imageId = imageId;
+  }
   public Boolean getActiveDecision() {
     return activeDecision;
   }

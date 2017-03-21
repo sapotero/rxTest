@@ -4,7 +4,7 @@ import android.content.Context;
 
 import com.f2prateek.rx.preferences.Preference;
 
-import java.util.ArrayList;
+import java.io.File;
 
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
@@ -12,10 +12,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.utils.Fields;
-import sapotero.rxtest.retrofit.OperationService;
-import sapotero.rxtest.retrofit.models.OperationResult;
+import sapotero.rxtest.retrofit.ImagesService;
 import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.views.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.views.managers.menu.utils.CommandParams;
@@ -84,16 +81,6 @@ public class SignFile extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    int count = dataStore
-      .update(RDocumentEntity.class)
-      .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue() )
-      .set( RDocumentEntity.PROCESSED, true)
-      .set( RDocumentEntity.FROM_SIGN, true)
-      .set( RDocumentEntity.MD5, "" )
-      .set( RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq(UID.get()))
-      .get()
-      .value();
 
     if (callback != null ){
       callback.onCommandExecuteSuccess( getType() );
@@ -111,54 +98,44 @@ public class SignFile extends AbstractCommand {
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( HOST.get() + "v3/operations/" )
+      .baseUrl( HOST.get() )
       .client( okHttpClient )
       .build();
 
-    OperationService operationService = retrofit.create( OperationService.class );
+    ImagesService imagesService = retrofit.create( ImagesService.class );
 
-    ArrayList<String> uids = new ArrayList<>();
-    uids.add( UID.get() );
+    File file = new File( context.getFilesDir(), params.getFilePath() );
 
-    String comment = null;
-    if ( params.getComment() != null ){
-      comment = params.getComment();
-    }
-
+    String file_sign = null;
     try {
-      sign = MainService.getFakeSign( context, PIN.get(), null );
+      file_sign = MainService.getFakeSign( context, PIN.get(), file );
     } catch (Exception e) {
       e.printStackTrace();
     }
 
-    Observable<OperationResult> info = operationService.approval(
-      getType(),
-      LOGIN.get(),
-      TOKEN.get(),
-      uids,
-      comment,
-      STATUS_CODE.get(),
-      official_id,
-      sign
-    );
-
-    info.subscribeOn( Schedulers.computation() )//        .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue() )
-      .observeOn( AndroidSchedulers.mainThread() )
-      .subscribe(
-        data -> {
-          Timber.tag(TAG).i("ok: %s", data.getOk());
-          Timber.tag(TAG).i("error: %s", data.getMessage());
-          Timber.tag(TAG).i("type: %s", data.getType());
-
-          queueManager.setExecutedRemote(this);
-        },
-        error -> {
-          if (callback != null) {
-            callback.onCommandExecuteError(getType());
-          }
-
-        }
+    if (file_sign != null) {
+      Observable<Object> info = imagesService.update(
+        getParams().getImageId(),
+        LOGIN.get(),
+        TOKEN.get(),
+        file_sign
       );
+
+      info.subscribeOn( Schedulers.computation() )
+        .observeOn( AndroidSchedulers.mainThread() )
+        .subscribe(
+          data -> {
+            Timber.tag(TAG).i("signed: %s", data);
+            queueManager.setExecutedRemote(this);
+          },
+          error -> {
+            if (callback != null) {
+              callback.onCommandExecuteError(getType());
+            }
+
+          }
+        );
+    }
 
   }
 

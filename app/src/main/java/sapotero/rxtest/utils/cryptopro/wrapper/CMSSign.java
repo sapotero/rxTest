@@ -54,11 +54,13 @@ import ru.CryptoPro.JCP.ASN.PKIX1Explicit88.Time;
 import ru.CryptoPro.JCP.ASN.PKIX1Explicit88._SeqOfESSCertIDv2;
 import ru.CryptoPro.JCP.params.OID;
 import ru.CryptoPro.JCP.tools.Array;
+import ru.CryptoPro.JCP.tools.Encoder;
 import ru.CryptoPro.JCSP.JCSP;
 import sapotero.rxtest.utils.cryptopro.ContainerAdapter;
 import sapotero.rxtest.utils.cryptopro.ISignData;
 import sapotero.rxtest.utils.cryptopro.KeyStoreType;
 import sapotero.rxtest.utils.cryptopro.LogCallback;
+import timber.log.Timber;
 
 /**
  * Класс CMSSignatureExample реализует пример
@@ -145,6 +147,13 @@ public class CMSSign extends ISignData {
     callback.log(signature, true);
     callback.log("--- SIGNATURE END ---");
 
+
+    Encoder enc = new Encoder();
+
+
+    Timber.w("--- SIGNATURE BEGIN ---");
+    Timber.w( enc.encode(signature) );
+    Timber.w("--- SIGNATURE END ---");
 
     callback.setStatusOK();
   }

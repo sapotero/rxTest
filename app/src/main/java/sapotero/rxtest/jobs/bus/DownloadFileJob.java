@@ -144,8 +144,9 @@ public class DownloadFileJob  extends BaseJob {
     InputStream inputStream;
     OutputStream outputStream;
 
+    byte[] fileReader = new byte[1024*1024];
+
     try {
-      byte[] fileReader = new byte[1024*64];
 
       long fileSize = body.contentLength();
       long fileSizeDownloaded = 0;

@@ -4,7 +4,6 @@ import android.content.Context;
 
 import com.f2prateek.rx.preferences.Preference;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -21,6 +20,8 @@ import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
+import sapotero.rxtest.views.managers.menu.factories.CommandFactory;
+import sapotero.rxtest.views.managers.menu.interfaces.Command;
 import sapotero.rxtest.views.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.views.managers.menu.utils.CommandParams;
 import sapotero.rxtest.views.services.MainService;
@@ -59,7 +60,6 @@ public class NextPerson extends AbstractCommand {
   private void loadSettings(){
     LOGIN = settings.getString("login");
     TOKEN = settings.getString("token");
-    UID   = settings.getString("activity_main_menu.uid");
     HOST  = settings.getString("settings_username_host");
     STATUS_CODE = settings.getString("activity_main_menu.star");
     PIN = settings.getString("PIN");
@@ -95,7 +95,7 @@ public class NextPerson extends AbstractCommand {
       .set( RDocumentEntity.FROM_SIGN, true)
       .set( RDocumentEntity.MD5, "" )
       .set( RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq(UID.get()))
+      .where(RDocumentEntity.UID.eq(document.getUid()))
       .get()
       .value();
 
@@ -122,7 +122,7 @@ public class NextPerson extends AbstractCommand {
     OperationService operationService = retrofit.create( OperationService.class );
 
     ArrayList<String> uids = new ArrayList<>();
-    uids.add( UID.get() );
+    uids.add( document.getUid() );
 
 
     String comment = null;
@@ -155,36 +155,8 @@ public class NextPerson extends AbstractCommand {
           Timber.tag(TAG).i("error: %s", data.getMessage());
           Timber.tag(TAG).i("type: %s", data.getType());
 
-          RDocumentEntity doc = getDocument(UID.get());
-          if (doc != null) {
-
-            Set<RImage> images = doc.getImages();
-            if (images != null && images.size() > 0) {
-              for (RImage img: images) {
-                RImageEntity image = (RImageEntity) img;
-
-                File file = new File( context.getFilesDir(), String.format( "%s_%s", image.getMd5(), image.getTitle() ));
-
-                String file_sign = null;
-
-                try {
-                  file_sign = MainService.getFakeSign( context, PIN.get(), file );
-                } catch (Exception e) {
-                  e.printStackTrace();
-                }
-
-                if (file_sign != null) {
-                  Timber.tag("APPROVE/NEXT").e("SIGN: %s", file_sign);
-                }
-
-
-              }
-            }
-            queueManager.setExecutedRemote(this);
-
-          } else {
-            queueManager.setExecutedRemote(this);
-          }
+          addImageSignTask();
+          queueManager.setExecutedRemote(this);
         },
         error -> {
           if (callback != null ){
@@ -194,6 +166,41 @@ public class NextPerson extends AbstractCommand {
 
         }
       );
+  }
+
+  private void addImageSignTask(){
+    Timber.tag(TAG).e("addImageSignTask");
+    RDocumentEntity doc = getDocument(document.getUid());
+
+    Timber.tag(TAG).e("doc: %s", doc);
+
+    if (doc != null) {
+
+      Set<RImage> images = doc.getImages();
+      Timber.tag(TAG).e("images: %s", images);
+
+
+      if (images != null && images.size() > 0) {
+        for (RImage img: images) {
+          RImageEntity image = (RImageEntity) img;
+
+          CommandFactory.Operation operation = CommandFactory.Operation.FILE_SIGN;
+          CommandParams params = new CommandParams();
+          params.setUser( LOGIN.get() );
+
+          params.setFilePath( String.format( "%s_%s", image.getMd5(), image.getTitle()) );
+          params.setImageId( image.getImageId() );
+
+
+          Command command = operation.getCommand(null, context, document, params);
+
+          Timber.tag(TAG).e("image: %s", document.getUid());
+          queueManager.add(command);
+        }
+      }
+      queueManager.setExecutedRemote(this);
+
+    }
   }
 
   @Override

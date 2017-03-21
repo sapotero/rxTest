@@ -25,10 +25,13 @@ import timber.log.Timber;
 
 public class QueueSupervisor implements JobCountInterface {
 
+  private String TAG = this.getClass().getSimpleName();
+
   private final Context context;
   private final CommandFactory commandFactory;
   private ThreadPoolExecutor   commandPool;
-  private String TAG = this.getClass().getSimpleName();
+
+  public static int THREAD_POOL_SIZE = 1;
 
   public QueueSupervisor(Context context) {
 
@@ -43,7 +46,7 @@ public class QueueSupervisor implements JobCountInterface {
     ThreadRejectedExecutionHandler rejectionHandler = new ThreadRejectedExecutionHandler();
     ThreadFactory threadFactory = Executors.defaultThreadFactory();
 
-    commandPool = new ThreadPoolExecutor(8, 30, 60, TimeUnit.SECONDS, new ArrayBlockingQueue<>(2), threadFactory, rejectionHandler);
+    commandPool = new ThreadPoolExecutor(THREAD_POOL_SIZE, 30, 60, TimeUnit.SECONDS, new ArrayBlockingQueue<>(2), threadFactory, rejectionHandler);
 
     SuperVisor monitor   = new SuperVisor(commandPool, 5);
     Thread monitorThread = new Thread(monitor);

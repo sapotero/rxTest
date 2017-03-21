@@ -389,6 +389,7 @@ public class SyncDocumentsJob  extends BaseJob {
           image.setPath(i.getPath());
           image.setContentType(i.getContentType());
           image.setSigned(i.getSigned());
+          image.setImageId( i.getPath().substring(11, 35) );
           image.setDocument(rDoc);
           rDoc.getImages().add(image);
         }
@@ -616,6 +617,7 @@ public class SyncDocumentsJob  extends BaseJob {
           image.setPath(i.getPath());
           image.setContentType(i.getContentType());
           image.setSigned(i.getSigned());
+          image.setImageId( i.getPath().substring(11, 35) );
           image.setDocument(doc);
           doc.getImages().add(image);
         }

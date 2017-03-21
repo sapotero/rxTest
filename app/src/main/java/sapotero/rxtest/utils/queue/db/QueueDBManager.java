@@ -77,25 +77,25 @@ public class QueueDBManager implements JobCountInterface {
           .get().value() > 0;
   }
 
-  public List<QueueEntity> getUncompleteLocalTasks() {
+  public List<QueueEntity> getUncompleteLocalTasks(int limit) {
     return dataStore
       .select(QueueEntity.class)
       .where(QueueEntity.LOCAL.eq(false))
       .and(QueueEntity.RUNNING.eq(false))
       .and(QueueEntity.WITH_ERROR.eq(false))
-      .limit(4)
+      .limit(limit)
       .get()
       .toList();
   }
 
-  public List<QueueEntity> getUncompleteRemoteTasks() {
+  public List<QueueEntity> getUncompleteRemoteTasks(int limit) {
     return dataStore
       .select(QueueEntity.class)
       .where(QueueEntity.REMOTE.eq(false))
       .and( QueueEntity.LOCAL.eq(true) )
       .and(QueueEntity.RUNNING.eq(false))
       .and(QueueEntity.WITH_ERROR.eq(false))
-      .limit(4)
+      .limit(limit)
       .get()
       .toList();
   }

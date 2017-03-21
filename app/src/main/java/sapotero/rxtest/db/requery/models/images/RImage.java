@@ -12,6 +12,7 @@ public abstract class RImage {
   @Generated
   int id;
 
+  String imageId;
   Integer number;
   Integer size;
   String title;

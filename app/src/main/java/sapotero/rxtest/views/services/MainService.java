@@ -426,7 +426,7 @@ public class MainService extends Service {
       BufferedReader reader = new BufferedReader( new InputStreamReader(process.getInputStream()) );
 
       int read;
-      char[] buffer = new char[256];
+      char[] buffer = new char[1024];
 
       StringBuilder output = new StringBuilder();
       while ((read = reader.read(buffer)) > 0) {
@@ -437,11 +437,12 @@ public class MainService extends Service {
 
       Pattern pattern = Pattern.compile("(\\w{4}-\\w{4})");
       Matcher matcher = pattern.matcher(output.toString());
+
       if (matcher.find()){
-        Timber.tag("LS: folder - ").e( matcher.group() );
-        containerFolder += matcher.group();
+        Timber.tag("LS: folder - ").e( "/storage/%s", matcher.group() );
+        containerFolder += matcher.group() + "/";
       } else {
-        containerFolder += "self/primary/keys";
+        containerFolder = "self/primary/keys";
       }
 
 
@@ -450,6 +451,26 @@ public class MainService extends Service {
       Timber.tag("LS fails: ").e( e.toString() );
     }
 
+    try {
+      Process proc = Runtime.getRuntime().exec("ls -la " + containerFolder);
+
+      BufferedReader reader = new BufferedReader( new InputStreamReader(proc.getInputStream()) );
+
+      int read;
+      char[] buffer = new char[1024];
+
+      StringBuilder output = new StringBuilder();
+      while ((read = reader.read(buffer)) > 0) {
+        output.append(buffer, 0, read);
+      }
+      reader.close();
+      proc.waitFor();
+
+      Timber.tag("LS").e("%s", output.toString());
+
+    } catch (IOException | InterruptedException e) {
+      e.printStackTrace();
+    }
 
 
     try {
@@ -504,22 +525,22 @@ public class MainService extends Service {
 
           for (File srcCurrentContainerFile : srcContainer) {
 
-            if (srcCurrentContainerFile.getName().equals(".") || srcCurrentContainerFile.getName().equals("..")) {
+            Timber.i("\tCurrent file: %s", srcCurrentContainerFile.getName());
+
+            if (  srcCurrentContainerFile.getName().endsWith(".key") ){
+              if (!RawResource.writeStreamToFile(
+                srcCurrentContainerFile,
+                dstContainer.getPath(), srcCurrentContainerFile.getName())) {
+                Timber.i("\tCouldn't is_responsible file: %s", srcCurrentContainerFile.getName());
+              }
+              else {
+                Timber.i("\tFile %s was copied successfully", srcCurrentContainerFile.getName());
+              }
+            } else {
               continue;
             }
 
-            Timber.i("\tCopy file: %s", srcCurrentContainerFile.getName());
 
-            // Копирование единичного файла.
-
-            if (!RawResource.writeStreamToFile(
-              srcCurrentContainerFile,
-              dstContainer.getPath(), srcCurrentContainerFile.getName())) {
-              Timber.i("\tCouldn't is_responsible file: %s", srcCurrentContainerFile.getName());
-            } // if
-            else {
-              Timber.i("\tFile %s was copied successfully", srcCurrentContainerFile.getName());
-            } // else
 
           } // for
 
@@ -535,6 +556,8 @@ public class MainService extends Service {
   }
 
   private void checkPin(String password) throws Exception {
+    addKey();
+    aliases( KeyStoreType.currentType(), ProviderType.currentProviderType() );
 
     Timber.tag(TAG).d( "aliasesList, %s", aliasesList );
 
@@ -585,7 +608,6 @@ public class MainService extends Service {
     } else {
       settings.getString("PIN").set("");
       EventBus.getDefault().post( new StepperDcCheckFailEvent("Ошибка! Проверьте SD карту") );
-      addKey();
     }
   }
 
