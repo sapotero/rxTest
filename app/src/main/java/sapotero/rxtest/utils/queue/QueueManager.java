@@ -78,6 +78,10 @@ public class QueueManager {
       }
     }
 
+    if ( dBManager.getRunningJobsCount() > supervisor.getRunningJobsCount() ){
+      dBManager.dropRunningJobs();
+    }
+
   }
 
   public void setExecutedLocal(Command command) {

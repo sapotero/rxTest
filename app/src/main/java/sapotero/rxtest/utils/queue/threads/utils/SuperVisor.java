@@ -23,8 +23,7 @@ public class SuperVisor implements Runnable
   }
 
   @Override
-  public void run()
-  {
+  public void run() {
     while(run){
       Timber.e("[monitor] [%d/%d] Active: %d, Completed: %d, Task: %d, isShutdown: %s, isTerminated: %s",
           this.executor.getPoolSize(),
@@ -35,6 +34,7 @@ public class SuperVisor implements Runnable
           this.executor.isShutdown(),
           this.executor.isTerminated()
       );
+
       try {
         Thread.sleep(seconds*1000);
       } catch (InterruptedException e) {

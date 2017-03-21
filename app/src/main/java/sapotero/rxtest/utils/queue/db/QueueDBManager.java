@@ -15,11 +15,12 @@ import io.requery.rx.SingleEntityStore;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.queue.QueueEntity;
+import sapotero.rxtest.utils.queue.interfaces.JobCountInterface;
 import sapotero.rxtest.views.managers.menu.interfaces.Command;
 import sapotero.rxtest.views.managers.menu.utils.CommandParams;
 import timber.log.Timber;
 
-public class QueueDBManager {
+public class QueueDBManager implements JobCountInterface {
   @Inject SingleEntityStore<Persistable> dataStore;
 
   private final Context context;
@@ -166,5 +167,20 @@ public class QueueDBManager {
         Timber.tag(TAG).i( "[%s] - setAsRunning", uuid );
       }
     }
+  }
+
+  public void dropRunningJobs() {
+    dataStore
+      .update(QueueEntity.class)
+      .set(QueueEntity.RUNNING, false)
+      .where(QueueEntity.RUNNING.eq(true))
+      .get()
+      .value();
+  }
+
+  /* JobCountInterface */
+  @Override
+  public int getRunningJobsCount(){
+    return dataStore.count(QueueEntity.class).where(QueueEntity.RUNNING.eq(true)).get().value();
   }
 }

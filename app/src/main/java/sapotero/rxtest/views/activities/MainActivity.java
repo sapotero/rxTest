@@ -466,6 +466,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     RAdapter.notifyDataSetChanged();
     dropLoadProgress(false);
 
+//    EventBus.getDefault().post( new UpdateAllDocumentsEvent());
+
   }
 
 

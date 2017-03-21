@@ -698,6 +698,10 @@ public class MainService extends Service {
   }
 
   public void updateAll(){
+
+    Timber.tag(TAG).e("updateAll");
+
+
     if ( subscription == null ){
       subscription = new CompositeSubscription();
     }
@@ -706,28 +710,26 @@ public class MainService extends Service {
       subscription.unsubscribe();
     }
 
-    if ( settings.getString("is_first_run").get() != null ){
-      subscription.add(
-        Observable
-          .interval( 120, TimeUnit.SECONDS )
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(interval -> {
-            dataLoaderInterface.updateByStatus(MainMenuItem.ALL);
+    subscription.add(
+      Observable
+        .interval( 120, TimeUnit.SECONDS )
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(interval -> {
+          dataLoaderInterface.updateByStatus(MainMenuItem.ALL);
 
-          })
-      );
+        })
+    );
 
-      subscription.add(
-        Observable
-          .interval( 10, TimeUnit.SECONDS )
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(interval -> {
-            queue.getUncompleteTasks();
-          })
-      );
-    }
+    subscription.add(
+      Observable
+        .interval( 10, TimeUnit.SECONDS )
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(interval -> {
+          queue.getUncompleteTasks();
+        })
+    );
   }
 
 
@@ -812,15 +814,13 @@ public class MainService extends Service {
     dataLoaderInterface.updateDocument(event.uid);
   }
 
-  @Subscribe(threadMode = ThreadMode.BACKGROUND)
+  @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(UpdateAllDocumentsEvent event) throws Exception {
     EventBus.getDefault().post( new UpdateCurrentInfoActivityEvent() );
+
+
+    Timber.tag(TAG).e("updateAll");
     updateAll();
-//    try {
-//      Timber.tag("SIGN").w( "%s", getFakeSign( getApplicationContext(), "123456" ) );
-//    } catch (Exception e) {
-//      e.printStackTrace();
-//    }
   }
 
   public static boolean deleteDirectory(File directory) {

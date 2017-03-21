@@ -5,7 +5,7 @@
     android:id="@+id/log_layout_cv"
     android:layout_width="match_parent"
     android:layout_height="72dp"
-    app:cardElevation="2dp"
+    app:cardElevation="0dp"
     app:cardCornerRadius="0dp"
     >
 
@@ -16,57 +16,43 @@
         android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/log_operation_id"
-            android:layout_width="196dp"
-            android:padding="@dimen/date_offset"
-            android:layout_height="match_parent"
-            android:textColor="@color/md_grey_600"
-            android:fontFamily="sans-serif"
-            android:textStyle="normal"
-            android:visibility="gone"
-            />
-
-        <TextView
             android:id="@+id/log_operation_date"
-            android:layout_width="196dp"
+            android:layout_width="180dp"
             android:padding="@dimen/date_offset"
             android:layout_height="match_parent"
             android:textColor="@color/md_grey_600"
             android:fontFamily="sans-serif"
             android:textStyle="normal"
+            android:gravity="center_vertical"
             />
 
         <TextView
             android:id="@+id/log_operation_name"
-            android:layout_width="800dp"
-            android:padding="@dimen/date_offset"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:padding="@dimen/date_offset"
             android:textColor="@color/md_grey_800"
             android:fontFamily="sans-serif"
             android:textStyle="normal"
+            android:gravity="center_vertical"
             />
         <TextView
-            android:id="@+id/log_executed_remote"
+            android:id="@+id/log_job_status"
             android:layout_width="wrap_content"
             android:clickable="false"
             android:focusable="false"
             android:layout_height="match_parent"
-            android:layout_weight="1"
             android:layout_gravity="center"
             android:gravity="center"
             android:width="100dp"
             />
-        <CheckBox
-            android:id="@+id/log_executed_operation"
-            android:layout_width="wrap_content"
-            android:clickable="false"
-            android:focusable="false"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
+        <ImageView
+            android:layout_width="100dp"
             android:layout_gravity="center"
-            android:gravity="center"
-            android:width="50dp"
-            />
+            android:layout_height="wrap_content"
+            android:foreground="@drawable/card_foreground"
+            android:src="@drawable/close"/>
 
     </LinearLayout>
 </android.support.v7.widget.CardView>

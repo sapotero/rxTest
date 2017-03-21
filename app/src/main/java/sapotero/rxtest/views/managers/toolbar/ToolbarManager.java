@@ -572,7 +572,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         CommandParams params = new CommandParams();
         params.setUser( LOGIN.get() );
         params.setDocument( UID.get() );
-        params.setSign( "Sign" );
+        params.setSign( "SignFileCommand" );
 
         operationManager.execute( operation, params );
       })
@@ -596,11 +596,11 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
 
         params.setUser(LOGIN.get());
-        params.setSign("Sign");
+        params.setSign("SignFileCommand");
 
         // если есть комментарий
         if (settings.getString("prev_dialog_comment").get() != null) {
-          params.setComment("Sign");
+          params.setComment("SignFileCommand");
         }
 
         params.setComment( dialog1.getInputEditText().getText().toString() );

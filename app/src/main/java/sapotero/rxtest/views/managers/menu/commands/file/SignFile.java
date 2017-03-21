@@ -1,4 +1,4 @@
-package sapotero.rxtest.views.managers.menu.commands.report;
+package sapotero.rxtest.views.managers.menu.commands.file;
 
 import android.content.Context;
 
@@ -19,9 +19,10 @@ import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.views.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.views.managers.menu.utils.CommandParams;
+import sapotero.rxtest.views.services.MainService;
 import timber.log.Timber;
 
-public class FromTheReport extends AbstractCommand {
+public class SignFile extends AbstractCommand {
 
   private final DocumentReceiver document;
   private final Context context;
@@ -34,12 +35,13 @@ public class FromTheReport extends AbstractCommand {
   private Preference<String> HOST;
   private Preference<String> STATUS_CODE;
   private Preference<String> PIN;
+  private String official_id;
+  private String sign;
 
-  public FromTheReport(Context context, DocumentReceiver document){
+  public SignFile(Context context, DocumentReceiver document){
     super(context);
     this.context = context;
     this.document = document;
-
   }
 
   public String getInfo(){
@@ -59,19 +61,29 @@ public class FromTheReport extends AbstractCommand {
     PIN = settings.getString("PIN");
   }
 
+  public SignFile withPerson(String uid){
+    this.official_id = uid;
+    return this;
+  }
+  public SignFile withSign(String sign){
+    this.sign = sign;
+    return this;
+  }
+
   @Override
   public void execute() {
+    loadSettings();
+
     queueManager.add(this);
   }
 
   @Override
   public String getType() {
-    return "from_the_report";
+    return "file_sign";
   }
 
   @Override
   public void executeLocal() {
-    loadSettings();
     int count = dataStore
       .update(RDocumentEntity.class)
       .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue() )
@@ -83,8 +95,8 @@ public class FromTheReport extends AbstractCommand {
       .get()
       .value();
 
-    if (callback != null){
-      callback.onCommandExecuteSuccess(getType());
+    if (callback != null ){
+      callback.onCommandExecuteSuccess( getType() );
     }
 
     queueManager.setExecutedLocal(this);
@@ -93,6 +105,7 @@ public class FromTheReport extends AbstractCommand {
   @Override
   public void executeRemote() {
     loadSettings();
+
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
     Retrofit retrofit = new Retrofit.Builder()
@@ -108,21 +121,28 @@ public class FromTheReport extends AbstractCommand {
     uids.add( UID.get() );
 
     String comment = null;
-
-    if (params.getComment() != null){
+    if ( params.getComment() != null ){
       comment = params.getComment();
     }
 
-    Observable<OperationResult> info = operationService.report(
+    try {
+      sign = MainService.getFakeSign( context, PIN.get(), null );
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    Observable<OperationResult> info = operationService.approval(
       getType(),
       LOGIN.get(),
       TOKEN.get(),
       uids,
       comment,
-      STATUS_CODE.get()
+      STATUS_CODE.get(),
+      official_id,
+      sign
     );
 
-    info.subscribeOn( Schedulers.computation() )
+    info.subscribeOn( Schedulers.computation() )//        .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue() )
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         data -> {
@@ -133,18 +153,19 @@ public class FromTheReport extends AbstractCommand {
           queueManager.setExecutedRemote(this);
         },
         error -> {
-          if (callback != null){
+          if (callback != null) {
             callback.onCommandExecuteError(getType());
           }
+
         }
       );
+
   }
 
   @Override
   public void withParams(CommandParams params) {
     this.params = params;
   }
-
   @Override
   public CommandParams getParams() {
     return params;

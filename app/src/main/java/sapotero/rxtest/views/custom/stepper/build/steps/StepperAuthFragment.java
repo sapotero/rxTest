@@ -221,7 +221,7 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(StepperDcCheckSuccesEvent event) throws Exception {
-    Timber.tag(TAG).d("Sign success");
+    Timber.tag(TAG).d("SignFileCommand success");
     if (callback != null) {
       loadingDialog.hide();
       callback.goToNextStep();
@@ -230,7 +230,7 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(StepperDcCheckFailEvent event) throws Exception {
-    Timber.tag(TAG).d("Sign fail");
+    Timber.tag(TAG).d("SignFileCommand fail");
 
     if (event.error != null) {
       Toast.makeText( getContext(), event.error, Toast.LENGTH_SHORT ).show();

@@ -12,6 +12,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import sapotero.rxtest.db.requery.models.queue.QueueEntity;
+import sapotero.rxtest.utils.queue.interfaces.JobCountInterface;
 import sapotero.rxtest.utils.queue.threads.handlers.ThreadRejectedExecutionHandler;
 import sapotero.rxtest.utils.queue.threads.producers.LocalCommandProducer;
 import sapotero.rxtest.utils.queue.threads.producers.RemoteCommandProducer;
@@ -22,7 +23,7 @@ import sapotero.rxtest.views.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.views.managers.menu.utils.CommandParams;
 import timber.log.Timber;
 
-public class QueueSupervisor {
+public class QueueSupervisor implements JobCountInterface {
 
   private final Context context;
   private final CommandFactory commandFactory;
@@ -44,11 +45,10 @@ public class QueueSupervisor {
 
     commandPool = new ThreadPoolExecutor(8, 30, 60, TimeUnit.SECONDS, new ArrayBlockingQueue<>(2), threadFactory, rejectionHandler);
 
-    SuperVisor monitor = new SuperVisor(commandPool, 5);
+    SuperVisor monitor   = new SuperVisor(commandPool, 5);
     Thread monitorThread = new Thread(monitor);
     monitorThread.start();
   }
-
 
   public Command create(QueueEntity task){
     Command command = null;
@@ -92,5 +92,12 @@ public class QueueSupervisor {
     Timber.tag(TAG).i("local %s | %s", executeLocal, producedCommand.toString() );
 
     commandPool.execute( producedCommand );
+  }
+
+
+  /* JobCountInterface */
+  @Override
+  public int getRunningJobsCount(){
+    return commandPool.getActiveCount();
   }
 }

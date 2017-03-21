@@ -6,13 +6,14 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.views.managers.menu.commands.approval.ChangePerson;
 import sapotero.rxtest.views.managers.menu.commands.approval.NextPerson;
-import sapotero.rxtest.views.managers.menu.commands.primary_consideration.PrimaryConsideration;
 import sapotero.rxtest.views.managers.menu.commands.decision.AddDecision;
 import sapotero.rxtest.views.managers.menu.commands.decision.ApproveDecision;
 import sapotero.rxtest.views.managers.menu.commands.decision.RejectDecision;
 import sapotero.rxtest.views.managers.menu.commands.decision.SaveDecision;
+import sapotero.rxtest.views.managers.menu.commands.file.SignFile;
 import sapotero.rxtest.views.managers.menu.commands.performance.ApprovalPerformance;
 import sapotero.rxtest.views.managers.menu.commands.performance.DelegatePerformance;
+import sapotero.rxtest.views.managers.menu.commands.primary_consideration.PrimaryConsideration;
 import sapotero.rxtest.views.managers.menu.commands.report.FromTheReport;
 import sapotero.rxtest.views.managers.menu.commands.report.ReturnToPrimaryConsideration;
 import sapotero.rxtest.views.managers.menu.commands.shared.AddToFolder;
@@ -52,7 +53,20 @@ public class CommandFactory implements AbstractCommand.Callback{
 
 
   public enum Operation {
+    FILE_SIGN {
+      @Override
+      Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
+        SignFile command = new SignFile(context, document);
+        command.registerCallBack(instance);
+        command.withParams(params);
+        return command;
+      }
 
+      @Override
+      public String getRussinaName() {
+        return "Возврат с доклада";
+      }
+    },
     FROM_THE_REPORT {
       @Override
       Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {

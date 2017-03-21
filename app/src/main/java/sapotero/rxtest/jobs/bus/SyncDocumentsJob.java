@@ -50,8 +50,8 @@ public class SyncDocumentsJob  extends BaseJob {
 
   public static final int PRIORITY = 1;
   private Boolean onControl;
-  private Boolean isProcessed;
-  private Boolean isFavorites;
+  private Boolean isProcessed = false;
+  private Boolean isFavorites = false;
   private String processed_folder;
 
   private Preference<String> LOGIN = null;
@@ -67,8 +67,6 @@ public class SyncDocumentsJob  extends BaseJob {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
     this.filter = filter;
-    this.isFavorites = false;
-    this.isProcessed = false;
     this.processed_folder = "";
   }
 

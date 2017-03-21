@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.widget.ImageView;
 
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
@@ -14,12 +15,14 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.queue.QueueEntity;
 import sapotero.rxtest.views.adapters.LogAdapter;
+import sapotero.rxtest.views.adapters.decorators.DividerItemDecoration;
 import sapotero.rxtest.views.adapters.decorators.GridSpacingItemDecoration;
 import timber.log.Timber;
 
@@ -31,6 +34,8 @@ public class LogActivity extends AppCompatActivity {
 
   @BindView(R.id.activity_log_recycle_view) RecyclerView recyclerView;
   @BindView(R.id.activity_log_toolbar) Toolbar toolbar;
+  @BindView(R.id.activity_reload_table) ImageView reload;
+
   private LogAdapter adapter;
   private String TAG = this.getClass().getSimpleName();
 
@@ -44,6 +49,10 @@ public class LogActivity extends AppCompatActivity {
     ButterKnife.bind(this);
     EsdApplication.getComponent(this).inject(this);
 
+  }
+  @OnClick(R.id.activity_reload_table)
+  public void reload(){
+    updateAdapter();
   }
 
   @Override
@@ -61,9 +70,13 @@ public class LogActivity extends AppCompatActivity {
       }
     );
 
+    updateAdapter();
+
+  }
+
+  private void updateAdapter() {
     List<QueueEntity> tasks = dataStore
       .select(QueueEntity.class)
-      .where(QueueEntity.UUID.ne(""))
       .get()
       .toList();
 
@@ -78,7 +91,8 @@ public class LogActivity extends AppCompatActivity {
 
     recyclerView.addItemDecoration(new GridSpacingItemDecoration(columnCount, spacing, true));
     recyclerView.setLayoutManager(gridLayoutManager);
-    recyclerView.setAdapter(adapter);
+    recyclerView.addItemDecoration(new DividerItemDecoration( getDrawable(R.drawable.devider) ));
 
+    recyclerView.setAdapter(adapter);
   }
 }
