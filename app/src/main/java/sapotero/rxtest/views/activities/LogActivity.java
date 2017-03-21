@@ -9,6 +9,7 @@ import android.widget.ImageView;
 
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -69,24 +70,12 @@ public class LogActivity extends AppCompatActivity {
         finish();
       }
     );
-
-    updateAdapter();
-
-  }
-
-  private void updateAdapter() {
-    List<QueueEntity> tasks = dataStore
-      .select(QueueEntity.class)
-      .get()
-      .toList();
-
-    Timber.tag(TAG).e("task list size: %s", tasks.size());
-
-    adapter = new LogAdapter(this, tasks);
-
     int columnCount = 1;
     int spacing = 0;
 
+
+    List<QueueEntity> empty_list = new ArrayList<QueueEntity>();
+    adapter = new LogAdapter(this, empty_list );
     GridLayoutManager gridLayoutManager = new GridLayoutManager(this, columnCount, GridLayoutManager.VERTICAL, false);
 
     recyclerView.addItemDecoration(new GridSpacingItemDecoration(columnCount, spacing, true));
@@ -94,5 +83,21 @@ public class LogActivity extends AppCompatActivity {
     recyclerView.addItemDecoration(new DividerItemDecoration( getDrawable(R.drawable.devider) ));
 
     recyclerView.setAdapter(adapter);
+
+    updateAdapter();
+
+  }
+
+  private void updateAdapter() {
+
+    List<QueueEntity> tasks = dataStore
+      .select(QueueEntity.class)
+      .get()
+      .toList();
+
+    Timber.tag(TAG).e("task list size: %s", tasks.size());
+
+    adapter.add(tasks);
+
   }
 }

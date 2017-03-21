@@ -97,6 +97,11 @@ public class LogAdapter extends RecyclerView.Adapter<LogAdapter.QueueViewHolder>
     notifyDataSetChanged();
   }
 
+  public void add(List<QueueEntity> tasks) {
+    queueEntities = tasks;
+    notifyDataSetChanged();
+  }
+
   class QueueViewHolder extends RecyclerView.ViewHolder {
     private TextView date;
     private CardView cv;
@@ -104,7 +109,7 @@ public class LogAdapter extends RecyclerView.Adapter<LogAdapter.QueueViewHolder>
 //    private CheckBox operations;
     private TextView jobStatus;
 
-    public QueueViewHolder(View itemView) {
+    QueueViewHolder(View itemView) {
       super(itemView);
       cv     = (CardView)itemView.findViewById(R.id.log_layout_cv);
       date   = (TextView)itemView.findViewById(R.id.log_operation_date);
