@@ -129,6 +129,10 @@ public class StepperLoadDataFragment extends Fragment implements Step {
 
     if ( settings.getString("is_first_run").get() != null ){
       error = null;
+
+      if (subscription.hasSubscriptions()){
+        subscription.unsubscribe();
+      }
     } else {
       error = new VerificationError("Дождитесь окончания загрузки");
 
@@ -186,6 +190,11 @@ public class StepperLoadDataFragment extends Fragment implements Step {
     float result = 100f * loaded / COUNT.get();
     if (result > 100 ){
       result = 100f;
+
+      if (subscription.hasSubscriptions()){
+        subscription.unsubscribe();
+      }
+
     }
 
     return (int) Math.ceil(result);
