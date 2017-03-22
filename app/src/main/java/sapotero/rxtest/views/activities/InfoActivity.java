@@ -63,8 +63,8 @@ import sapotero.rxtest.views.fragments.InfoCardFieldsFragment;
 import sapotero.rxtest.views.fragments.InfoCardLinksFragment;
 import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
 import sapotero.rxtest.views.fragments.RoutePreviewFragment;
-import sapotero.rxtest.views.managers.menu.OperationManager;
-import sapotero.rxtest.views.managers.toolbar.ToolbarManager;
+import sapotero.rxtest.managers.menu.OperationManager;
+import sapotero.rxtest.managers.toolbar.ToolbarManager;
 import timber.log.Timber;
 
 public class InfoActivity extends AppCompatActivity implements InfoActivityDecisionPreviewFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, RoutePreviewFragment.OnFragmentInteractionListener, InfoCardDocumentsFragment.OnFragmentInteractionListener, InfoCardWebViewFragment.OnFragmentInteractionListener, InfoCardLinksFragment.OnFragmentInteractionListener, InfoCardFieldsFragment.OnFragmentInteractionListener{

@@ -2,8 +2,8 @@ package sapotero.rxtest.utils.queue.threads.producers;
 
 import android.content.Context;
 
-import sapotero.rxtest.views.managers.menu.interfaces.Command;
-import sapotero.rxtest.views.managers.menu.invokers.LocalExecutor;
+import sapotero.rxtest.managers.menu.interfaces.Command;
+import sapotero.rxtest.managers.menu.invokers.LocalExecutor;
 import timber.log.Timber;
 
 public class LocalCommandProducer implements Runnable, AutoCloseable {

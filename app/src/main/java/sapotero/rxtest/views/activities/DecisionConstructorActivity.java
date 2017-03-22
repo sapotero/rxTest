@@ -55,10 +55,10 @@ import sapotero.rxtest.views.custom.SpinnerWithLabel;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
 import sapotero.rxtest.views.fragments.DecisionFragment;
 import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
-import sapotero.rxtest.views.managers.menu.OperationManager;
-import sapotero.rxtest.views.managers.menu.factories.CommandFactory;
-import sapotero.rxtest.views.managers.menu.utils.CommandParams;
-import sapotero.rxtest.views.managers.view.DecisionManager;
+import sapotero.rxtest.managers.menu.OperationManager;
+import sapotero.rxtest.managers.menu.factories.CommandFactory;
+import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.managers.view.DecisionManager;
 import timber.log.Timber;
 
 public class DecisionConstructorActivity extends AppCompatActivity implements DecisionFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, OperationManager.Callback, SelectOshsDialogFragment.Callback {

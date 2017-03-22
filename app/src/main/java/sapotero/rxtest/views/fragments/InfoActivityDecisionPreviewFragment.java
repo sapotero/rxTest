@@ -73,10 +73,10 @@ import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.adapters.DecisionSpinnerAdapter;
 import sapotero.rxtest.views.adapters.models.DecisionSpinnerItem;
 import sapotero.rxtest.views.dialogs.DecisionMagniferFragment;
-import sapotero.rxtest.views.managers.menu.OperationManager;
-import sapotero.rxtest.views.managers.menu.factories.CommandFactory;
-import sapotero.rxtest.views.managers.menu.utils.CommandParams;
-import sapotero.rxtest.views.managers.toolbar.ToolbarManager;
+import sapotero.rxtest.managers.menu.OperationManager;
+import sapotero.rxtest.managers.menu.factories.CommandFactory;
+import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.managers.toolbar.ToolbarManager;
 import timber.log.Timber;
 
 

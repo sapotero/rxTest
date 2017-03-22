@@ -17,10 +17,10 @@ import sapotero.rxtest.utils.queue.threads.handlers.ThreadRejectedExecutionHandl
 import sapotero.rxtest.utils.queue.threads.producers.LocalCommandProducer;
 import sapotero.rxtest.utils.queue.threads.producers.RemoteCommandProducer;
 import sapotero.rxtest.utils.queue.threads.utils.SuperVisor;
-import sapotero.rxtest.views.managers.menu.factories.CommandFactory;
-import sapotero.rxtest.views.managers.menu.interfaces.Command;
-import sapotero.rxtest.views.managers.menu.receivers.DocumentReceiver;
-import sapotero.rxtest.views.managers.menu.utils.CommandParams;
+import sapotero.rxtest.managers.menu.factories.CommandFactory;
+import sapotero.rxtest.managers.menu.interfaces.Command;
+import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
+import sapotero.rxtest.managers.menu.utils.CommandParams;
 import timber.log.Timber;
 
 public class QueueSupervisor implements JobCountInterface {

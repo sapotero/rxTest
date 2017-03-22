@@ -48,7 +48,7 @@
         </activity>
 
         <service
-            android:name=".views.services.MainService"
+            android:name=".services.MainService"
             android:enabled="true"
             android:exported="true">
         </service>
@@ -75,6 +75,8 @@
             android:screenOrientation="landscape">
         </activity>
         <activity android:name=".views.activities.LogActivity">
+        </activity>
+        <activity android:name=".views.activities.FileSignActivity">
         </activity>
     </application>
 

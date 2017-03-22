@@ -19,6 +19,7 @@ import sapotero.rxtest.utils.queue.utils.QueueManagerModule;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.activities.DocumentImageFullScreenActivity;
 import sapotero.rxtest.views.activities.DocumentInfocardFullScreenActivity;
+import sapotero.rxtest.views.activities.FileSignActivity;
 import sapotero.rxtest.views.activities.InfoActivity;
 import sapotero.rxtest.views.activities.InfoNoMenuActivity;
 import sapotero.rxtest.views.activities.LogActivity;
@@ -46,30 +47,30 @@ import sapotero.rxtest.views.fragments.InfoCardLinksFragment;
 import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
 import sapotero.rxtest.views.fragments.RoutePreviewFragment;
 import sapotero.rxtest.views.fragments.SettingsViewFragment;
-import sapotero.rxtest.views.managers.CurrentDocumentManager;
-import sapotero.rxtest.views.managers.DataLoaderManager;
-import sapotero.rxtest.views.managers.db.managers.DBDocumentManager;
-import sapotero.rxtest.views.managers.db.utils.DBDocumentManagerModule;
-import sapotero.rxtest.views.managers.menu.OperationManager;
-import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
-import sapotero.rxtest.views.managers.menu.commands.approval.ChangePerson;
-import sapotero.rxtest.views.managers.menu.commands.approval.NextPerson;
-import sapotero.rxtest.views.managers.menu.commands.approval.PrevPerson;
-import sapotero.rxtest.views.managers.menu.commands.decision.AddDecision;
-import sapotero.rxtest.views.managers.menu.commands.decision.SaveDecision;
-import sapotero.rxtest.views.managers.menu.commands.performance.ApprovalPerformance;
-import sapotero.rxtest.views.managers.menu.commands.performance.DelegatePerformance;
-import sapotero.rxtest.views.managers.menu.commands.report.FromTheReport;
-import sapotero.rxtest.views.managers.menu.commands.report.ReturnToPrimaryConsideration;
-import sapotero.rxtest.views.managers.menu.commands.shared.AddToFolder;
-import sapotero.rxtest.views.managers.menu.commands.shared.CheckForControl;
-import sapotero.rxtest.views.managers.menu.utils.OperationHistory;
-import sapotero.rxtest.views.managers.menu.utils.OperationManagerModule;
-import sapotero.rxtest.views.managers.toolbar.ToolbarManager;
-import sapotero.rxtest.views.managers.view.DecisionManager;
+import sapotero.rxtest.managers.CurrentDocumentManager;
+import sapotero.rxtest.managers.DataLoaderManager;
+import sapotero.rxtest.managers.db.managers.DBDocumentManager;
+import sapotero.rxtest.managers.db.utils.DBDocumentManagerModule;
+import sapotero.rxtest.managers.menu.OperationManager;
+import sapotero.rxtest.managers.menu.commands.AbstractCommand;
+import sapotero.rxtest.managers.menu.commands.approval.ChangePerson;
+import sapotero.rxtest.managers.menu.commands.approval.NextPerson;
+import sapotero.rxtest.managers.menu.commands.approval.PrevPerson;
+import sapotero.rxtest.managers.menu.commands.decision.AddDecision;
+import sapotero.rxtest.managers.menu.commands.decision.SaveDecision;
+import sapotero.rxtest.managers.menu.commands.performance.ApprovalPerformance;
+import sapotero.rxtest.managers.menu.commands.performance.DelegatePerformance;
+import sapotero.rxtest.managers.menu.commands.report.FromTheReport;
+import sapotero.rxtest.managers.menu.commands.report.ReturnToPrimaryConsideration;
+import sapotero.rxtest.managers.menu.commands.shared.AddToFolder;
+import sapotero.rxtest.managers.menu.commands.shared.CheckForControl;
+import sapotero.rxtest.managers.menu.utils.OperationHistory;
+import sapotero.rxtest.managers.menu.utils.OperationManagerModule;
+import sapotero.rxtest.managers.toolbar.ToolbarManager;
+import sapotero.rxtest.managers.view.DecisionManager;
 import sapotero.rxtest.views.menu.builders.ButtonBuilder;
 import sapotero.rxtest.views.menu.factories.ItemsBuilder;
-import sapotero.rxtest.views.services.MainService;
+import sapotero.rxtest.services.MainService;
 
 @Singleton
 @Component(modules = {
@@ -85,15 +86,12 @@ import sapotero.rxtest.views.services.MainService;
 
 public interface EsdComponent {
 
-
+  void inject(EsdApplication activity);
 
   void inject(LogActivity activity);
   void inject(SettingsViewFragment activity);
-
-  void inject(EsdApplication activity);
-
   void inject(LoginActivity activity);
-
+  void inject(FileSignActivity activity);
   void inject(MainActivity  activity);
   void inject(InfoActivity  activity);
   void inject(SettingsActivity activity);
@@ -102,18 +100,15 @@ public interface EsdComponent {
   void inject(DocumentInfocardFullScreenActivity activity);
   void inject(SettingsTemplatesActivity activity);
   void inject(InfoNoMenuActivity activity);
+
   void inject(MainService service);
 
 
   void inject(DecisionAdapter adapter);
-
   void inject(DocumentsAdapter adapter);
   void inject(PrimaryConsiderationAdapter adapter);
-
   void inject(OshsAutoCompleteAdapter context);
 
-  void inject(DBDocumentManager context);
-  void inject(QueueManager context);
 
   void inject(StepperLoadDataFragment fragment);
   void inject(DecisionFragment fragment);
@@ -130,34 +125,22 @@ public interface EsdComponent {
   void inject(StepperAuthFragment fragment);
   void inject(StepperChooseAuthTypeFragment fragment);
 
-
-
   void inject(BaseJob job);
 
-
   void inject(ItemsBuilder context);
-
   void inject(QueueDBManager context);
-
-
-
-
+  void inject(DBDocumentManager context);
+  void inject(QueueManager context);
   void inject(DataLoaderManager context);
   void inject(CurrentDocumentManager context);
 
   void inject(DocumentTypeItem context);
   void inject(ButtonBuilder context);
-
   void inject(DBQueryBuilder context);
-
-
   void inject(DecisionManager context);
-
   void inject(OperationManager context);
   void inject(OperationHistory context);
   void inject(ToolbarManager context);
-
-
 
   void inject(AbstractCommand context);
 
@@ -168,17 +151,12 @@ public interface EsdComponent {
   void inject(AddToFolder context);
   void inject(ChangePerson context);
   void inject(CheckForControl context);
-
   void inject(NextPerson context);
   void inject(PrevPerson context);
-  void inject(sapotero.rxtest.views.managers.menu.commands.signing.NextPerson context);
-  void inject(sapotero.rxtest.views.managers.menu.commands.signing.PrevPerson context);
-
+  void inject(sapotero.rxtest.managers.menu.commands.signing.NextPerson context);
+  void inject(sapotero.rxtest.managers.menu.commands.signing.PrevPerson context);
   void inject(SaveDecision context);
   void inject(AddDecision context);
-
-
-
 
   Application application();
 }

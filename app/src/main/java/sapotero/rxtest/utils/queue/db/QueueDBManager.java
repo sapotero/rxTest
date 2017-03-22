@@ -16,8 +16,8 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.queue.QueueEntity;
 import sapotero.rxtest.utils.queue.interfaces.JobCountInterface;
-import sapotero.rxtest.views.managers.menu.interfaces.Command;
-import sapotero.rxtest.views.managers.menu.utils.CommandParams;
+import sapotero.rxtest.managers.menu.interfaces.Command;
+import sapotero.rxtest.managers.menu.utils.CommandParams;
 import timber.log.Timber;
 
 public class QueueDBManager implements JobCountInterface {

@@ -6,7 +6,7 @@ import android.support.annotation.NonNull;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 
-import sapotero.rxtest.views.managers.menu.interfaces.Command;
+import sapotero.rxtest.managers.menu.interfaces.Command;
 
 public class DelayedCommand implements Delayed {
   private final Command command;

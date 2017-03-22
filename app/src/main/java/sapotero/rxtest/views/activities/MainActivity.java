@@ -70,6 +70,7 @@ import sapotero.rxtest.events.service.UpdateAllDocumentsEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.events.view.RemoveDocumentFromAdapterEvent;
 import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
+import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
@@ -79,11 +80,10 @@ import sapotero.rxtest.views.custom.CircleLeftArrow;
 import sapotero.rxtest.views.custom.CircleRightArrow;
 import sapotero.rxtest.views.custom.OrganizationSpinner;
 import sapotero.rxtest.views.custom.SearchView.SearchView;
-import sapotero.rxtest.views.managers.DataLoaderManager;
+import sapotero.rxtest.managers.DataLoaderManager;
 import sapotero.rxtest.views.menu.MenuBuilder;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import sapotero.rxtest.views.menu.fields.MainMenuItem;
-import sapotero.rxtest.views.services.MainService;
 import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity implements MenuBuilder.Callback, SearchView.OnVisibilityChangeListener {
@@ -155,6 +155,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private final int SETTINGS_VIEW = 20;
   private final int SETTINGS_DECISION_TEMPLATES = 21;
   private final int SETTINGS_LOG = 99;
+  private final int SETTINGS_SIGN = 98;
 
   private final int SETTINGS_REJECTION_TEMPLATES = 22;
 
@@ -492,7 +493,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void drawer_build_bottom() {
-    String version = "1.12.0";
+    String version = "1.13.4";
 
     drawer
       .addDrawerItems(
@@ -507,13 +508,19 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
           .withName(R.string.drawer_item_settings_templates)
           .withIcon(MaterialDesignIconic.Icon.gmi_comment_edit)
           .withIdentifier(SETTINGS_DECISION_TEMPLATES),
-        new SecondaryDrawerItem()
-          .withName("Версия приложения: " + version )
-          .withSelectable(false),
-        new DividerDrawerItem(),
+        new SectionDrawerItem().withName(R.string.drawer_item_debug),
         new SecondaryDrawerItem()
           .withIdentifier(SETTINGS_LOG)
-          .withName("Лог")
+          .withIcon(MaterialDesignIconic.Icon.gmi_assignment)
+          .withName("Лог"),
+        new SecondaryDrawerItem()
+          .withIdentifier(SETTINGS_SIGN)
+          .withIcon(MaterialDesignIconic.Icon.gmi_dns)
+          .withName("Подписи ЭО"),
+        new DividerDrawerItem(),
+        new SecondaryDrawerItem()
+          .withName("Версия приложения: " + version )
+          .withSelectable(false)
       )
       .withOnDrawerItemClickListener(
         (view, position, drawerItem) -> {
@@ -571,6 +578,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
               break;
             case SETTINGS_LOG:
               activity = LogActivity.class;
+              break;
+            case SETTINGS_SIGN:
+              activity = FileSignActivity.class;
               break;
             default:
               activity = null;

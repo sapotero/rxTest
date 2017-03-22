@@ -12,8 +12,8 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.queue.QueueEntity;
 import sapotero.rxtest.utils.queue.db.QueueDBManager;
 import sapotero.rxtest.utils.queue.threads.QueueSupervisor;
-import sapotero.rxtest.views.managers.menu.commands.AbstractCommand;
-import sapotero.rxtest.views.managers.menu.interfaces.Command;
+import sapotero.rxtest.managers.menu.commands.AbstractCommand;
+import sapotero.rxtest.managers.menu.interfaces.Command;
 import timber.log.Timber;
 
 import static sapotero.rxtest.utils.queue.threads.QueueSupervisor.THREAD_POOL_SIZE;

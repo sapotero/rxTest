@@ -29,7 +29,7 @@ public final class RequeryDbModule {
   @Provides
   @Singleton
   SingleEntityStore<Persistable> provideDatabase(Context context) {
-    DatabaseSource source = new DatabaseSource(context, Models.DEFAULT, 1);
+    DatabaseSource source = new DatabaseSource(context, Models.DEFAULT, 3);
 
     EntityModel model = Models.DEFAULT;
     Configuration configuration = new ConfigurationBuilder(source, model)

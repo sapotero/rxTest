@@ -32,7 +32,7 @@ import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.custom.stepper.StepperLayout;
 import sapotero.rxtest.views.custom.stepper.VerificationError;
 import sapotero.rxtest.views.custom.stepper.build.StepperAdapter;
-import sapotero.rxtest.views.services.MainService;
+import sapotero.rxtest.services.MainService;
 
 
 public class LoginActivity extends AppCompatActivity implements StepperLayout.StepperListener {

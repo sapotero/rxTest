@@ -2,8 +2,8 @@ package sapotero.rxtest.utils.queue.threads.producers;
 
 import android.content.Context;
 
-import sapotero.rxtest.views.managers.menu.interfaces.Command;
-import sapotero.rxtest.views.managers.menu.invokers.RemoteExecutor;
+import sapotero.rxtest.managers.menu.interfaces.Command;
+import sapotero.rxtest.managers.menu.invokers.RemoteExecutor;
 import timber.log.Timber;
 
 public class RemoteCommandProducer implements Runnable, AutoCloseable {

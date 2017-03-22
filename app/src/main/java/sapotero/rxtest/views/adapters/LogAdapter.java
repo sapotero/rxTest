@@ -13,7 +13,7 @@ import java.util.List;
 
 import sapotero.rxtest.R;
 import sapotero.rxtest.db.requery.models.queue.QueueEntity;
-import sapotero.rxtest.views.managers.menu.factories.CommandFactory;
+import sapotero.rxtest.managers.menu.factories.CommandFactory;
 
 public class LogAdapter extends RecyclerView.Adapter<LogAdapter.QueueViewHolder> {
 

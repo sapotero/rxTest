@@ -56,8 +56,8 @@ import sapotero.rxtest.events.utils.NoDocumentsEvent;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.views.activities.InfoActivity;
 import sapotero.rxtest.views.activities.MainActivity;
-import sapotero.rxtest.views.managers.db.managers.DBDocumentManager;
-import sapotero.rxtest.views.managers.menu.OperationManager;
+import sapotero.rxtest.managers.db.managers.DBDocumentManager;
+import sapotero.rxtest.managers.menu.OperationManager;
 import timber.log.Timber;
 
 public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.DocumentViewHolder> implements Action1<List<Document>> {

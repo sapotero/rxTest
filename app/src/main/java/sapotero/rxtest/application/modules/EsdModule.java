@@ -12,7 +12,7 @@ import sapotero.rxtest.events.utils.SubscriptionsModule;
 import sapotero.rxtest.jobs.utils.JobModule;
 import sapotero.rxtest.retrofit.utils.OkHttpModule;
 import sapotero.rxtest.utils.queue.utils.QueueManagerModule;
-import sapotero.rxtest.views.managers.db.utils.DBDocumentManagerModule;
+import sapotero.rxtest.managers.db.utils.DBDocumentManagerModule;
 
 @Module(
   includes = {

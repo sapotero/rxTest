@@ -39,7 +39,7 @@ import sapotero.rxtest.views.adapters.OshsAutoCompleteAdapter;
 import sapotero.rxtest.views.adapters.PrimaryUsersAdapter;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 import sapotero.rxtest.views.custom.DelayAutoCompleteTextView;
-import sapotero.rxtest.views.managers.menu.factories.CommandFactory;
+import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import timber.log.Timber;
 
 public class SelectOshsDialogFragment extends DialogFragment implements View.OnClickListener {

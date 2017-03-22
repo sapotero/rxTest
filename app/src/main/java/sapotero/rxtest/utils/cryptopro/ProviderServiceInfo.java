@@ -7,7 +7,7 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Set;
 
-import sapotero.rxtest.views.services.MainService;
+import sapotero.rxtest.services.MainService;
 
 /**
  * Служебный класс ProviderServiceInfo предназначен
