@@ -17,7 +17,7 @@ import sapotero.rxtest.retrofit.models.Folder;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.models.Template;
 import sapotero.rxtest.retrofit.models.me.UserInfo;
-import sapotero.rxtest.retrofit.models.v2.V2UserInfo;
+import sapotero.rxtest.retrofit.models.v2.v2UserOshs;
 
 public interface AuthService {
 
@@ -52,7 +52,7 @@ public interface AuthService {
   );
 
   @GET("v2/oshs/me.json")
-  Observable<ArrayList<V2UserInfo>> getUserInfoV2(
+  Observable<ArrayList<v2UserOshs>> getUserInfoV2(
     @Query("login") String login,
     @Query("auth_token") String token
   );

@@ -29,12 +29,12 @@ public final class RequeryDbModule {
   @Provides
   @Singleton
   SingleEntityStore<Persistable> provideDatabase(Context context) {
-    DatabaseSource source = new DatabaseSource(context, Models.DEFAULT, 4);
+    DatabaseSource source = new DatabaseSource(context, Models.DEFAULT, 6);
 
     EntityModel model = Models.DEFAULT;
     Configuration configuration = new ConfigurationBuilder(source, model)
-      .setStatementCacheSize(50)
-      .setBatchUpdateSize(20)
+      .setStatementCacheSize(10)
+      .setBatchUpdateSize(10)
       .setWriteExecutor(
         Executors.newSingleThreadExecutor()
       )

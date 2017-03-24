@@ -1,7 +1,10 @@
 package sapotero.rxtest.utils.queue.threads.utils;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.concurrent.ThreadPoolExecutor;
 
+import sapotero.rxtest.events.service.SuperVisorUpdateEvent;
 import timber.log.Timber;
 
 public class SuperVisor implements Runnable
@@ -35,8 +38,10 @@ public class SuperVisor implements Runnable
           this.executor.isTerminated()
       );
 
+
       try {
         Thread.sleep(seconds*1000);
+        EventBus.getDefault().post(new SuperVisorUpdateEvent());
       } catch (InterruptedException e) {
         e.printStackTrace();
       }

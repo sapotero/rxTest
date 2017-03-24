@@ -17,6 +17,15 @@ public interface DocumentsService {
     @Query("offset") Integer offset
   );
 
+  @GET("/v3/documents.json")
+  Observable<Documents> getDocumentsByIndexes(
+    @Query("login") String login,
+    @Query("auth_token") String auth_token,
+    @Query("indexes") String indexes,
+    @Query("status_code") String status_code,
+    @Query("limit") int limit
+  );
+
   @GET("/v3/documents/{UID}.json")
   Observable<Document> getDocument(
     @Path("UID") String uid,

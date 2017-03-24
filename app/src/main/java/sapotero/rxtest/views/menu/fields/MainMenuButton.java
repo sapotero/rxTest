@@ -9,6 +9,28 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 
+import static sapotero.rxtest.views.menu.fields.V2FilterType.FOR_REPORT;
+import static sapotero.rxtest.views.menu.fields.V2FilterType.PRIMARY;
+import static sapotero.rxtest.views.menu.fields.V2FilterType.SIGNING;
+
+enum V2FilterType{
+  SIGNING    ("signing"),
+  APPROVAL   ("approval"),
+  FOR_REPORT ("sent_to_the_report"),
+  PRIMARY    ("primary_consideration");
+
+
+  private final String name;
+
+  V2FilterType(String name) {
+    this.name = name;
+  }
+
+  public String getName() {
+    return name;
+  }
+}
+
 public enum MainMenuButton {
 
   PROJECTS ( 1,
@@ -23,17 +45,19 @@ public enum MainMenuButton {
   PERFORMANCE ( 2,
     "На рассмотрение %s" ,
     new ConditionBuilder[]{
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in( ButtonStatus.getPerformance() )  ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_LINKS.eq( false  ) ),
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.ne(Fields.Status.LINK.getValue() ) ),
-//      new ConditionBuilder( ConditionBuilder.Condition.OR, RDocumentEntity.FILTER.eq(Fields.Status.SENT_TO_THE_REPORT.getValue())  ),
-//      new ConditionBuilder( ConditionBuilder.Condition.OR, RDocumentEntity.FILTER.eq(Fields.Status.SENT_TO_THE_PERFORMANCE.getValue())  ),
+      // V3
+      // new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in( ButtonStatus.getPerformance() )  ),
+      //new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_LINKS.eq( false  ) ),
+
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq( FOR_REPORT.getName() )  )
     }
   ),
   PRIMARY_CONSIDERATION ( 3,
     "Первичное рассмотрение %s" ,
     new ConditionBuilder[]{
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in(Arrays.asList(Fields.Status.PRIMARY_CONSIDERATION.getValue()))  ),
+      //V3
+      //new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in(Arrays.asList(Fields.Status.PRIMARY_CONSIDERATION.getValue()))  ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq( PRIMARY.getName() )  )
     }
   ),
   VIEWED ( 4,
@@ -47,12 +71,15 @@ public enum MainMenuButton {
   ASSIGN ( 5,
     "На подпись %s" ,
     new ConditionBuilder[]{
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in(Arrays.asList(Fields.Status.SIGNING.getValue())  ) ),
+
+      //new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in(Arrays.asList(Fields.Status.SIGNING.getValue())  ) ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq( SIGNING.getName() )  )
     }
   ),
   APPROVAL ( 6, "На согласование %s" ,
     new ConditionBuilder[]{
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in(Arrays.asList(Fields.Status.APPROVAL.getValue()) ) ),
+      //new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in(Arrays.asList(Fields.Status.APPROVAL.getValue()) ) ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq( V2FilterType.APPROVAL.getName() )  )
     }
   ),
   PROCESSED ( 7, "Обработанные %s" ,

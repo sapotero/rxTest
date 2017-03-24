@@ -58,6 +58,9 @@ public abstract class RDocument implements Persistable {
   @Index("filter_index")
   String filter;
 
+  @Index("documentType_index")
+  String documentType;
+
   String infoCard;
 
   @Index("folder_index")

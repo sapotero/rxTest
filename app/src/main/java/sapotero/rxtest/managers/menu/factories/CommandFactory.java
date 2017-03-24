@@ -18,6 +18,7 @@ import sapotero.rxtest.managers.menu.commands.report.FromTheReport;
 import sapotero.rxtest.managers.menu.commands.report.ReturnToPrimaryConsideration;
 import sapotero.rxtest.managers.menu.commands.shared.AddToFolder;
 import sapotero.rxtest.managers.menu.commands.shared.CheckForControl;
+import sapotero.rxtest.managers.menu.commands.shared.DoNothing;
 import sapotero.rxtest.managers.menu.commands.shared.RemoveFromFolder;
 import sapotero.rxtest.managers.menu.commands.signing.PrevPerson;
 import sapotero.rxtest.managers.menu.interfaces.Command;
@@ -301,7 +302,10 @@ public class CommandFactory implements AbstractCommand.Callback{
     INCORRECT {
       @Override
       public Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
-        return null;
+        DoNothing command = new DoNothing(context, document);
+        command.withParams(params);
+
+        return command;
       }
       @Override
       public String getRussinaName() {
@@ -459,6 +463,9 @@ public class CommandFactory implements AbstractCommand.Callback{
           operation = Operation.CHECK_FOR_CONTROL;
           break;
 
+        case "sapotero.rxtest.managers.menu.commands.shared.DoNothing":
+          operation = Operation.INCORRECT;
+          break;
 
         default:
           operation = Operation.INCORRECT;

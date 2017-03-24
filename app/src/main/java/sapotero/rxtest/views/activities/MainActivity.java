@@ -66,6 +66,7 @@ import sapotero.rxtest.db.requery.query.DBQueryBuilder;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.bus.GetDocumentInfoEvent;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
+import sapotero.rxtest.events.service.SuperVisorUpdateEvent;
 import sapotero.rxtest.events.service.UpdateAllDocumentsEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.events.view.RemoveDocumentFromAdapterEvent;
@@ -118,7 +119,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @BindView(R.id.favorites_button) CheckBox favorites_button;
 
   @BindView(R.id.documents_empty_list) TextView documents_empty_list;
-//  @BindView(R.id.searchBar) MaterialSearchBar searchBar;
+
+  private DataLoaderManager dataLoaderInterface;
 
 
 
@@ -185,7 +187,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     loadSettings();
 
     context = this;
-
     initAdapters();
 
     menuBuilder = new MenuBuilder(this);
@@ -409,6 +410,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
       })
     );
+
   }
 
   private void dropLoadProgress(Boolean visible) {
@@ -416,14 +418,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     if ( update_progressbar != null){
       update_progressbar.setProgress(0);
       update_progressbar.setVisibility(visible ? View.VISIBLE : View.GONE);
-    }
-
-    if (subscription == null){
-      subscription = new CompositeSubscription();
-    }
-
-    if (subscription.hasSubscriptions()){
-      subscription.unsubscribe();
     }
   }
 
@@ -438,6 +432,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     Intent serviceIntent = new Intent(this, MainService.class);
     if(startService(serviceIntent) != null) {
       Toast.makeText(getBaseContext(), "Service is already running", Toast.LENGTH_SHORT).show();
+    } else {
+      EventBus.getDefault().post(new SuperVisorUpdateEvent());
     }
   }
 
@@ -792,4 +788,5 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     return (int) Math.ceil(result);
   }
+
 }

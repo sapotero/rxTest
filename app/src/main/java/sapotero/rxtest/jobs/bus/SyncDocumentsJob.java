@@ -49,6 +49,9 @@ import timber.log.Timber;
 public class SyncDocumentsJob  extends BaseJob {
 
   public static final int PRIORITY = 1;
+  private String status;
+  private String journal;
+
   private Boolean onControl;
   private Boolean isProcessed = false;
   private Boolean isFavorites = false;
@@ -84,6 +87,24 @@ public class SyncDocumentsJob  extends BaseJob {
     this.uid = uid;
     this.filter = filter;
     this.onControl = control;
+  }
+
+  public SyncDocumentsJob(String uid, String journal, String status) {
+    super( new Params(PRIORITY).requireNetwork().persist() );
+    this.uid = uid;
+
+    String[] index = journal.split("_production_db_");
+    this.journal = index[0];
+
+    this.status  = status;
+  }
+
+  public SyncDocumentsJob(String uid, String status) {
+    super( new Params(PRIORITY).requireNetwork().persist() );
+    this.uid     = uid;
+    if (!Objects.equals(status, "")){
+      this.status  = status;
+    }
   }
 
   @Override
@@ -193,9 +214,18 @@ public class SyncDocumentsJob  extends BaseJob {
     rd.setUid( d.getUid() );
     rd.setFromLinks( false );
     rd.setUser( LOGIN.get() );
+
+    if (journal != null) {
+      rd.setDocumentType( journal );
+    }
+
+    if (status != null) {
+      rd.setFilter( status );
+    }
     if (filter != null) {
       rd.setFilter( filter.toString() );
     }
+
     rd.setMd5( d.getMd5() );
     rd.setSortKey( d.getSortKey() );
     rd.setTitle( d.getTitle() );
@@ -451,9 +481,17 @@ public class SyncDocumentsJob  extends BaseJob {
         rDoc.setInfoCard( document.getInfoCard() );
       }
 
-      if (filter != null){
-        rDoc.setFilter( filter.toString() );
-      }
+    if (journal != null) {
+      rDoc.setDocumentType( journal );
+    }
+
+    if (status != null) {
+      rDoc.setFilter( status );
+    }
+
+    if (filter != null) {
+      rDoc.setFilter( filter.toString() );
+    }
 
 
       dataStore.update(rDoc)
@@ -655,9 +693,17 @@ public class SyncDocumentsJob  extends BaseJob {
       EventBus.getDefault().post( new UpdateCurrentDocumentEvent( doc.getUid() ) );
     } else {
       Timber.tag("MD5").d("equal");
+
+      if (journal != null) {
+        doc.setDocumentType( journal );
+      }
+      if (status != null) {
+        doc.setFilter( status );
+      }
       if (filter != null) {
         doc.setFilter( filter.toString() );
       }
+
       doc.setChanged(false);
       doc.setProcessed(false);
     }
@@ -670,9 +716,7 @@ public class SyncDocumentsJob  extends BaseJob {
         result -> {
           Timber.tag("MD5").d("updateDocumentInfo " + result.getMd5());
         },
-        error ->{
-          error.printStackTrace();
-        }
+        Throwable::printStackTrace
       );
   }
 

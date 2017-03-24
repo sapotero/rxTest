@@ -39,7 +39,7 @@ android {
         develop {
             applicationId "sapotero.rxtest"
             versionCode 15
-            versionName "1.13.6"
+            versionName "1.13.8"
         }
     }
 
@@ -178,7 +178,7 @@ dependencies {
     }
     compile 'com.android.support:preference-v14:24.2.1'
 
-    annotationProcessor 'com.google.dagger:dagger-compiler:2.6'
+        annotationProcessor 'com.google.dagger:dagger-compiler:2.6'
 
     compile 'com.davemorrissey.labs:subsampling-scale-image-view:3.6.0'
 

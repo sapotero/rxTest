@@ -4,7 +4,7 @@ package sapotero.rxtest.retrofit.models.v2;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class V2UserInfo {
+public class v2UserOshs {
 
   @SerializedName("id")
   @Expose
@@ -48,7 +48,7 @@ public class V2UserInfo {
     this.id = id;
   }
 
-  public V2UserInfo withId(String id) {
+  public v2UserOshs withId(String id) {
     this.id = id;
     return this;
   }
@@ -61,7 +61,7 @@ public class V2UserInfo {
     this.isOrganization = isOrganization;
   }
 
-  public V2UserInfo withIsOrganization(Boolean isOrganization) {
+  public v2UserOshs withIsOrganization(Boolean isOrganization) {
     this.isOrganization = isOrganization;
     return this;
   }
@@ -74,7 +74,7 @@ public class V2UserInfo {
     this.isGroup = isGroup;
   }
 
-  public V2UserInfo withIsGroup(Boolean isGroup) {
+  public v2UserOshs withIsGroup(Boolean isGroup) {
     this.isGroup = isGroup;
     return this;
   }
@@ -87,7 +87,7 @@ public class V2UserInfo {
     this.name = name;
   }
 
-  public V2UserInfo withName(String name) {
+  public v2UserOshs withName(String name) {
     this.name = name;
     return this;
   }
@@ -100,7 +100,7 @@ public class V2UserInfo {
     this.organization = organization;
   }
 
-  public V2UserInfo withOrganization(String organization) {
+  public v2UserOshs withOrganization(String organization) {
     this.organization = organization;
     return this;
   }
@@ -113,7 +113,7 @@ public class V2UserInfo {
     this.position = position;
   }
 
-  public V2UserInfo withPosition(String position) {
+  public v2UserOshs withPosition(String position) {
     this.position = position;
     return this;
   }
@@ -126,7 +126,7 @@ public class V2UserInfo {
     this.lastName = lastName;
   }
 
-  public V2UserInfo withLastName(String lastName) {
+  public v2UserOshs withLastName(String lastName) {
     this.lastName = lastName;
     return this;
   }
@@ -139,7 +139,7 @@ public class V2UserInfo {
     this.firstName = firstName;
   }
 
-  public V2UserInfo withFirstName(String firstName) {
+  public v2UserOshs withFirstName(String firstName) {
     this.firstName = firstName;
     return this;
   }
@@ -152,7 +152,7 @@ public class V2UserInfo {
     this.middleName = middleName;
   }
 
-  public V2UserInfo withMiddleName(String middleName) {
+  public v2UserOshs withMiddleName(String middleName) {
     this.middleName = middleName;
     return this;
   }
@@ -165,7 +165,7 @@ public class V2UserInfo {
     this.gender = gender;
   }
 
-  public V2UserInfo withGender(String gender) {
+  public v2UserOshs withGender(String gender) {
     this.gender = gender;
     return this;
   }
@@ -178,7 +178,7 @@ public class V2UserInfo {
     this.image = image;
   }
 
-  public V2UserInfo withImage(Object image) {
+  public v2UserOshs withImage(Object image) {
     this.image = image;
     return this;
   }

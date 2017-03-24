@@ -14,7 +14,6 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -28,7 +27,6 @@ import io.requery.rx.SingleEntityStore;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
-import retrofit2.Call;
 import retrofit2.Retrofit;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
@@ -47,7 +45,6 @@ import sapotero.rxtest.jobs.bus.AddAssistantJob;
 import sapotero.rxtest.jobs.bus.AddFavoriteUsersJob;
 import sapotero.rxtest.jobs.bus.AddFoldersJob;
 import sapotero.rxtest.jobs.bus.AddPrimaryConsiderationJob;
-import sapotero.rxtest.jobs.bus.AddTemplatesJob;
 import sapotero.rxtest.jobs.bus.SyncDocumentsJob;
 import sapotero.rxtest.jobs.bus.SyncFavoritesDocumentsJob;
 import sapotero.rxtest.jobs.bus.SyncProcessedDocumentsJob;
@@ -56,13 +53,12 @@ import sapotero.rxtest.retrofit.DocumentsService;
 import sapotero.rxtest.retrofit.models.AuthSignToken;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.retrofit.models.documents.Documents;
-import sapotero.rxtest.retrofit.models.v2.V2UserInfo;
+import sapotero.rxtest.retrofit.models.v2.v2UserOshs;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
-import sapotero.rxtest.views.menu.builders.ButtonBuilder;
-import sapotero.rxtest.views.menu.fields.MainMenuButton;
-import sapotero.rxtest.views.menu.fields.MainMenuItem;
 import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.views.adapters.utils.TDmodel;
+import sapotero.rxtest.views.menu.fields.MainMenuButton;
+import sapotero.rxtest.views.menu.fields.MainMenuItem;
 import timber.log.Timber;
 
 public class DataLoaderManager {
@@ -86,6 +82,8 @@ public class DataLoaderManager {
   private SimpleDateFormat dateFormat;
   private CompositeSubscription subscription;
   private final Context context;
+  private ArrayList<String> v2Journals;
+  private ArrayList<String> v2Statuses;
 
   public DataLoaderManager(Context context) {
     this.context = context;
@@ -97,7 +95,149 @@ public class DataLoaderManager {
     }
     EventBus.getDefault().register(this);
 
+
     initialize();
+
+  }
+
+  private void initV2() {
+//    v2Journals = new ArrayList<String>();
+//    v2Journals.add("incoming_documents");
+//    v2Journals.add("citizen_requests");
+//    v2Journals.add("incoming_orders");
+//    v2Journals.add("outgoing_documents");
+//    v2Journals.add("orders");
+//    v2Journals.add("orders_ddo");
+//
+//    v2Statuses = new ArrayList<String>();
+//    v2Statuses.add("for_report");
+//    v2Statuses.add("for_primary_consideration");
+//    v2Statuses.add("for_sign");
+//    v2Statuses.add("for_approval");
+
+    ArrayList<String> indexes = new ArrayList<String>();
+    indexes.add("incoming_documents_production_db_core_cards_incoming_documents_cards");
+    indexes.add("outgoing_documents_production_db_core_cards_outgoing_documents_cards");
+    indexes.add("orders_production_db_core_cards_orders_cards");
+    indexes.add("orders_ddo_production_db_core_cards_orders_ddo_cards");
+    indexes.add("incoming_orders_production_db_core_cards_incoming_orders_cards");
+    indexes.add("citizen_requests_production_db_core_cards_citizen_requests_cards");
+
+    ArrayList<String> statuses = new ArrayList<String>();
+    statuses.add("sent_to_the_report");
+    statuses.add("primary_consideration");
+
+    ArrayList<String> sp = new ArrayList<String>();
+    sp.add("approval");
+    sp.add("signing");
+
+
+    Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
+    DocumentsService docService = retrofit.create(DocumentsService.class);
+
+    if (subscription != null) {
+      subscription.clear();
+    }
+
+    for (String index: indexes ) {
+      for (String status: statuses ) {
+
+
+
+        subscription.add(
+          docService
+            .getDocumentsByIndexes(LOGIN.get(), TOKEN.get(), index, status, 500)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+              data -> {
+                if (data.getDocuments().size() > 0){
+                  for (Document doc: data.getDocuments() ) {
+                    jobManager.addJobInBackground( new SyncDocumentsJob(doc.getUid(), index, status) );
+                  }
+                }
+              },
+              error -> {
+                Timber.tag(TAG).e(error);
+              })
+        );
+      }
+    }
+
+    for (String code: sp ) {
+      subscription.add(
+        docService
+          .getDocuments(LOGIN.get(), TOKEN.get(), code, 500, 0)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe(
+            data -> {
+              if (data.getDocuments().size() > 0){
+                for (Document doc: data.getDocuments() ) {
+                  jobManager.addJobInBackground( new SyncDocumentsJob(doc.getUid(), code) );
+                }
+              }
+            },
+            error -> {
+              Timber.tag(TAG).e(error);
+            })
+      );
+    }
+
+
+    AuthService auth = retrofit.create(AuthService.class);
+    // получаем папки
+    subscription.add(
+      auth.getFolders(LOGIN.get(), TOKEN.get())
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+      .subscribe( data -> {
+        jobManager.addJobInBackground(new AddFoldersJob(data));
+      }, error -> {
+        Timber.tag(TAG).e(error);
+      })
+    );
+
+
+    subscription.add(
+      auth.getPrimaryConsiderationUsers(LOGIN.get(), TOKEN.get())
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe( data -> {
+          jobManager.addJobInBackground(new AddPrimaryConsiderationJob(data));
+        }, error -> {
+          Timber.tag(TAG).e(error);
+        })
+    );
+
+    // получаем группу Избранное(МП)
+    subscription.add(
+      auth.getFavoriteUsers(LOGIN.get(), TOKEN.get())
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe( data -> {
+          jobManager.addJobInBackground(new AddFavoriteUsersJob(data));
+        }, error -> {
+          Timber.tag(TAG).e(error);
+        })
+    );
+
+    // Доработка api для возврата ВРИО/по поручению
+    // https://tasks.n-core.ru/browse/MVDESD-11453
+    subscription.add(
+      auth.getAssistant(LOGIN.get(), TOKEN.get(), CURRENT_USER_ID.get())
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe( data -> {
+          jobManager.addJobInBackground(new AddAssistantJob(data));
+        }, error -> {
+          Timber.tag(TAG).e(error);
+        })
+    );
+
+    updateProcessed();
+    updateFavorites();
+
   }
 
   private void initialize() {
@@ -295,6 +435,7 @@ public class DataLoaderManager {
 
   private void updateDocuments(MainMenuItem items) {
 
+
     Timber.tag(TAG).i("getAuthToken");
 
     Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
@@ -313,10 +454,12 @@ public class DataLoaderManager {
           data -> {
 
             try {
-              V2UserInfo user = data.get(0);
+              v2UserOshs user = data.get(0);
               setCurrentUser(user.getName());
               setCurrentUserId(user.getId());
               setCurrentUserOrganization(user.getOrganization());
+
+              initV2();
             } catch (Exception e) {
               e.printStackTrace();
             }
@@ -326,119 +469,119 @@ public class DataLoaderManager {
           })
     );
 
-    subscription.add(
-
-      Observable.just(TOKEN.get())
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .unsubscribeOn(Schedulers.io())
-        // получаем шаблоны
-
-        .concatMap(data -> auth.getTemplates(LOGIN.get(), TOKEN.get()).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()))
-        .doOnNext(templates -> jobManager.addJobInBackground(new AddTemplatesJob(templates)))
-
-        // получаем данные о пользователе
-//        .concatMap(data -> auth.getUserInfo(LOGIN.get(), TOKEN.get()).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()))
-//        .doOnNext(info -> {
-//          setCurrentUser(info.getMe().getName());
-//          setCurrentUserId(info.getMe().getId());
-//          setCurrentUserId(info.getMe().getId());
+//    subscription.add(
+//
+//      Observable.just(TOKEN.get())
+//        .subscribeOn(Schedulers.io())
+//        .observeOn(AndroidSchedulers.mainThread())
+//        .unsubscribeOn(Schedulers.io())
+//        // получаем шаблоны
+//
+//        .concatMap(data -> auth.getTemplates(LOGIN.get(), TOKEN.get()).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()))
+//        .doOnNext(templates -> jobManager.addJobInBackground(new AddTemplatesJob(templates)))
+//
+//        // получаем данные о пользователе
+////        .concatMap(data -> auth.getUserInfo(LOGIN.get(), TOKEN.get()).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()))
+////        .doOnNext(info -> {
+////          setCurrentUser(info.getMe().getName());
+////          setCurrentUserId(info.getMe().getId());
+////          setCurrentUserId(info.getMe().getId());
+////        })
+//
+//
+//
+//        // получаем папки
+//        .concatMap(data -> auth.getFolders(LOGIN.get(), TOKEN.get()).subscribeOn(Schedulers.io()))
+//        .doOnNext(folders -> jobManager.addJobInBackground(new AddFoldersJob(folders)))
+//
+//        // получаем группу первичного рассмотрения
+//        .concatMap(data -> auth.getPrimaryConsiderationUsers(LOGIN.get(), TOKEN.get()).subscribeOn(Schedulers.io()))
+//        .doOnNext(users -> jobManager.addJobInBackground(new AddPrimaryConsiderationJob(users)))
+//
+//        // получаем группу Избранное(МП)
+//        .concatMap(data -> auth.getFavoriteUsers(LOGIN.get(), TOKEN.get()).subscribeOn(Schedulers.io()))
+//        .doOnNext(users -> jobManager.addJobInBackground(new AddFavoriteUsersJob(users)))
+//
+//        // Доработка api для возврата ВРИО/по поручению
+//        // https://tasks.n-core.ru/browse/MVDESD-11453
+//        .concatMap(data -> auth.getAssistant(LOGIN.get(), TOKEN.get(), CURRENT_USER_ID.get()).subscribeOn(Schedulers.io()))
+//        .doOnNext(users -> jobManager.addJobInBackground(new AddAssistantJob(users)))
+//
+//        // получаем список документов по статусам
+//        .concatMap(data -> {
+////          Fields.Status[] new_filter_types = Fields.Status.INDEX;
+//
+//          ArrayList<Fields.Status> new_filter_types = new ArrayList<Fields.Status>();
+//
+//          if (items == null){
+////            new_filter_types.add( Fields.Status.SENT_TO_THE_REPORT );
+////            new_filter_types.add( Fields.Status.PRIMARY_CONSIDERATION );
+//            new_filter_types.add( Fields.Status.APPROVAL );
+//            new_filter_types.add( Fields.Status.SIGNING );
+//          } else {
+//            if (items.getButtons() != null && items.getButtons().length > 0){
+//
+//              ArrayList<ButtonBuilder> getButtonList = items.getButtonList();
+//
+//              if (getButtonList != null && getButtonList.size() > 0){
+//
+//                for (ButtonBuilder builder: getButtonList) {
+//                  if ( builder.isActive() ){
+//                    Timber.tag(TAG).d("ACTIVE BUTTON INDEX: %s", builder.getIndex() );
+//                    Timber.tag(TAG).d("ACTIVE BUTTON: %s", MainMenuButton.getByIndex( builder.getIndex() ).toString() );
+//
+//                    MainMenuButton button = MainMenuButton.getByIndex(builder.getIndex());
+//
+//                    if (button != null) {
+//
+//                      getButtonType(new_filter_types, button);
+//                    }
+//                  }
+//                }
+//              } else {
+//                for (MainMenuButton button: items.getButtons() ) {
+//                  getButtonType(new_filter_types, button);
+//                }
+//              }
+//
+//            }
+//          }
+//
+//          Timber.tag(TAG).d("new_filter_types: %s", new_filter_types );
+//
+//          Observable<Fields.Status> types = Observable.from(new_filter_types);
+//          Observable<Documents> count = Observable
+//            .from(new_filter_types)
+//            .flatMap(status -> docService.getDocuments(LOGIN.get(), TOKEN.get(), status.getValue(), 500, 0));
+//
+//          return Observable.zip(types, count, (type, docs) -> new TDmodel(type, docs.getDocuments()))
+//            .subscribeOn(Schedulers.computation())
+//            .observeOn(AndroidSchedulers.mainThread())
+//            .toList();
 //        })
-
-
-
-        // получаем папки
-        .concatMap(data -> auth.getFolders(LOGIN.get(), TOKEN.get()).subscribeOn(Schedulers.io()))
-        .doOnNext(folders -> jobManager.addJobInBackground(new AddFoldersJob(folders)))
-
-        // получаем группу первичного рассмотрения
-        .concatMap(data -> auth.getPrimaryConsiderationUsers(LOGIN.get(), TOKEN.get()).subscribeOn(Schedulers.io()))
-        .doOnNext(users -> jobManager.addJobInBackground(new AddPrimaryConsiderationJob(users)))
-
-        // получаем группу Избранное(МП)
-        .concatMap(data -> auth.getFavoriteUsers(LOGIN.get(), TOKEN.get()).subscribeOn(Schedulers.io()))
-        .doOnNext(users -> jobManager.addJobInBackground(new AddFavoriteUsersJob(users)))
-
-        // Доработка api для возврата ВРИО/по поручению
-        // https://tasks.n-core.ru/browse/MVDESD-11453
-        .concatMap(data -> auth.getAssistant(LOGIN.get(), TOKEN.get(), CURRENT_USER_ID.get()).subscribeOn(Schedulers.io()))
-        .doOnNext(users -> jobManager.addJobInBackground(new AddAssistantJob(users)))
-
-        // получаем список документов по статусам
-        .concatMap(data -> {
-//          Fields.Status[] new_filter_types = Fields.Status.INDEX;
-
-          ArrayList<Fields.Status> new_filter_types = new ArrayList<Fields.Status>();
-
-          if (items == null){
-            new_filter_types.add( Fields.Status.SENT_TO_THE_REPORT );
-            new_filter_types.add( Fields.Status.PRIMARY_CONSIDERATION );
-            new_filter_types.add( Fields.Status.APPROVAL );
-            new_filter_types.add( Fields.Status.SIGNING );
-          } else {
-            if (items.getButtons() != null && items.getButtons().length > 0){
-
-              ArrayList<ButtonBuilder> getButtonList = items.getButtonList();
-
-              if (getButtonList != null && getButtonList.size() > 0){
-
-                for (ButtonBuilder builder: getButtonList) {
-                  if ( builder.isActive() ){
-                    Timber.tag(TAG).d("ACTIVE BUTTON INDEX: %s", builder.getIndex() );
-                    Timber.tag(TAG).d("ACTIVE BUTTON: %s", MainMenuButton.getByIndex( builder.getIndex() ).toString() );
-
-                    MainMenuButton button = MainMenuButton.getByIndex(builder.getIndex());
-
-                    if (button != null) {
-
-                      getButtonType(new_filter_types, button);
-                    }
-                  }
-                }
-              } else {
-                for (MainMenuButton button: items.getButtons() ) {
-                  getButtonType(new_filter_types, button);
-                }
-              }
-
-            }
-          }
-
-          Timber.tag(TAG).d("new_filter_types: %s", new_filter_types );
-
-          Observable<Fields.Status> types = Observable.from(new_filter_types);
-          Observable<Documents> count = Observable
-            .from(new_filter_types)
-            .flatMap(status -> docService.getDocuments(LOGIN.get(), TOKEN.get(), status.getValue(), 500, 0));
-
-          return Observable.zip(types, count, (type, docs) -> new TDmodel(type, docs.getDocuments()))
-            .subscribeOn(Schedulers.computation())
-            .observeOn(AndroidSchedulers.mainThread())
-            .toList();
-        })
-        .doOnNext(raw -> {
-          for (TDmodel data : raw) {
-            Timber.tag(TAG).i(" DocumentType: %s | %s", data.getType(), data.getDocuments().size());
-
-            COUNT.set( COUNT.get() + data.getDocuments().size());
-
-            for (Document doc : data.getDocuments()) {
-              String type = data.getType();
-              Timber.tag(TAG).d("%s | %s", type, doc.getUid());
-
-              jobManager.addJobInBackground( new SyncDocumentsJob(doc.getUid(), Fields.getStatus(type)) );
-            }
-          }
-        })
-        .subscribe(
-          data -> {
-            Timber.tag(TAG).w("subscribe %s", data);
-            updateUnprocessed();
-          }, error -> {
-            //          callback.onError(error);
-          }
-        )
-    );
+//        .doOnNext(raw -> {
+//          for (TDmodel data : raw) {
+//            Timber.tag(TAG).i(" DocumentType: %s | %s", data.getType(), data.getDocuments().size());
+//
+//            COUNT.set( COUNT.get() + data.getDocuments().size());
+//
+//            for (Document doc : data.getDocuments()) {
+//              String type = data.getType();
+//              Timber.tag(TAG).d("%s | %s", type, doc.getUid());
+//
+//              jobManager.addJobInBackground( new SyncDocumentsJob(doc.getUid(), Fields.getStatus(type)) );
+//            }
+//          }
+//        })
+//        .subscribe(
+//          data -> {
+//            Timber.tag(TAG).w("subscribe %s", data);
+//            updateUnprocessed();
+//          }, error -> {
+//            //          callback.onError(error);
+//          }
+//        )
+//    );
 
   }
 
@@ -645,35 +788,14 @@ public class DataLoaderManager {
     return netInfo != null && netInfo.isConnectedOrConnecting();
   }
 
-  @Subscribe(threadMode = ThreadMode.BACKGROUND)
-  public void onMessageEvent(StepperDcCheckEvent event) throws Exception {
-    String token = event.pin;
-  }
-
   public void updateDocument(String uid) {
     new Handler().postDelayed( () -> {
-      jobManager.addJobInBackground(new SyncDocumentsJob( uid, null ));
+      jobManager.addJobInBackground(new SyncDocumentsJob( uid, "" ));
     }, 2000L);
   }
 
-  public Boolean checkSedAvailibility() {
-
-    Boolean result = false;
-    try {
-
-      Retrofit retrofit = new RetrofitManager( context, HOST.get(), okHttpClient).process();
-      AuthService auth = retrofit.create( AuthService.class );
-
-      Call<AuthSignToken> token = auth.getSimpleAuth(LOGIN.get(), PASSWORD.get());
-
-
-      AuthSignToken data = token.execute().body();
-      result  = true;
-    } catch (IOException error) {
-      Timber.tag(TAG).i("checkSedAvailibility error: %s" , error );
-    }
-
-    return result;
-
+  @Subscribe(threadMode = ThreadMode.BACKGROUND)
+  public void onMessageEvent(StepperDcCheckEvent event) throws Exception {
+    String token = event.pin;
   }
 }
