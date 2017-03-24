@@ -5,7 +5,6 @@ import android.content.Context;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.commands.approval.ChangePerson;
-import sapotero.rxtest.managers.menu.commands.approval.NextPerson;
 import sapotero.rxtest.managers.menu.commands.decision.AddDecision;
 import sapotero.rxtest.managers.menu.commands.decision.ApproveDecision;
 import sapotero.rxtest.managers.menu.commands.decision.RejectDecision;
@@ -164,10 +163,9 @@ public class CommandFactory implements AbstractCommand.Callback{
     APPROVAL_NEXT_PERSON {
       @Override
       public Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
-        NextPerson command = new NextPerson(context, document);
+        sapotero.rxtest.managers.menu.commands.approval.NextPerson command = new sapotero.rxtest.managers.menu.commands.approval.NextPerson(context, document);
         command.withParams(params);
         command
-          .withPerson( "" )
           .registerCallBack(instance);
         command.withParams(params);
         return command;
@@ -212,10 +210,9 @@ public class CommandFactory implements AbstractCommand.Callback{
     SIGNING_NEXT_PERSON {
       @Override
       public Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
-        NextPerson command = new NextPerson(context, document);
+        sapotero.rxtest.managers.menu.commands.signing.NextPerson command = new sapotero.rxtest.managers.menu.commands.signing.NextPerson(context, document);
         command.withParams(params);
         command
-          .withPerson( "" )
           .registerCallBack(instance);
         command.withParams(params);
         return command;
@@ -464,10 +461,6 @@ public class CommandFactory implements AbstractCommand.Callback{
           break;
 
         case "sapotero.rxtest.managers.menu.commands.shared.DoNothing":
-          operation = Operation.INCORRECT;
-          break;
-
-        default:
           operation = Operation.INCORRECT;
           break;
       }

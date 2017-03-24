@@ -415,6 +415,11 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   private void dropLoadProgress(Boolean visible) {
     loaded = 0;
+
+    if (subscription != null) {
+      subscription.clear();
+    }
+
     if ( update_progressbar != null){
       update_progressbar.setProgress(0);
       update_progressbar.setVisibility(visible ? View.VISIBLE : View.GONE);
@@ -434,6 +439,10 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       Toast.makeText(getBaseContext(), "Service is already running", Toast.LENGTH_SHORT).show();
     } else {
       EventBus.getDefault().post(new SuperVisorUpdateEvent());
+    }
+
+    if (subscription == null){
+      subscription = new CompositeSubscription();
     }
   }
 

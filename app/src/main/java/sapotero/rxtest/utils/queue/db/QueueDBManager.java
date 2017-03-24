@@ -34,7 +34,7 @@ public class QueueDBManager implements JobCountInterface {
 
   public void add(Command command){
     if (command != null && command.getParams() != null) {
-      Timber.tag(TAG).v( "Command: %s\n\n Params: %s", command, command.getParams() );
+      Timber.tag(TAG).i( "\n----------- ADD ------------\n%s\n Params: %s", command, command.getParams() );
 
       CommandParams params = command.getParams();
 

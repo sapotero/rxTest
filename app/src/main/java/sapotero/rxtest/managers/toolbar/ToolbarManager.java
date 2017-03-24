@@ -158,7 +158,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
               showNextDialog(false);
             } else {
               operation = CommandFactory.Operation.APPROVAL_NEXT_PERSON;
-              params.setSign( "SIGN" );
             }
 //
             break;
@@ -214,7 +213,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
               showNextDialog(true);
             } else {
               operation = CommandFactory.Operation.SIGNING_NEXT_PERSON;
-              params.setSign( "SIGN" );
             }
 
 
@@ -228,7 +226,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
               showPrevDialog(false);
             } else {
               operation = CommandFactory.Operation.SIGNING_PREV_PERSON;
-              params.setSign( "SIGN" );
             }
 
             break;
@@ -567,7 +564,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       .onPositive((dialog1, which) -> {
 
         CommandFactory.Operation operation;
-        operation = isApproval ? CommandFactory.Operation.APPROVAL_NEXT_PERSON: CommandFactory.Operation.SIGNING_NEXT_PERSON;
+        operation = !isApproval ? CommandFactory.Operation.APPROVAL_NEXT_PERSON: CommandFactory.Operation.SIGNING_NEXT_PERSON;
 
         CommandParams params = new CommandParams();
         params.setUser( LOGIN.get() );

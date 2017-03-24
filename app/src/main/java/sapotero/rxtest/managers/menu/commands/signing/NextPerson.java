@@ -156,6 +156,7 @@ public class NextPerson extends AbstractCommand {
           Timber.tag(TAG).i("type: %s", data.getType());
 
           addImageSignTask();
+
           queueManager.setExecutedRemote(this);
         },
         error -> {

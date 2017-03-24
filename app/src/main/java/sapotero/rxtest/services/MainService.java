@@ -10,7 +10,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.birbit.android.jobqueue.JobManager;
-import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.github.pwittchen.reactivenetwork.library.ReactiveNetwork;
 
@@ -28,10 +27,10 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.Security;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -56,7 +55,6 @@ import ru.cprocsp.ACSP.tools.common.RawResource;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.auth.AuthDcCheckFailEvent;
@@ -70,7 +68,6 @@ import sapotero.rxtest.events.crypto.SignDataWrongPinEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateUnprocessedDocumentsEvent;
 import sapotero.rxtest.events.service.AuthServiceAuthEvent;
-import sapotero.rxtest.events.service.SuperVisorUpdateEvent;
 import sapotero.rxtest.events.service.UpdateAllDocumentsEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckFailEvent;
@@ -80,6 +77,8 @@ import sapotero.rxtest.events.stepper.auth.StepperLoginCheckFailEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckSuccessEvent;
 import sapotero.rxtest.events.view.UpdateCurrentInfoActivityEvent;
 import sapotero.rxtest.managers.DataLoaderManager;
+import sapotero.rxtest.services.task.UpdateAllDocumentsTask;
+import sapotero.rxtest.services.task.UpdateQueueTask;
 import sapotero.rxtest.utils.cryptopro.AlgorithmSelector;
 import sapotero.rxtest.utils.cryptopro.CMSSignExample;
 import sapotero.rxtest.utils.cryptopro.ContainerAdapter;
@@ -94,6 +93,7 @@ public class MainService extends Service {
 
 
   final String TAG = MainService.class.getSimpleName();
+  private ScheduledThreadPoolExecutor scheduller;
 
   @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
@@ -101,18 +101,6 @@ public class MainService extends Service {
   @Inject SingleEntityStore<Persistable> dataStore;
 
   @Inject QueueManager queue;
-
-  private Preference<String> TOKEN;
-  private Preference<String> CURRENT_USER;
-  private Preference<String> LOGIN;
-  private Preference<String> PASSWORD;
-  private Preference<String> HOST;
-  private Preference<String> COUNT;
-
-  private String processed_folder;
-  private SimpleDateFormat dateFormat;
-
-  private CompositeSubscription subscription;
 
   /**
    * Java-провайдер Java CSP.
@@ -125,6 +113,7 @@ public class MainService extends Service {
   public static String user;
 
   public MainService() {
+    scheduller = new ScheduledThreadPoolExecutor(2);
   }
 
   public void onCreate() {
@@ -167,6 +156,10 @@ public class MainService extends Service {
     aliases( KeyStoreType.currentType(), ProviderType.currentProviderType() );
 
     isConnected();
+
+
+    scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 0 ,60, TimeUnit.SECONDS );
+    scheduller.scheduleWithFixedDelay( new UpdateQueueTask(queue), 0 ,5, TimeUnit.SECONDS );
 
 
   }
@@ -828,9 +821,6 @@ public class MainService extends Service {
       );
   }
 
-
-
-
   public static boolean deleteDirectory(File directory) {
     if(directory.exists()){
       File[] files = directory.listFiles();
@@ -856,19 +846,8 @@ public class MainService extends Service {
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(UpdateAllDocumentsEvent event) throws Exception {
-    EventBus.getDefault().post( new UpdateCurrentInfoActivityEvent() );
-
-
     Timber.tag(TAG).e("updateAll");
     updateAll();
   }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(SuperVisorUpdateEvent event) throws Exception {
-    EventBus.getDefault().post( new UpdateCurrentInfoActivityEvent() );
-//    dataLoaderInterface.updateByStatus(MainMenuItem.ALL);
-    queue.getUncompleteTasks();
-  }
-
 
 }

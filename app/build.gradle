@@ -34,12 +34,10 @@ android {
             versionName "1.2.0"
         }
 
-        // resolved https://tasks.n-core.ru/browse/MVDESD-12623 - поиск по краткому сожержанию
-        // resolved https://tasks.n-core.ru/browse/MVDESD-12607 - 3 шаг авторизации
         develop {
             applicationId "sapotero.rxtest"
             versionCode 15
-            versionName "1.13.8"
+            versionName "1.14.1"
         }
     }
 
