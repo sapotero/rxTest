@@ -136,11 +136,17 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
           showSaveDialog = false;
           new MaterialDialog.Builder(this)
             .title("Внимание")
-            .content("Укажите хотя бы одного подписавшего")
+            .content("Укажите хотя бы одного исполнителя")
             .positiveText("Ок")
+            .negativeText("Выход")
             .onPositive(
               (dialog, which) -> {
                 dialog.dismiss();
+              }
+            )
+            .onNegative(
+              (dialog, which) -> {
+                finish();
               }
             )
             .show();

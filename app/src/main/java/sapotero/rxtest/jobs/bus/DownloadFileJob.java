@@ -22,6 +22,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import rx.Observable;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.events.bus.FileDownloadedEvent;
 import sapotero.rxtest.retrofit.DocumentLinkService;
 import sapotero.rxtest.retrofit.models.DownloadLink;
@@ -30,6 +31,7 @@ import timber.log.Timber;
 
 public class DownloadFileJob  extends BaseJob {
 
+  private final int rImageId;
   private String TAG = this.getClass().getSimpleName();
   public static final int PRIORITY = 10;
 
@@ -37,12 +39,14 @@ public class DownloadFileJob  extends BaseJob {
   private String strUrl;
   private String fileName;
   private Preference<String> HOST;
+  private RImageEntity image;
 
-  DownloadFileJob(String host, String strUrl, String fileName) {
+  DownloadFileJob(String host, String strUrl, String fileName, int id) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.host = host;
     this.strUrl = strUrl;
     this.fileName = fileName;
+    this.rImageId = id;
 
   }
 
@@ -54,16 +58,55 @@ public class DownloadFileJob  extends BaseJob {
 
   @Override
   public void onRun() throws Throwable {
+    getImage();
 
-    if ( fileExist() ){
-      File file = new File(getApplicationContext().getFilesDir(), fileName);
-      Timber.tag(TAG).v( "file exists: %s", file.getAbsolutePath() );
-      EventBus.getDefault().post( new FileDownloadedEvent(file.getAbsolutePath()) );
-    } else {
-      Timber.tag(TAG).v( "file not exists" );
-      loadFile();
+    if (image != null) {
+
+      if ( !image.isLoading() && image.isComplete() ){
+        Timber.tag(TAG).e("File exists!");
+      }
+
+      if ( image.isLoading() ){
+        Timber.tag(TAG).e("File already downloading!");
+      }
+
+      if ( !image.isComplete() ){
+        loadFile();
+      }
+
     }
 
+  }
+
+//  if ( fileExist() ){
+//    File file = new File(getApplicationContext().getFilesDir(), fileName);
+//    Timber.tag(TAG).v( "file exists: %s", file.getAbsolutePath() );
+//    EventBus.getDefault().post( new FileDownloadedEvent(file.getAbsolutePath()) );
+//  } else {
+//    Timber.tag(TAG).v( "file not exists" );
+//    loadFile();
+//  }
+
+  private RImageEntity getImage(){
+    image = dataStore
+      .select(RImageEntity.class)
+      .where(RImageEntity.ID.eq(rImageId))
+      .get().firstOrNull();
+    return image;
+  }
+
+  private void setLoading(Boolean status){
+    dataStore
+      .update(RImageEntity.class)
+      .set(RImageEntity.LOADING, status)
+      .where(RImageEntity.ID.eq( image.getId() )).get().value();
+  }
+
+  private void setComplete(Boolean status){
+    dataStore
+      .update(RImageEntity.class)
+      .set(RImageEntity.COMPLETE, status)
+      .where(RImageEntity.ID.eq( image.getId() )).get().value();
   }
 
   private Boolean fileExist(){
@@ -89,12 +132,19 @@ public class DownloadFileJob  extends BaseJob {
       .subscribe(
         this::downloadFile,
         error -> {
+
+          setLoading(false);
+          setComplete(false);
+
           EventBus.getDefault().post(new FileDownloadedEvent(""));
         }
       );
   }
 
   private void downloadFile(DownloadLink link) {
+
+    setLoading(true);
+
     Timber.tag(TAG).v( "downloadFile ..." );
 
     String admin = settings.getString("login").get();
@@ -130,8 +180,17 @@ public class DownloadFileJob  extends BaseJob {
           }
 
           Timber.tag(TAG).d("file download was a success? " + writtenToDisk);
+
+          if (writtenToDisk){
+            setLoading(false);
+            setComplete(true);
+          }
         },
         error -> {
+
+          setLoading(false);
+          setComplete(false);
+
           EventBus.getDefault().post(new FileDownloadedEvent(""));
         }
       );

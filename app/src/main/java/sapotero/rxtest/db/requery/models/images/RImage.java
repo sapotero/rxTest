@@ -1,5 +1,6 @@
 package sapotero.rxtest.db.requery.models.images;
 
+import io.requery.Column;
 import io.requery.Entity;
 import io.requery.Generated;
 import io.requery.Key;
@@ -20,6 +21,12 @@ public abstract class RImage {
   String path;
   String contentType;
   Boolean signed;
+
+
+  @Column(value="false")
+  Boolean loading;
+  @Column(value="false")
+  Boolean complete;
 
   @ManyToOne
   RDocument document;

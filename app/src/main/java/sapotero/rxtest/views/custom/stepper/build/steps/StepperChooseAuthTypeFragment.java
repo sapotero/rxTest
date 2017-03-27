@@ -95,12 +95,14 @@ public class StepperChooseAuthTypeFragment extends Fragment implements Step, Vie
       case R.id.stepper_auth_choose_cert:
         Timber.tag("StepperAuthFragment").d( "stepper_auth_choose_cert" );
         setAuthType( AuthType.DS );
+        settings.getBoolean("SIGN_WITH_DC").set(true);
         EventBus.getDefault().post( new StepperNextStepEvent() );
         break;
 
       case R.id.stepper_auth_choose_password:
         Timber.tag("StepperAuthFragment").d( "stepper_auth_choose_password" );
         setAuthType( AuthType.PASSWORD );
+        settings.getBoolean("SIGN_WITH_DC").set(false);
         EventBus.getDefault().post( new StepperNextStepEvent() );
 
         break;

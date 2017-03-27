@@ -128,6 +128,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
   private RDecisionEntity current_decision;
   private String TAG = this.getClass().getSimpleName();
   private GestureDetector gestureDetector;
+  private RDocumentEntity doc;
 
   public InfoActivityDecisionPreviewFragment() {
   }
@@ -277,16 +278,21 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
     public boolean onDoubleTap(MotionEvent e) {
       Timber.tag("GestureListener").w("DOUBLE TAP");
 
-      if ( current_decision != null && !current_decision.isApproved() ){
-        edit();
-      }
+      if ( !doc.isFromLinks() ){
 
-      if (current_decision == null ){
-        settings.getString("decision.active.id").set(null);
+        if ( current_decision != null && !current_decision.isApproved() ){
+          edit();
+        }
 
-        Context context = getContext();
-        Intent create_intent = new Intent(context, DecisionConstructorActivity.class);
-        context.startActivity(create_intent);
+        if (current_decision == null ){
+          settings.getString("decision.active.id").set(null);
+
+          Context context = getContext();
+          Intent create_intent = new Intent(context, DecisionConstructorActivity.class);
+          context.startActivity(create_intent);
+
+        }
+
 
       }
 
@@ -379,6 +385,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
       prev_person_button.setVisibility( !approved ? View.INVISIBLE : View.GONE);
     }
 
+
     if (approved){
       decision_toolbar.getMenu().findItem(R.id.decision_preview_edit).setVisible(false);
     }
@@ -388,6 +395,12 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
     if ( !decision_spinner_adapter.hasActiveDecision() ){
       Timber.tag(TAG).e("NO ACTIVE DECISION");
       EventBus.getDefault().post( new HasNoActiveDecisionConstructor() );
+    }
+
+    //FIX не даем выполнять операции для связанных документов
+    if ( doc!=null && doc.isFromLinks()!=null && doc.isFromLinks() ){
+      next_person_button.setVisibility( View.GONE );
+      prev_person_button.setVisibility( View.GONE );
     }
   }
 
@@ -517,6 +530,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
       .subscribeOn(Schedulers.io())
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(doc -> {
+
+        this.doc = doc;
 
         Timber.tag("loadFromDb").i( "loaded %s", doc.getId() );
 

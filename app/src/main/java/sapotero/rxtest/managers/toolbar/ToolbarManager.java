@@ -385,20 +385,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       }
     }
 
-
-
-    if (doc!= null && doc.isFromFavoritesFolder() != null && doc.isFromFavoritesFolder() ){
-      toolbar.getMenu().clear();
-      toolbar.inflateMenu(R.menu.info_menu);
-
-      try {
-        toolbar.getMenu().findItem(R.id.menu_info_decision_edit).setVisible(false);
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-
-
-    }
     //настройка
     try {
       if (!settings.getBoolean("settings_view_show_create_decision_post").get() && doc.isFromFavoritesFolder() != null && doc.isFromFavoritesFolder() ) {
@@ -415,6 +401,31 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       // убрать кнопку "К" у проектов из раздела на согласование("на подписание" её также быть не должно)
       try {
         toolbar.getMenu().findItem(R.id.menu_info_shared_to_control).setVisible(false);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+
+    if (doc!= null && doc.isFromProcessedFolder() != null && doc.isFromProcessedFolder() ){
+      toolbar.getMenu().clear();
+      toolbar.inflateMenu(R.menu.info_menu);
+
+      try {
+        toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(false);
+        toolbar.getMenu().findItem(R.id.menu_info_decision_edit).setVisible(false);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+
+    if (doc!= null && doc.isFromFavoritesFolder() != null && doc.isFromFavoritesFolder() ){
+      toolbar.getMenu().clear();
+      toolbar.inflateMenu(R.menu.info_menu);
+
+      try {
+        toolbar.getMenu().findItem(R.id.menu_info_shared_to_control).setVisible(false);
+        toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(false);
+        toolbar.getMenu().findItem(R.id.menu_info_decision_edit).setVisible(false);
       } catch (Exception e) {
         e.printStackTrace();
       }

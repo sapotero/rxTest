@@ -714,38 +714,7 @@ public class MainService extends Service {
   }
 
   public void updateAll(){
-
     Timber.tag(TAG).e("updateAll");
-
-
-//    if ( subscription == null ){
-//      subscription = new CompositeSubscription();
-//    }
-//
-//    if ( subscription.hasSubscriptions() ){
-//      subscription.unsubscribe();
-//    }
-//
-//    subscription.add(
-//      Observable
-//        .interval( 120, TimeUnit.SECONDS )
-//        .subscribeOn(Schedulers.io())
-//        .observeOn(AndroidSchedulers.mainThread())
-//        .subscribe(interval -> {
-//          dataLoaderInterface.updateByStatus(MainMenuItem.ALL);
-//
-//        })
-//    );
-//
-//    subscription.add(
-//      Observable
-//        .interval( 10, TimeUnit.SECONDS )
-//        .subscribeOn(Schedulers.io())
-//        .observeOn(AndroidSchedulers.mainThread())
-//        .subscribe(interval -> {
-//          queue.getUncompleteTasks();
-//        })
-//    );
   }
 
 

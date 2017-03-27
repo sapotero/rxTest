@@ -29,6 +29,7 @@ import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.db.requery.models.exemplars.RExemplarEntity;
+import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
@@ -104,13 +105,6 @@ public class SyncFavoritesDocumentsJob extends BaseJob {
           Timber.tag(TAG).d("actions - %s", new Gson().toJson( doc.getOperations() ) );
 
           update( exist(doc.getUid()) );
-
-          if ( doc.getImages() != null && doc.getImages().size() > 0 ){
-            for (Image image : doc.getImages()) {
-              jobManager.addJobInBackground( new DownloadFileJob(HOST.get(), image.getPath(), image.getMd5()+"_"+image.getTitle()) );
-            }
-
-          }
 
           if ( doc.getLinks() != null && doc.getLinks().size() > 0 ){
 
@@ -346,6 +340,8 @@ public class SyncFavoritesDocumentsJob extends BaseJob {
           image.setContentType(i.getContentType());
           image.setSigned(i.getSigned());
           image.setDocument(rDoc);
+          image.setLoading(false);
+          image.setComplete(false);
           rDoc.getImages().add(image);
         }
       }
@@ -418,6 +414,16 @@ public class SyncFavoritesDocumentsJob extends BaseJob {
         .subscribe(
           result -> {
             Timber.tag(TAG).d("updated " + result.getUid());
+
+            if ( result.getImages() != null && result.getImages().size() > 0 ){
+
+              for (RImage _image : result.getImages()) {
+
+                RImageEntity image = (RImageEntity) _image;
+                jobManager.addJobInBackground( new DownloadFileJob(HOST.get(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
+              }
+
+            }
           },
           error ->{
             error.printStackTrace();
@@ -568,6 +574,8 @@ public class SyncFavoritesDocumentsJob extends BaseJob {
           image.setContentType(i.getContentType());
           image.setSigned(i.getSigned());
           image.setDocument(doc);
+          image.setLoading(false);
+          image.setComplete(false);
           doc.getImages().add(image);
         }
       }
@@ -607,6 +615,16 @@ public class SyncFavoritesDocumentsJob extends BaseJob {
         .subscribe(
           result -> {
             Timber.tag("MD5").d("updateDocumentInfo " + result.getMd5());
+
+            if ( result.getImages() != null && result.getImages().size() > 0 ){
+
+              for (RImage _image : result.getImages()) {
+
+                RImageEntity image = (RImageEntity) _image;
+                jobManager.addJobInBackground( new DownloadFileJob(HOST.get(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
+              }
+
+            }
           },
           error ->{
             error.printStackTrace();

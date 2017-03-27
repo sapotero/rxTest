@@ -283,6 +283,7 @@ public class DataLoaderManager {
     CURRENT_USER_ID.set(currentUserId);
   }
 
+  
 
   public void setPassword(String password) {
     PASSWORD.set(password);
@@ -469,120 +470,6 @@ public class DataLoaderManager {
           })
     );
 
-//    subscription.add(
-//
-//      Observable.just(TOKEN.get())
-//        .subscribeOn(Schedulers.io())
-//        .observeOn(AndroidSchedulers.mainThread())
-//        .unsubscribeOn(Schedulers.io())
-//        // получаем шаблоны
-//
-//        .concatMap(data -> auth.getTemplates(LOGIN.get(), TOKEN.get()).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()))
-//        .doOnNext(templates -> jobManager.addJobInBackground(new AddTemplatesJob(templates)))
-//
-//        // получаем данные о пользователе
-////        .concatMap(data -> auth.getUserInfo(LOGIN.get(), TOKEN.get()).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()))
-////        .doOnNext(info -> {
-////          setCurrentUser(info.getMe().getName());
-////          setCurrentUserId(info.getMe().getId());
-////          setCurrentUserId(info.getMe().getId());
-////        })
-//
-//
-//
-//        // получаем папки
-//        .concatMap(data -> auth.getFolders(LOGIN.get(), TOKEN.get()).subscribeOn(Schedulers.io()))
-//        .doOnNext(folders -> jobManager.addJobInBackground(new AddFoldersJob(folders)))
-//
-//        // получаем группу первичного рассмотрения
-//        .concatMap(data -> auth.getPrimaryConsiderationUsers(LOGIN.get(), TOKEN.get()).subscribeOn(Schedulers.io()))
-//        .doOnNext(users -> jobManager.addJobInBackground(new AddPrimaryConsiderationJob(users)))
-//
-//        // получаем группу Избранное(МП)
-//        .concatMap(data -> auth.getFavoriteUsers(LOGIN.get(), TOKEN.get()).subscribeOn(Schedulers.io()))
-//        .doOnNext(users -> jobManager.addJobInBackground(new AddFavoriteUsersJob(users)))
-//
-//        // Доработка api для возврата ВРИО/по поручению
-//        // https://tasks.n-core.ru/browse/MVDESD-11453
-//        .concatMap(data -> auth.getAssistant(LOGIN.get(), TOKEN.get(), CURRENT_USER_ID.get()).subscribeOn(Schedulers.io()))
-//        .doOnNext(users -> jobManager.addJobInBackground(new AddAssistantJob(users)))
-//
-//        // получаем список документов по статусам
-//        .concatMap(data -> {
-////          Fields.Status[] new_filter_types = Fields.Status.INDEX;
-//
-//          ArrayList<Fields.Status> new_filter_types = new ArrayList<Fields.Status>();
-//
-//          if (items == null){
-////            new_filter_types.add( Fields.Status.SENT_TO_THE_REPORT );
-////            new_filter_types.add( Fields.Status.PRIMARY_CONSIDERATION );
-//            new_filter_types.add( Fields.Status.APPROVAL );
-//            new_filter_types.add( Fields.Status.SIGNING );
-//          } else {
-//            if (items.getButtons() != null && items.getButtons().length > 0){
-//
-//              ArrayList<ButtonBuilder> getButtonList = items.getButtonList();
-//
-//              if (getButtonList != null && getButtonList.size() > 0){
-//
-//                for (ButtonBuilder builder: getButtonList) {
-//                  if ( builder.isActive() ){
-//                    Timber.tag(TAG).d("ACTIVE BUTTON INDEX: %s", builder.getIndex() );
-//                    Timber.tag(TAG).d("ACTIVE BUTTON: %s", MainMenuButton.getByIndex( builder.getIndex() ).toString() );
-//
-//                    MainMenuButton button = MainMenuButton.getByIndex(builder.getIndex());
-//
-//                    if (button != null) {
-//
-//                      getButtonType(new_filter_types, button);
-//                    }
-//                  }
-//                }
-//              } else {
-//                for (MainMenuButton button: items.getButtons() ) {
-//                  getButtonType(new_filter_types, button);
-//                }
-//              }
-//
-//            }
-//          }
-//
-//          Timber.tag(TAG).d("new_filter_types: %s", new_filter_types );
-//
-//          Observable<Fields.Status> types = Observable.from(new_filter_types);
-//          Observable<Documents> count = Observable
-//            .from(new_filter_types)
-//            .flatMap(status -> docService.getDocuments(LOGIN.get(), TOKEN.get(), status.getValue(), 500, 0));
-//
-//          return Observable.zip(types, count, (type, docs) -> new TDmodel(type, docs.getDocuments()))
-//            .subscribeOn(Schedulers.computation())
-//            .observeOn(AndroidSchedulers.mainThread())
-//            .toList();
-//        })
-//        .doOnNext(raw -> {
-//          for (TDmodel data : raw) {
-//            Timber.tag(TAG).i(" DocumentType: %s | %s", data.getType(), data.getDocuments().size());
-//
-//            COUNT.set( COUNT.get() + data.getDocuments().size());
-//
-//            for (Document doc : data.getDocuments()) {
-//              String type = data.getType();
-//              Timber.tag(TAG).d("%s | %s", type, doc.getUid());
-//
-//              jobManager.addJobInBackground( new SyncDocumentsJob(doc.getUid(), Fields.getStatus(type)) );
-//            }
-//          }
-//        })
-//        .subscribe(
-//          data -> {
-//            Timber.tag(TAG).w("subscribe %s", data);
-//            updateUnprocessed();
-//          }, error -> {
-//            //          callback.onError(error);
-//          }
-//        )
-//    );
-
   }
 
   private void updateUnprocessed() {
@@ -698,28 +585,9 @@ public class DataLoaderManager {
   }
 
   public void updateByStatus(MainMenuItem items) {
-    Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
-    AuthService auth = retrofit.create(AuthService.class);
-
     Timber.tag(TAG).e("UPDATE BY STATUS: %s", items.getName() );
 
-    String sign = "";
-
-    try {
-      sign = MainService.getFakeSign(context, "12341234", null);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
-    Map<String, Object> map = new HashMap<>();
-    map.put( "sign", sign );
-
-    RequestBody json = RequestBody.create(
-      MediaType.parse("application/json"),
-      new JSONObject( map ).toString()
-    );
-
-    Observable<AuthSignToken> authSubscription = settings.getBoolean("SIGN_WITH_DC").get() == null ? auth.getAuth( LOGIN.get(), PASSWORD.get() ) : auth.getAuthBySign(json);
+    Observable<AuthSignToken> authSubscription = getAuthSubscription();
 
 
     switch ( items ){
@@ -758,6 +626,37 @@ public class DataLoaderManager {
         break;
     }
 
+  }
+
+  private Observable<AuthSignToken> getAuthSubscription() {
+    Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
+    AuthService auth = retrofit.create(AuthService.class);
+
+    Observable<AuthSignToken> authSubscription;
+
+    if ( !settings.getBoolean("SIGN_WITH_DC").get() ){
+      authSubscription = auth.getAuth( LOGIN.get(), PASSWORD.get() );
+    } else {
+  
+      String sign = "";
+      try {
+        sign = MainService.getFakeSign( context, settings.getString("PIN").get(), null );
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+  
+      Map<String, Object> map = new HashMap<>();
+      map.put( "sign", sign );
+  
+      RequestBody json = RequestBody.create(
+        MediaType.parse("application/json"),
+        new JSONObject( map ).toString()
+      );
+  
+      authSubscription = auth.getAuthBySign(json);
+    }
+    
+    return authSubscription;
   }
 
   private void updateByDefault(Observable<AuthSignToken> auth, MainMenuItem items) {

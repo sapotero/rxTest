@@ -29,6 +29,7 @@ import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.db.requery.models.exemplars.RExemplarEntity;
+import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
@@ -100,12 +101,7 @@ public class SyncLinkJob extends BaseJob {
 
           EventBus.getDefault().post( new StepperLoadDocumentEvent(doc.getUid()) );
 
-          if ( doc.getImages() != null && doc.getImages().size() > 0 ){
-            for (Image image : doc.getImages()) {
-              jobManager.addJobInBackground( new DownloadFileJob(HOST.get(), image.getPath(), image.getMd5()+"_"+image.getTitle()) );
-            }
 
-          }
         },
         error -> {
           error.printStackTrace();
@@ -193,6 +189,8 @@ public class SyncLinkJob extends BaseJob {
         .subscribe(data -> {
           Timber.tag(TAG).v("addByOne " + data.getTitle() );
           setData( data, document, false);
+
+
         },
         error -> {
           error.printStackTrace();
@@ -331,6 +329,8 @@ public class SyncLinkJob extends BaseJob {
           image.setPath(i.getPath());
           image.setContentType(i.getContentType());
           image.setSigned(i.getSigned());
+          image.setLoading(false);
+          image.setComplete(false);
           image.setDocument(rDoc);
           rDoc.getImages().add(image);
         }
@@ -408,6 +408,16 @@ public class SyncLinkJob extends BaseJob {
       .subscribe(
         result -> {
           Timber.tag(TAG).d("updated %s",result.getUid());
+
+          if ( result.getImages() != null && result.getImages().size() > 0  ){
+
+            for (RImage _image : result.getImages()) {
+
+              RImageEntity image = (RImageEntity) _image;
+              jobManager.addJobInBackground( new DownloadFileJob(HOST.get(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
+            }
+
+          }
         },
         error ->{
           Timber.tag(TAG).d("error %s ", error);
