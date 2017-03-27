@@ -78,7 +78,6 @@ public class ChangePerson extends AbstractCommand {
       .update(RDocumentEntity.class)
       .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue() )
       .set( RDocumentEntity.PROCESSED, true)
-      .set( RDocumentEntity.FROM_SIGN, true)
       .set( RDocumentEntity.MD5, "" )
       .set( RDocumentEntity.CHANGED, true)
       .where(RDocumentEntity.UID.eq(UID.get()))

@@ -60,11 +60,25 @@ public class DocumentTypeItem {
       // настройка
       // если включена настройка "Отображать документы без резолюции"
       WhereAndOr<Scalar<Integer>> query;
-      if ( settings.getBoolean("settings_view_type_show_without_project").get() && !mainMenuItem.isProcessed() ){
+      if ( settings.getBoolean("settings_view_type_show_without_project").get()
+        || mainMenuItem.getIndex() == 3  // подписание/согласование
+        || mainMenuItem.getIndex() == 9  // обработанные
+        || mainMenuItem.getIndex() == 10 // избранное
+      ){
         query = dataStore
           .count(RDocumentEntity.class)
           .where(RDocumentEntity.USER.eq(settings.getString("login").get()))
           .and(RDocumentEntity.FILTER.ne(Fields.Status.LINK.getValue()));
+
+      } else {
+        query = dataStore
+          .count(RDocumentEntity.class)
+          .where( RDocumentEntity.USER.eq( settings.getString("login").get() ) )
+          .and( RDocumentEntity.WITH_DECISION.eq(true) )
+          .and( RDocumentEntity.FILTER.ne( Fields.Status.LINK.getValue() ) );
+      }
+
+      if ( mainMenuItem.getCountConditions().length > 0 ){
 
         for (ConditionBuilder condition : mainMenuItem.getCountConditions() ){
           switch ( condition.getCondition() ){
@@ -78,30 +92,8 @@ public class DocumentTypeItem {
               break;
           }
         }
-        count = query.get().value();
-      }else {
-        query = dataStore
-          .count(RDocumentEntity.class)
-          .where( RDocumentEntity.USER.eq( settings.getString("login").get() ) )
-          .and( RDocumentEntity.FILTER.ne( Fields.Status.LINK.getValue() ) );
-        if ( mainMenuItem.getCountConditions().length > 0 ){
-
-          for (ConditionBuilder condition : mainMenuItem.getCountConditions() ){
-            switch ( condition.getCondition() ){
-              case AND:
-                query = query.and( condition.getField() );
-                break;
-              case OR:
-                query = query.or( condition.getField() );
-                break;
-              default:
-                break;
-            }
-          }
-        }
-
-        count = query.get().value();
       }
+      count = query.get().value();
 
       return String.format( mainMenuItem.getName(), count);
     }

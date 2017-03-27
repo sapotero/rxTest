@@ -91,8 +91,12 @@ public abstract class RDocument implements Persistable {
   @Index("expired_index")
   Boolean expired;
 
-  @Index("fromSign_index")
-  Boolean fromSign;
+  @Column(value="false")
+  Boolean withDecision;
+
+  @Column(value="false")
+  Boolean red;
+
 
   @OneToMany(mappedBy = "document")
   Set<RDecision> decisions;

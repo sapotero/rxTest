@@ -249,7 +249,7 @@ public class DBQueryBuilder {
       if ( menuBuilder.getItem().isShowAnyWay() ){
         addOne(doc);
       } else {
-        if (doc.getDecisions().size() > 0){
+        if (doc.isWithDecision() != null && doc.isWithDecision()){
           addOne(doc);
         }
       }

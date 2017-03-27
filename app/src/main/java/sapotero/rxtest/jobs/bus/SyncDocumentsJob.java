@@ -323,69 +323,77 @@ public class SyncDocumentsJob  extends BaseJob {
       rDoc.setFromProcessedFolder( false );
       rDoc.setFromFavoritesFolder( false );
 
-      if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
+    Boolean red = false;
+    Boolean with_decision = false;
 
-        for (Decision d: document.getDecisions() ) {
+    if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
+      with_decision = true;
+      for (Decision d: document.getDecisions() ) {
 
-          RDecisionEntity decision = new RDecisionEntity();
-          decision.setUid( d.getId() );
-          decision.setLetterhead(d.getLetterhead());
-          decision.setApproved(d.getApproved());
-          decision.setSigner(d.getSigner());
-          decision.setSignerId(d.getSignerId());
-          decision.setSignerPositionS(d.getSignerPositionS());
-          decision.setAssistantId(d.getAssistantId());
-          decision.setSignerBlankText(d.getSignerBlankText());
-          decision.setSignerIsManager(d.getSignerIsManager());
-          decision.setComment(d.getComment());
-          decision.setDate(d.getDate());
-          decision.setUrgencyText(d.getUrgencyText());
-          decision.setShowPosition(d.getShowPosition());
-          decision.setSignBase64(d.getSignBase64());
-          decision.setRed(d.getRed());
+        RDecisionEntity decision = new RDecisionEntity();
+        decision.setUid( d.getId() );
+        decision.setLetterhead(d.getLetterhead());
+        decision.setApproved(d.getApproved());
+        decision.setSigner(d.getSigner());
+        decision.setSignerId(d.getSignerId());
+        decision.setAssistantId(d.getAssistantId());
+        decision.setSignerBlankText(d.getSignerBlankText());
+        decision.setSignerIsManager(d.getSignerIsManager());
+        decision.setSignerPositionS(d.getSignerPositionS());
+        decision.setComment(d.getComment());
+        decision.setDate(d.getDate());
+        decision.setUrgencyText(d.getUrgencyText());
+        decision.setShowPosition(d.getShowPosition());
+        decision.setSignBase64(d.getSignBase64());
+        decision.setRed(d.getRed());
+        if (d.getRed()){
+          red= true;
+        }
 
-          if ( d.getBlocks() != null && d.getBlocks().size() >= 1 ){
+        if ( d.getBlocks() != null && d.getBlocks().size() >= 1 ){
 
-            for (Block b: d.getBlocks() ) {
-              RBlockEntity block = new RBlockEntity();
-              block.setNumber(b.getNumber());
-              block.setText(b.getText());
-              block.setAppealText(b.getAppealText());
-              block.setTextBefore(b.getTextBefore());
-              block.setHidePerformers(b.getHidePerformers());
-              block.setToCopy(b.getToCopy());
-              block.setToFamiliarization(b.getToFamiliarization());
+          for (Block b: d.getBlocks() ) {
+            RBlockEntity block = new RBlockEntity();
+            block.setNumber(b.getNumber());
+            block.setText(b.getText());
+            block.setAppealText(b.getAppealText());
+            block.setTextBefore(b.getTextBefore());
+            block.setHidePerformers(b.getHidePerformers());
+            block.setToCopy(b.getToCopy());
+            block.setToFamiliarization(b.getToFamiliarization());
 
-              if ( b.getPerformers() != null && b.getPerformers().size() >= 1 ) {
+            if ( b.getPerformers() != null && b.getPerformers().size() >= 1 ) {
 
-                for (Performer p : b.getPerformers()) {
-                  RPerformerEntity performer = new RPerformerEntity();
+              for (Performer p : b.getPerformers()) {
+                RPerformerEntity performer = new RPerformerEntity();
+                performer.setNumber(p.getNumber());
+                performer.setPerformerId(p.getPerformerId());
+                performer.setPerformerType(p.getPerformerType());
+                performer.setPerformerText(p.getPerformerText());
+                performer.setOrganizationText(p.getOrganizationText());
+                performer.setIsOriginal(p.getIsOriginal());
+                performer.setIsResponsible(p.getIsResponsible());
 
-                  performer.setNumber(p.getNumber());
-                  performer.setPerformerId(p.getPerformerId());
-                  performer.setPerformerType(p.getPerformerType());
-                  performer.setPerformerText(p.getPerformerText());
-                  performer.setOrganizationText(p.getOrganizationText());
-                  performer.setIsOriginal(p.getIsOriginal());
-                  performer.setIsResponsible(p.getIsResponsible());
-
-                  performer.setBlock(block);
-                  block.getPerformers().add(performer);
-                }
+                performer.setBlock(block);
+                block.getPerformers().add(performer);
               }
-
-
-              block.setDecision(decision);
-              decision.getBlocks().add(block);
             }
 
+
+            block.setDecision(decision);
+            decision.getBlocks().add(block);
           }
 
-          //FIX DECISION
-          decision.setDocument(rDoc);
-          rDoc.getDecisions().add(decision);
         }
+
+        //FIX DECISION
+        decision.setDocument(rDoc);
+        rDoc.getDecisions().add(decision);
       }
+    }
+
+    rDoc.setWithDecision(with_decision);
+    rDoc.setRed(red);
 
       if ( document.getExemplars() != null && document.getExemplars().size() >= 1 ){
         for (Exemplar e: document.getExemplars() ) {
@@ -543,8 +551,11 @@ public class SyncDocumentsJob  extends BaseJob {
       doc.setFromFavoritesFolder( false );
       doc.setChanged( false );
 
+      Boolean red = false;
+      Boolean with_decision = false;
+
       if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
-        doc.getDecisions().clear();
+        with_decision = true;
         for (Decision d: document.getDecisions() ) {
 
           RDecisionEntity decision = new RDecisionEntity();
@@ -554,15 +565,18 @@ public class SyncDocumentsJob  extends BaseJob {
           decision.setSigner(d.getSigner());
           decision.setSignerId(d.getSignerId());
           decision.setAssistantId(d.getAssistantId());
-          decision.setSignerPositionS(d.getSignerPositionS());
           decision.setSignerBlankText(d.getSignerBlankText());
           decision.setSignerIsManager(d.getSignerIsManager());
+          decision.setSignerPositionS(d.getSignerPositionS());
           decision.setComment(d.getComment());
           decision.setDate(d.getDate());
           decision.setUrgencyText(d.getUrgencyText());
           decision.setShowPosition(d.getShowPosition());
           decision.setSignBase64(d.getSignBase64());
           decision.setRed(d.getRed());
+          if (d.getRed()){
+            red= true;
+          }
 
           if ( d.getBlocks() != null && d.getBlocks().size() >= 1 ){
 
@@ -580,7 +594,6 @@ public class SyncDocumentsJob  extends BaseJob {
 
                 for (Performer p : b.getPerformers()) {
                   RPerformerEntity performer = new RPerformerEntity();
-
                   performer.setNumber(p.getNumber());
                   performer.setPerformerId(p.getPerformerId());
                   performer.setPerformerType(p.getPerformerType());
@@ -606,6 +619,9 @@ public class SyncDocumentsJob  extends BaseJob {
           doc.getDecisions().add(decision);
         }
       }
+
+      doc.setWithDecision(with_decision);
+      doc.setRed(red);
 
       if ( document.getRoute() != null  ){
         RRouteEntity route = (RRouteEntity) doc.getRoute();

@@ -242,8 +242,11 @@ public class SyncLinkJob extends BaseJob {
       rDoc.setFromLinks(true);
       rDoc.setUser( LOGIN.get() );
 
-      if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
+      Boolean red = false;
+      Boolean with_decision = false;
 
+      if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
+        with_decision = true;
         for (Decision d: document.getDecisions() ) {
 
           RDecisionEntity decision = new RDecisionEntity();
@@ -261,6 +264,10 @@ public class SyncLinkJob extends BaseJob {
           decision.setUrgencyText(d.getUrgencyText());
           decision.setShowPosition(d.getShowPosition());
           decision.setSignBase64(d.getSignBase64());
+          decision.setRed(d.getRed());
+          if (d.getRed()){
+            red= true;
+          }
 
           if ( d.getBlocks() != null && d.getBlocks().size() >= 1 ){
 
@@ -278,7 +285,6 @@ public class SyncLinkJob extends BaseJob {
 
                 for (Performer p : b.getPerformers()) {
                   RPerformerEntity performer = new RPerformerEntity();
-
                   performer.setNumber(p.getNumber());
                   performer.setPerformerId(p.getPerformerId());
                   performer.setPerformerType(p.getPerformerType());
@@ -304,6 +310,10 @@ public class SyncLinkJob extends BaseJob {
           rDoc.getDecisions().add(decision);
         }
       }
+
+      rDoc.setWithDecision(with_decision);
+      rDoc.setRed(red);
+
 
       if ( document.getExemplars() != null && document.getExemplars().size() >= 1 ){
         for (Exemplar e: document.getExemplars() ) {

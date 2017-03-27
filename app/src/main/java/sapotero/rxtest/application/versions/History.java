@@ -7,5 +7,6 @@ public class History {
   //resolved https://tasks.n-core.ru/browse/MVDESD-13017 - Избранное (убрать все операции)
   //resolved https://tasks.n-core.ru/browse/MVDESD-12870 - В рассмотренных документах отображать резолюцию(сейчас маршрут)
   //resolved https://tasks.n-core.ru/browse/MVDESD-12926 - Либо предложить сохранить резолюцию и добавить "Исполнителя" или не сохранять её
+  //resolved https://tasks.n-core.ru/browse/MVDESD-12696 - Отображение количества документов без резолюции
 
 }

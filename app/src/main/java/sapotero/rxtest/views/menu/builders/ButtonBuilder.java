@@ -114,11 +114,9 @@ public class ButtonBuilder {
 
     WhereAndOr<Scalar<Integer>> query = dataStore
       .count(RDocumentEntity.class)
-//      .join(RDecisionEntity.class)
-//      .on(RDecisionEntity.DOCUMENT_ID.eq(RDocumentEntity.ID))
       .where(RDocumentEntity.USER.eq(settings.getString("login").get()))
+      .and(RDocumentEntity.WITH_DECISION.eq(true))
       .and(RDocumentEntity.FROM_LINKS.eq(false));
-//      .and(RDocumentEntity.FILTER.ne(Fields.Status.LINK.getValue()));
 
     if (index == 0){
       query = query.or(RDocumentEntity.FROM_PROCESSED_FOLDER.eq(true));

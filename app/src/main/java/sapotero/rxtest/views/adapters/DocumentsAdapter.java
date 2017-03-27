@@ -48,16 +48,14 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RLinks;
 import sapotero.rxtest.db.requery.models.RLinksEntity;
 import sapotero.rxtest.db.requery.models.RSignerEntity;
-import sapotero.rxtest.db.requery.models.decisions.RDecision;
-import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.events.utils.NoDocumentsEvent;
+import sapotero.rxtest.managers.db.managers.DBDocumentManager;
+import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.views.activities.InfoActivity;
 import sapotero.rxtest.views.activities.MainActivity;
-import sapotero.rxtest.managers.db.managers.DBDocumentManager;
-import sapotero.rxtest.managers.menu.OperationManager;
 import timber.log.Timber;
 
 public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.DocumentViewHolder> implements Action1<List<Document>> {
@@ -190,7 +188,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
     //resolved https://tasks.n-core.ru/browse/MVDESD-12625
     //  На плитке Обращения и НПА не показывать строку "Без организации", если её действительно нет(
-//    Timber.d("star with: %s %s", item.getUid().startsWith( Fields.Journal.INCOMING_ORDERS.getValue() ), item.getUid().startsWith( Fields.Journal.CITIZEN_REQUESTS.getValue() ));
+    //    Timber.d("star with: %s %s", item.getUid().startsWith( Fields.Journal.INCOMING_ORDERS.getValue() ), item.getUid().startsWith( Fields.Journal.CITIZEN_REQUESTS.getValue() ));
     if(
           item.getUid().startsWith( Fields.Journal.INCOMING_ORDERS.getValue() )
       ||  item.getUid().startsWith( Fields.Journal.CITIZEN_REQUESTS.getValue() )
@@ -291,7 +289,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       settings.getInteger("activity_main_menu.position").set( viewHolder.getAdapterPosition() );
       settings.getString("activity_main_menu.regnumber").set( item.getRegistrationNumber() );
       settings.getString("activity_main_menu.star").set( item.getFilter() );
-      settings.getBoolean("activity_main_menu.from_sign").set( item.isFromSign() );
+//      settings.getBoolean("activity_main_menu.from_sign").set( item.isFromSign() );
       settings.getString("activity_main_menu.date").set( item.getRegistrationDate() );
 
       Intent intent = new Intent(mContext, InfoActivity.class);
@@ -345,25 +343,11 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     //  когда создаём проект резолюции.
     //  В подписавших резолюцию должен быть Министр.
 
-    if ( item.getDecisions().size() >= 1){
-      for (RDecision dec: item.getDecisions()){
-        RDecisionEntity decision = (RDecisionEntity) dec;
-        if ( decision.isRed() != null && decision.isRed() && !decision.isApproved() ){
-//          viewHolder.date.setTextColor( ContextCompat.getColor(mContext, R.color.md_red_600) );
-//          viewHolder.title.setTextColor( ContextCompat.getColor(mContext, R.color.md_white_1000 ) );
-//          viewHolder.title.setBackgroundColor( ContextCompat.getColor(mContext, R.color.md_red_300 ) );
-          viewHolder.cv.setBackground( ContextCompat.getDrawable(mContext, R.drawable.top_border) );
-          break;
-        }
-      }
+    if (item.isRed() != null && item.isRed()){
+      viewHolder.cv.setBackground( ContextCompat.getDrawable(mContext, R.drawable.top_border) );
     } else {
-//      viewHolder.cv.setBackground( null );
       viewHolder.cv.setBackground( ContextCompat.getDrawable(mContext, R.color.md_white_1000 ) );
     }
-
-
-
-//    setAnimation(viewHolder.itemView, position);
 
   }
 
@@ -414,7 +398,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       settings.getString("activity_main_menu.uid").set(item.getUid());
       settings.getString("activity_main_menu.regnumber").set(item.getRegistrationNumber());
       settings.getString("activity_main_menu.star").set(item.getFilter());
-      settings.getBoolean("activity_main_menu.from_sign").set(item.isFromSign());
+//      settings.getBoolean("activity_main_menu.from_sign").set(item.isFromSign());
       settings.getString("activity_main_menu.date").set(item.getRegistrationDate());
     }
 
@@ -443,7 +427,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       settings.getString("activity_main_menu.uid").set( item.getUid() );
       settings.getString("activity_main_menu.regnumber").set( item.getRegistrationNumber() );
       settings.getString("activity_main_menu.star").set( item.getFilter() );
-      settings.getBoolean("activity_main_menu.from_sign").set( item.isFromSign() );
+//      settings.getBoolean("activity_main_menu.from_sign").set( item.isFromSign() );
       settings.getString("activity_main_menu.date").set( item.getRegistrationDate() );
     }
 

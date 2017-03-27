@@ -66,7 +66,7 @@ public class Decision implements Serializable {
     private String status;
     @SerializedName("red")
     @Expose
-    private Boolean red;
+    private Boolean red = false;
     @SerializedName("blocks")
     @Expose
     private List<Block> blocks = new ArrayList<Block>();
