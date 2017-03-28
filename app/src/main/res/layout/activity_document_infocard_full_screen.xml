@@ -54,6 +54,7 @@
             android:layout_height="32dp"
             android:layout_weight="1"
             android:background="@drawable/minus"
+            android:visibility="gone"
             android:foreground="@drawable/card_foreground"
             style="@style/Widget.AppCompat.Button"/>
 
@@ -63,6 +64,7 @@
             android:layout_height="32dp"
             android:background="@drawable/plus"
             android:layout_weight="1"
+            android:visibility="gone"
             android:foreground="@drawable/card_foreground"
             style="@style/Widget.AppCompat.Button"/>
     </LinearLayout>

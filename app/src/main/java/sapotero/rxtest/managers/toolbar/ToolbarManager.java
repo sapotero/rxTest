@@ -126,6 +126,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             dialogFragment.withSearch(false);
             dialogFragment.withConfirm(true);
             dialogFragment.registerCallBack( this );
+            dialogFragment.withDocumentUid( UID.get() );
             dialogFragment.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
 
             operation = CommandFactory.Operation.INCORRECT;
@@ -187,6 +188,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             approveDialogFragment.withConfirm( true );
             approveDialogFragment.withPrimaryConsideration(false);
             approveDialogFragment.registerCallBack( this );
+            approveDialogFragment.withDocumentUid( UID.get() );
             approveDialogFragment.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
 //
             break;
@@ -202,6 +204,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             sign.withConfirm( true );
             sign.withPrimaryConsideration(false);
             sign.registerCallBack( this );
+            sign.withDocumentUid( UID.get() );
             sign.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
 
           break;
@@ -670,10 +673,11 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
   // OSHS selector
   @Override
-  public void onSearchSuccess(Oshs user, CommandFactory.Operation operation) {
+  public void onSearchSuccess(Oshs user, CommandFactory.Operation operation, String uid) {
     Timber.tag("onSearchSuccess").i("user: %s", user.getName());
     CommandParams params = new CommandParams();
     params.setPerson( user.getId() );
+    params.setDocument( uid );
     operationManager.execute( operation, params );
   }
 

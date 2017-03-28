@@ -9,6 +9,7 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 import rx.Observable;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
+import sapotero.rxtest.retrofit.models.old_decision.DecisionResponce;
 
 public interface DocumentService {
   @GET("{document}.json")
@@ -28,6 +29,13 @@ public interface DocumentService {
 
   @POST("/v2/decisions.json")
   Observable<Object> create(
+    @Query("login") String login,
+    @Query("auth_token") String auth_token,
+    @Body RequestBody body
+  );
+
+  @POST("/v2/decisions.json")
+  Observable<DecisionResponce> createAndSign(
     @Query("login") String login,
     @Query("auth_token") String auth_token,
     @Body RequestBody body

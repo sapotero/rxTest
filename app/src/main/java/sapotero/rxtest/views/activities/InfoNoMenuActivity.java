@@ -294,7 +294,7 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
 
 
   @Override
-  public void onSearchSuccess(Oshs user, CommandFactory.Operation operation) {
+  public void onSearchSuccess(Oshs user, CommandFactory.Operation operation, String uid) {
 
   }
 

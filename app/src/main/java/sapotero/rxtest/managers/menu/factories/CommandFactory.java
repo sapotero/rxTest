@@ -8,6 +8,7 @@ import sapotero.rxtest.managers.menu.commands.approval.ChangePerson;
 import sapotero.rxtest.managers.menu.commands.decision.AddAndApproveDecision;
 import sapotero.rxtest.managers.menu.commands.decision.AddDecision;
 import sapotero.rxtest.managers.menu.commands.decision.ApproveDecision;
+import sapotero.rxtest.managers.menu.commands.decision.ApproveDecisionDelayed;
 import sapotero.rxtest.managers.menu.commands.decision.RejectDecision;
 import sapotero.rxtest.managers.menu.commands.decision.SaveDecision;
 import sapotero.rxtest.managers.menu.commands.file.SignFile;
@@ -378,6 +379,20 @@ public class CommandFactory implements AbstractCommand.Callback{
         return "Подписание резолюции";
       }
     },
+    APPROVE_DECISION_DELAYED {
+      @Override
+      public Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
+        ApproveDecisionDelayed command = new ApproveDecisionDelayed(context, document);
+        command.withParams(params);
+        command.registerCallBack(instance);
+        return command;
+      }
+      @Override
+      public String getRussinaName() {
+        return "Подписание резолюции";
+      }
+    },
+
     REJECT_DECISION {
       @Override
       public Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
@@ -425,6 +440,9 @@ public class CommandFactory implements AbstractCommand.Callback{
 
         case "sapotero.rxtest.managers.menu.commands.decision.ApproveDecision":
           operation = Operation.APPROVE_DECISION;
+          break;
+        case "sapotero.rxtest.managers.menu.commands.decision.ApproveDecisionDelayed":
+          operation = Operation.APPROVE_DECISION_DELAYED;
           break;
         case "sapotero.rxtest.managers.menu.commands.decision.RejectDecision":
           operation = Operation.REJECT_DECISION;

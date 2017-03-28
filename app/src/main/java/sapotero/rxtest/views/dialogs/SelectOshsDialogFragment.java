@@ -65,6 +65,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
 
   private PrimaryConsiderationPeople user = null;
   private OshsAutoCompleteAdapter autocomplete_adapter;
+  private String documentUid = null;
 
   public void setIgnoreUsers(ArrayList<String> users) {
     Timber.tag("setIgnoreUsers").e("users %s", new Gson().toJson(users) );
@@ -88,9 +89,13 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
     this.withConfirm = withConfirm;
   }
 
+  public void withDocumentUid(String uid) {
+    this.documentUid = uid;
+  }
+
 
   public interface Callback {
-    void onSearchSuccess(Oshs user, CommandFactory.Operation operation);
+    void onSearchSuccess(Oshs user, CommandFactory.Operation operation, String uid);
     void onSearchError(Throwable error);
   }
   public void registerCallBack(Callback callback){
@@ -139,7 +144,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
         oshs.setName( user.getName() );
 
         Timber.e("setOnItemClickListener OPERATION: %s", operation.toString());
-        callback.onSearchSuccess(oshs, operation);
+        callback.onSearchSuccess(oshs, operation, documentUid);
         dismiss();
 
       } else {
@@ -183,7 +188,13 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
       }
 
       if (withConfirm){
-//        user = adapter.getItem(position);
+        user = adapter.getItem(position);
+        if (user != null) {
+          indicator.setVisibility(View.GONE);
+          title.setText( user.getName() );
+          title.cancelPendingInputEvents();
+          title.hideIndicator();
+        }
 
 //        Timber.tag("withConfirm").w("%s", user.getName());
 
@@ -197,7 +208,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
 
         if (callback != null) {
           Oshs _user = adapter.getOshs(position);
-          callback.onSearchSuccess(_user, operation);
+          callback.onSearchSuccess(_user, operation, documentUid);
           dismiss();
         }
       }

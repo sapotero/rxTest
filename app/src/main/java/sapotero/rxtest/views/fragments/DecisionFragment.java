@@ -522,7 +522,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
 
 
   @Override
-  public void onSearchSuccess(Oshs user, CommandFactory.Operation operation) {
+  public void onSearchSuccess(Oshs user, CommandFactory.Operation operation, String uid) {
     Timber.tag("FROM DIALOG").i( "[%s] %s | %s", user.getId(), user.getName(), user.getOrganization());
 
     adapter.add( new PrimaryConsiderationPeople( user.getId(), user.getName(), user.getPosition(), user.getOrganization(), null) );

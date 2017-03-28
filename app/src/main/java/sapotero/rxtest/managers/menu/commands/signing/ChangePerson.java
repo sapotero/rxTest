@@ -80,7 +80,7 @@ public class ChangePerson extends AbstractCommand {
       .set( RDocumentEntity.PROCESSED, true)
       .set( RDocumentEntity.MD5, "" )
       .set( RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq(UID.get()))
+      .where(RDocumentEntity.UID.eq(params.getDocument() != null ? params.getDocument(): UID.get()))
       .get()
       .value();
     if (callback != null){
@@ -104,7 +104,7 @@ public class ChangePerson extends AbstractCommand {
     OperationService operationService = retrofit.create( OperationService.class );
 
     ArrayList<String> uids = new ArrayList<>();
-    uids.add( UID.get() );
+    uids.add( params.getDocument() != null ? params.getDocument(): UID.get() );
 
     String comment = null;
     if ( params.getComment() != null ){

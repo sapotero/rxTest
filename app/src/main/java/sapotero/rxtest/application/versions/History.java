@@ -3,9 +3,19 @@ package sapotero.rxtest.application.versions;
 public class History {
   //version 1.14.3
   //resolved https://tasks.n-core.ru/browse/MVDESD-12927 - Операция "передача" документа/проекта
-  //resolved - фикс операции первичное рассмотрение
-  //resolved - в модалке операции передачи согласования/подписания - избранному/поиск по ошс
+  //resolved https://tasks.n-core.ru/browse/MVDESD-12871 - в модалке операции передачи согласования/подписания - избранному/поиск по ошс
+  //resolved https://tasks.n-core.ru/browse/MVDESD-13052 - Подписание новой резолюции
+  //resolved Отправка отчетов о сбоях приложения на почту
+  //resolved Фикс операции первичное рассмотрение
 
+
+
+  //version 1.14.3
+  //resolved https://tasks.n-core.ru/browse/MVDESD-12927 - Операция "передача" документа/проекта
+  //resolved https://tasks.n-core.ru/browse/MVDESD-12871 - в модалке операции передачи согласования/подписания - избранному/поиск по ошс
+  //resolved https://tasks.n-core.ru/browse/MVDESD-13052 - Подписание новой резолюции
+  //resolved Отправка отчетов о сбоях приложения на почту
+  //resolved Фикс операции первичное рассмотрение
 
 
   //version 1.14.2

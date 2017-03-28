@@ -3,7 +3,6 @@ package sapotero.rxtest.views.activities;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentTransaction;
@@ -139,10 +138,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     toolbarManager = new ToolbarManager( this, toolbar);
     toolbarManager.init();
 
-    loadingDialog = new MaterialDialog.Builder(this)
-      .title("Обновление данных...")
-      .progress(true, 0);
-
     loadSettings();
 
     status  = Fields.Status.findStatus( STATUS_CODE.get() );
@@ -201,6 +196,13 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
 
     Timber.tag("INFO").v( "JOURNAL: %s | STATUS: %s", journal.getName(), status.getName() );
+
+    try {
+      LinearLayout layout = (LinearLayout) findViewById(R.id.activity_info_preview_container);
+      layout.removeAllViews();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
 
     if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || IS_PROCESSED.get()  ){
       fragmentTransaction.add( R.id.activity_info_preview_container, new RoutePreviewFragment() );
@@ -329,9 +331,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   public void onMessageEvent(UpdateCurrentInfoActivityEvent event) throws Exception {
 
     Timber.d("UpdateCurrentInfoActivityEvent");
-    loadingDialog.show();
-
-    new Handler().postDelayed(this::restart, 5000);
+    updateCurrent();
 
   }
 

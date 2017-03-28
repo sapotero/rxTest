@@ -15,12 +15,16 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
+import sapotero.rxtest.events.decision.SignAfterCreateEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Decision;
+import sapotero.rxtest.retrofit.models.old_decision.DecisionResponce;
 import timber.log.Timber;
 
 public class AddAndApproveDecision extends AbstractCommand {
@@ -111,7 +115,7 @@ public class AddAndApproveDecision extends AbstractCommand {
 
     DocumentService operationService = retrofit.create( DocumentService.class );
 
-    Observable<Object> info = operationService.create(
+    Observable<DecisionResponce> info = operationService.createAndSign(
       LOGIN.get(),
       TOKEN.get(),
       json
@@ -122,7 +126,7 @@ public class AddAndApproveDecision extends AbstractCommand {
       .subscribe(
         data -> {
 
-          Timber.tag(TAG).e("new decision: %s", data);
+          Timber.tag(TAG).e("DECISION_ID: %s", data.getId() );
 
           if (callback != null ){
             callback.onCommandExecuteSuccess( getType() );
@@ -130,21 +134,8 @@ public class AddAndApproveDecision extends AbstractCommand {
           }
 
           queueManager.setExecutedRemote(this);
+          EventBus.getDefault().post( new SignAfterCreateEvent( data.getId() ));
 
-
-//          CommandFactory.Operation operation = CommandFactory.Operation.APPROVE_DECISION;
-//          CommandParams params = new CommandParams();
-//          params.setUser( LOGIN.get() );
-//          params.setDocument( document.getUid() );
-//          params.setLabel( image.getTitle() );
-//          params.setFilePath( String.format( "%s_%s", image.getMd5(), image.getTitle()) );
-//          params.setImageId( image.getImageId() );
-//
-//
-//          Command command = operation.getCommand(null, context, document, params);
-//
-//          Timber.tag(TAG).e("image: %s", document.getUid());
-//          queueManager.add(command);
         },
         error -> {
           Timber.tag(TAG).i("error: %s", error);
@@ -153,6 +144,10 @@ public class AddAndApproveDecision extends AbstractCommand {
           }
         }
       );
+  }
+
+  private RDecisionEntity created_decision(String id) {
+    return dataStore.select(RDecisionEntity.class).where(RDocumentEntity.UID.eq(id)).get().firstOrNull();
   }
 
   @Override

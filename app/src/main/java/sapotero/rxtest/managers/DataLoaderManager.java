@@ -3,7 +3,6 @@ package sapotero.rxtest.managers;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Handler;
 
 import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
@@ -700,9 +699,7 @@ public class DataLoaderManager {
   }
 
   public void updateDocument(String uid) {
-    new Handler().postDelayed( () -> {
-      jobManager.addJobInBackground(new SyncDocumentsJob( uid, "" ));
-    }, 2000L);
+    jobManager.addJobInBackground(new SyncDocumentsJob( uid, "" ));
   }
 
   @Subscribe(threadMode = ThreadMode.BACKGROUND)

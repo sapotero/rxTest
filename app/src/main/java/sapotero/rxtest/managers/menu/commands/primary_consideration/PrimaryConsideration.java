@@ -80,7 +80,7 @@ public class PrimaryConsideration extends AbstractCommand {
       .set( RDocumentEntity.PROCESSED, true)
       .set( RDocumentEntity.MD5, "" )
       .set( RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq(UID.get()))
+      .where(RDocumentEntity.UID.eq(params.getDocument() != null ? params.getDocument(): UID.get()))
       .get()
       .value();
     if ( callback != null ){
@@ -106,7 +106,7 @@ public class PrimaryConsideration extends AbstractCommand {
     OperationService operationService = retrofit.create( OperationService.class );
 
     ArrayList<String> uids = new ArrayList<>();
-    uids.add( UID.get() );
+    uids.add( params.getDocument() != null ? params.getDocument(): UID.get() );
 
     Observable<OperationResult> info = operationService.consideration(
       getType(),

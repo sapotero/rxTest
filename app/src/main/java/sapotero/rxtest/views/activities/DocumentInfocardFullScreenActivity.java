@@ -80,13 +80,11 @@ public class DocumentInfocardFullScreenActivity extends AppCompatActivity {
       .select(RDocumentEntity.class)
       .where(RDocumentEntity.UID.eq( UID.get() ))
       .get()
-      .toSelfObservable()
+      .toObservable()
       .subscribe(
-        data -> {
-          RDocumentEntity doc;
+        doc -> {
 
-          if (data != null) {
-            doc = data.firstOrNull();
+          if (doc != null) {
 
             String card = doc.getInfoCard();
 
@@ -95,8 +93,8 @@ public class DocumentInfocardFullScreenActivity extends AppCompatActivity {
 
                 String htmlData = "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />" + new String(Base64.decode( card, Base64.DEFAULT) );
                 webview.loadDataWithBaseURL("file:///android_asset/", htmlData, "text/html", "UTF-8", null);
-                webview.getSettings().setBuiltInZoomControls(false);
-                webview.getSettings().setDisplayZoomControls(false);
+                webview.getSettings().setBuiltInZoomControls(true);
+                webview.getSettings().setDisplayZoomControls(true);
                 webview.setBackgroundColor( getResources().getColor(R.color.md_grey_50) );
               }
             } catch (Exception e) {

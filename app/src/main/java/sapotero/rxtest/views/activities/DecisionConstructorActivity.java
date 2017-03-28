@@ -269,6 +269,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
           operationManager.execute( operation, params );
 
+          finish();
+
           break;
         case R.id.action_constructor_add_block:
           manager.getDecisionBuilder().addBlock();
@@ -684,7 +686,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   }
 
   @Override
-  public void onSearchSuccess(Oshs user, CommandFactory.Operation operation) {
+  public void onSearchSuccess(Oshs user, CommandFactory.Operation operation, String uid) {
     Timber.tag(TAG).e("USER: %s", new Gson().toJson(user) );
     String name = user.getName();
 
