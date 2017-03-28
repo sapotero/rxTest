@@ -62,4 +62,9 @@ public class LinkAdapter extends BaseAdapter {
   public ArrayList<Link> getItems() {
     return links;
   }
+
+  public void clear() {
+    links = new ArrayList<>();
+    notifyDataSetChanged();
+  }
 }

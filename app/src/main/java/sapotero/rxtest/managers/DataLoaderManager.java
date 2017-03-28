@@ -45,6 +45,7 @@ import sapotero.rxtest.jobs.bus.AddAssistantJob;
 import sapotero.rxtest.jobs.bus.AddFavoriteUsersJob;
 import sapotero.rxtest.jobs.bus.AddFoldersJob;
 import sapotero.rxtest.jobs.bus.AddPrimaryConsiderationJob;
+import sapotero.rxtest.jobs.bus.AddTemplatesJob;
 import sapotero.rxtest.jobs.bus.SyncDocumentsJob;
 import sapotero.rxtest.jobs.bus.SyncFavoritesDocumentsJob;
 import sapotero.rxtest.jobs.bus.SyncProcessedDocumentsJob;
@@ -210,6 +211,17 @@ public class DataLoaderManager {
         })
     );
 
+    subscription.add(
+      auth.getTemplates(LOGIN.get(), TOKEN.get())
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe( templates -> {
+          jobManager.addJobInBackground(new AddTemplatesJob(templates));
+        }, error -> {
+          Timber.tag(TAG).e(error);
+        })
+    );
+
     // получаем группу Избранное(МП)
     subscription.add(
       auth.getFavoriteUsers(LOGIN.get(), TOKEN.get())
@@ -235,7 +247,7 @@ public class DataLoaderManager {
         })
     );
 
-    updateProcessed();
+//    updateProcessed();
     updateFavorites();
 
   }
@@ -614,7 +626,7 @@ public class DataLoaderManager {
             token -> {
               Timber.tag(TAG).i("updateAuth: token" + token.getAuthToken());
               setToken(token.getAuthToken());
-              updateProcessed();
+//              updateProcessed();
             },
             error -> {
               Timber.tag("getAuth").e( "ERROR: %s", error);
@@ -670,7 +682,7 @@ public class DataLoaderManager {
             Timber.tag(TAG).i("updateAuth: token" + token.getAuthToken());
             setToken(token.getAuthToken());
             updateDocuments( MainMenuItem.ALL );
-            updateProcessed();
+//            updateProcessed();
             updateFavorites();
           },
           error -> {

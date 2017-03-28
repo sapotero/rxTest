@@ -104,7 +104,7 @@
 
     <string name="dialog_oshs_add">Добавить</string>
     <string name="dialog_oshs_cancel">Отмена</string>
-    <string name="dialog_oshs_title">Выберите исполнителя</string>
+    <string name="dialog_oshs_title">Выберите сотрудника</string>
 
 
     <string name="fragment_decision_familiarize">Прошу ознакомить</string>
@@ -416,6 +416,8 @@
     <string name="error_csp_not_installed"> Внимание! </string>
     <string name="error_csp_not_installed_body">Приложение "CryptoPro CSP" не установленно на устройстве.\nУстановите его и перезапустите СЭД.</string>
     <string name="sign">sign</string>
+    <string name="crashed">crash!</string>
+    <string name="menu_info_decision_create_and_sign"> Создание и подписание </string>
 
     <string-array name="IntentsCAAddressList">
         <item>http://www.cryptopro.ru/certsrv/</item>

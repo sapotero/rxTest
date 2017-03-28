@@ -203,7 +203,8 @@ public class SyncFavoritesDocumentsJob extends BaseJob {
     }
 
     if (exist) {
-      updateDocumentInfo();
+      // не обновлять
+//      updateDocumentInfo();
     } else {
       create(document)
         .subscribeOn( Schedulers.io() )
@@ -252,7 +253,7 @@ public class SyncFavoritesDocumentsJob extends BaseJob {
       rDoc.setUser( LOGIN.get() );
 
       if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
-
+        rDoc.getDecisions().clear();
         for (Decision d: document.getDecisions() ) {
 
           RDecisionEntity decision = new RDecisionEntity();

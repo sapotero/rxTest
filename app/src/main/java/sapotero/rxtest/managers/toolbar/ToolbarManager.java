@@ -123,7 +123,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             bundle1.putString("operation", "primary_consideration");
             dialogFragment.setArguments(bundle1);
             dialogFragment.withPrimaryConsideration(true);
-            dialogFragment.withoutSearch(true);
+            dialogFragment.withSearch(false);
+            dialogFragment.withConfirm(true);
             dialogFragment.registerCallBack( this );
             dialogFragment.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
 
@@ -182,23 +183,24 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             Bundle approveBundle = new Bundle();
             approveBundle.putString("operation", "approve");
             approveDialogFragment.setArguments(approveBundle);
-            approveDialogFragment.withPrimaryConsideration(true);
-            approveDialogFragment.withoutSearch(true);
+            approveDialogFragment.withSearch(true);
+            approveDialogFragment.withConfirm( true );
+            approveDialogFragment.withPrimaryConsideration(false);
             approveDialogFragment.registerCallBack( this );
             approveDialogFragment.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
 //
             break;
 
           case R.id.menu_info_sign_change_person:
-          // operation = CommandFactory.Operation.APPROVAL_CHANGE_PERSON;
           operation = CommandFactory.Operation.INCORRECT;
 
             SelectOshsDialogFragment sign = new SelectOshsDialogFragment();
             Bundle signBundle = new Bundle();
             signBundle.putString("operation", "sign");
             sign.setArguments(signBundle);
-            sign.withPrimaryConsideration(true);
-            sign.withoutSearch(true);
+            sign.withSearch(true);
+            sign.withConfirm( true );
+            sign.withPrimaryConsideration(false);
             sign.registerCallBack( this );
             sign.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
 

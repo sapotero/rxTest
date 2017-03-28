@@ -244,7 +244,32 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     } );
     toolbar.setOnMenuItemClickListener(item -> {
 
+      CommandParams params;
+      CommandFactory.Operation operation;
+
       switch (item.getItemId()){
+
+
+        case R.id.action_constructor_create_and_sign:
+          operationManager.registerCallBack(null);
+
+          Decision decision = manager.getDecision();
+
+          params = new CommandParams();
+          params.setDecisionModel( decision );
+
+          decision.setDocumentUid( settings.getString("activity_main_menu.uid").get() );
+
+          if (rDecisionEntity != null) {
+            params.setDecisionModel( DecisionConverter.formatDecision(rDecisionEntity) );
+            params.setDecisionId( rDecisionEntity.getUid() );
+          }
+
+          operation = CommandFactory.Operation.CREATE_AND_APPROVE_DECISION;
+
+          operationManager.execute( operation, params );
+
+          break;
         case R.id.action_constructor_add_block:
           manager.getDecisionBuilder().addBlock();
 
@@ -261,10 +286,9 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
             operationManager.registerCallBack(this);
 
-            CommandFactory.Operation operation;
             operation =CommandFactory.Operation.APPROVE_DECISION;
 
-            CommandParams params = new CommandParams();
+            params = new CommandParams();
             params.setDecisionId( rDecisionEntity.getUid() );
 //            params.setDecision( rDecisionEntity );
             params.setDecisionModel( DecisionConverter.formatDecision(rDecisionEntity) );
@@ -281,10 +305,9 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
           } else {
             operationManager.registerCallBack(this);
 
-            CommandFactory.Operation operation;
             operation =CommandFactory.Operation.REJECT_DECISION;
 
-            CommandParams params = new CommandParams();
+            params = new CommandParams();
             params.setDecisionId( rDecisionEntity.getUid() );
 //            params.setDecision( rDecisionEntity );
             params.setDecisionModel( DecisionConverter.formatDecision(rDecisionEntity) );
@@ -373,7 +396,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     signer_oshs_selector.setOnClickListener(v -> {
       dialogFragment = new SelectOshsDialogFragment();
       dialogFragment.registerCallBack( this );
-      dialogFragment.withoutSearch(true);
+      dialogFragment.withSearch(true);
       dialogFragment.showWithAssistant(true);
       dialogFragment.show( getFragmentManager(), "SelectOshsDialogFragment");
     });

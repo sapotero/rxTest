@@ -19,7 +19,6 @@ import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import java.util.ArrayList;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 
@@ -30,6 +29,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
@@ -125,60 +126,61 @@ public class InfoCardLinksFragment extends Fragment {
   private void loadSettings() {
     Timber.e( " loadSettings");
 
-      Preference<String> DOCUMENT_UID = settings.getString("activity_main_menu.uid");
+    Preference<String> DOCUMENT_UID = settings.getString("activity_main_menu.uid");
 
-      RDocumentEntity doc = dataStore
-        .select(RDocumentEntity.class)
-        .where(RDocumentEntity.UID.eq(uid == null ? DOCUMENT_UID.get() : uid ))
-        .get().first();
+    adapter.add( new Link( "0", "Нет связанных документов" ) );
 
-      if ( doc.getLinks() != null ){
+    dataStore
+      .select(RDocumentEntity.class)
+      .where(RDocumentEntity.UID.eq(uid == null ? DOCUMENT_UID.get() : uid ))
+      .get()
+      .toObservable()
+      .subscribeOn(Schedulers.io())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(
+        doc -> {
 
-        if (doc.getLinks().size() == 0){
-          adapter.add( new Link( "0", "Нет связанных документов" ) );
-          goButton.setEnabled(false);
-          disable.setVisibility(View.VISIBLE);
-        } else {
+          Timber.tag("LOAD").e("%s %s", doc, doc.getLinks().size());
 
-          try {
+          if ( doc.getLinks() != null && doc.getLinks().size() > 0 ) {
+
+            adapter.clear();
+
             Set<RLinks> links = doc.getLinks();
-            ArrayList<String> _links = new ArrayList<String>();
 
-            for (RLinks _l: links) {
+            for (RLinks _l : links) {
+
+
               RLinksEntity _tmp = (RLinksEntity) _l;
+              Timber.tag("LOAD").e("links %s", _tmp.getUid() );
 
               RDocumentEntity _doc = dataStore
                 .select(RDocumentEntity.class)
-                .where(RDocumentEntity.UID.eq( _tmp.getUid() ))
+                .where(RDocumentEntity.UID.eq(_tmp.getUid()))
                 .get().first();
 
-              adapter.add( new Link( _doc.getUid(), _doc.getTitle() ) );
+              adapter.add(new Link(_doc.getUid(), _doc.getTitle()));
             }
-          } catch (NoSuchElementException e) {
-            e.printStackTrace();
           }
-        }
-
-        wrapper.setAdapter( adapter );
-
-        wrapper.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-          @Override
-          public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-            adapter.getItem(position);
-          }
-
-          @Override
-          public void onNothingSelected(AdapterView<?> parent) {
-            goButton.setEnabled(false);
-          }
+        }, error -> {
+          Timber.tag(TAG).e(error);
         });
 
 
-      } else {
-        Timber.e( " loadSettings empty");
-        adapter.add( new Link( "0", "Нет связанных документов" ) );
-        wrapper.setAdapter( adapter );
+
+    wrapper.setAdapter( adapter );
+
+    wrapper.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+      @Override
+      public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        adapter.getItem(position);
       }
+
+      @Override
+      public void onNothingSelected(AdapterView<?> parent) {
+        goButton.setEnabled(false);
+      }
+    });
 
   }
 

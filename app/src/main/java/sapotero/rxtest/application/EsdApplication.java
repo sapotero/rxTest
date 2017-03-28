@@ -1,13 +1,19 @@
 package sapotero.rxtest.application;
 
+import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
 
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.facebook.stetho.Stetho;
 
+import org.acra.ACRA;
+import org.acra.ReportingInteractionMode;
+import org.acra.annotation.ReportsCrashes;
+
 import javax.inject.Inject;
 
+import sapotero.rxtest.R;
 import sapotero.rxtest.annotations.AnnotationTest;
 import sapotero.rxtest.application.components.DaggerEsdComponent;
 import sapotero.rxtest.application.components.EsdComponent;
@@ -15,15 +21,30 @@ import sapotero.rxtest.application.config.Constant;
 import sapotero.rxtest.application.modules.EsdModule;
 import timber.log.Timber;
 
+
+@ReportsCrashes(
+  mailTo = "esapozhnikov@n-core.ru",
+  mode = ReportingInteractionMode.TOAST,
+  resToastText = R.string.crashed)
+
 public final class EsdApplication extends Application {
 
   public static EsdComponent mainComponent;
   public Application app;
+
+  @SuppressLint("StaticFieldLeak")
   private static Context context;
 
   private static String username;
 
   @Inject RxSharedPreferences settings;
+
+
+  @Override
+  protected void attachBaseContext(Context base) {
+    super.attachBaseContext(base);
+    ACRA.init(this);
+  }
 
   @Override public void onCreate() {
     super.onCreate();

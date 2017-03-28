@@ -247,6 +247,8 @@ public class SyncLinkJob extends BaseJob {
 
       if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
         with_decision = true;
+        rDoc.getDecisions().clear();
+
         for (Decision d: document.getDecisions() ) {
 
           RDecisionEntity decision = new RDecisionEntity();

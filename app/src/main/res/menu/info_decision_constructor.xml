@@ -10,11 +10,22 @@
         android:icon="@drawable/add_decision"
         android:title="@string/constructor_add_block"/>
     <item
+        android:id="@+id/action_constructor_create_and_sign"
+        app:showAsAction="ifRoom|withText"
+        android:icon="@drawable/sign"
+        android:title="@string/menu_info_decision_create_and_sign"/>
+    <item
         android:id="@+id/action_constructor_next"
         app:showAsAction="ifRoom|withText"
         android:icon="@drawable/sign"
         android:visible="false"
         android:title="@string/menu_info_next_person"/>
+    <item
+        android:id="@+id/action_constructor_prev"
+        app:showAsAction="ifRoom|withText"
+        android:icon="@drawable/dismiss"
+        android:visible="false"
+        android:title="@string/menu_info_prev_person"/>
     <!--<item-->
         <!--android:id="@+id/action_constructor_save"-->
         <!--app:showAsAction="ifRoom|withText"-->
@@ -33,10 +44,4 @@
         <!--app:showAsAction="always|withText"-->
         <!--android:icon="@drawable/to_control_icon"-->
         <!--android:title="@string/to_control"/>-->
-    <item
-        android:id="@+id/action_constructor_prev"
-        app:showAsAction="ifRoom|withText"
-        android:icon="@drawable/dismiss"
-        android:visible="false"
-        android:title="@string/menu_info_prev_person"/>
 </menu>

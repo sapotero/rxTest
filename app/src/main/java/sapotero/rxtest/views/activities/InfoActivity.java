@@ -53,6 +53,8 @@ import sapotero.rxtest.events.view.ShowPrevDocumentEvent;
 import sapotero.rxtest.events.view.ShowSnackEvent;
 import sapotero.rxtest.events.view.UpdateCurrentInfoActivityEvent;
 import sapotero.rxtest.jobs.bus.SyncDocumentsJob;
+import sapotero.rxtest.managers.menu.OperationManager;
+import sapotero.rxtest.managers.toolbar.ToolbarManager;
 import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.adapters.TabSigningPagerAdapter;
@@ -63,8 +65,6 @@ import sapotero.rxtest.views.fragments.InfoCardFieldsFragment;
 import sapotero.rxtest.views.fragments.InfoCardLinksFragment;
 import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
 import sapotero.rxtest.views.fragments.RoutePreviewFragment;
-import sapotero.rxtest.managers.menu.OperationManager;
-import sapotero.rxtest.managers.toolbar.ToolbarManager;
 import timber.log.Timber;
 
 public class InfoActivity extends AppCompatActivity implements InfoActivityDecisionPreviewFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, RoutePreviewFragment.OnFragmentInteractionListener, InfoCardDocumentsFragment.OnFragmentInteractionListener, InfoCardWebViewFragment.OnFragmentInteractionListener, InfoCardLinksFragment.OnFragmentInteractionListener, InfoCardFieldsFragment.OnFragmentInteractionListener{
@@ -346,18 +346,18 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   }
 
   private void showPrevDocument() {
-    try {
-      InfoActivity activity = (InfoActivity) this;
-      Intent intent = new Intent(this, InfoActivity.class);
 
-      MainActivity.RAdapter.getPrevFromPosition(settings.getInteger("activity_main_menu.position").get());
+    Timber.tag("SHOW_PREV").e("info_act");
 
-      activity.startActivity(intent);
-      activity.overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
-      finish();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    finish();
+
+    InfoActivity activity = this;
+    Intent intent = new Intent(this, InfoActivity.class);
+
+    MainActivity.RAdapter.getPrevFromPosition(settings.getInteger("activity_main_menu.position").get());
+    activity.startActivity(intent);
+//      activity.overridePendingTransition(R.anim.slide_to_right, R.anim.slide_from_left);
+//      activity.overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
@@ -367,14 +367,19 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   private void showNextDocument() {
 
+    Timber.tag("SHOW_NEXT").e("info_act");
+
     finish();
 
-    InfoActivity activity = (InfoActivity) this;
+    InfoActivity activity = this;
     Intent intent = new Intent( this, InfoActivity.class);
 
     MainActivity.RAdapter.getNextFromPosition( settings.getInteger("activity_main_menu.position").get() );
     activity.startActivity(intent);
-    activity.overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
+//    activity.overridePendingTransition(R.anim.slide_to_left, R.anim.slide_from_right);
+//    activity.overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
+
+
 
   }
 
@@ -388,13 +393,13 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   }
 
   public void updateCurrent(){
+
+    jobManager.addJobInBackground(new SyncDocumentsJob( UID.get(), status ));
+
     unsubscribe();
-
-//    jobManager.addJobInBackground(new SyncDocumentsJob( UID.get(), status ));
-
     subscription.add(
       Observable
-        .interval( 10, TimeUnit.SECONDS )
+        .interval( 5, TimeUnit.SECONDS )
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(interval -> {

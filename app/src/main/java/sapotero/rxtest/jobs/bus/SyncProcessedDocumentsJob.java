@@ -250,7 +250,7 @@ public class SyncProcessedDocumentsJob extends BaseJob {
       rDoc.setUser( LOGIN.get() );
 
       if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
-
+        rDoc.getDecisions().clear();
         for (Decision d: document.getDecisions() ) {
 
           RDecisionEntity decision = new RDecisionEntity();

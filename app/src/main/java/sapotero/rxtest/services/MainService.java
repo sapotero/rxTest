@@ -75,7 +75,6 @@ import sapotero.rxtest.events.stepper.auth.StepperDcCheckSuccesEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckFailEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckSuccessEvent;
-import sapotero.rxtest.events.view.UpdateCurrentInfoActivityEvent;
 import sapotero.rxtest.managers.DataLoaderManager;
 import sapotero.rxtest.services.task.UpdateAllDocumentsTask;
 import sapotero.rxtest.services.task.UpdateQueueTask;
@@ -809,7 +808,7 @@ public class MainService extends Service {
 
   @Subscribe(threadMode = ThreadMode.BACKGROUND)
   public void onMessageEvent(UpdateDocumentEvent event) throws Exception {
-    EventBus.getDefault().post( new UpdateCurrentInfoActivityEvent() );
+//    EventBus.getDefault().post( new UpdateCurrentInfoActivityEvent() );
     dataLoaderInterface.updateDocument(event.uid);
   }
 

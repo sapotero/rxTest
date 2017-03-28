@@ -5,6 +5,7 @@ import android.content.Context;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.commands.approval.ChangePerson;
+import sapotero.rxtest.managers.menu.commands.decision.AddAndApproveDecision;
 import sapotero.rxtest.managers.menu.commands.decision.AddDecision;
 import sapotero.rxtest.managers.menu.commands.decision.ApproveDecision;
 import sapotero.rxtest.managers.menu.commands.decision.RejectDecision;
@@ -344,6 +345,21 @@ public class CommandFactory implements AbstractCommand.Callback{
         return "Создание резолюции";
       }
     },
+    CREATE_AND_APPROVE_DECISION {
+      @Override
+      public Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
+        AddAndApproveDecision command = new AddAndApproveDecision(context, document);
+        command.withParams(params);
+        command.registerCallBack(instance);
+
+        command.withParams(params);
+        return command;
+      }
+      @Override
+      public String getRussinaName() {
+        return "Создание и подписание резолюции";
+      }
+    },
     APPROVE_DECISION {
       @Override
       public Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
@@ -402,6 +418,11 @@ public class CommandFactory implements AbstractCommand.Callback{
         case "sapotero.rxtest.managers.menu.commands.decision.AddDecision":
           operation = Operation.NEW_DECISION;
           break;
+
+        case "sapotero.rxtest.managers.menu.commands.decision.AddAndApproveDecision":
+          operation = Operation.CREATE_AND_APPROVE_DECISION;
+          break;
+
         case "sapotero.rxtest.managers.menu.commands.decision.ApproveDecision":
           operation = Operation.APPROVE_DECISION;
           break;
@@ -426,7 +447,7 @@ public class CommandFactory implements AbstractCommand.Callback{
           break;
 
         // primary_consideration (первичное рассмотрение)
-        case "sapotero.rxtest.managers.menu.commands.consideration.PrimaryConsideration":
+        case "sapotero.rxtest.managers.menu.commands.primary_consideration.PrimaryConsideration":
           operation = Operation.TO_THE_PRIMARY_CONSIDERATION;
           break;
 

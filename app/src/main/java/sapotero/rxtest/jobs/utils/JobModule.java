@@ -19,11 +19,11 @@ public final class JobModule {
   @Singleton
   JobManager provideJobModule(Context context) {
     Configuration.Builder builder = new Configuration.Builder(context)
-      .minConsumerCount(2)
-      .maxConsumerCount(16)
-      .loadFactor(1)
+      .minConsumerCount(1)
+      .maxConsumerCount(10)
+      .loadFactor(4)
       .injector(job -> EsdApplication.mainComponent.inject((BaseJob) job))
-      .consumerKeepAlive(10*60);
+      .consumerKeepAlive(60);
 
     return new JobManager(builder.build());
   }

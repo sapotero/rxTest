@@ -37,7 +37,7 @@ android {
         develop {
             applicationId "sapotero.rxtest"
             versionCode 15
-            versionName "1.14.1"
+            versionName "1.14.2"
         }
     }
 
@@ -201,6 +201,10 @@ dependencies {
     compile 'com.facebook.stetho:stetho:1.4.1'
     compile 'com.facebook.stetho:stetho-okhttp3:1.4.1'
     /*debug*/
+
+
+
+    compile 'ch.acra:acra:4.9.0'
 
 }
 

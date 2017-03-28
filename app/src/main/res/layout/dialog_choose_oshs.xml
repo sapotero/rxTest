@@ -25,8 +25,7 @@
                      android:layout_margin="@dimen/date_offset"
                      android:minWidth="800dp"
                      android:id="@+id/oshs_wrapper"
-                     android:focusableInTouchMode="true"
-            >
+                     android:focusableInTouchMode="true">
 
 
             <android.support.design.widget.TextInputLayout
@@ -42,7 +41,7 @@
                     android:layout_height="wrap_content"
                     android:paddingEnd="@dimen/date_offset"
                     android:minWidth="800dp"
-                    android:hint="Исполнитель"
+                    android:hint="Сотрудник"
                     />
             </android.support.design.widget.TextInputLayout>
             <!--android:imeOptions="flagNoExtractUi|actionSearch"-->

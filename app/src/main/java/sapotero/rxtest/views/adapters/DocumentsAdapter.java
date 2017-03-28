@@ -254,6 +254,8 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       viewHolder.sync_label.setVisibility(View.GONE);
     }
 
+
+
     if ( item.isControl() != null && item.isControl() ){
       viewHolder.control_label.setVisibility(View.VISIBLE);
     } else {
@@ -348,6 +350,10 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     } else {
       viewHolder.cv.setBackground( ContextCompat.getDrawable(mContext, R.color.md_white_1000 ) );
     }
+
+
+
+//    setAnimation(viewHolder.itemView, position);
 
   }
 
