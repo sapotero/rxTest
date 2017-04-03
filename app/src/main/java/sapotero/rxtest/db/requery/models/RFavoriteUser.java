@@ -23,4 +23,6 @@ public abstract class RFavoriteUser {
   Boolean isOrganization;
   Boolean isGroup;
 
+  String  user;
+
 }

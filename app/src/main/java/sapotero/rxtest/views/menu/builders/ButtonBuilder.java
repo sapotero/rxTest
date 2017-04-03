@@ -118,6 +118,12 @@ public class ButtonBuilder {
       .and(RDocumentEntity.WITH_DECISION.eq(true))
       .and(RDocumentEntity.FROM_LINKS.eq(false));
 
+    if (index == 4 || index == 7){
+      query = query.and(RDocumentEntity.PROCESSED.eq(true));
+    } else {
+      query = query.and(RDocumentEntity.PROCESSED.eq(false));
+    }
+
     if (index == 0){
       query = query.or(RDocumentEntity.FROM_PROCESSED_FOLDER.eq(true));
     }
@@ -165,6 +171,12 @@ public class ButtonBuilder {
       .count(RDocumentEntity.class)
       .where( RDocumentEntity.USER.eq( settings.getString("login").get() ) )
       .and(RDocumentEntity.FROM_LINKS.eq(false));
+
+    if (index == 4 || index == 7){
+      query = query.and(RDocumentEntity.PROCESSED.eq(true));
+    } else {
+      query = query.and(RDocumentEntity.PROCESSED.eq(false));
+    }
 
     ArrayList<ConditionBuilder> temp_conditions = new ArrayList<>();
 

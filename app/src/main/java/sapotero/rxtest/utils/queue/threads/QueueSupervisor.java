@@ -32,6 +32,7 @@ public class QueueSupervisor implements JobCountInterface {
   private ThreadPoolExecutor   commandPool;
 
   public static int THREAD_POOL_SIZE = 8;
+  public static int MAX_FILE_SIZE    = 1*1024*1024;
 
   public QueueSupervisor(Context context) {
 

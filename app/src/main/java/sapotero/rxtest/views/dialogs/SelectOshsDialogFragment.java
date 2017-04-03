@@ -216,7 +216,9 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
 
     if (showWithAssistant){
       dataStore
-        .select(RAssistantEntity.class).get().toObservable()
+        .select(RAssistantEntity.class)
+        .where(RAssistantEntity.USER.eq( settings.getString("current_user").get() ))
+        .get().toObservable()
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe( user -> {
@@ -227,7 +229,8 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
     if (withPrimaryConsideration){
       WhereAndOr<Result<RPrimaryConsiderationEntity>> query = dataStore
         .select(RPrimaryConsiderationEntity.class)
-        .where(RPrimaryConsiderationEntity.UID.ne( settings.getString("current_user_id").get() ));
+        .where(RPrimaryConsiderationEntity.UID.ne( settings.getString("current_user_id").get() ))
+        .and(  RPrimaryConsiderationEntity.USER.eq( settings.getString("current_user").get() ));
 
       query.get()
         .toObservable()
@@ -241,7 +244,8 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
       WhereAndOr<Result<RFavoriteUserEntity>> query =
         dataStore
           .select(RFavoriteUserEntity.class)
-          .where(RFavoriteUserEntity.UID.ne(""));
+          .where(RFavoriteUserEntity.UID.ne(""))
+          .and(  RFavoriteUserEntity.USER.eq( settings.getString("current_user").get() ));
 
       if (user_ids != null){
         query = query.and(RFavoriteUserEntity.UID.notIn(user_ids));

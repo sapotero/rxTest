@@ -36,6 +36,7 @@ import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RBlock;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
@@ -45,6 +46,10 @@ import sapotero.rxtest.db.requery.utils.DecisionConverter;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.decision.ApproveDecisionEvent;
 import sapotero.rxtest.events.decision.RejectDecisionEvent;
+import sapotero.rxtest.managers.menu.OperationManager;
+import sapotero.rxtest.managers.menu.factories.CommandFactory;
+import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.managers.view.DecisionManager;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
@@ -55,10 +60,6 @@ import sapotero.rxtest.views.custom.SpinnerWithLabel;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
 import sapotero.rxtest.views.fragments.DecisionFragment;
 import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
-import sapotero.rxtest.managers.menu.OperationManager;
-import sapotero.rxtest.managers.menu.factories.CommandFactory;
-import sapotero.rxtest.managers.menu.utils.CommandParams;
-import sapotero.rxtest.managers.view.DecisionManager;
 import timber.log.Timber;
 
 public class DecisionConstructorActivity extends AppCompatActivity implements DecisionFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, OperationManager.Callback, SelectOshsDialogFragment.Callback {
@@ -127,6 +128,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       Gson gson = new GsonBuilder().setPrettyPrinting().create();
       String json = gson.toJson( manager.getDecision() );
       Timber.tag(TAG).w("DECISION: %s", json );
+
+      Decision save_decision = manager.getDecision();
 
 
       if ( manager.isChanged() ){
@@ -205,14 +208,30 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 //                  params.setDecision( rDecisionEntity );
                   params.setDecisionModel( DecisionConverter.formatDecision(rDecisionEntity) );
                   params.setDecisionId( rDecisionEntity.getUid() );
+
+                  RDocumentEntity doc = (RDocumentEntity) rDecisionEntity.getDocument();
+                  params.setDocument( settings.getString("activity_main_menu.uid").get() );
+
+                  if (doc != null) {
+                    params.setDocument(doc.getUid());
+                  }
+                } else {
+                  params.setDocument( settings.getString("activity_main_menu.uid").get() );
                 }
 
-                CommandFactory.Operation operation = rDecisionEntity == null ? CommandFactory.Operation.NEW_DECISION: CommandFactory.Operation.SAVE_DECISION;
+
+
+                CommandFactory.Operation operation = rDecisionEntity == null ? CommandFactory.Operation.CREATE_DECISION : CommandFactory.Operation.SAVE_DECISION;
+
+                if (save_decision != null && operation == CommandFactory.Operation.SAVE_DECISION) {
+                  params.setDecisionModel(save_decision);
+
+                  rDecisionEntity.setTemporary(true);
+                }
 
                 operationManager.execute( operation, params );
 
                 finish();
-//                activity.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
 
               }
             )

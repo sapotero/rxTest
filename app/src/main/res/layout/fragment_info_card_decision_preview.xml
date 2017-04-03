@@ -161,6 +161,7 @@
                 android:gravity="center|start"
                 android:visibility="gone"
                 android:textAppearance="@style/TextAppearance.AppCompat.Caption"/>
+
         </LinearLayout>
         <!-- убрать в проде-->
         <LinearLayout
@@ -198,6 +199,18 @@
                 android:layout_marginTop="52dp"
                 android:visibility="gone"
                 android:layout_alignParentEnd="true"/>
+
+            <TextView
+                android:id="@+id/activity_info_decision_preview_temporary"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="Ожидает синхронизации"
+                android:drawableStart="@drawable/sync"
+                android:padding="@dimen/date_offset"
+                android:gravity="center|start"
+                android:visibility="gone"
+                android:textColor="@color/md_red_900"
+                android:textAppearance="@style/TextAppearance.AppCompat.Caption"/>
         </LinearLayout>
 
 

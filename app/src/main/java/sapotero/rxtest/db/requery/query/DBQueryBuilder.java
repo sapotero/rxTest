@@ -33,6 +33,7 @@ import sapotero.rxtest.views.adapters.models.OrganizationItem;
 import sapotero.rxtest.views.custom.OrganizationSpinner;
 import sapotero.rxtest.views.menu.MenuBuilder;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
+import sapotero.rxtest.views.menu.fields.MainMenuItem;
 import timber.log.Timber;
 
 public class DBQueryBuilder {
@@ -53,6 +54,7 @@ public class DBQueryBuilder {
   private Boolean withFavorites;
   private MenuBuilder menuBuilder;
   private RecyclerView recyclerView;
+  private MainMenuItem item;
 
   public DBQueryBuilder(Context context) {
     this.context = context;
@@ -106,11 +108,15 @@ public class DBQueryBuilder {
           .count(RDocument.class)
           .where(RDocumentEntity.USER.eq( settings.getString("login").get() ));
 
+
+
+      Boolean hasProcessed = false;
       if ( conditions.size() > 0 ){
 
 
         for (ConditionBuilder condition : conditions ){
           Timber.tag(TAG).i( "++ %s", condition.toString() );
+
           switch ( condition.getCondition() ){
             case AND:
               query = query.and( condition.getField() );
@@ -123,8 +129,17 @@ public class DBQueryBuilder {
             default:
               break;
           }
+
+          if (condition.getField().getLeftOperand() == RDocumentEntity.PROCESSED){
+            hasProcessed = true;
+          }
         }
       }
+
+      if (!hasProcessed){
+        query = query.and( RDocumentEntity.PROCESSED.eq(false) );
+      }
+
 
       if (withFavorites){
         query = query.or( RDocumentEntity.FAVORITES.eq(true) );
@@ -278,8 +293,8 @@ public class DBQueryBuilder {
     }
   }
 
-  public void executeWithConditions(ArrayList<ConditionBuilder> conditions, boolean withFavorites) {
-
+  public void executeWithConditions(ArrayList<ConditionBuilder> conditions, boolean withFavorites, MainMenuItem item) {
+    this.item = item;
     this.conditions = conditions;
     this.withFavorites = withFavorites;
     execute(true);

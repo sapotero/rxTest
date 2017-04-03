@@ -23,4 +23,5 @@ public abstract class RPrimaryConsideration {
   Boolean isOrganization;
   Boolean isGroup;
 
+  String  user;
 }

@@ -336,6 +336,7 @@ public class SyncDocumentsJob  extends BaseJob {
         decision.setUid( d.getId() );
         decision.setLetterhead(d.getLetterhead());
         decision.setApproved(d.getApproved());
+        decision.setTemporary(false);
         decision.setSigner(d.getSigner());
         decision.setSignerId(d.getSignerId());
         decision.setAssistantId(d.getAssistantId());
@@ -543,8 +544,14 @@ public class SyncDocumentsJob  extends BaseJob {
         signer.setType( document.getSigner().getType() );
       }
 
-      doc.setFavorites(isFavorites);
-      doc.setProcessed(isProcessed);
+      if (doc.isFavorites() == null){
+        doc.setFavorites(isFavorites);
+      }
+
+      if (doc.isProcessed() == null){
+        doc.setProcessed(isProcessed);
+      }
+
       doc.setFolder(processed_folder);
       doc.setControl(onControl);
       doc.setUser( LOGIN.get() );
@@ -566,6 +573,7 @@ public class SyncDocumentsJob  extends BaseJob {
           decision.setUid( d.getId() );
           decision.setLetterhead(d.getLetterhead());
           decision.setApproved(d.getApproved());
+          decision.setTemporary(false);
           decision.setSigner(d.getSigner());
           decision.setSignerId(d.getSignerId());
           decision.setAssistantId(d.getAssistantId());
@@ -731,7 +739,14 @@ public class SyncDocumentsJob  extends BaseJob {
       }
 
       doc.setChanged(false);
-      doc.setProcessed(false);
+
+      if (doc.isFavorites() == null){
+        doc.setFavorites(isFavorites);
+      }
+
+      if (doc.isProcessed() == null){
+        doc.setProcessed(isProcessed);
+      }
     }
 
     dataStore
@@ -740,10 +755,10 @@ public class SyncDocumentsJob  extends BaseJob {
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         result -> {
-          Timber.tag("MD5").d("updateDocumentInfo " + result.getMd5());
+          Timber.tag("MD5").d("updateDocumentInfo update" + result.getMd5());
 
 
-          if ( result.getImages() != null && result.getImages().size() > 0 && ( isFavorites != null && !isFavorites ) ){
+          if ( result.getImages() != null && result.getImages().size() > 0 ){
 
             for (RImage _image : result.getImages()) {
 

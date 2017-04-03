@@ -100,8 +100,7 @@ public enum MainMenuItem {
     true,
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in( MainMenuButton.ButtonStatus.getProject() ) ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_LINKS.eq( false ) )
-//      new ConditionBuilder( ConditionBuilder.Condition.OR,  RDocumentEntity.FILTER.eq( Fields.Status.APPROVAL.getValue() ) )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq( false ) ),
     },
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_LINKS.eq( false ) ),

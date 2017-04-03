@@ -17,6 +17,4 @@ public abstract class RLinks {
   @ManyToOne
   RDocument document;
 
-
-
 }

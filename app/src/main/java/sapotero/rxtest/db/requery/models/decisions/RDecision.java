@@ -35,6 +35,8 @@ public abstract class RDecision {
   Boolean showPosition;
   Boolean red;
 
+  Boolean temporary;
+
   String signBase64;
 
   @Index("decision_changed_index")

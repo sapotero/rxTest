@@ -133,7 +133,7 @@ public class MainService extends Service {
     dataLoaderInterface = new DataLoaderManager(getApplicationContext());
 
 
-    settings.getBoolean("SIGN_WITH_DC").set( false );
+//    settings.getBoolean("SIGN_WITH_DC").set( false );
 
     Provider[] providers = Security.getProviders();
 

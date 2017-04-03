@@ -16,16 +16,14 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.models.decisions.RDecision;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.utils.DecisionConverter;
-import sapotero.rxtest.db.requery.utils.Fields;
-import sapotero.rxtest.retrofit.DocumentService;
-import sapotero.rxtest.retrofit.models.document.Decision;
-import sapotero.rxtest.retrofit.models.wrapper.DecisionWrapper;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.retrofit.DocumentService;
+import sapotero.rxtest.retrofit.models.document.Decision;
+import sapotero.rxtest.retrofit.models.wrapper.DecisionWrapper;
 import sapotero.rxtest.services.MainService;
 import timber.log.Timber;
 
@@ -81,62 +79,28 @@ public class RejectDecision extends AbstractCommand {
 
   @Override
   public void execute() {
-    loadSettings();
     queueManager.add(this);
   }
 
-  private Boolean hasActiveDecision(){
-    RDocumentEntity doc = dataStore
-      .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq( document.getUid() ))
-      .get().firstOrNull();
-
-    Boolean result = false;
-
-    if (doc != null && doc.getDecisions().size() > 0){
-      for (RDecision _decision : doc.getDecisions()){
-        RDecisionEntity decision = (RDecisionEntity) _decision;
-
-        if (!decision.isApproved() && Objects.equals(decision.getSignerId(), CURRENT_USER_ID.get())){
-          result = true;
-        }
-      }
-    }
-
-    Timber.tag(TAG).e("hasActiveDecision : %s", result);
-
-
-    return result;
-  }
-
   public void update() {
+    loadSettings();
+    Integer decision_update = dataStore
+      .update(RDecisionEntity.class)
+      .set(RDecisionEntity.APPROVED, true)
+      .where(RDecisionEntity.UID.eq( params.getDecisionId()) )
+      .get().value();
 
-    if (callback != null ){
-      callback.onCommandExecuteSuccess( getType() );
-    }
+    Timber.tag(TAG).e("decision_update %s", decision_update);
 
-    if (params.getActiveDecision() != null && params.getActiveDecision()){
-      try {
+    if (Objects.equals(params.getDecisionModel().getSignerId(), settings.getString("current_user_id").get())){
+      Integer count = dataStore
+        .update(RDocumentEntity.class)
+        .set(RDocumentEntity.PROCESSED, true)
+        .set(RDocumentEntity.MD5, "")
+        .where(RDocumentEntity.UID.eq( params.getDocument() ))
+        .get().value();
 
-        String decision_uid = decision.getUid();
-
-        dataStore
-          .update(RDecisionEntity.class)
-          .set( RDecisionEntity.APPROVED, false)
-          .where(RDecisionEntity.UID.eq( decision_uid ));
-
-        if ( !hasActiveDecision() ){
-          dataStore
-            .update(RDocumentEntity.class)
-            .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue() )
-            .set( RDocumentEntity.MD5, "" )
-            .set( RDocumentEntity.CHANGED, true)
-            .where(RDocumentEntity.UID.eq( document.getUid() ));
-        }
-
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
+      Timber.tag(TAG).e("count %s", count);
     }
 
   }
@@ -151,13 +115,13 @@ public class RejectDecision extends AbstractCommand {
   @Override
   public void executeLocal() {
 
-    queueManager.setExecutedLocal(this);
-
+    loadSettings();
     if ( callback != null ){
       callback.onCommandExecuteSuccess( getType() );
     }
 
     update();
+    queueManager.setExecutedLocal(this);
   }
 
   @Override

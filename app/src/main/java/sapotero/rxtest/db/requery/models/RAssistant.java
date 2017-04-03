@@ -22,4 +22,6 @@ public abstract class RAssistant {
   Boolean forDecision;
   String  title;
 
+  String  user;
+
 }

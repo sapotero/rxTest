@@ -17,6 +17,8 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
+import sapotero.rxtest.managers.menu.factories.CommandFactory;
+import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
@@ -73,6 +75,16 @@ public class SaveDecision extends AbstractCommand {
 
   @Override
   public void execute() {
+
+
+    CommandFactory.Operation operation = CommandFactory.Operation.SAVE_TEMPORARY_DECISION;
+    CommandParams _params = new CommandParams();
+    _params.setDecisionId( params.getDecisionModel().getId() );
+    _params.setDecisionModel( params.getDecisionModel() );
+    _params.setDocument(params.getDocument());
+    Command command = operation.getCommand(null, context, document, _params);
+    queueManager.add(command);
+
     queueManager.add(this);
   }
 
@@ -95,6 +107,9 @@ public class SaveDecision extends AbstractCommand {
 
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
+
+
+
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
@@ -111,11 +126,12 @@ public class SaveDecision extends AbstractCommand {
 //    _decision.setDocumentUid( document.getUid() );
     _decision.setDocumentUid( null );
 
-//    String json_d = new Gson().toJson( wrapper );
+    String json_d = new Gson().toJson( decision );
     String json_m = new Gson().toJson( _decision );
 
 //    Timber.w("decision_json: %s", json_d);
     Timber.w("decision_json_m: %s", json_m);
+    Timber.w("decision_json_old: %s", json_d);
 
     RequestBody json = RequestBody.create(
       MediaType.parse("application/json"),

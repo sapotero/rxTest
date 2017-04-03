@@ -15,4 +15,6 @@ public abstract class RFolder {
   String title;
   String type;
 
+  String  user;
+
 }

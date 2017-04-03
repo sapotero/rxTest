@@ -16,14 +16,13 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
-import sapotero.rxtest.db.requery.utils.Fields;
-import sapotero.rxtest.retrofit.OperationService;
-import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.retrofit.OperationService;
+import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.services.MainService;
 import timber.log.Timber;
 
@@ -90,11 +89,11 @@ public class NextPerson extends AbstractCommand {
     loadSettings();
     int count = dataStore
       .update(RDocumentEntity.class)
-      .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue() )
+//      .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue() )
       .set( RDocumentEntity.PROCESSED, true)
       .set( RDocumentEntity.MD5, "" )
       .set( RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq(document.getUid()))
+      .where(RDocumentEntity.UID.eq(params.getDocument() != null ? params.getDocument(): document.getUid()))
       .get()
       .value();
 
@@ -121,7 +120,7 @@ public class NextPerson extends AbstractCommand {
     OperationService operationService = retrofit.create( OperationService.class );
 
     ArrayList<String> uids = new ArrayList<>();
-    uids.add( document.getUid() );
+    uids.add( params.getDocument() != null ? params.getDocument(): document.getUid() );
 
 
     String comment = null;

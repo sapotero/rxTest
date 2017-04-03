@@ -38,7 +38,11 @@ public class QueueDBManager implements JobCountInterface {
 
       CommandParams params = command.getParams();
 
-      if ( params.getUuid() != null && !exist( params.getUuid() ) ){
+      if (
+          params.getUuid() != null
+            && !exist( params.getUuid() )                                   // если такой задачи нет в базе
+            && !command.getClass().getCanonicalName().endsWith("DoNothing") // и если не заглушка
+        ){
 
         Gson gson = new Gson();
 
@@ -75,6 +79,18 @@ public class QueueDBManager implements JobCountInterface {
           .count(QueueEntity.class)
           .where(QueueEntity.UUID.eq( uuid ) )
           .get().value() > 0;
+  }
+
+  public List<QueueEntity> getUncompleteSignTasks(int limit) {
+    return dataStore
+      .select(QueueEntity.class)
+      .where(QueueEntity.LOCAL.eq(false))
+      .and(QueueEntity.RUNNING.eq(false))
+      .and(QueueEntity.WITH_ERROR.eq(false))
+      .and(QueueEntity.COMMAND.eq("sapotero.rxtest.managers.menu.commands.file.SignFile"))
+      .limit(limit)
+      .get()
+      .toList();
   }
 
   public List<QueueEntity> getUncompleteLocalTasks(int limit) {

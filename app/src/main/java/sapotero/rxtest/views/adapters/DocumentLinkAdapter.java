@@ -70,4 +70,9 @@ public class DocumentLinkAdapter extends BaseAdapter {
   public ArrayList<Image> getItems() {
     return images;
   }
+
+  public void clear() {
+    images.clear();
+    notifyDataSetChanged();
+  }
 }

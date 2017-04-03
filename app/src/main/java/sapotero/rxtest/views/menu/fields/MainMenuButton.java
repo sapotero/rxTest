@@ -1,7 +1,6 @@
 package sapotero.rxtest.views.menu.fields;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,7 +36,6 @@ public enum MainMenuButton {
     "Проекты %s" ,
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in( ButtonStatus.getProject() )  ),
-//  new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq( Fields.Status.APPROVAL.getValue() )  ),
 
 //      new ConditionBuilder( ConditionBuilder.Condition.OR,  RDocumentEntity.FILTER.eq( Fields.Status.SIGNING.getValue() )  )
     }
@@ -63,7 +61,8 @@ public enum MainMenuButton {
   VIEWED ( 4,
     "Рассмотренные %s" ,
     new ConditionBuilder[]{
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq(Fields.Status.PROCESSED.getValue() ) ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(true) ),
+//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq(Fields.Status.PROCESSED.getValue() ) ),
 //      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.ne(Fields.Status.LINK.getValue() ) ),
 //      new ConditionBuilder( ConditionBuilder.Condition.OR, RDocumentEntity.FILTER.in(Arrays.asList(Fields.Status.PROCESSED.getValue() ) ) ),
     }
@@ -84,7 +83,7 @@ public enum MainMenuButton {
   ),
   PROCESSED ( 7, "Обработанные %s" ,
     new ConditionBuilder[]{
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in(Arrays.asList(Fields.Status.PROCESSED.getValue() ) ) ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(true) ),
 //      new ConditionBuilder( ConditionBuilder.Condition.OR, RDocumentEntity.FILTER.eq( Fields.Status.PROCESSED.getValue() )  ),
     }
   ),

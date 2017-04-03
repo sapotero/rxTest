@@ -7,10 +7,12 @@ import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.commands.approval.ChangePerson;
 import sapotero.rxtest.managers.menu.commands.decision.AddAndApproveDecision;
 import sapotero.rxtest.managers.menu.commands.decision.AddDecision;
+import sapotero.rxtest.managers.menu.commands.decision.AddTemporaryDecision;
 import sapotero.rxtest.managers.menu.commands.decision.ApproveDecision;
 import sapotero.rxtest.managers.menu.commands.decision.ApproveDecisionDelayed;
 import sapotero.rxtest.managers.menu.commands.decision.RejectDecision;
 import sapotero.rxtest.managers.menu.commands.decision.SaveDecision;
+import sapotero.rxtest.managers.menu.commands.decision.SaveTemporaryDecision;
 import sapotero.rxtest.managers.menu.commands.file.SignFile;
 import sapotero.rxtest.managers.menu.commands.performance.ApprovalPerformance;
 import sapotero.rxtest.managers.menu.commands.performance.DelegatePerformance;
@@ -329,7 +331,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         return "Сохранение резолюции";
       }
     },
-    NEW_DECISION {
+    CREATE_DECISION {
       @Override
       public Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
         AddDecision command = new AddDecision(context, document);
@@ -344,6 +346,41 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       public String getRussinaName() {
         return "Создание резолюции";
+      }
+    },
+
+    CREATE_TEMPORARY_DECISION {
+      @Override
+      public Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
+        AddTemporaryDecision command = new AddTemporaryDecision(context, document);
+        command.withParams(params);
+        command
+          .withDecisionId( params.getDecisionId() )
+          .registerCallBack(instance);
+
+        command.withParams(params);
+        return command;
+      }
+      @Override
+      public String getRussinaName() {
+        return "*Создание резолюции";
+      }
+    },
+    SAVE_TEMPORARY_DECISION {
+      @Override
+      public Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
+        SaveTemporaryDecision command = new SaveTemporaryDecision(context, document);
+        command.withParams(params);
+        command
+          .withDecisionId( params.getDecisionId() )
+          .registerCallBack(instance);
+
+        command.withParams(params);
+        return command;
+      }
+      @Override
+      public String getRussinaName() {
+        return "*Сохранение резолюции";
       }
     },
     CREATE_AND_APPROVE_DECISION {
@@ -423,19 +460,25 @@ public class CommandFactory implements AbstractCommand.Callback{
       Operation operation = Operation.INCORRECT;
 
       switch ( operation_type ){
-        case "sapotero.rxtest.managers.menu.commands.decision.SaveDecision":
-          operation = Operation.SAVE_DECISION;
-          break;
-
         case "sapotero.rxtest.managers.menu.commands.file.SignFile":
           operation = Operation.FILE_SIGN;
           break;
-        case "sapotero.rxtest.managers.menu.commands.decision.AddDecision":
-          operation = Operation.NEW_DECISION;
-          break;
 
+        case "sapotero.rxtest.managers.menu.commands.decision.AddDecision":
+          operation = Operation.CREATE_DECISION;
+          break;
+        case "sapotero.rxtest.managers.menu.commands.decision.AddTemporaryDecision":
+          operation = Operation.CREATE_TEMPORARY_DECISION;
+          break;
         case "sapotero.rxtest.managers.menu.commands.decision.AddAndApproveDecision":
           operation = Operation.CREATE_AND_APPROVE_DECISION;
+          break;
+
+        case "sapotero.rxtest.managers.menu.commands.decision.SaveDecision":
+          operation = Operation.SAVE_DECISION;
+          break;
+        case "sapotero.rxtest.managers.menu.commands.decision.SaveTemporaryDecision":
+          operation = Operation.SAVE_TEMPORARY_DECISION;
           break;
 
         case "sapotero.rxtest.managers.menu.commands.decision.ApproveDecision":
@@ -444,6 +487,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         case "sapotero.rxtest.managers.menu.commands.decision.ApproveDecisionDelayed":
           operation = Operation.APPROVE_DECISION_DELAYED;
           break;
+
         case "sapotero.rxtest.managers.menu.commands.decision.RejectDecision":
           operation = Operation.REJECT_DECISION;
           break;

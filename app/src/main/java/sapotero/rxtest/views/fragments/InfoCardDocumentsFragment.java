@@ -29,7 +29,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.io.File;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -39,12 +39,15 @@ import butterknife.OnClick;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
 import okhttp3.OkHttpClient;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.events.bus.FileDownloadedEvent;
+import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.views.activities.DocumentImageFullScreenActivity;
 import sapotero.rxtest.views.adapters.DocumentLinkAdapter;
@@ -130,26 +133,40 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     ArrayList<Image> documents = new ArrayList<Image>();
     adapter = new DocumentLinkAdapter(mContext, documents);
 
-    List<RDocumentEntity> doc = dataStore
-      .select(RDocumentEntity.class)
+    dataStore.select(RDocumentEntity.class)
       .where(RDocumentEntity.UID.eq( uid == null ? UID.get() : uid ))
       .get()
-      .toList();
+      .toObservable()
+      .subscribeOn(Schedulers.io())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(
+        document-> {
 
-    //resolved https://tasks.n-core.ru/browse/MVDESD-12626 - срочность
-    for ( RDocumentEntity document: doc){
-      if ( document.getUrgency() != null ){
-        urgency.setVisibility(View.VISIBLE);
-      }
+          Timber.tag("IMAGESSS").e("%s", document.getUid() );
 
-      if (document.getImages().size() > 0){
-        for (RImage image : document.getImages()) {
-          RImageEntity img = (RImageEntity) image;
-          Timber.tag(TAG).i("image " + img.getTitle() );
-          adapter.add( img );
-        }
-      }
-    }
+          //resolved https://tasks.n-core.ru/browse/MVDESD-12626 - срочность
+          if ( document.getUrgency() != null ){
+            urgency.setVisibility(View.VISIBLE);
+          }
+
+          if (document.getImages().size() > 0){
+            adapter.clear();
+
+            for (RImage image : document.getImages()) {
+              RImageEntity img = (RImageEntity) image;
+              Timber.tag(TAG).i("image " + img.getTitle() );
+              adapter.add( img );
+            }
+
+            updateDocument();
+          }
+
+        },
+        error ->{
+
+        });
+
+
 
     index = 0;
     if (null != savedInstanceState) {
@@ -316,6 +333,14 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   public void onMessageEvent(FileDownloadedEvent event) {
     Log.d("FileDownloadedEvent", event.path);
 
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(UpdateCurrentDocumentEvent event) throws Exception {
+    Timber.tag(TAG).w("UpdateCurrentDocumentEvent %s", event.uid);
+    if (Objects.equals(event.uid, UID.get())){
+      updateDocument();
+    }
   }
 
 

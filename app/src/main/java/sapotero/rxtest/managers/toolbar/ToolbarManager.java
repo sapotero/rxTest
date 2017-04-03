@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.view.Menu;
@@ -28,18 +29,20 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
+import sapotero.rxtest.db.requery.models.images.RImage;
+import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.crypto.SignDataEvent;
 import sapotero.rxtest.events.decision.ShowDecisionConstructor;
 import sapotero.rxtest.events.view.RemoveDocumentFromAdapterEvent;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.events.view.ShowSnackEvent;
-import sapotero.rxtest.retrofit.models.Oshs;
-import sapotero.rxtest.views.activities.DecisionConstructorActivity;
-import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
 import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.retrofit.models.Oshs;
+import sapotero.rxtest.views.activities.DecisionConstructorActivity;
+import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
 import timber.log.Timber;
 
 public class ToolbarManager  implements SelectOshsDialogFragment.Callback, OperationManager.Callback {
@@ -108,6 +111,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         CommandFactory.Operation operation;
         CommandParams params = new CommandParams();
         params.setUser( LOGIN.get() );
+        params.setDocument( UID.get() );
 
         switch ( item.getItemId() ){
           // sent_to_the_report (отправлен на доклад)
@@ -211,15 +215,31 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
           case R.id.menu_info_sign_next_person:
 
-            // настройка
-            // Показывать подтверждения о действиях с документом
-            if ( settings.getBoolean("settings_view_show_actions_confirm").get() ){
-              operation = CommandFactory.Operation.INCORRECT;
-              showNextDialog(true);
-            } else {
-              operation = CommandFactory.Operation.SIGNING_NEXT_PERSON;
-            }
+            //проверим что все образы меньше 25Мб
+            if ( checkImagesSize() ){
 
+              // настройка
+              // Показывать подтверждения о действиях с документом
+              if ( settings.getBoolean("settings_view_show_actions_confirm").get() ){
+                operation = CommandFactory.Operation.INCORRECT;
+                showNextDialog(true);
+              } else {
+                operation = CommandFactory.Operation.SIGNING_NEXT_PERSON;
+              }
+
+            } else {
+
+
+
+              new MaterialDialog.Builder(context)
+                .title("Внимание!")
+                .content("Электронный образ превышает максимально допустимый размер и не может быть подписан!")
+                .positiveText("Продолжить")
+                .icon(ContextCompat.getDrawable(context, R.drawable.attention))
+                .show();
+
+              operation = CommandFactory.Operation.INCORRECT;
+            }
 
             break;
           case R.id.menu_info_sign_prev_person:
@@ -252,7 +272,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 //            intent.putExtra("decision", json);
 
             operation = CommandFactory.Operation.INCORRECT;
-//            operation = CommandFactory.Operation.NEW_DECISION;
+//            operation = CommandFactory.Operation.CREATE_DECISION;
 //
 //            Intent edit_intent = new Intent(context, DecisionConstructorActivity.class);
 //            context.startActivity(edit_intent);
@@ -299,6 +319,38 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     );
   }
 
+  public static int parseIntOrDefault(String value, int defaultValue) {
+    int result = defaultValue;
+    try {
+      result = Integer.parseInt(value);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return result;
+  }
+
+  private boolean checkImagesSize() {
+    Boolean result = true;
+
+    if ( doc.getImages() != null && doc.getImages().size() > 0 ){
+      for (RImage _image: doc.getImages()) {
+        RImageEntity image = (RImageEntity) _image;
+
+        int max_size = parseIntOrDefault( settings.getString("settings_view_show_max_image_size").get(), 20 )*1024*1024;
+
+        if (max_size > 20*1024*1024){
+          settings.getString("settings_view_show_max_image_size").set("20");
+        }
+
+        Timber.tag(TAG).e("MAX: %s | CURRENT: %s", max_size, image.getSize() );
+        if (image.getSize() > max_size){
+          result = false;
+        }
+      }
+    }
+
+    return result;
+  }
 
 
   private void loadSettings() {
@@ -347,6 +399,10 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         menu = R.menu.info_menu;
         break;
     }
+
+    if (doc != null && doc.isProcessed() != null && doc.isProcessed()){
+      menu = R.menu.info_menu;
+    }
     toolbar.inflateMenu(menu);
 
 
@@ -366,7 +422,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     }
 
     // Если документ обработан - то изменяем резолюции на поручения
-    if ( doc.isProcessed() != null || doc.isFromProcessedFolder() != null ) {
+    if ( doc.isProcessed() != null && doc.isProcessed() || doc.isFromProcessedFolder() != null && doc.isFromProcessedFolder()) {
       try {
         toolbar.getMenu().findItem(R.id.menu_info_decision_edit).setVisible(false);
         toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(true);
@@ -411,6 +467,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       }
     }
 
+
+    // Из папки обработанное
     if (doc!= null && doc.isFromProcessedFolder() != null && doc.isFromProcessedFolder() ){
       toolbar.getMenu().clear();
       toolbar.inflateMenu(R.menu.info_menu);
@@ -423,6 +481,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       }
     }
 
+    // Из папки избранное
     if (doc!= null && doc.isFromFavoritesFolder() != null && doc.isFromFavoritesFolder() ){
       toolbar.getMenu().clear();
       toolbar.inflateMenu(R.menu.info_menu);
@@ -436,6 +495,9 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       }
     }
   }
+
+
+
 
   //REFACTOR переделать это
   private void processEmptyDecisions() {
@@ -615,6 +677,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         if (settings.getString("prev_dialog_comment").get() != null) {
           params.setComment("SignFileCommand");
         }
+        params.setDocument( UID.get() );
 
         params.setComment( dialog1.getInputEditText().getText().toString() );
         operationManager.execute(operation, params);
@@ -651,6 +714,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
         operation = CommandFactory.Operation.FROM_THE_REPORT;
         params.setPerson( settings.getString("current_user_id").get() );
+        params.setDocument( UID.get() );
         params.setComment( dialog1.getInputEditText().getText().toString() );
 
         operationManager.execute(operation, params);

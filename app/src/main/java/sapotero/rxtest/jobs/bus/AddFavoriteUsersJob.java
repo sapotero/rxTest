@@ -58,6 +58,7 @@ public class AddFavoriteUsersJob extends BaseJob {
     data.setName( user.getName() );
     data.setIsGroup( user.getIsGroup() );
     data.setIsOrganization( user.getIsOrganization() );
+    data.setUser( settings.getString("current_user").get() );
 
     dataStore
       .insert(data)

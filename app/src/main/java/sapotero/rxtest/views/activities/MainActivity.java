@@ -498,7 +498,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void drawer_build_bottom() {
-    String version = "1.13.4";
+    String version = "1.14.5";
 
     drawer
       .addDrawerItems(
@@ -746,7 +746,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @Override
   public void onMenuBuilderUpdate(ArrayList<ConditionBuilder> conditions) {
     menuBuilder.setFavorites( dbQueryBuilder.getFavoritesCount() );
-    dbQueryBuilder.executeWithConditions( conditions, menuBuilder.getItem().isVisible() && favorites_button.isChecked() );
+    dbQueryBuilder.executeWithConditions( conditions, menuBuilder.getItem().isVisible() && favorites_button.isChecked(), menuBuilder.getItem() );
   }
 
   @Override

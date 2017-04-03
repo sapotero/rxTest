@@ -9,8 +9,6 @@ import com.birbit.android.jobqueue.RetryConstraint;
 import com.f2prateek.rx.preferences.Preference;
 import com.google.gson.Gson;
 
-import org.greenrobot.eventbus.EventBus;
-
 import java.util.Objects;
 
 import retrofit2.Retrofit;
@@ -32,7 +30,6 @@ import sapotero.rxtest.db.requery.models.exemplars.RExemplarEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
-import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Card;
@@ -127,9 +124,7 @@ public class SyncFavoritesDocumentsJob extends BaseJob {
           }
 
         },
-        error -> {
-          error.printStackTrace();
-        }
+        Throwable::printStackTrace
 
       );
   }
@@ -143,7 +138,7 @@ public class SyncFavoritesDocumentsJob extends BaseJob {
 
     Integer count = dataStore
       .count(RDocumentEntity.UID)
-      .where(RDocumentEntity.UID.eq("p"+uid))
+      .where(RDocumentEntity.UID.eq(uid))
       .get().value();
 
     if( count != 0 ){
@@ -160,7 +155,7 @@ public class SyncFavoritesDocumentsJob extends BaseJob {
 
 
     RDocumentEntity rd = new RDocumentEntity();
-    rd.setUid( "p"+ d.getUid() );
+    rd.setUid( d.getUid() );
     rd.setUser( LOGIN.get() );
     rd.setFilter( filter.toString() );
     rd.setMd5( d.getMd5() );
@@ -203,8 +198,8 @@ public class SyncFavoritesDocumentsJob extends BaseJob {
     }
 
     if (exist) {
-      // не обновлять
-//      updateDocumentInfo();
+      // добавим плашку избранное
+      updateDocumentInfo();
     } else {
       create(document)
         .subscribeOn( Schedulers.io() )
@@ -225,7 +220,7 @@ public class SyncFavoritesDocumentsJob extends BaseJob {
       } else {
         rDoc = dataStore
           .select(RDocumentEntity.class)
-          .where(RDocumentEntity.UID.eq( "p"+document.getUid() ))
+          .where(RDocumentEntity.UID.eq( document.getUid() ))
           .get()
           .first();
       }
@@ -433,209 +428,12 @@ public class SyncFavoritesDocumentsJob extends BaseJob {
   }
 
   private void updateDocumentInfo(){
+    Integer count = dataStore
+      .update(RDocumentEntity.class)
+      .set(RDocumentEntity.FAVORITES, true)
+      .where(RDocumentEntity.UID.eq(uid)).get().value();
+    Timber.tag(TAG).e("UPDATE! %s | result: %s", uid, count);
 
-
-    RDocumentEntity doc = dataStore
-      .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq("p"+uid))
-      .get().first();
-
-    if ( !Objects.equals( document.getMd5(), doc.getMd5() ) ){
-      Timber.tag("MD5").d("not equal %s - %s",document.getMd5(), doc.getMd5() );
-
-      doc.setMd5( document.getMd5() );
-
-      if (document.getSigner() != null){
-        RSignerEntity signer = (RSignerEntity) doc.getSigner();
-        signer.setUid( document.getSigner().getId() );
-        signer.setName( document.getSigner().getName() );
-        signer.setOrganisation( document.getSigner().getOrganisation() );
-        signer.setType( document.getSigner().getType() );
-      }
-
-      doc.setFromFavoritesFolder(true);
-      doc.setFavorites(true);
-      doc.setFolder(favorites_folder);
-      doc.setUser( LOGIN.get() );
-
-      if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
-        doc.getDecisions().clear();
-        for (Decision d: document.getDecisions() ) {
-
-          RDecisionEntity decision = new RDecisionEntity();
-          decision.setUid( d.getId() );
-          decision.setLetterhead(d.getLetterhead());
-          decision.setApproved(d.getApproved());
-          decision.setSigner(d.getSigner());
-          decision.setSignerId(d.getSignerId());
-          decision.setAssistantId(d.getAssistantId());
-          decision.setSignerBlankText(d.getSignerBlankText());
-          decision.setSignerPositionS(d.getSignerPositionS());
-          decision.setSignerIsManager(d.getSignerIsManager());
-          decision.setComment(d.getComment());
-          decision.setDate(d.getDate());
-          decision.setUrgencyText(d.getUrgencyText());
-          decision.setShowPosition(d.getShowPosition());
-          decision.setSignBase64(d.getSignBase64());
-          decision.setRed(d.getRed());
-
-          if ( d.getBlocks() != null && d.getBlocks().size() >= 1 ){
-
-            for (Block b: d.getBlocks() ) {
-              RBlockEntity block = new RBlockEntity();
-              block.setNumber(b.getNumber());
-              block.setText(b.getText());
-              block.setAppealText(b.getAppealText());
-              block.setTextBefore(b.getTextBefore());
-              block.setHidePerformers(b.getHidePerformers());
-              block.setToCopy(b.getToCopy());
-              block.setToFamiliarization(b.getToFamiliarization());
-
-              if ( b.getPerformers() != null && b.getPerformers().size() >= 1 ) {
-
-                for (Performer p : b.getPerformers()) {
-                  RPerformerEntity performer = new RPerformerEntity();
-
-                  performer.setNumber(p.getNumber());
-                  performer.setPerformerId(p.getPerformerId());
-                  performer.setPerformerType(p.getPerformerType());
-                  performer.setPerformerText(p.getPerformerText());
-                  performer.setOrganizationText(p.getOrganizationText());
-                  performer.setIsOriginal(p.getIsOriginal());
-                  performer.setIsResponsible(p.getIsResponsible());
-
-                  performer.setBlock(block);
-                  block.getPerformers().add(performer);
-                }
-              }
-
-
-              block.setDecision(decision);
-              decision.getBlocks().add(block);
-            }
-
-          }
-
-          //FIX DECISION
-          decision.setDocument(doc);
-          doc.getDecisions().add(decision);
-        }
-      }
-
-      if ( document.getRoute() != null  ){
-        RRouteEntity route = (RRouteEntity) doc.getRoute();
-        route.setText( document.getRoute().getTitle() );
-
-
-        for (Step step: document.getRoute().getSteps() ) {
-
-          RStepEntity r_step = new RStepEntity();
-          r_step.setTitle( step.getTitle() );
-          r_step.setNumber( step.getNumber() );
-
-          if ( step.getPeople() != null && step.getPeople().size() > 0 ){
-            r_step.setPeople(  new Gson().toJson( step.getPeople() )  );
-          }
-          if ( step.getCards() != null && step.getCards().size() > 0 ){
-            r_step.setCards(  new Gson().toJson( step.getCards() )  );
-          }
-          if ( step.getAnotherApprovals() != null && step.getAnotherApprovals().size() > 0 ){
-            r_step.setAnother_approvals(  new Gson().toJson( step.getAnotherApprovals() )  );
-          }
-
-          route.getSteps().add( r_step );
-        }
-
-      }
-
-      if ( document.getExemplars() != null && document.getExemplars().size() >= 1 ){
-        doc.getExemplars().clear();
-        for (Exemplar e: document.getExemplars() ) {
-          RExemplarEntity exemplar = new RExemplarEntity();
-          exemplar.setNumber(String.valueOf(e.getNumber()));
-          exemplar.setIsOriginal(e.getIsOriginal());
-          exemplar.setStatusCode(e.getStatusCode());
-          exemplar.setAddressedToId(e.getAddressedToId());
-          exemplar.setAddressedToName(e.getAddressedToName());
-          exemplar.setDate(e.getDate());
-          exemplar.setDocument(doc);
-          doc.getExemplars().add(exemplar);
-        }
-      }
-
-      if ( document.getImages() != null && document.getImages().size() >= 1 ){
-        doc.getImages().clear();
-        for (Image i: document.getImages() ) {
-          RImageEntity image = new RImageEntity();
-          image.setTitle(i.getTitle());
-          image.setNumber(i.getNumber());
-          image.setMd5(i.getMd5());
-          image.setSize(i.getSize());
-          image.setPath(i.getPath());
-          image.setContentType(i.getContentType());
-          image.setSigned(i.getSigned());
-          image.setDocument(doc);
-          image.setLoading(false);
-          image.setComplete(false);
-          doc.getImages().add(image);
-        }
-      }
-
-      if ( document.getControlLabels() != null && document.getControlLabels().size() >= 1 ){
-        doc.getControlLabels().clear();
-        for (ControlLabel l: document.getControlLabels() ) {
-          RControlLabelsEntity label = new RControlLabelsEntity();
-          label.setCreatedAt(l.getCreatedAt());
-          label.setOfficialId(l.getOfficialId());
-          label.setOfficialName(l.getOfficialName());
-          label.setSkippedOfficialId(l.getSkippedOfficialId());
-          label.setSkippedOfficialName(l.getSkippedOfficialName());
-          label.setState(l.getState());
-          label.setDocument(doc);
-          doc.getControlLabels().add(label);
-        }
-      }
-
-      if ( document.getLinks() != null){
-        doc.getLinks().clear();
-        for (String _link: document.getLinks()) {
-          RLinksEntity link = new RLinksEntity();
-          link.setUid(_link);
-          doc.getLinks().add(link);
-        }
-      }
-
-      if ( document.getInfoCard() != null){
-        doc.setInfoCard( document.getInfoCard() );
-      }
-
-      dataStore
-        .update( doc )
-        .subscribeOn( Schedulers.io() )
-        .observeOn( AndroidSchedulers.mainThread() )
-        .subscribe(
-          result -> {
-            Timber.tag("MD5").d("updateDocumentInfo " + result.getMd5());
-
-            if ( result.getImages() != null && result.getImages().size() > 0 ){
-
-              for (RImage _image : result.getImages()) {
-
-                RImageEntity image = (RImageEntity) _image;
-                jobManager.addJobInBackground( new DownloadFileJob(HOST.get(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
-              }
-
-            }
-          },
-          error ->{
-            error.printStackTrace();
-          }
-        );
-
-      EventBus.getDefault().post( new UpdateCurrentDocumentEvent( "p"+doc.getUid() ) );
-    } else {
-      Timber.tag("MD5").d("equal");
-    }
   }
 
   @Override

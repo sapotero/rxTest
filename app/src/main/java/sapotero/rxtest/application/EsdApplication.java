@@ -61,11 +61,18 @@ public final class EsdApplication extends Application {
 
     }
 
+    Runtime rt = Runtime.getRuntime();
+    long maxMemory = rt.maxMemory();
+    Timber.e( "MAX Memory Available: %s", Long.toString(maxMemory/1024/1024) );
+
+
     Stetho.Initializer initializer = Stetho.newInitializerBuilder(this)
         .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this))
         .enableDumpapp(Stetho.defaultDumperPluginsProvider(getApplicationContext()))
         .build();
     Stetho.initialize(initializer);
+
+
 
     mainComponent = DaggerEsdComponent.builder().esdModule(new EsdModule(this)).build();
     app = this;
@@ -81,10 +88,6 @@ public final class EsdApplication extends Application {
     });
 
 
-  }
-
-  public static String getUserName(){
-    return username;
   }
 
   public static Context getContext(){

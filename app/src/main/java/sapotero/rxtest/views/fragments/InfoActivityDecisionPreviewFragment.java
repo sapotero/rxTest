@@ -69,14 +69,14 @@ import sapotero.rxtest.events.decision.ApproveDecisionEvent;
 import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
 import sapotero.rxtest.events.decision.RejectDecisionEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
-import sapotero.rxtest.views.activities.DecisionConstructorActivity;
-import sapotero.rxtest.views.adapters.DecisionSpinnerAdapter;
-import sapotero.rxtest.views.adapters.models.DecisionSpinnerItem;
-import sapotero.rxtest.views.dialogs.DecisionMagniferFragment;
 import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.managers.toolbar.ToolbarManager;
+import sapotero.rxtest.views.activities.DecisionConstructorActivity;
+import sapotero.rxtest.views.adapters.DecisionSpinnerAdapter;
+import sapotero.rxtest.views.adapters.models.DecisionSpinnerItem;
+import sapotero.rxtest.views.dialogs.DecisionMagniferFragment;
 import timber.log.Timber;
 
 
@@ -115,6 +115,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
   @BindView(R.id.activity_info_decision_preview_next_person) Button next_person_button;
   @BindView(R.id.activity_info_decision_preview_prev_person) Button prev_person_button;
   @BindView(R.id.activity_info_decision_preview_approved_text) TextView approved_text;
+  @BindView(R.id.activity_info_decision_preview_temporary) TextView temporary;
+
 
 
   private ArrayList<DecisionSpinnerItem> decisionSpinnerItems  = new ArrayList<>();;
@@ -261,9 +263,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
   @Override
   public void onResume() {
     super.onResume();
-    initEvents();
-    loadSettings();
-    loadDocument();
+    invalidate();
   }
 
   public class GestureListener extends
@@ -278,7 +278,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
     public boolean onDoubleTap(MotionEvent e) {
       Timber.tag("GestureListener").w("DOUBLE TAP");
 
-      if ( !doc.isFromLinks() ){
+      if ( !doc.isFromLinks() || doc.isProcessed() ){
 
         if ( current_decision != null && !current_decision.isApproved() ){
           edit();
@@ -307,6 +307,16 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
     EsdApplication.getComponent( getContext() ).inject(this);
     binder = ButterKnife.bind(this, view);
 
+    invalidate();
+
+    return view;
+  }
+
+  private void invalidate() {
+    initEvents();
+    loadSettings();
+    loadDocument();
+
     initToolBar();
     setAdapter();
 
@@ -326,7 +336,6 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
     });
 
     preview = new Preview(getContext());
-    return view;
   }
 
   private void initToolBar() {
@@ -397,11 +406,22 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
       EventBus.getDefault().post( new HasNoActiveDecisionConstructor() );
     }
 
+
     //FIX не даем выполнять операции для связанных документов
     if ( doc!=null && doc.isFromLinks()!=null && doc.isFromLinks() ){
       next_person_button.setVisibility( View.GONE );
       prev_person_button.setVisibility( View.GONE );
     }
+
+
+    if ( current_decision.isTemporary() != null && current_decision.isTemporary() ){
+      temporary.setVisibility(View.VISIBLE);
+      next_person_button.setVisibility( View.GONE );
+      prev_person_button.setVisibility( View.GONE );
+    } else {
+      temporary.setVisibility(View.GONE);
+    }
+
   }
 
   private void showDecisionCardTollbarMenuItems(boolean visible) {
@@ -588,7 +608,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
       if (toolbarManager != null) {
         toolbarManager.setEditDecisionMenuItemVisible( !current_decision.isApproved() );
       }
-      updateVisibility(current_decision.isApproved());
+      updateVisibility( current_decision.isApproved() );
     }
 
 //    if ( !decision_spinner_adapter.hasActiveDecision() ){
@@ -687,12 +707,17 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
 
     Preview(Context context) {
       this.context = context;
+      clear();
     }
 
     private void clear(){
-      preview_head.removeAllViews();
-      preview_body.removeAllViews();
-      preview_bottom.removeAllViews();
+      try {
+        preview_head.removeAllViews();
+        preview_body.removeAllViews();
+        preview_bottom.removeAllViews();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
     };
 
     private void show( RDecisionEntity decision ){
@@ -986,7 +1011,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
   public void onMessageEvent(UpdateCurrentDocumentEvent event) throws Exception {
     Timber.tag(TAG).w("UpdateCurrentDocumentEvent %s", event.uid);
     if (Objects.equals(event.uid, UID.get())){
-      loadDocument();
+      invalidate();
     }
   }
 

@@ -64,6 +64,15 @@ public class QueueManager {
 
     if (supervisor.getRunningJobsCount() < THREAD_POOL_SIZE){
 
+
+      List<QueueEntity> uncompleteSignTasks  = dBManager.getUncompleteSignTasks(2);
+      if ( uncompleteSignTasks.size() > 0 ){
+        for ( QueueEntity command : uncompleteSignTasks ) {
+          dBManager.setAsRunning(command.getUuid());
+          supervisor.addLocal(command);
+        }
+      }
+
       List<QueueEntity> uncompleteLocalTasks  = dBManager.getUncompleteLocalTasks(THREAD_POOL_SIZE - supervisor.getRunningJobsCount());
       if ( uncompleteLocalTasks.size() > 0 ){
         for ( QueueEntity command : uncompleteLocalTasks ) {

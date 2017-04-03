@@ -15,4 +15,5 @@ public abstract class RTemplate {
   String title;
   String type;
 
+  String  user;
 }

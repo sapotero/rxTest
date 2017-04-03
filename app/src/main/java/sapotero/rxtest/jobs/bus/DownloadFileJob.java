@@ -203,7 +203,7 @@ public class DownloadFileJob  extends BaseJob {
     InputStream inputStream;
     OutputStream outputStream;
 
-    byte[] fileReader = new byte[1024*512];
+    byte[] fileReader = new byte[4*1024*1024];
 
     try {
 
@@ -224,7 +224,7 @@ public class DownloadFileJob  extends BaseJob {
 
         fileSizeDownloaded += read;
 
-        Timber.tag(TAG).d("file download: %s of %s", fileSizeDownloaded, fileSize);
+//        Timber.tag(TAG).d("file download: %s of %s", fileSizeDownloaded, fileSize);
       }
 
       outputStream.flush();

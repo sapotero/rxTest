@@ -573,6 +573,7 @@ public class DataLoaderManager {
     String favorites_folder = dataStore
       .select(RFolderEntity.class)
       .where(RFolderEntity.TYPE.eq("favorites"))
+      .and(RFolderEntity.USER.eq( settings.getString("current_user").get() ))
       .get().first().getUid();
 
 //    unsubscribe();
@@ -645,26 +646,26 @@ public class DataLoaderManager {
 
     Observable<AuthSignToken> authSubscription;
 
-    if ( !settings.getBoolean("SIGN_WITH_DC").get() ){
-      authSubscription = auth.getAuth( LOGIN.get(), PASSWORD.get() );
-    } else {
-  
+    if ( settings.getBoolean("SIGN_WITH_DC").get() ){
+
       String sign = "";
       try {
         sign = MainService.getFakeSign( context, settings.getString("PIN").get(), null );
       } catch (Exception e) {
         e.printStackTrace();
       }
-  
+
       Map<String, Object> map = new HashMap<>();
       map.put( "sign", sign );
-  
+
       RequestBody json = RequestBody.create(
         MediaType.parse("application/json"),
         new JSONObject( map ).toString()
       );
-  
+
       authSubscription = auth.getAuthBySign(json);
+    } else {
+      authSubscription = auth.getAuth( LOGIN.get(), PASSWORD.get() );
     }
     
     return authSubscription;

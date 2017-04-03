@@ -16,6 +16,8 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
+import sapotero.rxtest.managers.menu.factories.CommandFactory;
+import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
@@ -68,6 +70,15 @@ public class AddDecision extends AbstractCommand {
 
   @Override
   public void execute() {
+
+    CommandFactory.Operation operation = CommandFactory.Operation.CREATE_TEMPORARY_DECISION;
+    CommandParams _params = new CommandParams();
+    _params.setDecisionId( params.getDecisionModel().getId() );
+    _params.setDecisionModel( params.getDecisionModel() );
+    _params.setDocument(params.getDocument());
+    Command command = operation.getCommand(null, context, document, _params);
+    queueManager.add(command);
+
     queueManager.add(this);
   }
 

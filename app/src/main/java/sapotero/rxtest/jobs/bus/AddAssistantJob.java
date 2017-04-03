@@ -49,6 +49,7 @@ public class AddAssistantJob extends BaseJob {
     data.setForDecision( user.getForDecision() );
     data.setHeadId( user.getHeadId() );
     data.setHeadName( user.getHeadName() );
+    data.setUser( settings.getString("current_user").get() );
 
 
     dataStore

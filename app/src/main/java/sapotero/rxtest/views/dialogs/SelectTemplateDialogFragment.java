@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.f2prateek.rx.preferences.RxSharedPreferences;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +25,7 @@ public class SelectTemplateDialogFragment extends DialogFragment implements View
 
 
   @Inject SingleEntityStore<Persistable> dataStore;
+  @Inject RxSharedPreferences settings;
 
   private String TAG = this.getClass().getSimpleName();
   Callback callback;
@@ -48,7 +51,8 @@ public class SelectTemplateDialogFragment extends DialogFragment implements View
 
 
     List<RTemplateEntity> templates = dataStore
-      .select(RTemplateEntity.class)
+      .select( RTemplateEntity.class)
+      .where(  RTemplateEntity.USER.eq( settings.getString("current_user").get() ))
       .get().toList();
 
     if (templates.size() > 0) {
