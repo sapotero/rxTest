@@ -17,16 +17,16 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
+import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.interfaces.Command;
-import sapotero.rxtest.retrofit.DocumentService;
-import sapotero.rxtest.retrofit.models.document.Decision;
-import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.retrofit.DocumentService;
+import sapotero.rxtest.retrofit.models.document.Decision;
 import timber.log.Timber;
 
-public class SaveDecision extends AbstractCommand {
+public class SaveAndApproveDecision extends AbstractCommand {
 
   private final DocumentReceiver document;
   private final Context context;
@@ -43,7 +43,7 @@ public class SaveDecision extends AbstractCommand {
   private String decisionId;
   private boolean withSign = false;
 
-  public SaveDecision(Context context, DocumentReceiver document){
+  public SaveAndApproveDecision(Context context, DocumentReceiver document){
     super(context);
     this.context = context;
     this.document = document;
@@ -65,11 +65,11 @@ public class SaveDecision extends AbstractCommand {
     STATUS_CODE = settings.getString("activity_main_menu.star");
     PIN = settings.getString("PIN");
   }
-  public SaveDecision withDecision(RDecisionEntity decision){
+  public SaveAndApproveDecision withDecision(RDecisionEntity decision){
     this.decision = decision;
     return this;
   }
-  public SaveDecision withDecisionId(String decisionId){
+  public SaveAndApproveDecision withDecisionId(String decisionId){
     this.decisionId = decisionId;
     return this;
   }
@@ -168,7 +168,7 @@ public class SaveDecision extends AbstractCommand {
             CommandParams _params = new CommandParams();
             _params.setDecisionId( params.getDecisionModel().getId() );
             _params.setDecisionModel( params.getDecisionModel() );
-            _params.setDocument(params.getDocument());
+            _params.setDocument( document.getUid() );
 
             CommandFactory.Operation operation = CommandFactory.Operation.APPROVE_DECISION;
             Command command = operation.getCommand(null, context, document, _params);
@@ -197,7 +197,7 @@ public class SaveDecision extends AbstractCommand {
     return params;
   }
 
-  public SaveDecision withSign(boolean withSign) {
+  public SaveAndApproveDecision withSign(boolean withSign) {
     this.withSign = withSign;
     return this;
   }

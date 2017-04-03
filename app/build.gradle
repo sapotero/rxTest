@@ -37,7 +37,7 @@ android {
         develop {
             applicationId "sapotero.rxtest"
             versionCode 15
-            versionName "1.14.6"
+            versionName "1.14.7"
         }
     }
 

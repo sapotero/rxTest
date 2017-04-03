@@ -182,7 +182,13 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
   public void updateDocument(){
     if (adapter.getCount() > 0) {
-      setPdfPreview();
+
+      try {
+        setPdfPreview();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+
       updateDocumentCount();
       updatePageCount();
 

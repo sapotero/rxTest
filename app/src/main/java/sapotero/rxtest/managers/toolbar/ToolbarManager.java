@@ -340,6 +340,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
         if (max_size > 20*1024*1024){
           settings.getString("settings_view_show_max_image_size").set("20");
+          result = false;
         }
 
         Timber.tag(TAG).e("MAX: %s | CURRENT: %s", max_size, image.getSize() );

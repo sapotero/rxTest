@@ -285,6 +285,11 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
           }
 
           operation = CommandFactory.Operation.CREATE_AND_APPROVE_DECISION;
+          if (rDecisionEntity != null){
+            operation = CommandFactory.Operation.SAVE_AND_APPROVE_DECISION;
+            params.setDecisionId( rDecisionEntity.getUid() );
+            params.setDecisionModel( manager.getDecision() );
+          }
 
           operationManager.execute( operation, params );
 

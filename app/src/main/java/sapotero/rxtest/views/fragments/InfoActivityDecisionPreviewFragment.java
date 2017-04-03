@@ -278,22 +278,23 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
     public boolean onDoubleTap(MotionEvent e) {
       Timber.tag("GestureListener").w("DOUBLE TAP");
 
-      if ( !doc.isFromLinks() || doc.isProcessed() ){
+      if ( !doc.isFromLinks() ){
 
-        if ( current_decision != null && !current_decision.isApproved() ){
-          edit();
+        if ( !current_decision.isTemporary() ){
+
+          if ( current_decision != null && !current_decision.isApproved() ){
+            edit();
+          }
+
+          if (current_decision == null ){
+            settings.getString("decision.active.id").set(null);
+
+            Context context = getContext();
+            Intent create_intent = new Intent(context, DecisionConstructorActivity.class);
+            context.startActivity(create_intent);
+
+          }
         }
-
-        if (current_decision == null ){
-          settings.getString("decision.active.id").set(null);
-
-          Context context = getContext();
-          Intent create_intent = new Intent(context, DecisionConstructorActivity.class);
-          context.startActivity(create_intent);
-
-        }
-
-
       }
 
       return true;

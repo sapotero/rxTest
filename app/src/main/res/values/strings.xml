@@ -417,7 +417,7 @@
     <string name="error_csp_not_installed_body">Приложение "CryptoPro CSP" не установленно на устройстве.\nУстановите его и перезапустите СЭД.</string>
     <string name="sign">sign</string>
     <string name="crashed">crash!</string>
-    <string name="menu_info_decision_create_and_sign"> Создание и подписание </string>
+    <string name="menu_info_decision_create_and_sign">Сохранить и подписать</string>
 
     <string-array name="IntentsCAAddressList">
         <item>http://www.cryptopro.ru/certsrv/</item>

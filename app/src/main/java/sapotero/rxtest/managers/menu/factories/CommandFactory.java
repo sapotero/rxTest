@@ -11,6 +11,7 @@ import sapotero.rxtest.managers.menu.commands.decision.AddTemporaryDecision;
 import sapotero.rxtest.managers.menu.commands.decision.ApproveDecision;
 import sapotero.rxtest.managers.menu.commands.decision.ApproveDecisionDelayed;
 import sapotero.rxtest.managers.menu.commands.decision.RejectDecision;
+import sapotero.rxtest.managers.menu.commands.decision.SaveAndApproveDecision;
 import sapotero.rxtest.managers.menu.commands.decision.SaveDecision;
 import sapotero.rxtest.managers.menu.commands.decision.SaveTemporaryDecision;
 import sapotero.rxtest.managers.menu.commands.file.SignFile;
@@ -383,6 +384,26 @@ public class CommandFactory implements AbstractCommand.Callback{
         return "*Сохранение резолюции";
       }
     },
+    SAVE_AND_APPROVE_DECISION {
+      @Override
+      public Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
+        SaveAndApproveDecision command = new SaveAndApproveDecision(context, document);
+        command.withParams(params);
+        command
+//          .withDecision( params.getDecision() )
+          .withDecisionId( params.getDecisionId() )
+          .withSign( true )
+          .registerCallBack(instance);
+
+        command.withParams(params);
+        return command;
+      }
+      @Override
+      public String getRussinaName() {
+        return "Сохранение и подписание резолюции";
+      }
+    },
+
     CREATE_AND_APPROVE_DECISION {
       @Override
       public Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
@@ -477,9 +498,13 @@ public class CommandFactory implements AbstractCommand.Callback{
         case "sapotero.rxtest.managers.menu.commands.decision.SaveDecision":
           operation = Operation.SAVE_DECISION;
           break;
+        case "sapotero.rxtest.managers.menu.commands.decision.SaveAndApproveDecision":
+          operation = Operation.SAVE_AND_APPROVE_DECISION;
+          break;
         case "sapotero.rxtest.managers.menu.commands.decision.SaveTemporaryDecision":
           operation = Operation.SAVE_TEMPORARY_DECISION;
           break;
+
 
         case "sapotero.rxtest.managers.menu.commands.decision.ApproveDecision":
           operation = Operation.APPROVE_DECISION;
