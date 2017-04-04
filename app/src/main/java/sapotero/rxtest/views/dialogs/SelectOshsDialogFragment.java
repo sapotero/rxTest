@@ -62,6 +62,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
   private boolean withPrimaryConsideration = false;
   private boolean withSearch = false;
   private boolean withConfirm = false;
+  private boolean withChangePerson = false;
 
   private PrimaryConsiderationPeople user = null;
   private OshsAutoCompleteAdapter autocomplete_adapter;
@@ -93,6 +94,9 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
     this.documentUid = uid;
   }
 
+  public void withChangePerson(boolean withChangePerson) {
+    this.withChangePerson = withChangePerson;
+  }
 
   public interface Callback {
     void onSearchSuccess(Oshs user, CommandFactory.Operation operation, String uid);
@@ -166,7 +170,9 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
       ((Button) view.findViewById(R.id.dialog_oshs_add)).setText( R.string.approve );
     }
 
-
+    if ( withChangePerson ) {
+      ((Button) view.findViewById(R.id.dialog_oshs_add)).setText(R.string.primary_consideration_oshs_dialog_yes);
+    }
 
     ArrayList<PrimaryConsiderationPeople> people = new ArrayList<>();
 

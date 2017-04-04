@@ -187,6 +187,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             approveDialogFragment.withSearch(true);
             approveDialogFragment.withConfirm( true );
             approveDialogFragment.withPrimaryConsideration(false);
+            approveDialogFragment.withChangePerson(true);
             approveDialogFragment.registerCallBack( this );
             approveDialogFragment.withDocumentUid( UID.get() );
             approveDialogFragment.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
@@ -203,6 +204,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             sign.withSearch(true);
             sign.withConfirm( true );
             sign.withPrimaryConsideration(false);
+            sign.withChangePerson(true);
             sign.registerCallBack( this );
             sign.withDocumentUid( UID.get() );
             sign.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
