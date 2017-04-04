@@ -33,7 +33,7 @@ tr:nth-child(even) {
 }
 
 tr:nth-child(1) {
-    background-color: #2196F3;
+    background-color: #0288D1;
     color: rgba(255,255,255,.87);
     padding: 10px 15px 11px !important;
 }
