@@ -68,6 +68,7 @@ import sapotero.rxtest.db.requery.utils.DecisionConverter;
 import sapotero.rxtest.events.decision.ApproveDecisionEvent;
 import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
 import sapotero.rxtest.events.decision.RejectDecisionEvent;
+import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
@@ -1014,6 +1015,13 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
     if (Objects.equals(event.uid, UID.get())){
       invalidate();
     }
+  }
+
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(InvalidateDecisionSpinnerEvent event) throws Exception {
+    Timber.tag(TAG).w("InvalidateDecisionSpinnerEvent %s", event.uid);
+    decision_spinner_adapter.invalidate(event.uid);
   }
 
 

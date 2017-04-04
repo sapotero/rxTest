@@ -17,13 +17,13 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
+import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
-import sapotero.rxtest.managers.menu.factories.CommandFactory;
-import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Decision;
+import sapotero.rxtest.services.MainService;
 import timber.log.Timber;
 
 public class SaveAndApproveDecision extends AbstractCommand {
@@ -76,22 +76,12 @@ public class SaveAndApproveDecision extends AbstractCommand {
 
   @Override
   public void execute() {
-
-
-    CommandFactory.Operation operation = CommandFactory.Operation.SAVE_TEMPORARY_DECISION;
-    CommandParams _params = new CommandParams();
-    _params.setDecisionId( params.getDecisionModel().getId() );
-    _params.setDecisionModel( params.getDecisionModel() );
-    _params.setDocument(params.getDocument());
-    Command command = operation.getCommand(null, context, document, _params);
-    queueManager.add(command);
-
     queueManager.add(this);
   }
 
   @Override
   public String getType() {
-    return "save_decision";
+    return "save_and_approve_decision";
   }
 
   @Override
@@ -99,7 +89,19 @@ public class SaveAndApproveDecision extends AbstractCommand {
     if ( callback != null ){
       callback.onCommandExecuteSuccess( getType() );
     }
+    updateLocal();
     queueManager.setExecutedLocal(this);
+  }
+
+  private void updateLocal() {
+    Integer count = dataStore
+      .update(RDecisionEntity.class)
+      .set(RDecisionEntity.TEMPORARY, true)
+      .where(RDecisionEntity.UID.eq(params.getDecisionModel().getId()))
+      .get().value();
+    Timber.tag(TAG).i( "updateLocal: %s", count );
+
+    EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( params.getDecisionModel().getId() ));
   }
 
   @Override
@@ -126,7 +128,21 @@ public class SaveAndApproveDecision extends AbstractCommand {
     Decision _decision = params.getDecisionModel();
 //    _decision.setDocumentUid( document.getUid() );
     _decision.setDocumentUid( null );
+    _decision.setApproved(true);
 
+    try {
+      if ( settings.getBoolean("SIGN_WITH_DC").get() ){
+        String fake_sign = null;
+
+        fake_sign = MainService.getFakeSign( context, PIN.get(), null );
+
+        if (fake_sign != null) {
+          _decision.setSign(fake_sign);
+        }
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
 
     String json_d = new Gson().toJson( decision );
     String json_m = new Gson().toJson( _decision );
@@ -161,18 +177,6 @@ public class SaveAndApproveDecision extends AbstractCommand {
           if (callback != null ){
             callback.onCommandExecuteSuccess( getType() );
             EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
-          }
-
-          if (withSign){
-
-            CommandParams _params = new CommandParams();
-            _params.setDecisionId( params.getDecisionModel().getId() );
-            _params.setDecisionModel( params.getDecisionModel() );
-            _params.setDocument( document.getUid() );
-
-            CommandFactory.Operation operation = CommandFactory.Operation.APPROVE_DECISION;
-            Command command = operation.getCommand(null, context, document, _params);
-            queueManager.add(command);
           }
 
           queueManager.setExecutedRemote(this);

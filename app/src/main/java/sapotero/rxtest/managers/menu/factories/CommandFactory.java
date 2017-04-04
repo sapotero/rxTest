@@ -392,7 +392,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         command
 //          .withDecision( params.getDecision() )
           .withDecisionId( params.getDecisionId() )
-          .withSign( true )
+          .withSign(true)
           .registerCallBack(instance);
 
         command.withParams(params);

@@ -439,6 +439,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
 
   private void showAddOshsDialog() {
     oshs = new SelectOshsDialogFragment();
+    oshs.showWithAssistant(true);
     oshs.registerCallBack( this );
 
     // если есть люди из dialog как исполнители

@@ -110,4 +110,15 @@ public class DecisionSpinnerAdapter extends BaseAdapter {
 
     return result;
   }
+
+  public void invalidate(String uid) {
+    for (int i = 0; i < decisions.size(); i++) {
+      DecisionSpinnerItem item = decisions.get(i);
+      if (Objects.equals(item.getDecision().getUid(), uid)){
+        item.getDecision().setTemporary(true);
+        notifyDataSetChanged();
+        break;
+      }
+    }
+  }
 }

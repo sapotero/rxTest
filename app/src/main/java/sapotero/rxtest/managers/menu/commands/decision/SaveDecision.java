@@ -128,6 +128,11 @@ public class SaveDecision extends AbstractCommand {
     _decision.setDocumentUid( null );
 
 
+    if (withSign){
+      _decision.setApproved(true);
+    }
+
+
     String json_d = new Gson().toJson( decision );
     String json_m = new Gson().toJson( _decision );
 
@@ -161,18 +166,6 @@ public class SaveDecision extends AbstractCommand {
           if (callback != null ){
             callback.onCommandExecuteSuccess( getType() );
             EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
-          }
-
-          if (withSign){
-
-            CommandParams _params = new CommandParams();
-            _params.setDecisionId( params.getDecisionModel().getId() );
-            _params.setDecisionModel( params.getDecisionModel() );
-            _params.setDocument(params.getDocument());
-
-            CommandFactory.Operation operation = CommandFactory.Operation.APPROVE_DECISION;
-            Command command = operation.getCommand(null, context, document, _params);
-            queueManager.add(command);
           }
 
           queueManager.setExecutedRemote(this);

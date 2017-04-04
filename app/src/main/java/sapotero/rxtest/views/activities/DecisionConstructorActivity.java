@@ -285,6 +285,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
           }
 
           operation = CommandFactory.Operation.CREATE_AND_APPROVE_DECISION;
+
           if (rDecisionEntity != null){
             operation = CommandFactory.Operation.SAVE_AND_APPROVE_DECISION;
             params.setDecisionId( rDecisionEntity.getUid() );
@@ -423,6 +424,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       dialogFragment = new SelectOshsDialogFragment();
       dialogFragment.registerCallBack( this );
       dialogFragment.withSearch(true);
+      dialogFragment.withChangePerson(false);
       dialogFragment.showWithAssistant(true);
       dialogFragment.show( getFragmentManager(), "SelectOshsDialogFragment");
     });
