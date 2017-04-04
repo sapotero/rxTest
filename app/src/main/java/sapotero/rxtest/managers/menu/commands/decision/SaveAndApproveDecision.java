@@ -7,6 +7,8 @@ import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.Objects;
+
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Retrofit;
@@ -15,6 +17,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
@@ -100,6 +103,17 @@ public class SaveAndApproveDecision extends AbstractCommand {
       .where(RDecisionEntity.UID.eq(params.getDecisionModel().getId()))
       .get().value();
     Timber.tag(TAG).i( "updateLocal: %s", count );
+
+    if (Objects.equals(params.getDecisionModel().getSignerId(), settings.getString("current_user_id").get())){
+      Integer dec = dataStore
+        .update(RDocumentEntity.class)
+        .set(RDocumentEntity.PROCESSED, true)
+        .set(RDocumentEntity.MD5, "")
+        .where(RDocumentEntity.UID.eq( params.getDocument() ))
+        .get().value();
+
+      Timber.tag(TAG).e("count %s", dec);
+    }
 
     EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( params.getDecisionModel().getId() ));
   }
