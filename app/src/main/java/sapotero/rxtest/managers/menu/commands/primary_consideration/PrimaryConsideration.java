@@ -4,7 +4,10 @@ import android.content.Context;
 
 import com.f2prateek.rx.preferences.Preference;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.ArrayList;
+import java.util.Objects;
 
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
@@ -13,6 +16,7 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -61,6 +65,34 @@ public class PrimaryConsideration extends AbstractCommand {
   @Override
   public void execute() {
     queueManager.add(this);
+    update();
+  }
+
+  private void update(){
+    String uid = null;
+
+    if (params.getDocument() != null && !Objects.equals(params.getDocument(), "")){
+      uid = params.getDocument();
+    }
+
+    if (document.getUid() != null && !Objects.equals(document.getUid(), "")){
+      uid = document.getUid();
+    }
+
+
+    Timber.tag(TAG).i( "3 updateLocal document uid:\n%s\n%s\n", params.getDocument(), document.getUid() );
+
+
+    int count = dataStore
+      .update(RDocumentEntity.class)
+//      .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue() )
+      .set( RDocumentEntity.PROCESSED, true)
+      .set( RDocumentEntity.MD5, "" )
+      .set( RDocumentEntity.CHANGED, true)
+      .where(RDocumentEntity.UID.eq(uid))
+      .get()
+      .value();
+    EventBus.getDefault().post( new ShowNextDocumentEvent());
   }
 
 

@@ -89,7 +89,7 @@ public class QueueManager {
         }
       }
 
-      Timber.tag(TAG).e("getUncompleteTasks\nlocal: %s\nremote: %s\n", uncompleteLocalTasks.size(), uncompleteRemoteTasks.size() );
+//      Timber.tag(TAG).e("getUncompleteTasks\nlocal: %s\nremote: %s\n", uncompleteLocalTasks.size(), uncompleteRemoteTasks.size() );
     }
 
     if ( dBManager.getRunningJobsCount() > supervisor.getRunningJobsCount() ){

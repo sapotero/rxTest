@@ -5,6 +5,8 @@ import android.content.Context;
 import com.f2prateek.rx.preferences.Preference;
 import com.google.gson.Gson;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.Objects;
 
 import okhttp3.MediaType;
@@ -18,6 +20,8 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.utils.DecisionConverter;
+import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
+import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -80,29 +84,57 @@ public class RejectDecision extends AbstractCommand {
   @Override
   public void execute() {
     queueManager.add(this);
+    updateLocal();
+
   }
 
-  public void update() {
-    loadSettings();
-    Integer decision_update = dataStore
-      .update(RDecisionEntity.class)
-      .set(RDecisionEntity.APPROVED, true)
-      .where(RDecisionEntity.UID.eq( params.getDecisionId()) )
-      .get().value();
 
-    Timber.tag(TAG).e("decision_update %s", decision_update);
+  private void updateLocal() {
+
+    Timber.tag(TAG).e("1 updateLocal params%s", new Gson().toJson( params ));
+
+
+    Integer count = dataStore
+      .update(RDecisionEntity.class)
+      .set(RDecisionEntity.TEMPORARY, true)
+      .where(RDecisionEntity.UID.eq(params.getDecisionModel().getId()))
+      .get().value();
+    Timber.tag(TAG).i( "2 updateLocal decision: %s", count );
+    Timber.tag(TAG).i( "2 updateLocal decision signer:\n%s\n%s\n", params.getDecisionModel().getSignerId(), settings.getString("current_user_id").get() );
+
 
     if (Objects.equals(params.getDecisionModel().getSignerId(), settings.getString("current_user_id").get())){
-      Integer count = dataStore
+      String uid = null;
+
+      if (params.getDecisionModel().getDocumentUid() != null && !Objects.equals(params.getDecisionModel().getDocumentUid(), "")){
+        uid = params.getDecisionModel().getDocumentUid();
+      }
+
+      if (params.getDocument() != null && !Objects.equals(params.getDocument(), "")){
+        uid = params.getDocument();
+      }
+
+      if (document.getUid() != null && !Objects.equals(document.getUid(), "")){
+        uid = document.getUid();
+      }
+
+
+      Timber.tag(TAG).i( "3 updateLocal document uid:\n%s\n%s\n%s\n", params.getDecisionModel().getDocumentUid(), params.getDocument(), document.getUid() );
+
+
+      Integer dec = dataStore
         .update(RDocumentEntity.class)
         .set(RDocumentEntity.PROCESSED, true)
         .set(RDocumentEntity.MD5, "")
-        .where(RDocumentEntity.UID.eq( params.getDocument() ))
+        .where(RDocumentEntity.UID.eq( uid ))
         .get().value();
 
-      Timber.tag(TAG).e("count %s", count);
+      Timber.tag(TAG).e("3 updateLocal document %s | %s", uid, dec > 0);
+
+      EventBus.getDefault().post( new ShowNextDocumentEvent());
     }
 
+    EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( params.getDecisionModel().getId() ));
   }
 
 
@@ -120,7 +152,6 @@ public class RejectDecision extends AbstractCommand {
       callback.onCommandExecuteSuccess( getType() );
     }
 
-    update();
     queueManager.setExecutedLocal(this);
   }
 

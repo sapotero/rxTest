@@ -7,6 +7,8 @@ import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.Objects;
+
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Retrofit;
@@ -15,9 +17,11 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
+import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -77,6 +81,7 @@ public class SaveAndApproveDecision extends AbstractCommand {
   @Override
   public void execute() {
     queueManager.add(this);
+    updateLocal();
   }
 
   @Override
@@ -89,17 +94,33 @@ public class SaveAndApproveDecision extends AbstractCommand {
     if ( callback != null ){
       callback.onCommandExecuteSuccess( getType() );
     }
-    updateLocal();
+
     queueManager.setExecutedLocal(this);
   }
 
   private void updateLocal() {
+
+    Timber.tag(TAG).e("updateLocal %s", new Gson().toJson( params ));
+
+
     Integer count = dataStore
       .update(RDecisionEntity.class)
       .set(RDecisionEntity.TEMPORARY, true)
       .where(RDecisionEntity.UID.eq(params.getDecisionModel().getId()))
       .get().value();
     Timber.tag(TAG).i( "updateLocal: %s", count );
+
+    if (Objects.equals(params.getDecisionModel().getSignerId(), settings.getString("current_user_id").get())){
+      Integer dec = dataStore
+        .update(RDocumentEntity.class)
+        .set(RDocumentEntity.PROCESSED, true)
+        .set(RDocumentEntity.MD5, "")
+        .where(RDocumentEntity.UID.eq( params.getDecisionModel().getDocumentUid() ))
+        .get().value();
+
+      Timber.tag(TAG).e("count %s", dec);
+      EventBus.getDefault().post( new ShowNextDocumentEvent());
+    }
 
     EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( params.getDecisionModel().getId() ));
   }
@@ -177,6 +198,7 @@ public class SaveAndApproveDecision extends AbstractCommand {
           if (callback != null ){
             callback.onCommandExecuteSuccess( getType() );
             EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
+            EventBus.getDefault().post( new ShowNextDocumentEvent() );
           }
 
           queueManager.setExecutedRemote(this);

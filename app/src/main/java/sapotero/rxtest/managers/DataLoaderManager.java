@@ -45,6 +45,7 @@ import sapotero.rxtest.jobs.bus.AddFavoriteUsersJob;
 import sapotero.rxtest.jobs.bus.AddFoldersJob;
 import sapotero.rxtest.jobs.bus.AddPrimaryConsiderationJob;
 import sapotero.rxtest.jobs.bus.AddTemplatesJob;
+import sapotero.rxtest.jobs.bus.InvalidateDocumentsJob;
 import sapotero.rxtest.jobs.bus.SyncDocumentsJob;
 import sapotero.rxtest.jobs.bus.SyncFavoritesDocumentsJob;
 import sapotero.rxtest.jobs.bus.SyncProcessedDocumentsJob;
@@ -595,6 +596,109 @@ public class DataLoaderManager {
         )
     );
   }
+
+  public void updateByCurrentStatus(MainMenuItem items, MainMenuButton button) {
+    Timber.tag(TAG).e("updateByCurrentStatus: %s %s", items, button );
+
+    ArrayList<String> indexes = new ArrayList<String>();
+
+    switch (items){
+      case CITIZEN_REQUESTS:
+        indexes.add("citizen_requests_production_db_core_cards_citizen_requests_cards");
+        break;
+      case INCOMING_DOCUMENTS:
+        indexes.add("incoming_documents_production_db_core_cards_incoming_documents_cards");
+        break;
+      case ORDERS_DDO:
+        indexes.add("orders_ddo_production_db_core_cards_orders_ddo_cards");
+        break;
+      case ORDERS:
+        indexes.add("orders_production_db_core_cards_orders_cards");
+        break;
+      case IN_DOCUMENTS:
+        indexes.add("outgoing_documents_production_db_core_cards_outgoing_documents_cards");
+        break;
+      case INCOMING_ORDERS:
+        indexes.add("incoming_orders_production_db_core_cards_incoming_orders_cards");
+        break;
+    }
+
+    ArrayList<String> sp = new ArrayList<String>();
+    ArrayList<String> statuses = new ArrayList<String>();
+    switch (button){
+      case APPROVAL:
+        sp.add("approval");
+        break;
+      case ASSIGN:
+        sp.add("signing");
+        break;
+      case PRIMARY_CONSIDERATION:
+        statuses.add("primary_consideration");
+        break;
+      case PERFORMANCE:
+        statuses.add("sent_to_the_report");
+        break;
+
+    }
+
+
+
+
+    Timber.tag(TAG).e("data: %s %s", indexes, statuses );
+
+    Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
+    DocumentsService docService = retrofit.create(DocumentsService.class);
+
+
+    unsubscribe();
+
+    for (String index: indexes ) {
+      for (String status: statuses ) {
+        subscription.add(
+          docService
+            .getDocumentsByIndexes(LOGIN.get(), TOKEN.get(), index, status, 500)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+              data -> {
+                if (data.getDocuments().size() > 0){
+                  jobManager.addJobInBackground( new InvalidateDocumentsJob(data.getDocuments(), index, status) );
+
+                  for (Document doc: data.getDocuments() ) {
+                    jobManager.addJobInBackground( new SyncDocumentsJob(doc.getUid(), index, status) );
+                  }
+                }
+              },
+              error -> {
+                Timber.tag(TAG).e(error);
+              })
+        );
+      }
+    }
+
+    for (String code: sp ) {
+      subscription.add(
+        docService
+          .getDocuments(LOGIN.get(), TOKEN.get(), code, 500, 0)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe(
+            data -> {
+              if (data.getDocuments().size() > 0){
+                for (Document doc: data.getDocuments() ) {
+                  jobManager.addJobInBackground( new SyncDocumentsJob(doc.getUid(), code) );
+                }
+              }
+            },
+            error -> {
+              Timber.tag(TAG).e(error);
+            })
+      );
+    }
+
+
+  }
+
 
   public void updateByStatus(MainMenuItem items) {
     Timber.tag(TAG).e("UPDATE BY STATUS: %s", items.getName() );

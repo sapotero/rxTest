@@ -4,6 +4,8 @@ import android.content.Context;
 
 import com.f2prateek.rx.preferences.Preference;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.ArrayList;
 
 import retrofit2.Retrofit;
@@ -13,6 +15,7 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -72,6 +75,8 @@ public class PrevPerson extends AbstractCommand {
   @Override
   public void execute() {
     loadSettings();
+
+    EventBus.getDefault().post( new ShowNextDocumentEvent());
 
     queueManager.add(this);
   }

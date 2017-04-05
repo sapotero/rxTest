@@ -164,8 +164,10 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @SuppressLint("StaticFieldLeak")
   public static DocumentsAdapter RAdapter;
 
+  @SuppressLint("StaticFieldLeak")
+  public static DBQueryBuilder dbQueryBuilder;
+
   public  MenuBuilder menuBuilder;
-  private DBQueryBuilder dbQueryBuilder;
   private DataLoaderManager dataLoader;
   private SearchView searchView;
 
@@ -467,15 +469,19 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     initEvents();
 
     Timber.tag(TAG).v("onResume");
-    menuBuilder.getItem().recalcuate();
+    invalidate();
 
-    RAdapter.notifyDataSetChanged();
+    menuBuilder.getItem().recalcuate();
     dropLoadProgress(false);
 
 //    EventBus.getDefault().post( new UpdateAllDocumentsEvent());
 
   }
 
+  public static void invalidate(){
+    RAdapter.clear();
+    dbQueryBuilder.execute(true);
+  }
 
   @Override
   protected void onPause() {
@@ -732,12 +738,12 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   public void onMessageEvent(RemoveDocumentFromAdapterEvent event) {
     Timber.tag(TAG).v("RemoveDocumentFromAdapterEvent %s", event.uid );
 
-    if ( !IS_HIDDEN.containsKey(event.uid) ){
-      IS_HIDDEN.put(event.uid, true);
-      RAdapter.hideItem(event.uid);
-    }
+//    if ( !IS_HIDDEN.containsKey(event.uid) ){
+//      IS_HIDDEN.put(event.uid, true);
+//    }
+//    RAdapter.removeItem(event.uid);
 
-    menuBuilder.update();
+//    menuBuilder.update();
 
   }
 

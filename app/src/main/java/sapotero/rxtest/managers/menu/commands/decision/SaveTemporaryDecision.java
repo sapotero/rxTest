@@ -4,7 +4,10 @@ import android.content.Context;
 
 import com.f2prateek.rx.preferences.Preference;
 
+import org.greenrobot.eventbus.EventBus;
+
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
+import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -61,6 +64,7 @@ public class SaveTemporaryDecision extends AbstractCommand {
   @Override
   public void execute() {
     queueManager.add(this);
+    update();
   }
 
   @Override
@@ -71,7 +75,7 @@ public class SaveTemporaryDecision extends AbstractCommand {
   @Override
   public void executeLocal() {
     queueManager.setExecutedLocal(this);
-    update();
+
   }
 
   private void update() {
@@ -147,6 +151,7 @@ public class SaveTemporaryDecision extends AbstractCommand {
           .set(RDecisionEntity.TEMPORARY, true)
           .where(RDecisionEntity.UID.eq(params.getDecisionId()))
           .get();
+      EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( params.getDecisionModel().getId() ));
 //          .toObservable()
 //          .subscribeOn(Schedulers.computation())
 //          .observeOn(AndroidSchedulers.mainThread())

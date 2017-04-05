@@ -37,7 +37,7 @@ public enum MainMenuButton {
     "Проекты %s" ,
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in( ButtonStatus.getProject() )  ),
-
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(false) ),
 //      new ConditionBuilder( ConditionBuilder.Condition.OR,  RDocumentEntity.FILTER.eq( Fields.Status.SIGNING.getValue() )  )
     }
   ),
@@ -47,7 +47,7 @@ public enum MainMenuButton {
       // V3
       // new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in( ButtonStatus.getPerformance() )  ),
       //new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_LINKS.eq( false  ) ),
-
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(false) ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq( FOR_REPORT.getName() )  )
     }
   ),
@@ -56,7 +56,8 @@ public enum MainMenuButton {
     new ConditionBuilder[]{
       //V3
       //new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in(Arrays.asList(Fields.Status.PRIMARY_CONSIDERATION.getValue()))  ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq( PRIMARY.getName() )  )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq( PRIMARY.getName() )  ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(false) ),
     }
   ),
   VIEWED ( 4,
@@ -72,12 +73,15 @@ public enum MainMenuButton {
     new ConditionBuilder[]{
 
       //new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in(Arrays.asList(Fields.Status.SIGNING.getValue())  ) ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(false) ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq( SIGNING.getName() )  )
+
     }
   ),
   APPROVAL ( 6, "На согласование %s" ,
     new ConditionBuilder[]{
       //new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in(Arrays.asList(Fields.Status.APPROVAL.getValue()) ) ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(false) ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq( V2FilterType.APPROVAL.getName() )  )
     }
   ),
@@ -90,6 +94,7 @@ public enum MainMenuButton {
   ),
   FAVORITES ( 8, "Избранное %s" ,
     new ConditionBuilder[]{
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(false) ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FAVORITES.eq(true)  ),
     }
   );

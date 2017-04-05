@@ -17,13 +17,11 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
-import sapotero.rxtest.managers.menu.factories.CommandFactory;
-import sapotero.rxtest.managers.menu.interfaces.Command;
-import sapotero.rxtest.retrofit.DocumentService;
-import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.retrofit.DocumentService;
+import sapotero.rxtest.retrofit.models.document.Decision;
 import timber.log.Timber;
 
 public class SaveDecision extends AbstractCommand {
@@ -78,15 +76,17 @@ public class SaveDecision extends AbstractCommand {
   public void execute() {
 
 
-    CommandFactory.Operation operation = CommandFactory.Operation.SAVE_TEMPORARY_DECISION;
-    CommandParams _params = new CommandParams();
-    _params.setDecisionId( params.getDecisionModel().getId() );
-    _params.setDecisionModel( params.getDecisionModel() );
-    _params.setDocument(params.getDocument());
-    Command command = operation.getCommand(null, context, document, _params);
-    queueManager.add(command);
+//    CommandFactory.Operation operation = CommandFactory.Operation.SAVE_TEMPORARY_DECISION;
+//    CommandParams _params = new CommandParams();
+//    _params.setDecisionId( params.getDecisionModel().getId() );
+//    _params.setDecisionModel( params.getDecisionModel() );
+//    _params.setDocument(params.getDocument());
+//    Command command = operation.getCommand(null, context, document, _params);
+//    queueManager.add(command);
+
 
     queueManager.add(this);
+    updateLocal();
   }
 
   @Override
@@ -100,6 +100,22 @@ public class SaveDecision extends AbstractCommand {
       callback.onCommandExecuteSuccess( getType() );
     }
     queueManager.setExecutedLocal(this);
+  }
+
+  private void updateLocal() {
+
+    Timber.tag(TAG).e("1 updateLocal params%s", new Gson().toJson( params ));
+
+
+    Integer count = dataStore
+      .update(RDecisionEntity.class)
+      .set(RDecisionEntity.TEMPORARY, true)
+      .where(RDecisionEntity.UID.eq(params.getDecisionModel().getId()))
+      .get().value();
+    Timber.tag(TAG).i( "2 updateLocal decision: %s", count );
+    Timber.tag(TAG).i( "2 updateLocal decision signer:\n%s\n%s\n", params.getDecisionModel().getSignerId(), settings.getString("current_user_id").get() );
+
+//    EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( params.getDecisionModel().getId() ));
   }
 
   @Override

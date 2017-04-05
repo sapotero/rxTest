@@ -34,8 +34,6 @@ import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.crypto.SignDataEvent;
 import sapotero.rxtest.events.decision.ShowDecisionConstructor;
-import sapotero.rxtest.events.view.RemoveDocumentFromAdapterEvent;
-import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.events.view.ShowSnackEvent;
 import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
@@ -773,9 +771,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       default:
 
         toolbar.inflateMenu(R.menu.info_menu);
-        EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
-//        EventBus.getDefault().post( new RemoveDocumentFromAdapterEvent( UID.get() ) );
-        EventBus.getDefault().post( new ShowNextDocumentEvent() );
+//        EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
+//        EventBus.getDefault().post( new ShowNextDocumentEvent() );
         break;
     }
 

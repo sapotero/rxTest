@@ -70,6 +70,7 @@ import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateUnprocessedDocumentsEvent;
 import sapotero.rxtest.events.service.AuthServiceAuthEvent;
 import sapotero.rxtest.events.service.UpdateAllDocumentsEvent;
+import sapotero.rxtest.events.service.UpdateDocumentsByStatusEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckFailEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckSuccesEvent;
@@ -162,8 +163,8 @@ public class MainService extends Service {
     isConnected();
 
 
-    scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 0 ,60, TimeUnit.SECONDS );
-    scheduller.scheduleWithFixedDelay( new UpdateQueueTask(queue), 0 ,5, TimeUnit.SECONDS );
+    scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 0 ,5*60, TimeUnit.SECONDS );
+    scheduller.scheduleWithFixedDelay( new UpdateQueueTask(queue), 0 ,1, TimeUnit.SECONDS );
 
 
   }
@@ -835,5 +836,13 @@ public class MainService extends Service {
     Command command = operation.getCommand(null, getApplicationContext(), null, params);
     queue.add(command);
   }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(UpdateDocumentsByStatusEvent event) throws Exception {
+    Timber.tag(TAG).e("UpdateDocumentsByStatusEvent");
+    dataLoaderInterface.updateByCurrentStatus( event.item, event.button );
+  }
+
+
 
 }
