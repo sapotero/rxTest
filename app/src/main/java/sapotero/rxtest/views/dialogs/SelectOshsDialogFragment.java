@@ -1,5 +1,6 @@
 package sapotero.rxtest.views.dialogs;
 
+import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Build;
@@ -10,6 +11,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ListView;
@@ -219,6 +221,11 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
           callback.onSearchSuccess(_user, operation, documentUid);
           dismiss();
         }
+      }
+
+      if (view12 != null) {
+        InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
+        inputManager.hideSoftInputFromWindow(view12.getWindowToken(), 0);
       }
     });
 
