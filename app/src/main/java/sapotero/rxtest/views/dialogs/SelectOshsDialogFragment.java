@@ -46,8 +46,6 @@ import timber.log.Timber;
 
 public class SelectOshsDialogFragment extends DialogFragment implements View.OnClickListener {
 
-  public static final int AUTO_COMPLETE_THRESHOLD = 2;
-
   @Inject RxSharedPreferences settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
@@ -280,7 +278,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
 
     title.setText("");
 
-    title.setThreshold(AUTO_COMPLETE_THRESHOLD);
+    title.setThreshold(2);
 
     title.setLoadingIndicator( indicator );
 
@@ -302,7 +300,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
 
         @Override
         public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-          if (charSequence != null && charSequence.length() >= AUTO_COMPLETE_THRESHOLD) {
+          if (charSequence != null && charSequence.length() >= 1) {
             adapter.getFilter().filter(charSequence);
           } else {
             adapter.cancelFiltering();

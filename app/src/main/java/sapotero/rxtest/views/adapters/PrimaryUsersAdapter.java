@@ -89,7 +89,7 @@ public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
         if (constraint != null) {
           List<PrimaryConsiderationPeople> results = new ArrayList<>();
           for (PrimaryConsiderationPeople item : sourceItems) {
-            if (item.getName().toLowerCase().contains(constraint.toString().toLowerCase())) {
+            if (item.getName().toLowerCase().startsWith(constraint.toString().toLowerCase())) {
               results.add(item);
             }
           }
