@@ -37,6 +37,7 @@ import sapotero.rxtest.db.requery.models.RPrimaryConsiderationEntity;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.views.adapters.OshsAutoCompleteAdapter;
+import sapotero.rxtest.views.adapters.OshsPrimaryConsiderationAutoCompleteAdapter;
 import sapotero.rxtest.views.adapters.PrimaryUsersAdapter;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 import sapotero.rxtest.views.custom.DelayAutoCompleteTextView;
@@ -67,6 +68,8 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
   private PrimaryConsiderationPeople user = null;
   private OshsAutoCompleteAdapter autocomplete_adapter;
   private String documentUid = null;
+
+  private OshsPrimaryConsiderationAutoCompleteAdapter adapterPrimaryConsideration;
 
   public void setIgnoreUsers(ArrayList<String> users) {
     Timber.tag("setIgnoreUsers").e("users %s", new Gson().toJson(users) );
@@ -232,6 +235,8 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
         });
     }
 
+    adapterPrimaryConsideration = new OshsPrimaryConsiderationAutoCompleteAdapter(getActivity());
+
     if (withPrimaryConsideration){
       WhereAndOr<Result<RPrimaryConsiderationEntity>> query = dataStore
         .select(RPrimaryConsiderationEntity.class)
@@ -243,7 +248,10 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe( user -> {
-           adapter.add( new PrimaryConsiderationPeople( user.getUid(), user.getName(), user.getPosition(), user.getOrganization(), null) );
+           PrimaryConsiderationPeople primaryConsiderationPeople =
+                   new PrimaryConsiderationPeople( user.getUid(), user.getName(), user.getPosition(), user.getOrganization(), null);
+           adapter.add( primaryConsiderationPeople );
+           adapterPrimaryConsideration.add( primaryConsiderationPeople );
         });
     } else {
 
@@ -287,6 +295,10 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
     } else {
       title.setFocusable(false);
       title.setAdapter(null);
+    }
+
+    if (withSearch && withPrimaryConsideration) {
+      title.setAdapter(adapterPrimaryConsideration);
     }
 
     if ( withSearch || !withPrimaryConsideration ){
