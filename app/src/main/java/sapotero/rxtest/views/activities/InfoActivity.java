@@ -23,6 +23,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -93,6 +94,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   private byte[] CARD;
 
   private Preference<String> TOKEN;
+  private Preference<String> LAST_SEEN_UID;
   private Preference<String> LOGIN;
   private Preference<String> PASSWORD;
   private Preference<String> UID;
@@ -130,6 +132,8 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   }
 
   private void initInfoActivity() {
+    loadSettings();
+
     if (EventBus.getDefault().isRegistered(this)) {
       EventBus.getDefault().unregister(this);
     }
@@ -138,7 +142,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     toolbarManager = new ToolbarManager( this, toolbar);
     toolbarManager.init();
 
-    loadSettings();
+    setLastSeen();
 
     status  = Fields.Status.findStatus( STATUS_CODE.get() );
     journal = Fields.getJournalByUid( UID.get() );
@@ -216,6 +220,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   private void loadSettings() {
     LOGIN    = settings.getString("login");
     UID      = settings.getString("activity_main_menu.uid");
+    LAST_SEEN_UID = settings.getString("activity_main_menu.last_seen_uid");
     PASSWORD = settings.getString("password");
     TOKEN    = settings.getString("token");
     POSITION = settings.getInteger("position");
@@ -263,6 +268,18 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     unsubscribe();
 
     finish();
+  }
+
+  public void exitIfAlreadySeenThisFuckingDocument(){
+    if (LAST_SEEN_UID.get() != null && UID.get() != null) {
+      if (Objects.equals(LAST_SEEN_UID.get(), UID.get())){
+        finish();
+      }
+    }
+  }
+
+  public void setLastSeen(){
+    LAST_SEEN_UID.set( UID.get() );
   }
 
 
@@ -349,13 +366,21 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
     Timber.tag("SHOW_PREV").e("info_act");
 
-    finish();
 
-    InfoActivity activity = this;
-    Intent intent = new Intent(this, InfoActivity.class);
+    MainActivity.RAdapter.getPrevFromPosition( settings.getInteger("activity_main_menu.position").get() );
 
-    MainActivity.RAdapter.getPrevFromPosition(settings.getInteger("activity_main_menu.position").get());
-    activity.startActivity(intent);
+    exitIfAlreadySeenThisFuckingDocument();
+
+    initInfoActivity();
+//    finish();
+//
+//    InfoActivity activity = this;
+//    Intent intent = new Intent(this, InfoActivity.class);
+//
+////    MainActivity.invalidate();
+//
+//    MainActivity.RAdapter.getPrevFromPosition(settings.getInteger("activity_main_menu.position").get());
+//    activity.startActivity(intent);
 //      activity.overridePendingTransition(R.anim.slide_to_right, R.anim.slide_from_left);
 //      activity.overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
   }
@@ -369,13 +394,22 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
     Timber.tag("SHOW_NEXT").e("info_act");
 
-    finish();
-
-    InfoActivity activity = this;
-    Intent intent = new Intent( this, InfoActivity.class);
 
     MainActivity.RAdapter.getNextFromPosition( settings.getInteger("activity_main_menu.position").get() );
-    activity.startActivity(intent);
+
+    exitIfAlreadySeenThisFuckingDocument();
+
+    initInfoActivity();
+
+//    finish();
+//
+//    InfoActivity activity = this;
+//    Intent intent = new Intent( this, InfoActivity.class);
+//
+//    MainActivity.invalidate();
+//
+//    MainActivity.RAdapter.getNextFromPosition( settings.getInteger("activity_main_menu.position").get() );
+//    activity.startActivity(intent);
 //    activity.overridePendingTransition(R.anim.slide_to_left, R.anim.slide_from_right);
 //    activity.overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
 

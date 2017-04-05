@@ -14,6 +14,8 @@ import android.widget.Spinner;
 
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -21,13 +23,14 @@ import java.util.List;
 import javax.inject.Inject;
 
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.views.adapters.models.DocumentTypeItem;
+import sapotero.rxtest.events.service.UpdateDocumentsByStatusEvent;
 import sapotero.rxtest.views.adapters.DocumentTypeAdapter;
+import sapotero.rxtest.views.adapters.models.DocumentTypeItem;
+import sapotero.rxtest.views.custom.OrganizationSpinner;
 import sapotero.rxtest.views.menu.builders.ButtonBuilder;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import sapotero.rxtest.views.menu.fields.MainMenuButton;
 import sapotero.rxtest.views.menu.fields.MainMenuItem;
-import sapotero.rxtest.views.custom.OrganizationSpinner;
 import timber.log.Timber;
 
 public class ItemsBuilder implements ButtonBuilder.Callback {
@@ -217,6 +220,7 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
     try {
       this.index = index;
       Timber.tag(TAG).i( "onButtonBuilderUpdate" );
+      EventBus.getDefault().post( new UpdateDocumentsByStatusEvent( getSelectedItem(), MainMenuButton.getByIndex(index) ) );
       callback.onMenuUpdate( getConditions() );
     } catch (Exception e) {
       e.printStackTrace();

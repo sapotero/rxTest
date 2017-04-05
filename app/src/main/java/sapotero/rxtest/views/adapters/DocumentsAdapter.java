@@ -126,6 +126,34 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
   }
 
+  public void removeItem(String uid) {
+
+    if (Holder.MAP.containsKey(uid)){
+      for (int i = 0; i < documents.size(); i++) {
+        RDocumentEntity doc = documents.get(i);
+        if (Objects.equals(doc.getUid(), uid)){
+          documents.remove(doc);
+          break;
+        }
+      }
+    }
+
+    notifyDataSetChanged();
+  }
+
+  public void invalidate() {
+//    Holder.MAP
+//    for (int i = 0; i < documents.size(); i++) {
+//      RDocumentEntity doc = documents.get(i);
+//      if (Objects.equals(doc.getUid(), uid)){
+//        documents.remove(doc);
+//        break;
+//      }
+//    }
+
+    notifyDataSetChanged();
+  }
+
   private static class ObservableDocumentList<T> {
 
     protected final List<T> list;
@@ -384,11 +412,12 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
   }
 
   public void getNextFromPosition(int position) {
+    Timber.tag(TAG).e("getNextFromPosition %s", position);
+    Timber.tag(TAG).e("documents.size() %s", documents.size());
 
     position += 1;
 
     if ( documents.size() == 0 ){
-      Timber.e("noDocuments %s", documents.size());
       EventBus.getDefault().post( new NoDocumentsEvent() );
     } else {
 
@@ -404,7 +433,6 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       settings.getString("activity_main_menu.uid").set(item.getUid());
       settings.getString("activity_main_menu.regnumber").set(item.getRegistrationNumber());
       settings.getString("activity_main_menu.star").set(item.getFilter());
-//      settings.getBoolean("activity_main_menu.from_sign").set(item.isFromSign());
       settings.getString("activity_main_menu.date").set(item.getRegistrationDate());
     }
 

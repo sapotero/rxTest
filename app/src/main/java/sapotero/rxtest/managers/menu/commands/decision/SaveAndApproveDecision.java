@@ -21,6 +21,7 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
+import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -80,6 +81,7 @@ public class SaveAndApproveDecision extends AbstractCommand {
   @Override
   public void execute() {
     queueManager.add(this);
+    updateLocal();
   }
 
   @Override
@@ -92,11 +94,15 @@ public class SaveAndApproveDecision extends AbstractCommand {
     if ( callback != null ){
       callback.onCommandExecuteSuccess( getType() );
     }
-    updateLocal();
+
     queueManager.setExecutedLocal(this);
   }
 
   private void updateLocal() {
+
+    Timber.tag(TAG).e("updateLocal %s", new Gson().toJson( params ));
+
+
     Integer count = dataStore
       .update(RDecisionEntity.class)
       .set(RDecisionEntity.TEMPORARY, true)
@@ -109,10 +115,11 @@ public class SaveAndApproveDecision extends AbstractCommand {
         .update(RDocumentEntity.class)
         .set(RDocumentEntity.PROCESSED, true)
         .set(RDocumentEntity.MD5, "")
-        .where(RDocumentEntity.UID.eq( params.getDocument() ))
+        .where(RDocumentEntity.UID.eq( params.getDecisionModel().getDocumentUid() ))
         .get().value();
 
       Timber.tag(TAG).e("count %s", dec);
+      EventBus.getDefault().post( new ShowNextDocumentEvent());
     }
 
     EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( params.getDecisionModel().getId() ));
@@ -191,6 +198,7 @@ public class SaveAndApproveDecision extends AbstractCommand {
           if (callback != null ){
             callback.onCommandExecuteSuccess( getType() );
             EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
+            EventBus.getDefault().post( new ShowNextDocumentEvent() );
           }
 
           queueManager.setExecutedRemote(this);

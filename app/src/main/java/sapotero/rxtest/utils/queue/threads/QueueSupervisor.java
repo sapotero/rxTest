@@ -32,7 +32,6 @@ public class QueueSupervisor implements JobCountInterface {
   private ThreadPoolExecutor   commandPool;
 
   public static int THREAD_POOL_SIZE = 8;
-  public static int MAX_FILE_SIZE    = 1*1024*1024;
 
   public QueueSupervisor(Context context) {
 
@@ -49,7 +48,7 @@ public class QueueSupervisor implements JobCountInterface {
 
     commandPool = new ThreadPoolExecutor(THREAD_POOL_SIZE, 10, 10*60, TimeUnit.SECONDS, new ArrayBlockingQueue<>(4), threadFactory, rejectionHandler);
 
-    SuperVisor monitor   = new SuperVisor(commandPool, 5);
+    SuperVisor monitor   = new SuperVisor(commandPool, 1);
     Thread monitorThread = new Thread(monitor);
     monitorThread.start();
   }

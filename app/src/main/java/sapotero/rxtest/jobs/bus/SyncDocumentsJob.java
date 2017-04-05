@@ -731,11 +731,23 @@ public class SyncDocumentsJob  extends BaseJob {
       if (journal != null) {
         doc.setDocumentType( journal );
       }
+
+
+
       if (status != null) {
-        doc.setFilter( status );
+
+        if (!Objects.equals(doc.getFilter(), status)){
+          doc.setFilter( status );
+          doc.setProcessed(false);
+        }
+
       }
       if (filter != null) {
         doc.setFilter( filter.toString() );
+        if (!Objects.equals(doc.getFilter(), filter.getValue())){
+          doc.setFilter( status );
+          doc.setProcessed(false);
+        }
       }
 
       doc.setChanged(false);

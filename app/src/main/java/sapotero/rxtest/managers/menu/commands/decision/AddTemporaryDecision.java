@@ -6,12 +6,15 @@ import com.f2prateek.rx.preferences.Preference;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.Objects;
+
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
+import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
@@ -77,14 +80,25 @@ public class AddTemporaryDecision extends AbstractCommand {
   @Override
   public void executeLocal() {
     queueManager.setExecutedLocal(this);
-
     addDecision();
   }
 
   private void addDecision() {
+
+    String uid = null;
+
+    if (params.getDocument() != null && !Objects.equals(params.getDocument(), "")){
+      uid = params.getDocument();
+    }
+
+    if (document.getUid() != null && !Objects.equals(document.getUid(), "")){
+      uid = document.getUid();
+    }
+
+
     RDocumentEntity doc = dataStore
       .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq(params.getDocument()))
+      .where(RDocumentEntity.UID.eq(uid))
       .get().firstOrNull();
 
 
@@ -157,10 +171,12 @@ public class AddTemporaryDecision extends AbstractCommand {
           data -> {
             Timber.tag(TAG).e("Updated: %s", data.getId());
             EventBus.getDefault().post( new UpdateCurrentDocumentEvent( params.getDocument() ));
+            EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( params.getDecisionModel().getId() ));
           },
           error -> {
             Timber.tag(TAG).e("Error: %s", error);
           });
+
     }
   }
 

@@ -19,6 +19,7 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.events.decision.SignAfterCreateEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
+import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -68,11 +69,12 @@ public class AddAndApproveDecision extends AbstractCommand {
   @Override
   public void execute() {
     queueManager.add(this);
+    EventBus.getDefault().post( new ShowNextDocumentEvent() );
   }
 
   @Override
   public String getType() {
-    return "add_decision";
+    return "add_and_approve_decision";
   }
 
   @Override

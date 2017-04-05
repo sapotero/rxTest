@@ -281,7 +281,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
 
       if ( !doc.isFromLinks() ){
 
-        if ( !current_decision.isTemporary() ){
+        if ( current_decision != null && current_decision.isTemporary() != null && !current_decision.isTemporary() ){
 
           if ( current_decision != null && !current_decision.isApproved() ){
             edit();
@@ -606,7 +606,9 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
 
     if (current_decision != null) {
       preview.show( current_decision );
+
       settings.getInteger("decision.active.id").set( current_decision.getId() );
+
       if (toolbarManager != null) {
         toolbarManager.setEditDecisionMenuItemVisible( !current_decision.isApproved() );
       }
