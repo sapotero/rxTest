@@ -291,8 +291,10 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
       title.setAdapter(null);
     }
 
-    if (withSearch && withPrimaryConsideration) {
+    if (!withSearch && withPrimaryConsideration) {
       title.setAdapter(null);
+      title.setFocusable(true);
+      title.setFocusableInTouchMode(true);
       title.addTextChangedListener(new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {

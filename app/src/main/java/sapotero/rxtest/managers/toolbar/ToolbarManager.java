@@ -125,7 +125,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             bundle1.putString("operation", "primary_consideration");
             dialogFragment.setArguments(bundle1);
             dialogFragment.withPrimaryConsideration(true);
-            dialogFragment.withSearch(true);
+            dialogFragment.withSearch(false);
             dialogFragment.withConfirm(true);
             dialogFragment.withChangePerson(true);
             dialogFragment.registerCallBack( this );
