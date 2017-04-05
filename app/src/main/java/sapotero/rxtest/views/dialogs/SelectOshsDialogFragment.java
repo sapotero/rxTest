@@ -5,6 +5,8 @@ import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,6 +45,8 @@ import sapotero.rxtest.views.custom.DelayAutoCompleteTextView;
 import timber.log.Timber;
 
 public class SelectOshsDialogFragment extends DialogFragment implements View.OnClickListener {
+
+  public static final int AUTO_COMPLETE_THRESHOLD = 2;
 
   @Inject RxSharedPreferences settings;
   @Inject SingleEntityStore<Persistable> dataStore;
@@ -276,7 +280,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
 
     title.setText("");
 
-    title.setThreshold(2);
+    title.setThreshold(AUTO_COMPLETE_THRESHOLD);
 
     title.setLoadingIndicator( indicator );
 
@@ -290,7 +294,25 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
     }
 
     if (withSearch && withPrimaryConsideration) {
-      // TODO: Enable primary consideration people filtering here
+      title.setAdapter(null);
+      title.addTextChangedListener(new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+          if (charSequence != null && charSequence.length() >= AUTO_COMPLETE_THRESHOLD) {
+            adapter.getFilter().filter(charSequence);
+          } else {
+            adapter.cancelFiltering();
+          }
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+        }
+      });
     }
 
     if ( withSearch || !withPrimaryConsideration ){
