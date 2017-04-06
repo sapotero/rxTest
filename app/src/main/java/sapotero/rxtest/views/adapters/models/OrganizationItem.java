@@ -40,7 +40,12 @@ public class OrganizationItem {
   }
 
   public String getTitleForDialog() {
-    return String.format( template, count, getTitle() );
+    String title = String.format( template, count, getTitle() );
+    int maxLength = 37;
+    if (title.length() > maxLength){
+      title = title.toString().substring(0, maxLength - 3) + "...";
+    }
+    return title;
   }
 
   @Override
