@@ -41,6 +41,9 @@ import butterknife.OnClick;
 import okhttp3.OkHttpClient;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.application.utils.Keyboard;
+import sapotero.rxtest.managers.menu.factories.CommandFactory;
+import sapotero.rxtest.managers.view.builders.BlockFactory;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Performer;
@@ -49,8 +52,6 @@ import sapotero.rxtest.views.adapters.PrimaryConsiderationAdapter;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
 import sapotero.rxtest.views.dialogs.SelectTemplateDialogFragment;
-import sapotero.rxtest.managers.menu.factories.CommandFactory;
-import sapotero.rxtest.managers.view.builders.BlockFactory;
 import timber.log.Timber;
 
 public class DecisionFragment extends Fragment implements PrimaryConsiderationAdapter.Callback, SelectOshsDialogFragment.Callback, SelectTemplateDialogFragment.Callback {
@@ -186,6 +187,13 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     card_toolbar.inflateMenu(R.menu.decision_fragment_menu);
     card_toolbar.setTitle("Блок " + number );
     decision_text.setText( block.getText() );
+
+    decision_text.setOnFocusChangeListener((v, hasFocus) -> {
+      Timber.tag(TAG).e("has focus: %s", hasFocus);
+      if(!hasFocus){
+        Keyboard.hide(getActivity());
+      }
+    });
     decision_text.addTextChangedListener(new TextWatcher() {
 
       public void onTextChanged(CharSequence s, int start, int before, int count) {
