@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
+import com.github.barteksc.pdfviewer.PDFView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -64,12 +65,9 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   private Context mContext;
   private String TAG = this.getClass().getSimpleName();
 
-
-  // for PDF
   private static final String STATE_CURRENT_PAGE_INDEX = "current_page_index";
 
-//  @BindView(R.id.pdfView) PDFView pdfView;
-  @BindView(R.id.pdfView) com.github.barteksc.pdfviewer.PDFView pdfView;
+  @BindView(R.id.pdfView) PDFView pdfView;
 
   @BindView(R.id.info_card_pdf_fullscreen_prev_document) CircleLeftArrow prev_document;
   @BindView(R.id.info_card_pdf_fullscreen_next_document) CircleRightArrow next_document;
@@ -197,6 +195,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
         .enableDoubletap(true)
         .defaultPage(0)
         .swipeHorizontal(false)
+        .onRender((nbPages, pageWidth, pageHeight) -> pdfView.fitToWidth())
         .onLoad(nbPages -> {
           Timber.tag(TAG).i(" onLoad");
         })
@@ -211,10 +210,6 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
         .password(null)
         .scrollHandle(null)
         .load();
-
-//      pdfView.zoomCenteredTo(2, new PointF(200,0));
-//
-//      Timber.tag(TAG).e("OPTIMAL %s %s", pdfView.getOptimalPageWidth(), pdfView.getOptimalPageHeight());
     }
   }
 
