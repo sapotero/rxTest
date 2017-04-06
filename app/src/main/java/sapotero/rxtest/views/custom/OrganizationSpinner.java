@@ -12,6 +12,8 @@ import android.text.style.ForegroundColorSpan;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ListView;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
@@ -31,6 +33,8 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
   private boolean mAllSelected;
   private MultiSpinnerListener mListener;
 
+  Button neutralButton;
+
   public OrganizationSpinner(Context context) {
     super(context);
     inflater = (LayoutInflater) context.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
@@ -47,6 +51,7 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
 
   public void onClick(DialogInterface dialog, int which, boolean isChecked) {
     mSelected[which] = isChecked;
+    updateNeutralButtonText();
   }
 
   private OnClickListener onClickListener = new OnClickListener() {
@@ -76,21 +81,67 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
       });
 
       builder.setNeutralButton(android.R.string.selectAll, (dialog, which) -> {
-        mOldSelection = new boolean[mAdapter.getCount()];
-
-        for (int i = 0; i < mOldSelection.length; i++) {
-          mOldSelection[i] = true;
-          mSelected[i] = true;
-        }
-
-        System.arraycopy(mOldSelection, 0, mSelected, 0, mSelected.length);
-        refreshSpinner();
-        dialog.dismiss();
+        // This button is overriden later to change close behaviour
       });
 
-      builder.show();
+      final AlertDialog dialog = builder.create();
+
+      dialog.setOnShowListener(dialogInterface -> {
+        neutralButton = ((AlertDialog) dialogInterface).getButton(AlertDialog.BUTTON_NEUTRAL);
+        updateNeutralButtonText();
+      });
+
+      dialog.show();
+
+      // Override neutral button handler immediately after show to prevent dialog from closing
+      neutralButton.setOnClickListener(view -> {
+        ListView organizationList = dialog.getListView();
+        mOldSelection = new boolean[mAdapter.getCount()];
+
+        if ( isCheckedAll() ) {
+          // Deselect all
+          for (int i = 0; i < mOldSelection.length; i++) {
+            mOldSelection[i] = false;
+            mSelected[i] = false;
+            organizationList.setItemChecked(i, false);
+          }
+        } else {
+          // Select all
+          for (int i = 0; i < mOldSelection.length; i++) {
+            mOldSelection[i] = true;
+            mSelected[i] = true;
+            organizationList.setItemChecked(i, true);
+          }
+        }
+
+        updateNeutralButtonText();
+
+        // System.arraycopy(mOldSelection, 0, mSelected, 0, mSelected.length);
+        // refreshSpinner();
+      });
     }
   };
+
+  private boolean isCheckedAll() {
+    boolean isCheckedAll = true;
+    for (int i = 0; i < mSelected.length; i++) {
+      if ( !mSelected[i] ) {
+        isCheckedAll = false;
+        break;
+      }
+    }
+    return isCheckedAll;
+  }
+
+  private void updateNeutralButtonText() {
+    if (neutralButton != null) {
+      if ( isCheckedAll() ) {
+        neutralButton.setText("Снять выделение");
+      } else {
+        neutralButton.setText("Выделить все");
+      }
+    }
+  }
 
   public SpinnerAdapter getAdapter() {
     return this.mAdapter;
