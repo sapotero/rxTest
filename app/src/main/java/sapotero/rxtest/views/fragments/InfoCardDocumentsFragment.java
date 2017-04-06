@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
+import com.github.barteksc.pdfviewer.PDFView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -39,8 +40,6 @@ import butterknife.OnClick;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
 import okhttp3.OkHttpClient;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
@@ -53,7 +52,6 @@ import sapotero.rxtest.views.activities.DocumentImageFullScreenActivity;
 import sapotero.rxtest.views.adapters.DocumentLinkAdapter;
 import sapotero.rxtest.views.custom.CircleLeftArrow;
 import sapotero.rxtest.views.custom.CircleRightArrow;
-import sapotero.rxtest.views.custom.pdf.PDFView;
 import timber.log.Timber;
 
 public class InfoCardDocumentsFragment extends Fragment implements AdapterView.OnItemClickListener, GestureDetector.OnDoubleTapListener {
@@ -67,8 +65,6 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   private Context mContext;
   private String TAG = this.getClass().getSimpleName();
 
-
-  // for PDF
   private static final String STATE_CURRENT_PAGE_INDEX = "current_page_index";
 
   @BindView(R.id.pdfView) PDFView pdfView;
@@ -88,12 +84,8 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
   private int index;
 
-//  private PhotoViewAttacher mAttacher;
-  private Image IMAGE;
-  private String fileName;
   private Preference<String> UID;
   private DocumentLinkAdapter adapter;
-  private Preference<String> HOST;
   private String uid;
 
 
@@ -101,15 +93,8 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   }
 
 
-  public static InfoCardDocumentsFragment newInstance(String param1, String param2) {
-    InfoCardDocumentsFragment fragment = new InfoCardDocumentsFragment();
-
-    return fragment;
-  }
-
   private void loadSettings() {
     UID  = settings.getString("activity_main_menu.uid");
-    HOST = settings.getString("settings_username_host");
   }
 
   @Override
@@ -130,50 +115,9 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
     loadSettings();
 
-    ArrayList<Image> documents = new ArrayList<Image>();
-    adapter = new DocumentLinkAdapter(mContext, documents);
-
-    dataStore.select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq( uid == null ? UID.get() : uid ))
-      .get()
-      .toObservable()
-      .subscribeOn(Schedulers.io())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(
-        document-> {
-
-          Timber.tag("IMAGESSS").e("%s", document.getUid() );
-
-          //resolved https://tasks.n-core.ru/browse/MVDESD-12626 - срочность
-          if ( document.getUrgency() != null ){
-            urgency.setVisibility(View.VISIBLE);
-          }
-
-          if (document.getImages().size() > 0){
-            adapter.clear();
-
-            for (RImage image : document.getImages()) {
-              RImageEntity img = (RImageEntity) image;
-              Timber.tag(TAG).i("image " + img.getTitle() );
-              adapter.add( img );
-            }
-
-            updateDocument();
-          }
-
-        },
-        error ->{
-
-        });
-
-
-
-    index = 0;
     if (null != savedInstanceState) {
       index = savedInstanceState.getInt(STATE_CURRENT_PAGE_INDEX, 0);
     }
-
-
 
     updateDocument();
 
@@ -181,6 +125,42 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   }
 
   public void updateDocument(){
+
+    ArrayList<Image> documents = new ArrayList<Image>();
+    adapter = new DocumentLinkAdapter(mContext, documents);
+
+    RDocumentEntity document = dataStore
+      .select(RDocumentEntity.class)
+      .where(RDocumentEntity.UID.eq(uid == null ? UID.get() : uid))
+      .get()
+      .firstOrNull();
+
+    Timber.tag("IMAGESSS").e("%s", document.getUid() );
+
+    if (document != null) {
+      //resolved https://tasks.n-core.ru/browse/MVDESD-12626 - срочность
+      if ( document.getUrgency() != null ){
+        urgency.setVisibility(View.VISIBLE);
+      }
+
+      if (document.getImages().size() > 0){
+        adapter.clear();
+
+        for (RImage image : document.getImages()) {
+          RImageEntity img = (RImageEntity) image;
+          Timber.tag(TAG).i("image " + img.getTitle() );
+          adapter.add( img );
+        }
+
+      }
+    }
+
+
+
+
+    index = 0;
+
+
     if (adapter.getCount() > 0) {
 
       try {
@@ -207,31 +187,30 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
     File file = new File(getContext().getFilesDir(), String.format( "%s_%s", image.getMd5(), image.getTitle() ));
 
-    pdfView
-      .fromFile( file )
-      .enableSwipe(true)
-      .enableDoubletap(true)
-      .defaultPage(0)
-      .swipeHorizontal(false)
-      .onLoad(nbPages -> {
-        Timber.tag(TAG).i(" onLoad");
-      })
-      .onError(t -> {
-        Timber.tag(TAG).i(" onError");
-      })
-      .onPageChange((page, pageCount) -> {
-        Timber.tag(TAG).i(" onPageChange");
-        updatePageCount();
-      })
-      .enableAnnotationRendering(false)
-      .password(null)
-      .scrollHandle(null)
-      .load();
 
-    pdfView.resetZoomWithAnimation();
-
-
-    Timber.tag(TAG).e("OPTIMAL %s %s", pdfView.getOptimalPageWidth(), pdfView.getOptimalPageHeight());
+    if (file.exists()){
+      pdfView
+        .fromFile( file )
+        .enableSwipe(true)
+        .enableDoubletap(true)
+        .defaultPage(0)
+        .swipeHorizontal(false)
+        .onRender((nbPages, pageWidth, pageHeight) -> pdfView.fitToWidth())
+        .onLoad(nbPages -> {
+          Timber.tag(TAG).i(" onLoad");
+        })
+        .onError(t -> {
+          Timber.tag(TAG).i(" onError");
+        })
+        .onPageChange((page, pageCount) -> {
+          Timber.tag(TAG).i(" onPageChange");
+          updatePageCount();
+        })
+        .enableAnnotationRendering(false)
+        .password(null)
+        .scrollHandle(null)
+        .load();
+    }
   }
 
   public void updateDocumentCount(){
@@ -300,6 +279,11 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     }
   }
 
+  @Override
+  public void onDestroyView() {
+    super.onDestroyView();
+    pdfView.recycle();
+  }
 
   @Override
   public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -312,13 +296,10 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   }
 
   @Override
-  public boolean onDoubleTap(MotionEvent e) {
-    Timber.tag(TAG).i("onDoubleTap");
-    Intent intent = new Intent(mContext, DocumentImageFullScreenActivity.class);
-    intent.putExtra("filename", fileName );
-    startActivity(intent);
+  public boolean onDoubleTap(MotionEvent motionEvent) {
     return false;
   }
+
 
   @Override
   public boolean onDoubleTapEvent(MotionEvent e) {

@@ -7,6 +7,8 @@ import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.Collections;
+
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Retrofit;
@@ -16,12 +18,14 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
+import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Decision;
+import sapotero.rxtest.retrofit.models.v2.DecisionError;
 import timber.log.Timber;
 
 public class SaveDecision extends AbstractCommand {
@@ -124,7 +128,7 @@ public class SaveDecision extends AbstractCommand {
 
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
-
+    queueManager.setAsRunning(this);
 
 
     Retrofit retrofit = new Retrofit.Builder()
@@ -166,7 +170,7 @@ public class SaveDecision extends AbstractCommand {
 
     DocumentService operationService = retrofit.create( DocumentService.class );
 
-    Observable<Object> info = operationService.update(
+    Observable<DecisionError> info = operationService.update(
       decisionId,
       LOGIN.get(),
       TOKEN.get(),
@@ -177,14 +181,19 @@ public class SaveDecision extends AbstractCommand {
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         data -> {
-          Timber.tag(TAG).i("ok: %s", data);
 
-          if (callback != null ){
-            callback.onCommandExecuteSuccess( getType() );
-            EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
+          if (data.getErrors() !=null && data.getErrors().size() > 0){
+            queueManager.setExecutedWithError(this, data.getErrors());
+            EventBus.getDefault().post( new ForceUpdateDocumentEvent( data.getDocumentUid() ));
+          } else {
+
+            if (callback != null ){
+              callback.onCommandExecuteSuccess( getType() );
+              EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
+            }
+
+            queueManager.setExecutedRemote(this);
           }
-
-          queueManager.setExecutedRemote(this);
 
         },
         error -> {
@@ -192,6 +201,8 @@ public class SaveDecision extends AbstractCommand {
           if (callback != null){
             callback.onCommandExecuteError(getType());
           }
+          queueManager.setExecutedWithError(this, Collections.singletonList("http_error"));
+          EventBus.getDefault().post( new ForceUpdateDocumentEvent( params.getDecisionModel().getDocumentUid() ));
         }
       );
   }

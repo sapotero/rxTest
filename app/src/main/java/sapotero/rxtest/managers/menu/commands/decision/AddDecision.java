@@ -7,6 +7,8 @@ import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.Collections;
+
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Retrofit;
@@ -24,6 +26,7 @@ import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Decision;
+import sapotero.rxtest.retrofit.models.v2.DecisionError;
 import timber.log.Timber;
 
 public class AddDecision extends AbstractCommand {
@@ -149,7 +152,7 @@ public class AddDecision extends AbstractCommand {
 
     DocumentService operationService = retrofit.create( DocumentService.class );
 
-    Observable<Decision> info = operationService.create(
+    Observable<DecisionError> info = operationService.create(
       LOGIN.get(),
       TOKEN.get(),
       json
@@ -161,7 +164,7 @@ public class AddDecision extends AbstractCommand {
         data -> {
 
           if (data.getErrors() !=null && data.getErrors().size() > 0){
-            queueManager.setExecutedWithError(this);
+            queueManager.setExecutedWithError(this, data.getErrors());
             EventBus.getDefault().post( new ForceUpdateDocumentEvent( data.getDocumentUid() ));
           } else {
 
@@ -179,7 +182,7 @@ public class AddDecision extends AbstractCommand {
           if (callback != null){
             callback.onCommandExecuteError(getType());
           }
-          queueManager.setExecutedWithError(this);
+          queueManager.setExecutedWithError(this, Collections.singletonList("http_error"));
         }
       );
   }

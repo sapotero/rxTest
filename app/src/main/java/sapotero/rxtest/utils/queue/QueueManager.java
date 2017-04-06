@@ -10,10 +10,10 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.queue.QueueEntity;
-import sapotero.rxtest.utils.queue.db.QueueDBManager;
-import sapotero.rxtest.utils.queue.threads.QueueSupervisor;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.interfaces.Command;
+import sapotero.rxtest.utils.queue.db.QueueDBManager;
+import sapotero.rxtest.utils.queue.threads.QueueSupervisor;
 import timber.log.Timber;
 
 import static sapotero.rxtest.utils.queue.threads.QueueSupervisor.THREAD_POOL_SIZE;
@@ -106,9 +106,14 @@ public class QueueManager {
     dBManager.setExecutedRemote(command);
   }
 
-  public void setExecutedWithError(Command command) {
-    dBManager.setExecutedWithError(command);
+  public void setExecutedWithError(Command command, List<String> errors) {
+    dBManager.setExecutedWithError(command, errors);
   }
+
+  public void setAsRunning(Command Command) {
+    dBManager.setAsRunning(Command.getParams().getUuid());
+  }
+
   public void removeAll() {
     dBManager.removeAll();
   }

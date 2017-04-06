@@ -280,7 +280,11 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
             break;
           case R.id.menu_info_shared_to_favorites:
-            operation = !doc.isFavorites() ? CommandFactory.Operation.ADD_TO_FOLDER: CommandFactory.Operation.REMOVE_FROM_FOLDER;
+
+            operation = CommandFactory.Operation.ADD_TO_FOLDER;
+            if ( doc != null &&  doc.isFavorites() != null && doc.isFavorites() ){
+             operation = CommandFactory.Operation.REMOVE_FROM_FOLDER;
+            }
 
             String favorites = dataStore
               .select(RFolderEntity.class)

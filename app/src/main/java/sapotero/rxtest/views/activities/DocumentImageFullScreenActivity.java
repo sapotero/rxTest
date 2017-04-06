@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.f2prateek.rx.preferences.RxSharedPreferences;
+import com.github.barteksc.pdfviewer.PDFView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -27,13 +28,12 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.views.custom.CircleLeftArrow;
 import sapotero.rxtest.views.custom.CircleRightArrow;
-import sapotero.rxtest.views.custom.pdf.PDFView;
 import timber.log.Timber;
 
 public class DocumentImageFullScreenActivity extends AppCompatActivity {
 
   @BindView(R.id.document_image_toolbar)       Toolbar toolbar;
-  @BindView(R.id.document_image_fullscreen) PDFView pdfView;
+  @BindView(R.id.document_image_fullscreen)  PDFView pdfView;
   @BindView(R.id.document_image_urgency_title) TextView urgency;
 
   @BindView(R.id.pdf_fullscreen_prev_document)    CircleLeftArrow prev_document;

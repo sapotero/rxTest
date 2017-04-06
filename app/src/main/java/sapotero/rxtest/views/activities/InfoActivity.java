@@ -40,7 +40,6 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.db.requery.models.RFolderEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.bus.MassInsertDoneEvent;
 import sapotero.rxtest.events.crypto.SignDataResultEvent;
@@ -154,50 +153,40 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   private void setTabContent() {
 
     try {
-//      tabLayout.removeAllViews();
+      tabLayout.removeAllTabs();
       viewPager.removeAllViews();
     } catch (Exception e) {
       e.printStackTrace();
     }
 
-    if (viewPager.getAdapter() == null) {
 
-      Timber.tag(TAG).e("IS_PROCESSED.get() %s | %s -> %s", status, STATUS_CODE.get(), IS_PROCESSED.get() );
+    Timber.tag(TAG).e("IS_PROCESSED.get() %s | %s -> %s", status, STATUS_CODE.get(), IS_PROCESSED.get() );
 
-      dataStore
-        .select(RFolderEntity.class)
-        .get()
-        .toObservable()
-        .observeOn(Schedulers.io())
-        .subscribeOn(AndroidSchedulers.mainThread())
-        .subscribe( folder -> {
-          Timber.e( "%s - %s ", folder.getType(), folder.getTitle() );
-        });
 
-      if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || IS_PROCESSED.get()  ){
-        TabSigningPagerAdapter adapter = new TabSigningPagerAdapter( getSupportFragmentManager() );
-        viewPager.setAdapter(adapter);
-      } else {
-        TabPagerAdapter adapter = new TabPagerAdapter ( getSupportFragmentManager() );
-        viewPager.setAdapter(adapter);
-      }
-      viewPager.setOffscreenPageLimit(10);
-
-      tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-        @Override
-        public void onTabSelected(TabLayout.Tab tab) {
-          viewPager.setCurrentItem( tab.getPosition() );
-        }
-
-        @Override
-        public void onTabUnselected(TabLayout.Tab tab) {
-        }
-
-        @Override
-        public void onTabReselected(TabLayout.Tab tab) {
-        }
-      });
+    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || IS_PROCESSED.get()  ){
+      TabSigningPagerAdapter adapter = new TabSigningPagerAdapter( getSupportFragmentManager() );
+      viewPager.setAdapter(adapter);
+    } else {
+      TabPagerAdapter adapter = new TabPagerAdapter ( getSupportFragmentManager() );
+      viewPager.setAdapter(adapter);
     }
+    viewPager.setOffscreenPageLimit(10);
+
+    tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+      @Override
+      public void onTabSelected(TabLayout.Tab tab) {
+        viewPager.setCurrentItem( tab.getPosition() );
+      }
+
+      @Override
+      public void onTabUnselected(TabLayout.Tab tab) {
+      }
+
+      @Override
+      public void onTabReselected(TabLayout.Tab tab) {
+      }
+    });
+
 
     tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
     tabLayout.setupWithViewPager(viewPager);

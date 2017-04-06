@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -73,13 +74,17 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 //  @BindView(R.id.fragment_decision_autocomplete_field) DelayAutoCompleteTextView user_autocomplete;
 //  @BindView(R.id.fragment_decision_autocomplete_field_loading_indicator) ProgressBar indicator;
 
+  @BindView(R.id.activity_decision_constructor_wrapper) RelativeLayout wrapper;
+  @BindView(R.id.decision_constructor_decision_preview) RelativeLayout testWrapper;
+
   @BindView(R.id.urgency_selector) SpinnerWithLabel<UrgencyItem> urgency_selector;
   @BindView(R.id.head_font_selector) SpinnerWithLabel<FontItem> font_selector;
   @BindView(R.id.signer_oshs_selector) EditText signer_oshs_selector;
+
+
   @BindView(R.id.sign_as_current_user) Button sign_as_current_user;
-
-
   @BindView(R.id.select_oshs_wrapper) LinearLayout select_oshs_wrapper;
+
   @BindView(R.id.activity_decision_constructor_scroll_wrapper) ScrollView scroll;
 
 
@@ -95,6 +100,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   private RDecisionEntity rDecisionEntity;
   private SelectOshsDialogFragment dialogFragment;
   private Fields.Status status;
+  private DecisionConstructorActivity context;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -105,6 +111,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
     ButterKnife.bind(this);
     EsdApplication.getComponent(this).inject(this);
+
+    context = this;
 
     Preference<String> STATUS_CODE = settings.getString("activity_main_menu.star");
     status  = Fields.Status.findStatus( STATUS_CODE.get() );

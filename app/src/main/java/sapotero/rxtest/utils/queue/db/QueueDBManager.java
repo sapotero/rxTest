@@ -200,7 +200,7 @@ public class QueueDBManager implements JobCountInterface {
     return dataStore.count(QueueEntity.class).where(QueueEntity.RUNNING.eq(true)).get().value();
   }
 
-  public void setExecutedWithError(Command command) {
+  public void setExecutedWithError(Command command, List<String> errors) {
     if (command != null && command.getParams() != null) {
       CommandParams params = command.getParams();
 
@@ -211,6 +211,7 @@ public class QueueDBManager implements JobCountInterface {
           .set( QueueEntity.LOCAL,  true )
           .set( QueueEntity.RUNNING, false )
           .set( QueueEntity.WITH_ERROR, true )
+          .set( QueueEntity.ERROR, new Gson().toJson(errors) )
           .where( QueueEntity.UUID.eq( params.getUuid() ) )
           .get()
           .value();
