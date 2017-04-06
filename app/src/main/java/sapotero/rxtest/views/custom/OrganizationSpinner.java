@@ -89,36 +89,33 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
       dialog.setOnShowListener(dialogInterface -> {
         neutralButton = ((AlertDialog) dialogInterface).getButton(AlertDialog.BUTTON_NEUTRAL);
         updateNeutralButtonText();
+
+        // Override neutral button handler to prevent dialog from closing
+        neutralButton.setOnClickListener(view -> {
+          ListView organizationList = ((AlertDialog) dialogInterface).getListView();
+          mOldSelection = new boolean[mAdapter.getCount()];
+
+          if ( isCheckedAll() ) {
+            // Deselect all
+            for (int i = 0; i < mOldSelection.length; i++) {
+              mOldSelection[i] = false;
+              mSelected[i] = false;
+              organizationList.setItemChecked(i, false);
+            }
+          } else {
+            // Select all
+            for (int i = 0; i < mOldSelection.length; i++) {
+              mOldSelection[i] = true;
+              mSelected[i] = true;
+              organizationList.setItemChecked(i, true);
+            }
+          }
+
+          updateNeutralButtonText();
+        });
       });
 
       dialog.show();
-
-      // Override neutral button handler immediately after show to prevent dialog from closing
-      neutralButton.setOnClickListener(view -> {
-        ListView organizationList = dialog.getListView();
-        mOldSelection = new boolean[mAdapter.getCount()];
-
-        if ( isCheckedAll() ) {
-          // Deselect all
-          for (int i = 0; i < mOldSelection.length; i++) {
-            mOldSelection[i] = false;
-            mSelected[i] = false;
-            organizationList.setItemChecked(i, false);
-          }
-        } else {
-          // Select all
-          for (int i = 0; i < mOldSelection.length; i++) {
-            mOldSelection[i] = true;
-            mSelected[i] = true;
-            organizationList.setItemChecked(i, true);
-          }
-        }
-
-        updateNeutralButtonText();
-
-        // System.arraycopy(mOldSelection, 0, mSelected, 0, mSelected.length);
-        // refreshSpinner();
-      });
     }
   };
 
