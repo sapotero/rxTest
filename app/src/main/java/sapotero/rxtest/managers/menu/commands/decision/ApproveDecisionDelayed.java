@@ -5,6 +5,10 @@ import android.content.Context;
 import com.f2prateek.rx.preferences.Preference;
 import com.google.gson.Gson;
 
+import org.greenrobot.eventbus.EventBus;
+
+import java.util.Collections;
+
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Retrofit;
@@ -15,11 +19,14 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.utils.DecisionConverter;
+import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
+import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Decision;
+import sapotero.rxtest.retrofit.models.v2.DecisionError;
 import sapotero.rxtest.retrofit.models.wrapper.DecisionWrapper;
 import sapotero.rxtest.services.MainService;
 import timber.log.Timber;
@@ -150,7 +157,7 @@ public class ApproveDecisionDelayed extends AbstractCommand {
 
       DocumentService operationService = retrofit.create( DocumentService.class );
 
-      Observable<Object> info = operationService.update(
+      Observable<DecisionError> info = operationService.update(
         params.getDecisionId(),
         LOGIN.get(),
         TOKEN.get(),
@@ -161,19 +168,28 @@ public class ApproveDecisionDelayed extends AbstractCommand {
         .observeOn( AndroidSchedulers.mainThread() )
         .subscribe(
           data -> {
-            Timber.tag(TAG).i("ok: %s", data);
 
-            if (callback != null ){
-              callback.onCommandExecuteSuccess( getType() );
+            if (data.getErrors() !=null && data.getErrors().size() > 0){
+              queueManager.setExecutedWithError(this, data.getErrors());
+              EventBus.getDefault().post( new ForceUpdateDocumentEvent( data.getDocumentUid() ));
+            } else {
+
+              if (callback != null ){
+                callback.onCommandExecuteSuccess( getType() );
+                EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
+              }
+
+              queueManager.setExecutedRemote(this);
             }
-            queueManager.setExecutedRemote(this);
+
           },
           error -> {
             Timber.tag(TAG).i("error: %s", error);
             if (callback != null){
               callback.onCommandExecuteError(getType());
             }
-            queueManager.setExecutedWithError(this);
+            queueManager.setExecutedWithError(this, Collections.singletonList("http_error"));
+            EventBus.getDefault().post( new ForceUpdateDocumentEvent( params.getDecisionModel().getDocumentUid() ));
           }
         );
     } else {

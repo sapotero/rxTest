@@ -32,6 +32,12 @@ public abstract class Queue {
   @Column(value="false")
   Boolean withError;
 
+  String  error;
+
+  @Column(value="false")
+  Boolean canceled;
+
+
   @Index("db_queue_createdAt_index")
   String  createdAt;
 

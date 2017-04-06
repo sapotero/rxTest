@@ -8,9 +8,8 @@ import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 import rx.Observable;
-import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
-import sapotero.rxtest.retrofit.models.old_decision.DecisionResponce;
+import sapotero.rxtest.retrofit.models.v2.DecisionError;
 
 public interface DocumentService {
   @GET("{document}.json")
@@ -21,7 +20,7 @@ public interface DocumentService {
   );
 
   @PUT("/v2/decisions/{decision_id}.json")
-  Observable<Object> update(
+  Observable<DecisionError> update(
     @Path("decision_id") String decision_id,
     @Query("login") String login,
     @Query("auth_token") String auth_token,
@@ -29,14 +28,14 @@ public interface DocumentService {
   );
 
   @POST("/v2/decisions.json")
-  Observable<Decision> create(
+  Observable<DecisionError> create(
     @Query("login") String login,
     @Query("auth_token") String auth_token,
     @Body RequestBody body
   );
 
   @POST("/v2/decisions.json")
-  Observable<DecisionResponce> createAndSign(
+  Observable<DecisionError> createAndSign(
     @Query("login") String login,
     @Query("auth_token") String auth_token,
     @Body RequestBody body

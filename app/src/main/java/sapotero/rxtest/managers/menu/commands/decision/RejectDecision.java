@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.Collections;
 import java.util.Objects;
 
 import okhttp3.MediaType;
@@ -20,6 +21,8 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.utils.DecisionConverter;
+import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
+import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
@@ -27,8 +30,8 @@ import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Decision;
+import sapotero.rxtest.retrofit.models.v2.DecisionError;
 import sapotero.rxtest.retrofit.models.wrapper.DecisionWrapper;
-import sapotero.rxtest.services.MainService;
 import timber.log.Timber;
 
 public class RejectDecision extends AbstractCommand {
@@ -179,16 +182,6 @@ public class RejectDecision extends AbstractCommand {
     formated_decision.setCanceled(true);
     formated_decision.setDocumentUid(null);
 
-    String sign = null;
-
-    try {
-      sign = MainService.getFakeSign( context, PIN.get(), null );
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    formated_decision.setSign(sign);
-
-
     if (params.getComment() != null){
       formated_decision.setComment( String.format( "Причина отклонения: %s", params.getComment() ) );
     }
@@ -210,7 +203,7 @@ public class RejectDecision extends AbstractCommand {
 
     DocumentService operationService = retrofit.create( DocumentService.class );
 
-    Observable<Object> info = operationService.update(
+    Observable<DecisionError> info = operationService.update(
       decisionId,
       LOGIN.get(),
       TOKEN.get(),
@@ -221,19 +214,28 @@ public class RejectDecision extends AbstractCommand {
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         data -> {
-          Timber.tag(TAG).i("ok: %s", data);
 
-          if (callback != null){
-            callback.onCommandExecuteSuccess( getType() );
+          if (data.getErrors() !=null && data.getErrors().size() > 0){
+            queueManager.setExecutedWithError(this, data.getErrors());
+            EventBus.getDefault().post( new ForceUpdateDocumentEvent( data.getDocumentUid() ));
+          } else {
+
+            if (callback != null ){
+              callback.onCommandExecuteSuccess( getType() );
+              EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
+            }
+
+            queueManager.setExecutedRemote(this);
           }
 
-          queueManager.setExecutedRemote(this);
         },
         error -> {
           Timber.tag(TAG).i("error: %s", error);
           if (callback != null){
             callback.onCommandExecuteError(getType());
           }
+          queueManager.setExecutedWithError(this, Collections.singletonList("http_error"));
+          EventBus.getDefault().post( new ForceUpdateDocumentEvent( params.getDecisionModel().getDocumentUid() ));
         }
       );
   }

@@ -64,10 +64,10 @@ public class LogAdapter extends RecyclerView.Adapter<LogAdapter.QueueViewHolder>
 
       viewHolder.jobStatus.setText( status );
 
-//      viewHolder.operations.setChecked( item.isLocal() );
-
       viewHolder.cv.setOnClickListener(view -> {
-        Toast.makeText(mContext, " onClick : " + item.getUuid(), Toast.LENGTH_SHORT).show();
+        if (item.getError() != null ){
+          Toast.makeText(mContext, item.getError(), Toast.LENGTH_SHORT).show();
+        }
       });
     }
 
