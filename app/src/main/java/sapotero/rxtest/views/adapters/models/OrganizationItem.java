@@ -32,12 +32,16 @@ public class OrganizationItem {
   }
 
   public String getTitle() {
-    if (Objects.equals(name, "")){
-      setName("Без организации");
+    String title = name;
+    if (Objects.equals(title, "")){
+      title = "Без организации";
     }
-    return String.format( template, count, name );
+    return title;
   }
 
+  public String getTitleForDialog() {
+    return String.format( template, count, getTitle() );
+  }
 
   @Override
   public boolean equals(Object o) {

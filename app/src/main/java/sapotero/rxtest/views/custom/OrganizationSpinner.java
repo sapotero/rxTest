@@ -58,7 +58,7 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
 
       for (int i = 0; i < choices.length; i++) {
 //        choices[i] = mAdapter.getMainMenuItem(i).toString();
-        choices[i] = mAdapter.getItem(i).getTitle();
+        choices[i] = mAdapter.getItem(i).getTitleForDialog();
       }
 
       System.arraycopy(mSelected, 0, mOldSelection, 0, mSelected.length);
@@ -197,10 +197,10 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
         final ForegroundColorSpan grey  = new ForegroundColorSpan( getResources().getColor(R.color.md_grey_600) );
         final ForegroundColorSpan black = new ForegroundColorSpan( getResources().getColor(R.color.md_grey_900) );
 
-        final SpannableStringBuilder title = new SpannableStringBuilder( item.getName());
+        final SpannableStringBuilder title = new SpannableStringBuilder( item.getTitle());
         final SpannableStringBuilder count = new SpannableStringBuilder( String.format("%-4s ", String.valueOf(item.getCount()) ) );
 
-        title.setSpan(black, 0, item.getName().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+        title.setSpan(black, 0, item.getTitle().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
         count.setSpan(grey, 0, String.valueOf(item.getCount()).length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
         spinnerText = TextUtils.concat(count, title);
         break;
