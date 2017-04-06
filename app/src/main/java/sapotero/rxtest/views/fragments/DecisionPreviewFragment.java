@@ -117,6 +117,11 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
       next_person_button.setVisibility(View.VISIBLE);
       prev_person_button.setVisibility(View.VISIBLE);
     }
+
+
+    if ( settings.getBoolean("decision_with_assigment").get() ){
+      wrapper.setVisibility(View.GONE);
+    }
 //
 //    showDecisionCardTollbarMenuItems(true);
 //

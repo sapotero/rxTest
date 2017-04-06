@@ -199,4 +199,26 @@ public class QueueDBManager implements JobCountInterface {
   public int getRunningJobsCount(){
     return dataStore.count(QueueEntity.class).where(QueueEntity.RUNNING.eq(true)).get().value();
   }
+
+  public void setExecutedWithError(Command command) {
+    if (command != null && command.getParams() != null) {
+      CommandParams params = command.getParams();
+
+      if ( params.getUuid() != null && exist( params.getUuid() ) ){
+        int count = dataStore
+          .update(QueueEntity.class)
+          .set( QueueEntity.REMOTE, true )
+          .set( QueueEntity.LOCAL,  true )
+          .set( QueueEntity.RUNNING, false )
+          .set( QueueEntity.WITH_ERROR, true )
+          .where( QueueEntity.UUID.eq( params.getUuid() ) )
+          .get()
+          .value();
+
+        if ( count > 0 ){
+          Timber.tag(TAG).i( "[%s] - updated error", params.getUuid() );
+        }
+      }
+    }
+  }
 }

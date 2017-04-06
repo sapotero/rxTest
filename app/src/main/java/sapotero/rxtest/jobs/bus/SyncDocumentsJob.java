@@ -50,13 +50,13 @@ import timber.log.Timber;
 public class SyncDocumentsJob  extends BaseJob {
 
   public static final int PRIORITY = 1;
+  private boolean not_processed;
   private String status;
   private String journal;
 
   private Boolean onControl;
-  private Boolean isProcessed = false;
-  private Boolean isFavorites = false;
-  private String processed_folder;
+  private Boolean isProcessed = null;
+  private Boolean isFavorites = null;
 
   private Preference<String> LOGIN = null;
   private Preference<String> TOKEN = null;
@@ -71,23 +71,25 @@ public class SyncDocumentsJob  extends BaseJob {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
     this.filter = filter;
-    this.processed_folder = "";
   }
 
-  public SyncDocumentsJob(String uid, Fields.Status filter, String processed_folder, Boolean isFavorites, Boolean isProcessed) {
+  public SyncDocumentsJob(String uid, String journal, String status, boolean b) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
-    this.filter = filter;
-    this.processed_folder = processed_folder;
-    this.isFavorites = isFavorites;
-    this.isProcessed = isProcessed;
+
+    String[] index = journal.split("_production_db_");
+    this.journal = index[0];
+
+    this.status  = status;
+    this.not_processed = true;
   }
 
-  public SyncDocumentsJob(String uid, Fields.Status filter, boolean control) {
+  public SyncDocumentsJob(String uid, String status) {
     super( new Params(PRIORITY).requireNetwork().persist() );
-    this.uid = uid;
-    this.filter = filter;
-    this.onControl = control;
+    this.uid     = uid;
+    if (!Objects.equals(status, "")){
+      this.status  = status;
+    }
   }
 
   public SyncDocumentsJob(String uid, String journal, String status) {
@@ -98,14 +100,6 @@ public class SyncDocumentsJob  extends BaseJob {
     this.journal = index[0];
 
     this.status  = status;
-  }
-
-  public SyncDocumentsJob(String uid, String status) {
-    super( new Params(PRIORITY).requireNetwork().persist() );
-    this.uid     = uid;
-    if (!Objects.equals(status, "")){
-      this.status  = status;
-    }
   }
 
   @Override
@@ -233,10 +227,7 @@ public class SyncDocumentsJob  extends BaseJob {
 
     rd.setFavorites(false);
     rd.setProcessed(false);
-    rd.setFolder(processed_folder);
-    if ( processed_folder != "" ){
-      rd.setProcessed(true);
-    }
+
     rd.setControl(onControl);
 
     if ( d.getSigner().getOrganisation() != null && !Objects.equals(d.getSigner().getOrganisation(), "")){
@@ -308,17 +299,12 @@ public class SyncDocumentsJob  extends BaseJob {
 
       rDoc.setFavorites(isFavorites);
       rDoc.setProcessed(isProcessed);
-      rDoc.setFolder(processed_folder);
-
-      if ( processed_folder != "" && isProcessed ){
-        rDoc.setProcessed(true);
-        rDoc.setFilter( Fields.Status.PROCESSED.getValue() );
-      }
 
       rDoc.setControl(onControl);
       rDoc.setUser( LOGIN.get() );
       rDoc.setFromLinks( false );
       rDoc.setChanged( false );
+      rDoc.setProcessed(false);
 
       rDoc.setFromProcessedFolder( false );
       rDoc.setFromFavoritesFolder( false );
@@ -551,14 +537,13 @@ public class SyncDocumentsJob  extends BaseJob {
       if (doc.isProcessed() == null){
         doc.setProcessed(isProcessed);
       }
-
-      doc.setFolder(processed_folder);
       doc.setControl(onControl);
       doc.setUser( LOGIN.get() );
       doc.setFromLinks( false );
       doc.setFromProcessedFolder( false );
       doc.setFromFavoritesFolder( false );
       doc.setChanged( false );
+      doc.setProcessed(false);
 
       Boolean red = false;
       Boolean with_decision = false;
@@ -759,6 +744,10 @@ public class SyncDocumentsJob  extends BaseJob {
       if (doc.isProcessed() == null){
         doc.setProcessed(isProcessed);
       }
+    }
+
+    if (not_processed) {
+      doc.setProcessed(false);
     }
 
     dataStore

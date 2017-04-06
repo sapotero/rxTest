@@ -5,7 +5,7 @@
     tools:context="net.taptools.android.sportshistory.PlayerProfileActivity">
 
     <item
-        android:id="@+id/menu_info_decision_create"
+        android:id="@+id/menu_info_decision_create_with_assignment"
         app:showAsAction="always|withText"
         android:icon="@drawable/add_decision"
         android:title="@string/info_create_decision_processed"/>

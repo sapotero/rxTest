@@ -5,6 +5,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
 import com.birbit.android.jobqueue.JobManager;
+import com.birbit.android.jobqueue.TagConstraint;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
@@ -332,6 +333,7 @@ public class DataLoaderManager {
     Observable<AuthSignToken> authSubscription = sign == null ? auth.getAuth( LOGIN.get(), PASSWORD.get() ) : auth.getAuthBySign(json);
 
     unsubscribe();
+
     subscription.add(
 
       authSubscription
@@ -649,6 +651,8 @@ public class DataLoaderManager {
     Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
     DocumentsService docService = retrofit.create(DocumentsService.class);
 
+    jobManager.clear();
+    jobManager.cancelJobsInBackground(null, TagConstraint.ANY);
 
     unsubscribe();
 
@@ -662,10 +666,12 @@ public class DataLoaderManager {
             .subscribe(
               data -> {
                 if (data.getDocuments().size() > 0){
-                  jobManager.addJobInBackground( new InvalidateDocumentsJob(data.getDocuments(), index, status) );
 
                   for (Document doc: data.getDocuments() ) {
-                    jobManager.addJobInBackground( new SyncDocumentsJob(doc.getUid(), index, status) );
+                    jobManager.addJobInBackground( new SyncDocumentsJob(doc.getUid(), index, status, true) );
+                  }
+                  if ( settings.getString("is_first_run").get() != null ){
+                    jobManager.addJobInBackground( new InvalidateDocumentsJob(data.getDocuments(), index, status) );
                   }
                 }
               },

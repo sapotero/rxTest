@@ -106,6 +106,9 @@ public class QueueManager {
     dBManager.setExecutedRemote(command);
   }
 
+  public void setExecutedWithError(Command command) {
+    dBManager.setExecutedWithError(command);
+  }
   public void removeAll() {
     dBManager.removeAll();
   }

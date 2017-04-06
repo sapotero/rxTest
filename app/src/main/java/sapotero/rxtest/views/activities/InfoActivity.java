@@ -153,6 +153,13 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   private void setTabContent() {
 
+    try {
+//      tabLayout.removeAllViews();
+      viewPager.removeAllViews();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
     if (viewPager.getAdapter() == null) {
 
       Timber.tag(TAG).e("IS_PROCESSED.get() %s | %s -> %s", status, STATUS_CODE.get(), IS_PROCESSED.get() );
@@ -197,6 +204,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   }
 
   private void setPreview() {
+
     FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
 
     Timber.tag("INFO").v( "JOURNAL: %s | STATUS: %s", journal.getName(), status.getName() );
@@ -291,6 +299,8 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   @Override
   protected void onResume() {
     super.onResume();
+
+    settings.getBoolean("decision_with_assigment").set(false);
 
     initInfoActivity();
     updateCurrent();

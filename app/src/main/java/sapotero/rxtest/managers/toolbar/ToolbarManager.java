@@ -306,6 +306,15 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             }
             break;
 
+          case R.id.menu_info_decision_create_with_assignment:
+            // настройка
+            // Показывать подтверждения о постановке на контроль документов для раздела «Обращение граждан»
+            operation = CommandFactory.Operation.INCORRECT;
+            settings.getBoolean("decision_with_assigment").set(true);
+            settings.getString("decision.active.id").set(null);
+            Intent create_assigment_intent = new Intent(context, DecisionConstructorActivity.class);
+            activity.startActivity(create_assigment_intent);
+            break;
 
           default:
             operation = CommandFactory.Operation.INCORRECT;
@@ -475,7 +484,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       toolbar.inflateMenu(R.menu.info_menu);
 
       try {
-        toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(false);
+        toolbar.getMenu().findItem(R.id.menu_info_shared_to_favorites).setVisible(false);
+        toolbar.getMenu().findItem(R.id.menu_info_shared_to_control).setVisible(false);
         toolbar.getMenu().findItem(R.id.menu_info_decision_edit).setVisible(false);
       } catch (Exception e) {
         e.printStackTrace();
@@ -491,6 +501,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         toolbar.getMenu().findItem(R.id.menu_info_shared_to_control).setVisible(false);
         toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(false);
         toolbar.getMenu().findItem(R.id.menu_info_decision_edit).setVisible(false);
+        toolbar.getMenu().findItem(R.id.menu_info_shared_to_favorites).setVisible(false);
       } catch (Exception e) {
         e.printStackTrace();
       }

@@ -31,11 +31,13 @@ public class InvalidateDocumentsJob extends BaseJob {
   private DocumentInfo document;
 
 
-  public InvalidateDocumentsJob(List<Document> uids, String index, String status) {
+  public InvalidateDocumentsJob(List<Document> uids, String journal, String status) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uids = uids;
-    this.index = index;
     this.status = status;
+
+    String[] index = journal.split("_production_db_");
+    this.index = index[0];
   }
 
   @Override
@@ -52,6 +54,10 @@ public class InvalidateDocumentsJob extends BaseJob {
     List<RDocumentEntity> dbDocs = dataStore
       .select(RDocumentEntity.class)
       .where(RDocumentEntity.FILTER.eq(status))
+      .and(RDocumentEntity.DOCUMENT_TYPE.eq(index))
+      .and(RDocumentEntity.FROM_LINKS.eq(false))
+      .and(RDocumentEntity.FROM_FAVORITES_FOLDER.eq(false))
+      .and(RDocumentEntity.FROM_PROCESSED_FOLDER.eq(false))
       .get()
       .toList();
 
@@ -59,6 +65,7 @@ public class InvalidateDocumentsJob extends BaseJob {
 
     if (dbDocs.size() > 0){
       for (RDocumentEntity doc :dbDocs ) {
+        Timber.tag(TAG).e("db_uid: %s", doc.getUid());
         db_uids.add( doc.getUid() );
       }
     }
@@ -67,10 +74,12 @@ public class InvalidateDocumentsJob extends BaseJob {
     if ( uids.size() > 0 ){
       for (Document doc :uids ) {
         api_uids.add( doc.getUid() );
+
       }
     }
 
     for ( String uid: api_uids ) {
+      Timber.tag(TAG).e("api_uid: %s", uid);
       if (db_uids.contains(uid)){
         db_uids.remove(uid);
       }

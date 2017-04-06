@@ -110,8 +110,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     status  = Fields.Status.findStatus( STATUS_CODE.get() );
 
 
-
-
     toolbar.setTitleTextColor( getResources().getColor( R.color.md_grey_100 ) );
     toolbar.setSubtitleTextColor( getResources().getColor( R.color.md_grey_400 ) );
 
@@ -126,8 +124,20 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
 
       Gson gson = new GsonBuilder().setPrettyPrinting().create();
-      String json = gson.toJson( manager.getDecision() );
+
+      Decision _dec_ = manager.getDecision();
+
+      if ( settings.getBoolean("decision_with_assigment").get() ){
+        Timber.tag(TAG).w("ASSIGNMENT: %s", settings.getBoolean("decision_with_assigment").get() );
+        _dec_.setAssignment(true);
+      }
+
+      String json = gson.toJson( _dec_ );
+
+
+
       Timber.tag(TAG).w("DECISION: %s", json );
+      Timber.tag(TAG).w("ASSIGNMENT: %s", settings.getBoolean("decision_with_assigment").get() );
 
       Decision save_decision = manager.getDecision();
 
@@ -184,11 +194,16 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
             .show();
         }
 
+        String content = "Резолюция была изменена";
+
+        if ( settings.getBoolean("decision_with_assigment").get() ){
+          content = "Поручение не отправлено. Вернуться назад и удалить поручение?";
+        }
 
         if (showSaveDialog){
           new MaterialDialog.Builder(this)
             .title("Имеются несохранненые данные")
-            .content("Резолюция была изменена")
+            .content(content)
             .positiveText("сохранить")
             .onPositive(
               (dialog, which) -> {
@@ -227,6 +242,26 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
                   params.setDecisionModel(save_decision);
 
                   rDecisionEntity.setTemporary(true);
+                }
+
+                if ( settings.getBoolean("decision_with_assigment").get() ){
+                  decision = manager.getDecision();
+
+                  params = new CommandParams();
+                  params.setDecisionModel( decision );
+
+                  decision.setDocumentUid( settings.getString("activity_main_menu.uid").get() );
+
+                  if (rDecisionEntity != null) {
+                    params.setDecisionModel( DecisionConverter.formatDecision(rDecisionEntity) );
+                    params.setDecisionId( rDecisionEntity.getUid() );
+                  }
+
+                  operation = CommandFactory.Operation.CREATE_AND_APPROVE_DECISION;
+
+                  params.setAssignment(true);
+                  decision.setAssignment(true);
+
                 }
 
                 operationManager.execute( operation, params );
@@ -292,6 +327,12 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
             params.setDecisionModel( manager.getDecision() );
           }
 
+          if ( settings.getBoolean("decision_with_assigment").get() ){
+            Timber.tag(TAG).w("ASSIGNMENT: %s", settings.getBoolean("decision_with_assigment").get() );
+            params.setAssignment(true);
+            decision.setAssignment(true);
+          }
+
           operationManager.execute( operation, params );
 
           finish();
@@ -319,6 +360,11 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
             params.setDecisionId( rDecisionEntity.getUid() );
 //            params.setDecision( rDecisionEntity );
             params.setDecisionModel( DecisionConverter.formatDecision(rDecisionEntity) );
+
+            if ( settings.getBoolean("decision_with_assigment").get() ){
+              Timber.tag(TAG).w("ASSIGNMENT: %s", settings.getBoolean("decision_with_assigment").get() );
+              params.setAssignment(true);
+            }
             operationManager.execute(operation, params);
           }
 
@@ -681,6 +727,11 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
         params.setDecisionId( settings.getString("decision.active.id").get() );
 //        params.setDecision( rDecisionEntity );
         params.setDecisionModel( DecisionConverter.formatDecision(rDecisionEntity) );
+
+        if ( settings.getBoolean("decision_with_assigment").get() ){
+          Timber.tag(TAG).w("ASSIGNMENT: %s", settings.getBoolean("decision_with_assigment").get() );
+          params.setAssignment(true);
+        }
 
         operationManager.execute(operation, params);
       })

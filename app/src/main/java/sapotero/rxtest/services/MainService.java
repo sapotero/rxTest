@@ -66,6 +66,7 @@ import sapotero.rxtest.events.crypto.SignDataEvent;
 import sapotero.rxtest.events.crypto.SignDataResultEvent;
 import sapotero.rxtest.events.crypto.SignDataWrongPinEvent;
 import sapotero.rxtest.events.decision.SignAfterCreateEvent;
+import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateUnprocessedDocumentsEvent;
 import sapotero.rxtest.events.service.AuthServiceAuthEvent;
@@ -832,6 +833,8 @@ public class MainService extends Service {
     CommandFactory.Operation operation = CommandFactory.Operation.APPROVE_DECISION_DELAYED;
     CommandParams params = new CommandParams();
     params.setDecisionId( event.uid );
+    params.setAssignment( event.assignment );
+
 
     Command command = operation.getCommand(null, getApplicationContext(), null, params);
     queue.add(command);
@@ -843,6 +846,16 @@ public class MainService extends Service {
     dataLoaderInterface.updateByCurrentStatus( event.item, event.button );
   }
 
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(ForceUpdateDocumentEvent event){
+    Timber.tag(TAG).e("ForceUpdateDocumentEvent");
 
+    int count = dataStore.update(RDocumentEntity.class)
+      .set(RDocumentEntity.MD5, "")
+      .where(RDocumentEntity.UID.eq(event.uid))
+      .get()
+      .value();
+    Timber.tag(TAG).e("updated: %s", count);
+  }
 
 }

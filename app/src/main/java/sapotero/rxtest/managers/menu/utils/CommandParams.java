@@ -22,6 +22,7 @@ public class CommandParams implements Serializable {
   public String comment;
   public Decision decisionModel;
   public Boolean activeDecision;
+  private boolean assignment = false;
 
 
   public String getFilePath() {
@@ -141,5 +142,13 @@ public class CommandParams implements Serializable {
 
   public Decision getDecisionModel() {
     return decisionModel;
+  }
+
+  public void setAssignment(boolean assignment) {
+    this.assignment = assignment;
+  }
+
+  public boolean isAssignment() {
+    return assignment;
   }
 }

@@ -17,7 +17,6 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
-import sapotero.rxtest.events.decision.SignAfterCreateEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
@@ -26,6 +25,7 @@ import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.old_decision.DecisionResponce;
+import sapotero.rxtest.services.MainService;
 import timber.log.Timber;
 
 public class AddAndApproveDecision extends AbstractCommand {
@@ -89,7 +89,7 @@ public class AddAndApproveDecision extends AbstractCommand {
   public void executeRemote() {
     loadSettings();
 
-    Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
+    Timber.tag(TAG).i( "type: %s", new Gson().toJson(params) );
 
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
@@ -103,6 +103,21 @@ public class AddAndApproveDecision extends AbstractCommand {
     decision.setLetterheadFontSize("15");
     decision.setPerformersFontSize("12");
     decision.setLetterhead(null);
+
+    if (params.isAssignment()){
+      decision.setAssignment(true);
+    }
+
+    decision.setApproved(true);
+
+    String sign = null;
+
+    try {
+      sign = MainService.getFakeSign( context, PIN.get(), null );
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    decision.setSign(sign);
 
     String json_m = new Gson().toJson( decision );
 
@@ -136,7 +151,7 @@ public class AddAndApproveDecision extends AbstractCommand {
           }
 
           queueManager.setExecutedRemote(this);
-          EventBus.getDefault().post( new SignAfterCreateEvent( data.getId() ));
+//          EventBus.getDefault().post( new SignAfterCreateEvent( data.getId(), params.isAssignment() ));
 
         },
         error -> {
@@ -144,6 +159,7 @@ public class AddAndApproveDecision extends AbstractCommand {
           if (callback != null){
             callback.onCommandExecuteError(getType());
           }
+          queueManager.setExecutedWithError(this);
         }
       );
   }

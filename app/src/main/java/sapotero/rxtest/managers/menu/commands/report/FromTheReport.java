@@ -126,7 +126,18 @@ public class FromTheReport extends AbstractCommand {
     OperationService operationService = retrofit.create( OperationService.class );
 
     ArrayList<String> uids = new ArrayList<>();
-    uids.add( UID.get() );
+
+    String uid = null;
+
+    if (params.getDocument() != null && !Objects.equals(params.getDocument(), "")){
+      uid = params.getDocument();
+    }
+
+    if (document.getUid() != null && !Objects.equals(document.getUid(), "")){
+      uid = document.getUid();
+    }
+
+    uids.add( uid );
 
     String comment = null;
 

@@ -15,14 +15,15 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
+import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.interfaces.Command;
-import sapotero.rxtest.retrofit.DocumentService;
-import sapotero.rxtest.retrofit.models.document.Decision;
-import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.retrofit.DocumentService;
+import sapotero.rxtest.retrofit.models.document.Decision;
 import timber.log.Timber;
 
 public class AddDecision extends AbstractCommand {
@@ -76,8 +77,11 @@ public class AddDecision extends AbstractCommand {
     _params.setDecisionId( params.getDecisionModel().getId() );
     _params.setDecisionModel( params.getDecisionModel() );
     _params.setDocument(params.getDocument());
+    _params.setAssignment(params.isAssignment());
     Command command = operation.getCommand(null, context, document, _params);
     queueManager.add(command);
+
+    Timber.tag(TAG).w("ASSIGNMENT: %s", params.isAssignment() );
 
     queueManager.add(this);
   }
@@ -127,6 +131,10 @@ public class AddDecision extends AbstractCommand {
     decision.setPerformersFontSize("12");
     decision.setLetterhead(null);
 
+    if (params.isAssignment()){
+      decision.setAssignment(true);
+    }
+
     String json_m = new Gson().toJson( decision );
 
 //    Timber.w("decision_json_m: %s", json_m);
@@ -137,11 +145,11 @@ public class AddDecision extends AbstractCommand {
     );
 
     Timber.tag(TAG).e("DECISION");
-    Timber.tag(TAG).e("%s", json);
+    Timber.tag(TAG).e("%s", json_m);
 
     DocumentService operationService = retrofit.create( DocumentService.class );
 
-    Observable<Object> info = operationService.create(
+    Observable<Decision> info = operationService.create(
       LOGIN.get(),
       TOKEN.get(),
       json
@@ -152,18 +160,26 @@ public class AddDecision extends AbstractCommand {
       .subscribe(
         data -> {
 
-          if (callback != null ){
-            callback.onCommandExecuteSuccess( getType() );
-            EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
+          if (data.getErrors() !=null && data.getErrors().size() > 0){
+            queueManager.setExecutedWithError(this);
+            EventBus.getDefault().post( new ForceUpdateDocumentEvent( data.getDocumentUid() ));
+          } else {
+
+            if (callback != null ){
+              callback.onCommandExecuteSuccess( getType() );
+              EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
+            }
+
+            queueManager.setExecutedRemote(this);
           }
 
-          queueManager.setExecutedRemote(this);
         },
         error -> {
           Timber.tag(TAG).i("error: %s", error);
           if (callback != null){
             callback.onCommandExecuteError(getType());
           }
+          queueManager.setExecutedWithError(this);
         }
       );
   }

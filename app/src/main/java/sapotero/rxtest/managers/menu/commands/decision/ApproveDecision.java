@@ -180,6 +180,10 @@ public class ApproveDecision extends AbstractCommand {
     _decision.setApproved(true);
     _decision.setSign( sign );
 
+    if (params.isAssignment()){
+      _decision.setAssignment(true);
+    }
+
     DecisionWrapper wrapper = new DecisionWrapper();
     wrapper.setDecision(_decision);
 

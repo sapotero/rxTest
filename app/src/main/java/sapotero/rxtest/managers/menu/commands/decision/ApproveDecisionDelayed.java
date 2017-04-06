@@ -128,6 +128,11 @@ public class ApproveDecisionDelayed extends AbstractCommand {
       _decision.setApproved(true);
       _decision.setSign( sign );
 
+      if (params.isAssignment()){
+        _decision.setAssignment(true);
+      }
+
+
       DecisionWrapper wrapper = new DecisionWrapper();
       wrapper.setDecision(_decision);
 
@@ -168,6 +173,7 @@ public class ApproveDecisionDelayed extends AbstractCommand {
             if (callback != null){
               callback.onCommandExecuteError(getType());
             }
+            queueManager.setExecutedWithError(this);
           }
         );
     } else {

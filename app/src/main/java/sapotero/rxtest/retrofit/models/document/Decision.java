@@ -86,6 +86,19 @@ public class Decision implements Serializable {
   @SerializedName("sign")
   @Expose
   private String sign = null;
+  private boolean assignment = false;
+
+  @SerializedName("errors")
+  @Expose
+  private List<String> errors = null;
+
+  public List<String> getErrors() {
+    return errors;
+  }
+  public void setErrors(List<String> errors) {
+    this.errors = errors;
+  }
+
 
   public String getSign() {
     return sign;
@@ -445,4 +458,15 @@ public class Decision implements Serializable {
         this.blocks = blocks;
     }
 
+  public void setassignment(boolean assignment) {
+    this.assignment = assignment;
+  }
+
+  public boolean isAssignment() {
+    return assignment;
+  }
+
+  public void setAssignment(boolean assignment) {
+    this.assignment = assignment;
+  }
 }
