@@ -292,6 +292,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
 
     if (withSearch){
       autocomplete_adapter = new OshsAutoCompleteAdapter(getActivity());
+      autocomplete_adapter.setIgnoreUsers(user_ids);
       title.setAdapter( autocomplete_adapter );
     } else {
       title.setFocusable(false);
