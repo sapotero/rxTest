@@ -1,13 +1,17 @@
 package sapotero.rxtest.views.dialogs;
 
+import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ListView;
@@ -218,6 +222,11 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
           dismiss();
         }
       }
+
+      if (view12 != null) {
+        InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
+        inputManager.hideSoftInputFromWindow(view12.getWindowToken(), 0);
+      }
     });
 
     if (showWithAssistant){
@@ -283,10 +292,35 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
 
     if (withSearch){
       autocomplete_adapter = new OshsAutoCompleteAdapter(getActivity());
+      autocomplete_adapter.setIgnoreUsers(user_ids);
       title.setAdapter( autocomplete_adapter );
     } else {
       title.setFocusable(false);
       title.setAdapter(null);
+    }
+
+    if (!withSearch && withPrimaryConsideration) {
+      title.setAdapter(null);
+      title.setFocusable(true);
+      title.setFocusableInTouchMode(true);
+      title.addTextChangedListener(new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+          if (charSequence != null && charSequence.length() >= 1) {
+            adapter.getFilter().filter(charSequence);
+          } else {
+            adapter.cancelFiltering();
+          }
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+        }
+      });
     }
 
     if ( withSearch || !withPrimaryConsideration ){
