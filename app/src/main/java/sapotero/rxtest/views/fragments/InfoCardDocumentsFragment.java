@@ -137,25 +137,21 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
     Timber.tag("IMAGESSS").e("%s", document.getUid() );
 
-    if (document != null) {
-      //resolved https://tasks.n-core.ru/browse/MVDESD-12626 - срочность
-      if ( document.getUrgency() != null ){
-        urgency.setVisibility(View.VISIBLE);
-      }
-
-      if (document.getImages().size() > 0){
-        adapter.clear();
-
-        for (RImage image : document.getImages()) {
-          RImageEntity img = (RImageEntity) image;
-          Timber.tag(TAG).i("image " + img.getTitle() );
-          adapter.add( img );
-        }
-
-      }
+    //resolved https://tasks.n-core.ru/browse/MVDESD-12626 - срочность
+    if ( document.getUrgency() != null ){
+      urgency.setVisibility(View.VISIBLE);
     }
 
+    if (document.getImages().size() > 0){
+      adapter.clear();
 
+      for (RImage image : document.getImages()) {
+        RImageEntity img = (RImageEntity) image;
+        Timber.tag(TAG).i("image " + img.getTitle() );
+        adapter.add( img );
+      }
+
+    }
 
 
     index = 0;

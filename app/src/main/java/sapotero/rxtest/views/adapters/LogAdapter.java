@@ -62,6 +62,11 @@ public class LogAdapter extends RecyclerView.Adapter<LogAdapter.QueueViewHolder>
         status = "В очереди";
       }
 
+      if (item.isCanceled() != null && item.isCanceled()){
+        status = "Отменена";
+      }
+
+
       viewHolder.jobStatus.setText( status );
 
       viewHolder.cv.setOnClickListener(view -> {

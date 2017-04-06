@@ -7,8 +7,6 @@ import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.util.Collections;
-
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Retrofit;
@@ -21,6 +19,8 @@ import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
+import sapotero.rxtest.managers.menu.factories.CommandFactory;
+import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.DocumentService;
@@ -80,17 +80,20 @@ public class SaveDecision extends AbstractCommand {
   public void execute() {
 
 
-//    CommandFactory.Operation operation = CommandFactory.Operation.SAVE_TEMPORARY_DECISION;
-//    CommandParams _params = new CommandParams();
-//    _params.setDecisionId( params.getDecisionModel().getId() );
-//    _params.setDecisionModel( params.getDecisionModel() );
-//    _params.setDocument(params.getDocument());
-//    Command command = operation.getCommand(null, context, document, _params);
-//    queueManager.add(command);
+    CommandFactory.Operation operation = CommandFactory.Operation.SAVE_TEMPORARY_DECISION;
+    CommandParams temporaryParams = new CommandParams();
+    temporaryParams.setDecisionId( this.params.getDecisionModel().getId() );
+    temporaryParams.setDecisionModel( this.params.getDecisionModel() );
+    temporaryParams.setDocument(this.params.getDocument());
+    temporaryParams.setLinkedTaskUuid( params.getUuid() );
+    Command command = operation.getCommand(null, context, document, temporaryParams);
+//    command.execute();
+
+    queueManager.add(command);
 
 
     queueManager.add(this);
-    updateLocal();
+//    updateLocal();
   }
 
   @Override
@@ -119,7 +122,7 @@ public class SaveDecision extends AbstractCommand {
     Timber.tag(TAG).i( "2 updateLocal decision: %s", count );
     Timber.tag(TAG).i( "2 updateLocal decision signer:\n%s\n%s\n", params.getDecisionModel().getSignerId(), settings.getString("current_user_id").get() );
 
-//    EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( params.getDecisionModel().getId() ));
+
   }
 
   @Override
@@ -127,9 +130,6 @@ public class SaveDecision extends AbstractCommand {
     loadSettings();
 
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
-
-    queueManager.setAsRunning(this);
-
 
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
@@ -201,7 +201,12 @@ public class SaveDecision extends AbstractCommand {
           if (callback != null){
             callback.onCommandExecuteError(getType());
           }
-          queueManager.setExecutedWithError(this, Collections.singletonList("http_error"));
+
+          /* Раскоментировать перед релизом
+          if ( queueManager.getConnected() ){
+            queueManager.setExecutedWithError(this, Collections.singletonList("http_error"));
+          }
+          */
           EventBus.getDefault().post( new ForceUpdateDocumentEvent( params.getDecisionModel().getDocumentUid() ));
         }
       );

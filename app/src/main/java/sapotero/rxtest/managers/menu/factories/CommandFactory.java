@@ -372,9 +372,7 @@ public class CommandFactory implements AbstractCommand.Callback{
       public Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
         SaveTemporaryDecision command = new SaveTemporaryDecision(context, document);
         command.withParams(params);
-        command
-          .withDecisionId( params.getDecisionId() )
-          .registerCallBack(instance);
+        command.registerCallBack(instance);
 
         command.withParams(params);
         return command;

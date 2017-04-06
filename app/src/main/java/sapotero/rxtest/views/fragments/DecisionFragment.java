@@ -16,6 +16,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -41,7 +42,6 @@ import butterknife.OnClick;
 import okhttp3.OkHttpClient;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.application.utils.Keyboard;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.view.builders.BlockFactory;
 import sapotero.rxtest.retrofit.models.Oshs;
@@ -191,7 +191,8 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     decision_text.setOnFocusChangeListener((v, hasFocus) -> {
       Timber.tag(TAG).e("has focus: %s", hasFocus);
       if(!hasFocus){
-        Keyboard.hide(getActivity());
+        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
       }
     });
     decision_text.addTextChangedListener(new TextWatcher() {

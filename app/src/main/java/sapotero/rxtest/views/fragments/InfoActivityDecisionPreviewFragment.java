@@ -29,6 +29,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.f2prateek.rx.preferences.Preference;
@@ -74,6 +75,7 @@ import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.managers.toolbar.ToolbarManager;
+import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.adapters.DecisionSpinnerAdapter;
 import sapotero.rxtest.views.adapters.models.DecisionSpinnerItem;
@@ -87,6 +89,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
   @Inject RxSharedPreferences settings;
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject OperationManager operationManager;
+  @Inject QueueManager queue;
 
   private ToolbarManager toolbarManager;
   private OnFragmentInteractionListener mListener;
@@ -281,9 +284,12 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
 
       if ( !doc.isFromLinks() ){
 
-        if ( current_decision != null && current_decision.isTemporary() != null && !current_decision.isTemporary() ){
+        if ( current_decision != null ){
 
-          if ( current_decision != null && !current_decision.isApproved() ){
+          if ( !queue.getConnected() && current_decision.isTemporary() != null && current_decision.isTemporary() ){
+            Toast.makeText( getContext(), "В ОФЛАЙНЕ", Toast.LENGTH_SHORT ).show();
+            edit();
+          } else if ( current_decision.isApproved() != null && !current_decision.isApproved() ){
             edit();
           }
 

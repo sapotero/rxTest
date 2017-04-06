@@ -40,6 +40,7 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.application.utils.Keyboard;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.bus.MassInsertDoneEvent;
 import sapotero.rxtest.events.crypto.SignDataResultEvent;
@@ -123,9 +124,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     setContentView(R.layout.activity_info);
     ButterKnife.bind(this);
     EsdApplication.getComponent(this).inject(this);
-
-
-
 
 
   }
@@ -293,6 +291,8 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
     initInfoActivity();
     updateCurrent();
+
+    Keyboard.hide(this);
 
   }
 
