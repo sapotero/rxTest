@@ -47,6 +47,7 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
   private Preference<String> token;
   private Preference<String> HOST;
 
+  private ArrayList<String> ignore_user_ids;
 
   public OshsAutoCompleteAdapter(Context context) {
     mContext = context;
@@ -131,6 +132,9 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
     if (data != null && data.length > 0){
       for (Oshs oshs : data) {
         if (!oshs.getIsGroup() && !oshs.getIsOrganization()) {
+          if ( ignore_user_ids != null && ignore_user_ids.contains(oshs.getId()) ) {
+            continue;
+          }
           result.add(oshs);
         }
       }
@@ -144,5 +148,12 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
     token = settings.getString("token");
     HOST  = settings.getString("settings_username_host");
 
+  }
+
+  public void setIgnoreUsers(ArrayList<String> users) {
+    ignore_user_ids = new ArrayList<>();
+    if (users != null) {
+      ignore_user_ids = users;
+    }
   }
 }
