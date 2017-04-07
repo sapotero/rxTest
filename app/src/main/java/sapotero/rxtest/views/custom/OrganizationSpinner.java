@@ -5,10 +5,12 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.DataSetObserver;
+import android.graphics.Typeface;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -59,7 +61,7 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
     public void onClick(View v) {
       AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
 
-      String choices[] = new String[mAdapter.getCount()];
+      CharSequence choices[] = new CharSequence[mAdapter.getCount()];
 
       for (int i = 0; i < choices.length; i++) {
 //        choices[i] = mAdapter.getMainMenuItem(i).toString();
@@ -244,12 +246,13 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
 
         final ForegroundColorSpan grey  = new ForegroundColorSpan( getResources().getColor(R.color.md_grey_600) );
         final ForegroundColorSpan black = new ForegroundColorSpan( getResources().getColor(R.color.md_grey_900) );
+        final StyleSpan bold = new StyleSpan(Typeface.BOLD);
 
         final SpannableStringBuilder title = new SpannableStringBuilder( item.getTitle());
         final SpannableStringBuilder count = new SpannableStringBuilder( String.format("%-4s ", String.valueOf(item.getCount()) ) );
 
         title.setSpan(black, 0, item.getTitle().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-        count.setSpan(grey, 0, String.valueOf(item.getCount()).length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+        count.setSpan(bold, 0, String.valueOf(item.getCount()).length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
         spinnerText = TextUtils.concat(count, title);
         break;
       default:

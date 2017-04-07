@@ -1,5 +1,11 @@
 package sapotero.rxtest.views.adapters.models;
 
+import android.graphics.Typeface;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
+import android.text.style.StyleSpan;
+
 import java.util.Objects;
 
 public class OrganizationItem {
@@ -39,12 +45,17 @@ public class OrganizationItem {
     return title;
   }
 
-  public String getTitleForDialog() {
-    String title = String.format( template, count, getTitle() );
+  public CharSequence getTitleForDialog() {
+    String titleText = String.format( template, count, getTitle() );
     int maxLength = 37;
-    if (title.length() > maxLength){
-      title = title.toString().substring(0, maxLength - 3) + "...";
+    if (titleText.length() > maxLength){
+      titleText = titleText.toString().substring(0, maxLength - 3) + "...";
     }
+
+    final SpannableStringBuilder title = new SpannableStringBuilder( titleText );
+    final StyleSpan bold = new StyleSpan(Typeface.BOLD);
+    title.setSpan(bold, 0, String.valueOf(getCount()).length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
     return title;
   }
 
