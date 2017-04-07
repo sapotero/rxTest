@@ -14,6 +14,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -194,6 +195,16 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
         InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
       }
+    });
+    decision_text.setOnTouchListener((v, event) -> {
+
+      v.getParent().getParent().requestDisallowInterceptTouchEvent(true);
+      switch (event.getAction() & MotionEvent.ACTION_MASK){
+        case MotionEvent.ACTION_UP:
+          v.getParent().getParent().requestDisallowInterceptTouchEvent(false);
+          break;
+      }
+      return false;
     });
     decision_text.addTextChangedListener(new TextWatcher() {
 

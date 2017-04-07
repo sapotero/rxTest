@@ -40,6 +40,12 @@ public class QueueDBManager implements JobCountInterface {
       CommandParams params = command.getParams();
       String commandClass = command.getClass().getCanonicalName();
 
+      // обновим все резолюции и пометим их как отменённые
+      if ( params.getUuid() != null && ( commandClass.endsWith("SaveDecision")) ){
+        Decision decision = params.getDecisionModel();
+        setAsCanceled( decision.getId()  );
+      }
+
       if (
           params.getUuid() != null
             && !exist( params.getUuid() )          // если такой задачи нет в базе
@@ -70,13 +76,6 @@ public class QueueDBManager implements JobCountInterface {
           .subscribe(data -> {
             Timber.tag(TAG).v("inserted %s [ %s ]", data.getCommand(), data.getId() );
           });
-
-        // обновим все резолюции и пометим их как отменённые
-        if ( params.getUuid() != null && ( commandClass.endsWith("SaveDecision") || commandClass.endsWith("SaveDecision")) ){
-          Decision decision = params.getDecisionModel();
-          setAsCanceled( decision.getId()  );
-        }
-
       } else {
         Timber.tag(TAG).v("UUID exist!");
       }
@@ -92,10 +91,10 @@ public class QueueDBManager implements JobCountInterface {
       .set(QueueEntity.RUNNING, false)
       .set(QueueEntity.LOCAL, true)
       .set(QueueEntity.REMOTE, true)
-      .set(QueueEntity.WITH_ERROR, false)
       .set(QueueEntity.CANCELED, true)
       .where(QueueEntity.COMMAND.eq("sapotero.rxtest.managers.menu.commands.decision.SaveDecision"))
       .and( QueueEntity.PARAMS.like("%\"decisionId\":\""+decision_id+"\"%") )
+      .and(QueueEntity.WITH_ERROR.ne(true))
       .get().value();
     Timber.tag(TAG).i( "setAsCanceled %s", count );
   }

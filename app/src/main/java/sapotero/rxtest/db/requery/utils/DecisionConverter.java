@@ -1,5 +1,7 @@
 package sapotero.rxtest.db.requery.utils;
 
+import java.util.Arrays;
+
 import sapotero.rxtest.db.requery.models.decisions.RBlock;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
@@ -67,12 +69,32 @@ public class DecisionConverter {
   }
 
   public static String formatName(String name){
-
+    Timber.tag("DecisionConverter").e("formatName %s", name);
     try {
       String[] split = name.split(" ");
 
+      Timber.tag("DecisionConverter").e("split %s", Arrays.asList(split));
+
       if (split.length >= 1 ){
         name = String.format("%s %s", split[1], split[0] );
+      }
+    } catch (Exception error) {
+      Timber.tag("DecisionConverter").e(error);
+    }
+
+    return name;
+  }
+
+  public static String formatTemporaryName(String name){
+
+    Timber.tag("DecisionConverter").e("formatTemporaryName %s", name);
+    try {
+      String[] split = name.split(" ");
+
+      Timber.tag("DecisionConverter").e("split %s", Arrays.asList(split));
+
+      if (split.length >= 1 ){
+        name = String.format("%s %s", split[2], split[1] );
       }
     } catch (Exception error) {
       Timber.tag("DecisionConverter").e(error);

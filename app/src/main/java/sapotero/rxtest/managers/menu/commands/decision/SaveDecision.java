@@ -7,6 +7,8 @@ import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.Collections;
+
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Retrofit;
@@ -15,16 +17,19 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
+import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
+import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
-import sapotero.rxtest.managers.menu.factories.CommandFactory;
-import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.DocumentService;
+import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
+import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
 import timber.log.Timber;
 
@@ -80,20 +85,19 @@ public class SaveDecision extends AbstractCommand {
   public void execute() {
 
 
-    CommandFactory.Operation operation = CommandFactory.Operation.SAVE_TEMPORARY_DECISION;
-    CommandParams temporaryParams = new CommandParams();
-    temporaryParams.setDecisionId( this.params.getDecisionModel().getId() );
-    temporaryParams.setDecisionModel( this.params.getDecisionModel() );
-    temporaryParams.setDocument(this.params.getDocument());
-    temporaryParams.setLinkedTaskUuid( params.getUuid() );
-    Command command = operation.getCommand(null, context, document, temporaryParams);
+//    CommandFactory.Operation operation = CommandFactory.Operation.SAVE_TEMPORARY_DECISION;
+//    CommandParams temporaryParams = new CommandParams();
+//    temporaryParams.setDecisionId( this.params.getDecisionModel().getId() );
+//    temporaryParams.setDecisionModel( this.params.getDecisionModel() );
+//    temporaryParams.setDocument(this.params.getDocument());
+//    temporaryParams.setLinkedTaskUuid( params.getUuid() );
+//    Command command = operation.getCommand(null, context, document, temporaryParams);
 //    command.execute();
+//    queueManager.add(command);
 
-    queueManager.add(command);
 
+    updateLocal();
 
-    queueManager.add(this);
-//    updateLocal();
   }
 
   @Override
@@ -111,17 +115,96 @@ public class SaveDecision extends AbstractCommand {
 
   private void updateLocal() {
 
+    Decision dec = params.getDecisionModel();
+    Timber.tag(TAG).e("UPDATE %s", new Gson().toJson(dec));
+
+    RDecisionEntity decision = dataStore
+      .select(RDecisionEntity.class)
+      .where(RDecisionEntity.UID.eq(dec.getId()))
+      .get()
+      .first();
+
+    decision.setTemporary(true);
+
+    if (dec.getUrgencyText() != null) {
+      decision.setUrgencyText(dec.getUrgencyText());
+    }
+    decision.setComment(dec.getComment());
+    decision.setDate( dec.getDate());
+//    decision.setSigner( DecisionConverter.formatTemporaryName(dec.getSigner()));
+//    decision.setSignerBlankText(DecisionConverter.formatTemporaryName(dec.getSignerText()));
+    decision.setSigner( dec.getSigner() );
+    decision.setSignerBlankText(dec.getSignerBlankText());
+    decision.setSignerId(dec.getSignerId());
+    decision.setSignerPositionS(dec.getSignerPositionS());
+    decision.setTemporary(true);
+    decision.setApproved(dec.getApproved());
+    decision.setChanged(true);
+    decision.setRed(dec.getRed());
+
+    if (dec.getBlocks().size() > 0) {
+      decision.getBlocks().clear();
+    }
+
+    for (Block _block : dec.getBlocks()) {
+      RBlockEntity block = new RBlockEntity();
+
+      block.setTextBefore(_block.getTextBefore());
+      block.setText(_block.getText());
+      block.setAppealText(_block.getAppealText());
+      block.setNumber(_block.getNumber());
+
+
+      block.setToCopy(_block.getToCopy());
+      block.setHidePerformers(_block.getHidePerformers());
+      block.setToFamiliarization(_block.getToFamiliarization());
+
+
+      for (Performer _perf : _block.getPerformers()) {
+        RPerformerEntity perf = new RPerformerEntity();
+
+        perf.setNumber(_perf.getNumber());
+        perf.setPerformerText(_perf.getPerformerText());
+        perf.setOrganizationText(_perf.getOrganizationText());
+        perf.setIsOriginal(_perf.getIsOriginal());
+        perf.setIsResponsible(_perf.getIsResponsible());
+        perf.setIsResponsible(_perf.getIsResponsible());
+
+        perf.setBlock(block);
+        block.getPerformers().add(perf);
+      }
+
+      block.setDecision(decision);
+      decision.getBlocks().add(block);
+    }
+
+    dataStore
+      .update(decision)
+      .toObservable()
+      .observeOn(Schedulers.io())
+      .subscribeOn(AndroidSchedulers.mainThread())
+      .subscribe(
+        data -> {
+          Timber.tag(TAG).e("UPDATED %s", data.getSigner() );
+          EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( data.getUid() ));
+//          queueManager.setExecutedRemote(this);
+          queueManager.add(this);
+        },
+        error -> {
+          queueManager.setExecutedWithError(this, Collections.singletonList("db_error"));
+        }
+      );
+
     Timber.tag(TAG).e("1 updateLocal params%s", new Gson().toJson( params ));
 
 
     Integer count = dataStore
       .update(RDecisionEntity.class)
       .set(RDecisionEntity.TEMPORARY, true)
-      .where(RDecisionEntity.UID.eq(params.getDecisionModel().getId()))
+      .where(RDecisionEntity.UID.eq(dec.getId()))
       .get().value();
-    Timber.tag(TAG).i( "2 updateLocal decision: %s", count );
-    Timber.tag(TAG).i( "2 updateLocal decision signer:\n%s\n%s\n", params.getDecisionModel().getSignerId(), settings.getString("current_user_id").get() );
 
+    Timber.tag(TAG).i( "2 updateLocal decision: %s", count );
 
   }
 
@@ -202,11 +285,11 @@ public class SaveDecision extends AbstractCommand {
             callback.onCommandExecuteError(getType());
           }
 
-          /* Раскоментировать перед релизом
+          // Раскоментировать перед релизом
           if ( queueManager.getConnected() ){
             queueManager.setExecutedWithError(this, Collections.singletonList("http_error"));
           }
-          */
+
           EventBus.getDefault().post( new ForceUpdateDocumentEvent( params.getDecisionModel().getDocumentUid() ));
         }
       );
