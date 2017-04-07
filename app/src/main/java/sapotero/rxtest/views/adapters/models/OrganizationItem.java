@@ -1,6 +1,12 @@
 package sapotero.rxtest.views.adapters.models;
 
+import android.graphics.Typeface;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.StyleSpan;
+
 import java.util.Objects;
+import java.util.Random;
 
 public class OrganizationItem {
   private int id;
@@ -32,12 +38,24 @@ public class OrganizationItem {
   }
 
   public String getTitle() {
-    if (Objects.equals(name, "")){
-      setName("Без организации");
+    String title = name;
+    if (Objects.equals(title, "")){
+      title = "Без организации";
     }
-    return String.format( template, count, name );
+    return title;
   }
 
+  public CharSequence getCountForDialog() {
+    final SpannableStringBuilder countText = new SpannableStringBuilder( String.valueOf(count) );
+    final StyleSpan bold = new StyleSpan(Typeface.BOLD);
+    countText.setSpan(bold, 0, String.valueOf(count).length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+    return countText;
+  }
+
+  public CharSequence getTitleForDialog() {
+    String titleText = getTitle();
+    return titleText;
+  }
 
   @Override
   public boolean equals(Object o) {
