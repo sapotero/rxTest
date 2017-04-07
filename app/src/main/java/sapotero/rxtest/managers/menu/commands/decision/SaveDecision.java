@@ -96,7 +96,7 @@ public class SaveDecision extends AbstractCommand {
 //    queueManager.add(command);
 
 
-    updateLocal();
+    update();
 
   }
 
@@ -113,16 +113,23 @@ public class SaveDecision extends AbstractCommand {
     queueManager.setExecutedLocal(this);
   }
 
-  private void updateLocal() {
+  private void update() {
 
     Decision dec = params.getDecisionModel();
     Timber.tag(TAG).e("UPDATE %s", new Gson().toJson(dec));
+//
+//    int count = dataStore
+//      .delete(RDecisionEntity.class)
+//      .where(RDecisionEntity.UID.eq(dec.getId()))
+//      .get().value();
+//    Timber.tag(TAG).e("DELETED %s", count);
 
+
+    // RDecisionEntity decision = new RDecisionEntity();
     RDecisionEntity decision = dataStore
       .select(RDecisionEntity.class)
       .where(RDecisionEntity.UID.eq(dec.getId()))
-      .get()
-      .first();
+      .get().firstOrNull();
 
     decision.setTemporary(true);
 
@@ -131,8 +138,6 @@ public class SaveDecision extends AbstractCommand {
     }
     decision.setComment(dec.getComment());
     decision.setDate( dec.getDate());
-//    decision.setSigner( DecisionConverter.formatTemporaryName(dec.getSigner()));
-//    decision.setSignerBlankText(DecisionConverter.formatTemporaryName(dec.getSignerText()));
     decision.setSigner( dec.getSigner() );
     decision.setSignerBlankText(dec.getSignerBlankText());
     decision.setSignerId(dec.getSignerId());
@@ -178,6 +183,14 @@ public class SaveDecision extends AbstractCommand {
       decision.getBlocks().add(block);
     }
 
+//    RDocumentEntity doc = dataStore
+//      .select(RDocumentEntity.class)
+//      .where(RDocumentEntity.UID.eq(dec.getDocumentUid()))
+//      .get()
+//      .first();
+//
+//    decision.setDocument( doc );
+
     dataStore
       .update(decision)
       .toObservable()
@@ -195,16 +208,16 @@ public class SaveDecision extends AbstractCommand {
         }
       );
 
-    Timber.tag(TAG).e("1 updateLocal params%s", new Gson().toJson( params ));
+    Timber.tag(TAG).e("1 update params%s", new Gson().toJson( params ));
 
+//
+//    Integer count = dataStore
+//      .update(RDecisionEntity.class)
+//      .set(RDecisionEntity.TEMPORARY, true)
+//      .where(RDecisionEntity.UID.eq(dec.getId()))
+//      .get().value();
 
-    Integer count = dataStore
-      .update(RDecisionEntity.class)
-      .set(RDecisionEntity.TEMPORARY, true)
-      .where(RDecisionEntity.UID.eq(dec.getId()))
-      .get().value();
-
-    Timber.tag(TAG).i( "2 updateLocal decision: %s", count );
+//    Timber.tag(TAG).i( "2 update decision: %s", count );
 
   }
 

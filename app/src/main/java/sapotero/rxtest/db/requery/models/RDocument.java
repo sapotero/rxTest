@@ -2,6 +2,7 @@ package sapotero.rxtest.db.requery.models;
 
 import java.util.Set;
 
+import io.requery.CascadeAction;
 import io.requery.Column;
 import io.requery.Entity;
 import io.requery.ForeignKey;
@@ -98,16 +99,16 @@ public abstract class RDocument implements Persistable {
   Boolean red;
 
 
-  @OneToMany(mappedBy = "document")
+  @OneToMany(mappedBy = "document", cascade = {CascadeAction.DELETE, CascadeAction.SAVE})
   Set<RDecision> decisions;
 
-  @OneToMany(mappedBy = "document")
+  @OneToMany(mappedBy = "document", cascade = {CascadeAction.DELETE, CascadeAction.SAVE})
   Set<RExemplar> exemplars;
 
-  @OneToMany(mappedBy = "document")
+  @OneToMany(mappedBy = "document", cascade = {CascadeAction.DELETE, CascadeAction.SAVE})
   Set<RImage> images;
 
-  @OneToMany(mappedBy = "document")
+  @OneToMany(mappedBy = "document", cascade = {CascadeAction.DELETE, CascadeAction.SAVE})
   Set<RControlLabels> controlLabels;
 
   @ForeignKey

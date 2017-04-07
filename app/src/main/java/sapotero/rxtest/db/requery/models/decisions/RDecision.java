@@ -3,6 +3,7 @@ package sapotero.rxtest.db.requery.models.decisions;
 import java.util.Set;
 
 import io.requery.CascadeAction;
+import io.requery.Column;
 import io.requery.Entity;
 import io.requery.Generated;
 import io.requery.Index;
@@ -20,7 +21,9 @@ public abstract class RDecision {
   int id;
 
   @Index("decision_uid")
+  @Column(unique = true)
   String uid;
+
   String letterhead;
   String signer;
   String signerId;
