@@ -19,7 +19,7 @@
             style="@android:style/Widget.Material.SeekBar.Discrete"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:max="22"
+            android:max="30"
             android:padding="@dimen/half_date_offset"
             android:progress="4"
             tools:targetApi="n"/>
@@ -29,7 +29,7 @@
             android:orientation="vertical"
             android:layout_height="wrap_content"
             android:weightSum="3"
-            android:layout_width="700dp">
+            android:layout_width="900dp">
 
             <LinearLayout
                 android:id="@+id/desigion_view_root"

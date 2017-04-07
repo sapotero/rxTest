@@ -85,7 +85,7 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
     }
 
     // resolved https://tasks.n-core.ru/browse/MVDESD-13131
-    seekbar.setProgress(10);
+    seekbar.setProgress(12);
 
     return view;
   }

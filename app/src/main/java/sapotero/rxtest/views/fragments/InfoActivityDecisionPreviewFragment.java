@@ -282,26 +282,39 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
     public boolean onDoubleTap(MotionEvent e) {
       Timber.tag("GestureListener").w("DOUBLE TAP");
 
-      if ( !doc.isFromLinks() ){
 
-        if ( current_decision != null ){
 
-          if ( !queue.getConnected() && current_decision.isTemporary() != null && current_decision.isTemporary() ){
-            Toast.makeText( getContext(), "В ОФЛАЙНЕ", Toast.LENGTH_SHORT ).show();
-            edit();
-          } else if ( current_decision.isApproved() != null && !current_decision.isApproved() ){
-            edit();
-          }
+      if ( !doc.isFromLinks() && current_decision != null ){
 
-          if (current_decision == null ){
-            settings.getString("decision.active.id").set(null);
+        if ( !queue.getConnected() &&
+          current_decision.isTemporary() != null &&
+          current_decision.isTemporary() ){
 
-            Context context = getContext();
-            Intent create_intent = new Intent(context, DecisionConstructorActivity.class);
-            context.startActivity(create_intent);
-
-          }
+          edit();
         }
+
+        if ( queue.getConnected() &&
+          current_decision.isTemporary() != null &&
+          current_decision.isTemporary() ){
+          Toast.makeText( getContext(), "Запрещено редактировать резолюции в онлайне!\nДождитесь синхронизации.", Toast.LENGTH_SHORT ).show();
+        }
+
+        if ( current_decision.isApproved() != null &&
+          !current_decision.isApproved() &&
+          current_decision.isTemporary() != null &&
+          !current_decision.isTemporary()){
+          edit();
+        }
+      }
+
+      if (!doc.isFromLinks() &&
+        current_decision == null ){
+
+        settings.getString("decision.active.id").set(null);
+        Context context = getContext();
+        Intent create_intent = new Intent(context, DecisionConstructorActivity.class);
+        context.startActivity(create_intent);
+
       }
 
       return true;
