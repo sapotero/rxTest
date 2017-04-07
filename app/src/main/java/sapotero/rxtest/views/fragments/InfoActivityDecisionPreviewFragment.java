@@ -29,6 +29,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.f2prateek.rx.preferences.Preference;
@@ -74,6 +75,7 @@ import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.managers.toolbar.ToolbarManager;
+import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.adapters.DecisionSpinnerAdapter;
 import sapotero.rxtest.views.adapters.models.DecisionSpinnerItem;
@@ -87,6 +89,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
   @Inject RxSharedPreferences settings;
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject OperationManager operationManager;
+  @Inject QueueManager queue;
 
   private ToolbarManager toolbarManager;
   private OnFragmentInteractionListener mListener;
@@ -279,23 +282,39 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
     public boolean onDoubleTap(MotionEvent e) {
       Timber.tag("GestureListener").w("DOUBLE TAP");
 
-      if ( !doc.isFromLinks() ){
 
-        if ( current_decision != null && current_decision.isTemporary() != null && !current_decision.isTemporary() ){
 
-          if ( current_decision != null && !current_decision.isApproved() ){
-            edit();
-          }
+      if ( !doc.isFromLinks() && current_decision != null ){
 
-          if (current_decision == null ){
-            settings.getString("decision.active.id").set(null);
+        if ( !queue.getConnected() &&
+          current_decision.isTemporary() != null &&
+          current_decision.isTemporary() ){
 
-            Context context = getContext();
-            Intent create_intent = new Intent(context, DecisionConstructorActivity.class);
-            context.startActivity(create_intent);
-
-          }
+          edit();
         }
+
+        if ( queue.getConnected() &&
+          current_decision.isTemporary() != null &&
+          current_decision.isTemporary() ){
+          Toast.makeText( getContext(), "Запрещено редактировать резолюции в онлайне!\nДождитесь синхронизации.", Toast.LENGTH_SHORT ).show();
+        }
+
+        if ( current_decision.isApproved() != null &&
+          !current_decision.isApproved() &&
+          current_decision.isTemporary() != null &&
+          !current_decision.isTemporary()){
+          edit();
+        }
+      }
+
+      if (!doc.isFromLinks() &&
+        current_decision == null ){
+
+        settings.getString("decision.active.id").set(null);
+        Context context = getContext();
+        Intent create_intent = new Intent(context, DecisionConstructorActivity.class);
+        context.startActivity(create_intent);
+
       }
 
       return true;

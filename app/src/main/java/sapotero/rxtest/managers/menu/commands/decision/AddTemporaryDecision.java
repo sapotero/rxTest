@@ -80,7 +80,7 @@ public class AddTemporaryDecision extends AbstractCommand {
   @Override
   public void executeLocal() {
     queueManager.setExecutedLocal(this);
-    addDecision();
+    //addDecision();
   }
 
   private void addDecision() {

@@ -22,6 +22,8 @@ public class CommandParams implements Serializable {
   public String comment;
   public Decision decisionModel;
   public Boolean activeDecision;
+
+  private String linkedTaskUuid = "";
   private boolean assignment = false;
 
 
@@ -150,5 +152,13 @@ public class CommandParams implements Serializable {
 
   public boolean isAssignment() {
     return assignment;
+  }
+
+  public String getLinkedTaskUuid() {
+    return linkedTaskUuid;
+  }
+
+  public void setLinkedTaskUuid(String linkedTaskUuid) {
+    this.linkedTaskUuid = linkedTaskUuid;
   }
 }

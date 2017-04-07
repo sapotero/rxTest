@@ -34,9 +34,9 @@ public final class RequeryDbModule {
     EntityModel model = Models.DEFAULT;
     Configuration configuration = new ConfigurationBuilder(source, model)
       .setStatementCacheSize(16*2)
-      .setBatchUpdateSize(16)
+      .setBatchUpdateSize(4)
       .setWriteExecutor(
-        Executors.newScheduledThreadPool(16)
+        Executors.newScheduledThreadPool(4)
       )
       .build();
 

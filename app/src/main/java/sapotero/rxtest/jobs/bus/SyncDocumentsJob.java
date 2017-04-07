@@ -552,6 +552,10 @@ public class SyncDocumentsJob  extends BaseJob {
         with_decision = true;
         doc.getDecisions().clear();
 
+        for ( Decision dec : document.getDecisions() ) {
+          dataStore.delete(RDecisionEntity.class).where(RDecisionEntity.UID.eq(dec.getId())).get().value();
+        }
+
         for (Decision d: document.getDecisions() ) {
 
           RDecisionEntity decision = new RDecisionEntity();
@@ -769,7 +773,9 @@ public class SyncDocumentsJob  extends BaseJob {
 
           }
         },
-        Throwable::printStackTrace
+        error -> {
+          Timber.tag(TAG).e("%s", error);
+        }
       );
   }
 

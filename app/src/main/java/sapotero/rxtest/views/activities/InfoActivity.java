@@ -125,9 +125,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     EsdApplication.getComponent(this).inject(this);
 
 
-
-
-
   }
 
   private void initInfoActivity() {
@@ -293,6 +290,8 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
     initInfoActivity();
     updateCurrent();
+
+//    Keyboard.hide(this);
 
   }
 

@@ -15,9 +15,10 @@ import io.requery.rx.SingleEntityStore;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.queue.QueueEntity;
-import sapotero.rxtest.utils.queue.interfaces.JobCountInterface;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.retrofit.models.document.Decision;
+import sapotero.rxtest.utils.queue.interfaces.JobCountInterface;
 import timber.log.Timber;
 
 public class QueueDBManager implements JobCountInterface {
@@ -37,11 +38,18 @@ public class QueueDBManager implements JobCountInterface {
       Timber.tag(TAG).i( "\n----------- ADD ------------\n%s\n Params: %s", command, command.getParams() );
 
       CommandParams params = command.getParams();
+      String commandClass = command.getClass().getCanonicalName();
+
+      // обновим все резолюции и пометим их как отменённые
+      if ( params.getUuid() != null && ( commandClass.endsWith("SaveDecision")) ){
+        Decision decision = params.getDecisionModel();
+        setAsCanceled( decision.getId()  );
+      }
 
       if (
           params.getUuid() != null
-            && !exist( params.getUuid() )                                   // если такой задачи нет в базе
-            && !command.getClass().getCanonicalName().endsWith("DoNothing") // и если не заглушка
+            && !exist( params.getUuid() )          // если такой задачи нет в базе
+            && !commandClass.endsWith("DoNothing") // и если не заглушка
         ){
 
         Gson gson = new Gson();
@@ -72,6 +80,23 @@ public class QueueDBManager implements JobCountInterface {
         Timber.tag(TAG).v("UUID exist!");
       }
     }
+  }
+
+  private void setAsCanceled(String decision_id) {
+
+    Timber.tag(TAG).i( "decision_id %s", decision_id);
+
+    int count = dataStore
+      .update(QueueEntity.class)
+      .set(QueueEntity.RUNNING, false)
+      .set(QueueEntity.LOCAL, true)
+      .set(QueueEntity.REMOTE, true)
+      .set(QueueEntity.CANCELED, true)
+      .where(QueueEntity.COMMAND.eq("sapotero.rxtest.managers.menu.commands.decision.SaveDecision"))
+      .and( QueueEntity.PARAMS.like("%\"decisionId\":\""+decision_id+"\"%") )
+      .and(QueueEntity.WITH_ERROR.ne(true))
+      .get().value();
+    Timber.tag(TAG).i( "setAsCanceled %s", count );
   }
 
   private Boolean exist(String uuid) {

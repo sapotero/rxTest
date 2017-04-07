@@ -163,9 +163,10 @@ public class MainService extends Service {
 
     isConnected();
 
+    scheduller = new ScheduledThreadPoolExecutor(2);
 
     scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 0 ,5*60, TimeUnit.SECONDS );
-    scheduller.scheduleWithFixedDelay( new UpdateQueueTask(queue), 0 ,5, TimeUnit.SECONDS );
+    scheduller.scheduleWithFixedDelay( new UpdateQueueTask(queue), 0 ,1, TimeUnit.SECONDS );
 
 
   }
