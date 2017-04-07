@@ -168,13 +168,12 @@ public class SaveDecision extends AbstractCommand {
       for (Performer _perf : _block.getPerformers()) {
         RPerformerEntity perf = new RPerformerEntity();
 
+        perf.setPerformerId(_perf.getPerformerId());
         perf.setNumber(_perf.getNumber());
         perf.setPerformerText(_perf.getPerformerText());
         perf.setOrganizationText(_perf.getOrganizationText());
         perf.setIsOriginal(_perf.getIsOriginal());
         perf.setIsResponsible(_perf.getIsResponsible());
-        perf.setIsResponsible(_perf.getIsResponsible());
-
         perf.setBlock(block);
         block.getPerformers().add(perf);
       }
@@ -299,9 +298,9 @@ public class SaveDecision extends AbstractCommand {
           }
 
           // Раскоментировать перед релизом
-          if ( queueManager.getConnected() ){
-            queueManager.setExecutedWithError(this, Collections.singletonList("http_error"));
-          }
+          // if ( queueManager.getConnected() ){
+          //   queueManager.setExecutedWithError(this, Collections.singletonList("http_error"));
+          // }
 
           EventBus.getDefault().post( new ForceUpdateDocumentEvent( params.getDecisionModel().getDocumentUid() ));
         }

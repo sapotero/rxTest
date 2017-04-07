@@ -165,9 +165,6 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
         e.printStackTrace();
       }
 
-      updateDocumentCount();
-      updatePageCount();
-
       no_files.setVisibility(View.GONE);
       pdf_wrapper.setVisibility(View.VISIBLE);
     } else {
@@ -206,6 +203,8 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
         .password(null)
         .scrollHandle(null)
         .load();
+      updateDocumentCount();
+      updatePageCount();
     }
   }
 
@@ -227,7 +226,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     }
     Timber.tag(TAG).i( "AFTER %s - %s", index, adapter.getCount() );
 
-    updateDocument();
+    setPdfPreview();
   }
 
   @OnClick(R.id.info_card_pdf_fullscreen_next_document)
@@ -240,7 +239,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     }
     Timber.tag(TAG).i( "AFTER %s - %s", index, adapter.getCount() );
 
-    updateDocument();
+    setPdfPreview();
   }
 
   @OnClick(R.id.info_card_pdf_fullscreen_button)
