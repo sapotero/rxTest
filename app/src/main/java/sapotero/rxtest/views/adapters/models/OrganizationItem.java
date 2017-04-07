@@ -46,23 +46,14 @@ public class OrganizationItem {
   }
 
   public CharSequence getCountForDialog() {
-
-    // TODO: Remove this line. It is for testing only
-    int count = new Random().nextInt(200);
-
     final SpannableStringBuilder countText = new SpannableStringBuilder( String.valueOf(count) );
     final StyleSpan bold = new StyleSpan(Typeface.BOLD);
     countText.setSpan(bold, 0, String.valueOf(count).length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
     return countText;
   }
 
   public CharSequence getTitleForDialog() {
     String titleText = getTitle();
-//    int maxLength = 33;
-//    if (titleText.length() > maxLength){
-//      titleText = titleText.toString().substring(0, maxLength - 3) + "...";
-//    }
     return titleText;
   }
 

@@ -45,6 +45,7 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
   private boolean mAllSelected;
   private MultiSpinnerListener mListener;
 
+  List<DialogListItem> choices;
   DialogListAdapter dialogListAdapter;
   Button neutralButton;
 
@@ -72,7 +73,7 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
     public void onClick(View v) {
       System.arraycopy(mSelected, 0, mOldSelection, 0, mSelected.length);
 
-      List<DialogListItem> choices = new ArrayList<>();
+      choices = new ArrayList<>();
 
       for (int i = 0; i < mAdapter.getCount(); i++) {
         DialogListItem dialogListItem = new DialogListItem(
@@ -88,14 +89,15 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
 
       builder.setAdapter(dialogListAdapter, null);
 
-      // builder.setMultiChoiceItems(choices, mSelected, OrganizationSpinner.this);
-
       builder.setNegativeButton(android.R.string.cancel, (dialog, which) -> {
         System.arraycopy(mOldSelection, 0, mSelected, 0, mSelected.length);
         dialog.dismiss();
       });
 
       builder.setPositiveButton(android.R.string.ok, (dialog, which) -> {
+        for (int i = 0; i < choices.size(); i++) {
+          mSelected[i] = choices.get(i).isChecked();
+        }
         refreshSpinner();
         mListener.onItemsSelected(mSelected);
         dialog.dismiss();
@@ -111,8 +113,7 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
       listView.setAdapter(dialogListAdapter);
       listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
       listView.setOnItemClickListener((parent, view, position, id) -> {
-        mSelected[position] = !mSelected[position];
-        choices.get(position).setChecked(mSelected[position]);
+        choices.get(position).setChecked(!choices.get(position).isChecked());
         dialogListAdapter.notifyDataSetChanged();
         updateNeutralButtonText();
       });
@@ -123,24 +124,17 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
 
         // Override neutral button handler to prevent dialog from closing
         neutralButton.setOnClickListener(view -> {
-          mOldSelection = new boolean[mAdapter.getCount()];
-
           if ( isCheckedAll() ) {
             // Deselect all
             for (int i = 0; i < mOldSelection.length; i++) {
-              mOldSelection[i] = false;
-              mSelected[i] = false;
               choices.get(i).setChecked(false);
             }
           } else {
             // Select all
             for (int i = 0; i < mOldSelection.length; i++) {
-              mOldSelection[i] = true;
-              mSelected[i] = true;
               choices.get(i).setChecked(true);
             }
           }
-
           dialogListAdapter.notifyDataSetChanged();
           updateNeutralButtonText();
         });
@@ -152,8 +146,8 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
 
   private boolean isCheckedAll() {
     boolean isCheckedAll = true;
-    for (int i = 0; i < mSelected.length; i++) {
-      if ( !mSelected[i] ) {
+    for (int i = 0; i < choices.size(); i++) {
+      if ( !choices.get(i).isChecked() ) {
         isCheckedAll = false;
         break;
       }
