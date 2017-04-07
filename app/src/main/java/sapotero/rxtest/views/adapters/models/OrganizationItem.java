@@ -3,10 +3,10 @@ package sapotero.rxtest.views.adapters.models;
 import android.graphics.Typeface;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
-import android.text.TextUtils;
 import android.text.style.StyleSpan;
 
 import java.util.Objects;
+import java.util.Random;
 
 public class OrganizationItem {
   private int id;
@@ -45,18 +45,25 @@ public class OrganizationItem {
     return title;
   }
 
-  public CharSequence getTitleForDialog() {
-    String titleText = String.format( template, count, getTitle() );
-    int maxLength = 37;
-    if (titleText.length() > maxLength){
-      titleText = titleText.toString().substring(0, maxLength - 3) + "...";
-    }
+  public CharSequence getCountForDialog() {
 
-    final SpannableStringBuilder title = new SpannableStringBuilder( titleText );
+    // TODO: Remove this line. It is for testing only
+    int count = new Random().nextInt(200);
+
+    final SpannableStringBuilder countText = new SpannableStringBuilder( String.valueOf(count) );
     final StyleSpan bold = new StyleSpan(Typeface.BOLD);
-    title.setSpan(bold, 0, String.valueOf(getCount()).length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+    countText.setSpan(bold, 0, String.valueOf(count).length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-    return title;
+    return countText;
+  }
+
+  public CharSequence getTitleForDialog() {
+    String titleText = getTitle();
+//    int maxLength = 33;
+//    if (titleText.length() > maxLength){
+//      titleText = titleText.toString().substring(0, maxLength - 3) + "...";
+//    }
+    return titleText;
   }
 
   @Override

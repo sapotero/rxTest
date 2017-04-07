@@ -14,14 +14,24 @@ import android.text.style.StyleSpan;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CheckedTextView;
 import android.widget.ListView;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import sapotero.rxtest.R;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
 import sapotero.rxtest.views.adapters.models.OrganizationItem;
+import timber.log.Timber;
 
 public class OrganizationSpinner extends TextView implements DialogInterface.OnMultiChoiceClickListener {
 
@@ -35,6 +45,7 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
   private boolean mAllSelected;
   private MultiSpinnerListener mListener;
 
+  DialogListAdapter dialogListAdapter;
   Button neutralButton;
 
   public OrganizationSpinner(Context context) {
@@ -59,17 +70,25 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
   private OnClickListener onClickListener = new OnClickListener() {
     @Override
     public void onClick(View v) {
-      AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+      System.arraycopy(mSelected, 0, mOldSelection, 0, mSelected.length);
 
-      CharSequence choices[] = new CharSequence[mAdapter.getCount()];
+      List<DialogListItem> choices = new ArrayList<>();
 
-      for (int i = 0; i < choices.length; i++) {
-//        choices[i] = mAdapter.getMainMenuItem(i).toString();
-        choices[i] = mAdapter.getItem(i).getTitleForDialog();
+      for (int i = 0; i < mAdapter.getCount(); i++) {
+        DialogListItem dialogListItem = new DialogListItem(
+                mSelected[i],
+                mAdapter.getItem(i).getCountForDialog(),
+                mAdapter.getItem(i).getTitleForDialog() );
+        choices.add(dialogListItem);
       }
 
-      System.arraycopy(mSelected, 0, mOldSelection, 0, mSelected.length);
-      builder.setMultiChoiceItems(choices, mSelected, OrganizationSpinner.this);
+      AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+
+      dialogListAdapter = new DialogListAdapter(getContext(), choices);
+
+      builder.setAdapter(dialogListAdapter, null);
+
+      // builder.setMultiChoiceItems(choices, mSelected, OrganizationSpinner.this);
 
       builder.setNegativeButton(android.R.string.cancel, (dialog, which) -> {
         System.arraycopy(mOldSelection, 0, mSelected, 0, mSelected.length);
@@ -88,13 +107,22 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
 
       final AlertDialog dialog = builder.create();
 
+      ListView listView = dialog.getListView();
+      listView.setAdapter(dialogListAdapter);
+      listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+      listView.setOnItemClickListener((parent, view, position, id) -> {
+        mSelected[position] = !mSelected[position];
+        choices.get(position).setChecked(mSelected[position]);
+        dialogListAdapter.notifyDataSetChanged();
+        updateNeutralButtonText();
+      });
+
       dialog.setOnShowListener(dialogInterface -> {
         neutralButton = ((AlertDialog) dialogInterface).getButton(AlertDialog.BUTTON_NEUTRAL);
         updateNeutralButtonText();
 
         // Override neutral button handler to prevent dialog from closing
         neutralButton.setOnClickListener(view -> {
-          ListView organizationList = ((AlertDialog) dialogInterface).getListView();
           mOldSelection = new boolean[mAdapter.getCount()];
 
           if ( isCheckedAll() ) {
@@ -102,17 +130,18 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
             for (int i = 0; i < mOldSelection.length; i++) {
               mOldSelection[i] = false;
               mSelected[i] = false;
-              organizationList.setItemChecked(i, false);
+              choices.get(i).setChecked(false);
             }
           } else {
             // Select all
             for (int i = 0; i < mOldSelection.length; i++) {
               mOldSelection[i] = true;
               mSelected[i] = true;
-              organizationList.setItemChecked(i, true);
+              choices.get(i).setChecked(true);
             }
           }
 
+          dialogListAdapter.notifyDataSetChanged();
           updateNeutralButtonText();
         });
       });
@@ -287,5 +316,87 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
 
   public void setAllText(String allText) {
     this.mAllText = allText;
+  }
+
+
+  private class DialogListItem {
+    private boolean checked;
+    private CharSequence count;
+    private CharSequence title;
+
+    public DialogListItem(boolean checked, CharSequence count, CharSequence title) {
+      this.checked = checked;
+      this.count = count;
+      this.title = title;
+    }
+
+    public boolean isChecked() {
+      return checked;
+    }
+
+    public void setChecked(boolean checked) {
+      this.checked = checked;
+    }
+
+    public CharSequence getCount() {
+      return count;
+    }
+
+    public void setCount(CharSequence count) {
+      this.count = count;
+    }
+
+    public CharSequence getTitle() {
+      return title;
+    }
+
+    public void setTitle(CharSequence title) {
+      this.title = title;
+    }
+  }
+
+  private class DialogListAdapter extends BaseAdapter {
+
+    Context context;
+    List<DialogListItem> itemList;
+    LayoutInflater inflater;
+
+    public DialogListAdapter(Context context, List<DialogListItem> itemList) {
+      this.context = context;
+      this.itemList = itemList;
+      this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    }
+
+    @Override
+    public int getCount() {
+      return itemList.size();
+    }
+
+    @Override
+    public DialogListItem getItem(int position) {
+      return itemList.get(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+      return position;
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+
+      View view = convertView;
+      if (null == view) {
+        view = inflater.inflate(R.layout.filter_organizations_dialog_item, parent, false);
+      }
+
+      DialogListItem dialogListItem = itemList.get(position);
+
+      ( (CheckBox) view.findViewById(R.id.filter_organization_checkbox) ).setChecked( dialogListItem.isChecked() );
+      ( (TextView) view.findViewById(R.id.filter_organization_count) ).setText( dialogListItem.getCount() );
+      ( (TextView) view.findViewById(R.id.filter_organization_name) ).setText( dialogListItem.getTitle() );
+
+      return view;
+    }
   }
 }
