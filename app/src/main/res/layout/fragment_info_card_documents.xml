@@ -26,6 +26,7 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:padding="32dp"
+            android:layout_margin="@dimen/half_date_offset"
             />
 
         <FrameLayout

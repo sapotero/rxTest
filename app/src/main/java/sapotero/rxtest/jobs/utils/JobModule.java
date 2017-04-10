@@ -23,7 +23,7 @@ public final class JobModule {
       .maxConsumerCount(25)
       .loadFactor(1)
       .injector(job -> EsdApplication.mainComponent.inject((BaseJob) job))
-      .consumerKeepAlive(10);
+      .consumerKeepAlive(60);
 
     return new JobManager(builder.build());
   }
