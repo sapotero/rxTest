@@ -64,6 +64,7 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.query.DBQueryBuilder;
 import sapotero.rxtest.db.requery.utils.Fields;
+import sapotero.rxtest.events.adapter.UpdateDocumentAdapterEvent;
 import sapotero.rxtest.events.bus.GetDocumentInfoEvent;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.events.service.SuperVisorUpdateEvent;
@@ -71,6 +72,7 @@ import sapotero.rxtest.events.service.UpdateAllDocumentsEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.events.view.RemoveDocumentFromAdapterEvent;
 import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
+import sapotero.rxtest.managers.DataLoaderManager;
 import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
@@ -81,7 +83,6 @@ import sapotero.rxtest.views.custom.CircleLeftArrow;
 import sapotero.rxtest.views.custom.CircleRightArrow;
 import sapotero.rxtest.views.custom.OrganizationSpinner;
 import sapotero.rxtest.views.custom.SearchView.SearchView;
-import sapotero.rxtest.managers.DataLoaderManager;
 import sapotero.rxtest.views.menu.MenuBuilder;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import sapotero.rxtest.views.menu.fields.MainMenuItem;
@@ -733,6 +734,14 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     menuBuilder.getItem().recalcuate();
   }
 
+  @Subscribe( threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(UpdateDocumentAdapterEvent event) {
+    Timber.tag(TAG).v("UpdateDocumentAdapterEvent");
+    dbQueryBuilder.invalidateDocumentEvent(event);
+  }
+
+
+
   @RequiresApi(api = Build.VERSION_CODES.M)
   @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
   public void onMessageEvent(RemoveDocumentFromAdapterEvent event) {
@@ -754,6 +763,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     menuBuilder.setFavorites( dbQueryBuilder.getFavoritesCount() );
     dbQueryBuilder.executeWithConditions( conditions, menuBuilder.getItem().isVisible() && favorites_button.isChecked(), menuBuilder.getItem() );
   }
+
 
   @Override
   public void onUpdateError(Throwable error) {

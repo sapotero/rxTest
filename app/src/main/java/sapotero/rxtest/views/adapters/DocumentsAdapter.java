@@ -48,6 +48,7 @@ import sapotero.rxtest.db.requery.models.RLinks;
 import sapotero.rxtest.db.requery.models.RLinksEntity;
 import sapotero.rxtest.db.requery.models.RSignerEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
+import sapotero.rxtest.events.adapter.UpdateDocumentAdapterEvent;
 import sapotero.rxtest.events.utils.NoDocumentsEvent;
 import sapotero.rxtest.managers.db.managers.DBDocumentManager;
 import sapotero.rxtest.managers.menu.OperationManager;
@@ -150,6 +151,23 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 //    }
 
     notifyDataSetChanged();
+  }
+
+  public void removeAllWithRange() {
+    notifyItemRangeRemoved(0, documents.size());
+    Holder.MAP.clear();
+    documents.clear();
+  }
+
+  public void addOneItem(RDocumentEntity documentEntity) {
+    notifyItemInserted(documents.size());
+    documents.add(documentEntity);
+  }
+
+  public void invalidateDocumentEvent(UpdateDocumentAdapterEvent event) {
+    if (Holder.MAP.containsKey(event.uid)){
+
+    }
   }
 
   private static class ObservableDocumentList<T> {
@@ -503,8 +521,9 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     }
   }
 
-  public void setDocuments(List<RDocumentEntity> list_dosc, RecyclerView recyclerView) {
+  public void setDocuments(List<RDocumentEntity> list_dosc) {
     Timber.e("setDocuments %s", list_dosc.size());
+    clear();
     documents = list_dosc;
     notifyDataSetChanged();
 
@@ -550,4 +569,5 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
   private static class Holder {
     static Map<String, RDocumentEntity> MAP = new HashMap<>();
   }
+
 }

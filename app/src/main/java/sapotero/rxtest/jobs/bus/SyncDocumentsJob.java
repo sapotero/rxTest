@@ -32,6 +32,7 @@ import sapotero.rxtest.db.requery.models.exemplars.RExemplarEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
+import sapotero.rxtest.events.adapter.UpdateDocumentAdapterEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.retrofit.DocumentService;
@@ -762,6 +763,7 @@ public class SyncDocumentsJob  extends BaseJob {
         result -> {
           Timber.tag("MD5").d("updateDocumentInfo update" + result.getMd5());
 
+          EventBus.getDefault().post( new UpdateDocumentAdapterEvent( result.getUid(), result.getDocumentType(), result.getFilter() ) );
 
           if ( result.getImages() != null && result.getImages().size() > 0 ){
 

@@ -8,9 +8,12 @@ import android.widget.TextView;
 
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -26,6 +29,8 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocument;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RSignerEntity;
+import sapotero.rxtest.events.adapter.UpdateDocumentAdapterEvent;
+import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
 import sapotero.rxtest.views.adapters.models.OrganizationItem;
@@ -54,6 +59,9 @@ public class DBQueryBuilder {
   private MenuBuilder menuBuilder;
   private RecyclerView recyclerView;
   private MainMenuItem item;
+
+  private String query_status = null;
+  private String query_type = null;
 
   public DBQueryBuilder(Context context) {
     this.context = context;
@@ -112,9 +120,20 @@ public class DBQueryBuilder {
       Boolean hasProcessed = false;
       if ( conditions.size() > 0 ){
 
-
+        query_status = "";
+        query_type = "";
         for (ConditionBuilder condition : conditions ){
           Timber.tag(TAG).i( "++ %s", condition.toString() );
+
+          if (condition.getField().getLeftOperand() == RDocumentEntity.FILTER){
+            query_status = String.valueOf(condition.getField().getRightOperand());
+            Timber.tag("!!!").w("filter: %s", query_status);
+          }
+
+          if (condition.getField().getLeftOperand() == RDocumentEntity.DOCUMENT_TYPE){
+            query_type = String.valueOf(condition.getField().getRightOperand());
+            Timber.tag("!!!").w("type: %s", query_type);
+          }
 
           switch ( condition.getCondition() ){
             case AND:
@@ -144,13 +163,14 @@ public class DBQueryBuilder {
         query = query.or( RDocumentEntity.FAVORITES.eq(true) );
       }
 
-//      Integer count = queryCount.get().value();
-//      if ( count != null || count != 0 ){
-//        hideEmpty();
-//      }
-//      Timber.v( "queryCount: %s", count );
+      Integer count = queryCount.get().value();
+      if ( count == 0 ){
+        showEmpty();
+      }
+      Timber.v( "queryCount: %s", count );
 
       unsubscribe();
+      adapter.removeAllWithRange();
 
       subscribe.add(
 //          query
@@ -196,10 +216,15 @@ public class DBQueryBuilder {
 
             return result;
           })
-          .toList()
           .subscribeOn(Schedulers.newThread())
           .observeOn( AndroidSchedulers.mainThread() )
-          .subscribe(this::addAllInAdapter, this::error)
+
+          .subscribe(this::addByOneInAdapter, this::error)
+
+
+        // Добавляем всё сразу
+        // .toList()
+        //.subscribe(this::addAllInAdapter, this::error)
       );
 //
 //      if (count == 0){
@@ -212,13 +237,18 @@ public class DBQueryBuilder {
     }
   }
 
+  private void addByOneInAdapter(RDocumentEntity documentEntity) {
+    hideEmpty();
+    adapter.addOneItem(documentEntity);
+  }
+
   private void addAllInAdapter(List<RDocumentEntity> rDocumentEntities) {
 
     Timber.tag(TAG).e("addAllInAdapter size: %s", rDocumentEntities.size() );
 
     if (rDocumentEntities.size() > 0){
       hideEmpty();
-      addList(rDocumentEntities, recyclerView);
+      addList(rDocumentEntities);
     } else{
       showEmpty();
       adapter.clear();
@@ -333,7 +363,7 @@ public class DBQueryBuilder {
       .observeOn( AndroidSchedulers.mainThread() )
       .toList()
       .subscribe( list -> {
-        addList(list, recyclerView);
+        addList(list);
       }, this::error);
 
   }
@@ -353,17 +383,18 @@ public class DBQueryBuilder {
     this.withFavorites = withFavorites;
     execute(true);
   }
-  private void addList(List<RDocumentEntity> docs, RecyclerView recyclerView) {
+  private void addList(List<RDocumentEntity> docs) {
     if ( docs.size() == 0 ){
       showEmpty();
     } else {
       hideEmpty();
+      EventBus.getDefault().post(new UpdateCountEvent());
     }
 
     progressBar.setVisibility(ProgressBar.GONE);
 
     adapter.clear();
-    adapter.setDocuments(docs, this.recyclerView);
+    adapter.setDocuments(docs);
 
   }
 
@@ -379,6 +410,7 @@ public class DBQueryBuilder {
 
   private void hideEmpty(){
     documents_empty_list.setVisibility(View.GONE);
+    progressBar.setVisibility(ProgressBar.GONE);
   }
 
   private void findOrganizations() {
@@ -471,5 +503,17 @@ public class DBQueryBuilder {
   public DBQueryBuilder withRecycleView(RecyclerView recyclerView) {
     this.recyclerView = recyclerView;
     return this;
+  }
+
+  public void invalidateDocumentEvent(UpdateDocumentAdapterEvent event) {
+
+    if (!Objects.equals(query_status, "") && !Objects.equals(query_type, "")){
+      if (Objects.equals(event.status, query_status) && Objects.equals(query_type, event.type)){
+        RDocumentEntity doc = dataStore.select(RDocumentEntity.class).where(RDocumentEntity.UID.eq(event.uid)).get().firstOrNull();
+        if (doc != null) {
+          adapter.addItem(doc);
+        }
+      }
+    }
   }
 }
