@@ -95,6 +95,7 @@
             android:id="@+id/fragment_decision_preview_button_wrapper"
             android:layout_width="match_parent"
             android:layout_height="48dp"
+            android:visibility="gone"
             >
 
             <Button
