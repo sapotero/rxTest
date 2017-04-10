@@ -33,7 +33,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -49,7 +48,6 @@ import sapotero.rxtest.db.requery.models.RLinks;
 import sapotero.rxtest.db.requery.models.RLinksEntity;
 import sapotero.rxtest.db.requery.models.RSignerEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
-import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.events.utils.NoDocumentsEvent;
 import sapotero.rxtest.managers.db.managers.DBDocumentManager;
 import sapotero.rxtest.managers.menu.OperationManager;
@@ -68,7 +66,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
   private Context mContext;
   private List<RDocumentEntity> documents;
-  private ObservableDocumentList real_docs;
+//  private ObservableDocumentList real_docs;
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -181,23 +179,23 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     this.mContext  = context;
     this.documents = documents;
 
-    real_docs = new ObservableDocumentList();
+//    real_docs = new ObservableDocumentList();
 
-    populateDocs(documents);
+//    populateDocs(documents);
 
-    real_docs.getObservable()
-      .debounce(1000, TimeUnit.MILLISECONDS)
-      .subscribe( data -> {
-        Timber.e("FROM UPDATE STREAM");
-        EventBus.getDefault().post(new UpdateCountEvent());
-      });
+//    real_docs.getObservable()
+//      .debounce(100, TimeUnit.MILLISECONDS)
+//      .subscribe( data -> {
+//        Timber.e("FROM UPDATE STREAM");
+//        EventBus.getDefault().post(new UpdateCountEvent());
+//      });
 
     EsdApplication.getComponent(context).inject(this);
   }
 
   private void populateDocs(List<RDocumentEntity> documents) {
     for (int i = 0; i < documents.size(); i++) {
-      real_docs.add(documents.get(i));
+//      real_docs.add(documents.get(i));
     }
   }
 
@@ -492,7 +490,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
   public void clear(){
     Holder.MAP.clear();
     documents.clear();
-    real_docs.clear();
+//    real_docs.clear();
     notifyDataSetChanged();
   }
 
@@ -500,7 +498,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     if ( !Holder.MAP.containsKey( document.getUid()) ){
       Holder.MAP.put( document.getUid(), document );
       documents.add(document);
-      real_docs.add(document);
+//      real_docs.add(document);
       notifyItemInserted(documents.size());
     }
   }

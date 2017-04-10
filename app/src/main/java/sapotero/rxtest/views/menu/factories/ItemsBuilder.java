@@ -185,10 +185,10 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
       Collections.addAll(result, MainMenuButton.getByIndex(index).getConditions() );
     }
 
-    Timber.tag(TAG).v( "onMenuUpdate: %s", result.size() );
-    for (ConditionBuilder condition : result ) {
-      Timber.tag(TAG).i("** %s", condition.toString());
-    }
+//    Timber.tag(TAG).v( "onMenuUpdate: %s", result.size() );
+//    for (ConditionBuilder condition : result ) {
+//      Timber.tag(TAG).i("** %s", condition.toString());
+//    }
 
 
     Timber.tag(TAG).v( MainMenuButton.getByIndex(index).getFormat() );

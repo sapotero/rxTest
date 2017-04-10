@@ -26,7 +26,6 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocument;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RSignerEntity;
-import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
 import sapotero.rxtest.views.adapters.models.OrganizationItem;
@@ -145,31 +144,86 @@ public class DBQueryBuilder {
         query = query.or( RDocumentEntity.FAVORITES.eq(true) );
       }
 
-      Integer count = queryCount.get().value();
-      if ( count != null || count != 0 ){
-        hideEmpty();
-      }
+//      Integer count = queryCount.get().value();
+//      if ( count != null || count != 0 ){
+//        hideEmpty();
+//      }
+//      Timber.v( "queryCount: %s", count );
 
       unsubscribe();
-      adapter.clear();
 
-      if (count == 0){
-        showEmpty();
-      } else {
-        Timber.v( "queryCount: %s", count );
-        subscribe.add(
-          query
-            .orderBy( RDocumentEntity.SORT_KEY.desc() )
-            .get()
-            .toSelfObservable()
-            .subscribeOn(Schedulers.io())
-            .observeOn( AndroidSchedulers.mainThread() )
-            .subscribe(this::addByOne, this::error)
-        );
-      }
+      subscribe.add(
+//          query
+//            .orderBy( RDocumentEntity.SORT_KEY.desc() )
+//            .get()
+//            .toSelfObservable()
+//            .subscribeOn(Schedulers.io())
+//            .observeOn( AndroidSchedulers.mainThread() )
+//            .subscribe(this::addByOne, this::error)
+        query
+          .orderBy( RDocumentEntity.SORT_KEY.desc() )
+          .get()
+          .toObservable()
+          .filter(documentEntity -> {
+
+            Boolean result = true;
+
+            Timber.tag(TAG).w("filter: %s %s",
+              organizationSelector.getSelected().length,
+              organizationSelector.getAdapter().getCount()
+            );
+
+            if ( organizationSelector.getSelected().length != organizationSelector.getAdapter().getCount() ){
+              // resolved https://tasks.n-core.ru/browse/MVDESD-12625
+              // *1) *Фильтр по организациям.
+
+              String organization = documentEntity.getOrganization();
+
+              boolean[] selected_index = organizationSelector.getSelected();
+              ArrayList<String> ids = new ArrayList<>();
+
+              for (int i = 0; i < selected_index.length; i++) {
+                if ( selected_index[i] ){
+                  ids.add( organizationAdapter.getItem(i).getName() );
+                }
+              }
+
+              if ( !ids.contains(organization) || !withFavorites && !documentEntity.isFavorites() ){
+                result = false;
+              }
+
+            }
+
+            return result;
+          })
+          .toList()
+          .subscribeOn(Schedulers.newThread())
+          .observeOn( AndroidSchedulers.mainThread() )
+          .subscribe(this::addAllInAdapter, this::error)
+      );
+//
+//      if (count == 0){
+//        showEmpty();
+//      } else {
+//
+//      }
 
 
     }
+  }
+
+  private void addAllInAdapter(List<RDocumentEntity> rDocumentEntities) {
+
+    Timber.tag(TAG).e("addAllInAdapter size: %s", rDocumentEntities.size() );
+
+    if (rDocumentEntities.size() > 0){
+      hideEmpty();
+      addList(rDocumentEntities, recyclerView);
+    } else{
+      showEmpty();
+      adapter.clear();
+    }
+
   }
 
 //
@@ -300,13 +354,15 @@ public class DBQueryBuilder {
     execute(true);
   }
   private void addList(List<RDocumentEntity> docs, RecyclerView recyclerView) {
-    ArrayList<Document> list_dosc = new ArrayList<>();
-
-    if ( list_dosc.size() == 0 ){
+    if ( docs.size() == 0 ){
       showEmpty();
+    } else {
+      hideEmpty();
     }
 
     progressBar.setVisibility(ProgressBar.GONE);
+
+    adapter.clear();
     adapter.setDocuments(docs, this.recyclerView);
 
   }
