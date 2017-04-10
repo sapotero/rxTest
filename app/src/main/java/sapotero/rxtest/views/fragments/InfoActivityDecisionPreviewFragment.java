@@ -443,6 +443,19 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
       temporary.setVisibility(View.GONE);
     }
 
+    // resolved https://tasks.n-core.ru/browse/MVDESD-13146
+    // для статуса "на первичное рассмотрение" вместо "Подписать" должно быть "Согласовать"
+    // Если подписывающий в резолюции и оператор в МП совпадают, то кнопка должна быть "Подписать"
+    if ( doc.getFilter() != null && doc.getFilter().equals("primary_consideration") ){
+      if ( current_decision != null &&
+           current_decision.getSignerId() != null &&
+           current_decision.getSignerId().equals( settings.getString("current_user_id").get() ) ){
+        next_person_button.setText( getString(R.string.menu_info_next_person));
+      } else {
+        next_person_button.setText( getString(R.string.menu_info_sign_next_person) );
+      }
+    }
+
   }
 
   private void showDecisionCardTollbarMenuItems(boolean visible) {

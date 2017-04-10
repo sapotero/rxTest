@@ -8,7 +8,7 @@
     android:layout_height="match_parent"
     tools:context="sapotero.rxtest.views.activities.DocumentImageFullScreenActivity"
     android:orientation="vertical"
-    android:background="@color/md_white_1000">
+    android:background="@color/md_grey_100">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/document_image_toolbar"
@@ -20,93 +20,114 @@
         android:transitionName="actionBar"
         app:navigationIcon="?attr/homeAsUpIndicator"
         app:theme="@style/ToolbarColoredBackArrow"
-
+        android:theme="@style/AlertDialog.AppCompat.Light"
         android:background="@drawable/toolbar_background"
-        android:theme="@style/AlertDialog.AppCompat.Light"/>
+        />
 
-    <com.github.barteksc.pdfviewer.PDFView
-        android:id="@+id/document_image_fullscreen"
+
+    <android.support.v7.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/document_image_toolbar">
+        app:cardElevation="2dp"
+        android:layout_below="@+id/document_image_toolbar"
+        android:layout_margin="24dp"
+        >
 
-        <TextView
-            android:id="@+id/document_image_urgency_title"
-            android:visibility="gone"
-            android:text="Срочно"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/document_image_toolbar"
-            android:layout_alignParentEnd="true"
-            android:textColor="@color/md_red_500"
-            android:padding="@dimen/date_offset"
-            android:textAppearance="@style/TextAppearance.AppCompat.Large"/>
-
-    </com.github.barteksc.pdfviewer.PDFView>
-
-    <FrameLayout
-        android:background="@drawable/pdf_fullscreen"
-        android:layout_width="match_parent"
-        android:layout_alignParentBottom="true"
-        android:layout_height="48dp">
-
-        <LinearLayout
+        <FrameLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_height="match_parent"
-                android:padding="@dimen/half_date_offset"
-                android:layout_gravity="center_vertical"
-                android:layout_width="160dp"
-                android:layout_marginStart="@dimen/date_offset">
-
-                <sapotero.rxtest.views.custom.CircleLeftArrow
-                    android:id="@+id/pdf_fullscreen_prev_document"
-                    android:clickable="true"
-                    android:layout_width="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginStart="@dimen/half_date_offset"
-                    android:layout_marginEnd="@dimen/half_date_offset"
-                    android:layout_height="30dp"/>
+            android:layout_height="match_parent"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/document_image_toolbar"
+            android:id="@+id/activity_document_image_full_screen_wrapper"
+            android:layout_alignParentBottom="true">
+        </FrameLayout>
+    </android.support.v7.widget.CardView>
 
 
-                <TextView
-                    android:text="1 из 2"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:id="@+id/pdf_fullscreen_document_counter"
-                    android:gravity="center"
-                    android:layout_weight="1"/>
+    <!--<com.github.barteksc.pdfviewer.PDFView-->
+        <!--android:id="@+id/document_image_fullscreen"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:layout_below="@+id/document_image_toolbar">-->
 
-                <sapotero.rxtest.views.custom.CircleRightArrow
-                    android:id="@+id/pdf_fullscreen_next_document"
-                    android:clickable="true"
-                    android:layout_width="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginStart="@dimen/half_date_offset"
-                    android:layout_marginEnd="@dimen/half_date_offset"
-                    android:layout_height="30dp"/>
-            </LinearLayout>
+        <!--<TextView-->
+            <!--android:id="@+id/document_image_urgency_title"-->
+            <!--android:visibility="gone"-->
+            <!--android:text="Срочно"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_below="@+id/document_image_toolbar"-->
+            <!--android:layout_alignParentEnd="true"-->
+            <!--android:textColor="@color/md_red_500"-->
+            <!--android:padding="@dimen/date_offset"-->
+            <!--android:textAppearance="@style/TextAppearance.AppCompat.Large"/>-->
 
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_gravity="center">
-                <TextView
-                    android:text="1 из 2 страниц"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:id="@+id/pdf_fullscreen_page_counter"
-                    android:gravity="center"
-                    android:layout_weight="1"/>
+    <!--</com.github.barteksc.pdfviewer.PDFView>-->
 
-            </FrameLayout>
-        </LinearLayout>
+    <!--<FrameLayout-->
+        <!--android:background="@drawable/pdf_fullscreen"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--android:layout_height="48dp">-->
 
-    </FrameLayout>
+        <!--<LinearLayout-->
+            <!--android:orientation="horizontal"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent">-->
+
+            <!--<LinearLayout-->
+                <!--android:orientation="horizontal"-->
+                <!--android:layout_height="match_parent"-->
+                <!--android:padding="@dimen/half_date_offset"-->
+                <!--android:layout_gravity="center_vertical"-->
+                <!--android:layout_width="160dp"-->
+                <!--android:layout_marginStart="@dimen/date_offset">-->
+
+                <!--<sapotero.rxtest.views.custom.CircleLeftArrow-->
+                    <!--android:id="@+id/pdf_fullscreen_prev_document"-->
+                    <!--android:clickable="true"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_gravity="center"-->
+                    <!--android:layout_marginStart="@dimen/half_date_offset"-->
+                    <!--android:layout_marginEnd="@dimen/half_date_offset"-->
+                    <!--android:layout_height="30dp"/>-->
+
+
+                <!--<TextView-->
+                    <!--android:text="1 из 2"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_height="match_parent"-->
+                    <!--android:id="@+id/pdf_fullscreen_document_counter"-->
+                    <!--android:gravity="center"-->
+                    <!--android:layout_weight="1"/>-->
+
+                <!--<sapotero.rxtest.views.custom.CircleRightArrow-->
+                    <!--android:id="@+id/pdf_fullscreen_next_document"-->
+                    <!--android:clickable="true"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_gravity="center"-->
+                    <!--android:layout_marginStart="@dimen/half_date_offset"-->
+                    <!--android:layout_marginEnd="@dimen/half_date_offset"-->
+                    <!--android:layout_height="30dp"/>-->
+            <!--</LinearLayout>-->
+
+            <!--<FrameLayout-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="match_parent"-->
+                <!--android:layout_gravity="center">-->
+                <!--<TextView-->
+                    <!--android:text="1 из 2 страниц"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="match_parent"-->
+                    <!--android:id="@+id/pdf_fullscreen_page_counter"-->
+                    <!--android:gravity="center"-->
+                    <!--android:layout_weight="1"/>-->
+
+            <!--</FrameLayout>-->
+        <!--</LinearLayout>-->
+
+    <!--</FrameLayout>-->
 
 
 </RelativeLayout>

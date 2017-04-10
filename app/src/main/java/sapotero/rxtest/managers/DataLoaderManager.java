@@ -651,7 +651,8 @@ public class DataLoaderManager {
     Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
     DocumentsService docService = retrofit.create(DocumentsService.class);
 
-    jobManager.cancelJobsInBackground(null, TagConstraint.ANY);
+
+    jobManager.cancelJobsInBackground(null, TagConstraint.ANY, "SyncDocument");
 
     unsubscribe();
 

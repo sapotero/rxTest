@@ -14,7 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:background="@color/md_grey_50">
+        android:background="@color/md_grey_100">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/document_image_toolbar"
@@ -29,14 +29,23 @@
             android:theme="@style/AlertDialog.AppCompat.Light"
             android:elevation="8dp"/>
 
-
-            <WebView
+            <android.support.v7.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:id="@+id/fullscreen_web_infocard"
-                android:layout_margin="@dimen/date_offset">
+                app:cardElevation="2dp"
+                android:layout_below="@+id/document_image_toolbar"
+                android:layout_margin="24dp"
+                >
 
-            </WebView>
+                <WebView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/fullscreen_web_infocard"
+                    android:background="@color/md_white_1000"
+                    android:layout_margin="@dimen/date_offset">
+
+                </WebView>
+            </android.support.v7.widget.CardView>
         </LinearLayout>
 
     <LinearLayout

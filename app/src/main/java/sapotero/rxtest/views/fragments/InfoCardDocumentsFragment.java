@@ -87,6 +87,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   private Preference<String> UID;
   private DocumentLinkAdapter adapter;
   private String uid;
+  private Boolean withOutZoom = false;
 
 
   public InfoCardDocumentsFragment() {
@@ -188,6 +189,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
         .enableDoubletap(true)
         .defaultPage(0)
         .swipeHorizontal(false)
+        .enableAntialiasing(true)
         .onRender((nbPages, pageWidth, pageHeight) -> pdfView.fitToWidth())
         .onLoad(nbPages -> {
           Timber.tag(TAG).i(" onLoad");
@@ -205,6 +207,13 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
         .load();
       updateDocumentCount();
       updatePageCount();
+      updateZoomVisibility();
+    }
+  }
+
+  private void updateZoomVisibility() {
+    if (withOutZoom){
+      fullscreen.setVisibility(View.GONE);
     }
   }
 
@@ -301,8 +310,13 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     return false;
   }
 
-  public Fragment withUid(String uid) {
+  public InfoCardDocumentsFragment withUid(String uid) {
     this.uid = uid;
+    return this;
+  }
+
+  public InfoCardDocumentsFragment withOutZoom(Boolean withOutZoom) {
+    this.withOutZoom = withOutZoom;
     return this;
   }
 

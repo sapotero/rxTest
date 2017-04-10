@@ -85,7 +85,7 @@ public class SyncDocumentsJob  extends BaseJob {
   }
 
   public SyncDocumentsJob(String uid, String status) {
-    super( new Params(PRIORITY).requireNetwork().persist() );
+    super( new Params(PRIORITY).requireNetwork().persist().addTags("SyncDocument") );
     this.uid     = uid;
     if (!Objects.equals(status, "")){
       this.status  = status;

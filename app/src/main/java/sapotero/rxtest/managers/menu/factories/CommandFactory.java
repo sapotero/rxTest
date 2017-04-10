@@ -495,6 +495,7 @@ public class CommandFactory implements AbstractCommand.Callback{
 
         case "sapotero.rxtest.managers.menu.commands.decision.SaveDecision":
           operation = Operation.SAVE_DECISION;
+
           break;
         case "sapotero.rxtest.managers.menu.commands.decision.SaveAndApproveDecision":
           operation = Operation.SAVE_AND_APPROVE_DECISION;
