@@ -74,7 +74,11 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
       startService(new Intent(this, MainService.class));
 
       initialize();
-      check_permissions();
+
+      // Check for permissions if the activity previously not existed
+      if (null == savedInstanceState) {
+        check_permissions();
+      }
 
       initView();
 
