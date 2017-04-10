@@ -148,7 +148,8 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
         .negativeText(R.string.no)
         .onPositive((dialog1, which) -> {
 
-          CommandFactory.Operation operation = CommandFactory.Operation.APPROVE_DECISION;
+          //CommandFactory.Operation operation = CommandFactory.Operation.APPROVE_DECISION;
+          CommandFactory.Operation operation = CommandFactory.Operation.SAVE_AND_APPROVE_DECISION;
 
           CommandParams params = new CommandParams();
 
@@ -165,7 +166,8 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
 
     } else {
       CommandFactory.Operation operation;
-      operation =CommandFactory.Operation.APPROVE_DECISION;
+      //operation =CommandFactory.Operation.APPROVE_DECISION;
+      operation =CommandFactory.Operation.SAVE_AND_APPROVE_DECISION;
 
       CommandParams params = new CommandParams();
 
