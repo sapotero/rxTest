@@ -248,6 +248,7 @@
 
     <string name="request_permission_rationale">Запрашиваемые разрешения необходимы приложению для функционирования</string>
     <string name="request_permission_denied_notification">Пожалуйста, включите отклоненные разрешения в настройках системы</string>
+    <string name="request_permission_screen_overlay">Пожалуйста, включите наложения для данного приложения в настройках системы</string>
 
 
     <!-- //FIX ПОЧИСТИТЬ ЭТО-->
