@@ -585,7 +585,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   public void init() {
 
     toolbar.setTitleTextColor( context.getResources().getColor( R.color.md_grey_100 ) );
-    toolbar.setSubtitleTextColor( context.getResources().getColor( R.color.md_grey_400 ) );
+    toolbar.setSubtitleTextColor( context.getResources().getColor( R.color.md_grey_300 ) );
 
     toolbar.setContentInsetStartWithNavigation(250);
 
@@ -600,12 +600,15 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     status  = Fields.Status.findStatus(STATUS_CODE.get());
     journal = Fields.getJournalByUid( UID.get() );
 
-    toolbar.setTitle( String.format("%s от %s", REG_NUMBER.get(), REG_DATE.get()) );
 
     Timber.tag("MENU").e( "STATUS CODE: %s", STATUS_CODE.get() );
 
     invalidate();
 
+    toolbar.setTitle( String.format("%s от %s", REG_NUMBER.get(), REG_DATE.get()) );
+    if (doc!=null && doc.getDocumentType() != null){
+      toolbar.setSubtitle( String.format("%s", Fields.getJournalName(doc.getDocumentType()) ) );
+    }
   }
 
   public void showCreateDecisionButton() {

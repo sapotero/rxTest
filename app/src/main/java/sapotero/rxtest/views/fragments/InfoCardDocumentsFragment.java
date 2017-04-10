@@ -189,6 +189,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
         .enableDoubletap(true)
         .defaultPage(0)
         .swipeHorizontal(false)
+        .enableAntialiasing(true)
         .onRender((nbPages, pageWidth, pageHeight) -> pdfView.fitToWidth())
         .onLoad(nbPages -> {
           Timber.tag(TAG).i(" onLoad");
