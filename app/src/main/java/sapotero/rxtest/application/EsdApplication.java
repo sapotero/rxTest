@@ -11,6 +11,9 @@ import org.acra.ACRA;
 import org.acra.ReportingInteractionMode;
 import org.acra.annotation.ReportsCrashes;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.inject.Inject;
 
 import sapotero.rxtest.R;
@@ -19,6 +22,7 @@ import sapotero.rxtest.application.components.DaggerEsdComponent;
 import sapotero.rxtest.application.components.EsdComponent;
 import sapotero.rxtest.application.config.Constant;
 import sapotero.rxtest.application.modules.EsdModule;
+import sapotero.rxtest.utils.padeg.TestString;
 import timber.log.Timber;
 
 
@@ -86,6 +90,23 @@ public final class EsdApplication extends Application {
       Timber.e( "USERNAME: %s", name );
       username = name;
     });
+
+    try {
+      TestString strings = new TestString();
+      strings.declAll();
+
+      List<TestString.ResultItem> results = strings.getResultItems();
+
+      List<String> items = new ArrayList<>();
+
+      for (TestString.ResultItem result : results ) {
+        items.add( String.format(" %s - %s, %s \n", result.getFio(), result.getAppointment(), result.getOffice() ) );
+      }
+
+      Timber.e( "Items: \n%s\n", items );
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
 
 
   }
