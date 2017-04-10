@@ -48,7 +48,7 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
 
   private String TAG = this.getClass().getSimpleName();
 
-  private static int REQUEST_READWRITE_STORAGE = 0;
+  private static int REQUEST_PERMISSIONS = 0;
 
   private Preference<String> TOKEN;
   private Preference<String> LOGIN;
@@ -115,24 +115,75 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
     stepperLayout.setListener(this);
   }
 
+  // Called, when permissions request response received
   @Override
   public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-    if (requestCode == REQUEST_READWRITE_STORAGE) {
-      if ((grantResults.length > 0) && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-//        addKey();
+    if (requestCode == REQUEST_PERMISSIONS) {
+
+      boolean isAllGranted = true;
+
+      if (grantResults.length <= 0) {
+        isAllGranted = false;
+      }
+
+      for (int i = 0; i < grantResults.length; i++) {
+        if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
+          isAllGranted = false;
+          break;
+        }
+      }
+
+      if (!isAllGranted) {
+        // User denied some permissions, show rationale
+        boolean rationaleShown = showRationale();
+
+        if (rationaleShown) {
+          // Rationale shown, request permissions again
+          requestPermissions();
+        }
+          // Rationale not shown (this means, user denied permission and opted Don't show again)
+          // Notify user to grant permissions in the system settings
+          Toast.makeText(this, R.string.request_permission_denied_notification, Toast.LENGTH_SHORT).show();
       }
     }
   }
 
   private void check_permissions(){
-    if (ContextCompat.checkSelfPermission( this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+    boolean hasAllPermissions =
+            ContextCompat.checkSelfPermission( this, Manifest.permission.READ_EXTERNAL_STORAGE ) == PackageManager.PERMISSION_GRANTED
+            && ContextCompat.checkSelfPermission( this, Manifest.permission.WRITE_EXTERNAL_STORAGE ) == PackageManager.PERMISSION_GRANTED
+            && ContextCompat.checkSelfPermission( this, Manifest.permission.RECORD_AUDIO ) == PackageManager.PERMISSION_GRANTED;
 
-      if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
-
-      } else {
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_READWRITE_STORAGE);
-      }
+    if (!hasAllPermissions) {
+      showRationale();
+      requestPermissions();
     }
+  }
+
+  private void requestPermissions() {
+    String[] permissions = new String[] {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.RECORD_AUDIO
+    };
+
+    ActivityCompat.requestPermissions(this, permissions, REQUEST_PERMISSIONS);
+  }
+
+  // Shows request permission rationale.
+  // Returns true if shown.
+  private boolean showRationale() {
+    boolean shouldShowRationale =
+            ActivityCompat.shouldShowRequestPermissionRationale( this, Manifest.permission.READ_EXTERNAL_STORAGE )
+            || ActivityCompat.shouldShowRequestPermissionRationale( this, Manifest.permission.WRITE_EXTERNAL_STORAGE )
+            || ActivityCompat.shouldShowRequestPermissionRationale( this, Manifest.permission.RECORD_AUDIO );
+
+    if (shouldShowRationale) {
+      Toast.makeText(this, R.string.request_permission_rationale, Toast.LENGTH_SHORT).show();
+    }
+
+    // False if the app runs for the first time or the user denied permissions and opted Don't show again
+    return shouldShowRationale;
   }
 
   private void initialize() {
