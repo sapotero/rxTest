@@ -3,7 +3,9 @@ package sapotero.rxtest.views.activities;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
@@ -37,6 +39,8 @@ import sapotero.rxtest.services.MainService;
 
 public class LoginActivity extends AppCompatActivity implements StepperLayout.StepperListener {
 
+  private static final int PERM_REQUEST_CODE = 0;
+  private static final int PERM_SYSTEM_SETTINGS_REQUEST_CODE = 1;
 
   @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
@@ -47,8 +51,6 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
   @Inject QueueManager queue;
 
   private String TAG = this.getClass().getSimpleName();
-
-  private static int REQUEST_READWRITE_STORAGE = 0;
 
   private Preference<String> TOKEN;
   private Preference<String> LOGIN;
@@ -72,7 +74,11 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
       startService(new Intent(this, MainService.class));
 
       initialize();
-      check_permissions();
+
+      // Check for permissions if the activity previously not existed
+      if (null == savedInstanceState) {
+        check_permissions();
+      }
 
       initView();
 
@@ -115,24 +121,98 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
     stepperLayout.setListener(this);
   }
 
+  // Called, when permissions request response received
   @Override
   public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-    if (requestCode == REQUEST_READWRITE_STORAGE) {
-      if ((grantResults.length > 0) && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-//        addKey();
+    if (requestCode == PERM_REQUEST_CODE) {
+
+      boolean isAllGranted = true;
+
+      if (grantResults.length <= 0) {
+        isAllGranted = false;
+      }
+
+      for (int i = 0; i < grantResults.length; i++) {
+        if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
+          isAllGranted = false;
+          break;
+        }
+      }
+
+      if (!isAllGranted) {
+        // User denied some permissions, show rationale
+        boolean rationaleShown = showRationale();
+
+        if (rationaleShown) {
+          // Rationale shown, request permissions again
+          requestPermissions();
+        } else {
+          // Rationale not shown (this means, user denied permission and opted Don't show again).
+          // Explicitly open system settings, so that user could grant permissions.
+          openSystemSettings();
+        }
+      }
+    }
+  }
+
+  @Override
+  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    if (requestCode == PERM_SYSTEM_SETTINGS_REQUEST_CODE) {
+      if (!checkHasPermissions()) {
+        openSystemSettings();
       }
     }
   }
 
   private void check_permissions(){
-    if (ContextCompat.checkSelfPermission( this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-
-      if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
-
-      } else {
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_READWRITE_STORAGE);
-      }
+    if (!checkHasPermissions()) {
+      showRationale();
+      requestPermissions();
     }
+  }
+
+  private boolean checkHasPermissions() {
+    boolean isPermissionsGranted =
+            ContextCompat.checkSelfPermission( this, Manifest.permission.READ_EXTERNAL_STORAGE ) == PackageManager.PERMISSION_GRANTED
+            && ContextCompat.checkSelfPermission( this, Manifest.permission.WRITE_EXTERNAL_STORAGE ) == PackageManager.PERMISSION_GRANTED
+            && ContextCompat.checkSelfPermission( this, Manifest.permission.RECORD_AUDIO ) == PackageManager.PERMISSION_GRANTED;
+    return isPermissionsGranted;
+  }
+
+  private void requestPermissions() {
+    String[] permissions = new String[] {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.RECORD_AUDIO
+    };
+
+    ActivityCompat.requestPermissions(this, permissions, PERM_REQUEST_CODE);
+    // Result is passed to onRequestPermissionsResult() method
+  }
+
+  // Shows request permission rationale.
+  // Returns true if shown.
+  private boolean showRationale() {
+    boolean shouldShowRationale =
+            ActivityCompat.shouldShowRequestPermissionRationale( this, Manifest.permission.READ_EXTERNAL_STORAGE )
+            || ActivityCompat.shouldShowRequestPermissionRationale( this, Manifest.permission.WRITE_EXTERNAL_STORAGE )
+            || ActivityCompat.shouldShowRequestPermissionRationale( this, Manifest.permission.RECORD_AUDIO );
+
+    if (shouldShowRationale) {
+      Toast.makeText(this, R.string.request_permission_rationale, Toast.LENGTH_SHORT).show();
+    }
+
+    // False if the app runs for the first time or the user denied permissions and opted Don't show again
+    return shouldShowRationale;
+  }
+
+  private void openSystemSettings() {
+    // Notify user to grant permissions in the system settings
+    Toast.makeText(this, R.string.request_permission_denied_notification, Toast.LENGTH_SHORT).show();
+    // Open system settings
+    Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", getPackageName(), null));
+    startActivityForResult(intent, PERM_SYSTEM_SETTINGS_REQUEST_CODE);
+    // Result will be passed to onActivityResult() method
   }
 
   private void initialize() {
