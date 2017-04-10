@@ -1,6 +1,7 @@
 package sapotero.rxtest.views.activities;
 
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Base64;
@@ -95,7 +96,6 @@ public class DocumentInfocardFullScreenActivity extends AppCompatActivity {
                 webview.loadDataWithBaseURL("file:///android_asset/", htmlData, "text/html", "UTF-8", null);
                 webview.getSettings().setBuiltInZoomControls(true);
                 webview.getSettings().setDisplayZoomControls(true);
-                webview.setBackgroundColor( getResources().getColor(R.color.md_grey_50) );
               }
             } catch (Exception e) {
               e.printStackTrace();
@@ -119,6 +119,7 @@ public class DocumentInfocardFullScreenActivity extends AppCompatActivity {
     webSettings.setGeolocationEnabled(false);
     webSettings.setNeedInitialFocus(false);
     webSettings.setSaveFormData(false);
+    webview.setBackgroundColor(ContextCompat.getColor(this, R.color.md_white_1000));
 
 
   }
