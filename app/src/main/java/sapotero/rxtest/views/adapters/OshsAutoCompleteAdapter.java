@@ -131,11 +131,16 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
 
     if (data != null && data.length > 0){
       for (Oshs oshs : data) {
-        if (!oshs.getIsGroup() && !oshs.getIsOrganization()) {
-          if ( ignore_user_ids != null && ignore_user_ids.contains(oshs.getId()) ) {
-            continue;
+        String oshsId = oshs.getId();
+        Boolean isGroup = oshs.getIsGroup();
+        Boolean isOrganization = oshs.getIsOrganization();
+        if (oshsId != null && isGroup != null && isOrganization != null) {
+          if (!isGroup && !isOrganization) {
+            if ( ignore_user_ids != null && ignore_user_ids.contains(oshsId) ) {
+              continue;
+            }
+            result.add(oshs);
           }
-          result.add(oshs);
         }
       }
     }
