@@ -46,7 +46,7 @@ import sapotero.rxtest.retrofit.models.document.Signer;
 import sapotero.rxtest.retrofit.models.document.Step;
 import timber.log.Timber;
 
-public class SyncProcessedDocumentsJob extends BaseJob {
+public class UpdateProcessedDocumentsJob extends BaseJob {
 
   public static final int PRIORITY = 1;
 
@@ -62,7 +62,7 @@ public class SyncProcessedDocumentsJob extends BaseJob {
   private DocumentInfo document;
 
 
-  public SyncProcessedDocumentsJob(String uid, Fields.Status filter, String processed_folder) {
+  public UpdateProcessedDocumentsJob(String uid, Fields.Status filter, String processed_folder) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
     this.filter = filter;
@@ -109,7 +109,7 @@ public class SyncProcessedDocumentsJob extends BaseJob {
           if ( doc.getLinks() != null && doc.getLinks().size() > 0 ){
 
             for (String link: doc.getLinks()) {
-              jobManager.addJobInBackground( new SyncLinkJob( link ) );
+              jobManager.addJobInBackground( new UpdateLinkJob( link ) );
             }
 
           }
@@ -119,7 +119,7 @@ public class SyncProcessedDocumentsJob extends BaseJob {
               if ( step.getCards() != null && step.getCards().size() > 0){
                 for (Card card: step.getCards() ) {
                   if (card.getUid() != null) {
-                    jobManager.addJobInBackground( new SyncLinkJob( card.getUid() ) );
+                    jobManager.addJobInBackground( new UpdateLinkJob( card.getUid() ) );
                   }
                 }
               }

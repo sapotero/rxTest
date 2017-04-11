@@ -17,6 +17,6 @@ public class UpdateAllDocumentsTask implements Runnable {
 
   @Override
   public void run() {
-    dataLoaderInterface.updateByStatus(MainMenuItem.ALL);
+    dataLoaderInterface.updateByCurrentStatus(MainMenuItem.ALL, null);
   }
 }

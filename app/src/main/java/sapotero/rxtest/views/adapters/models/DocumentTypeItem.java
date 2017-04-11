@@ -7,8 +7,8 @@ import com.f2prateek.rx.preferences.RxSharedPreferences;
 import javax.inject.Inject;
 
 import io.requery.Persistable;
-import io.requery.query.Scalar;
 import io.requery.query.WhereAndOr;
+import io.requery.rx.RxScalar;
 import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
@@ -59,7 +59,7 @@ public class DocumentTypeItem {
 
       // настройка
       // если включена настройка "Отображать документы без резолюции"
-      WhereAndOr<Scalar<Integer>> query;
+      WhereAndOr<RxScalar<Integer>> query;
       if ( settings.getBoolean("settings_view_type_show_without_project").get()
         || mainMenuItem.getIndex() == 3  // подписание/согласование
         || mainMenuItem.getIndex() == 9  // обработанные

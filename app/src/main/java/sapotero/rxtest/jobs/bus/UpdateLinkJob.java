@@ -28,7 +28,7 @@ import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
 import timber.log.Timber;
 
-public class SyncLinkJob extends BaseJob {
+public class UpdateLinkJob extends BaseJob {
 
   public static final int PRIORITY = 1;
 
@@ -40,7 +40,7 @@ public class SyncLinkJob extends BaseJob {
   private String uid;
   private String TAG = this.getClass().getSimpleName();
 
-  public SyncLinkJob(String uid) {
+  public UpdateLinkJob(String uid) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
     this.filter = Fields.Status.LINK;

@@ -15,14 +15,14 @@ import sapotero.rxtest.retrofit.models.Folder;
 import timber.log.Timber;
 
 
-public class AddFoldersJob extends BaseJob {
+public class CreateFoldersJob extends BaseJob {
 
   public static final int PRIORITY = 1;
   private final ArrayList<Folder> templates;
 
   private String TAG = this.getClass().getSimpleName();
 
-  public AddFoldersJob(ArrayList<Folder> templates) {
+  public CreateFoldersJob(ArrayList<Folder> templates) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.templates = templates;
   }

@@ -18,9 +18,9 @@ import java.util.Objects;
 import javax.inject.Inject;
 
 import io.requery.Persistable;
-import io.requery.query.Result;
-import io.requery.query.Scalar;
 import io.requery.query.WhereAndOr;
+import io.requery.rx.RxResult;
+import io.requery.rx.RxScalar;
 import io.requery.rx.SingleEntityStore;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -105,12 +105,12 @@ public class DBQueryBuilder {
 
       progressBar.setVisibility(ProgressBar.VISIBLE);
 
-      WhereAndOr<Result<RDocumentEntity>> query =
+      WhereAndOr<RxResult<RDocumentEntity>> query =
         dataStore
           .select(RDocumentEntity.class)
           .where(RDocumentEntity.USER.eq( settings.getString("login").get() ) );
 
-      WhereAndOr<Scalar<Integer>> queryCount =
+      WhereAndOr<RxScalar<Integer>> queryCount =
         dataStore
           .count(RDocument.class)
           .where(RDocumentEntity.USER.eq( settings.getString("login").get() ));
@@ -300,44 +300,43 @@ public class DBQueryBuilder {
   private void error(Throwable error) {
     Timber.tag(TAG).e(error);
   }
-
-  public void addByOne(Result<RDocumentEntity> docs){
-
-
-
-    docs
-      .toObservable()
-      .subscribeOn(Schedulers.io())
-      .observeOn( AndroidSchedulers.mainThread() )
-      .subscribe( doc -> {
-
-
-        RSignerEntity signer = (RSignerEntity) doc.getSigner();
-
-        boolean[] selected_index = organizationSelector.getSelected();
-        ArrayList<String> ids = new ArrayList<>();
-
-        for (int i = 0; i < selected_index.length; i++) {
-          if ( selected_index[i] ){
-            ids.add( organizationAdapter.getItem(i).getName() );
-          }
-        }
-
-        // resolved https://tasks.n-core.ru/browse/MVDESD-12625
-        // *1) *Фильтр по организациям.
-        String organization = signer.getOrganisation();
-
-        if (selected_index.length == 0){
-          addDocument(doc);
-        } else {
-          if ( ids.contains(organization) || withFavorites && doc.isFavorites() ){
-            addDocument(doc);
-          }
-        }
-
-      }, this::error);
-
-  }
+//
+//  public void addByOne(Result<RDocumentEntity> docs){
+//
+//
+//
+//    docs()
+//      .subscribeOn(Schedulers.io())
+//      .observeOn( AndroidSchedulers.mainThread() )
+//      .subscribe( doc -> {
+//
+//
+//        RSignerEntity signer = (RSignerEntity) doc.getSigner();
+//
+//        boolean[] selected_index = organizationSelector.getSelected();
+//        ArrayList<String> ids = new ArrayList<>();
+//
+//        for (int i = 0; i < selected_index.length; i++) {
+//          if ( selected_index[i] ){
+//            ids.add( organizationAdapter.getItem(i).getName() );
+//          }
+//        }
+//
+//        // resolved https://tasks.n-core.ru/browse/MVDESD-12625
+//        // *1) *Фильтр по организациям.
+//        String organization = signer.getOrganisation();
+//
+//        if (selected_index.length == 0){
+//          addDocument(doc);
+//        } else {
+//          if ( ids.contains(organization) || withFavorites && doc.isFavorites() ){
+//            addDocument(doc);
+//          }
+//        }
+//
+//      }, this::error);
+//
+//  }
 
   private void addDocument(RDocumentEntity doc) {
     // настройка
@@ -355,18 +354,18 @@ public class DBQueryBuilder {
     }
   }
 
-  public void addList(Result<RDocumentEntity> docs){
-
-    docs
-      .toObservable()
-      .subscribeOn(Schedulers.io())
-      .observeOn( AndroidSchedulers.mainThread() )
-      .toList()
-      .subscribe( list -> {
-        addList(list);
-      }, this::error);
-
-  }
+//  public void addList(Result<RDocumentEntity> docs){
+//
+//    docs
+//      .toObservable()
+//      .subscribeOn(Schedulers.io())
+//      .observeOn( AndroidSchedulers.mainThread() )
+//      .toList()
+//      .subscribe( list -> {
+//        addList(list);
+//      }, this::error);
+//
+//  }
 
   private void unsubscribe() {
     if (subscribe == null) {
@@ -418,7 +417,7 @@ public class DBQueryBuilder {
     organizationAdapter.clear();
     organizationSelector.clear();
 
-    WhereAndOr<Result<RSignerEntity>> query = dataStore
+    WhereAndOr<RxResult<RSignerEntity>> query = dataStore
       .select(RSignerEntity.class)
       .distinct()
       .join(RDocumentEntity.class)

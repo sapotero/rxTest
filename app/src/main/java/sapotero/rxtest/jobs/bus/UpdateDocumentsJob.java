@@ -48,7 +48,7 @@ import sapotero.rxtest.retrofit.models.document.Signer;
 import sapotero.rxtest.retrofit.models.document.Step;
 import timber.log.Timber;
 
-public class SyncDocumentsJob  extends BaseJob {
+public class UpdateDocumentsJob extends BaseJob {
 
   public static final int PRIORITY = 1;
   private boolean not_processed;
@@ -68,13 +68,13 @@ public class SyncDocumentsJob  extends BaseJob {
   private String TAG = this.getClass().getSimpleName();
   private DocumentInfo document;
 
-  public SyncDocumentsJob(String uid, Fields.Status filter) {
+  public UpdateDocumentsJob(String uid, Fields.Status filter) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
     this.filter = filter;
   }
 
-  public SyncDocumentsJob(String uid, String journal, String status, boolean b) {
+  public UpdateDocumentsJob(String uid, String journal, String status, boolean b) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
 
@@ -85,7 +85,7 @@ public class SyncDocumentsJob  extends BaseJob {
     this.not_processed = true;
   }
 
-  public SyncDocumentsJob(String uid, String status) {
+  public UpdateDocumentsJob(String uid, String status) {
     super( new Params(PRIORITY).requireNetwork().persist().addTags("SyncDocument") );
     this.uid     = uid;
     if (!Objects.equals(status, "")){
@@ -93,7 +93,7 @@ public class SyncDocumentsJob  extends BaseJob {
     }
   }
 
-  public SyncDocumentsJob(String uid, String journal, String status) {
+  public UpdateDocumentsJob(String uid, String journal, String status) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
 
@@ -145,7 +145,7 @@ public class SyncDocumentsJob  extends BaseJob {
           if ( doc.getLinks() != null && doc.getLinks().size() > 0 ){
 
             for (String link: doc.getLinks()) {
-              jobManager.addJobInBackground( new SyncLinkJob( link ) );
+              jobManager.addJobInBackground( new UpdateLinkJob( link ) );
             }
 
           }
@@ -155,7 +155,7 @@ public class SyncDocumentsJob  extends BaseJob {
               if ( step.getCards() != null && step.getCards().size() > 0){
                 for (Card card: step.getCards() ) {
                   if (card.getUid() != null) {
-                    jobManager.addJobInBackground( new SyncLinkJob( card.getUid() ) );
+                    jobManager.addJobInBackground( new UpdateLinkJob( card.getUid() ) );
                   }
                 }
               }

@@ -51,7 +51,7 @@ import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.events.view.ShowPrevDocumentEvent;
 import sapotero.rxtest.events.view.ShowSnackEvent;
 import sapotero.rxtest.events.view.UpdateCurrentInfoActivityEvent;
-import sapotero.rxtest.jobs.bus.SyncDocumentsJob;
+import sapotero.rxtest.jobs.bus.UpdateDocumentsJob;
 import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.toolbar.ToolbarManager;
 import sapotero.rxtest.utils.queue.QueueManager;
@@ -426,7 +426,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   public void updateCurrent(){
 
-    jobManager.addJobInBackground(new SyncDocumentsJob( UID.get(), status ));
+    jobManager.addJobInBackground(new UpdateDocumentsJob( UID.get(), status ));
 
     unsubscribe();
     subscription.add(
@@ -435,7 +435,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(interval -> {
-          jobManager.addJobInBackground(new SyncDocumentsJob( UID.get(), status ));
+          jobManager.addJobInBackground(new UpdateDocumentsJob( UID.get(), status ));
         })
     );
   }

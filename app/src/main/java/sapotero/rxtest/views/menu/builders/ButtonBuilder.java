@@ -23,8 +23,8 @@ import javax.inject.Inject;
 import io.requery.Persistable;
 import io.requery.query.Expression;
 import io.requery.query.LogicalCondition;
-import io.requery.query.Scalar;
 import io.requery.query.WhereAndOr;
+import io.requery.rx.RxScalar;
 import io.requery.rx.SingleEntityStore;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
@@ -112,7 +112,7 @@ public class ButtonBuilder {
 
     unsubscribe();
 
-    WhereAndOr<Scalar<Integer>> query = dataStore
+    WhereAndOr<RxScalar<Integer>> query = dataStore
       .count(RDocumentEntity.class)
       .where(RDocumentEntity.USER.eq(settings.getString("login").get()))
       .and(RDocumentEntity.WITH_DECISION.eq(true))
@@ -167,7 +167,7 @@ public class ButtonBuilder {
 
   private void getCountWithoutDecisons() {
 
-    WhereAndOr<Scalar<Integer>> query = dataStore
+    WhereAndOr<RxScalar<Integer>> query = dataStore
       .count(RDocumentEntity.class)
       .where( RDocumentEntity.USER.eq( settings.getString("login").get() ) )
       .and(RDocumentEntity.FROM_LINKS.eq(false));

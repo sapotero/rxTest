@@ -28,8 +28,8 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.requery.Persistable;
-import io.requery.query.Result;
 import io.requery.query.WhereAndOr;
+import io.requery.rx.RxResult;
 import io.requery.rx.SingleEntityStore;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -242,7 +242,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
     }
 
     if (withPrimaryConsideration){
-      WhereAndOr<Result<RPrimaryConsiderationEntity>> query = dataStore
+      WhereAndOr<RxResult<RPrimaryConsiderationEntity>> query = dataStore
         .select(RPrimaryConsiderationEntity.class)
         .where(RPrimaryConsiderationEntity.UID.ne( settings.getString("current_user_id").get() ))
         .and(  RPrimaryConsiderationEntity.USER.eq( settings.getString("current_user").get() ));
@@ -256,7 +256,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
         });
     } else {
 
-      WhereAndOr<Result<RFavoriteUserEntity>> query =
+      WhereAndOr<RxResult<RFavoriteUserEntity>> query =
         dataStore
           .select(RFavoriteUserEntity.class)
           .where(RFavoriteUserEntity.UID.ne(""))

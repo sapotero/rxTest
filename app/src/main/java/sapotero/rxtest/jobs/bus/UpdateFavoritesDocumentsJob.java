@@ -43,7 +43,7 @@ import sapotero.rxtest.retrofit.models.document.Signer;
 import sapotero.rxtest.retrofit.models.document.Step;
 import timber.log.Timber;
 
-public class SyncFavoritesDocumentsJob extends BaseJob {
+public class UpdateFavoritesDocumentsJob extends BaseJob {
 
   public static final int PRIORITY = 1;
 
@@ -59,7 +59,7 @@ public class SyncFavoritesDocumentsJob extends BaseJob {
   private DocumentInfo document;
 
 
-  public SyncFavoritesDocumentsJob(String uid, Fields.Status filter, String favorites_folder) {
+  public UpdateFavoritesDocumentsJob(String uid, Fields.Status filter, String favorites_folder) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
     this.filter = filter;
@@ -106,7 +106,7 @@ public class SyncFavoritesDocumentsJob extends BaseJob {
           if ( doc.getLinks() != null && doc.getLinks().size() > 0 ){
 
             for (String link: doc.getLinks()) {
-              jobManager.addJobInBackground( new SyncLinkJob( link ) );
+              jobManager.addJobInBackground( new UpdateLinkJob( link ) );
             }
 
           }
@@ -116,7 +116,7 @@ public class SyncFavoritesDocumentsJob extends BaseJob {
               if ( step.getCards() != null && step.getCards().size() > 0){
                 for (Card card: step.getCards() ) {
                   if (card.getUid() != null) {
-                    jobManager.addJobInBackground( new SyncLinkJob( card.getUid() ) );
+                    jobManager.addJobInBackground( new UpdateLinkJob( card.getUid() ) );
                   }
                 }
               }

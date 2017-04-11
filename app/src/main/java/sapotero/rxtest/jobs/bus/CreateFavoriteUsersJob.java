@@ -10,19 +10,19 @@ import com.birbit.android.jobqueue.RetryConstraint;
 import java.util.ArrayList;
 
 import rx.schedulers.Schedulers;
-import sapotero.rxtest.db.requery.models.RAssistantEntity;
-import sapotero.rxtest.retrofit.models.Assistant;
+import sapotero.rxtest.db.requery.models.RFavoriteUserEntity;
+import sapotero.rxtest.retrofit.models.Oshs;
 import timber.log.Timber;
 
 
-public class AddAssistantJob extends BaseJob {
+public class CreateFavoriteUsersJob extends BaseJob {
 
   public static final int PRIORITY = 1;
-  private final ArrayList<Assistant> users;
+  private final ArrayList<Oshs> users;
 
   private String TAG = this.getClass().getSimpleName();
 
-  public AddAssistantJob(ArrayList<Assistant> users) {
+  public CreateFavoriteUsersJob(ArrayList<Oshs> users) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.users = users;
   }
@@ -33,24 +33,32 @@ public class AddAssistantJob extends BaseJob {
 
   @Override
   public void onRun() throws Throwable {
-    for (Assistant user : users){
-      if ( !exist( user.getAssistantId()) ){
-        add(user);
+    try {
+      Timber.tag(TAG).i( "users: %s | %s", users.size(), users.get(0).getName() );
+      for (Oshs user : users){
+        if ( !exist( user.getId()) ){
+          add(user);
+        }
       }
+    } catch (Exception e) {
+      e.printStackTrace();
     }
 
   }
 
-  private void add(Assistant user) {
-    RAssistantEntity data = new RAssistantEntity();
-    data.setTitle( user.getToS() );
-    data.setAssistantId( user.getAssistantId() );
-    data.setAssistantName( user.getAssistantName() );
-    data.setForDecision( user.getForDecision() );
-    data.setHeadId( user.getHeadId() );
-    data.setHeadName( user.getHeadName() );
+  private void add(Oshs user) {
+    RFavoriteUserEntity data = new RFavoriteUserEntity();
+    data.setOrganization( user.getOrganization() );
+    data.setFirstName( user.getFirstName() );
+    data.setLastName( user.getLastName() );
+    data.setMiddleName( user.getMiddleName() );
+    data.setGender( user.getGender() );
+    data.setPosition( user.getPosition() );
+    data.setUid( user.getId() );
+    data.setName( user.getName() );
+    data.setIsGroup( user.getIsGroup() );
+    data.setIsOrganization( user.getIsOrganization() );
     data.setUser( settings.getString("current_user").get() );
-
 
     dataStore
       .insert(data)
@@ -58,19 +66,19 @@ public class AddAssistantJob extends BaseJob {
       .subscribeOn(Schedulers.computation())
       .observeOn(Schedulers.computation())
       .subscribe(u -> {
-        Timber.tag(TAG).v("addByOne " + u.getTitle() );
+        Timber.tag(TAG).v("addByOne " + u.getName() );
       });
   }
 
 
   @NonNull
-  private Boolean exist(String id){
+  private Boolean exist(String uid){
 
     boolean result = false;
 
     Integer count = dataStore
-      .count(RAssistantEntity.ASSISTANT_ID)
-      .where(RAssistantEntity.ASSISTANT_ID.eq(id))
+      .count(RFavoriteUserEntity.UID)
+      .where(RFavoriteUserEntity.UID.eq(uid))
       .get().value();
 
     if( count != 0 ){

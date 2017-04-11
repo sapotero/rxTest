@@ -168,6 +168,21 @@ public class MainService extends Service {
     scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 0 ,5*60, TimeUnit.SECONDS );
     scheduller.scheduleWithFixedDelay( new UpdateQueueTask(queue), 0 ,1, TimeUnit.SECONDS );
 
+//    dataStore
+//      .select(RDocumentEntity.class)
+//      .where(RDocumentEntity.FILTER.eq("approval"))
+//      .and(RDocumentEntity.PROCESSED.eq(false))
+//      .get()
+//      .toSelfObservable()
+//      .observeOn(Schedulers.computation())
+//      .subscribeOn(AndroidSchedulers.mainThread())
+//      .subscribe(
+//        data -> {
+//          Timber.tag(TAG).e("self observerable %s", data.toList().size());
+//        },
+//        error -> {
+//          Timber.tag(TAG).e(error);
+//      });
 
   }
 

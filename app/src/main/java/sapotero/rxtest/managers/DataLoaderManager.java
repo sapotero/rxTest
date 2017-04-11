@@ -10,13 +10,10 @@ import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,32 +30,23 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.db.requery.models.RFolderEntity;
-import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.auth.AuthDcCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthDcCheckSuccessEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckSuccessEvent;
-import sapotero.rxtest.events.document.UpdateUnprocessedDocumentsEvent;
-import sapotero.rxtest.events.stepper.auth.StepperDcCheckEvent;
-import sapotero.rxtest.jobs.bus.AddAssistantJob;
-import sapotero.rxtest.jobs.bus.AddFavoriteUsersJob;
-import sapotero.rxtest.jobs.bus.AddFoldersJob;
-import sapotero.rxtest.jobs.bus.AddPrimaryConsiderationJob;
-import sapotero.rxtest.jobs.bus.AddTemplatesJob;
+import sapotero.rxtest.jobs.bus.CreateAssistantJob;
+import sapotero.rxtest.jobs.bus.CreateFavoriteUsersJob;
+import sapotero.rxtest.jobs.bus.CreateFoldersJob;
+import sapotero.rxtest.jobs.bus.CreatePrimaryConsiderationJob;
+import sapotero.rxtest.jobs.bus.CreateTemplatesJob;
 import sapotero.rxtest.jobs.bus.InvalidateDocumentsJob;
-import sapotero.rxtest.jobs.bus.SyncDocumentsJob;
-import sapotero.rxtest.jobs.bus.SyncFavoritesDocumentsJob;
-import sapotero.rxtest.jobs.bus.SyncProcessedDocumentsJob;
+import sapotero.rxtest.jobs.bus.UpdateDocumentsJob;
 import sapotero.rxtest.retrofit.Api.AuthService;
 import sapotero.rxtest.retrofit.DocumentsService;
 import sapotero.rxtest.retrofit.models.AuthSignToken;
 import sapotero.rxtest.retrofit.models.documents.Document;
-import sapotero.rxtest.retrofit.models.documents.Documents;
-import sapotero.rxtest.retrofit.models.v2.v2UserOshs;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.services.MainService;
-import sapotero.rxtest.views.adapters.utils.TDmodel;
 import sapotero.rxtest.views.menu.fields.MainMenuButton;
 import sapotero.rxtest.views.menu.fields.MainMenuItem;
 import timber.log.Timber;
@@ -92,31 +80,11 @@ public class DataLoaderManager {
 
     EsdApplication.getComponent(context).inject(this);
 
-    if ( EventBus.getDefault().isRegistered(this) ){
-      EventBus.getDefault().unregister(this);
-    }
-    EventBus.getDefault().register(this);
-
-
     initialize();
 
   }
 
   private void initV2() {
-//    v2Journals = new ArrayList<String>();
-//    v2Journals.add("incoming_documents");
-//    v2Journals.add("citizen_requests");
-//    v2Journals.add("incoming_orders");
-//    v2Journals.add("outgoing_documents");
-//    v2Journals.add("orders");
-//    v2Journals.add("orders_ddo");
-//
-//    v2Statuses = new ArrayList<String>();
-//    v2Statuses.add("for_report");
-//    v2Statuses.add("for_primary_consideration");
-//    v2Statuses.add("for_sign");
-//    v2Statuses.add("for_approval");
-
     ArrayList<String> indexes = new ArrayList<String>();
     indexes.add("incoming_documents_production_db_core_cards_incoming_documents_cards");
     indexes.add("outgoing_documents_production_db_core_cards_outgoing_documents_cards");
@@ -137,14 +105,9 @@ public class DataLoaderManager {
     Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
     DocumentsService docService = retrofit.create(DocumentsService.class);
 
-    if (subscription != null) {
-      subscription.clear();
-    }
 
     for (String index: indexes ) {
       for (String status: statuses ) {
-
-
 
         subscription.add(
           docService
@@ -155,7 +118,7 @@ public class DataLoaderManager {
               data -> {
                 if (data.getDocuments().size() > 0){
                   for (Document doc: data.getDocuments() ) {
-                    jobManager.addJobInBackground( new SyncDocumentsJob(doc.getUid(), index, status) );
+                    jobManager.addJobInBackground( new UpdateDocumentsJob(doc.getUid(), index, status) );
                   }
                 }
               },
@@ -176,7 +139,7 @@ public class DataLoaderManager {
             data -> {
               if (data.getDocuments().size() > 0){
                 for (Document doc: data.getDocuments() ) {
-                  jobManager.addJobInBackground( new SyncDocumentsJob(doc.getUid(), code) );
+                  jobManager.addJobInBackground( new UpdateDocumentsJob(doc.getUid(), code) );
                 }
               }
             },
@@ -194,7 +157,7 @@ public class DataLoaderManager {
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
       .subscribe( data -> {
-        jobManager.addJobInBackground(new AddFoldersJob(data));
+        jobManager.addJobInBackground(new CreateFoldersJob(data));
       }, error -> {
         Timber.tag(TAG).e(error);
       })
@@ -206,7 +169,7 @@ public class DataLoaderManager {
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe( data -> {
-          jobManager.addJobInBackground(new AddPrimaryConsiderationJob(data));
+          jobManager.addJobInBackground(new CreatePrimaryConsiderationJob(data));
         }, error -> {
           Timber.tag(TAG).e(error);
         })
@@ -217,7 +180,7 @@ public class DataLoaderManager {
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe( templates -> {
-          jobManager.addJobInBackground(new AddTemplatesJob(templates));
+          jobManager.addJobInBackground(new CreateTemplatesJob(templates));
         }, error -> {
           Timber.tag(TAG).e(error);
         })
@@ -229,7 +192,7 @@ public class DataLoaderManager {
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe( data -> {
-          jobManager.addJobInBackground(new AddFavoriteUsersJob(data));
+          jobManager.addJobInBackground(new CreateFavoriteUsersJob(data));
         }, error -> {
           Timber.tag(TAG).e(error);
         })
@@ -242,14 +205,14 @@ public class DataLoaderManager {
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe( data -> {
-          jobManager.addJobInBackground(new AddAssistantJob(data));
+          jobManager.addJobInBackground(new CreateAssistantJob(data));
         }, error -> {
           Timber.tag(TAG).e(error);
         })
     );
 
 //    updateProcessed();
-    updateFavorites();
+//    updateFavorites();
 
   }
 
@@ -274,7 +237,6 @@ public class DataLoaderManager {
     return EventBus.getDefault().isRegistered(this);
   }
 
-
   private void setToken( String token ){
     TOKEN.set(token);
   }
@@ -291,15 +253,34 @@ public class DataLoaderManager {
     CURRENT_USER.set(user);
   }
 
-
   public void setCurrentUserId(String currentUserId) {
     CURRENT_USER_ID.set(currentUserId);
   }
 
-  
+  private void setCurrentUserOrganization(String organization) {
+    CURRENT_USER_ORGANIZATION.set(organization);
+  }
 
   public void setPassword(String password) {
     PASSWORD.set(password);
+  }
+
+
+
+  private boolean validateHost(String host) {
+    Boolean error = false;
+
+    if (host == null){
+      error = true;
+    }
+
+    return error;
+  }
+
+  private boolean isOnline() {
+    ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+    NetworkInfo netInfo = cm.getActiveNetworkInfo();
+    return netInfo != null && netInfo.isConnectedOrConnecting();
   }
 
   private void unsubscribe(){
@@ -310,8 +291,6 @@ public class DataLoaderManager {
       subscription.clear();
     }
   }
-
-
 
   public void updateAuth( String sign ){
     Timber.tag(TAG).i("updateAuth: %s", sign );
@@ -384,7 +363,9 @@ public class DataLoaderManager {
 
             EventBus.getDefault().post( new AuthDcCheckSuccessEvent() );
 
-            updateDocuments(null);
+            initV2();
+
+            updateByCurrentStatus(MainMenuItem.ALL, null);
           },
           error -> {
             Timber.tag(TAG).i("tryToSignWithDc error: %s" , error );
@@ -428,172 +409,13 @@ public class DataLoaderManager {
 
             EventBus.getDefault().post(new AuthLoginCheckSuccessEvent());
 
-            updateDocuments(null);
+            initV2();
+            
+            updateByCurrentStatus(MainMenuItem.ALL, null);
           },
           error -> {
             Timber.tag(TAG).i("tryToSignWithLogin error: %s", error);
             EventBus.getDefault().post(new AuthLoginCheckFailEvent(error.getMessage()));
-          }
-        )
-    );
-  }
-
-  private boolean validateHost(String host) {
-    Boolean error = false;
-
-    if (host == null){
-      error = true;
-    }
-
-    return error;
-  }
-
-  private void updateDocuments(MainMenuItem items) {
-
-
-    Timber.tag(TAG).i("getAuthToken");
-
-    Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
-    AuthService auth = retrofit.create(AuthService.class);
-    DocumentsService docService = retrofit.create(DocumentsService.class);
-
-    COUNT.set(0);
-
-    unsubscribe();
-    subscription.add(
-      // получаем данные о пользователе
-      auth.getUserInfoV2(LOGIN.get(), TOKEN.get())
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(
-          data -> {
-
-            try {
-              v2UserOshs user = data.get(0);
-              setCurrentUser(user.getName());
-              setCurrentUserId(user.getId());
-              setCurrentUserOrganization(user.getOrganization());
-
-              initV2();
-            } catch (Exception e) {
-              e.printStackTrace();
-            }
-          },
-          error -> {
-            Timber.tag("USER_INFO").e( "ERROR: %s", error);
-          })
-    );
-
-  }
-
-  private void updateUnprocessed() {
-    EventBus.getDefault().post( new UpdateUnprocessedDocumentsEvent() );
-  }
-
-  private void getButtonType(ArrayList<Fields.Status> new_filter_types, MainMenuButton button) {
-    switch (button){
-      case APPROVAL:
-        new_filter_types.add( Fields.Status.APPROVAL );
-        break;
-      case PRIMARY_CONSIDERATION:
-        new_filter_types.add( Fields.Status.PRIMARY_CONSIDERATION );
-        break;
-      case ASSIGN:
-        new_filter_types.add( Fields.Status.SIGNING );
-        break;
-      case PERFORMANCE:
-        new_filter_types.add( Fields.Status.SENT_TO_THE_REPORT );
-        break;
-      default:
-        new_filter_types.add( Fields.Status.SENT_TO_THE_REPORT );
-        new_filter_types.add( Fields.Status.SIGNING );
-        new_filter_types.add( Fields.Status.PRIMARY_CONSIDERATION );
-        new_filter_types.add( Fields.Status.APPROVAL );
-        break;
-    }
-  }
-
-  private void setCurrentUserOrganization(String organization) {
-    CURRENT_USER_ORGANIZATION.set(organization);
-  }
-
-  private void updateProcessed(){
-    Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
-    DocumentsService docService = retrofit.create(DocumentsService.class);
-
-    String processed_folder = dataStore
-      .select(RFolderEntity.class)
-      .where(RFolderEntity.TYPE.eq("processed"))
-      .get().first().getUid();
-
-    dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-    Calendar cal = Calendar.getInstance();
-    cal.add(Calendar.HOUR, -30*24);
-    String date = dateFormat.format(cal.getTime());
-
-    Timber.tag("PROCESSED").e("FROM DATE: %s | %s", date, processed_folder);
-
-    Fields.Status[] new_filter_types = Fields.Status.values();
-
-    Observable<Fields.Status> types = Observable.from(new_filter_types);
-    Observable<Documents> count = Observable
-      .from(new_filter_types)
-      .flatMap(status -> docService.getByFolders(LOGIN.get(), TOKEN.get(), status.getValue(), 500, 0, processed_folder, date));
-
-//    unsubscribe();
-    subscription.add(
-        Observable.zip(types, count, (type, docs) -> new TDmodel(type, docs.getDocuments()))
-          .subscribeOn(Schedulers.computation())
-          .observeOn(AndroidSchedulers.mainThread())
-          .toList()
-          .doOnNext(raw -> {
-            for (TDmodel data : raw) {
-              Timber.tag(TAG).i(" DocumentType: %s | %s", data.getType(), data.getDocuments().size());
-
-              for (Document doc : data.getDocuments()) {
-                String type = data.getType();
-                Timber.tag("PROCESSED").e("TYPE: %s | UID: %s", type, doc.getUid());
-
-                jobManager.addJobInBackground(new SyncProcessedDocumentsJob(doc.getUid(), Fields.getStatus(type), processed_folder ) );
-              }
-            }
-          })
-          .subscribe(
-            data -> {
-              Timber.tag(TAG).w("subscribe %s", data);
-              //          callback.onGetProcessedInfoSuccess();
-            }, error -> {
-              Timber.tag(TAG).e(error);
-            }
-          )
-    );
-  }
-
-  private void updateFavorites(){
-    Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
-    DocumentsService docService = retrofit.create(DocumentsService.class);
-
-    String favorites_folder = dataStore
-      .select(RFolderEntity.class)
-      .where(RFolderEntity.TYPE.eq("favorites"))
-      .and(RFolderEntity.USER.eq( settings.getString("current_user").get() ))
-      .get().first().getUid();
-
-//    unsubscribe();
-    subscription.add(
-      docService.getByFolders(LOGIN.get(), TOKEN.get(), null, 500, 0, favorites_folder, null)
-        .subscribeOn( Schedulers.io() )
-        .observeOn( AndroidSchedulers.mainThread() )
-        .subscribe(
-          data -> {
-            if ( data.getDocuments().size() > 0 ) {
-              Timber.tag("FAVORITES").e("DOCUMENTS COUNT: %s", data.getDocuments().size() );
-              for (Document doc : data.getDocuments()) {
-                jobManager.addJobInBackground(new SyncFavoritesDocumentsJob(doc.getUid(), Fields.Status.PROCESSED, favorites_folder ) );
-              }
-            }
-          }, error -> {
-            Timber.tag(TAG).e(error);
           }
         )
     );
@@ -625,22 +447,41 @@ public class DataLoaderManager {
         break;
     }
 
+    if (items == MainMenuItem.ALL){
+      indexes.add("citizen_requests_production_db_core_cards_citizen_requests_cards");
+      indexes.add("incoming_documents_production_db_core_cards_incoming_documents_cards");
+      indexes.add("orders_ddo_production_db_core_cards_orders_ddo_cards");
+      indexes.add("orders_production_db_core_cards_orders_cards");
+      indexes.add("outgoing_documents_production_db_core_cards_outgoing_documents_cards");
+      indexes.add("incoming_orders_production_db_core_cards_incoming_orders_cards");
+    }
+
     ArrayList<String> sp = new ArrayList<String>();
     ArrayList<String> statuses = new ArrayList<String>();
-    switch (button){
-      case APPROVAL:
-        sp.add("approval");
-        break;
-      case ASSIGN:
-        sp.add("signing");
-        break;
-      case PRIMARY_CONSIDERATION:
-        statuses.add("primary_consideration");
-        break;
-      case PERFORMANCE:
-        statuses.add("sent_to_the_report");
-        break;
 
+    if (button != null) {
+      switch (button){
+        case APPROVAL:
+          sp.add("approval");
+          break;
+        case ASSIGN:
+          sp.add("signing");
+          break;
+        case PRIMARY_CONSIDERATION:
+          statuses.add("primary_consideration");
+          break;
+        case PERFORMANCE:
+          statuses.add("sent_to_the_report");
+          break;
+
+      }
+    }
+
+    if (items == MainMenuItem.ALL){
+      statuses.add("primary_consideration");
+      statuses.add("sent_to_the_report");
+      sp.add("approval");
+      sp.add("signing");
     }
 
 
@@ -668,7 +509,7 @@ public class DataLoaderManager {
                 if (data.getDocuments().size() > 0){
 
                   for (Document doc: data.getDocuments() ) {
-                    jobManager.addJobInBackground( new SyncDocumentsJob(doc.getUid(), index, status, true) );
+                    jobManager.addJobInBackground( new UpdateDocumentsJob(doc.getUid(), index, status, true) );
                   }
                   if ( settings.getString("is_first_run").get() != null ){
                     jobManager.addJobInBackground( new InvalidateDocumentsJob(data.getDocuments(), index, status) );
@@ -692,7 +533,7 @@ public class DataLoaderManager {
             data -> {
               if (data.getDocuments().size() > 0){
                 for (Document doc: data.getDocuments() ) {
-                  jobManager.addJobInBackground( new SyncDocumentsJob(doc.getUid(), code) );
+                  jobManager.addJobInBackground( new UpdateDocumentsJob(doc.getUid(), code) );
                 }
               }
             },
@@ -704,7 +545,6 @@ public class DataLoaderManager {
 
 
   }
-
 
   public void updateByStatus(MainMenuItem items) {
     Timber.tag(TAG).e("UPDATE BY STATUS: %s", items.getName() );
@@ -721,7 +561,7 @@ public class DataLoaderManager {
             token -> {
               Timber.tag(TAG).i("updateAuth: token" + token.getAuthToken());
               setToken(token.getAuthToken());
-              updateFavorites();
+//              updateFavorites();
             },
             error -> {
               Timber.tag("getAuth").e( "ERROR: %s", error);
@@ -744,7 +584,7 @@ public class DataLoaderManager {
           );
         break;
       default:
-        updateByDefault(authSubscription, items);
+//        updateByDefault(authSubscription, items);
         break;
     }
 
@@ -777,44 +617,16 @@ public class DataLoaderManager {
     } else {
       authSubscription = auth.getAuth( LOGIN.get(), PASSWORD.get() );
     }
-    
+
     return authSubscription;
   }
 
-  private void updateByDefault(Observable<AuthSignToken> auth, MainMenuItem items) {
-    unsubscribe();
-    subscription.add(
-      auth
-        .subscribeOn( Schedulers.io() )
-        .observeOn( AndroidSchedulers.mainThread() )
-        .subscribe(
-          token -> {
-            Timber.tag(TAG).i("updateAuth: token" + token.getAuthToken());
-            setToken(token.getAuthToken());
-            updateDocuments( MainMenuItem.ALL );
-//            updateProcessed();
-            updateFavorites();
-          },
-          error -> {
-            Timber.tag("getAuth").e( "ERROR: %s", error);
-          }
-        )
-    );
-  }
-
-
-  private boolean isOnline() {
-    ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-    NetworkInfo netInfo = cm.getActiveNetworkInfo();
-    return netInfo != null && netInfo.isConnectedOrConnecting();
-  }
-
   public void updateDocument(String uid) {
-    jobManager.addJobInBackground(new SyncDocumentsJob( uid, "" ));
+//    jobManager.addJobInBackground(new UpdateDocumentsJob( uid, "" ));
   }
 
-  @Subscribe(threadMode = ThreadMode.BACKGROUND)
-  public void onMessageEvent(StepperDcCheckEvent event) throws Exception {
-    String token = event.pin;
-  }
+//  @Subscribe(threadMode = ThreadMode.BACKGROUND)
+//  public void onMessageEvent(StepperDcCheckEvent event) throws Exception {
+//    String token = event.pin;
+//  }
 }
