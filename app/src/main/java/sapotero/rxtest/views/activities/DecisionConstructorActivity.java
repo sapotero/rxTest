@@ -202,6 +202,45 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
             .show();
         }
 
+        // Check if signer and performers are different persons
+        if ( showSaveDialog && manager.hasBlocks() && manager.hasSigner() ) {
+          Decision decision = manager.getDecision();
+          if (decision != null) {
+            String signerId = decision.getSignerId();
+            String assistantId = decision.getAssistantId();
+            boolean signerEqualsPerformer = false;
+            List<Block> blocks = decision.getBlocks();
+
+            for (Block block : blocks) {
+              List<Performer> performers = block.getPerformers();
+              for (Performer performer : performers) {
+                String performerId = performer.getPerformerId();
+                if ( performerId.equals(signerId) || performerId.equals(assistantId) ) {
+                  signerEqualsPerformer = true;
+                  break;
+                }
+              }
+              if (signerEqualsPerformer) {
+                break;
+              }
+            }
+
+            if (signerEqualsPerformer) {
+              showSaveDialog = false;
+              new MaterialDialog.Builder(this)
+                .title("Внимание")
+                .content("Подписавший и исполнитель совпадают")
+                .positiveText("Ок")
+                .onPositive(
+                  (dialog, which) -> {
+                    dialog.dismiss();
+                  }
+                )
+                .show();
+            }
+          }
+        }
+
         String content = "Резолюция была изменена";
 
         if ( settings.getBoolean("decision_with_assigment").get() ){
