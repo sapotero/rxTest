@@ -464,18 +464,31 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     oshs.showWithAssistant(true);
     oshs.registerCallBack( this );
 
+    ArrayList<String> users = new ArrayList<>();
+
     // если есть люди из dialog как исполнители
     if ( adapter.getCount() > 0 ){
-      ArrayList<String> users = new ArrayList<>();
-
-
       for (PrimaryConsiderationPeople user: adapter.getAll()) {
         Timber.tag(TAG).e("user: %s", new Gson().toJson(user));
         users.add( user.getId() );
       }
-
-      oshs.setIgnoreUsers( users );
     }
+
+    // исключить подписанта из списка выбора исполнителей
+    if (blockFactory != null) {
+      String signerId = blockFactory.getDecision().getSignerId();
+      if (signerId != null) {
+        users.add(signerId);
+      }
+
+      String assistantId = blockFactory.getDecision().getAssistantId();
+      if (assistantId != null) {
+        users.add(assistantId);
+      }
+    }
+
+    oshs.setIgnoreUsers( users );
+
     oshs.show( getActivity().getFragmentManager(), "SelectOshsDialogFragment");
   }
 
