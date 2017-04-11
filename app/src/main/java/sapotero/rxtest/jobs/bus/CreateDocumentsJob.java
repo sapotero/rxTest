@@ -116,7 +116,7 @@ public class CreateDocumentsJob extends BaseJob {
           EventBus.getDefault().post( new StepperLoadDocumentEvent(doc.getUid()) );
         },
         error -> {
-          error.printStackTrace();
+          Timber.tag(TAG).e(error);
         }
 
       );
@@ -132,17 +132,6 @@ public class CreateDocumentsJob extends BaseJob {
     doc.setFromLinks( false );
     doc.setUser( LOGIN.get() );
 
-    if (journal != null) {
-      doc.setDocumentType( journal );
-    }
-
-    if (status != null) {
-      doc.setFilter( status );
-    }
-    if (filter != null) {
-      doc.setFilter( filter.toString() );
-    }
-
     doc.setMd5( document.getMd5() );
     doc.setSortKey( document.getSortKey() );
     doc.setTitle( document.getTitle() );
@@ -154,29 +143,26 @@ public class CreateDocumentsJob extends BaseJob {
     doc.setExternalDocumentNumber( document.getExternalDocumentNumber() );
     doc.setReceiptDate( document.getReceiptDate() );
     doc.setViewed( document.getViewed() );
-    doc.setChanged( false );
 
-    doc.setFavorites(false);
-    doc.setProcessed(false);
 
-    doc.setControl(onControl);
+    Timber.tag(TAG).d("signer %s", new Gson().toJson( document.getSigner() ) );
+
+    doc.setMd5( document.getMd5() );
+
+    if (document.getSigner() != null){
+      RSignerEntity signer = new RSignerEntity();
+      signer.setUid( document.getSigner().getId() );
+      signer.setName( document.getSigner().getName() );
+      signer.setOrganisation( document.getSigner().getOrganisation() );
+      signer.setType( document.getSigner().getType() );
+
+      doc.setSigner(signer);
+    }
 
     if ( document.getSigner().getOrganisation() != null && !Objects.equals(document.getSigner().getOrganisation(), "")){
       doc.setOrganization( document.getSigner().getOrganisation() );
     } else {
       doc.setOrganization("Без организации" );
-    }
-
-    Timber.tag("MD5").d("not equal %s - %s",document.getMd5(), doc.getMd5() );
-
-    doc.setMd5( document.getMd5() );
-
-    if (document.getSigner() != null){
-      RSignerEntity signer = (RSignerEntity) doc.getSigner();
-      signer.setUid( document.getSigner().getId() );
-      signer.setName( document.getSigner().getName() );
-      signer.setOrganisation( document.getSigner().getOrganisation() );
-      signer.setType( document.getSigner().getType() );
     }
 
     doc.setUser( LOGIN.get() );
@@ -187,7 +173,7 @@ public class CreateDocumentsJob extends BaseJob {
     doc.setFromProcessedFolder( false );
     doc.setFromFavoritesFolder( false );
     doc.setChanged( false );
-    doc.setProcessed(false);
+
 
     Boolean red = false;
     Boolean with_decision = false;
@@ -195,12 +181,7 @@ public class CreateDocumentsJob extends BaseJob {
     if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
       with_decision = true;
 
-      for ( Decision dec : document.getDecisions() ) {
-        dataStore.delete(RDecisionEntity.class).where(RDecisionEntity.UID.eq(dec.getId())).get().value();
-      }
-
       for (Decision d: document.getDecisions() ) {
-
         RDecisionEntity decision = new RDecisionEntity();
         decision.setUid( d.getId() );
         decision.setLetterhead(d.getLetterhead());
@@ -272,7 +253,6 @@ public class CreateDocumentsJob extends BaseJob {
 
 
       for (Step step: document.getRoute().getSteps() ) {
-
         RStepEntity r_step = new RStepEntity();
         r_step.setTitle( step.getTitle() );
         r_step.setNumber( step.getNumber() );
@@ -308,7 +288,6 @@ public class CreateDocumentsJob extends BaseJob {
     }
 
     if ( document.getImages() != null && document.getImages().size() >= 1 ){
-      doc.getImages().clear();
       for (Image i: document.getImages() ) {
         RImageEntity image = new RImageEntity();
         image.setTitle(i.getTitle());
@@ -327,7 +306,6 @@ public class CreateDocumentsJob extends BaseJob {
     }
 
     if ( document.getControlLabels() != null && document.getControlLabels().size() >= 1 ){
-      doc.getControlLabels().clear();
       for (ControlLabel l: document.getControlLabels() ) {
         RControlLabelsEntity label = new RControlLabelsEntity();
         label.setCreatedAt(l.getCreatedAt());
@@ -342,7 +320,6 @@ public class CreateDocumentsJob extends BaseJob {
     }
 
     if ( document.getLinks() != null){
-      doc.getLinks().clear();
       for (String _link: document.getLinks()) {
         RLinksEntity link = new RLinksEntity();
         link.setUid(_link);
@@ -357,7 +334,8 @@ public class CreateDocumentsJob extends BaseJob {
 
     EventBus.getDefault().post( new UpdateCurrentDocumentEvent( doc.getUid() ) );
 
-    dataStore.insert( doc )
+    dataStore
+      .insert( doc )
       .toObservable()
       .subscribeOn( Schedulers.computation() )
       .observeOn( AndroidSchedulers.mainThread() )
@@ -409,7 +387,10 @@ public class CreateDocumentsJob extends BaseJob {
 
 
         },
-        Throwable::printStackTrace
+        error -> {
+          Timber.tag(TAG).e(error);
+        }
+
       );
   }
 

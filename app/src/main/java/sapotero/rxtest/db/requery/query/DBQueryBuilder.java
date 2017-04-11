@@ -173,6 +173,32 @@ public class DBQueryBuilder {
       adapter.removeAllWithRange();
 
       subscribe.add(
+
+        query
+          .orderBy( RDocumentEntity.SORT_KEY.desc() )
+          .get()
+//          .toSelfObservable()
+          .toObservable()
+//          .toList()
+          .observeOn(Schedulers.newThread())
+          .subscribeOn(AndroidSchedulers.mainThread())
+//          .debounce(1000, TimeUnit.MILLISECONDS)
+          .subscribe(
+            data -> {
+              addByOneInAdapter(data);
+//              List<RDocumentEntity> docs = data.toList();
+//
+//              if (docs.size() > 0){
+//                adapter.removeAllWithRange();
+//                for (RDocumentEntity d: docs ) {
+//                  addByOneInAdapter(d);
+//                }
+//              }
+              Timber.tag(TAG).e("self observerable %s", data.getUid());
+            },
+            error -> {
+              Timber.tag(TAG).e(error);
+            })
 //          query
 //            .orderBy( RDocumentEntity.SORT_KEY.desc() )
 //            .get()
@@ -180,46 +206,46 @@ public class DBQueryBuilder {
 //            .subscribeOn(Schedulers.io())
 //            .observeOn( AndroidSchedulers.mainThread() )
 //            .subscribe(this::addByOne, this::error)
-        query
-          .orderBy( RDocumentEntity.SORT_KEY.desc() )
-          .get()
-          .toObservable()
-          .filter(documentEntity -> {
-
-            Boolean result = true;
-
-            Timber.tag(TAG).w("filter: %s %s",
-              organizationSelector.getSelected().length,
-              organizationSelector.getAdapter().getCount()
-            );
-
-            if ( organizationSelector.getSelected().length != organizationSelector.getAdapter().getCount() ){
-              // resolved https://tasks.n-core.ru/browse/MVDESD-12625
-              // *1) *Фильтр по организациям.
-
-              String organization = documentEntity.getOrganization();
-
-              boolean[] selected_index = organizationSelector.getSelected();
-              ArrayList<String> ids = new ArrayList<>();
-
-              for (int i = 0; i < selected_index.length; i++) {
-                if ( selected_index[i] ){
-                  ids.add( organizationAdapter.getItem(i).getName() );
-                }
-              }
-
-              if ( !ids.contains(organization) || !withFavorites && !documentEntity.isFavorites() ){
-                result = false;
-              }
-
-            }
-
-            return result;
-          })
-          .subscribeOn(Schedulers.newThread())
-          .observeOn( AndroidSchedulers.mainThread() )
-
-          .subscribe(this::addByOneInAdapter, this::error)
+//        query
+//          .orderBy( RDocumentEntity.SORT_KEY.desc() )
+//          .get()
+//          .toObservable()
+//          .filter(documentEntity -> {
+//
+//            Boolean result = true;
+//
+//            Timber.tag(TAG).w("filter: %s %s",
+//              organizationSelector.getSelected().length,
+//              organizationSelector.getAdapter().getCount()
+//            );
+//
+//            if ( organizationSelector.getSelected().length != organizationSelector.getAdapter().getCount() ){
+//              // resolved https://tasks.n-core.ru/browse/MVDESD-12625
+//              // *1) *Фильтр по организациям.
+//
+//              String organization = documentEntity.getOrganization();
+//
+//              boolean[] selected_index = organizationSelector.getSelected();
+//              ArrayList<String> ids = new ArrayList<>();
+//
+//              for (int i = 0; i < selected_index.length; i++) {
+//                if ( selected_index[i] ){
+//                  ids.add( organizationAdapter.getItem(i).getName() );
+//                }
+//              }
+//
+//              if ( !ids.contains(organization) || !withFavorites && !documentEntity.isFavorites() ){
+//                result = false;
+//              }
+//
+//            }
+//
+//            return result;
+//          })
+//          .subscribeOn(Schedulers.newThread())
+//          .observeOn( AndroidSchedulers.mainThread() )
+//
+//          .subscribe(this::addByOneInAdapter, this::error)
 
 
         // Добавляем всё сразу

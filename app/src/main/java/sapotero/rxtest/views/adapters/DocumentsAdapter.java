@@ -160,8 +160,8 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
   }
 
   public void addOneItem(RDocumentEntity documentEntity) {
-    notifyItemInserted(documents.size());
     documents.add(documentEntity);
+    notifyItemInserted(documents.size());
   }
 
   public void invalidateDocumentEvent(UpdateDocumentAdapterEvent event) {

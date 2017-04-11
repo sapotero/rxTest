@@ -171,11 +171,11 @@ public class MainService extends Service {
 //    dataStore
 //      .select(RDocumentEntity.class)
 //      .where(RDocumentEntity.FILTER.eq("approval"))
-//      .and(RDocumentEntity.PROCESSED.eq(false))
 //      .get()
 //      .toSelfObservable()
 //      .observeOn(Schedulers.computation())
 //      .subscribeOn(AndroidSchedulers.mainThread())
+//      .debounce(1000, TimeUnit.MILLISECONDS)
 //      .subscribe(
 //        data -> {
 //          Timber.tag(TAG).e("self observerable %s", data.toList().size());

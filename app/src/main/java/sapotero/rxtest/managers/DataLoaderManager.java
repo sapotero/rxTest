@@ -30,11 +30,13 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.auth.AuthDcCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthDcCheckSuccessEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckSuccessEvent;
 import sapotero.rxtest.jobs.bus.CreateAssistantJob;
+import sapotero.rxtest.jobs.bus.CreateDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateFavoriteUsersJob;
 import sapotero.rxtest.jobs.bus.CreateFoldersJob;
 import sapotero.rxtest.jobs.bus.CreatePrimaryConsiderationJob;
@@ -410,7 +412,7 @@ public class DataLoaderManager {
             EventBus.getDefault().post(new AuthLoginCheckSuccessEvent());
 
             initV2();
-            
+
             updateByCurrentStatus(MainMenuItem.ALL, null);
           },
           error -> {
@@ -509,7 +511,13 @@ public class DataLoaderManager {
                 if (data.getDocuments().size() > 0){
 
                   for (Document doc: data.getDocuments() ) {
-                    jobManager.addJobInBackground( new UpdateDocumentsJob(doc.getUid(), index, status, true) );
+
+
+                    if ( isExist(doc) ){
+                      jobManager.addJobInBackground( new UpdateDocumentsJob(doc.getUid(), index, status, true) );
+                    } else {
+                      jobManager.addJobInBackground( new CreateDocumentsJob(doc.getUid(), index, status) );
+                    }
                   }
                   if ( settings.getString("is_first_run").get() != null ){
                     jobManager.addJobInBackground( new InvalidateDocumentsJob(data.getDocuments(), index, status) );
@@ -544,6 +552,13 @@ public class DataLoaderManager {
     }
 
 
+  }
+
+  private boolean isExist(Document doc) {
+    return dataStore
+      .count(RDocumentEntity.class)
+      .where(RDocumentEntity.UID.eq(doc.getUid()))
+      .get().value() > 0;
   }
 
   public void updateByStatus(MainMenuItem items) {

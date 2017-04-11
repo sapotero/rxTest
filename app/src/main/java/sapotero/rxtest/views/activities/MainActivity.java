@@ -375,6 +375,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
         case R.id.reload:
 
+          dataLoader.updateAuth(null);
           updateByStatus();
 
           if (menuBuilder.getItem() != MainMenuItem.PROCESSED || menuBuilder.getItem() != MainMenuItem.FAVORITES ){
