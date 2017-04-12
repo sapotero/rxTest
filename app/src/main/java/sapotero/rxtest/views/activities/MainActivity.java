@@ -451,7 +451,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void updateByStatus() {
-    dataLoader.updateByStatus( menuBuilder.getItem() );
+    dataLoader.updateByStatus( MainMenuItem.ALL );
 
     Toast.makeText(this, "Обновление данных...", Toast.LENGTH_SHORT).show();
 

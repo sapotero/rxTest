@@ -180,8 +180,8 @@ public class DBQueryBuilder {
 //          .toSelfObservable()
           .toObservable()
 //          .toList()
-          .observeOn(Schedulers.newThread())
-          .subscribeOn(AndroidSchedulers.mainThread())
+          .subscribeOn(Schedulers.newThread())
+          .observeOn(AndroidSchedulers.mainThread())
 //          .debounce(1000, TimeUnit.MILLISECONDS)
           .subscribe(
             data -> {

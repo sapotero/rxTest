@@ -87,70 +87,7 @@ public class DataLoaderManager {
   }
 
   private void initV2() {
-    ArrayList<String> indexes = new ArrayList<String>();
-    indexes.add("incoming_documents_production_db_core_cards_incoming_documents_cards");
-    indexes.add("outgoing_documents_production_db_core_cards_outgoing_documents_cards");
-    indexes.add("orders_production_db_core_cards_orders_cards");
-    indexes.add("orders_ddo_production_db_core_cards_orders_ddo_cards");
-    indexes.add("incoming_orders_production_db_core_cards_incoming_orders_cards");
-    indexes.add("citizen_requests_production_db_core_cards_citizen_requests_cards");
-
-    ArrayList<String> statuses = new ArrayList<String>();
-    statuses.add("sent_to_the_report");
-    statuses.add("primary_consideration");
-
-    ArrayList<String> sp = new ArrayList<String>();
-    sp.add("approval");
-    sp.add("signing");
-
-
     Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
-    DocumentsService docService = retrofit.create(DocumentsService.class);
-
-
-    for (String index: indexes ) {
-      for (String status: statuses ) {
-
-        subscription.add(
-          docService
-            .getDocumentsByIndexes(LOGIN.get(), TOKEN.get(), index, status, 500)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(
-              data -> {
-                if (data.getDocuments().size() > 0){
-                  for (Document doc: data.getDocuments() ) {
-                    jobManager.addJobInBackground( new UpdateDocumentsJob(doc.getUid(), index, status) );
-                  }
-                }
-              },
-              error -> {
-                Timber.tag(TAG).e(error);
-              })
-        );
-      }
-    }
-
-    for (String code: sp ) {
-      subscription.add(
-        docService
-          .getDocuments(LOGIN.get(), TOKEN.get(), code, 500, 0)
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(
-            data -> {
-              if (data.getDocuments().size() > 0){
-                for (Document doc: data.getDocuments() ) {
-                  jobManager.addJobInBackground( new UpdateDocumentsJob(doc.getUid(), code) );
-                }
-              }
-            },
-            error -> {
-              Timber.tag(TAG).e(error);
-            })
-      );
-    }
-
 
     AuthService auth = retrofit.create(AuthService.class);
     // получаем папки
@@ -365,9 +302,9 @@ public class DataLoaderManager {
 
             EventBus.getDefault().post( new AuthDcCheckSuccessEvent() );
 
-            initV2();
 
             updateByCurrentStatus(MainMenuItem.ALL, null);
+            initV2();
           },
           error -> {
             Timber.tag(TAG).i("tryToSignWithDc error: %s" , error );
@@ -411,9 +348,9 @@ public class DataLoaderManager {
 
             EventBus.getDefault().post(new AuthLoginCheckSuccessEvent());
 
-            initV2();
 
             updateByCurrentStatus(MainMenuItem.ALL, null);
+            initV2();
           },
           error -> {
             Timber.tag(TAG).i("tryToSignWithLogin error: %s", error);
@@ -449,15 +386,6 @@ public class DataLoaderManager {
         break;
     }
 
-    if (items == MainMenuItem.ALL){
-      indexes.add("citizen_requests_production_db_core_cards_citizen_requests_cards");
-      indexes.add("incoming_documents_production_db_core_cards_incoming_documents_cards");
-      indexes.add("orders_ddo_production_db_core_cards_orders_ddo_cards");
-      indexes.add("orders_production_db_core_cards_orders_cards");
-      indexes.add("outgoing_documents_production_db_core_cards_outgoing_documents_cards");
-      indexes.add("incoming_orders_production_db_core_cards_incoming_orders_cards");
-    }
-
     ArrayList<String> sp = new ArrayList<String>();
     ArrayList<String> statuses = new ArrayList<String>();
 
@@ -479,11 +407,20 @@ public class DataLoaderManager {
       }
     }
 
+
+    // обновляем всё
     if (items == MainMenuItem.ALL){
       statuses.add("primary_consideration");
       statuses.add("sent_to_the_report");
       sp.add("approval");
       sp.add("signing");
+
+      indexes.add("citizen_requests_production_db_core_cards_citizen_requests_cards");
+      indexes.add("incoming_documents_production_db_core_cards_incoming_documents_cards");
+      indexes.add("orders_ddo_production_db_core_cards_orders_ddo_cards");
+      indexes.add("orders_production_db_core_cards_orders_cards");
+      indexes.add("outgoing_documents_production_db_core_cards_outgoing_documents_cards");
+      indexes.add("incoming_orders_production_db_core_cards_incoming_orders_cards");
     }
 
 
@@ -550,8 +487,6 @@ public class DataLoaderManager {
             })
       );
     }
-
-
   }
 
   private boolean isExist(Document doc) {
@@ -562,46 +497,46 @@ public class DataLoaderManager {
   }
 
   public void updateByStatus(MainMenuItem items) {
-    Timber.tag(TAG).e("UPDATE BY STATUS: %s", items.getName() );
-
-    Observable<AuthSignToken> authSubscription = getAuthSubscription();
-
-
-    switch ( items ){
-      case FAVORITES:
-        authSubscription
-          .subscribeOn( Schedulers.io() )
-          .observeOn( AndroidSchedulers.mainThread() )
-          .subscribe(
-            token -> {
-              Timber.tag(TAG).i("updateAuth: token" + token.getAuthToken());
-              setToken(token.getAuthToken());
-//              updateFavorites();
-            },
-            error -> {
-              Timber.tag("getAuth").e( "ERROR: %s", error);
-            }
-          );
-        break;
-      case PROCESSED:
-        authSubscription
-          .subscribeOn( Schedulers.io() )
-          .observeOn( AndroidSchedulers.mainThread() )
-          .subscribe(
-            token -> {
-              Timber.tag(TAG).i("updateAuth: token" + token.getAuthToken());
-              setToken(token.getAuthToken());
-//              updateProcessed();
-            },
-            error -> {
-              Timber.tag("getAuth").e( "ERROR: %s", error);
-            }
-          );
-        break;
-      default:
-//        updateByDefault(authSubscription, items);
-        break;
-    }
+//    Timber.tag(TAG).e("UPDATE BY STATUS: %s", items.getName() );
+//
+//    Observable<AuthSignToken> authSubscription = getAuthSubscription();
+//
+//
+//    switch ( items ){
+//      case FAVORITES:
+//        authSubscription
+//          .subscribeOn( Schedulers.io() )
+//          .observeOn( AndroidSchedulers.mainThread() )
+//          .subscribe(
+//            token -> {
+//              Timber.tag(TAG).i("updateAuth: token" + token.getAuthToken());
+//              setToken(token.getAuthToken());
+////              updateFavorites();
+//            },
+//            error -> {
+//              Timber.tag("getAuth").e( "ERROR: %s", error);
+//            }
+//          );
+//        break;
+//      case PROCESSED:
+//        authSubscription
+//          .subscribeOn( Schedulers.io() )
+//          .observeOn( AndroidSchedulers.mainThread() )
+//          .subscribe(
+//            token -> {
+//              Timber.tag(TAG).i("updateAuth: token" + token.getAuthToken());
+//              setToken(token.getAuthToken());
+////              updateProcessed();
+//            },
+//            error -> {
+//              Timber.tag("getAuth").e( "ERROR: %s", error);
+//            }
+//          );
+//        break;
+//      default:
+////        updateByDefault(authSubscription, items);
+//        break;
+//    }
 
   }
 
