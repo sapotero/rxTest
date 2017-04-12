@@ -48,7 +48,7 @@ import sapotero.rxtest.retrofit.models.document.Signer;
 import sapotero.rxtest.retrofit.models.document.Step;
 import timber.log.Timber;
 
-public class UpdateDocumentsJob extends BaseJob {
+public class UpdateDocumentJob extends BaseJob {
 
   public static final int PRIORITY = 1;
   private boolean not_processed;
@@ -68,13 +68,13 @@ public class UpdateDocumentsJob extends BaseJob {
   private String TAG = this.getClass().getSimpleName();
   private DocumentInfo document;
 
-  public UpdateDocumentsJob(String uid, Fields.Status filter) {
+  public UpdateDocumentJob(String uid, Fields.Status filter) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
     this.filter = filter;
   }
 
-  public UpdateDocumentsJob(String uid, String journal, String status, boolean b) {
+  public UpdateDocumentJob(String uid, String journal, String status, boolean b) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
 
@@ -85,7 +85,7 @@ public class UpdateDocumentsJob extends BaseJob {
     this.not_processed = true;
   }
 
-  public UpdateDocumentsJob(String uid, String status) {
+  public UpdateDocumentJob(String uid, String status) {
     super( new Params(PRIORITY).requireNetwork().persist().addTags("SyncDocument") );
     this.uid     = uid;
     if (!Objects.equals(status, "")){
@@ -93,7 +93,7 @@ public class UpdateDocumentsJob extends BaseJob {
     }
   }
 
-  public UpdateDocumentsJob(String uid, String journal, String status) {
+  public UpdateDocumentJob(String uid, String journal, String status) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
 
