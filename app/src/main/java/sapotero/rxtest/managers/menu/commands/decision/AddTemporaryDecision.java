@@ -147,6 +147,7 @@ public class AddTemporaryDecision extends AbstractCommand {
 
           perf.setNumber( _perf.getNumber() );
           perf.setPerformerText( _perf.getPerformerText() );
+          perf.setPerformerGender( _perf.getPerformerGender() );
           perf.setOrganizationText( _perf.getOrganizationText() );
           perf.setIsOriginal( _perf.getIsOriginal() );
           perf.setIsResponsible( _perf.getIsResponsible() );

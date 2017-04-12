@@ -360,6 +360,7 @@ public class UpdateDocumentJob extends BaseJob {
                 performer.setPerformerId(p.getPerformerId());
                 performer.setPerformerType(p.getPerformerType());
                 performer.setPerformerText(p.getPerformerText());
+                performer.setPerformerGender(p.getPerformerGender());
                 performer.setOrganizationText(p.getOrganizationText());
                 performer.setIsOriginal(p.getIsOriginal());
                 performer.setIsResponsible(p.getIsResponsible());
@@ -602,6 +603,7 @@ public class UpdateDocumentJob extends BaseJob {
                   performer.setPerformerId(p.getPerformerId());
                   performer.setPerformerType(p.getPerformerType());
                   performer.setPerformerText(p.getPerformerText());
+                  performer.setPerformerGender(p.getPerformerGender());
                   performer.setOrganizationText(p.getOrganizationText());
                   performer.setIsOriginal(p.getIsOriginal());
                   performer.setIsResponsible(p.getIsResponsible());

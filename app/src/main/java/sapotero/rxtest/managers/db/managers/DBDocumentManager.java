@@ -145,6 +145,7 @@ public class DBDocumentManager {
             raw_performer.setPerformerId(performer.getPerformerId());
             raw_performer.setPerformerType(performer.getPerformerType());
             raw_performer.setPerformerText(performer.getPerformerText());
+            raw_performer.setPerformerGender(performer.getPerformerGender());
             raw_performer.setOrganizationText(performer.getOrganizationText());
             raw_performer.setIsOriginal(performer.isIsOriginal());
             raw_performer.setIsResponsible(performer.isIsResponsible());

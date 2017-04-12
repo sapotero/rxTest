@@ -15,6 +15,7 @@ public abstract class RPerformer {
   String performerId;
   String performerType;
   String performerText;
+  String performerGender;
   String organizationText;
   Boolean isOriginal;
   Boolean isResponsible;
