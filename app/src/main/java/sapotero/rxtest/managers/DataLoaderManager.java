@@ -42,11 +42,12 @@ import sapotero.rxtest.jobs.bus.CreateFoldersJob;
 import sapotero.rxtest.jobs.bus.CreatePrimaryConsiderationJob;
 import sapotero.rxtest.jobs.bus.CreateTemplatesJob;
 import sapotero.rxtest.jobs.bus.InvalidateDocumentsJob;
-import sapotero.rxtest.jobs.bus.UpdateDocumentsJob;
+import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.retrofit.Api.AuthService;
 import sapotero.rxtest.retrofit.DocumentsService;
 import sapotero.rxtest.retrofit.models.AuthSignToken;
 import sapotero.rxtest.retrofit.models.documents.Document;
+import sapotero.rxtest.retrofit.models.v2.v2UserOshs;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.views.menu.fields.MainMenuButton;
@@ -90,64 +91,86 @@ public class DataLoaderManager {
     Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
 
     AuthService auth = retrofit.create(AuthService.class);
-    // получаем папки
     subscription.add(
-      auth.getFolders(LOGIN.get(), TOKEN.get())
+      // получаем данные о пользователе
+      auth.getUserInfoV2(LOGIN.get(), TOKEN.get())
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-      .subscribe( data -> {
-        jobManager.addJobInBackground(new CreateFoldersJob(data));
-      }, error -> {
-        Timber.tag(TAG).e(error);
-      })
-    );
+        .subscribe(
+          v2 -> {
+            try {
+              v2UserOshs user = v2.get(0);
+              setCurrentUser(user.getName());
+              setCurrentUserId(user.getId());
+              setCurrentUserOrganization(user.getOrganization());
+
+              // получаем папки
+              subscription.add(
+                auth.getFolders(LOGIN.get(), TOKEN.get())
+                  .subscribeOn(Schedulers.io())
+                  .observeOn(AndroidSchedulers.mainThread())
+                  .subscribe( data -> {
+                    jobManager.addJobInBackground(new CreateFoldersJob(data));
+                  }, error -> {
+                    Timber.tag(TAG).e(error);
+                  })
+              );
 
 
-    subscription.add(
-      auth.getPrimaryConsiderationUsers(LOGIN.get(), TOKEN.get())
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe( data -> {
-          jobManager.addJobInBackground(new CreatePrimaryConsiderationJob(data));
-        }, error -> {
-          Timber.tag(TAG).e(error);
-        })
-    );
+              subscription.add(
+                auth.getPrimaryConsiderationUsers(LOGIN.get(), TOKEN.get())
+                  .subscribeOn(Schedulers.io())
+                  .observeOn(AndroidSchedulers.mainThread())
+                  .subscribe( data -> {
+                    jobManager.addJobInBackground(new CreatePrimaryConsiderationJob(data));
+                  }, error -> {
+                    Timber.tag(TAG).e(error);
+                  })
+              );
 
-    subscription.add(
-      auth.getTemplates(LOGIN.get(), TOKEN.get())
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe( templates -> {
-          jobManager.addJobInBackground(new CreateTemplatesJob(templates));
-        }, error -> {
-          Timber.tag(TAG).e(error);
-        })
-    );
+              subscription.add(
+                auth.getTemplates(LOGIN.get(), TOKEN.get())
+                  .subscribeOn(Schedulers.io())
+                  .observeOn(AndroidSchedulers.mainThread())
+                  .subscribe( templates -> {
+                    jobManager.addJobInBackground(new CreateTemplatesJob(templates));
+                  }, error -> {
+                    Timber.tag(TAG).e(error);
+                  })
+              );
 
-    // получаем группу Избранное(МП)
-    subscription.add(
-      auth.getFavoriteUsers(LOGIN.get(), TOKEN.get())
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe( data -> {
-          jobManager.addJobInBackground(new CreateFavoriteUsersJob(data));
-        }, error -> {
-          Timber.tag(TAG).e(error);
-        })
-    );
+              // получаем группу Избранное(МП)
+              subscription.add(
+                auth.getFavoriteUsers(LOGIN.get(), TOKEN.get())
+                  .subscribeOn(Schedulers.io())
+                  .observeOn(AndroidSchedulers.mainThread())
+                  .subscribe( data -> {
+                    jobManager.addJobInBackground(new CreateFavoriteUsersJob(data));
+                  }, error -> {
+                    Timber.tag(TAG).e(error);
+                  })
+              );
 
-    // Доработка api для возврата ВРИО/по поручению
-    // https://tasks.n-core.ru/browse/MVDESD-11453
-    subscription.add(
-      auth.getAssistant(LOGIN.get(), TOKEN.get(), CURRENT_USER_ID.get())
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe( data -> {
-          jobManager.addJobInBackground(new CreateAssistantJob(data));
-        }, error -> {
-          Timber.tag(TAG).e(error);
-        })
+              // Доработка api для возврата ВРИО/по поручению
+              // https://tasks.n-core.ru/browse/MVDESD-11453
+              subscription.add(
+                auth.getAssistant(LOGIN.get(), TOKEN.get(), CURRENT_USER_ID.get())
+                  .subscribeOn(Schedulers.io())
+                  .observeOn(AndroidSchedulers.mainThread())
+                  .subscribe( data -> {
+                    jobManager.addJobInBackground(new CreateAssistantJob(data));
+                  }, error -> {
+                    Timber.tag(TAG).e(error);
+                  })
+              );
+
+            } catch (Exception e) {
+              e.printStackTrace();
+            }
+          },
+          error -> {
+            Timber.tag("USER_INFO").e( "ERROR: %s", error);
+          })
     );
 
 //    updateProcessed();
@@ -451,7 +474,7 @@ public class DataLoaderManager {
 
 
                     if ( isExist(doc) ){
-                      jobManager.addJobInBackground( new UpdateDocumentsJob(doc.getUid(), index, status, true) );
+                      jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), index, status, true) );
                     } else {
                       jobManager.addJobInBackground( new CreateDocumentsJob(doc.getUid(), index, status) );
                     }
@@ -478,7 +501,7 @@ public class DataLoaderManager {
             data -> {
               if (data.getDocuments().size() > 0){
                 for (Document doc: data.getDocuments() ) {
-                  jobManager.addJobInBackground( new UpdateDocumentsJob(doc.getUid(), code) );
+                  jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), code) );
                 }
               }
             },
@@ -572,7 +595,7 @@ public class DataLoaderManager {
   }
 
   public void updateDocument(String uid) {
-//    jobManager.addJobInBackground(new UpdateDocumentsJob( uid, "" ));
+//    jobManager.addJobInBackground(new UpdateDocumentJob( uid, "" ));
   }
 
 //  @Subscribe(threadMode = ThreadMode.BACKGROUND)

@@ -185,6 +185,7 @@ public class DBQueryBuilder {
 //          .debounce(1000, TimeUnit.MILLISECONDS)
           .subscribe(
             data -> {
+              Timber.tag(TAG).e("add: %s", data.getId());
               addByOneInAdapter(data);
 //              List<RDocumentEntity> docs = data.toList();
 //
@@ -265,7 +266,7 @@ public class DBQueryBuilder {
 
   private void addByOneInAdapter(RDocumentEntity documentEntity) {
     hideEmpty();
-    adapter.addOneItem(documentEntity);
+    adapter.addItem(documentEntity);
   }
 
   private void addAllInAdapter(List<RDocumentEntity> rDocumentEntities) {

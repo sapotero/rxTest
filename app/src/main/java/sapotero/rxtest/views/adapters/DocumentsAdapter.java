@@ -192,6 +192,20 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     }
   }
 
+  private void populateDocs(List<RDocumentEntity> documents) {
+    for (int i = 0; i < documents.size(); i++) {
+//      real_docs.add(documents.get(i));
+    }
+  }
+
+  private void setAnimation(View viewToAnimate, int position){
+
+
+
+    Animation animation = AnimationUtils.loadAnimation(mContext, R.anim.fade_in);
+    viewToAnimate.startAnimation(animation);
+  }
+
   @SuppressLint("NewApi")
   public DocumentsAdapter(Context context, List<RDocumentEntity> documents) {
     this.mContext  = context;
@@ -209,12 +223,6 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 //      });
 
     EsdApplication.getComponent(context).inject(this);
-  }
-
-  private void populateDocs(List<RDocumentEntity> documents) {
-    for (int i = 0; i < documents.size(); i++) {
-//      real_docs.add(documents.get(i));
-    }
   }
 
   @Override
@@ -401,14 +409,6 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
   }
 
-  private void setAnimation(View viewToAnimate, int position){
-
-
-
-    Animation animation = AnimationUtils.loadAnimation(mContext, R.anim.fade_in);
-    viewToAnimate.startAnimation(animation);
-  }
-
   @Override
   public int getItemCount() {
     return documents == null ? 0 : documents.size();
@@ -516,7 +516,6 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     if ( !Holder.MAP.containsKey( document.getUid()) ){
       Holder.MAP.put( document.getUid(), document );
       documents.add(document);
-//      real_docs.add(document);
       notifyItemInserted(documents.size());
     }
   }
@@ -537,8 +536,6 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     private TextView control_label;
     private TextView favorite_label;
 
-    private TextView wait_for_sync;
-
     private CardView cv;
     private TextView title;
     private TextView date;
@@ -558,7 +555,6 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       sync_label = (TextView)itemView.findViewById(R.id.sync_label);
       control_label  = (TextView)itemView.findViewById(R.id.control_label);
       lock_label  = (TextView)itemView.findViewById(R.id.lock_label);
-      wait_for_sync  = (TextView)itemView.findViewById(R.id.wait_for_sync);
 
       favorite_label.setVisibility(View.GONE);
       control_label.setVisibility(View.GONE);

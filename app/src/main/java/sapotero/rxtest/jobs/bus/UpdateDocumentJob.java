@@ -538,6 +538,8 @@ public class UpdateDocumentJob extends BaseJob {
       if (doc.isProcessed() == null){
         doc.setProcessed(isProcessed);
       }
+
+
       doc.setControl(onControl);
       doc.setUser( LOGIN.get() );
       doc.setFromLinks( false );
