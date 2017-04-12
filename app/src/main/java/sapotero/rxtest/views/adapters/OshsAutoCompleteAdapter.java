@@ -49,6 +49,8 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
 
   private ArrayList<String> ignore_user_ids;
 
+  private int threshold;
+
   public OshsAutoCompleteAdapter(Context context) {
     mContext = context;
     EsdApplication.getComponent( context ).inject( this );
@@ -89,7 +91,9 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
       @Override
       protected FilterResults performFiltering(CharSequence constraint) {
         FilterResults filterResults = new FilterResults();
-        if (constraint != null) {
+        filterResults.count = 0;
+
+        if (constraint != null && constraint.length() >= threshold) {
           List<Oshs> results = null;
           try {
             results = findOshs(mContext, constraint.toString());
@@ -101,12 +105,13 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
           assert results != null;
           filterResults.count  = results.size();
         }
+
         return filterResults;
       }
 
       @Override
       protected void publishResults(CharSequence constraint, FilterResults results) {
-        if (results != null && results.count > 0) {
+        if (results != null && results.values != null && results.count > 0) {
           resultList = (List<Oshs>) results.values;
 
           InputMethodManager imm = (InputMethodManager) mContext.getSystemService(Activity.INPUT_METHOD_SERVICE);
@@ -131,11 +136,16 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
 
     if (data != null && data.length > 0){
       for (Oshs oshs : data) {
-        if (!oshs.getIsGroup() && !oshs.getIsOrganization()) {
-          if ( ignore_user_ids != null && ignore_user_ids.contains(oshs.getId()) ) {
-            continue;
+        String oshsId = oshs.getId();
+        Boolean isGroup = oshs.getIsGroup();
+        Boolean isOrganization = oshs.getIsOrganization();
+        if (oshsId != null && isGroup != null && isOrganization != null) {
+          if (!isGroup && !isOrganization) {
+            if ( ignore_user_ids != null && ignore_user_ids.contains(oshsId) ) {
+              continue;
+            }
+            result.add(oshs);
           }
-          result.add(oshs);
         }
       }
     }
@@ -155,5 +165,9 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
     if (users != null) {
       ignore_user_ids = users;
     }
+  }
+
+  public void setThreshold(int threshold) {
+    this.threshold = threshold;
   }
 }

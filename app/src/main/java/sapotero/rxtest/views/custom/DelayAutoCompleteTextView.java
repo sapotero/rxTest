@@ -14,7 +14,7 @@ import sapotero.rxtest.views.adapters.OshsAutoCompleteAdapter;
 public class DelayAutoCompleteTextView extends AutoCompleteTextView {
 
   private static final int MESSAGE_TEXT_CHANGED = 100;
-  private static final int DEFAULT_AUTOCOMPLETE_DELAY = 750;
+  private static final int DEFAULT_AUTOCOMPLETE_DELAY = 1500;
 
   private int mAutoCompleteDelay = DEFAULT_AUTOCOMPLETE_DELAY;
   private ProgressBar mLoadingIndicator;
