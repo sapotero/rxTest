@@ -151,56 +151,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
 
       if ( manager.isChanged() ){
-        Boolean showSaveDialog = true;
-
-        if ( !manager.allSignersSet() ) {
-          showSaveDialog = false;
-          new MaterialDialog.Builder(this)
-            .title("Внимание")
-            .content("Укажите хотя бы одного исполнителя")
-            .positiveText("Ок")
-            .negativeText("Выход")
-            .onPositive(
-              (dialog, which) -> {
-                dialog.dismiss();
-              }
-            )
-            .onNegative(
-              (dialog, which) -> {
-                finish();
-              }
-            )
-            .show();
-        }
-
-        if ( showSaveDialog && !manager.hasBlocks() ) {
-          showSaveDialog = false;
-          new MaterialDialog.Builder(this)
-            .title("Внимание")
-            .content("Необходимо добавить хотя бы один блок")
-            .positiveText("Ок")
-            .onPositive(
-              (dialog, which) -> {
-                dialog.dismiss();
-              }
-            )
-            .show();
-
-        }
-
-        if ( showSaveDialog && !manager.hasSigner() ) {
-          showSaveDialog = false;
-          new MaterialDialog.Builder(this)
-            .title("Внимание")
-            .content("Необходимо выбрать подписавшего")
-            .positiveText("Ок")
-            .onPositive(
-              (dialog, which) -> {
-                dialog.dismiss();
-              }
-            )
-            .show();
-        }
+        Boolean showSaveDialog = checkDecision();
 
         String content = "Резолюция была изменена";
 
@@ -295,9 +246,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
             .show();
         }
 
-
-
-
       } else {
         finish();
 //        activity.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
@@ -313,37 +261,41 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
 
         case R.id.action_constructor_create_and_sign:
-          operationManager.registerCallBack(null);
+          boolean canCreateAndSign = checkDecision();
 
-          Decision decision = manager.getDecision();
+          if (canCreateAndSign) {
+            operationManager.registerCallBack(null);
 
-          params = new CommandParams();
-          params.setDecisionModel( decision );
+            Decision decision = manager.getDecision();
 
-          decision.setDocumentUid( settings.getString("activity_main_menu.uid").get() );
+            params = new CommandParams();
+            params.setDecisionModel( decision );
 
-          if (rDecisionEntity != null) {
-            params.setDecisionModel( DecisionConverter.formatDecision(rDecisionEntity) );
-            params.setDecisionId( rDecisionEntity.getUid() );
+            decision.setDocumentUid( settings.getString("activity_main_menu.uid").get() );
+
+            if (rDecisionEntity != null) {
+              params.setDecisionModel( DecisionConverter.formatDecision(rDecisionEntity) );
+              params.setDecisionId( rDecisionEntity.getUid() );
+            }
+
+            operation = CommandFactory.Operation.CREATE_AND_APPROVE_DECISION;
+
+            if (rDecisionEntity != null){
+              operation = CommandFactory.Operation.SAVE_AND_APPROVE_DECISION;
+              params.setDecisionId( rDecisionEntity.getUid() );
+              params.setDecisionModel( manager.getDecision() );
+            }
+
+            if ( settings.getBoolean("decision_with_assigment").get() ){
+              Timber.tag(TAG).w("ASSIGNMENT: %s", settings.getBoolean("decision_with_assigment").get() );
+              params.setAssignment(true);
+              decision.setAssignment(true);
+            }
+
+            operationManager.execute( operation, params );
+
+            finish();
           }
-
-          operation = CommandFactory.Operation.CREATE_AND_APPROVE_DECISION;
-
-          if (rDecisionEntity != null){
-            operation = CommandFactory.Operation.SAVE_AND_APPROVE_DECISION;
-            params.setDecisionId( rDecisionEntity.getUid() );
-            params.setDecisionModel( manager.getDecision() );
-          }
-
-          if ( settings.getBoolean("decision_with_assigment").get() ){
-            Timber.tag(TAG).w("ASSIGNMENT: %s", settings.getBoolean("decision_with_assigment").get() );
-            params.setAssignment(true);
-            decision.setAssignment(true);
-          }
-
-          operationManager.execute( operation, params );
-
-          finish();
 
           break;
         case R.id.action_constructor_add_block:
@@ -575,6 +527,100 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
 
 
+  }
+
+  private boolean checkDecision() {
+    boolean showSaveDialog = true;
+
+    if ( !manager.allSignersSet() ) {
+      showSaveDialog = false;
+      new MaterialDialog.Builder(this)
+              .title("Внимание")
+              .content("Укажите хотя бы одного исполнителя")
+              .positiveText("Ок")
+              .negativeText("Выход")
+              .onPositive(
+                      (dialog, which) -> {
+                        dialog.dismiss();
+                      }
+              )
+              .onNegative(
+                      (dialog, which) -> {
+                        finish();
+                      }
+              )
+              .show();
+    }
+
+    if ( showSaveDialog && !manager.hasBlocks() ) {
+      showSaveDialog = false;
+      new MaterialDialog.Builder(this)
+              .title("Внимание")
+              .content("Необходимо добавить хотя бы один блок")
+              .positiveText("Ок")
+              .onPositive(
+                      (dialog, which) -> {
+                        dialog.dismiss();
+                      }
+              )
+              .show();
+
+    }
+
+    if ( showSaveDialog && !manager.hasSigner() ) {
+      showSaveDialog = false;
+      new MaterialDialog.Builder(this)
+              .title("Внимание")
+              .content("Необходимо выбрать подписавшего")
+              .positiveText("Ок")
+              .onPositive(
+                      (dialog, which) -> {
+                        dialog.dismiss();
+                      }
+              )
+              .show();
+    }
+
+    // Check if signer and performers are different persons
+    if ( showSaveDialog && manager.hasBlocks() && manager.hasSigner() ) {
+      Decision decision = manager.getDecision();
+      if (decision != null) {
+        String signerId = decision.getSignerId();
+        String assistantId = decision.getAssistantId();
+        boolean signerEqualsPerformer = false;
+        List<Block> blocks = decision.getBlocks();
+
+        for (Block block : blocks) {
+          List<Performer> performers = block.getPerformers();
+          for (Performer performer : performers) {
+            String performerId = performer.getPerformerId();
+            if ( performerId.equals(signerId) || performerId.equals(assistantId) ) {
+              signerEqualsPerformer = true;
+              break;
+            }
+          }
+          if (signerEqualsPerformer) {
+            break;
+          }
+        }
+
+        if (signerEqualsPerformer) {
+          showSaveDialog = false;
+          new MaterialDialog.Builder(this)
+                  .title("Внимание")
+                  .content("Подписавший и исполнитель совпадают")
+                  .positiveText("Ок")
+                  .onPositive(
+                          (dialog, which) -> {
+                            dialog.dismiss();
+                          }
+                  )
+                  .show();
+        }
+      }
+    }
+
+    return showSaveDialog;
   }
 
   @Override
