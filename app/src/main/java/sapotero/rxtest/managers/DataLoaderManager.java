@@ -45,7 +45,6 @@ import sapotero.rxtest.jobs.bus.CreateTemplatesJob;
 import sapotero.rxtest.jobs.bus.InvalidateDocumentsJob;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.jobs.bus.UpdateFavoritesDocumentsJob;
-import sapotero.rxtest.jobs.bus.UpdateProcessedDocumentsJob;
 import sapotero.rxtest.retrofit.Api.AuthService;
 import sapotero.rxtest.retrofit.DocumentsService;
 import sapotero.rxtest.retrofit.models.AuthSignToken;
@@ -617,25 +616,25 @@ public class DataLoaderManager {
       .and(RFolderEntity.USER.eq( settings.getString("current_user").get() ))
       .get().firstOrNull();
 
-    if (processed_folder != null) {
-      subscription.add(
-        docService.getByFolders(LOGIN.get(), TOKEN.get(), null, 500, 0, processed_folder.getUid(), null)
-          .subscribeOn( Schedulers.io() )
-          .observeOn( AndroidSchedulers.mainThread() )
-          .subscribe(
-            data -> {
-              if ( data.getDocuments().size() > 0 ) {
-                Timber.tag("FAVORITES").e("DOCUMENTS COUNT: %s", data.getDocuments().size() );
-                for (Document doc : data.getDocuments()) {
-                  jobManager.addJobInBackground(new UpdateProcessedDocumentsJob(doc.getUid(), processed_folder.getUid() ) );
-                }
-              }
-            }, error -> {
-              Timber.tag(TAG).e(error);
-            }
-          )
-      );
-    }
+//    if (processed_folder != null) {
+//      subscription.add(
+//        docService.getByFolders(LOGIN.get(), TOKEN.get(), null, 500, 0, processed_folder.getUid(), null)
+//          .subscribeOn( Schedulers.io() )
+//          .observeOn( AndroidSchedulers.mainThread() )
+//          .subscribe(
+//            data -> {
+//              if ( data.getDocuments().size() > 0 ) {
+//                Timber.tag("FAVORITES").e("DOCUMENTS COUNT: %s", data.getDocuments().size() );
+//                for (Document doc : data.getDocuments()) {
+//                  jobManager.addJobInBackground(new UpdateProcessedDocumentsJob(doc.getUid(), processed_folder.getUid() ) );
+//                }
+//              }
+//            }, error -> {
+//              Timber.tag(TAG).e(error);
+//            }
+//          )
+//      );
+//    }
     if (favorites_folder != null) {
       subscription.add(
         docService.getByFolders(LOGIN.get(), TOKEN.get(), null, 500, 0, favorites_folder.getUid(), null)

@@ -226,6 +226,21 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   }
 
+
+
+
+  @OnClick(R.id.activity_info_prev_document)
+  public void prev_doc(){
+    showPrevDocument();
+  }
+  @OnClick(R.id.activity_info_next_document)
+  public void next_doc(){
+    showNextDocument();
+  }
+
+
+
+
   @OnClick(R.id.activity_info_left_button)
   public void prev(){
     Timber.tag(TAG).v("prev document");
