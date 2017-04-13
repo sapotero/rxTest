@@ -150,6 +150,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
         oshs.setAssistantId( user.getAssistantId() );
         oshs.setPosition( user.getPosition() );
         oshs.setName( user.getName() );
+        oshs.setGender( user.getGender() );
 
         Timber.e("setOnItemClickListener OPERATION: %s", operation.toString());
         callback.onSearchSuccess(oshs, operation, documentUid);

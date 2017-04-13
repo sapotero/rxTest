@@ -35,6 +35,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
+import padeg.lib.Padeg;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.utils.DecisionConverter;
@@ -306,6 +307,53 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
 
         String performerName = "";
 
+        String tempPerformerName = DecisionConverter.formatName( user.getPerformerText() );
+        String genderString = user.getPerformerGender();
+
+        // true - мужской, false - женский
+        boolean gender = true;
+        // true - склонять, false - не склонять
+        boolean decl = false;
+
+        if ( genderString != null && !genderString.equals("") ) {
+          // пол указан
+          if ( genderString.toLowerCase().trim().startsWith("м") ) {
+            // мужской
+            gender = true;
+            decl = true;
+          } else if ( genderString.toLowerCase().trim().startsWith("ж") ) {
+            // женский
+            gender = false;
+            decl = true;
+          } else {
+            // пол неизвестен, не склонять
+            decl = false;
+          }
+        } else {
+          // пол не указан, не склонять
+          decl = false;
+        }
+
+        boolean forReport = block.getAppealText().contains("дол");
+        boolean forAcquaint = block.getAppealText().contains("озн");
+
+        // 1 - именительный падеж
+        // 2 - родительный падеж
+        // 3 - дательный падеж
+        // 4 - винительный падеж
+        // 5 - творительный падеж
+        // 6 - предложный падеж
+
+        if (decl) {
+          if (forAcquaint) {
+            // Если Прошу ознакомить, то винительный падеж
+            tempPerformerName = Padeg.getFIOPadegFS(tempPerformerName, gender, 4);
+          } else {
+            // По умолчанию и если Прошу доложить, то дательный падеж
+            tempPerformerName = Padeg.getFIOPadegFS(tempPerformerName, gender, 3);
+          }
+        }
+
         Timber.tag("TEST").w("null? - %s | %s", block.getAppealText() == null, block.getAppealText() );
         Timber.tag("TEST").w("user %s", new Gson().toJson( user ) );
 
@@ -314,7 +362,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
           numberPrinted = true;
         }
 
-        performerName += DecisionConverter.formatName( user.getPerformerText() );
+        performerName += tempPerformerName;
 
         if (user.getIsResponsible() != null && user.getIsResponsible()){
           performerName += " *";
