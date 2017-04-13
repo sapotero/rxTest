@@ -283,6 +283,8 @@ public class DataLoaderManager {
           data -> {
             Timber.tag(TAG).i("updateAuth: token" + data.getAuthToken());
             setToken( data.getAuthToken() );
+
+            initV2();
           },
           error -> {
             Timber.tag(TAG).i("updateAuth error: %s" , error );
@@ -327,7 +329,7 @@ public class DataLoaderManager {
 
             updateByCurrentStatus(MainMenuItem.ALL, null);
             initV2();
-            updateFavoritesAndProcessed();
+//            updateFavoritesAndProcessed();
           },
           error -> {
             Timber.tag(TAG).i("tryToSignWithDc error: %s" , error );
@@ -374,7 +376,7 @@ public class DataLoaderManager {
 
             updateByCurrentStatus(MainMenuItem.ALL, null);
             initV2();
-            updateFavoritesAndProcessed();
+//            updateFavoritesAndProcessed();
           },
           error -> {
             Timber.tag(TAG).i("tryToSignWithLogin error: %s", error);
