@@ -9,6 +9,7 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.util.Collections;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -102,6 +103,8 @@ public class RejectDecision extends AbstractCommand {
       .set(RDecisionEntity.TEMPORARY, true)
       .where(RDecisionEntity.UID.eq(params.getDecisionModel().getId()))
       .get().value();
+
+
     Timber.tag(TAG).i( "2 updateLocal decision: %s", count );
     Timber.tag(TAG).i( "2 updateLocal decision signer:\n%s\n%s\n", params.getDecisionModel().getSignerId(), settings.getString("current_user_id").get() );
 
@@ -137,7 +140,14 @@ public class RejectDecision extends AbstractCommand {
       EventBus.getDefault().post( new ShowNextDocumentEvent());
     }
 
-    EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( params.getDecisionModel().getId() ));
+    Observable.just("").timeout(100, TimeUnit.MILLISECONDS).subscribe(
+      data -> {
+        Timber.tag("slow").e("exec");
+        EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( params.getDecisionModel().getId() ));
+      }, error -> {
+        Timber.tag(TAG).e(error);
+      }
+    );
   }
 
 

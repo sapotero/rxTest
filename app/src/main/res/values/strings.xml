@@ -238,6 +238,7 @@
     <string name="dialog_reject_body"> Отклонить документ?</string>
     <string name="dialog_empty_value"></string>
 
+    <string name="decision_assignment_approve_body">Согласовать данную резолюцию?</string>
     <string name="decision_approve_body">Подписать данную резолюцию?</string>
     <string name="decision_reject_body"> Отклонить данную резолюцию?</string>
 

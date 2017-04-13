@@ -13,6 +13,7 @@ import java.util.Objects;
 
 import sapotero.rxtest.R;
 import sapotero.rxtest.views.adapters.models.DecisionSpinnerItem;
+import timber.log.Timber;
 
 public class DecisionSpinnerAdapter extends BaseAdapter {
   private final String current_user;
@@ -29,6 +30,7 @@ public class DecisionSpinnerAdapter extends BaseAdapter {
   private int mPos;
 
   private ArrayList<DecisionSpinnerItem> suggestions = new ArrayList<>();
+  private String TAG = this.getClass().getSimpleName();
 
   public DecisionSpinnerAdapter(Context context, String current_user,  List<DecisionSpinnerItem> decisions) {
     this.current_user = current_user;
@@ -114,11 +116,21 @@ public class DecisionSpinnerAdapter extends BaseAdapter {
   public void invalidate(String uid) {
     for (int i = 0; i < decisions.size(); i++) {
       DecisionSpinnerItem item = decisions.get(i);
+
+      Timber.tag(TAG).e("%s\n%s", item.getDecision().getUid(), uid );
+
       if (Objects.equals(item.getDecision().getUid(), uid)){
         item.getDecision().setTemporary(true);
         notifyDataSetChanged();
         break;
       }
+    }
+  }
+
+  public void setCurrentAsTemporary(int selectedItemPosition) {
+    if (decisions.size() > 0 && selectedItemPosition >= 0 && decisions.size() >= selectedItemPosition){
+      decisions.get(selectedItemPosition).getDecision().setTemporary(true);
+      notifyDataSetChanged();
     }
   }
 }

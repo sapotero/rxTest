@@ -177,7 +177,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
             params.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
 
             operationManager.execute(operation, params);
-
+            updateAfteButtonPressed();
           })
           .autoDismiss(true);
 
@@ -196,8 +196,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
       params.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
 
       operationManager.execute(operation, params);
+      updateAfteButtonPressed();
     }
-
 
     Timber.tag(TAG).v("decision_preview_next end");
   }
@@ -229,6 +229,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
           commandParams.setComment( dialog1.getInputEditText().getText().toString() );
 
           operationManager.execute(operation, commandParams);
+          updateAfteButtonPressed();
         })
         .autoDismiss(true);
 
@@ -254,8 +255,14 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
       params.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
 
       operationManager.execute(operation, params);
+      updateAfteButtonPressed();
     }
+  }
 
+  private void updateAfteButtonPressed() {
+    decision_spinner_adapter.setCurrentAsTemporary( decision_spinner.getSelectedItemPosition() );
+    current_decision = decision_spinner_adapter.getItem(decision_spinner.getSelectedItemPosition()).getDecision();
+    displayDecision();
   }
 
   @Override
@@ -836,14 +843,22 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
 
 
       LinearLayout signer_view = new LinearLayout(context);
-      signer_view.setOrientation(LinearLayout.HORIZONTAL);
+      signer_view.setOrientation(LinearLayout.VERTICAL);
 
       if ( decision.isShowPosition() != null && decision.isShowPosition() ){
         TextView signerPositionView = new TextView(context);
         signerPositionView.setText( decision.getSignerPositionS() );
-        signerPositionView.setTextColor( Color.BLACK );
-        signerPositionView.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
+        signerPositionView.setTextColor( ContextCompat.getColor(context, R.color.md_grey_800) );
+        signerPositionView.setTypeface( Typeface.create("sans-serif-light", Typeface.NORMAL) );
         signerPositionView.setGravity( Gravity.END );
+
+        LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(
+          LinearLayout.LayoutParams.MATCH_PARENT,
+          LinearLayout.LayoutParams.MATCH_PARENT,
+          1.0f
+        );
+        signerPositionView.setLayoutParams(param);
+
         signer_view.addView( signerPositionView );
       }
 
@@ -853,6 +868,14 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
       signerBlankTextView.setGravity( Gravity.END);
       signerBlankTextView.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
       signerBlankTextView.setLayoutParams(viewsLayotuParams);
+
+      LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(
+        LinearLayout.LayoutParams.MATCH_PARENT,
+        LinearLayout.LayoutParams.MATCH_PARENT,
+        1.0f
+      );
+      signerBlankTextView.setLayoutParams(param);
+
       signer_view.addView( signerBlankTextView );
 
 

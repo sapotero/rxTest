@@ -1,8 +1,6 @@
 package sapotero.rxtest.views.menu;
 
 import android.content.Context;
-import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -49,7 +47,7 @@ public class MenuBuilder implements ItemsBuilder.Callback{
     itemsBuilder.get(type);
   }
 
-  @RequiresApi(api = Build.VERSION_CODES.M)
+
   public void updateCount() {
     itemsBuilder.getSelectedItem().recalcuate();
     update();
@@ -127,7 +125,6 @@ public class MenuBuilder implements ItemsBuilder.Callback{
 
   }
 
-  @RequiresApi(api = Build.VERSION_CODES.M)
   public void update() {
     organizationsSelector.clear();
 

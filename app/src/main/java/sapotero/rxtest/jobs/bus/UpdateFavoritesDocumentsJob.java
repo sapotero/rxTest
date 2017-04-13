@@ -29,7 +29,6 @@ import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.db.requery.models.exemplars.RExemplarEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
-import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Card;
@@ -53,16 +52,14 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
   private Preference<String> TOKEN = null;
   private Preference<String> HOST;
 
-  private Fields.Status filter;
   private String uid;
   private String TAG = this.getClass().getSimpleName();
   private DocumentInfo document;
 
 
-  public UpdateFavoritesDocumentsJob(String uid, Fields.Status filter, String favorites_folder) {
+  public UpdateFavoritesDocumentsJob(String uid, String favorites_folder) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
-    this.filter = filter;
     this.favorites_folder = favorites_folder;
   }
 
@@ -157,7 +154,7 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
     RDocumentEntity rd = new RDocumentEntity();
     rd.setUid( d.getUid() );
     rd.setUser( LOGIN.get() );
-    rd.setFilter( filter.toString() );
+    rd.setFilter( "" );
     rd.setMd5( d.getMd5() );
     rd.setSortKey( d.getSortKey() );
     rd.setTitle( d.getTitle() );
@@ -170,8 +167,11 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
     rd.setReceiptDate( d.getReceiptDate() );
     rd.setViewed( d.getViewed() );
 
-    rd.setFolder(favorites_folder);
+    if (favorites_folder != null) {
+      rd.setFolder(favorites_folder);
+    }
     rd.setFromFavoritesFolder(true);
+    rd.setProcessed(true);
     rd.setFavorites(true);
 
     if ( d.getSigner().getOrganisation() != null && !Objects.equals(d.getSigner().getOrganisation(), "")){
@@ -193,9 +193,6 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
 
   private void update(Boolean exist){
 
-    if (filter != null) {
-      Timber.tag(TAG).d("create title - %s | %s", document.getTitle(), filter.toString() );
-    }
 
     if (exist) {
       // добавим плашку избранное
@@ -242,8 +239,13 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
         rDoc.setSigner( signer );
       }
 
-      rDoc.setFolder(favorites_folder);
+      if (favorites_folder != null) {
+        rDoc.setFolder(favorites_folder);
+      }
+
       rDoc.setFromFavoritesFolder(true);
+      rDoc.setProcessed(true);
+
       rDoc.setFavorites(true);
       rDoc.setUser( LOGIN.get() );
 
@@ -396,10 +398,6 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
 
       if ( document.getInfoCard() != null){
         rDoc.setInfoCard( document.getInfoCard() );
-      }
-
-      if (filter != null){
-        rDoc.setFilter( filter.toString() );
       }
 
 

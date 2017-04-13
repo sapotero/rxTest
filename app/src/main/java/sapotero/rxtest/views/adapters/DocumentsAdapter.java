@@ -154,9 +154,10 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
   }
 
   public void removeAllWithRange() {
-    notifyItemRangeRemoved(0, documents.size());
+//    notifyItemRangeRemoved(0, documents.size());
     Holder.MAP.clear();
     documents.clear();
+    notifyDataSetChanged();
   }
 
   public void addOneItem(RDocumentEntity documentEntity) {

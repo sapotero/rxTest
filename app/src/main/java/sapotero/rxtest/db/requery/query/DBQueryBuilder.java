@@ -95,6 +95,8 @@ public class DBQueryBuilder {
 
   public void execute(Boolean refreshSpinner){
 
+    menuBuilder.updateCount();
+
     if (conditions != null) {
 
 

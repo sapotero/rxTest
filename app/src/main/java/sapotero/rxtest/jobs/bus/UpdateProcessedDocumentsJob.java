@@ -31,7 +31,6 @@ import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.db.requery.models.exemplars.RExemplarEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
-import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Block;
@@ -56,16 +55,14 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
   private Preference<String> TOKEN = null;
   private Preference<String> HOST;
 
-  private Fields.Status filter;
   private String uid;
   private String TAG = this.getClass().getSimpleName();
   private DocumentInfo document;
 
 
-  public UpdateProcessedDocumentsJob(String uid, Fields.Status filter, String processed_folder) {
+  public UpdateProcessedDocumentsJob(String uid, String processed_folder) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
-    this.filter = filter;
     this.processed_folder = processed_folder;
   }
 
@@ -162,7 +159,7 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
     RDocumentEntity rd = new RDocumentEntity();
     rd.setUid( "p"+ d.getUid() );
     rd.setUser( LOGIN.get() );
-    rd.setFilter( filter.toString() );
+    rd.setFilter( "" );
     rd.setMd5( d.getMd5() );
     rd.setSortKey( d.getSortKey() );
     rd.setTitle( d.getTitle() );
@@ -174,6 +171,7 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
     rd.setExternalDocumentNumber( d.getExternalDocumentNumber() );
     rd.setReceiptDate( d.getReceiptDate() );
     rd.setViewed( d.getViewed() );
+    rd.setProcessed(true);
 
     rd.setFolder(processed_folder);
     rd.setFromProcessedFolder(true);
@@ -196,10 +194,6 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
   }
 
   private void update(Boolean exist){
-
-    if (filter != null) {
-      Timber.tag(TAG).d("create title - %s | %s", document.getTitle(), filter.toString() );
-    }
 
     if (exist) {
       updateDocumentInfo();
@@ -400,9 +394,8 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
         rDoc.setInfoCard( document.getInfoCard() );
       }
 
-      if (filter != null){
-        rDoc.setFilter( filter.toString() );
-      }
+      rDoc.setFilter( "" );
+
 
 
       dataStore.update(rDoc)
@@ -451,6 +444,7 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
       }
 
       doc.setFromProcessedFolder(true);
+      doc.setProcessed(true);
       doc.setFolder(processed_folder);
       doc.setUser( LOGIN.get() );
 

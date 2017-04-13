@@ -594,7 +594,9 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
           List<Performer> performers = block.getPerformers();
           for (Performer performer : performers) {
             String performerId = performer.getPerformerId();
-            if ( performerId.equals(signerId) || performerId.equals(assistantId) ) {
+
+            // fix null pointer exception
+            if ( signerId!= null && performerId.equals(signerId) || assistantId != null && performerId.equals(assistantId) ) {
               signerEqualsPerformer = true;
               break;
             }
@@ -741,6 +743,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
 
   private void showPrevDialog() {
+    // decision_assignment_approve_body
 
     MaterialDialog.Builder prev_dialog = new MaterialDialog.Builder(this)
       .content(R.string.decision_reject_body)

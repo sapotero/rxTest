@@ -142,7 +142,7 @@ public class MainService extends Service {
 
 
     // 1. Инициализация RxSharedPreferences
-    //    initialize();
+//        initialize();
 
     // 2. Инициализация провайдеров: CSP и java-провайдеров (Обязательная часть).
     if (!initCSPProviders()) {

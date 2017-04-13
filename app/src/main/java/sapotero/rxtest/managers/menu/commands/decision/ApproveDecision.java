@@ -9,7 +9,9 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.util.Collections;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
+import io.requery.query.Tuple;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Retrofit;
@@ -104,8 +106,19 @@ public class ApproveDecision extends AbstractCommand {
     Timber.tag(TAG).i( "2 updateLocal decision: %s", count );
     Timber.tag(TAG).i( "2 updateLocal decision signer:\n%s\n%s\n", params.getDecisionModel().getSignerId(), settings.getString("current_user_id").get() );
 
+    Tuple red = dataStore
+      .select(RDecisionEntity.RED)
+      .where(RDecisionEntity.UID.eq(params.getDecisionModel().getId()))
+      .get().firstOrNull();
 
-    if (Objects.equals(params.getDecisionModel().getSignerId(), settings.getString("current_user_id").get())){
+    if (
+        // если активная резолюция
+        Objects.equals(params.getDecisionModel().getSignerId(), settings.getString("current_user_id").get())
+
+        // или если подписывающий министр
+        || ( red != null && red.get(0).equals(true) )
+
+      ){
       String uid = null;
 
       if (params.getDecisionModel().getDocumentUid() != null && !Objects.equals(params.getDecisionModel().getDocumentUid(), "")){
@@ -136,7 +149,15 @@ public class ApproveDecision extends AbstractCommand {
       EventBus.getDefault().post( new ShowNextDocumentEvent());
     }
 
-    EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( params.getDecisionModel().getId() ));
+    Observable.just("").timeout(100, TimeUnit.MILLISECONDS).subscribe(
+      data -> {
+        Timber.tag("slow").e("exec");
+        EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( params.getDecisionModel().getId() ));
+      }, error -> {
+        Timber.tag(TAG).e(error);
+      }
+    );
+
   }
 
 
