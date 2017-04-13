@@ -437,25 +437,12 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
     sign_as_current_user.setOnClickListener(v -> {
       Timber.tag(TAG).e( "%s | %s", rDecisionEntity == null, raw_decision == null );
-
-      if (rDecisionEntity != null) {
-        rDecisionEntity.setSignerId( settings.getString("current_user_id").get() );
-        rDecisionEntity.setSigner( settings.getString("current_user").get() );
-        signer_oshs_selector.setText( rDecisionEntity.getSigner() );
-      } else {
-        manager.setSigner( settings.getString("current_user").get() );
-        manager.setSignerId( settings.getString("current_user_id").get() );
-        manager.setSignerBlankText( settings.getString("current_user").get() );
-
-        raw_decision.setSigner( settings.getString("current_user").get() );
-        raw_decision.setSignerId( settings.getString("current_user_id").get() );
-        raw_decision.setSignerBlankText( settings.getString("current_user").get() );
-
-        signer_oshs_selector.setText( settings.getString("current_user").get() );
-
-        manager.update();
-      }
-
+      updateSigner(
+              settings.getString("current_user_id").get(),
+              settings.getString("current_user").get(),
+              settings.getString("current_user_organization").get(),
+              null
+      );
     });
 
     if ( rDecisionEntity != null ){
@@ -819,38 +806,43 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   @Override
   public void onSearchSuccess(Oshs user, CommandFactory.Operation operation, String uid) {
     Timber.tag(TAG).e("USER: %s", new Gson().toJson(user) );
-    String name = user.getName();
+
+    updateSigner(user.getId(), user.getName(), user.getOrganization(), user.getAssistantId());
+  }
+
+  @Override
+  public void onSearchError(Throwable error) {
+
+  }
+
+  private void updateSigner(String signerId, String signerName, String signerOrganization, String assistantId) {
+    String name = signerName;
 
     manager.setSignerBlankText( name );
 
     if (!name.endsWith(")")){
-      name = String.format(" %s (%s)", user.getName(), user.getOrganization() );
+      name = String.format(" %s (%s)", name, signerOrganization );
     }
 
     if (rDecisionEntity != null) {
-      rDecisionEntity.setSignerId( user.getId() );
+      rDecisionEntity.setSignerId( signerId );
       rDecisionEntity.setSigner( name );
 
-      if ( user.getAssistantId() != null ){
-        rDecisionEntity.setAssistantId( user.getAssistantId() );
+      if ( assistantId != null ){
+        rDecisionEntity.setAssistantId( assistantId );
       }
     }
 
-    if ( user.getAssistantId() != null ){
-      manager.setAssistantId(user.getAssistantId());
+    if ( assistantId != null ){
+      manager.setAssistantId(assistantId);
     }
 
-    manager.setSignerId(user.getId());
+    manager.setSignerId(signerId);
     manager.setSigner(name);
 
     signer_oshs_selector.setText( name );
 
 //    manager.setDecision( DecisionConverter.formatDecision(rDecisionEntity) );
     manager.update();
-  }
-
-  @Override
-  public void onSearchError(Throwable error) {
-
   }
 }
