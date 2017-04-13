@@ -307,15 +307,8 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
 
         String performerName = "";
 
-        boolean forAcquaint = false;
-        String appealText = block.getAppealText();
-
-        if ( appealText != null && appealText.contains("озн") ) {
-          forAcquaint = true;
-        }
-
         String tempPerformerName =
-                DecisionConverter.getPerformerNameForDecisionPreview(user.getPerformerText(), user.getPerformerGender(), forAcquaint);
+                DecisionConverter.getPerformerNameForDecisionPreview(user.getPerformerText(), user.getPerformerGender(), block.getAppealText());
 
         Timber.tag("TEST").w("null? - %s | %s", block.getAppealText() == null, block.getAppealText() );
         Timber.tag("TEST").w("user %s", new Gson().toJson( user ) );

@@ -104,12 +104,18 @@ public class DecisionConverter {
     return name;
   }
 
-  public static String getPerformerNameForDecisionPreview(String name, String genderString, boolean forAcquaint) {
+  public static String getPerformerNameForDecisionPreview(String name, String genderString, String appealText) {
 
     String tempName = "";
 
     if (name != null) {
       tempName = name;
+    }
+
+    boolean forAcquaint = false;
+
+    if ( appealText != null && appealText.contains("озн") ) {
+      forAcquaint = true;
     }
 
     // true - мужской, false - женский

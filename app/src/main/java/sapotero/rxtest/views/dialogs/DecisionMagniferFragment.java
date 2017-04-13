@@ -362,12 +362,15 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
           RPerformerEntity user = (RPerformerEntity) _user;
           String performerName = "";
 
+          String tempPerformerName =
+                  DecisionConverter.getPerformerNameForDecisionPreview(user.getPerformerText(), user.getPerformerGender(), block.getAppealText());
+
           if ( block.getAppealText() == null && !numberPrinted && !isOnlyOneBlock ){
             performerName += block.getNumber().toString() + ". ";
             numberPrinted = true;
           }
 
-          performerName += DecisionConverter.formatName( user.getPerformerText() );
+          performerName += tempPerformerName;
 
           if (user.isIsResponsible() != null && user.isIsResponsible()){
             performerName += " *";
