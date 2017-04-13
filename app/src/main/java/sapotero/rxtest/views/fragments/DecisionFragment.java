@@ -378,6 +378,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
       empty_view.setText("Нет исполнителей");
       empty_view.setPadding(0,8,0,16);
       people_view.addView(empty_view);
+      oldSize = 0;
     }
 
   }
