@@ -535,10 +535,6 @@ public class UpdateDocumentJob extends BaseJob {
         doc.setFavorites(isFavorites);
       }
 
-      if (doc.isProcessed() == null){
-        doc.setProcessed(isProcessed);
-      }
-
 
       doc.setControl(onControl);
       doc.setUser( LOGIN.get() );
@@ -546,7 +542,6 @@ public class UpdateDocumentJob extends BaseJob {
       doc.setFromProcessedFolder( false );
       doc.setFromFavoritesFolder( false );
       doc.setChanged( false );
-      doc.setProcessed(false);
 
       Boolean red = false;
       Boolean with_decision = false;
@@ -716,6 +711,17 @@ public class UpdateDocumentJob extends BaseJob {
       }
 
 
+      // если прилетоло обновление - уберем из обработанных
+      if ( filter != null && filter.getValue() != null && status != null && doc.isProcessed()  ){
+        doc.setProcessed( false );
+      }
+
+      // если подписание/согласование
+      if ( journal == null && doc.getDocumentType()  == null && status != null && doc.isProcessed()  ){
+        doc.setProcessed( false );
+      }
+
+
       EventBus.getDefault().post( new UpdateCurrentDocumentEvent( doc.getUid() ) );
     } else {
       Timber.tag("MD5").d("equal");
@@ -730,7 +736,7 @@ public class UpdateDocumentJob extends BaseJob {
 
         if (!Objects.equals(doc.getFilter(), status)){
           doc.setFilter( status );
-          doc.setProcessed(false);
+//          doc.setProcessed(false);
         }
 
       }
@@ -738,24 +744,26 @@ public class UpdateDocumentJob extends BaseJob {
         doc.setFilter( filter.toString() );
         if (!Objects.equals(doc.getFilter(), filter.getValue())){
           doc.setFilter( status );
-          doc.setProcessed(false);
         }
       }
 
       doc.setChanged(false);
 
-      if (doc.isFavorites() == null){
-        doc.setFavorites(isFavorites);
+
+      if ( filter != null && filter.getValue() != null && status != null && doc.isProcessed()  ){
+        doc.setProcessed( false );
       }
 
-      if (doc.isProcessed() == null){
-        doc.setProcessed(isProcessed);
+      // если подписание/согласование
+      if ( journal == null && doc.getDocumentType()  == null && status != null && doc.isProcessed()  ){
+        doc.setProcessed( false );
       }
+
     }
 
-    if (not_processed) {
-      doc.setProcessed(false);
-    }
+//    if (not_processed) {
+//      doc.setProcessed(false);
+//    }
 
     dataStore
       .update( doc )

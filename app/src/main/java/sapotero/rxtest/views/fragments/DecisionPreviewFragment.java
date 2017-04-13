@@ -425,7 +425,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
     relativeSigner.setOrientation(LinearLayout.VERTICAL);
     relativeSigner.setVerticalGravity( Gravity.BOTTOM );
 //    relativeSigner.setMinimumHeight(350);
-    LinearLayout.LayoutParams relativeSigner_params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+    LinearLayout.LayoutParams relativeSigner_params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f);
     relativeSigner_params.height = LinearLayout.LayoutParams.WRAP_CONTENT;
     relativeSigner.setLayoutParams( relativeSigner_params );
 
@@ -434,6 +434,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
 
     LinearLayout signer_view = new LinearLayout(getActivity());
     signer_view.setOrientation(LinearLayout.VERTICAL);
+    signer_view.setWeightSum(2);
 //    signer_view.setPadding(0,40,0,0);
 
     if ( decision.getShowPosition() ){
@@ -442,6 +443,14 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
       signerPositionView.setTextColor( Color.BLACK );
       signerPositionView.setGravity( Gravity.END );
       signerPositionView.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
+
+      LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(
+        LinearLayout.LayoutParams.MATCH_PARENT,
+        LinearLayout.LayoutParams.MATCH_PARENT,
+        1.0f
+      );
+      signerPositionView.setLayoutParams(param);
+
       signer_view.addView( signerPositionView );
     }
 
@@ -450,6 +459,13 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
     signerBlankTextView.setTextColor( Color.BLACK );
     signerBlankTextView.setGravity( Gravity.END);
     signerBlankTextView.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
+
+    LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(
+      LinearLayout.LayoutParams.MATCH_PARENT,
+      LinearLayout.LayoutParams.MATCH_PARENT,
+      1.0f
+    );
+    signerBlankTextView.setLayoutParams(param);
     signer_view.addView( signerBlankTextView );
 
 

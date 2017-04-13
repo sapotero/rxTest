@@ -31,6 +31,7 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.db.requery.models.RFolderEntity;
 import sapotero.rxtest.events.auth.AuthDcCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthDcCheckSuccessEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
@@ -43,6 +44,7 @@ import sapotero.rxtest.jobs.bus.CreatePrimaryConsiderationJob;
 import sapotero.rxtest.jobs.bus.CreateTemplatesJob;
 import sapotero.rxtest.jobs.bus.InvalidateDocumentsJob;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
+import sapotero.rxtest.jobs.bus.UpdateFavoritesDocumentsJob;
 import sapotero.rxtest.retrofit.Api.AuthService;
 import sapotero.rxtest.retrofit.DocumentsService;
 import sapotero.rxtest.retrofit.models.AuthSignToken;
@@ -173,9 +175,6 @@ public class DataLoaderManager {
           })
     );
 
-//    updateProcessed();
-//    updateFavorites();
-
   }
 
   private void initialize() {
@@ -271,7 +270,7 @@ public class DataLoaderManager {
     Timber.tag(TAG).i("json: %s", json .toString());
 
 
-    Observable<AuthSignToken> authSubscription = sign == null ? auth.getAuth( LOGIN.get(), PASSWORD.get() ) : auth.getAuthBySign(json);
+    Observable<AuthSignToken> authSubscription = getAuthSubscription();
 
     unsubscribe();
 
@@ -284,6 +283,8 @@ public class DataLoaderManager {
           data -> {
             Timber.tag(TAG).i("updateAuth: token" + data.getAuthToken());
             setToken( data.getAuthToken() );
+
+            initV2();
           },
           error -> {
             Timber.tag(TAG).i("updateAuth error: %s" , error );
@@ -328,6 +329,7 @@ public class DataLoaderManager {
 
             updateByCurrentStatus(MainMenuItem.ALL, null);
             initV2();
+//            updateFavoritesAndProcessed();
           },
           error -> {
             Timber.tag(TAG).i("tryToSignWithDc error: %s" , error );
@@ -374,6 +376,7 @@ public class DataLoaderManager {
 
             updateByCurrentStatus(MainMenuItem.ALL, null);
             initV2();
+//            updateFavoritesAndProcessed();
           },
           error -> {
             Timber.tag(TAG).i("tryToSignWithLogin error: %s", error);
@@ -596,6 +599,64 @@ public class DataLoaderManager {
 
   public void updateDocument(String uid) {
 //    jobManager.addJobInBackground(new UpdateDocumentJob( uid, "" ));
+  }
+
+
+  private void updateFavoritesAndProcessed() {
+
+    Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
+    DocumentsService docService = retrofit.create(DocumentsService.class);
+    RFolderEntity favorites_folder = dataStore
+      .select(RFolderEntity.class)
+      .where(RFolderEntity.TYPE.eq("favorites"))
+      .and(RFolderEntity.USER.eq( settings.getString("current_user").get() ))
+      .get().firstOrNull();
+
+    RFolderEntity processed_folder = dataStore
+      .select(RFolderEntity.class)
+      .where(RFolderEntity.TYPE.eq("processed"))
+      .and(RFolderEntity.USER.eq( settings.getString("current_user").get() ))
+      .get().firstOrNull();
+
+//    if (processed_folder != null) {
+//      subscription.add(
+//        docService.getByFolders(LOGIN.get(), TOKEN.get(), null, 500, 0, processed_folder.getUid(), null)
+//          .subscribeOn( Schedulers.io() )
+//          .observeOn( AndroidSchedulers.mainThread() )
+//          .subscribe(
+//            data -> {
+//              if ( data.getDocuments().size() > 0 ) {
+//                Timber.tag("FAVORITES").e("DOCUMENTS COUNT: %s", data.getDocuments().size() );
+//                for (Document doc : data.getDocuments()) {
+//                  jobManager.addJobInBackground(new UpdateProcessedDocumentsJob(doc.getUid(), processed_folder.getUid() ) );
+//                }
+//              }
+//            }, error -> {
+//              Timber.tag(TAG).e(error);
+//            }
+//          )
+//      );
+//    }
+    if (favorites_folder != null) {
+      subscription.add(
+        docService.getByFolders(LOGIN.get(), TOKEN.get(), null, 500, 0, favorites_folder.getUid(), null)
+          .subscribeOn( Schedulers.io() )
+          .observeOn( AndroidSchedulers.mainThread() )
+          .subscribe(
+            data -> {
+              if ( data.getDocuments().size() > 0 ) {
+                Timber.tag("FAVORITES").e("DOCUMENTS COUNT: %s", data.getDocuments().size() );
+                for (Document doc : data.getDocuments()) {
+                  jobManager.addJobInBackground(new UpdateFavoritesDocumentsJob(doc.getUid(), favorites_folder.getUid() ) );
+                }
+              }
+            }, error -> {
+              Timber.tag(TAG).e(error);
+            }
+          )
+      );
+    }
+
   }
 
 //  @Subscribe(threadMode = ThreadMode.BACKGROUND)

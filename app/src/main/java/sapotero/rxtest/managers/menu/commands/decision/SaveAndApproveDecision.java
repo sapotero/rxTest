@@ -10,6 +10,7 @@ import org.greenrobot.eventbus.EventBus;
 import java.util.Collections;
 import java.util.Objects;
 
+import io.requery.query.Tuple;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Retrofit;
@@ -113,7 +114,16 @@ public class SaveAndApproveDecision extends AbstractCommand {
       .get().value();
     Timber.tag(TAG).i( "updateLocal: %s", count );
 
-    if (Objects.equals(params.getDecisionModel().getSignerId(), settings.getString("current_user_id").get())){
+    Tuple red = dataStore
+      .select(RDecisionEntity.RED)
+      .where(RDecisionEntity.UID.eq(params.getDecisionModel().getId()))
+      .get().firstOrNull();
+
+    if (
+      Objects.equals(params.getDecisionModel().getSignerId(), settings.getString("current_user_id").get())
+      // или если подписывающий министр
+      || ( red != null && red.get(0).equals(true) )
+      ){
       Integer dec = dataStore
         .update(RDocumentEntity.class)
         .set(RDocumentEntity.PROCESSED, true)

@@ -17,10 +17,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
-import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
-import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
@@ -146,18 +142,20 @@ public class AddAndApproveDecision extends AbstractCommand {
       .subscribe(
         data -> {
 
-          if (data.getErrors() !=null && data.getErrors().size() > 0){
-            queueManager.setExecutedWithError(this, data.getErrors());
-            EventBus.getDefault().post( new ForceUpdateDocumentEvent( data.getDocumentUid() ));
-          } else {
+          queueManager.setExecutedRemote(this);
 
-            if (callback != null ){
-              callback.onCommandExecuteSuccess( getType() );
-              EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
-            }
-
-            queueManager.setExecutedRemote(this);
-          }
+//          if (data.getErrors() !=null && data.getErrors().size() > 0){
+//            queueManager.setExecutedWithError(this, data.getErrors());
+//            EventBus.getDefault().post( new ForceUpdateDocumentEvent( data.getDocumentUid() ));
+//          } else {
+//
+//            if (callback != null ){
+//              callback.onCommandExecuteSuccess( getType() );
+//              EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
+//            }
+//
+//            queueManager.setExecutedRemote(this);
+//          }
 
         },
         error -> {
@@ -168,10 +166,6 @@ public class AddAndApproveDecision extends AbstractCommand {
           queueManager.setExecutedWithError(this, Collections.singletonList("http_error"));
         }
       );
-  }
-
-  private RDecisionEntity created_decision(String id) {
-    return dataStore.select(RDecisionEntity.class).where(RDocumentEntity.UID.eq(id)).get().firstOrNull();
   }
 
   @Override

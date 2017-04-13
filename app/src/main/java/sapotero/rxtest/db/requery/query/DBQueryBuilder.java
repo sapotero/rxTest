@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -94,6 +95,8 @@ public class DBQueryBuilder {
   }
 
   public void execute(Boolean refreshSpinner){
+
+    menuBuilder.updateCount();
 
     if (conditions != null) {
 
@@ -179,23 +182,23 @@ public class DBQueryBuilder {
           .get()
 //          .toSelfObservable()
           .toObservable()
-//          .toList()
+          .toList()
+          .debounce(300, TimeUnit.MILLISECONDS)
           .subscribeOn(Schedulers.newThread())
           .observeOn(AndroidSchedulers.mainThread())
-//          .debounce(1000, TimeUnit.MILLISECONDS)
           .subscribe(
             data -> {
-              Timber.tag(TAG).e("add: %s", data.getId());
-              addByOneInAdapter(data);
+//              Timber.tag(TAG).e("add: %s", data.getId());
+//              addByOneInAdapter(data);
 //              List<RDocumentEntity> docs = data.toList();
 //
-//              if (docs.size() > 0){
-//                adapter.removeAllWithRange();
-//                for (RDocumentEntity d: docs ) {
-//                  addByOneInAdapter(d);
-//                }
-//              }
-              Timber.tag(TAG).e("self observerable %s", data.getUid());
+              if (data.size() > 0){
+                adapter.removeAllWithRange();
+                for (RDocumentEntity d: data ) {
+                  addByOneInAdapter(d);
+                }
+              }
+//              Timber.tag(TAG).e("self observerable %s", data.getUid());
             },
             error -> {
               Timber.tag(TAG).e(error);

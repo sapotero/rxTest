@@ -7,6 +7,7 @@ import com.f2prateek.rx.preferences.Preference;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.Objects;
+import java.util.UUID;
 
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -69,6 +70,7 @@ public class AddTemporaryDecision extends AbstractCommand {
 
   @Override
   public void execute() {
+    addDecision();
     queueManager.add(this);
   }
 
@@ -80,7 +82,6 @@ public class AddTemporaryDecision extends AbstractCommand {
   @Override
   public void executeLocal() {
     queueManager.setExecutedLocal(this);
-    //addDecision();
   }
 
   private void addDecision() {
@@ -95,35 +96,41 @@ public class AddTemporaryDecision extends AbstractCommand {
       uid = document.getUid();
     }
 
+    Timber.tag(TAG).e("DOCUMENT_UID: %s", uid);
 
     RDocumentEntity doc = dataStore
       .select(RDocumentEntity.class)
       .where(RDocumentEntity.UID.eq(uid))
       .get().firstOrNull();
 
+    Timber.tag(TAG).e("doc: %s", doc);
+
 
 
     Decision dec = params.getDecisionModel();
 
-    if (dec != null) {
+    Timber.tag(TAG).e("dec: %s", dec);
+
+    if (dec != null && doc != null) {
 
       RDecisionEntity decision = new RDecisionEntity();
-      decision.setUid("");
-      decision.setUrgencyText( dec.getUrgencyText()+" " );
+      decision.setUid(UUID.randomUUID().toString() );
+      decision.setUrgencyText( dec.getUrgencyText() );
       decision.setComment( dec.getComment()+" " );
       decision.setDate( dec.getDate() );
       decision.setLetterhead( "Бланк резолюции" );
       decision.setShowPosition( true );
       decision.setSignBase64( null );
-      decision.setSigner( dec.getSigner()+" " );
+      decision.setSigner( dec.getSigner() );
       decision.setSignerId( dec.getSignerId() );
       decision.setSignerPositionS( dec.getSignerPositionS() );
-      decision.setSignerBlankText( dec.getSignerText()+" " );
+      decision.setSignerBlankText( dec.getSignerText() );
+
       decision.setTemporary( true );
       decision.setApproved( false );
       decision.setChanged( false );
       decision.setRed( false );
-      decision.setAssistantId( "" );
+      decision.setAssistantId( null );
       decision.setChanged( false );
 
       decision.setDate( dec.getDate() );
@@ -176,7 +183,6 @@ public class AddTemporaryDecision extends AbstractCommand {
           error -> {
             Timber.tag(TAG).e("Error: %s", error);
           });
-
     }
   }
 

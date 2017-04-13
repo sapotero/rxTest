@@ -82,7 +82,7 @@ public class AddDecision extends AbstractCommand {
     _params.setDocument(params.getDocument());
     _params.setAssignment(params.isAssignment());
     Command command = operation.getCommand(null, context, document, _params);
-    queueManager.add(command);
+    command.execute();
 
     Timber.tag(TAG).w("ASSIGNMENT: %s", params.isAssignment() );
 

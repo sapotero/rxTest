@@ -87,16 +87,22 @@ public class InvalidateDocumentsJob extends BaseJob {
 
     if (db_uids.size() > 0){
       for (String uid: db_uids ) {
-        updateAsProcessed(uid);
+        updateAsProcessed(uid, true);
+      }
+    }
+
+    if (api_uids.size() > 0){
+      for (String uid: api_uids ) {
+        updateAsProcessed(uid, false);
       }
     }
 
   }
 
-  private void updateAsProcessed(String uid) {
+  private void updateAsProcessed(String uid, Boolean processed) {
     int count = dataStore
       .update(RDocumentEntity.class)
-      .set(RDocumentEntity.PROCESSED, true)
+      .set(RDocumentEntity.PROCESSED, processed)
       .where(RDocumentEntity.UID.eq(uid))
       .get()
       .value();
