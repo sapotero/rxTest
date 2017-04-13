@@ -93,14 +93,14 @@
                 <ImageButton
                     android:id="@+id/activity_info_prev_document"
                     android:src="@drawable/arrow_left_tab"
-                    android:layout_width="wrap_content"
+                    android:layout_width="48dp"
                     android:foreground="?android:attr/selectableItemBackground"
                     android:layout_height="wrap_content"
                     style="@style/Widget.AppCompat.Button.Borderless"/>
                 <ImageButton
                     android:id="@+id/activity_info_next_document"
                     android:src="@drawable/arrow_right_tab"
-                    android:layout_width="wrap_content"
+                    android:layout_width="48dp"
                     android:layout_height="wrap_content"
                     android:foreground="?android:attr/selectableItemBackground"
                     android:layout_alignParentEnd="true"
@@ -119,7 +119,7 @@
                         android:layout_height="48dp"
                         android:id="@+id/tabs"
                         android:layout_gravity="center"
-                        android:layout_width="698dp">
+                        android:layout_width="778dp">
                     </android.support.design.widget.TabLayout>
 
                     <View
