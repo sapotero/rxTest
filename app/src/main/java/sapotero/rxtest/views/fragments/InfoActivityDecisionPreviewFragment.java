@@ -985,12 +985,22 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
           RPerformerEntity user = (RPerformerEntity) _user;
           String performerName = "";
 
+          boolean forAcquaint = false;
+          String appealText = block.getAppealText();
+
+          if ( appealText != null && appealText.contains("озн") ) {
+            forAcquaint = true;
+          }
+
+          String tempPerformerName =
+                  DecisionConverter.getPerformerNameForDecisionPreview(user.getPerformerText(), user.getPerformerGender(), forAcquaint);
+
           if ( block.getAppealText() == null && !numberPrinted && !isOnlyOneBlock ){
             performerName += block.getNumber().toString() + ". ";
             numberPrinted = true;
           }
 
-          performerName += DecisionConverter.formatName( user.getPerformerText() );
+          performerName += tempPerformerName;
 
           if (user.isIsResponsible() != null && user.isIsResponsible()){
             performerName += " *";

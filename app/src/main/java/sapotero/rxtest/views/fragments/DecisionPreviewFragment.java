@@ -307,52 +307,15 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
 
         String performerName = "";
 
-        String tempPerformerName = DecisionConverter.formatName( user.getPerformerText() );
-        String genderString = user.getPerformerGender();
+        boolean forAcquaint = false;
+        String appealText = block.getAppealText();
 
-        // true - мужской, false - женский
-        boolean gender = true;
-        // true - склонять, false - не склонять
-        boolean decl = false;
-
-        if ( genderString != null && !genderString.equals("") ) {
-          // пол указан
-          if ( genderString.toLowerCase().trim().startsWith("м") ) {
-            // мужской
-            gender = true;
-            decl = true;
-          } else if ( genderString.toLowerCase().trim().startsWith("ж") ) {
-            // женский
-            gender = false;
-            decl = true;
-          } else {
-            // пол неизвестен, не склонять
-            decl = false;
-          }
-        } else {
-          // пол не указан, не склонять
-          decl = false;
+        if ( appealText != null && appealText.contains("озн") ) {
+          forAcquaint = true;
         }
 
-        boolean forReport = block.getAppealText().contains("дол");
-        boolean forAcquaint = block.getAppealText().contains("озн");
-
-        // 1 - именительный падеж
-        // 2 - родительный падеж
-        // 3 - дательный падеж
-        // 4 - винительный падеж
-        // 5 - творительный падеж
-        // 6 - предложный падеж
-
-        if (decl) {
-          if (forAcquaint) {
-            // Если Прошу ознакомить, то винительный падеж
-            tempPerformerName = Padeg.getFIOPadegFS(tempPerformerName, gender, 4);
-          } else {
-            // По умолчанию и если Прошу доложить, то дательный падеж
-            tempPerformerName = Padeg.getFIOPadegFS(tempPerformerName, gender, 3);
-          }
-        }
+        String tempPerformerName =
+                DecisionConverter.getPerformerNameForDecisionPreview(user.getPerformerText(), user.getPerformerGender(), forAcquaint);
 
         Timber.tag("TEST").w("null? - %s | %s", block.getAppealText() == null, block.getAppealText() );
         Timber.tag("TEST").w("user %s", new Gson().toJson( user ) );
@@ -377,7 +340,6 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
         users_view.addView(performer_view);
       }
     }
-
 
     decision_preview_body.addView( users_view );
   }
