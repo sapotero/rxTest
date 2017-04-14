@@ -18,7 +18,7 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
-import sapotero.rxtest.events.view.ShowNextDocumentEvent;
+import sapotero.rxtest.events.view.ShowPrevDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.interfaces.Command;
@@ -79,7 +79,7 @@ public class NextPerson extends AbstractCommand {
   @Override
   public void execute() {
     queueManager.add(this);
-    EventBus.getDefault().post( new ShowNextDocumentEvent());
+    EventBus.getDefault().post( new ShowPrevDocumentEvent());
   }
 
 

@@ -20,6 +20,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import io.requery.Persistable;
+import io.requery.query.Tuple;
 import io.requery.rx.SingleEntityStore;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -477,7 +478,11 @@ public class DataLoaderManager {
 
 
                     if ( isExist(doc) ){
-                      jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), index, status, true) );
+
+                      if ( !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) ){
+                        jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), index, status, true) );
+                      }
+
                     } else {
                       jobManager.addJobInBackground( new CreateDocumentsJob(doc.getUid(), index, status) );
                     }
@@ -504,7 +509,11 @@ public class DataLoaderManager {
             data -> {
               if (data.getDocuments().size() > 0){
                 for (Document doc: data.getDocuments() ) {
-                  jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), code) );
+
+                  if ( !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) ){
+                    jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), code) );
+                  }
+
                 }
               }
             },
@@ -513,6 +522,25 @@ public class DataLoaderManager {
             })
       );
     }
+  }
+
+  private boolean isDocumentMd5Changed(String uid, String md5) {
+
+    Boolean result = false;
+
+    Tuple doc = dataStore
+      .select(RDocumentEntity.MD5)
+      .where(RDocumentEntity.UID.eq(uid))
+      .get()
+      .firstOrNull();
+
+    if (doc != null){
+      if (doc.get(0).equals(md5)){
+        result = true;
+      }
+    }
+
+    return result;
   }
 
   private boolean isExist(Document doc) {

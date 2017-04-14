@@ -46,7 +46,7 @@ public class QueueSupervisor implements JobCountInterface {
     ThreadRejectedExecutionHandler rejectionHandler = new ThreadRejectedExecutionHandler();
     ThreadFactory threadFactory = Executors.defaultThreadFactory();
 
-    commandPool = new ThreadPoolExecutor(THREAD_POOL_SIZE, 10, 10*60, TimeUnit.SECONDS, new ArrayBlockingQueue<>(4), threadFactory, rejectionHandler);
+    commandPool = new ThreadPoolExecutor(THREAD_POOL_SIZE, 10, 10*60, TimeUnit.SECONDS, new ArrayBlockingQueue<>(THREAD_POOL_SIZE), threadFactory, rejectionHandler);
 
     SuperVisor monitor   = new SuperVisor(commandPool, 1);
     Thread monitorThread = new Thread(monitor);

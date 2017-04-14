@@ -167,7 +167,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
             .onPositive(
               (dialog, which) -> {
 
-                operationManager.registerCallBack(null);
+
 
 //                manager.getDecisionBuilder().build();
 
@@ -203,6 +203,11 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
                   rDecisionEntity.setTemporary(true);
                 }
 
+
+
+
+
+
                 if ( settings.getBoolean("decision_with_assigment").get() ){
                   decision = manager.getDecision();
 
@@ -222,7 +227,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
                   decision.setAssignment(true);
 
                 }
-
                 operationManager.execute( operation, params );
 
                 finish();
@@ -252,6 +256,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       }
 
     } );
+
+
     toolbar.setOnMenuItemClickListener(item -> {
 
       CommandParams params;
@@ -264,7 +270,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
           boolean canCreateAndSign = checkDecision();
 
           if (canCreateAndSign) {
-            operationManager.registerCallBack(null);
+
 
             Decision decision = manager.getDecision();
 
@@ -312,7 +318,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
             showNextDialog();
           } else {
 
-            operationManager.registerCallBack(this);
+            // operationManager.registerCallBack(this);
 
             operation =CommandFactory.Operation.APPROVE_DECISION;
 
@@ -336,7 +342,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
           if ( settings.getBoolean("settings_view_show_actions_confirm").get() ){
             showPrevDialog();
           } else {
-            operationManager.registerCallBack(this);
+//            operationManager.registerCallBack(this);
 
             operation =CommandFactory.Operation.REJECT_DECISION;
 
@@ -629,7 +635,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   protected void onResume() {
     super.onPostResume();
 
-    operationManager.registerCallBack(null);
+
     operationManager.registerCallBack(this);
   }
 

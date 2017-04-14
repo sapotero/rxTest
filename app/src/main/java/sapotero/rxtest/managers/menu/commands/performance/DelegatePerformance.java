@@ -14,12 +14,12 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import sapotero.rxtest.events.view.ShowNextDocumentEvent;
-import sapotero.rxtest.retrofit.OperationService;
-import sapotero.rxtest.retrofit.models.OperationResult;
+import sapotero.rxtest.events.view.ShowPrevDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.retrofit.OperationService;
+import sapotero.rxtest.retrofit.models.OperationResult;
 import timber.log.Timber;
 
 public class DelegatePerformance extends AbstractCommand {
@@ -68,7 +68,7 @@ public class DelegatePerformance extends AbstractCommand {
   @Override
   public void execute() {
     loadSettings();
-    EventBus.getDefault().post( new ShowNextDocumentEvent());
+    EventBus.getDefault().post( new ShowPrevDocumentEvent());
 
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 

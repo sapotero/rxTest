@@ -24,7 +24,7 @@ import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
-import sapotero.rxtest.events.view.ShowNextDocumentEvent;
+import sapotero.rxtest.events.view.ShowPrevDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -132,7 +132,7 @@ public class SaveAndApproveDecision extends AbstractCommand {
         .get().value();
 
       Timber.tag(TAG).e("count %s", dec);
-      EventBus.getDefault().post( new ShowNextDocumentEvent());
+      EventBus.getDefault().post( new ShowPrevDocumentEvent());
     }
 
     EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( params.getDecisionModel().getId() ));

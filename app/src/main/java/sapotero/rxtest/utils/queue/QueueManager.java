@@ -110,8 +110,9 @@ public class QueueManager {
     dBManager.setExecutedWithError(command, errors);
   }
 
-  public void setAsRunning(Command Command) {
-    dBManager.setAsRunning(Command.getParams().getUuid());
+  public void setAsRunning(Command command) {
+    dBManager
+      .setAsRunning(command.getParams().getUuid());
   }
 
   public void removeAll() {

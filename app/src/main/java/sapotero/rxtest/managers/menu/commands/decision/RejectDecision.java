@@ -25,7 +25,6 @@ import sapotero.rxtest.db.requery.utils.DecisionConverter;
 import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
-import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -137,7 +136,7 @@ public class RejectDecision extends AbstractCommand {
 
       Timber.tag(TAG).e("3 updateLocal document %s | %s", uid, dec > 0);
 
-      EventBus.getDefault().post( new ShowNextDocumentEvent());
+//      EventBus.getDefault().post( new ShowPrevDocumentEvent());
     }
 
     Observable.just("").timeout(100, TimeUnit.MILLISECONDS).subscribe(

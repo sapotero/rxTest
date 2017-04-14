@@ -165,9 +165,12 @@ public class QueueDBManager implements JobCountInterface {
     if (command != null && command.getParams() != null) {
       CommandParams params = command.getParams();
 
+      Timber.tag(TAG).i( "begin [%s] - updated remote", new Gson().toJson(params) );
+
       if ( params.getUuid() != null && exist( params.getUuid() ) ){
         int count = dataStore
           .update(QueueEntity.class)
+          .set( QueueEntity.LOCAL, true )
           .set( QueueEntity.REMOTE, true )
           .set( QueueEntity.RUNNING, false )
           .where( QueueEntity.UUID.eq( params.getUuid() ) )
@@ -196,6 +199,8 @@ public class QueueDBManager implements JobCountInterface {
   }
 
   private void updateRunningStatus(String uuid, Boolean running){
+    Timber.tag(TAG).i( "[%s] - setAsRunning", uuid );
+
     if ( uuid != null ) {
       int count = dataStore
         .update(QueueEntity.class)

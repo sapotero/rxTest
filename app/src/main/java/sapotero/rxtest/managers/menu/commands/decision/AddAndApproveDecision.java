@@ -87,6 +87,7 @@ public class AddAndApproveDecision extends AbstractCommand {
   @Override
   public void executeRemote() {
     loadSettings();
+    queueManager.setAsRunning(this);
 
     Timber.tag(TAG).i( "type: %s", new Gson().toJson(params) );
 
