@@ -133,6 +133,7 @@ public class AddDecision extends AbstractCommand {
     decision.setLetterheadFontSize("15");
     decision.setPerformersFontSize("12");
     decision.setLetterhead(null);
+    decision.setShowPosition( false );
 
     if (params.isAssignment()){
       decision.setAssignment(true);

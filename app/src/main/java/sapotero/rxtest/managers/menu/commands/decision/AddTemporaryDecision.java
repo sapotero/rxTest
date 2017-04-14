@@ -15,6 +15,7 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
+import sapotero.rxtest.db.requery.utils.DecisionConverter;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
@@ -119,12 +120,26 @@ public class AddTemporaryDecision extends AbstractCommand {
       decision.setComment( dec.getComment()+" " );
       decision.setDate( dec.getDate() );
       decision.setLetterhead( "Бланк резолюции" );
-      decision.setShowPosition( true );
+      decision.setShowPosition( false );
       decision.setSignBase64( null );
       decision.setSigner( dec.getSigner() );
       decision.setSignerId( dec.getSignerId() );
       decision.setSignerPositionS( dec.getSignerPositionS() );
-      decision.setSignerBlankText( dec.getSignerText() );
+      
+      String name = null;
+
+      try {
+        name = DecisionConverter.formatTemporaryName(dec.getSignerText());
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+
+      if (name == null) {
+        decision.setSignerBlankText( name );
+      } else {
+        decision.setSignerBlankText( dec.getSignerText() );
+      }
+
 
       decision.setTemporary( true );
       decision.setApproved( false );

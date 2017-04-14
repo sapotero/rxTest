@@ -158,8 +158,7 @@ public class SaveDecision extends AbstractCommand {
       block.setText(_block.getText());
       block.setAppealText(_block.getAppealText());
       block.setNumber(_block.getNumber());
-
-
+      block.setToFamiliarization(_block.getAskToReport());
       block.setToCopy(_block.getToCopy());
       block.setHidePerformers(_block.getHidePerformers());
       block.setToFamiliarization(_block.getToFamiliarization());
