@@ -268,43 +268,20 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     Timber.tag(TAG).v( " appeal text: %s | %s %s", block.getAppealText(),forReport, forAcquaint );
 
     button_ask_to_acquaint.setChecked( forAcquaint );
-    button_ask_to_acquaint.setOnCheckedChangeListener(
-      (buttonView, isChecked) -> {
-        Timber.tag(TAG).v( "button_ask_to_acquaint ++" );
-        if (isChecked){
-          button_ask_to_report.setChecked(false);
-          button_ask_to_acquaint.setChecked(true);
-          block.setAskToReport(false);
-          block.setAskToAcquaint(true);
-
-          forReport   = false;
-          forAcquaint = true;
-        }
-        if (callback != null) {
-          callback.onUpdateSuccess(lastUpdate);
-        }
-      }
-    );
-
+    button_ask_to_acquaint.setOnClickListener(v -> {
+      Timber.tag(TAG).v( "button_ask_to_acquaint ++" );
+      forReport = false;
+      forAcquaint = ((ToggleButton) v).isChecked();
+      updateAppeal();
+    });
 
     button_ask_to_report.setChecked( forReport );
-    button_ask_to_report.setOnCheckedChangeListener(
-      (buttonView, isChecked) -> {
-        Timber.tag(TAG).v( "button_ask_to_report ++" );
-        if (isChecked){
-          button_ask_to_acquaint.setChecked(false);
-          button_ask_to_report.setChecked(true);
-          block.setAskToReport(true);
-          block.setAskToAcquaint(false);
-
-          forReport   = true;
-          forAcquaint = false;
-        }
-        if (callback != null) {
-          callback.onUpdateSuccess(lastUpdate);
-        }
-      }
-    );
+    button_ask_to_report.setOnClickListener(v -> {
+      Timber.tag(TAG).v( "button_ask_to_report ++" );
+      forReport = ((ToggleButton) v).isChecked();
+      forAcquaint = false;
+      updateAppeal();
+    });
 
     Boolean hide = false;
     if (block.getHidePerformers() != null) {
@@ -357,6 +334,25 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     addUsersToView();
 
     return view;
+  }
+
+  private void updateAppeal() {
+    block.setAskToReport(forReport);
+    block.setAskToAcquaint(forAcquaint);
+    button_ask_to_report.setChecked(forReport);
+    button_ask_to_acquaint.setChecked(forAcquaint);
+
+    String appealText = "";
+    if (forReport) {
+      appealText = button_ask_to_report.getTextOn().toString();
+    } else if (forAcquaint) {
+      appealText = button_ask_to_acquaint.getTextOn().toString();
+    }
+    block.setAppealText(appealText);
+
+    if (callback != null) {
+      callback.onUpdateSuccess(lastUpdate);
+    }
   }
 
   private void updateUsers(){
