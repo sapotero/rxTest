@@ -102,6 +102,11 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   private Fields.Status status;
   private DecisionConstructorActivity context;
 
+  private String originalSigner;
+  private String originalSignerBlankText;
+  private String originalSignerId;
+  private String originalSignerAssistantId;
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
 
@@ -233,6 +238,20 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
             .onNeutral(
               (dialog, which) -> {
                 Timber.tag(TAG).w("nothing");
+
+                // Restore original signer
+                raw_decision.setSignerId(originalSignerId);
+                raw_decision.setSigner(originalSigner);
+                raw_decision.setSignerBlankText(originalSignerBlankText);
+                raw_decision.setAssistantId(originalSignerAssistantId);
+
+                if (rDecisionEntity != null) {
+                  rDecisionEntity.setSignerId(originalSignerId);
+                  rDecisionEntity.setSigner(originalSigner);
+                  rDecisionEntity.setSignerBlankText(originalSignerBlankText);
+                  rDecisionEntity.setAssistantId(originalSignerAssistantId);
+                }
+
                 finish();
 //                activity.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
               }
@@ -516,8 +535,11 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       }
     });
 
-
-
+    // Save original signer
+    originalSignerId = raw_decision.getSignerId();
+    originalSigner = raw_decision.getSigner();
+    originalSignerBlankText = raw_decision.getSignerBlankText();
+    originalSignerAssistantId = raw_decision.getAssistantId();
   }
 
   private boolean checkDecision() {
