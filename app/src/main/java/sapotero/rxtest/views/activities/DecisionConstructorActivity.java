@@ -448,6 +448,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     if ( rDecisionEntity != null ){
       manager.setSigner( rDecisionEntity.getSigner() );
       manager.setSignerId( rDecisionEntity.getSignerId() );
+      manager.setSignerBlankText( rDecisionEntity.getSignerBlankText() );
       decision_comment.setText( rDecisionEntity.getComment() );
       signer_oshs_selector.setText( rDecisionEntity.getSigner() );
     } else {
