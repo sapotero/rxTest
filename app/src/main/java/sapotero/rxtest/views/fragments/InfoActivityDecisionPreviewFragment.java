@@ -70,6 +70,7 @@ import sapotero.rxtest.events.decision.ApproveDecisionEvent;
 import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
 import sapotero.rxtest.events.decision.RejectDecisionEvent;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
+import sapotero.rxtest.events.view.ShowPrevDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
@@ -178,6 +179,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
 
             operationManager.execute(operation, params);
             updateAfteButtonPressed();
+            EventBus.getDefault().post( new ShowPrevDocumentEvent());
           })
           .autoDismiss(true);
 
@@ -197,6 +199,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
 
       operationManager.execute(operation, params);
       updateAfteButtonPressed();
+      EventBus.getDefault().post( new ShowPrevDocumentEvent());
     }
 
     Timber.tag(TAG).v("decision_preview_next end");
@@ -230,6 +233,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
 
           operationManager.execute(operation, commandParams);
           updateAfteButtonPressed();
+          EventBus.getDefault().post( new ShowPrevDocumentEvent());
         })
         .autoDismiss(true);
 
@@ -256,6 +260,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
 
       operationManager.execute(operation, params);
       updateAfteButtonPressed();
+      EventBus.getDefault().post( new ShowPrevDocumentEvent());
     }
   }
 
@@ -347,6 +352,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
 
     initToolBar();
     setAdapter();
+
+
 
     gestureDetector = new GestureDetector( getContext(),new GestureListener() );
 

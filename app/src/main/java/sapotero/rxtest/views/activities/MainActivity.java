@@ -175,8 +175,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private MainActivity context;
   private CompositeSubscription subscription;
 
-  static Map<String, Boolean> IS_HIDDEN = new HashMap<>();
-
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {

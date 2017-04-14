@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -151,6 +152,8 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     setPreview();
   }
 
+
+
   private void setTabContent() {
 
     try {
@@ -235,11 +238,11 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   @OnClick(R.id.activity_info_prev_document)
   public void prev_doc(){
-    showPrevDocument();
+    showNextDocument();
   }
   @OnClick(R.id.activity_info_next_document)
   public void next_doc(){
-    showNextDocument();
+    showPrevDocument();
   }
 
 
@@ -314,9 +317,28 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     initInfoActivity();
     updateCurrent();
 
+    invalidateArrows();
+
 //    startThreadedUpdate();
 //    Keyboard.hide(this);
 
+  }
+
+  private void invalidateArrows() {
+    // если пришли из поиска - дизейблим стрелки
+    try {
+      if ( settings.getBoolean("load_from_search").get() ){
+        ImageButton prev = (ImageButton) findViewById(R.id.activity_info_prev_document);
+        ImageButton next = (ImageButton) findViewById(R.id.activity_info_next_document);
+
+        prev.setClickable(false);
+        next.setClickable(false);
+        prev.setAlpha(0.5f);
+        next.setAlpha(0.5f);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   private void startThreadedUpdate() {
@@ -406,6 +428,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     exitIfAlreadySeenThisFuckingDocument();
 
     initInfoActivity();
+    updateCurrent();
 //    finish();
 //
 //    InfoActivity activity = this;
@@ -434,6 +457,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     exitIfAlreadySeenThisFuckingDocument();
 
     initInfoActivity();
+    updateCurrent();
 
 //    finish();
 //

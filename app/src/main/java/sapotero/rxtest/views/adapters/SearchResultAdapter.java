@@ -61,7 +61,10 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapte
 
       Preference<String> rxDate = rxPreferences.getString("activity_main_menu.date");
       rxDate.set( doc.getRegistrationDate() );
-      
+
+      Preference<Boolean> rxFromSearch = rxPreferences.getBoolean("load_from_search");
+      rxFromSearch.set( true );
+
       Intent intent = new Intent(context, InfoActivity.class);
       context.startActivity(intent);
     });
