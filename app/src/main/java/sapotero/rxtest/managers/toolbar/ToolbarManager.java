@@ -384,130 +384,146 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   private void invalidate() {
     getFirstForLenovo();
 
+    if (doc != null){
 
-    toolbar.getMenu().clear();
+      String code = null;
 
-    int menu;
+      try {
+        code = STATUS_CODE.get();
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
 
-    switch ( STATUS_CODE.get() ){
-      case "sent_to_the_report":
-        menu = R.menu.info_menu_sent_to_the_report;
-        break;
-      case "sent_to_the_performance":
-        menu = R.menu.info_menu_sent_to_the_performance;
-        break;
-      case "primary_consideration":
-        menu = R.menu.info_menu_primary_consideration;
-        break;
-      case "approval":
-        menu = R.menu.info_menu_approval;
-        break;
-      case "signing":
-        menu = R.menu.info_menu_signing;
-        break;
-      case "processed":
+      toolbar.getMenu().clear();
+
+      int menu;
+
+      if (code == null){
         menu = R.menu.info_menu;
-        break;
+      } else {
+        switch ( STATUS_CODE.get() ){
+          case "sent_to_the_report":
+            menu = R.menu.info_menu_sent_to_the_report;
+            break;
+          case "sent_to_the_performance":
+            menu = R.menu.info_menu_sent_to_the_performance;
+            break;
+          case "primary_consideration":
+            menu = R.menu.info_menu_primary_consideration;
+            break;
+          case "approval":
+            menu = R.menu.info_menu_approval;
+            break;
+          case "signing":
+            menu = R.menu.info_menu_signing;
+            break;
+          case "processed":
+            menu = R.menu.info_menu;
+            break;
 
-      default:
+          default:
+            menu = R.menu.info_menu;
+            break;
+        }
+      }
+
+
+
+
+      if (doc != null && doc.isProcessed() != null && doc.isProcessed()){
         menu = R.menu.info_menu;
-        break;
-    }
+      }
+      toolbar.inflateMenu(menu);
 
-    if (doc != null && doc.isProcessed() != null && doc.isProcessed()){
-      menu = R.menu.info_menu;
-    }
-    toolbar.inflateMenu(menu);
+      decision_count = doc.getDecisions().size();
+      switch (decision_count) {
+        case 0:
+          processEmptyDecisions();
+          break;
+        default:
+          try {
+            toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(false);
+            toolbar.getMenu().findItem(R.id.menu_info_decision_edit).setVisible(false);
+          } catch (Exception e) {
+            Timber.tag(TAG).v(e);
+          }
+          break;
+      }
 
-
-    decision_count = doc.getDecisions().size();
-    switch (decision_count) {
-      case 0:
-        processEmptyDecisions();
-        break;
-      default:
+      // Если документ обработан - то изменяем резолюции на поручения
+      if ( doc.isProcessed() != null && doc.isProcessed() || doc.isFromProcessedFolder() != null && doc.isFromProcessedFolder()) {
         try {
-          toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(false);
           toolbar.getMenu().findItem(R.id.menu_info_decision_edit).setVisible(false);
+          toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(true);
         } catch (Exception e) {
           Timber.tag(TAG).v(e);
         }
-        break;
-    }
-
-    // Если документ обработан - то изменяем резолюции на поручения
-    if ( doc.isProcessed() != null && doc.isProcessed() || doc.isFromProcessedFolder() != null && doc.isFromProcessedFolder()) {
-      try {
-        toolbar.getMenu().findItem(R.id.menu_info_decision_edit).setVisible(false);
-        toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(true);
-      } catch (Exception e) {
-        Timber.tag(TAG).v(e);
       }
-    }
 
-    for (int i = 0; i < toolbar.getMenu().size(); i++) {
-      MenuItem item = toolbar.getMenu().getItem(i);
+      for (int i = 0; i < toolbar.getMenu().size(); i++) {
+        MenuItem item = toolbar.getMenu().getItem(i);
 
-      switch (item.getItemId()) {
-        case R.id.menu_info_shared_to_favorites:
-          item.setTitle(context.getString(doc.isFavorites() != null && doc.isFavorites() ? R.string.remove_from_favorites : R.string.to_favorites));
-          break;
-        case R.id.menu_info_shared_to_control:
-          item.setTitle(context.getString(doc.isControl() != null && doc.isControl() ? R.string.remove_from_control : R.string.to_control));
-          break;
-        default:
-          break;
-      }
-    }
-
-    //настройка
-    try {
-      if (!settings.getBoolean("settings_view_show_create_decision_post").get() && doc.isFromFavoritesFolder() != null && doc.isFromFavoritesFolder() ) {
-        if ( doc.isFromFavoritesFolder() != null && !doc.isFromFavoritesFolder() ){
-          toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(false);
+        switch (item.getItemId()) {
+          case R.id.menu_info_shared_to_favorites:
+            item.setTitle(context.getString(doc.isFavorites() != null && doc.isFavorites() ? R.string.remove_from_favorites : R.string.to_favorites));
+            break;
+          case R.id.menu_info_shared_to_control:
+            item.setTitle(context.getString(doc.isControl() != null && doc.isControl() ? R.string.remove_from_control : R.string.to_control));
+            break;
+          default:
+            break;
         }
       }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
 
-    if (Objects.equals(doc.getFilter(), Fields.Status.SIGNING.getValue()) || Objects.equals(doc.getFilter(), Fields.Status.APPROVAL.getValue()) || doc.isFromFavoritesFolder() != null && doc.isFromFavoritesFolder() ) {
-      // resolved https://tasks.n-core.ru/browse/MVDESD-12765
-      // убрать кнопку "К" у проектов из раздела на согласование("на подписание" её также быть не должно)
+      //настройка
       try {
-        toolbar.getMenu().findItem(R.id.menu_info_shared_to_control).setVisible(false);
+        if (!settings.getBoolean("settings_view_show_create_decision_post").get() && doc.isFromFavoritesFolder() != null && doc.isFromFavoritesFolder() ) {
+          if ( doc.isFromFavoritesFolder() != null && !doc.isFromFavoritesFolder() ){
+            toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(false);
+          }
+        }
       } catch (Exception e) {
         e.printStackTrace();
       }
-    }
 
-
-    // Из папки обработанное
-    if (doc!= null && doc.isFromProcessedFolder() != null && doc.isFromProcessedFolder() ){
-      toolbar.getMenu().clear();
-      toolbar.inflateMenu(R.menu.info_menu);
-
-      try {
-        toolbar.getMenu().findItem(R.id.menu_info_shared_to_favorites).setVisible(false);
-        toolbar.getMenu().findItem(R.id.menu_info_shared_to_control).setVisible(false);
-        toolbar.getMenu().findItem(R.id.menu_info_decision_edit).setVisible(false);
-      } catch (Exception e) {
-        e.printStackTrace();
+      if (Objects.equals(doc.getFilter(), Fields.Status.SIGNING.getValue()) || Objects.equals(doc.getFilter(), Fields.Status.APPROVAL.getValue()) || doc.isFromFavoritesFolder() != null && doc.isFromFavoritesFolder() ) {
+        // resolved https://tasks.n-core.ru/browse/MVDESD-12765
+        // убрать кнопку "К" у проектов из раздела на согласование("на подписание" её также быть не должно)
+        try {
+          toolbar.getMenu().findItem(R.id.menu_info_shared_to_control).setVisible(false);
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
       }
-    }
 
-    // Из папки избранное
-    if (doc!= null && doc.isFromFavoritesFolder() != null && doc.isFromFavoritesFolder() ){
-      toolbar.getMenu().clear();
-      toolbar.inflateMenu(R.menu.info_menu);
 
-      try {
-        toolbar.getMenu().findItem(R.id.menu_info_shared_to_control).setVisible(false);
-        toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(false);
-        toolbar.getMenu().findItem(R.id.menu_info_decision_edit).setVisible(false);
-        toolbar.getMenu().findItem(R.id.menu_info_shared_to_favorites).setVisible(false);
-      } catch (Exception e) {
-        e.printStackTrace();
+      // Из папки обработанное
+      if (doc!= null && doc.isFromProcessedFolder() != null && doc.isFromProcessedFolder() ){
+        toolbar.getMenu().clear();
+        toolbar.inflateMenu(R.menu.info_menu);
+
+        try {
+          toolbar.getMenu().findItem(R.id.menu_info_shared_to_favorites).setVisible(false);
+          toolbar.getMenu().findItem(R.id.menu_info_shared_to_control).setVisible(false);
+          toolbar.getMenu().findItem(R.id.menu_info_decision_edit).setVisible(false);
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+
+      // Из папки избранное
+      if (doc!= null && doc.isFromFavoritesFolder() != null && doc.isFromFavoritesFolder() ){
+        toolbar.getMenu().clear();
+        toolbar.inflateMenu(R.menu.info_menu);
+
+        try {
+          toolbar.getMenu().findItem(R.id.menu_info_shared_to_control).setVisible(false);
+          toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(false);
+          toolbar.getMenu().findItem(R.id.menu_info_decision_edit).setVisible(false);
+          toolbar.getMenu().findItem(R.id.menu_info_shared_to_favorites).setVisible(false);
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
       }
     }
   }
@@ -597,8 +613,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       }
     );
 
-    status  = Fields.Status.findStatus(STATUS_CODE.get());
-    journal = Fields.getJournalByUid( UID.get() );
+//    status  = Fields.Status.findStatus(STATUS_CODE.get());
+//    journal = Fields.getJournalByUid( UID.get() );
 
 
     Timber.tag("MENU").e( "STATUS CODE: %s", STATUS_CODE.get() );
