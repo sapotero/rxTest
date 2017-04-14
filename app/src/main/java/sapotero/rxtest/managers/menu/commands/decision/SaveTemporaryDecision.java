@@ -6,8 +6,6 @@ import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.util.Collections;
-
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
@@ -141,7 +139,7 @@ public class SaveTemporaryDecision extends AbstractCommand {
             queueManager.setExecutedRemote(this);
           },
           error -> {
-            queueManager.setExecutedWithError(this, Collections.singletonList("db_error"));
+//            queueManager.setExecutedWithError(this, Collections.singletonList("db_error"));
           }
         );
     }

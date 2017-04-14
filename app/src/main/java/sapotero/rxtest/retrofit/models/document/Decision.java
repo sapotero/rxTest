@@ -49,10 +49,24 @@ public class Decision implements Serializable {
     @SerializedName("assistant_id")
     @Expose
     private String assistantId;
-    @SerializedName("comment")
-    @Expose
-    private String comment;
-    @SerializedName("date")
+  @SerializedName("comment")
+  @Expose
+  private String comment;
+
+
+  @SerializedName("urgency")
+  @Expose
+  private String urgency;
+
+  public String getUrgency() {
+    return urgency;
+  }
+
+  public void setUrgency(String urgency) {
+    this.urgency = urgency;
+  }
+
+  @SerializedName("date")
     @Expose
     private String date;
     @SerializedName("urgency_text")

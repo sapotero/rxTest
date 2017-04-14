@@ -59,6 +59,7 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
+import sapotero.rxtest.BuildConfig;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
@@ -85,7 +86,6 @@ import sapotero.rxtest.views.custom.OrganizationSpinner;
 import sapotero.rxtest.views.custom.SearchView.SearchView;
 import sapotero.rxtest.views.menu.MenuBuilder;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
-import sapotero.rxtest.views.menu.fields.MainMenuItem;
 import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity implements MenuBuilder.Callback, SearchView.OnVisibilityChangeListener {
@@ -186,8 +186,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     ButterKnife.bind(this);
     EsdApplication.getComponent(this).inject(this);
     loadSettings();
-
     context = this;
+
     initAdapters();
 
     menuBuilder = new MenuBuilder(this);
@@ -376,9 +376,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
           dataLoader.updateAuth(null);
           updateByStatus();
 
-          if (menuBuilder.getItem() != MainMenuItem.PROCESSED || menuBuilder.getItem() != MainMenuItem.FAVORITES ){
-            updateProgressBar();
-          }
+//          if (menuBuilder.getItem() != MainMenuItem.PROCESSED || menuBuilder.getItem() != MainMenuItem.FAVORITES ){
+//            updateProgressBar();
+//          }
           break;
         case R.id.action_search:
           searchView.onOptionsItemSelected(getFragmentManager(), item);
@@ -389,6 +389,11 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       }
       return false;
     });
+
+    if (!settings.getBoolean("debug_enabled").get()){
+      toolbar.getMenu().findItem(R.id.removeQueue).setVisible(false);
+      toolbar.getMenu().findItem(R.id.checkQueue).setVisible(false);
+    }
 
   }
 
@@ -449,7 +454,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void updateByStatus() {
-    dataLoader.updateByStatus( MainMenuItem.ALL );
+    dataLoader.updateByCurrentStatus( menuBuilder.getItem(), null );
 
     Toast.makeText(this, "Обновление данных...", Toast.LENGTH_SHORT).show();
 
@@ -504,7 +509,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void drawer_build_bottom() {
-    String version = "1.14.5";
+    String version = BuildConfig.VERSION_NAME;
 
     drawer
       .addDrawerItems(
@@ -514,26 +519,36 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
         new SecondaryDrawerItem()
           .withName(R.string.drawer_item_settings_account)
           .withIcon(MaterialDesignIconic.Icon.gmi_accounts)
-          .withIdentifier(SETTINGS_VIEW),
+          .withIdentifier(SETTINGS_VIEW)
+      );
+
+    if (settings.getBoolean("debug_enabled").get()){
+      drawer
+        .addDrawerItems(
+          new SecondaryDrawerItem()
+            .withName(R.string.drawer_item_settings_templates)
+            .withIcon(MaterialDesignIconic.Icon.gmi_comment_edit)
+            .withIdentifier(SETTINGS_DECISION_TEMPLATES),
+          new SectionDrawerItem().withName(R.string.drawer_item_debug),
+          new SecondaryDrawerItem()
+            .withIdentifier(SETTINGS_LOG)
+            .withIcon(MaterialDesignIconic.Icon.gmi_assignment)
+            .withName("Лог"),
+          new SecondaryDrawerItem()
+            .withIdentifier(SETTINGS_SIGN)
+            .withIcon(MaterialDesignIconic.Icon.gmi_dns)
+            .withName("Подписи ЭО"),
+          new DividerDrawerItem()
+        );
+    }
+
+    drawer
+      .addDrawerItems(
         new SecondaryDrawerItem()
-          .withName(R.string.drawer_item_settings_templates)
-          .withIcon(MaterialDesignIconic.Icon.gmi_comment_edit)
-          .withIdentifier(SETTINGS_DECISION_TEMPLATES),
-        new SectionDrawerItem().withName(R.string.drawer_item_debug),
-        new SecondaryDrawerItem()
-          .withIdentifier(SETTINGS_LOG)
-          .withIcon(MaterialDesignIconic.Icon.gmi_assignment)
-          .withName("Лог"),
-        new SecondaryDrawerItem()
-          .withIdentifier(SETTINGS_SIGN)
-          .withIcon(MaterialDesignIconic.Icon.gmi_dns)
-          .withName("Подписи ЭО"),
-        new DividerDrawerItem(),
-        new SecondaryDrawerItem()
-          .withName("Версия приложения: " + version )
-          .withSelectable(false)
-      )
-      .withOnDrawerItemClickListener(
+        .withName("Версия приложения: " + version )
+        .withSelectable(false));
+
+      drawer.withOnDrawerItemClickListener(
         (view, position, drawerItem) -> {
 
           Timber.tag(TAG).d("drawerItem.getIdentifier(): " + drawerItem.getIdentifier());

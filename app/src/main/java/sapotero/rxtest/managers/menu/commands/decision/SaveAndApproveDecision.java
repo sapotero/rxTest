@@ -7,7 +7,6 @@ import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.util.Collections;
 import java.util.Objects;
 
 import io.requery.query.Tuple;
@@ -226,7 +225,7 @@ public class SaveAndApproveDecision extends AbstractCommand {
           if (callback != null){
             callback.onCommandExecuteError(getType());
           }
-          queueManager.setExecutedWithError(this, Collections.singletonList("http_error"));
+//          queueManager.setExecutedWithError(this, Collections.singletonList("http_error"));
           EventBus.getDefault().post( new ForceUpdateDocumentEvent( params.getDecisionModel().getDocumentUid() ));
         }
       );

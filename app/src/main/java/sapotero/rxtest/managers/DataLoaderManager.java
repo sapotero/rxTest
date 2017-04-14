@@ -450,6 +450,13 @@ public class DataLoaderManager {
       indexes.add("incoming_orders_production_db_core_cards_incoming_orders_cards");
     }
 
+    if (button == null){
+      statuses.add("primary_consideration");
+      statuses.add("sent_to_the_report");
+      sp.add("approval");
+      sp.add("signing");
+    }
+
 
 
 
@@ -476,19 +483,27 @@ public class DataLoaderManager {
 
                   for (Document doc: data.getDocuments() ) {
 
+                    Timber.tag(TAG).e("index: %s | status: %s ",index, status );
+                    Timber.tag(TAG).e("exist: %s | md5: %s", isExist(doc), !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) );
 
                     if ( isExist(doc) ){
 
+                      Timber.tag(TAG).e("isExist" );
+
                       if ( !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) ){
+                        Timber.tag(TAG).e("isUpdate" );
                         jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), index, status, true) );
                       }
 
                     } else {
+                      Timber.tag(TAG).e("isCreate" );
                       jobManager.addJobInBackground( new CreateDocumentsJob(doc.getUid(), index, status) );
                     }
                   }
-                  if ( settings.getString("is_first_run").get() != null ){
-                    jobManager.addJobInBackground( new InvalidateDocumentsJob(data.getDocuments(), index, status) );
+
+                  if ( settings.getString("is_first_run").get() != null ) {
+                    Timber.tag(TAG).e("isInvalidate" );
+                    jobManager.addJobInBackground(new InvalidateDocumentsJob(data.getDocuments(), index, status));
                   }
                 }
               },
@@ -510,9 +525,9 @@ public class DataLoaderManager {
               if (data.getDocuments().size() > 0){
                 for (Document doc: data.getDocuments() ) {
 
-                  if ( !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) ){
-                    jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), code) );
-                  }
+                  jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), code) );
+//                  if ( !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) ){
+//                  }
 
                 }
               }
@@ -551,6 +566,7 @@ public class DataLoaderManager {
   }
 
   public void updateByStatus(MainMenuItem items) {
+
 //    Timber.tag(TAG).e("UPDATE BY STATUS: %s", items.getName() );
 //
 //    Observable<AuthSignToken> authSubscription = getAuthSubscription();

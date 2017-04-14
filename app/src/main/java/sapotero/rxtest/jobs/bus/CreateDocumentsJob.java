@@ -333,7 +333,8 @@ public class CreateDocumentsJob extends BaseJob {
     }
 
 
-    EventBus.getDefault().post( new UpdateCurrentDocumentEvent( doc.getUid() ) );
+    doc.setFilter(status);
+    doc.setDocumentType(journal);
 
     dataStore
       .insert( doc )
@@ -342,6 +343,7 @@ public class CreateDocumentsJob extends BaseJob {
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         result -> {
+          EventBus.getDefault().post( new UpdateCurrentDocumentEvent( doc.getUid() ) );
 
           if ( result.getImages() != null && result.getImages().size() > 0 && ( isFavorites != null && !isFavorites ) ){
             for (RImage _image : result.getImages()) {

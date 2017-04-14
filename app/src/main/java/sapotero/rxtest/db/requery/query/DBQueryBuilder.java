@@ -180,8 +180,39 @@ public class DBQueryBuilder {
         query
           .orderBy( RDocumentEntity.SORT_KEY.desc() )
           .get()
-//          .toSelfObservable()
           .toObservable()
+          .filter(documentEntity -> {
+
+            Boolean result = true;
+
+            Timber.tag(TAG).w("filter: %s %s",
+              organizationSelector.getSelected().length,
+              organizationSelector.getAdapter().getCount()
+            );
+
+            if ( organizationSelector.getSelected().length != organizationSelector.getAdapter().getCount() ){
+              // resolved https://tasks.n-core.ru/browse/MVDESD-12625
+              // *1) *Фильтр по организациям.
+
+              String organization = documentEntity.getOrganization();
+
+              boolean[] selected_index = organizationSelector.getSelected();
+              ArrayList<String> ids = new ArrayList<>();
+
+              for (int i = 0; i < selected_index.length; i++) {
+                if ( selected_index[i] ){
+                  ids.add( organizationAdapter.getItem(i).getName() );
+                }
+              }
+
+              if ( !ids.contains(organization) || !withFavorites && !documentEntity.isFavorites() ){
+                result = false;
+              }
+
+            }
+
+            return result;
+          })
           .toList()
           .debounce(300, TimeUnit.MILLISECONDS)
           .subscribeOn(Schedulers.newThread())

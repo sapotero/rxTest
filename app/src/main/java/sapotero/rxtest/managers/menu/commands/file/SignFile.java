@@ -147,7 +147,8 @@ public class SignFile extends AbstractCommand {
       .subscribeOn(Schedulers.computation())
       .subscribe(data -> {
         Timber.tag(TAG).v("inserted %s [ %s ]", data.getImageId(), data.getDocumentId() );
-      });
+      },
+        Timber::e);
   }
 
   @Override

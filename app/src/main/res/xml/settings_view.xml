@@ -114,4 +114,13 @@
 
     </android.support.v7.preference.PreferenceCategory>
 
+    <android.support.v7.preference.PreferenceCategory
+        android:title="Настройки операций">
+
+        <SwitchPreference
+            android:key="debug_enabled"
+            android:title="Режим отладки"
+            android:defaultValue="false" />
+    </android.support.v7.preference.PreferenceCategory>
+
 </android.support.v7.preference.PreferenceScreen>

@@ -7,8 +7,6 @@ import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.util.Collections;
-
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Retrofit;
@@ -164,7 +162,7 @@ public class AddAndApproveDecision extends AbstractCommand {
           if (callback != null){
             callback.onCommandExecuteError(getType());
           }
-          queueManager.setExecutedWithError(this, Collections.singletonList("http_error"));
+//          queueManager.setExecutedWithError(this, Collections.singletonList("http_error"));
         }
       );
   }
