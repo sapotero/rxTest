@@ -102,6 +102,11 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   private Fields.Status status;
   private DecisionConstructorActivity context;
 
+  private String originalSigner;
+  private String originalSignerBlankText;
+  private String originalSignerId;
+  private String originalSignerAssistantId;
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
 
@@ -237,6 +242,20 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
             .onNeutral(
               (dialog, which) -> {
                 Timber.tag(TAG).w("nothing");
+
+                // Restore original signer
+                raw_decision.setSignerId(originalSignerId);
+                raw_decision.setSigner(originalSigner);
+                raw_decision.setSignerBlankText(originalSignerBlankText);
+                raw_decision.setAssistantId(originalSignerAssistantId);
+
+                if (rDecisionEntity != null) {
+                  rDecisionEntity.setSignerId(originalSignerId);
+                  rDecisionEntity.setSigner(originalSigner);
+                  rDecisionEntity.setSignerBlankText(originalSignerBlankText);
+                  rDecisionEntity.setAssistantId(originalSignerAssistantId);
+                }
+
                 finish();
 //                activity.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
               }
@@ -443,35 +462,26 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
     sign_as_current_user.setOnClickListener(v -> {
       Timber.tag(TAG).e( "%s | %s", rDecisionEntity == null, raw_decision == null );
-
-      if (rDecisionEntity != null) {
-        rDecisionEntity.setSignerId( settings.getString("current_user_id").get() );
-        rDecisionEntity.setSigner( settings.getString("current_user").get() );
-        signer_oshs_selector.setText( rDecisionEntity.getSigner() );
-      } else {
-        manager.setSigner( settings.getString("current_user").get() );
-        manager.setSignerId( settings.getString("current_user_id").get() );
-        manager.setSignerBlankText( settings.getString("current_user").get() );
-
-        raw_decision.setSigner( settings.getString("current_user").get() );
-        raw_decision.setSignerId( settings.getString("current_user_id").get() );
-        raw_decision.setSignerBlankText( settings.getString("current_user").get() );
-
-        signer_oshs_selector.setText( settings.getString("current_user").get() );
-
-        manager.update();
-      }
-
+      updateSigner(
+              getCurrentUserId(),
+              getCurrentUserName(),
+              getCurrentUserOrganization(),
+              null
+      );
     });
 
     if ( rDecisionEntity != null ){
       manager.setSigner( rDecisionEntity.getSigner() );
       manager.setSignerId( rDecisionEntity.getSignerId() );
+      manager.setSignerBlankText( rDecisionEntity.getSignerBlankText() );
       decision_comment.setText( rDecisionEntity.getComment() );
       signer_oshs_selector.setText( rDecisionEntity.getSigner() );
     } else {
-      raw_decision.setSignerId( settings.getString("current_user_id").get() );
-      raw_decision.setSigner( settings.getString("current_user").get() );
+      String signerName = getCurrentUserName();
+      String signerOrganization = getCurrentUserOrganization();
+      raw_decision.setSignerId( getCurrentUserId() );
+      raw_decision.setSigner( makeSignerWithOrganizationText(signerName, signerOrganization) );
+      raw_decision.setSignerBlankText( signerName );
       signer_oshs_selector.setText( raw_decision.getSigner() );
     }
 
@@ -531,8 +541,11 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       }
     });
 
-
-
+    // Save original signer
+    originalSignerId = raw_decision.getSignerId();
+    originalSigner = raw_decision.getSigner();
+    originalSignerBlankText = raw_decision.getSignerBlankText();
+    originalSignerAssistantId = raw_decision.getAssistantId();
   }
 
   private boolean checkDecision() {
@@ -715,11 +728,15 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       Calendar cal = Calendar.getInstance();
       String date = dateFormat.format(cal.getTime());
 
+      String signerName = getCurrentUserName();
+      String signerOrganization = getCurrentUserOrganization();
+
       raw_decision = new Decision();
       raw_decision.setLetterhead("Бланк резолюции");
       raw_decision.setShowPosition(true);
-      raw_decision.setSignerId( settings.getString("current_user_id").get() );
-      raw_decision.setSigner( settings.getString("current_user").get() );
+      raw_decision.setSignerId( getCurrentUserId() );
+      raw_decision.setSigner( makeSignerWithOrganizationText(signerName, signerOrganization) );
+      raw_decision.setSignerBlankText( signerName );
       raw_decision.setUrgencyText("");
       raw_decision.setId(null);
       raw_decision.setDate( date );
@@ -829,29 +846,36 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   @Override
   public void onSearchSuccess(Oshs user, CommandFactory.Operation operation, String uid) {
     Timber.tag(TAG).e("USER: %s", new Gson().toJson(user) );
-    String name = user.getName();
 
-    manager.setSignerBlankText( name );
+    updateSigner(user.getId(), user.getName(), user.getOrganization(), user.getAssistantId());
+  }
 
-    if (!name.endsWith(")")){
-      name = String.format(" %s (%s)", user.getName(), user.getOrganization() );
-    }
+  @Override
+  public void onSearchError(Throwable error) {
+
+  }
+
+  private void updateSigner(String signerId, String signerName, String signerOrganization, String assistantId) {
+
+    String name = makeSignerWithOrganizationText(signerName, signerOrganization);
 
     if (rDecisionEntity != null) {
-      rDecisionEntity.setSignerId( user.getId() );
+      rDecisionEntity.setSignerId( signerId );
       rDecisionEntity.setSigner( name );
+      rDecisionEntity.setSignerBlankText( signerName );
 
-      if ( user.getAssistantId() != null ){
-        rDecisionEntity.setAssistantId( user.getAssistantId() );
+      if ( assistantId != null ){
+        rDecisionEntity.setAssistantId( assistantId );
       }
     }
 
-    if ( user.getAssistantId() != null ){
-      manager.setAssistantId(user.getAssistantId());
-    }
-
-    manager.setSignerId(user.getId());
+    manager.setSignerId(signerId);
     manager.setSigner(name);
+    manager.setSignerBlankText(signerName);
+
+    if ( assistantId != null ){
+      manager.setAssistantId(assistantId);
+    }
 
     signer_oshs_selector.setText( name );
 
@@ -859,8 +883,25 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     manager.update();
   }
 
-  @Override
-  public void onSearchError(Throwable error) {
+  private String makeSignerWithOrganizationText(String signerName, String signerOrganization) {
+    String name = signerName;
 
+    if (!name.endsWith(")")){
+      name = String.format("%s (%s)", name, signerOrganization );
+    }
+
+    return name;
+  }
+
+  private String getCurrentUserId() {
+    return settings.getString("current_user_id").get();
+  }
+
+  private String getCurrentUserName() {
+    return settings.getString("current_user").get();
+  }
+
+  private String getCurrentUserOrganization() {
+    return settings.getString("current_user_organization").get();
   }
 }
