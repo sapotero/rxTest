@@ -438,9 +438,9 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     sign_as_current_user.setOnClickListener(v -> {
       Timber.tag(TAG).e( "%s | %s", rDecisionEntity == null, raw_decision == null );
       updateSigner(
-              settings.getString("current_user_id").get(),
-              settings.getString("current_user").get(),
-              settings.getString("current_user_organization").get(),
+              getCurrentUserId(),
+              getCurrentUserName(),
+              getCurrentUserOrganization(),
               null
       );
     });
@@ -451,8 +451,11 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       decision_comment.setText( rDecisionEntity.getComment() );
       signer_oshs_selector.setText( rDecisionEntity.getSigner() );
     } else {
-      raw_decision.setSignerId( settings.getString("current_user_id").get() );
-      raw_decision.setSigner( settings.getString("current_user").get() );
+      String signerName = getCurrentUserName();
+      String signerOrganization = getCurrentUserOrganization();
+      raw_decision.setSignerId( getCurrentUserId() );
+      raw_decision.setSigner( makeSignerWithOrganizationText(signerName, signerOrganization) );
+      raw_decision.setSignerBlankText( signerName );
       signer_oshs_selector.setText( raw_decision.getSigner() );
     }
 
@@ -695,11 +698,15 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       Calendar cal = Calendar.getInstance();
       String date = dateFormat.format(cal.getTime());
 
+      String signerName = getCurrentUserName();
+      String signerOrganization = getCurrentUserOrganization();
+
       raw_decision = new Decision();
       raw_decision.setLetterhead("Бланк резолюции");
       raw_decision.setShowPosition(true);
-      raw_decision.setSignerId( settings.getString("current_user_id").get() );
-      raw_decision.setSigner( settings.getString("current_user").get() );
+      raw_decision.setSignerId( getCurrentUserId() );
+      raw_decision.setSigner( makeSignerWithOrganizationText(signerName, signerOrganization) );
+      raw_decision.setSignerBlankText( signerName );
       raw_decision.setUrgencyText("");
       raw_decision.setId(null);
       raw_decision.setDate( date );
@@ -819,33 +826,52 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   }
 
   private void updateSigner(String signerId, String signerName, String signerOrganization, String assistantId) {
-    String name = signerName;
 
-    manager.setSignerBlankText( name );
-
-    if (!name.endsWith(")")){
-      name = String.format(" %s (%s)", name, signerOrganization );
-    }
+    String name = makeSignerWithOrganizationText(signerName, signerOrganization);
 
     if (rDecisionEntity != null) {
       rDecisionEntity.setSignerId( signerId );
       rDecisionEntity.setSigner( name );
+      rDecisionEntity.setSignerBlankText( signerName );
 
       if ( assistantId != null ){
         rDecisionEntity.setAssistantId( assistantId );
       }
     }
 
+    manager.setSignerId(signerId);
+    manager.setSigner(name);
+    manager.setSignerBlankText(signerName);
+
     if ( assistantId != null ){
       manager.setAssistantId(assistantId);
     }
-
-    manager.setSignerId(signerId);
-    manager.setSigner(name);
 
     signer_oshs_selector.setText( name );
 
 //    manager.setDecision( DecisionConverter.formatDecision(rDecisionEntity) );
     manager.update();
+  }
+
+  private String makeSignerWithOrganizationText(String signerName, String signerOrganization) {
+    String name = signerName;
+
+    if (!name.endsWith(")")){
+      name = String.format("%s (%s)", name, signerOrganization );
+    }
+
+    return name;
+  }
+
+  private String getCurrentUserId() {
+    return settings.getString("current_user_id").get();
+  }
+
+  private String getCurrentUserName() {
+    return settings.getString("current_user").get();
+  }
+
+  private String getCurrentUserOrganization() {
+    return settings.getString("current_user_organization").get();
   }
 }
