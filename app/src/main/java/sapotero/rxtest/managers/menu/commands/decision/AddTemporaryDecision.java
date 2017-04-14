@@ -125,7 +125,7 @@ public class AddTemporaryDecision extends AbstractCommand {
       decision.setSigner( dec.getSigner() );
       decision.setSignerId( dec.getSignerId() );
       decision.setSignerPositionS( dec.getSignerPositionS() );
-      
+
       String name = null;
 
       try {
@@ -134,7 +134,7 @@ public class AddTemporaryDecision extends AbstractCommand {
         e.printStackTrace();
       }
 
-      if (name == null) {
+      if (name != null) {
         decision.setSignerBlankText( name );
       } else {
         decision.setSignerBlankText( dec.getSignerText() );

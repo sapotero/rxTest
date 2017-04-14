@@ -24,6 +24,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.Objects;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -50,10 +51,12 @@ import sapotero.rxtest.events.utils.NoDocumentsEvent;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.events.view.ShowPrevDocumentEvent;
 import sapotero.rxtest.events.view.ShowSnackEvent;
+import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentInfoActivityEvent;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.toolbar.ToolbarManager;
+import sapotero.rxtest.services.task.UpdateCurrentDocumentTask;
 import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.adapters.TabSigningPagerAdapter;
@@ -113,6 +116,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   private Fields.Status  status;
   private MaterialDialog.Builder loadingDialog;
   private Preference<Boolean> IS_PROCESSED;
+  private ScheduledThreadPoolExecutor scheduller;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -157,7 +161,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     }
 
 
-    Timber.tag(TAG).e("IS_PROCESSED.get() %s | %s -> %s", status, STATUS_CODE.get(), IS_PROCESSED.get() );
+//    Timber.tag(TAG).e("IS_PROCESSED.get() %s | %s -> %s", status, STATUS_CODE.get(), IS_PROCESSED.get() );
 
 
     if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || IS_PROCESSED.get()  ){
@@ -193,7 +197,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
     FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
 
-    Timber.tag("INFO").v( "JOURNAL: %s | STATUS: %s", journal.getName(), status.getName() );
+//    Timber.tag("INFO").v( "JOURNAL: %s | STATUS: %s", journal.getName(), status.getName() );
 
     try {
       LinearLayout layout = (LinearLayout) findViewById(R.id.activity_info_preview_container);
@@ -274,6 +278,10 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
       EventBus.getDefault().unregister(this);
     }
 
+    if (scheduller != null){
+      scheduller.shutdown();
+    }
+
     unsubscribe();
 
     finish();
@@ -306,8 +314,14 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     initInfoActivity();
     updateCurrent();
 
+//    startThreadedUpdate();
 //    Keyboard.hide(this);
 
+  }
+
+  private void startThreadedUpdate() {
+    scheduller = new ScheduledThreadPoolExecutor(1);
+    scheduller.scheduleWithFixedDelay( new UpdateCurrentDocumentTask(UID.get()), 0 ,5, TimeUnit.SECONDS );
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
@@ -361,6 +375,13 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   public void onMessageEvent(UpdateCurrentInfoActivityEvent event) throws Exception {
 
     Timber.d("UpdateCurrentInfoActivityEvent");
+    updateCurrent();
+
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(UpdateCurrentDocumentEvent event) throws Exception {
+    Timber.d("UpdateCurrentDocumentEvent");
     updateCurrent();
 
   }
