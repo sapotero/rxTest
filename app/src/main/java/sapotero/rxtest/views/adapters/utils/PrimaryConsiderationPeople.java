@@ -10,15 +10,17 @@ public class PrimaryConsiderationPeople {
   private String name;
   private String position;
   private String organization;
+  private String gender;
   private boolean isOriginal = false;
   private boolean isResponsible = false;
 
-  public PrimaryConsiderationPeople(String id, String name, String position, String organization, String assistantId) {
+  public PrimaryConsiderationPeople(String id, String name, String position, String organization, String assistantId, String gender) {
     this.id = id;
     this.name = name;
     this.position = position;
     this.organization = organization;
     this.assistantId = assistantId;
+    this.gender = gender;
   }
 
   public PrimaryConsiderationPeople(Performer u) {
@@ -28,6 +30,7 @@ public class PrimaryConsiderationPeople {
       this.name = u.getPerformerText();
       this.position = String.valueOf( u.getNumber() );
       this.organization = u.getOrganizationText();
+      this.gender = u.getPerformerGender();
       if (u.getIsOriginal() != null) {
         this.isOriginal = u.getIsOriginal();
       } else {
@@ -98,5 +101,13 @@ public class PrimaryConsiderationPeople {
 
   public void setResponsible(boolean responsible) {
     this.isResponsible = responsible;
+  }
+
+  public String getGender() {
+    return gender;
+  }
+
+  public void setGender(String gender) {
+    this.gender = gender;
   }
 }

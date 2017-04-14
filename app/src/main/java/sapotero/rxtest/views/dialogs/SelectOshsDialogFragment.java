@@ -150,6 +150,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
         oshs.setAssistantId( user.getAssistantId() );
         oshs.setPosition( user.getPosition() );
         oshs.setName( user.getName() );
+        oshs.setGender( user.getGender() );
 
         Timber.e("setOnItemClickListener OPERATION: %s", operation.toString());
         callback.onSearchSuccess(oshs, operation, documentUid);
@@ -237,7 +238,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe( user -> {
-           adapter.add( new PrimaryConsiderationPeople( user.getHeadId(), user.getTitle(), "", "", user.getAssistantId() ) );
+           adapter.add( new PrimaryConsiderationPeople( user.getHeadId(), user.getTitle(), "", "", user.getAssistantId(), "" ) );
         });
     }
 
@@ -252,7 +253,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe( user -> {
-           adapter.add( new PrimaryConsiderationPeople( user.getUid(), user.getName(), user.getPosition(), user.getOrganization(), null) );
+           adapter.add( new PrimaryConsiderationPeople( user.getUid(), user.getName(), user.getPosition(), user.getOrganization(), null, user.getGender() ) );
         });
     } else {
 
@@ -272,7 +273,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe( user -> {
-           adapter.add( new PrimaryConsiderationPeople( user.getUid(), user.getName(), user.getPosition(), user.getOrganization(), null) );
+           adapter.add( new PrimaryConsiderationPeople( user.getUid(), user.getName(), user.getPosition(), user.getOrganization(), null, user.getGender() ) );
         });
     }
 
@@ -337,7 +338,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
 //            callback.onSearchSuccess( user, operation);
           }
 
-          user = new PrimaryConsiderationPeople( _user.getId(), _user.getName(), _user.getPosition(), _user.getOrganization(), _user.getAssistantId());
+          user = new PrimaryConsiderationPeople( _user.getId(), _user.getName(), _user.getPosition(), _user.getOrganization(), _user.getAssistantId(), _user.getGender());
           title.setText( _user.getName() );
           title.cancelPendingInputEvents();
           title.hideIndicator();

@@ -35,6 +35,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
+import padeg.lib.Padeg;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.utils.DecisionConverter;
@@ -306,6 +307,9 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
 
         String performerName = "";
 
+        String tempPerformerName =
+                DecisionConverter.getPerformerNameForDecisionPreview(user.getPerformerText(), user.getPerformerGender(), block.getAppealText());
+
         Timber.tag("TEST").w("null? - %s | %s", block.getAppealText() == null, block.getAppealText() );
         Timber.tag("TEST").w("user %s", new Gson().toJson( user ) );
 
@@ -314,7 +318,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
           numberPrinted = true;
         }
 
-        performerName += DecisionConverter.formatName( user.getPerformerText() );
+        performerName += tempPerformerName;
 
         if (user.getIsResponsible() != null && user.getIsResponsible()){
           performerName += " *";
@@ -329,7 +333,6 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
         users_view.addView(performer_view);
       }
     }
-
 
     decision_preview_body.addView( users_view );
   }

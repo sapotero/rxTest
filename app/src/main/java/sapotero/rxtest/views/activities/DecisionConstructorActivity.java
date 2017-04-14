@@ -693,6 +693,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
               performer.setPerformerId(p.getPerformerId());
               performer.setPerformerType(p.getPerformerType());
               performer.setPerformerText(p.getPerformerText());
+              performer.setPerformerGender(p.getPerformerGender());
               performer.setOrganizationText(p.getOrganizationText());
               performer.setIsOriginal(p.isIsOriginal());
               performer.setIsResponsible(p.isIsResponsible());

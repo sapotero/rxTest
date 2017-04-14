@@ -18,6 +18,9 @@ public class Performer {
     @SerializedName("performer_text")
     @Expose
     private String performerText;
+    @SerializedName("performer_gender")
+    @Expose
+    private String performerGender;
     @SerializedName("organization_text")
     @Expose
     private String organizationText;
@@ -193,4 +196,11 @@ public class Performer {
         this.isResponsible = isResponsible;
     }
 
+    public String getPerformerGender() {
+        return performerGender;
+    }
+
+    public void setPerformerGender(String performerGender) {
+        this.performerGender = performerGender;
+    }
 }

@@ -428,6 +428,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
         p.setIsOriginal( item.isOriginal() );
         p.setPerformerId( item.getId() );
         p.setPerformerText( item.getName() );
+        p.setPerformerGender( item.getGender() );
         p.setOrganizationText( item.getOrganization() );
         p.setNumber( i );
 
@@ -563,7 +564,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   public void onSearchSuccess(Oshs user, CommandFactory.Operation operation, String uid) {
     Timber.tag("FROM DIALOG").i( "[%s] %s | %s", user.getId(), user.getName(), user.getOrganization());
 
-    adapter.add( new PrimaryConsiderationPeople( user.getId(), user.getName(), user.getPosition(), user.getOrganization(), null) );
+    adapter.add( new PrimaryConsiderationPeople( user.getId(), user.getName(), user.getPosition(), user.getOrganization(), null, user.getGender() ) );
     updateUsers();
 
     if (callback != null) {
