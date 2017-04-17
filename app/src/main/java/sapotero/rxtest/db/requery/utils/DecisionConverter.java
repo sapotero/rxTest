@@ -76,8 +76,16 @@ public class DecisionConverter {
 
       Timber.tag("DecisionConverter").e("split %s", Arrays.asList(split));
 
-      if (split.length >= 1 ){
-        name = String.format("%s %s", split[1], split[0] );
+      if ( split.length >= 2 ){
+        String part1 = split[0];
+        String part2 = split[1];
+
+        if (part2 != null && part2.contains(".")) {
+          String temp = part1;
+          part1 = part2;
+          part2 = temp;
+          name = String.format("%s %s", part1, part2);
+        }
       }
     } catch (Exception error) {
       Timber.tag("DecisionConverter").e(error);
@@ -90,7 +98,7 @@ public class DecisionConverter {
     Timber.tag("DecisionConverter").e("formatTemporaryName %s", name);
 
     try {
-      // Delete organization (text within "()")from name, if exists
+      // Delete organization (text within "()") from name, if exists
       int startIndex = name.indexOf("(");
       if (startIndex != -1) {
         String toBeReplaced = name.substring(startIndex);
