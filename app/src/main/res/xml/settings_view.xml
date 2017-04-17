@@ -6,7 +6,8 @@
         <EditTextPreference
             android:key="settings_username_host"
             android:title="Домен"
-            android:defaultValue="http://mobile.sed.mvd.ru/"/>
+            android:defaultValue="http://mobile.sed.a-soft.org/"/>
+        <!--android:defaultValue="http://mobile.sed.mvd.ru/"/>-->
     </android.support.v7.preference.PreferenceCategory>
 
     <android.support.v7.preference.PreferenceCategory
@@ -115,12 +116,17 @@
     </android.support.v7.preference.PreferenceCategory>
 
     <android.support.v7.preference.PreferenceCategory
-        android:title="Настройки операций">
+        android:title="Расширенные настройки">
 
         <SwitchPreference
             android:key="debug_enabled"
             android:title="Режим отладки"
             android:defaultValue="false" />
+
+        <SwitchPreference
+            android:key="is_first_run"
+            android:title="Первый запуск"
+            android:defaultValue="true" />
     </android.support.v7.preference.PreferenceCategory>
 
 </android.support.v7.preference.PreferenceScreen>

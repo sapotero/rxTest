@@ -501,7 +501,7 @@ public class DataLoaderManager {
                     }
                   }
 
-                  if ( settings.getString("is_first_run").get() != null ) {
+                  if ( settings.getBoolean("is_first_run").get() != null && !settings.getBoolean("is_first_run").get() ) {
                     Timber.tag(TAG).e("isInvalidate" );
                     jobManager.addJobInBackground(new InvalidateDocumentsJob(data.getDocuments(), index, status));
                   }

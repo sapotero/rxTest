@@ -23,16 +23,9 @@
         app:style="STROKE"
         app:textColor="@color/colorPrimary"
         app:textIsShow="true"
-        app:textSize="16sp" />
+        app:textSize="16sp"
 
-    <TextView
-        android:text="Подождите загрузки документов"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/textView7"
-        android:layout_alignTop="@+id/stepper_test_ring_progress"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="101dp"/>
+        />
 
 
 </RelativeLayout>

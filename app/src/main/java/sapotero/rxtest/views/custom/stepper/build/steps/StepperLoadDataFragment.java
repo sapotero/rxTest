@@ -127,7 +127,7 @@ public class StepperLoadDataFragment extends Fragment implements Step {
       Toast.makeText( getContext(), "Режим работы: оффлайн", Toast.LENGTH_SHORT ).show();
     }
 
-    if ( settings.getString("is_first_run").get() != null ){
+    if ( settings.getBoolean("is_first_run").get() != null && !settings.getBoolean("is_first_run").get() ){
       error = null;
 
       if (subscription.hasSubscriptions()){

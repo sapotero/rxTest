@@ -230,8 +230,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void setFirstRunFalse() {
-    if ( settings.getString("is_first_run").get() == null ){
-      settings.getString("is_first_run").set("false");
+    if ( settings.getBoolean("is_first_run").get() != null && settings.getBoolean("is_first_run").get() ){
+      settings.getBoolean("is_first_run").set(false);
     }
 
     EventBus.getDefault().post( new UpdateAllDocumentsEvent());
