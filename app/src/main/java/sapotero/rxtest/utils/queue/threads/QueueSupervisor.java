@@ -1,6 +1,7 @@
 package sapotero.rxtest.utils.queue.threads;
 
 import android.content.Context;
+import android.os.Handler;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -12,15 +13,15 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import sapotero.rxtest.db.requery.models.queue.QueueEntity;
+import sapotero.rxtest.managers.menu.factories.CommandFactory;
+import sapotero.rxtest.managers.menu.interfaces.Command;
+import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
+import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.utils.queue.interfaces.JobCountInterface;
 import sapotero.rxtest.utils.queue.threads.handlers.ThreadRejectedExecutionHandler;
 import sapotero.rxtest.utils.queue.threads.producers.LocalCommandProducer;
 import sapotero.rxtest.utils.queue.threads.producers.RemoteCommandProducer;
 import sapotero.rxtest.utils.queue.threads.utils.SuperVisor;
-import sapotero.rxtest.managers.menu.factories.CommandFactory;
-import sapotero.rxtest.managers.menu.interfaces.Command;
-import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
-import sapotero.rxtest.managers.menu.utils.CommandParams;
 import timber.log.Timber;
 
 public class QueueSupervisor implements JobCountInterface {
@@ -48,9 +49,9 @@ public class QueueSupervisor implements JobCountInterface {
 
     commandPool = new ThreadPoolExecutor(THREAD_POOL_SIZE, 10, 10*60, TimeUnit.SECONDS, new ArrayBlockingQueue<>(THREAD_POOL_SIZE), threadFactory, rejectionHandler);
 
-    SuperVisor monitor   = new SuperVisor(commandPool, 1);
-    Thread monitorThread = new Thread(monitor);
-    monitorThread.start();
+    Handler handler = new Handler();
+    handler.postDelayed(new SuperVisor(commandPool, handler), 1000);
+
   }
 
   public Command create(QueueEntity task){

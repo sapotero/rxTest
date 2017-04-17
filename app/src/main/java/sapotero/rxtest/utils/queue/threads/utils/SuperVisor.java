@@ -1,54 +1,33 @@
 package sapotero.rxtest.utils.queue.threads.utils;
 
-import java.util.Calendar;
+import android.os.Handler;
+
 import java.util.concurrent.ThreadPoolExecutor;
 
 import timber.log.Timber;
 
 public class SuperVisor implements Runnable
 {
+  private final Handler handler;
   private ThreadPoolExecutor executor;
 
-  private int seconds;
-
-  private boolean run=true;
-
-  public SuperVisor(ThreadPoolExecutor executor, int delay)
-  {
+  public SuperVisor(ThreadPoolExecutor executor, Handler handler){
     this.executor = executor;
-    this.seconds=delay;
-  }
-
-  public void shutdown(){
-    this.run=false;
+    this.handler  = handler;
   }
 
   @Override
   public void run() {
-    while(run){
-      Calendar calendar = Calendar.getInstance();
+    Timber.e("[monitor] [%d/%d] Active: %d, Completed: %d, Task: %d, isShutdown: %s, isTerminated: %s",
+      this.executor.getPoolSize(),
+      this.executor.getCorePoolSize(),
+      this.executor.getActiveCount(),
+      this.executor.getCompletedTaskCount(),
+      this.executor.getTaskCount(),
+      this.executor.isShutdown(),
+      this.executor.isTerminated()
+    );
 
-      // печатаем каждые 5 сек
-      if ( calendar.get(Calendar.SECOND) % 5 == 0 ){
-        Timber.e("[monitor] [%d/%d] Active: %d, Completed: %d, Task: %d, isShutdown: %s, isTerminated: %s",
-          this.executor.getPoolSize(),
-          this.executor.getCorePoolSize(),
-          this.executor.getActiveCount(),
-          this.executor.getCompletedTaskCount(),
-          this.executor.getTaskCount(),
-          this.executor.isShutdown(),
-          this.executor.isTerminated()
-        );
-      }
-
-
-      try {
-        Thread.sleep(seconds*1000);
-//        EventBus.getDefault().post(new SuperVisorUpdateEvent());
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
-    }
-
+    handler.postDelayed(this, 1000);
   }
 }
