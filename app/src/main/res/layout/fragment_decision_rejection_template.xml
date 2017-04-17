@@ -22,11 +22,17 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Резолюция-"
-            android:textSize="16sp"
-            android:fontFamily="sans-serif-light"
-            android:gravity="center"
-            android:layout_gravity="center"
+            android:paddingTop="24dp"
+            android:paddingBottom="8sp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:textColor="@color/md_grey_800"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:fontFamily="sans-serif"
+            android:textStyle="normal"
+            android:textSize="24sp"
+            android:text="Шаблоны отклонения"
             />
 
         <android.support.v7.widget.RecyclerView
