@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.DataSetObserver;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -121,6 +122,13 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
       dialog.setOnShowListener(dialogInterface -> {
         neutralButton = ((AlertDialog) dialogInterface).getButton(AlertDialog.BUTTON_NEUTRAL);
         updateNeutralButtonText();
+        neutralButton.setTextColor(Color.BLACK);
+
+        Button positiveButton = ((AlertDialog) dialogInterface).getButton(AlertDialog.BUTTON_POSITIVE);
+        positiveButton.setTextColor(Color.BLACK);
+
+        Button negativeButton = ((AlertDialog) dialogInterface).getButton(AlertDialog.BUTTON_NEGATIVE);
+        negativeButton.setTextColor(Color.BLACK);
 
         // Override neutral button handler to prevent dialog from closing
         neutralButton.setOnClickListener(view -> {
