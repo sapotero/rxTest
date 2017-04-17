@@ -87,16 +87,18 @@ public class DecisionConverter {
   }
 
   public static String formatTemporaryName(String name){
-
     Timber.tag("DecisionConverter").e("formatTemporaryName %s", name);
+
     try {
-      String[] split = name.split(" ");
-
-      Timber.tag("DecisionConverter").e("split %s", Arrays.asList(split));
-
-      if (split.length >= 1 ){
-        name = String.format("%s %s", split[2], split[1] );
+      // Delete organization (text within "()")from name, if exists
+      int startIndex = name.indexOf("(");
+      if (startIndex != -1) {
+        String toBeReplaced = name.substring(startIndex);
+        name = name.replace(toBeReplaced, "");
       }
+
+      name = formatName(name);
+
     } catch (Exception error) {
       Timber.tag("DecisionConverter").e(error);
     }
