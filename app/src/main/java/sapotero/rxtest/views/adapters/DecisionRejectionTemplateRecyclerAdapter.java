@@ -9,15 +9,15 @@ import android.widget.TextView;
 import java.util.List;
 
 import sapotero.rxtest.R;
+import sapotero.rxtest.db.requery.models.RRejectionTemplateEntity;
 import sapotero.rxtest.views.fragments.DecisionRejectionTemplateFragment;
-import sapotero.rxtest.views.fragments.dummy.DummyContent.DummyItem;
 
-public class DecisionRejectionTemplateRecyclerViewAdapter extends RecyclerView.Adapter<DecisionRejectionTemplateRecyclerViewAdapter.ViewHolder> {
+public class DecisionRejectionTemplateRecyclerAdapter extends RecyclerView.Adapter<DecisionRejectionTemplateRecyclerAdapter.ViewHolder> {
 
-  private final List<DummyItem> mValues;
+  private final List<RRejectionTemplateEntity> mValues;
   private final DecisionRejectionTemplateFragment.OnListFragmentInteractionListener mListener;
 
-  public DecisionRejectionTemplateRecyclerViewAdapter(List<DummyItem> items, DecisionRejectionTemplateFragment.OnListFragmentInteractionListener listener) {
+  public DecisionRejectionTemplateRecyclerAdapter(List<RRejectionTemplateEntity> items, DecisionRejectionTemplateFragment.OnListFragmentInteractionListener listener) {
     mValues = items;
     mListener = listener;
   }
@@ -30,9 +30,11 @@ public class DecisionRejectionTemplateRecyclerViewAdapter extends RecyclerView.A
 
   @Override
   public void onBindViewHolder(final ViewHolder holder, int position) {
-    holder.mItem = mValues.get(position);
-    holder.mIdView.setText(mValues.get(position).id);
-    holder.mContentView.setText(mValues.get(position).content);
+    RRejectionTemplateEntity item = mValues.get(position);
+
+    holder.mItem = item;
+    holder.mIdView.setText( item.getId() );
+    holder.mContentView.setText( item.getTitle() );
 
     holder.mView.setOnClickListener(v -> {
       if (null != mListener) {
@@ -46,11 +48,16 @@ public class DecisionRejectionTemplateRecyclerViewAdapter extends RecyclerView.A
     return mValues.size();
   }
 
+  public void addItem(RRejectionTemplateEntity tmp) {
+    mValues.add(tmp);
+    notifyItemInserted(mValues.size());
+  }
+
   public class ViewHolder extends RecyclerView.ViewHolder {
     public final View mView;
     public final TextView mIdView;
     public final TextView mContentView;
-    public DummyItem mItem;
+    public RRejectionTemplateEntity mItem;
 
     public ViewHolder(View view) {
       super(view);

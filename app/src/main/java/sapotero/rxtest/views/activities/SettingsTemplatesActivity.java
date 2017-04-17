@@ -11,9 +11,10 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.models.RRejectionTemplateEntity;
+import sapotero.rxtest.db.requery.models.RTemplateEntity;
 import sapotero.rxtest.views.fragments.DecisionRejectionTemplateFragment;
 import sapotero.rxtest.views.fragments.DecisionTemplateFragment;
-import sapotero.rxtest.views.fragments.dummy.DummyContent;
 
 public class SettingsTemplatesActivity extends AppCompatActivity implements DecisionTemplateFragment.OnListFragmentInteractionListener, DecisionRejectionTemplateFragment.OnListFragmentInteractionListener {
 
@@ -65,22 +66,6 @@ public class SettingsTemplatesActivity extends AppCompatActivity implements Deci
 
   @Override protected void onResume() {
     super.onResume();
-//
-//      ArrayList<String> items = new ArrayList<>();
-//
-//
-//      List<RTemplateEntity> templates = dataStore
-//        .select(RTemplateEntity.class)
-//        .get().toList();
-//
-//      if (templates.size() > 0) {
-//        for (RTemplateEntity tmp : templates){
-//          items.add( tmp.getTitle() );
-//        }
-//      }
-//
-//    ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.list_black_text, items);
-//    decisions_list.setAdapter(adapter);
 
   }
 
@@ -89,7 +74,12 @@ public class SettingsTemplatesActivity extends AppCompatActivity implements Deci
   }
 
   @Override
-  public void onListFragmentInteraction(DummyContent.DummyItem item) {
+  public void onListFragmentInteraction(RTemplateEntity item) {
+
+  }
+
+  @Override
+  public void onListFragmentInteraction(RRejectionTemplateEntity item) {
 
   }
 }

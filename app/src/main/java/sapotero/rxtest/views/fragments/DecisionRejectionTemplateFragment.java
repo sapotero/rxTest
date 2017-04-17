@@ -3,42 +3,40 @@ package sapotero.rxtest.views.fragments;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.f2prateek.rx.preferences.RxSharedPreferences;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import io.requery.Persistable;
+import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.R;
-import sapotero.rxtest.views.adapters.DecisionRejectionTemplateRecyclerViewAdapter;
-import sapotero.rxtest.views.fragments.dummy.DummyContent;
-import sapotero.rxtest.views.fragments.dummy.DummyContent.DummyItem;
+import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.models.RRejectionTemplateEntity;
+import sapotero.rxtest.views.adapters.DecisionRejectionTemplateRecyclerAdapter;
 
 public class DecisionRejectionTemplateFragment extends Fragment {
+  @Inject RxSharedPreferences settings;
+  @Inject SingleEntityStore<Persistable> dataStore;
 
-  private static final String ARG_COLUMN_COUNT = "column-count";
-  private int mColumnCount = 1;
   private OnListFragmentInteractionListener mListener;
+  private DecisionRejectionTemplateRecyclerAdapter adapter;
 
   public DecisionRejectionTemplateFragment() {
-  }
-
-  public static DecisionRejectionTemplateFragment newInstance(int columnCount) {
-    DecisionRejectionTemplateFragment fragment = new DecisionRejectionTemplateFragment();
-    Bundle args = new Bundle();
-    args.putInt(ARG_COLUMN_COUNT, columnCount);
-    fragment.setArguments(args);
-    return fragment;
   }
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    if (getArguments() != null) {
-      mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
-    }
   }
 
   @Override
@@ -46,16 +44,30 @@ public class DecisionRejectionTemplateFragment extends Fragment {
     View view = inflater.inflate(R.layout.fragment_decision_rejection_template, container, false);
 
     Context context = view.getContext();
+    EsdApplication.getComponent(getContext()).inject( this );
+
     RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.fragment_rejection_decision_template_list);
+    recyclerView.setLayoutManager(new LinearLayoutManager(context));
+    adapter = new DecisionRejectionTemplateRecyclerAdapter( new ArrayList<>(), mListener);
 
-    if (mColumnCount <= 1) {
-      recyclerView.setLayoutManager(new LinearLayoutManager(context));
-    } else {
-      recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
-    }
+    populateAdapter();
 
-    recyclerView.setAdapter(new DecisionRejectionTemplateRecyclerViewAdapter(DummyContent.ITEMS, mListener));
+    recyclerView.setAdapter(adapter);
     return view;
+  }
+
+  private void populateAdapter() {
+
+    List<RRejectionTemplateEntity> templates = dataStore
+      .select(RRejectionTemplateEntity.class)
+      .where(RRejectionTemplateEntity.USER.eq( settings.getString("current_user").get() ))
+      .get().toList();
+
+    if (templates.size() > 0) {
+      for (RRejectionTemplateEntity tmp : templates){
+        adapter.addItem( tmp );
+      }
+    }
   }
 
 
@@ -76,7 +88,6 @@ public class DecisionRejectionTemplateFragment extends Fragment {
     mListener = null;
   }
   public interface OnListFragmentInteractionListener {
-    // TODO: Update argument type and name
-    void onListFragmentInteraction(DummyItem item);
+    void onListFragmentInteraction(RRejectionTemplateEntity item);
   }
 }

@@ -9,15 +9,15 @@ import android.widget.TextView;
 import java.util.List;
 
 import sapotero.rxtest.R;
+import sapotero.rxtest.db.requery.models.RTemplateEntity;
 import sapotero.rxtest.views.fragments.DecisionTemplateFragment;
-import sapotero.rxtest.views.fragments.dummy.DummyContent.DummyItem;
 
-public class DecisionTemplateRecyclerViewAdapter extends RecyclerView.Adapter<DecisionTemplateRecyclerViewAdapter.ViewHolder> {
+public class DecisionTemplateRecyclerAdapter extends RecyclerView.Adapter<DecisionTemplateRecyclerAdapter.ViewHolder> {
 
-  private final List<DummyItem> mValues;
+  private final List<RTemplateEntity> mValues;
   private final DecisionTemplateFragment.OnListFragmentInteractionListener mListener;
 
-  public DecisionTemplateRecyclerViewAdapter(List<DummyItem> items, DecisionTemplateFragment.OnListFragmentInteractionListener mListener) {
+  public DecisionTemplateRecyclerAdapter(List<RTemplateEntity> items, DecisionTemplateFragment.OnListFragmentInteractionListener mListener) {
     this.mValues = items;
     this.mListener = mListener;
   }
@@ -30,15 +30,21 @@ public class DecisionTemplateRecyclerViewAdapter extends RecyclerView.Adapter<De
 
   @Override
   public void onBindViewHolder(final ViewHolder holder, int position) {
-    holder.mItem = mValues.get(position);
-    holder.mIdView.setText(mValues.get(position).id);
-    holder.mContentView.setText(mValues.get(position).content);
 
-    holder.mView.setOnClickListener(v -> {
-      if (null != mListener) {
-        mListener.onListFragmentInteraction(holder.mItem);
-      }
-    });
+    RTemplateEntity item = mValues.get(position);
+
+    if (item != null) {
+      holder.mItem = item;
+      holder.mIdView.setText(item.getUser());
+      holder.mContentView.setText(item.getTitle());
+
+      holder.mView.setOnClickListener(v -> {
+        if (null != mListener) {
+          mListener.onListFragmentInteraction(holder.mItem);
+        }
+      });
+    }
+
   }
 
   @Override
@@ -46,11 +52,16 @@ public class DecisionTemplateRecyclerViewAdapter extends RecyclerView.Adapter<De
     return mValues.size();
   }
 
+  public void addItem(RTemplateEntity tmp) {
+    mValues.add(tmp);
+    notifyItemInserted(mValues.size());
+  }
+
   public class ViewHolder extends RecyclerView.ViewHolder {
     public final View mView;
     public final TextView mIdView;
     public final TextView mContentView;
-    public DummyItem mItem;
+    public RTemplateEntity mItem;
 
     public ViewHolder(View view) {
       super(view);
