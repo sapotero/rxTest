@@ -18,7 +18,6 @@
         android:orientation="vertical">
 
         <LinearLayout
-            android:id="@+id/swipe_layout_title_wrapper"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -144,7 +143,6 @@
             android:background="@color/md_grey_200" />
 
         <LinearLayout
-            android:id="@+id/swipe_layout_date_wrapper"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

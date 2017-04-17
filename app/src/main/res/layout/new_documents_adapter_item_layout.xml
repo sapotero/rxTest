@@ -17,6 +17,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:clickable="true"
+            android:padding="@dimen/date_offset"
             android:foreground="@drawable/card_foreground"
             >
 
@@ -26,29 +27,19 @@
                 android:layout_alignParentEnd="true">
 
                 <TextView
-                    android:id="@+id/favorite_label"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentTop="true"
-                    android:text="@string/favorites"
-                    android:textColor="@color/md_white_1000"
-                    android:gravity="top|end"
-                    android:paddingTop="0dp"
-                    android:paddingRight="4dp"
-                    android:textSize="24sp"
-                    android:background="@drawable/badge_favorite" />
-
-                <TextView
-                    android:id="@+id/swipe_layout_title"
-                    android:layout_width="fill_parent"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="16dp"
-                    android:textAppearance="?android:attr/textAppearanceLarge"
-                    android:layout_alignParentTop="true"
-                    android:layout_alignParentStart="true"
+                    android:paddingTop="24dp"
+                    android:paddingBottom="8sp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:textColor="@color/md_grey_800"
                     android:maxLines="2"
                     android:ellipsize="end"
+                    android:fontFamily="sans-serif"
+                    android:textStyle="normal"
+                    android:textSize="24sp"
+                    android:text="Шаблоны резолюции"
                     />
 
 

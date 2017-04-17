@@ -22,7 +22,6 @@
             android:text="Причина отклонения документа"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/textView6"
             android:textAppearance="@style/TextAppearance.AppCompat.Headline"/>
 
         <EditText
@@ -31,7 +30,6 @@
             android:ems="5"
             android:lines="5"
             android:hint="..."
-            android:id="@+id/editText"
             android:layout_width="match_parent"/>
 
     </LinearLayout>
