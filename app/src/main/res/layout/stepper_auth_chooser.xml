@@ -23,7 +23,6 @@
             android:text="@string/auth_attention"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/textView"
             android:padding="@dimen/half_date_offset"
             android:textAppearance="@style/TextAppearance.AppCompat.Headline"/>
 

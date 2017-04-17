@@ -184,7 +184,6 @@
             <ImageView
                 android:layout_width="100dp"
                 android:layout_height="100dp"
-                android:id="@+id/edit"
                 android:visibility="gone"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentEnd="true"/>

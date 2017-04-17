@@ -91,7 +91,6 @@
                     tools:ignore="UselessParent">
 
                     <View
-                        android:id="@+id/search_divider"
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/searchview_height_divider"
                         android:background="@color/searchview_divider"/>
