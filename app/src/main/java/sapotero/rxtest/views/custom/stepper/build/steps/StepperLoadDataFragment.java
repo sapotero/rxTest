@@ -119,7 +119,7 @@ public class StepperLoadDataFragment extends Fragment implements Step {
   @Override
   public VerificationError verifyStep() {
     if (error != null) {
-      Toast.makeText( getContext(), error.getErrorMessage(), Toast.LENGTH_SHORT ).show();
+//      Toast.makeText( getContext(), error.getErrorMessage(), Toast.LENGTH_SHORT ).show();
     }
 
     if ( !IS_CONNECTED.get() ){
@@ -160,7 +160,7 @@ public class StepperLoadDataFragment extends Fragment implements Step {
     Timber.tag(TAG).d("login fail");
 
     if (event.error != null) {
-      Toast.makeText( getContext(), event.error, Toast.LENGTH_SHORT ).show();
+//      Toast.makeText( getContext(), event.error, Toast.LENGTH_SHORT ).show();
     }
   }
 

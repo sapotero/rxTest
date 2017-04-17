@@ -250,7 +250,7 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
   /* Stepper */
   @Override
   public void onCompleted(View completeButton) {
-    Toast.makeText( getApplicationContext(), "onCompleted", Toast.LENGTH_SHORT ).show();
+//    Toast.makeText( getApplicationContext(), "onCompleted", Toast.LENGTH_SHORT ).show();
 
 
     Intent intent = new Intent(this, MainActivity.class);
@@ -264,17 +264,17 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
 
   @Override
   public void onError(VerificationError verificationError) {
-    Toast.makeText( getApplicationContext(), "onError", Toast.LENGTH_SHORT ).show();
+//    Toast.makeText( getApplicationContext(), "onError", Toast.LENGTH_SHORT ).show();
   }
 
   @Override
   public void onStepSelected(int newStepPosition) {
-    Toast.makeText( getApplicationContext(), "onStepSelected", Toast.LENGTH_SHORT ).show();
+//    Toast.makeText( getApplicationContext(), "onStepSelected", Toast.LENGTH_SHORT ).show();
   }
 
   @Override
   public void onReturn() {
-    Toast.makeText( getApplicationContext(), "onReturn", Toast.LENGTH_SHORT ).show();
+//    Toast.makeText( getApplicationContext(), "onReturn", Toast.LENGTH_SHORT ).show();
   }
 
 

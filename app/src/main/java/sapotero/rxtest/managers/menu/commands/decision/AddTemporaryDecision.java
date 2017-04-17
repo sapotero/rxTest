@@ -129,7 +129,8 @@ public class AddTemporaryDecision extends AbstractCommand {
       String name = null;
 
       try {
-        name = DecisionConverter.formatTemporaryName(dec.getSignerText());
+
+        name = DecisionConverter.formatName(dec.getSignerText());
       } catch (Exception e) {
         e.printStackTrace();
       }

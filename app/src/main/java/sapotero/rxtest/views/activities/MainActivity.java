@@ -443,7 +443,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     Intent serviceIntent = new Intent(this, MainService.class);
     if(startService(serviceIntent) != null) {
-      Toast.makeText(getBaseContext(), "Service is already running", Toast.LENGTH_SHORT).show();
+//      Toast.makeText(getBaseContext(), "Service is already running", Toast.LENGTH_SHORT).show();
     } else {
       EventBus.getDefault().post(new SuperVisorUpdateEvent());
     }
@@ -721,7 +721,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   @Subscribe(threadMode = ThreadMode.BACKGROUND)
   public void onMessageEvent(GetDocumentInfoEvent event) {
-    Toast.makeText(getApplicationContext(), event.message, Toast.LENGTH_SHORT).show();
+//    Toast.makeText(getApplicationContext(), event.message, Toast.LENGTH_SHORT).show();
   }
 
 //  @Subscribe(threadMode = ThreadMode.MAIN)

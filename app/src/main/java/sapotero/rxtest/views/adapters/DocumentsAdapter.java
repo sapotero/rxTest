@@ -1,13 +1,10 @@
 package sapotero.rxtest.views.adapters;
 
 import android.annotation.SuppressLint;
-import android.app.Notification;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -18,7 +15,6 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
@@ -355,7 +351,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       activity.startActivity(intent);
 //      activity.overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
 
-      Toast.makeText(mContext, " onClick : " + item.getMd5() + " \n" + item.getTitle(), Toast.LENGTH_SHORT).show();
+//      Toast.makeText(mContext, " onClick : " + item.getMd5() + " \n" + item.getTitle(), Toast.LENGTH_SHORT).show();
 //      viewHolder.swipeLayout.close(true);
     });
 
@@ -366,24 +362,24 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
 
 //      String _title = documentManager.getDocument(item.getUid()).getTitle();
-      String _title = manager.get(item.getUid()).getTitle();
-      Timber.e("title : %s", _title);
-
-      Notification builder =
-        new NotificationCompat.Builder(mContext)
-          .setSmallIcon( R.drawable.gerb )
-          .setContentTitle("Уведомление")
-          .setContentText("Добавлена резолюция к документу " + item.getUid() )
-          .setDefaults(Notification.DEFAULT_ALL)
-          .setCategory(Notification.CATEGORY_MESSAGE)
-          .setPriority(NotificationCompat.PRIORITY_HIGH)
-          .addAction( 1 , "Утвердить", null)
-          .addAction( 0 ,  "Отклонить", null)
-          .build();
-
-      NotificationManager notificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
-      notificationManager.notify(0, builder);
-
+//      String _title = manager.get(item.getUid()).getTitle();
+//      Timber.e("title : %s", _title);
+//
+//      Notification builder =
+//        new NotificationCompat.Builder(mContext)
+//          .setSmallIcon( R.drawable.gerb )
+//          .setContentTitle("Уведомление")
+//          .setContentText("Добавлена резолюция к документу " + item.getUid() )
+//          .setDefaults(Notification.DEFAULT_ALL)
+//          .setCategory(Notification.CATEGORY_MESSAGE)
+//          .setPriority(NotificationCompat.PRIORITY_HIGH)
+//          .addAction( 1 , "Утвердить", null)
+//          .addAction( 0 ,  "Отклонить", null)
+//          .build();
+//
+//      NotificationManager notificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+//      notificationManager.notify(0, builder);
+//
       return true;
     });
 

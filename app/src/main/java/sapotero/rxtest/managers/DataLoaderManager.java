@@ -526,8 +526,7 @@ public class DataLoaderManager {
                 for (Document doc: data.getDocuments() ) {
 
                   jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), code) );
-//                  if ( !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) ){
-//                  }
+
 
                 }
               }
@@ -537,6 +536,8 @@ public class DataLoaderManager {
             })
       );
     }
+
+//    updateFavoritesAndProcessed();
   }
 
   private boolean isDocumentMd5Changed(String uid, String md5) {
@@ -656,11 +657,11 @@ public class DataLoaderManager {
       .and(RFolderEntity.USER.eq( settings.getString("current_user").get() ))
       .get().firstOrNull();
 
-    RFolderEntity processed_folder = dataStore
-      .select(RFolderEntity.class)
-      .where(RFolderEntity.TYPE.eq("processed"))
-      .and(RFolderEntity.USER.eq( settings.getString("current_user").get() ))
-      .get().firstOrNull();
+//    RFolderEntity processed_folder = dataStore
+//      .select(RFolderEntity.class)
+//      .where(RFolderEntity.TYPE.eq("processed"))
+//      .and(RFolderEntity.USER.eq( settings.getString("current_user").get() ))
+//      .get().firstOrNull();
 
 //    if (processed_folder != null) {
 //      subscription.add(
@@ -691,7 +692,11 @@ public class DataLoaderManager {
               if ( data.getDocuments().size() > 0 ) {
                 Timber.tag("FAVORITES").e("DOCUMENTS COUNT: %s", data.getDocuments().size() );
                 for (Document doc : data.getDocuments()) {
-                  jobManager.addJobInBackground(new UpdateFavoritesDocumentsJob(doc.getUid(), favorites_folder.getUid() ) );
+
+                  if ( !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) ){
+                    jobManager.addJobInBackground(new UpdateFavoritesDocumentsJob(doc.getUid(), favorites_folder.getUid() ) );
+                  }
+
                 }
               }
             }, error -> {
