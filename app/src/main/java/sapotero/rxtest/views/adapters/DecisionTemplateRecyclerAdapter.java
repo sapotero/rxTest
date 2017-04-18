@@ -11,7 +11,6 @@ import java.util.List;
 import sapotero.rxtest.R;
 import sapotero.rxtest.db.requery.models.RTemplateEntity;
 import sapotero.rxtest.views.fragments.DecisionTemplateFragment;
-import timber.log.Timber;
 
 public class DecisionTemplateRecyclerAdapter extends RecyclerView.Adapter<DecisionTemplateRecyclerAdapter.ViewHolder> {
 
@@ -39,14 +38,16 @@ public class DecisionTemplateRecyclerAdapter extends RecyclerView.Adapter<Decisi
 //      holder.mIdView.setText(item.getType());
       holder.mContentView.setText(item.getTitle());
 
-      holder.mView.setOnClickListener(v -> {
+//      holder.mView.setOnClickListener(v -> {
+//        if (null != mListener) {
+//          mListener.onListFragmentInteraction(holder.mItem);
+//        }
+//      });
+
+      holder.mView.setOnLongClickListener(view -> {
         if (null != mListener) {
           mListener.onListFragmentInteraction(holder.mItem);
         }
-      });
-
-      holder.mView.setOnLongClickListener(view -> {
-        Timber.e("sd");
         return false;
       });
     }

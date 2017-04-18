@@ -22,6 +22,6 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/text_margin"
         android:gravity="center_vertical"
-        android:text="@string/decision_template_refresf"
+        android:text="@string/decision_template_refresh"
         android:textAppearance="?attr/textAppearanceListItem"/>
 </LinearLayout>

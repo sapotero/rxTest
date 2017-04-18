@@ -10,13 +10,11 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import sapotero.rxtest.db.requery.models.RTemplateEntity;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.TemplatesService;
 import sapotero.rxtest.retrofit.models.Template;
-import timber.log.Timber;
 
 public class UpdateTemplate extends AbstractCommand {
 
@@ -56,7 +54,7 @@ public class UpdateTemplate extends AbstractCommand {
 
   @Override
   public String getType() {
-    return "create_template";
+    return "update_template";
   }
 
   @Override
@@ -83,11 +81,11 @@ public class UpdateTemplate extends AbstractCommand {
 
     TemplatesService templatesService = retrofit.create( TemplatesService.class );
 
-    Observable<Template> info = templatesService.create(
+    Observable<Template> info = templatesService.update(
+      params.getUuid(),
       LOGIN.get(),
       TOKEN.get(),
-      params.getComment(),
-      params.getLabel()
+      params.getComment()
     );
 
     info
@@ -96,8 +94,6 @@ public class UpdateTemplate extends AbstractCommand {
       .subscribe(
         data -> {
           queueManager.setExecutedRemote(this);
-
-          insertTemplate(data);
         },
         error -> {
           if (callback != null){
@@ -106,30 +102,6 @@ public class UpdateTemplate extends AbstractCommand {
         }
       );
   }
-
-  private void insertTemplate(Template data) {
-
-    RTemplateEntity template = new RTemplateEntity();
-    template.setUid(data.getId());
-    template.setType(data.getType());
-    template.setTitle(data.getText());
-    template.setUser(LOGIN.get());
-
-    dataStore
-      .insert(template)
-      .toObservable()
-      .subscribeOn( Schedulers.computation() )
-      .observeOn( AndroidSchedulers.mainThread() )
-      .subscribe(
-        temp -> {
-          Timber.tag(TAG).i("success");
-        },
-        error -> {
-          Timber.tag(TAG).e(error);
-        }
-      );
-  }
-
 
   @Override
   public void withParams(CommandParams params) {

@@ -16,7 +16,6 @@ import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.TemplatesService;
 import sapotero.rxtest.retrofit.models.Template;
-import timber.log.Timber;
 
 public class RemoveTemplate extends AbstractCommand {
 
@@ -56,7 +55,7 @@ public class RemoveTemplate extends AbstractCommand {
 
   @Override
   public String getType() {
-    return "create_template";
+    return "remove_template";
   }
 
   @Override
@@ -83,11 +82,10 @@ public class RemoveTemplate extends AbstractCommand {
 
     TemplatesService templatesService = retrofit.create( TemplatesService.class );
 
-    Observable<Template> info = templatesService.create(
+    Observable<Template> info = templatesService.remove(
+      params.getUuid(),
       LOGIN.get(),
-      TOKEN.get(),
-      params.getComment(),
-      params.getLabel()
+      TOKEN.get()
     );
 
     info
@@ -96,8 +94,7 @@ public class RemoveTemplate extends AbstractCommand {
       .subscribe(
         data -> {
           queueManager.setExecutedRemote(this);
-
-          insertTemplate(data);
+          remove(data);
         },
         error -> {
           if (callback != null){
@@ -107,27 +104,8 @@ public class RemoveTemplate extends AbstractCommand {
       );
   }
 
-  private void insertTemplate(Template data) {
-
-    RTemplateEntity template = new RTemplateEntity();
-    template.setUid(data.getId());
-    template.setType(data.getType());
-    template.setTitle(data.getText());
-    template.setUser(LOGIN.get());
-
-    dataStore
-      .insert(template)
-      .toObservable()
-      .subscribeOn( Schedulers.computation() )
-      .observeOn( AndroidSchedulers.mainThread() )
-      .subscribe(
-        temp -> {
-          Timber.tag(TAG).i("success");
-        },
-        error -> {
-          Timber.tag(TAG).e(error);
-        }
-      );
+  private void remove(Template data) {
+    dataStore.delete(RTemplateEntity.class).where(RTemplateEntity.UID.eq(data.getId())).get().value();
   }
 
 
