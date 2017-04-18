@@ -52,7 +52,7 @@ public class SelectTemplateDialogFragment extends DialogFragment implements View
 
     List<RTemplateEntity> templates = dataStore
       .select( RTemplateEntity.class)
-      .where(  RTemplateEntity.USER.eq( settings.getString("current_user").get() ))
+      .where(  RTemplateEntity.USER.eq( settings.getString("login").get() ))
       .get().toList();
 
     if (templates.size() > 0) {

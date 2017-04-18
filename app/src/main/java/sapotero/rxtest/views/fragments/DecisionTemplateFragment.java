@@ -17,12 +17,14 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.inject.Inject;
 
 import io.requery.Persistable;
+import io.requery.rx.RxResult;
 import io.requery.rx.SingleEntityStore;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RTemplateEntity;
@@ -41,6 +43,7 @@ public class DecisionTemplateFragment extends Fragment {
 
   private OnListFragmentInteractionListener mListener;
   private DecisionTemplateRecyclerAdapter adapter;
+  private String TAG = this.getClass().getSimpleName();
 
   public DecisionTemplateFragment() {
   }
@@ -135,16 +138,30 @@ public class DecisionTemplateFragment extends Fragment {
     adapter = new DecisionTemplateRecyclerAdapter(new ArrayList<>(), mListener);
     recyclerView.setAdapter(adapter);
 
-    List<RTemplateEntity> templates = dataStore
-      .select(RTemplateEntity.class)
-      .where(RTemplateEntity.USER.eq( settings.getString("current_user").get() ))
-      .get().toList();
 
-    if (templates.size() > 0) {
-      for (RTemplateEntity tmp : templates){
-        adapter.addItem( tmp );
-      }
-    }
+
+    dataStore
+      .select(RTemplateEntity.class)
+      .where(RTemplateEntity.USER.eq( settings.getString("login").get() ))
+      .get()
+      .toSelfObservable()
+      .toList()
+      .subscribeOn( Schedulers.computation() )
+      .observeOn( AndroidSchedulers.mainThread() )
+      .subscribe(
+        templates -> {
+          if (templates.size() > 0) {
+            for (RxResult<RTemplateEntity> tmp : templates){
+              adapter.addList( tmp );
+            }
+          }
+        },
+        error -> {
+          Timber.tag(TAG).e(error);
+        }
+      );
+
+
   }
 
 

@@ -3,6 +3,7 @@ package sapotero.rxtest.managers.menu.commands.templates;
 import android.content.Context;
 
 import com.f2prateek.rx.preferences.Preference;
+import com.google.gson.Gson;
 
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
@@ -122,6 +123,7 @@ public class CreateTemplate extends AbstractCommand {
       .subscribe(
         temp -> {
           Timber.tag(TAG).i("success");
+          Timber.tag(TAG).i("%s", new Gson().toJson(temp));
         },
         error -> {
           Timber.tag(TAG).e(error);

@@ -8,6 +8,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import io.requery.rx.RxResult;
 import sapotero.rxtest.R;
 import sapotero.rxtest.db.requery.models.RTemplateEntity;
 import sapotero.rxtest.views.fragments.DecisionTemplateFragment;
@@ -61,6 +62,15 @@ public class DecisionTemplateRecyclerAdapter extends RecyclerView.Adapter<Decisi
   public void addItem(RTemplateEntity tmp) {
     mValues.add(tmp);
     notifyItemInserted(mValues.size());
+  }
+
+  public void addList(RxResult<RTemplateEntity> list) {
+    mValues.clear();
+    notifyDataSetChanged();
+
+    for (RTemplateEntity tmp: list) {
+      addItem(tmp);
+    }
   }
 
   public class ViewHolder extends RecyclerView.ViewHolder {
