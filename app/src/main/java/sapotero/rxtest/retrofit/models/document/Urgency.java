@@ -3,7 +3,9 @@ package sapotero.rxtest.retrofit.models.document;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Urgency {
+import java.io.Serializable;
+
+public class Urgency implements Serializable {
 
   @SerializedName("_id")
   @Expose

@@ -246,7 +246,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
       WhereAndOr<RxResult<RPrimaryConsiderationEntity>> query = dataStore
         .select(RPrimaryConsiderationEntity.class)
         .where(RPrimaryConsiderationEntity.UID.ne( settings.getString("current_user_id").get() ))
-        .and(  RPrimaryConsiderationEntity.USER.eq( settings.getString("current_user").get() ));
+        .and(  RPrimaryConsiderationEntity.USER.eq( settings.getString("login").get() ));
 
       query.get()
         .toObservable()
@@ -261,7 +261,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
         dataStore
           .select(RFavoriteUserEntity.class)
           .where(RFavoriteUserEntity.UID.ne(""))
-          .and(  RFavoriteUserEntity.USER.eq( settings.getString("current_user").get() ));
+          .and(  RFavoriteUserEntity.USER.eq( settings.getString("login").get() ));
 
       if (user_ids != null){
         query = query.and(RFavoriteUserEntity.UID.notIn(user_ids));
