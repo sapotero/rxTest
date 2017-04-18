@@ -7,10 +7,13 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import java.util.ArrayList;
@@ -23,13 +26,18 @@ import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RTemplateEntity;
+import sapotero.rxtest.managers.menu.OperationManager;
+import sapotero.rxtest.managers.menu.factories.CommandFactory;
+import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.views.adapters.DecisionTemplateRecyclerAdapter;
 import sapotero.rxtest.views.adapters.decorators.DividerItemDecoration;
+import timber.log.Timber;
 
 public class DecisionTemplateFragment extends Fragment {
 
   @Inject RxSharedPreferences settings;
   @Inject SingleEntityStore<Persistable> dataStore;
+  @Inject OperationManager operationManager;
 
   private OnListFragmentInteractionListener mListener;
   private DecisionTemplateRecyclerAdapter adapter;
@@ -77,11 +85,42 @@ public class DecisionTemplateFragment extends Fragment {
 
   }
 
-  private void refresh() {
-    
+  private void addDecisionTemplateDialog() {
+    MaterialDialog add_dialog = new MaterialDialog.Builder(getContext())
+      .title(R.string.fragment_decision_template_add)
+      .inputType(
+        InputType.TYPE_CLASS_TEXT
+          | InputType.TYPE_TEXT_FLAG_MULTI_LINE
+          | InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE
+          | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT)
+      .input(R.string.fragment_decision_template_add_hint, R.string.dialog_empty_value,
+        (dialog, input) -> {
+          Timber.tag("ADD").e("asd");
+
+          if (input != null && input.length() > 0) {
+            dialog.getActionButton(DialogAction.POSITIVE).setEnabled(true);
+          }
+        })
+      .negativeText(R.string.constructor_close)
+      .onNegative((dialog, which) -> {
+        Timber.tag("-").e("asd");
+      })
+      .positiveText(R.string.constructor_save)
+      .onPositive((dialog, which) -> {
+
+        CommandFactory.Operation operation = CommandFactory.Operation.CREATE_AND_APPROVE_DECISION;
+        CommandParams params = new CommandParams();
+        operationManager.execute(operation, params);
+
+      })
+      .alwaysCallInputCallback()
+      .build();
+
+    add_dialog.getActionButton(DialogAction.POSITIVE).setEnabled(false);
+    add_dialog.show();
   }
 
-  private void addDecisionTemplateDialog() {
+  private void refresh() {
 
   }
 

@@ -425,6 +425,10 @@
     <string name="crashed">crash!</string>
     <string name="menu_info_decision_create_and_sign">Сохранить и подписать</string>
 
+    <string name="fragment_decision_template_add">Добавление шаблона</string>
+    <string name="fragment_decision_template_add_hint">Введите текст резолюции</string>
+    <string name="fragment_decision_template_add_prefill">Внимание!\nНеобходимо срочно исполнить!</string>
+
     <string-array name="IntentsCAAddressList">
         <item>http://www.cryptopro.ru/certsrv/</item>
         <item>https://www.cryptopro.ru:5555/ui/</item>
