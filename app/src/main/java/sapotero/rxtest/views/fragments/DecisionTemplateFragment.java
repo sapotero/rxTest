@@ -108,8 +108,9 @@ public class DecisionTemplateFragment extends Fragment {
       .positiveText(R.string.constructor_save)
       .onPositive((dialog, which) -> {
 
-        CommandFactory.Operation operation = CommandFactory.Operation.CREATE_AND_APPROVE_DECISION;
+        CommandFactory.Operation operation = CommandFactory.Operation.CREATE_DECISION_TEMPLATE;
         CommandParams params = new CommandParams();
+        params.setComment( dialog.getInputEditText().getText().toString() );
         operationManager.execute(operation, params);
 
       })
