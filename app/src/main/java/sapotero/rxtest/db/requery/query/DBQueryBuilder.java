@@ -183,32 +183,40 @@ public class DBQueryBuilder {
           .toObservable()
           .filter(documentEntity -> {
 
-            Boolean result = true;
+            boolean result = true;
 
             Timber.tag(TAG).w("filter: %s %s",
               organizationSelector.getSelected().length,
               organizationSelector.getAdapter().getCount()
             );
 
-            if ( organizationSelector.getSelected().length != organizationSelector.getAdapter().getCount() ){
-              // resolved https://tasks.n-core.ru/browse/MVDESD-12625
-              // *1) *Фильтр по организациям.
+            // resolved https://tasks.n-core.ru/browse/MVDESD-12625
+            // *1) *Фильтр по организациям.
 
-              String organization = documentEntity.getOrganization();
+            String organization = ((RSignerEntity) documentEntity.getSigner()).getOrganisation();
 
-              boolean[] selected_index = organizationSelector.getSelected();
+            boolean[] selected_index = organizationSelector.getSelected();
+
+            if (selected_index.length > 0) {
               ArrayList<String> ids = new ArrayList<>();
 
               for (int i = 0; i < selected_index.length; i++) {
-                if ( selected_index[i] ){
+                if ( selected_index[i] ) {
                   ids.add( organizationAdapter.getItem(i).getName() );
                 }
               }
 
-              if ( !ids.contains(organization) || !withFavorites && !documentEntity.isFavorites() ){
-                result = false;
+              boolean favorites;
+
+              if (documentEntity.isFavorites() != null) {
+                favorites = documentEntity.isFavorites();
+              } else {
+                favorites = false;
               }
 
+              if ( !ids.contains(organization) && !favorites ) {
+                result = false;
+              }
             }
 
             return result;
