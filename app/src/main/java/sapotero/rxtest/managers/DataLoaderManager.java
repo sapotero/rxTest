@@ -131,12 +131,25 @@ public class DataLoaderManager {
                   })
               );
 
+              // загрузка шаблонов резолюции
               subscription.add(
-                auth.getTemplates(LOGIN.get(), TOKEN.get())
+                auth.getTemplates(LOGIN.get(), TOKEN.get(), null)
                   .subscribeOn(Schedulers.io())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( templates -> {
-                    jobManager.addJobInBackground(new CreateTemplatesJob(templates));
+                    jobManager.addJobInBackground(new CreateTemplatesJob(templates, null));
+                  }, error -> {
+                    Timber.tag(TAG).e(error);
+                  })
+              );
+
+              // загрузка шаблонов отклонения
+              subscription.add(
+                auth.getTemplates(LOGIN.get(), TOKEN.get(), "rejection")
+                  .subscribeOn(Schedulers.io())
+                  .observeOn(AndroidSchedulers.mainThread())
+                  .subscribe( templates -> {
+                    jobManager.addJobInBackground(new CreateTemplatesJob(templates, "rejection"));
                   }, error -> {
                     Timber.tag(TAG).e(error);
                   })
