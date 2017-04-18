@@ -582,7 +582,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
 
     if (templates == null){
       templates = new SelectTemplateDialogFragment();
-      templates.setType("rejection");
+      templates.setType("decision");
       templates.registerCallBack( this );
     }
 

@@ -10,6 +10,7 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
@@ -31,6 +32,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
@@ -81,11 +83,12 @@ import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.adapters.DecisionSpinnerAdapter;
 import sapotero.rxtest.views.adapters.models.DecisionSpinnerItem;
 import sapotero.rxtest.views.dialogs.DecisionMagniferFragment;
+import sapotero.rxtest.views.dialogs.SelectTemplateDialogFragment;
 import timber.log.Timber;
 
 
 @SuppressLint("ValidFragment")
-public class InfoActivityDecisionPreviewFragment extends Fragment{
+public class InfoActivityDecisionPreviewFragment extends Fragment implements SelectTemplateDialogFragment.Callback{
 
   @Inject RxSharedPreferences settings;
   @Inject SingleEntityStore<Persistable> dataStore;
@@ -136,6 +139,9 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
   private String TAG = this.getClass().getSimpleName();
   private GestureDetector gestureDetector;
   private RDocumentEntity doc;
+  private InfoActivityDecisionPreviewFragment fragment;
+  private SelectTemplateDialogFragment templates;
+  private MaterialDialog.Builder prev_dialog;
 
   public InfoActivityDecisionPreviewFragment() {
   }
@@ -215,37 +221,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
 
     if ( settings.getBoolean("settings_view_show_comment_post").get() ){
 
-      MaterialDialog.Builder prev_dialog = new MaterialDialog.Builder( getContext() )
-        .content(R.string.decision_reject_body)
-        .cancelable(true)
-        .positiveText(R.string.yes)
-        .negativeText(R.string.no)
-        .onPositive((dialog1, which) -> {
-
-          CommandFactory.Operation operation =CommandFactory.Operation.REJECT_DECISION;
-
-          CommandParams commandParams = new CommandParams();
-          commandParams.setDecisionId( current_decision.getUid() );
-//          commandParams.setDecision( current_decision );
-          commandParams.setDecisionModel( DecisionConverter.formatDecision(current_decision) );
-          commandParams.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
-          commandParams.setComment( dialog1.getInputEditText().getText().toString() );
-
-          operationManager.execute(operation, commandParams);
-          updateAfteButtonPressed();
-          EventBus.getDefault().post( new ShowPrevDocumentEvent());
-        })
-        .autoDismiss(true);
-
-      // настройка
-      // Показывать комментарий при отклонении
-      if ( settings.getBoolean("settings_view_show_comment_post").get() ){
-        prev_dialog.inputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES )
-          .input(R.string.comment_hint, R.string.dialog_empty_value, (dialog12, input) -> {});
-      }
-
-
-      prev_dialog.build().show();
+      showPrevDialog(null);
 
     } else {
 
@@ -261,6 +237,61 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
       operationManager.execute(operation, params);
       updateAfteButtonPressed();
       EventBus.getDefault().post( new ShowPrevDocumentEvent());
+    }
+  }
+
+  private void showPrevDialog(String text) {
+    prev_dialog = new MaterialDialog.Builder( getContext() )
+      .content(R.string.decision_reject_body)
+      .cancelable(true)
+      .positiveText(R.string.yes)
+      .negativeText(R.string.no)
+      .onPositive((dialog1, which) -> {
+
+        CommandFactory.Operation operation =CommandFactory.Operation.REJECT_DECISION;
+
+        CommandParams commandParams = new CommandParams();
+        commandParams.setDecisionId( current_decision.getUid() );
+//          commandParams.setDecision( current_decision );
+        commandParams.setDecisionModel( DecisionConverter.formatDecision(current_decision) );
+        commandParams.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
+        commandParams.setComment( dialog1.getInputEditText().getText().toString() );
+
+        operationManager.execute(operation, commandParams);
+        updateAfteButtonPressed();
+        EventBus.getDefault().post( new ShowPrevDocumentEvent());
+      })
+      .autoDismiss(true);
+
+    // настройка
+    // Показывать комментарий при отклонении
+    if ( settings.getBoolean("settings_view_show_comment_post").get() ){
+      prev_dialog
+        .inputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES )
+        .input(R.string.comment_hint, R.string.dialog_empty_value, (dialog12, input) -> {})
+        .neutralText("Шаблон")
+        .onNeutral(new MaterialDialog.SingleButtonCallback() {
+          @Override
+          public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+
+            templates = new SelectTemplateDialogFragment();
+            templates.setType("rejection");
+            templates.registerCallBack( fragment );
+
+            templates.show( getActivity().getFragmentManager(), "SelectTemplateDialogFragment");
+          }
+        });
+    }
+
+
+
+    if ( text != null ){
+      MaterialDialog build = prev_dialog.build();
+      build.getInputEditText().setText(text);
+      build.show();
+    } else {
+      MaterialDialog build = prev_dialog.build();
+      build.show();
     }
   }
 
@@ -280,6 +311,14 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
   public void onResume() {
     super.onResume();
     invalidate();
+  }
+
+  @Override
+  public void onSelectTemplate(String template) {
+
+    showPrevDialog(template);
+
+    templates.dismiss();
   }
 
   public class GestureListener extends
@@ -340,6 +379,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
     EsdApplication.getComponent( getContext() ).inject(this);
     binder = ButterKnife.bind(this, view);
 
+    fragment = this;
     invalidate();
 
     return view;
