@@ -16,6 +16,7 @@ import sapotero.rxtest.retrofit.models.AuthSignToken;
 import sapotero.rxtest.retrofit.models.Folder;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.models.Template;
+import sapotero.rxtest.retrofit.models.document.Urgency;
 import sapotero.rxtest.retrofit.models.me.UserInfo;
 import sapotero.rxtest.retrofit.models.v2.v2UserOshs;
 
@@ -26,6 +27,13 @@ public interface AuthService {
     @Query("login") String username,
     @Query("auth_token") String token,
     @Query("head_id") String head
+  );
+
+  @GET("/v2/classifiers.json")
+  Observable<ArrayList<Urgency>> getUrgency(
+    @Query("login") String username,
+    @Query("auth_token") String token,
+    @Query("code") String code
   );
 
   @PUT("token/{username}.json")
@@ -82,4 +90,6 @@ public interface AuthService {
     @Query("login") String username,
     @Query("auth_token") String token
   );
+
+
 }

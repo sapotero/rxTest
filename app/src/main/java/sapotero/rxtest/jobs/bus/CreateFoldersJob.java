@@ -47,7 +47,7 @@ public class CreateFoldersJob extends BaseJob {
     data.setUid( template.getId() );
     data.setTitle( template.getTitle() );
     data.setType( template.getType() );
-    data.setUser( settings.getString("current_user").get() );
+    data.setUser( settings.getString("login").get() );
 
 
     dataStore

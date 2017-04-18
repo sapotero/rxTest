@@ -9,22 +9,22 @@ import com.birbit.android.jobqueue.RetryConstraint;
 
 import java.util.ArrayList;
 
+import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import sapotero.rxtest.db.requery.models.RAssistantEntity;
-import sapotero.rxtest.retrofit.models.Assistant;
+import sapotero.rxtest.db.requery.models.RUrgencyEntity;
+import sapotero.rxtest.retrofit.models.document.Urgency;
 import timber.log.Timber;
 
 
-public class CreateAssistantJob extends BaseJob {
+public class CreateUrgencyJob extends BaseJob {
 
   public static final int PRIORITY = 1;
-  private final ArrayList<Assistant> users;
-
+  private final ArrayList<Urgency> urgencies;
   private String TAG = this.getClass().getSimpleName();
 
-  public CreateAssistantJob(ArrayList<Assistant> users) {
+  public CreateUrgencyJob(ArrayList<Urgency> urgencies) {
     super( new Params(PRIORITY).requireNetwork().persist() );
-    this.users = users;
+    this.urgencies = urgencies;
   }
 
   @Override
@@ -33,22 +33,19 @@ public class CreateAssistantJob extends BaseJob {
 
   @Override
   public void onRun() throws Throwable {
-    for (Assistant user : users){
-      if ( !exist( user.getAssistantId()) ){
-        add(user);
+    for (Urgency urgency : urgencies){
+      if ( !exist( urgency.getId()) ){
+        add(urgency);
       }
     }
 
   }
 
-  private void add(Assistant user) {
-    RAssistantEntity data = new RAssistantEntity();
-    data.setTitle( user.getToS() );
-    data.setAssistantId( user.getAssistantId() );
-    data.setAssistantName( user.getAssistantName() );
-    data.setForDecision( user.getForDecision() );
-    data.setHeadId( user.getHeadId() );
-    data.setHeadName( user.getHeadName() );
+  private void add(Urgency urgency) {
+    RUrgencyEntity data = new RUrgencyEntity();
+    data.setUid( urgency.getId() );
+    data.setCode( urgency.getCode() );
+    data.setName( urgency.getName() );
     data.setUser( settings.getString("login").get() );
 
 
@@ -56,21 +53,21 @@ public class CreateAssistantJob extends BaseJob {
       .insert(data)
       .toObservable()
       .subscribeOn(Schedulers.computation())
-      .observeOn(Schedulers.computation())
+      .observeOn(AndroidSchedulers.mainThread())
       .subscribe(u -> {
-        Timber.tag(TAG).v("addByOne " + u.getTitle() );
+        Timber.tag(TAG).v("addByOne " + u.getName() );
       });
   }
 
 
   @NonNull
-  private Boolean exist(String id){
+  private Boolean exist(String uid){
 
     boolean result = false;
 
     Integer count = dataStore
-      .count(RAssistantEntity.ASSISTANT_ID)
-      .where(RAssistantEntity.ASSISTANT_ID.eq(id))
+      .count(RUrgencyEntity.UID)
+      .where(RUrgencyEntity.UID.eq(uid))
       .get().value();
 
     if( count != 0 ){
