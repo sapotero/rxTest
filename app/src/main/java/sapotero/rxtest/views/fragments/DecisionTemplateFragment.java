@@ -43,6 +43,7 @@ public class DecisionTemplateFragment extends Fragment {
   private OnListFragmentInteractionListener mListener;
   private DecisionTemplateRecyclerAdapter adapter;
   private String TAG = this.getClass().getSimpleName();
+  private String DECISION = "decision";
 
   public DecisionTemplateFragment() {
   }
@@ -113,6 +114,7 @@ public class DecisionTemplateFragment extends Fragment {
         CommandFactory.Operation operation = CommandFactory.Operation.CREATE_DECISION_TEMPLATE;
         CommandParams params = new CommandParams();
         params.setComment( dialog.getInputEditText().getText().toString() );
+        params.setLabel( DECISION );
         operationManager.execute(operation, params);
 
       })
@@ -142,6 +144,7 @@ public class DecisionTemplateFragment extends Fragment {
     dataStore
       .select(RTemplateEntity.class)
       .where(RTemplateEntity.USER.eq( settings.getString("login").get() ))
+      .and(RTemplateEntity.TYPE.eq(DECISION))
       .get()
       .toObservable()
       .toList()

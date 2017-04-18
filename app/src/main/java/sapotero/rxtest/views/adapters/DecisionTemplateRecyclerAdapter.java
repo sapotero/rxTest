@@ -36,7 +36,7 @@ public class DecisionTemplateRecyclerAdapter extends RecyclerView.Adapter<Decisi
 
     if (item != null) {
       holder.mItem = item;
-      holder.mIdView.setText(item.getType());
+//      holder.mIdView.setText(item.getType());
       holder.mContentView.setText(item.getTitle());
 
       holder.mView.setOnClickListener(v -> {
@@ -75,13 +75,13 @@ public class DecisionTemplateRecyclerAdapter extends RecyclerView.Adapter<Decisi
   public class ViewHolder extends RecyclerView.ViewHolder {
     RTemplateEntity mItem;
     final View mView;
-    final TextView mIdView;
+//    final TextView mIdView;
     final TextView mContentView;
 
     public ViewHolder(View view) {
       super(view);
       mView = view;
-      mIdView = (TextView) view.findViewById(R.id.id);
+//      mIdView = (TextView) view.findViewById(R.id.id);
       mContentView = (TextView) view.findViewById(R.id.content);
     }
 

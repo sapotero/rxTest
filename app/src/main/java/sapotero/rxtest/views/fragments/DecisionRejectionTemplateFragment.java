@@ -152,7 +152,7 @@ public class DecisionRejectionTemplateFragment extends Fragment {
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         templates -> {
-          Timber.tag(TAG).e("templates: %s", templates);
+          Timber.tag(TAG).e("rejection templates: %s", templates);
           if (templates.size() > 0) {
             adapter.addList( templates );
           }

@@ -5,6 +5,8 @@ import android.content.Context;
 import com.f2prateek.rx.preferences.Preference;
 import com.google.gson.Gson;
 
+import java.util.Objects;
+
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -62,13 +64,8 @@ public class CreateTemplate extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    loadSettings();
-
     queueManager.setExecutedLocal(this);
 
-    if ( callback != null ){
-      callback.onCommandExecuteSuccess( getType() );
-    }
   }
 
   @Override
@@ -84,11 +81,16 @@ public class CreateTemplate extends AbstractCommand {
 
     TemplatesService templatesService = retrofit.create( TemplatesService.class );
 
+    String type = null;
+    if ( params.getLabel() != null && !Objects.equals(params.getLabel(), "decision")){
+      type = params.getLabel();
+    }
+
     Observable<Template> info = templatesService.create(
       LOGIN.get(),
       TOKEN.get(),
       params.getComment(),
-      params.getLabel()
+      type
     );
 
     info
@@ -110,9 +112,14 @@ public class CreateTemplate extends AbstractCommand {
 
   private void insertTemplate(Template data) {
 
+    String type = null;
+    if ( params.getLabel() != null && !Objects.equals(params.getLabel(), "decision")){
+      type = params.getLabel();
+    }
+
     RTemplateEntity template = new RTemplateEntity();
     template.setUid(data.getId());
-    template.setType(data.getType());
+    template.setType(type);
     template.setTitle(data.getText());
     template.setUser(LOGIN.get());
 

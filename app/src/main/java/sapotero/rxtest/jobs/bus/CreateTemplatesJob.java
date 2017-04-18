@@ -19,12 +19,14 @@ public class CreateTemplatesJob extends BaseJob {
 
   public static final int PRIORITY = 1;
   private final ArrayList<Template> templates;
+  private final String type;
 
   private String TAG = this.getClass().getSimpleName();
 
-  public CreateTemplatesJob(ArrayList<Template> templates) {
+  public CreateTemplatesJob(ArrayList<Template> templates, String type) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.templates = templates;
+    this.type = type;
   }
 
   @Override
@@ -46,7 +48,7 @@ public class CreateTemplatesJob extends BaseJob {
     RTemplateEntity data = new RTemplateEntity();
     data.setUid( template.getId() );
     data.setTitle( template.getText() );
-    data.setType( template.getType() );
+    data.setType( type != null ? type : "decision");
     data.setUser( settings.getString("login").get() );
 
 
