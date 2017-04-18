@@ -246,6 +246,8 @@
 
     <!--<string name="decision_add_people">\u2000Добавить исполнителя</string>-->
     <string name="decision_add_people">Добавить исполнителя</string>
+    <string name="decision_template_add">Добавить шаблон</string>
+    <string name="decision_template_refresf">Обновить</string>
 
     <string name="request_permission_rationale">Запрашиваемые разрешения необходимы приложению для функционирования</string>
     <string name="request_permission_denied_notification">Пожалуйста, включите отклоненные разрешения в настройках системы</string>

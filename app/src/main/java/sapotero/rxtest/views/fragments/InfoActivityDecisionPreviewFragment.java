@@ -375,7 +375,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment{
 
   private void initToolBar() {
 
-    decision_toolbar.inflateMenu(R.menu.decision_preview_menu);
+    decision_toolbar.inflateMenu(R.menu.fragment_decision_preview_menu);
     decision_toolbar.setOnMenuItemClickListener(item -> {
       switch ( item.getItemId() ){
         case R.id.decision_preview_magnifer:
