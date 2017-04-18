@@ -8,7 +8,6 @@
     >
     <!--android:gravity="center"-->
     <ProgressBar
-        android:id="@+id/stepper_auth_progress"
         style="@style/Widget.AppCompat.ProgressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -28,7 +27,6 @@
 
 
         <LinearLayout
-            android:id="@+id/wrapper"
             android:alpha="1.0"
             android:background="@color/transparent"
             android:layout_width="wrap_content"

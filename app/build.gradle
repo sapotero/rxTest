@@ -16,7 +16,7 @@ android {
 
     dexOptions {
         preDexLibraries = false
-        additionalParameters=['--core-library']
+        additionalParameters = ['--core-library']
     }
 
     buildTypes {
@@ -176,7 +176,7 @@ dependencies {
     }
     compile 'com.android.support:preference-v14:25.2.0'
 
-        annotationProcessor 'com.google.dagger:dagger-compiler:2.6'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.6'
 
     compile 'com.davemorrissey.labs:subsampling-scale-image-view:3.6.0'
 
@@ -184,15 +184,12 @@ dependencies {
     compile 'com.github.barteksc:pdfium-android:1.6.0'
     compile 'com.afollestad.material-dialogs:core:0.9.1.0'
 
-
     // экран загрузки
     compile 'com.github.HotBitmapGG:RingProgressBar:V1.2.2'
 
     //searchView
     compile 'com.andkulikov:transitionseverywhere:1.6.2'
     compile 'com.github.johnkil.android-robototextview:robototextview:2.5.0'
-
-
 
     /*debug*/
     debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5'
@@ -217,6 +214,14 @@ dependencies {
     compile 'com.android.support:support-v4:25.2.0'
     compile 'com.android.support.test.espresso:espresso-core:2.2.2'
     compile 'com.android.support:appcompat-v7:25.2.0'
+}
+dependencies {
+    compile 'com.android.support:support-v4:25.+'
+    compile 'com.android.support:recyclerview-v7:25.+'
+}
+dependencies {
+    compile 'com.android.support:support-v4:25.+'
+    compile 'com.android.support:recyclerview-v7:25.+'
 }
 allprojects {
     repositories {
