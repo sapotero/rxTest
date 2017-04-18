@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import javax.inject.Inject;
 
 import io.requery.Persistable;
-import io.requery.rx.RxResult;
 import io.requery.rx.SingleEntityStore;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -144,16 +143,15 @@ public class DecisionTemplateFragment extends Fragment {
       .select(RTemplateEntity.class)
       .where(RTemplateEntity.USER.eq( settings.getString("login").get() ))
       .get()
-      .toSelfObservable()
+      .toObservable()
       .toList()
       .subscribeOn( Schedulers.computation() )
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         templates -> {
+          Timber.tag(TAG).e("templates: %s", templates);
           if (templates.size() > 0) {
-            for (RxResult<RTemplateEntity> tmp : templates){
-              adapter.addList( tmp );
-            }
+            adapter.addList( templates );
           }
         },
         error -> {

@@ -519,16 +519,16 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
         new SecondaryDrawerItem()
           .withName(R.string.drawer_item_settings_account)
           .withIcon(MaterialDesignIconic.Icon.gmi_accounts)
-          .withIdentifier(SETTINGS_VIEW)
+          .withIdentifier(SETTINGS_VIEW),
+        new SecondaryDrawerItem()
+          .withName(R.string.drawer_item_settings_templates)
+          .withIcon(MaterialDesignIconic.Icon.gmi_comment_edit)
+          .withIdentifier(SETTINGS_DECISION_TEMPLATES)
       );
 
     if (settings.getBoolean("debug_enabled").get()){
       drawer
         .addDrawerItems(
-          new SecondaryDrawerItem()
-            .withName(R.string.drawer_item_settings_templates)
-            .withIcon(MaterialDesignIconic.Icon.gmi_comment_edit)
-            .withIdentifier(SETTINGS_DECISION_TEMPLATES),
           new SectionDrawerItem().withName(R.string.drawer_item_debug),
           new SecondaryDrawerItem()
             .withIdentifier(SETTINGS_LOG)
