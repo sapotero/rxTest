@@ -9,38 +9,48 @@ import android.widget.TextView;
 import java.util.List;
 
 import sapotero.rxtest.R;
-import sapotero.rxtest.db.requery.models.RRejectionTemplateEntity;
+import sapotero.rxtest.db.requery.models.RTemplateEntity;
 import sapotero.rxtest.views.fragments.DecisionRejectionTemplateFragment;
+import timber.log.Timber;
 
 public class DecisionRejectionTemplateRecyclerAdapter extends RecyclerView.Adapter<DecisionRejectionTemplateRecyclerAdapter.ViewHolder> {
 
-  private final List<RRejectionTemplateEntity> mValues;
+  private final List<RTemplateEntity> mValues;
   private final DecisionRejectionTemplateFragment.OnListFragmentInteractionListener mListener;
 
-  public DecisionRejectionTemplateRecyclerAdapter(List<RRejectionTemplateEntity> items, DecisionRejectionTemplateFragment.OnListFragmentInteractionListener listener) {
-    mValues = items;
-    mListener = listener;
+  public DecisionRejectionTemplateRecyclerAdapter(List<RTemplateEntity> items, DecisionRejectionTemplateFragment.OnListFragmentInteractionListener mListener) {
+    this.mValues = items;
+    this.mListener = mListener;
   }
 
   @Override
   public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-    View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.fragment_decision_rejection_template_item, parent, false);
+    View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.fragment_decision_template_item, parent, false);
     return new ViewHolder(view);
   }
 
   @Override
   public void onBindViewHolder(final ViewHolder holder, int position) {
-    RRejectionTemplateEntity item = mValues.get(position);
 
-    holder.mItem = item;
-    holder.mIdView.setText( item.getId() );
-    holder.mContentView.setText( item.getTitle() );
+    RTemplateEntity item = mValues.get(position);
 
-    holder.mView.setOnClickListener(v -> {
-      if (null != mListener) {
-        mListener.onListFragmentInteraction(holder.mItem);
-      }
-    });
+    if (item != null) {
+      holder.mItem = item;
+      holder.mIdView.setText(item.getType());
+      holder.mContentView.setText(item.getTitle());
+
+      holder.mView.setOnClickListener(v -> {
+        if (null != mListener) {
+          mListener.onListFragmentInteraction(holder.mItem);
+        }
+      });
+
+      holder.mView.setOnLongClickListener(view -> {
+        Timber.e("sd");
+        return false;
+      });
+    }
+
   }
 
   @Override
@@ -48,16 +58,25 @@ public class DecisionRejectionTemplateRecyclerAdapter extends RecyclerView.Adapt
     return mValues.size();
   }
 
-  public void addItem(RRejectionTemplateEntity tmp) {
+  public void addItem(RTemplateEntity tmp) {
     mValues.add(tmp);
     notifyItemInserted(mValues.size());
   }
 
+  public void addList(List<RTemplateEntity> list) {
+    mValues.clear();
+    notifyDataSetChanged();
+    for (RTemplateEntity tmp: list) {
+      addItem(tmp);
+    }
+
+  }
+
   public class ViewHolder extends RecyclerView.ViewHolder {
-    public final View mView;
-    public final TextView mIdView;
-    public final TextView mContentView;
-    public RRejectionTemplateEntity mItem;
+    RTemplateEntity mItem;
+    final View mView;
+    final TextView mIdView;
+    final TextView mContentView;
 
     public ViewHolder(View view) {
       super(view);

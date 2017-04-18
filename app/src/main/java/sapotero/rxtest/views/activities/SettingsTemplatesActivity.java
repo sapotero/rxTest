@@ -11,7 +11,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.db.requery.models.RRejectionTemplateEntity;
 import sapotero.rxtest.db.requery.models.RTemplateEntity;
 import sapotero.rxtest.views.fragments.DecisionRejectionTemplateFragment;
 import sapotero.rxtest.views.fragments.DecisionTemplateFragment;
@@ -75,11 +74,6 @@ public class SettingsTemplatesActivity extends AppCompatActivity implements Deci
 
   @Override
   public void onListFragmentInteraction(RTemplateEntity item) {
-
-  }
-
-  @Override
-  public void onListFragmentInteraction(RRejectionTemplateEntity item) {
 
   }
 }

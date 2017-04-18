@@ -86,7 +86,8 @@ public class RemoveTemplate extends AbstractCommand {
     Observable<Template> info = templatesService.create(
       LOGIN.get(),
       TOKEN.get(),
-      params.getComment()
+      params.getComment(),
+      params.getLabel()
     );
 
     info

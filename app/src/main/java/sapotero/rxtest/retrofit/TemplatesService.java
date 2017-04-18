@@ -22,7 +22,8 @@ public interface TemplatesService {
   Observable<Template> create(
     @Query("login") String username,
     @Query("auth_token") String token,
-    @Query("text") String text
+    @Query("text") String text,
+    @Query("type") String type
   );
 
   @DELETE("v2/templates/{uid}.json")
