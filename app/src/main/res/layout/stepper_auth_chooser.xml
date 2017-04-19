@@ -56,7 +56,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:weightSum="2"
             android:layout_gravity="center"
             >
 
@@ -65,18 +64,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/auth_enter_cert"
-                android:layout_weight="1"
                 android:textColor="@color/md_white_1000"
                 android:background="@drawable/default_button"
                 tools:ignore="ButtonStyle"
-                android:minWidth="256dp"
+                android:minWidth="512dp"
                 />
 
             <android.support.v7.widget.AppCompatButton
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/auth_enter_password"
-                android:layout_weight="1"
+                android:visibility="gone"
                 android:id="@+id/stepper_auth_choose_password"
                 android:minWidth="256dp"
                 tools:ignore="ButtonStyle"/>

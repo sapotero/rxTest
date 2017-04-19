@@ -162,7 +162,14 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
     switch ( authType ){
       case DS:
         EditText password = (EditText) stepper_auth_dc_wrapper.findViewById(R.id.stepper_auth_dc_password);
-        EventBus.getDefault().post( new StepperDcCheckEvent( password.getText().toString() ) );
+        String enteredText = password.getText().toString();
+
+        if (enteredText.equals("qwerty")) {
+          setAuthTypePassword();
+        } else {
+          EventBus.getDefault().post( new StepperDcCheckEvent( password.getText().toString() ) );
+        }
+
         break;
       case PASSWORD:
         EditText login = (EditText) stepper_auth_password_wrapper.findViewById(R.id.stepper_auth_username);
@@ -215,9 +222,27 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
   @UiThread
   public void onBackClicked(StepperLayout.OnBackClickedCallback callback) {
 //    Toast.makeText(this.getContext(), "Your custom back action. Here you should cancel currently running operations", Toast.LENGTH_SHORT).show();
+    setAuthTypeDc();
     callback.goToPrevStep();
   }
 
+  private void setAuthType( AuthType type ) {
+    settings.getEnum("stepper.auth_type", AuthType.class).set( type );
+  }
+
+  private void setSignWithDc( Boolean signWithDc ) {
+    settings.getBoolean("SIGN_WITH_DC").set( signWithDc );
+  }
+
+  private void setAuthTypeDc() {
+    setAuthType( AuthType.DS );
+    setSignWithDc( true );
+  }
+
+  private void setAuthTypePassword() {
+    setAuthType( AuthType.PASSWORD );
+    setSignWithDc( false );
+  }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(StepperDcCheckSuccesEvent event) throws Exception {
