@@ -246,52 +246,62 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
 
   }
 
-  private void refreshSpinner() {
-    int selected = 0;
-    OrganizationItem item = null;
+  public void refreshSpinner() {
 
-    for (int i = 0; i < mAdapter.getCount(); i++) {
-      if (mSelected[i]) {
-        item = mAdapter.getItem(i);
-        selected++;
+    if (mAdapter.getCount() == 0) {
+      // No organizations in adapter, disable organization spinner
+      setText("Нет организаций");
+      setEnabled(false);
+
+    } else {
+      // Otherwise enable spinner and set spinner text depending on organization filter selection
+      setEnabled(true);
+
+      int selected = 0;
+      OrganizationItem item = null;
+
+      for (int i = 0; i < mAdapter.getCount(); i++) {
+        if (mSelected[i]) {
+          item = mAdapter.getItem(i);
+          selected++;
+        }
       }
+
+      CharSequence spinnerText;
+
+      switch( selected ){
+        case 0:
+          spinnerText = "Организации";
+          break;
+
+        case 1:
+          final ForegroundColorSpan grey  = new ForegroundColorSpan( getResources().getColor(R.color.md_grey_600) );
+          final ForegroundColorSpan black = new ForegroundColorSpan( getResources().getColor(R.color.md_grey_900) );
+          final StyleSpan bold = new StyleSpan(Typeface.BOLD);
+
+          final SpannableStringBuilder title = new SpannableStringBuilder( item.getTitle());
+          final SpannableStringBuilder count = new SpannableStringBuilder( String.format("%-4s ", String.valueOf(item.getCount()) ) );
+
+          title.setSpan(black, 0, item.getTitle().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+          count.setSpan(bold, 0, String.valueOf(item.getCount()).length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+          spinnerText = TextUtils.concat(count, title);
+          break;
+
+        default:
+          spinnerText = String.format("Выбрано организаций: %s", selected);
+          break;
+      }
+
+      if ( selected == mAdapter.getCount() ){
+        spinnerText = "Все организации";
+      }
+
+      if (spinnerText.length() > 80){
+        spinnerText = spinnerText.toString().substring(0,77) + "...";
+      }
+
+      setText( spinnerText );
     }
-
-    CharSequence spinnerText;
-
-    switch( selected ){
-      case 0:
-        spinnerText = "Организации";
-        break;
-      case 1:
-
-        final ForegroundColorSpan grey  = new ForegroundColorSpan( getResources().getColor(R.color.md_grey_600) );
-        final ForegroundColorSpan black = new ForegroundColorSpan( getResources().getColor(R.color.md_grey_900) );
-        final StyleSpan bold = new StyleSpan(Typeface.BOLD);
-
-        final SpannableStringBuilder title = new SpannableStringBuilder( item.getTitle());
-        final SpannableStringBuilder count = new SpannableStringBuilder( String.format("%-4s ", String.valueOf(item.getCount()) ) );
-
-        title.setSpan(black, 0, item.getTitle().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-        count.setSpan(bold, 0, String.valueOf(item.getCount()).length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-        spinnerText = TextUtils.concat(count, title);
-        break;
-      default:
-        spinnerText = String.format("Выбрано организаций: %s", selected);
-        break;
-    }
-    if ( selected == mAdapter.getCount() ){
-      spinnerText = "Все организации";
-    }
-
-
-//    setText(String.format(spinnerText, selected));
-
-    if (spinnerText.length() > 80){
-      spinnerText = spinnerText.toString().substring(0,77) + "...";
-    }
-
-    setText( spinnerText );
   }
 
   public String getDefaultText() {

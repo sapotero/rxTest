@@ -544,6 +544,8 @@ public class DBQueryBuilder {
             organizationAdapter.add( new OrganizationItem( organization, organizations.get(organization) ) );
           }
 
+          organizationSelector.refreshSpinner();
+
         },
         error -> {
           Timber.tag("ERROR").e(error);
