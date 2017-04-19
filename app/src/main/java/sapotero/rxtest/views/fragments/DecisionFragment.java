@@ -491,7 +491,10 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   private void showAddOshsDialog() {
     oshs = new SelectOshsDialogFragment();
     oshs.withSearch(true);
-    oshs.showWithAssistant(true);
+
+    //resolved https://tasks.n-core.ru/browse/MVDESD-13231 - убрать врио
+    oshs.showWithAssistant(false);
+
     oshs.registerCallBack( this );
 
     ArrayList<String> users = new ArrayList<>();
