@@ -5,6 +5,8 @@ import android.content.Context;
 import com.f2prateek.rx.preferences.Preference;
 import com.google.gson.Gson;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.Objects;
 
 import retrofit2.Retrofit;
@@ -14,6 +16,7 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RTemplateEntity;
+import sapotero.rxtest.events.decision.AddDecisionTemplateEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -130,6 +133,8 @@ public class CreateTemplate extends AbstractCommand {
         temp -> {
           Timber.tag(TAG).i("success");
           Timber.tag(TAG).i("%s", new Gson().toJson(temp));
+
+          EventBus.getDefault().post( new AddDecisionTemplateEvent() );
         },
         error -> {
           Timber.tag(TAG).e(error);

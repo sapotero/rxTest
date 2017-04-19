@@ -16,6 +16,10 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import java.util.ArrayList;
 
 import javax.inject.Inject;
@@ -27,6 +31,7 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RTemplateEntity;
+import sapotero.rxtest.events.decision.AddDecisionTemplateEvent;
 import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -60,10 +65,18 @@ public class DecisionRejectionTemplateFragment extends Fragment {
 
     EsdApplication.getComponent(getContext()).inject( this );
 
+    initEvents();
     populateAdapter(view);
     initToolbar(view);
 
     return view;
+  }
+
+  private void initEvents() {
+    if (EventBus.getDefault().isRegistered(this)) {
+      EventBus.getDefault().unregister(this);
+    }
+    EventBus.getDefault().register(this);
   }
 
   private void initToolbar(View view) {
@@ -139,8 +152,26 @@ public class DecisionRejectionTemplateFragment extends Fragment {
     adapter = new DecisionRejectionTemplateRecyclerAdapter(new ArrayList<>(), mListener);
     recyclerView.setAdapter(adapter);
 
+    invalidateDecisions();
+  }
 
 
+  @Override
+  public void onAttach(Context context) {
+    super.onAttach(context);
+    if (context instanceof OnListFragmentInteractionListener) {
+      mListener = (OnListFragmentInteractionListener) context;
+    } else {
+      throw new RuntimeException(context.toString() + " must implement OnListFragmentInteractionListener");
+    }
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(AddDecisionTemplateEvent event){
+    invalidateDecisions();
+  }
+
+  private void invalidateDecisions() {
     dataStore
       .select(RTemplateEntity.class)
       .where(RTemplateEntity.USER.eq( settings.getString("login").get() ))
@@ -161,19 +192,6 @@ public class DecisionRejectionTemplateFragment extends Fragment {
           Timber.tag(TAG).e(error);
         }
       );
-
-
-  }
-
-
-  @Override
-  public void onAttach(Context context) {
-    super.onAttach(context);
-    if (context instanceof OnListFragmentInteractionListener) {
-      mListener = (OnListFragmentInteractionListener) context;
-    } else {
-      throw new RuntimeException(context.toString() + " must implement OnListFragmentInteractionListener");
-    }
   }
 
   @Override
