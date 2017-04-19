@@ -59,11 +59,12 @@ import sapotero.rxtest.views.adapters.models.FontItem;
 import sapotero.rxtest.views.adapters.models.UrgencyItem;
 import sapotero.rxtest.views.custom.SpinnerWithLabel;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
+import sapotero.rxtest.views.dialogs.SelectTemplateDialogFragment;
 import sapotero.rxtest.views.fragments.DecisionFragment;
 import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
 import timber.log.Timber;
 
-public class DecisionConstructorActivity extends AppCompatActivity implements DecisionFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, OperationManager.Callback, SelectOshsDialogFragment.Callback {
+public class DecisionConstructorActivity extends AppCompatActivity implements DecisionFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, OperationManager.Callback, SelectOshsDialogFragment.Callback, SelectTemplateDialogFragment.Callback {
 
   @Inject RxSharedPreferences settings;
   @Inject OperationManager operationManager;
@@ -903,5 +904,10 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
   private String getCurrentUserOrganization() {
     return settings.getString("current_user_organization").get();
+  }
+
+  @Override
+  public void onSelectTemplate(String template) {
+
   }
 }

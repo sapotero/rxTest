@@ -3,7 +3,8 @@
           android:id="@android:id/text1"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
-          android:textAppearance="?android:attr/textAppearanceListItemSmall"
+          android:textAppearance="?android:attr/textAppearanceListItem"
           android:gravity="center_vertical"
-          android:textColor="@color/md_grey_800"
-          android:minHeight="?android:attr/listPreferredItemHeightSmall" />
+          android:padding="@dimen/half_date_offset"
+          android:textColor="@color/md_grey_700"
+          android:minHeight="?android:attr/listPreferredItemHeight" />

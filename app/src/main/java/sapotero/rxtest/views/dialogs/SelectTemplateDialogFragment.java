@@ -29,6 +29,11 @@ public class SelectTemplateDialogFragment extends DialogFragment implements View
 
   private String TAG = this.getClass().getSimpleName();
   Callback callback;
+  private String type;
+
+  public void setType(String type) {
+    this.type = type;
+  }
 
   public interface Callback {
     void onSelectTemplate(String template);
@@ -43,16 +48,15 @@ public class SelectTemplateDialogFragment extends DialogFragment implements View
     EsdApplication.getComponent( getActivity() ).inject( this );
     getDialog().setTitle("Title!");
 
-    View view = inflater.inflate(R.layout.dialog_choose_template, null);
-
+    View view = inflater.inflate(R.layout.dialog_choose_template, container, false);
     ListView list = (ListView) view.findViewById(R.id.dialog_template_listview_templates);
 
     ArrayList<String> items = new ArrayList<>();
 
-
     List<RTemplateEntity> templates = dataStore
       .select( RTemplateEntity.class)
-      .where(  RTemplateEntity.USER.eq( settings.getString("current_user").get() ))
+      .where(  RTemplateEntity.USER.eq( settings.getString("login").get() ))
+      .and(RTemplateEntity.TYPE.eq(type))
       .get().toList();
 
     if (templates.size() > 0) {

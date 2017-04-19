@@ -25,6 +25,9 @@ import sapotero.rxtest.managers.menu.commands.shared.CheckForControl;
 import sapotero.rxtest.managers.menu.commands.shared.DoNothing;
 import sapotero.rxtest.managers.menu.commands.shared.RemoveFromFolder;
 import sapotero.rxtest.managers.menu.commands.signing.PrevPerson;
+import sapotero.rxtest.managers.menu.commands.templates.CreateTemplate;
+import sapotero.rxtest.managers.menu.commands.templates.RemoveTemplate;
+import sapotero.rxtest.managers.menu.commands.templates.UpdateTemplate;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -473,7 +476,46 @@ public class CommandFactory implements AbstractCommand.Callback{
       public String getRussinaName() {
         return "Отклонение резолюции";
       }
-    };
+    },
+
+    CREATE_DECISION_TEMPLATE {
+      @Override
+      public Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
+        CreateTemplate command = new CreateTemplate(context, document);
+        command.withParams(params);
+        return command;
+      }
+      @Override
+      public String getRussinaName() {
+        return "Создание шаблона резолюции";
+      }
+    },
+    UPDATE_DECISION_TEMPLATE {
+      @Override
+      public Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
+        UpdateTemplate command = new UpdateTemplate(context, document);
+        command.withParams(params);
+        return command;
+      }
+      @Override
+      public String getRussinaName() {
+        return "Изменение шаблона резолюции";
+      }
+    },
+    DELETE_DECISION_TEMPLATE {
+      @Override
+      public Command getCommand(CommandFactory instance, Context context, DocumentReceiver document, CommandParams params) {
+        RemoveTemplate command = new RemoveTemplate(context, document);
+        command.withParams(params);
+        return command;
+      }
+      @Override
+      public String getRussinaName() {
+        return "Удаление шаблона резолюции";
+      }
+    },
+
+    ;
 
     public static Operation getOperation(String operation_type){
       Operation operation = Operation.INCORRECT;
@@ -560,7 +602,7 @@ public class CommandFactory implements AbstractCommand.Callback{
           break;
 
 
-        case "sapotero.rxtest.managers.menu.commands.shared.AddToFolder":
+        case "sapotero.rxtest.managers.menu.commands.shared.CreateTemplate":
           operation = Operation.ADD_TO_FOLDER;
           break;
         case "sapotero.rxtest.managers.menu.commands.shared.CheckForControl":
@@ -570,6 +612,17 @@ public class CommandFactory implements AbstractCommand.Callback{
         case "sapotero.rxtest.managers.menu.commands.shared.DoNothing":
           operation = Operation.INCORRECT;
           break;
+
+        case "sapotero.rxtest.managers.menu.commands.templates.CreateTemplate":
+          operation = Operation.CREATE_DECISION_TEMPLATE;
+          break;
+        case "sapotero.rxtest.managers.menu.commands.templates.UpdateTemplate":
+          operation = Operation.UPDATE_DECISION_TEMPLATE;
+          break;
+        case "sapotero.rxtest.managers.menu.commands.templates.RemoveTemplate":
+          operation = Operation.DELETE_DECISION_TEMPLATE;
+          break;
+
       }
       return operation;
     }

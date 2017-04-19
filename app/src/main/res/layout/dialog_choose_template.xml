@@ -5,14 +5,24 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:weightSum="1">
+
     <TextView
-        android:layout_width="wrap_content"
+        android:id="@+id/swipe_layout_title"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_margin="20dp"
+        android:paddingTop="24dp"
+        android:paddingBottom="8sp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:textColor="@color/md_grey_800"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:fontFamily="sans-serif"
+        android:textStyle="normal"
+        android:textSize="24sp"
         android:text="@string/dialog_template_title"
-        android:textAppearance="?android:attr/textAppearanceLarge">
-    </TextView>
+        />
+
 
     <ListView
         android:id="@+id/dialog_template_listview_templates"

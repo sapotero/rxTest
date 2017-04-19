@@ -60,7 +60,8 @@ public interface AuthService {
   @GET("v2/templates.json")
   Observable<ArrayList<Template>> getTemplates(
     @Query("login") String username,
-    @Query("auth_token") String token
+    @Query("auth_token") String token,
+    @Query("type") String type
   );
 
   @GET("/v2/oshs/primary_consideration.json")
