@@ -351,7 +351,9 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
       }
     }
 
-    fragment_decision_text_before.setChecked( block.getTextBefore() );
+    if (block != null && block.getTextBefore() != null){
+      fragment_decision_text_before.setChecked( block.getTextBefore() );
+    }
 
     adapter = new PrimaryConsiderationAdapter( getContext(), people);
     adapter.registerCallBack(this);
