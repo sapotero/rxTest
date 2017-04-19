@@ -98,8 +98,8 @@ public class AddAndApproveDecision extends AbstractCommand {
 
 
     Decision decision = params.getDecisionModel();
-    decision.setLetterheadFontSize("15");
-    decision.setPerformersFontSize("12");
+//    decision.setLetterheadFontSize("12");
+//    decision.setPerformersFontSize("12");
     decision.setLetterhead(null);
 
     if (params.isAssignment()){

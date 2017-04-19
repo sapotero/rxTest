@@ -18,6 +18,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -34,6 +35,7 @@ import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -72,7 +74,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   @BindView(R.id.fragment_decision_linear_people) LinearLayout people_view;
 
   @BindView(R.id.fragment_decision_hide_performers) CheckBox hide_performers;
-  @BindView(R.id.fragment_decision_font_size) Spinner hintSpinner;
+  @BindView(R.id.fragment_decision_font_size) Spinner font_size;
 
   @BindView(R.id.fragment_decision_button_wrapper) LinearLayout buttons;
   @BindView(R.id.fragment_decision_text_before) ToggleButton fragment_decision_text_before;
@@ -111,6 +113,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   private boolean forAcquaint = false;
   private int oldSize = 0;
   private int lastUpdate = -1;
+  private String fontSize;
 
   public void setBlockFactory(BlockFactory blockFactory) {
     this.blockFactory = blockFactory;
@@ -170,20 +173,47 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
       Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
       intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
       startActivityForResult(intent, RECOGNIZER_CODE);
-//      speechRecognizer.startListening(intent);
     });
-//    speechRecognizer = SpeechRecognizer.createSpeechRecognizer( getContext() );
-//    speechRecognizer.setRecognitionListener(new Listener());
 
     ArrayList<String> arrayStrings = new ArrayList<>();
 
+    arrayStrings.add("8");
+    arrayStrings.add("9");
+    arrayStrings.add("10");
+    arrayStrings.add("11");
+    arrayStrings.add("12");
     arrayStrings.add("13");
-    arrayStrings.add("14");
-    arrayStrings.add("15");
 
     ArrayAdapter<String> tmp_adapter = new ArrayAdapter<>(mContext, R.layout.simple_spinner_item, arrayStrings);
-//    hintSpinner.setAdapter(new HintSpinnerAdapter( tmp_adapter, R.layout.hint_row_item, mContext));
-    hintSpinner.setAdapter(tmp_adapter);
+//    font_size.setAdapter(new HintSpinnerAdapter( tmp_adapter, R.layout.hint_row_item, mContext));
+    font_size.setAdapter(tmp_adapter);
+    font_size.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+      @Override
+      public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+        block.setFontSize( arrayStrings.get(i) );
+        fontSize = arrayStrings.get(i);
+        if (callback != null) {
+          callback.onUpdateSuccess(lastUpdate);
+        }
+      }
+
+      @Override
+      public void onNothingSelected(AdapterView<?> adapterView) {
+
+      }
+    });
+
+    Timber.d("FONT_SIZE: %s", block.getFontSize());
+
+    if (block.getFontSize() != null){
+      for (int i = 0; i < arrayStrings.size(); i++) {
+        String size = arrayStrings.get(i);
+        if (Objects.equals(size, block.getFontSize())){
+          font_size.setSelection(i);
+          break;
+        }
+      }
+    }
 
     card_toolbar.inflateMenu(R.menu.fragment_decision_menu);
     card_toolbar.setTitle("Блок " + number );
@@ -305,14 +335,6 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
       button_ask_to_report.setVisibility(View.GONE);
       buttons.setVisibility(View.GONE);
     }
-
-    // настройка
-    // Возможность выбора размера шрифта
-    if (settings.getBoolean("settings_view_show_decision_change_font").get()){
-//      textSelector.setVisibility(View.VISIBLE);
-//      head_font_selector_wrapper.setVisibility(View.VISIBLE);
-    }
-
     Timber.e(" ArrayList<PrimaryConsiderationPeople> people = new ArrayList<>(); ");
 
 
@@ -327,6 +349,10 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
 
         people.add(user);
       }
+    }
+
+    if (block != null && block.getTextBefore() != null){
+      fragment_decision_text_before.setChecked( block.getTextBefore() );
     }
 
     adapter = new PrimaryConsiderationAdapter( getContext(), people);
@@ -412,6 +438,12 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     block.setToFamiliarization(false);
     block.setAskToAcquaint(forAcquaint);
     block.setAskToReport(forReport);
+
+    if (fontSize == null ){
+      block.setFontSize("13");
+    } else {
+      block.setFontSize(fontSize);
+    }
 
     if ( adapter.getCount() > 0 ){
       ArrayList<Performer> performers = new ArrayList<>();

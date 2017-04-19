@@ -180,7 +180,7 @@
                                     android:layout_height="wrap_content"
                                     android:orientation="horizontal"
 
-                                    android:visibility="gone"
+
                                     >
 
 
@@ -199,6 +199,21 @@
                                             android:hint="@string/hint_head_font_size" />
                                     </android.support.design.widget.TextInputLayout>
 
+                                    <android.support.design.widget.TextInputLayout
+                                        android:layout_width="match_parent"
+                                        android:layout_height="match_parent"
+                                        android:longClickable="false"
+                                        android:padding="@dimen/half_date_offset"
+                                        android:gravity="start|center_vertical"
+                                        android:layout_weight="1">
+
+                                        <sapotero.rxtest.views.custom.SpinnerWithLabel
+                                            android:id="@+id/urgency_selector"
+                                            android:layout_width="match_parent"
+                                            android:layout_height="match_parent"
+                                            android:hint="@string/hint_urgency" />
+                                    </android.support.design.widget.TextInputLayout>
+
 
                                     <android.support.design.widget.TextInputLayout
                                         android:layout_width="match_parent"
@@ -206,7 +221,9 @@
                                         android:longClickable="false"
                                         android:padding="@dimen/half_date_offset"
                                         android:layout_gravity="end|center_vertical"
-                                        android:layout_weight="1">
+                                        android:layout_weight="1"
+                                        android:visibility="gone"
+                                        >
 
                                         <EditText
                                             android:layout_width="match_parent"
@@ -222,24 +239,6 @@
 
 
                                 </LinearLayout>
-
-
-                                <android.support.design.widget.TextInputLayout
-                                    android:visibility="gone"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:longClickable="false"
-                                    android:padding="@dimen/half_date_offset"
-                                    android:gravity="start|center_vertical"
-                                    android:layout_weight="1">
-
-                                    <sapotero.rxtest.views.custom.SpinnerWithLabel
-                                        android:id="@+id/urgency_selector"
-                                        android:layout_width="match_parent"
-                                        android:layout_height="match_parent"
-                                        android:hint="@string/hint_urgency" />
-
-                                </android.support.design.widget.TextInputLayout>
 
 
                                 <android.support.design.widget.TextInputLayout

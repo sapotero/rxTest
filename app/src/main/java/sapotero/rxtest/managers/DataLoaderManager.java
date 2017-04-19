@@ -102,11 +102,13 @@ public class DataLoaderManager {
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(
           v2 -> {
-            try {
+//            try {
               v2UserOshs user = v2.get(0);
               setCurrentUser(user.getName());
               setCurrentUserId(user.getId());
               setCurrentUserOrganization(user.getOrganization());
+
+              updateByCurrentStatus(MainMenuItem.ALL, null);
 
               // получаем папки
               subscription.add(
@@ -193,9 +195,9 @@ public class DataLoaderManager {
                   })
               );
 
-            } catch (Exception e) {
-              e.printStackTrace();
-            }
+//            } catch (Exception e) {
+//              e.printStackTrace();
+//            }
           },
           error -> {
             Timber.tag("USER_INFO").e( "ERROR: %s", error);
@@ -354,7 +356,7 @@ public class DataLoaderManager {
             EventBus.getDefault().post( new AuthDcCheckSuccessEvent() );
 
 
-            updateByCurrentStatus(MainMenuItem.ALL, null);
+//            updateByCurrentStatus(MainMenuItem.ALL, null);
             initV2();
 //            updateFavoritesAndProcessed();
           },
@@ -401,7 +403,7 @@ public class DataLoaderManager {
             EventBus.getDefault().post(new AuthLoginCheckSuccessEvent());
 
 
-            updateByCurrentStatus(MainMenuItem.ALL, null);
+
             initV2();
 //            updateFavoritesAndProcessed();
           },
@@ -501,8 +503,8 @@ public class DataLoaderManager {
         subscription.add(
           docService
             .getDocumentsByIndexes(LOGIN.get(), TOKEN.get(), index, status, 500)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(Schedulers.computation())
+            .observeOn(Schedulers.computation())
             .subscribe(
               data -> {
                 if (data.getDocuments().size() > 0){
@@ -544,8 +546,8 @@ public class DataLoaderManager {
       subscription.add(
         docService
           .getDocuments(LOGIN.get(), TOKEN.get(), code, 500, 0)
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
+          .subscribeOn(Schedulers.computation())
+          .observeOn(Schedulers.computation())
           .subscribe(
             data -> {
               if (data.getDocuments().size() > 0){

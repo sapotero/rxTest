@@ -6,5 +6,6 @@
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:ellipsize="marquee"
-          android:padding="4sp"
+          android:padding="@dimen/half_date_offset"
+          android:layout_margin="@dimen/date_offset"
           android:textAlignment="inherit"/>

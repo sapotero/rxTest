@@ -145,6 +145,7 @@ public class CreateDocumentsJob extends BaseJob {
     doc.setViewed( document.getViewed() );
 
 
+
     Timber.tag(TAG).d("signer %s", new Gson().toJson( document.getSigner() ) );
 
     doc.setMd5( document.getMd5() );
@@ -199,6 +200,9 @@ public class CreateDocumentsJob extends BaseJob {
         decision.setShowPosition(d.getShowPosition());
         decision.setSignBase64(d.getSignBase64());
         decision.setRed(d.getRed());
+        decision.setLetterheadFontSize(d.getLetterhead());
+        decision.setPerformerFontSize(d.getPerformersFontSize());
+
         if (d.getRed()){
           red= true;
         }
@@ -209,6 +213,7 @@ public class CreateDocumentsJob extends BaseJob {
             RBlockEntity block = new RBlockEntity();
             block.setNumber(b.getNumber());
             block.setText(b.getText());
+            block.setFontSize(b.getFontSize());
             block.setAppealText(b.getAppealText());
             block.setTextBefore(b.getTextBefore());
             block.setHidePerformers(b.getHidePerformers());

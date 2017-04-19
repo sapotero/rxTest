@@ -50,7 +50,7 @@ public class Block implements Serializable{
 
     @SerializedName("font_size")
     @Expose
-    private String fontSize = "10";
+    private String fontSize;
 
     public Boolean getAskToReport() {
         return askToReport;
