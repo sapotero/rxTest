@@ -126,8 +126,6 @@ public class MenuBuilder implements ItemsBuilder.Callback{
   }
 
   public void update() {
-    organizationsSelector.clear();
-
     //test update adapter
     int index = journalSpinner.getSelectedItemPosition();
     DocumentTypeAdapter tmp_adapter = (DocumentTypeAdapter) journalSpinner.getAdapter();

@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.DataSetObserver;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -85,16 +86,21 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
 
       AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
 
-      dialogListAdapter = new DialogListAdapter(getContext(), choices);
+      View dialogView = inflater.inflate(R.layout.filter_organizations_dialog, null);
+      builder.setView(dialogView);
 
-      builder.setAdapter(dialogListAdapter, null);
+      final AlertDialog dialog = builder.create();
 
-      builder.setNegativeButton(android.R.string.cancel, (dialog, which) -> {
+      Button negativeButton = (Button) dialogView.findViewById(R.id.filter_organization_negative);
+      negativeButton.setText(android.R.string.cancel);
+      negativeButton.setOnClickListener(v1 -> {
         System.arraycopy(mOldSelection, 0, mSelected, 0, mSelected.length);
         dialog.dismiss();
       });
 
-      builder.setPositiveButton(android.R.string.ok, (dialog, which) -> {
+      Button positiveButton = (Button) dialogView.findViewById(R.id.filter_organization_positive);
+      positiveButton.setText(android.R.string.ok);
+      positiveButton.setOnClickListener(v1 -> {
         for (int i = 0; i < choices.size(); i++) {
           mSelected[i] = choices.get(i).isChecked();
         }
@@ -103,41 +109,33 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
         dialog.dismiss();
       });
 
-      builder.setNeutralButton(android.R.string.selectAll, (dialog, which) -> {
-        // This button is overriden later to change close behaviour
+      neutralButton = (Button) dialogView.findViewById(R.id.filter_organization_neutral);
+      updateNeutralButtonText();
+      neutralButton.setOnClickListener(v12 -> {
+        if ( isCheckedAll() ) {
+          // Deselect all
+          for (int i = 0; i < mOldSelection.length; i++) {
+            choices.get(i).setChecked(false);
+          }
+        } else {
+          // Select all
+          for (int i = 0; i < mOldSelection.length; i++) {
+            choices.get(i).setChecked(true);
+          }
+        }
+        dialogListAdapter.notifyDataSetChanged();
+        updateNeutralButtonText();
       });
 
-      final AlertDialog dialog = builder.create();
+      dialogListAdapter = new DialogListAdapter(getContext(), choices);
 
-      ListView listView = dialog.getListView();
+      ListView listView = (ListView) dialogView.findViewById(R.id.filter_organization_list);
       listView.setAdapter(dialogListAdapter);
       listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
       listView.setOnItemClickListener((parent, view, position, id) -> {
         choices.get(position).setChecked(!choices.get(position).isChecked());
         dialogListAdapter.notifyDataSetChanged();
         updateNeutralButtonText();
-      });
-
-      dialog.setOnShowListener(dialogInterface -> {
-        neutralButton = ((AlertDialog) dialogInterface).getButton(AlertDialog.BUTTON_NEUTRAL);
-        updateNeutralButtonText();
-
-        // Override neutral button handler to prevent dialog from closing
-        neutralButton.setOnClickListener(view -> {
-          if ( isCheckedAll() ) {
-            // Deselect all
-            for (int i = 0; i < mOldSelection.length; i++) {
-              choices.get(i).setChecked(false);
-            }
-          } else {
-            // Select all
-            for (int i = 0; i < mOldSelection.length; i++) {
-              choices.get(i).setChecked(true);
-            }
-          }
-          dialogListAdapter.notifyDataSetChanged();
-          updateNeutralButtonText();
-        });
       });
 
       dialog.show();
@@ -248,52 +246,62 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
 
   }
 
-  private void refreshSpinner() {
-    int selected = 0;
-    OrganizationItem item = null;
+  public void refreshSpinner() {
 
-    for (int i = 0; i < mAdapter.getCount(); i++) {
-      if (mSelected[i]) {
-        item = mAdapter.getItem(i);
-        selected++;
+    if (mAdapter.getCount() == 0) {
+      // No organizations in adapter, disable organization spinner
+      setText("Нет организаций");
+      setEnabled(false);
+
+    } else {
+      // Otherwise enable spinner and set spinner text depending on organization filter selection
+      setEnabled(true);
+
+      int selected = 0;
+      OrganizationItem item = null;
+
+      for (int i = 0; i < mAdapter.getCount(); i++) {
+        if (mSelected[i]) {
+          item = mAdapter.getItem(i);
+          selected++;
+        }
       }
+
+      CharSequence spinnerText;
+
+      switch( selected ){
+        case 0:
+          spinnerText = "Организации";
+          break;
+
+        case 1:
+          final ForegroundColorSpan grey  = new ForegroundColorSpan( getResources().getColor(R.color.md_grey_600) );
+          final ForegroundColorSpan black = new ForegroundColorSpan( getResources().getColor(R.color.md_grey_900) );
+          final StyleSpan bold = new StyleSpan(Typeface.BOLD);
+
+          final SpannableStringBuilder title = new SpannableStringBuilder( item.getTitle());
+          final SpannableStringBuilder count = new SpannableStringBuilder( String.format("%-4s ", String.valueOf(item.getCount()) ) );
+
+          title.setSpan(black, 0, item.getTitle().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+          count.setSpan(bold, 0, String.valueOf(item.getCount()).length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+          spinnerText = TextUtils.concat(count, title);
+          break;
+
+        default:
+          spinnerText = String.format("Выбрано организаций: %s", selected);
+          break;
+      }
+
+      if ( selected == mAdapter.getCount() ){
+        spinnerText = "Все организации";
+      }
+
+      if (spinnerText.length() > 80){
+        spinnerText = spinnerText.toString().substring(0,77) + "...";
+      }
+
+      setText( spinnerText );
     }
-
-    CharSequence spinnerText;
-
-    switch( selected ){
-      case 0:
-        spinnerText = "Организации";
-        break;
-      case 1:
-
-        final ForegroundColorSpan grey  = new ForegroundColorSpan( getResources().getColor(R.color.md_grey_600) );
-        final ForegroundColorSpan black = new ForegroundColorSpan( getResources().getColor(R.color.md_grey_900) );
-        final StyleSpan bold = new StyleSpan(Typeface.BOLD);
-
-        final SpannableStringBuilder title = new SpannableStringBuilder( item.getTitle());
-        final SpannableStringBuilder count = new SpannableStringBuilder( String.format("%-4s ", String.valueOf(item.getCount()) ) );
-
-        title.setSpan(black, 0, item.getTitle().length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-        count.setSpan(bold, 0, String.valueOf(item.getCount()).length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-        spinnerText = TextUtils.concat(count, title);
-        break;
-      default:
-        spinnerText = String.format("Выбрано организаций: %s", selected);
-        break;
-    }
-    if ( selected == mAdapter.getCount() ){
-      spinnerText = "Все организации";
-    }
-
-
-//    setText(String.format(spinnerText, selected));
-
-    if (spinnerText.length() > 80){
-      spinnerText = spinnerText.toString().substring(0,77) + "...";
-    }
-
-    setText( spinnerText );
   }
 
   public String getDefaultText() {
