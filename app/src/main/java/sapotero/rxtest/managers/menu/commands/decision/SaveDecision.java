@@ -249,13 +249,9 @@ public class SaveDecision extends AbstractCommand {
       _decision.setApproved(true);
     }
 
-
-    String json_d = new Gson().toJson( decision );
     String json_m = new Gson().toJson( _decision );
 
-//    Timber.w("decision_json: %s", json_d);
     Timber.w("decision_json_m: %s", json_m);
-    Timber.w("decision_json_old: %s", json_d);
 
     RequestBody json = RequestBody.create(
       MediaType.parse("application/json"),

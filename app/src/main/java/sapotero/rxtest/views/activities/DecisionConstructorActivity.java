@@ -387,6 +387,27 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     });
 
 
+    raw_decision = null;
+    Gson gson = new Gson();
+
+    Intent intent = getIntent();
+
+    if (null != intent) {
+      String data = intent.getStringExtra("decision");
+      raw_decision = gson.fromJson(data, Decision.class);
+
+      Timber.tag(TAG).v( "getIntent ++" + raw_decision);
+      if (raw_decision == null) {
+
+        loadDecision();
+
+      }
+    }
+
+    manager = new DecisionManager(this, getSupportFragmentManager(), raw_decision);
+    manager.build();
+
+
     // настройка
     if (!settings.getBoolean("settings_view_show_urgency").get()){
       urgency_selector.setVisibility(View.GONE);
@@ -457,47 +478,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     urgency_selector.setOnItemSelectedListener((item, selectedIndex) -> {
       manager.setUrgency( item );
     });
-
-
-
-    // настройка
-    if (settings.getBoolean("settings_view_show_decision_change_font").get()){
-      List<FontItem> fonts = new ArrayList<>();
-      fonts.add(new FontItem("12", "12"));
-      fonts.add(new FontItem("13", "13"));
-      fonts.add(new FontItem("14", "14"));
-      fonts.add(new FontItem("15", "15"));
-      fonts.add(new FontItem("16", "16"));
-
-      font_selector.setItems(fonts);
-      font_selector.setOnItemSelectedListener((item, selectedIndex) -> {
-        Timber.e("%s - %s", item.getLabel(), item.getValue());
-      });
-    } else {
-      font_selector.setVisibility(View.GONE);
-    }
-
-
-
-    raw_decision = null;
-    Gson gson = new Gson();
-
-    Intent intent = getIntent();
-
-    if (null != intent) {
-      String data = intent.getStringExtra("decision");
-      raw_decision = gson.fromJson(data, Decision.class);
-
-      Timber.tag(TAG).v( "getIntent ++" + raw_decision);
-      if (raw_decision == null) {
-
-        loadDecision();
-
-      }
-    }
-
-    manager = new DecisionManager(this, getSupportFragmentManager(), raw_decision);
-    manager.build();
 
 
     signer_oshs_selector.setOnClickListener(v -> {
@@ -584,6 +564,38 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
       }
     });
+
+    // настройка
+    if (settings.getBoolean("settings_view_show_decision_change_font").get()){
+      List<FontItem> fonts = new ArrayList<>();
+      fonts.add(new FontItem("10", "10"));
+      fonts.add(new FontItem("11", "11"));
+      fonts.add(new FontItem("12", "12"));
+      fonts.add(new FontItem("13", "13"));
+      fonts.add(new FontItem("14", "14"));
+      fonts.add(new FontItem("15", "15"));
+
+      font_selector.setItems(fonts);
+      font_selector.setOnItemSelectedListener((item, selectedIndex) -> {
+        manager.setPerformersFontSize(item.getValue());
+      });
+
+      Timber.tag(TAG).e("font-size: %s %s", raw_decision.getLetterheadFontSize(), raw_decision.getPerformersFontSize());
+
+      if ( raw_decision != null && raw_decision.getPerformersFontSize() != null ){
+
+        Timber.tag(TAG).e("FONT SIZE: %s", Integer.parseInt( raw_decision.getPerformersFontSize().substring(1) ));
+
+        font_selector.setText( raw_decision.getPerformersFontSize() );
+        manager.setPerformersFontSize( raw_decision.getPerformersFontSize() );
+      } else {
+        font_selector.setText( "15" );
+        manager.setPerformersFontSize( "15" );
+      }
+
+    } else {
+      font_selector.setVisibility(View.GONE);
+    }
 
     // Save original signer
     originalSignerId = raw_decision.getSignerId();
@@ -721,8 +733,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       raw_decision.setDate(rDecisionEntity.getDate());
       raw_decision.setUrgencyText(rDecisionEntity.getUrgencyText());
       raw_decision.setShowPosition(rDecisionEntity.isShowPosition());
-
-      Timber.tag(TAG).e("getUrgencyText: %s", rDecisionEntity.getUrgencyText() );
+      raw_decision.setLetterheadFontSize(rDecisionEntity.getLetterheadFontSize());
+      raw_decision.setPerformersFontSize(rDecisionEntity.getPerformerFontSize());
 
       if ( rDecisionEntity.getBlocks() != null && rDecisionEntity.getBlocks().size() >= 1 ){
 
@@ -733,6 +745,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
           RBlockEntity b = (RBlockEntity) _block;
           Block block = new Block();
           block.setNumber(b.getNumber());
+          block.setFontSize(b.getFontSize());
           block.setText(b.getText());
           block.setAppealText(b.getAppealText());
           block.setTextBefore(b.isTextBefore());

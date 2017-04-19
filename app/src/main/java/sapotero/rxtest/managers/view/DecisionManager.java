@@ -318,4 +318,8 @@ public class DecisionManager implements DecisionInterface, DecisionBuilder.Callb
   public void setUrgency(String urgencyText) {
     decision.setUrgency(urgencyText);
   }
+
+  public void setPerformersFontSize(String size) {
+    decision.setPerformersFontSize(size);
+  }
 }
