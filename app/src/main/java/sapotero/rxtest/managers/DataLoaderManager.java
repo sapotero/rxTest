@@ -43,6 +43,7 @@ import sapotero.rxtest.jobs.bus.CreateFavoriteUsersJob;
 import sapotero.rxtest.jobs.bus.CreateFoldersJob;
 import sapotero.rxtest.jobs.bus.CreatePrimaryConsiderationJob;
 import sapotero.rxtest.jobs.bus.CreateTemplatesJob;
+import sapotero.rxtest.jobs.bus.CreateUrgencyJob;
 import sapotero.rxtest.jobs.bus.InvalidateDocumentsJob;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.jobs.bus.UpdateFavoritesDocumentsJob;
@@ -126,6 +127,18 @@ public class DataLoaderManager {
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( data -> {
                     jobManager.addJobInBackground(new CreatePrimaryConsiderationJob(data));
+                  }, error -> {
+                    Timber.tag(TAG).e(error);
+                  })
+              );
+
+              // загрузка срочности
+              subscription.add(
+                auth.getUrgency(LOGIN.get(), TOKEN.get(), "urgency")
+                  .subscribeOn(Schedulers.io())
+                  .observeOn(AndroidSchedulers.mainThread())
+                  .subscribe( urgencies -> {
+                    jobManager.addJobInBackground(new CreateUrgencyJob(urgencies));
                   }, error -> {
                     Timber.tag(TAG).e(error);
                   })

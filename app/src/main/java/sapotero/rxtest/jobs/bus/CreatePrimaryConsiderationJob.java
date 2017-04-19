@@ -54,7 +54,7 @@ public class CreatePrimaryConsiderationJob extends BaseJob {
     data.setName( user.getName() );
     data.setIsGroup( user.getIsGroup() );
     data.setIsOrganization( user.getIsOrganization() );
-    data.setUser( settings.getString("current_user").get() );
+    data.setUser( settings.getString("login").get() );
 
     dataStore
       .insert(data)

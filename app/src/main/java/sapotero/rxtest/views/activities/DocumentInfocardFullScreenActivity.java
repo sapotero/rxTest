@@ -18,6 +18,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
@@ -82,6 +84,8 @@ public class DocumentInfocardFullScreenActivity extends AppCompatActivity {
       .where(RDocumentEntity.UID.eq( UID.get() ))
       .get()
       .toObservable()
+      .subscribeOn(Schedulers.newThread())
+      .observeOn(AndroidSchedulers.mainThread())
       .subscribe(
         doc -> {
 
