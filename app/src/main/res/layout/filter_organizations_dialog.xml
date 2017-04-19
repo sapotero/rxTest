@@ -30,7 +30,7 @@
         android:layout_height="wrap_content"/>
 
     <RelativeLayout
-        android:paddingTop="0dp"
+        android:paddingTop="10dp"
         android:paddingBottom="10dp"
         android:paddingStart="16dp"
         android:paddingEnd="10dp"

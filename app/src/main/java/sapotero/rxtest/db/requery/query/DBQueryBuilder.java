@@ -236,6 +236,8 @@ public class DBQueryBuilder {
                 for (RDocumentEntity d: data ) {
                   addByOneInAdapter(d);
                 }
+              } else {
+                showEmpty();
               }
 //              Timber.tag(TAG).e("self observerable %s", data.getUid());
             },
