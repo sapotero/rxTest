@@ -8,6 +8,7 @@ import com.birbit.android.jobqueue.Params;
 import com.birbit.android.jobqueue.RetryConstraint;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RTemplateEntity;
@@ -35,7 +36,6 @@ public class CreateTemplatesJob extends BaseJob {
 
   @Override
   public void onRun() throws Throwable {
-//    Timber.tag(TAG).i( "templates: %s | %s", templates.size(), templates.get(0).getText() );
     for (Template template : templates){
       if ( !exist( template.getId()) ){
         add(template);
@@ -48,7 +48,7 @@ public class CreateTemplatesJob extends BaseJob {
     RTemplateEntity data = new RTemplateEntity();
     data.setUid( template.getId() );
     data.setTitle( template.getText() );
-    data.setType( type != null ? type : "decision");
+    data.setType( type != null && !Objects.equals(type, "") ? type : "decision");
     data.setUser( settings.getString("login").get() );
 
 

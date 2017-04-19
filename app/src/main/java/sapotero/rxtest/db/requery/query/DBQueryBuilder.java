@@ -215,7 +215,7 @@ public class DBQueryBuilder {
           })
           .toList()
           .debounce(300, TimeUnit.MILLISECONDS)
-          .subscribeOn(Schedulers.newThread())
+          .subscribeOn(Schedulers.computation())
           .observeOn(AndroidSchedulers.mainThread())
           .subscribe(
             data -> {

@@ -113,13 +113,11 @@ public class CreateTemplate extends AbstractCommand {
   private void insertTemplate(Template data) {
 
     String type = null;
-    if ( params.getLabel() != null && !Objects.equals(params.getLabel(), "decision")){
-      type = params.getLabel();
-    }
+
 
     RTemplateEntity template = new RTemplateEntity();
     template.setUid(data.getId());
-    template.setType(type);
+    template.setType(params.getLabel());
     template.setTitle(data.getText());
     template.setUser(LOGIN.get());
 
