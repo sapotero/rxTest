@@ -335,14 +335,6 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
       button_ask_to_report.setVisibility(View.GONE);
       buttons.setVisibility(View.GONE);
     }
-
-    // настройка
-    // Возможность выбора размера шрифта
-    if (settings.getBoolean("settings_view_show_decision_change_font").get()){
-//      textSelector.setVisibility(View.VISIBLE);
-//      head_font_selector_wrapper.setVisibility(View.VISIBLE);
-    }
-
     Timber.e(" ArrayList<PrimaryConsiderationPeople> people = new ArrayList<>(); ");
 
 
@@ -358,6 +350,8 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
         people.add(user);
       }
     }
+
+    fragment_decision_text_before.setChecked( block.getTextBefore() );
 
     adapter = new PrimaryConsiderationAdapter( getContext(), people);
     adapter.registerCallBack(this);
