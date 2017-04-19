@@ -35,9 +35,12 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.db.requery.models.RUrgencyEntity;
 import sapotero.rxtest.db.requery.models.decisions.RBlock;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
@@ -107,6 +110,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   private String originalSignerBlankText;
   private String originalSignerId;
   private String originalSignerAssistantId;
+  private ArrayList<UrgencyItem> urgency = new ArrayList<UrgencyItem>();
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -382,32 +386,76 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       return false;
     });
 
-    List<UrgencyItem> urgency = new ArrayList<>();
-
 
     // настройка
     if (!settings.getBoolean("settings_view_show_urgency").get()){
       urgency_selector.setVisibility(View.GONE);
-    }
-    // настройка
-    if (settings.getBoolean("settings_view_only_urgent").get()){
-      urgency.add(new UrgencyItem("Нет", ""));
-      urgency.add(new UrgencyItem("Срочно", "Срочно"));
-      urgency_selector.setVisibility(View.VISIBLE);
     } else {
-      urgency.add(new UrgencyItem("Весьма срочно", "Весьма срочно"));
-      urgency.add(new UrgencyItem("Крайне срочно", "Крайне срочно"));
-      urgency.add(new UrgencyItem("Няшная срочность", "Няшная срочность"));
-      urgency.add(new UrgencyItem("Очень срочно", "Очень срочно"));
-      urgency.add(new UrgencyItem("Срочно", "Срочно"));
+
+      urgency_selector.setVisibility(View.VISIBLE);
+      dataStore
+        .select(RUrgencyEntity.class)
+        .where(RUrgencyEntity.USER.eq( settings.getString("login").get() ))
+        .get()
+        .toObservable()
+        .filter(rUrgencyEntity -> {
+          Boolean result = true;
+
+          Timber.d("filter: %s", new Gson().toJson(rUrgencyEntity) );
+
+          if ( settings.getBoolean("settings_view_only_urgent").get() ){
+            if (!Objects.equals(rUrgencyEntity.getName().toLowerCase(), "срочно")){
+              result = false;
+            }
+          }
+
+          return result;
+        })
+        .toList()
+        .observeOn(Schedulers.newThread())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(
+          list -> {
+
+
+            if (list.size() > 0){
+              for (RUrgencyEntity u: list) {
+                urgency.add(new UrgencyItem(u.getName(), u.getUid()));
+              }
+              urgency_selector.setItems(urgency);
+            }
+
+
+            if ( raw_decision != null && raw_decision.getUrgencyText() != null ){
+
+              for (int i = 0; i < urgency.size(); i++) {
+                UrgencyItem urgency_item = urgency.get(i);
+                Timber.tag(TAG).d("urgency: %s | %s", raw_decision.getUrgencyText(), urgency_item.getLabel());
+
+                if (Objects.equals(urgency_item.getLabel().toLowerCase(), raw_decision.getUrgencyText().toLowerCase())){
+                  Timber.tag(TAG).d("SUCCES: %s | %s", raw_decision.getUrgencyText(), urgency_item.getLabel());
+
+                  manager.setUrgencyText(urgency_item.getLabel());
+                  manager.setUrgency(urgency_item.getValue());
+
+                  urgency_selector.setText(urgency_item.getLabel());
+                  urgency_selector.setSelected(true);
+                  break;
+                }
+              }
+            }
+
+          },
+          error -> {
+            Timber.tag(TAG).e(error);
+          }
+        );
     }
 
 
 
-
-    urgency_selector.setItems(urgency);
     urgency_selector.setOnItemSelectedListener((item, selectedIndex) -> {
-      manager.setUrgency( item.getLabel() );
+      manager.setUrgency( item );
     });
 
 
@@ -486,11 +534,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       signer_oshs_selector.setText( raw_decision.getSigner() );
     }
 
-    if ( raw_decision.getUrgencyText() != null ){
-      urgency_selector.setSelection( 0 );
-      manager.setUrgency("");
-    }
-
     if ( rDecisionEntity != null && rDecisionEntity.getDate() != null ){
       decision_date.setText( rDecisionEntity.getDate() );
       manager.setDate( rDecisionEntity.getDate() );
@@ -547,6 +590,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     originalSigner = raw_decision.getSigner();
     originalSignerBlankText = raw_decision.getSignerBlankText();
     originalSignerAssistantId = raw_decision.getAssistantId();
+
   }
 
   private boolean checkDecision() {

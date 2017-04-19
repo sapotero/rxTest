@@ -54,7 +54,7 @@ public class Decision implements Serializable {
   private String comment;
 
 
-  @SerializedName("urgency")
+  @SerializedName("urgency_id")
   @Expose
   private String urgency;
 

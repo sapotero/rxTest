@@ -137,6 +137,7 @@ public class SaveDecision extends AbstractCommand {
     if (dec.getUrgencyText() != null) {
       decision.setUrgencyText(dec.getUrgencyText());
     }
+
     decision.setComment(dec.getComment());
     decision.setDate( dec.getDate());
     decision.setSigner( dec.getSigner() );
@@ -248,8 +249,6 @@ public class SaveDecision extends AbstractCommand {
       _decision.setApproved(true);
     }
 
-
-    _decision.setUrgency( "12345" );
 
     String json_d = new Gson().toJson( decision );
     String json_m = new Gson().toJson( _decision );
