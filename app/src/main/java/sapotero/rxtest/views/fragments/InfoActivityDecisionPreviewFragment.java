@@ -650,7 +650,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
             unsorterd_decisions.add( new DecisionSpinnerItem( decision, decision.getSignerBlankText(), decision.getDate() ) );
           }
 
-          Collections.sort(unsorterd_decisions, (o1, o2) -> o1.getDecision().getUid().compareTo( o2.getDecision().getUid() ));
+//          Collections.sort(unsorterd_decisions, (o1, o2) -> o1.getDecision().getUid().compareTo( o2.getDecision().getUid() ));
+          Timber.tag(TAG).e("unsorterd_decisions > %s", unsorterd_decisions.size());
 
           decision_spinner_adapter.addAll( unsorterd_decisions );
 
@@ -674,6 +675,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
           showDecisionCardTollbarMenuItems(false);
         }
 
+      }, error -> {
+        Timber.tag(TAG).e(error);
       });
   }
 
