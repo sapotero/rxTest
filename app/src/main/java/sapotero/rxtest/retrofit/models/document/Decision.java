@@ -95,7 +95,7 @@ public class Decision implements Serializable {
 
   @SerializedName("letterhead_font_size")
   @Expose
-  private String letterheadFontSize;
+  private String letterheadFontSize = "12";
 
   @SerializedName("sign")
   @Expose
