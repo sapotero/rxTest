@@ -37,6 +37,8 @@ import sapotero.rxtest.events.auth.AuthDcCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthDcCheckSuccessEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckSuccessEvent;
+import sapotero.rxtest.events.stepper.load.StepperDocumentCountReadyEvent;
+import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.jobs.bus.CreateAssistantJob;
 import sapotero.rxtest.jobs.bus.CreateDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateFavoriteUsersJob;
@@ -594,6 +596,7 @@ public class DataLoaderManager {
       // Received responses on all requests, now jobCount contains total initial job count value.
       // Update counter in preferences with this value.
       jobCounter.addJobCount(jobCount);
+      EventBus.getDefault().post( new StepperDocumentCountReadyEvent() );
     }
   }
 

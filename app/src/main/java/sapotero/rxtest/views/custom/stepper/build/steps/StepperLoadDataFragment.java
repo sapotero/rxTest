@@ -32,6 +32,7 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.events.bus.FileDownloadedEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckFailEvent;
+import sapotero.rxtest.events.stepper.load.StepperDocumentCountReadyEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.events.stepper.shared.StepperNextStepEvent;
 import sapotero.rxtest.jobs.utils.JobCounter;
@@ -75,36 +76,7 @@ public class StepperLoadDataFragment extends Fragment implements Step {
       Timber.tag(TAG).v( "mRingProgressBar value: complete");
     });
 
-    if (subscription == null){
-      subscription = new CompositeSubscription();
-    }
-
-    if (subscription.hasSubscriptions()){
-      subscription.unsubscribe();
-    }
-
-//    subscription.add(
-//      Observable
-//      .interval( 2, TimeUnit.SECONDS)
-//      .subscribeOn(AndroidSchedulers.mainThread())
-//      .observeOn(AndroidSchedulers.mainThread())
-//      .subscribe( data-> {
-//        int value = mRingProgressBar.getProgress();
-//        mRingProgressBar.setProgress( value + 1 );
-//
-//        if ( getLoadedDocumentsPercent() > value ){
-//          subscription.unsubscribe();
-//          mRingProgressBar.setOnProgressListener(null);
-//          mRingProgressBar = null;
-//          EventBus.getDefault().post( new StepperNextStepEvent() );
-//        }
-//
-//      })
-//    );
-
     error = new VerificationError("Подождите загрузки документов");
-
-
 
     return view;
   }
@@ -145,8 +117,10 @@ public class StepperLoadDataFragment extends Fragment implements Step {
     } else {
       error = new VerificationError("Дождитесь окончания загрузки");
 
-      if ( mRingProgressBar.getProgress() >= 99 ){
+      if ( mRingProgressBar.getProgress() >= 80 ){
         error = null;
+      } else {
+        Toast.makeText( getContext(), error.getErrorMessage(), Toast.LENGTH_SHORT ).show();
       }
     }
 
@@ -155,8 +129,27 @@ public class StepperLoadDataFragment extends Fragment implements Step {
 
   @Override
   public void onSelected() {
-    loaded = 0;
-    mRingProgressBar.setProgress( 0 );
+    if (jobCounter.getJobCount() == 0) {
+      loaded = 0;
+      mRingProgressBar.setProgress( 0 );
+
+      if (subscription != null && subscription.hasSubscriptions()){
+        subscription.unsubscribe();
+      }
+
+      subscription = new CompositeSubscription();
+
+      subscription.add(
+        Observable
+          .interval( 2, TimeUnit.SECONDS)
+          .subscribeOn(AndroidSchedulers.mainThread())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe( data-> {
+            int value = mRingProgressBar.getProgress();
+            mRingProgressBar.setProgress( value + 1 );
+          })
+      );
+    }
   }
 
   @Override
@@ -178,35 +171,43 @@ public class StepperLoadDataFragment extends Fragment implements Step {
     updateProgressBar(event.message);
   }
 
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(StepperDocumentCountReadyEvent event) {
+    updateProgressBar("");
+  }
+
   private void updateProgressBar(String message) {
     loaded++;
 
     Timber.tag(TAG).d("TOTAL: %s/%s | %s", COUNT.get(), loaded, message );
 
-    int perc = getLoadedDocumentsPercent();
+    int jobCount = jobCounter.getJobCount();
 
-    if (mRingProgressBar != null) {
-      mRingProgressBar.setProgress( perc );
-    }
+    if (jobCount != 0) {
+      if (subscription.hasSubscriptions()) {
+        subscription.unsubscribe();
+      }
 
-    if ( perc == 100f ){
-      error = null;
+      int perc = calculatePercent(jobCount);
+
+      if (mRingProgressBar != null && mRingProgressBar.getProgress() != 100) {
+        mRingProgressBar.setProgress( perc );
+      }
+
+      if ( perc == 100f ){
+        error = null;
+      }
     }
   }
 
-  private int getLoadedDocumentsPercent() {
+  private int calculatePercent(int jobCount) {
     float result = 0;
-    int jobCount = jobCounter.getJobCount();
 
     if (jobCount != 0) {
       result = 100f * loaded / jobCount;
 
       if (result > 100){
         result = 100f;
-
-        if (subscription.hasSubscriptions()){
-          subscription.unsubscribe();
-        }
       }
     }
 
