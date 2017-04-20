@@ -380,7 +380,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     binder = ButterKnife.bind(this, view);
 
     fragment = this;
-    invalidate();
+//    invalidate();
 
     return view;
   }
@@ -635,7 +635,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       .where(RDocumentEntity.UID.eq( uid == null? UID.get() : uid ))
       .get()
       .toObservable()
-      .subscribeOn(Schedulers.io())
+      .subscribeOn(Schedulers.computation())
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(doc -> {
 
@@ -813,6 +813,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     private void show( RDecisionEntity decision ){
       clear();
 
+      showMagnifer();
+
       Timber.tag("getUrgencyText").v("%s", decision.getUrgencyText() );
       Timber.tag("getLetterhead").v("%s",  decision.getLetterhead() );
 
@@ -871,6 +873,20 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
       clear();
       printLetterHead( getString(R.string.decision_blank) );
+      hideMagnifer();
+
+    }
+
+    private void hideMagnifer() {
+      magnifer.setAlpha(0.4f);
+      magnifer.setFocusable(false);
+      magnifer.setClickable(false);
+    }
+
+    private void showMagnifer() {
+      magnifer.setAlpha(1.0f);
+      magnifer.setFocusable(true);
+      magnifer.setClickable(true);
     }
 
     private void printSigner(RDecisionEntity decision, String registrationNumber) {
@@ -1087,10 +1103,6 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       preview_body.addView( users_view );
     }
 
-
-    public String getRegNumber() {
-      return reg_number;
-    }
   }
 
   private void initEvents() {
