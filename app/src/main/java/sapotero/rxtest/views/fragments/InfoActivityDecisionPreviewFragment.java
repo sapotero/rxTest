@@ -397,18 +397,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
     gestureDetector = new GestureDetector( getContext(),new GestureListener() );
 
-    desigion_view_root.setOnTouchListener(new View.OnTouchListener() {
-      @Override
-      public boolean onTouch(View v, MotionEvent event) {
-        return gestureDetector.onTouchEvent(event);
-      }
-    });
-    preview_body.setOnTouchListener(new View.OnTouchListener() {
-      @Override
-      public boolean onTouch(View v, MotionEvent event) {
-        return gestureDetector.onTouchEvent(event);
-      }
-    });
+    desigion_view_root.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
+    preview_body.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
 
     preview = new Preview(getContext());
   }
