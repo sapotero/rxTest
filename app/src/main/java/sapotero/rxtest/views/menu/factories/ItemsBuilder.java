@@ -230,7 +230,7 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
 //    }
 
 
-    Timber.tag(TAG).v( MainMenuButton.getByIndex(index).getFormat() );
+//    Timber.tag(TAG).v( MainMenuButton.getByIndex(index).getFormat() );
 
     return result;
   }

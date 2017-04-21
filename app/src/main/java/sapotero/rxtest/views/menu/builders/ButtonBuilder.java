@@ -118,6 +118,7 @@ public class ButtonBuilder {
       .count(RDocumentEntity.class)
       .where(RDocumentEntity.USER.eq(settings.getString("login").get()))
       .and(RDocumentEntity.WITH_DECISION.eq(true))
+      .and( RDocumentEntity.DOCUMENT_TYPE.in( validation.getSelectedJournals() ) )
       .and(RDocumentEntity.FROM_LINKS.eq(false));
 
     if (index == 4 || index == 7){
@@ -171,6 +172,7 @@ public class ButtonBuilder {
     WhereAndOr<RxScalar<Integer>> query = dataStore
       .count(RDocumentEntity.class)
       .where( RDocumentEntity.USER.eq( settings.getString("login").get() ) )
+      .and( RDocumentEntity.DOCUMENT_TYPE.in( validation.getSelectedJournals() ) )
       .and(RDocumentEntity.FROM_LINKS.eq(false));
 
     if (index == 4 || index == 7){
@@ -213,7 +215,7 @@ public class ButtonBuilder {
         }
       }
     }
-    
+
     view.setText( String.format( label, query.get().value() ) );
   }
 

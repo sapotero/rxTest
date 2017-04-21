@@ -218,7 +218,7 @@ public class DBQueryBuilder {
 
             return result;
           })
-          .filter(documentEntity -> validation.isDocumentInActiveJournal(documentEntity.getDocumentType(), documentEntity.getFilter()))
+          .filter(documentEntity -> validation.filterDocumentInSelectedJournals(documentEntity.getDocumentType(), documentEntity.getFilter()))
           .toList()
           .debounce(300, TimeUnit.MILLISECONDS)
           .subscribeOn(Schedulers.newThread())

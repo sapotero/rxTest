@@ -6,6 +6,7 @@ import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -37,7 +38,7 @@ public class Validation{
       );
   }
 
-  public Boolean isDocumentInActiveJournal(String type, String status){
+  public Boolean filterDocumentInSelectedJournals(String type, String status){
 
     Boolean result = false;
 
@@ -80,7 +81,50 @@ public class Validation{
       }
     }
 
+    return result;
+  }
 
+  public List<String> getSelectedJournals() {
+    ArrayList<String> journal = new ArrayList<>();
+
+    if (selected_journals != null){
+      for (String index: selected_journals) {
+        switch (index){
+          case "1":
+            journal.add("incoming_documents");
+            break;
+          case "2":
+            journal.add("citizen_requests");
+            break;
+          case "4":
+            journal.add("incoming_orders");
+            break;
+          case "7":
+            journal.add("outgoing_documents");
+            break;
+          case "5":
+            journal.add("orders");
+            break;
+          case "6":
+            journal.add("orders_ddo");
+            break;
+        }
+
+      }
+    }
+
+    Timber.tag(TAG).e("selected status: %s", journal);
+
+    return journal;
+  }
+  public Boolean containsSigningAndApproval(){
+    Boolean result = false;
+
+    if (selected_journals != null) {
+      if (selected_journals.contains("3")){
+        result = true;
+      }
+    }
 
     return result;
   }
