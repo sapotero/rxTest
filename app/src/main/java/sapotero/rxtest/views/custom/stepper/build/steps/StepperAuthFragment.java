@@ -154,12 +154,48 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
   @Override
   public void onResume() {
     super.onResume();
-    startAuthorization();
+    // startAuthorization();
+    // TODO: Remove this line and restore the line above
+    startAuthorizationWithLogin();
   }
 
   private void startAuthorization() {
     // If not first run, immediately start authorization with DC
     if ( !isFirstRun() ) {
+      EditText password = (EditText) stepper_auth_dc_wrapper.findViewById(R.id.stepper_auth_dc_password);
+
+      String passwordText = settings.getString("PIN").get();
+      if (passwordText == null) {
+        passwordText = "";
+      }
+
+      password.setText(passwordText);
+
+      verifyStep();
+    }
+  }
+
+  // For testing
+  private void startAuthorizationWithLogin() {
+    if ( !isFirstRun() ) {
+      setAuthTypePassword();
+
+      EditText login = (EditText) stepper_auth_password_wrapper.findViewById(R.id.stepper_auth_username);
+      EditText pwd   = (EditText) stepper_auth_password_wrapper.findViewById(R.id.stepper_auth_password);
+
+      String loginText = settings.getString("login").get();
+      if (loginText == null) {
+        loginText = "";
+      }
+
+      String pwdText = settings.getString("password").get();
+      if (pwdText == null) {
+        pwdText = "";
+      }
+
+      login.setText(loginText);
+      pwd.setText(pwdText);
+
       verifyStep();
     }
   }
@@ -182,13 +218,6 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
       case DS:
         EditText password = (EditText) stepper_auth_dc_wrapper.findViewById(R.id.stepper_auth_dc_password);
         String enteredText = password.getText().toString();
-
-        if ( !isFirstRun() ) {
-          enteredText = settings.getString("PIN").get();
-          if (enteredText == null) {
-            enteredText = "";
-          }
-        }
 
         if (enteredText.equals("qwerty")) {
           setAuthTypePassword();
