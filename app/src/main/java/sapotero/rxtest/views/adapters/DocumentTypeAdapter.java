@@ -5,16 +5,25 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+
+import javax.inject.Inject;
 
 import sapotero.rxtest.R;
+import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.views.adapters.models.DocumentTypeItem;
 
 public class DocumentTypeAdapter extends BaseAdapter {
+  @Inject RxSharedPreferences settings;
+
   private List<DocumentTypeItem> documents;
   private Context context;
   private LayoutInflater inflter;
@@ -22,12 +31,16 @@ public class DocumentTypeAdapter extends BaseAdapter {
   private int mPos;
   private View view;
   private TextView text;
+  private LinearLayout wrapper;
 
   public DocumentTypeAdapter(Context context, List<DocumentTypeItem> organizations) {
+
 
     this.context = context;
     this.documents = organizations;
     this.inflter = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    EsdApplication.getComponent(context).inject(this);
+
   }
 
   @Override
@@ -60,15 +73,41 @@ public class DocumentTypeAdapter extends BaseAdapter {
 
     text = ( (TextView) view.findViewById(R.id.document_type_name)  );
     text.setText( item.getName()  );
-//    ( (TextView) view.findViewById(R.id.document_type_count) ).setText( item.getValue() );
+
 
     return view;
   }
 
+  @Override
+  public View getDropDownView(int position, View convertView, ViewGroup parent) {
+    View v = null;
+
+    Set<String> visible_journals = settings.getStringSet("settings_view_journals").get();
+    int index =  documents.get(position).getMainMenuItem().getIndex();
+
+    if ( !Arrays.asList(0,8,9,10).contains(index) ){
+
+      assert visible_journals != null;
+      if ( !visible_journals.contains( String.valueOf( index ) ) ){
+        TextView tv = new TextView(context);
+        tv.setVisibility(View.GONE);
+        tv.setHeight(0);
+        v = tv;
+        v.setVisibility(View.GONE);
+      } else {
+        v = super.getDropDownView(position, null, parent);
+      }
+    } else {
+      v = super.getDropDownView(position, null, parent);
+    }
+
+    return v;
+  }
+
+
   private DocumentTypeItem getOrganizationItem(int position) {
     return getItem(position);
   }
-
 
   public int getPosition() {
     return mPos;
