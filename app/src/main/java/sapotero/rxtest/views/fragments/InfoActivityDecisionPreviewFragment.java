@@ -617,6 +617,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     }
   }
 
+  
   private void loadFromDb() {
     Timber.tag("loadFromDb").v("star");
 
@@ -625,7 +626,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       .where(RDocumentEntity.UID.eq( uid == null? UID.get() : uid ))
       .get()
       .toObservable()
-      .subscribeOn(Schedulers.computation())
+      .subscribeOn(Schedulers.newThread())
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(doc -> {
 

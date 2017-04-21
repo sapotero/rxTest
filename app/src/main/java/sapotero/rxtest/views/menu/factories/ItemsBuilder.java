@@ -151,11 +151,50 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
     RadioGroup button_group = getButtonGroupLayout(context);
 
     if ( mainMenuItem.getMainMenuButtons().size() > 0 ){
-      for ( ButtonBuilder button: mainMenuItem.getMainMenuButtons() ){
+//      for ( ButtonBuilder button: mainMenuItem.getMainMenuButtons() ){
+      Boolean isSet = false;
+
+      for (int i = 0; i < mainMenuItem.getMainMenuButtons().size(); i++) {
+        ButtonBuilder button = mainMenuItem.getMainMenuButtons().get(i);
+
         button_group.addView( button.getView(context) );
         button.registerCallBack(this);
+
+        // resolved https://tasks.n-core.ru/browse/MVDESD-12879
+        // Стартовая страница: Должен быть выбор отображаемого раздела документов при запуске
+        // На рассмотрение, Первичное рассмотрение, Рассмотренные
+
+        switch (settings.getString("settings_view_start_page").get()){
+          case "report":
+            if ( button.getIndex() == 2 ) {
+              ((RadioButton) button_group.getChildAt(i)).setChecked(true);
+              isSet = true;
+            }
+            break;
+          case "primary_consideration":
+            if ( button.getIndex() == 3 ) {
+              ((RadioButton) button_group.getChildAt(i)).setChecked(true);
+              isSet = true;
+            }
+            break;
+          case "processed":
+            if ( button.getIndex() == 4 || button.getIndex() == 7 ) {
+              ((RadioButton) button_group.getChildAt(i)).setChecked(true);
+              isSet = true;
+            }
+            break;
+        }
       }
-      ((RadioButton) button_group.getChildAt(0)).setChecked(true);
+
+      if (!isSet){
+        ((RadioButton) button_group.getChildAt(0)).setChecked(true);
+      }
+
+      // если отключена первичка, но она есть в кнопках
+      if (settings.getBoolean("settings_view_hide_primary_consideration").get()){
+        ((RadioButton) button_group.getChildAt(0)).setChecked(true);
+      }
+
     } else {
       onButtonBuilderUpdate(index);
     }
