@@ -29,6 +29,8 @@ import okhttp3.OkHttpClient;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.events.bus.FileDownloadedEvent;
+import sapotero.rxtest.events.stepper.auth.StepperDcCheckEvent;
+import sapotero.rxtest.events.stepper.auth.StepperDcCheckSuccesEvent;
 import sapotero.rxtest.events.stepper.shared.StepperNextStepEvent;
 import sapotero.rxtest.utils.FirstRun;
 import sapotero.rxtest.utils.queue.QueueManager;
@@ -36,6 +38,7 @@ import sapotero.rxtest.views.custom.stepper.StepperLayout;
 import sapotero.rxtest.views.custom.stepper.VerificationError;
 import sapotero.rxtest.views.custom.stepper.build.StepperAdapter;
 import sapotero.rxtest.services.MainService;
+import timber.log.Timber;
 
 
 public class LoginActivity extends AppCompatActivity implements StepperLayout.StepperListener {
@@ -243,14 +246,6 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
       EventBus.getDefault().unregister(this);
     }
     EventBus.getDefault().register(this);
-
-    FirstRun firstRun = new FirstRun(settings);
-    boolean isFirstRun = firstRun.isFirstRun();
-
-//    if ( !isFirstRun ) {
-//      // TODO: Send event to auth with DC
-//      finish();
-//    }
   }
 
   /* Stepper */
@@ -283,6 +278,10 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
 //    Toast.makeText( getApplicationContext(), "onReturn", Toast.LENGTH_SHORT ).show();
   }
 
+  private boolean isFirstRun() {
+    FirstRun firstRun = new FirstRun(settings);
+    return firstRun.isFirstRun();
+  }
 
   @Subscribe(threadMode = ThreadMode.BACKGROUND)
   public void onMessageEvent(FileDownloadedEvent event) {
@@ -292,5 +291,13 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(StepperNextStepEvent event) {
     stepperLayout.getmNextNavigationButton().performClick();
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(StepperDcCheckSuccesEvent event) {
+    // If signed with DC successfully and not first run, immediately go to main activity
+    if ( !isFirstRun() ) {
+      onCompleted(null);
+    }
   }
 }

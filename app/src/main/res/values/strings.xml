@@ -216,7 +216,7 @@
     <string name="ms_complete">Завершить</string>
 
 
-    <string name="stepper_choose_auth">Выбор способа авторизации</string>
+    <string name="stepper_choose_auth">Начало</string>
     <string name="stepper_auth">Авторизация</string>
     <string name="stepper_load_data">Загрузка данных, подождите</string>
     <string name="stepper_end">Завершение</string>

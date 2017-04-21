@@ -36,6 +36,7 @@ import sapotero.rxtest.events.stepper.load.StepperDocumentCountReadyEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.events.stepper.shared.StepperNextStepEvent;
 import sapotero.rxtest.jobs.utils.JobCounter;
+import sapotero.rxtest.utils.FirstRun;
 import sapotero.rxtest.views.custom.stepper.Step;
 import sapotero.rxtest.views.custom.stepper.VerificationError;
 import timber.log.Timber;
@@ -108,7 +109,7 @@ public class StepperLoadDataFragment extends Fragment implements Step {
       Toast.makeText( getContext(), "Режим работы: оффлайн", Toast.LENGTH_SHORT ).show();
     }
 
-    if ( settings.getBoolean("is_first_run").get() != null && !settings.getBoolean("is_first_run").get() ){
+    if ( !isFirstRun() ) {
       error = null;
 
       if (subscription.hasSubscriptions()){
@@ -125,6 +126,11 @@ public class StepperLoadDataFragment extends Fragment implements Step {
     }
 
     return error;
+  }
+
+  private boolean isFirstRun() {
+    FirstRun firstRun = new FirstRun(settings);
+    return firstRun.isFirstRun();
   }
 
   @Override

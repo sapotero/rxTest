@@ -32,6 +32,7 @@ import sapotero.rxtest.events.stepper.auth.StepperDcCheckSuccesEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckFailEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckSuccessEvent;
+import sapotero.rxtest.utils.FirstRun;
 import sapotero.rxtest.views.custom.stepper.BlockingStep;
 import sapotero.rxtest.views.custom.stepper.StepperLayout;
 import sapotero.rxtest.views.custom.stepper.VerificationError;
@@ -151,6 +152,24 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
   }
 
   @Override
+  public void onResume() {
+    super.onResume();
+    startAuthorization();
+  }
+
+  private void startAuthorization() {
+    // If not first run, immediately start authorization with DC
+    if ( !isFirstRun() ) {
+      verifyStep();
+    }
+  }
+
+  private boolean isFirstRun() {
+    FirstRun firstRun = new FirstRun(settings);
+    return firstRun.isFirstRun();
+  }
+
+  @Override
   @StringRes
   public int getName() {
     return R.string.stepper_auth;
@@ -163,6 +182,13 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
       case DS:
         EditText password = (EditText) stepper_auth_dc_wrapper.findViewById(R.id.stepper_auth_dc_password);
         String enteredText = password.getText().toString();
+
+        if ( !isFirstRun() ) {
+          enteredText = settings.getString("PIN").get();
+          if (enteredText == null) {
+            enteredText = "";
+          }
+        }
 
         if (enteredText.equals("qwerty")) {
           setAuthTypePassword();
