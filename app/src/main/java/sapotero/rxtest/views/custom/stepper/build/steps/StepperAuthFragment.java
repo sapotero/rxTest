@@ -32,6 +32,7 @@ import sapotero.rxtest.events.stepper.auth.StepperDcCheckSuccesEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckFailEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckSuccessEvent;
+import sapotero.rxtest.events.stepper.shared.StepperNextStepEvent;
 import sapotero.rxtest.utils.FirstRun;
 import sapotero.rxtest.views.custom.stepper.BlockingStep;
 import sapotero.rxtest.views.custom.stepper.StepperLayout;
@@ -171,7 +172,7 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
 
       password.setText(passwordText);
 
-      verifyStep();
+      EventBus.getDefault().post( new StepperNextStepEvent() );
     }
   }
 
@@ -196,7 +197,7 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
       login.setText(loginText);
       pwd.setText(pwdText);
 
-      verifyStep();
+      EventBus.getDefault().post( new StepperNextStepEvent() );
     }
   }
 

@@ -34,6 +34,7 @@ import sapotero.rxtest.events.bus.FileDownloadedEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckFailEvent;
 import sapotero.rxtest.events.stepper.load.StepperDocumentCountReadyEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
+import sapotero.rxtest.events.stepper.shared.StepperCloseLoginScreenEvent;
 import sapotero.rxtest.events.stepper.shared.StepperNextStepEvent;
 import sapotero.rxtest.jobs.utils.JobCounter;
 import sapotero.rxtest.utils.FirstRun;
@@ -200,8 +201,12 @@ public class StepperLoadDataFragment extends Fragment implements Step {
         mRingProgressBar.setProgress( perc );
       }
 
-      if ( perc == 100f ){
+      if ( perc >= 80f ) {
         error = null;
+        if ( !isFirstRun() ) {
+          // If loaded 80 or more percent and not first run, immediately move to main activity
+          EventBus.getDefault().post( new StepperCloseLoginScreenEvent() );
+        }
       }
     }
   }
