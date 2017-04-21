@@ -30,12 +30,14 @@ import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.db.requery.utils.validation.Validation;
 import timber.log.Timber;
 
 public class ButtonBuilder {
 
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject RxSharedPreferences settings;
+  @Inject Validation validation;
 
   private ConditionBuilder[] conditions;
   private ConditionBuilder[] item_conditions;
@@ -161,7 +163,6 @@ public class ButtonBuilder {
       }
     }
 
-    Timber.tag(TAG).e("getCountWithDecisons %s", query.get().value());
     view.setText( String.format( label, query.get().value() ) );
   }
 
@@ -212,19 +213,7 @@ public class ButtonBuilder {
         }
       }
     }
-
-    if ( temp_conditions.size() > 0 ) {
-      for (ConditionBuilder condition : temp_conditions) {
-        Timber.tag("temp_conditions").v("%s %s %s | %s"
-          , condition.getField().getLeftOperand()
-          , condition.getField().getOperator()
-          , condition.getField().getRightOperand()
-          , condition.getCondition());
-      }
-    }
-
-
-    Timber.tag(TAG).e("getCountWithOutDecisons %s", query.get().value());
+    
     view.setText( String.format( label, query.get().value() ) );
   }
 

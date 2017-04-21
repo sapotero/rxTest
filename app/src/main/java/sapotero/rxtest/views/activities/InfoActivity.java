@@ -90,12 +90,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   @Inject QueueManager queue;
   @Inject OperationManager operationManager;
 
-  private static final int SWIPE_MIN_DISTANCE = 120;
-  private static final int SWIPE_MAX_OFF_PATH = 250;
-  private static final int SWIPE_THRESHOLD_VELOCITY = 200;
-
-  private byte[] CARD;
-
   private Preference<String> TOKEN;
   private Preference<String> LAST_SEEN_UID;
   private Preference<String> LOGIN;

@@ -43,7 +43,6 @@ public final class EsdApplication extends Application {
 
   @Inject RxSharedPreferences settings;
 
-
   @Override
   protected void attachBaseContext(Context base) {
     super.attachBaseContext(base);
@@ -76,9 +75,8 @@ public final class EsdApplication extends Application {
         .build();
     Stetho.initialize(initializer);
 
-
-
     mainComponent = DaggerEsdComponent.builder().esdModule(new EsdModule(this)).build();
+
     app = this;
 
     context=getApplicationContext();
@@ -116,6 +114,6 @@ public final class EsdApplication extends Application {
   }
 
   public static EsdComponent getComponent(Context context) {
-    return ((EsdApplication) context.getApplicationContext()).mainComponent;
+    return mainComponent;
   }
 }
