@@ -229,23 +229,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     setFirstRunFalse();
 
-    checkAuth();
-  }
+    showLoginScreen();
 
-  private boolean isFirstRun() {
-    FirstRun firstRun = new FirstRun(settings);
-    return firstRun.isFirstRun();
-  }
-
-  private boolean isPinValid() {
-    boolean result;
-    try {
-      String sign = MainService.getFakeSign( context, settings.getString("PIN").get(), null );
-      result = sign != null && !sign.equals("");
-    } catch (Exception e) {
-      result = false;
-    }
-    return result;
+    updateToken();
   }
 
   private void setFirstRunFalse() {
@@ -262,11 +248,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     EventBus.getDefault().post( new UpdateAllDocumentsEvent());
   }
 
-  private void setFirstRunTrue() {
-    FirstRun firstRun = new FirstRun(settings);
-    firstRun.setFirstRun(true);
-  }
-
   private void updateToken() {
     String sign = settings.getString("START_UP_SIGN").get();
     if (sign == null) {
@@ -275,14 +256,36 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     dataLoader.updateAuth(sign);
   }
 
-  private void checkAuth() {
-    if ( !isFirstRun() ) {
-      String password = settings.getString("PIN").get();
-      if (password == null) {
-        password = "";
-      }
-      EventBus.getDefault().post( new StepperDcCheckEvent( password ) );
+  private boolean isSkippedSignIn() {
+    boolean result;
+
+    String pin = settings.getString("PIN").get();
+    if (pin == null) {
+      pin = "";
     }
+
+    String password = settings.getString("password").get();
+    if (password == null) {
+      password = "";
+    }
+
+    result = pin.equals("") && password.equals("");
+
+    return result;
+  }
+
+  private void showLoginScreen() {
+    if ( isSkippedSignIn() ) {
+      setFirstRunTrue();
+      Intent intent = new Intent(this, LoginActivity.class);
+      startActivity(intent);
+      finish();
+    }
+  }
+
+  private void setFirstRunTrue() {
+    FirstRun firstRun = new FirstRun(settings);
+    firstRun.setFirstRun(true);
   }
 
   public void isConnected(){
@@ -816,16 +819,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
 //    menuBuilder.update();
 
-  }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(StepperDcCheckFailEvent event) {
-    if ( !isFirstRun() ) {
-      setFirstRunTrue();
-      Intent intent = new Intent(this, LoginActivity.class);
-      startActivity(intent);
-      finish();
-    }
   }
 
   /* MenuBuilder.Callback */
