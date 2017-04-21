@@ -54,7 +54,7 @@ public class DocumentTypeItem {
         .value();
 
 
-      if ( validation.containsSigningAndApproval() ){
+      if ( validation.hasSigningAndApproval() ){
         projects = dataStore
           .count(RDocumentEntity.class)
           .where( RDocumentEntity.FILTER.in( MainMenuButton.ButtonStatus.getProject() )   )
@@ -87,6 +87,7 @@ public class DocumentTypeItem {
           .count(RDocumentEntity.class)
           .where(RDocumentEntity.USER.eq(settings.getString("login").get()))
           .and(RDocumentEntity.FILTER.ne( Fields.Status.LINK.getValue() ));
+
 
       } else {
         query = dataStore
