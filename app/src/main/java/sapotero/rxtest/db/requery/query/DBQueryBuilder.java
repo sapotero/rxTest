@@ -30,6 +30,7 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocument;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RSignerEntity;
+import sapotero.rxtest.db.requery.utils.validation.Validation;
 import sapotero.rxtest.events.adapter.UpdateDocumentAdapterEvent;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
@@ -45,6 +46,7 @@ public class DBQueryBuilder {
 
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject RxSharedPreferences settings;
+  @Inject Validation validation;
 
   private final String TAG = this.getClass().getSimpleName();
 
@@ -185,11 +187,6 @@ public class DBQueryBuilder {
 
             boolean result = true;
 
-            Timber.tag(TAG).w("filter: %s %s",
-              organizationSelector.getSelected().length,
-              organizationSelector.getAdapter().getCount()
-            );
-
             // resolved https://tasks.n-core.ru/browse/MVDESD-12625
             // *1) *Фильтр по организациям.
 
@@ -221,9 +218,10 @@ public class DBQueryBuilder {
 
             return result;
           })
+          .filter(documentEntity -> validation.filterDocumentInSelectedJournals(documentEntity.getDocumentType(), documentEntity.getFilter()))
           .toList()
           .debounce(300, TimeUnit.MILLISECONDS)
-          .subscribeOn(Schedulers.computation())
+          .subscribeOn(Schedulers.newThread())
           .observeOn(AndroidSchedulers.mainThread())
           .subscribe(
             data -> {
@@ -307,6 +305,8 @@ public class DBQueryBuilder {
 
     }
   }
+
+
 
   private void addByOneInAdapter(RDocumentEntity documentEntity) {
     hideEmpty();
