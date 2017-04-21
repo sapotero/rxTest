@@ -3,6 +3,7 @@
               android:layout_width="match_parent"
               android:orientation="horizontal"
               android:padding="4sp"
+              android:id="@+id/document_type_item_wrapper"
               android:layout_height="wrap_content">
 
     <!--android:drawableStart="@drawable/edit_pencil_black"-->

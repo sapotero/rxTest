@@ -50,6 +50,7 @@ import sapotero.rxtest.views.activities.MainActivity;
 import sapotero.rxtest.views.activities.SettingsActivity;
 import sapotero.rxtest.views.activities.SettingsTemplatesActivity;
 import sapotero.rxtest.views.adapters.DecisionAdapter;
+import sapotero.rxtest.views.adapters.DocumentTypeAdapter;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OshsAutoCompleteAdapter;
 import sapotero.rxtest.views.adapters.PrimaryConsiderationAdapter;
@@ -108,6 +109,7 @@ public interface EsdComponent {
 
   void inject(DecisionAdapter adapter);
   void inject(DocumentsAdapter adapter);
+  void inject(DocumentTypeAdapter adapter);
   void inject(PrimaryConsiderationAdapter adapter);
   void inject(OshsAutoCompleteAdapter context);
 

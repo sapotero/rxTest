@@ -18,29 +18,28 @@
         <item>processed</item>
     </string-array>
 
+    <string name="test_all"> ["1","6","4","7","5","3","2"] </string>
 
-    <!--<string-array name="settings_view_start_page">-->
-        <!--<item>Все документы</item>-->
-        <!--<item>Входящие документы</item>-->
-        <!--<item>Обращения граждан</item>-->
-        <!--<item>НПА</item>-->
-        <!--<item>Внутренние документы</item>-->
-        <!--<item>Приказы </item>-->
-        <!--<item>Приказы МВД</item>-->
-        <!--<item>Приказы ДДО</item>-->
-        <!--<item>Подписание/согласование</item>-->
-    <!--</string-array>-->
-    <!--<string-array name="settings_view_start_page_values">-->
-        <!--<item>settings_view_type_all</item>-->
-        <!--<item>settings_view_type_incoming_documents</item>-->
-        <!--<item>settings_view_type_citizen_requests</item>-->
-        <!--<item>settings_view_type_incoming_orders</item>-->
-        <!--<item>settings_view_type_internal</item>-->
-        <!--<item>settings_view_type_orders</item>-->
-        <!--<item>settings_view_type_orders_mvd</item>-->
-        <!--<item>settings_view_type_orders_ddo</item>-->
-        <!--<item>settings_view_type_approve</item>-->
-    <!--</string-array>-->
+
+    <string-array name="settings_view_journals">
+        <item>Входящие документы</item>
+        <item>Обращения граждан</item>
+        <item>НПА</item>
+        <item>Внутренние документы</item>
+        <item>Приказы </item>
+        <item>Приказы ДДО</item>
+        <item>Подписание/согласование</item>
+    </string-array>
+    <string-array name="settings_view_journals_values">
+        <item>1</item>
+        <item>2</item>
+        <item>4</item>
+        <item>7</item>
+        <item>5</item>
+        <item>6</item>
+        <item>3</item>
+    </string-array>
+
 
     <string-array name="settings_view_start_page_identifier">
         <item>10</item>

@@ -103,12 +103,14 @@ public enum MainMenuButton {
   public final String format;
   public final ConditionBuilder[] conditions;
 
-  MainMenuButton(final Integer index, final String format, final ConditionBuilder[] conditions ) {
+  MainMenuButton(final Integer index, final String format, final ConditionBuilder[] conditions) {
     this.index = index;
     this.format = format;
     this.conditions = conditions;
     Holder.MAP.put( String.valueOf(index), this);
   }
+
+
 
   public ConditionBuilder[] getConditions() {
     return conditions;
