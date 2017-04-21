@@ -29,10 +29,6 @@ import okhttp3.OkHttpClient;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.events.bus.FileDownloadedEvent;
-import sapotero.rxtest.events.stepper.auth.StepperDcCheckEvent;
-import sapotero.rxtest.events.stepper.auth.StepperDcCheckSuccesEvent;
-import sapotero.rxtest.events.stepper.auth.StepperLoginCheckSuccessEvent;
-import sapotero.rxtest.events.stepper.shared.StepperCloseLoginScreenEvent;
 import sapotero.rxtest.events.stepper.shared.StepperNextStepEvent;
 import sapotero.rxtest.utils.FirstRun;
 import sapotero.rxtest.utils.queue.QueueManager;
@@ -40,7 +36,6 @@ import sapotero.rxtest.views.custom.stepper.StepperLayout;
 import sapotero.rxtest.views.custom.stepper.VerificationError;
 import sapotero.rxtest.views.custom.stepper.build.StepperAdapter;
 import sapotero.rxtest.services.MainService;
-import timber.log.Timber;
 
 
 public class LoginActivity extends AppCompatActivity implements StepperLayout.StepperListener {
@@ -248,6 +243,11 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
       EventBus.getDefault().unregister(this);
     }
     EventBus.getDefault().register(this);
+
+    // If not first run, immediately move to main activity
+    if ( !isFirstRun() ) {
+      onCompleted(null);
+    }
   }
 
   /* Stepper */
@@ -294,25 +294,4 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
   public void onMessageEvent(StepperNextStepEvent event) {
     stepperLayout.getmNextNavigationButton().performClick();
   }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(StepperCloseLoginScreenEvent event) {
-    onCompleted(null);
-  }
-
-//  @Subscribe(threadMode = ThreadMode.MAIN)
-//  public void onMessageEvent(StepperDcCheckSuccesEvent event) {
-//    // If signed with DC successfully and not first run, immediately go to main activity
-//    if ( !isFirstRun() ) {
-//      onCompleted(null);
-//    }
-//  }
-//
-//  // TODO: Remove this, for testing only
-//  @Subscribe(threadMode = ThreadMode.MAIN)
-//  public void onMessageEvent(StepperLoginCheckSuccessEvent event) {
-//    if ( !isFirstRun() ) {
-//      onCompleted(null);
-//    }
-//  }
 }

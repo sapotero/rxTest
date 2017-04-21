@@ -69,21 +69,6 @@ public class StepperChooseAuthTypeFragment extends Fragment implements Step, Vie
   }
 
   @Override
-  public void onResume() {
-    super.onResume();
-    moveToNextStep();
-  }
-
-  private void moveToNextStep() {
-    // If not first run, immediately move to next step with chosen auth type DC
-    FirstRun firstRun = new FirstRun(settings);
-    boolean isFirstRun = firstRun.isFirstRun();
-    if ( !isFirstRun ) {
-      signWithDc();
-    }
-  }
-
-  @Override
   @StringRes
   public int getName() {
     return R.string.stepper_choose_auth;

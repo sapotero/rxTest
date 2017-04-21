@@ -70,6 +70,8 @@ import sapotero.rxtest.events.bus.GetDocumentInfoEvent;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.events.service.SuperVisorUpdateEvent;
 import sapotero.rxtest.events.service.UpdateAllDocumentsEvent;
+import sapotero.rxtest.events.stepper.auth.StepperDcCheckEvent;
+import sapotero.rxtest.events.stepper.auth.StepperDcCheckFailEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.events.view.RemoveDocumentFromAdapterEvent;
 import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
@@ -215,7 +217,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     progressBar.setVisibility(ProgressBar.GONE);
 
-
     initToolbar();
 
     initEvents();
@@ -228,6 +229,23 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     setFirstRunFalse();
 
+    checkAuth();
+  }
+
+  private boolean isFirstRun() {
+    FirstRun firstRun = new FirstRun(settings);
+    return firstRun.isFirstRun();
+  }
+
+  private boolean isPinValid() {
+    boolean result;
+    try {
+      String sign = MainService.getFakeSign( context, settings.getString("PIN").get(), null );
+      result = sign != null && !sign.equals("");
+    } catch (Exception e) {
+      result = false;
+    }
+    return result;
   }
 
   private void setFirstRunFalse() {
@@ -236,11 +254,35 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     boolean isFirstRun = firstRun.isFirstRun();
     boolean isSignedWithDc = firstRun.getBooleanFromSettings("SIGN_WITH_DC");
 
+    // If signed with login and password, do not set first run flag to false
     if ( isFirstRun && isSignedWithDc ) {
       firstRun.setFirstRun(false);
     }
 
     EventBus.getDefault().post( new UpdateAllDocumentsEvent());
+  }
+
+  private void setFirstRunTrue() {
+    FirstRun firstRun = new FirstRun(settings);
+    firstRun.setFirstRun(true);
+  }
+
+  private void updateToken() {
+    String sign = settings.getString("START_UP_SIGN").get();
+    if (sign == null) {
+      sign = "";
+    }
+    dataLoader.updateAuth(sign);
+  }
+
+  private void checkAuth() {
+    if ( !isFirstRun() ) {
+      String password = settings.getString("PIN").get();
+      if (password == null) {
+        password = "";
+      }
+      EventBus.getDefault().post( new StepperDcCheckEvent( password ) );
+    }
   }
 
   public void isConnected(){
@@ -776,6 +818,15 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   }
 
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(StepperDcCheckFailEvent event) {
+    if ( !isFirstRun() ) {
+      setFirstRunTrue();
+      Intent intent = new Intent(this, LoginActivity.class);
+      startActivity(intent);
+      finish();
+    }
+  }
 
   /* MenuBuilder.Callback */
   @Override

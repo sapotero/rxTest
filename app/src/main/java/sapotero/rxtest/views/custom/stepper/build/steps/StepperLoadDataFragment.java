@@ -30,12 +30,9 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.events.bus.FileDownloadedEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckFailEvent;
 import sapotero.rxtest.events.stepper.load.StepperDocumentCountReadyEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
-import sapotero.rxtest.events.stepper.shared.StepperCloseLoginScreenEvent;
-import sapotero.rxtest.events.stepper.shared.StepperNextStepEvent;
 import sapotero.rxtest.jobs.utils.JobCounter;
 import sapotero.rxtest.utils.FirstRun;
 import sapotero.rxtest.views.custom.stepper.Step;
@@ -180,7 +177,12 @@ public class StepperLoadDataFragment extends Fragment implements Step {
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(StepperDocumentCountReadyEvent event) {
-    updateProgressBar("");
+    if (jobCounter.getJobCount() == 0) {
+      // No documents to download, set download complete
+      mRingProgressBar.setProgress( 100 );
+    } else {
+      updateProgressBar("");
+    }
   }
 
   private void updateProgressBar(String message) {
@@ -203,10 +205,6 @@ public class StepperLoadDataFragment extends Fragment implements Step {
 
       if ( perc >= 80f ) {
         error = null;
-        if ( !isFirstRun() ) {
-          // If loaded 80 or more percent and not first run, immediately move to main activity
-          EventBus.getDefault().post( new StepperCloseLoginScreenEvent() );
-        }
       }
     }
   }
