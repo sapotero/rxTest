@@ -117,7 +117,7 @@ public class Validation{
 
     return journal;
   }
-  public Boolean containsSigningAndApproval(){
+  public Boolean hasSigningAndApproval(){
     Boolean result = false;
 
     if (selected_journals != null) {

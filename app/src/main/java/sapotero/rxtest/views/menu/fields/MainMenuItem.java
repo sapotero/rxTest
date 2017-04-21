@@ -321,7 +321,7 @@ public enum MainMenuItem {
     else {
       for (ButtonBuilder button: buttonsList){
         Timber.tag(TAG).e("getMainMenuButtons else recalcuate");
-        button.recalculate();
+//        button.recalculate();
       }
     }
 
