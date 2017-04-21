@@ -75,6 +75,7 @@ import sapotero.rxtest.events.view.RemoveDocumentFromAdapterEvent;
 import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
 import sapotero.rxtest.managers.DataLoaderManager;
 import sapotero.rxtest.services.MainService;
+import sapotero.rxtest.utils.FirstRun;
 import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
@@ -230,8 +231,13 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void setFirstRunFalse() {
-    if ( settings.getBoolean("is_first_run").get() != null && settings.getBoolean("is_first_run").get() ){
-      settings.getBoolean("is_first_run").set(false);
+    FirstRun firstRun = new FirstRun(settings);
+
+    boolean isFirstRun = firstRun.isFirstRun();
+    boolean isSignedWithDc = firstRun.getBooleanFromSettings("SIGN_WITH_DC");
+
+    if ( isFirstRun && isSignedWithDc ) {
+      firstRun.setFirstRun(false);
     }
 
     EventBus.getDefault().post( new UpdateAllDocumentsEvent());

@@ -30,6 +30,7 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.events.bus.FileDownloadedEvent;
 import sapotero.rxtest.events.stepper.shared.StepperNextStepEvent;
+import sapotero.rxtest.utils.FirstRun;
 import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.custom.stepper.StepperLayout;
 import sapotero.rxtest.views.custom.stepper.VerificationError;
@@ -243,9 +244,14 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
     }
     EventBus.getDefault().register(this);
 
+    FirstRun firstRun = new FirstRun(settings);
+    boolean isFirstRun = firstRun.isFirstRun();
+
+//    if ( !isFirstRun ) {
+//      // TODO: Send event to auth with DC
+//      finish();
+//    }
   }
-
-
 
   /* Stepper */
   @Override
