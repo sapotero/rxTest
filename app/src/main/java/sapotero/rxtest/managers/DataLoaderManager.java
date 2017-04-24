@@ -591,6 +591,8 @@ public class DataLoaderManager {
 //    updateFavoritesAndProcessed();
   }
 
+  // resolved https://tasks.n-core.ru/browse/MVDESD-13145
+  // Передача количества документов в экран загрузки
   private void updatePrefJobCount() {
     if (0 == requestCount) {
       // Received responses on all requests, now jobCount contains total initial job count value.
