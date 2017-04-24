@@ -33,6 +33,7 @@ import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.adapter.UpdateDocumentAdapterEvent;
+import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Block;
@@ -112,7 +113,7 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
 
           update( exist(doc.getUid()) );
 
-//          EventBus.getDefault().post( new StepperLoadDocumentEvent(doc.getUid()) );
+          EventBus.getDefault().post( new StepperLoadDocumentEvent(doc.getUid()) );
 
           if ( doc.getLinks() != null && doc.getLinks().size() > 0 ){
 

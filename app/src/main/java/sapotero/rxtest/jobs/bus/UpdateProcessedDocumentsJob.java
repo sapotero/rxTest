@@ -31,6 +31,7 @@ import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.db.requery.models.exemplars.RExemplarEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
+import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Block;
@@ -610,6 +611,8 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
         .subscribe(
           result -> {
             Timber.tag("MD5").d("updateDocumentInfo " + result.getMd5());
+
+            EventBus.getDefault().post( new StepperLoadDocumentEvent(doc.getUid()) );
 
             if ( result.getImages() != null && result.getImages().size() > 0  ){
 

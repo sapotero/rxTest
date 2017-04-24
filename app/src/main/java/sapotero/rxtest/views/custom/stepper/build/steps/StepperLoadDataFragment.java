@@ -2,18 +2,14 @@ package sapotero.rxtest.views.custom.stepper.build.steps;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
-import android.support.annotation.UiThread;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.birbit.android.jobqueue.Job;
 import com.birbit.android.jobqueue.JobManager;
-import com.birbit.android.jobqueue.callback.JobManagerCallback;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
@@ -28,6 +24,7 @@ import javax.inject.Inject;
 import io.netopen.hotbitmapgg.library.view.RingProgressBar;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
@@ -38,7 +35,6 @@ import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.jobs.utils.JobCounter;
 import sapotero.rxtest.utils.FirstRun;
 import sapotero.rxtest.views.custom.stepper.Step;
-import sapotero.rxtest.views.custom.stepper.StepperLayout;
 import sapotero.rxtest.views.custom.stepper.VerificationError;
 import timber.log.Timber;
 
@@ -156,7 +152,7 @@ public class StepperLoadDataFragment extends Fragment implements Step {
       subscription.add(
         Observable
           .interval( 2, TimeUnit.SECONDS)
-          .subscribeOn(AndroidSchedulers.mainThread())
+          .subscribeOn(Schedulers.computation())
           .observeOn(AndroidSchedulers.mainThread())
           .subscribe( data-> {
             int value = mRingProgressBar.getProgress();
