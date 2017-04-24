@@ -53,7 +53,7 @@ public class JobCounter {
   }
 
   public boolean isDownoadFileAlmostComplete() {
-    return getDownloadFileJobCount() <= 3;
+    return getDownloadFileJobCount() <= 5;
   }
 
   public void addDownloadFileJobCount(int value) {
