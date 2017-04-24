@@ -229,8 +229,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     setFirstRunFalse();
 
-    showLoginScreen();
-
     updateToken();
   }
 
@@ -254,38 +252,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       sign = "";
     }
     dataLoader.updateAuth(sign);
-  }
-
-  private boolean isSkippedSignIn() {
-    boolean result;
-
-    String pin = settings.getString("PIN").get();
-    if (pin == null) {
-      pin = "";
-    }
-
-    String password = settings.getString("password").get();
-    if (password == null) {
-      password = "";
-    }
-
-    result = pin.equals("") && password.equals("");
-
-    return result;
-  }
-
-  private void showLoginScreen() {
-    if ( isSkippedSignIn() ) {
-      setFirstRunTrue();
-      Intent intent = new Intent(this, LoginActivity.class);
-      startActivity(intent);
-      finish();
-    }
-  }
-
-  private void setFirstRunTrue() {
-    FirstRun firstRun = new FirstRun(settings);
-    firstRun.setFirstRun(true);
   }
 
   public void isConnected(){
