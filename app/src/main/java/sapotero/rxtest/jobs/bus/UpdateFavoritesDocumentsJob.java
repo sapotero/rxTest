@@ -33,7 +33,6 @@ import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.adapter.UpdateDocumentAdapterEvent;
-import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Block;
@@ -113,7 +112,7 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
 
           update( exist(doc.getUid()) );
 
-          EventBus.getDefault().post( new StepperLoadDocumentEvent(doc.getUid()) );
+//          EventBus.getDefault().post( new StepperLoadDocumentEvent(doc.getUid()) );
 
           if ( doc.getLinks() != null && doc.getLinks().size() > 0 ){
 
@@ -273,7 +272,7 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
       rDoc.setSigner( signer );
     }
 
-    rDoc.setFavorites(isFavorites);
+    rDoc.setFavorites(true);
     rDoc.setProcessed(isProcessed);
 
     rDoc.setControl(onControl);
@@ -283,7 +282,7 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
     rDoc.setProcessed(false);
 
     rDoc.setFromProcessedFolder( false );
-    rDoc.setFromFavoritesFolder( false );
+    rDoc.setFromFavoritesFolder( true );
 
     Boolean red = false;
     Boolean with_decision = false;
@@ -446,16 +445,16 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
     }
 
     rDoc.setDocumentType("");
-    rDoc.setFromFavoritesFolder(true);
-    rDoc.setFavorites(true);
     rDoc.setFilter("");
     rDoc.setFolder(folder);
+    rDoc.setFromFavoritesFolder(true);
+    rDoc.setFavorites(true);
 
 
     dataStore.update(rDoc)
       .toObservable()
-      .subscribeOn( Schedulers.io() )
-      .observeOn( Schedulers.io() )
+      .subscribeOn( Schedulers.newThread() )
+      .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         result -> {
           Timber.tag(TAG).d("updated " + result.getUid());
@@ -500,14 +499,6 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
       if (doc.isFavorites() == null){
         doc.setFavorites(isFavorites);
       }
-
-
-      doc.setControl(onControl);
-      doc.setUser( LOGIN.get() );
-      doc.setFromLinks( false );
-      doc.setFromProcessedFolder( false );
-      doc.setFromFavoritesFolder( false );
-      doc.setChanged( false );
 
       Boolean red = false;
       Boolean with_decision = false;
@@ -729,9 +720,7 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
 
     }
 
-//    if (not_processed) {
-//      doc.setProcessed(false);
-//    }
+
 
     dataStore
       .update( doc )

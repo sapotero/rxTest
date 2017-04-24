@@ -14,7 +14,9 @@ import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -50,6 +52,7 @@ import sapotero.rxtest.jobs.bus.InvalidateDocumentsJob;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.jobs.bus.UpdateFavoritesDocumentsJob;
 import sapotero.rxtest.jobs.utils.JobCounter;
+import sapotero.rxtest.jobs.bus.UpdateProcessedDocumentsJob;
 import sapotero.rxtest.retrofit.Api.AuthService;
 import sapotero.rxtest.retrofit.DocumentsService;
 import sapotero.rxtest.retrofit.models.AuthSignToken;
@@ -429,129 +432,152 @@ public class DataLoaderManager {
   public void updateByCurrentStatus(MainMenuItem items, MainMenuButton button) {
     Timber.tag(TAG).e("updateByCurrentStatus: %s %s", items, button );
 
-    ArrayList<String> indexes = new ArrayList<String>();
-
-    switch (items){
-      case CITIZEN_REQUESTS:
-        indexes.add("citizen_requests_production_db_core_cards_citizen_requests_cards");
-        break;
-      case INCOMING_DOCUMENTS:
-        indexes.add("incoming_documents_production_db_core_cards_incoming_documents_cards");
-        break;
-      case ORDERS_DDO:
-        indexes.add("orders_ddo_production_db_core_cards_orders_ddo_cards");
-        break;
-      case ORDERS:
-        indexes.add("orders_production_db_core_cards_orders_cards");
-        break;
-      case IN_DOCUMENTS:
-        indexes.add("outgoing_documents_production_db_core_cards_outgoing_documents_cards");
-        break;
-      case INCOMING_ORDERS:
-        indexes.add("incoming_orders_production_db_core_cards_incoming_orders_cards");
-        break;
-    }
-
-    ArrayList<String> sp = new ArrayList<String>();
-    ArrayList<String> statuses = new ArrayList<String>();
-
-    if (button != null) {
-      switch (button){
-        case APPROVAL:
-          sp.add("approval");
-          break;
-        case ASSIGN:
-          sp.add("signing");
-          break;
-        case PRIMARY_CONSIDERATION:
-          statuses.add("primary_consideration");
-          break;
-        case PERFORMANCE:
-          statuses.add("sent_to_the_report");
-          break;
-
-      }
-    }
-
-
-    // обновляем всё
-    if (items == MainMenuItem.ALL){
-      statuses.add("primary_consideration");
-      statuses.add("sent_to_the_report");
-      sp.add("approval");
-      sp.add("signing");
-
-      indexes.add("citizen_requests_production_db_core_cards_citizen_requests_cards");
-      indexes.add("incoming_documents_production_db_core_cards_incoming_documents_cards");
-      indexes.add("orders_ddo_production_db_core_cards_orders_ddo_cards");
-      indexes.add("orders_production_db_core_cards_orders_cards");
-      indexes.add("outgoing_documents_production_db_core_cards_outgoing_documents_cards");
-      indexes.add("incoming_orders_production_db_core_cards_incoming_orders_cards");
-    }
-
-    if (button == null){
-      statuses.add("primary_consideration");
-      statuses.add("sent_to_the_report");
-      sp.add("approval");
-      sp.add("signing");
-    }
-
-
-
-
-    Timber.tag(TAG).e("data: %s %s", indexes, statuses );
-
-    Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
-    DocumentsService docService = retrofit.create(DocumentsService.class);
-
-
     jobManager.cancelJobsInBackground(null, TagConstraint.ANY, "SyncDocument");
-
     unsubscribe();
 
-    requestCount = 0;
-    jobCount = 0;
-    jobCounter.setJobCount(0);
-    jobCounter.setDownloadFileJobCount(0);
+    if (items == MainMenuItem.PROCESSED ){
+      updateFavoritesAndProcessed(MainMenuItem.PROCESSED);
+    } else if( items == MainMenuItem.FAVORITES ){
+      updateFavoritesAndProcessed(MainMenuItem.FAVORITES);
+    } else {
 
-    for (String index: indexes ) {
-      for (String status: statuses ) {
+      ArrayList<String> indexes = new ArrayList<String>();
+      switch (items){
+        case CITIZEN_REQUESTS:
+          indexes.add("citizen_requests_production_db_core_cards_citizen_requests_cards");
+          break;
+        case INCOMING_DOCUMENTS:
+          indexes.add("incoming_documents_production_db_core_cards_incoming_documents_cards");
+          break;
+        case ORDERS_DDO:
+          indexes.add("orders_ddo_production_db_core_cards_orders_ddo_cards");
+          break;
+        case ORDERS:
+          indexes.add("orders_production_db_core_cards_orders_cards");
+          break;
+        case IN_DOCUMENTS:
+          indexes.add("outgoing_documents_production_db_core_cards_outgoing_documents_cards");
+          break;
+        case INCOMING_ORDERS:
+          indexes.add("incoming_orders_production_db_core_cards_incoming_orders_cards");
+          break;
+      }
+
+      ArrayList<String> sp = new ArrayList<String>();
+      ArrayList<String> statuses = new ArrayList<String>();
+
+      if (button != null) {
+        switch (button){
+          case APPROVAL:
+            sp.add("approval");
+            break;
+          case ASSIGN:
+            sp.add("signing");
+            break;
+          case PRIMARY_CONSIDERATION:
+            statuses.add("primary_consideration");
+            break;
+          case PERFORMANCE:
+            statuses.add("sent_to_the_report");
+            break;
+
+        }
+      }
+
+
+      // обновляем всё
+      if (items == MainMenuItem.ALL){
+        statuses.add("primary_consideration");
+        statuses.add("sent_to_the_report");
+        sp.add("approval");
+        sp.add("signing");
+
+        indexes.add("citizen_requests_production_db_core_cards_citizen_requests_cards");
+        indexes.add("incoming_documents_production_db_core_cards_incoming_documents_cards");
+        indexes.add("orders_ddo_production_db_core_cards_orders_ddo_cards");
+        indexes.add("orders_production_db_core_cards_orders_cards");
+        indexes.add("outgoing_documents_production_db_core_cards_outgoing_documents_cards");
+        indexes.add("incoming_orders_production_db_core_cards_incoming_orders_cards");
+      }
+
+      if (button == null){
+        statuses.add("primary_consideration");
+        statuses.add("sent_to_the_report");
+        sp.add("approval");
+        sp.add("signing");
+      }
+
+
+
+
+      Timber.tag(TAG).e("data: %s %s", indexes, statuses );
+
+      Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
+      DocumentsService docService = retrofit.create(DocumentsService.class);
+
+      for (String index: indexes ) {
+        for (String status: statuses ) {
+          subscription.add(
+            docService
+              .getDocumentsByIndexes(LOGIN.get(), TOKEN.get(), index, status, 500)
+              .subscribeOn( Schedulers.io() )
+              .observeOn( AndroidSchedulers.mainThread() )
+              .subscribe(
+                data -> {
+                  if (data.getDocuments().size() > 0){
+
+                    for (Document doc: data.getDocuments() ) {
+
+                      Timber.tag(TAG).e("index: %s | status: %s ",index, status );
+                      Timber.tag(TAG).e("exist: %s | md5: %s", isExist(doc), !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) );
+
+                      if ( isExist(doc) ){
+
+                        Timber.tag(TAG).e("isExist" );
+
+                        if ( !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) ){
+                          Timber.tag(TAG).e("isUpdate" );
+                          jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), index, status, true) );
+                        }
+
+                      } else {
+                        Timber.tag(TAG).e("isCreate" );
+                        jobManager.addJobInBackground( new CreateDocumentsJob(doc.getUid(), index, status) );
+                      }
+                    }
+
+                    requestCount = 0;
+                    jobCount = 0;
+                    jobCounter.setJobCount(0);
+                    jobCounter.setDownloadFileJobCount(0);
+
+                    if ( settings.getBoolean("is_first_run").get() != null && !settings.getBoolean("is_first_run").get() ) {
+                      Timber.tag(TAG).e("isInvalidate" );
+                      jobManager.addJobInBackground(new InvalidateDocumentsJob(data.getDocuments(), index, status));
+                    }
+                  }
+                },
+                error -> {
+                  Timber.tag(TAG).e(error);
+                })
+          );
+        }
+      }
+
+      for (String code: sp ) {
         requestCount++;
         subscription.add(
           docService
-            .getDocumentsByIndexes(LOGIN.get(), TOKEN.get(), index, status, 500)
+            .getDocuments(LOGIN.get(), TOKEN.get(), code, 500, 0)
             .subscribeOn(Schedulers.computation())
             .observeOn(Schedulers.computation())
             .subscribe(
               data -> {
                 requestCount--;
                 if (data.getDocuments().size() > 0){
-
                   for (Document doc: data.getDocuments() ) {
-
-                    Timber.tag(TAG).e("index: %s | status: %s ",index, status );
-                    Timber.tag(TAG).e("exist: %s | md5: %s", isExist(doc), !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) );
-
-                    if ( isExist(doc) ){
-
-                      Timber.tag(TAG).e("isExist" );
-
-                      if ( !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) ){
-                        Timber.tag(TAG).e("isUpdate" );
-                        jobCount++;
-                        jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), index, status, true) );
-                      }
-
-                    } else {
-                      Timber.tag(TAG).e("isCreate" );
-                      jobCount++;
-                      jobManager.addJobInBackground( new CreateDocumentsJob(doc.getUid(), index, status) );
-                    }
-                  }
-
-                  if ( settings.getBoolean("is_first_run").get() != null && !settings.getBoolean("is_first_run").get() ) {
-                    Timber.tag(TAG).e("isInvalidate" );
-                    jobManager.addJobInBackground(new InvalidateDocumentsJob(data.getDocuments(), index, status));
+                    jobCount++;
+                    jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), code) );
                   }
                 }
                 updatePrefJobCount();
@@ -564,34 +590,6 @@ public class DataLoaderManager {
         );
       }
     }
-
-    for (String code: sp ) {
-      requestCount++;
-      subscription.add(
-        docService
-          .getDocuments(LOGIN.get(), TOKEN.get(), code, 500, 0)
-          .subscribeOn(Schedulers.computation())
-          .observeOn(Schedulers.computation())
-          .subscribe(
-            data -> {
-              requestCount--;
-              if (data.getDocuments().size() > 0){
-                for (Document doc: data.getDocuments() ) {
-                  jobCount++;
-                  jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), code) );
-                }
-              }
-              updatePrefJobCount();
-            },
-            error -> {
-              requestCount--;
-              updatePrefJobCount();
-              Timber.tag(TAG).e(error);
-            })
-      );
-    }
-
-//    updateFavoritesAndProcessed();
   }
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13145
@@ -631,51 +629,6 @@ public class DataLoaderManager {
       .get().value() > 0;
   }
 
-  public void updateByStatus(MainMenuItem items) {
-
-//    Timber.tag(TAG).e("UPDATE BY STATUS: %s", items.getName() );
-//
-//    Observable<AuthSignToken> authSubscription = getAuthSubscription();
-//
-//
-//    switch ( items ){
-//      case FAVORITES:
-//        authSubscription
-//          .subscribeOn( Schedulers.io() )
-//          .observeOn( AndroidSchedulers.mainThread() )
-//          .subscribe(
-//            token -> {
-//              Timber.tag(TAG).i("updateAuth: token" + token.getAuthToken());
-//              setToken(token.getAuthToken());
-////              updateFavorites();
-//            },
-//            error -> {
-//              Timber.tag("getAuth").e( "ERROR: %s", error);
-//            }
-//          );
-//        break;
-//      case PROCESSED:
-//        authSubscription
-//          .subscribeOn( Schedulers.io() )
-//          .observeOn( AndroidSchedulers.mainThread() )
-//          .subscribe(
-//            token -> {
-//              Timber.tag(TAG).i("updateAuth: token" + token.getAuthToken());
-//              setToken(token.getAuthToken());
-////              updateProcessed();
-//            },
-//            error -> {
-//              Timber.tag("getAuth").e( "ERROR: %s", error);
-//            }
-//          );
-//        break;
-//      default:
-////        updateByDefault(authSubscription, items);
-//        break;
-//    }
-
-  }
-
   private Observable<AuthSignToken> getAuthSubscription() {
     Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
     AuthService auth = retrofit.create(AuthService.class);
@@ -712,42 +665,55 @@ public class DataLoaderManager {
   }
 
 
-  private void updateFavoritesAndProcessed() {
+  private void updateFavoritesAndProcessed(MainMenuItem item) {
 
     Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
     DocumentsService docService = retrofit.create(DocumentsService.class);
     RFolderEntity favorites_folder = dataStore
       .select(RFolderEntity.class)
       .where(RFolderEntity.TYPE.eq("favorites"))
-      .and(RFolderEntity.USER.eq( settings.getString("current_user").get() ))
+      .and(RFolderEntity.USER.eq( settings.getString("login").get() ))
       .get().firstOrNull();
 
-//    RFolderEntity processed_folder = dataStore
-//      .select(RFolderEntity.class)
-//      .where(RFolderEntity.TYPE.eq("processed"))
-//      .and(RFolderEntity.USER.eq( settings.getString("current_user").get() ))
-//      .get().firstOrNull();
+    RFolderEntity processed_folder = dataStore
+      .select(RFolderEntity.class)
+      .where(RFolderEntity.TYPE.eq("processed"))
+      .and(RFolderEntity.USER.eq( settings.getString("login").get() ))
+      .get().firstOrNull();
 
-//    if (processed_folder != null) {
-//      subscription.add(
-//        docService.getByFolders(LOGIN.get(), TOKEN.get(), null, 500, 0, processed_folder.getUid(), null)
-//          .subscribeOn( Schedulers.io() )
-//          .observeOn( AndroidSchedulers.mainThread() )
-//          .subscribe(
-//            data -> {
-//              if ( data.getDocuments().size() > 0 ) {
-//                Timber.tag("FAVORITES").e("DOCUMENTS COUNT: %s", data.getDocuments().size() );
-//                for (Document doc : data.getDocuments()) {
-//                  jobManager.addJobInBackground(new UpdateProcessedDocumentsJob(doc.getUid(), processed_folder.getUid() ) );
-//                }
-//              }
-//            }, error -> {
-//              Timber.tag(TAG).e(error);
-//            }
-//          )
-//      );
-//    }
-    if (favorites_folder != null) {
+    if (processed_folder != null && item == MainMenuItem.PROCESSED) {
+
+      dateFormat = new SimpleDateFormat("dd.MM.yyyy", new Locale("RU"));
+      Calendar cal = Calendar.getInstance();
+      cal.add(Calendar.HOUR, -20*24);
+      String date = dateFormat.format(cal.getTime());
+
+      Timber.tag(TAG).e("PROCESSED EXIST! %s", date);
+
+
+      subscription.add(
+        docService.getByFolders(LOGIN.get(), TOKEN.get(), null, 500, 0, processed_folder.getUid(), date)
+          .subscribeOn( Schedulers.io() )
+          .observeOn( AndroidSchedulers.mainThread() )
+          .subscribe(
+            data -> {
+              if ( data.getDocuments().size() > 0 ) {
+                Timber.tag("PROCESSED").e("DOCUMENTS COUNT: %s", data.getDocuments().size() );
+                for (Document doc : data.getDocuments()) {
+                  jobManager.addJobInBackground( new UpdateProcessedDocumentsJob(doc.getUid(), processed_folder.getUid() ) );
+                }
+              }
+            }, error -> {
+              Timber.tag(TAG).e(error);
+            }
+          )
+      );
+    }
+
+
+    if (favorites_folder != null  && item == MainMenuItem.FAVORITES ) {
+      Timber.tag(TAG).e("FAVORITES EXIST!");
+
       subscription.add(
         docService.getByFolders(LOGIN.get(), TOKEN.get(), null, 500, 0, favorites_folder.getUid(), null)
           .subscribeOn( Schedulers.io() )

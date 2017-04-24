@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.os.IBinder;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
@@ -706,7 +705,7 @@ public class MainService extends Service {
       .subscribeOn(Schedulers.io())
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(isConnectedToInternet -> {
-        Toast.makeText( this, String.format( "Connected to inet: %s", isConnectedToInternet ), Toast.LENGTH_SHORT ).show();
+//        Toast.makeText( this, String.format( "Connected to inet: %s", isConnectedToInternet ), Toast.LENGTH_SHORT ).show();
         settings.getBoolean("isConnectedToInternet").set( isConnectedToInternet );
 
         if ( isConnectedToInternet ){

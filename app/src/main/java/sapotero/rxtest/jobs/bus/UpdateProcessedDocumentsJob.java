@@ -140,7 +140,7 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
 
     Integer count = dataStore
       .count(RDocumentEntity.UID)
-      .where(RDocumentEntity.UID.eq("p"+uid))
+      .where(RDocumentEntity.UID.eq(uid))
       .get().value();
 
     if( count != 0 ){
@@ -157,7 +157,7 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
 
 
     RDocumentEntity rd = new RDocumentEntity();
-    rd.setUid( "p"+ d.getUid() );
+    rd.setUid(  d.getUid() );
     rd.setUser( LOGIN.get() );
     rd.setFilter( "" );
     rd.setMd5( d.getMd5() );
@@ -171,8 +171,8 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
     rd.setExternalDocumentNumber( d.getExternalDocumentNumber() );
     rd.setReceiptDate( d.getReceiptDate() );
     rd.setViewed( d.getViewed() );
-    rd.setProcessed(true);
 
+    rd.setProcessed(true);
     rd.setFolder(processed_folder);
     rd.setFromProcessedFolder(true);
 
@@ -217,16 +217,10 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
       } else {
         rDoc = dataStore
           .select(RDocumentEntity.class)
-          .where(RDocumentEntity.UID.eq( "p"+document.getUid() ))
+          .where(RDocumentEntity.UID.eq( document.getUid() ))
           .get()
           .first();
       }
-
-      Timber.tag(TAG).v("createNewDocument " + rDoc.getRegistrationNumber() );
-      Timber.tag(TAG).v("getImages " + document.getImages().size() );
-      Timber.tag(TAG).v("getDecisions " + rDoc.getDecisions().size() );
-      Timber.tag(TAG).v("getExemplars " + rDoc.getExemplars().size() );
-      Timber.tag(TAG).v("getControlLabels " + rDoc.getControlLabels().size() );
 
       if (document.getSigner() != null){
         Signer _signer = document.getSigner();
@@ -241,6 +235,8 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
 
       rDoc.setFolder(processed_folder);
       rDoc.setFromProcessedFolder(true);
+      rDoc.setProcessed(true);
+
       rDoc.setUser( LOGIN.get() );
 
       if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
@@ -397,6 +393,9 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
       }
 
       rDoc.setFilter( "" );
+      rDoc.setFolder(processed_folder);
+      rDoc.setFromProcessedFolder(true);
+      rDoc.setProcessed(true);
 
 
 
@@ -429,7 +428,7 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
 
     RDocumentEntity doc = dataStore
       .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq("p"+uid))
+      .where(RDocumentEntity.UID.eq(uid))
       .get().first();
 
     if ( !Objects.equals( document.getMd5(), doc.getMd5() ) ){
@@ -445,9 +444,6 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
         signer.setType( document.getSigner().getType() );
       }
 
-      doc.setFromProcessedFolder(true);
-      doc.setProcessed(true);
-      doc.setFolder(processed_folder);
       doc.setUser( LOGIN.get() );
 
       if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
@@ -603,6 +599,10 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
         doc.setInfoCard( document.getInfoCard() );
       }
 
+      doc.setFromProcessedFolder(true);
+      doc.setProcessed(true);
+      doc.setFolder(processed_folder);
+
       dataStore
         .update( doc )
         .subscribeOn( Schedulers.io() )
@@ -626,7 +626,7 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
           }
         );
 
-      EventBus.getDefault().post( new UpdateCurrentDocumentEvent( "p"+doc.getUid() ) );
+      EventBus.getDefault().post( new UpdateCurrentDocumentEvent( doc.getUid() ) );
     } else {
       Timber.tag("MD5").d("equal");
     }

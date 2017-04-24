@@ -120,7 +120,7 @@ public class DBQueryBuilder {
           .count(RDocument.class)
           .where(RDocumentEntity.USER.eq( settings.getString("login").get() ));
 
-
+      Boolean hsdFavorites = false;
 
       Boolean hasProcessed = false;
       if ( conditions.size() > 0 ){
@@ -129,6 +129,13 @@ public class DBQueryBuilder {
         query_type = "";
         for (ConditionBuilder condition : conditions ){
           Timber.tag(TAG).i( "++ %s", condition.toString() );
+
+          if (condition.getField().getLeftOperand() == RDocumentEntity.FAVORITES){
+            hsdFavorites = true;
+          }
+          if (condition.getField().getLeftOperand() == RDocumentEntity.PROCESSED){
+            hasProcessed = true;
+          }
 
           if (condition.getField().getLeftOperand() == RDocumentEntity.FILTER){
             query_status = String.valueOf(condition.getField().getRightOperand());
@@ -153,9 +160,6 @@ public class DBQueryBuilder {
               break;
           }
 
-          if (condition.getField().getLeftOperand() == RDocumentEntity.PROCESSED){
-            hasProcessed = true;
-          }
         }
       }
 
@@ -164,9 +168,9 @@ public class DBQueryBuilder {
       }
 
 
-      if (withFavorites){
-        query = query.or( RDocumentEntity.FAVORITES.eq(true) );
-      }
+//      if (withFavorites){
+//        query = query.or( RDocumentEntity.FAVORITES.eq(true) );
+//      }
 
       Integer count = queryCount.get().value();
       if ( count == 0 ){
@@ -177,6 +181,8 @@ public class DBQueryBuilder {
       unsubscribe();
       adapter.removeAllWithRange();
 
+      Boolean finalWithFavorites = hsdFavorites;
+      Boolean finalHasProcessed = hasProcessed;
       subscribe.add(
 
         query
@@ -218,7 +224,7 @@ public class DBQueryBuilder {
 
             return result;
           })
-          .filter(documentEntity -> validation.filterDocumentInSelectedJournals(documentEntity.getDocumentType(), documentEntity.getFilter()))
+          .filter(documentEntity -> validation.filterDocumentInSelectedJournals(finalWithFavorites || finalHasProcessed, documentEntity.getDocumentType(), documentEntity.getFilter()))
           .toList()
           .debounce(300, TimeUnit.MILLISECONDS)
           .subscribeOn(Schedulers.newThread())
