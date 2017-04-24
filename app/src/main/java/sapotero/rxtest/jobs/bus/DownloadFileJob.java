@@ -24,6 +24,7 @@ import rx.Observable;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.events.bus.FileDownloadedEvent;
+import sapotero.rxtest.jobs.utils.JobCounter;
 import sapotero.rxtest.retrofit.DocumentLinkService;
 import sapotero.rxtest.retrofit.models.DownloadLink;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
@@ -41,19 +42,22 @@ public class DownloadFileJob  extends BaseJob {
   private Preference<String> HOST;
   private RImageEntity image;
 
+  private JobCounter jobCounter;
+
   DownloadFileJob(String host, String strUrl, String fileName, int id) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.host = host;
     this.strUrl = strUrl;
     this.fileName = fileName;
     this.rImageId = id;
-
   }
 
 
   @Override
   public void onAdded() {
     Timber.tag(TAG).v( "onAdded"  );
+    jobCounter = new JobCounter(settings);
+    jobCounter.incJobCount();
   }
 
   @Override

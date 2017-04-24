@@ -31,6 +31,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.events.bus.FileDownloadedEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckFailEvent;
 import sapotero.rxtest.events.stepper.load.StepperDocumentCountReadyEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
@@ -58,6 +59,7 @@ public class StepperLoadDataFragment extends Fragment implements Step {
   private CompositeSubscription subscription;
 
   private JobCounter jobCounter;
+  private boolean isReceivedJobCount = false;
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -118,7 +120,7 @@ public class StepperLoadDataFragment extends Fragment implements Step {
     } else {
       error = new VerificationError("Дождитесь окончания загрузки");
 
-      if ( mRingProgressBar.getProgress() >= 80 ){
+      if ( mRingProgressBar.getProgress() >= 99 ){
         error = null;
       } else {
         Toast.makeText( getContext(), error.getErrorMessage(), Toast.LENGTH_SHORT ).show();
@@ -179,12 +181,18 @@ public class StepperLoadDataFragment extends Fragment implements Step {
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(StepperLoadDocumentEvent event) throws Exception {
+  public void onMessageEvent(StepperLoadDocumentEvent event) {
     updateProgressBar(event.message);
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(FileDownloadedEvent event) {
+    updateProgressBar(event.path);
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(StepperDocumentCountReadyEvent event) {
+    isReceivedJobCount = true;
     if (jobCounter.getJobCount() == 0) {
       // No documents to download, set download complete
       mRingProgressBar.setProgress( 100 );
@@ -200,18 +208,18 @@ public class StepperLoadDataFragment extends Fragment implements Step {
 
     int jobCount = jobCounter.getJobCount();
 
-    if (jobCount != 0) {
+    if ( isReceivedJobCount && jobCount != 0) {
       if (subscription.hasSubscriptions()) {
         subscription.unsubscribe();
       }
 
       int perc = calculatePercent(jobCount);
 
-      if (mRingProgressBar != null && mRingProgressBar.getProgress() != 100) {
+      if (mRingProgressBar != null && mRingProgressBar.getProgress() < perc) {
         mRingProgressBar.setProgress( perc );
       }
 
-      if ( perc >= 80f ) {
+      if ( perc >= 99f ) {
         error = null;
       }
     }
