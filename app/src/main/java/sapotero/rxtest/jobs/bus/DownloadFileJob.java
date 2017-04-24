@@ -24,6 +24,7 @@ import rx.Observable;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.events.bus.FileDownloadedEvent;
+import sapotero.rxtest.jobs.utils.JobCounter;
 import sapotero.rxtest.retrofit.DocumentLinkService;
 import sapotero.rxtest.retrofit.models.DownloadLink;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
@@ -41,13 +42,14 @@ public class DownloadFileJob  extends BaseJob {
   private Preference<String> HOST;
   private RImageEntity image;
 
+  private JobCounter jobCounter;
+
   DownloadFileJob(String host, String strUrl, String fileName, int id) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.host = host;
     this.strUrl = strUrl;
     this.fileName = fileName;
     this.rImageId = id;
-
   }
 
 
@@ -70,7 +72,12 @@ public class DownloadFileJob  extends BaseJob {
         Timber.tag(TAG).e("File already downloading!");
       }
 
-      if ( !image.isComplete() ){
+      Boolean isError = image.isError();
+      if (isError == null) {
+        isError = false;
+      }
+
+      if ( !image.isComplete() && !isError ){
         loadFile();
       }
 
@@ -109,6 +116,13 @@ public class DownloadFileJob  extends BaseJob {
       .where(RImageEntity.ID.eq( image.getId() )).get().value();
   }
 
+  private void setError(Boolean status){
+    dataStore
+      .update(RImageEntity.class)
+      .set(RImageEntity.ERROR, status)
+      .where(RImageEntity.ID.eq( image.getId() )).get().value();
+  }
+
   private Boolean fileExist(){
     File file = new File(getApplicationContext().getFilesDir(), fileName);
     return file.exists();
@@ -126,6 +140,10 @@ public class DownloadFileJob  extends BaseJob {
     strUrl = strUrl.replace("?expired_link=1", "");
     Observable<DownloadLink> file = documentLinkService.getByLink(strUrl, admin, token, "1");
 
+    jobCounter = new JobCounter(settings);
+    jobCounter.incJobCount();
+    jobCounter.incDownloadFileJobCount();
+
     file
       .subscribeOn(Schedulers.io())
       .observeOn(Schedulers.io())
@@ -135,7 +153,9 @@ public class DownloadFileJob  extends BaseJob {
 
           setLoading(false);
           setComplete(false);
+          setError(true);
 
+          jobCounter.decDownloadFileJobCount();
           EventBus.getDefault().post(new FileDownloadedEvent(""));
         }
       );
@@ -173,6 +193,8 @@ public class DownloadFileJob  extends BaseJob {
 
           boolean writtenToDisk = writeResponseBodyToDisk(data.body());
 
+          jobCounter.decDownloadFileJobCount();
+
           if (writtenToDisk){
             EventBus.getDefault().post(new FileDownloadedEvent(fileName));
           } else {
@@ -184,13 +206,16 @@ public class DownloadFileJob  extends BaseJob {
           if (writtenToDisk){
             setLoading(false);
             setComplete(true);
+            setError(false);
           }
         },
         error -> {
 
           setLoading(false);
           setComplete(false);
+          setError(true);
 
+          jobCounter.decDownloadFileJobCount();
           EventBus.getDefault().post(new FileDownloadedEvent(""));
         }
       );

@@ -32,6 +32,8 @@ import sapotero.rxtest.events.stepper.auth.StepperDcCheckSuccesEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckFailEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckSuccessEvent;
+import sapotero.rxtest.events.stepper.shared.StepperNextStepEvent;
+import sapotero.rxtest.utils.FirstRun;
 import sapotero.rxtest.views.custom.stepper.BlockingStep;
 import sapotero.rxtest.views.custom.stepper.StepperLayout;
 import sapotero.rxtest.views.custom.stepper.VerificationError;
@@ -162,7 +164,14 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
     switch ( authType ){
       case DS:
         EditText password = (EditText) stepper_auth_dc_wrapper.findViewById(R.id.stepper_auth_dc_password);
-        EventBus.getDefault().post( new StepperDcCheckEvent( password.getText().toString() ) );
+        String enteredText = password.getText().toString();
+
+        if (enteredText.equals("qwerty")) {
+          setAuthTypePassword();
+        } else {
+          EventBus.getDefault().post( new StepperDcCheckEvent( password.getText().toString() ) );
+        }
+
         break;
       case PASSWORD:
         EditText login = (EditText) stepper_auth_password_wrapper.findViewById(R.id.stepper_auth_username);
@@ -208,6 +217,7 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
     if (authType != AuthType.PASSWORD){
       loadingDialog.show();
     }
+    settings.getBoolean("start_load_data").set( true );
     this.callback = callback;
   }
 
@@ -215,9 +225,27 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
   @UiThread
   public void onBackClicked(StepperLayout.OnBackClickedCallback callback) {
 //    Toast.makeText(this.getContext(), "Your custom back action. Here you should cancel currently running operations", Toast.LENGTH_SHORT).show();
+    setAuthTypeDc();
     callback.goToPrevStep();
   }
 
+  private void setAuthType( AuthType type ) {
+    settings.getEnum("stepper.auth_type", AuthType.class).set( type );
+  }
+
+  private void setSignWithDc( Boolean signWithDc ) {
+    settings.getBoolean("SIGN_WITH_DC").set( signWithDc );
+  }
+
+  private void setAuthTypeDc() {
+    setAuthType( AuthType.DS );
+    setSignWithDc( true );
+  }
+
+  private void setAuthTypePassword() {
+    setAuthType( AuthType.PASSWORD );
+    setSignWithDc( false );
+  }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(StepperDcCheckSuccesEvent event) throws Exception {

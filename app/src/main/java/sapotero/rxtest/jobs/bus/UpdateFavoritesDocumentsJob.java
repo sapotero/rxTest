@@ -273,7 +273,7 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
       rDoc.setSigner( signer );
     }
 
-    rDoc.setFavorites(isFavorites);
+    rDoc.setFavorites(true);
     rDoc.setProcessed(isProcessed);
 
     rDoc.setControl(onControl);
@@ -283,7 +283,7 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
     rDoc.setProcessed(false);
 
     rDoc.setFromProcessedFolder( false );
-    rDoc.setFromFavoritesFolder( false );
+    rDoc.setFromFavoritesFolder( true );
 
     Boolean red = false;
     Boolean with_decision = false;
@@ -388,6 +388,7 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
         image.setDocument(rDoc);
         image.setLoading(false);
         image.setComplete(false);
+        image.setError(false);
         rDoc.getImages().add(image);
       }
     }
@@ -445,16 +446,16 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
     }
 
     rDoc.setDocumentType("");
-    rDoc.setFromFavoritesFolder(true);
-    rDoc.setFavorites(true);
     rDoc.setFilter("");
     rDoc.setFolder(folder);
+    rDoc.setFromFavoritesFolder(true);
+    rDoc.setFavorites(true);
 
 
     dataStore.update(rDoc)
       .toObservable()
-      .subscribeOn( Schedulers.io() )
-      .observeOn( Schedulers.io() )
+      .subscribeOn( Schedulers.newThread() )
+      .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         result -> {
           Timber.tag(TAG).d("updated " + result.getUid());
@@ -499,14 +500,6 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
       if (doc.isFavorites() == null){
         doc.setFavorites(isFavorites);
       }
-
-
-      doc.setControl(onControl);
-      doc.setUser( LOGIN.get() );
-      doc.setFromLinks( false );
-      doc.setFromProcessedFolder( false );
-      doc.setFromFavoritesFolder( false );
-      doc.setChanged( false );
 
       Boolean red = false;
       Boolean with_decision = false;
@@ -644,6 +637,7 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
           image.setDocument(doc);
           image.setLoading(false);
           image.setComplete(false);
+          image.setError(false);
           doc.getImages().add(image);
         }
       }
@@ -727,9 +721,7 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
 
     }
 
-//    if (not_processed) {
-//      doc.setProcessed(false);
-//    }
+
 
     dataStore
       .update( doc )

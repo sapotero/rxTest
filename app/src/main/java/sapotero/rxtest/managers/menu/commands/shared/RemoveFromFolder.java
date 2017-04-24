@@ -4,6 +4,8 @@ import android.content.Context;
 
 import com.f2prateek.rx.preferences.Preference;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.ArrayList;
 
 import retrofit2.Retrofit;
@@ -13,11 +15,12 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.retrofit.OperationService;
-import sapotero.rxtest.retrofit.models.OperationResult;
+import sapotero.rxtest.events.view.ShowPrevDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.retrofit.OperationService;
+import sapotero.rxtest.retrofit.models.OperationResult;
 import timber.log.Timber;
 
 public class RemoveFromFolder extends AbstractCommand {
@@ -71,7 +74,19 @@ public class RemoveFromFolder extends AbstractCommand {
 
   @Override
   public void execute() {
-    Timber.tag(TAG).i("execute for %s - %s: %s",getType(),document_id, queueManager.getConnected());
+
+    loadSettings();
+
+    Integer count = dataStore
+      .update(RDocumentEntity.class)
+      .set( RDocumentEntity.FAVORITES, false)
+      .set( RDocumentEntity.FROM_FAVORITES_FOLDER, false)
+      .where(RDocumentEntity.UID.eq(document_id))
+      .get().value();
+    Timber.tag(TAG).w( "updated: %s", count );
+
+    EventBus.getDefault().post( new ShowPrevDocumentEvent());
+    
     queueManager.add(this);
   }
 
@@ -82,14 +97,6 @@ public class RemoveFromFolder extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    loadSettings();
-
-    Integer count = dataStore
-      .update(RDocumentEntity.class)
-      .set( RDocumentEntity.FAVORITES, false)
-      .where(RDocumentEntity.UID.eq(document_id))
-      .get().value();
-    Timber.tag(TAG).w( "updated: %s", count );
 
     queueManager.setExecutedLocal(this);
 

@@ -18,6 +18,7 @@
         <item>processed</item>
     </string-array>
 
+
     <string-array name="settings_view_journals">
         <item>Входящие документы</item>
         <item>Обращения граждан</item>
@@ -27,6 +28,7 @@
         <item>Приказы ДДО</item>
         <item>Подписание/согласование</item>
     </string-array>
+
     <string-array name="settings_view_journals_values">
         <item>1</item>
         <item>2</item>
@@ -190,7 +192,7 @@
     <string name="field_urgency">Срочность:</string>
     <string name="field_comment">Комментарий:</string>
     <string name="field_external_number">Номер поступившего документа:</string>
-    <string name="to_favorites">В избранное</string>
+    <string name="to_favorites">Добавить в избранное</string>
     <string name="to_control">На контроль</string>
     <string name="dialog_template_title">Шаблоны резолюции</string>
     <string name="no_files">Нет электронных образов</string>
@@ -224,7 +226,7 @@
     <string name="ms_complete">Завершить</string>
 
 
-    <string name="stepper_choose_auth">Выбор способа авторизации</string>
+    <string name="stepper_choose_auth">Начало</string>
     <string name="stepper_auth">Авторизация</string>
     <string name="stepper_load_data">Загрузка данных, подождите</string>
     <string name="stepper_end">Завершение</string>

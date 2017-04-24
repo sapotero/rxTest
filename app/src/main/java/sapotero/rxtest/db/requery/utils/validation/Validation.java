@@ -38,7 +38,7 @@ public class Validation{
       );
   }
 
-  public Boolean filterDocumentInSelectedJournals(String type, String status){
+  public Boolean filterDocumentInSelectedJournals(Boolean finalWithFavorites, String type, String status){
 
     Boolean result = false;
 
@@ -79,6 +79,10 @@ public class Validation{
         }
 
       }
+    }
+
+    if (finalWithFavorites){
+      result = true;
     }
 
     return result;
