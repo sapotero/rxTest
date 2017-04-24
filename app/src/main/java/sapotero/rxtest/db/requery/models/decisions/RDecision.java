@@ -33,6 +33,8 @@ public abstract class RDecision {
   String comment;
   String date;
   String urgencyText;
+  String performerFontSize;
+  String letterheadFontSize;
   Boolean approved;
   Boolean signerIsManager;
   Boolean showPosition;

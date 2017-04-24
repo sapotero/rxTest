@@ -10,6 +10,7 @@ import android.widget.EditText;
 
 import java.util.List;
 
+import sapotero.rxtest.R;
 import sapotero.rxtest.views.adapters.utils.Listable;
 
 public class SpinnerWithLabel<T extends Listable> extends EditText {
@@ -78,7 +79,7 @@ public class SpinnerWithLabel<T extends Listable> extends EditText {
           }
         });
 
-        builder.setPositiveButton("close", null);
+        builder.setPositiveButton(R.string.constructor_close, null);
         builder.create().show();
       });
     }

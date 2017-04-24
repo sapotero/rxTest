@@ -1,5 +1,6 @@
 package sapotero.rxtest.views.activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -7,7 +8,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -35,9 +38,12 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.db.requery.models.RUrgencyEntity;
 import sapotero.rxtest.db.requery.models.decisions.RBlock;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
@@ -107,6 +113,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   private String originalSignerBlankText;
   private String originalSignerId;
   private String originalSignerAssistantId;
+  private ArrayList<UrgencyItem> urgency = new ArrayList<UrgencyItem>();
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -382,54 +389,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       return false;
     });
 
-    List<UrgencyItem> urgency = new ArrayList<>();
-
-
-    // настройка
-    if (!settings.getBoolean("settings_view_show_urgency").get()){
-      urgency_selector.setVisibility(View.GONE);
-    }
-    // настройка
-    if (settings.getBoolean("settings_view_only_urgent").get()){
-      urgency.add(new UrgencyItem("Нет", ""));
-      urgency.add(new UrgencyItem("Срочно", "Срочно"));
-      urgency_selector.setVisibility(View.VISIBLE);
-    } else {
-      urgency.add(new UrgencyItem("Весьма срочно", "Весьма срочно"));
-      urgency.add(new UrgencyItem("Крайне срочно", "Крайне срочно"));
-      urgency.add(new UrgencyItem("Няшная срочность", "Няшная срочность"));
-      urgency.add(new UrgencyItem("Очень срочно", "Очень срочно"));
-      urgency.add(new UrgencyItem("Срочно", "Срочно"));
-    }
-
-
-
-
-    urgency_selector.setItems(urgency);
-    urgency_selector.setOnItemSelectedListener((item, selectedIndex) -> {
-      manager.setUrgency( item.getLabel() );
-    });
-
-
-
-    // настройка
-    if (settings.getBoolean("settings_view_show_decision_change_font").get()){
-      List<FontItem> fonts = new ArrayList<>();
-      fonts.add(new FontItem("12", "12"));
-      fonts.add(new FontItem("13", "13"));
-      fonts.add(new FontItem("14", "14"));
-      fonts.add(new FontItem("15", "15"));
-      fonts.add(new FontItem("16", "16"));
-
-      font_selector.setItems(fonts);
-      font_selector.setOnItemSelectedListener((item, selectedIndex) -> {
-        Timber.e("%s - %s", item.getLabel(), item.getValue());
-      });
-    } else {
-      font_selector.setVisibility(View.GONE);
-    }
-
-
 
     raw_decision = null;
     Gson gson = new Gson();
@@ -450,6 +409,78 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
     manager = new DecisionManager(this, getSupportFragmentManager(), raw_decision);
     manager.build();
+
+
+    // настройка
+    if (!settings.getBoolean("settings_view_show_urgency").get()){
+      urgency_selector.setVisibility(View.GONE);
+    } else {
+
+      urgency_selector.setVisibility(View.VISIBLE);
+      dataStore
+        .select(RUrgencyEntity.class)
+        .where(RUrgencyEntity.USER.eq( settings.getString("login").get() ))
+        .get()
+        .toObservable()
+        .filter(rUrgencyEntity -> {
+          Boolean result = true;
+
+          Timber.d("filter: %s", new Gson().toJson(rUrgencyEntity) );
+
+          if ( settings.getBoolean("settings_view_only_urgent").get() ){
+            if (!Objects.equals(rUrgencyEntity.getName().toLowerCase(), "срочно")){
+              result = false;
+            }
+          }
+
+          return result;
+        })
+        .toList()
+        .observeOn(Schedulers.newThread())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(
+          list -> {
+
+
+            if (list.size() > 0){
+              for (RUrgencyEntity u: list) {
+                urgency.add(new UrgencyItem(u.getName(), u.getUid()));
+              }
+              urgency_selector.setItems(urgency);
+            }
+
+
+            if ( raw_decision != null && raw_decision.getUrgencyText() != null ){
+
+              for (int i = 0; i < urgency.size(); i++) {
+                UrgencyItem urgency_item = urgency.get(i);
+                Timber.tag(TAG).d("urgency: %s | %s", raw_decision.getUrgencyText(), urgency_item.getLabel());
+
+                if (Objects.equals(urgency_item.getLabel().toLowerCase(), raw_decision.getUrgencyText().toLowerCase())){
+                  Timber.tag(TAG).d("SUCCES: %s | %s", raw_decision.getUrgencyText(), urgency_item.getLabel());
+
+                  manager.setUrgencyText(urgency_item.getLabel());
+                  manager.setUrgency(urgency_item.getValue());
+
+                  urgency_selector.setText(urgency_item.getLabel());
+                  urgency_selector.setSelected(true);
+                  break;
+                }
+              }
+            }
+
+          },
+          error -> {
+            Timber.tag(TAG).e(error);
+          }
+        );
+    }
+
+
+
+    urgency_selector.setOnItemSelectedListener((item, selectedIndex) -> {
+      manager.setUrgency( item );
+    });
 
 
     signer_oshs_selector.setOnClickListener(v -> {
@@ -484,11 +515,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       raw_decision.setSigner( makeSignerWithOrganizationText(signerName, signerOrganization) );
       raw_decision.setSignerBlankText( signerName );
       signer_oshs_selector.setText( raw_decision.getSigner() );
-    }
-
-    if ( raw_decision.getUrgencyText() != null ){
-      urgency_selector.setSelection( 0 );
-      manager.setUrgency("");
     }
 
     if ( rDecisionEntity != null && rDecisionEntity.getDate() != null ){
@@ -542,11 +568,44 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       }
     });
 
+    // настройка
+    if (settings.getBoolean("settings_view_show_decision_change_font").get()){
+      List<FontItem> fonts = new ArrayList<>();
+      fonts.add(new FontItem("10", "10"));
+      fonts.add(new FontItem("11", "11"));
+      fonts.add(new FontItem("12", "12"));
+      fonts.add(new FontItem("13", "13"));
+      fonts.add(new FontItem("14", "14"));
+      fonts.add(new FontItem("15", "15"));
+
+      font_selector.setItems(fonts);
+      font_selector.setOnItemSelectedListener((item, selectedIndex) -> {
+        manager.setPerformersFontSize(item.getValue());
+      });
+
+      Timber.tag(TAG).e("font-size: %s %s", raw_decision.getLetterheadFontSize(), raw_decision.getPerformersFontSize());
+
+      if ( raw_decision != null && raw_decision.getPerformersFontSize() != null ){
+
+        Timber.tag(TAG).e("FONT SIZE: %s", Integer.parseInt( raw_decision.getPerformersFontSize().substring(1) ));
+
+        font_selector.setText( raw_decision.getPerformersFontSize() );
+        manager.setPerformersFontSize( raw_decision.getPerformersFontSize() );
+      } else {
+        font_selector.setText( "15" );
+        manager.setPerformersFontSize( "15" );
+      }
+
+    } else {
+      font_selector.setVisibility(View.GONE);
+    }
+
     // Save original signer
     originalSignerId = raw_decision.getSignerId();
     originalSigner = raw_decision.getSigner();
     originalSignerBlankText = raw_decision.getSignerBlankText();
     originalSignerAssistantId = raw_decision.getAssistantId();
+
   }
 
   private boolean checkDecision() {
@@ -645,6 +704,34 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     return showSaveDialog;
   }
 
+
+  @Override
+  public boolean dispatchTouchEvent(MotionEvent ev) {
+    View view = getCurrentFocus();
+    if (view != null && (ev.getAction() == MotionEvent.ACTION_UP || ev.getAction() == MotionEvent.ACTION_MOVE) && view instanceof EditText && !view.getClass().getName().startsWith("android.webkit.")) {
+      int scrcoords[] = new int[2];
+      view.getLocationOnScreen(scrcoords);
+      float x = ev.getRawX() + view.getLeft() - scrcoords[0];
+      float y = ev.getRawY() + view.getTop() - scrcoords[1];
+      if (x < view.getLeft() || x > view.getRight() || y < view.getTop() || y > view.getBottom())
+        hideKeyboard(this);
+    }
+    return super.dispatchTouchEvent(ev);
+  }
+
+  private void hideKeyboard(DecisionConstructorActivity constructorActivity) {
+    if( constructorActivity != null ){
+      ((InputMethodManager) constructorActivity
+        .getSystemService(Context.INPUT_METHOD_SERVICE))
+        .hideSoftInputFromWindow(
+          constructorActivity
+            .getWindow()
+            .getDecorView()
+            .getApplicationWindowToken(),
+          0);
+    }
+  }
+
   @Override
   protected void onResume() {
     super.onPostResume();
@@ -677,8 +764,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       raw_decision.setDate(rDecisionEntity.getDate());
       raw_decision.setUrgencyText(rDecisionEntity.getUrgencyText());
       raw_decision.setShowPosition(rDecisionEntity.isShowPosition());
-
-      Timber.tag(TAG).e("getUrgencyText: %s", rDecisionEntity.getUrgencyText() );
+      raw_decision.setLetterheadFontSize(rDecisionEntity.getLetterheadFontSize());
+      raw_decision.setPerformersFontSize(rDecisionEntity.getPerformerFontSize());
 
       if ( rDecisionEntity.getBlocks() != null && rDecisionEntity.getBlocks().size() >= 1 ){
 
@@ -689,6 +776,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
           RBlockEntity b = (RBlockEntity) _block;
           Block block = new Block();
           block.setNumber(b.getNumber());
+          block.setFontSize(b.getFontSize());
           block.setText(b.getText());
           block.setAppealText(b.getAppealText());
           block.setTextBefore(b.isTextBefore());

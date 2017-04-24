@@ -89,6 +89,8 @@ public class SaveTemporaryDecision extends AbstractCommand {
       decision.setApproved(dec.getApproved());
       decision.setChanged(true);
       decision.setRed(dec.getRed());
+      decision.setPerformerFontSize(dec.getPerformersFontSize());
+      decision.setLetterheadFontSize(dec.getLetterheadFontSize());
 
       if (dec.getBlocks().size() > 0) {
         decision.getBlocks().clear();
@@ -101,6 +103,7 @@ public class SaveTemporaryDecision extends AbstractCommand {
         block.setText(_block.getText());
         block.setAppealText(_block.getAppealText());
         block.setNumber(_block.getNumber());
+        block.setFontSize(_block.getFontSize());
 
 
         block.setToCopy(_block.getToCopy());

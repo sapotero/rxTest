@@ -18,6 +18,7 @@ public abstract class RBlock {
   Integer number;
   String text;
   String appealText;
+  String fontSize;
   Boolean textBefore;
   Boolean hidePerformers;
   Boolean toCopy;

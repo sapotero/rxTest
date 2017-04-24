@@ -210,6 +210,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="8"
+                android:clipToPadding="false"
                     />
 
                 <sapotero.rxtest.views.custom.CircleRightArrow
@@ -257,6 +258,7 @@
                   android:textSize="20dp"
                   android:gravity="center"
                   android:elevation="@dimen/date_offset"
+
                   android:textColor="@color/md_grey_600"
                   android:text="@string/empty_list"
                   android:layout_marginTop="184dp"

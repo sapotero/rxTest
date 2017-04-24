@@ -69,6 +69,7 @@ public class CreateFoldersJob extends BaseJob {
     Integer count = dataStore
       .count(RFolderEntity.UID)
       .where(RFolderEntity.UID.eq(uid))
+      .and(RFolderEntity.USER.eq(settings.getString("login").get()))
       .get().value();
 
     if( count != 0 ){

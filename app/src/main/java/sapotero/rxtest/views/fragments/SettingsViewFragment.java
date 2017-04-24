@@ -12,6 +12,7 @@ import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.utils.FirstRun;
+import timber.log.Timber;
 
 public class SettingsViewFragment extends PreferenceFragmentCompat {
   private CompositeSubscription subscriptions;
@@ -27,6 +28,8 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
     super.onCreate(savedInstanceState);
 
     EsdApplication.getComponent( getContext() ).inject(this);
+
+    Timber.tag("SETTINGS").d("settings_view_journals %s", settings.getStringSet("settings_view_journals").get() );
 
     subscriptions = new CompositeSubscription();
     subscriptions.add(

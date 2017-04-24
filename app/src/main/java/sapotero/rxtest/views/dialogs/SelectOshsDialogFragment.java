@@ -233,7 +233,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
     if (showWithAssistant){
       dataStore
         .select(RAssistantEntity.class)
-        .where(RAssistantEntity.USER.eq( settings.getString("current_user").get() ))
+        .where(RAssistantEntity.USER.eq( settings.getString("login").get() ))
         .get().toObservable()
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())

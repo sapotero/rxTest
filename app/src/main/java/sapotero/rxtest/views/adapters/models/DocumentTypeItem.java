@@ -13,6 +13,7 @@ import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
+import sapotero.rxtest.db.requery.utils.validation.Validation;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import sapotero.rxtest.views.menu.fields.MainMenuButton;
 import sapotero.rxtest.views.menu.fields.MainMenuItem;
@@ -20,6 +21,7 @@ import sapotero.rxtest.views.menu.fields.MainMenuItem;
 public class DocumentTypeItem {
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject RxSharedPreferences settings;
+  @Inject Validation validation;
 
   private final MainMenuItem mainMenuItem;
   private final String user;
@@ -36,24 +38,40 @@ public class DocumentTypeItem {
   // Главное меню
   public String getName() {
 
+
+
     if (mainMenuItem.getIndex() == 0){
+
+      Integer projects = -1;
 
       Integer total = dataStore
         .count(RDocumentEntity.class)
-        .where( RDocumentEntity.FILTER.in( MainMenuButton.ButtonStatus.forAllDocuments() )   )
-        .and( RDocumentEntity.USER.eq( settings.getString("login").get() ) )
+        .where( RDocumentEntity.USER.eq( settings.getString("login").get() )   )
+//        .and( RDocumentEntity.FILTER.in( MainMenuButton.ButtonStatus.forAllDocuments() ) )
+        .and( RDocumentEntity.DOCUMENT_TYPE.in( validation.getSelectedJournals() ) )
         .and( RDocumentEntity.PROCESSED.eq( false ) )
         .get()
         .value();
 
-      Integer projects = dataStore
-        .count(RDocumentEntity.class)
-        .where( RDocumentEntity.FILTER.in( MainMenuButton.ButtonStatus.getProject() )   )
-        .and( RDocumentEntity.USER.eq( settings.getString("login").get() ) )
-        .get()
-        .value();
 
-      return String.format( mainMenuItem.getName(), total, projects);
+      if ( validation.hasSigningAndApproval() ){
+        projects = dataStore
+          .count(RDocumentEntity.class)
+          .where( RDocumentEntity.FILTER.in( MainMenuButton.ButtonStatus.getProject() )   )
+          .and( RDocumentEntity.USER.eq( settings.getString("login").get() ) )
+          .get()
+          .value();
+      }
+
+      String title;
+      if (projects != -1) {
+        title = String.format( mainMenuItem.getName(), total, projects);
+      } else {
+        title = String.format( "Документы %s", total);
+      }
+
+      return title;
+
     } else {
       int count = 0;
 
@@ -68,7 +86,8 @@ public class DocumentTypeItem {
         query = dataStore
           .count(RDocumentEntity.class)
           .where(RDocumentEntity.USER.eq(settings.getString("login").get()))
-          .and(RDocumentEntity.FILTER.ne(Fields.Status.LINK.getValue()));
+          .and(RDocumentEntity.FILTER.ne( Fields.Status.LINK.getValue() ));
+
 
       } else {
         query = dataStore

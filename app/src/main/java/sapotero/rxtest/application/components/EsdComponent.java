@@ -9,6 +9,8 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.application.modules.EsdModule;
 import sapotero.rxtest.application.modules.SettingsModule;
 import sapotero.rxtest.db.requery.query.DBQueryBuilder;
+import sapotero.rxtest.db.requery.utils.validation.Validation;
+import sapotero.rxtest.db.requery.utils.validation.ValidationModule;
 import sapotero.rxtest.events.utils.SubscriptionsModule;
 import sapotero.rxtest.jobs.bus.BaseJob;
 import sapotero.rxtest.jobs.utils.JobModule;
@@ -50,6 +52,7 @@ import sapotero.rxtest.views.activities.MainActivity;
 import sapotero.rxtest.views.activities.SettingsActivity;
 import sapotero.rxtest.views.activities.SettingsTemplatesActivity;
 import sapotero.rxtest.views.adapters.DecisionAdapter;
+import sapotero.rxtest.views.adapters.DocumentTypeAdapter;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OshsAutoCompleteAdapter;
 import sapotero.rxtest.views.adapters.PrimaryConsiderationAdapter;
@@ -83,7 +86,8 @@ import sapotero.rxtest.views.menu.factories.ItemsBuilder;
   SettingsModule.class,
   DBDocumentManagerModule.class,
   QueueManagerModule.class,
-  OperationManagerModule.class
+  OperationManagerModule.class,
+  ValidationModule.class
 })
 
 public interface EsdComponent {
@@ -105,9 +109,12 @@ public interface EsdComponent {
 
   void inject(MainService service);
 
+  void inject(Validation context);
+
 
   void inject(DecisionAdapter adapter);
   void inject(DocumentsAdapter adapter);
+  void inject(DocumentTypeAdapter adapter);
   void inject(PrimaryConsiderationAdapter adapter);
   void inject(OshsAutoCompleteAdapter context);
 

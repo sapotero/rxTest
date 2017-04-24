@@ -380,7 +380,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     binder = ButterKnife.bind(this, view);
 
     fragment = this;
-    invalidate();
+//    invalidate();
 
     return view;
   }
@@ -397,18 +397,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
     gestureDetector = new GestureDetector( getContext(),new GestureListener() );
 
-    desigion_view_root.setOnTouchListener(new View.OnTouchListener() {
-      @Override
-      public boolean onTouch(View v, MotionEvent event) {
-        return gestureDetector.onTouchEvent(event);
-      }
-    });
-    preview_body.setOnTouchListener(new View.OnTouchListener() {
-      @Override
-      public boolean onTouch(View v, MotionEvent event) {
-        return gestureDetector.onTouchEvent(event);
-      }
-    });
+    desigion_view_root.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
+    preview_body.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
 
     preview = new Preview(getContext());
   }
@@ -627,6 +617,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     }
   }
 
+  
   private void loadFromDb() {
     Timber.tag("loadFromDb").v("star");
 
@@ -635,7 +626,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       .where(RDocumentEntity.UID.eq( uid == null? UID.get() : uid ))
       .get()
       .toObservable()
-      .subscribeOn(Schedulers.io())
+      .subscribeOn(Schedulers.newThread())
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(doc -> {
 
@@ -660,7 +651,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
             unsorterd_decisions.add( new DecisionSpinnerItem( decision, decision.getSignerBlankText(), decision.getDate() ) );
           }
 
-          Collections.sort(unsorterd_decisions, (o1, o2) -> o1.getDecision().getUid().compareTo( o2.getDecision().getUid() ));
+//          Collections.sort(unsorterd_decisions, (o1, o2) -> o1.getDecision().getUid().compareTo( o2.getDecision().getUid() ));
+          Timber.tag(TAG).e("unsorterd_decisions > %s", unsorterd_decisions.size());
 
           decision_spinner_adapter.addAll( unsorterd_decisions );
 
@@ -684,6 +676,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
           showDecisionCardTollbarMenuItems(false);
         }
 
+      }, error -> {
+        Timber.tag(TAG).e(error);
       });
   }
 
@@ -813,6 +807,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     private void show( RDecisionEntity decision ){
       clear();
 
+      showMagnifer();
+
       Timber.tag("getUrgencyText").v("%s", decision.getUrgencyText() );
       Timber.tag("getLetterhead").v("%s",  decision.getLetterhead() );
 
@@ -871,6 +867,20 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
       clear();
       printLetterHead( getString(R.string.decision_blank) );
+      hideMagnifer();
+
+    }
+
+    private void hideMagnifer() {
+      magnifer.setAlpha(0.4f);
+      magnifer.setFocusable(false);
+      magnifer.setClickable(false);
+    }
+
+    private void showMagnifer() {
+      magnifer.setAlpha(1.0f);
+      magnifer.setFocusable(true);
+      magnifer.setClickable(true);
     }
 
     private void printSigner(RDecisionEntity decision, String registrationNumber) {
@@ -1087,10 +1097,6 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       preview_body.addView( users_view );
     }
 
-
-    public String getRegNumber() {
-      return reg_number;
-    }
   }
 
   private void initEvents() {

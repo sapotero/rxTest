@@ -79,6 +79,7 @@ public class CreateFavoriteUsersJob extends BaseJob {
     Integer count = dataStore
       .count(RFavoriteUserEntity.UID)
       .where(RFavoriteUserEntity.UID.eq(uid))
+      .and(RFavoriteUserEntity.USER.eq(settings.getString("login").get()))
       .get().value();
 
     if( count != 0 ){

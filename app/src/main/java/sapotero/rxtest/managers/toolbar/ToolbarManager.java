@@ -525,6 +525,16 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
           e.printStackTrace();
         }
       }
+
+      // resolved https://tasks.n-core.ru/browse/MVDESD-13259
+      // Кнопка "Без ответа" только на документах без резолюции
+      if (doc != null && doc.getDecisions() != null && doc.getDecisions().size() > 0){
+        try {
+          toolbar.getMenu().findItem(R.id.menu_info_to_the_approval_performance).setVisible(false);
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
     }
   }
 

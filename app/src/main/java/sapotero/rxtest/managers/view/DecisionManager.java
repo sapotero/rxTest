@@ -32,6 +32,7 @@ import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.managers.view.builders.DecisionBuilder;
 import sapotero.rxtest.managers.view.builders.PreviewBuilder;
 import sapotero.rxtest.managers.view.interfaces.DecisionInterface;
+import sapotero.rxtest.views.adapters.models.UrgencyItem;
 import timber.log.Timber;
 
 public class DecisionManager implements DecisionInterface, DecisionBuilder.Callback, PreviewBuilder.Callback {
@@ -230,8 +231,10 @@ public class DecisionManager implements DecisionInterface, DecisionBuilder.Callb
 
   }
 
-  public void setUrgency(String urgency) {
-    decision.setUrgencyText(urgency);
+  public void setUrgency(UrgencyItem urgency) {
+    decision.setUrgencyText(urgency.getLabel());
+    decision.setUrgency(urgency.getValue());
+    update();
   }
 
 
@@ -306,5 +309,17 @@ public class DecisionManager implements DecisionInterface, DecisionBuilder.Callb
   public void setSignerBlankText(String signerBlankText) {
     this.signerBlankText = signerBlankText;
     decision.setSignerBlankText(signerBlankText);
+  }
+
+
+  public void setUrgencyText(String urgencyText) {
+    decision.setUrgencyText(urgencyText);
+  }
+  public void setUrgency(String urgencyText) {
+    decision.setUrgency(urgencyText);
+  }
+
+  public void setPerformersFontSize(String size) {
+    decision.setPerformersFontSize(size);
   }
 }

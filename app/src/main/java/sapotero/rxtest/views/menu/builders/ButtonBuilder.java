@@ -15,7 +15,9 @@ import android.widget.RadioGroup;
 
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import javax.inject.Inject;
@@ -26,16 +28,21 @@ import io.requery.query.LogicalCondition;
 import io.requery.query.WhereAndOr;
 import io.requery.rx.RxScalar;
 import io.requery.rx.SingleEntityStore;
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.db.requery.utils.validation.Validation;
 import timber.log.Timber;
 
 public class ButtonBuilder {
 
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject RxSharedPreferences settings;
+  @Inject Validation validation;
 
   private ConditionBuilder[] conditions;
   private ConditionBuilder[] item_conditions;
@@ -53,11 +60,20 @@ public class ButtonBuilder {
   private final CompositeSubscription subscription = new CompositeSubscription();
 
   public void recalculate() {
-    Timber.tag(TAG).e("recalculate");
-    if (view != null) {
-//      view.setText( getLabel() );
-      getCount();
-    }
+    Observable
+      .just("")
+      .debounce(100, TimeUnit.MILLISECONDS)
+      .subscribeOn(Schedulers.newThread())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(
+        data -> {
+          Timber.tag(TAG).e("recalculate");
+          if (view != null) {
+            getCount();
+          }
+        },
+        Timber::e
+      );
   }
 
   public interface Callback {
@@ -68,7 +84,7 @@ public class ButtonBuilder {
   }
 
 
-  enum Corner{
+  private enum Corner{
     LEFT,
     RIGHT,
     NONE
@@ -93,6 +109,7 @@ public class ButtonBuilder {
 
   private void getCount() {
 
+    // Отображать документы без резолюции
     if ( settings.getBoolean("settings_view_type_show_without_project").get() ){
       getCountWithoutDecisons();
     } else {
@@ -116,6 +133,7 @@ public class ButtonBuilder {
       .count(RDocumentEntity.class)
       .where(RDocumentEntity.USER.eq(settings.getString("login").get()))
       .and(RDocumentEntity.WITH_DECISION.eq(true))
+      .and( RDocumentEntity.DOCUMENT_TYPE.in( validation.getSelectedJournals() ) )
       .and(RDocumentEntity.FROM_LINKS.eq(false));
 
     if (index == 4 || index == 7){
@@ -161,7 +179,6 @@ public class ButtonBuilder {
       }
     }
 
-    Timber.tag(TAG).e("getCountWithDecisons %s", query.get().value());
     view.setText( String.format( label, query.get().value() ) );
   }
 
@@ -169,22 +186,25 @@ public class ButtonBuilder {
 
     WhereAndOr<RxScalar<Integer>> query = dataStore
       .count(RDocumentEntity.class)
-      .where( RDocumentEntity.USER.eq( settings.getString("login").get() ) )
-      .and(RDocumentEntity.FROM_LINKS.eq(false));
+      .where( RDocumentEntity.USER.eq( settings.getString("login").get() ) );
 
-    if (index == 4 || index == 7){
+    // проекты, подпись, согласование
+    if ( !Arrays.asList(1,5,6).contains(index) ){
+      List<String> journals = validation.getSelectedJournals();
+      if ( journals.size() > 0){
+        query = query.and( RDocumentEntity.DOCUMENT_TYPE.in( validation.getSelectedJournals() ) );
+      }
+    }
+
+    // обработанные и Рассмотренные
+    if ( Arrays.asList(4,7).contains(index) ){
       query = query.and(RDocumentEntity.PROCESSED.eq(true));
     } else {
       query = query.and(RDocumentEntity.PROCESSED.eq(false));
     }
 
-    ArrayList<ConditionBuilder> temp_conditions = new ArrayList<>();
-
     if ( item_conditions.length > 0 ){
-
       for (ConditionBuilder condition : item_conditions ){
-        temp_conditions.add(condition);
-
         switch ( condition.getCondition() ){
           case AND:
             query = query.and( condition.getField() );
@@ -199,7 +219,6 @@ public class ButtonBuilder {
     }
     if ( conditions.length > 0 ){
       for (ConditionBuilder condition : conditions ){
-        temp_conditions.add(condition);
         switch ( condition.getCondition() ){
           case AND:
             query = query.and( condition.getField() );
@@ -213,19 +232,20 @@ public class ButtonBuilder {
       }
     }
 
-    if ( temp_conditions.size() > 0 ) {
-      for (ConditionBuilder condition : temp_conditions) {
-        Timber.tag("temp_conditions").v("%s %s %s | %s"
-          , condition.getField().getLeftOperand()
-          , condition.getField().getOperator()
-          , condition.getField().getRightOperand()
-          , condition.getCondition());
-      }
+    Integer size = query.get().value();
+    Timber.tag(TAG).i("size %s",  conditions.length);
+    Timber.tag(TAG).i("total %s", size);
+
+    for (ConditionBuilder condition : conditions ) {
+      Timber.tag(TAG).i("button %s", condition.toString());
+    }
+
+    for (ConditionBuilder condition : item_conditions ) {
+      Timber.tag(TAG).i("button %s", condition.toString());
     }
 
 
-    Timber.tag(TAG).e("getCountWithOutDecisons %s", query.get().value());
-    view.setText( String.format( label, query.get().value() ) );
+    view.setText( String.format( label, size ) );
   }
 
   @RequiresApi(api = Build.VERSION_CODES.M)
@@ -264,6 +284,10 @@ public class ButtonBuilder {
       if (matches){
         view.setVisibility(View.GONE);
       }
+    }
+
+    if (!validation.hasSigningAndApproval() && index == 1){
+      view.setVisibility(View.GONE);
     }
 
 

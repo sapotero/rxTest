@@ -12,6 +12,10 @@ import java.util.List;
 import java.util.Objects;
 
 import sapotero.rxtest.R;
+import sapotero.rxtest.db.requery.models.decisions.RBlock;
+import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
+import sapotero.rxtest.db.requery.models.decisions.RPerformer;
+import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.views.adapters.models.DecisionSpinnerItem;
 import timber.log.Timber;
 
@@ -55,8 +59,42 @@ public class DecisionSpinnerAdapter extends BaseAdapter {
   }
 
   public void addAll(List<DecisionSpinnerItem> items) {
-    decisions = items;
-    notifyDataSetChanged();
+    if (items.size() > 0){
+
+      List<DecisionSpinnerItem> list = new ArrayList<>();
+      List<DecisionSpinnerItem> signer = new ArrayList<>();
+      List<DecisionSpinnerItem> performer = new ArrayList<>();
+
+      decisions.clear();
+
+      for (DecisionSpinnerItem item: items ) {
+        if ( getPerformerIds(item).contains( current_user ) ){
+          performer.add(item);
+        } else if (Objects.equals(item.getDecision().getSignerId(), current_user)){
+          signer.add(0, item);
+        } else {
+          list.add(item);
+        }
+      }
+      decisions = new ArrayList<>();
+      decisions.addAll(signer);
+      decisions.addAll(performer);
+      decisions.addAll(list);
+
+      notifyDataSetChanged();
+    }
+  }
+
+  public ArrayList<String> getPerformerIds(DecisionSpinnerItem decisionSpinnerItem){
+    ArrayList<String> performers = new ArrayList<String>();
+
+    for ( RBlock block : decisionSpinnerItem.getDecision().getBlocks()) {
+      for ( RPerformer perf : ((RBlockEntity) block).getPerformers() ) {
+        performers.add( ((RPerformerEntity) perf).getPerformerId() );
+      }
+    }
+
+    return performers;
   }
 
 
