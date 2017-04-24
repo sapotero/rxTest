@@ -512,6 +512,7 @@ public class DataLoaderManager {
     requestCount = 0;
     jobCount = 0;
     jobCounter.setJobCount(0);
+    jobCounter.setDownloadFileJobCount(0);
 
     for (String index: indexes ) {
       for (String status: statuses ) {

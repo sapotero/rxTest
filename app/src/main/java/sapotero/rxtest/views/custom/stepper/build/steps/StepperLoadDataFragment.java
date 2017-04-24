@@ -120,7 +120,7 @@ public class StepperLoadDataFragment extends Fragment implements Step {
     } else {
       error = new VerificationError("Дождитесь окончания загрузки");
 
-      if ( mRingProgressBar.getProgress() >= 99 ){
+      if ( mRingProgressBar.getProgress() == 100 ){
         error = null;
       } else {
         Toast.makeText( getContext(), error.getErrorMessage(), Toast.LENGTH_SHORT ).show();
@@ -215,11 +215,16 @@ public class StepperLoadDataFragment extends Fragment implements Step {
 
       int perc = calculatePercent(jobCount);
 
+      // Set 100% only if all images downloaded
+      if ( perc == 100 && !jobCounter.isDownoadFileAlmostComplete() ) {
+        perc = 99;
+      }
+
       if (mRingProgressBar != null && mRingProgressBar.getProgress() < perc) {
         mRingProgressBar.setProgress( perc );
       }
 
-      if ( perc >= 99f ) {
+      if ( perc == 100 ) {
         error = null;
       }
     }

@@ -56,8 +56,6 @@ public class DownloadFileJob  extends BaseJob {
   @Override
   public void onAdded() {
     Timber.tag(TAG).v( "onAdded"  );
-    jobCounter = new JobCounter(settings);
-    jobCounter.incJobCount();
   }
 
   @Override
@@ -142,6 +140,10 @@ public class DownloadFileJob  extends BaseJob {
     strUrl = strUrl.replace("?expired_link=1", "");
     Observable<DownloadLink> file = documentLinkService.getByLink(strUrl, admin, token, "1");
 
+    jobCounter = new JobCounter(settings);
+    jobCounter.incJobCount();
+    jobCounter.incDownloadFileJobCount();
+
     file
       .subscribeOn(Schedulers.io())
       .observeOn(Schedulers.io())
@@ -153,6 +155,7 @@ public class DownloadFileJob  extends BaseJob {
           setComplete(false);
           setError(true);
 
+          jobCounter.decDownloadFileJobCount();
           EventBus.getDefault().post(new FileDownloadedEvent(""));
         }
       );
@@ -190,6 +193,8 @@ public class DownloadFileJob  extends BaseJob {
 
           boolean writtenToDisk = writeResponseBodyToDisk(data.body());
 
+          jobCounter.decDownloadFileJobCount();
+
           if (writtenToDisk){
             EventBus.getDefault().post(new FileDownloadedEvent(fileName));
           } else {
@@ -210,6 +215,7 @@ public class DownloadFileJob  extends BaseJob {
           setComplete(false);
           setError(true);
 
+          jobCounter.decDownloadFileJobCount();
           EventBus.getDefault().post(new FileDownloadedEvent(""));
         }
       );
