@@ -298,10 +298,20 @@ public class UpdateDocumentJob extends BaseJob {
         rDoc.setSigner( signer );
       }
 
-      rDoc.setFavorites(isFavorites);
+//      if (rDoc.isFavorites() != null && rDoc.isFavorites()){
+//        rDoc.setFavorites(true);
+//      } else {
+//        rDoc.setFavorites(false);
+//      }
+//
+//      if (rDoc.isControl() != null && rDoc.isControl()){
+//        rDoc.setControl(true);
+//      } else {
+//        rDoc.setControl(false);
+//      }
+
       rDoc.setProcessed(isProcessed);
 
-      rDoc.setControl(onControl);
       rDoc.setUser( LOGIN.get() );
       rDoc.setFromLinks( false );
       rDoc.setChanged( false );
@@ -535,16 +545,9 @@ public class UpdateDocumentJob extends BaseJob {
         signer.setType( document.getSigner().getType() );
       }
 
-      if (doc.isFavorites() == null){
-        doc.setFavorites(isFavorites);
-      }
-
-
-      doc.setControl(onControl);
+//      doc.setControl(onControl);
       doc.setUser( LOGIN.get() );
       doc.setFromLinks( false );
-      doc.setFromProcessedFolder( false );
-      doc.setFromFavoritesFolder( false );
       doc.setChanged( false );
 
       Boolean red = false;
@@ -769,9 +772,36 @@ public class UpdateDocumentJob extends BaseJob {
 
     }
 
-//    if (not_processed) {
-//      doc.setProcessed(false);
-//    }
+
+    if (doc.isFavorites() != null && doc.isFavorites()){
+      doc.setFavorites(true);
+    } else {
+      doc.setFavorites(false);
+    }
+
+    if (doc.isControl() != null && doc.isControl()){
+      doc.setControl(true);
+    } else {
+      doc.setControl(false);
+    }
+
+    if (doc.isControl() != null && doc.isControl()){
+      doc.setControl(true);
+    } else {
+      doc.setControl(false);
+    }
+
+    if (doc.isFromProcessedFolder() != null && doc.isFromProcessedFolder()){
+      doc.setFromProcessedFolder(true);
+    } else {
+      doc.setFromProcessedFolder(false);
+    }
+
+    if (doc.isFromFavoritesFolder() != null && doc.isFromFavoritesFolder()){
+      doc.setFromFavoritesFolder(true);
+    } else {
+      doc.setFromFavoritesFolder(false);
+    }
 
     dataStore
       .update( doc )

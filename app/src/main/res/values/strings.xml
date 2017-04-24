@@ -18,6 +18,7 @@
         <item>processed</item>
     </string-array>
 
+
     <string-array name="settings_view_journals">
         <item>Входящие документы</item>
         <item>Обращения граждан</item>
@@ -27,6 +28,7 @@
         <item>Приказы ДДО</item>
         <item>Подписание/согласование</item>
     </string-array>
+
     <string-array name="settings_view_journals_values">
         <item>1</item>
         <item>2</item>

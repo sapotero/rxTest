@@ -137,8 +137,8 @@ public class UpdateLinkJob extends BaseJob {
     rd.setReceiptDate( d.getReceiptDate() );
     rd.setViewed( d.getViewed() );
 
-    rd.setFavorites(true);
-    rd.setProcessed(true);
+    rd.setFavorites(false);
+    rd.setProcessed(false);
     rd.setFolder("");
     rd.setControl(false);
     rd.setFromLinks(true);
@@ -191,27 +191,6 @@ public class UpdateLinkJob extends BaseJob {
       .set(RDocumentEntity.FROM_LINKS, true)
       .where(RDecisionEntity.UID.eq(document.getUid()))
       .get().value();
-//      .toObservable()
-//      .subscribeOn( Schedulers.io() )
-//      .observeOn( Schedulers.io() )
-//      .subscribe(
-//        result -> {
-//          Timber.tag(TAG).d("updated %s",result.getUid());
-//
-//          if ( result.getImages() != null && result.getImages().size() > 0  ){
-//
-//            for (RImage _image : result.getImages()) {
-//
-//              RImageEntity image = (RImageEntity) _image;
-//              jobManager.addJobInBackground( new DownloadFileJob(HOST.get(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
-//            }
-//
-//          }
-//        },
-//        error ->{
-//          Timber.tag(TAG).d("error %s ", error);
-//        }
-//      );
   }
 
   @Override

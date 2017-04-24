@@ -281,7 +281,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
           case R.id.menu_info_shared_to_favorites:
 
             operation = CommandFactory.Operation.ADD_TO_FOLDER;
-            if ( doc != null &&  doc.isFavorites() != null && doc.isFavorites() ){
+            if ( isFromFavorites() ){
              operation = CommandFactory.Operation.REMOVE_FROM_FOLDER;
             }
 
@@ -426,14 +426,37 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             break;
         }
       }
-
-
-
-
-      if (doc != null && doc.isProcessed() != null && doc.isProcessed()){
-        menu = R.menu.info_menu;
-      }
       toolbar.inflateMenu(menu);
+
+
+      // Из папки обработанное
+      if (isProcessed()){
+        toolbar.getMenu().clear();
+        toolbar.inflateMenu(R.menu.info_menu);
+
+        try {
+          toolbar.getMenu().findItem(R.id.menu_info_shared_to_favorites).setVisible(false);
+          toolbar.getMenu().findItem(R.id.menu_info_shared_to_control).setVisible(false);
+          toolbar.getMenu().findItem(R.id.menu_info_decision_edit).setVisible(false);
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+
+      // Из папки избранное
+      if (isFromFavorites() ){
+        toolbar.getMenu().clear();
+        toolbar.inflateMenu(R.menu.info_menu);
+
+        try {
+          toolbar.getMenu().findItem(R.id.menu_info_shared_to_control).setVisible(false);
+          toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(false);
+          toolbar.getMenu().findItem(R.id.menu_info_decision_edit).setVisible(false);
+          toolbar.getMenu().findItem(R.id.menu_info_shared_to_favorites).setVisible(false);
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
 
       decision_count = doc.getDecisions().size();
       switch (decision_count) {
@@ -451,7 +474,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       }
 
       // Если документ обработан - то изменяем резолюции на поручения
-      if ( doc.isProcessed() != null && doc.isProcessed() || doc.isFromProcessedFolder() != null && doc.isFromProcessedFolder()) {
+      if ( isProcessed() ) {
         try {
           toolbar.getMenu().findItem(R.id.menu_info_decision_edit).setVisible(false);
           toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(true);
@@ -459,23 +482,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
           Timber.tag(TAG).v(e);
         }
       }
-
-      for (int i = 0; i < toolbar.getMenu().size(); i++) {
-        MenuItem item = toolbar.getMenu().getItem(i);
-
-        switch (item.getItemId()) {
-          case R.id.menu_info_shared_to_favorites:
-            item.setTitle(context.getString(doc.isFavorites() != null && doc.isFavorites() ? R.string.remove_from_favorites : R.string.to_favorites));
-            break;
-          case R.id.menu_info_shared_to_control:
-            item.setTitle(context.getString(doc.isControl() != null && doc.isControl() ? R.string.remove_from_control : R.string.to_control));
-            break;
-          default:
-            break;
-        }
-      }
-
-      //настройка
+      // настройка
+      // Показывать кнопку «Создать поручение»
       try {
         if (!settings.getBoolean("settings_view_show_create_decision_post").get() && doc.isFromFavoritesFolder() != null && doc.isFromFavoritesFolder() ) {
           if ( doc.isFromFavoritesFolder() != null && !doc.isFromFavoritesFolder() ){
@@ -497,32 +505,20 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       }
 
 
-      // Из папки обработанное
-      if (doc!= null && doc.isFromProcessedFolder() != null && doc.isFromProcessedFolder() ){
-        toolbar.getMenu().clear();
-        toolbar.inflateMenu(R.menu.info_menu);
+      for (int i = 0; i < toolbar.getMenu().size(); i++) {
+        MenuItem item = toolbar.getMenu().getItem(i);
 
-        try {
-          toolbar.getMenu().findItem(R.id.menu_info_shared_to_favorites).setVisible(false);
-          toolbar.getMenu().findItem(R.id.menu_info_shared_to_control).setVisible(false);
-          toolbar.getMenu().findItem(R.id.menu_info_decision_edit).setVisible(false);
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-      }
-
-      // Из папки избранное
-      if (doc!= null && doc.isFromFavoritesFolder() != null && doc.isFromFavoritesFolder() ){
-        toolbar.getMenu().clear();
-        toolbar.inflateMenu(R.menu.info_menu);
-
-        try {
-          toolbar.getMenu().findItem(R.id.menu_info_shared_to_control).setVisible(false);
-          toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(false);
-          toolbar.getMenu().findItem(R.id.menu_info_decision_edit).setVisible(false);
-          toolbar.getMenu().findItem(R.id.menu_info_shared_to_favorites).setVisible(false);
-        } catch (Exception e) {
-          e.printStackTrace();
+        switch (item.getItemId()) {
+          case R.id.menu_info_shared_to_favorites:
+            item.setTitle(context.getString(
+              isFromFavorites() ? R.string.remove_from_favorites : R.string.to_favorites));
+            break;
+          case R.id.menu_info_shared_to_control:
+            item.setTitle(context.getString(
+              isFromControl() ? R.string.remove_from_control : R.string.to_control));
+            break;
+          default:
+            break;
         }
       }
 
@@ -538,7 +534,18 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     }
   }
 
+  private boolean isProcessed() {
+    return doc.isProcessed() != null && doc.isProcessed() || doc.isFromProcessedFolder() != null && doc.isFromProcessedFolder();
+  }
 
+  private boolean isFromControl() {
+    return doc.isControl() != null && doc.isControl();
+  }
+
+  private boolean isFromFavorites() {
+    Timber.tag("FAVORITES").w("favore: %s %s", doc.isFavorites() != null && doc.isFavorites(), doc.isFromFavoritesFolder() != null && doc.isFromFavoritesFolder());
+    return doc.isFavorites() != null && doc.isFavorites() || doc.isFromFavoritesFolder() != null && doc.isFromFavoritesFolder();
+  }
 
 
   //REFACTOR переделать это
@@ -654,7 +661,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   private void showToControlDialog() {
     Boolean isControl = false;
 
-    if ( doc.isControl() != null && doc.isControl() ){
+    if (isFromControl()){
       isControl = true;
     }
     new MaterialDialog.Builder( context )
