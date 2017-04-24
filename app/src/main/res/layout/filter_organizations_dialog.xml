@@ -21,42 +21,51 @@
         android:text="Фильтр организаций"
         />
 
-    <ListView
-        android:id="@+id/filter_organization_list"
-        android:paddingTop="4dp"
-        android:dividerHeight="0dp"
-        android:divider="@null"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-
     <RelativeLayout
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"
-        android:paddingStart="16dp"
-        android:paddingEnd="10dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="500dp">
 
-        <Button
-            android:id="@+id/filter_organization_neutral"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            style="@style/Widget.AppCompat.Button.Borderless"/>
+        <RelativeLayout
+            android:id="@+id/filter_organization_buttons"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="10dp"
+            android:layout_alignParentBottom="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-        <Button
-            android:id="@+id/filter_organization_positive"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            style="@style/Widget.AppCompat.Button.Borderless"/>
+            <Button
+                android:id="@+id/filter_organization_neutral"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                style="@style/Widget.AppCompat.Button.Borderless"/>
 
-        <Button
-            android:id="@+id/filter_organization_negative"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toStartOf="@id/filter_organization_positive"
-            style="@style/Widget.AppCompat.Button.Borderless"/>
+            <Button
+                android:id="@+id/filter_organization_positive"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                style="@style/Widget.AppCompat.Button.Borderless"/>
+
+            <Button
+                android:id="@+id/filter_organization_negative"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toStartOf="@id/filter_organization_positive"
+                style="@style/Widget.AppCompat.Button.Borderless"/>
+
+        </RelativeLayout>
+
+        <ListView
+            android:id="@+id/filter_organization_list"
+            android:paddingTop="4dp"
+            android:dividerHeight="0dp"
+            android:divider="@null"
+            android:layout_above="@id/filter_organization_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
 
     </RelativeLayout>
 
