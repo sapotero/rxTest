@@ -417,6 +417,7 @@ public class UpdateDocumentJob extends BaseJob {
           image.setDocument(rDoc);
           image.setLoading(false);
           image.setComplete(false);
+          image.setError(false);
           rDoc.getImages().add(image);
         }
       }
@@ -686,6 +687,7 @@ public class UpdateDocumentJob extends BaseJob {
           image.setDocument(doc);
           image.setLoading(false);
           image.setComplete(false);
+          image.setError(false);
           doc.getImages().add(image);
         }
       }

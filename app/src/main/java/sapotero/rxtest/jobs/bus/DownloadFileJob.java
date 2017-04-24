@@ -70,7 +70,12 @@ public class DownloadFileJob  extends BaseJob {
         Timber.tag(TAG).e("File already downloading!");
       }
 
-      if ( !image.isComplete() ){
+      Boolean isError = image.isError();
+      if (isError == null) {
+        isError = false;
+      }
+
+      if ( !image.isComplete() && !isError ){
         loadFile();
       }
 
@@ -109,6 +114,13 @@ public class DownloadFileJob  extends BaseJob {
       .where(RImageEntity.ID.eq( image.getId() )).get().value();
   }
 
+  private void setError(Boolean status){
+    dataStore
+      .update(RImageEntity.class)
+      .set(RImageEntity.ERROR, status)
+      .where(RImageEntity.ID.eq( image.getId() )).get().value();
+  }
+
   private Boolean fileExist(){
     File file = new File(getApplicationContext().getFilesDir(), fileName);
     return file.exists();
@@ -135,6 +147,7 @@ public class DownloadFileJob  extends BaseJob {
 
           setLoading(false);
           setComplete(false);
+          setError(true);
 
           EventBus.getDefault().post(new FileDownloadedEvent(""));
         }
@@ -184,12 +197,14 @@ public class DownloadFileJob  extends BaseJob {
           if (writtenToDisk){
             setLoading(false);
             setComplete(true);
+            setError(false);
           }
         },
         error -> {
 
           setLoading(false);
           setComplete(false);
+          setError(true);
 
           EventBus.getDefault().post(new FileDownloadedEvent(""));
         }

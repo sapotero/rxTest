@@ -27,6 +27,8 @@ public abstract class RImage {
   Boolean loading;
   @Column(value="false")
   Boolean complete;
+  @Column(value="false")
+  Boolean error;
 
   @ManyToOne
   RDocument document;
