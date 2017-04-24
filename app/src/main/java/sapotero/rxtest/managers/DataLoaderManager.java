@@ -37,6 +37,8 @@ import sapotero.rxtest.events.auth.AuthDcCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthDcCheckSuccessEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckSuccessEvent;
+import sapotero.rxtest.events.stepper.load.StepperDocumentCountReadyEvent;
+import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.jobs.bus.CreateAssistantJob;
 import sapotero.rxtest.jobs.bus.CreateDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateFavoriteUsersJob;
@@ -47,6 +49,7 @@ import sapotero.rxtest.jobs.bus.CreateUrgencyJob;
 import sapotero.rxtest.jobs.bus.InvalidateDocumentsJob;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.jobs.bus.UpdateFavoritesDocumentsJob;
+import sapotero.rxtest.jobs.utils.JobCounter;
 import sapotero.rxtest.retrofit.Api.AuthService;
 import sapotero.rxtest.retrofit.DocumentsService;
 import sapotero.rxtest.retrofit.models.AuthSignToken;
@@ -81,6 +84,13 @@ public class DataLoaderManager {
   private final Context context;
   private ArrayList<String> v2Journals;
   private ArrayList<String> v2Statuses;
+
+  // Network request counter. Incremented when request created, decremented when response received.
+  private int requestCount;
+
+  private int jobCount;
+
+  private JobCounter jobCounter;
 
   public DataLoaderManager(Context context) {
     this.context = context;
@@ -215,6 +225,7 @@ public class DataLoaderManager {
     CURRENT_USER = settings.getString("current_user");
     CURRENT_USER_ID = settings.getString("current_user_id");
     CURRENT_USER_ORGANIZATION = settings.getString("current_user_organization");
+    jobCounter = new JobCounter(settings);
   }
 
   public void unregister(){
@@ -498,8 +509,14 @@ public class DataLoaderManager {
 
     unsubscribe();
 
+    requestCount = 0;
+    jobCount = 0;
+    jobCounter.setJobCount(0);
+    jobCounter.setDownloadFileJobCount(0);
+
     for (String index: indexes ) {
       for (String status: statuses ) {
+        requestCount++;
         subscription.add(
           docService
             .getDocumentsByIndexes(LOGIN.get(), TOKEN.get(), index, status, 500)
@@ -507,6 +524,7 @@ public class DataLoaderManager {
             .observeOn(Schedulers.computation())
             .subscribe(
               data -> {
+                requestCount--;
                 if (data.getDocuments().size() > 0){
 
                   for (Document doc: data.getDocuments() ) {
@@ -520,11 +538,13 @@ public class DataLoaderManager {
 
                       if ( !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) ){
                         Timber.tag(TAG).e("isUpdate" );
+                        jobCount++;
                         jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), index, status, true) );
                       }
 
                     } else {
                       Timber.tag(TAG).e("isCreate" );
+                      jobCount++;
                       jobManager.addJobInBackground( new CreateDocumentsJob(doc.getUid(), index, status) );
                     }
                   }
@@ -534,8 +554,11 @@ public class DataLoaderManager {
                     jobManager.addJobInBackground(new InvalidateDocumentsJob(data.getDocuments(), index, status));
                   }
                 }
+                updatePrefJobCount();
               },
               error -> {
+                requestCount--;
+                updatePrefJobCount();
                 Timber.tag(TAG).e(error);
               })
         );
@@ -543,6 +566,7 @@ public class DataLoaderManager {
     }
 
     for (String code: sp ) {
+      requestCount++;
       subscription.add(
         docService
           .getDocuments(LOGIN.get(), TOKEN.get(), code, 500, 0)
@@ -550,22 +574,35 @@ public class DataLoaderManager {
           .observeOn(Schedulers.computation())
           .subscribe(
             data -> {
+              requestCount--;
               if (data.getDocuments().size() > 0){
                 for (Document doc: data.getDocuments() ) {
-
+                  jobCount++;
                   jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), code) );
-
-
                 }
               }
+              updatePrefJobCount();
             },
             error -> {
+              requestCount--;
+              updatePrefJobCount();
               Timber.tag(TAG).e(error);
             })
       );
     }
 
 //    updateFavoritesAndProcessed();
+  }
+
+  // resolved https://tasks.n-core.ru/browse/MVDESD-13145
+  // Передача количества документов в экран загрузки
+  private void updatePrefJobCount() {
+    if (0 == requestCount) {
+      // Received responses on all requests, now jobCount contains total initial job count value.
+      // Update counter in preferences with this value.
+      jobCounter.addJobCount(jobCount);
+      EventBus.getDefault().post( new StepperDocumentCountReadyEvent() );
+    }
   }
 
   private boolean isDocumentMd5Changed(String uid, String md5) {

@@ -2,13 +2,18 @@ package sapotero.rxtest.views.custom.stepper.build.steps;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
+import android.support.annotation.UiThread;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.birbit.android.jobqueue.Job;
+import com.birbit.android.jobqueue.JobManager;
+import com.birbit.android.jobqueue.callback.JobManagerCallback;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
@@ -26,16 +31,21 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.events.bus.FileDownloadedEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckFailEvent;
+import sapotero.rxtest.events.stepper.load.StepperDocumentCountReadyEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
-import sapotero.rxtest.events.stepper.shared.StepperNextStepEvent;
+import sapotero.rxtest.jobs.utils.JobCounter;
+import sapotero.rxtest.utils.FirstRun;
 import sapotero.rxtest.views.custom.stepper.Step;
+import sapotero.rxtest.views.custom.stepper.StepperLayout;
 import sapotero.rxtest.views.custom.stepper.VerificationError;
 import timber.log.Timber;
 
 public class StepperLoadDataFragment extends Fragment implements Step {
 
   @Inject RxSharedPreferences settings;
+  @Inject JobManager jobManager;
 
   private String TAG = this.getClass().getSimpleName();
   private int loaded = 0;
@@ -47,6 +57,9 @@ public class StepperLoadDataFragment extends Fragment implements Step {
 
   private VerificationError error;
   private CompositeSubscription subscription;
+
+  private JobCounter jobCounter;
+  private boolean isReceivedJobCount = false;
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -66,36 +79,7 @@ public class StepperLoadDataFragment extends Fragment implements Step {
       Timber.tag(TAG).v( "mRingProgressBar value: complete");
     });
 
-    if (subscription == null){
-      subscription = new CompositeSubscription();
-    }
-
-    if (subscription.hasSubscriptions()){
-      subscription.unsubscribe();
-    }
-
-    subscription.add(
-      Observable
-      .interval( 2, TimeUnit.SECONDS)
-      .subscribeOn(AndroidSchedulers.mainThread())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe( data-> {
-        int value = mRingProgressBar.getProgress();
-        mRingProgressBar.setProgress( value + 1 );
-
-        if ( getLoadedDocumentsPercent() > value ){
-          subscription.unsubscribe();
-          mRingProgressBar.setOnProgressListener(null);
-          mRingProgressBar = null;
-          EventBus.getDefault().post( new StepperNextStepEvent() );
-        }
-
-      })
-    );
-
     error = new VerificationError("Подождите загрузки документов");
-
-
 
     return view;
   }
@@ -127,7 +111,7 @@ public class StepperLoadDataFragment extends Fragment implements Step {
       Toast.makeText( getContext(), "Режим работы: оффлайн", Toast.LENGTH_SHORT ).show();
     }
 
-    if ( settings.getBoolean("is_first_run").get() != null && !settings.getBoolean("is_first_run").get() ){
+    if ( !isFirstRun() ) {
       error = null;
 
       if (subscription.hasSubscriptions()){
@@ -136,18 +120,50 @@ public class StepperLoadDataFragment extends Fragment implements Step {
     } else {
       error = new VerificationError("Дождитесь окончания загрузки");
 
-      if ( mRingProgressBar.getProgress() >= 99 ){
+      if ( mRingProgressBar.getProgress() == 100 ){
         error = null;
+      } else {
+        Toast.makeText( getContext(), error.getErrorMessage(), Toast.LENGTH_SHORT ).show();
       }
     }
 
     return error;
   }
 
+  private boolean isFirstRun() {
+    FirstRun firstRun = new FirstRun(settings);
+    return firstRun.isFirstRun();
+  }
+
   @Override
   public void onSelected() {
-    loaded = 0;
-    mRingProgressBar.setProgress( 0 );
+    Boolean startLoadData = settings.getBoolean("start_load_data").get();
+    if (startLoadData == null) {
+      startLoadData = true;
+    }
+
+    if ( startLoadData ) {
+      loaded = 0;
+      mRingProgressBar.setProgress( 0 );
+      settings.getBoolean("start_load_data").set( false );
+
+      if (subscription != null && subscription.hasSubscriptions()){
+        subscription.unsubscribe();
+      }
+
+      subscription = new CompositeSubscription();
+
+      subscription.add(
+        Observable
+          .interval( 2, TimeUnit.SECONDS)
+          .subscribeOn(AndroidSchedulers.mainThread())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe( data-> {
+            int value = mRingProgressBar.getProgress();
+            mRingProgressBar.setProgress( value + 1 );
+          })
+      );
+    }
   }
 
   @Override
@@ -165,36 +181,64 @@ public class StepperLoadDataFragment extends Fragment implements Step {
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(StepperLoadDocumentEvent event) throws Exception {
-    loaded++;
-    Timber.tag(TAG).d("TOTAL: %s/%s | %s", COUNT.get(),loaded, event.message );
+  public void onMessageEvent(StepperLoadDocumentEvent event) {
+    updateProgressBar(event.message);
+  }
 
-    int perc = getLoadedDocumentsPercent();
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(FileDownloadedEvent event) {
+    updateProgressBar(event.path);
+  }
 
-    if (mRingProgressBar != null) {
-      if ( mRingProgressBar.getProgress() < perc ){
-        mRingProgressBar.setProgress( perc );
-      }
-    }
-
-    if ( perc == 100f ){
-      error = null;
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(StepperDocumentCountReadyEvent event) {
+    isReceivedJobCount = true;
+    if (jobCounter.getJobCount() == 0) {
+      // No documents to download, set download complete
+      mRingProgressBar.setProgress( 100 );
+    } else {
+      updateProgressBar("");
     }
   }
 
-  private int getLoadedDocumentsPercent() {
-    if ( COUNT.get() == null ){
-      COUNT.set(1);
-    }
+  private void updateProgressBar(String message) {
+    loaded++;
 
-    float result = 100f * loaded / COUNT.get();
-    if (result > 100 ){
-      result = 100f;
+    Timber.tag(TAG).d("TOTAL: %s/%s | %s", COUNT.get(), loaded, message );
 
-      if (subscription.hasSubscriptions()){
+    int jobCount = jobCounter.getJobCount();
+
+    if ( isReceivedJobCount && jobCount != 0) {
+      if (subscription.hasSubscriptions()) {
         subscription.unsubscribe();
       }
 
+      int perc = calculatePercent(jobCount);
+
+      // Set 100% only if all images downloaded
+      if ( perc == 100 && !jobCounter.isDownoadFileAlmostComplete() ) {
+        perc = 99;
+      }
+
+      if (mRingProgressBar != null && mRingProgressBar.getProgress() < perc) {
+        mRingProgressBar.setProgress( perc );
+      }
+
+      if ( perc == 100 ) {
+        error = null;
+      }
+    }
+  }
+
+  private int calculatePercent(int jobCount) {
+    float result = 0;
+
+    if (jobCount != 0) {
+      result = 100f * loaded / jobCount;
+
+      if (result > 100){
+        result = 100f;
+      }
     }
 
     return (int) Math.ceil(result);
@@ -203,7 +247,6 @@ public class StepperLoadDataFragment extends Fragment implements Step {
   private void loadRxSettings() {
     COUNT = settings.getInteger("documents.count");
     IS_CONNECTED = settings.getBoolean("isConnectedToInternet");
+    jobCounter = new JobCounter(settings);
   }
-
-
 }

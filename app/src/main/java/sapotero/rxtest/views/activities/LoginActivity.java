@@ -30,6 +30,7 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.events.bus.FileDownloadedEvent;
 import sapotero.rxtest.events.stepper.shared.StepperNextStepEvent;
+import sapotero.rxtest.utils.FirstRun;
 import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.custom.stepper.StepperLayout;
 import sapotero.rxtest.views.custom.stepper.VerificationError;
@@ -243,9 +244,11 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
     }
     EventBus.getDefault().register(this);
 
+    // If not first run, immediately move to main activity
+    if ( !isFirstRun() ) {
+      onCompleted(null);
+    }
   }
-
-
 
   /* Stepper */
   @Override
@@ -277,6 +280,10 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
 //    Toast.makeText( getApplicationContext(), "onReturn", Toast.LENGTH_SHORT ).show();
   }
 
+  private boolean isFirstRun() {
+    FirstRun firstRun = new FirstRun(settings);
+    return firstRun.isFirstRun();
+  }
 
   @Subscribe(threadMode = ThreadMode.BACKGROUND)
   public void onMessageEvent(FileDownloadedEvent event) {

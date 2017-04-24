@@ -20,7 +20,9 @@ import javax.inject.Inject;
 
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.events.stepper.auth.StepperDcCheckEvent;
 import sapotero.rxtest.events.stepper.shared.StepperNextStepEvent;
+import sapotero.rxtest.utils.FirstRun;
 import sapotero.rxtest.views.activities.SettingsActivity;
 import sapotero.rxtest.views.custom.stepper.Step;
 import sapotero.rxtest.views.custom.stepper.VerificationError;
@@ -58,6 +60,12 @@ public class StepperChooseAuthTypeFragment extends Fragment implements Step, Vie
   }
 
   @Override
+  public void onResume() {
+    super.onResume();
+    setAuthTypeDc();
+  }
+
+  @Override
   public void onDestroy(){
     super.onDestroy();
 //    if ( EventBus.getDefault().isRegistered(this) ) {
@@ -80,7 +88,6 @@ public class StepperChooseAuthTypeFragment extends Fragment implements Step, Vie
 
   @Override
   public void onSelected() {
-    //addByOne UI when selected
   }
 
   @Override
@@ -93,26 +100,41 @@ public class StepperChooseAuthTypeFragment extends Fragment implements Step, Vie
     switch ( v.getId() ){
 
       case R.id.stepper_auth_choose_cert:
-        Timber.tag("StepperAuthFragment").d( "stepper_auth_choose_cert" );
-        setAuthType( AuthType.DS );
-        settings.getBoolean("SIGN_WITH_DC").set(true);
-        EventBus.getDefault().post( new StepperNextStepEvent() );
+        signWithDc();
         break;
 
       case R.id.stepper_auth_choose_password:
-        Timber.tag("StepperAuthFragment").d( "stepper_auth_choose_password" );
-        setAuthType( AuthType.PASSWORD );
-        settings.getBoolean("SIGN_WITH_DC").set(false);
-        EventBus.getDefault().post( new StepperNextStepEvent() );
-
+        signWithLogin();
         break;
+
       default:
         break;
     }
+  }
+
+  private void signWithDc() {
+    Timber.tag("StepperAuthFragment").d( "stepper_auth_choose_cert" );
+    setAuthTypeDc();
+    EventBus.getDefault().post( new StepperNextStepEvent() );
+  }
+
+  private void signWithLogin() {
+    Timber.tag("StepperAuthFragment").d( "stepper_auth_choose_password" );
+    setAuthTypeLogin();
+    EventBus.getDefault().post( new StepperNextStepEvent() );
   }
 
   private void setAuthType( AuthType type ){
     settings.getEnum("stepper.auth_type", AuthType.class).set( type );
   }
 
+  private void setAuthTypeDc() {
+    setAuthType( AuthType.DS );
+    settings.getBoolean("SIGN_WITH_DC").set(true);
+  }
+
+  private void setAuthTypeLogin() {
+    setAuthType( AuthType.PASSWORD );
+    settings.getBoolean("SIGN_WITH_DC").set(false);
+  }
 }
