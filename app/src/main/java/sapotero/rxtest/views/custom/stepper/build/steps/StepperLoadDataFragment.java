@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
+import android.support.annotation.UiThread;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,6 +37,7 @@ import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.jobs.utils.JobCounter;
 import sapotero.rxtest.utils.FirstRun;
 import sapotero.rxtest.views.custom.stepper.Step;
+import sapotero.rxtest.views.custom.stepper.StepperLayout;
 import sapotero.rxtest.views.custom.stepper.VerificationError;
 import timber.log.Timber;
 
@@ -133,9 +135,15 @@ public class StepperLoadDataFragment extends Fragment implements Step {
 
   @Override
   public void onSelected() {
-    if (jobCounter.getJobCount() == 0) {
+    Boolean startLoadData = settings.getBoolean("start_load_data").get();
+    if (startLoadData == null) {
+      startLoadData = true;
+    }
+
+    if ( startLoadData ) {
       loaded = 0;
       mRingProgressBar.setProgress( 0 );
+      settings.getBoolean("start_load_data").set( false );
 
       if (subscription != null && subscription.hasSubscriptions()){
         subscription.unsubscribe();

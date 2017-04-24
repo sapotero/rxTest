@@ -60,6 +60,12 @@ public class StepperChooseAuthTypeFragment extends Fragment implements Step, Vie
   }
 
   @Override
+  public void onResume() {
+    super.onResume();
+    setAuthTypeDc();
+  }
+
+  @Override
   public void onDestroy(){
     super.onDestroy();
 //    if ( EventBus.getDefault().isRegistered(this) ) {
@@ -108,15 +114,13 @@ public class StepperChooseAuthTypeFragment extends Fragment implements Step, Vie
 
   private void signWithDc() {
     Timber.tag("StepperAuthFragment").d( "stepper_auth_choose_cert" );
-    setAuthType( AuthType.DS );
-    settings.getBoolean("SIGN_WITH_DC").set(true);
+    setAuthTypeDc();
     EventBus.getDefault().post( new StepperNextStepEvent() );
   }
 
   private void signWithLogin() {
     Timber.tag("StepperAuthFragment").d( "stepper_auth_choose_password" );
-    setAuthType( AuthType.PASSWORD );
-    settings.getBoolean("SIGN_WITH_DC").set(false);
+    setAuthTypeLogin();
     EventBus.getDefault().post( new StepperNextStepEvent() );
   }
 
@@ -124,4 +128,13 @@ public class StepperChooseAuthTypeFragment extends Fragment implements Step, Vie
     settings.getEnum("stepper.auth_type", AuthType.class).set( type );
   }
 
+  private void setAuthTypeDc() {
+    setAuthType( AuthType.DS );
+    settings.getBoolean("SIGN_WITH_DC").set(true);
+  }
+
+  private void setAuthTypeLogin() {
+    setAuthType( AuthType.PASSWORD );
+    settings.getBoolean("SIGN_WITH_DC").set(false);
+  }
 }
