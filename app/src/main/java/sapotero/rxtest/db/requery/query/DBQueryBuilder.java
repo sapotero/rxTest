@@ -209,15 +209,15 @@ public class DBQueryBuilder {
                 }
               }
 
-              boolean favorites;
+//              boolean favorites;
+//
+//              if (documentEntity.isFavorites() != null) {
+//                favorites = documentEntity.isFavorites();
+//              } else {
+//                favorites = false;
+//              }
 
-              if (documentEntity.isFavorites() != null) {
-                favorites = documentEntity.isFavorites();
-              } else {
-                favorites = false;
-              }
-
-              if ( !ids.contains(organization) && !favorites ) {
+              if ( !ids.contains(organization) ) {
                 result = false;
               }
             }
