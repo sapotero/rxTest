@@ -94,26 +94,6 @@ public class DecisionConverter {
     return name;
   }
 
-  public static String formatTemporaryName(String name){
-    Timber.tag("DecisionConverter").e("formatTemporaryName %s", name);
-
-    try {
-      // Delete organization (text within "()") from name, if exists
-      int startIndex = name.indexOf("(");
-      if (startIndex != -1) {
-        String toBeReplaced = name.substring(startIndex);
-        name = name.replace(toBeReplaced, "");
-      }
-
-      name = formatName(name);
-
-    } catch (Exception error) {
-      Timber.tag("DecisionConverter").e(error);
-    }
-
-    return name;
-  }
-
   public static String getPerformerNameForDecisionPreview(String name, String genderString, String appealText) {
 
     String tempName = "";
