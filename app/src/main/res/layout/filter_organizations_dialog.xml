@@ -23,7 +23,10 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="500dp">
+        android:layout_height="540dp">
+
+        <!--Buttons are placed above ListView in layout so that ListView doesn't
+        push buttons from the screen if populated with lots of items-->
 
         <RelativeLayout
             android:id="@+id/filter_organization_buttons"
