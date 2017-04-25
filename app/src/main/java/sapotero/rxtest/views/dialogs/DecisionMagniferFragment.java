@@ -213,14 +213,21 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
 
 
       LinearLayout signer_view = new LinearLayout(context);
-      signer_view.setOrientation(LinearLayout.HORIZONTAL);
+      signer_view.setOrientation(LinearLayout.VERTICAL);
 
       if ( decision.isShowPosition() != null && decision.isShowPosition() ){
         TextView signerPositionView = new TextView(context);
         signerPositionView.setText( decision.getSignerPositionS() );
-        signerPositionView.setTextColor( Color.BLACK );
-        signerPositionView.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
+        signerPositionView.setTextColor( ContextCompat.getColor(context, R.color.md_grey_800) );
+        signerPositionView.setTypeface( Typeface.create("sans-serif-light", Typeface.NORMAL) );
         signerPositionView.setGravity( Gravity.END );
+
+        LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(
+          LinearLayout.LayoutParams.MATCH_PARENT,
+          LinearLayout.LayoutParams.MATCH_PARENT,
+          1.0f
+        );
+        signerPositionView.setLayoutParams(param);
         signer_view.addView( signerPositionView );
         textLabels.add(signerPositionView);
       }
@@ -231,6 +238,14 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
       signerBlankTextView.setGravity( Gravity.END);
       signerBlankTextView.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
       signerBlankTextView.setLayoutParams(viewsLayotuParams);
+
+      LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(
+        LinearLayout.LayoutParams.MATCH_PARENT,
+        LinearLayout.LayoutParams.MATCH_PARENT,
+        1.0f
+      );
+      signerBlankTextView.setLayoutParams(param);
+
       signer_view.addView( signerBlankTextView );
 
 
