@@ -60,6 +60,7 @@ import sapotero.rxtest.events.auth.AuthDcCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthDcCheckSuccessEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckSuccessEvent;
+import sapotero.rxtest.events.bus.FolderCreatedEvent;
 import sapotero.rxtest.events.bus.UpdateAuthTokenEvent;
 import sapotero.rxtest.events.crypto.SignDataEvent;
 import sapotero.rxtest.events.crypto.SignDataResultEvent;
@@ -84,6 +85,7 @@ import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.services.task.UpdateAllDocumentsTask;
 import sapotero.rxtest.services.task.UpdateQueueTask;
+import sapotero.rxtest.utils.FirstRun;
 import sapotero.rxtest.utils.cryptopro.AlgorithmSelector;
 import sapotero.rxtest.utils.cryptopro.CMSSignExample;
 import sapotero.rxtest.utils.cryptopro.ContainerAdapter;
@@ -92,6 +94,7 @@ import sapotero.rxtest.utils.cryptopro.PinCheck;
 import sapotero.rxtest.utils.cryptopro.ProviderType;
 import sapotero.rxtest.utils.cryptopro.wrapper.CMSSign;
 import sapotero.rxtest.utils.queue.QueueManager;
+import sapotero.rxtest.views.menu.fields.MainMenuItem;
 import timber.log.Timber;
 
 public class MainService extends Service {
@@ -873,4 +876,24 @@ public class MainService extends Service {
     Timber.tag(TAG).e("updated: %s", count);
   }
 
+
+  // resolved https://tasks.n-core.ru/browse/MVDESD-13017
+  // При первом запуске выгружаем все избранные с ЭО
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(FolderCreatedEvent event){
+    String type = event.getType();
+    if (type == null) {
+      type = "";
+    }
+    if ( type.equals("favorites") ) {
+      if ( isFirstRun() ) {
+        dataLoaderInterface.updateFavorites();
+      }
+    }
+  }
+
+  private boolean isFirstRun() {
+    FirstRun firstRun = new FirstRun(settings);
+    return firstRun.isFirstRun();
+  }
 }

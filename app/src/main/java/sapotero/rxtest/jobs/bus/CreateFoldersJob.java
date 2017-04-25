@@ -7,10 +7,14 @@ import com.birbit.android.jobqueue.CancelReason;
 import com.birbit.android.jobqueue.Params;
 import com.birbit.android.jobqueue.RetryConstraint;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.ArrayList;
 
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
+import sapotero.rxtest.events.bus.FolderCreatedEvent;
+import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.retrofit.models.Folder;
 import timber.log.Timber;
 
@@ -37,6 +41,8 @@ public class CreateFoldersJob extends BaseJob {
     for (Folder template : templates){
       if ( !exist( template.getId()) ){
         add(template);
+      } else {
+        EventBus.getDefault().post( new FolderCreatedEvent(template.getType()) );
       }
     }
 
@@ -57,6 +63,7 @@ public class CreateFoldersJob extends BaseJob {
       .observeOn(Schedulers.newThread())
       .subscribe(u -> {
         Timber.tag(TAG).v("addByOne " + u.getTitle() );
+        EventBus.getDefault().post( new FolderCreatedEvent(u.getType()) );
       });
   }
 
