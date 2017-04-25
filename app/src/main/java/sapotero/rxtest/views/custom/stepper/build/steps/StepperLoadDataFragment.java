@@ -73,6 +73,7 @@ public class StepperLoadDataFragment extends Fragment implements Step {
     mRingProgressBar.setProgress(0);
     mRingProgressBar.setOnProgressListener(() -> {
       Timber.tag(TAG).v( "mRingProgressBar value: complete");
+      unsubscribe();
     });
 
     error = new VerificationError("Подождите загрузки документов");
@@ -102,17 +103,10 @@ public class StepperLoadDataFragment extends Fragment implements Step {
 //      Toast.makeText( getContext(), error.getErrorMessage(), Toast.LENGTH_SHORT ).show();
     }
 
-//    if ( !IS_CONNECTED.get() ){
-//      error = null;
-//      Toast.makeText( getContext(), "Режим работы: оффлайн", Toast.LENGTH_SHORT ).show();
-//    }
-
     if ( !isFirstRun() ) {
       error = null;
+      unsubscribe();
 
-      if (subscription.hasSubscriptions()){
-        subscription.unsubscribe();
-      }
     } else {
       error = new VerificationError("Дождитесь окончания загрузки");
 
@@ -133,6 +127,8 @@ public class StepperLoadDataFragment extends Fragment implements Step {
 
   @Override
   public void onSelected() {
+    Timber.tag(TAG).d("mRingProgressBar init");
+
     Boolean startLoadData = settings.getBoolean("start_load_data").get();
     if (startLoadData == null) {
       startLoadData = true;
@@ -143,22 +139,26 @@ public class StepperLoadDataFragment extends Fragment implements Step {
       mRingProgressBar.setProgress( 0 );
       settings.getBoolean("start_load_data").set( false );
 
-      if (subscription != null && subscription.hasSubscriptions()){
-        subscription.unsubscribe();
-      }
-
+      unsubscribe();
       subscription = new CompositeSubscription();
 
       subscription.add(
         Observable
           .interval( 2, TimeUnit.SECONDS)
-          .subscribeOn(Schedulers.computation())
-          .observeOn(AndroidSchedulers.mainThread())
           .subscribe( data-> {
+            Timber.tag(TAG).d("mRingProgressBar increment");
             int value = mRingProgressBar.getProgress();
-            mRingProgressBar.setProgress( value + 1 );
+            if (value < 99) {
+              mRingProgressBar.setProgress( value + 1 );
+            }
           })
       );
+    }
+  }
+
+  private void unsubscribe() {
+    if ( subscription != null && subscription.hasSubscriptions() ) {
+      subscription.unsubscribe();
     }
   }
 
@@ -200,15 +200,11 @@ public class StepperLoadDataFragment extends Fragment implements Step {
   private void updateProgressBar(String message) {
     loaded++;
 
-    Timber.tag(TAG).d("TOTAL: %s/%s | %s", COUNT.get(), loaded, message );
-
     int jobCount = jobCounter.getJobCount();
 
-    if ( isReceivedJobCount && jobCount != 0) {
-      if (subscription.hasSubscriptions()) {
-        subscription.unsubscribe();
-      }
+    Timber.tag(TAG).d("TOTAL: %s/%s | %s", jobCount, loaded, message );
 
+    if ( isReceivedJobCount && jobCount != 0) {
       int perc = calculatePercent(jobCount);
 
       // Set 100% only if all images downloaded
