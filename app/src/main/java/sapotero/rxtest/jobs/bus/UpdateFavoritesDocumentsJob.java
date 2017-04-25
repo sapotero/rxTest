@@ -445,6 +445,10 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
       }
     }
 
+    if ( document.getInfoCard() != null){
+      rDoc.setInfoCard( document.getInfoCard() );
+    }
+
     rDoc.setDocumentType("");
     rDoc.setFilter("");
     rDoc.setFolder(folder);
