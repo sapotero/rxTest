@@ -663,6 +663,10 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
             Timber.tag(TAG).e("decision_spinner_adapter > 0");
             displayDecision();
           }
+
+          if (decision_spinner_adapter.size() == 1){
+            disableSelection();
+          }
         } else {
           Timber.e("no decisions");
           magnifer_button.setVisibility(View.GONE);
@@ -671,7 +675,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
           }
           preview.showEmpty();
           EventBus.getDefault().post( new HasNoActiveDecisionConstructor() );
-          decision_spinner_adapter.add( new DecisionSpinnerItem(null, "Нет резолюций", 0 ) );
+          disableSelection();
+          decision_spinner_adapter.add( new DecisionSpinnerItem(null, "Нет резолюций", null ) );
 
           showDecisionCardTollbarMenuItems(false);
         }
@@ -679,6 +684,13 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       }, error -> {
         Timber.tag(TAG).e(error);
       });
+  }
+
+  private void disableSelection() {
+    decision_spinner.setBackgroundColor( ContextCompat.getColor(getContext(), R.color.transparent ) );
+    decision_spinner.setClickable( false );
+    decision_spinner.setFocusable( false );
+    decision_spinner.setEnabled( false );
   }
 
   private void displayDecision() {
