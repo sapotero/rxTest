@@ -136,7 +136,6 @@ public class DataLoaderManager {
                     jobManager.addJobInBackground(new CreateFoldersJob(data));
                   }, error -> {
                     Timber.tag(TAG).e(error);
-                    EventBus.getDefault().post( new FolderCreatedEvent( "error" ) );
                   })
               );
 
@@ -445,9 +444,9 @@ public class DataLoaderManager {
 
 
     if (items == MainMenuItem.PROCESSED){
-      updateFavoritesAndProcessed(MainMenuItem.PROCESSED);
+      updateProcessed();
     } else if (items == MainMenuItem.FAVORITES){
-      updateFavoritesAndProcessed(MainMenuItem.FAVORITES);
+      updateFavorites();
     } else {
 
       ArrayList<String> indexes = new ArrayList<>();
@@ -686,53 +685,17 @@ public class DataLoaderManager {
 //    jobManager.addJobInBackground(new UpdateDocumentJob( uid, "" ));
   }
 
-
-  public void updateFavoritesAndProcessed(MainMenuItem item) {
-
+  public void updateFavorites() {
     Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
     DocumentsService docService = retrofit.create(DocumentsService.class);
+
     RFolderEntity favorites_folder = dataStore
-      .select(RFolderEntity.class)
-      .where(RFolderEntity.TYPE.eq("favorites"))
-      .and(RFolderEntity.USER.eq( settings.getString("login").get() ))
-      .get().firstOrNull();
+            .select(RFolderEntity.class)
+            .where(RFolderEntity.TYPE.eq("favorites"))
+            .and(RFolderEntity.USER.eq( settings.getString("login").get() ))
+            .get().firstOrNull();
 
-    RFolderEntity processed_folder = dataStore
-      .select(RFolderEntity.class)
-      .where(RFolderEntity.TYPE.eq("processed"))
-      .and(RFolderEntity.USER.eq( settings.getString("login").get() ))
-      .get().firstOrNull();
-
-    if (processed_folder != null && item == MainMenuItem.PROCESSED) {
-
-      dateFormat = new SimpleDateFormat("dd.MM.yyyy", new Locale("RU"));
-      Calendar cal = Calendar.getInstance();
-      cal.add(Calendar.HOUR, -20*24);
-      String date = dateFormat.format(cal.getTime());
-
-      Timber.tag(TAG).e("PROCESSED EXIST! %s", date);
-
-      subscription.add(
-        docService.getByFolders(LOGIN.get(), TOKEN.get(), null, 500, 0, processed_folder.getUid(), date)
-          .subscribeOn( Schedulers.io() )
-          .observeOn( AndroidSchedulers.mainThread() )
-          .subscribe(
-            data -> {
-              if ( data.getDocuments().size() > 0 ) {
-                Timber.tag("PROCESSED").e("DOCUMENTS COUNT: %s", data.getDocuments().size() );
-                for (Document doc : data.getDocuments()) {
-                  jobManager.addJobInBackground( new UpdateProcessedDocumentsJob(doc.getUid(), processed_folder.getUid() ) );
-                }
-              }
-            }, error -> {
-              Timber.tag(TAG).e(error);
-            }
-          )
-      );
-    }
-
-
-    if (favorites_folder != null  && item == MainMenuItem.FAVORITES ) {
+    if ( favorites_folder != null ) {
       Timber.tag(TAG).e("FAVORITES EXIST!");
 
       jobCountFavorites = 0;
@@ -761,7 +724,45 @@ public class DataLoaderManager {
           )
       );
     }
+  }
 
+  public void updateProcessed() {
+    Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
+    DocumentsService docService = retrofit.create(DocumentsService.class);
+
+    RFolderEntity processed_folder = dataStore
+      .select(RFolderEntity.class)
+      .where(RFolderEntity.TYPE.eq("processed"))
+      .and(RFolderEntity.USER.eq( settings.getString("login").get() ))
+      .get().firstOrNull();
+
+    if ( processed_folder != null ) {
+
+      dateFormat = new SimpleDateFormat("dd.MM.yyyy", new Locale("RU"));
+      Calendar cal = Calendar.getInstance();
+      cal.add(Calendar.HOUR, -20*24);
+      String date = dateFormat.format(cal.getTime());
+
+      Timber.tag(TAG).e("PROCESSED EXIST! %s", date);
+
+      subscription.add(
+        docService.getByFolders(LOGIN.get(), TOKEN.get(), null, 500, 0, processed_folder.getUid(), date)
+          .subscribeOn( Schedulers.io() )
+          .observeOn( AndroidSchedulers.mainThread() )
+          .subscribe(
+            data -> {
+              if ( data.getDocuments().size() > 0 ) {
+                Timber.tag("PROCESSED").e("DOCUMENTS COUNT: %s", data.getDocuments().size() );
+                for (Document doc : data.getDocuments()) {
+                  jobManager.addJobInBackground( new UpdateProcessedDocumentsJob(doc.getUid(), processed_folder.getUid() ) );
+                }
+              }
+            }, error -> {
+              Timber.tag(TAG).e(error);
+            }
+          )
+      );
+    }
   }
 
 //  @Subscribe(threadMode = ThreadMode.BACKGROUND)

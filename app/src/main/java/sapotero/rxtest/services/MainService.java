@@ -887,7 +887,7 @@ public class MainService extends Service {
     }
     if ( type.equals("favorites") ) {
       if ( isFirstRun() ) {
-        dataLoaderInterface.updateFavoritesAndProcessed( MainMenuItem.FAVORITES );
+        dataLoaderInterface.updateFavorites();
       }
     }
   }
