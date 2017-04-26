@@ -135,6 +135,7 @@ public class StepperLoadDataFragment extends Fragment implements Step {
     }
 
     if ( startLoadData ) {
+      isReceivedJobCount = false;
       loaded = 0;
       mRingProgressBar.setProgress( 0 );
       settings.getBoolean("start_load_data").set( false );
@@ -150,6 +151,16 @@ public class StepperLoadDataFragment extends Fragment implements Step {
             int value = mRingProgressBar.getProgress();
             if (value < 99) {
               mRingProgressBar.setProgress( value + 1 );
+            }
+          })
+      );
+
+      // If no network connection, set progress bar to 100 and allow to proceed
+      subscription.add(
+        IS_CONNECTED.asObservable()
+          .subscribe( isConnected -> {
+            if ( !isConnected ) {
+              mRingProgressBar.setProgress( 100 );
             }
           })
       );
@@ -210,10 +221,6 @@ public class StepperLoadDataFragment extends Fragment implements Step {
       if (mRingProgressBar != null && mRingProgressBar.getProgress() < perc) {
         mRingProgressBar.setProgress( perc );
       }
-
-//      if ( perc == 100 ) {
-//        error = null;
-//      }
     }
   }
 
@@ -223,7 +230,7 @@ public class StepperLoadDataFragment extends Fragment implements Step {
     if (jobCount != 0) {
       result = 100f * loaded / jobCount;
 
-      if (result > 100){
+      if (result > 95){
         result = 100f;
       }
     }
