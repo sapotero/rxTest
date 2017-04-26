@@ -35,6 +35,7 @@ import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.adapter.UpdateDocumentAdapterEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
+import sapotero.rxtest.jobs.utils.JobCounter;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Card;
@@ -67,6 +68,8 @@ public class UpdateDocumentJob extends BaseJob {
   private String uid;
   private String TAG = this.getClass().getSimpleName();
   private DocumentInfo document;
+
+  private int jobCount;
 
   public UpdateDocumentJob(String uid, Fields.Status filter) {
     super( new Params(PRIORITY).requireNetwork().persist() );
@@ -142,9 +145,12 @@ public class UpdateDocumentJob extends BaseJob {
 
           EventBus.getDefault().post( new StepperLoadDocumentEvent(doc.getUid()) );
 
+          jobCount = 0;
+
           if ( doc.getLinks() != null && doc.getLinks().size() > 0 ){
 
             for (String link: doc.getLinks()) {
+              jobCount++;
               jobManager.addJobInBackground( new UpdateLinkJob( link ) );
             }
 
@@ -155,6 +161,7 @@ public class UpdateDocumentJob extends BaseJob {
               if ( step.getCards() != null && step.getCards().size() > 0){
                 for (Card card: step.getCards() ) {
                   if (card.getUid() != null) {
+                    jobCount++;
                     jobManager.addJobInBackground( new UpdateLinkJob( card.getUid() ) );
                   }
                 }
@@ -162,6 +169,8 @@ public class UpdateDocumentJob extends BaseJob {
             }
           }
 
+          JobCounter jobCounter = new JobCounter(settings);
+          jobCounter.addJobCount(jobCount);
         },
         error -> {
           error.printStackTrace();

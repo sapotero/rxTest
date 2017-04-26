@@ -193,7 +193,7 @@ public class StepperLoadDataFragment extends Fragment implements Step {
       // No documents to download, set download complete
       mRingProgressBar.setProgress( 100 );
     } else {
-      updateProgressBar("");
+      updateProgressBar("Document count ready");
     }
   }
 
@@ -207,18 +207,13 @@ public class StepperLoadDataFragment extends Fragment implements Step {
     if ( isReceivedJobCount && jobCount != 0) {
       int perc = calculatePercent(jobCount);
 
-      // Set 100% only if all images downloaded
-      if ( perc == 100 && !jobCounter.isDownoadFileAlmostComplete() ) {
-        perc = 99;
-      }
-
       if (mRingProgressBar != null && mRingProgressBar.getProgress() < perc) {
         mRingProgressBar.setProgress( perc );
       }
 
-      if ( perc == 100 ) {
-        error = null;
-      }
+//      if ( perc == 100 ) {
+//        error = null;
+//      }
     }
   }
 
