@@ -442,6 +442,7 @@ public class DataLoaderManager {
   public void updateByCurrentStatus(MainMenuItem items, MainMenuButton button) {
     Timber.tag(TAG).e("updateByCurrentStatus: %s %s", items, button );
 
+    unsubscribe();
 
     if (items == MainMenuItem.PROCESSED){
       updateProcessed();
@@ -527,12 +528,9 @@ public class DataLoaderManager {
 
       jobManager.cancelJobsInBackground(null, TagConstraint.ANY, "SyncDocument");
 
-      unsubscribe();
-
       requestCount = 0;
       jobCount = 0;
       jobCounter.setJobCount(0);
-      jobCounter.setDownloadFileJobCount(0);
 
       for (String index: indexes ) {
         for (String status: statuses ) {

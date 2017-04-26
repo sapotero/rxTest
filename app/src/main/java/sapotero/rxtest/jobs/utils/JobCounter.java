@@ -6,12 +6,10 @@ import com.f2prateek.rx.preferences.RxSharedPreferences;
 public class JobCounter {
   RxSharedPreferences settings;
   private Preference<Integer> count;
-  private Preference<Integer> downloadFileJobCount;
 
   public JobCounter(RxSharedPreferences rxSharedPreferences) {
     settings = rxSharedPreferences;
     count = settings.getInteger("documents.count");
-    downloadFileJobCount = settings.getInteger("images.count");
   }
 
   public int getJobCount() {
@@ -42,29 +40,5 @@ public class JobCounter {
 
   public void decJobCount() {
     addJobCount(-1);
-  }
-
-  public int getDownloadFileJobCount() {
-    return getIntegerFromSettings(downloadFileJobCount);
-  }
-
-  public void setDownloadFileJobCount(int value) {
-    downloadFileJobCount.set(value);
-  }
-
-  public boolean isDownoadFileAlmostComplete() {
-    return getDownloadFileJobCount() <= 5;
-  }
-
-  public void addDownloadFileJobCount(int value) {
-    setDownloadFileJobCount(getDownloadFileJobCount() + value);
-  }
-
-  public void incDownloadFileJobCount() {
-    addDownloadFileJobCount(1);
-  }
-
-  public void decDownloadFileJobCount() {
-    addDownloadFileJobCount(-1);
   }
 }

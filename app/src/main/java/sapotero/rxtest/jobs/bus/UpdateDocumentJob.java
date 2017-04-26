@@ -35,6 +35,7 @@ import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.adapter.UpdateDocumentAdapterEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
+import sapotero.rxtest.jobs.utils.JobCounter;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Card;
@@ -67,6 +68,8 @@ public class UpdateDocumentJob extends BaseJob {
   private String uid;
   private String TAG = this.getClass().getSimpleName();
   private DocumentInfo document;
+
+  private int jobCount;
 
   public UpdateDocumentJob(String uid, Fields.Status filter) {
     super( new Params(PRIORITY).requireNetwork().persist() );
@@ -142,9 +145,12 @@ public class UpdateDocumentJob extends BaseJob {
 
           EventBus.getDefault().post( new StepperLoadDocumentEvent(doc.getUid()) );
 
+          jobCount = 0;
+
           if ( doc.getLinks() != null && doc.getLinks().size() > 0 ){
 
             for (String link: doc.getLinks()) {
+              jobCount++;
               jobManager.addJobInBackground( new UpdateLinkJob( link ) );
             }
 
@@ -155,6 +161,7 @@ public class UpdateDocumentJob extends BaseJob {
               if ( step.getCards() != null && step.getCards().size() > 0){
                 for (Card card: step.getCards() ) {
                   if (card.getUid() != null) {
+                    jobCount++;
                     jobManager.addJobInBackground( new UpdateLinkJob( card.getUid() ) );
                   }
                 }
@@ -162,15 +169,15 @@ public class UpdateDocumentJob extends BaseJob {
             }
           }
 
+          addPrefJobCounter(jobCount);
         },
         error -> {
           error.printStackTrace();
+          EventBus.getDefault().post( new StepperLoadDocumentEvent("Error downloading document info on update") );
         }
 
       );
   }
-
-
 
   @NonNull
   private Boolean exist(String uid){
@@ -509,15 +516,19 @@ public class UpdateDocumentJob extends BaseJob {
           result -> {
             Timber.tag(TAG).d("updated " + result.getUid());
 
+            jobCount = 0;
+
             if ( result.getImages() != null && result.getImages().size() > 0 && ( isFavorites != null && !isFavorites ) ){
 
               for (RImage _image : result.getImages()) {
-
+                jobCount++;
                 RImageEntity image = (RImageEntity) _image;
                 jobManager.addJobInBackground( new DownloadFileJob(HOST.get(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
               }
 
             }
+
+            addPrefJobCounter(jobCount);
           },
           error ->{
             error.printStackTrace();
@@ -815,15 +826,19 @@ public class UpdateDocumentJob extends BaseJob {
 
           EventBus.getDefault().post( new UpdateDocumentAdapterEvent( result.getUid(), result.getDocumentType(), result.getFilter() ) );
 
+          jobCount = 0;
+
           if ( result.getImages() != null && result.getImages().size() > 0 ){
 
             for (RImage _image : result.getImages()) {
-
+              jobCount++;
               RImageEntity image = (RImageEntity) _image;
               jobManager.addJobInBackground( new DownloadFileJob(HOST.get(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
             }
 
           }
+
+          addPrefJobCounter(jobCount);
         },
         error -> {
           Timber.tag(TAG).e("%s", error);
@@ -838,5 +853,11 @@ public class UpdateDocumentJob extends BaseJob {
   @Override
   protected void onCancel(@CancelReason int cancelReason, @Nullable Throwable throwable) {
     // Job has exceeded retry attempts or shouldReRunOnThrowable() has decided to cancel.
+    EventBus.getDefault().post( new StepperLoadDocumentEvent("Error updating document (job cancelled)") );
+  }
+
+  private void addPrefJobCounter(int value) {
+    JobCounter jobCounter = new JobCounter(settings);
+    jobCounter.addJobCount(value);
   }
 }

@@ -50,6 +50,7 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
 
   private FrameLayout stepper_auth_password_wrapper;
   private FrameLayout stepper_auth_dc_wrapper;
+  private EditText passwordEditText;
 
   private Subscription auth_type_subscription;
 
@@ -60,7 +61,6 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
   private StepperLayout.OnNextClickedCallback callback;
   private Preference<String> host;
 
-
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     EsdApplication.getComponent( getContext() ).inject(this);
@@ -69,6 +69,7 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
 
     stepper_auth_password_wrapper = (FrameLayout) view.findViewById(R.id.stepper_auth_password_wrapper);
     stepper_auth_dc_wrapper       = (FrameLayout) view.findViewById(R.id.stepper_auth_dc_wrapper);
+    passwordEditText = (EditText) stepper_auth_dc_wrapper.findViewById(R.id.stepper_auth_dc_password);
 
     initialize();
 
@@ -163,13 +164,12 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
 
     switch ( authType ){
       case DS:
-        EditText password = (EditText) stepper_auth_dc_wrapper.findViewById(R.id.stepper_auth_dc_password);
-        String enteredText = password.getText().toString();
+        String enteredText = passwordEditText.getText().toString();
 
         if (enteredText.equals("qwerty")) {
           setAuthTypePassword();
         } else {
-          EventBus.getDefault().post( new StepperDcCheckEvent( password.getText().toString() ) );
+          EventBus.getDefault().post( new StepperDcCheckEvent( enteredText ) );
         }
 
         break;
@@ -194,6 +194,7 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
 
   @Override
   public void onSelected() {
+    passwordEditText.setText("");
   }
 
   @Override
