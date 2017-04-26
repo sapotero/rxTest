@@ -110,7 +110,7 @@ public class StepperLoadDataFragment extends Fragment implements Step {
     } else {
       error = new VerificationError("Дождитесь окончания загрузки");
 
-      if ( mRingProgressBar.getProgress() == 100 ){
+      if ( mRingProgressBar.getProgress() >= 90 ){
         error = null;
       } else {
         Toast.makeText( getContext(), error.getErrorMessage(), Toast.LENGTH_SHORT ).show();
@@ -149,18 +149,8 @@ public class StepperLoadDataFragment extends Fragment implements Step {
           .subscribe( data-> {
             Timber.tag(TAG).d("mRingProgressBar increment");
             int value = mRingProgressBar.getProgress();
-            if (value < 99) {
+            if (value < 100) {
               mRingProgressBar.setProgress( value + 1 );
-            }
-          })
-      );
-
-      // If no network connection, set progress bar to 100 and allow to proceed
-      subscription.add(
-        IS_CONNECTED.asObservable()
-          .subscribe( isConnected -> {
-            if ( !isConnected ) {
-              mRingProgressBar.setProgress( 100 );
             }
           })
       );
