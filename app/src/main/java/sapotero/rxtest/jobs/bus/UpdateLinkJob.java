@@ -88,6 +88,7 @@ public class UpdateLinkJob extends BaseJob {
         },
         error -> {
           error.printStackTrace();
+          EventBus.getDefault().post( new StepperLoadDocumentEvent("Error downloading document on update link") );
         }
 
       );
@@ -200,5 +201,6 @@ public class UpdateLinkJob extends BaseJob {
   @Override
   protected void onCancel(@CancelReason int cancelReason, @Nullable Throwable throwable) {
     // Job has exceeded retry attempts or shouldReRunOnThrowable() has decided to cancel.
+    EventBus.getDefault().post( new StepperLoadDocumentEvent("Error updating link (job cancelled)") );
   }
 }

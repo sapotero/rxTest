@@ -169,17 +169,15 @@ public class UpdateDocumentJob extends BaseJob {
             }
           }
 
-          JobCounter jobCounter = new JobCounter(settings);
-          jobCounter.addJobCount(jobCount);
+          addPrefJobCounter(jobCount);
         },
         error -> {
           error.printStackTrace();
+          EventBus.getDefault().post( new StepperLoadDocumentEvent("Error downloading document info on update") );
         }
 
       );
   }
-
-
 
   @NonNull
   private Boolean exist(String uid){
@@ -518,15 +516,19 @@ public class UpdateDocumentJob extends BaseJob {
           result -> {
             Timber.tag(TAG).d("updated " + result.getUid());
 
+            jobCount = 0;
+
             if ( result.getImages() != null && result.getImages().size() > 0 && ( isFavorites != null && !isFavorites ) ){
 
               for (RImage _image : result.getImages()) {
-
+                jobCount++;
                 RImageEntity image = (RImageEntity) _image;
                 jobManager.addJobInBackground( new DownloadFileJob(HOST.get(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
               }
 
             }
+
+            addPrefJobCounter(jobCount);
           },
           error ->{
             error.printStackTrace();
@@ -824,15 +826,19 @@ public class UpdateDocumentJob extends BaseJob {
 
           EventBus.getDefault().post( new UpdateDocumentAdapterEvent( result.getUid(), result.getDocumentType(), result.getFilter() ) );
 
+          jobCount = 0;
+
           if ( result.getImages() != null && result.getImages().size() > 0 ){
 
             for (RImage _image : result.getImages()) {
-
+              jobCount++;
               RImageEntity image = (RImageEntity) _image;
               jobManager.addJobInBackground( new DownloadFileJob(HOST.get(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
             }
 
           }
+
+          addPrefJobCounter(jobCount);
         },
         error -> {
           Timber.tag(TAG).e("%s", error);
@@ -847,5 +853,11 @@ public class UpdateDocumentJob extends BaseJob {
   @Override
   protected void onCancel(@CancelReason int cancelReason, @Nullable Throwable throwable) {
     // Job has exceeded retry attempts or shouldReRunOnThrowable() has decided to cancel.
+    EventBus.getDefault().post( new StepperLoadDocumentEvent("Error updating document (job cancelled)") );
+  }
+
+  private void addPrefJobCounter(int value) {
+    JobCounter jobCounter = new JobCounter(settings);
+    jobCounter.addJobCount(value);
   }
 }

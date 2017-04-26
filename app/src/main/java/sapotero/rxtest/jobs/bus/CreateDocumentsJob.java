@@ -120,6 +120,7 @@ public class CreateDocumentsJob extends BaseJob {
         },
         error -> {
           Timber.tag(TAG).e(error);
+          EventBus.getDefault().post( new StepperLoadDocumentEvent("Error downloading document info on create") );
         }
 
       );
@@ -420,5 +421,6 @@ public class CreateDocumentsJob extends BaseJob {
   @Override
   protected void onCancel(@CancelReason int cancelReason, @Nullable Throwable throwable) {
     // Job has exceeded retry attempts or shouldReRunOnThrowable() has decided to cancel.
+    EventBus.getDefault().post( new StepperLoadDocumentEvent("Error creating document (job cancelled)") );
   }
 }

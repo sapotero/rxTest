@@ -64,10 +64,12 @@ public class DownloadFileJob  extends BaseJob {
 
       if ( !image.isLoading() && image.isComplete() ){
         Timber.tag(TAG).e("File exists!");
+        EventBus.getDefault().post(new FileDownloadedEvent("File exists: " + fileName));
       }
 
       if ( image.isLoading() ){
         Timber.tag(TAG).e("File already downloading!");
+        EventBus.getDefault().post(new FileDownloadedEvent("File already downloading: " + fileName));
       }
 
       Boolean isError = image.isError();
@@ -149,7 +151,7 @@ public class DownloadFileJob  extends BaseJob {
           setComplete(false);
           setError(true);
 
-          EventBus.getDefault().post(new FileDownloadedEvent(""));
+          EventBus.getDefault().post(new FileDownloadedEvent("Error downloading file"));
         }
       );
   }
@@ -189,7 +191,7 @@ public class DownloadFileJob  extends BaseJob {
           if (writtenToDisk){
             EventBus.getDefault().post(new FileDownloadedEvent(fileName));
           } else {
-            EventBus.getDefault().post(new FileDownloadedEvent(null));
+            EventBus.getDefault().post(new FileDownloadedEvent("Error writing file to disk"));
           }
 
           Timber.tag(TAG).d("file download was a success? " + writtenToDisk);
@@ -206,7 +208,7 @@ public class DownloadFileJob  extends BaseJob {
           setComplete(false);
           setError(true);
 
-          EventBus.getDefault().post(new FileDownloadedEvent(""));
+          EventBus.getDefault().post(new FileDownloadedEvent("Error downloading file"));
         }
       );
 
@@ -265,5 +267,6 @@ public class DownloadFileJob  extends BaseJob {
   @Override
   protected void onCancel(@CancelReason int cancelReason, @Nullable Throwable throwable) {
     // Job has exceeded retry attempts or shouldReRunOnThrowable() has decided to cancel.
+    EventBus.getDefault().post(new FileDownloadedEvent("Error downloading file (job cancelled)"));
   }
 }
