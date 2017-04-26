@@ -236,7 +236,7 @@
 
     <string name="searchview_image_back">Back</string>
     <string name="searchview_voice_cancel">Voice Cancel</string>
-    <string name="searchview_text_hint">Hint</string>
+    <string name="searchview_text_hint">Поиск</string>
 
     <string name="dialog_to_control_positive">Подтверждение постановки на контроль</string>
     <string name="dialog_to_control_body_positive">Документ будет отмечен к постановке на контроль с проставлением на электронный образ штампа контроля</string>
