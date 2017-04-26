@@ -126,7 +126,7 @@
 
         <SwitchPreference
             android:key="is_first_run"
-            android:title="Первый запуск"
+            android:title="Отображение окна авторизации"
             android:defaultValue="true" />
     </android.support.v7.preference.PreferenceCategory>
 

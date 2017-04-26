@@ -136,11 +136,11 @@ public class ButtonBuilder {
       .and( RDocumentEntity.DOCUMENT_TYPE.in( validation.getSelectedJournals() ) )
       .and(RDocumentEntity.FROM_LINKS.eq(false));
 
-    if (index == 4 || index == 7){
-      query = query.and(RDocumentEntity.PROCESSED.eq(true));
-    } else {
-      query = query.and(RDocumentEntity.PROCESSED.eq(false));
-    }
+//    if (index == 4 || index == 7){
+//      query = query.and(RDocumentEntity.PROCESSED.eq(true));
+//    } else {
+//      query = query.and(RDocumentEntity.PROCESSED.eq(false));
+//    }
 
     if (index == 0){
       query = query.or(RDocumentEntity.FROM_PROCESSED_FOLDER.eq(true));
@@ -189,7 +189,7 @@ public class ButtonBuilder {
       .where( RDocumentEntity.USER.eq( settings.getString("login").get() ) );
 
     // проекты, подпись, согласование
-    if ( !Arrays.asList(1,5,6).contains(index) ){
+    if ( !Arrays.asList(1,5,6,4,7).contains(index) ){
       List<String> journals = validation.getSelectedJournals();
       if ( journals.size() > 0){
         query = query.and( RDocumentEntity.DOCUMENT_TYPE.in( validation.getSelectedJournals() ) );
@@ -233,17 +233,17 @@ public class ButtonBuilder {
     }
 
     Integer size = query.get().value();
-    Timber.tag(TAG).i("size %s",  conditions.length);
-    Timber.tag(TAG).i("total %s", size);
 
     for (ConditionBuilder condition : conditions ) {
-      Timber.tag(TAG).i("button %s", condition.toString());
+      Timber.tag(TAG).i("condition %s", condition.toString());
     }
 
     for (ConditionBuilder condition : item_conditions ) {
-      Timber.tag(TAG).i("button %s", condition.toString());
+      Timber.tag(TAG).i("condition %s", condition.toString());
     }
 
+    Timber.tag(TAG).i("size %s",  conditions.length);
+    Timber.tag(TAG).i("total %s", size);
 
     view.setText( String.format( label, size ) );
   }
