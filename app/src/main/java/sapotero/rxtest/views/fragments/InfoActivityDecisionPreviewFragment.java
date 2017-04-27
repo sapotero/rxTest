@@ -335,7 +335,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
 
 
-      if ( !doc.isFromLinks() && current_decision != null ){
+      if ( doc.isFromLinks() != null && !doc.isFromLinks() && current_decision != null ){
 
         if ( !queue.getConnected() &&
           current_decision.isTemporary() != null &&
@@ -358,7 +358,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
         }
       }
 
-      if (!doc.isFromLinks() &&
+      if ( doc.isFromLinks() != null && !doc.isFromLinks() &&
         current_decision == null ){
 
         settings.getString("decision.active.id").set(null);
@@ -492,9 +492,9 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     }
 
 
-    if ( doc.isProcessed() ){
-      next_person_button.setVisibility( View.GONE );
-      prev_person_button.setVisibility( View.GONE );
+    if ( doc.isProcessed() != null && doc.isProcessed() && !current_decision.isApproved() ){
+      next_person_button.setVisibility( View.INVISIBLE );
+      prev_person_button.setVisibility( View.INVISIBLE );
     }
 
     if ( current_decision.isTemporary() != null && current_decision.isTemporary() ){

@@ -444,7 +444,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       }
 
       // Из папки избранное
-      if (isFromFavorites() ){
+      if (isFromFavoritesFolder() ){
         toolbar.getMenu().clear();
         toolbar.inflateMenu(R.menu.info_menu);
 
@@ -486,7 +486,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       // Показывать кнопку «Создать поручение»
       try {
         if (!settings.getBoolean("settings_view_show_create_decision_post").get() && doc.isFromFavoritesFolder() != null && doc.isFromFavoritesFolder() ) {
-          if ( doc.isFromFavoritesFolder() != null && !doc.isFromFavoritesFolder() ){
+          if ( isProcessed() ){
             toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(false);
           }
         }
@@ -543,8 +543,10 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   }
 
   private boolean isFromFavorites() {
-    Timber.tag("FAVORITES").w("favore: %s %s", doc.isFavorites() != null && doc.isFavorites(), doc.isFromFavoritesFolder() != null && doc.isFromFavoritesFolder());
-    return doc.isFavorites() != null && doc.isFavorites() || doc.isFromFavoritesFolder() != null && doc.isFromFavoritesFolder();
+    return doc.isFavorites() != null && doc.isFavorites();
+  }
+  private boolean isFromFavoritesFolder() {
+    return doc.isFromFavoritesFolder() != null && doc.isFromFavoritesFolder();
   }
 
 
