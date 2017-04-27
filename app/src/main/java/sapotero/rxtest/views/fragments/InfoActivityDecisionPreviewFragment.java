@@ -1072,9 +1072,23 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       users_view.setPadding(40,5,5,5);
 
       if( block.getPerformers().size() > 0 ){
-        for (RPerformer _user: block.getPerformers()){
 
+
+
+        Set<RPerformer> users = block.getPerformers();
+        ArrayList<RPerformerEntity> _users = new ArrayList<>();
+
+        for (RPerformer _user: users){
           RPerformerEntity user = (RPerformerEntity) _user;
+          _users.add(user);
+        }
+
+        Collections.sort(_users, (o1, o2) -> o1.getNumber().compareTo( o2.getNumber() ));
+
+        for (RPerformerEntity user: _users){
+//
+//
+//          RPerformerEntity user = (RPerformerEntity) _user;
           String performerName = "";
 
           String tempPerformerName =
