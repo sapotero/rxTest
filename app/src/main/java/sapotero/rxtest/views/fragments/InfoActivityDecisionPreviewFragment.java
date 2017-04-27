@@ -339,7 +339,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
         if ( !queue.getConnected() &&
           current_decision.isTemporary() != null &&
-          current_decision.isTemporary() ){
+          current_decision.isTemporary() && !doc.isProcessed() ){
 
           edit();
         }
@@ -353,7 +353,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
         if ( current_decision.isApproved() != null &&
           !current_decision.isApproved() &&
           current_decision.isTemporary() != null &&
-          !current_decision.isTemporary()){
+          !current_decision.isTemporary() && !doc.isProcessed()){
           edit();
         }
       }
@@ -478,15 +478,6 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       prev_person_button.setVisibility( View.GONE );
     }
 
-
-    if ( current_decision.isTemporary() != null && current_decision.isTemporary() ){
-      temporary.setVisibility(View.VISIBLE);
-      next_person_button.setVisibility( View.GONE );
-      prev_person_button.setVisibility( View.GONE );
-    } else {
-      temporary.setVisibility(View.GONE);
-    }
-
     // resolved https://tasks.n-core.ru/browse/MVDESD-13146
     // для статуса "на первичное рассмотрение" вместо "Подписать" должно быть "Согласовать"
     // Если подписывающий в резолюции и оператор в МП совпадают, то кнопка должна быть "Подписать"
@@ -498,6 +489,20 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       } else {
         next_person_button.setText( getString(R.string.menu_info_sign_next_person) );
       }
+    }
+
+
+    if ( doc.isProcessed() ){
+      next_person_button.setVisibility( View.GONE );
+      prev_person_button.setVisibility( View.GONE );
+    }
+
+    if ( current_decision.isTemporary() != null && current_decision.isTemporary() ){
+      temporary.setVisibility(View.VISIBLE);
+      next_person_button.setVisibility( View.GONE );
+      prev_person_button.setVisibility( View.GONE );
+    } else {
+      temporary.setVisibility(View.GONE);
     }
 
   }
