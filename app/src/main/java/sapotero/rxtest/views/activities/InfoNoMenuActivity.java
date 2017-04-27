@@ -62,7 +62,6 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
 
 
   @Inject JobManager jobManager;
-  @Inject CompositeSubscription subscriptions;
   @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
   @Inject SingleEntityStore<Persistable> dataStore;
@@ -257,10 +256,6 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
 
     if ( EventBus.getDefault().isRegistered(this) ){
       EventBus.getDefault().unregister(this);
-    }
-
-    if ( subscriptions != null && subscriptions.hasSubscriptions() ){
-      subscriptions.unsubscribe();
     }
 
     finish();

@@ -5,13 +5,11 @@ import android.app.Application;
 import javax.inject.Singleton;
 
 import dagger.Component;
-import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.application.modules.EsdModule;
 import sapotero.rxtest.application.modules.SettingsModule;
 import sapotero.rxtest.db.requery.query.DBQueryBuilder;
 import sapotero.rxtest.db.requery.utils.validation.Validation;
 import sapotero.rxtest.db.requery.utils.validation.ValidationModule;
-import sapotero.rxtest.events.utils.SubscriptionsModule;
 import sapotero.rxtest.jobs.bus.BaseJob;
 import sapotero.rxtest.jobs.utils.JobModule;
 import sapotero.rxtest.managers.CurrentDocumentManager;
@@ -81,7 +79,6 @@ import sapotero.rxtest.views.menu.factories.ItemsBuilder;
 @Component(modules = {
   EsdModule.class,
   JobModule.class,
-  SubscriptionsModule.class,
   OkHttpModule.class,
   SettingsModule.class,
   DBDocumentManagerModule.class,
@@ -91,8 +88,6 @@ import sapotero.rxtest.views.menu.factories.ItemsBuilder;
 })
 
 public interface EsdComponent {
-
-  void inject(EsdApplication activity);
 
   void inject(LogActivity activity);
   void inject(SettingsViewFragment activity);

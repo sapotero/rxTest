@@ -81,7 +81,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
 
   @Inject JobManager jobManager;
-  @Inject CompositeSubscription subscriptions;
   @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
   @Inject SingleEntityStore<Persistable> dataStore;
