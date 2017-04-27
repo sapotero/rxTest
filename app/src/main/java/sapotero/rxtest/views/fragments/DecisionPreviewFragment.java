@@ -52,7 +52,6 @@ import timber.log.Timber;
 public class DecisionPreviewFragment extends Fragment implements DecisionInterface {
 
   @Inject RxSharedPreferences settings;
-  @Inject SingleEntityStore<Persistable> dataStore;
   @Inject OperationManager operationManager;
 
   private OnFragmentInteractionListener mListener;

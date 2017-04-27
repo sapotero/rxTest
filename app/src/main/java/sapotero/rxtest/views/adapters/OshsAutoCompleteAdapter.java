@@ -41,7 +41,6 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
 
   @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
-  @Inject SingleEntityStore<Persistable> dataStore;
 
   private Preference<String> login;
   private Preference<String> token;

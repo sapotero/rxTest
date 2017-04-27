@@ -56,10 +56,7 @@ import timber.log.Timber;
 public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.DocumentViewHolder> implements Action1<List<Document>> {
 
   @Inject RxSharedPreferences settings;
-  @Inject JobManager jobManager;
   @Inject SingleEntityStore<Persistable> dataStore;
-  @Inject DBDocumentManager manager;
-  @Inject OperationManager operationManager;
 
   private Context mContext;
   private List<RDocumentEntity> documents;

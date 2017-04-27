@@ -95,7 +95,6 @@ public interface EsdComponent {
   void inject(FileSignActivity activity);
   void inject(MainActivity  activity);
   void inject(InfoActivity  activity);
-  void inject(SettingsActivity activity);
   void inject(DecisionConstructorActivity activity);
   void inject(DocumentImageFullScreenActivity activity);
   void inject(DocumentInfocardFullScreenActivity activity);
@@ -106,13 +105,11 @@ public interface EsdComponent {
 
   void inject(Validation context);
 
-
   void inject(DecisionAdapter adapter);
   void inject(DocumentsAdapter adapter);
   void inject(DocumentTypeAdapter adapter);
   void inject(PrimaryConsiderationAdapter adapter);
   void inject(OshsAutoCompleteAdapter context);
-
 
   void inject(DecisionTemplateFragment fragment);
   void inject(DecisionRejectionTemplateFragment fragment);
@@ -137,7 +134,6 @@ public interface EsdComponent {
   void inject(ItemsBuilder context);
   void inject(QueueDBManager context);
   void inject(DBDocumentManager context);
-  void inject(QueueManager context);
   void inject(DataLoaderManager context);
   void inject(CurrentDocumentManager context);
 
@@ -146,22 +142,7 @@ public interface EsdComponent {
   void inject(DBQueryBuilder context);
   void inject(DecisionManager context);
   void inject(OperationManager context);
-  void inject(OperationHistory context);
   void inject(ToolbarManager context);
 
   void inject(AbstractCommand context);
-
-  void inject(FromTheReport context);
-  void inject(ReturnToPrimaryConsideration context);
-  void inject(ApprovalPerformance context);
-  void inject(DelegatePerformance context);
-  void inject(AddToFolder context);
-  void inject(ChangePerson context);
-  void inject(CheckForControl context);
-  void inject(NextPerson context);
-  void inject(PrevPerson context);
-  void inject(sapotero.rxtest.managers.menu.commands.signing.NextPerson context);
-  void inject(sapotero.rxtest.managers.menu.commands.signing.PrevPerson context);
-  void inject(SaveDecision context);
-  void inject(AddDecision context);
 }

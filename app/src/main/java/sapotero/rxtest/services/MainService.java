@@ -103,9 +103,7 @@ public class MainService extends Service {
   final String TAG = MainService.class.getSimpleName();
   private ScheduledThreadPoolExecutor scheduller;
 
-  @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
-  @Inject JobManager jobManager;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   @Inject QueueManager queue;

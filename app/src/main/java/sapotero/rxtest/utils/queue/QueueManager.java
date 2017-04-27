@@ -31,7 +31,6 @@ public class QueueManager {
   public QueueManager(Context context) {
     this.context = context;
 
-    EsdApplication.getComponent().inject(this);
     isConnectedToInternet();
 
     supervisor = new QueueSupervisor(context);

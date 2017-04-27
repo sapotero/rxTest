@@ -29,8 +29,6 @@ import timber.log.Timber;
 
 public class LogActivity extends AppCompatActivity {
 
-
-  @Inject RxSharedPreferences settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   @BindView(R.id.activity_log_recycle_view) RecyclerView recyclerView;

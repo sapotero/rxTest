@@ -38,7 +38,6 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity implement
 
 
   @Inject RxSharedPreferences settings;
-  @Inject SingleEntityStore<Persistable> dataStore;
 
   private String TAG = this.getClass().getSimpleName();
 

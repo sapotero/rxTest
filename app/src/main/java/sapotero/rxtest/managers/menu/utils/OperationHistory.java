@@ -20,8 +20,6 @@ import timber.log.Timber;
 
 public class OperationHistory {
 
-  @Inject RxSharedPreferences settings;
-
   private final Context context;
   private final ArrayList<Command> commands = new ArrayList<>();
 
@@ -30,7 +28,6 @@ public class OperationHistory {
   public OperationHistory(Context context) {
 
     this.context = context;
-    EsdApplication.getComponent().inject(this);
 
     isConnectedToInternet();
     historyCheck();

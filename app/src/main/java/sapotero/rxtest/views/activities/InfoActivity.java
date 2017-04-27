@@ -79,15 +79,8 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   @BindView(R.id.tabs) TabLayout tabLayout;
   @BindView(R.id.activity_info_wrapper) View wrapper;
 
-
   @Inject JobManager jobManager;
-  @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
-  @Inject SingleEntityStore<Persistable> dataStore;
-
-  // test
-  @Inject QueueManager queue;
-  @Inject OperationManager operationManager;
 
   private Preference<String> TOKEN;
   private Preference<String> LAST_SEEN_UID;

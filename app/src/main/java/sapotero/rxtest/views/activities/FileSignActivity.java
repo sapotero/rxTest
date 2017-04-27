@@ -26,7 +26,6 @@ import timber.log.Timber;
 
 public class FileSignActivity extends AppCompatActivity {
 
-  @Inject RxSharedPreferences settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   @BindView(R.id.activity_file_sign_toolbar) Toolbar toolbar;

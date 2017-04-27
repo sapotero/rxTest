@@ -56,9 +56,7 @@ import timber.log.Timber;
 
 public class InfoCardDocumentsFragment extends Fragment implements AdapterView.OnItemClickListener, GestureDetector.OnDoubleTapListener {
 
-  @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
-  @Inject JobManager jobManager;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   private OnFragmentInteractionListener mListener;

@@ -14,7 +14,6 @@ import sapotero.rxtest.annotations.AnnotationTest;
 import sapotero.rxtest.application.components.DaggerEsdComponent;
 import sapotero.rxtest.application.components.EsdComponent;
 import sapotero.rxtest.application.config.Constant;
-import sapotero.rxtest.application.modules.EsdModule;
 import timber.log.Timber;
 
 
@@ -25,9 +24,8 @@ import timber.log.Timber;
 
 public final class EsdApplication extends Application {
 
-  public static EsdComponent mainComponent;
-
   private static EsdApplication instance;
+  private static EsdComponent mainComponent;
 
   @Override
   protected void attachBaseContext(Context base) {
