@@ -46,7 +46,7 @@ public class DocumentInfocardFullScreenActivity extends AppCompatActivity {
     setContentView(R.layout.activity_document_infocard_full_screen);
 
     ButterKnife.bind(this);
-    EsdApplication.getComponent(this).inject(this);
+    EsdApplication.getComponent().inject(this);
 
     toolbar.setContentInsetStartWithNavigation(250);
     toolbar.setTitle("Просмотр инфокарточки");

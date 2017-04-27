@@ -28,7 +28,7 @@ public class QueueDBManager implements JobCountInterface {
   private String TAG = this.getClass().getSimpleName();
 
   public QueueDBManager(Context context) {
-    EsdApplication.getComponent(context).inject(this);
+    EsdApplication.getComponent().inject(this);
 
     this.context = context;
   }

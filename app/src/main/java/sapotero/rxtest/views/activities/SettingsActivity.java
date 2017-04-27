@@ -37,7 +37,7 @@ public class SettingsActivity extends AppCompatActivity {
 
 
     ButterKnife.bind(this);
-    EsdApplication.getComponent(this).inject(this);
+    EsdApplication.getComponent().inject(this);
 
     fooPreference = settings.getBoolean("foo");
 

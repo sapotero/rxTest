@@ -123,7 +123,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     setContentView(R.layout.activity_decision_constructor);
 
     ButterKnife.bind(this);
-    EsdApplication.getComponent(this).inject(this);
+    EsdApplication.getComponent().inject(this);
 
     context = this;
 

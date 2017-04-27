@@ -23,7 +23,7 @@ public class Validation{
   private String TAG = this.getClass().getSimpleName();
 
   Validation(Context context) {
-    EsdApplication.getComponent(context).inject(this);
+    EsdApplication.getComponent().inject(this);
 
     settings
       .getStringSet("settings_view_journals")

@@ -100,7 +100,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
     view = inflater.inflate(R.layout.fragment_decision_preview, container, false);
 
     ButterKnife.bind(this, view);
-    EsdApplication.getComponent( mContext ).inject( this );
+    EsdApplication.getComponent().inject( this );
 
     if (decision != null){
       updateView();

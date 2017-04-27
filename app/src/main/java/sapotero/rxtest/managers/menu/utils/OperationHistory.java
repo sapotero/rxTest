@@ -30,7 +30,7 @@ public class OperationHistory {
   public OperationHistory(Context context) {
 
     this.context = context;
-    EsdApplication.getComponent(context).inject(this);
+    EsdApplication.getComponent().inject(this);
 
     isConnectedToInternet();
     historyCheck();

@@ -101,7 +101,7 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
     setContentView(R.layout.activity_info);
     ButterKnife.bind(this);
 
-    EsdApplication.getComponent(this).inject(this);
+    EsdApplication.getComponent().inject(this);
 
 //    documentManager = new CurrentDocumentManager(this);
 //    documentManager.registerCallBack(this);

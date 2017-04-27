@@ -43,9 +43,9 @@ public class CommandFactory implements AbstractCommand.Callback{
 
   Callback callback;
 
-  public static CommandFactory getInstance() {
+  public static CommandFactory getInstance(Context context) {
     if (instance == null){
-      instance = new CommandFactory(EsdApplication.getContext());
+      instance = new CommandFactory(context);
     }
     return instance;
   }

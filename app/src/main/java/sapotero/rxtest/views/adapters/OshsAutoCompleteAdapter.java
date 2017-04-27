@@ -53,7 +53,7 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
 
   public OshsAutoCompleteAdapter(Context context) {
     mContext = context;
-    EsdApplication.getComponent( context ).inject( this );
+    EsdApplication.getComponent().inject( this );
     loadSettings();
   }
 

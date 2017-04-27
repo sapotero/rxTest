@@ -187,7 +187,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     setContentView(R.layout.activity_main);
 
     ButterKnife.bind(this);
-    EsdApplication.getComponent(this).inject(this);
+    EsdApplication.getComponent().inject(this);
     loadSettings();
     context = this;
 

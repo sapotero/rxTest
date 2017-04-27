@@ -67,7 +67,7 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_login);
 
-    EsdApplication.getComponent(this).inject(this);
+    EsdApplication.getComponent().inject(this);
 
 
     if( appInstalled("ru.cprocsp.ACSP") ) {

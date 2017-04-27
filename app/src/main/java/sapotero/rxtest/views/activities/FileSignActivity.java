@@ -44,7 +44,7 @@ public class FileSignActivity extends AppCompatActivity {
     setContentView(R.layout.activity_file_sign);
 
     ButterKnife.bind(this);
-    EsdApplication.getComponent(this).inject(this);
+    EsdApplication.getComponent().inject(this);
 
 
     populateView();

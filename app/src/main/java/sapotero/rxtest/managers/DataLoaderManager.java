@@ -101,7 +101,7 @@ public class DataLoaderManager {
   public DataLoaderManager(Context context) {
     this.context = context;
 
-    EsdApplication.getComponent(context).inject(this);
+    EsdApplication.getComponent().inject(this);
 
     initialize();
 

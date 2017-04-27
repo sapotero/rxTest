@@ -40,7 +40,7 @@ public class OperationManager implements CommandFactory.Callback {
   }
 
   public OperationManager(Context context) {
-    EsdApplication.getComponent(context).inject(this);
+    EsdApplication.getComponent().inject(this);
 
     histrory          = new OperationHistory(context);
     operationExecutor = new OperationExecutor();

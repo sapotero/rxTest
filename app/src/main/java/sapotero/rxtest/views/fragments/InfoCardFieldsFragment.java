@@ -69,7 +69,7 @@ public class InfoCardFieldsFragment extends Fragment {
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.fragment_info_card_fields, container, false);
     ButterKnife.bind(this, view);
-    EsdApplication.getComponent(mContext).inject( this );
+    EsdApplication.getComponent().inject( this );
 
     view.setOnTouchListener( new OnSwipeTouchListener( getContext() ) );
 

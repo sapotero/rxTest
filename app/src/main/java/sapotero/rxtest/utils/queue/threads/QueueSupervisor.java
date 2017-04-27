@@ -37,7 +37,7 @@ public class QueueSupervisor implements JobCountInterface {
   public QueueSupervisor(Context context) {
 
     this.context = context;
-    this.commandFactory = CommandFactory.getInstance();
+    this.commandFactory = CommandFactory.getInstance(context);
 
     start();
   }

@@ -219,7 +219,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 //        EventBus.getDefault().post(new UpdateCountEvent());
 //      });
 
-    EsdApplication.getComponent(context).inject(this);
+    EsdApplication.getComponent().inject(this);
   }
 
   @Override

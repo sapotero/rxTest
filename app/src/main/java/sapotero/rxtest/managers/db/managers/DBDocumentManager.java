@@ -40,7 +40,7 @@ public class DBDocumentManager {
 
   public DBDocumentManager(Context context) {
 
-    EsdApplication.getComponent(context).inject(this);
+    EsdApplication.getComponent().inject(this);
   }
 
   public RDocumentEntity get(String uid) {

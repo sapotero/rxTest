@@ -132,7 +132,7 @@ public class MainService extends Service {
     }
     EventBus.getDefault().register(this);
 
-    EsdApplication.getComponent(this).inject(this);
+    EsdApplication.getComponent().inject(this);
 
     dataLoaderInterface = new DataLoaderManager(getApplicationContext());
 

@@ -68,7 +68,7 @@ public class DBQueryBuilder {
 
   public DBQueryBuilder(Context context) {
     this.context = context;
-    EsdApplication.getComponent(context).inject(this);
+    EsdApplication.getComponent().inject(this);
   }
 
   public DBQueryBuilder withAdapter(DocumentsAdapter rAdapter) {

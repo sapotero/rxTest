@@ -65,7 +65,7 @@ public class StepperLoadDataFragment extends Fragment implements Step {
       EventBus.getDefault().unregister(this);
     }
     EventBus.getDefault().register(this);
-    EsdApplication.getComponent(getContext()).inject(this);
+    EsdApplication.getComponent().inject(this);
 
     loadRxSettings();
 
