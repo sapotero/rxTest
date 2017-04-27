@@ -27,6 +27,8 @@ public final class EsdApplication extends Application {
 
   public static EsdComponent mainComponent;
 
+  private static EsdApplication instance;
+
   @Override
   protected void attachBaseContext(Context base) {
     super.attachBaseContext(base);
@@ -53,12 +55,18 @@ public final class EsdApplication extends Application {
         .build();
     Stetho.initialize(initializer);
 
-    mainComponent = DaggerEsdComponent.builder().esdModule(new EsdModule(this)).build();
+    instance = this;
+
+    mainComponent = DaggerEsdComponent.builder().build();
 
     AnnotationTest.getInstance();
   }
 
   public static EsdComponent getComponent() {
     return mainComponent;
+  }
+
+  public static EsdApplication getInstance() {
+    return instance;
   }
 }

@@ -1,30 +1,23 @@
 package sapotero.rxtest.application.modules;
 
-import android.app.Application;
 import android.content.Context;
 
 import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import sapotero.rxtest.application.EsdApplication;
 
 @Module
 public final class EsdModule {
-  private final Application application;
   private final Context context;
 
-  public EsdModule(Application application) {
-    this.application = application;
-    this.context = application.getApplicationContext();
+  public EsdModule() {
+    context = EsdApplication.getInstance().getApplicationContext();
   }
 
   @Provides
   @Singleton
-  Application provideApplication() {
-    return application;
-  }
-
-  @Provides
   Context provideContext() {
     return context;
   }

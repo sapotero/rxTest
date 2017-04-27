@@ -1,7 +1,5 @@
 package sapotero.rxtest.application.components;
 
-import android.app.Application;
-
 import javax.inject.Singleton;
 
 import dagger.Component;
@@ -166,6 +164,4 @@ public interface EsdComponent {
   void inject(sapotero.rxtest.managers.menu.commands.signing.PrevPerson context);
   void inject(SaveDecision context);
   void inject(AddDecision context);
-
-  Application application();
 }
