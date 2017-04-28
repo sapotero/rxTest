@@ -4,9 +4,6 @@ import android.content.Context;
 
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
-import javax.inject.Inject;
-
-import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.invokers.OperationExecutor;
@@ -17,7 +14,7 @@ import timber.log.Timber;
 
 public class OperationManager implements CommandFactory.Callback {
 
-  @Inject RxSharedPreferences settings;
+  private RxSharedPreferences settings;
 
   private final String TAG = this.getClass().getSimpleName();
 
@@ -39,8 +36,8 @@ public class OperationManager implements CommandFactory.Callback {
     this.callback = callback;
   }
 
-  public OperationManager(Context context) {
-    EsdApplication.getDataComponent().inject(this);
+  public OperationManager(Context context, RxSharedPreferences rxSharedPreferences) {
+    settings = rxSharedPreferences;
 
     histrory          = new OperationHistory(context);
     operationExecutor = new OperationExecutor();

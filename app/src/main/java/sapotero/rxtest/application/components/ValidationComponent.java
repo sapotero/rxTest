@@ -13,10 +13,10 @@ import sapotero.rxtest.views.menu.builders.ButtonBuilder;
 
 @Singleton
 @Component(modules = {
-        EsdModule.class,
-        SettingsModule.class,
-        RequeryDbModule.class,
-        ValidationModule.class
+  EsdModule.class,
+  SettingsModule.class,
+  RequeryDbModule.class,
+  ValidationModule.class
 })
 
 public interface ValidationComponent {

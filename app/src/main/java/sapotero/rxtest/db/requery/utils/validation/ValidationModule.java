@@ -1,5 +1,7 @@
 package sapotero.rxtest.db.requery.utils.validation;
 
+import com.f2prateek.rx.preferences.RxSharedPreferences;
+
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -10,8 +12,8 @@ public final class ValidationModule {
 
   @Provides
   @Singleton
-  Validation provideValidation() {
-    return new Validation();
+  Validation provideValidation(RxSharedPreferences rxSharedPreferences) {
+    return new Validation(rxSharedPreferences);
   }
 
 }

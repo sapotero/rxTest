@@ -6,10 +6,8 @@ import dagger.Component;
 import sapotero.rxtest.application.modules.EsdModule;
 import sapotero.rxtest.application.modules.SettingsModule;
 import sapotero.rxtest.db.requery.utils.RequeryDbModule;
-import sapotero.rxtest.db.requery.utils.validation.Validation;
 import sapotero.rxtest.managers.CurrentDocumentManager;
 import sapotero.rxtest.managers.db.managers.DBDocumentManager;
-import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.view.DecisionManager;
 import sapotero.rxtest.utils.queue.db.QueueDBManager;
 import sapotero.rxtest.views.activities.DocumentImageFullScreenActivity;
@@ -38,9 +36,9 @@ import sapotero.rxtest.views.menu.factories.ItemsBuilder;
 
 @Singleton
 @Component(modules = {
-        EsdModule.class,
-        SettingsModule.class,
-        RequeryDbModule.class,
+  EsdModule.class,
+  SettingsModule.class,
+  RequeryDbModule.class,
 })
 
 public interface DataComponent {
@@ -52,8 +50,6 @@ public interface DataComponent {
   void inject(DocumentImageFullScreenActivity activity);
   void inject(DocumentInfocardFullScreenActivity activity);
   void inject(InfoNoMenuActivity activity);
-
-  void inject(Validation context);
 
   void inject(DocumentsAdapter adapter);
   void inject(DocumentTypeAdapter adapter);
@@ -78,5 +74,4 @@ public interface DataComponent {
   void inject(CurrentDocumentManager context);
 
   void inject(DecisionManager context);
-  void inject(OperationManager context);
 }

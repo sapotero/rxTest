@@ -10,9 +10,9 @@ import sapotero.rxtest.views.adapters.OshsAutoCompleteAdapter;
 
 @Singleton
 @Component(modules = {
-        EsdModule.class,
-        SettingsModule.class,
-        OkHttpModule.class,
+  EsdModule.class,
+  SettingsModule.class,
+  OkHttpModule.class,
 })
 
 public interface NetworkComponent {
