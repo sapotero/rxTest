@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.db.managers;
 
-import android.content.Context;
-
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -38,7 +36,7 @@ public class DBDocumentManager {
 
   private final String TAG = this.getClass().getSimpleName();
 
-  public DBDocumentManager(Context context) {
+  public DBDocumentManager() {
 
     EsdApplication.getComponent().inject(this);
   }

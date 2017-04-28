@@ -14,27 +14,13 @@ import sapotero.rxtest.jobs.utils.JobModule;
 import sapotero.rxtest.managers.CurrentDocumentManager;
 import sapotero.rxtest.managers.DataLoaderManager;
 import sapotero.rxtest.managers.db.managers.DBDocumentManager;
-import sapotero.rxtest.managers.db.utils.DBDocumentManagerModule;
 import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
-import sapotero.rxtest.managers.menu.commands.approval.ChangePerson;
-import sapotero.rxtest.managers.menu.commands.approval.NextPerson;
-import sapotero.rxtest.managers.menu.commands.approval.PrevPerson;
-import sapotero.rxtest.managers.menu.commands.decision.AddDecision;
-import sapotero.rxtest.managers.menu.commands.decision.SaveDecision;
-import sapotero.rxtest.managers.menu.commands.performance.ApprovalPerformance;
-import sapotero.rxtest.managers.menu.commands.performance.DelegatePerformance;
-import sapotero.rxtest.managers.menu.commands.report.FromTheReport;
-import sapotero.rxtest.managers.menu.commands.report.ReturnToPrimaryConsideration;
-import sapotero.rxtest.managers.menu.commands.shared.AddToFolder;
-import sapotero.rxtest.managers.menu.commands.shared.CheckForControl;
-import sapotero.rxtest.managers.menu.utils.OperationHistory;
 import sapotero.rxtest.managers.menu.utils.OperationManagerModule;
 import sapotero.rxtest.managers.toolbar.ToolbarManager;
 import sapotero.rxtest.managers.view.DecisionManager;
 import sapotero.rxtest.retrofit.utils.OkHttpModule;
 import sapotero.rxtest.services.MainService;
-import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.utils.queue.db.QueueDBManager;
 import sapotero.rxtest.utils.queue.utils.QueueManagerModule;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
@@ -46,7 +32,6 @@ import sapotero.rxtest.views.activities.InfoNoMenuActivity;
 import sapotero.rxtest.views.activities.LogActivity;
 import sapotero.rxtest.views.activities.LoginActivity;
 import sapotero.rxtest.views.activities.MainActivity;
-import sapotero.rxtest.views.activities.SettingsActivity;
 import sapotero.rxtest.views.activities.SettingsTemplatesActivity;
 import sapotero.rxtest.views.adapters.DecisionAdapter;
 import sapotero.rxtest.views.adapters.DocumentTypeAdapter;
@@ -80,7 +65,6 @@ import sapotero.rxtest.views.menu.factories.ItemsBuilder;
   JobModule.class,
   OkHttpModule.class,
   SettingsModule.class,
-  DBDocumentManagerModule.class,
   RequeryDbModule.class,
   QueueManagerModule.class,
   OperationManagerModule.class,

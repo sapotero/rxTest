@@ -1,7 +1,6 @@
 package sapotero.rxtest.managers.db.utils;
 
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 
 import javax.inject.Singleton;
@@ -16,7 +15,7 @@ public final class DBDocumentManagerModule {
   @NonNull
   @Provides
   @Singleton
-  DBDocumentManager provideDBDocumentManager(Context context) {
-    return new DBDocumentManager(context);
+  DBDocumentManager provideDBDocumentManager() {
+    return new DBDocumentManager();
   }
 }

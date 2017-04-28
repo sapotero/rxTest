@@ -1,7 +1,5 @@
 package sapotero.rxtest.db.requery.utils.validation;
 
-import android.content.Context;
-
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -12,8 +10,8 @@ public final class ValidationModule {
 
   @Provides
   @Singleton
-  Validation provideValidation(Context context) {
-    return new Validation(context);
+  Validation provideValidation() {
+    return new Validation();
   }
 
 }

@@ -22,7 +22,7 @@ public class Validation{
   private Set<String> selected_journals;
   private String TAG = this.getClass().getSimpleName();
 
-  Validation(Context context) {
+  Validation() {
     EsdApplication.getComponent().inject(this);
 
     settings
