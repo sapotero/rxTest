@@ -163,7 +163,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.fragment_decision, container, false);
     ButterKnife.bind(this, view);
-    EsdApplication.getComponent().inject( this );
+    EsdApplication.getDataComponent().inject( this );
 
     loadSettings();
 

@@ -84,7 +84,7 @@ public class InfoCardLinksFragment extends Fragment {
 
 
 
-    EsdApplication.getComponent().inject( this );
+    EsdApplication.getDataComponent().inject( this );
     ButterKnife.bind(this, view);
 
     view.setOnTouchListener( new OnSwipeTouchListener( getContext() ) );

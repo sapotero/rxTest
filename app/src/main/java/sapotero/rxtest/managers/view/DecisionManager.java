@@ -59,7 +59,7 @@ public class DecisionManager implements DecisionInterface, DecisionBuilder.Callb
 
   public DecisionManager(Context context, FragmentManager supportFragmentManager, Decision decision) {
 
-    EsdApplication.getComponent().inject(this);
+    EsdApplication.getDataComponent().inject(this);
 
     this.context = context;
     this.decision = decision;

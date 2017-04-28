@@ -27,7 +27,7 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    EsdApplication.getComponent().inject(this);
+    EsdApplication.getDataComponent().inject(this);
 
     Timber.tag("SETTINGS").d("settings_view_journals %s", settings.getStringSet("settings_view_journals").get() );
 

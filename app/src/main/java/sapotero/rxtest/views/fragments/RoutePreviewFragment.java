@@ -77,7 +77,7 @@ public class RoutePreviewFragment extends Fragment {
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.fragment_route_preview, container, false);
 
-    EsdApplication.getComponent().inject(this);
+    EsdApplication.getDataComponent().inject(this);
     ButterKnife.bind(view);
 
     loadSettings();

@@ -46,7 +46,7 @@ public class LogActivity extends AppCompatActivity {
 
     setContentView(R.layout.activity_log);
     ButterKnife.bind(this);
-    EsdApplication.getComponent().inject(this);
+    EsdApplication.getDataComponent().inject(this);
 
   }
   @OnClick(R.id.activity_reload_table)

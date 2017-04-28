@@ -43,7 +43,7 @@ public class InfoCardDialogFragment extends DialogFragment implements View.OnCli
   @RequiresApi(api = Build.VERSION_CODES.M)
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.fragment_preview_main_infocard, null);
-    EsdApplication.getComponent().inject(this);
+    EsdApplication.getDataComponent().inject(this);
     ButterKnife.bind(view);
 
     loadSettings();

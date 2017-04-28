@@ -38,7 +38,7 @@ public class DBDocumentManager {
 
   public DBDocumentManager() {
 
-    EsdApplication.getComponent().inject(this);
+    EsdApplication.getDataComponent().inject(this);
   }
 
   public RDocumentEntity get(String uid) {

@@ -49,7 +49,7 @@ public class CurrentDocumentManager {
 
   public CurrentDocumentManager(Context context) {
     this.context = context;
-    EsdApplication.getComponent().inject(this);
+    EsdApplication.getDataComponent().inject(this);
     initialize();
   }
 

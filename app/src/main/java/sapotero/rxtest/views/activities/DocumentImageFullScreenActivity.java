@@ -53,7 +53,7 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity implement
     setContentView(R.layout.activity_document_image_full_screen);
 
     ButterKnife.bind(this);
-    EsdApplication.getComponent().inject(this);
+    EsdApplication.getDataComponent().inject(this);
 
     InfoCardDocumentsFragment fragment = new InfoCardDocumentsFragment();
     fragment.withOutZoom(true);

@@ -71,7 +71,7 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
 
   public ItemsBuilder(Context context) {
     this.context = context;
-    EsdApplication.getComponent().inject(this);
+    EsdApplication.getDataComponent().inject(this);
   }
 
   public void setSpinner(Spinner selector) {
