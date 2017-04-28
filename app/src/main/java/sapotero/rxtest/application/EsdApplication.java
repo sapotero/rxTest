@@ -15,11 +15,13 @@ import sapotero.rxtest.application.components.DaggerDataComponent;
 import sapotero.rxtest.application.components.DaggerJobManagerComponent;
 import sapotero.rxtest.application.components.DaggerManagerComponent;
 import sapotero.rxtest.application.components.DaggerNetworkComponent;
+import sapotero.rxtest.application.components.DaggerOperationManagerComponent;
 import sapotero.rxtest.application.components.DaggerValidationComponent;
 import sapotero.rxtest.application.components.DataComponent;
 import sapotero.rxtest.application.components.JobManagerComponent;
 import sapotero.rxtest.application.components.ManagerComponent;
 import sapotero.rxtest.application.components.NetworkComponent;
+import sapotero.rxtest.application.components.OperationManagerComponent;
 import sapotero.rxtest.application.components.ValidationComponent;
 import sapotero.rxtest.application.config.Constant;
 import timber.log.Timber;
@@ -39,6 +41,7 @@ public final class EsdApplication extends Application {
   private static NetworkComponent networkComponent;
   private static ManagerComponent managerComponent;
   private static JobManagerComponent jobManagerComponent;
+  private static OperationManagerComponent operationManagerComponent;
 
   @Override
   protected void attachBaseContext(Context base) {
@@ -73,6 +76,7 @@ public final class EsdApplication extends Application {
     networkComponent = DaggerNetworkComponent.builder().build();
     managerComponent = DaggerManagerComponent.builder().build();
     jobManagerComponent = DaggerJobManagerComponent.builder().build();
+    operationManagerComponent = DaggerOperationManagerComponent.builder().build();
 
     AnnotationTest.getInstance();
   }
@@ -95,6 +99,10 @@ public final class EsdApplication extends Application {
 
   public static JobManagerComponent getJobManagerComponent() {
     return jobManagerComponent;
+  }
+
+  public static OperationManagerComponent getOperationManagerComponent() {
+    return operationManagerComponent;
   }
 
   public static EsdApplication getInstance() {
