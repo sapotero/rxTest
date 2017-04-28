@@ -5,9 +5,7 @@ import javax.inject.Singleton;
 import dagger.Component;
 import sapotero.rxtest.application.modules.EsdModule;
 import sapotero.rxtest.application.modules.SettingsModule;
-import sapotero.rxtest.db.requery.query.DBQueryBuilder;
 import sapotero.rxtest.db.requery.utils.RequeryDbModule;
-import sapotero.rxtest.db.requery.utils.validation.ValidationModule;
 import sapotero.rxtest.jobs.bus.BaseJob;
 import sapotero.rxtest.jobs.utils.JobModule;
 import sapotero.rxtest.managers.DataLoaderManager;
@@ -22,13 +20,10 @@ import sapotero.rxtest.views.activities.InfoActivity;
 import sapotero.rxtest.views.activities.MainActivity;
 import sapotero.rxtest.views.activities.SettingsTemplatesActivity;
 import sapotero.rxtest.views.adapters.DecisionAdapter;
-import sapotero.rxtest.views.adapters.OshsAutoCompleteAdapter;
-import sapotero.rxtest.views.adapters.models.DocumentTypeItem;
 import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
 import sapotero.rxtest.views.fragments.DecisionRejectionTemplateFragment;
 import sapotero.rxtest.views.fragments.DecisionTemplateFragment;
 import sapotero.rxtest.views.fragments.InfoActivityDecisionPreviewFragment;
-import sapotero.rxtest.views.menu.builders.ButtonBuilder;
 
 @Singleton
 @Component(modules = {
@@ -39,7 +34,6 @@ import sapotero.rxtest.views.menu.builders.ButtonBuilder;
   OkHttpModule.class,
   QueueManagerModule.class,
   OperationManagerModule.class,
-  ValidationModule.class
 })
 
 public interface EsdComponent {
@@ -52,7 +46,6 @@ public interface EsdComponent {
   void inject(MainService service);
 
   void inject(DecisionAdapter adapter);
-  void inject(OshsAutoCompleteAdapter context);
 
   void inject(DecisionTemplateFragment fragment);
   void inject(DecisionRejectionTemplateFragment fragment);
