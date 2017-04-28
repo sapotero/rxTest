@@ -72,7 +72,7 @@ import sapotero.rxtest.events.decision.ApproveDecisionEvent;
 import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
 import sapotero.rxtest.events.decision.RejectDecisionEvent;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
-import sapotero.rxtest.events.view.ShowPrevDocumentEvent;
+import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
@@ -185,7 +185,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
             operationManager.execute(operation, params);
             updateAfteButtonPressed();
-            EventBus.getDefault().post( new ShowPrevDocumentEvent());
+            EventBus.getDefault().post( new ShowNextDocumentEvent());
           })
           .autoDismiss(true);
 
@@ -205,7 +205,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
       operationManager.execute(operation, params);
       updateAfteButtonPressed();
-      EventBus.getDefault().post( new ShowPrevDocumentEvent());
+      EventBus.getDefault().post( new ShowNextDocumentEvent());
     }
 
     Timber.tag(TAG).v("decision_preview_next end");
@@ -236,7 +236,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
       operationManager.execute(operation, params);
       updateAfteButtonPressed();
-      EventBus.getDefault().post( new ShowPrevDocumentEvent());
+      EventBus.getDefault().post( new ShowNextDocumentEvent());
     }
   }
 
@@ -259,7 +259,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
         operationManager.execute(operation, commandParams);
         updateAfteButtonPressed();
-        EventBus.getDefault().post( new ShowPrevDocumentEvent());
+        EventBus.getDefault().post( new ShowNextDocumentEvent());
       })
       .autoDismiss(true);
 
@@ -392,7 +392,6 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
     initToolBar();
     setAdapter();
-
 
 
     gestureDetector = new GestureDetector( getContext(),new GestureListener() );

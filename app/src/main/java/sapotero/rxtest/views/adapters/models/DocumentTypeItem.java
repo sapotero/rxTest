@@ -80,7 +80,7 @@ public class DocumentTypeItem {
       WhereAndOr<RxScalar<Integer>> query;
       if ( settings.getBoolean("settings_view_type_show_without_project").get()
         || mainMenuItem.getIndex() == 3  // подписание/согласование
-        || mainMenuItem.getIndex() == 9  // обработанные
+        || mainMenuItem.getIndex() == 8  // контроль
         || mainMenuItem.getIndex() == 10 // избранное
       ){
         query = dataStore

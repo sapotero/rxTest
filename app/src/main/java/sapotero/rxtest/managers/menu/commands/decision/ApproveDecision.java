@@ -144,7 +144,7 @@ public class ApproveDecision extends AbstractCommand {
 
       Timber.tag(TAG).e("3 updateLocal document %s | %s", uid, dec > 0);
 
-//      EventBus.getDefault().post( new ShowPrevDocumentEvent());
+//      EventBus.getDefault().post( new ShowNextDocumentEvent());
     }
 
     Observable.just("").timeout(100, TimeUnit.MILLISECONDS).subscribe(
