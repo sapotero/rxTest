@@ -17,6 +17,7 @@ import sapotero.rxtest.application.components.DaggerManagerComponent;
 import sapotero.rxtest.application.components.DaggerNetManagerComponent;
 import sapotero.rxtest.application.components.DaggerNetworkComponent;
 import sapotero.rxtest.application.components.DaggerOperationManagerComponent;
+import sapotero.rxtest.application.components.DaggerQueueManagerComponent;
 import sapotero.rxtest.application.components.DaggerValidationComponent;
 import sapotero.rxtest.application.components.DataComponent;
 import sapotero.rxtest.application.components.JobManagerComponent;
@@ -24,6 +25,7 @@ import sapotero.rxtest.application.components.ManagerComponent;
 import sapotero.rxtest.application.components.NetManagerComponent;
 import sapotero.rxtest.application.components.NetworkComponent;
 import sapotero.rxtest.application.components.OperationManagerComponent;
+import sapotero.rxtest.application.components.QueueManagerComponent;
 import sapotero.rxtest.application.components.ValidationComponent;
 import sapotero.rxtest.application.config.Constant;
 import timber.log.Timber;
@@ -45,6 +47,7 @@ public final class EsdApplication extends Application {
   private static JobManagerComponent jobManagerComponent;
   private static OperationManagerComponent operationManagerComponent;
   private static NetManagerComponent netManagerComponent;
+  private static QueueManagerComponent queueManagerComponent;
 
   @Override
   protected void attachBaseContext(Context base) {
@@ -87,6 +90,7 @@ public final class EsdApplication extends Application {
     jobManagerComponent = DaggerJobManagerComponent.builder().build();
     operationManagerComponent = DaggerOperationManagerComponent.builder().build();
     netManagerComponent = DaggerNetManagerComponent.builder().build();
+    queueManagerComponent = DaggerQueueManagerComponent.builder().build();
   }
 
   public static DataComponent getDataComponent() {
@@ -115,6 +119,10 @@ public final class EsdApplication extends Application {
 
   public static NetManagerComponent getNetManagerComponent() {
     return netManagerComponent;
+  }
+
+  public static QueueManagerComponent getQueueManagerComponent() {
+    return queueManagerComponent;
   }
 
   public static EsdApplication getInstance() {
