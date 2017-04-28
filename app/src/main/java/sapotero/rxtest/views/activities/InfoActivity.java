@@ -480,6 +480,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   public void updateCurrent(){
 
+    toolbarManager.invalidate();
     jobManager.addJobInBackground(new UpdateDocumentJob( UID.get(), status ));
 
     unsubscribe();

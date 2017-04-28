@@ -383,7 +383,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     PIN = settings.getString("PIN");
   }
 
-  private void invalidate() {
+  public void invalidate() {
     getFirstForLenovo();
 
     if (doc != null){
