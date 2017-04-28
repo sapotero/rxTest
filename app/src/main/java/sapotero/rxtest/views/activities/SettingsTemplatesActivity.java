@@ -41,7 +41,7 @@ public class SettingsTemplatesActivity extends AppCompatActivity implements Deci
     setContentView(R.layout.activity_settings_templates);
 
     ButterKnife.bind(this);
-    EsdApplication.getOperationManagerComponent().inject(this);
+    EsdApplication.getManagerComponent().inject(this);
 
 
 

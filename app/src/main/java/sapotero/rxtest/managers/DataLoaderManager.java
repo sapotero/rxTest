@@ -99,7 +99,7 @@ public class DataLoaderManager {
   public DataLoaderManager(Context context) {
     this.context = context;
 
-    EsdApplication.getNetManagerComponent().inject(this);
+    EsdApplication.getManagerComponent().inject(this);
 
     initialize();
 

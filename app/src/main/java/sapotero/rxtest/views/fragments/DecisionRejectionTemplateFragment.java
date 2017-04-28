@@ -63,7 +63,7 @@ public class DecisionRejectionTemplateFragment extends Fragment {
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.fragment_decision_template, container, false);
 
-    EsdApplication.getOperationManagerComponent().inject( this );
+    EsdApplication.getManagerComponent().inject( this );
 
     initEvents();
     populateAdapter(view);
