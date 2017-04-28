@@ -12,11 +12,11 @@ import org.acra.annotation.ReportsCrashes;
 import sapotero.rxtest.R;
 import sapotero.rxtest.annotations.AnnotationTest;
 import sapotero.rxtest.application.components.DaggerDataComponent;
-import sapotero.rxtest.application.components.DaggerEsdComponent;
+import sapotero.rxtest.application.components.DaggerManagerComponent;
 import sapotero.rxtest.application.components.DaggerNetworkComponent;
 import sapotero.rxtest.application.components.DaggerValidationComponent;
 import sapotero.rxtest.application.components.DataComponent;
-import sapotero.rxtest.application.components.EsdComponent;
+import sapotero.rxtest.application.components.ManagerComponent;
 import sapotero.rxtest.application.components.NetworkComponent;
 import sapotero.rxtest.application.components.ValidationComponent;
 import sapotero.rxtest.application.config.Constant;
@@ -31,7 +31,8 @@ import timber.log.Timber;
 public final class EsdApplication extends Application {
 
   private static EsdApplication instance;
-  private static EsdComponent mainComponent;
+
+  private static ManagerComponent managerComponent;
   private static DataComponent dataComponent;
   private static ValidationComponent validationComponent;
   private static NetworkComponent networkComponent;
@@ -64,7 +65,7 @@ public final class EsdApplication extends Application {
 
     instance = this;
 
-    mainComponent = DaggerEsdComponent.builder().build();
+    managerComponent = DaggerManagerComponent.builder().build();
     dataComponent = DaggerDataComponent.builder().build();
     validationComponent = DaggerValidationComponent.builder().build();
     networkComponent = DaggerNetworkComponent.builder().build();
@@ -72,8 +73,8 @@ public final class EsdApplication extends Application {
     AnnotationTest.getInstance();
   }
 
-  public static EsdComponent getComponent() {
-    return mainComponent;
+  public static ManagerComponent getManagerComponent() {
+    return managerComponent;
   }
 
   public static DataComponent getDataComponent() {

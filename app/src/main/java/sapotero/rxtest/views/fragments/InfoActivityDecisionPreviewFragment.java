@@ -376,7 +376,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.fragment_info_card_decision_preview, container, false);
 
-    EsdApplication.getComponent().inject(this);
+    EsdApplication.getManagerComponent().inject(this);
     binder = ButterKnife.bind(this, view);
 
     fragment = this;

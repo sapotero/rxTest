@@ -54,7 +54,6 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
-import okhttp3.OkHttpClient;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -70,8 +69,6 @@ import sapotero.rxtest.events.bus.GetDocumentInfoEvent;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.events.service.SuperVisorUpdateEvent;
 import sapotero.rxtest.events.service.UpdateAllDocumentsEvent;
-import sapotero.rxtest.events.stepper.auth.StepperDcCheckEvent;
-import sapotero.rxtest.events.stepper.auth.StepperDcCheckFailEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.events.view.RemoveDocumentFromAdapterEvent;
 import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
@@ -186,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     setContentView(R.layout.activity_main);
 
     ButterKnife.bind(this);
-    EsdApplication.getComponent().inject(this);
+    EsdApplication.getManagerComponent().inject(this);
     loadSettings();
     context = this;
 

@@ -33,9 +33,6 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.requery.Persistable;
-import io.requery.rx.SingleEntityStore;
-import padeg.lib.Padeg;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.utils.DecisionConverter;
@@ -99,7 +96,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
     view = inflater.inflate(R.layout.fragment_decision_preview, container, false);
 
     ButterKnife.bind(this, view);
-    EsdApplication.getComponent().inject( this );
+    EsdApplication.getManagerComponent().inject( this );
 
     if (decision != null){
       updateView();

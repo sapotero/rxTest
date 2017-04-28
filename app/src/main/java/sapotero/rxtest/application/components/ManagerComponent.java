@@ -30,13 +30,13 @@ import sapotero.rxtest.views.fragments.InfoActivityDecisionPreviewFragment;
   EsdModule.class,
   SettingsModule.class,
   RequeryDbModule.class,
-  JobModule.class,
   OkHttpModule.class,
+  JobModule.class,
   QueueManagerModule.class,
   OperationManagerModule.class,
 })
 
-public interface EsdComponent {
+public interface ManagerComponent {
 
   void inject(MainActivity activity);
   void inject(InfoActivity activity);

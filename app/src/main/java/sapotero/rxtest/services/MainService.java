@@ -8,7 +8,6 @@ import android.content.pm.ApplicationInfo;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.github.pwittchen.reactivenetwork.library.ReactiveNetwork;
 
@@ -38,7 +37,6 @@ import javax.inject.Inject;
 
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
-import okhttp3.OkHttpClient;
 import ru.CryptoPro.CAdES.CAdESConfig;
 import ru.CryptoPro.JCP.JCP;
 import ru.CryptoPro.JCP.tools.Encoder;
@@ -94,7 +92,6 @@ import sapotero.rxtest.utils.cryptopro.PinCheck;
 import sapotero.rxtest.utils.cryptopro.ProviderType;
 import sapotero.rxtest.utils.cryptopro.wrapper.CMSSign;
 import sapotero.rxtest.utils.queue.QueueManager;
-import sapotero.rxtest.views.menu.fields.MainMenuItem;
 import timber.log.Timber;
 
 public class MainService extends Service {
@@ -130,7 +127,7 @@ public class MainService extends Service {
     }
     EventBus.getDefault().register(this);
 
-    EsdApplication.getComponent().inject(this);
+    EsdApplication.getManagerComponent().inject(this);
 
     dataLoaderInterface = new DataLoaderManager(getApplicationContext());
 
