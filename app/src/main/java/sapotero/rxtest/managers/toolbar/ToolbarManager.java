@@ -29,6 +29,8 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
+import sapotero.rxtest.db.requery.models.decisions.RDecision;
+import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
@@ -524,7 +526,10 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
       // resolved https://tasks.n-core.ru/browse/MVDESD-13259
       // Кнопка "Без ответа" только на документах без резолюции
-      if (doc != null && doc.getDecisions() != null && doc.getDecisions().size() > 0){
+
+      // resolved https://tasks.n-core.ru/browse/MVDESD-13330
+      // Или если нет активной резолюции
+      if ( hasActiveDecision() ){
         try {
           toolbar.getMenu().findItem(R.id.menu_info_to_the_approval_performance).setVisible(false);
         } catch (Exception e) {
@@ -532,6 +537,25 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         }
       }
     }
+  }
+
+  public boolean hasActiveDecision() {
+    Boolean result = false;
+
+    try {
+      if (doc != null && doc.getDecisions().size() > 0){
+        for ( RDecision _decision: doc.getDecisions() ) {
+          RDecisionEntity decision = (RDecisionEntity) _decision;
+          if (!decision.isApproved() && Objects.equals(decision.getSignerId(), settings.getString("current_user_id").get())){
+            result = true;
+          }
+        }
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    return result;
   }
 
   private boolean isProcessed() {
