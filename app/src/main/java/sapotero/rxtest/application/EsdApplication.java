@@ -13,8 +13,10 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.annotations.AnnotationTest;
 import sapotero.rxtest.application.components.DaggerDataComponent;
 import sapotero.rxtest.application.components.DaggerEsdComponent;
+import sapotero.rxtest.application.components.DaggerValidationComponent;
 import sapotero.rxtest.application.components.DataComponent;
 import sapotero.rxtest.application.components.EsdComponent;
+import sapotero.rxtest.application.components.ValidationComponent;
 import sapotero.rxtest.application.config.Constant;
 import timber.log.Timber;
 
@@ -29,6 +31,7 @@ public final class EsdApplication extends Application {
   private static EsdApplication instance;
   private static EsdComponent mainComponent;
   private static DataComponent dataComponent;
+  private static ValidationComponent validationComponent;
 
   @Override
   protected void attachBaseContext(Context base) {
@@ -60,6 +63,7 @@ public final class EsdApplication extends Application {
 
     mainComponent = DaggerEsdComponent.builder().build();
     dataComponent = DaggerDataComponent.builder().build();
+    validationComponent = DaggerValidationComponent.builder().build();
 
     AnnotationTest.getInstance();
   }
@@ -70,6 +74,10 @@ public final class EsdApplication extends Application {
 
   public static DataComponent getDataComponent() {
     return dataComponent;
+  }
+
+  public static ValidationComponent getValidationComponent() {
+    return validationComponent;
   }
 
   public static EsdApplication getInstance() {

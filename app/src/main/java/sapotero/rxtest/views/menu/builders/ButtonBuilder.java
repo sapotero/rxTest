@@ -103,7 +103,7 @@ public class ButtonBuilder {
     this.corner = Corner.NONE;
     this.active = false;
 
-    EsdApplication.getComponent().inject(this);
+    EsdApplication.getValidationComponent().inject(this);
   }
 
 

@@ -64,9 +64,6 @@ public interface EsdComponent {
 
   void inject(DataLoaderManager context);
 
-  void inject(DocumentTypeItem context);
-  void inject(ButtonBuilder context);
-  void inject(DBQueryBuilder context);
   void inject(ToolbarManager context);
 
   void inject(AbstractCommand context);

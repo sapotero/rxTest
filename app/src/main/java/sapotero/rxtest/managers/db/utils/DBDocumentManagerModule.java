@@ -9,6 +9,7 @@ import dagger.Module;
 import dagger.Provides;
 import sapotero.rxtest.managers.db.managers.DBDocumentManager;
 
+// TODO: В данный момент не используется. Доделать.
 @Module
 public final class DBDocumentManagerModule {
 
