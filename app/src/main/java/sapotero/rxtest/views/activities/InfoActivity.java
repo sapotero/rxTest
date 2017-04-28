@@ -108,7 +108,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
     setContentView(R.layout.activity_info);
     ButterKnife.bind(this);
-    EsdApplication.getManagerComponent().inject(this);
+    EsdApplication.getJobManagerComponent().inject(this);
 
 
   }

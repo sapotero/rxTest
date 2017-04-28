@@ -37,7 +37,7 @@ public class DecisionAdapter extends RecyclerView.Adapter<DecisionViewHolder> {
     this.decisions = decisions;
     this.context = context;
     this.recycler_view = recyclerView;
-    EsdApplication.getManagerComponent().inject(this);
+    EsdApplication.getJobManagerComponent().inject(this);
   }
 
   @Override
