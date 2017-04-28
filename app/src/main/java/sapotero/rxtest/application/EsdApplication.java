@@ -14,12 +14,14 @@ import sapotero.rxtest.annotations.AnnotationTest;
 import sapotero.rxtest.application.components.DaggerDataComponent;
 import sapotero.rxtest.application.components.DaggerJobManagerComponent;
 import sapotero.rxtest.application.components.DaggerManagerComponent;
+import sapotero.rxtest.application.components.DaggerNetManagerComponent;
 import sapotero.rxtest.application.components.DaggerNetworkComponent;
 import sapotero.rxtest.application.components.DaggerOperationManagerComponent;
 import sapotero.rxtest.application.components.DaggerValidationComponent;
 import sapotero.rxtest.application.components.DataComponent;
 import sapotero.rxtest.application.components.JobManagerComponent;
 import sapotero.rxtest.application.components.ManagerComponent;
+import sapotero.rxtest.application.components.NetManagerComponent;
 import sapotero.rxtest.application.components.NetworkComponent;
 import sapotero.rxtest.application.components.OperationManagerComponent;
 import sapotero.rxtest.application.components.ValidationComponent;
@@ -42,6 +44,7 @@ public final class EsdApplication extends Application {
   private static ManagerComponent managerComponent;
   private static JobManagerComponent jobManagerComponent;
   private static OperationManagerComponent operationManagerComponent;
+  private static NetManagerComponent netManagerComponent;
 
   @Override
   protected void attachBaseContext(Context base) {
@@ -71,14 +74,19 @@ public final class EsdApplication extends Application {
 
     instance = this;
 
+    initComponents();
+
+    AnnotationTest.getInstance();
+  }
+
+  private void initComponents() {
     dataComponent = DaggerDataComponent.builder().build();
     validationComponent = DaggerValidationComponent.builder().build();
     networkComponent = DaggerNetworkComponent.builder().build();
     managerComponent = DaggerManagerComponent.builder().build();
     jobManagerComponent = DaggerJobManagerComponent.builder().build();
     operationManagerComponent = DaggerOperationManagerComponent.builder().build();
-
-    AnnotationTest.getInstance();
+    netManagerComponent = DaggerNetManagerComponent.builder().build();
   }
 
   public static DataComponent getDataComponent() {
@@ -103,6 +111,10 @@ public final class EsdApplication extends Application {
 
   public static OperationManagerComponent getOperationManagerComponent() {
     return operationManagerComponent;
+  }
+
+  public static NetManagerComponent getNetManagerComponent() {
+    return netManagerComponent;
   }
 
   public static EsdApplication getInstance() {

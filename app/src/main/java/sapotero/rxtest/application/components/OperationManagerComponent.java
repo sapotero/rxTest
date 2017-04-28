@@ -16,10 +16,10 @@ import sapotero.rxtest.views.fragments.DecisionTemplateFragment;
 
 @Singleton
 @Component(modules = {
-        EsdModule.class,
-        SettingsModule.class,
-        RequeryDbModule.class,
-        OperationManagerModule.class,
+  EsdModule.class,
+  SettingsModule.class,
+  RequeryDbModule.class,
+  OperationManagerModule.class,
 })
 
 public interface OperationManagerComponent {

@@ -28,7 +28,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
   public CommandParams params;
 
   public AbstractCommand(Context context) {
-    EsdApplication.getManagerComponent().inject(this);
+    EsdApplication.getNetManagerComponent().inject(this);
   }
 
   public abstract void withParams(CommandParams params);

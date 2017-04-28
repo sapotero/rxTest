@@ -42,7 +42,6 @@ import sapotero.rxtest.views.menu.factories.ItemsBuilder;
 })
 
 public interface DataComponent {
-
   void inject(LogActivity activity);
   void inject(SettingsViewFragment activity);
   void inject(LoginActivity activity);

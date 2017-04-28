@@ -12,10 +12,10 @@ import sapotero.rxtest.views.adapters.DecisionAdapter;
 
 @Singleton
 @Component(modules = {
-        EsdModule.class,
-        SettingsModule.class,
-        RequeryDbModule.class,
-        JobModule.class,
+  EsdModule.class,
+  SettingsModule.class,
+  RequeryDbModule.class,
+  JobModule.class,
 })
 
 public interface JobManagerComponent {
