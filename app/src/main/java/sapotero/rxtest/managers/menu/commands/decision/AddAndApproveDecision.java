@@ -15,7 +15,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import sapotero.rxtest.events.view.ShowNextDocumentEvent;
+import sapotero.rxtest.events.view.ShowPrevDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -66,7 +66,7 @@ public class AddAndApproveDecision extends AbstractCommand {
   @Override
   public void execute() {
     queueManager.add(this);
-    EventBus.getDefault().post( new ShowNextDocumentEvent() );
+    EventBus.getDefault().post( new ShowPrevDocumentEvent() );
   }
 
   @Override

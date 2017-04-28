@@ -4,8 +4,6 @@ import android.content.Context;
 
 import com.f2prateek.rx.preferences.Preference;
 
-import org.greenrobot.eventbus.EventBus;
-
 import java.util.ArrayList;
 
 import retrofit2.Retrofit;
@@ -15,7 +13,6 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.events.view.ShowPrevDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -85,8 +82,6 @@ public class RemoveFromFolder extends AbstractCommand {
       .get().value();
     Timber.tag(TAG).w( "updated: %s", count );
 
-    EventBus.getDefault().post( new ShowPrevDocumentEvent());
-    
     queueManager.add(this);
   }
 
