@@ -20,8 +20,7 @@ import sapotero.rxtest.views.menu.builders.ButtonBuilder;
 })
 
 public interface ValidationComponent {
-
-  void inject(DocumentTypeItem context);
-  void inject(ButtonBuilder context);
-  void inject(DBQueryBuilder context);
+  void inject(DocumentTypeItem documentTypeItem);
+  void inject(ButtonBuilder buttonBuilder);
+  void inject(DBQueryBuilder dbQueryBuilder);
 }

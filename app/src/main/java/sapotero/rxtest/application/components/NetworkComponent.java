@@ -16,5 +16,5 @@ import sapotero.rxtest.views.adapters.OshsAutoCompleteAdapter;
 })
 
 public interface NetworkComponent {
-  void inject(OshsAutoCompleteAdapter context);
+  void inject(OshsAutoCompleteAdapter oshsAutoCompleteAdapter);
 }

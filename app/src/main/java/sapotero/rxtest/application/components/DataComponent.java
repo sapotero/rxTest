@@ -67,10 +67,10 @@ public interface DataComponent {
   void inject(StepperAuthFragment fragment);
   void inject(StepperChooseAuthTypeFragment fragment);
 
-  void inject(ItemsBuilder context);
-  void inject(QueueDBManager context);
-  void inject(DBDocumentManager context);
-  void inject(CurrentDocumentManager context);
+  void inject(ItemsBuilder itemsBuilder);
+  void inject(QueueDBManager queueDBManager);
+  void inject(DBDocumentManager dbDocumentManager);
+  void inject(CurrentDocumentManager currentDocumentManager);
 
-  void inject(DecisionManager context);
+  void inject(DecisionManager decisionManager);
 }

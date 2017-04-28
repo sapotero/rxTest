@@ -25,6 +25,6 @@ import sapotero.rxtest.utils.queue.utils.QueueManagerModule;
 
 public interface NetManagerComponent {
   void inject(BaseJob job);
-  void inject(DataLoaderManager context);
-  void inject(AbstractCommand context);
+  void inject(DataLoaderManager dataLoaderManager);
+  void inject(AbstractCommand abstractCommand);
 }

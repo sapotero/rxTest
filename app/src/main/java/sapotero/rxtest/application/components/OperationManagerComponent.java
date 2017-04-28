@@ -25,8 +25,10 @@ import sapotero.rxtest.views.fragments.DecisionTemplateFragment;
 public interface OperationManagerComponent {
   void inject(DecisionConstructorActivity activity);
   void inject(SettingsTemplatesActivity activity);
+
   void inject(DecisionTemplateFragment fragment);
   void inject(DecisionRejectionTemplateFragment fragment);
   void inject(DecisionPreviewFragment fragment);
-  void inject(ToolbarManager context);
+
+  void inject(ToolbarManager toolbarManager);
 }
