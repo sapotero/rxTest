@@ -99,13 +99,6 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   private OnFragmentInteractionListener mListener;
 
   private Preference<String> UID;
-  //  private Preference<String> DOCUMENT_UID;
-  //  private Preference<String> TOKEN;
-  //  private Preference<String> LOGIN;
-  //  private Preference<String> PASSWORD;
-  //  private Preference<String> STATUS_CODE;
-  //  private Preference<Integer> POSITION;
-
 
   @BindView(R.id.activity_info_decision_preview_head) LinearLayout preview_head;
 
@@ -114,6 +107,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   @BindView(R.id.desigion_view_root) LinearLayout desigion_view_root;
 
   @BindView(R.id.activity_info_button_magnifer) ImageButton magnifer_button;
+  @BindView(R.id.activity_info_decision_preview_comment) ImageButton comment_button;
   @BindView(R.id.activity_info_button_edit) ImageButton edit;
 
   @BindView(R.id.activity_info_decision_spinner) Spinner decision_spinner;
@@ -124,6 +118,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   @BindView(R.id.activity_info_decision_preview_prev_person) Button prev_person_button;
   @BindView(R.id.activity_info_decision_preview_approved_text) TextView approved_text;
   @BindView(R.id.activity_info_decision_preview_temporary) TextView temporary;
+  @BindView(R.id.activity_info_decision_preview_count) TextView decision_count;
 
 
   ;
@@ -553,12 +548,6 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   }
 
   private void loadSettings() {
-//    LOGIN    = settings.getString("login");
-//    PASSWORD = settings.getString("password");
-//    TOKEN    = settings.getString("token");
-//    POSITION = settings.getInteger("position");
-//    STATUS_CODE = settings.getString("activity_main_menu.star");
-//    DOCUMENT_UID = settings.getString("document.uid");
     UID      = settings.getString("activity_main_menu.uid");
     REG_NUMBER = settings.getString("activity_main_menu.regnumber");
 
@@ -578,6 +567,19 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
     magnifer.show( getFragmentManager() , "DecisionMagniferFragment");
   }
+
+  @OnClick(R.id.activity_info_decision_preview_comment)
+  public void comment(){
+    Timber.tag(TAG).v("comment_button");
+
+    new MaterialDialog.Builder( getContext() )
+      .title("Комментарий резолюции")
+      .content( current_decision.getComment() )
+      .positiveText(R.string.yes)
+      .build().show();
+  }
+
+
 
 
   @OnClick(R.id.activity_info_button_edit)
@@ -674,6 +676,16 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
           if (decision_spinner_adapter.size() == 1){
             disableSelection();
+            decision_count.setVisibility(View.GONE);
+          }
+
+          if (decision_spinner_adapter.size() >= 2){
+            decision_count.setText( String.format(" %s ", unsorterd_decisions.size()) );
+            decision_count.setVisibility(View.VISIBLE);
+          }
+
+          if (current_decision != null && current_decision.getComment() != null && !Objects.equals(current_decision.getComment(), "")){
+            comment_button.setVisibility(View.VISIBLE);
           }
         } else {
           Timber.e("no decisions");
@@ -690,6 +702,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
           preview.showEmpty();
 
           magnifer_button.setVisibility(View.GONE);
+          comment_button.setVisibility(View.GONE);
+          decision_count.setVisibility(View.GONE);
           disableSelection();
           showDecisionCardTollbarMenuItems(false);
           EventBus.getDefault().post( new HasNoActiveDecisionConstructor() );
