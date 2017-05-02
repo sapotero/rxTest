@@ -40,7 +40,7 @@ public class ChangePerson extends AbstractCommand {
   private String official_id;
 
   public ChangePerson(Context context, DocumentReceiver document){
-    super(context);
+    super();
     this.context = context;
     this.document = document;
   }

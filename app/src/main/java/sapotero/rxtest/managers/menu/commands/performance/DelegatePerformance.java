@@ -38,7 +38,7 @@ public class DelegatePerformance extends AbstractCommand {
   private String official_id;
 
   public DelegatePerformance(Context context, DocumentReceiver document){
-    super(context);
+    super();
     this.context = context;
     this.document = document;
   }

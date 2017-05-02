@@ -36,7 +36,7 @@ public class CreateTemplate extends AbstractCommand {
   private Preference<String> HOST;
 
   public CreateTemplate(Context context, DocumentReceiver document){
-    super(context);
+    super();
     this.context = context;
     this.document = document;
   }

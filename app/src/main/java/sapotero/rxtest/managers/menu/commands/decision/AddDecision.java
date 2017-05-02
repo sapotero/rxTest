@@ -43,7 +43,7 @@ public class AddDecision extends AbstractCommand {
   private String decisionId;
 
   public AddDecision(Context context, DocumentReceiver document){
-    super(context);
+    super();
     this.context = context;
     this.document = document;
   }

@@ -37,7 +37,7 @@ public class AddToFolder extends AbstractCommand {
   private String document_id;
 
   public AddToFolder(Context context, DocumentReceiver document){
-    super(context);
+    super();
     this.context = context;
     this.document = document;
   }

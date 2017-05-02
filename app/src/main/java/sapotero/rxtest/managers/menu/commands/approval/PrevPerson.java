@@ -41,7 +41,7 @@ public class PrevPerson extends AbstractCommand {
   private String sign;
 
   public PrevPerson(Context context, DocumentReceiver document){
-    super(context);
+    super();
     this.context = context;
     this.document = document;
   }

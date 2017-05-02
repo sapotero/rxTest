@@ -35,7 +35,7 @@ public class SkipControlLabel extends AbstractCommand {
   private String label_id;
 
   public SkipControlLabel(Context context, DocumentReceiver document){
-    super(context);
+    super();
     this.context = context;
     this.document = document;
   }

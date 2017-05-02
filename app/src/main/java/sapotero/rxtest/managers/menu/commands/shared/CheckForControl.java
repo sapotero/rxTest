@@ -36,7 +36,7 @@ public class CheckForControl extends AbstractCommand {
   private String document_id;
 
   public CheckForControl(Context context, DocumentReceiver document){
-    super(context);
+    super();
     this.context = context;
     this.document = document;
   }

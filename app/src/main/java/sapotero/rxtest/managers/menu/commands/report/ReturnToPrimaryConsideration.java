@@ -37,7 +37,7 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
   private Preference<String> PIN;
 
   public ReturnToPrimaryConsideration(Context context, DocumentReceiver document){
-    super(context);
+    super();
     this.context = context;
     this.document = document;
   }

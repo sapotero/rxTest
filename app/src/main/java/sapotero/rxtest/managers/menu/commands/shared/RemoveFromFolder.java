@@ -40,7 +40,7 @@ public class RemoveFromFolder extends AbstractCommand {
   private String document_id;
 
   public RemoveFromFolder(Context context, DocumentReceiver document){
-    super(context);
+    super();
     this.context = context;
     this.document = document;
   }

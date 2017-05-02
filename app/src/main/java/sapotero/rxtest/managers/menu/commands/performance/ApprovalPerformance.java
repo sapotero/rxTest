@@ -39,7 +39,7 @@ public class ApprovalPerformance extends AbstractCommand {
   private String official_id;
 
   public ApprovalPerformance(Context context, DocumentReceiver document){
-    super(context);
+    super();
     this.context = context;
     this.document = document;
   }

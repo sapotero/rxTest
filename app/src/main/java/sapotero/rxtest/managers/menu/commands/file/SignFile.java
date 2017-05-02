@@ -37,7 +37,7 @@ public class SignFile extends AbstractCommand {
   private String sign;
 
   public SignFile(Context context, DocumentReceiver document){
-    super(context);
+    super();
     this.context = context;
     this.document = document;
   }

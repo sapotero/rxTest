@@ -42,7 +42,7 @@ public class AddTemporaryDecision extends AbstractCommand {
   private String decisionId;
 
   public AddTemporaryDecision(Context context, DocumentReceiver document){
-    super(context);
+    super();
     this.context = context;
     this.document = document;
   }

@@ -42,7 +42,7 @@ public class ApproveDecisionDelayed extends AbstractCommand {
   private Preference<String> PIN;
 
   public ApproveDecisionDelayed(Context context, DocumentReceiver document){
-    super(context);
+    super();
     this.context = context;
     this.document = document;
   }

@@ -41,7 +41,7 @@ public class AddAndApproveDecision extends AbstractCommand {
   private String decisionId;
 
   public AddAndApproveDecision(Context context, DocumentReceiver document){
-    super(context);
+    super();
     this.context = context;
     this.document = document;
   }

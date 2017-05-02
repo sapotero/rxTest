@@ -28,7 +28,7 @@ public class SaveTemporaryDecision extends AbstractCommand {
   private String TAG = this.getClass().getSimpleName();
 
   public SaveTemporaryDecision(Context context, DocumentReceiver document){
-    super(context);
+    super();
     this.context = context;
     this.document = document;
   }

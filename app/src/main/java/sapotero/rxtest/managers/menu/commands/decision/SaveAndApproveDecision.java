@@ -51,7 +51,7 @@ public class SaveAndApproveDecision extends AbstractCommand {
   private boolean withSign = false;
 
   public SaveAndApproveDecision(Context context, DocumentReceiver document){
-    super(context);
+    super();
     this.context = context;
     this.document = document;
   }

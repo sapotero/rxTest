@@ -12,7 +12,7 @@ public class DoNothing extends AbstractCommand {
   private final Context context;
 
   public DoNothing(Context context, DocumentReceiver document){
-    super(context);
+    super();
     this.context = context;
     this.document = document;
   }

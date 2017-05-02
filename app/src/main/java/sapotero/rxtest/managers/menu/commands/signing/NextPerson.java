@@ -46,7 +46,7 @@ public class NextPerson extends AbstractCommand {
   private String sign;
 
   public NextPerson(Context context, DocumentReceiver document){
-    super(context);
+    super();
     this.context = context;
     this.document = document;
   }

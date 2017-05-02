@@ -39,7 +39,7 @@ public class FromTheReport extends AbstractCommand {
   private Preference<String> PIN;
 
   public FromTheReport(Context context, DocumentReceiver document){
-    super(context);
+    super();
     this.context = context;
     this.document = document;
 

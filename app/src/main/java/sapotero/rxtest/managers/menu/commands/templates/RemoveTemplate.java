@@ -29,7 +29,7 @@ public class RemoveTemplate extends AbstractCommand {
   private Preference<String> HOST;
 
   public RemoveTemplate(Context context, DocumentReceiver document){
-    super(context);
+    super();
     this.context = context;
     this.document = document;
   }

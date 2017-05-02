@@ -52,7 +52,7 @@ public class ApproveDecision extends AbstractCommand {
   private Preference<String> CURRENT_USER_ID;
 
   public ApproveDecision(Context context, DocumentReceiver document){
-    super(context);
+    super();
     this.context = context;
     this.document = document;
   }

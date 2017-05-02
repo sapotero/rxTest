@@ -40,7 +40,7 @@ public class PrimaryConsideration extends AbstractCommand {
   private String official_id;
 
   public PrimaryConsideration(Context context, DocumentReceiver document){
-    super(context);
+    super();
     this.context = context;
     this.document = document;
   }
