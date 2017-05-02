@@ -494,7 +494,7 @@ public class DataLoaderManager {
 
 
       // обновляем всё
-      if (items == MainMenuItem.ALL){
+      if (items == MainMenuItem.ALL || items.getIndex() == 11 ){
         statuses.add("primary_consideration");
         statuses.add("sent_to_the_report");
         sp.add("approval");
