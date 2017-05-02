@@ -85,7 +85,7 @@ public class DocumentTypeAdapter extends BaseAdapter {
     Set<String> visible_journals = settings.getStringSet("settings_view_journals").get();
     int index =  documents.get(position).getMainMenuItem().getIndex();
 
-    if ( !Arrays.asList(0,8,9,10).contains(index) ){
+    if ( !Arrays.asList(0,8,9,10,11).contains(index) ){
 
       assert visible_journals != null;
       if ( !visible_journals.contains( String.valueOf( index ) ) ){

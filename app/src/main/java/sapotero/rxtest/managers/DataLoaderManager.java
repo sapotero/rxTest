@@ -39,7 +39,6 @@ import sapotero.rxtest.events.auth.AuthDcCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthDcCheckSuccessEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckSuccessEvent;
-import sapotero.rxtest.events.bus.FolderCreatedEvent;
 import sapotero.rxtest.events.stepper.load.StepperDocumentCountReadyEvent;
 import sapotero.rxtest.jobs.bus.CreateAssistantJob;
 import sapotero.rxtest.jobs.bus.CreateDocumentsJob;
@@ -60,7 +59,6 @@ import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.retrofit.models.v2.v2UserOshs;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.services.MainService;
-import sapotero.rxtest.utils.FirstRun;
 import sapotero.rxtest.views.menu.fields.MainMenuButton;
 import sapotero.rxtest.views.menu.fields.MainMenuItem;
 import timber.log.Timber;
@@ -525,6 +523,13 @@ public class DataLoaderManager {
       Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
       DocumentsService docService = retrofit.create(DocumentsService.class);
 
+      // resolved https://tasks.n-core.ru/browse/MVDESD-13343
+      // если общие документы
+
+      boolean shared = false;
+      if (items.getIndex() == 11){
+        shared = true;
+      }
 
       jobManager.cancelJobsInBackground(null, TagConstraint.ANY, "SyncDocument");
 
@@ -535,9 +540,10 @@ public class DataLoaderManager {
       for (String index: indexes ) {
         for (String status: statuses ) {
           requestCount++;
+          boolean finalShared = shared;
           subscription.add(
             docService
-              .getDocumentsByIndexes(LOGIN.get(), TOKEN.get(), index, status, 500)
+              .getDocumentsByIndexes(LOGIN.get(), TOKEN.get(), index, status, shared ? "group" : null , 500)
               .subscribeOn(Schedulers.computation())
               .observeOn(Schedulers.computation())
               .subscribe(
@@ -547,8 +553,8 @@ public class DataLoaderManager {
 
                     for (Document doc: data.getDocuments() ) {
 
-                      Timber.tag(TAG).e("index: %s | status: %s ",index, status );
-                      Timber.tag(TAG).e("exist: %s | md5: %s", isExist(doc), !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) );
+                      // Timber.tag(TAG).e("index: %s | status: %s ",index, status );
+                      // Timber.tag(TAG).e("exist: %s | md5: %s", isExist(doc), !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) );
 
                       if ( isExist(doc) ){
 
@@ -557,7 +563,7 @@ public class DataLoaderManager {
                         if ( !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) ){
                           Timber.tag(TAG).e("isUpdate" );
                           jobCount++;
-                          jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), index, status, true) );
+                          jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), index, status, finalShared) );
                         }
 
                       } else {
@@ -587,7 +593,7 @@ public class DataLoaderManager {
         requestCount++;
         subscription.add(
           docService
-            .getDocuments(LOGIN.get(), TOKEN.get(), code, 500, 0)
+            .getDocuments(LOGIN.get(), TOKEN.get(), code, shared ? "group" : null , 500, 0)
             .subscribeOn(Schedulers.computation())
             .observeOn(Schedulers.computation())
             .subscribe(

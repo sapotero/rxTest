@@ -52,6 +52,7 @@ import timber.log.Timber;
 public class UpdateDocumentJob extends BaseJob {
 
   public static final int PRIORITY = 1;
+  private boolean shared;
   private boolean not_processed;
   private String status;
   private String journal;
@@ -77,9 +78,10 @@ public class UpdateDocumentJob extends BaseJob {
     this.filter = filter;
   }
 
-  public UpdateDocumentJob(String uid, String journal, String status, boolean b) {
+  public UpdateDocumentJob(String uid, String journal, String status, boolean shared) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
+    this.shared = shared;
 
     String[] index = journal.split("_production_db_");
     this.journal = index[0];
@@ -235,6 +237,9 @@ public class UpdateDocumentJob extends BaseJob {
 
     rd.setFavorites(false);
     rd.setProcessed(false);
+    if (shared) {
+      rd.setAddressedToType("group");
+    }
 
     rd.setControl(onControl);
 
@@ -494,6 +499,10 @@ public class UpdateDocumentJob extends BaseJob {
       if ( document.getInfoCard() != null){
         rDoc.setInfoCard( document.getInfoCard() );
       }
+
+    if (shared) {
+      rDoc.setAddressedToType("group");
+    }
 
     if (journal != null) {
       rDoc.setDocumentType( journal );
@@ -814,6 +823,10 @@ public class UpdateDocumentJob extends BaseJob {
       doc.setFromFavoritesFolder(true);
     } else {
       doc.setFromFavoritesFolder(false);
+    }
+
+    if (shared) {
+      doc.setAddressedToType("group");
     }
 
     dataStore
