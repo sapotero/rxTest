@@ -565,13 +565,13 @@ public class UpdateDocumentJob extends BaseJob {
       Boolean red = false;
       Boolean with_decision = false;
 
+      if ( document.getDecisions() != null && document.getDecisions().size() >= 0 ){
+        doc.getDecisions().clear();
+        dataStore.delete(RDecisionEntity.class).where(RDecisionEntity.DOCUMENT_ID.eq(doc.getId())).get().value();
+      }
+
       if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
         with_decision = true;
-        doc.getDecisions().clear();
-
-        for ( Decision dec : document.getDecisions() ) {
-          dataStore.delete(RDecisionEntity.class).where(RDecisionEntity.UID.eq(dec.getId())).get().value();
-        }
 
         for (Decision d: document.getDecisions() ) {
 
