@@ -187,6 +187,8 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
     list.setAdapter(adapter);
 
     list.setOnItemClickListener((parent, view12, position, id) -> {
+      title.clearFocus();
+
       if ( !withSearch || withPrimaryConsideration ){
         user = adapter.getItem(position);
 
@@ -228,8 +230,6 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
         InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
         inputManager.hideSoftInputFromWindow(view12.getWindowToken(), 0);
       }
-
-      title.clearFocus();
     });
 
     if (showWithAssistant){
