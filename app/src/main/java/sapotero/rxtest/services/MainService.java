@@ -9,6 +9,7 @@ import android.os.IBinder;
 import android.util.Log;
 
 import com.birbit.android.jobqueue.JobManager;
+import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.github.pwittchen.reactivenetwork.library.ReactiveNetwork;
 
@@ -39,6 +40,7 @@ import javax.inject.Inject;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
 import okhttp3.OkHttpClient;
+import retrofit2.Retrofit;
 import ru.CryptoPro.CAdES.CAdESConfig;
 import ru.CryptoPro.JCP.JCP;
 import ru.CryptoPro.JCP.tools.Encoder;
@@ -54,6 +56,7 @@ import ru.cprocsp.ACSP.tools.common.RawResource;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.auth.AuthDcCheckFailEvent;
@@ -83,6 +86,8 @@ import sapotero.rxtest.managers.DataLoaderManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.retrofit.Api.AuthService;
+import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.services.task.UpdateAllDocumentsTask;
 import sapotero.rxtest.services.task.UpdateQueueTask;
 import sapotero.rxtest.utils.FirstRun;
@@ -119,6 +124,11 @@ public class MainService extends Service {
   private DataLoaderManager dataLoaderInterface;
   private String SIGN;
   public static String user;
+
+  private Preference<String> HOST;
+  private Preference<String> LOGIN;
+  private Preference<String> TOKEN;
+  private Preference<Boolean> IS_CONNECTED;
 
   public MainService() {
     scheduller = new ScheduledThreadPoolExecutor(2);
@@ -163,6 +173,8 @@ public class MainService extends Service {
 
     aliases( KeyStoreType.currentType(), ProviderType.currentProviderType() );
 
+    initSettings();
+
     isConnected();
 
     scheduller = new ScheduledThreadPoolExecutor(2);
@@ -186,6 +198,13 @@ public class MainService extends Service {
 //          Timber.tag(TAG).e(error);
 //      });
 
+  }
+
+  private void initSettings() {
+    HOST = settings.getString("settings_username_host");
+    LOGIN = settings.getString("login");
+    TOKEN = settings.getString("token");
+    IS_CONNECTED = settings.getBoolean("isConnectedToInternet");
   }
 
   public int onStartCommand(Intent intent, int flags, int startId) {
@@ -703,17 +722,25 @@ public class MainService extends Service {
 
   }
 
-  public void isConnected(){
-    ReactiveNetwork.observeInternetConnectivity()
+  public void isConnected() {
+    Retrofit retrofit = new RetrofitManager(this, HOST.get(), okHttpClient).process();
+    AuthService auth = retrofit.create(AuthService.class);
+
+    Observable
+      .interval( 10, TimeUnit.SECONDS )
       .subscribeOn(Schedulers.io())
       .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(isConnectedToInternet -> {
-//        Toast.makeText( this, String.format( "Connected to inet: %s", isConnectedToInternet ), Toast.LENGTH_SHORT ).show();
-        settings.getBoolean("isConnectedToInternet").set( isConnectedToInternet );
-
-        if ( isConnectedToInternet ){
-          updateAll();
-        }
+      .subscribe(interval -> {
+        auth.getUserInfoV2(LOGIN.get(), TOKEN.get())
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe(
+            v2 -> {
+              IS_CONNECTED.set( true );
+            },
+            error -> {
+              IS_CONNECTED.set( false );
+            });
       });
   }
 

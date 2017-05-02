@@ -133,6 +133,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private Preference<String> HOST;
   private Preference<String> PASSWORD;
   private Preference<Integer> COUNT;
+  private Preference<Boolean> IS_CONNECTED;
 
   private int loaded = 0;
 
@@ -254,7 +255,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   public void isConnected(){
-    ReactiveNetwork.observeInternetConnectivity()
+    IS_CONNECTED.asObservable()
       .subscribeOn(Schedulers.io())
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(isConnectedToInternet -> {
@@ -266,7 +267,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
         }
       });
   }
-
 
   private void initSearch() {
     searchView = SearchView.getInstance(this);
@@ -686,6 +686,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     TOKEN = settings.getString("token");
     HOST = settings.getString("settings_username_host");
     COUNT = settings.getInteger("documents.count");
+    IS_CONNECTED = settings.getBoolean("isConnectedToInternet");
   }
 
   private void drawer_add_item(int index, String title, Long identifier) {
