@@ -12,14 +12,16 @@ import org.acra.annotation.ReportsCrashes;
 import sapotero.rxtest.R;
 import sapotero.rxtest.annotations.AnnotationTest;
 import sapotero.rxtest.application.components.DaggerDataComponent;
-import sapotero.rxtest.application.components.DaggerManagerComponent;
-import sapotero.rxtest.application.components.DaggerNetworkComponent;
-import sapotero.rxtest.application.components.DaggerValidationComponent;
 import sapotero.rxtest.application.components.DataComponent;
 import sapotero.rxtest.application.components.ManagerComponent;
 import sapotero.rxtest.application.components.NetworkComponent;
 import sapotero.rxtest.application.components.ValidationComponent;
 import sapotero.rxtest.application.config.Constant;
+import sapotero.rxtest.db.requery.utils.validation.ValidationModule;
+import sapotero.rxtest.jobs.utils.JobModule;
+import sapotero.rxtest.managers.menu.utils.OperationManagerModule;
+import sapotero.rxtest.retrofit.utils.OkHttpModule;
+import sapotero.rxtest.utils.queue.utils.QueueManagerModule;
 import timber.log.Timber;
 
 
@@ -72,9 +74,10 @@ public final class EsdApplication extends Application {
 
   private void initComponents() {
     dataComponent = DaggerDataComponent.builder().build();
-    validationComponent = DaggerValidationComponent.builder().build();
-    networkComponent = DaggerNetworkComponent.builder().build();
-    managerComponent = DaggerManagerComponent.builder().build();
+    validationComponent = dataComponent.plusValidationComponent(new ValidationModule());
+    networkComponent = dataComponent.plusNetworkComponent(new OkHttpModule());
+    managerComponent = networkComponent.plusManagerComponent(
+            new JobModule(), new QueueManagerModule(), new OperationManagerModule() );
   }
 
   public static DataComponent getDataComponent() {

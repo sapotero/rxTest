@@ -5,8 +5,6 @@ import android.support.annotation.NonNull;
 
 import java.util.concurrent.Executors;
 
-import javax.inject.Singleton;
-
 import dagger.Module;
 import dagger.Provides;
 import io.requery.Persistable;
@@ -20,6 +18,7 @@ import io.requery.sql.EntityDataStore;
 import io.requery.sql.SchemaModifier;
 import io.requery.sql.TableCreationMode;
 import sapotero.rxtest.application.config.Constant;
+import sapotero.rxtest.application.scopes.DataScope;
 import sapotero.rxtest.db.requery.models.Models;
 
 @Module
@@ -27,7 +26,7 @@ public final class RequeryDbModule {
 
   @NonNull
   @Provides
-  @Singleton
+  @DataScope
   SingleEntityStore<Persistable> provideDatabase(Context context) {
     DatabaseSource source = new DatabaseSource(context, Models.DEFAULT, 7);
 

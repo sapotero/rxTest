@@ -6,16 +6,15 @@ import android.preference.PreferenceManager;
 
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
-import javax.inject.Singleton;
-
 import dagger.Module;
 import dagger.Provides;
+import sapotero.rxtest.application.scopes.DataScope;
 
 @Module
 public final class SettingsModule {
 
   @Provides
-  @Singleton
+  @DataScope
   RxSharedPreferences provideSettingsModule(Context context) {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
     return RxSharedPreferences.create(preferences);

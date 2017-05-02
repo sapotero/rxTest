@@ -2,11 +2,10 @@ package sapotero.rxtest.application.modules;
 
 import android.content.Context;
 
-import javax.inject.Singleton;
-
 import dagger.Module;
 import dagger.Provides;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.application.scopes.DataScope;
 
 @Module
 public final class EsdModule {
@@ -17,7 +16,7 @@ public final class EsdModule {
   }
 
   @Provides
-  @Singleton
+  @DataScope
   Context provideContext() {
     return context;
   }

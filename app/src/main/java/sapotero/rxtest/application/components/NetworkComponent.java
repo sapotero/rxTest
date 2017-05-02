@@ -1,20 +1,23 @@
 package sapotero.rxtest.application.components;
 
-import javax.inject.Singleton;
-
-import dagger.Component;
-import sapotero.rxtest.application.modules.EsdModule;
-import sapotero.rxtest.application.modules.SettingsModule;
+import dagger.Subcomponent;
+import sapotero.rxtest.application.scopes.NetworkScope;
+import sapotero.rxtest.jobs.utils.JobModule;
+import sapotero.rxtest.managers.menu.utils.OperationManagerModule;
 import sapotero.rxtest.retrofit.utils.OkHttpModule;
+import sapotero.rxtest.utils.queue.utils.QueueManagerModule;
 import sapotero.rxtest.views.adapters.OshsAutoCompleteAdapter;
 
-@Singleton
-@Component(modules = {
-  EsdModule.class,
-  SettingsModule.class,
-  OkHttpModule.class,
+@NetworkScope
+@Subcomponent(modules = {
+  OkHttpModule.class
 })
 
 public interface NetworkComponent {
+  ManagerComponent plusManagerComponent(
+          JobModule jobModule,
+          QueueManagerModule queueManagerModule,
+          OperationManagerModule operationManagerModule);
+
   void inject(OshsAutoCompleteAdapter oshsAutoCompleteAdapter);
 }

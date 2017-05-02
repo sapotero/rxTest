@@ -1,18 +1,13 @@
 package sapotero.rxtest.application.components;
 
-import javax.inject.Singleton;
-
-import dagger.Component;
-import sapotero.rxtest.application.modules.EsdModule;
-import sapotero.rxtest.application.modules.SettingsModule;
-import sapotero.rxtest.db.requery.utils.RequeryDbModule;
+import dagger.Subcomponent;
+import sapotero.rxtest.application.scopes.ManagerScope;
 import sapotero.rxtest.jobs.bus.BaseJob;
 import sapotero.rxtest.jobs.utils.JobModule;
 import sapotero.rxtest.managers.DataLoaderManager;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.utils.OperationManagerModule;
 import sapotero.rxtest.managers.toolbar.ToolbarManager;
-import sapotero.rxtest.retrofit.utils.OkHttpModule;
 import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.queue.utils.QueueManagerModule;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
@@ -25,12 +20,8 @@ import sapotero.rxtest.views.fragments.DecisionRejectionTemplateFragment;
 import sapotero.rxtest.views.fragments.DecisionTemplateFragment;
 import sapotero.rxtest.views.fragments.InfoActivityDecisionPreviewFragment;
 
-@Singleton
-@Component(modules = {
-  EsdModule.class,
-  SettingsModule.class,
-  RequeryDbModule.class,
-  OkHttpModule.class,
+@ManagerScope
+@Subcomponent(modules = {
   JobModule.class,
   QueueManagerModule.class,
   OperationManagerModule.class,

@@ -5,18 +5,17 @@ import android.content.Context;
 import com.birbit.android.jobqueue.JobManager;
 import com.birbit.android.jobqueue.config.Configuration;
 
-import javax.inject.Singleton;
-
 import dagger.Module;
 import dagger.Provides;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.application.scopes.ManagerScope;
 import sapotero.rxtest.jobs.bus.BaseJob;
 
 @Module
 public final class JobModule {
 
   @Provides
-  @Singleton
+  @ManagerScope
   JobManager provideJobModule(Context context) {
     Configuration.Builder builder = new Configuration.Builder(context)
       .minConsumerCount(0)
