@@ -331,6 +331,8 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
 
       title.setOnItemClickListener(
         (adapterView, view1, position, id) -> {
+          title.clearFocus();
+
           Oshs _user = (Oshs) adapterView.getItemAtPosition(position);
 
           Timber.tag("SEARCH").w("%s %s", _user.getName(), _user.getId());
