@@ -24,6 +24,7 @@
         android:textColor="@color/md_grey_600"
         android:layout_alignParentEnd="true"
         android:layout_marginEnd="@dimen/date_offset"
+        android:visibility="gone"
         />
 
 </RelativeLayout>

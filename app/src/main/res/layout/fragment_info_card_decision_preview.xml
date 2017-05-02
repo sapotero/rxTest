@@ -43,12 +43,35 @@
                 android:layout_weight="1"
                 android:layout_gravity="top"
                 />
+            <TextView
+                android:id="@+id/activity_info_decision_preview_count"
+                android:textColor="@color/md_grey_900"
+                android:layout_marginStart="@dimen/date_offset"
+                android:padding="6sp"
+                android:visibility="gone"
+                android:layout_margin="@dimen/half_date_offset"
+                android:gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:background="@drawable/urgency_badge"
+                />
+
+            <ImageButton
+                android:id="@+id/activity_info_decision_preview_comment"
+                android:layout_width="48dp"
+                android:layout_height="match_parent"
+                android:src="@drawable/comment"
+                android:visibility="gone"
+                android:background="@color/md_white_1000"
+                android:foreground="?android:attr/selectableItemBackground"
+                />
 
             <ImageButton
                 android:id="@+id/activity_info_decision_preview_magnifer"
                 android:layout_width="48dp"
                 android:layout_height="match_parent"
                 android:src="@drawable/magnifer"
+
                 android:background="@color/md_white_1000"
                 android:foreground="?android:attr/selectableItemBackground"
                 />
