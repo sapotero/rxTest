@@ -59,9 +59,6 @@ public class SettingsActivity extends AppCompatActivity {
     fragmentTransaction.commit();
     }
 
-
-
-    // FIX добавить сортировку документов по настройкам
   }
 
   @Override protected void onResume() {

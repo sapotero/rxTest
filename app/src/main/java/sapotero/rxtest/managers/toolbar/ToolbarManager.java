@@ -757,7 +757,9 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         }
         params.setDocument( UID.get() );
 
-        params.setComment( dialog1.getInputEditText().getText().toString() );
+        if ( settings.getBoolean("settings_view_show_comment_post").get() ) {
+          params.setComment(dialog1.getInputEditText().getText().toString());
+        }
         operationManager.execute(operation, params);
       })
       .autoDismiss(true);
@@ -793,7 +795,9 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         operation = CommandFactory.Operation.FROM_THE_REPORT;
         params.setPerson( settings.getString("current_user_id").get() );
         params.setDocument( UID.get() );
-        params.setComment( dialog1.getInputEditText().getText().toString() );
+        if ( settings.getBoolean("settings_view_show_comment_post").get() ) {
+          params.setComment(dialog1.getInputEditText().getText().toString());
+        }
 
         operationManager.execute(operation, params);
       })

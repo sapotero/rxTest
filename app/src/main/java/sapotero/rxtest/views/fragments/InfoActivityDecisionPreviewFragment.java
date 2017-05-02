@@ -36,7 +36,6 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
-import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -249,7 +248,10 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 //          commandParams.setDecision( current_decision );
         commandParams.setDecisionModel( DecisionConverter.formatDecision(current_decision) );
         commandParams.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
-        commandParams.setComment( dialog1.getInputEditText().getText().toString() );
+
+        if ( settings.getBoolean("settings_view_show_comment_post").get() ) {
+          commandParams.setComment(dialog1.getInputEditText().getText().toString());
+        }
 
         operationManager.execute(operation, commandParams);
         updateAfteButtonPressed();
@@ -586,9 +588,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   public void edit(){
 
     Timber.tag(TAG).v("edit");
-    Gson gson = new Gson();
     RDecisionEntity data = decision_spinner_adapter.getItem( decision_spinner.getSelectedItemPosition() ).getDecision();
-
 
     Timber.tag(TAG).v("DECISION");
     Timber.tag(TAG).v("%s", data);
@@ -596,11 +596,6 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
     Context context = getContext();
     Intent intent = new Intent( context , DecisionConstructorActivity.class);
-    Bundle bundle = intent.getExtras();
-
-//    if (current_decision != null) {
-//      bundle.putString( "decision", gson.toJson( DecisionConverter.formatDecision(current_decision), Decision.class)  );
-//    }
 
     context.startActivity(intent);
 
