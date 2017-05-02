@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
@@ -376,7 +377,6 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     binder = ButterKnife.bind(this, view);
 
     fragment = this;
-//    invalidate();
 
     return view;
   }
@@ -670,17 +670,14 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
           }
 
           if (decision_spinner_adapter.size() == 1){
-            disableSelection();
+            invalidateSpinner(false);
             decision_count.setVisibility(View.GONE);
           }
 
           if (decision_spinner_adapter.size() >= 2){
             decision_count.setText( String.format(" %s ", unsorterd_decisions.size()) );
             decision_count.setVisibility(View.VISIBLE);
-          }
-
-          if (current_decision != null && current_decision.getComment() != null && !Objects.equals(current_decision.getComment(), "")){
-            comment_button.setVisibility(View.VISIBLE);
+            invalidateSpinner(true);
           }
         } else {
           Timber.e("no decisions");
@@ -699,7 +696,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
           magnifer_button.setVisibility(View.GONE);
           comment_button.setVisibility(View.GONE);
           decision_count.setVisibility(View.GONE);
-          disableSelection();
+          invalidateSpinner(false);
           showDecisionCardTollbarMenuItems(false);
           EventBus.getDefault().post( new HasNoActiveDecisionConstructor() );
         }
@@ -709,17 +706,31 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       });
   }
 
-  private void disableSelection() {
-    decision_spinner.setBackgroundColor( ContextCompat.getColor(getContext(), R.color.transparent ) );
-    decision_spinner.setClickable( false );
-    decision_spinner.setFocusable( false );
-    decision_spinner.setEnabled( false );
+  private void invalidateSpinner(boolean visibility) {
+//    decision_spinner.setBackgroundColor( ContextCompat.getColor(getContext(), R.color.md_grey_50) );
+
+    decision_spinner
+      .getBackground()
+      .setColorFilter(
+        ContextCompat.getColor(getContext(), visibility ? R.color.md_grey_800 : R.color.md_white_1000),
+        PorterDuff.Mode.SRC_ATOP);
+
+    decision_spinner.setClickable( visibility );
+    decision_spinner.setFocusable( visibility );
+    decision_spinner.setEnabled( visibility );
   }
 
   private void displayDecision() {
     Timber.tag(TAG).v("displayDecision");
 
     if (current_decision != null && current_decision.getUid() != null) {
+
+      if (current_decision.getComment() != null && !Objects.equals(current_decision.getComment(), "")){
+        comment_button.setVisibility(View.VISIBLE);
+      } else {
+        comment_button.setVisibility(View.GONE);
+      }
+
       preview.show( current_decision );
 
       settings.getInteger("decision.active.id").set( current_decision.getId() );
@@ -728,6 +739,9 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
         toolbarManager.setEditDecisionMenuItemVisible( !current_decision.isApproved() );
       }
       updateVisibility( current_decision.isApproved() );
+
+
+
     }
 
 //    if ( !decision_spinner_adapter.hasActiveDecision() ){
