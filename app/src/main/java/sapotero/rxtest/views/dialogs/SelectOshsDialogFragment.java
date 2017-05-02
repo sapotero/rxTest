@@ -228,6 +228,8 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
         InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
         inputManager.hideSoftInputFromWindow(view12.getWindowToken(), 0);
       }
+
+      title.clearFocus();
     });
 
     if (showWithAssistant){
@@ -292,7 +294,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
 
 
     if (withSearch){
-      autocomplete_adapter = new OshsAutoCompleteAdapter(getActivity());
+      autocomplete_adapter = new OshsAutoCompleteAdapter(getActivity(), title);
       autocomplete_adapter.setIgnoreUsers(user_ids);
       autocomplete_adapter.setThreshold(title.getThreshold());
       title.setAdapter( autocomplete_adapter );
