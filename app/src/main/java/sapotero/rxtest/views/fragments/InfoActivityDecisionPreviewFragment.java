@@ -98,13 +98,13 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   private ToolbarManager toolbarManager;
   private OnFragmentInteractionListener mListener;
 
-  private Preference<String> DOCUMENT_UID;
   private Preference<String> UID;
-  private Preference<String> TOKEN;
-  private Preference<String> LOGIN;
-  private Preference<String> PASSWORD;
-  private Preference<String> STATUS_CODE;
-  private Preference<Integer> POSITION;
+  //  private Preference<String> DOCUMENT_UID;
+  //  private Preference<String> TOKEN;
+  //  private Preference<String> LOGIN;
+  //  private Preference<String> PASSWORD;
+  //  private Preference<String> STATUS_CODE;
+  //  private Preference<Integer> POSITION;
 
 
   @BindView(R.id.activity_info_decision_preview_head) LinearLayout preview_head;
@@ -126,8 +126,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   @BindView(R.id.activity_info_decision_preview_temporary) TextView temporary;
 
 
-
-  private ArrayList<DecisionSpinnerItem> decisionSpinnerItems  = new ArrayList<>();;
+  ;
 
   private DecisionSpinnerAdapter decision_spinner_adapter;
   private Preview preview;
@@ -388,11 +387,11 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   private void invalidate() {
     initEvents();
     loadSettings();
-    loadDocument();
 
     initToolBar();
-    setAdapter();
 
+    setAdapter();
+    loadDocument();
 
     gestureDetector = new GestureDetector( getContext(),new GestureListener() );
 
@@ -421,6 +420,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   }
 
   private void setAdapter() {
+
+    ArrayList<DecisionSpinnerItem> decisionSpinnerItems = new ArrayList<>();
     decision_spinner_adapter = new DecisionSpinnerAdapter(getContext(), settings.getString("current_user_id").get() , decisionSpinnerItems);
     decision_spinner.setAdapter(decision_spinner_adapter);
 
@@ -510,6 +511,11 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     try {
       decision_toolbar.getMenu().findItem(R.id.decision_preview_magnifer).setVisible(visible);
       decision_toolbar.getMenu().findItem(R.id.decision_preview_edit).setVisible(visible);
+
+      if (!visible){
+        next_person_button.setVisibility( View.GONE );
+        prev_person_button.setVisibility( View.GONE );
+      }
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -518,10 +524,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   @Override public void onDestroyView() {
     super.onDestroyView();
     binder.unbind();
-
-    if (EventBus.getDefault().isRegistered(this)) {
-      EventBus.getDefault().unregister(this);
-    }
+    initEvents();
   }
 
   @Override
@@ -550,13 +553,13 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   }
 
   private void loadSettings() {
-    LOGIN    = settings.getString("login");
+//    LOGIN    = settings.getString("login");
+//    PASSWORD = settings.getString("password");
+//    TOKEN    = settings.getString("token");
+//    POSITION = settings.getInteger("position");
+//    STATUS_CODE = settings.getString("activity_main_menu.star");
+//    DOCUMENT_UID = settings.getString("document.uid");
     UID      = settings.getString("activity_main_menu.uid");
-    PASSWORD = settings.getString("password");
-    TOKEN    = settings.getString("token");
-    POSITION = settings.getInteger("position");
-    DOCUMENT_UID = settings.getString("document.uid");
-    STATUS_CODE = settings.getString("activity_main_menu.star");
     REG_NUMBER = settings.getString("activity_main_menu.regnumber");
 
   }
@@ -613,6 +616,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   }
 
   private void loadDocument() {
+    Timber.tag(TAG).v("loadDocument | exist %s | %s", documentExist(), UID.get() );
 
     if ( documentExist() ){
       loadFromDb();
@@ -636,7 +640,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
         this.doc = doc;
 
-        Timber.tag("loadFromDb").i( "loaded %s", doc.getId() );
+//        Timber.tag("loadFromDb").i( "loaded %s", doc.getId() );
 
         Preference<String> documentNumber = settings.getString("document.number");
         documentNumber.set( doc.getRegistrationNumber() );
@@ -652,11 +656,11 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
           for (RDecision rDecision: doc.getDecisions()) {
             RDecisionEntity decision = (RDecisionEntity) rDecision;
-            unsorterd_decisions.add( new DecisionSpinnerItem( decision, decision.getSignerBlankText(), decision.getDate() ) );
+            unsorterd_decisions.add( new DecisionSpinnerItem( decision ) );
           }
 
 //          Collections.sort(unsorterd_decisions, (o1, o2) -> o1.getDecision().getUid().compareTo( o2.getDecision().getUid() ));
-          Timber.tag(TAG).e("unsorterd_decisions > %s", unsorterd_decisions.size());
+//          Timber.tag(TAG).e("unsorterd_decisions > %s", unsorterd_decisions.size());
 
           decision_spinner_adapter.addAll( unsorterd_decisions );
 
@@ -673,16 +677,22 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
           }
         } else {
           Timber.e("no decisions");
-          magnifer_button.setVisibility(View.GONE);
+
           if (toolbarManager != null) {
             toolbarManager.setEditDecisionMenuItemVisible(false);
           }
-          preview.showEmpty();
-          EventBus.getDefault().post( new HasNoActiveDecisionConstructor() );
-          disableSelection();
-          decision_spinner_adapter.add( new DecisionSpinnerItem(null, "Нет резолюций", null ) );
+          decision_spinner_adapter.clear();
 
+          RDecisionEntity empty = new RDecisionEntity();
+          empty.setSignerBlankText("Нет резолюций");
+          decision_spinner_adapter.add( new DecisionSpinnerItem( empty ) );
+
+          preview.showEmpty();
+
+          magnifer_button.setVisibility(View.GONE);
+          disableSelection();
           showDecisionCardTollbarMenuItems(false);
+          EventBus.getDefault().post( new HasNoActiveDecisionConstructor() );
         }
 
       }, error -> {
@@ -700,7 +710,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   private void displayDecision() {
     Timber.tag(TAG).v("displayDecision");
 
-    if (current_decision != null) {
+    if (current_decision != null && current_decision.getUid() != null) {
       preview.show( current_decision );
 
       settings.getInteger("decision.active.id").set( current_decision.getId() );
