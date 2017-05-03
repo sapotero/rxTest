@@ -103,9 +103,15 @@ public class RejectDecision extends AbstractCommand {
       .get().value();
 
 
-    Timber.tag(TAG).i( "2 updateLocal decision: %s", count );
-    Timber.tag(TAG).i( "2 updateLocal decision signer:\n%s\n%s\n", params.getDecisionModel().getSignerId(), settings.getString("current_user_id").get() );
-
+    // resolved https://tasks.n-core.ru/browse/MVDESD-13366
+    // ставим плашку всегда
+    dataStore
+      .update(RDocumentEntity.class)
+      .set(RDocumentEntity.CHANGED, true)
+      .set(RDocumentEntity.MD5, "")
+      .where(RDocumentEntity.UID.eq( params.getDecisionModel().getDocumentUid() ))
+      .get()
+      .value();
 
     if (Objects.equals(params.getDecisionModel().getSignerId(), settings.getString("current_user_id").get())){
       String uid = null;

@@ -15,6 +15,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
@@ -107,6 +108,17 @@ public class AddDecision extends AbstractCommand {
 //
 //      dataStore
 //        .update(decision).toObservable().subscribe();
+
+    // resolved https://tasks.n-core.ru/browse/MVDESD-13366
+    // ставим плашку всегда
+    dataStore
+      .update(RDocumentEntity.class)
+      .set(RDocumentEntity.CHANGED, true)
+      .set(RDocumentEntity.MD5, "")
+      .where(RDocumentEntity.UID.eq( params.getDecisionModel().getDocumentUid() ))
+      .get()
+      .value();
+
     if (callback != null ){
       callback.onCommandExecuteSuccess( getType() );
     }
