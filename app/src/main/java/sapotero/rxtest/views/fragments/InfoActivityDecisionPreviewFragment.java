@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
@@ -36,7 +37,6 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
-import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -249,7 +249,10 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 //          commandParams.setDecision( current_decision );
         commandParams.setDecisionModel( DecisionConverter.formatDecision(current_decision) );
         commandParams.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
-        commandParams.setComment( dialog1.getInputEditText().getText().toString() );
+
+        if ( settings.getBoolean("settings_view_show_comment_post").get() ) {
+          commandParams.setComment(dialog1.getInputEditText().getText().toString());
+        }
 
         operationManager.execute(operation, commandParams);
         updateAfteButtonPressed();
@@ -374,7 +377,6 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     binder = ButterKnife.bind(this, view);
 
     fragment = this;
-//    invalidate();
 
     return view;
   }
@@ -575,20 +577,16 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     new MaterialDialog.Builder( getContext() )
       .title("Комментарий резолюции")
       .content( current_decision.getComment() )
-      .positiveText(R.string.yes)
+      .positiveText(R.string.constructor_close)
       .build().show();
   }
-
-
 
 
   @OnClick(R.id.activity_info_button_edit)
   public void edit(){
 
     Timber.tag(TAG).v("edit");
-    Gson gson = new Gson();
     RDecisionEntity data = decision_spinner_adapter.getItem( decision_spinner.getSelectedItemPosition() ).getDecision();
-
 
     Timber.tag(TAG).v("DECISION");
     Timber.tag(TAG).v("%s", data);
@@ -596,11 +594,6 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
     Context context = getContext();
     Intent intent = new Intent( context , DecisionConstructorActivity.class);
-    Bundle bundle = intent.getExtras();
-
-//    if (current_decision != null) {
-//      bundle.putString( "decision", gson.toJson( DecisionConverter.formatDecision(current_decision), Decision.class)  );
-//    }
 
     context.startActivity(intent);
 
@@ -675,17 +668,14 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
           }
 
           if (decision_spinner_adapter.size() == 1){
-            disableSelection();
+            invalidateSpinner(false);
             decision_count.setVisibility(View.GONE);
           }
 
           if (decision_spinner_adapter.size() >= 2){
             decision_count.setText( String.format(" %s ", unsorterd_decisions.size()) );
             decision_count.setVisibility(View.VISIBLE);
-          }
-
-          if (current_decision != null && current_decision.getComment() != null && !Objects.equals(current_decision.getComment(), "")){
-            comment_button.setVisibility(View.VISIBLE);
+            invalidateSpinner(true);
           }
         } else {
           Timber.e("no decisions");
@@ -704,7 +694,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
           magnifer_button.setVisibility(View.GONE);
           comment_button.setVisibility(View.GONE);
           decision_count.setVisibility(View.GONE);
-          disableSelection();
+          invalidateSpinner(false);
           showDecisionCardTollbarMenuItems(false);
           EventBus.getDefault().post( new HasNoActiveDecisionConstructor() );
         }
@@ -714,17 +704,31 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       });
   }
 
-  private void disableSelection() {
-    decision_spinner.setBackgroundColor( ContextCompat.getColor(getContext(), R.color.transparent ) );
-    decision_spinner.setClickable( false );
-    decision_spinner.setFocusable( false );
-    decision_spinner.setEnabled( false );
+  private void invalidateSpinner(boolean visibility) {
+//    decision_spinner.setBackgroundColor( ContextCompat.getColor(getContext(), R.color.md_grey_50) );
+
+    decision_spinner
+      .getBackground()
+      .setColorFilter(
+        ContextCompat.getColor(getContext(), visibility ? R.color.md_grey_800 : R.color.md_white_1000),
+        PorterDuff.Mode.SRC_ATOP);
+
+    decision_spinner.setClickable( visibility );
+    decision_spinner.setFocusable( visibility );
+    decision_spinner.setEnabled( visibility );
   }
 
   private void displayDecision() {
     Timber.tag(TAG).v("displayDecision");
 
     if (current_decision != null && current_decision.getUid() != null) {
+
+      if (current_decision.getComment() != null && !Objects.equals(current_decision.getComment(), "")){
+        comment_button.setVisibility(View.VISIBLE);
+      } else {
+        comment_button.setVisibility(View.GONE);
+      }
+
       preview.show( current_decision );
 
       settings.getInteger("decision.active.id").set( current_decision.getId() );
@@ -733,6 +737,9 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
         toolbarManager.setEditDecisionMenuItemVisible( !current_decision.isApproved() );
       }
       updateVisibility( current_decision.isApproved() );
+
+
+
     }
 
 //    if ( !decision_spinner_adapter.hasActiveDecision() ){

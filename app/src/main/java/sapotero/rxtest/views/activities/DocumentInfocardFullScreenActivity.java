@@ -49,7 +49,7 @@ public class DocumentInfocardFullScreenActivity extends AppCompatActivity {
     EsdApplication.getComponent(this).inject(this);
 
     toolbar.setContentInsetStartWithNavigation(250);
-    toolbar.setTitle("Просмотр инфокарточки");
+//    toolbar.setTitle("Просмотр инфокарточки");
     toolbar.setNavigationOnClickListener(v ->{
         finish();
       }

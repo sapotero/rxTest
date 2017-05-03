@@ -19,8 +19,6 @@
         android:transitionName="actionBar"
         app:navigationIcon="?attr/homeAsUpIndicator"
         app:theme="@style/ToolbarColoredBackArrow"
-        android:theme="@style/AlertDialog.AppCompat.Light"
-        android:background="@drawable/toolbar_background"
         />
 
 
@@ -28,9 +26,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:cardElevation="2dp"
-        android:layout_below="@+id/document_image_toolbar"
-        android:layout_margin="24dp"
         >
+        <!--android:layout_below="@+id/document_image_toolbar"-->
+        <!--android:layout_margin="24dp"-->
 
         <FrameLayout
             android:orientation="horizontal"
