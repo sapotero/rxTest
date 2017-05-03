@@ -86,6 +86,7 @@ public class DataLoaderManager {
   private SimpleDateFormat dateFormat;
   private CompositeSubscription subscription;
   private CompositeSubscription subscriptionInitV2;
+  private CompositeSubscription subscriptionUpdateAuth;
   private final Context context;
   private ArrayList<String> v2Journals;
   private ArrayList<String> v2Statuses;
@@ -309,6 +310,15 @@ public class DataLoaderManager {
     }
   }
 
+  private void unsubscribeUpdateAuth() {
+    if ( subscriptionUpdateAuth == null ){
+      subscriptionUpdateAuth = new CompositeSubscription();
+    }
+    if (subscriptionUpdateAuth.hasSubscriptions()){
+      subscriptionUpdateAuth.clear();
+    }
+  }
+
   public void updateAuth( String sign ){
     Timber.tag(TAG).i("updateAuth: %s", sign );
 
@@ -328,10 +338,9 @@ public class DataLoaderManager {
 
     Observable<AuthSignToken> authSubscription = getAuthSubscription();
 
-    unsubscribe();
+    unsubscribeUpdateAuth();
 
-    subscription.add(
-
+    subscriptionUpdateAuth.add(
       authSubscription
         .subscribeOn( Schedulers.io() )
         .observeOn( AndroidSchedulers.mainThread() )
