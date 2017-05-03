@@ -11,7 +11,6 @@ import android.util.Log;
 import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
-import com.github.pwittchen.reactivenetwork.library.ReactiveNetwork;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.greenrobot.eventbus.EventBus;
@@ -130,6 +129,10 @@ public class MainService extends Service {
   private Preference<String> TOKEN;
   private Preference<Boolean> IS_CONNECTED;
 
+  private CompositeSubscription subscriptionNetwork;
+
+  private static MainService mainService;
+
   public MainService() {
     scheduller = new ScheduledThreadPoolExecutor(2);
   }
@@ -173,9 +176,9 @@ public class MainService extends Service {
 
     aliases( KeyStoreType.currentType(), ProviderType.currentProviderType() );
 
-    initSettings();
+    mainService = this;
 
-    isConnected();
+    initSettings();
 
     scheduller = new ScheduledThreadPoolExecutor(2);
 
@@ -200,11 +203,16 @@ public class MainService extends Service {
 
   }
 
+  public static MainService getMainService() {
+    return mainService;
+  }
+
   private void initSettings() {
     HOST = settings.getString("settings_username_host");
     LOGIN = settings.getString("login");
     TOKEN = settings.getString("token");
     IS_CONNECTED = settings.getBoolean("isConnectedToInternet");
+    IS_CONNECTED.set( true );
   }
 
   public int onStartCommand(Intent intent, int flags, int startId) {
@@ -726,22 +734,42 @@ public class MainService extends Service {
     Retrofit retrofit = new RetrofitManager(this, HOST.get(), okHttpClient).process();
     AuthService auth = retrofit.create(AuthService.class);
 
-    Observable
-      .interval( 10, TimeUnit.SECONDS )
-      .subscribeOn(Schedulers.io())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(interval -> {
-        auth.getUserInfoV2(LOGIN.get(), TOKEN.get())
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(
-            v2 -> {
-              IS_CONNECTED.set( true );
-            },
-            error -> {
-              IS_CONNECTED.set( false );
-            });
-      });
+    unsubscribeNetwork();
+    subscriptionNetwork = new CompositeSubscription();
+
+    subscriptionNetwork.add(
+      Observable
+        .interval( 10, TimeUnit.SECONDS )
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(interval -> {
+          Timber.tag(TAG).d("Checking internet connectivity");
+          subscriptionNetwork.add(
+            auth.getUserInfoV2(LOGIN.get(), TOKEN.get())
+              .subscribeOn(Schedulers.io())
+              .observeOn(AndroidSchedulers.mainThread())
+              .subscribe(
+                v2 -> {
+                  Timber.tag(TAG).d("Internet connectivity: true");
+                  IS_CONNECTED.set( true );
+                },
+                error -> {
+                  Timber.tag(TAG).d("Internet connectivity: false");
+                  IS_CONNECTED.set( false );
+                })
+          );
+        })
+    );
+  }
+
+  private void unsubscribeNetwork() {
+    if ( subscriptionNetwork != null && subscriptionNetwork.hasSubscriptions() ) {
+      subscriptionNetwork.unsubscribe();
+    }
+  }
+
+  public void stopNetworkCheck() {
+    unsubscribeNetwork();
   }
 
   private void checkSedAvailibility() {

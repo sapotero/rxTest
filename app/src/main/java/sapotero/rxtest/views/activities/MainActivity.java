@@ -23,7 +23,6 @@ import android.widget.Toast;
 import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
-import com.github.pwittchen.reactivenetwork.library.ReactiveNetwork;
 import com.mikepenz.material_design_iconic_typeface_library.MaterialDesignIconic;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
@@ -176,7 +175,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   private MainActivity context;
   private CompositeSubscription subscription;
-
+  private CompositeSubscription subscriptionNetwork;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -224,8 +223,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     initSearch();
 
-    isConnected();
-
     setFirstRunFalse();
 
     updateToken();
@@ -254,18 +251,38 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     dataLoader.updateAuth(sign);
   }
 
-  public void isConnected(){
-    IS_CONNECTED.asObservable()
-      .subscribeOn(Schedulers.io())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(isConnectedToInternet -> {
-        try {
-          toolbar.getMenu().findItem(R.id.online).setTitle( isConnectedToInternet ? "В сети" : "Не в сети" );
-          toolbar.getMenu().findItem(R.id.online).setIcon( isConnectedToInternet  ? R.drawable.icon_online : R.drawable.icon_offline );
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-      });
+  private void isConnected() {
+    // Start network checking
+    MainService.getMainService().isConnected();
+
+    unsubscribeNetwork();
+    subscriptionNetwork = new CompositeSubscription();
+
+    // Subscribe to network checking result changes
+    subscriptionNetwork.add(
+      IS_CONNECTED.asObservable()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(isConnectedToInternet -> {
+          try {
+            toolbar.getMenu().findItem(R.id.online).setTitle( isConnectedToInternet ? R.string.is_online : R.string.is_offline );
+            toolbar.getMenu().findItem(R.id.online).setIcon( isConnectedToInternet  ? R.drawable.icon_online : R.drawable.icon_offline );
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+        })
+    );
+  }
+
+  private void stopNetworkCheck() {
+    unsubscribeNetwork();
+    MainService.getMainService().stopNetworkCheck();
+  }
+
+  private void unsubscribeNetwork() {
+    if ( subscriptionNetwork != null && subscriptionNetwork.hasSubscriptions() ) {
+      subscriptionNetwork.unsubscribe();
+    }
   }
 
   private void initSearch() {
@@ -495,6 +512,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     menuBuilder.getItem().recalcuate();
     dropLoadProgress(false);
 
+    isConnected();
+
 //    EventBus.getDefault().post( new UpdateAllDocumentsEvent());
 
   }
@@ -510,6 +529,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     if (subscriptions != null) {
       subscriptions.unsubscribe();
     }
+
+    stopNetworkCheck();
   }
 
   @Override
