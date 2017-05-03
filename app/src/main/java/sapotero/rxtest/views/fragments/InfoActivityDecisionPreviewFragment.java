@@ -290,12 +290,27 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       MaterialDialog build = prev_dialog.build();
       build.show();
     }
+
+    setAsFakeProcessed();
+  }
+
+  private void setAsFakeProcessed() {
+    // resolved https://tasks.n-core.ru/browse/MVDESD-13366
+    // ставим плашку всегда
+    dataStore
+      .update(RDocumentEntity.class)
+      .set(RDocumentEntity.CHANGED, true)
+      .set(RDocumentEntity.MD5, "")
+      .where(RDocumentEntity.UID.eq( UID.get() ))
+      .get()
+      .value();
   }
 
   private void updateAfteButtonPressed() {
     decision_spinner_adapter.setCurrentAsTemporary( decision_spinner.getSelectedItemPosition() );
     current_decision = decision_spinner_adapter.getItem(decision_spinner.getSelectedItemPosition()).getDecision();
     displayDecision();
+    setAsFakeProcessed();
   }
 
   @Override

@@ -85,6 +85,7 @@ public class RejectDecision extends AbstractCommand {
 
   @Override
   public void execute() {
+
     queueManager.add(this);
     updateLocal();
 
@@ -103,18 +104,9 @@ public class RejectDecision extends AbstractCommand {
       .get().value();
 
 
-    // resolved https://tasks.n-core.ru/browse/MVDESD-13366
-    // ставим плашку всегда
-    dataStore
-      .update(RDocumentEntity.class)
-      .set(RDocumentEntity.CHANGED, true)
-      .set(RDocumentEntity.MD5, "")
-      .where(RDocumentEntity.UID.eq( params.getDecisionModel().getDocumentUid() ))
-      .get()
-      .value();
+    String uid = null;
 
     if (Objects.equals(params.getDecisionModel().getSignerId(), settings.getString("current_user_id").get())){
-      String uid = null;
 
       if (params.getDecisionModel().getDocumentUid() != null && !Objects.equals(params.getDecisionModel().getDocumentUid(), "")){
         uid = params.getDecisionModel().getDocumentUid();
@@ -147,6 +139,7 @@ public class RejectDecision extends AbstractCommand {
     Observable.just("").timeout(100, TimeUnit.MILLISECONDS).subscribe(
       data -> {
         Timber.tag("slow").e("exec");
+
         EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( params.getDecisionModel().getId() ));
       }, error -> {
         Timber.tag(TAG).e(error);
