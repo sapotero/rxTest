@@ -56,7 +56,6 @@ import io.requery.rx.SingleEntityStore;
 import okhttp3.OkHttpClient;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.BuildConfig;
 import sapotero.rxtest.R;
@@ -67,6 +66,8 @@ import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.adapter.UpdateDocumentAdapterEvent;
 import sapotero.rxtest.events.bus.GetDocumentInfoEvent;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
+import sapotero.rxtest.events.service.CheckNetworkEvent;
+import sapotero.rxtest.events.service.CheckNetworkResultEvent;
 import sapotero.rxtest.events.service.SuperVisorUpdateEvent;
 import sapotero.rxtest.events.service.UpdateAllDocumentsEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
@@ -132,7 +133,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private Preference<String> HOST;
   private Preference<String> PASSWORD;
   private Preference<Integer> COUNT;
-  private Preference<Boolean> IS_CONNECTED;
 
   private int loaded = 0;
 
@@ -175,7 +175,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   private MainActivity context;
   private CompositeSubscription subscription;
-  private CompositeSubscription subscriptionNetwork;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -249,40 +248,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       sign = "";
     }
     dataLoader.updateAuth(sign);
-  }
-
-  private void isConnected() {
-    // Start network checking
-    MainService.getMainService().isConnected();
-
-    unsubscribeNetwork();
-    subscriptionNetwork = new CompositeSubscription();
-
-    // Subscribe to network checking result changes
-    subscriptionNetwork.add(
-      IS_CONNECTED.asObservable()
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(isConnectedToInternet -> {
-          try {
-            toolbar.getMenu().findItem(R.id.online).setTitle( isConnectedToInternet ? R.string.is_online : R.string.is_offline );
-            toolbar.getMenu().findItem(R.id.online).setIcon( isConnectedToInternet  ? R.drawable.icon_online : R.drawable.icon_offline );
-          } catch (Exception e) {
-            e.printStackTrace();
-          }
-        })
-    );
-  }
-
-  private void stopNetworkCheck() {
-    unsubscribeNetwork();
-    MainService.getMainService().stopNetworkCheck();
-  }
-
-  private void unsubscribeNetwork() {
-    if ( subscriptionNetwork != null && subscriptionNetwork.hasSubscriptions() ) {
-      subscriptionNetwork.unsubscribe();
-    }
   }
 
   private void initSearch() {
@@ -512,10 +477,18 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     menuBuilder.getItem().recalcuate();
     dropLoadProgress(false);
 
-    isConnected();
+    startNetworkCheck();
 
 //    EventBus.getDefault().post( new UpdateAllDocumentsEvent());
 
+  }
+
+  private void startNetworkCheck() {
+    EventBus.getDefault().post(new CheckNetworkEvent( true ));
+  }
+
+  private void stopNetworkCheck() {
+    EventBus.getDefault().post(new CheckNetworkEvent( false ));
   }
 
   public static void invalidate(){
@@ -707,7 +680,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     TOKEN = settings.getString("token");
     HOST = settings.getString("settings_username_host");
     COUNT = settings.getInteger("documents.count");
-    IS_CONNECTED = settings.getBoolean("isConnectedToInternet");
   }
 
   private void drawer_add_item(int index, String title, Long identifier) {
@@ -865,4 +837,17 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     return (int) Math.ceil(result);
   }
 
+  // resolved https://tasks.n-core.ru/browse/MVDESD-13314
+  // Обновление иконки В сети / Не в сети
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(CheckNetworkResultEvent event) {
+    boolean isConnectedToInternet = event.isConnected();
+
+    try {
+      toolbar.getMenu().findItem(R.id.online).setTitle( isConnectedToInternet ? R.string.is_online : R.string.is_offline );
+      toolbar.getMenu().findItem(R.id.online).setIcon( isConnectedToInternet  ? R.drawable.icon_online : R.drawable.icon_offline );
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
 }

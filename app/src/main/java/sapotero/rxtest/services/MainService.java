@@ -9,7 +9,6 @@ import android.os.IBinder;
 import android.util.Log;
 
 import com.birbit.android.jobqueue.JobManager;
-import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -29,6 +28,7 @@ import java.security.Security;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -39,7 +39,6 @@ import javax.inject.Inject;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
 import okhttp3.OkHttpClient;
-import retrofit2.Retrofit;
 import ru.CryptoPro.CAdES.CAdESConfig;
 import ru.CryptoPro.JCP.JCP;
 import ru.CryptoPro.JCP.tools.Encoder;
@@ -55,7 +54,6 @@ import ru.cprocsp.ACSP.tools.common.RawResource;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.auth.AuthDcCheckFailEvent;
@@ -72,6 +70,7 @@ import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateUnprocessedDocumentsEvent;
 import sapotero.rxtest.events.service.AuthServiceAuthEvent;
+import sapotero.rxtest.events.service.CheckNetworkEvent;
 import sapotero.rxtest.events.service.UpdateAllDocumentsEvent;
 import sapotero.rxtest.events.service.UpdateDocumentsByStatusEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckEvent;
@@ -85,8 +84,7 @@ import sapotero.rxtest.managers.DataLoaderManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
-import sapotero.rxtest.retrofit.Api.AuthService;
-import sapotero.rxtest.retrofit.utils.RetrofitManager;
+import sapotero.rxtest.services.task.CheckNetworkTask;
 import sapotero.rxtest.services.task.UpdateAllDocumentsTask;
 import sapotero.rxtest.services.task.UpdateQueueTask;
 import sapotero.rxtest.utils.FirstRun;
@@ -98,7 +96,6 @@ import sapotero.rxtest.utils.cryptopro.PinCheck;
 import sapotero.rxtest.utils.cryptopro.ProviderType;
 import sapotero.rxtest.utils.cryptopro.wrapper.CMSSign;
 import sapotero.rxtest.utils.queue.QueueManager;
-import sapotero.rxtest.views.menu.fields.MainMenuItem;
 import timber.log.Timber;
 
 public class MainService extends Service {
@@ -106,6 +103,7 @@ public class MainService extends Service {
 
   final String TAG = MainService.class.getSimpleName();
   private ScheduledThreadPoolExecutor scheduller;
+  private ScheduledFuture futureNetwork;
 
   @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
@@ -124,17 +122,7 @@ public class MainService extends Service {
   private String SIGN;
   public static String user;
 
-  private Preference<String> HOST;
-  private Preference<String> LOGIN;
-  private Preference<String> TOKEN;
-  private Preference<Boolean> IS_CONNECTED;
-
-  private CompositeSubscription subscriptionNetwork;
-
-  private static MainService mainService;
-
   public MainService() {
-    scheduller = new ScheduledThreadPoolExecutor(2);
   }
 
   public void onCreate() {
@@ -176,14 +164,7 @@ public class MainService extends Service {
 
     aliases( KeyStoreType.currentType(), ProviderType.currentProviderType() );
 
-    mainService = this;
-
-    initSettings();
-
-    scheduller = new ScheduledThreadPoolExecutor(2);
-
-    scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 0 ,5*60, TimeUnit.SECONDS );
-    scheduller.scheduleWithFixedDelay( new UpdateQueueTask(queue), 0 ,5, TimeUnit.SECONDS );
+    initScheduller();
 
 //    dataStore
 //      .select(RDocumentEntity.class)
@@ -203,16 +184,14 @@ public class MainService extends Service {
 
   }
 
-  public static MainService getMainService() {
-    return mainService;
-  }
+  private void initScheduller() {
+    scheduller = new ScheduledThreadPoolExecutor(3);
 
-  private void initSettings() {
-    HOST = settings.getString("settings_username_host");
-    LOGIN = settings.getString("login");
-    TOKEN = settings.getString("token");
-    IS_CONNECTED = settings.getBoolean("isConnectedToInternet");
-    IS_CONNECTED.set( true );
+    // Tasks will be removed on cancellation
+    scheduller.setRemoveOnCancelPolicy(true);
+
+    scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 0 ,5*60, TimeUnit.SECONDS );
+    scheduller.scheduleWithFixedDelay( new UpdateQueueTask(queue), 0 ,5, TimeUnit.SECONDS );
   }
 
   public int onStartCommand(Intent intent, int flags, int startId) {
@@ -730,48 +709,6 @@ public class MainService extends Service {
 
   }
 
-  public void isConnected() {
-    Retrofit retrofit = new RetrofitManager(this, HOST.get(), okHttpClient).process();
-    AuthService auth = retrofit.create(AuthService.class);
-
-    unsubscribeNetwork();
-    subscriptionNetwork = new CompositeSubscription();
-
-    subscriptionNetwork.add(
-      Observable
-        .interval( 10, TimeUnit.SECONDS )
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(interval -> {
-          Timber.tag(TAG).d("Checking internet connectivity");
-          subscriptionNetwork.add(
-            auth.getUserInfoV2(LOGIN.get(), TOKEN.get())
-              .subscribeOn(Schedulers.io())
-              .observeOn(AndroidSchedulers.mainThread())
-              .subscribe(
-                v2 -> {
-                  Timber.tag(TAG).d("Internet connectivity: true");
-                  IS_CONNECTED.set( true );
-                },
-                error -> {
-                  Timber.tag(TAG).d("Internet connectivity: false");
-                  IS_CONNECTED.set( false );
-                })
-          );
-        })
-    );
-  }
-
-  private void unsubscribeNetwork() {
-    if ( subscriptionNetwork != null && subscriptionNetwork.hasSubscriptions() ) {
-      subscriptionNetwork.unsubscribe();
-    }
-  }
-
-  public void stopNetworkCheck() {
-    unsubscribeNetwork();
-  }
-
   private void checkSedAvailibility() {
 //    dataLoaderInterface.updateByStatus( MainMenuItem.ALL );
   }
@@ -950,5 +887,21 @@ public class MainService extends Service {
   private boolean isFirstRun() {
     FirstRun firstRun = new FirstRun(settings);
     return firstRun.isFirstRun();
+  }
+
+  // resolved https://tasks.n-core.ru/browse/MVDESD-13314
+  // Старт / стоп проверки наличия сети
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(CheckNetworkEvent event){
+    // Stop previously started checking network connection task, if exists
+    if ( futureNetwork != null && !futureNetwork.isCancelled() ) {
+      futureNetwork.cancel(true);
+    }
+
+    // Start new checking network connection task, if requested by the event
+    if ( event.isStart() ) {
+      futureNetwork = scheduller.scheduleWithFixedDelay(
+              new CheckNetworkTask(getApplicationContext(), settings, okHttpClient),  0 , 10, TimeUnit.SECONDS );
+    }
   }
 }
