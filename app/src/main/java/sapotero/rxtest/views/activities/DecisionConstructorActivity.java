@@ -568,6 +568,27 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       }
     });
 
+    decision_comment.setOnTouchListener((v, event) -> {
+
+      v.getParent().requestDisallowInterceptTouchEvent(true);
+      switch (event.getAction() & MotionEvent.ACTION_MASK){
+        case MotionEvent.ACTION_UP:
+          v.getParent().requestDisallowInterceptTouchEvent(false);
+          break;
+      }
+      return false;
+    });
+
+    decision_comment.setOnFocusChangeListener((v, hasFocus) -> {
+      Timber.tag(TAG).e("has focus: %s", hasFocus);
+      if(!hasFocus){
+        decision_comment.setSelected(false);
+        decision_comment.setPressed(false);
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+      }
+    });
+
     // настройка
     if (settings.getBoolean("settings_view_show_decision_change_font").get()){
       List<FontItem> fonts = new ArrayList<>();
