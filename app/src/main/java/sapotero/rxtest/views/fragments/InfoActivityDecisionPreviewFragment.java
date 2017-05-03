@@ -577,11 +577,9 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     new MaterialDialog.Builder( getContext() )
       .title("Комментарий резолюции")
       .content( current_decision.getComment() )
-      .positiveText(R.string.yes)
+      .positiveText(R.string.constructor_close)
       .build().show();
   }
-
-
 
 
   @OnClick(R.id.activity_info_button_edit)
