@@ -20,9 +20,9 @@
     <item
         android:id="@+id/online"
         app:showAsAction="always|withText"
-        android:icon="@drawable/icon_online"
+        android:icon="@drawable/icon_offline"
         android:visible="true"
-        android:title="@string/is_online"/>
+        android:title="@string/is_offline"/>
 
     <item
         android:id="@+id/reload"
