@@ -58,6 +58,7 @@ public class InvalidateDocumentsJob extends BaseJob {
       .and(RDocumentEntity.FROM_LINKS.eq(false))
       .and(RDocumentEntity.FROM_FAVORITES_FOLDER.eq(false))
       .and(RDocumentEntity.FROM_PROCESSED_FOLDER.eq(false))
+      .and(RDocumentEntity.ADDRESSED_TO_TYPE.eq(""))
       .get()
       .toList();
 
