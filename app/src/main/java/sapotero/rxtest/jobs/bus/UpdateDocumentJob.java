@@ -52,6 +52,7 @@ import timber.log.Timber;
 public class UpdateDocumentJob extends BaseJob {
 
   public static final int PRIORITY = 1;
+  private boolean shared = false;
   private boolean not_processed;
   private String status;
   private String journal;
@@ -77,9 +78,10 @@ public class UpdateDocumentJob extends BaseJob {
     this.filter = filter;
   }
 
-  public UpdateDocumentJob(String uid, String journal, String status, boolean b) {
+  public UpdateDocumentJob(String uid, String journal, String status, boolean shared) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
+    this.shared = shared;
 
     String[] index = journal.split("_production_db_");
     this.journal = index[0];
@@ -88,22 +90,14 @@ public class UpdateDocumentJob extends BaseJob {
     this.not_processed = true;
   }
 
-  public UpdateDocumentJob(String uid, String status) {
+  public UpdateDocumentJob(String uid, String status, boolean shared) {
     super( new Params(PRIORITY).requireNetwork().persist().addTags("SyncDocument") );
     this.uid     = uid;
     if (!Objects.equals(status, "")){
       this.status  = status;
     }
-  }
+    this.shared = shared;
 
-  public UpdateDocumentJob(String uid, String journal, String status) {
-    super( new Params(PRIORITY).requireNetwork().persist() );
-    this.uid = uid;
-
-    String[] index = journal.split("_production_db_");
-    this.journal = index[0];
-
-    this.status  = status;
   }
 
   @Override
@@ -138,8 +132,7 @@ public class UpdateDocumentJob extends BaseJob {
       .subscribe(
         doc -> {
           document = doc;
-          Timber.tag(TAG).d("recv title - %s", doc.getTitle() );
-          Timber.tag(TAG).d("actions - %s", new Gson().toJson( doc.getOperations() ) );
+          Timber.tag(TAG).d("recv title - %s %s", doc.getTitle(), shared );
 
           update( exist(doc.getUid()) );
 
@@ -191,7 +184,32 @@ public class UpdateDocumentJob extends BaseJob {
 
     if( count != 0 ){
       result = true;
+
+      RDocumentEntity doc = dataStore.select(RDocumentEntity.class).where(RDocumentEntity.UID.eq(uid)).get().firstOrNull();
+
+      if (doc != null) {
+
+        if (shared || Objects.equals(doc.getAddressedToType(), "group")) {
+          doc.setAddressedToType("group");
+        } else {
+          doc.setAddressedToType("");
+        }
+
+
+        dataStore
+          .update(doc)
+          .toObservable()
+          .subscribeOn( Schedulers.io() )
+          .observeOn( AndroidSchedulers.mainThread() )
+          .subscribe(
+            data -> {
+              Timber.tag(TAG).e("UPDATED %s %s", uid, shared);
+            }, error -> {
+              Timber.tag(TAG).e(error);
+          });
+      }
     }
+
 
     Timber.tag(TAG).v("exist " + result );
 
@@ -235,6 +253,9 @@ public class UpdateDocumentJob extends BaseJob {
 
     rd.setFavorites(false);
     rd.setProcessed(false);
+    if (shared) {
+      rd.setAddressedToType("group");
+    }
 
     rd.setControl(onControl);
 
@@ -510,11 +531,12 @@ public class UpdateDocumentJob extends BaseJob {
 
       dataStore.update(rDoc)
         .toObservable()
-        .subscribeOn( Schedulers.io() )
-        .observeOn( Schedulers.io() )
+        .subscribeOn( Schedulers.computation() )
+        .observeOn( AndroidSchedulers.mainThread() )
         .subscribe(
           result -> {
             Timber.tag(TAG).d("updated " + result.getUid());
+            Timber.tag(TAG).e("%s", shared);
 
             jobCount = 0;
 

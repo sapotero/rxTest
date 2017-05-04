@@ -47,9 +47,9 @@ public class DocumentTypeItem {
       Integer total = dataStore
         .count(RDocumentEntity.class)
         .where( RDocumentEntity.USER.eq( settings.getString("login").get() )   )
-//        .and( RDocumentEntity.FILTER.in( MainMenuButton.ButtonStatus.forAllDocuments() ) )
         .and( RDocumentEntity.DOCUMENT_TYPE.in( validation.getSelectedJournals() ) )
         .and( RDocumentEntity.PROCESSED.eq( false ) )
+        .and( RDocumentEntity.ADDRESSED_TO_TYPE.eq( "" ) )
         .get()
         .value();
 
@@ -59,6 +59,7 @@ public class DocumentTypeItem {
           .count(RDocumentEntity.class)
           .where( RDocumentEntity.FILTER.in( MainMenuButton.ButtonStatus.getProject() )   )
           .and( RDocumentEntity.USER.eq( settings.getString("login").get() ) )
+          .and( RDocumentEntity.ADDRESSED_TO_TYPE.eq( "" ) )
           .get()
           .value();
       }
@@ -69,6 +70,7 @@ public class DocumentTypeItem {
       } else {
         title = String.format( "Документы %s", total);
       }
+//      title = String.format( mainMenuItem.getName(), total, projects);
 
       return title;
 

@@ -346,38 +346,40 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       Timber.tag("GestureListener").w("DOUBLE TAP");
 
 
+      if ( doc != null && Objects.equals(doc.getAddressedToType(), "")){
 
-      if ( doc.isFromLinks() != null && !doc.isFromLinks() && current_decision != null ){
+        if ( doc.isFromLinks() != null && !doc.isFromLinks() && current_decision != null ){
 
-        if ( !queue.getConnected() &&
-          current_decision.isTemporary() != null &&
-          current_decision.isTemporary() && !doc.isProcessed() ){
+          if ( !queue.getConnected() &&
+            current_decision.isTemporary() != null &&
+            current_decision.isTemporary() && !doc.isProcessed() ){
 
-          edit();
+            edit();
+          }
+
+          if ( queue.getConnected() &&
+            current_decision.isTemporary() != null &&
+            current_decision.isTemporary() ){
+            Toast.makeText( getContext(), "Запрещено редактировать резолюции в онлайне!\nДождитесь синхронизации.", Toast.LENGTH_SHORT ).show();
+          }
+
+          if ( current_decision.isApproved() != null &&
+            !current_decision.isApproved() &&
+            current_decision.isTemporary() != null &&
+            !current_decision.isTemporary() && !doc.isProcessed()){
+            edit();
+          }
         }
 
-        if ( queue.getConnected() &&
-          current_decision.isTemporary() != null &&
-          current_decision.isTemporary() ){
-          Toast.makeText( getContext(), "Запрещено редактировать резолюции в онлайне!\nДождитесь синхронизации.", Toast.LENGTH_SHORT ).show();
+        if ( doc.isFromLinks() != null && !doc.isFromLinks() &&
+          current_decision == null ){
+
+          settings.getString("decision.active.id").set(null);
+          Context context = getContext();
+          Intent create_intent = new Intent(context, DecisionConstructorActivity.class);
+          context.startActivity(create_intent);
+
         }
-
-        if ( current_decision.isApproved() != null &&
-          !current_decision.isApproved() &&
-          current_decision.isTemporary() != null &&
-          !current_decision.isTemporary() && !doc.isProcessed()){
-          edit();
-        }
-      }
-
-      if ( doc.isFromLinks() != null && !doc.isFromLinks() &&
-        current_decision == null ){
-
-        settings.getString("decision.active.id").set(null);
-        Context context = getContext();
-        Intent create_intent = new Intent(context, DecisionConstructorActivity.class);
-        context.startActivity(create_intent);
-
       }
 
       return true;

@@ -94,10 +94,14 @@ public enum MainMenuButton {
   ),
   FAVORITES ( 8, "Избранное %s" ,
     new ConditionBuilder[]{
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(false) ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FAVORITES.eq(true)  ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_LINKS.in(Arrays.asList(null, false))  ),
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FAVORITES.eq(true)  ),
+    }
+  ),
+  SHARED_PRIMARY ( 9, "Аппараты %s" ,
+    new ConditionBuilder[]{
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq( PRIMARY.getName() )  ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(false) ),
     }
   );
 
