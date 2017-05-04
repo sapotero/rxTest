@@ -4,7 +4,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.birbit.android.jobqueue.CancelReason;
-import com.birbit.android.jobqueue.Job;
 import com.birbit.android.jobqueue.Params;
 import com.birbit.android.jobqueue.RetryConstraint;
 import com.f2prateek.rx.preferences.Preference;
@@ -235,9 +234,6 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
 
   private void update(Boolean exist){
 
-    if (filter != null) {
-      Timber.tag(TAG).d("create title - %s | %s", document.getTitle(), filter.toString() );
-    }
 
     if (exist) {
       updateDocumentInfo();
@@ -713,7 +709,7 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
       if (folder != null) {
 
         if (!Objects.equals(doc.getFilter(), folder)){
-          doc.setFilter(folder);
+          doc.setFolder(folder);
 //          doc.setProcessed(false);
         }
 
@@ -721,7 +717,7 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
       if (filter != null) {
         doc.setFilter( filter.toString() );
         if (!Objects.equals(doc.getFilter(), filter.getValue())){
-          doc.setFilter(folder);
+          doc.setFolder(folder);
         }
       }
 
@@ -735,6 +731,12 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
       // если подписание/согласование
       if ( journal == null && doc.getDocumentType()  == null && folder != null && doc.isProcessed()  ){
         doc.setProcessed( false );
+      }
+
+      // если обновляем документ
+      if ( doc.getDocumentType() != null && doc.getFilter() != null ){
+        doc.setProcessed( false );
+        doc.setFavorites(true);
       }
 
     }

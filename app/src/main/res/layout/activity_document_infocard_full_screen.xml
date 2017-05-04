@@ -8,32 +8,28 @@
     tools:context="sapotero.rxtest.views.activities.DocumentImageFullScreenActivity"
     android:orientation="vertical">
 
-        <LinearLayout
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/document_image_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:paddingTop="@dimen/half_date_offset"
+        android:transitionName="actionBar"
+        android:minHeight="?attr/actionBarSize"
+        app:navigationIcon="?attr/homeAsUpIndicator"
+        app:theme="@style/ToolbarColoredBackArrow"
+        android:elevation="8dp"/>
+
+    <LinearLayout
 
             android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:background="@color/md_grey_100">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/document_image_toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:paddingTop="@dimen/half_date_offset"
-            android:transitionName="actionBar"
-            android:minHeight="?attr/actionBarSize"
-            android:background="@drawable/toolbar_background"
-            app:navigationIcon="?attr/homeAsUpIndicator"
-            app:theme="@style/ToolbarColoredBackArrow"
-            android:theme="@style/AlertDialog.AppCompat.Light"
-            android:elevation="8dp"/>
-
-            <android.support.v7.widget.CardView
+        <android.support.v7.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 app:cardElevation="2dp"
-                android:layout_below="@+id/document_image_toolbar"
-                android:layout_margin="24dp"
                 >
 
                 <WebView

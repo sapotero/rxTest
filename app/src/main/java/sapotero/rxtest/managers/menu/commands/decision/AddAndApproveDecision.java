@@ -94,6 +94,18 @@ public class AddAndApproveDecision extends AbstractCommand {
       .where(RDecisionEntity.UID.eq(params.getDecisionModel().getId()))
       .get().firstOrNull();
 
+    // resolved https://tasks.n-core.ru/browse/MVDESD-13366
+    // ставим плашку всегда
+    dataStore
+      .update(RDocumentEntity.class)
+      .set(RDocumentEntity.CHANGED, true)
+      .set(RDocumentEntity.MD5, "")
+      .where(RDocumentEntity.UID.eq( params.getDecisionModel().getDocumentUid() ))
+      .get()
+      .value();
+
+
+
 
     Timber.tag(TAG).e("-------- %s %s", params.getDecisionModel().getSignerId(), settings.getString("current_user_id").get());
     if (

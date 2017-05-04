@@ -10,7 +10,6 @@ import android.util.Log;
 
 import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
-import com.github.pwittchen.reactivenetwork.library.ReactiveNetwork;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.greenrobot.eventbus.EventBus;
@@ -29,6 +28,7 @@ import java.security.Security;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -70,6 +70,7 @@ import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateUnprocessedDocumentsEvent;
 import sapotero.rxtest.events.service.AuthServiceAuthEvent;
+import sapotero.rxtest.events.service.CheckNetworkEvent;
 import sapotero.rxtest.events.service.UpdateAllDocumentsEvent;
 import sapotero.rxtest.events.service.UpdateDocumentsByStatusEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckEvent;
@@ -83,6 +84,7 @@ import sapotero.rxtest.managers.DataLoaderManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.services.task.CheckNetworkTask;
 import sapotero.rxtest.services.task.UpdateAllDocumentsTask;
 import sapotero.rxtest.services.task.UpdateQueueTask;
 import sapotero.rxtest.utils.FirstRun;
@@ -94,7 +96,6 @@ import sapotero.rxtest.utils.cryptopro.PinCheck;
 import sapotero.rxtest.utils.cryptopro.ProviderType;
 import sapotero.rxtest.utils.cryptopro.wrapper.CMSSign;
 import sapotero.rxtest.utils.queue.QueueManager;
-import sapotero.rxtest.views.menu.fields.MainMenuItem;
 import timber.log.Timber;
 
 public class MainService extends Service {
@@ -102,6 +103,7 @@ public class MainService extends Service {
 
   final String TAG = MainService.class.getSimpleName();
   private ScheduledThreadPoolExecutor scheduller;
+  private ScheduledFuture futureNetwork;
 
   @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
@@ -121,7 +123,6 @@ public class MainService extends Service {
   public static String user;
 
   public MainService() {
-    scheduller = new ScheduledThreadPoolExecutor(2);
   }
 
   public void onCreate() {
@@ -163,12 +164,7 @@ public class MainService extends Service {
 
     aliases( KeyStoreType.currentType(), ProviderType.currentProviderType() );
 
-    isConnected();
-
-    scheduller = new ScheduledThreadPoolExecutor(2);
-
-    scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 0 ,5*60, TimeUnit.SECONDS );
-    scheduller.scheduleWithFixedDelay( new UpdateQueueTask(queue), 0 ,5, TimeUnit.SECONDS );
+    initScheduller();
 
 //    dataStore
 //      .select(RDocumentEntity.class)
@@ -186,6 +182,16 @@ public class MainService extends Service {
 //          Timber.tag(TAG).e(error);
 //      });
 
+  }
+
+  private void initScheduller() {
+    scheduller = new ScheduledThreadPoolExecutor(3);
+
+    // Tasks will be removed on cancellation
+    scheduller.setRemoveOnCancelPolicy(true);
+
+    scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 0 ,5*60, TimeUnit.SECONDS );
+    scheduller.scheduleWithFixedDelay( new UpdateQueueTask(queue), 0 ,5, TimeUnit.SECONDS );
   }
 
   public int onStartCommand(Intent intent, int flags, int startId) {
@@ -703,20 +709,6 @@ public class MainService extends Service {
 
   }
 
-  public void isConnected(){
-    ReactiveNetwork.observeInternetConnectivity()
-      .subscribeOn(Schedulers.io())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(isConnectedToInternet -> {
-//        Toast.makeText( this, String.format( "Connected to inet: %s", isConnectedToInternet ), Toast.LENGTH_SHORT ).show();
-        settings.getBoolean("isConnectedToInternet").set( isConnectedToInternet );
-
-        if ( isConnectedToInternet ){
-          updateAll();
-        }
-      });
-  }
-
   private void checkSedAvailibility() {
 //    dataLoaderInterface.updateByStatus( MainMenuItem.ALL );
   }
@@ -895,5 +887,21 @@ public class MainService extends Service {
   private boolean isFirstRun() {
     FirstRun firstRun = new FirstRun(settings);
     return firstRun.isFirstRun();
+  }
+
+  // resolved https://tasks.n-core.ru/browse/MVDESD-13314
+  // Старт / стоп проверки наличия сети
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(CheckNetworkEvent event){
+    // Stop previously started checking network connection task, if exists
+    if ( futureNetwork != null && !futureNetwork.isCancelled() ) {
+      futureNetwork.cancel(true);
+    }
+
+    // Start new checking network connection task, if requested by the event
+    if ( event.isStart() ) {
+      futureNetwork = scheduller.scheduleWithFixedDelay(
+              new CheckNetworkTask(getApplicationContext(), settings, okHttpClient),  0 , 10, TimeUnit.SECONDS );
+    }
   }
 }

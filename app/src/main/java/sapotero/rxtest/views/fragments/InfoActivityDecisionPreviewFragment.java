@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
@@ -36,7 +37,6 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
-import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -98,14 +98,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   private ToolbarManager toolbarManager;
   private OnFragmentInteractionListener mListener;
 
-  private Preference<String> DOCUMENT_UID;
   private Preference<String> UID;
-  private Preference<String> TOKEN;
-  private Preference<String> LOGIN;
-  private Preference<String> PASSWORD;
-  private Preference<String> STATUS_CODE;
-  private Preference<Integer> POSITION;
-
 
   @BindView(R.id.activity_info_decision_preview_head) LinearLayout preview_head;
 
@@ -114,6 +107,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   @BindView(R.id.desigion_view_root) LinearLayout desigion_view_root;
 
   @BindView(R.id.activity_info_button_magnifer) ImageButton magnifer_button;
+  @BindView(R.id.activity_info_decision_preview_comment) ImageButton comment_button;
   @BindView(R.id.activity_info_button_edit) ImageButton edit;
 
   @BindView(R.id.activity_info_decision_spinner) Spinner decision_spinner;
@@ -124,10 +118,10 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   @BindView(R.id.activity_info_decision_preview_prev_person) Button prev_person_button;
   @BindView(R.id.activity_info_decision_preview_approved_text) TextView approved_text;
   @BindView(R.id.activity_info_decision_preview_temporary) TextView temporary;
+  @BindView(R.id.activity_info_decision_preview_count) TextView decision_count;
 
 
-
-  private ArrayList<DecisionSpinnerItem> decisionSpinnerItems  = new ArrayList<>();;
+  ;
 
   private DecisionSpinnerAdapter decision_spinner_adapter;
   private Preview preview;
@@ -255,7 +249,10 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 //          commandParams.setDecision( current_decision );
         commandParams.setDecisionModel( DecisionConverter.formatDecision(current_decision) );
         commandParams.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
-        commandParams.setComment( dialog1.getInputEditText().getText().toString() );
+
+        if ( settings.getBoolean("settings_view_show_comment_post").get() ) {
+          commandParams.setComment(dialog1.getInputEditText().getText().toString());
+        }
 
         operationManager.execute(operation, commandParams);
         updateAfteButtonPressed();
@@ -293,12 +290,27 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       MaterialDialog build = prev_dialog.build();
       build.show();
     }
+
+    setAsFakeProcessed();
+  }
+
+  private void setAsFakeProcessed() {
+    // resolved https://tasks.n-core.ru/browse/MVDESD-13366
+    // ставим плашку всегда
+    dataStore
+      .update(RDocumentEntity.class)
+      .set(RDocumentEntity.CHANGED, true)
+      .set(RDocumentEntity.MD5, "")
+      .where(RDocumentEntity.UID.eq( UID.get() ))
+      .get()
+      .value();
   }
 
   private void updateAfteButtonPressed() {
     decision_spinner_adapter.setCurrentAsTemporary( decision_spinner.getSelectedItemPosition() );
     current_decision = decision_spinner_adapter.getItem(decision_spinner.getSelectedItemPosition()).getDecision();
     displayDecision();
+    setAsFakeProcessed();
   }
 
   @Override
@@ -380,7 +392,6 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     binder = ButterKnife.bind(this, view);
 
     fragment = this;
-//    invalidate();
 
     return view;
   }
@@ -388,11 +399,11 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   private void invalidate() {
     initEvents();
     loadSettings();
-    loadDocument();
 
     initToolBar();
-    setAdapter();
 
+    setAdapter();
+    loadDocument();
 
     gestureDetector = new GestureDetector( getContext(),new GestureListener() );
 
@@ -421,6 +432,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   }
 
   private void setAdapter() {
+
+    ArrayList<DecisionSpinnerItem> decisionSpinnerItems = new ArrayList<>();
     decision_spinner_adapter = new DecisionSpinnerAdapter(getContext(), settings.getString("current_user_id").get() , decisionSpinnerItems);
     decision_spinner.setAdapter(decision_spinner_adapter);
 
@@ -510,6 +523,11 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     try {
       decision_toolbar.getMenu().findItem(R.id.decision_preview_magnifer).setVisible(visible);
       decision_toolbar.getMenu().findItem(R.id.decision_preview_edit).setVisible(visible);
+
+      if (!visible){
+        next_person_button.setVisibility( View.GONE );
+        prev_person_button.setVisibility( View.GONE );
+      }
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -518,10 +536,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   @Override public void onDestroyView() {
     super.onDestroyView();
     binder.unbind();
-
-    if (EventBus.getDefault().isRegistered(this)) {
-      EventBus.getDefault().unregister(this);
-    }
+    initEvents();
   }
 
   @Override
@@ -550,13 +565,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   }
 
   private void loadSettings() {
-    LOGIN    = settings.getString("login");
     UID      = settings.getString("activity_main_menu.uid");
-    PASSWORD = settings.getString("password");
-    TOKEN    = settings.getString("token");
-    POSITION = settings.getInteger("position");
-    DOCUMENT_UID = settings.getString("document.uid");
-    STATUS_CODE = settings.getString("activity_main_menu.star");
     REG_NUMBER = settings.getString("activity_main_menu.regnumber");
 
   }
@@ -576,14 +585,23 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     magnifer.show( getFragmentManager() , "DecisionMagniferFragment");
   }
 
+  @OnClick(R.id.activity_info_decision_preview_comment)
+  public void comment(){
+    Timber.tag(TAG).v("comment_button");
+
+    new MaterialDialog.Builder( getContext() )
+      .title("Комментарий резолюции")
+      .content( current_decision.getComment() )
+      .positiveText(R.string.constructor_close)
+      .build().show();
+  }
+
 
   @OnClick(R.id.activity_info_button_edit)
   public void edit(){
 
     Timber.tag(TAG).v("edit");
-    Gson gson = new Gson();
     RDecisionEntity data = decision_spinner_adapter.getItem( decision_spinner.getSelectedItemPosition() ).getDecision();
-
 
     Timber.tag(TAG).v("DECISION");
     Timber.tag(TAG).v("%s", data);
@@ -591,11 +609,6 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
     Context context = getContext();
     Intent intent = new Intent( context , DecisionConstructorActivity.class);
-    Bundle bundle = intent.getExtras();
-
-//    if (current_decision != null) {
-//      bundle.putString( "decision", gson.toJson( DecisionConverter.formatDecision(current_decision), Decision.class)  );
-//    }
 
     context.startActivity(intent);
 
@@ -613,6 +626,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   }
 
   private void loadDocument() {
+    Timber.tag(TAG).v("loadDocument | exist %s | %s", documentExist(), UID.get() );
 
     if ( documentExist() ){
       loadFromDb();
@@ -636,7 +650,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
         this.doc = doc;
 
-        Timber.tag("loadFromDb").i( "loaded %s", doc.getId() );
+//        Timber.tag("loadFromDb").i( "loaded %s", doc.getId() );
 
         Preference<String> documentNumber = settings.getString("document.number");
         documentNumber.set( doc.getRegistrationNumber() );
@@ -652,11 +666,11 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
           for (RDecision rDecision: doc.getDecisions()) {
             RDecisionEntity decision = (RDecisionEntity) rDecision;
-            unsorterd_decisions.add( new DecisionSpinnerItem( decision, decision.getSignerBlankText(), decision.getDate() ) );
+            unsorterd_decisions.add( new DecisionSpinnerItem( decision ) );
           }
 
 //          Collections.sort(unsorterd_decisions, (o1, o2) -> o1.getDecision().getUid().compareTo( o2.getDecision().getUid() ));
-          Timber.tag(TAG).e("unsorterd_decisions > %s", unsorterd_decisions.size());
+//          Timber.tag(TAG).e("unsorterd_decisions > %s", unsorterd_decisions.size());
 
           decision_spinner_adapter.addAll( unsorterd_decisions );
 
@@ -669,20 +683,35 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
           }
 
           if (decision_spinner_adapter.size() == 1){
-            disableSelection();
+            invalidateSpinner(false);
+            decision_count.setVisibility(View.GONE);
+          }
+
+          if (decision_spinner_adapter.size() >= 2){
+            decision_count.setText( String.format(" %s ", unsorterd_decisions.size()) );
+            decision_count.setVisibility(View.VISIBLE);
+            invalidateSpinner(true);
           }
         } else {
           Timber.e("no decisions");
-          magnifer_button.setVisibility(View.GONE);
+
           if (toolbarManager != null) {
             toolbarManager.setEditDecisionMenuItemVisible(false);
           }
-          preview.showEmpty();
-          EventBus.getDefault().post( new HasNoActiveDecisionConstructor() );
-          disableSelection();
-          decision_spinner_adapter.add( new DecisionSpinnerItem(null, "Нет резолюций", null ) );
+          decision_spinner_adapter.clear();
 
+          RDecisionEntity empty = new RDecisionEntity();
+          empty.setSignerBlankText("Нет резолюций");
+          decision_spinner_adapter.add( new DecisionSpinnerItem( empty ) );
+
+          preview.showEmpty();
+
+          magnifer_button.setVisibility(View.GONE);
+          comment_button.setVisibility(View.GONE);
+          decision_count.setVisibility(View.GONE);
+          invalidateSpinner(false);
           showDecisionCardTollbarMenuItems(false);
+          EventBus.getDefault().post( new HasNoActiveDecisionConstructor() );
         }
 
       }, error -> {
@@ -690,17 +719,31 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       });
   }
 
-  private void disableSelection() {
-    decision_spinner.setBackgroundColor( ContextCompat.getColor(getContext(), R.color.transparent ) );
-    decision_spinner.setClickable( false );
-    decision_spinner.setFocusable( false );
-    decision_spinner.setEnabled( false );
+  private void invalidateSpinner(boolean visibility) {
+//    decision_spinner.setBackgroundColor( ContextCompat.getColor(getContext(), R.color.md_grey_50) );
+
+    decision_spinner
+      .getBackground()
+      .setColorFilter(
+        ContextCompat.getColor(getContext(), visibility ? R.color.md_grey_800 : R.color.md_white_1000),
+        PorterDuff.Mode.SRC_ATOP);
+
+    decision_spinner.setClickable( visibility );
+    decision_spinner.setFocusable( visibility );
+    decision_spinner.setEnabled( visibility );
   }
 
   private void displayDecision() {
     Timber.tag(TAG).v("displayDecision");
 
-    if (current_decision != null) {
+    if (current_decision != null && current_decision.getUid() != null) {
+
+      if (current_decision.getComment() != null && !Objects.equals(current_decision.getComment(), "")){
+        comment_button.setVisibility(View.VISIBLE);
+      } else {
+        comment_button.setVisibility(View.GONE);
+      }
+
       preview.show( current_decision );
 
       settings.getInteger("decision.active.id").set( current_decision.getId() );
@@ -709,6 +752,9 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
         toolbarManager.setEditDecisionMenuItemVisible( !current_decision.isApproved() );
       }
       updateVisibility( current_decision.isApproved() );
+
+
+
     }
 
 //    if ( !decision_spinner_adapter.hasActiveDecision() ){

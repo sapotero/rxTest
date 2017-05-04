@@ -187,6 +187,8 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
     list.setAdapter(adapter);
 
     list.setOnItemClickListener((parent, view12, position, id) -> {
+      title.clearFocus();
+
       if ( !withSearch || withPrimaryConsideration ){
         user = adapter.getItem(position);
 
@@ -292,7 +294,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
 
 
     if (withSearch){
-      autocomplete_adapter = new OshsAutoCompleteAdapter(getActivity());
+      autocomplete_adapter = new OshsAutoCompleteAdapter(getActivity(), title);
       autocomplete_adapter.setIgnoreUsers(user_ids);
       autocomplete_adapter.setThreshold(title.getThreshold());
       title.setAdapter( autocomplete_adapter );
@@ -329,6 +331,8 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
 
       title.setOnItemClickListener(
         (adapterView, view1, position, id) -> {
+          title.clearFocus();
+
           Oshs _user = (Oshs) adapterView.getItemAtPosition(position);
 
           Timber.tag("SEARCH").w("%s %s", _user.getName(), _user.getId());
