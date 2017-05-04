@@ -2,6 +2,7 @@ package sapotero.rxtest.views.dialogs;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.util.DisplayMetrics;
 import android.widget.EditText;
 
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -21,6 +22,12 @@ public class DecisionTextDialog {
         .customView(R.layout.dialog_decision_text, true)
         .positiveText("OK")
         .showListener(dialog -> {
+          DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+          float screenWidth = displayMetrics.widthPixels;
+          int marginInPixels = 200;
+          int width = Math.round(screenWidth - (marginInPixels * 2));
+          ((MaterialDialog) dialog).getWindow().setLayout(width, 500);
+
           textInput = (EditText) ((MaterialDialog) dialog)
                   .getCustomView().findViewById(R.id.dialog_decision_text_input);
           textInput.setHint(hint);
