@@ -282,6 +282,7 @@
                                 android:scrollbarStyle="insideInset"
                                 android:scrollbars="vertical"
 
+                                android:longClickable="false"
                                 />
 
                         </android.support.design.widget.TextInputLayout>

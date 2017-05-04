@@ -2,7 +2,6 @@ package sapotero.rxtest.views.fragments;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -13,14 +12,10 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
-import android.text.InputType;
 import android.text.TextWatcher;
-import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
@@ -223,44 +218,29 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     card_toolbar.setTitle("Блок " + number );
     decision_text.setText( block.getText() );
 
-//    decision_text.setOnFocusChangeListener((v, hasFocus) -> {
-//      Timber.tag(TAG).e("has focus: %s", hasFocus);
-//      if(!hasFocus){
-//        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-//        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-//      }
-//    });
-//    decision_text.setOnTouchListener((v, event) -> {
-//
-//      v.getParent().getParent().requestDisallowInterceptTouchEvent(true);
-//      switch (event.getAction() & MotionEvent.ACTION_MASK){
-//        case MotionEvent.ACTION_UP:
-//          v.getParent().getParent().requestDisallowInterceptTouchEvent(false);
-//          break;
-//      }
-//      return false;
-//    });
-
     decision_text.setFocusable(false);
     decision_text.setFocusableInTouchMode(false);
 
     decision_text.setOnClickListener(v -> {
-      String hint = getString(R.string.decision_text);
-      String prefill = decision_text.getText().toString();
-
       new MaterialDialog.Builder(mContext)
         .title(R.string.decision_text)
-        .inputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE)
-        .input(hint, prefill, (dialog, input) -> {
-          // This is called on positive button click
-          decision_text.setText(input);
-        })
+        .autoDismiss(false)
+        .cancelable(false)
+        .customView(R.layout.dialog_decision_text, true)
+        .positiveText("OK")
+        .negativeText("Отмена")
         .showListener(dialog -> {
-          DisplayMetrics displayMetrics = getActivity().getResources().getDisplayMetrics();
-          float screenWidth = displayMetrics.widthPixels;
-          int marginInPixels = 50;
-          int width = Math.round(screenWidth - (marginInPixels * 2));
-          ((MaterialDialog) dialog).getWindow().setLayout(width, 500);
+          EditText textInput = (EditText) ((MaterialDialog) dialog)
+                  .getCustomView().findViewById(R.id.dialog_decision_text_input);
+          textInput.setText(decision_text.getText());
+        })
+        .onPositive((dialog, which) -> {
+          EditText textInput = (EditText) dialog.getCustomView().findViewById(R.id.dialog_decision_text_input);
+          decision_text.setText(textInput.getText());
+          dialog.dismiss();
+        })
+        .onNegative((dialog, which) -> {
+          dialog.dismiss();
         })
         .show();
     });

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="800dp"
+              android:layout_height="400dp">
+
+    <EditText
+        android:id="@+id/dialog_decision_text_input"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:hint="@string/decision_text"
+        android:background="@color/transparent"
+        android:padding="@dimen/half_date_offset"
+        android:inputType="textMultiLine"
+        android:lines="8"
+        android:gravity="top|start"
+        android:maxLines="8"
+
+        android:overScrollMode="always"
+        android:scrollbarStyle="insideInset"
+        android:scrollbars="vertical"
+        />
+
+</LinearLayout>
