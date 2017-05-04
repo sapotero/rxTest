@@ -531,6 +531,7 @@ public class DataLoaderManager {
         shared = true;
       }
 
+
       jobManager.cancelJobsInBackground(null, TagConstraint.ANY, "SyncDocument");
 
       requestCount = 0;
@@ -541,6 +542,7 @@ public class DataLoaderManager {
         for (String status: statuses ) {
           requestCount++;
           boolean finalShared = shared;
+
           subscription.add(
             docService
               .getDocumentsByIndexes(LOGIN.get(), TOKEN.get(), index, status, shared ? "group" : null , 500)
@@ -558,7 +560,7 @@ public class DataLoaderManager {
 
                       if ( isExist(doc) ){
 
-                        Timber.tag(TAG).e("isExist" );
+                        Timber.tag(TAG).e("isExist %s", finalShared );
 
                         if ( !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) ){
                           Timber.tag(TAG).e("isUpdate" );
@@ -569,7 +571,7 @@ public class DataLoaderManager {
                       } else {
                         Timber.tag(TAG).e("isCreate" );
                         jobCount++;
-                        jobManager.addJobInBackground( new CreateDocumentsJob(doc.getUid(), index, status) );
+                        jobManager.addJobInBackground( new CreateDocumentsJob(doc.getUid(), index, status, finalShared) );
                       }
                     }
 
@@ -591,6 +593,7 @@ public class DataLoaderManager {
 
       for (String code: sp ) {
         requestCount++;
+        boolean finalShared1 = shared;
         subscription.add(
           docService
             .getDocuments(LOGIN.get(), TOKEN.get(), code, shared ? "group" : null , 500, 0)
@@ -602,7 +605,7 @@ public class DataLoaderManager {
                 if (data.getDocuments().size() > 0){
                   for (Document doc: data.getDocuments() ) {
                     jobCount++;
-                    jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), code) );
+                    jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), code, finalShared1) );
                   }
                 }
                 updatePrefJobCount();

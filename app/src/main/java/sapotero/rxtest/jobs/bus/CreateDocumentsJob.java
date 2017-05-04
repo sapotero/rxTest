@@ -52,6 +52,7 @@ import timber.log.Timber;
 public class CreateDocumentsJob extends BaseJob {
 
   public static final int PRIORITY = 1;
+  private boolean shared = false;
   private boolean not_processed;
   private String status;
   private String journal;
@@ -71,9 +72,10 @@ public class CreateDocumentsJob extends BaseJob {
 
   private int jobCount;
 
-  public CreateDocumentsJob(String uid, String journal, String status) {
+  public CreateDocumentsJob(String uid, String journal, String status, boolean shared) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
+    this.shared = shared;
 
     if (journal != null) {
       String[] index = journal.split("_production_db_");
@@ -345,6 +347,8 @@ public class CreateDocumentsJob extends BaseJob {
 
     doc.setFilter(status);
     doc.setDocumentType(journal);
+
+    doc.setAddressedToType( shared ? "group" : "" );
 
     dataStore
       .insert( doc )
