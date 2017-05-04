@@ -1,6 +1,7 @@
 package sapotero.rxtest.views.dialogs;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.widget.EditText;
 
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -17,23 +18,17 @@ public class DecisionTextDialog {
     if (context != null && parentEditText != null && title != null && hint != null) {
       dialogBuilder = new MaterialDialog.Builder(context)
         .title(title)
-        .autoDismiss(false)
-        .cancelable(false)
         .customView(R.layout.dialog_decision_text, true)
         .positiveText("OK")
-        .negativeText("Отмена")
         .showListener(dialog -> {
           textInput = (EditText) ((MaterialDialog) dialog)
                   .getCustomView().findViewById(R.id.dialog_decision_text_input);
           textInput.setHint(hint);
           textInput.setText(parentEditText.getText());
         })
-        .onPositive((dialog, which) -> {
+        .dismissListener(dialog1 -> {
           parentEditText.setText(textInput.getText());
-          dismiss();
-        })
-        .onNegative((dialog, which) -> {
-          dismiss();
+          clearReferences();
         });
     }
   }
@@ -44,11 +39,7 @@ public class DecisionTextDialog {
     }
   }
 
-  private void dismiss() {
-    if (dialog != null) {
-      dialog.dismiss();
-    }
-
+  private void clearReferences() {
     textInput = null;
     dialogBuilder = null;
     dialog = null;
