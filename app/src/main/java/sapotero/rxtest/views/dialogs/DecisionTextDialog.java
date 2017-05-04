@@ -19,7 +19,7 @@ public class DecisionTextDialog {
     if (context != null && parentEditText != null && title != null && hint != null) {
       dialogBuilder = new MaterialDialog.Builder(context)
         .title(title)
-        .customView(R.layout.dialog_decision_text, true)
+        .customView(R.layout.dialog_decision_text, false)
         .positiveText("OK")
         .showListener(dialog -> {
           DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
