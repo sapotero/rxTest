@@ -61,6 +61,7 @@ import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.views.adapters.models.FontItem;
 import sapotero.rxtest.views.adapters.models.UrgencyItem;
 import sapotero.rxtest.views.custom.SpinnerWithLabel;
+import sapotero.rxtest.views.dialogs.DecisionTextDialog;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
 import sapotero.rxtest.views.dialogs.SelectTemplateDialogFragment;
 import sapotero.rxtest.views.fragments.DecisionFragment;
@@ -549,28 +550,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     }
 
     decision_comment.setOnClickListener(v -> {
-      new MaterialDialog.Builder(context)
-        .title(R.string.comment_hint)
-        .autoDismiss(false)
-        .cancelable(false)
-        .customView(R.layout.dialog_decision_text, true)
-        .positiveText("OK")
-        .negativeText("Отмена")
-        .showListener(dialog -> {
-          EditText textInput = (EditText) ((MaterialDialog) dialog)
-                  .getCustomView().findViewById(R.id.dialog_decision_text_input);
-          textInput.setHint(R.string.comment_hint);
-          textInput.setText(decision_comment.getText());
-        })
-        .onPositive((dialog, which) -> {
-          EditText textInput = (EditText) dialog.getCustomView().findViewById(R.id.dialog_decision_text_input);
-          decision_comment.setText(textInput.getText());
-          dialog.dismiss();
-        })
-        .onNegative((dialog, which) -> {
-          dialog.dismiss();
-        })
-        .show();
+      String title = getString(R.string.comment_hint);
+      new DecisionTextDialog(context, decision_comment, title, title).show();
     });
 
     decision_comment.addTextChangedListener(new TextWatcher() {
@@ -589,27 +570,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
       }
     });
-
-//    decision_comment.setOnTouchListener((v, event) -> {
-//
-//      v.getParent().requestDisallowInterceptTouchEvent(true);
-//      switch (event.getAction() & MotionEvent.ACTION_MASK){
-//        case MotionEvent.ACTION_UP:
-//          v.getParent().requestDisallowInterceptTouchEvent(false);
-//          break;
-//      }
-//      return false;
-//    });
-//
-//    decision_comment.setOnFocusChangeListener((v, hasFocus) -> {
-//      Timber.tag(TAG).e("has focus: %s", hasFocus);
-//      if(!hasFocus){
-//        decision_comment.setSelected(false);
-//        decision_comment.setPressed(false);
-//        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-//        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-//      }
-//    });
 
     // настройка
     if (settings.getBoolean("settings_view_show_decision_change_font").get()){

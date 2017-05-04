@@ -52,6 +52,7 @@ import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.retrofit.utils.OshsService;
 import sapotero.rxtest.views.adapters.PrimaryConsiderationAdapter;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
+import sapotero.rxtest.views.dialogs.DecisionTextDialog;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
 import sapotero.rxtest.views.dialogs.SelectTemplateDialogFragment;
 import timber.log.Timber;
@@ -219,28 +220,8 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     decision_text.setText( block.getText() );
 
     decision_text.setOnClickListener(v -> {
-      new MaterialDialog.Builder(mContext)
-        .title(R.string.decision_text)
-        .autoDismiss(false)
-        .cancelable(false)
-        .customView(R.layout.dialog_decision_text, true)
-        .positiveText("OK")
-        .negativeText("Отмена")
-        .showListener(dialog -> {
-          EditText textInput = (EditText) ((MaterialDialog) dialog)
-                  .getCustomView().findViewById(R.id.dialog_decision_text_input);
-          textInput.setHint(R.string.decision_text);
-          textInput.setText(decision_text.getText());
-        })
-        .onPositive((dialog, which) -> {
-          EditText textInput = (EditText) dialog.getCustomView().findViewById(R.id.dialog_decision_text_input);
-          decision_text.setText(textInput.getText());
-          dialog.dismiss();
-        })
-        .onNegative((dialog, which) -> {
-          dialog.dismiss();
-        })
-        .show();
+      String title = getString(R.string.decision_text);
+      new DecisionTextDialog(mContext, decision_text, title, title).show();
     });
 
     decision_text.addTextChangedListener(new TextWatcher() {
