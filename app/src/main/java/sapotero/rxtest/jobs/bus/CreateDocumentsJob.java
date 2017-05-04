@@ -348,7 +348,11 @@ public class CreateDocumentsJob extends BaseJob {
     doc.setFilter(status);
     doc.setDocumentType(journal);
 
-    doc.setAddressedToType( shared ? "group" : "" );
+    if (shared || Objects.equals(doc.getAddressedToType(), "group")) {
+      doc.setAddressedToType("group");
+    } else {
+      doc.setAddressedToType("");
+    }
 
     dataStore
       .insert( doc )
@@ -358,13 +362,6 @@ public class CreateDocumentsJob extends BaseJob {
       .subscribe(
         result -> {
           EventBus.getDefault().post( new UpdateCurrentDocumentEvent( doc.getUid() ) );
-
-//          if ( result.getImages() != null && result.getImages().size() > 0 && ( isFavorites != null && !isFavorites ) ){
-//            for (RImage _image : result.getImages()) {
-//              RImageEntity image = (RImageEntity) _image;
-//              jobManager.addJobInBackground( new DownloadFileJob(HOST.get(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
-//            }
-//          }
 
           jobCount = 0;
 

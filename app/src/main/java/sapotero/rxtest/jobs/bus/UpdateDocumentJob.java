@@ -189,11 +189,12 @@ public class UpdateDocumentJob extends BaseJob {
 
       if (doc != null) {
 
-        if (shared) {
+        if (shared || Objects.equals(doc.getAddressedToType(), "group")) {
           doc.setAddressedToType("group");
         } else {
           doc.setAddressedToType("");
         }
+
 
         dataStore
           .update(doc)
@@ -515,11 +516,6 @@ public class UpdateDocumentJob extends BaseJob {
         rDoc.setInfoCard( document.getInfoCard() );
       }
 
-    if (shared) {
-      rDoc.setAddressedToType("group");
-    }
-
-
     if (journal != null) {
       rDoc.setDocumentType( journal );
     }
@@ -840,10 +836,6 @@ public class UpdateDocumentJob extends BaseJob {
       doc.setFromFavoritesFolder(true);
     } else {
       doc.setFromFavoritesFolder(false);
-    }
-
-    if (shared) {
-      doc.setAddressedToType("group");
     }
 
     dataStore

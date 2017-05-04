@@ -531,9 +531,14 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       // resolved https://tasks.n-core.ru/browse/MVDESD-13343
       // Или если нет активной резолюции
       if ( isShared() ){
-        showAsProcessed();
+        clearToolbar();
       }
+
     }
+  }
+
+  private void clearToolbar() {
+    toolbar.getMenu().clear();
   }
 
   private void showAsProcessed() {

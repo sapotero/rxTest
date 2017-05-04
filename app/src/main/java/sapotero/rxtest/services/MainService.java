@@ -853,7 +853,7 @@ public class MainService extends Service {
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(UpdateDocumentsByStatusEvent event) throws Exception {
     Timber.tag(TAG).e("UpdateDocumentsByStatusEvent");
-    dataLoaderInterface.updateByCurrentStatus( event.item, event.button );
+    dataLoaderInterface.updateByCurrentStatus( event.item, event.button, false);
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
