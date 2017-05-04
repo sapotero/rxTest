@@ -218,9 +218,6 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     card_toolbar.setTitle("Блок " + number );
     decision_text.setText( block.getText() );
 
-    decision_text.setFocusable(false);
-    decision_text.setFocusableInTouchMode(false);
-
     decision_text.setOnClickListener(v -> {
       new MaterialDialog.Builder(mContext)
         .title(R.string.decision_text)
@@ -232,6 +229,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
         .showListener(dialog -> {
           EditText textInput = (EditText) ((MaterialDialog) dialog)
                   .getCustomView().findViewById(R.id.dialog_decision_text_input);
+          textInput.setHint(R.string.decision_text);
           textInput.setText(decision_text.getText());
         })
         .onPositive((dialog, which) -> {

@@ -1,6 +1,5 @@
 package sapotero.rxtest.views.activities;
 
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -8,9 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -551,6 +548,31 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       }
     }
 
+    decision_comment.setOnClickListener(v -> {
+      new MaterialDialog.Builder(context)
+        .title(R.string.comment_hint)
+        .autoDismiss(false)
+        .cancelable(false)
+        .customView(R.layout.dialog_decision_text, true)
+        .positiveText("OK")
+        .negativeText("Отмена")
+        .showListener(dialog -> {
+          EditText textInput = (EditText) ((MaterialDialog) dialog)
+                  .getCustomView().findViewById(R.id.dialog_decision_text_input);
+          textInput.setHint(R.string.comment_hint);
+          textInput.setText(decision_comment.getText());
+        })
+        .onPositive((dialog, which) -> {
+          EditText textInput = (EditText) dialog.getCustomView().findViewById(R.id.dialog_decision_text_input);
+          decision_comment.setText(textInput.getText());
+          dialog.dismiss();
+        })
+        .onNegative((dialog, which) -> {
+          dialog.dismiss();
+        })
+        .show();
+    });
+
     decision_comment.addTextChangedListener(new TextWatcher() {
       @Override
       public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -568,26 +590,26 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       }
     });
 
-    decision_comment.setOnTouchListener((v, event) -> {
-
-      v.getParent().requestDisallowInterceptTouchEvent(true);
-      switch (event.getAction() & MotionEvent.ACTION_MASK){
-        case MotionEvent.ACTION_UP:
-          v.getParent().requestDisallowInterceptTouchEvent(false);
-          break;
-      }
-      return false;
-    });
-
-    decision_comment.setOnFocusChangeListener((v, hasFocus) -> {
-      Timber.tag(TAG).e("has focus: %s", hasFocus);
-      if(!hasFocus){
-        decision_comment.setSelected(false);
-        decision_comment.setPressed(false);
-        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-      }
-    });
+//    decision_comment.setOnTouchListener((v, event) -> {
+//
+//      v.getParent().requestDisallowInterceptTouchEvent(true);
+//      switch (event.getAction() & MotionEvent.ACTION_MASK){
+//        case MotionEvent.ACTION_UP:
+//          v.getParent().requestDisallowInterceptTouchEvent(false);
+//          break;
+//      }
+//      return false;
+//    });
+//
+//    decision_comment.setOnFocusChangeListener((v, hasFocus) -> {
+//      Timber.tag(TAG).e("has focus: %s", hasFocus);
+//      if(!hasFocus){
+//        decision_comment.setSelected(false);
+//        decision_comment.setPressed(false);
+//        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+//        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+//      }
+//    });
 
     // настройка
     if (settings.getBoolean("settings_view_show_decision_change_font").get()){
@@ -726,32 +748,32 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   }
 
 
-  @Override
-  public boolean dispatchTouchEvent(MotionEvent ev) {
-    View view = getCurrentFocus();
-    if (view != null && (ev.getAction() == MotionEvent.ACTION_UP || ev.getAction() == MotionEvent.ACTION_MOVE) && view instanceof EditText && !view.getClass().getName().startsWith("android.webkit.")) {
-      int scrcoords[] = new int[2];
-      view.getLocationOnScreen(scrcoords);
-      float x = ev.getRawX() + view.getLeft() - scrcoords[0];
-      float y = ev.getRawY() + view.getTop() - scrcoords[1];
-      if (x < view.getLeft() || x > view.getRight() || y < view.getTop() || y > view.getBottom())
-        hideKeyboard(this);
-    }
-    return super.dispatchTouchEvent(ev);
-  }
+//  @Override
+//  public boolean dispatchTouchEvent(MotionEvent ev) {
+//    View view = getCurrentFocus();
+//    if (view != null && (ev.getAction() == MotionEvent.ACTION_UP || ev.getAction() == MotionEvent.ACTION_MOVE) && view instanceof EditText && !view.getClass().getName().startsWith("android.webkit.")) {
+//      int scrcoords[] = new int[2];
+//      view.getLocationOnScreen(scrcoords);
+//      float x = ev.getRawX() + view.getLeft() - scrcoords[0];
+//      float y = ev.getRawY() + view.getTop() - scrcoords[1];
+//      if (x < view.getLeft() || x > view.getRight() || y < view.getTop() || y > view.getBottom())
+//        hideKeyboard(this);
+//    }
+//    return super.dispatchTouchEvent(ev);
+//  }
 
-  private void hideKeyboard(DecisionConstructorActivity constructorActivity) {
-    if( constructorActivity != null ){
-      ((InputMethodManager) constructorActivity
-        .getSystemService(Context.INPUT_METHOD_SERVICE))
-        .hideSoftInputFromWindow(
-          constructorActivity
-            .getWindow()
-            .getDecorView()
-            .getApplicationWindowToken(),
-          0);
-    }
-  }
+//  private void hideKeyboard(DecisionConstructorActivity constructorActivity) {
+//    if( constructorActivity != null ){
+//      ((InputMethodManager) constructorActivity
+//        .getSystemService(Context.INPUT_METHOD_SERVICE))
+//        .hideSoftInputFromWindow(
+//          constructorActivity
+//            .getWindow()
+//            .getDecorView()
+//            .getApplicationWindowToken(),
+//          0);
+//    }
+//  }
 
   @Override
   protected void onResume() {
