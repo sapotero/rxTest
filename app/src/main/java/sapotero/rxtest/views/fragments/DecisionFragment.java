@@ -219,6 +219,9 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     card_toolbar.setTitle("Блок " + number );
     decision_text.setText( block.getText() );
 
+    // Disable EditText scrolling
+    decision_text.setMovementMethod(null);
+
     decision_text.setOnClickListener(v -> {
       String title = getString(R.string.decision_text);
       new DecisionTextDialog(mContext, decision_text, title, title).show();

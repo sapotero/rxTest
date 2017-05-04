@@ -549,6 +549,9 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       }
     }
 
+    // Disable EditText scrolling
+    decision_comment.setMovementMethod(null);
+
     decision_comment.setOnClickListener(v -> {
       String title = getString(R.string.comment_hint);
       new DecisionTextDialog(context, decision_comment, title, title).show();
