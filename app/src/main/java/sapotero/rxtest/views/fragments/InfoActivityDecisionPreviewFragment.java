@@ -417,20 +417,22 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
   private void initToolBar() {
 
-    decision_toolbar.inflateMenu(R.menu.fragment_decision_preview_menu);
-    decision_toolbar.setOnMenuItemClickListener(item -> {
-      switch ( item.getItemId() ){
-        case R.id.decision_preview_magnifer:
-          magnifer();
-          break;
-        case R.id.decision_preview_edit:
-          edit();
-          break;
-        default:
-          break;
-      }
-      return false;
-    });
+    if (decision_toolbar != null) {
+      decision_toolbar.inflateMenu(R.menu.fragment_decision_preview_menu);
+      decision_toolbar.setOnMenuItemClickListener(item -> {
+        switch ( item.getItemId() ){
+          case R.id.decision_preview_magnifer:
+            magnifer();
+            break;
+          case R.id.decision_preview_edit:
+            edit();
+            break;
+          default:
+            break;
+        }
+        return false;
+      });
+    }
   }
 
   private void setAdapter() {

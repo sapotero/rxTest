@@ -10,6 +10,7 @@ import com.f2prateek.rx.preferences.Preference;
 import java.util.ArrayList;
 import java.util.List;
 
+import rx.Single;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
 import sapotero.rxtest.retrofit.models.documents.Document;
@@ -86,28 +87,32 @@ public class InvalidateDocumentsJob extends BaseJob {
       }
     }
 
+    List<Single<RDocumentEntity>> transactions = new ArrayList<>();
+
     if (db_uids.size() > 0){
       for (String uid: db_uids ) {
-        updateAsProcessed(uid, true);
+//        transactions.add( updateAsProcessed(uid, true) );
+        dataStore.runInTransaction( updateAsProcessed(uid, true) );
       }
     }
 
     if (api_uids.size() > 0){
       for (String uid: api_uids ) {
-        updateAsProcessed(uid, false);
+//        transactions.add( updateAsProcessed(uid, false) );
+        dataStore.runInTransaction( updateAsProcessed(uid, false) );
       }
     }
 
+
   }
 
-  private void updateAsProcessed(String uid, Boolean processed) {
-    int count = dataStore
-      .update(RDocumentEntity.class)
-      .set(RDocumentEntity.PROCESSED, processed)
-      .where(RDocumentEntity.UID.eq(uid))
-      .get()
-      .value();
-    Timber.tag(TAG).e("updateAsProcessed: %s %s", uid, count);
+  private Single<RDocumentEntity> updateAsProcessed(String uid, Boolean processed) {
+
+    RDocumentEntity doc = dataStore.select(RDocumentEntity.class).where(RDocumentEntity.UID.eq(uid)).get().firstOrNull();
+
+    return dataStore
+      .update(doc)
+      .toObservable().toSingle();
   }
 
 
