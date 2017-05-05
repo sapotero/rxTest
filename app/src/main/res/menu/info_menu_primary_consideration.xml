@@ -29,4 +29,9 @@
         app:showAsAction="always|withText"
         android:icon="@drawable/to_favorites"
         android:title="@string/to_favorites"/>
+    <item
+        android:id="@+id/menu_info_report_dismiss"
+        app:showAsAction="always|withText"
+        android:icon="@drawable/dismiss"
+        android:title="@string/menu_info_prev_person"/>
 </menu>

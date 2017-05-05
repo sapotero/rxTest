@@ -322,6 +322,15 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             activity.startActivity(create_assigment_intent);
             break;
 
+          // resolved https://tasks.n-core.ru/browse/MVDESD-13368
+          // Кнопка "Отклонить" в документах "На рассмотрение" и "Первичное рассмотрение"
+          case R.id.menu_info_report_dismiss:
+            // TODO: Add confirmation dialog ???
+            // TODO: Add CommandParams
+            // TODO: Uncomment this line
+            // operation = CommandFactory.Operation.RETURN_TO_THE_PRIMARY_CONSIDERATION;
+            break;
+
           default:
             operation = CommandFactory.Operation.INCORRECT;
             break;
