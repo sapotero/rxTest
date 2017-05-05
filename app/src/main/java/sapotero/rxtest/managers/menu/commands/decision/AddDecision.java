@@ -181,8 +181,8 @@ public class AddDecision extends AbstractCommand {
 
             if (callback != null ){
               callback.onCommandExecuteSuccess( getType() );
-              EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
             }
+            EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
 
             queueManager.setExecutedRemote(this);
           }

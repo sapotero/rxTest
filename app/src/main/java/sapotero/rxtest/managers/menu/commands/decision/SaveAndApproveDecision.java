@@ -83,6 +83,7 @@ public class SaveAndApproveDecision extends AbstractCommand {
 
   @Override
   public void execute() {
+
     queueManager.add(this);
     updateLocal();
   }
@@ -117,6 +118,13 @@ public class SaveAndApproveDecision extends AbstractCommand {
       .select(RDecisionEntity.RED)
       .where(RDecisionEntity.UID.eq(params.getDecisionModel().getId()))
       .get().firstOrNull();
+
+    dataStore
+      .update(RDocumentEntity.class)
+      .set(RDocumentEntity.CHANGED, true)
+      .where(RDocumentEntity.UID.eq( params.getDecisionModel().getDocumentUid() ))
+      .get()
+      .value();
 
 
     Timber.tag(TAG).e("-------- %s %s", params.getDecisionModel().getSignerId(), settings.getString("current_user_id").get());
@@ -216,11 +224,13 @@ public class SaveAndApproveDecision extends AbstractCommand {
 
             if (callback != null ){
               callback.onCommandExecuteSuccess( getType() );
-              EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
             }
+            EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
 
             queueManager.setExecutedRemote(this);
           }
+
+//          EventBus.getDefault().post( new UpdateCurrentDocumentEvent( data.getDocumentUid() ));
 
         },
         error -> {
