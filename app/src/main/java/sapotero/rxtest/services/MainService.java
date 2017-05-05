@@ -62,6 +62,7 @@ import sapotero.rxtest.events.bus.FolderCreatedEvent;
 import sapotero.rxtest.events.bus.UpdateAuthTokenEvent;
 import sapotero.rxtest.events.crypto.AddKeyEvent;
 import sapotero.rxtest.events.crypto.SelectKeyStoreEvent;
+import sapotero.rxtest.events.crypto.SelectKeysEvent;
 import sapotero.rxtest.events.crypto.SignDataEvent;
 import sapotero.rxtest.events.crypto.SignDataResultEvent;
 import sapotero.rxtest.events.crypto.SignDataWrongPinEvent;
@@ -164,7 +165,17 @@ public class MainService extends Service {
 
     aliases( KeyStoreType.currentType(), ProviderType.currentProviderType() );
 
+    loadParams();
+
     initScheduller();
+
+  }
+
+  private void loadParams() {
+    KeyStoreType.init(this);
+    List<String> keyStoreTypeList = KeyStoreType.getKeyStoreTypeList();
+
+    EventBus.getDefault().post( new SelectKeysEvent(keyStoreTypeList));
 
   }
 
