@@ -29,7 +29,8 @@ public class FirstRun {
       if (value != null) {
         result = value;
       } else {
-        result = false;
+        // If no preference found, return true (it is first run)
+        result = true;
       }
     } else {
       result = false;

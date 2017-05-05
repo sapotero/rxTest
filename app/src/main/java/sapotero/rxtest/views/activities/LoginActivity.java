@@ -61,6 +61,8 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
   private StepperLayout stepperLayout;
   private StepperAdapter adapter;
 
+  private boolean cryptoProInstalled = false;
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     setTheme(R.style.AppTheme);
@@ -69,12 +71,13 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
 
     EsdApplication.getComponent(this).inject(this);
 
+    initialize();
 
-    if( appInstalled("ru.cprocsp.ACSP") ) {
+    cryptoProInstalled = appInstalled("ru.cprocsp.ACSP");
+
+    if( cryptoProInstalled ) {
 
       startService(new Intent(this, MainService.class));
-
-      initialize();
 
       // Check for permissions if the activity previously not existed
       if (null == savedInstanceState) {
@@ -89,7 +92,7 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
         .title(R.string.error_csp_not_installed)
         .content(R.string.error_csp_not_installed_body)
         .positiveText(R.string.yes)
-        .autoDismiss(false)
+        .cancelable(false)
         .onPositive((dialog, which) -> {
           finish();
         })
@@ -244,8 +247,8 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
     }
     EventBus.getDefault().register(this);
 
-    // If not first run, immediately move to main activity
-    if ( !isFirstRun() ) {
+    // If not first run and CryptoPro installed, immediately move to main activity
+    if ( !isFirstRun() && cryptoProInstalled ) {
       onCompleted(null);
     }
   }
