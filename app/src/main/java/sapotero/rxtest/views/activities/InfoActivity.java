@@ -479,6 +479,8 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
           jobManager.addJobInBackground(new UpdateDocumentJob( UID.get(), status ));
         })
     );
+
+    toolbarManager.invalidate();
   }
 
   private void unsubscribe(){
@@ -487,7 +489,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     }
 
     if (subscription.hasSubscriptions()){
-      subscription.unsubscribe();
+      subscription.clear();
     }
   }
 }

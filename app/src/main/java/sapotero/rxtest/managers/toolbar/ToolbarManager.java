@@ -29,6 +29,8 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
+import sapotero.rxtest.db.requery.models.decisions.RDecision;
+import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
@@ -50,30 +52,30 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   @Inject OperationManager operationManager;
 
   private final String TAG = this.getClass().getSimpleName();
-
-  private Preference<String> TOKEN;
   private Preference<String> LOGIN;
-  private Preference<String> PASSWORD;
-  private Preference<String> UID;
-  private Preference<String> DOCUMENT_UID;
-  private Preference<String> STATUS_CODE;
-  private Preference<Integer> POSITION;
-  private Preference<String> REG_NUMBER;
   private Preference<String> REG_DATE;
-  private Preference<String> PIN;
+  private Preference<String> UID;
+  private Preference<String> REG_NUMBER;
+  private Preference<String> STATUS_CODE;
 
-  private final Context context;
-  private final Toolbar toolbar;
-  private String SIGN;
-  private Fields.Status status;
-  private Fields.Journal journal;
+  //  private Fields.Journal journal;
+  //  private Preference<String> PIN;
+  //  private Preference<String> TOKEN;
+  //  private Preference<String> DOCUMENT_UID;
+  //  private Preference<Integer> POSITION;
+  //  private String SIGN;
+  //  private Fields.Status status;
+  //  private Preference<String> CURRENT_USER_ID;
+  //  private Preference<String> PASSWORD;
+  //  private SelectOshsDialogFragment oshs;
 
-  private MaterialDialog dialog;
-
-  private SelectOshsDialogFragment oshs;
   private int decision_count;
+
+  private final Toolbar toolbar;
+  private final Context context;
+
   private RDocumentEntity doc;
-  private Preference<String> CURRENT_USER_ID;
+  private MaterialDialog dialog;
 
   public ToolbarManager (Context context, Toolbar toolbar) {
     this.context = context;
@@ -370,18 +372,18 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   private void loadSettings() {
     LOGIN    = settings.getString("login");
     UID      = settings.getString("activity_main_menu.uid");
-    PASSWORD = settings.getString("password");
-    TOKEN    = settings.getString("token");
-    POSITION = settings.getInteger("position");
-    DOCUMENT_UID = settings.getString("document.uid");
+//    PASSWORD = settings.getString("password");
+//    TOKEN    = settings.getString("token");
+//    POSITION = settings.getInteger("position");
+//    DOCUMENT_UID = settings.getString("document.uid");
     STATUS_CODE = settings.getString("activity_main_menu.star");
     REG_NUMBER = settings.getString("activity_main_menu.regnumber");
     REG_DATE = settings.getString("activity_main_menu.date");
-    CURRENT_USER_ID = settings.getString("current_user_id");
-    PIN = settings.getString("PIN");
+//    CURRENT_USER_ID = settings.getString("current_user_id");
+//    PIN = settings.getString("PIN");
   }
 
-  private void invalidate() {
+  public void invalidate() {
     getFirstForLenovo();
 
     if (doc != null){
@@ -444,18 +446,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       }
 
       // Из папки избранное
-      if (isFromFavorites() ){
-        toolbar.getMenu().clear();
-        toolbar.inflateMenu(R.menu.info_menu);
-
-        try {
-          toolbar.getMenu().findItem(R.id.menu_info_shared_to_control).setVisible(false);
-          toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(false);
-          toolbar.getMenu().findItem(R.id.menu_info_decision_edit).setVisible(false);
-          toolbar.getMenu().findItem(R.id.menu_info_shared_to_favorites).setVisible(false);
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
+      if (isFromFavoritesFolder() ){
+        showAsProcessed();
       }
 
       decision_count = doc.getDecisions().size();
@@ -486,7 +478,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       // Показывать кнопку «Создать поручение»
       try {
         if (!settings.getBoolean("settings_view_show_create_decision_post").get() && doc.isFromFavoritesFolder() != null && doc.isFromFavoritesFolder() ) {
-          if ( doc.isFromFavoritesFolder() != null && !doc.isFromFavoritesFolder() ){
+          if ( isProcessed() ){
             toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(false);
           }
         }
@@ -524,14 +516,66 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
       // resolved https://tasks.n-core.ru/browse/MVDESD-13259
       // Кнопка "Без ответа" только на документах без резолюции
-      if (doc != null && doc.getDecisions() != null && doc.getDecisions().size() > 0){
+
+      // resolved https://tasks.n-core.ru/browse/MVDESD-13330
+      // Или если нет активной резолюции
+      if ( hasActiveDecision() ){
         try {
           toolbar.getMenu().findItem(R.id.menu_info_to_the_approval_performance).setVisible(false);
         } catch (Exception e) {
           e.printStackTrace();
         }
       }
+
+
+      // resolved https://tasks.n-core.ru/browse/MVDESD-13343
+      // Или если нет активной резолюции
+      if ( isShared() ){
+        clearToolbar();
+      }
+
     }
+  }
+
+  private void clearToolbar() {
+    toolbar.getMenu().clear();
+  }
+
+  private void showAsProcessed() {
+    toolbar.getMenu().clear();
+    toolbar.inflateMenu(R.menu.info_menu);
+
+    try {
+      toolbar.getMenu().findItem(R.id.menu_info_shared_to_control).setVisible(false);
+      toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(false);
+      toolbar.getMenu().findItem(R.id.menu_info_decision_edit).setVisible(false);
+      toolbar.getMenu().findItem(R.id.menu_info_shared_to_favorites).setVisible(false);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  private boolean isShared() {
+    return doc != null && doc.getAddressedToType() != null && Objects.equals(doc.getAddressedToType(), "group");
+  }
+
+  public boolean hasActiveDecision() {
+    Boolean result = false;
+
+    try {
+      if (doc != null && doc.getDecisions().size() > 0){
+        for ( RDecision _decision: doc.getDecisions() ) {
+          RDecisionEntity decision = (RDecisionEntity) _decision;
+          if (!decision.isApproved() && Objects.equals(decision.getSignerId(), settings.getString("current_user_id").get())){
+            result = true;
+          }
+        }
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    return result;
   }
 
   private boolean isProcessed() {
@@ -543,8 +587,10 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   }
 
   private boolean isFromFavorites() {
-    Timber.tag("FAVORITES").w("favore: %s %s", doc.isFavorites() != null && doc.isFavorites(), doc.isFromFavoritesFolder() != null && doc.isFromFavoritesFolder());
-    return doc.isFavorites() != null && doc.isFavorites() || doc.isFromFavoritesFolder() != null && doc.isFromFavoritesFolder();
+    return doc.isFavorites() != null && doc.isFavorites();
+  }
+  private boolean isFromFavoritesFolder() {
+    return doc.isFromFavoritesFolder() != null && doc.isFromFavoritesFolder();
   }
 
 
@@ -726,12 +772,15 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         params.setSign("SignFileCommand");
 
         // если есть комментарий
-        if (settings.getString("prev_dialog_comment").get() != null) {
-          params.setComment("SignFileCommand");
+        if (settings.getString("prev_dialog_comment").get() != null && settings.getBoolean("settings_view_show_comment_post").get() ) {
+//          params.setComment("SignFileCommand");
+          if ( settings.getBoolean("settings_view_show_comment_post").get() ) {
+            params.setComment(dialog1.getInputEditText().getText().toString());
+          }
         }
         params.setDocument( UID.get() );
 
-        params.setComment( dialog1.getInputEditText().getText().toString() );
+
         operationManager.execute(operation, params);
       })
       .autoDismiss(true);
@@ -767,7 +816,9 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         operation = CommandFactory.Operation.FROM_THE_REPORT;
         params.setPerson( settings.getString("current_user_id").get() );
         params.setDocument( UID.get() );
-        params.setComment( dialog1.getInputEditText().getText().toString() );
+        if ( settings.getBoolean("settings_view_show_comment_post").get() ) {
+          params.setComment(dialog1.getInputEditText().getText().toString());
+        }
 
         operationManager.execute(operation, params);
       })

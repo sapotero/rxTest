@@ -52,6 +52,7 @@ import timber.log.Timber;
 public class CreateDocumentsJob extends BaseJob {
 
   public static final int PRIORITY = 1;
+  private boolean shared = false;
   private boolean not_processed;
   private String status;
   private String journal;
@@ -71,9 +72,10 @@ public class CreateDocumentsJob extends BaseJob {
 
   private int jobCount;
 
-  public CreateDocumentsJob(String uid, String journal, String status) {
+  public CreateDocumentsJob(String uid, String journal, String status, boolean shared) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
+    this.shared = shared;
 
     if (journal != null) {
       String[] index = journal.split("_production_db_");
@@ -346,6 +348,12 @@ public class CreateDocumentsJob extends BaseJob {
     doc.setFilter(status);
     doc.setDocumentType(journal);
 
+    if (shared || Objects.equals(doc.getAddressedToType(), "group")) {
+      doc.setAddressedToType("group");
+    } else {
+      doc.setAddressedToType("");
+    }
+
     dataStore
       .insert( doc )
       .toObservable()
@@ -354,13 +362,6 @@ public class CreateDocumentsJob extends BaseJob {
       .subscribe(
         result -> {
           EventBus.getDefault().post( new UpdateCurrentDocumentEvent( doc.getUid() ) );
-
-//          if ( result.getImages() != null && result.getImages().size() > 0 && ( isFavorites != null && !isFavorites ) ){
-//            for (RImage _image : result.getImages()) {
-//              RImageEntity image = (RImageEntity) _image;
-//              jobManager.addJobInBackground( new DownloadFileJob(HOST.get(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
-//            }
-//          }
 
           jobCount = 0;
 

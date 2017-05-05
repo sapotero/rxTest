@@ -23,7 +23,6 @@ import android.widget.Toast;
 import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
-import com.github.pwittchen.reactivenetwork.library.ReactiveNetwork;
 import com.mikepenz.material_design_iconic_typeface_library.MaterialDesignIconic;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
@@ -56,7 +55,6 @@ import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.BuildConfig;
 import sapotero.rxtest.R;
@@ -67,6 +65,8 @@ import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.adapter.UpdateDocumentAdapterEvent;
 import sapotero.rxtest.events.bus.GetDocumentInfoEvent;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
+import sapotero.rxtest.events.service.CheckNetworkEvent;
+import sapotero.rxtest.events.service.CheckNetworkResultEvent;
 import sapotero.rxtest.events.service.SuperVisorUpdateEvent;
 import sapotero.rxtest.events.service.UpdateAllDocumentsEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
@@ -174,10 +174,26 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private MainActivity context;
   private CompositeSubscription subscription;
 
-
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     setTheme(R.style.AppTheme);
+
+
+
+    /*
+    *
+    *
+    * Сделать InvalidationManager
+    * назначение - инвалидация документов по мд5
+
+    * Суть его - хранилка в памяти, где лежат ид доков и их мд5
+    *
+    * Назначение
+    * - не делать 100 запросов на обновление - если мд5 в памяти совпадают
+    * - обновлять доки пачками
+    *
+    *
+    * */
 
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
@@ -221,11 +237,10 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     initSearch();
 
-    isConnected();
-
     setFirstRunFalse();
 
     updateToken();
+
   }
 
   private void setFirstRunFalse() {
@@ -249,21 +264,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     }
     dataLoader.updateAuth(sign);
   }
-
-  public void isConnected(){
-    ReactiveNetwork.observeInternetConnectivity()
-      .subscribeOn(Schedulers.io())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(isConnectedToInternet -> {
-        try {
-          toolbar.getMenu().findItem(R.id.online).setTitle( isConnectedToInternet ? "В сети" : "Не в сети" );
-          toolbar.getMenu().findItem(R.id.online).setIcon( isConnectedToInternet  ? R.drawable.icon_online : R.drawable.icon_offline );
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-      });
-  }
-
 
   private void initSearch() {
     searchView = SearchView.getInstance(this);
@@ -467,7 +467,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void updateByStatus() {
-    dataLoader.updateByCurrentStatus( menuBuilder.getItem(), null );
+    dataLoader.updateByCurrentStatus( menuBuilder.getItem(), null, false);
 
     Toast.makeText(this, "Обновление данных...", Toast.LENGTH_SHORT).show();
 
@@ -492,8 +492,18 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     menuBuilder.getItem().recalcuate();
     dropLoadProgress(false);
 
+    startNetworkCheck();
+
 //    EventBus.getDefault().post( new UpdateAllDocumentsEvent());
 
+  }
+
+  private void startNetworkCheck() {
+    EventBus.getDefault().post(new CheckNetworkEvent( true ));
+  }
+
+  private void stopNetworkCheck() {
+    EventBus.getDefault().post(new CheckNetworkEvent( false ));
   }
 
   public static void invalidate(){
@@ -507,6 +517,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     if (subscriptions != null) {
       subscriptions.unsubscribe();
     }
+
+    stopNetworkCheck();
   }
 
   @Override
@@ -840,4 +852,17 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     return (int) Math.ceil(result);
   }
 
+  // resolved https://tasks.n-core.ru/browse/MVDESD-13314
+  // Обновление иконки В сети / Не в сети
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(CheckNetworkResultEvent event) {
+    boolean isConnectedToInternet = event.isConnected();
+
+    try {
+      toolbar.getMenu().findItem(R.id.online).setTitle( isConnectedToInternet ? R.string.is_online : R.string.is_offline );
+      toolbar.getMenu().findItem(R.id.online).setIcon( isConnectedToInternet  ? R.drawable.icon_online : R.drawable.icon_offline );
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
 }

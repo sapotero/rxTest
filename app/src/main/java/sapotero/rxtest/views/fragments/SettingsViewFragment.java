@@ -31,12 +31,33 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
 
     Timber.tag("SETTINGS").d("settings_view_journals %s", settings.getStringSet("settings_view_journals").get() );
 
+    findPreference("settings_view_show_comment_post").setDependency("settings_view_show_actions_confirm");
+
     subscriptions = new CompositeSubscription();
     subscriptions.add(
       settings.getBoolean("settings_view_show_urgency").asObservable().subscribe( active -> {
         findPreference("settings_view_only_urgent").setEnabled(active);
         settings.getBoolean("settings_view_only_urgent").set(active);
-      })
+      },Timber::e)
+    );
+
+    // resolved https://tasks.n-core.ru/browse/MVDESD-13341
+    // При отклонении проекта не отображается окно ввода комментария
+    subscriptions.add(
+      settings.getBoolean("settings_view_show_actions_confirm")
+        .asObservable()
+        .subscribe(
+          active -> {
+            if (active){
+              settings.getBoolean("settings_view_show_comment_post").set(true);
+              findPreference("settings_view_show_comment_post").setEnabled(true);
+            } else {
+              settings.getBoolean("settings_view_show_comment_post").set(false);
+              findPreference("settings_view_show_comment_post").setEnabled(false);
+            }
+          },
+          Timber::e
+        )
     );
   }
 

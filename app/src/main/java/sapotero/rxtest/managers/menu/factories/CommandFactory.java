@@ -602,9 +602,13 @@ public class CommandFactory implements AbstractCommand.Callback{
           break;
 
 
-        case "sapotero.rxtest.managers.menu.commands.shared.CreateTemplate":
+        case "sapotero.rxtest.managers.menu.commands.shared.AddToFolder":
           operation = Operation.ADD_TO_FOLDER;
           break;
+        case "sapotero.rxtest.managers.menu.commands.shared.RemoveFromFolder":
+          operation = Operation.REMOVE_FROM_FOLDER;
+          break;
+
         case "sapotero.rxtest.managers.menu.commands.shared.CheckForControl":
           operation = Operation.CHECK_FOR_CONTROL;
           break;

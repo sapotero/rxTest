@@ -268,7 +268,6 @@
                                 android:hint="@string/decision_text"
                                 android:background="@color/transparent"
                                 android:padding="@dimen/half_date_offset"
-                                android:inputType="textMultiLine"
                                 android:lines="8"
                                 android:gravity="top|start"
                                 android:maxLines="8"
@@ -278,10 +277,10 @@
                                 android:nextFocusLeft="@id/decision_text"
                                 android:layout_weight="1"
 
-                                android:overScrollMode="always"
-                                android:scrollbarStyle="insideInset"
-                                android:scrollbars="vertical"
-
+                                android:cursorVisible="false"
+                                android:longClickable="false"
+                                android:focusable="false"
+                                android:focusableInTouchMode="false"
                                 />
 
                         </android.support.design.widget.TextInputLayout>

@@ -59,6 +59,7 @@ import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.retrofit.models.v2.v2UserOshs;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.services.MainService;
+import sapotero.rxtest.utils.FirstRun;
 import sapotero.rxtest.views.menu.fields.MainMenuButton;
 import sapotero.rxtest.views.menu.fields.MainMenuItem;
 import timber.log.Timber;
@@ -66,6 +67,7 @@ import timber.log.Timber;
 public class DataLoaderManager {
 
   private final String TAG = this.getClass().getSimpleName();
+  private final FirstRun firstRun;
 
   @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
@@ -84,6 +86,7 @@ public class DataLoaderManager {
   private SimpleDateFormat dateFormat;
   private CompositeSubscription subscription;
   private CompositeSubscription subscriptionInitV2;
+  private CompositeSubscription subscriptionUpdateAuth;
   private final Context context;
   private ArrayList<String> v2Journals;
   private ArrayList<String> v2Statuses;
@@ -102,6 +105,7 @@ public class DataLoaderManager {
     EsdApplication.getManagerComponent().inject(this);
 
     initialize();
+    firstRun = new FirstRun(settings);
 
   }
 
@@ -307,6 +311,15 @@ public class DataLoaderManager {
     }
   }
 
+  private void unsubscribeUpdateAuth() {
+    if ( subscriptionUpdateAuth == null ){
+      subscriptionUpdateAuth = new CompositeSubscription();
+    }
+    if (subscriptionUpdateAuth.hasSubscriptions()){
+      subscriptionUpdateAuth.clear();
+    }
+  }
+
   public void updateAuth( String sign ){
     Timber.tag(TAG).i("updateAuth: %s", sign );
 
@@ -326,10 +339,9 @@ public class DataLoaderManager {
 
     Observable<AuthSignToken> authSubscription = getAuthSubscription();
 
-    unsubscribe();
+    unsubscribeUpdateAuth();
 
-    subscription.add(
-
+    subscriptionUpdateAuth.add(
       authSubscription
         .subscribeOn( Schedulers.io() )
         .observeOn( AndroidSchedulers.mainThread() )
@@ -381,7 +393,10 @@ public class DataLoaderManager {
             EventBus.getDefault().post( new AuthDcCheckSuccessEvent() );
 
             initV2();
-            updateByCurrentStatus(MainMenuItem.ALL, null);
+
+            updateByCurrentStatus(MainMenuItem.ALL, null, false);
+            updateByCurrentStatus(MainMenuItem.ALL, null, true);
+
 //            updateFavoritesAndProcessed();
           },
           error -> {
@@ -427,7 +442,7 @@ public class DataLoaderManager {
             EventBus.getDefault().post(new AuthLoginCheckSuccessEvent());
 
             initV2();
-            updateByCurrentStatus(MainMenuItem.ALL, null);
+            updateByCurrentStatus(MainMenuItem.ALL, null, false);
 //            updateFavoritesAndProcessed();
           },
           error -> {
@@ -437,10 +452,12 @@ public class DataLoaderManager {
         )
     );
   }
-  public void updateByCurrentStatus(MainMenuItem items, MainMenuButton button) {
+  public void updateByCurrentStatus(MainMenuItem items, MainMenuButton button, Boolean firstRunShared) {
     Timber.tag(TAG).e("updateByCurrentStatus: %s %s", items, button );
 
-    unsubscribe();
+    if ( firstRun != null && !firstRun.isFirstRun() ) {
+      unsubscribe();
+    }
 
     if (items == MainMenuItem.PROCESSED){
       updateProcessed();
@@ -494,7 +511,7 @@ public class DataLoaderManager {
 
 
       // обновляем всё
-      if (items == MainMenuItem.ALL){
+      if (items == MainMenuItem.ALL || items.getIndex() == 11 ){
         statuses.add("primary_consideration");
         statuses.add("sent_to_the_report");
         sp.add("approval");
@@ -523,6 +540,14 @@ public class DataLoaderManager {
       Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
       DocumentsService docService = retrofit.create(DocumentsService.class);
 
+      // resolved https://tasks.n-core.ru/browse/MVDESD-13343
+      // если общие документы
+
+      boolean shared = false;
+      if (items.getIndex() == 11){
+        shared = true;
+      }
+
 
       jobManager.cancelJobsInBackground(null, TagConstraint.ANY, "SyncDocument");
 
@@ -533,9 +558,54 @@ public class DataLoaderManager {
       for (String index: indexes ) {
         for (String status: statuses ) {
           requestCount++;
+          boolean finalShared = shared;
+
+          if (firstRunShared){
+            requestCount++;
+            subscription.add(
+              docService
+                .getDocumentsByIndexes(LOGIN.get(), TOKEN.get(), index, status, "group", 500)
+                .subscribeOn(Schedulers.computation())
+                .observeOn(Schedulers.computation())
+                .subscribe(
+                  data -> {
+                    requestCount--;
+                    if (data.getDocuments().size() > 0){
+
+                      for (Document doc: data.getDocuments() ) {
+
+                        if ( isExist(doc) ){
+
+                          Timber.tag(TAG).e("isExist %s", finalShared );
+
+                          if ( !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) ){
+                            Timber.tag(TAG).e("isUpdate" );
+                            jobCount++;
+                            jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), index, status, true) );
+                          }
+
+                        } else {
+                          Timber.tag(TAG).e("isCreate" );
+                          jobCount++;
+                          jobManager.addJobInBackground( new CreateDocumentsJob(doc.getUid(), index, status, true) );
+                        }
+                      }
+                    }
+                    updatePrefJobCount();
+                  },
+                  error -> {
+                    requestCount--;
+                    updatePrefJobCount();
+                    Timber.tag(TAG).e(error);
+                  })
+            );
+
+
+          }
+
           subscription.add(
             docService
-              .getDocumentsByIndexes(LOGIN.get(), TOKEN.get(), index, status, 500)
+              .getDocumentsByIndexes(LOGIN.get(), TOKEN.get(), index, status, shared ? "group" : null , 500)
               .subscribeOn(Schedulers.computation())
               .observeOn(Schedulers.computation())
               .subscribe(
@@ -545,23 +615,23 @@ public class DataLoaderManager {
 
                     for (Document doc: data.getDocuments() ) {
 
-                      Timber.tag(TAG).e("index: %s | status: %s ",index, status );
-                      Timber.tag(TAG).e("exist: %s | md5: %s", isExist(doc), !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) );
+                      // Timber.tag(TAG).e("index: %s | status: %s ",index, status );
+                      // Timber.tag(TAG).e("exist: %s | md5: %s", isExist(doc), !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) );
 
                       if ( isExist(doc) ){
 
-                        Timber.tag(TAG).e("isExist" );
+                        Timber.tag(TAG).e("isExist %s", finalShared );
 
                         if ( !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) ){
                           Timber.tag(TAG).e("isUpdate" );
                           jobCount++;
-                          jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), index, status, true) );
+                          jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), index, status, finalShared) );
                         }
 
                       } else {
                         Timber.tag(TAG).e("isCreate" );
                         jobCount++;
-                        jobManager.addJobInBackground( new CreateDocumentsJob(doc.getUid(), index, status) );
+                        jobManager.addJobInBackground( new CreateDocumentsJob(doc.getUid(), index, status, finalShared) );
                       }
                     }
 
@@ -583,9 +653,36 @@ public class DataLoaderManager {
 
       for (String code: sp ) {
         requestCount++;
+        boolean finalShared1 = shared;
+
+        if (firstRunShared){
+          requestCount++;
+          subscription.add(
+            docService
+              .getDocuments(LOGIN.get(), TOKEN.get(), code, "group" , 500, 0)
+              .subscribeOn(Schedulers.computation())
+              .observeOn(Schedulers.computation())
+              .subscribe(
+                data -> {
+                  requestCount--;
+                  if (data.getDocuments().size() > 0){
+                    for (Document doc: data.getDocuments() ) {
+                      jobCount++;
+                      jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), code, true) );
+                    }
+                  }
+                  updatePrefJobCount();
+                },
+                error -> {
+                  requestCount--;
+                  updatePrefJobCount();
+                  Timber.tag(TAG).e(error);
+                })
+          );
+        }
         subscription.add(
           docService
-            .getDocuments(LOGIN.get(), TOKEN.get(), code, 500, 0)
+            .getDocuments(LOGIN.get(), TOKEN.get(), code, shared ? "group" : null , 500, 0)
             .subscribeOn(Schedulers.computation())
             .observeOn(Schedulers.computation())
             .subscribe(
@@ -594,7 +691,7 @@ public class DataLoaderManager {
                 if (data.getDocuments().size() > 0){
                   for (Document doc: data.getDocuments() ) {
                     jobCount++;
-                    jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), code) );
+                    jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), code, finalShared1) );
                   }
                 }
                 updatePrefJobCount();
@@ -606,6 +703,9 @@ public class DataLoaderManager {
               })
         );
       }
+
+
+
     }
   }
 

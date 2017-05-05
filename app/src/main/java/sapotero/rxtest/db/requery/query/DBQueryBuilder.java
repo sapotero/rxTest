@@ -137,6 +137,10 @@ public class DBQueryBuilder {
             hasProcessed = true;
           }
 
+          if (condition.getField().getLeftOperand() == RDocumentEntity.CONTROL){
+            hasProcessed = true;
+          }
+
           if (condition.getField().getLeftOperand() == RDocumentEntity.FILTER){
             query_status = String.valueOf(condition.getField().getRightOperand());
             Timber.tag("!!!").w("filter: %s", query_status);

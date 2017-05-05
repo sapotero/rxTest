@@ -49,10 +49,13 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
   private ArrayList<String> ignore_user_ids;
 
   private int threshold;
+  
+  private View view;
 
-  public OshsAutoCompleteAdapter(Context context) {
+  public OshsAutoCompleteAdapter(Context context, View view) {
     mContext = context;
     EsdApplication.getNetworkComponent().inject( this );
+    this.view = view;
     loadSettings();
   }
 
@@ -113,8 +116,10 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
         if (results != null && results.values != null && results.count > 0) {
           resultList = (List<Oshs>) results.values;
 
-          InputMethodManager imm = (InputMethodManager) mContext.getSystemService(Activity.INPUT_METHOD_SERVICE);
-          imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+          if (view != null) {
+            InputMethodManager imm = (InputMethodManager) mContext.getSystemService(Activity.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+          }
 
           notifyDataSetChanged();
         } else {

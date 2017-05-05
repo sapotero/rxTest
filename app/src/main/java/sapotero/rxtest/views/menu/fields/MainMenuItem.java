@@ -43,10 +43,12 @@ public enum MainMenuItem {
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_LINKS.eq( false ) ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_PROCESSED_FOLDER.eq( false ) ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_FAVORITES_FOLDER.eq( false ) ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
     },
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_PROCESSED_FOLDER.eq( false ) ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_FAVORITES_FOLDER.eq( false ) ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
     },
     true, false),
 
@@ -57,16 +59,12 @@ public enum MainMenuItem {
   },
     true,
     new ConditionBuilder[]{
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.INCOMING_DOCUMENTS.getValue() + "%"  ) ),
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_LINKS.eq( false ) )
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(false) ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( V2DocumentType.INCOMING_DOCUMENTS.getName() )  )
     },
     new ConditionBuilder[]{
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.INCOMING_DOCUMENTS.getValue() + "%"  ) ),
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_LINKS.eq( false ) ),
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_PROCESSED_FOLDER.eq( false ) ),
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_FAVORITES_FOLDER.eq( false ) ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( V2DocumentType.INCOMING_DOCUMENTS.getName() )  )
     },
     false, false),
@@ -78,16 +76,12 @@ public enum MainMenuItem {
   },
     true,
     new ConditionBuilder[]{
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.CITIZEN_REQUESTS.getValue() + "%"  ) ),
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_LINKS.eq( false ) )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(false) ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( V2DocumentType.CITIZEN_REQUESTS.getName() )  )
     },
     new ConditionBuilder[]{
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.CITIZEN_REQUESTS.getValue() + "%"  ) ),
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_LINKS.eq( false ) ),
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_PROCESSED_FOLDER.eq( false ) ),
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_FAVORITES_FOLDER.eq( false ) ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( V2DocumentType.CITIZEN_REQUESTS.getName() )  )
     },
     false, false),
@@ -102,11 +96,13 @@ public enum MainMenuItem {
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in( MainMenuButton.ButtonStatus.getProject() ) ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq( false ) ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
     },
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_LINKS.eq( false ) ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_PROCESSED_FOLDER.eq( false ) ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_FAVORITES_FOLDER.eq( false ) ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
     },
     true, true),
 
@@ -116,16 +112,12 @@ public enum MainMenuItem {
     MainMenuButton.VIEWED
   },true,
     new ConditionBuilder[]{
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like(  Fields.Journal.INCOMING_ORDERS.getValue() + "%"  ) ),
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_LINKS.eq( false ) )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(false) ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( V2DocumentType.INCOMING_ORDERS.getName() )  )
     },
     new ConditionBuilder[]{
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like(  Fields.Journal.INCOMING_ORDERS.getValue() + "%"  ) ),
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_LINKS.eq( false ) ),
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_PROCESSED_FOLDER.eq( false ) ),
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_FAVORITES_FOLDER.eq( false ) ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( V2DocumentType.INCOMING_ORDERS.getName() )  )
     },
     false, false),
@@ -136,16 +128,12 @@ public enum MainMenuItem {
     MainMenuButton.VIEWED
   },true,
     new ConditionBuilder[]{
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.ORDERS.getValue() + "%"  ) ),
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_LINKS.eq( false ) )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(false) ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( V2DocumentType.ORDERS.getName() )  )
     },
     new ConditionBuilder[]{
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.ORDERS.getValue() + "%"  ) ),
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_LINKS.eq( false ) ),
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_PROCESSED_FOLDER.eq( false ) ),
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_FAVORITES_FOLDER.eq( false ) ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( V2DocumentType.ORDERS.getName() )  )
     },
     false, false),
@@ -156,16 +144,12 @@ public enum MainMenuItem {
     MainMenuButton.VIEWED
   },true,
     new ConditionBuilder[]{
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.ORDERS_DDO.getValue()+ "%"  ) ),
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_LINKS.ne( true ) ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(false) ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( V2DocumentType.ORDERS_DDO.getName() )  )
     },
     new ConditionBuilder[]{
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.ORDERS_DDO.getValue()+ "%"  ) ),
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_LINKS.eq( false ) ),
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_PROCESSED_FOLDER.eq( false ) ),
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_FAVORITES_FOLDER.eq( false ) ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( V2DocumentType.ORDERS_DDO.getName() )  )
     },
     false, false),
@@ -177,16 +161,12 @@ public enum MainMenuItem {
   },
     true,
     new ConditionBuilder[]{
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.OUTGOING_DOCUMENTS.getValue()+ "%"  ) ),
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_LINKS.eq( false ) )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(false) ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( V2DocumentType.OUTGOING_DOCUMENTS.getName() )  )
     },
     new ConditionBuilder[]{
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.UID.like( Fields.Journal.OUTGOING_DOCUMENTS.getValue()+ "%"  ) ),
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_LINKS.eq( false ) ),
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_PROCESSED_FOLDER.eq( false ) ),
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_FAVORITES_FOLDER.eq( false ) ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( V2DocumentType.OUTGOING_DOCUMENTS.getName() )  )
     },
     false, false),
@@ -195,13 +175,13 @@ public enum MainMenuItem {
     true,
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.CONTROL.eq( true ) ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_LINKS.eq( false ) )
+//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_LINKS.eq( false ) )
     },
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.CONTROL.eq( true ) ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_LINKS.eq( false ) ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_PROCESSED_FOLDER.eq( false ) ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_FAVORITES_FOLDER.eq( false ) ),
+//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_LINKS.eq( false ) ),
+//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_PROCESSED_FOLDER.eq( false ) ),
+//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_FAVORITES_FOLDER.eq( false ) ),
     },
     true, true),
   PROCESSED ( 9, "Обработанное %s", new MainMenuButton[]{},
@@ -227,6 +207,19 @@ public enum MainMenuItem {
 
     },
     true, true
+  ),
+  SHARED ( 11, "Общие документы %s", new MainMenuButton[]{
+    MainMenuButton.SHARED_PRIMARY,
+    MainMenuButton.ASSIGN,
+    MainMenuButton.APPROVAL,
+    MainMenuButton.VIEWED,
+  }, true,
+    new ConditionBuilder[]{
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq( "group" ) ),
+    },
+    new ConditionBuilder[]{
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq( "group" ) ),
+    },  false, false
   );
 
   private static final String TAG = "MainMenuItem";

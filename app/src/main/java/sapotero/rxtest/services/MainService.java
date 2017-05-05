@@ -7,20 +7,18 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 
 import com.f2prateek.rx.preferences.RxSharedPreferences;
-import com.github.pwittchen.reactivenetwork.library.ReactiveNetwork;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Provider;
@@ -28,10 +26,9 @@ import java.security.Security;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
@@ -52,6 +49,7 @@ import ru.cprocsp.ACSP.tools.common.RawResource;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.auth.AuthDcCheckFailEvent;
@@ -60,6 +58,9 @@ import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckSuccessEvent;
 import sapotero.rxtest.events.bus.FolderCreatedEvent;
 import sapotero.rxtest.events.bus.UpdateAuthTokenEvent;
+import sapotero.rxtest.events.crypto.AddKeyEvent;
+import sapotero.rxtest.events.crypto.SelectKeyStoreEvent;
+import sapotero.rxtest.events.crypto.SelectKeysEvent;
 import sapotero.rxtest.events.crypto.SignDataEvent;
 import sapotero.rxtest.events.crypto.SignDataResultEvent;
 import sapotero.rxtest.events.crypto.SignDataWrongPinEvent;
@@ -68,6 +69,7 @@ import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateUnprocessedDocumentsEvent;
 import sapotero.rxtest.events.service.AuthServiceAuthEvent;
+import sapotero.rxtest.events.service.CheckNetworkEvent;
 import sapotero.rxtest.events.service.UpdateAllDocumentsEvent;
 import sapotero.rxtest.events.service.UpdateDocumentsByStatusEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckEvent;
@@ -81,6 +83,7 @@ import sapotero.rxtest.managers.DataLoaderManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.services.task.CheckNetworkTask;
 import sapotero.rxtest.services.task.UpdateAllDocumentsTask;
 import sapotero.rxtest.services.task.UpdateQueueTask;
 import sapotero.rxtest.utils.FirstRun;
@@ -99,6 +102,7 @@ public class MainService extends Service {
 
   final String TAG = MainService.class.getSimpleName();
   private ScheduledThreadPoolExecutor scheduller;
+  private ScheduledFuture futureNetwork;
 
   @Inject RxSharedPreferences settings;
   @Inject SingleEntityStore<Persistable> dataStore;
@@ -114,9 +118,9 @@ public class MainService extends Service {
   private DataLoaderManager dataLoaderInterface;
   private String SIGN;
   public static String user;
+  private int keyStoreTypeIndex = 0;
 
   public MainService() {
-    scheduller = new ScheduledThreadPoolExecutor(2);
   }
 
   public void onCreate() {
@@ -154,33 +158,33 @@ public class MainService extends Service {
     ProviderType.init(this);
 
 
-    addKey();
 
     aliases( KeyStoreType.currentType(), ProviderType.currentProviderType() );
 
-    isConnected();
+    loadParams();
 
-    scheduller = new ScheduledThreadPoolExecutor(2);
+    initScheduller();
+
+  }
+
+  private void loadParams() {
+    KeyStoreType.init(this);
+    List<String> keyStoreTypeList = KeyStoreType.getKeyStoreTypeList();
+
+    EventBus.getDefault().post( new SelectKeysEvent(keyStoreTypeList));
+
+  }
+
+
+  private void initScheduller() {
+    scheduller = new ScheduledThreadPoolExecutor(3);
+
+    // Tasks will be removed on cancellation
+    scheduller.setRemoveOnCancelPolicy(true);
+
 
     scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 0 ,5*60, TimeUnit.SECONDS );
     scheduller.scheduleWithFixedDelay( new UpdateQueueTask(queue), 0 ,5, TimeUnit.SECONDS );
-
-//    dataStore
-//      .select(RDocumentEntity.class)
-//      .where(RDocumentEntity.FILTER.eq("approval"))
-//      .get()
-//      .toSelfObservable()
-//      .observeOn(Schedulers.computation())
-//      .subscribeOn(AndroidSchedulers.mainThread())
-//      .debounce(1000, TimeUnit.MILLISECONDS)
-//      .subscribe(
-//        data -> {
-//          Timber.tag(TAG).e("self observerable %s", data.toList().size());
-//        },
-//        error -> {
-//          Timber.tag(TAG).e(error);
-//      });
-
   }
 
   public int onStartCommand(Intent intent, int flags, int startId) {
@@ -423,110 +427,247 @@ public class MainService extends Service {
 
   }
 
+  public void containerOnSelectListener(AdapterView<?> adapterView, View view, int i, long l) {
+
+    if (keyStoreTypeIndex != i) {
+      KeyStoreType.saveCurrentType((String) adapterView.getItemAtPosition(i));
+      keyStoreTypeIndex = i;
+    }
+  }
+
   private void addKey() {
+
+
+//    List<String> keyStoreTypeList = KeyStoreType.getKeyStoreTypeList();
+//
+//    Timber.tag("KEYS").e("%s", keyStoreTypeList);
+//
+//    final String containerFolder = getString(R.string.defaultPath);
+//
+//    if ( keyStoreTypeList.size() > 0 ){
+//
+//      new MaterialDialog.Builder(this)
+//        .title(R.string.container_title)
+//        .items(keyStoreTypeList)
+//        .itemsCallbackSingleChoice(-1, (dialog, view, which, text) -> {
+//
+//          KeyStoreType.saveCurrentType(keyStoreTypeList.get(which));
+//          keyStoreTypeIndex = which;
+//
+//          add_new_key(containerFolder);
+//
+//          return true;
+//        })
+//        .positiveText(R.string.vertical_form_stepper_form_continue)
+//        .show();
+//
+//    }
+
+
+//----------------------------------------------------
 
 //    EditText etContainerFolder = (EditText) view.findViewById(R.id.etContainerFolder);
 
-    // Получаем исходную папку с контейнерами.
-    String containerFolder = "/storage/";
+//    // Получаем исходную папку с контейнерами.
+//    String containerFolder = "/storage/";
+//
+//    try {
+//
+//      // Executes the command.
+//
+//      Process process = Runtime.getRuntime().exec("ls -la /storage/");
+//
+//      BufferedReader reader = new BufferedReader( new InputStreamReader(process.getInputStream()) );
+//
+//      int read;
+//      char[] buffer = new char[1024];
+//
+//      StringBuilder output = new StringBuilder();
+//      while ((read = reader.read(buffer)) > 0) {
+//        output.append(buffer, 0, read);
+//      }
+//      reader.close();
+//      process.waitFor();
+//
+//      Pattern pattern = Pattern.compile("(\\w{4}-\\w{4})");
+//      Matcher matcher = pattern.matcher(output.toString());
+//
+//      if (matcher.find()){
+//        Timber.tag("LS: folder - ").e( "/storage/%s", matcher.group() );
+//        containerFolder += matcher.group() + "/";
+//      } else {
+//        containerFolder = "self/primary/keys";
+//      }
+//
+//
+//    } catch (IOException | InterruptedException e) {
+////      throw new RuntimeException(e);
+//      Timber.tag("LS fails: ").e( e.toString() );
+//    }
+//
+//    try {
+//      Process proc = Runtime.getRuntime().exec("ls -la " + containerFolder);
+//
+//      BufferedReader reader = new BufferedReader( new InputStreamReader(proc.getInputStream()) );
+//
+//      int read;
+//      char[] buffer = new char[1024];
+//
+//      StringBuilder output = new StringBuilder();
+//      while ((read = reader.read(buffer)) > 0) {
+//        output.append(buffer, 0, read);
+//      }
+//      reader.close();
+//      proc.waitFor();
+//
+//      Timber.tag("LS").e("%s", output.toString());
+//
+//    } catch (IOException | InterruptedException e) {
+//      e.printStackTrace();
+//    }
+//
+//
+//    try {
+//      // Проверяем наличие контейнеров.
+//      File fileCur = null;
+//
+//
+//
+//      File sourceDirectory = new File(containerFolder);
+//      if (!sourceDirectory.exists()) {
+//        Timber.i("Source directory is empty or doesn't exist.");
+//        return;
+//      } // if
+//
+//      File[] srcContainers = sourceDirectory.listFiles();
+//      if (srcContainers == null || srcContainers.length == 0) {
+//        Timber.i("Source directory is empty.");
+//        return;
+//      } // if
+//
+//      // Определяемся с папкой назначения в кататоге
+//      // приложения.
+//
+//      CSPTool cspTool = new CSPTool(this);
+//      final String dstPath = cspTool.getAppInfrastructure().getKeysDirectory() + File.separator + userName2Dir(this);
+//
+//      deleteDirectory( new File(cspTool.getAppInfrastructure().getKeysDirectory()) );
+//
+//      cspTool.getAppInfrastructure().create();
+//
+//      Timber.i("Destination directory: %s", dstPath);
+//
+//      // Копируем папки контейнеров.
+//
+//      for (File srcCurrentContainer : srcContainers) {
+//
+//        if (srcCurrentContainer.getName().equals(".") || srcCurrentContainer.getName().equals("..")) {
+//          continue;
+//        }
+//
+//
+//        // Создаем папку контейнера в каталоге приложения.
+//        Timber.i("Container: %s", dstPath);
+//
+//        File dstContainer = new File(dstPath, srcCurrentContainer.getName());
+//        dstContainer.mkdirs();
+//
+//        // Копируем файлы из контейнера.
+//
+//        File[] srcContainer = srcCurrentContainer.listFiles();
+//        if (srcContainer != null) {
+//
+//          for (File srcCurrentContainerFile : srcContainer) {
+//
+//            Timber.i("\tCurrent file: %s", srcCurrentContainerFile.getName());
+//
+//            if (  srcCurrentContainerFile.getName().endsWith(".key") ){
+//              if (!RawResource.writeStreamToFile(
+//                srcCurrentContainerFile,
+//                dstContainer.getPath(), srcCurrentContainerFile.getName())) {
+//                Timber.i("\tCouldn't is_responsible file: %s", srcCurrentContainerFile.getName());
+//              }
+//              else {
+//                Timber.i("\tFile %s was copied successfully", srcCurrentContainerFile.getName());
+//              }
+//            } else {
+//              continue;
+//            }
+//
+//
+//
+//          } // for
+//
+//        } // if
+//
+//      } // for
+//
+//    } catch (Exception e) {
+//      Log.e(Constants.APP_LOGGER_TAG, e.getMessage(), e);
+//    }
 
+  }
+
+  public String userName2Dir() throws Exception {
+    Context context = getApplicationContext();
+
+    ApplicationInfo appInfo = context.getPackageManager()
+      .getPackageInfo(context.getPackageName(), 0)
+      .applicationInfo;
+
+    return String.valueOf(appInfo.uid) + "." +
+      String.valueOf(appInfo.uid);
+  }
+
+  private void setKeyEvent(String data) {
     try {
-
-      // Executes the command.
-
-      Process process = Runtime.getRuntime().exec("ls -la /storage/");
-
-      BufferedReader reader = new BufferedReader( new InputStreamReader(process.getInputStream()) );
-
-      int read;
-      char[] buffer = new char[1024];
-
-      StringBuilder output = new StringBuilder();
-      while ((read = reader.read(buffer)) > 0) {
-        output.append(buffer, 0, read);
-      }
-      reader.close();
-      process.waitFor();
-
-      Pattern pattern = Pattern.compile("(\\w{4}-\\w{4})");
-      Matcher matcher = pattern.matcher(output.toString());
-
-      if (matcher.find()){
-        Timber.tag("LS: folder - ").e( "/storage/%s", matcher.group() );
-        containerFolder += matcher.group() + "/";
-      } else {
-        containerFolder = "self/primary/keys";
-      }
-
-
-    } catch (IOException | InterruptedException e) {
-//      throw new RuntimeException(e);
-      Timber.tag("LS fails: ").e( e.toString() );
-    }
-
-    try {
-      Process proc = Runtime.getRuntime().exec("ls -la " + containerFolder);
-
-      BufferedReader reader = new BufferedReader( new InputStreamReader(proc.getInputStream()) );
-
-      int read;
-      char[] buffer = new char[1024];
-
-      StringBuilder output = new StringBuilder();
-      while ((read = reader.read(buffer)) > 0) {
-        output.append(buffer, 0, read);
-      }
-      reader.close();
-      proc.waitFor();
-
-      Timber.tag("LS").e("%s", output.toString());
-
-    } catch (IOException | InterruptedException e) {
+      KeyStoreType.saveCurrentType(data);
+    } catch (Exception e) {
       e.printStackTrace();
     }
+  }
 
+  private void add_new_key() {
 
     try {
-      // Проверяем наличие контейнеров.
-      File fileCur = null;
+
+      final String containerFolder = getString(R.string.defaultPath);
 
 
 
       File sourceDirectory = new File(containerFolder);
       if (!sourceDirectory.exists()) {
-        Timber.i("Source directory is empty or doesn't exist.");
+        Timber.tag(TAG).i("Source directory is empty or doesn't exist.");
         return;
       } // if
 
       File[] srcContainers = sourceDirectory.listFiles();
       if (srcContainers == null || srcContainers.length == 0) {
-        Timber.i("Source directory is empty.");
+        Timber.tag(TAG).i("Source directory is empty.");
         return;
       } // if
 
       // Определяемся с папкой назначения в кататоге
       // приложения.
 
-      CSPTool cspTool = new CSPTool(this);
-      final String dstPath = cspTool.getAppInfrastructure().getKeysDirectory() + File.separator + userName2Dir(this);
+      CSPTool cspTool = new CSPTool( getApplicationContext() );
+      final String dstPath = cspTool.getAppInfrastructure().getKeysDirectory() + File.separator + userName2Dir();
 
-      deleteDirectory( new File(cspTool.getAppInfrastructure().getKeysDirectory()) );
-
-      cspTool.getAppInfrastructure().create();
-
-      Timber.i("Destination directory: %s", dstPath);
+      Timber.tag(TAG).i("Destination directory: " + dstPath);
 
       // Копируем папки контейнеров.
 
-      for (File srcCurrentContainer : srcContainers) {
+      for (int i = 0; i < srcContainers.length; i++) {
+
+        File srcCurrentContainer = srcContainers[i];
 
         if (srcCurrentContainer.getName().equals(".") || srcCurrentContainer.getName().equals("..")) {
           continue;
-        }
+        } // if
 
+        Timber.tag(TAG).i("Copy container: " + srcCurrentContainer.getName());
 
         // Создаем папку контейнера в каталоге приложения.
-        Timber.i("Container: %s", dstPath);
 
         File dstContainer = new File(dstPath, srcCurrentContainer.getName());
         dstContainer.mkdirs();
@@ -536,40 +677,41 @@ public class MainService extends Service {
         File[] srcContainer = srcCurrentContainer.listFiles();
         if (srcContainer != null) {
 
-          for (File srcCurrentContainerFile : srcContainer) {
+          for (int j = 0; j < srcContainer.length; j++) {
 
-            Timber.i("\tCurrent file: %s", srcCurrentContainerFile.getName());
+            File srcCurrentContainerFile = srcContainer[j];
 
-            if (  srcCurrentContainerFile.getName().endsWith(".key") ){
-              if (!RawResource.writeStreamToFile(
-                srcCurrentContainerFile,
-                dstContainer.getPath(), srcCurrentContainerFile.getName())) {
-                Timber.i("\tCouldn't is_responsible file: %s", srcCurrentContainerFile.getName());
-              }
-              else {
-                Timber.i("\tFile %s was copied successfully", srcCurrentContainerFile.getName());
-              }
-            } else {
+            if (srcCurrentContainerFile.getName().equals(".")
+              || srcCurrentContainerFile.getName().equals("..")) {
               continue;
-            }
+            } // if
 
+            Timber.tag(TAG).i("\tCopy file: " + srcCurrentContainerFile.getName());
 
+            // Копирование единичного файла.
+
+            if (!RawResource.writeStreamToFile(
+              srcCurrentContainerFile,
+              dstContainer.getPath(), srcCurrentContainerFile.getName())) {
+              Timber.tag(TAG).i("\tCouldn't copy file: " + srcCurrentContainerFile.getName());
+            } // if
+            else {
+              Timber.tag(TAG).i("\tFile " + srcCurrentContainerFile.getName() + " was copied successfully.");
+            } // else
 
           } // for
 
         } // if
 
       } // for
-
     } catch (Exception e) {
-      Log.e(Constants.APP_LOGGER_TAG, e.getMessage(), e);
+      Timber.tag(TAG).e(e);
+
     }
-
-
   }
 
   private void checkPin(String password) throws Exception {
-    addKey();
+//    addKey();
     aliases( KeyStoreType.currentType(), ProviderType.currentProviderType() );
 
     Timber.tag(TAG).d( "aliasesList, %s", aliasesList );
@@ -696,20 +838,6 @@ public class MainService extends Service {
 
     return result;
 
-  }
-
-  public void isConnected(){
-    ReactiveNetwork.observeInternetConnectivity()
-      .subscribeOn(Schedulers.io())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(isConnectedToInternet -> {
-//        Toast.makeText( this, String.format( "Connected to inet: %s", isConnectedToInternet ), Toast.LENGTH_SHORT ).show();
-        settings.getBoolean("isConnectedToInternet").set( isConnectedToInternet );
-
-        if ( isConnectedToInternet ){
-          updateAll();
-        }
-      });
   }
 
   private void checkSedAvailibility() {
@@ -856,7 +984,7 @@ public class MainService extends Service {
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(UpdateDocumentsByStatusEvent event) throws Exception {
     Timber.tag(TAG).e("UpdateDocumentsByStatusEvent");
-    dataLoaderInterface.updateByCurrentStatus( event.item, event.button );
+    dataLoaderInterface.updateByCurrentStatus( event.item, event.button, false);
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
@@ -887,8 +1015,35 @@ public class MainService extends Service {
     }
   }
 
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(SelectKeyStoreEvent event){
+    setKeyEvent(event.data);
+
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(AddKeyEvent event){
+    add_new_key();
+  }
+
   private boolean isFirstRun() {
     FirstRun firstRun = new FirstRun(settings);
     return firstRun.isFirstRun();
+  }
+
+  // resolved https://tasks.n-core.ru/browse/MVDESD-13314
+  // Старт / стоп проверки наличия сети
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(CheckNetworkEvent event){
+    // Stop previously started checking network connection task, if exists
+    if ( futureNetwork != null && !futureNetwork.isCancelled() ) {
+      futureNetwork.cancel(true);
+    }
+
+    // Start new checking network connection task, if requested by the event
+    if ( event.isStart() ) {
+      futureNetwork = scheduller.scheduleWithFixedDelay(
+              new CheckNetworkTask(getApplicationContext(), settings, okHttpClient),  0 , 10, TimeUnit.SECONDS );
+    }
   }
 }

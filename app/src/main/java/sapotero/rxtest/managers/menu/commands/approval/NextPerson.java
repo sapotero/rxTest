@@ -15,7 +15,7 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.events.view.ShowPrevDocumentEvent;
+import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -74,7 +74,7 @@ public class NextPerson extends AbstractCommand {
   @Override
   public void execute() {
     queueManager.add(this);
-    EventBus.getDefault().post( new ShowPrevDocumentEvent());
+    EventBus.getDefault().post( new ShowNextDocumentEvent());
   }
 
   @Override

@@ -72,7 +72,7 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity implement
       }
     );
 
-    toolbar.setTitle("Просмотр ЭО");
+//    toolbar.setTitle("Просмотр ЭО");
 //    toolbar.setSubtitle("subtitle");
 
   }
