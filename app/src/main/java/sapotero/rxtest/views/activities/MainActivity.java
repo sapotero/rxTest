@@ -180,6 +180,23 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   protected void onCreate(Bundle savedInstanceState) {
     setTheme(R.style.AppTheme);
 
+
+
+    /*
+    *
+    *
+    * Сделать InvalidationManager
+    * назначение - инвалидация документов по мд5
+
+    * Суть его - хранилка в памяти, где лежат ид доков и их мд5
+    *
+    * Назначение
+    * - не делать 100 запросов на обновление - если мд5 в памяти совпадают
+    * - обновлять доки пачками
+    *
+    *
+    * */
+
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
 

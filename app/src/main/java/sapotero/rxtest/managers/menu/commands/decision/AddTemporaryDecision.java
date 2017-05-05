@@ -17,7 +17,6 @@ import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.db.requery.utils.DecisionConverter;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
-import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -204,7 +203,7 @@ public class AddTemporaryDecision extends AbstractCommand {
         .subscribe(
           data -> {
             Timber.tag(TAG).e("Updated: %s", data.getId());
-            EventBus.getDefault().post( new UpdateCurrentDocumentEvent( params.getDocument() ));
+//            EventBus.getDefault().post( new UpdateCurrentDocumentEvent( params.getDocument() ));
             EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( params.getDecisionModel().getId() ));
           },
           error -> {

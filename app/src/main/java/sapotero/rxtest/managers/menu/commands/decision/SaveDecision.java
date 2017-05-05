@@ -24,7 +24,6 @@ import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
-import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -92,12 +91,12 @@ public class SaveDecision extends AbstractCommand {
     dataStore
       .update(RDocumentEntity.class)
       .set(RDocumentEntity.CHANGED, true)
-      .set(RDocumentEntity.MD5, "")
+//      .set(RDocumentEntity.MD5, "")
       .where(RDocumentEntity.UID.eq( params.getDecisionModel().getDocumentUid() ))
       .get()
       .value();
 
-    EventBus.getDefault().post( new ShowNextDocumentEvent());
+//    EventBus.getDefault().post( new ShowNextDocumentEvent());
     update();
 
   }
@@ -283,8 +282,8 @@ public class SaveDecision extends AbstractCommand {
 
             if (callback != null ){
               callback.onCommandExecuteSuccess( getType() );
-              EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
             }
+            EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
 
             queueManager.setExecutedRemote(this);
           }
