@@ -502,7 +502,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     }
 
     if (subscription.hasSubscriptions()){
-      subscription.unsubscribe();
+      subscription.clear();
     }
   }
 }

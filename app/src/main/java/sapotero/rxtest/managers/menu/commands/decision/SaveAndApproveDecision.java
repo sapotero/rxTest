@@ -25,6 +25,8 @@ import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
+import sapotero.rxtest.managers.menu.factories.CommandFactory;
+import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.DocumentService;
@@ -83,6 +85,17 @@ public class SaveAndApproveDecision extends AbstractCommand {
 
   @Override
   public void execute() {
+
+    CommandFactory.Operation operation = CommandFactory.Operation.CREATE_TEMPORARY_DECISION;
+    CommandParams _params = new CommandParams();
+    _params.setDecisionId( params.getDecisionModel().getId() );
+    _params.setDecisionModel( params.getDecisionModel() );
+    _params.setDocument(params.getDocument());
+    _params.setAssignment(params.isAssignment());
+    Command command = operation.getCommand(null, context, document, _params);
+    command.execute();
+
+
     queueManager.add(this);
     updateLocal();
   }
@@ -216,11 +229,13 @@ public class SaveAndApproveDecision extends AbstractCommand {
 
             if (callback != null ){
               callback.onCommandExecuteSuccess( getType() );
-              EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
             }
+            EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
 
             queueManager.setExecutedRemote(this);
           }
+
+//          EventBus.getDefault().post( new UpdateCurrentDocumentEvent( data.getDocumentUid() ));
 
         },
         error -> {
