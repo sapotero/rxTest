@@ -36,6 +36,7 @@ import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.adapter.UpdateDocumentAdapterEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
+import sapotero.rxtest.jobs.utils.JobCounter;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Card;
@@ -51,6 +52,7 @@ import timber.log.Timber;
 public class CreateDocumentsJob extends BaseJob {
 
   public static final int PRIORITY = 1;
+  private boolean shared = false;
   private boolean not_processed;
   private String status;
   private String journal;
@@ -68,9 +70,12 @@ public class CreateDocumentsJob extends BaseJob {
   private String TAG = this.getClass().getSimpleName();
   private DocumentInfo document;
 
-  public CreateDocumentsJob(String uid, String journal, String status) {
+  private int jobCount;
+
+  public CreateDocumentsJob(String uid, String journal, String status, boolean shared) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
+    this.shared = shared;
 
     if (journal != null) {
       String[] index = journal.split("_production_db_");
@@ -117,6 +122,7 @@ public class CreateDocumentsJob extends BaseJob {
         },
         error -> {
           Timber.tag(TAG).e(error);
+          EventBus.getDefault().post( new StepperLoadDocumentEvent("Error downloading document info on create") );
         }
 
       );
@@ -342,6 +348,12 @@ public class CreateDocumentsJob extends BaseJob {
     doc.setFilter(status);
     doc.setDocumentType(journal);
 
+    if (shared || Objects.equals(doc.getAddressedToType(), "group")) {
+      doc.setAddressedToType("group");
+    } else {
+      doc.setAddressedToType("");
+    }
+
     dataStore
       .insert( doc )
       .toObservable()
@@ -351,17 +363,11 @@ public class CreateDocumentsJob extends BaseJob {
         result -> {
           EventBus.getDefault().post( new UpdateCurrentDocumentEvent( doc.getUid() ) );
 
-//          if ( result.getImages() != null && result.getImages().size() > 0 && ( isFavorites != null && !isFavorites ) ){
-//            for (RImage _image : result.getImages()) {
-//              RImageEntity image = (RImageEntity) _image;
-//              jobManager.addJobInBackground( new DownloadFileJob(HOST.get(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
-//            }
-//          }
-
+          jobCount = 0;
 
           if ( result.getImages() != null && result.getImages().size() > 0 ){
             for (RImage _image : result.getImages()) {
-
+              jobCount++;
               RImageEntity image = (RImageEntity) _image;
               jobManager.addJobInBackground( new DownloadFileJob(HOST.get(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
             }
@@ -369,6 +375,7 @@ public class CreateDocumentsJob extends BaseJob {
 
           if ( doc.getLinks() != null && doc.getLinks().size() > 0 ){
             for (RLinks _link: doc.getLinks()) {
+              jobCount++;
               RLinksEntity link = (RLinksEntity) _link;
               jobManager.addJobInBackground( new UpdateLinkJob( link.getUid() ) );
             }
@@ -384,6 +391,7 @@ public class CreateDocumentsJob extends BaseJob {
                 if (cards.length > 0){
                   for (Card card: cards ) {
                     if (card.getUid() != null) {
+                      jobCount++;
                       jobManager.addJobInBackground( new UpdateLinkJob( card.getUid() ) );
                     }
                   }
@@ -391,6 +399,9 @@ public class CreateDocumentsJob extends BaseJob {
               }
             }
           }
+
+          JobCounter jobCounter = new JobCounter(settings);
+          jobCounter.addJobCount(jobCount);
 
           EventBus.getDefault().post( new UpdateDocumentAdapterEvent( result.getUid(), result.getDocumentType(), result.getFilter() ) );
 
@@ -411,5 +422,6 @@ public class CreateDocumentsJob extends BaseJob {
   @Override
   protected void onCancel(@CancelReason int cancelReason, @Nullable Throwable throwable) {
     // Job has exceeded retry attempts or shouldReRunOnThrowable() has decided to cancel.
+    EventBus.getDefault().post( new StepperLoadDocumentEvent("Error creating document (job cancelled)") );
   }
 }

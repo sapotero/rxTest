@@ -6,8 +6,8 @@
         <EditTextPreference
             android:key="settings_username_host"
             android:title="Домен"
-            android:defaultValue="http://mobile.sed.a-soft.org/"/>
-        <!--android:defaultValue="http://mobile.sed.mvd.ru/"/>-->
+            android:defaultValue="http://mobile.sed.mvd.ru/"/>
+        <!--android:defaultValue="http://mobile.sed.a-soft.org/"/>-->
     </android.support.v7.preference.PreferenceCategory>
 
     <android.support.v7.preference.PreferenceCategory
@@ -126,7 +126,7 @@
 
         <SwitchPreference
             android:key="is_first_run"
-            android:title="Первый запуск"
+            android:title="Отображение окна авторизации"
             android:defaultValue="true" />
     </android.support.v7.preference.PreferenceCategory>
 

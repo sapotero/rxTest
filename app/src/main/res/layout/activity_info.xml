@@ -91,14 +91,14 @@
                 android:layout_height="match_parent">
 
                 <ImageButton
-                    android:id="@+id/activity_info_prev_document"
+                    android:id="@+id/activity_info_next_document"
                     android:src="@drawable/arrow_left_tab"
                     android:layout_width="48dp"
                     android:foreground="?android:attr/selectableItemBackground"
                     android:layout_height="wrap_content"
                     style="@style/Widget.AppCompat.Button.Borderless"/>
                 <ImageButton
-                    android:id="@+id/activity_info_next_document"
+                    android:id="@+id/activity_info_prev_document"
                     android:src="@drawable/arrow_right_tab"
                     android:layout_width="48dp"
                     android:layout_height="wrap_content"

@@ -17,13 +17,14 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
-import sapotero.rxtest.events.view.ShowPrevDocumentEvent;
+import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -86,17 +87,17 @@ public class SaveDecision extends AbstractCommand {
   public void execute() {
 
 
-//    CommandFactory.Operation operation = CommandFactory.Operation.SAVE_TEMPORARY_DECISION;
-//    CommandParams temporaryParams = new CommandParams();
-//    temporaryParams.setDecisionId( this.params.getDecisionModel().getId() );
-//    temporaryParams.setDecisionModel( this.params.getDecisionModel() );
-//    temporaryParams.setDocument(this.params.getDocument());
-//    temporaryParams.setLinkedTaskUuid( params.getUuid() );
-//    Command command = operation.getCommand(null, context, document, temporaryParams);
-//    command.execute();
-//    queueManager.add(command);
+    // resolved https://tasks.n-core.ru/browse/MVDESD-13366
+    // ставим плашку всегда
+    dataStore
+      .update(RDocumentEntity.class)
+      .set(RDocumentEntity.CHANGED, true)
+      .set(RDocumentEntity.MD5, "")
+      .where(RDocumentEntity.UID.eq( params.getDecisionModel().getDocumentUid() ))
+      .get()
+      .value();
 
-    EventBus.getDefault().post( new ShowPrevDocumentEvent());
+    EventBus.getDefault().post( new ShowNextDocumentEvent());
     update();
 
   }

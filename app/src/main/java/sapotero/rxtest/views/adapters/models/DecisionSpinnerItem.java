@@ -5,19 +5,9 @@ import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 public class DecisionSpinnerItem {
 
   private RDecisionEntity decision;
-  private String name;
-  private String date;
 
-  public DecisionSpinnerItem(RDecisionEntity decision, String name, String date) {
+  public DecisionSpinnerItem(RDecisionEntity decision) {
     this.decision = decision;
-    this.name = name;
-    this.date = date;
-  }
-
-  public DecisionSpinnerItem(RDecisionEntity decision, String name, int size) {
-    this.decision = decision;
-    this.name = name;
-    this.date = String.valueOf(size);
   }
 
   public RDecisionEntity getDecision() {
@@ -29,20 +19,13 @@ public class DecisionSpinnerItem {
   }
 
   public String getDate() {
-    return date;
-  }
-
-  public void setDate(String date) {
-    this.date = date;
+    return decision.getDate();
   }
 
   public String getName() {
-    return name;
+    return decision.getSignerBlankText();
   }
 
-  public void setName(String name) {
-    this.name = name;
-  }
 
 
 }

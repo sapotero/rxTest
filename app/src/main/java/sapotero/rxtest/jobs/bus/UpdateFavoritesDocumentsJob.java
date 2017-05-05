@@ -35,6 +35,7 @@ import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.adapter.UpdateDocumentAdapterEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
+import sapotero.rxtest.jobs.utils.JobCounter;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Card;
@@ -67,6 +68,8 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
   private String uid;
   private String TAG = this.getClass().getSimpleName();
   private DocumentInfo document;
+
+  private int jobCount;
 
   public UpdateFavoritesDocumentsJob(String uid, String folder) {
     super( new Params(PRIORITY).requireNetwork().persist().addTags("SyncDocument") );
@@ -115,9 +118,12 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
 
           EventBus.getDefault().post( new StepperLoadDocumentEvent(doc.getUid()) );
 
+          jobCount = 0;
+
           if ( doc.getLinks() != null && doc.getLinks().size() > 0 ){
 
             for (String link: doc.getLinks()) {
+              jobCount++;
               jobManager.addJobInBackground( new UpdateLinkJob( link ) );
             }
 
@@ -128,6 +134,7 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
               if ( step.getCards() != null && step.getCards().size() > 0){
                 for (Card card: step.getCards() ) {
                   if (card.getUid() != null) {
+                    jobCount++;
                     jobManager.addJobInBackground( new UpdateLinkJob( card.getUid() ) );
                   }
                 }
@@ -135,9 +142,11 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
             }
           }
 
+          addPrefJobCount(jobCount);
         },
         error -> {
           error.printStackTrace();
+          EventBus.getDefault().post( new StepperLoadDocumentEvent("Error downloading favorite document info") );
         }
 
       );
@@ -225,9 +234,6 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
 
   private void update(Boolean exist){
 
-    if (filter != null) {
-      Timber.tag(TAG).d("create title - %s | %s", document.getTitle(), filter.toString() );
-    }
 
     if (exist) {
       updateDocumentInfo();
@@ -464,15 +470,19 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
         result -> {
           Timber.tag(TAG).d("updated " + result.getUid());
 
+          jobCount = 0;
+
           if ( result.getImages() != null && result.getImages().size() > 0 && ( isFavorites != null && !isFavorites ) ){
 
             for (RImage _image : result.getImages()) {
-
+              jobCount++;
               RImageEntity image = (RImageEntity) _image;
               jobManager.addJobInBackground( new DownloadFileJob(HOST.get(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
             }
 
           }
+
+          addPrefJobCount(jobCount);
         },
         error ->{
           error.printStackTrace();
@@ -699,7 +709,7 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
       if (folder != null) {
 
         if (!Objects.equals(doc.getFilter(), folder)){
-          doc.setFilter(folder);
+          doc.setFolder(folder);
 //          doc.setProcessed(false);
         }
 
@@ -707,7 +717,7 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
       if (filter != null) {
         doc.setFilter( filter.toString() );
         if (!Objects.equals(doc.getFilter(), filter.getValue())){
-          doc.setFilter(folder);
+          doc.setFolder(folder);
         }
       }
 
@@ -721,6 +731,12 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
       // если подписание/согласование
       if ( journal == null && doc.getDocumentType()  == null && folder != null && doc.isProcessed()  ){
         doc.setProcessed( false );
+      }
+
+      // если обновляем документ
+      if ( doc.getDocumentType() != null && doc.getFilter() != null ){
+        doc.setProcessed( false );
+        doc.setFavorites(true);
       }
 
     }
@@ -737,15 +753,19 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
 
           EventBus.getDefault().post( new UpdateDocumentAdapterEvent( result.getUid(), result.getDocumentType(), result.getFilter() ) );
 
+          jobCount = 0;
+
           if ( result.getImages() != null && result.getImages().size() > 0 ){
 
             for (RImage _image : result.getImages()) {
-
+              jobCount++;
               RImageEntity image = (RImageEntity) _image;
               jobManager.addJobInBackground( new DownloadFileJob(HOST.get(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
             }
 
           }
+
+          addPrefJobCount(jobCount);
         },
         error -> {
           Timber.tag(TAG).e("%s", error);
@@ -760,5 +780,11 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
   @Override
   protected void onCancel(@CancelReason int cancelReason, @Nullable Throwable throwable) {
     // Job has exceeded retry attempts or shouldReRunOnThrowable() has decided to cancel.
+    EventBus.getDefault().post( new StepperLoadDocumentEvent("Error updating favorite document (job cancelled)") );
+  }
+
+  private void addPrefJobCount(int value) {
+    JobCounter jobCounter = new JobCounter(settings);
+    jobCounter.addJobCount(jobCount);
   }
 }

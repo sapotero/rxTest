@@ -34,6 +34,11 @@ public abstract class RDocument implements Persistable {
   @Index("user_index")
   String user;
 
+  //  Запрос на получение документов по api v3
+  //  /v3/documents.json?status_code=primary_consideration&addressed_to_type=group
+  @Index("addressedToType_index")
+  String addressedToType;
+
   Integer sortKey;
   String title;
   String registrationNumber;

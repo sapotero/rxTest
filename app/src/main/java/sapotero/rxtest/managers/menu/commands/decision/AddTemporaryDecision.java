@@ -106,6 +106,16 @@ public class AddTemporaryDecision extends AbstractCommand {
 
     Timber.tag(TAG).e("doc: %s", doc);
 
+    // resolved https://tasks.n-core.ru/browse/MVDESD-13366
+    // ставим плашку всегда
+    dataStore
+      .update(RDocumentEntity.class)
+      .set(RDocumentEntity.CHANGED, true)
+      .set(RDocumentEntity.MD5, "")
+      .where(RDocumentEntity.UID.eq( uid ))
+      .get()
+      .value();
+
 
 
     Decision dec = params.getDecisionModel();

@@ -236,7 +236,7 @@
 
     <string name="searchview_image_back">Back</string>
     <string name="searchview_voice_cancel">Voice Cancel</string>
-    <string name="searchview_text_hint">Hint</string>
+    <string name="searchview_text_hint">Поиск</string>
 
     <string name="dialog_to_control_positive">Подтверждение постановки на контроль</string>
     <string name="dialog_to_control_body_positive">Документ будет отмечен к постановке на контроль с проставлением на электронный образ штампа контроля</string>
@@ -443,6 +443,9 @@
     <string name="fragment_decision_template_add_prefill">Внимание!\nНеобходимо срочно исполнить!</string>
     <string name="defaultPath">/mnt/sdcard/keys</string>
     <string name="container_title">Выбор контейнера</string>
+
+    <string name="is_online">В сети</string>
+    <string name="is_offline">Не в сети</string>
 
     <string-array name="IntentsCAAddressList">
         <item>http://www.cryptopro.ru/certsrv/</item>

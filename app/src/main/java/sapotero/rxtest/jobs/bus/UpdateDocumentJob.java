@@ -35,6 +35,7 @@ import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.adapter.UpdateDocumentAdapterEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
+import sapotero.rxtest.jobs.utils.JobCounter;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Card;
@@ -51,6 +52,7 @@ import timber.log.Timber;
 public class UpdateDocumentJob extends BaseJob {
 
   public static final int PRIORITY = 1;
+  private boolean shared = false;
   private boolean not_processed;
   private String status;
   private String journal;
@@ -68,15 +70,18 @@ public class UpdateDocumentJob extends BaseJob {
   private String TAG = this.getClass().getSimpleName();
   private DocumentInfo document;
 
+  private int jobCount;
+
   public UpdateDocumentJob(String uid, Fields.Status filter) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
     this.filter = filter;
   }
 
-  public UpdateDocumentJob(String uid, String journal, String status, boolean b) {
+  public UpdateDocumentJob(String uid, String journal, String status, boolean shared) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
+    this.shared = shared;
 
     String[] index = journal.split("_production_db_");
     this.journal = index[0];
@@ -85,22 +90,14 @@ public class UpdateDocumentJob extends BaseJob {
     this.not_processed = true;
   }
 
-  public UpdateDocumentJob(String uid, String status) {
+  public UpdateDocumentJob(String uid, String status, boolean shared) {
     super( new Params(PRIORITY).requireNetwork().persist().addTags("SyncDocument") );
     this.uid     = uid;
     if (!Objects.equals(status, "")){
       this.status  = status;
     }
-  }
+    this.shared = shared;
 
-  public UpdateDocumentJob(String uid, String journal, String status) {
-    super( new Params(PRIORITY).requireNetwork().persist() );
-    this.uid = uid;
-
-    String[] index = journal.split("_production_db_");
-    this.journal = index[0];
-
-    this.status  = status;
   }
 
   @Override
@@ -135,16 +132,18 @@ public class UpdateDocumentJob extends BaseJob {
       .subscribe(
         doc -> {
           document = doc;
-          Timber.tag(TAG).d("recv title - %s", doc.getTitle() );
-          Timber.tag(TAG).d("actions - %s", new Gson().toJson( doc.getOperations() ) );
+          Timber.tag(TAG).d("recv title - %s %s", doc.getTitle(), shared );
 
           update( exist(doc.getUid()) );
 
           EventBus.getDefault().post( new StepperLoadDocumentEvent(doc.getUid()) );
 
+          jobCount = 0;
+
           if ( doc.getLinks() != null && doc.getLinks().size() > 0 ){
 
             for (String link: doc.getLinks()) {
+              jobCount++;
               jobManager.addJobInBackground( new UpdateLinkJob( link ) );
             }
 
@@ -155,6 +154,7 @@ public class UpdateDocumentJob extends BaseJob {
               if ( step.getCards() != null && step.getCards().size() > 0){
                 for (Card card: step.getCards() ) {
                   if (card.getUid() != null) {
+                    jobCount++;
                     jobManager.addJobInBackground( new UpdateLinkJob( card.getUid() ) );
                   }
                 }
@@ -162,15 +162,15 @@ public class UpdateDocumentJob extends BaseJob {
             }
           }
 
+          addPrefJobCounter(jobCount);
         },
         error -> {
           error.printStackTrace();
+          EventBus.getDefault().post( new StepperLoadDocumentEvent("Error downloading document info on update") );
         }
 
       );
   }
-
-
 
   @NonNull
   private Boolean exist(String uid){
@@ -184,7 +184,32 @@ public class UpdateDocumentJob extends BaseJob {
 
     if( count != 0 ){
       result = true;
+
+      RDocumentEntity doc = dataStore.select(RDocumentEntity.class).where(RDocumentEntity.UID.eq(uid)).get().firstOrNull();
+
+      if (doc != null) {
+
+        if (shared || Objects.equals(doc.getAddressedToType(), "group")) {
+          doc.setAddressedToType("group");
+        } else {
+          doc.setAddressedToType("");
+        }
+
+
+        dataStore
+          .update(doc)
+          .toObservable()
+          .subscribeOn( Schedulers.io() )
+          .observeOn( AndroidSchedulers.mainThread() )
+          .subscribe(
+            data -> {
+              Timber.tag(TAG).e("UPDATED %s %s", uid, shared);
+            }, error -> {
+              Timber.tag(TAG).e(error);
+          });
+      }
     }
+
 
     Timber.tag(TAG).v("exist " + result );
 
@@ -228,6 +253,9 @@ public class UpdateDocumentJob extends BaseJob {
 
     rd.setFavorites(false);
     rd.setProcessed(false);
+    if (shared) {
+      rd.setAddressedToType("group");
+    }
 
     rd.setControl(onControl);
 
@@ -503,21 +531,26 @@ public class UpdateDocumentJob extends BaseJob {
 
       dataStore.update(rDoc)
         .toObservable()
-        .subscribeOn( Schedulers.io() )
-        .observeOn( Schedulers.io() )
+        .subscribeOn( Schedulers.computation() )
+        .observeOn( AndroidSchedulers.mainThread() )
         .subscribe(
           result -> {
             Timber.tag(TAG).d("updated " + result.getUid());
+            Timber.tag(TAG).e("%s", shared);
+
+            jobCount = 0;
 
             if ( result.getImages() != null && result.getImages().size() > 0 && ( isFavorites != null && !isFavorites ) ){
 
               for (RImage _image : result.getImages()) {
-
+                jobCount++;
                 RImageEntity image = (RImageEntity) _image;
                 jobManager.addJobInBackground( new DownloadFileJob(HOST.get(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
               }
 
             }
+
+            addPrefJobCounter(jobCount);
           },
           error ->{
             error.printStackTrace();
@@ -554,13 +587,13 @@ public class UpdateDocumentJob extends BaseJob {
       Boolean red = false;
       Boolean with_decision = false;
 
+      if ( document.getDecisions() != null && document.getDecisions().size() >= 0 ){
+        doc.getDecisions().clear();
+        dataStore.delete(RDecisionEntity.class).where(RDecisionEntity.DOCUMENT_ID.eq(doc.getId())).get().value();
+      }
+
       if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
         with_decision = true;
-        doc.getDecisions().clear();
-
-        for ( Decision dec : document.getDecisions() ) {
-          dataStore.delete(RDecisionEntity.class).where(RDecisionEntity.UID.eq(dec.getId())).get().value();
-        }
 
         for (Decision d: document.getDecisions() ) {
 
@@ -815,15 +848,19 @@ public class UpdateDocumentJob extends BaseJob {
 
           EventBus.getDefault().post( new UpdateDocumentAdapterEvent( result.getUid(), result.getDocumentType(), result.getFilter() ) );
 
+          jobCount = 0;
+
           if ( result.getImages() != null && result.getImages().size() > 0 ){
 
             for (RImage _image : result.getImages()) {
-
+              jobCount++;
               RImageEntity image = (RImageEntity) _image;
               jobManager.addJobInBackground( new DownloadFileJob(HOST.get(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
             }
 
           }
+
+          addPrefJobCounter(jobCount);
         },
         error -> {
           Timber.tag(TAG).e("%s", error);
@@ -838,5 +875,11 @@ public class UpdateDocumentJob extends BaseJob {
   @Override
   protected void onCancel(@CancelReason int cancelReason, @Nullable Throwable throwable) {
     // Job has exceeded retry attempts or shouldReRunOnThrowable() has decided to cancel.
+    EventBus.getDefault().post( new StepperLoadDocumentEvent("Error updating document (job cancelled)") );
+  }
+
+  private void addPrefJobCounter(int value) {
+    JobCounter jobCounter = new JobCounter(settings);
+    jobCounter.addJobCount(value);
   }
 }

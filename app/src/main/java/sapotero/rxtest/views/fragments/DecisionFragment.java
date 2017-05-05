@@ -14,10 +14,8 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
@@ -28,6 +26,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
@@ -53,6 +52,7 @@ import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.retrofit.utils.OshsService;
 import sapotero.rxtest.views.adapters.PrimaryConsiderationAdapter;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
+import sapotero.rxtest.views.dialogs.DecisionTextDialog;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
 import sapotero.rxtest.views.dialogs.SelectTemplateDialogFragment;
 import timber.log.Timber;
@@ -219,23 +219,14 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     card_toolbar.setTitle("Блок " + number );
     decision_text.setText( block.getText() );
 
-    decision_text.setOnFocusChangeListener((v, hasFocus) -> {
-      Timber.tag(TAG).e("has focus: %s", hasFocus);
-      if(!hasFocus){
-        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-      }
-    });
-    decision_text.setOnTouchListener((v, event) -> {
+    // Disable EditText scrolling
+    decision_text.setMovementMethod(null);
 
-      v.getParent().getParent().requestDisallowInterceptTouchEvent(true);
-      switch (event.getAction() & MotionEvent.ACTION_MASK){
-        case MotionEvent.ACTION_UP:
-          v.getParent().getParent().requestDisallowInterceptTouchEvent(false);
-          break;
-      }
-      return false;
+    decision_text.setOnClickListener(v -> {
+      String title = getString(R.string.decision_text);
+      new DecisionTextDialog(mContext, decision_text, title, title).show();
     });
+
     decision_text.addTextChangedListener(new TextWatcher() {
 
       public void onTextChanged(CharSequence s, int start, int before, int count) {

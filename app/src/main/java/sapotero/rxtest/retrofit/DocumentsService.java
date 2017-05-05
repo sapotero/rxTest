@@ -13,6 +13,7 @@ public interface DocumentsService {
     @Query("login") String login,
     @Query("auth_token") String auth_token,
     @Query("status_code") String status_code,
+    @Query("addressed_to_type") String addressed_to_type,
     @Query("limit")  Integer limit,
     @Query("offset") Integer offset
   );
@@ -23,6 +24,7 @@ public interface DocumentsService {
     @Query("auth_token") String auth_token,
     @Query("indexes") String indexes,
     @Query("status_code") String status_code,
+    @Query("addressed_to_type") String addressed_to_type,
     @Query("limit") int limit
   );
 
