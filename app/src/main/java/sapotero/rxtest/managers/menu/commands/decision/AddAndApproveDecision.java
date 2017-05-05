@@ -71,9 +71,9 @@ public class AddAndApproveDecision extends AbstractCommand {
 
   @Override
   public void execute() {
-    queueManager.add(this);
 
     updateLocal();
+    queueManager.add(this);
     EventBus.getDefault().post( new ShowNextDocumentEvent() );
   }
 
@@ -94,6 +94,13 @@ public class AddAndApproveDecision extends AbstractCommand {
       .where(RDecisionEntity.UID.eq(params.getDecisionModel().getId()))
       .get().firstOrNull();
 
+    dataStore
+      .update(RDocumentEntity.class)
+      .set(RDocumentEntity.CHANGED, true)
+      .where(RDocumentEntity.UID.eq( params.getDecisionModel().getDocumentUid() ))
+      .get()
+      .value();
+
     // resolved https://tasks.n-core.ru/browse/MVDESD-13366
     // ставим плашку всегда
     dataStore
@@ -107,7 +114,6 @@ public class AddAndApproveDecision extends AbstractCommand {
 
 
 
-    Timber.tag(TAG).e("-------- %s %s", params.getDecisionModel().getSignerId(), settings.getString("current_user_id").get());
     if (
       Objects.equals(params.getDecisionModel().getSignerId(), settings.getString("current_user_id").get())
       // или если подписывающий министр
