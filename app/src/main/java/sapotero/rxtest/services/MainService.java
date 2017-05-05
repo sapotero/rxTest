@@ -34,6 +34,7 @@ import javax.inject.Inject;
 
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
+import okhttp3.OkHttpClient;
 import ru.CryptoPro.CAdES.CAdESConfig;
 import ru.CryptoPro.JCP.JCP;
 import ru.CryptoPro.JCP.tools.Encoder;
@@ -104,6 +105,7 @@ public class MainService extends Service {
   private ScheduledThreadPoolExecutor scheduller;
   private ScheduledFuture futureNetwork;
 
+  @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
