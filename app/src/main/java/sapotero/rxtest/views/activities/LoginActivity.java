@@ -23,19 +23,25 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import okhttp3.OkHttpClient;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.events.bus.FileDownloadedEvent;
+import sapotero.rxtest.events.crypto.AddKeyEvent;
+import sapotero.rxtest.events.crypto.SelectKeyStoreEvent;
+import sapotero.rxtest.events.crypto.SelectKeysEvent;
 import sapotero.rxtest.events.stepper.shared.StepperNextStepEvent;
+import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.FirstRun;
 import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.custom.stepper.StepperLayout;
 import sapotero.rxtest.views.custom.stepper.VerificationError;
 import sapotero.rxtest.views.custom.stepper.build.StepperAdapter;
-import sapotero.rxtest.services.MainService;
+import timber.log.Timber;
 
 
 public class LoginActivity extends AppCompatActivity implements StepperLayout.StepperListener {
@@ -86,6 +92,7 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
 
       initView();
 
+
     } else {
 
       new MaterialDialog.Builder(this)
@@ -103,6 +110,33 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
 
 //    queue.clean();
 
+  }
+
+  private void showSelectDialog(List<String> keyStoreTypeList) {
+
+
+    Timber.tag("KEYS").e("%s", keyStoreTypeList);
+
+    if ( keyStoreTypeList.size() > 0 ){
+
+      new MaterialDialog.Builder(this)
+        .title(R.string.container_title)
+        .items(keyStoreTypeList)
+        .itemsCallbackSingleChoice(-1, (dialog, view, which, text) -> {
+
+//          KeyStoreType.saveCurrentType(keyStoreTypeList.get(which));
+
+          EventBus.getDefault().post( new SelectKeyStoreEvent(keyStoreTypeList.get(which)));
+
+          return true;
+        })
+        .positiveText(R.string.vertical_form_stepper_form_continue)
+        .onPositive((dialog, which) -> {
+          EventBus.getDefault().post( new AddKeyEvent());
+        })
+        .show();
+
+    }
   }
 
   private boolean appInstalled(String uri) {
@@ -297,4 +331,11 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
   public void onMessageEvent(StepperNextStepEvent event) {
     stepperLayout.getmNextNavigationButton().performClick();
   }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(SelectKeysEvent event) {
+    showSelectDialog(event.list);
+  }
+
+
 }

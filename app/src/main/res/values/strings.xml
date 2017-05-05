@@ -441,6 +441,8 @@
     <string name="fragment_decision_template_edit">Редактирование шаблона</string>
     <string name="fragment_decision_template_add_hint">Введите текст резолюции</string>
     <string name="fragment_decision_template_add_prefill">Внимание!\nНеобходимо срочно исполнить!</string>
+    <string name="defaultPath">/mnt/sdcard/keys</string>
+    <string name="container_title">Выбор контейнера</string>
 
     <string name="is_online">В сети</string>
     <string name="is_offline">Не в сети</string>
