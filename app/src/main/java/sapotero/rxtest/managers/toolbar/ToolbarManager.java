@@ -330,6 +330,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
               showDismissDialog();
             } else {
               operation = CommandFactory.Operation.RETURN_TO_THE_PRIMARY_CONSIDERATION;
+              params.setDocument( UID.get() );
             }
 
             break;
@@ -863,6 +864,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       .onPositive((dialog1, which) -> {
         CommandFactory.Operation operation;
         operation = CommandFactory.Operation.RETURN_TO_THE_PRIMARY_CONSIDERATION;
+        params.setDocument( UID.get() );
         operationManager.execute(operation, params);
       })
       .autoDismiss(true)
