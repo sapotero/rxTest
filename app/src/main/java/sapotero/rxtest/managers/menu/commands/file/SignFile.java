@@ -10,6 +10,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.queue.FileSignEntity;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
@@ -92,7 +93,7 @@ public class SignFile extends AbstractCommand {
 
     ImagesService imagesService = retrofit.create( ImagesService.class );
 
-    File file = new File( MainService.getContext().getFilesDir(), params.getFilePath() );
+    File file = new File( EsdApplication.getApplication().getApplicationContext().getFilesDir(), params.getFilePath() );
 
     String file_sign = null;
     try {

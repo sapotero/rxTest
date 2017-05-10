@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.services.MainService;
 import timber.log.Timber;
@@ -34,7 +35,7 @@ public class OperationHistory {
       .subscribe(interval -> {
 
         if ( commands.size() > 0 && !isConnectedToInternet ){
-          Toast.makeText( MainService.getContext(), String.format( "History size: %s", commands.size() ), Toast.LENGTH_SHORT).show();
+          Toast.makeText( EsdApplication.getApplication().getApplicationContext(), String.format( "History size: %s", commands.size() ), Toast.LENGTH_SHORT).show();
 
           for (Command command: commands) {
             if (command != null) {

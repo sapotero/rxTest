@@ -122,19 +122,11 @@ public class MainService extends Service {
   public static String user;
   private int keyStoreTypeIndex = 0;
 
-  private static Context context;
-
-  public static Context getContext() {
-    return context;
-  }
-
   public MainService() {
   }
 
   public void onCreate() {
     super.onCreate();
-
-    context = getApplicationContext();
 
     if ( EventBus.getDefault().isRegistered(this) ){
       EventBus.getDefault().unregister(this);
@@ -821,10 +813,10 @@ public class MainService extends Service {
 
     adapter.setProviderType(ProviderType.currentProviderType());
     adapter.setClientPassword( password.toCharArray() );
-    adapter.setResources( context.getResources());
+    adapter.setResources( EsdApplication.getApplication().getApplicationContext().getResources());
 
 
-    String newtrustStorePath = context.getApplicationInfo().dataDir + File.separator + BKSTrustStore.STORAGE_DIRECTORY + File.separator + BKSTrustStore.STORAGE_FILE_TRUST;
+    String newtrustStorePath = EsdApplication.getApplication().getApplicationContext().getApplicationInfo().dataDir + File.separator + BKSTrustStore.STORAGE_DIRECTORY + File.separator + BKSTrustStore.STORAGE_FILE_TRUST;
 
     adapter.setTrustStoreProvider(BouncyCastleProvider.PROVIDER_NAME);
     adapter.setTrustStoreType(BKSTrustStore.STORAGE_TYPE);
