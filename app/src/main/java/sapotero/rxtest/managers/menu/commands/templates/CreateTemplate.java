@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.templates;
 
-import android.content.Context;
-
 import com.f2prateek.rx.preferences.Preference;
 import com.google.gson.Gson;
 
@@ -27,7 +25,6 @@ import timber.log.Timber;
 public class CreateTemplate extends AbstractCommand {
 
   private final DocumentReceiver document;
-  private final Context context;
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -35,9 +32,8 @@ public class CreateTemplate extends AbstractCommand {
   private Preference<String> LOGIN;
   private Preference<String> HOST;
 
-  public CreateTemplate(Context context, DocumentReceiver document){
+  public CreateTemplate(DocumentReceiver document){
     super();
-    this.context = context;
     this.document = document;
   }
 

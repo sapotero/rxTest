@@ -124,6 +124,10 @@ public class MainService extends Service {
 
   private static Context context;
 
+  public static Context getContext() {
+    return context;
+  }
+
   public MainService() {
   }
 
@@ -983,7 +987,7 @@ public class MainService extends Service {
     params.setAssignment( event.assignment );
 
 
-    Command command = operation.getCommand(null, getApplicationContext(), null, params);
+    Command command = operation.getCommand(null, null, params);
     queue.add(command);
   }
 

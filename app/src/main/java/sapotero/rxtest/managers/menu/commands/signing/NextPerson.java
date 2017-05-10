@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.signing;
 
-import android.content.Context;
-
 import com.f2prateek.rx.preferences.Preference;
 
 import org.greenrobot.eventbus.EventBus;
@@ -32,7 +30,6 @@ import timber.log.Timber;
 public class NextPerson extends AbstractCommand {
 
   private final DocumentReceiver document;
-  private final Context context;
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -45,9 +42,8 @@ public class NextPerson extends AbstractCommand {
   private String official_id;
   private String sign;
 
-  public NextPerson(Context context, DocumentReceiver document){
+  public NextPerson(DocumentReceiver document){
     super();
-    this.context = context;
     this.document = document;
   }
 
@@ -196,7 +192,7 @@ public class NextPerson extends AbstractCommand {
           params.setImageId( image.getImageId() );
 
 
-          Command command = operation.getCommand(null, context, document, params);
+          Command command = operation.getCommand(null, document, params);
 
           Timber.tag(TAG).e("image: %s", document.getUid());
           queueManager.add(command);

@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.shared;
 
-import android.content.Context;
-
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -9,11 +7,9 @@ import sapotero.rxtest.managers.menu.utils.CommandParams;
 public class DoNothing extends AbstractCommand {
 
   private final DocumentReceiver document;
-  private final Context context;
 
-  public DoNothing(Context context, DocumentReceiver document){
+  public DoNothing(DocumentReceiver document){
     super();
-    this.context = context;
     this.document = document;
   }
 

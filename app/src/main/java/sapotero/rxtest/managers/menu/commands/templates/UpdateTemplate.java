@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.templates;
 
-import android.content.Context;
-
 import com.f2prateek.rx.preferences.Preference;
 
 import retrofit2.Retrofit;
@@ -19,7 +17,6 @@ import sapotero.rxtest.retrofit.models.Template;
 public class UpdateTemplate extends AbstractCommand {
 
   private final DocumentReceiver document;
-  private final Context context;
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -27,9 +24,8 @@ public class UpdateTemplate extends AbstractCommand {
   private Preference<String> LOGIN;
   private Preference<String> HOST;
 
-  public UpdateTemplate(Context context, DocumentReceiver document){
+  public UpdateTemplate(DocumentReceiver document){
     super();
-    this.context = context;
     this.document = document;
   }
 

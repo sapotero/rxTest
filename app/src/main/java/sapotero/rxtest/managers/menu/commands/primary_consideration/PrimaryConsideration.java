@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.primary_consideration;
 
-import android.content.Context;
-
 import com.f2prateek.rx.preferences.Preference;
 
 import org.greenrobot.eventbus.EventBus;
@@ -27,7 +25,6 @@ import timber.log.Timber;
 public class PrimaryConsideration extends AbstractCommand {
 
   private final DocumentReceiver document;
-  private final Context context;
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -39,9 +36,8 @@ public class PrimaryConsideration extends AbstractCommand {
   private Preference<String> PIN;
   private String official_id;
 
-  public PrimaryConsideration(Context context, DocumentReceiver document){
+  public PrimaryConsideration(DocumentReceiver document){
     super();
-    this.context = context;
     this.document = document;
   }
 

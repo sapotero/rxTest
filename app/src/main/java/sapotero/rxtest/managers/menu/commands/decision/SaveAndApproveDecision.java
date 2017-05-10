@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.decision;
 
-import android.content.Context;
-
 import com.f2prateek.rx.preferences.Preference;
 import com.google.gson.Gson;
 
@@ -36,7 +34,6 @@ import timber.log.Timber;
 public class SaveAndApproveDecision extends AbstractCommand {
 
   private final DocumentReceiver document;
-  private final Context context;
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -50,9 +47,8 @@ public class SaveAndApproveDecision extends AbstractCommand {
   private String decisionId;
   private boolean withSign = false;
 
-  public SaveAndApproveDecision(Context context, DocumentReceiver document){
+  public SaveAndApproveDecision(DocumentReceiver document){
     super();
-    this.context = context;
     this.document = document;
   }
 

@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.approval;
 
-import android.content.Context;
-
 import com.f2prateek.rx.preferences.Preference;
 
 import org.greenrobot.eventbus.EventBus;
@@ -27,7 +25,6 @@ import timber.log.Timber;
 public class NextPerson extends AbstractCommand {
 
   private final DocumentReceiver document;
-  private final Context context;
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -40,9 +37,8 @@ public class NextPerson extends AbstractCommand {
   private String official_id;
   private String sign;
 
-  public NextPerson(Context context, DocumentReceiver document){
+  public NextPerson(DocumentReceiver document){
     super();
-    this.context = context;
     this.document = document;
   }
 

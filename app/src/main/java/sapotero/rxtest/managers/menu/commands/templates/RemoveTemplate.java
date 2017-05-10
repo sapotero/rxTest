@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.templates;
 
-import android.content.Context;
-
 import com.f2prateek.rx.preferences.Preference;
 
 import retrofit2.Retrofit;
@@ -20,7 +18,6 @@ import sapotero.rxtest.retrofit.models.Template;
 public class RemoveTemplate extends AbstractCommand {
 
   private final DocumentReceiver document;
-  private final Context context;
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -28,9 +25,8 @@ public class RemoveTemplate extends AbstractCommand {
   private Preference<String> LOGIN;
   private Preference<String> HOST;
 
-  public RemoveTemplate(Context context, DocumentReceiver document){
+  public RemoveTemplate(DocumentReceiver document){
     super();
-    this.context = context;
     this.document = document;
   }
 

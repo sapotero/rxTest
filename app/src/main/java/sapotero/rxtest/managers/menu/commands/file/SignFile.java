@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.file;
 
-import android.content.Context;
-
 import com.f2prateek.rx.preferences.Preference;
 
 import java.io.File;
@@ -23,7 +21,6 @@ import timber.log.Timber;
 public class SignFile extends AbstractCommand {
 
   private final DocumentReceiver document;
-  private final Context context;
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -36,9 +33,8 @@ public class SignFile extends AbstractCommand {
   private String official_id;
   private String sign;
 
-  public SignFile(Context context, DocumentReceiver document){
+  public SignFile(DocumentReceiver document){
     super();
-    this.context = context;
     this.document = document;
   }
 
@@ -96,7 +92,7 @@ public class SignFile extends AbstractCommand {
 
     ImagesService imagesService = retrofit.create( ImagesService.class );
 
-    File file = new File( context.getFilesDir(), params.getFilePath() );
+    File file = new File( MainService.getContext().getFilesDir(), params.getFilePath() );
 
     String file_sign = null;
     try {

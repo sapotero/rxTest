@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.decision;
 
-import android.content.Context;
-
 import com.f2prateek.rx.preferences.Preference;
 import com.google.gson.Gson;
 
@@ -32,7 +30,6 @@ import timber.log.Timber;
 public class ApproveDecisionDelayed extends AbstractCommand {
 
   private final DocumentReceiver document;
-  private final Context context;
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -41,9 +38,8 @@ public class ApproveDecisionDelayed extends AbstractCommand {
   private Preference<String> HOST;
   private Preference<String> PIN;
 
-  public ApproveDecisionDelayed(Context context, DocumentReceiver document){
+  public ApproveDecisionDelayed(DocumentReceiver document){
     super();
-    this.context = context;
     this.document = document;
   }
 

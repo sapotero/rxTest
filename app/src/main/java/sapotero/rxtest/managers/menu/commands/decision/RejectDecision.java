@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.decision;
 
-import android.content.Context;
-
 import com.f2prateek.rx.preferences.Preference;
 import com.google.gson.Gson;
 
@@ -36,7 +34,6 @@ import timber.log.Timber;
 public class RejectDecision extends AbstractCommand {
 
   private final DocumentReceiver document;
-  private final Context context;
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -51,9 +48,8 @@ public class RejectDecision extends AbstractCommand {
   private String decisionId;
   private Preference<String> CURRENT_USER_ID;
 
-  public RejectDecision(Context context, DocumentReceiver document){
+  public RejectDecision(DocumentReceiver document){
     super();
-    this.context = context;
     this.document = document;
   }
 

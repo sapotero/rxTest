@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.shared;
 
-import android.content.Context;
-
 import com.f2prateek.rx.preferences.Preference;
 
 import java.util.ArrayList;
@@ -23,7 +21,6 @@ import timber.log.Timber;
 public class RemoveFromFolder extends AbstractCommand {
 
   private final DocumentReceiver document;
-  private final Context context;
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -36,9 +33,8 @@ public class RemoveFromFolder extends AbstractCommand {
   private String folder_id;
   private String document_id;
 
-  public RemoveFromFolder(Context context, DocumentReceiver document){
+  public RemoveFromFolder(DocumentReceiver document){
     super();
-    this.context = context;
     this.document = document;
   }
 
