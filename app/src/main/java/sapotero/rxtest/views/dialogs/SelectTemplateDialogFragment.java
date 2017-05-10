@@ -45,7 +45,7 @@ public class SelectTemplateDialogFragment extends DialogFragment implements View
 
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-    EsdApplication.getComponent( getActivity() ).inject( this );
+    EsdApplication.getDataComponent().inject( this );
     getDialog().setTitle("Title!");
 
     View view = inflater.inflate(R.layout.dialog_choose_template, container, false);

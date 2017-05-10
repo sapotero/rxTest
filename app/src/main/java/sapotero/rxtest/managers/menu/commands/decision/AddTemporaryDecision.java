@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.decision;
 
-import android.content.Context;
-
 import com.f2prateek.rx.preferences.Preference;
 
 import org.greenrobot.eventbus.EventBus;
@@ -28,7 +26,6 @@ import timber.log.Timber;
 public class AddTemporaryDecision extends AbstractCommand {
 
   private final DocumentReceiver document;
-  private final Context context;
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -40,9 +37,8 @@ public class AddTemporaryDecision extends AbstractCommand {
   private Preference<String> PIN;
   private String decisionId;
 
-  public AddTemporaryDecision(Context context, DocumentReceiver document){
-    super(context);
-    this.context = context;
+  public AddTemporaryDecision(DocumentReceiver document){
+    super();
     this.document = document;
   }
 

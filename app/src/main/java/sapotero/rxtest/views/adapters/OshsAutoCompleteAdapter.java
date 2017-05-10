@@ -41,7 +41,6 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
 
   @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
-  @Inject SingleEntityStore<Persistable> dataStore;
 
   private Preference<String> login;
   private Preference<String> token;
@@ -55,8 +54,8 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
 
   public OshsAutoCompleteAdapter(Context context, View view) {
     mContext = context;
+    EsdApplication.getNetworkComponent().inject( this );
     this.view = view;
-    EsdApplication.getComponent( context ).inject( this );
     loadSettings();
   }
 

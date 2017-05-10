@@ -26,7 +26,6 @@ import timber.log.Timber;
 
 public class FileSignActivity extends AppCompatActivity {
 
-  @Inject RxSharedPreferences settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   @BindView(R.id.activity_file_sign_toolbar) Toolbar toolbar;
@@ -44,7 +43,7 @@ public class FileSignActivity extends AppCompatActivity {
     setContentView(R.layout.activity_file_sign);
 
     ButterKnife.bind(this);
-    EsdApplication.getComponent(this).inject(this);
+    EsdApplication.getDataComponent().inject(this);
 
 
     populateView();

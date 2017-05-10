@@ -91,28 +91,30 @@ public class InvalidateDocumentsJob extends BaseJob {
 
     if (db_uids.size() > 0){
       for (String uid: db_uids ) {
+        updateAsProcessed(uid, true);
 //        transactions.add( updateAsProcessed(uid, true) );
-        dataStore.runInTransaction( updateAsProcessed(uid, true) );
+//        dataStore.runInTransaction( updateAsProcessed(uid, true) );
       }
     }
 
     if (api_uids.size() > 0){
       for (String uid: api_uids ) {
+        updateAsProcessed(uid, false);
 //        transactions.add( updateAsProcessed(uid, false) );
-        dataStore.runInTransaction( updateAsProcessed(uid, false) );
+//        dataStore.runInTransaction( updateAsProcessed(uid, false) );
       }
     }
 
 
   }
 
-  private Single<RDocumentEntity> updateAsProcessed(String uid, Boolean processed) {
+  private void updateAsProcessed(String uid, Boolean processed) {
 
-    RDocumentEntity doc = dataStore.select(RDocumentEntity.class).where(RDocumentEntity.UID.eq(uid)).get().firstOrNull();
-
-    return dataStore
-      .update(doc)
-      .toObservable().toSingle();
+    dataStore
+      .update(RDocumentEntity.class)
+      .set(RDocumentEntity.PROCESSED, processed)
+      .where(RDocumentEntity.UID.eq(uid))
+      .get().value();
   }
 
 

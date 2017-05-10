@@ -19,9 +19,7 @@ import timber.log.Timber;
 
 public class CurrentDocumentManager {
 
-  @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
-  @Inject JobManager jobManager;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   private Preference<String> UID;
@@ -51,7 +49,7 @@ public class CurrentDocumentManager {
 
   public CurrentDocumentManager(Context context) {
     this.context = context;
-    EsdApplication.getComponent(context).inject(this);
+    EsdApplication.getDataComponent().inject(this);
     initialize();
   }
 

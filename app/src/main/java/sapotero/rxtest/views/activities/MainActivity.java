@@ -53,7 +53,6 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
-import okhttp3.OkHttpClient;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.subscriptions.CompositeSubscription;
@@ -92,7 +91,6 @@ import timber.log.Timber;
 public class MainActivity extends AppCompatActivity implements MenuBuilder.Callback, SearchView.OnVisibilityChangeListener {
 
   @Inject JobManager jobManager;
-  @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
@@ -201,7 +199,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     setContentView(R.layout.activity_main);
 
     ButterKnife.bind(this);
-    EsdApplication.getComponent(this).inject(this);
+    EsdApplication.getManagerComponent().inject(this);
     loadSettings();
     context = this;
 

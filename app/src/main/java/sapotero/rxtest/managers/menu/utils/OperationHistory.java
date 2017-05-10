@@ -1,37 +1,27 @@
 package sapotero.rxtest.managers.menu.utils;
 
-import android.content.Context;
 import android.widget.Toast;
 
-import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.github.pwittchen.reactivenetwork.library.ReactiveNetwork;
 
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
-
-import javax.inject.Inject;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.managers.menu.interfaces.Command;
+import sapotero.rxtest.services.MainService;
 import timber.log.Timber;
 
 public class OperationHistory {
 
-  @Inject RxSharedPreferences settings;
-
-  private final Context context;
   private final ArrayList<Command> commands = new ArrayList<>();
 
   private Boolean isConnectedToInternet;
 
-  public OperationHistory(Context context) {
-
-    this.context = context;
-    EsdApplication.getComponent(context).inject(this);
-
+  public OperationHistory() {
     isConnectedToInternet();
     historyCheck();
 
@@ -45,7 +35,7 @@ public class OperationHistory {
       .subscribe(interval -> {
 
         if ( commands.size() > 0 && !isConnectedToInternet ){
-          Toast.makeText( context, String.format( "History size: %s", commands.size() ), Toast.LENGTH_SHORT).show();
+          Toast.makeText( EsdApplication.getApplication().getApplicationContext(), String.format( "History size: %s", commands.size() ), Toast.LENGTH_SHORT).show();
 
           for (Command command: commands) {
             if (command != null) {

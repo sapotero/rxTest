@@ -60,10 +60,6 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
   @BindView(R.id.tab_main) ViewPager viewPager;
   @BindView(R.id.tabs) TabLayout tabLayout;
 
-
-  @Inject JobManager jobManager;
-  @Inject CompositeSubscription subscriptions;
-  @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
@@ -101,7 +97,7 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
     setContentView(R.layout.activity_info);
     ButterKnife.bind(this);
 
-    EsdApplication.getComponent(this).inject(this);
+    EsdApplication.getDataComponent().inject(this);
 
 //    documentManager = new CurrentDocumentManager(this);
 //    documentManager.registerCallBack(this);
@@ -257,10 +253,6 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
 
     if ( EventBus.getDefault().isRegistered(this) ){
       EventBus.getDefault().unregister(this);
-    }
-
-    if ( subscriptions != null && subscriptions.hasSubscriptions() ){
-      subscriptions.unsubscribe();
     }
 
     finish();

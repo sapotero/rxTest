@@ -1,7 +1,5 @@
 package sapotero.rxtest.db.requery.utils.validation;
 
-import android.content.Context;
-
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import java.util.ArrayList;
@@ -9,21 +7,18 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import javax.inject.Inject;
-
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import sapotero.rxtest.application.EsdApplication;
 import timber.log.Timber;
 
 public class Validation{
-  @Inject RxSharedPreferences settings;
+  private RxSharedPreferences settings;
 
   private Set<String> selected_journals;
   private String TAG = this.getClass().getSimpleName();
 
-  Validation(Context context) {
-    EsdApplication.getComponent(context).inject(this);
+  Validation(RxSharedPreferences rxSharedPreferences) {
+    settings = rxSharedPreferences;
 
     settings
       .getStringSet("settings_view_journals")

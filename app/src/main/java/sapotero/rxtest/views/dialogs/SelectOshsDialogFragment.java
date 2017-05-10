@@ -115,7 +115,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
     operation = CommandFactory.Operation.INCORRECT;
-    EsdApplication.getComponent( getActivity() ).inject( this );
+    EsdApplication.getDataComponent().inject( this );
 
     Bundle bundle = getArguments();
     if (bundle != null) {

@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.approval;
 
-import android.content.Context;
-
 import com.f2prateek.rx.preferences.Preference;
 
 import org.greenrobot.eventbus.EventBus;
@@ -27,7 +25,6 @@ import timber.log.Timber;
 public class ChangePerson extends AbstractCommand {
 
   private final DocumentReceiver document;
-  private final Context context;
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -39,9 +36,8 @@ public class ChangePerson extends AbstractCommand {
   private Preference<String> PIN;
   private String official_id;
 
-  public ChangePerson(Context context, DocumentReceiver document){
-    super(context);
-    this.context = context;
+  public ChangePerson(DocumentReceiver document){
+    super();
     this.document = document;
   }
 
@@ -125,7 +121,7 @@ public class ChangePerson extends AbstractCommand {
     String sign = null;
 
     try {
-      sign = MainService.getFakeSign( context, PIN.get(), null );
+      sign = MainService.getFakeSign( PIN.get(), null );
     } catch (Exception e) {
       e.printStackTrace();
     }

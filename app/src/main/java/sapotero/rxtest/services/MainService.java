@@ -10,7 +10,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 
-import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -108,7 +107,6 @@ public class MainService extends Service {
 
   @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
-  @Inject JobManager jobManager;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   @Inject QueueManager queue;
@@ -135,7 +133,7 @@ public class MainService extends Service {
     }
     EventBus.getDefault().register(this);
 
-    EsdApplication.getComponent(this).inject(this);
+    EsdApplication.getManagerComponent().inject(this);
 
     dataLoaderInterface = new DataLoaderManager(getApplicationContext());
 
@@ -809,16 +807,16 @@ public class MainService extends Service {
     }
   }
 
-  public static String getFakeSign(Context context, String password, File file) throws Exception {
+  public static String getFakeSign(String password, File file) throws Exception {
 
     ContainerAdapter adapter = new ContainerAdapter(aliasesList.get(0), null, aliasesList.get(0), null);
 
     adapter.setProviderType(ProviderType.currentProviderType());
     adapter.setClientPassword( password.toCharArray() );
-    adapter.setResources( context.getResources());
+    adapter.setResources( EsdApplication.getApplication().getApplicationContext().getResources());
 
 
-    String newtrustStorePath = context.getApplicationInfo().dataDir + File.separator + BKSTrustStore.STORAGE_DIRECTORY + File.separator + BKSTrustStore.STORAGE_FILE_TRUST;
+    String newtrustStorePath = EsdApplication.getApplication().getApplicationContext().getApplicationInfo().dataDir + File.separator + BKSTrustStore.STORAGE_DIRECTORY + File.separator + BKSTrustStore.STORAGE_FILE_TRUST;
 
     adapter.setTrustStoreProvider(BouncyCastleProvider.PROVIDER_NAME);
     adapter.setTrustStoreType(BKSTrustStore.STORAGE_TYPE);
@@ -981,7 +979,7 @@ public class MainService extends Service {
     params.setAssignment( event.assignment );
 
 
-    Command command = operation.getCommand(null, getApplicationContext(), null, params);
+    Command command = operation.getCommand(null, null, params);
     queue.add(command);
   }
 

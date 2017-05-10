@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.primary_consideration;
 
-import android.content.Context;
-
 import com.f2prateek.rx.preferences.Preference;
 
 import org.greenrobot.eventbus.EventBus;
@@ -27,7 +25,6 @@ import timber.log.Timber;
 public class PrimaryConsideration extends AbstractCommand {
 
   private final DocumentReceiver document;
-  private final Context context;
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -39,9 +36,8 @@ public class PrimaryConsideration extends AbstractCommand {
   private Preference<String> PIN;
   private String official_id;
 
-  public PrimaryConsideration(Context context, DocumentReceiver document){
-    super(context);
-    this.context = context;
+  public PrimaryConsideration(DocumentReceiver document){
+    super();
     this.document = document;
   }
 
@@ -64,8 +60,16 @@ public class PrimaryConsideration extends AbstractCommand {
 
   @Override
   public void execute() {
+
+    dataStore
+      .update(RDocumentEntity.class)
+      .set(RDocumentEntity.CHANGED, true)
+      .where(RDocumentEntity.UID.eq( params.getDocument() ))
+      .get()
+      .value();
+
     queueManager.add(this);
-    update();
+
   }
 
   private void update(){
@@ -117,6 +121,8 @@ public class PrimaryConsideration extends AbstractCommand {
     if ( callback != null ){
       callback.onCommandExecuteSuccess( getType() );
     }
+
+    update();
 
     queueManager.setExecutedLocal(this);
   }

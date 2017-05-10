@@ -34,7 +34,7 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
   public PrimaryConsiderationAdapter(Context context, ArrayList<PrimaryConsiderationPeople> items) {
     this.items = items;
     this.context = context;
-    EsdApplication.getComponent(context).inject( this );
+    EsdApplication.getDataComponent().inject( this );
   }
 
   private Callback callback;

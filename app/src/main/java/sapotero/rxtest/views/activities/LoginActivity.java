@@ -49,13 +49,7 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
   private static final int PERM_REQUEST_CODE = 0;
   private static final int PERM_SYSTEM_SETTINGS_REQUEST_CODE = 1;
 
-  @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
-  @Inject JobManager jobManager;
-
-
-  // test
-  @Inject QueueManager queue;
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -75,7 +69,7 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_login);
 
-    EsdApplication.getComponent(this).inject(this);
+    EsdApplication.getDataComponent().inject(this);
 
     initialize();
 

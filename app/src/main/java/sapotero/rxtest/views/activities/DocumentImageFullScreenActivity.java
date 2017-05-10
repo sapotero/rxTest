@@ -38,7 +38,6 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity implement
 
 
   @Inject RxSharedPreferences settings;
-  @Inject SingleEntityStore<Persistable> dataStore;
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -54,7 +53,7 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity implement
     setContentView(R.layout.activity_document_image_full_screen);
 
     ButterKnife.bind(this);
-    EsdApplication.getComponent(this).inject(this);
+    EsdApplication.getDataComponent().inject(this);
 
     InfoCardDocumentsFragment fragment = new InfoCardDocumentsFragment();
     fragment.withOutZoom(true);

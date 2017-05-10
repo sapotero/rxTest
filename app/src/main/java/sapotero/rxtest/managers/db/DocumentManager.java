@@ -18,7 +18,7 @@ public class DocumentManager {
 
   public DocumentManager(Context context) {
     this.context = context;
-    this.loader = new DBDocumentManager(context);
+    this.loader = new DBDocumentManager();
     this.entity = new DocumentManagerEntity();
   }
 

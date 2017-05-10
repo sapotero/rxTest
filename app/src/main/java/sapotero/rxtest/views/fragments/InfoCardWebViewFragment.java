@@ -71,7 +71,7 @@ public class InfoCardWebViewFragment extends Fragment {
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.fragment_info_card_web_view, container, false);
     ButterKnife.bind(this, view);
-    EsdApplication.getComponent(mContext).inject( this );
+    EsdApplication.getDataComponent().inject( this );
     loadSettings();
 
     final GestureDetector gestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener() {
