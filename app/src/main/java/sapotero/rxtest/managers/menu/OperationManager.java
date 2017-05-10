@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu;
 
-import android.content.Context;
-
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
@@ -22,7 +20,6 @@ public class OperationManager implements CommandFactory.Callback {
   private final OperationHistory histrory;
   private final OperationExecutor operationExecutor;
 
-  private Context context;
   private String uid;
 
   Callback callback;
@@ -36,16 +33,14 @@ public class OperationManager implements CommandFactory.Callback {
     this.callback = callback;
   }
 
-  public OperationManager(Context context, RxSharedPreferences rxSharedPreferences) {
+  public OperationManager(RxSharedPreferences rxSharedPreferences) {
     settings = rxSharedPreferences;
 
-    histrory          = new OperationHistory(context);
+    histrory          = new OperationHistory();
     operationExecutor = new OperationExecutor();
 
-    commandBuilder = new CommandFactory(context);
+    commandBuilder = new CommandFactory();
     commandBuilder.registerCallBack(this);
-
-    this.context = context;
   }
 
   public void execute(CommandFactory.Operation operation, CommandParams params) {

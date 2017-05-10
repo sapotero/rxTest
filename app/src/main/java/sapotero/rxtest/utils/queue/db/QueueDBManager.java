@@ -1,7 +1,5 @@
 package sapotero.rxtest.utils.queue.db;
 
-import android.content.Context;
-
 import com.google.gson.Gson;
 
 import java.text.SimpleDateFormat;
@@ -24,13 +22,10 @@ import timber.log.Timber;
 public class QueueDBManager implements JobCountInterface {
   @Inject SingleEntityStore<Persistable> dataStore;
 
-  private final Context context;
   private String TAG = this.getClass().getSimpleName();
 
-  public QueueDBManager(Context context) {
+  public QueueDBManager() {
     EsdApplication.getDataComponent().inject(this);
-
-    this.context = context;
   }
 
   public void add(Command command){

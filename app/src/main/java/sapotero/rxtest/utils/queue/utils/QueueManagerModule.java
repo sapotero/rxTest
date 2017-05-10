@@ -1,6 +1,5 @@
 package sapotero.rxtest.utils.queue.utils;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 
 import dagger.Module;
@@ -14,7 +13,7 @@ public final class QueueManagerModule {
   @NonNull
   @Provides
   @ManagerScope
-  QueueManager provideQueueManager(Context context) {
-    return new QueueManager(context);
+  QueueManager provideQueueManager() {
+    return new QueueManager();
   }
 }

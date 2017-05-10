@@ -1,6 +1,5 @@
 package sapotero.rxtest.managers.menu.utils;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 
 import com.f2prateek.rx.preferences.RxSharedPreferences;
@@ -16,7 +15,7 @@ public final class OperationManagerModule {
   @NonNull
   @Provides
   @ManagerScope
-  OperationManager provideOperationManager(Context context, RxSharedPreferences rxSharedPreferences) {
-    return new OperationManager( context, rxSharedPreferences );
+  OperationManager provideOperationManager(RxSharedPreferences rxSharedPreferences) {
+    return new OperationManager( rxSharedPreferences );
   }
 }

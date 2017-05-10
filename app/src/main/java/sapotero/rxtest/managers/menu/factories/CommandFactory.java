@@ -1,8 +1,5 @@
 package sapotero.rxtest.managers.menu.factories;
 
-import android.content.Context;
-
-import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.commands.approval.ChangePerson;
 import sapotero.rxtest.managers.menu.commands.decision.AddAndApproveDecision;
@@ -37,15 +34,14 @@ public class CommandFactory implements AbstractCommand.Callback{
   private static CommandFactory instance;
   private final String TAG = this.getClass().getSimpleName();
 
-  private Context context;
   private CommandParams params;
   private DocumentReceiver document;
 
   Callback callback;
 
-  public static CommandFactory getInstance(Context context) {
+  public static CommandFactory getInstance() {
     if (instance == null){
-      instance = new CommandFactory(context);
+      instance = new CommandFactory();
     }
     return instance;
   }
@@ -635,10 +631,7 @@ public class CommandFactory implements AbstractCommand.Callback{
     public abstract String getRussinaName();
   };
 
-  public CommandFactory(Context context) {
-
-
-    this.context = context;
+  public CommandFactory() {
   }
 
   public CommandFactory withDocument(DocumentReceiver doc) {
