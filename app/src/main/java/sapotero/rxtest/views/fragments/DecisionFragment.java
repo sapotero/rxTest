@@ -59,9 +59,7 @@ import timber.log.Timber;
 
 public class DecisionFragment extends Fragment implements PrimaryConsiderationAdapter.Callback, SelectOshsDialogFragment.Callback, SelectTemplateDialogFragment.Callback {
 
-  @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
-  @Inject JobManager jobManager;
 
   @BindView(R.id.card_toolbar)  Toolbar  card_toolbar;
   @BindView(R.id.decision_text) EditText decision_text;
@@ -165,7 +163,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.fragment_decision, container, false);
     ButterKnife.bind(this, view);
-    EsdApplication.getComponent(mContext).inject( this );
+    EsdApplication.getDataComponent().inject( this );
 
     loadSettings();
 

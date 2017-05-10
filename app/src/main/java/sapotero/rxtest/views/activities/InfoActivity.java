@@ -33,9 +33,6 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.requery.Persistable;
-import io.requery.rx.SingleEntityStore;
-import okhttp3.OkHttpClient;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -55,10 +52,8 @@ import sapotero.rxtest.events.view.ShowSnackEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentInfoActivityEvent;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
-import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.toolbar.ToolbarManager;
 import sapotero.rxtest.services.task.UpdateCurrentDocumentTask;
-import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.adapters.TabSigningPagerAdapter;
 import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
@@ -79,16 +74,8 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   @BindView(R.id.tabs) TabLayout tabLayout;
   @BindView(R.id.activity_info_wrapper) View wrapper;
 
-
   @Inject JobManager jobManager;
-  @Inject CompositeSubscription subscriptions;
-  @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
-  @Inject SingleEntityStore<Persistable> dataStore;
-
-  // test
-  @Inject QueueManager queue;
-  @Inject OperationManager operationManager;
 
   private Preference<String> TOKEN;
   private Preference<String> LAST_SEEN_UID;
@@ -121,7 +108,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
     setContentView(R.layout.activity_info);
     ButterKnife.bind(this);
-    EsdApplication.getComponent(this).inject(this);
+    EsdApplication.getManagerComponent().inject(this);
 
 
   }

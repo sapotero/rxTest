@@ -39,7 +39,7 @@ public class DocumentTypeAdapter extends BaseAdapter {
     this.context = context;
     this.documents = organizations;
     this.inflter = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-    EsdApplication.getComponent(context).inject(this);
+    EsdApplication.getDataComponent().inject(this);
 
   }
 

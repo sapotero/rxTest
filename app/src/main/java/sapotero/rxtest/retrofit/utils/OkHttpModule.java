@@ -1,13 +1,9 @@
 package sapotero.rxtest.retrofit.utils;
 
-import android.content.Context;
-
 import com.facebook.stetho.okhttp3.StethoInterceptor;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-
-import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
@@ -15,12 +11,13 @@ import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.logging.HttpLoggingInterceptor;
+import sapotero.rxtest.application.scopes.NetworkScope;
 
 @Module
 public class OkHttpModule {
   @Provides
-  @Singleton
-  OkHttpClient provideOkHttpModule(Context context) {
+  @NetworkScope
+  OkHttpClient provideOkHttpModule() {
     return  new OkHttpClient.Builder()
       .readTimeout(60,    TimeUnit.SECONDS)
       .connectTimeout(60, TimeUnit.SECONDS)

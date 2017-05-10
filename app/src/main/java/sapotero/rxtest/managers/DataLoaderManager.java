@@ -102,8 +102,7 @@ public class DataLoaderManager {
   public DataLoaderManager(Context context) {
     this.context = context;
 
-
-    EsdApplication.getComponent(context).inject(this);
+    EsdApplication.getManagerComponent().inject(this);
 
     initialize();
     firstRun = new FirstRun(settings);
@@ -757,7 +756,7 @@ public class DataLoaderManager {
 
       String sign = "";
       try {
-        sign = MainService.getFakeSign( context, settings.getString("PIN").get(), null );
+        sign = MainService.getFakeSign( settings.getString("PIN").get(), null );
       } catch (Exception e) {
         e.printStackTrace();
       }

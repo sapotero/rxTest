@@ -80,7 +80,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   public ToolbarManager (Context context, Toolbar toolbar) {
     this.context = context;
     this.toolbar = toolbar;
-    EsdApplication.getComponent(context).inject(this);
+    EsdApplication.getManagerComponent().inject(this);
 
     loadSettings();
 

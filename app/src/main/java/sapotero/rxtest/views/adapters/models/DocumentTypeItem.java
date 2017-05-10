@@ -32,7 +32,7 @@ public class DocumentTypeItem {
     this.mainMenuItem = mainMenuItem;
     this.user = user;
 
-    EsdApplication.getComponent( context ).inject(this);
+    EsdApplication.getValidationComponent().inject(this);
   }
 
   // Главное меню

@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.performance;
 
-import android.content.Context;
-
 import com.f2prateek.rx.preferences.Preference;
 
 import org.greenrobot.eventbus.EventBus;
@@ -25,7 +23,6 @@ import timber.log.Timber;
 public class DelegatePerformance extends AbstractCommand {
 
   private final DocumentReceiver document;
-  private final Context context;
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -37,9 +34,8 @@ public class DelegatePerformance extends AbstractCommand {
   private Preference<String> PIN;
   private String official_id;
 
-  public DelegatePerformance(Context context, DocumentReceiver document){
-    super(context);
-    this.context = context;
+  public DelegatePerformance(DocumentReceiver document){
+    super();
     this.document = document;
   }
 

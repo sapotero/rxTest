@@ -1,19 +1,18 @@
 package sapotero.rxtest.db.requery.utils.validation;
 
-import android.content.Context;
-
-import javax.inject.Singleton;
+import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import dagger.Module;
 import dagger.Provides;
+import sapotero.rxtest.application.scopes.ValidationScope;
 
 @Module
 public final class ValidationModule {
 
   @Provides
-  @Singleton
-  Validation provideValidation(Context context) {
-    return new Validation(context);
+  @ValidationScope
+  Validation provideValidation(RxSharedPreferences rxSharedPreferences) {
+    return new Validation(rxSharedPreferences);
   }
 
 }

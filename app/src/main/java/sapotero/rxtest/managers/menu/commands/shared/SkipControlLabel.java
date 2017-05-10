@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.shared;
 
-import android.content.Context;
-
 import com.f2prateek.rx.preferences.Preference;
 
 import java.util.ArrayList;
@@ -22,7 +20,6 @@ import timber.log.Timber;
 public class SkipControlLabel extends AbstractCommand {
 
   private final DocumentReceiver document;
-  private final Context context;
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -34,9 +31,8 @@ public class SkipControlLabel extends AbstractCommand {
   private Preference<String> PIN;
   private String label_id;
 
-  public SkipControlLabel(Context context, DocumentReceiver document){
-    super(context);
-    this.context = context;
+  public SkipControlLabel(DocumentReceiver document){
+    super();
     this.document = document;
   }
 

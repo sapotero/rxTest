@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands;
 
-import android.content.Context;
-
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import java.io.Serializable;
@@ -27,8 +25,8 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
 
   public CommandParams params;
 
-  public AbstractCommand(Context context) {
-    EsdApplication.getComponent(context).inject(this);
+  public AbstractCommand() {
+    EsdApplication.getManagerComponent().inject(this);
   }
 
   public abstract void withParams(CommandParams params);

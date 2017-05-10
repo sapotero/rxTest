@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.signing;
 
-import android.content.Context;
-
 import com.f2prateek.rx.preferences.Preference;
 
 import org.greenrobot.eventbus.EventBus;
@@ -27,7 +25,6 @@ import timber.log.Timber;
 public class PrevPerson extends AbstractCommand {
 
   private final DocumentReceiver document;
-  private final Context context;
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -40,9 +37,8 @@ public class PrevPerson extends AbstractCommand {
   private String official_id;
   private String sign;
 
-  public PrevPerson(Context context, DocumentReceiver document){
-    super(context);
-    this.context = context;
+  public PrevPerson(DocumentReceiver document){
+    super();
     this.document = document;
   }
 
@@ -126,7 +122,7 @@ public class PrevPerson extends AbstractCommand {
     }
 
     try {
-      sign = MainService.getFakeSign( context, PIN.get(), null );
+      sign = MainService.getFakeSign( PIN.get(), null );
     } catch (Exception e) {
       e.printStackTrace();
     }

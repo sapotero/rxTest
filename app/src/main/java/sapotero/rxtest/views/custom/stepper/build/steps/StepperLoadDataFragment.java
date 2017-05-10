@@ -41,7 +41,6 @@ import timber.log.Timber;
 public class StepperLoadDataFragment extends Fragment implements Step {
 
   @Inject RxSharedPreferences settings;
-  @Inject JobManager jobManager;
 
   private String TAG = this.getClass().getSimpleName();
   private int loaded = 0;
@@ -65,7 +64,7 @@ public class StepperLoadDataFragment extends Fragment implements Step {
       EventBus.getDefault().unregister(this);
     }
     EventBus.getDefault().register(this);
-    EsdApplication.getComponent(getContext()).inject(this);
+    EsdApplication.getDataComponent().inject(this);
 
     loadRxSettings();
 

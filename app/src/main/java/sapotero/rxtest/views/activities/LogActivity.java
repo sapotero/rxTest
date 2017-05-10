@@ -29,8 +29,6 @@ import timber.log.Timber;
 
 public class LogActivity extends AppCompatActivity {
 
-
-  @Inject RxSharedPreferences settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   @BindView(R.id.activity_log_recycle_view) RecyclerView recyclerView;
@@ -48,7 +46,7 @@ public class LogActivity extends AppCompatActivity {
 
     setContentView(R.layout.activity_log);
     ButterKnife.bind(this);
-    EsdApplication.getComponent(this).inject(this);
+    EsdApplication.getDataComponent().inject(this);
 
   }
   @OnClick(R.id.activity_reload_table)

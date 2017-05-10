@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.file;
 
-import android.content.Context;
-
 import com.f2prateek.rx.preferences.Preference;
 
 import java.io.File;
@@ -12,6 +10,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.queue.FileSignEntity;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
@@ -23,7 +22,6 @@ import timber.log.Timber;
 public class SignFile extends AbstractCommand {
 
   private final DocumentReceiver document;
-  private final Context context;
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -36,9 +34,8 @@ public class SignFile extends AbstractCommand {
   private String official_id;
   private String sign;
 
-  public SignFile(Context context, DocumentReceiver document){
-    super(context);
-    this.context = context;
+  public SignFile(DocumentReceiver document){
+    super();
     this.document = document;
   }
 
@@ -96,11 +93,11 @@ public class SignFile extends AbstractCommand {
 
     ImagesService imagesService = retrofit.create( ImagesService.class );
 
-    File file = new File( context.getFilesDir(), params.getFilePath() );
+    File file = new File( EsdApplication.getApplication().getApplicationContext().getFilesDir(), params.getFilePath() );
 
     String file_sign = null;
     try {
-      file_sign = MainService.getFakeSign( context, PIN.get(), file );
+      file_sign = MainService.getFakeSign( PIN.get(), file );
     } catch (Exception e) {
       e.printStackTrace();
     }

@@ -1,6 +1,5 @@
 package sapotero.rxtest.utils.queue.threads;
 
-import android.content.Context;
 import android.os.Handler;
 
 import com.google.gson.Gson;
@@ -28,17 +27,13 @@ public class QueueSupervisor implements JobCountInterface {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private final Context context;
   private final CommandFactory commandFactory;
   private ThreadPoolExecutor   commandPool;
 
   public static int THREAD_POOL_SIZE = 8;
 
-  public QueueSupervisor(Context context) {
-
-    this.context = context;
+  public QueueSupervisor() {
     this.commandFactory = CommandFactory.getInstance();
-
     start();
   }
 
@@ -88,9 +83,9 @@ public class QueueSupervisor implements JobCountInterface {
     Runnable producedCommand;
 
     if ( executeLocal) {
-      producedCommand = new LocalCommandProducer(  create(command), context);
+      producedCommand = new LocalCommandProducer(  create(command) );
     } else {
-      producedCommand = new RemoteCommandProducer( create(command), context);
+      producedCommand = new RemoteCommandProducer( create(command) );
     }
 
     Timber.tag(TAG).i("local %s | %s", executeLocal, producedCommand.toString() );

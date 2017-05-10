@@ -56,9 +56,7 @@ import timber.log.Timber;
 
 public class InfoCardDocumentsFragment extends Fragment implements AdapterView.OnItemClickListener, GestureDetector.OnDoubleTapListener {
 
-  @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
-  @Inject JobManager jobManager;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   private OnFragmentInteractionListener mListener;
@@ -112,7 +110,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.fragment_info_card_documents, container, false);
     ButterKnife.bind(this, view);
-    EsdApplication.getComponent(mContext).inject( this );
+    EsdApplication.getDataComponent().inject( this );
 
     loadSettings();
 

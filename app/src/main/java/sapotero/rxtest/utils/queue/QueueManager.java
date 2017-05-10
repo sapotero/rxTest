@@ -1,14 +1,11 @@
 package sapotero.rxtest.utils.queue;
 
-import android.content.Context;
-
 import com.github.pwittchen.reactivenetwork.library.ReactiveNetwork;
 
 import java.util.List;
 
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.queue.QueueEntity;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.interfaces.Command;
@@ -20,7 +17,6 @@ import static sapotero.rxtest.utils.queue.threads.QueueSupervisor.THREAD_POOL_SI
 
 public class QueueManager {
 
-  private final Context context;
   private final QueueDBManager dBManager;
   private QueueSupervisor supervisor;
   private final String TAG = this.getClass().getSimpleName();
@@ -28,14 +24,12 @@ public class QueueManager {
 
   private Boolean isConnectedToInternet = false;
 
-  public QueueManager(Context context) {
-    this.context = context;
+  public QueueManager() {
 
-    EsdApplication.getComponent(context).inject(this);
     isConnectedToInternet();
 
-    supervisor = new QueueSupervisor(context);
-    dBManager  = new QueueDBManager(context);
+    supervisor = new QueueSupervisor();
+    dBManager  = new QueueDBManager();
   }
 
   public void add(Command command){

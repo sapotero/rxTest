@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.decision;
 
-import android.content.Context;
-
 import com.f2prateek.rx.preferences.Preference;
 import com.google.gson.Gson;
 
@@ -36,7 +34,6 @@ import timber.log.Timber;
 public class SaveAndApproveDecision extends AbstractCommand {
 
   private final DocumentReceiver document;
-  private final Context context;
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -50,9 +47,8 @@ public class SaveAndApproveDecision extends AbstractCommand {
   private String decisionId;
   private boolean withSign = false;
 
-  public SaveAndApproveDecision(Context context, DocumentReceiver document){
-    super(context);
-    this.context = context;
+  public SaveAndApproveDecision(DocumentReceiver document){
+    super();
     this.document = document;
   }
 
@@ -178,7 +174,7 @@ public class SaveAndApproveDecision extends AbstractCommand {
       if ( settings.getBoolean("SIGN_WITH_DC").get() ){
         String fake_sign = null;
 
-        fake_sign = MainService.getFakeSign( context, PIN.get(), null );
+        fake_sign = MainService.getFakeSign( PIN.get(), null );
 
         if (fake_sign != null) {
           _decision.setSign(fake_sign);

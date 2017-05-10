@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.decision;
 
-import android.content.Context;
-
 import com.f2prateek.rx.preferences.Preference;
 import com.google.gson.Gson;
 
@@ -31,7 +29,6 @@ import timber.log.Timber;
 public class AddDecision extends AbstractCommand {
 
   private final DocumentReceiver document;
-  private final Context context;
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -43,9 +40,8 @@ public class AddDecision extends AbstractCommand {
   private Preference<String> PIN;
   private String decisionId;
 
-  public AddDecision(Context context, DocumentReceiver document){
-    super(context);
-    this.context = context;
+  public AddDecision(DocumentReceiver document){
+    super();
     this.document = document;
   }
 
@@ -80,7 +76,7 @@ public class AddDecision extends AbstractCommand {
     _params.setDecisionModel( params.getDecisionModel() );
     _params.setDocument(params.getDocument());
     _params.setAssignment(params.isAssignment());
-    Command command = operation.getCommand(null, context, document, _params);
+    Command command = operation.getCommand(null, document, _params);
     command.execute();
 
     Timber.tag(TAG).w("ASSIGNMENT: %s", params.isAssignment() );

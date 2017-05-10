@@ -1,7 +1,5 @@
 package sapotero.rxtest.utils.queue.threads.producers;
 
-import android.content.Context;
-
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.invokers.LocalExecutor;
 import timber.log.Timber;
@@ -9,17 +7,12 @@ import timber.log.Timber;
 public class LocalCommandProducer implements Runnable, AutoCloseable {
 
   private final Command command;
-  private final Context context;
   private final LocalExecutor localExecutor;
   private String TAG = this.getClass().getSimpleName();
 
-  public LocalCommandProducer(Command command, Context context) {
-
+  public LocalCommandProducer(Command command) {
     this.command = command;
-    this.context = context;
-
     localExecutor = new LocalExecutor();
-
   }
 
   @Override

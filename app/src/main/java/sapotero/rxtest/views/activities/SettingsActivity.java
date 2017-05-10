@@ -22,9 +22,6 @@ public class SettingsActivity extends AppCompatActivity {
 
   @BindView(R.id.toolbar) Toolbar toolbar;
 
-  @Inject RxSharedPreferences settings;
-
-  Preference<Boolean> fooPreference;
   CompositeSubscription subscriptions;
 
   private String TAG = this.getClass().getSimpleName();
@@ -37,9 +34,6 @@ public class SettingsActivity extends AppCompatActivity {
 
 
     ButterKnife.bind(this);
-    EsdApplication.getComponent(this).inject(this);
-
-    fooPreference = settings.getBoolean("foo");
 
     toolbar.setTitle("Настройки приложения");
     toolbar.setSubtitle("доступ и отображение");

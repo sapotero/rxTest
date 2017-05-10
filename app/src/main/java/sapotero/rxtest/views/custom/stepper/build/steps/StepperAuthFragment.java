@@ -63,7 +63,7 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    EsdApplication.getComponent( getContext() ).inject(this);
+    EsdApplication.getDataComponent().inject(this);
 
     View view = inflater.inflate(R.layout.stepper_auth, container, false);
 

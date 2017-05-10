@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.decision;
 
-import android.content.Context;
-
 import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
@@ -23,13 +21,11 @@ import timber.log.Timber;
 public class SaveTemporaryDecision extends AbstractCommand {
 
   private final DocumentReceiver document;
-  private final Context context;
 
   private String TAG = this.getClass().getSimpleName();
 
-  public SaveTemporaryDecision(Context context, DocumentReceiver document){
-    super(context);
-    this.context = context;
+  public SaveTemporaryDecision(DocumentReceiver document){
+    super();
     this.document = document;
   }
 
