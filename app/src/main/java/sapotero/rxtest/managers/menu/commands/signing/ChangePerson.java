@@ -117,7 +117,7 @@ public class ChangePerson extends AbstractCommand {
     String sign = null;
 
     try {
-      sign = MainService.getFakeSign( context, PIN.get(), null );
+      sign = MainService.getFakeSign( PIN.get(), null );
     } catch (Exception e) {
       e.printStackTrace();
     }

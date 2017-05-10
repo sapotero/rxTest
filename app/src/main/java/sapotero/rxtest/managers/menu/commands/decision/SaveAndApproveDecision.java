@@ -178,7 +178,7 @@ public class SaveAndApproveDecision extends AbstractCommand {
       if ( settings.getBoolean("SIGN_WITH_DC").get() ){
         String fake_sign = null;
 
-        fake_sign = MainService.getFakeSign( context, PIN.get(), null );
+        fake_sign = MainService.getFakeSign( PIN.get(), null );
 
         if (fake_sign != null) {
           _decision.setSign(fake_sign);

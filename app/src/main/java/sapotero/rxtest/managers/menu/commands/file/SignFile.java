@@ -100,7 +100,7 @@ public class SignFile extends AbstractCommand {
 
     String file_sign = null;
     try {
-      file_sign = MainService.getFakeSign( context, PIN.get(), file );
+      file_sign = MainService.getFakeSign( PIN.get(), file );
     } catch (Exception e) {
       e.printStackTrace();
     }

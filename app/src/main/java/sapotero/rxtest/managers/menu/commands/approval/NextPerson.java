@@ -127,7 +127,7 @@ public class NextPerson extends AbstractCommand {
     }
 
     try {
-      sign = MainService.getFakeSign( context, PIN.get(), null );
+      sign = MainService.getFakeSign( PIN.get(), null );
     } catch (Exception e) {
       e.printStackTrace();
     }

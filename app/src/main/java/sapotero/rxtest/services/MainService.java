@@ -122,11 +122,15 @@ public class MainService extends Service {
   public static String user;
   private int keyStoreTypeIndex = 0;
 
+  private static Context context;
+
   public MainService() {
   }
 
   public void onCreate() {
     super.onCreate();
+
+    context = getApplicationContext();
 
     if ( EventBus.getDefault().isRegistered(this) ){
       EventBus.getDefault().unregister(this);
@@ -807,7 +811,7 @@ public class MainService extends Service {
     }
   }
 
-  public static String getFakeSign(Context context, String password, File file) throws Exception {
+  public static String getFakeSign(String password, File file) throws Exception {
 
     ContainerAdapter adapter = new ContainerAdapter(aliasesList.get(0), null, aliasesList.get(0), null);
 
