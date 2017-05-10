@@ -64,8 +64,16 @@ public class PrimaryConsideration extends AbstractCommand {
 
   @Override
   public void execute() {
+
+    dataStore
+      .update(RDocumentEntity.class)
+      .set(RDocumentEntity.CHANGED, true)
+      .where(RDocumentEntity.UID.eq( params.getDocument() ))
+      .get()
+      .value();
+
     queueManager.add(this);
-    update();
+
   }
 
   private void update(){
@@ -117,6 +125,8 @@ public class PrimaryConsideration extends AbstractCommand {
     if ( callback != null ){
       callback.onCommandExecuteSuccess( getType() );
     }
+
+    update();
 
     queueManager.setExecutedLocal(this);
   }
