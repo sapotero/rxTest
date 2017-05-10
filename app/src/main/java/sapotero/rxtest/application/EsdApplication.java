@@ -32,7 +32,7 @@ import timber.log.Timber;
 
 public final class EsdApplication extends Application {
 
-  private static EsdApplication instance;
+  private static EsdApplication application;
 
   private static DataComponent dataComponent;
   private static ValidationComponent validationComponent;
@@ -65,7 +65,7 @@ public final class EsdApplication extends Application {
         .build();
     Stetho.initialize(initializer);
 
-    instance = this;
+    application = this;
 
     initComponents();
 
@@ -96,7 +96,7 @@ public final class EsdApplication extends Application {
     return managerComponent;
   }
 
-  public static EsdApplication getInstance() {
-    return instance;
+  public static EsdApplication getApplication() {
+    return application;
   }
 }

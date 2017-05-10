@@ -12,7 +12,7 @@ public final class EsdModule {
   private final Context context;
 
   public EsdModule() {
-    context = EsdApplication.getInstance().getApplicationContext();
+    context = EsdApplication.getApplication().getApplicationContext();
   }
 
   @Provides
