@@ -457,6 +457,7 @@
         <item>1.5</item>
     </string-array>
 
+    <string name="first_run_key">is_first_run</string>
 
     <!--CRYPTO PRO-->
 

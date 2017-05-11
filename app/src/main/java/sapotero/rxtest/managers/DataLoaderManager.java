@@ -629,7 +629,7 @@ public class DataLoaderManager {
                       }
                     }
 
-                    if ( settings.getBoolean("is_first_run").get() != null && !settings.getBoolean("is_first_run").get() ) {
+                    if ( !settings2.isFirstRun() ) {
                       Timber.tag(TAG).e("isInvalidate" );
                       jobManager.addJobInBackground(new InvalidateDocumentsJob(data.getDocuments(), index, status));
                     }

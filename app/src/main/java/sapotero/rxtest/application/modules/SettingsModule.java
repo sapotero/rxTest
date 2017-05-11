@@ -23,8 +23,8 @@ public final class SettingsModule {
 
   @Provides
   @DataScope
-  Settings provideSettings(RxSharedPreferences rxSharedPreferences) {
-    Settings settings = new Settings(rxSharedPreferences);
+  Settings provideSettings(Context context, RxSharedPreferences rxSharedPreferences) {
+    Settings settings = new Settings(context, rxSharedPreferences);
     return settings;
   }
 }

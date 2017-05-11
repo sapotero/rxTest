@@ -1,26 +1,35 @@
 package sapotero.rxtest.utils;
 
+import android.content.Context;
+
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
+import sapotero.rxtest.R;
+
 public class Settings {
 
-  public static final String FIRST_RUN_KEY = "is_first_run";
   public static final String SIGN_WITH_DC_KEY = "SIGN_WITH_DC";
   public static final String DOCUMENTS_COUNT_KEY = "documents.count";
 
+  public static String FIRST_RUN_KEY;
+
+  private Context context;
   private RxSharedPreferences settings;
 
   private Preference<Boolean> firstRunFlag;
   private Preference<Boolean> signWithDc;
   private Preference<Integer> jobCount;
 
-  public Settings(RxSharedPreferences settings) {
+  public Settings(Context context, RxSharedPreferences settings) {
+    this.context = context;
     this.settings = settings;
     loadSettings();
   }
 
   private void loadSettings() {
+    FIRST_RUN_KEY = context.getResources().getString(R.string.first_run_key);
+
     firstRunFlag = settings.getBoolean(FIRST_RUN_KEY);
     signWithDc = settings.getBoolean(SIGN_WITH_DC_KEY);
     jobCount = settings.getInteger(DOCUMENTS_COUNT_KEY);
