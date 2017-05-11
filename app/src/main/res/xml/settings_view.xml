@@ -105,6 +105,11 @@
             android:title="Показывать подтверждения о постановке на контроль документов для раздела «Обращение граждан»"
             android:defaultValue="true" />
 
+        <SwitchPreference
+            android:key="settings_view_show_approve_on_primary"
+            android:title="Возможность согласования документов на первичном рассмотрении"
+            android:defaultValue="true" />
+
         <EditTextPreference
             android:key="settings_view_show_max_image_size"
             android:title="Максимальный размер файла для подписи"
