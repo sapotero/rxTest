@@ -10,21 +10,32 @@
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/document_image_toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_width="200dp"
         android:paddingTop="@dimen/half_date_offset"
         android:transitionName="actionBar"
         android:minHeight="?attr/actionBarSize"
         app:navigationIcon="?attr/homeAsUpIndicator"
-        app:theme="@style/ToolbarColoredBackArrow"
-        android:elevation="8dp"/>
+        android:elevation="8dp"
+        android:layout_height="80dp">
+
+    </android.support.v7.widget.Toolbar>
+
+    <SeekBar
+        android:id="@+id/fullscreen_web_infocard_zoomer"
+        android:layout_width="match_parent"
+        android:layout_gravity="bottom"
+        android:max="24"
+        android:progress="2"
+        android:layout_toEndOf="@+id/document_image_toolbar"
+        android:layout_height="80dp"/>
 
     <LinearLayout
 
-            android:layout_width="match_parent"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:background="@color/md_grey_100">
+        android:background="@color/md_grey_100"
+        android:layout_below="@+id/document_image_toolbar">
 
         <android.support.v7.widget.CardView
                 android:layout_width="match_parent"
@@ -37,6 +48,7 @@
                     android:layout_height="match_parent"
                     android:id="@+id/fullscreen_web_infocard"
                     android:background="@color/md_white_1000"
+                    android:scrollbars="none"
                     android:layout_margin="@dimen/date_offset">
 
                 </WebView>
@@ -50,6 +62,7 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
         android:layout_margin="24dp"
+        android:visibility="gone"
         >
 
         <Button
@@ -58,7 +71,8 @@
             android:layout_height="32dp"
             android:layout_weight="1"
             android:background="@drawable/minus"
-            android:visibility="gone"
+            android:visibility="visible"
+            android:rotation="270"
             android:foreground="@drawable/card_foreground"
             style="@style/Widget.AppCompat.Button"/>
 
@@ -68,9 +82,11 @@
             android:layout_height="32dp"
             android:background="@drawable/plus"
             android:layout_weight="1"
-            android:visibility="gone"
+            android:visibility="visible"
             android:foreground="@drawable/card_foreground"
             style="@style/Widget.AppCompat.Button"/>
+
     </LinearLayout>
+
 
 </RelativeLayout>

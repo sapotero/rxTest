@@ -1,8 +1,11 @@
 package sapotero.rxtest.views.activities;
 
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.widget.FrameLayout;
@@ -15,8 +18,6 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.requery.Persistable;
-import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.retrofit.models.document.Image;
@@ -64,16 +65,17 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity implement
     fragmentTransaction.commit();
 
 
-    toolbar.setTitleTextColor(getResources().getColor(R.color.md_grey_100));
-    toolbar.setSubtitleTextColor(getResources().getColor(R.color.md_grey_400));
-    toolbar.setContentInsetStartWithNavigation(250);
+    toolbar.setTitleTextColor(getResources().getColor(R.color.md_black_1000));
     toolbar.setNavigationOnClickListener(v ->{
         finish();
       }
     );
 
-//    toolbar.setTitle("Просмотр ЭО");
-//    toolbar.setSubtitle("subtitle");
+    Drawable drawable = toolbar.getNavigationIcon();
+    assert drawable != null;
+    drawable.setColorFilter(ContextCompat.getColor(this, R.color.md_black_1000), PorterDuff.Mode.SRC_ATOP);
+
+    toolbar.setTitle("Назад");
 
   }
 
