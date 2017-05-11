@@ -205,7 +205,7 @@ public class SearchView extends BaseRestoreInstanceFragment implements DialogInt
         mSearchEditText.addTextChangedListener(mSearchTextWatcher);
         mSearchEditText.setOnBackKeyListener(this);
         mSearchEditText.setOnKeyListener(this);
-//        mCloseVoiceBtn.setOnClickListener(mCloseVoiceClickListener);
+        mCloseVoiceBtn.setOnClickListener(mCloseVoiceClickListener);
         mNavBackBtn.setOnClickListener(mNavigationBackClickListener);
         mSearchEditText.setCustomSelectionActionModeCallback(mNotAllowedToEditCallback);
         setUpDialogTouchListener(mOnOutsideTouchListener);
@@ -450,10 +450,22 @@ public class SearchView extends BaseRestoreInstanceFragment implements DialogInt
         if (searchText != null && searchText.length() != 0) {
             mCloseVoiceBtn.setVisibility(View.VISIBLE);
             mCloseVoiceBtn.setImageResource(R.drawable.close);
+
+            mCloseVoiceBtn.setClickable(true);
+            mCloseVoiceBtn.setFocusable(true);
+            mCloseVoiceBtn.setEnabled(true);
+            mCloseVoiceBtn.setAlpha(1f);
+
         } else if (!isSpeechRecognitionToolAvailable()) {
             mCloseVoiceBtn.setVisibility(View.INVISIBLE);
         } else {
             mCloseVoiceBtn.setImageResource(R.drawable.voice);
+            mCloseVoiceBtn.setClickable(false);
+            mCloseVoiceBtn.setFocusable(false);
+            mCloseVoiceBtn.setEnabled(false);
+            mCloseVoiceBtn.setAlpha(0.2f);
+
+
         }
     }
 
