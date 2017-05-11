@@ -79,7 +79,6 @@ public class DataLoaderManager {
   private Preference<String> LOGIN;
   private Preference<String> PASSWORD;
   private Preference<String> HOST;
-  private Preference<Integer> COUNT;
   private Preference<String> CURRENT_USER_ID;
 
   private SimpleDateFormat dateFormat;
@@ -225,7 +224,6 @@ public class DataLoaderManager {
     PASSWORD = settings.getString("password");
     TOKEN    = settings.getString("token");
     HOST     = settings.getString("settings_username_host");
-    COUNT    = settings.getInteger("documents.count");
     CURRENT_USER = settings.getString("current_user");
     CURRENT_USER_ID = settings.getString("current_user_id");
     CURRENT_USER_ORGANIZATION = settings.getString("current_user_organization");

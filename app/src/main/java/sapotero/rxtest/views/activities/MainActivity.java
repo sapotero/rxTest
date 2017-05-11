@@ -131,7 +131,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private Preference<String> LOGIN;
   private Preference<String> HOST;
   private Preference<String> PASSWORD;
-  private Preference<Integer> COUNT;
 
   private int loaded = 0;
 
@@ -693,7 +692,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     PASSWORD = settings.getString("password");
     TOKEN = settings.getString("token");
     HOST = settings.getString("settings_username_host");
-    COUNT = settings.getInteger("documents.count");
   }
 
   private void drawer_add_item(int index, String title, Long identifier) {
@@ -839,11 +837,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private int getLoadedDocumentsPercent() {
-    if ( COUNT.get() == null ){
-      COUNT.set(1);
-    }
-
-    float result = 100f * loaded / COUNT.get();
+    float result = 100f * loaded / settings2.getJobCount();
     if (result > 100 ){
       result = 100f;
     }

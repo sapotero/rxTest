@@ -44,7 +44,6 @@ public class StepperLoadDataFragment extends Fragment implements Step {
 
   private RingProgressBar mRingProgressBar;
 
-  private Preference<Integer> COUNT;
   private Preference<Boolean> IS_CONNECTED;
 
   private VerificationError error;
@@ -219,7 +218,6 @@ public class StepperLoadDataFragment extends Fragment implements Step {
   }
 
   private void loadRxSettings() {
-    COUNT = settings.getInteger("documents.count");
     IS_CONNECTED = settings.getBoolean("isConnectedToInternet");
   }
 }
