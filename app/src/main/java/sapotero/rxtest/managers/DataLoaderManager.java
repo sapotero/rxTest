@@ -746,7 +746,7 @@ public class DataLoaderManager {
 
     Observable<AuthSignToken> authSubscription;
 
-    if ( settings.getBoolean("SIGN_WITH_DC").get() ){
+    if ( settings2.isSignedWithDc() ){
 
       String sign = "";
       try {

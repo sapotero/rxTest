@@ -138,9 +138,6 @@ public class MainService extends Service {
 
     dataLoaderInterface = new DataLoaderManager(getApplicationContext());
 
-
-//    settings.getBoolean("SIGN_WITH_DC").set( false );
-
     Provider[] providers = Security.getProviders();
 
 
@@ -754,7 +751,7 @@ public class MainService extends Service {
         SIGN = enc.encode(signature);
 
         settings.getString("START_UP_SIGN").set( SIGN );
-        settings.getBoolean("SIGN_WITH_DC").set( true );
+        settings2.setSignedWithDc( true );
         settings.getString("PIN").set( password );
 
         dataLoaderInterface.tryToSignWithDc( SIGN );
