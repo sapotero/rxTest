@@ -59,7 +59,7 @@ import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.retrofit.models.v2.v2UserOshs;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.services.MainService;
-import sapotero.rxtest.utils.FirstRun;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.menu.fields.MainMenuButton;
 import sapotero.rxtest.views.menu.fields.MainMenuItem;
 import timber.log.Timber;
@@ -67,10 +67,10 @@ import timber.log.Timber;
 public class DataLoaderManager {
 
   private final String TAG = this.getClass().getSimpleName();
-  private final FirstRun firstRun;
 
   @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
+  @Inject Settings settings2;
   @Inject JobManager jobManager;
   @Inject SingleEntityStore<Persistable> dataStore;
 
@@ -105,8 +105,6 @@ public class DataLoaderManager {
     EsdApplication.getManagerComponent().inject(this);
 
     initialize();
-    firstRun = new FirstRun(settings);
-
   }
 
   private void initV2() {
@@ -455,7 +453,7 @@ public class DataLoaderManager {
   public void updateByCurrentStatus(MainMenuItem items, MainMenuButton button, Boolean firstRunShared) {
     Timber.tag(TAG).e("updateByCurrentStatus: %s %s", items, button );
 
-    if ( firstRun != null && !firstRun.isFirstRun() ) {
+    if ( !settings2.isFirstRun() ) {
       unsubscribe();
     }
 

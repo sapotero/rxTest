@@ -15,7 +15,6 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
@@ -27,7 +26,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import okhttp3.OkHttpClient;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.events.bus.FileDownloadedEvent;
@@ -36,8 +34,6 @@ import sapotero.rxtest.events.crypto.SelectKeyStoreEvent;
 import sapotero.rxtest.events.crypto.SelectKeysEvent;
 import sapotero.rxtest.events.stepper.shared.StepperNextStepEvent;
 import sapotero.rxtest.services.MainService;
-import sapotero.rxtest.utils.FirstRun;
-import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.custom.stepper.StepperLayout;
 import sapotero.rxtest.views.custom.stepper.VerificationError;
 import sapotero.rxtest.views.custom.stepper.build.StepperAdapter;
@@ -50,6 +46,7 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
   private static final int PERM_SYSTEM_SETTINGS_REQUEST_CODE = 1;
 
   @Inject RxSharedPreferences settings;
+  @Inject sapotero.rxtest.utils.Settings settings2;
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -276,7 +273,7 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
     EventBus.getDefault().register(this);
 
     // If not first run and CryptoPro installed, immediately move to main activity
-    if ( !isFirstRun() && cryptoProInstalled ) {
+    if ( !settings2.isFirstRun() && cryptoProInstalled ) {
       onCompleted(null);
     }
   }
@@ -309,11 +306,6 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
   @Override
   public void onReturn() {
 //    Toast.makeText( getApplicationContext(), "onReturn", Toast.LENGTH_SHORT ).show();
-  }
-
-  private boolean isFirstRun() {
-    FirstRun firstRun = new FirstRun(settings);
-    return firstRun.isFirstRun();
   }
 
   @Subscribe(threadMode = ThreadMode.BACKGROUND)

@@ -11,12 +11,13 @@ import javax.inject.Inject;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.utils.FirstRun;
+import sapotero.rxtest.utils.Settings;
 import timber.log.Timber;
 
 public class SettingsViewFragment extends PreferenceFragmentCompat {
   private CompositeSubscription subscriptions;
   @Inject RxSharedPreferences settings;
+  @Inject Settings settings2;
 
   @Override
   public void onCreatePreferences(Bundle bundle, String s) {
@@ -67,9 +68,8 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
     subscriptions = new CompositeSubscription();
 
     // Enable First run flag preference only if not first run
-    FirstRun firstRun = new FirstRun(settings);
-    boolean isFirstRun = firstRun.isFirstRun();
-    Preference firstFlagPreference = findPreference("is_first_run");
+    boolean isFirstRun = settings2.isFirstRun();
+    Preference firstFlagPreference = findPreference(Settings.FIRST_RUN_KEY);
     if (firstFlagPreference != null) {
       firstFlagPreference.setEnabled(!isFirstRun);
     }

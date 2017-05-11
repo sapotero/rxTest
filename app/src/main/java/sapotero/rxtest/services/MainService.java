@@ -87,7 +87,7 @@ import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.services.task.CheckNetworkTask;
 import sapotero.rxtest.services.task.UpdateAllDocumentsTask;
 import sapotero.rxtest.services.task.UpdateQueueTask;
-import sapotero.rxtest.utils.FirstRun;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.utils.cryptopro.AlgorithmSelector;
 import sapotero.rxtest.utils.cryptopro.CMSSignExample;
 import sapotero.rxtest.utils.cryptopro.ContainerAdapter;
@@ -107,6 +107,7 @@ public class MainService extends Service {
 
   @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
+  @Inject Settings settings2;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   @Inject QueueManager queue;
@@ -1011,7 +1012,7 @@ public class MainService extends Service {
       type = "";
     }
     if ( type.equals("favorites") ) {
-      if ( isFirstRun() ) {
+      if ( settings2.isFirstRun() ) {
         dataLoaderInterface.updateFavorites();
       }
     }
@@ -1026,11 +1027,6 @@ public class MainService extends Service {
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(AddKeyEvent event){
     add_new_key();
-  }
-
-  private boolean isFirstRun() {
-    FirstRun firstRun = new FirstRun(settings);
-    return firstRun.isFirstRun();
   }
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13314

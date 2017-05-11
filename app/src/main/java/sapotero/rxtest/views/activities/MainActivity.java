@@ -74,7 +74,7 @@ import sapotero.rxtest.events.view.RemoveDocumentFromAdapterEvent;
 import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
 import sapotero.rxtest.managers.DataLoaderManager;
 import sapotero.rxtest.services.MainService;
-import sapotero.rxtest.utils.FirstRun;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
@@ -92,6 +92,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   @Inject JobManager jobManager;
   @Inject RxSharedPreferences settings;
+  @Inject Settings settings2;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   @Inject QueueManager queue;
@@ -244,14 +245,12 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void setFirstRunFalse() {
-    FirstRun firstRun = new FirstRun(settings);
-
-    boolean isFirstRun = firstRun.isFirstRun();
-    boolean isSignedWithDc = firstRun.getBooleanFromSettings("SIGN_WITH_DC");
+    boolean isFirstRun = settings2.isFirstRun();
+    boolean isSignedWithDc = settings2.isSignedWithDc();
 
     // If signed with login and password, do not set first run flag to false
     if ( isFirstRun && isSignedWithDc ) {
-      firstRun.setFirstRun(false);
+      settings2.setFirstRun(false);
     }
 
     EventBus.getDefault().post( new UpdateAllDocumentsEvent());

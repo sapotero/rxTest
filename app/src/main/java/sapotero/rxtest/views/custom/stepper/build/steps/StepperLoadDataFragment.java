@@ -23,8 +23,6 @@ import javax.inject.Inject;
 
 import io.netopen.hotbitmapgg.library.view.RingProgressBar;
 import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
@@ -33,7 +31,7 @@ import sapotero.rxtest.events.stepper.auth.StepperLoginCheckFailEvent;
 import sapotero.rxtest.events.stepper.load.StepperDocumentCountReadyEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.jobs.utils.JobCounter;
-import sapotero.rxtest.utils.FirstRun;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.custom.stepper.Step;
 import sapotero.rxtest.views.custom.stepper.VerificationError;
 import timber.log.Timber;
@@ -41,6 +39,7 @@ import timber.log.Timber;
 public class StepperLoadDataFragment extends Fragment implements Step {
 
   @Inject RxSharedPreferences settings;
+  @Inject Settings settings2;
 
   private String TAG = this.getClass().getSimpleName();
   private int loaded = 0;
@@ -102,7 +101,7 @@ public class StepperLoadDataFragment extends Fragment implements Step {
 //      Toast.makeText( getContext(), error.getErrorMessage(), Toast.LENGTH_SHORT ).show();
     }
 
-    if ( !isFirstRun() ) {
+    if ( !settings2.isFirstRun() ) {
       error = null;
       unsubscribe();
 
@@ -117,11 +116,6 @@ public class StepperLoadDataFragment extends Fragment implements Step {
     }
 
     return error;
-  }
-
-  private boolean isFirstRun() {
-    FirstRun firstRun = new FirstRun(settings);
-    return firstRun.isFirstRun();
   }
 
   @Override
