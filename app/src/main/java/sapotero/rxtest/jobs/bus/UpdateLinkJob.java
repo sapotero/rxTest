@@ -32,7 +32,6 @@ public class UpdateLinkJob extends BaseJob {
 
   public static final int PRIORITY = 1;
 
-  private Preference<String> TOKEN = null;
   private Preference<String> HOST;
 
   private Fields.Status filter;
@@ -54,7 +53,6 @@ public class UpdateLinkJob extends BaseJob {
   public void onRun() throws Throwable {
 
     HOST  = settings.getString("settings_username_host");
-    TOKEN = settings.getString("token");
 
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
@@ -68,7 +66,7 @@ public class UpdateLinkJob extends BaseJob {
     Observable<DocumentInfo> info = documentService.getInfo(
       uid,
       settings2.getLogin(),
-      TOKEN.get()
+      settings2.getToken()
     );
 
     info

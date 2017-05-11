@@ -23,7 +23,6 @@ public class SkipControlLabel extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> TOKEN;
   private Preference<String> UID;
   private Preference<String> HOST;
   private Preference<String> STATUS_CODE;
@@ -49,7 +48,6 @@ public class SkipControlLabel extends AbstractCommand {
   }
 
   private void loadSettings(){
-    TOKEN = settings.getString("token");
     UID   = settings.getString("activity_main_menu.uid");
     HOST  = settings.getString("settings_username_host");
     STATUS_CODE = settings.getString("activity_main_menu.star");
@@ -92,7 +90,7 @@ public class SkipControlLabel extends AbstractCommand {
     Observable<OperationResult> info = operationService.shared(
       getType(),
       settings2.getLogin(),
-      TOKEN.get(),
+      settings2.getToken(),
       uids,
       UID.get(),
       STATUS_CODE.get(),

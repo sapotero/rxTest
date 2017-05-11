@@ -127,7 +127,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   private String TAG = MainActivity.class.getSimpleName();
 
-  private Preference<String> TOKEN;
   private Preference<String> HOST;
   private Preference<String> PASSWORD;
 
@@ -688,7 +687,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   private void loadSettings() {
     PASSWORD = settings.getString("password");
-    TOKEN = settings.getString("token");
     HOST = settings.getString("settings_username_host");
   }
 

@@ -61,7 +61,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
   //  private Fields.Journal journal;
   //  private Preference<String> PIN;
-  //  private Preference<String> TOKEN;
   //  private Preference<String> DOCUMENT_UID;
   //  private Preference<Integer> POSITION;
   //  private String SIGN;
@@ -373,7 +372,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   private void loadSettings() {
     UID      = settings.getString("activity_main_menu.uid");
 //    PASSWORD = settings.getString("password");
-//    TOKEN    = settings.getString("token");
 //    POSITION = settings.getInteger("position");
 //    DOCUMENT_UID = settings.getString("document.uid");
     STATUS_CODE = settings.getString("activity_main_menu.star");

@@ -21,7 +21,6 @@ public class RemoveTemplate extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> TOKEN;
   private Preference<String> HOST;
 
   public RemoveTemplate(DocumentReceiver document){
@@ -39,7 +38,6 @@ public class RemoveTemplate extends AbstractCommand {
 
   private void loadSettings(){
     HOST  = settings.getString("settings_username_host");
-    TOKEN = settings.getString("token");
   }
 
   @Override
@@ -79,7 +77,7 @@ public class RemoveTemplate extends AbstractCommand {
     Observable<Template> info = templatesService.remove(
       params.getUuid(),
       settings2.getLogin(),
-      TOKEN.get()
+      settings2.getToken()
     );
 
     info

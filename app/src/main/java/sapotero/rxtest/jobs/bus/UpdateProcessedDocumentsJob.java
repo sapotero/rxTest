@@ -52,7 +52,6 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
 
   private String processed_folder;
 
-  private Preference<String> TOKEN = null;
   private Preference<String> HOST;
 
   private String uid;
@@ -74,7 +73,6 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
   public void onRun() throws Throwable {
 
     HOST  = settings.getString("settings_username_host");
-    TOKEN = settings.getString("token");
 
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
@@ -88,7 +86,7 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
     Observable<DocumentInfo> info = documentService.getInfo(
       uid,
       settings2.getLogin(),
-      TOKEN.get()
+      settings2.getToken()
     );
 
     info

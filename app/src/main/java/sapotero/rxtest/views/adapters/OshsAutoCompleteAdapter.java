@@ -44,7 +44,6 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
   @Inject RxSharedPreferences settings;
   @Inject Settings settings2;
 
-  private Preference<String> token;
   private Preference<String> HOST;
 
   private ArrayList<String> ignore_user_ids;
@@ -133,7 +132,7 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
 
     Retrofit retrofit = new RetrofitManager( context, HOST.get() + "/v2/", okHttpClient).process();
     OshsAdapterService documentsService = retrofit.create( OshsAdapterService.class );
-    Call<Oshs[]> call = documentsService.find(settings2.getLogin(), token.get(), term);
+    Call<Oshs[]> call = documentsService.find(settings2.getLogin(), settings2.getToken(), term);
 
     Oshs[] data = call.execute().body();
 
@@ -159,7 +158,6 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
   }
 
   private void loadSettings(){
-    token = settings.getString("token");
     HOST  = settings.getString("settings_username_host");
   }
 

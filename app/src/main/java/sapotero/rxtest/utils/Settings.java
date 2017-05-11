@@ -12,6 +12,7 @@ public class Settings {
   public static final String SIGN_WITH_DC_KEY = "SIGN_WITH_DC";
   public static final String DOCUMENTS_COUNT_KEY = "documents.count";
   public static final String LOGIN_KEY = "login";
+  public static final String TOKEN_KEY = "token";
 
   public static String FIRST_RUN_KEY;
 
@@ -22,6 +23,7 @@ public class Settings {
   private Preference<Boolean> signWithDc;
   private Preference<Integer> jobCount;
   private Preference<String> login;
+  private Preference<String> token;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -36,6 +38,7 @@ public class Settings {
     signWithDc = settings.getBoolean(SIGN_WITH_DC_KEY);
     jobCount = settings.getInteger(DOCUMENTS_COUNT_KEY);
     login = settings.getString(LOGIN_KEY);
+    token = settings.getString(TOKEN_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -132,5 +135,13 @@ public class Settings {
     if (stringPreference != null && value != null) {
       stringPreference.set(value);
     }
+  }
+
+  public String getToken() {
+    return getString(token);
+  }
+
+  public void setToken(String value) {
+    setString(token, value);
   }
 }

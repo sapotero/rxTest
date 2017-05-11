@@ -471,10 +471,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
 
   private void loadSettings() {
     login = settings2.getLogin();
-
-    Preference<String> _token = settings.getString("token");
-    token = _token.get();
-
+    token = settings2.getToken();
     HOST = settings.getString("settings_username_host");
   }
 

@@ -77,7 +77,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   @Inject JobManager jobManager;
   @Inject RxSharedPreferences settings;
 
-  private Preference<String> TOKEN;
   private Preference<String> LAST_SEEN_UID;
   private Preference<String> PASSWORD;
   private Preference<String> UID;
@@ -202,7 +201,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     UID      = settings.getString("activity_main_menu.uid");
     LAST_SEEN_UID = settings.getString("activity_main_menu.last_seen_uid");
     PASSWORD = settings.getString("password");
-    TOKEN    = settings.getString("token");
     POSITION = settings.getInteger("position");
     DOCUMENT_UID = settings.getString("document.uid");
     STATUS_CODE = settings.getString("activity_main_menu.star");

@@ -33,7 +33,6 @@ public class NextPerson extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> TOKEN;
   private Preference<String> UID;
   private Preference<String> HOST;
   private Preference<String> STATUS_CODE;
@@ -55,7 +54,6 @@ public class NextPerson extends AbstractCommand {
   }
 
   private void loadSettings(){
-    TOKEN = settings.getString("token");
     HOST  = settings.getString("settings_username_host");
     STATUS_CODE = settings.getString("activity_main_menu.star");
     PIN = settings.getString("PIN");
@@ -135,7 +133,7 @@ public class NextPerson extends AbstractCommand {
     Observable<OperationResult> info = operationService.sign(
       getType(),
       settings2.getLogin(),
-      TOKEN.get(),
+      settings2.getToken(),
       uids,
       comment,
       STATUS_CODE.get(),

@@ -20,7 +20,6 @@ public class InvalidateDocumentsJob extends BaseJob {
 
   public static final int PRIORITY = 1;
 
-  private Preference<String> TOKEN = null;
   private Preference<String> HOST;
 
   private List<Document> uids;
@@ -47,7 +46,6 @@ public class InvalidateDocumentsJob extends BaseJob {
   public void onRun() throws Throwable {
 
     HOST  = settings.getString("settings_username_host");
-    TOKEN = settings.getString("token");
 
     List<RDocumentEntity> dbDocs = dataStore
       .select(RDocumentEntity.class)

@@ -28,7 +28,6 @@ public class CreateTemplate extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> TOKEN;
   private Preference<String> HOST;
 
   public CreateTemplate(DocumentReceiver document){
@@ -46,7 +45,6 @@ public class CreateTemplate extends AbstractCommand {
 
   private void loadSettings(){
     HOST  = settings.getString("settings_username_host");
-    TOKEN = settings.getString("token");
   }
 
   @Override
@@ -85,7 +83,7 @@ public class CreateTemplate extends AbstractCommand {
 
     Observable<Template> info = templatesService.create(
       settings2.getLogin(),
-      TOKEN.get(),
+      settings2.getToken(),
       params.getComment(),
       type
     );

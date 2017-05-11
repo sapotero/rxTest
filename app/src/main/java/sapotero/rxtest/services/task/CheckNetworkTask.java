@@ -30,7 +30,6 @@ public class CheckNetworkTask implements Runnable {
   @Inject OkHttpClient okHttpClient;
 
   private Preference<String> HOST;
-  private Preference<String> TOKEN;
   private Preference<Boolean> IS_CONNECTED;
 
   public CheckNetworkTask() {
@@ -40,7 +39,6 @@ public class CheckNetworkTask implements Runnable {
 
   private void initSettings() {
     HOST = settings.getString("settings_username_host");
-    TOKEN = settings.getString("token");
     IS_CONNECTED = settings.getBoolean("isConnectedToInternet");
   }
 
@@ -51,7 +49,7 @@ public class CheckNetworkTask implements Runnable {
 
     Timber.tag(TAG).d("Checking internet connectivity");
 
-    auth.getUserInfoV2(settings2.getLogin(), TOKEN.get())
+    auth.getUserInfoV2(settings2.getLogin(), settings2.getToken())
       .subscribeOn(Schedulers.io())
       .observeOn(Schedulers.computation())
       .subscribe(
