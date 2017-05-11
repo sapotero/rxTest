@@ -77,6 +77,9 @@
                     android:paddingLeft="@dimen/searchview_padding_horizontal_button_action"
                     android:paddingRight="@dimen/searchview_padding_horizontal_button_action"
                     android:scaleType="fitCenter"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:alpha="0.2"
                     android:src="@drawable/voice"/>
 
             </RelativeLayout>
