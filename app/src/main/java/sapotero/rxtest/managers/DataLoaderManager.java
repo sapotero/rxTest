@@ -51,7 +51,6 @@ import sapotero.rxtest.jobs.bus.InvalidateDocumentsJob;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.jobs.bus.UpdateFavoritesDocumentsJob;
 import sapotero.rxtest.jobs.bus.UpdateProcessedDocumentsJob;
-import sapotero.rxtest.jobs.utils.JobCounter;
 import sapotero.rxtest.retrofit.Api.AuthService;
 import sapotero.rxtest.retrofit.DocumentsService;
 import sapotero.rxtest.retrofit.models.AuthSignToken;
@@ -96,8 +95,6 @@ public class DataLoaderManager {
 
   private int jobCount;
   private int jobCountFavorites;
-
-  private JobCounter jobCounter;
 
   public DataLoaderManager(Context context) {
     this.context = context;
@@ -232,7 +229,6 @@ public class DataLoaderManager {
     CURRENT_USER = settings.getString("current_user");
     CURRENT_USER_ID = settings.getString("current_user_id");
     CURRENT_USER_ORGANIZATION = settings.getString("current_user_organization");
-    jobCounter = new JobCounter(settings);
   }
 
   public void unregister(){
@@ -551,7 +547,7 @@ public class DataLoaderManager {
 
       requestCount = 0;
       jobCount = 0;
-      jobCounter.setJobCount(0);
+      settings2.setJobCount(0);
 
       for (String index: indexes ) {
         for (String status: statuses ) {
@@ -713,7 +709,7 @@ public class DataLoaderManager {
     if (0 == requestCount) {
       // Received responses on all requests, now jobCount contains total initial job count value.
       // Update counter in preferences with this value.
-      jobCounter.addJobCount(jobCount);
+      settings2.addJobCount(jobCount);
       EventBus.getDefault().post( new StepperDocumentCountReadyEvent() );
     }
   }
@@ -811,7 +807,7 @@ public class DataLoaderManager {
 
                 }
               }
-              jobCounter.addJobCount(jobCountFavorites);
+              settings2.addJobCount(jobCountFavorites);
             }, error -> {
               Timber.tag(TAG).e(error);
             }

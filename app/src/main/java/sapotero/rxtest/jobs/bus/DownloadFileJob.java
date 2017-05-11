@@ -24,7 +24,6 @@ import rx.Observable;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.events.bus.FileDownloadedEvent;
-import sapotero.rxtest.jobs.utils.JobCounter;
 import sapotero.rxtest.retrofit.DocumentLinkService;
 import sapotero.rxtest.retrofit.models.DownloadLink;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;

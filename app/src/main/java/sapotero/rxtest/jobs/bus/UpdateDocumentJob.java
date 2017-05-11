@@ -35,7 +35,6 @@ import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.adapter.UpdateDocumentAdapterEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
-import sapotero.rxtest.jobs.utils.JobCounter;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Card;
@@ -162,7 +161,7 @@ public class UpdateDocumentJob extends BaseJob {
             }
           }
 
-          addPrefJobCounter(jobCount);
+          addPrefJobCount(jobCount);
         },
         error -> {
           error.printStackTrace();
@@ -550,7 +549,7 @@ public class UpdateDocumentJob extends BaseJob {
 
             }
 
-            addPrefJobCounter(jobCount);
+            addPrefJobCount(jobCount);
           },
           error ->{
             error.printStackTrace();
@@ -860,7 +859,7 @@ public class UpdateDocumentJob extends BaseJob {
 
           }
 
-          addPrefJobCounter(jobCount);
+          addPrefJobCount(jobCount);
         },
         error -> {
           Timber.tag(TAG).e("%s", error);
@@ -878,8 +877,7 @@ public class UpdateDocumentJob extends BaseJob {
     EventBus.getDefault().post( new StepperLoadDocumentEvent("Error updating document (job cancelled)") );
   }
 
-  private void addPrefJobCounter(int value) {
-    JobCounter jobCounter = new JobCounter(settings);
-    jobCounter.addJobCount(value);
+  private void addPrefJobCount(int value) {
+    settings2.addJobCount(value);
   }
 }

@@ -36,7 +36,6 @@ import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.adapter.UpdateDocumentAdapterEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
-import sapotero.rxtest.jobs.utils.JobCounter;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Card;
@@ -400,8 +399,7 @@ public class CreateDocumentsJob extends BaseJob {
             }
           }
 
-          JobCounter jobCounter = new JobCounter(settings);
-          jobCounter.addJobCount(jobCount);
+          settings2.addJobCount(jobCount);
 
           EventBus.getDefault().post( new UpdateDocumentAdapterEvent( result.getUid(), result.getDocumentType(), result.getFilter() ) );
 

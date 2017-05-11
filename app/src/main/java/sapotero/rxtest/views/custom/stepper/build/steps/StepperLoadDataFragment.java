@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
@@ -30,7 +29,6 @@ import sapotero.rxtest.events.bus.FileDownloadedEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckFailEvent;
 import sapotero.rxtest.events.stepper.load.StepperDocumentCountReadyEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
-import sapotero.rxtest.jobs.utils.JobCounter;
 import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.custom.stepper.Step;
 import sapotero.rxtest.views.custom.stepper.VerificationError;
@@ -52,7 +50,6 @@ public class StepperLoadDataFragment extends Fragment implements Step {
   private VerificationError error;
   private CompositeSubscription subscription;
 
-  private JobCounter jobCounter;
   private boolean isReceivedJobCount = false;
 
   @Override
@@ -183,7 +180,7 @@ public class StepperLoadDataFragment extends Fragment implements Step {
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(StepperDocumentCountReadyEvent event) {
     isReceivedJobCount = true;
-    if (jobCounter.getJobCount() == 0) {
+    if (settings2.getJobCount() == 0) {
       // No documents to download, set download complete
       mRingProgressBar.setProgress( 100 );
     } else {
@@ -194,7 +191,7 @@ public class StepperLoadDataFragment extends Fragment implements Step {
   private void updateProgressBar(String message) {
     loaded++;
 
-    int jobCount = jobCounter.getJobCount();
+    int jobCount = settings2.getJobCount();
 
     Timber.tag(TAG).d("TOTAL: %s/%s | %s", jobCount, loaded, message );
 
@@ -224,6 +221,5 @@ public class StepperLoadDataFragment extends Fragment implements Step {
   private void loadRxSettings() {
     COUNT = settings.getInteger("documents.count");
     IS_CONNECTED = settings.getBoolean("isConnectedToInternet");
-    jobCounter = new JobCounter(settings);
   }
 }

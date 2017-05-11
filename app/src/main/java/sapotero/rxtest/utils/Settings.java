@@ -7,11 +7,13 @@ public class Settings {
 
   public static final String FIRST_RUN_KEY = "is_first_run";
   public static final String SIGN_WITH_DC_KEY = "SIGN_WITH_DC";
+  public static final String DOCUMENTS_COUNT_KEY = "documents.count";
 
   private RxSharedPreferences settings;
 
   private Preference<Boolean> firstRunFlag;
   private Preference<Boolean> signWithDc;
+  private Preference<Integer> jobCount;
 
   public Settings(RxSharedPreferences settings) {
     this.settings = settings;
@@ -21,6 +23,7 @@ public class Settings {
   private void loadSettings() {
     firstRunFlag = settings.getBoolean(FIRST_RUN_KEY);
     signWithDc = settings.getBoolean(SIGN_WITH_DC_KEY);
+    jobCount = settings.getInteger(DOCUMENTS_COUNT_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -60,6 +63,34 @@ public class Settings {
   private void setBoolean(Preference<Boolean> booleanPreference, boolean value) {
     if (booleanPreference != null) {
       booleanPreference.set(value);
+    }
+  }
+
+  public int getJobCount() {
+    return getInteger(jobCount);
+  }
+
+  public void setJobCount(int value) {
+    setInteger(jobCount, value);
+  }
+
+  public void addJobCount(int value) {
+    setJobCount(getJobCount() + value);
+  }
+
+  private int getInteger(Preference<Integer> integerPreference) {
+    Integer value = integerPreference.get();
+
+    if (value != null) {
+      return value;
+    } else {
+      return 0;
+    }
+  }
+
+  private void setInteger(Preference<Integer> integerPreference, int value) {
+    if (integerPreference != null) {
+      integerPreference.set(value);
     }
   }
 }
