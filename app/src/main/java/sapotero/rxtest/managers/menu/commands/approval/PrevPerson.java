@@ -30,7 +30,6 @@ public class PrevPerson extends AbstractCommand {
 
   private Preference<String> UID;
   private Preference<String> STATUS_CODE;
-  private Preference<String> PIN;
   private String official_id;
   private String sign;
 
@@ -50,7 +49,6 @@ public class PrevPerson extends AbstractCommand {
   private void loadSettings(){
     UID   = settings.getString("activity_main_menu.uid");
     STATUS_CODE = settings.getString("activity_main_menu.star");
-    PIN = settings.getString("PIN");
   }
 
   public PrevPerson withPerson(String uid){
@@ -119,7 +117,7 @@ public class PrevPerson extends AbstractCommand {
     }
 
     try {
-      sign = MainService.getFakeSign( PIN.get(), null );
+      sign = MainService.getFakeSign( settings2.getPin(), null );
     } catch (Exception e) {
       e.printStackTrace();
     }

@@ -39,7 +39,6 @@ public class SaveAndApproveDecision extends AbstractCommand {
 
   private Preference<String> UID;
   private Preference<String> STATUS_CODE;
-  private Preference<String> PIN;
   private RDecisionEntity decision;
   private String decisionId;
   private boolean withSign = false;
@@ -60,7 +59,6 @@ public class SaveAndApproveDecision extends AbstractCommand {
   private void loadSettings(){
     UID   = settings.getString("activity_main_menu.uid");
     STATUS_CODE = settings.getString("activity_main_menu.star");
-    PIN = settings.getString("PIN");
   }
   public SaveAndApproveDecision withDecision(RDecisionEntity decision){
     this.decision = decision;
@@ -168,7 +166,7 @@ public class SaveAndApproveDecision extends AbstractCommand {
       if ( settings2.isSignedWithDc() ){
         String fake_sign = null;
 
-        fake_sign = MainService.getFakeSign( PIN.get(), null );
+        fake_sign = MainService.getFakeSign( settings2.getPin(), null );
 
         if (fake_sign != null) {
           _decision.setSign(fake_sign);

@@ -740,7 +740,7 @@ public class DataLoaderManager {
 
       String sign = "";
       try {
-        sign = MainService.getFakeSign( settings.getString("PIN").get(), null );
+        sign = MainService.getFakeSign( settings2.getPin(), null );
       } catch (Exception e) {
         e.printStackTrace();
       }

@@ -752,7 +752,7 @@ public class MainService extends Service {
 
         settings.getString("START_UP_SIGN").set( SIGN );
         settings2.setSignedWithDc( true );
-        settings.getString("PIN").set( password );
+        settings2.setPin( password );
 
         dataLoaderInterface.tryToSignWithDc( SIGN );
 
@@ -761,7 +761,7 @@ public class MainService extends Service {
         EventBus.getDefault().post( new StepperDcCheckFailEvent("Pin is invalid") );
       }
     } else {
-      settings.getString("PIN").set("");
+      settings2.setPin("");
       EventBus.getDefault().post( new StepperDcCheckFailEvent("Ошибка! Проверьте SD карту") );
     }
   }

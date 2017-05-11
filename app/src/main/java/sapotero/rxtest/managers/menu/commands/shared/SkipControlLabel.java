@@ -25,7 +25,6 @@ public class SkipControlLabel extends AbstractCommand {
 
   private Preference<String> UID;
   private Preference<String> STATUS_CODE;
-  private Preference<String> PIN;
   private String label_id;
 
   public SkipControlLabel(DocumentReceiver document){
@@ -49,7 +48,6 @@ public class SkipControlLabel extends AbstractCommand {
   private void loadSettings(){
     UID   = settings.getString("activity_main_menu.uid");
     STATUS_CODE = settings.getString("activity_main_menu.star");
-    PIN = settings.getString("PIN");
   }
 
   @Override

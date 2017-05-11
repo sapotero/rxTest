@@ -60,7 +60,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   private Preference<String> STATUS_CODE;
 
   //  private Fields.Journal journal;
-  //  private Preference<String> PIN;
   //  private Preference<String> DOCUMENT_UID;
   //  private Preference<Integer> POSITION;
   //  private String SIGN;
@@ -376,7 +375,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     REG_NUMBER = settings.getString("activity_main_menu.regnumber");
     REG_DATE = settings.getString("activity_main_menu.date");
 //    CURRENT_USER_ID = settings.getString("current_user_id");
-//    PIN = settings.getString("PIN");
   }
 
   public void invalidate() {

@@ -40,7 +40,6 @@ public class SaveDecision extends AbstractCommand {
 
   private Preference<String> UID;
   private Preference<String> STATUS_CODE;
-  private Preference<String> PIN;
   private RDecisionEntity decision;
   private String decisionId;
   private boolean withSign = false;
@@ -61,7 +60,6 @@ public class SaveDecision extends AbstractCommand {
   private void loadSettings(){
     UID   = settings.getString("activity_main_menu.uid");
     STATUS_CODE = settings.getString("activity_main_menu.star");
-    PIN = settings.getString("PIN");
   }
   public SaveDecision withDecision(RDecisionEntity decision){
     this.decision = decision;

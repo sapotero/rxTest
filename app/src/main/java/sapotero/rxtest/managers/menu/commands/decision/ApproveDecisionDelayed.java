@@ -1,6 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.decision;
 
-import com.f2prateek.rx.preferences.Preference;
 import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
@@ -33,8 +32,6 @@ public class ApproveDecisionDelayed extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> PIN;
-
   public ApproveDecisionDelayed(DocumentReceiver document){
     super();
     this.document = document;
@@ -46,10 +43,6 @@ public class ApproveDecisionDelayed extends AbstractCommand {
 
   public void registerCallBack(Callback callback){
     this.callback = callback;
-  }
-
-  private void loadSettings(){
-    PIN = settings.getString("PIN");
   }
 
   @Override
@@ -82,8 +75,6 @@ public class ApproveDecisionDelayed extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    loadSettings();
-
     update();
 
     if ( callback != null ){
@@ -95,8 +86,6 @@ public class ApproveDecisionDelayed extends AbstractCommand {
 
   @Override
   public void executeRemote() {
-    loadSettings();
-
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
     Retrofit retrofit = new Retrofit.Builder()
@@ -109,7 +98,7 @@ public class ApproveDecisionDelayed extends AbstractCommand {
     String sign = null;
 
     try {
-      sign = MainService.getFakeSign( PIN.get(), null );
+      sign = MainService.getFakeSign( settings2.getPin(), null );
     } catch (Exception e) {
       e.printStackTrace();
     }

@@ -30,7 +30,6 @@ public class PrimaryConsideration extends AbstractCommand {
 
   private Preference<String> UID;
   private Preference<String> STATUS_CODE;
-  private Preference<String> PIN;
   private String official_id;
 
   public PrimaryConsideration(DocumentReceiver document){
@@ -45,7 +44,6 @@ public class PrimaryConsideration extends AbstractCommand {
   private void loadSettings(){
     UID   = settings.getString("activity_main_menu.uid");
     STATUS_CODE = settings.getString("activity_main_menu.star");
-    PIN = settings.getString("PIN");
   }
   public PrimaryConsideration withPerson(String uid){
     official_id = uid;

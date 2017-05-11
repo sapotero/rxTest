@@ -28,7 +28,6 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
 
   private Preference<String> UID;
   private Preference<String> STATUS_CODE;
-  private Preference<String> PIN;
 
   public ReturnToPrimaryConsideration(DocumentReceiver document){
     super();
@@ -46,7 +45,6 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
   private void loadSettings(){
     UID   = settings.getString("activity_main_menu.uid");
     STATUS_CODE = settings.getString("activity_main_menu.star");
-    PIN = settings.getString("PIN");
   }
 
   @Override

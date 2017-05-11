@@ -35,7 +35,6 @@ public class NextPerson extends AbstractCommand {
 
   private Preference<String> UID;
   private Preference<String> STATUS_CODE;
-  private Preference<String> PIN;
   private String official_id;
   private String sign;
 
@@ -54,7 +53,6 @@ public class NextPerson extends AbstractCommand {
 
   private void loadSettings(){
     STATUS_CODE = settings.getString("activity_main_menu.star");
-    PIN = settings.getString("PIN");
   }
   public NextPerson withPerson(String uid){
     this.official_id = uid;
@@ -123,7 +121,7 @@ public class NextPerson extends AbstractCommand {
     }
 
     try {
-      sign = MainService.getFakeSign( PIN.get(), null );
+      sign = MainService.getFakeSign( settings2.getPin(), null );
     } catch (Exception e) {
       e.printStackTrace();
     }

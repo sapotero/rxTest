@@ -31,7 +31,6 @@ public class AddTemporaryDecision extends AbstractCommand {
 
   private Preference<String> UID;
   private Preference<String> STATUS_CODE;
-  private Preference<String> PIN;
   private String decisionId;
 
   public AddTemporaryDecision(DocumentReceiver document){
@@ -50,7 +49,6 @@ public class AddTemporaryDecision extends AbstractCommand {
   private void loadSettings(){
     UID   = settings.getString("activity_main_menu.uid");
     STATUS_CODE = settings.getString("activity_main_menu.star");
-    PIN = settings.getString("PIN");
   }
 
   public AddTemporaryDecision withDecisionId(String decisionId){

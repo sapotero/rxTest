@@ -39,7 +39,6 @@ public class RejectDecision extends AbstractCommand {
 
   private Preference<String> UID;
   private Preference<String> STATUS_CODE;
-  private Preference<String> PIN;
   private String folder_id;
   private RDecisionEntity decision;
   private String decisionId;
@@ -62,7 +61,6 @@ public class RejectDecision extends AbstractCommand {
     UID   = settings.getString("activity_main_menu.uid");
     STATUS_CODE = settings.getString("activity_main_menu.star");
     CURRENT_USER_ID = settings.getString("current_user_id");
-    PIN = settings.getString("PIN");
   }
   public RejectDecision withDecision(RDecisionEntity decision){
     this.decision = decision;

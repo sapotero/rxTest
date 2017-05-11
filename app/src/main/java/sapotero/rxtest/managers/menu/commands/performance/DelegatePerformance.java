@@ -28,7 +28,6 @@ public class DelegatePerformance extends AbstractCommand {
 
   private Preference<String> UID;
   private Preference<String> STATUS_CODE;
-  private Preference<String> PIN;
   private String official_id;
 
   public DelegatePerformance(DocumentReceiver document){
@@ -47,7 +46,6 @@ public class DelegatePerformance extends AbstractCommand {
   private void loadSettings(){
     UID   = settings.getString("activity_main_menu.uid");
     STATUS_CODE = settings.getString("activity_main_menu.star");
-    PIN = settings.getString("PIN");
   }
 
   public DelegatePerformance withPerson(String uid){
