@@ -38,7 +38,6 @@ public class DownloadFileJob  extends BaseJob {
   private String host;
   private String strUrl;
   private String fileName;
-  private Preference<String> HOST;
   private RImageEntity image;
 
   DownloadFileJob(String host, String strUrl, String fileName, int id) {
@@ -128,12 +127,10 @@ public class DownloadFileJob  extends BaseJob {
   }
 
   private void loadFile(){
-    HOST = settings.getString("settings_username_host");
-
     String admin = settings2.getLogin();
     String token = settings2.getToken();
 
-    Retrofit retrofit = new RetrofitManager(getApplicationContext(), HOST.get(), okHttpClient).process();
+    Retrofit retrofit = new RetrofitManager(getApplicationContext(), settings2.getHost(), okHttpClient).process();
     DocumentLinkService documentLinkService = retrofit.create(DocumentLinkService.class);
 
     strUrl = strUrl.replace("?expired_link=1", "");
@@ -174,7 +171,7 @@ public class DownloadFileJob  extends BaseJob {
       .build();
 
 
-    Retrofit retrofit = new RetrofitManager(getApplicationContext(), HOST.get(), okHttpClient).process();
+    Retrofit retrofit = new RetrofitManager(getApplicationContext(), settings2.getHost(), okHttpClient).process();
     DocumentLinkService documentLinkService = retrofit.create(DocumentLinkService.class);
 
     Observable<Response<ResponseBody>> call = documentLinkService.download(new_builtUri.toString(), admin, token);

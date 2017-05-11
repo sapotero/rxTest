@@ -33,7 +33,6 @@ public class ApproveDecisionDelayed extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> HOST;
   private Preference<String> PIN;
 
   public ApproveDecisionDelayed(DocumentReceiver document){
@@ -50,7 +49,6 @@ public class ApproveDecisionDelayed extends AbstractCommand {
   }
 
   private void loadSettings(){
-    HOST  = settings.getString("settings_username_host");
     PIN = settings.getString("PIN");
   }
 
@@ -104,7 +102,7 @@ public class ApproveDecisionDelayed extends AbstractCommand {
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( HOST.get() )
+      .baseUrl( settings2.getHost() )
       .client( okHttpClient )
       .build();
 

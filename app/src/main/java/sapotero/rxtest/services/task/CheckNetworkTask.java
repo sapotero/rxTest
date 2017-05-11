@@ -29,7 +29,6 @@ public class CheckNetworkTask implements Runnable {
   @Inject Settings settings2;
   @Inject OkHttpClient okHttpClient;
 
-  private Preference<String> HOST;
   private Preference<Boolean> IS_CONNECTED;
 
   public CheckNetworkTask() {
@@ -38,13 +37,12 @@ public class CheckNetworkTask implements Runnable {
   }
 
   private void initSettings() {
-    HOST = settings.getString("settings_username_host");
     IS_CONNECTED = settings.getBoolean("isConnectedToInternet");
   }
 
   @Override
   public void run() {
-    Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
+    Retrofit retrofit = new RetrofitManager(context, settings2.getHost(), okHttpClient).process();
     AuthService auth = retrofit.create(AuthService.class);
 
     Timber.tag(TAG).d("Checking internet connectivity");

@@ -29,7 +29,6 @@ public class FromTheReport extends AbstractCommand {
   private String TAG = this.getClass().getSimpleName();
 
   private Preference<String> UID;
-  private Preference<String> HOST;
   private Preference<String> STATUS_CODE;
   private Preference<String> PIN;
 
@@ -48,7 +47,6 @@ public class FromTheReport extends AbstractCommand {
 
   private void loadSettings(){
     UID   = settings.getString("activity_main_menu.uid");
-    HOST  = settings.getString("settings_username_host");
     STATUS_CODE = settings.getString("activity_main_menu.star");
     PIN = settings.getString("PIN");
   }
@@ -110,7 +108,7 @@ public class FromTheReport extends AbstractCommand {
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( HOST.get() + "v3/operations/" )
+      .baseUrl( settings2.getHost() + "v3/operations/" )
       .client( okHttpClient )
       .build();
 

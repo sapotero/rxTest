@@ -15,6 +15,7 @@ public class Settings {
   public static final String TOKEN_KEY = "token";
 
   public static String FIRST_RUN_KEY;
+  public static String HOST_KEY;
 
   private Context context;
   private RxSharedPreferences settings;
@@ -24,6 +25,7 @@ public class Settings {
   private Preference<Integer> jobCount;
   private Preference<String> login;
   private Preference<String> token;
+  private Preference<String> host;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -33,12 +35,14 @@ public class Settings {
 
   private void loadSettings() {
     FIRST_RUN_KEY = context.getResources().getString(R.string.first_run_key);
+    HOST_KEY = context.getResources().getString(R.string.host_key);
 
     firstRunFlag = settings.getBoolean(FIRST_RUN_KEY);
     signWithDc = settings.getBoolean(SIGN_WITH_DC_KEY);
     jobCount = settings.getInteger(DOCUMENTS_COUNT_KEY);
     login = settings.getString(LOGIN_KEY);
     token = settings.getString(TOKEN_KEY);
+    host  = settings.getString(HOST_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -143,5 +147,13 @@ public class Settings {
 
   public void setToken(String value) {
     setString(token, value);
+  }
+
+  public String getHost() {
+    return getString(host);
+  }
+
+  public void setHost(String value) {
+    setString(host, value);
   }
 }

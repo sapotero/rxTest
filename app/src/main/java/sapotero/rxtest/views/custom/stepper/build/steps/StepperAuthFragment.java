@@ -25,7 +25,6 @@ import javax.inject.Inject;
 import rx.Subscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.application.config.Constant;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckFailEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckSuccesEvent;
@@ -59,7 +58,6 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
   private VerificationError error = new VerificationError("error");
 
   private StepperLayout.OnNextClickedCallback callback;
-  private Preference<String> host;
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -85,16 +83,6 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
     hideAllFields();
     attachSettings();
     prepareDialog();
-    setHostDefault();
-  }
-
-  private void setHostDefault() {
-  // EditText host  = (EditText) stepper_auth_password_wrapper.findViewById(R.id.stepper_auth_host);
-  // if ( Objects.equals(host.getText().toString(), "") ){
-  //   host.setText( settings.getString("settings_username_host").get() );
-  // }
-//    settings.getString("settings_username_host").get()
-
   }
 
   private void prepareDialog() {
@@ -110,12 +98,6 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
 
   private void attachSettings() {
     Preference<AuthType> auth_type = settings.getEnum("stepper.auth_type", AuthType.class);
-
-    host = settings.getString("settings_username_host");
-
-    if (host.get() == null){
-      host.set(Constant.HOST);
-    }
 
     if (auth_type.get() == null) {
       auth_type.set( authType );
@@ -182,7 +164,7 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
           new StepperLoginCheckEvent(
             login.getText().toString(),
             pwd.getText().toString(),
-            host.get()
+            settings2.getHost()
           )
         );
         break;

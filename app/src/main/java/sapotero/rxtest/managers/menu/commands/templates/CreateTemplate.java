@@ -1,6 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.templates;
 
-import com.f2prateek.rx.preferences.Preference;
 import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
@@ -28,8 +27,6 @@ public class CreateTemplate extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> HOST;
-
   public CreateTemplate(DocumentReceiver document){
     super();
     this.document = document;
@@ -41,10 +38,6 @@ public class CreateTemplate extends AbstractCommand {
 
   public void registerCallBack(Callback callback){
     this.callback = callback;
-  }
-
-  private void loadSettings(){
-    HOST  = settings.getString("settings_username_host");
   }
 
   @Override
@@ -65,12 +58,10 @@ public class CreateTemplate extends AbstractCommand {
 
   @Override
   public void executeRemote() {
-    loadSettings();
-
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( HOST.get() )
+      .baseUrl( settings2.getHost() )
       .client( okHttpClient )
       .build();
 

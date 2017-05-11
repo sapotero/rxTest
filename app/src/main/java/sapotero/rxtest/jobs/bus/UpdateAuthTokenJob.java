@@ -25,7 +25,6 @@ public class UpdateAuthTokenJob extends BaseJob {
   private String TOKEN;
 
   private String TAG = "UpdateAuthTokenJob";
-  private Preference<String> HOST;
 
   public UpdateAuthTokenJob() {
     super( new Params(PRIORITY).requireNetwork().persist() );
@@ -44,9 +43,7 @@ public class UpdateAuthTokenJob extends BaseJob {
   @Override
   public void onRun() throws Throwable {
 
-    HOST = settings.getString("settings_username_host");
-
-    Retrofit retrofit = new RetrofitManager( getApplicationContext(), HOST.get(), okHttpClient).process();
+    Retrofit retrofit = new RetrofitManager( getApplicationContext(), settings2.getHost(), okHttpClient).process();
     AuthService auth = retrofit.create( AuthService.class );
 
     Observable<AuthSignToken> user = auth.getAuth( settings2.getLogin(), settings.getString("password").get() );

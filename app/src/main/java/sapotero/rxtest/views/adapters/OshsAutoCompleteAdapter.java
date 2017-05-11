@@ -11,7 +11,6 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
 
-import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import java.io.IOException;
@@ -20,8 +19,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import io.requery.Persistable;
-import io.requery.rx.SingleEntityStore;
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Retrofit;
@@ -44,8 +41,6 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
   @Inject RxSharedPreferences settings;
   @Inject Settings settings2;
 
-  private Preference<String> HOST;
-
   private ArrayList<String> ignore_user_ids;
 
   private int threshold;
@@ -56,7 +51,6 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
     mContext = context;
     EsdApplication.getNetworkComponent().inject( this );
     this.view = view;
-    loadSettings();
   }
 
   @Override
@@ -130,7 +124,7 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
 
   private List<Oshs> findOshs(Context context, String term) throws IOException {
 
-    Retrofit retrofit = new RetrofitManager( context, HOST.get() + "/v2/", okHttpClient).process();
+    Retrofit retrofit = new RetrofitManager( context, settings2.getHost() + "/v2/", okHttpClient).process();
     OshsAdapterService documentsService = retrofit.create( OshsAdapterService.class );
     Call<Oshs[]> call = documentsService.find(settings2.getLogin(), settings2.getToken(), term);
 
@@ -155,10 +149,6 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
     }
 
     return result;
-  }
-
-  private void loadSettings(){
-    HOST  = settings.getString("settings_username_host");
   }
 
   public void setIgnoreUsers(ArrayList<String> users) {

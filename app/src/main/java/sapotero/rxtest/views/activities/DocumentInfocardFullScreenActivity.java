@@ -23,6 +23,7 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.utils.Settings;
 import timber.log.Timber;
 
 public class DocumentInfocardFullScreenActivity extends AppCompatActivity {
@@ -32,6 +33,7 @@ public class DocumentInfocardFullScreenActivity extends AppCompatActivity {
 
 
   @Inject RxSharedPreferences settings;
+  @Inject Settings settings2;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   private String TAG = this.getClass().getSimpleName();
@@ -130,7 +132,7 @@ public class DocumentInfocardFullScreenActivity extends AppCompatActivity {
 
   @Override protected void onResume() {
     super.onResume();
-    Timber.tag(TAG).i( " settings_username_host - " + settings.getString("settings_username_host").get() );
+    Timber.tag(TAG).i( " settings_username_host - " + settings2.getHost() );
   }
 
   @Override protected void onPause() {

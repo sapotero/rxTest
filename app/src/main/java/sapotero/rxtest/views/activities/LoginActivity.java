@@ -51,7 +51,6 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
   private String TAG = this.getClass().getSimpleName();
 
   private Preference<String> PASSWORD;
-  private Preference<String> HOST;
 
   private StepperLayout stepperLayout;
   private StepperAdapter adapter;
@@ -244,7 +243,6 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
 
   private void initialize() {
     PASSWORD = settings.getString("password");
-    HOST     = settings.getString("settings_username_host");
 
     PreferenceManager.setDefaultValues(this, R.xml.settings_view, false);
   }

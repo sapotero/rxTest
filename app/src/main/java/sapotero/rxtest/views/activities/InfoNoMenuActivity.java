@@ -75,7 +75,6 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
   private String TAG = this.getClass().getSimpleName();
 
   @BindView(R.id.toolbar) Toolbar toolbar;
-  private Preference<String> HOST;
   //  private Preview preview;
   private Fields.Status status;
   private Fields.Journal journal;

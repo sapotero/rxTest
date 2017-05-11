@@ -76,7 +76,6 @@ public class DataLoaderManager {
   private Preference<String> CURRENT_USER;
   private Preference<String> CURRENT_USER_ORGANIZATION;
   private Preference<String> PASSWORD;
-  private Preference<String> HOST;
   private Preference<String> CURRENT_USER_ID;
 
   private SimpleDateFormat dateFormat;
@@ -102,7 +101,7 @@ public class DataLoaderManager {
   }
 
   private void initV2() {
-    Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
+    Retrofit retrofit = new RetrofitManager(context, settings2.getHost(), okHttpClient).process();
 
     AuthService auth = retrofit.create(AuthService.class);
 
@@ -219,7 +218,6 @@ public class DataLoaderManager {
 
   private void initialize() {
     PASSWORD = settings.getString("password");
-    HOST     = settings.getString("settings_username_host");
     CURRENT_USER = settings.getString("current_user");
     CURRENT_USER_ID = settings.getString("current_user_id");
     CURRENT_USER_ORGANIZATION = settings.getString("current_user_organization");
@@ -244,7 +242,7 @@ public class DataLoaderManager {
   }
 
   private void setHost( String host ){
-    HOST.set(host);
+    settings2.setHost(host);
   }
 
   private void setCurrentUser( String user ){
@@ -311,7 +309,7 @@ public class DataLoaderManager {
   public void updateAuth( String sign ){
     Timber.tag(TAG).i("updateAuth: %s", sign );
 
-    Retrofit retrofit = new RetrofitManager( context, HOST.get(), okHttpClient).process();
+    Retrofit retrofit = new RetrofitManager( context, settings2.getHost(), okHttpClient).process();
     AuthService auth = retrofit.create( AuthService.class );
 
     Map<String, Object> map = new HashMap<>();
@@ -350,7 +348,7 @@ public class DataLoaderManager {
   public void tryToSignWithDc(String sign){
     Timber.tag(TAG).i("tryToSignWithDc: %s", sign );
 
-    Retrofit retrofit = new RetrofitManager( context, HOST.get(), okHttpClient).process();
+    Retrofit retrofit = new RetrofitManager( context, settings2.getHost(), okHttpClient).process();
     AuthService auth = retrofit.create( AuthService.class );
 
     Map<String, Object> map = new HashMap<>();
@@ -525,7 +523,7 @@ public class DataLoaderManager {
 
       Timber.tag(TAG).e("data: %s %s", indexes, statuses );
 
-      Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
+      Retrofit retrofit = new RetrofitManager(context, settings2.getHost(), okHttpClient).process();
       DocumentsService docService = retrofit.create(DocumentsService.class);
 
       // resolved https://tasks.n-core.ru/browse/MVDESD-13343
@@ -735,7 +733,7 @@ public class DataLoaderManager {
   }
 
   private Observable<AuthSignToken> getAuthSubscription() {
-    Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
+    Retrofit retrofit = new RetrofitManager(context, settings2.getHost(), okHttpClient).process();
     AuthService auth = retrofit.create(AuthService.class);
 
     Observable<AuthSignToken> authSubscription;
@@ -770,7 +768,7 @@ public class DataLoaderManager {
   }
 
   public void updateFavorites() {
-    Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
+    Retrofit retrofit = new RetrofitManager(context, settings2.getHost(), okHttpClient).process();
     DocumentsService docService = retrofit.create(DocumentsService.class);
 
     RFolderEntity favorites_folder = dataStore
@@ -811,7 +809,7 @@ public class DataLoaderManager {
   }
 
   public void updateProcessed() {
-    Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
+    Retrofit retrofit = new RetrofitManager(context, settings2.getHost(), okHttpClient).process();
     DocumentsService docService = retrofit.create(DocumentsService.class);
 
     RFolderEntity processed_folder = dataStore

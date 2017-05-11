@@ -20,7 +20,7 @@
             android:inputType="textPassword"
             />
         <sapotero.rxtest.views.views.EsdEditTextPreference
-            android:key="settings_username_host"
+            android:key="@string/host_key"
             android:title="Домен"
             android:dialogMessage="Dialog Message"
             android:defaultValue=" http://mobile.sed.a-soft.org/"

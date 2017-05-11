@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.templates;
 
-import com.f2prateek.rx.preferences.Preference;
-
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -21,8 +19,6 @@ public class RemoveTemplate extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> HOST;
-
   public RemoveTemplate(DocumentReceiver document){
     super();
     this.document = document;
@@ -34,10 +30,6 @@ public class RemoveTemplate extends AbstractCommand {
 
   public void registerCallBack(Callback callback){
     this.callback = callback;
-  }
-
-  private void loadSettings(){
-    HOST  = settings.getString("settings_username_host");
   }
 
   @Override
@@ -52,8 +44,6 @@ public class RemoveTemplate extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    loadSettings();
-
     queueManager.setExecutedLocal(this);
 
     if ( callback != null ){
@@ -63,12 +53,10 @@ public class RemoveTemplate extends AbstractCommand {
 
   @Override
   public void executeRemote() {
-    loadSettings();
-
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( HOST.get() )
+      .baseUrl( settings2.getHost() )
       .client( okHttpClient )
       .build();
 

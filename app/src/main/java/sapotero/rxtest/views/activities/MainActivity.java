@@ -127,7 +127,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   private String TAG = MainActivity.class.getSimpleName();
 
-  private Preference<String> HOST;
   private Preference<String> PASSWORD;
 
   private int loaded = 0;
@@ -687,7 +686,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   private void loadSettings() {
     PASSWORD = settings.getString("password");
-    HOST = settings.getString("settings_username_host");
   }
 
   private void drawer_add_item(int index, String title, Long identifier) {

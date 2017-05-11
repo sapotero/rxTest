@@ -26,9 +26,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import com.afollestad.materialdialogs.MaterialDialog;
-import com.birbit.android.jobqueue.JobManager;
-import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.google.gson.Gson;
 
@@ -41,7 +38,6 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import okhttp3.OkHttpClient;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
@@ -97,7 +93,6 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   private OshsService oshsService;
   private int number;
   private Block block;
-  private Preference<String> HOST;
   private PrimaryConsiderationAdapter adapter;
   private SelectOshsDialogFragment oshs;
   private SelectTemplateDialogFragment templates;
@@ -472,7 +467,6 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   private void loadSettings() {
     login = settings2.getLogin();
     token = settings2.getToken();
-    HOST = settings.getString("settings_username_host");
   }
 
   private void showAddOshsDialog() {

@@ -44,7 +44,6 @@ public class InfoCardWebViewFragment extends Fragment {
   private String document;
   private String TAG = this.getClass().getSimpleName();
   private String uid;
-  private Preference<String> HOST;
   private Preference<String> UID;
 
   public InfoCardWebViewFragment() {
@@ -64,7 +63,6 @@ public class InfoCardWebViewFragment extends Fragment {
 
   private void loadSettings() {
     UID  = settings.getString("activity_main_menu.uid");
-    HOST = settings.getString("settings_username_host");
   }
 
   @Override

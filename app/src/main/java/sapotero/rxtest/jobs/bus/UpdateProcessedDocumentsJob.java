@@ -52,8 +52,6 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
 
   private String processed_folder;
 
-  private Preference<String> HOST;
-
   private String uid;
   private String TAG = this.getClass().getSimpleName();
   private DocumentInfo document;
@@ -72,12 +70,10 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
   @Override
   public void onRun() throws Throwable {
 
-    HOST  = settings.getString("settings_username_host");
-
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl(HOST.get() + "v3/documents/")
+      .baseUrl(settings2.getHost() + "v3/documents/")
       .client(okHttpClient)
       .build();
 
@@ -409,7 +405,7 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
               for (RImage _image : result.getImages()) {
 
                 RImageEntity image = (RImageEntity) _image;
-                jobManager.addJobInBackground( new DownloadFileJob(HOST.get(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
+                jobManager.addJobInBackground( new DownloadFileJob(settings2.getHost(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
               }
 
             }
@@ -615,7 +611,7 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
               for (RImage _image : result.getImages()) {
 
                 RImageEntity image = (RImageEntity) _image;
-                jobManager.addJobInBackground( new DownloadFileJob(HOST.get(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
+                jobManager.addJobInBackground( new DownloadFileJob(settings2.getHost(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
               }
 
             }
