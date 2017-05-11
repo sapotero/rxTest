@@ -342,6 +342,8 @@
                         android:adjustViewBounds="false"
                         android:cropToPadding="false"
 
+                        android:visibility="gone"
+
                         android:clickable="true"
                         android:foreground="@drawable/card_foreground"
 
