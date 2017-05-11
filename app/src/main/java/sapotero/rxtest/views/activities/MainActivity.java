@@ -250,7 +250,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void updateToken() {
-    String sign = settings.getString("START_UP_SIGN").get();
+    String sign = settings2.getSign();
     if (sign == null) {
       sign = "";
     }

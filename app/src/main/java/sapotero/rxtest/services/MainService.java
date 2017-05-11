@@ -750,7 +750,7 @@ public class MainService extends Service {
 
         SIGN = enc.encode(signature);
 
-        settings.getString("START_UP_SIGN").set( SIGN );
+        settings2.setSign( SIGN );
         settings2.setSignedWithDc( true );
         settings2.setPin( password );
 

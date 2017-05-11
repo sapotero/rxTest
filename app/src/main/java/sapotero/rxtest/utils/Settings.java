@@ -15,6 +15,7 @@ public class Settings {
   public static final String TOKEN_KEY = "token";
   public static final String PASSWORD_KEY = "password";
   public static final String PIN_KEY = "PIN";
+  public static final String SIGN_KEY = "START_UP_SIGN";
 
   public static String FIRST_RUN_KEY;
   public static String HOST_KEY;
@@ -30,6 +31,7 @@ public class Settings {
   private Preference<String> host;
   private Preference<String> password;
   private Preference<String> pin;
+  private Preference<String> sign;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -49,6 +51,7 @@ public class Settings {
     host  = settings.getString(HOST_KEY);
     password = settings.getString(PASSWORD_KEY);
     pin = settings.getString(PIN_KEY);
+    sign = settings.getString(SIGN_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -177,5 +180,13 @@ public class Settings {
 
   public void setPin(String value) {
     setString(pin, value);
+  }
+
+  public String getSign() {
+    return getString(sign);
+  }
+
+  public void setSign(String value) {
+    setString(sign, value);
   }
 }
