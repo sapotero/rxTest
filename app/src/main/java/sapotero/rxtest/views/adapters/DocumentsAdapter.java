@@ -396,11 +396,11 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
       // resolved https://tasks.n-core.ru/browse/MVDESD-13426
       // Выделять номер документа красным на плитке
-      viewHolder.title.setTextColor( ContextCompat.getColor(mContext, R.color.md_red_A700 ) );
+      viewHolder.date.setTextColor( ContextCompat.getColor(mContext, R.color.md_red_A700 ) );
 
     } else {
       viewHolder.cv.setBackground( ContextCompat.getDrawable(mContext, R.color.md_white_1000 ) );
-      viewHolder.title.setTextColor( ContextCompat.getColor(mContext, R.color.md_grey_800 ) );
+      viewHolder.date.setTextColor( ContextCompat.getColor(mContext, R.color.md_grey_800 ) );
     }
 
 
