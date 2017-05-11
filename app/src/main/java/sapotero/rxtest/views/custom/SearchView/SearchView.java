@@ -205,7 +205,7 @@ public class SearchView extends BaseRestoreInstanceFragment implements DialogInt
         mSearchEditText.addTextChangedListener(mSearchTextWatcher);
         mSearchEditText.setOnBackKeyListener(this);
         mSearchEditText.setOnKeyListener(this);
-        mCloseVoiceBtn.setOnClickListener(mCloseVoiceClickListener);
+//        mCloseVoiceBtn.setOnClickListener(mCloseVoiceClickListener);
         mNavBackBtn.setOnClickListener(mNavigationBackClickListener);
         mSearchEditText.setCustomSelectionActionModeCallback(mNotAllowedToEditCallback);
         setUpDialogTouchListener(mOnOutsideTouchListener);
