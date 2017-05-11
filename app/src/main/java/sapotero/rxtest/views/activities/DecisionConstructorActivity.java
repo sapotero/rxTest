@@ -387,15 +387,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       return false;
     });
 
-    // resolved https://tasks.n-core.ru/browse/MVDESD-13438
-    // Добавить настройку наличия кнопки Согласовать в Первичном рассмотрении
-    if (!settings.getBoolean("settings_view_show_approve_on_primary").get()){
-      toolbar.getMenu().findItem(R.id.action_constructor_create_and_sign).setVisible(false);
-    } else {
-      toolbar.getMenu().findItem(R.id.action_constructor_create_and_sign).setVisible(true);
-    }
-
-
     raw_decision = null;
     Gson gson = new Gson();
 
@@ -619,6 +610,20 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     originalSigner = raw_decision.getSigner();
     originalSignerBlankText = raw_decision.getSignerBlankText();
     originalSignerAssistantId = raw_decision.getAssistantId();
+
+
+    if ( rDecisionEntity != null &&
+      rDecisionEntity.getSignerId() != null &&
+      !rDecisionEntity.getSignerId().equals( settings.getString("current_user_id").get() ) &&
+      !settings.getBoolean("settings_view_show_approve_on_primary").get() ){
+
+      // resolved https://tasks.n-core.ru/browse/MVDESD-13438
+      // Добавить настройку наличия кнопки Согласовать в Первичном рассмотрении
+      toolbar.getMenu().findItem(R.id.action_constructor_create_and_sign).setVisible(false);
+
+    } else {
+      toolbar.getMenu().findItem(R.id.action_constructor_create_and_sign).setVisible(true);
+    }
 
   }
 
