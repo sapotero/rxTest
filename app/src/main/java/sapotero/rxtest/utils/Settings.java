@@ -13,6 +13,7 @@ public class Settings {
   public static final String DOCUMENTS_COUNT_KEY = "documents.count";
   public static final String LOGIN_KEY = "login";
   public static final String TOKEN_KEY = "token";
+  public static final String PASSWORD_KEY = "password";
 
   public static String FIRST_RUN_KEY;
   public static String HOST_KEY;
@@ -26,6 +27,7 @@ public class Settings {
   private Preference<String> login;
   private Preference<String> token;
   private Preference<String> host;
+  private Preference<String> password;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -43,6 +45,7 @@ public class Settings {
     login = settings.getString(LOGIN_KEY);
     token = settings.getString(TOKEN_KEY);
     host  = settings.getString(HOST_KEY);
+    password = settings.getString(PASSWORD_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -155,5 +158,13 @@ public class Settings {
 
   public void setHost(String value) {
     setString(host, value);
+  }
+
+  public String getPassword() {
+    return getString(password);
+  }
+
+  public void setPassword(String value) {
+    setString(password, value);
   }
 }

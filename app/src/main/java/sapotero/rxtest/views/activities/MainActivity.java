@@ -127,8 +127,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   private String TAG = MainActivity.class.getSimpleName();
 
-  private Preference<String> PASSWORD;
-
   private int loaded = 0;
 
   private OrganizationAdapter organization_adapter;
@@ -197,7 +195,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     ButterKnife.bind(this);
     EsdApplication.getManagerComponent().inject(this);
-    loadSettings();
     context = this;
 
     initAdapters();
@@ -682,10 +679,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     drawer.addDrawerItems(
       new SectionDrawerItem().withName(R.string.drawer_item_journals)
     );
-  }
-
-  private void loadSettings() {
-    PASSWORD = settings.getString("password");
   }
 
   private void drawer_add_item(int index, String title, Long identifier) {

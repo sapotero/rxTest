@@ -15,7 +15,6 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import org.greenrobot.eventbus.EventBus;
@@ -49,8 +48,6 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
   @Inject sapotero.rxtest.utils.Settings settings2;
 
   private String TAG = this.getClass().getSimpleName();
-
-  private Preference<String> PASSWORD;
 
   private StepperLayout stepperLayout;
   private StepperAdapter adapter;
@@ -242,8 +239,6 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
   }
 
   private void initialize() {
-    PASSWORD = settings.getString("password");
-
     PreferenceManager.setDefaultValues(this, R.xml.settings_view, false);
   }
 

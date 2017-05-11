@@ -66,7 +66,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   //  private String SIGN;
   //  private Fields.Status status;
   //  private Preference<String> CURRENT_USER_ID;
-  //  private Preference<String> PASSWORD;
   //  private SelectOshsDialogFragment oshs;
 
   private int decision_count;
@@ -371,7 +370,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
   private void loadSettings() {
     UID      = settings.getString("activity_main_menu.uid");
-//    PASSWORD = settings.getString("password");
 //    POSITION = settings.getInteger("position");
 //    DOCUMENT_UID = settings.getString("document.uid");
     STATUS_CODE = settings.getString("activity_main_menu.star");

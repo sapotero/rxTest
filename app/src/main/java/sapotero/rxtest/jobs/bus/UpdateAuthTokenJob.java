@@ -46,7 +46,7 @@ public class UpdateAuthTokenJob extends BaseJob {
     Retrofit retrofit = new RetrofitManager( getApplicationContext(), settings2.getHost(), okHttpClient).process();
     AuthService auth = retrofit.create( AuthService.class );
 
-    Observable<AuthSignToken> user = auth.getAuth( settings2.getLogin(), settings.getString("password").get() );
+    Observable<AuthSignToken> user = auth.getAuth( settings2.getLogin(), settings2.getPassword() );
 
     user.subscribeOn( Schedulers.newThread() )
       .observeOn( AndroidSchedulers.mainThread() )

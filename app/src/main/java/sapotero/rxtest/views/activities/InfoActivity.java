@@ -78,7 +78,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   @Inject RxSharedPreferences settings;
 
   private Preference<String> LAST_SEEN_UID;
-  private Preference<String> PASSWORD;
   private Preference<String> UID;
   private Preference<String> DOCUMENT_UID;
   private Preference<String> STATUS_CODE;
@@ -200,7 +199,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   private void loadSettings() {
     UID      = settings.getString("activity_main_menu.uid");
     LAST_SEEN_UID = settings.getString("activity_main_menu.last_seen_uid");
-    PASSWORD = settings.getString("password");
     POSITION = settings.getInteger("position");
     DOCUMENT_UID = settings.getString("document.uid");
     STATUS_CODE = settings.getString("activity_main_menu.star");

@@ -75,7 +75,6 @@ public class DataLoaderManager {
 
   private Preference<String> CURRENT_USER;
   private Preference<String> CURRENT_USER_ORGANIZATION;
-  private Preference<String> PASSWORD;
   private Preference<String> CURRENT_USER_ID;
 
   private SimpleDateFormat dateFormat;
@@ -217,7 +216,6 @@ public class DataLoaderManager {
   }
 
   private void initialize() {
-    PASSWORD = settings.getString("password");
     CURRENT_USER = settings.getString("current_user");
     CURRENT_USER_ID = settings.getString("current_user_id");
     CURRENT_USER_ORGANIZATION = settings.getString("current_user_organization");
@@ -258,7 +256,7 @@ public class DataLoaderManager {
   }
 
   public void setPassword(String password) {
-    PASSWORD.set(password);
+    settings2.setPassword(password);
   }
 
 
@@ -757,7 +755,7 @@ public class DataLoaderManager {
 
       authSubscription = auth.getAuthBySign(json);
     } else {
-      authSubscription = auth.getAuth( settings2.getLogin(), PASSWORD.get() );
+      authSubscription = auth.getAuth( settings2.getLogin(), settings2.getPassword() );
     }
 
     return authSubscription;
