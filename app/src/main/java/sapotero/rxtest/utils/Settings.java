@@ -11,6 +11,7 @@ public class Settings {
 
   public static final String SIGN_WITH_DC_KEY = "SIGN_WITH_DC";
   public static final String DOCUMENTS_COUNT_KEY = "documents.count";
+  public static final String LOGIN_KEY = "login";
 
   public static String FIRST_RUN_KEY;
 
@@ -20,6 +21,7 @@ public class Settings {
   private Preference<Boolean> firstRunFlag;
   private Preference<Boolean> signWithDc;
   private Preference<Integer> jobCount;
+  private Preference<String> login;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -33,6 +35,7 @@ public class Settings {
     firstRunFlag = settings.getBoolean(FIRST_RUN_KEY);
     signWithDc = settings.getBoolean(SIGN_WITH_DC_KEY);
     jobCount = settings.getInteger(DOCUMENTS_COUNT_KEY);
+    login = settings.getString(LOGIN_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -100,6 +103,34 @@ public class Settings {
   private void setInteger(Preference<Integer> integerPreference, int value) {
     if (integerPreference != null) {
       integerPreference.set(value);
+    }
+  }
+
+  public String getLogin() {
+    return getString(login);
+  }
+
+  public void setLogin(String value) {
+    setString(login, value);
+  }
+
+  public Preference<String> getLoginPreference() {
+    return login;
+  }
+
+  private String getString(Preference<String> stringPreference) {
+    String value = stringPreference.get();
+
+    if (value != null) {
+      return value;
+    } else {
+      return "";
+    }
+  }
+
+  private void setString(Preference<String> stringPreference, String value) {
+    if (stringPreference != null && value != null) {
+      stringPreference.set(value);
     }
   }
 }

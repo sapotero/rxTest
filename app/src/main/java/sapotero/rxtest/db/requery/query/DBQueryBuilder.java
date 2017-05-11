@@ -33,6 +33,7 @@ import sapotero.rxtest.db.requery.models.RSignerEntity;
 import sapotero.rxtest.db.requery.utils.validation.Validation;
 import sapotero.rxtest.events.adapter.UpdateDocumentAdapterEvent;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
 import sapotero.rxtest.views.adapters.models.OrganizationItem;
@@ -46,6 +47,7 @@ public class DBQueryBuilder {
 
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject RxSharedPreferences settings;
+  @Inject Settings settings2;
   @Inject Validation validation;
 
   private final String TAG = this.getClass().getSimpleName();
@@ -113,12 +115,12 @@ public class DBQueryBuilder {
       WhereAndOr<RxResult<RDocumentEntity>> query =
         dataStore
           .select(RDocumentEntity.class)
-          .where(RDocumentEntity.USER.eq( settings.getString("login").get() ) );
+          .where(RDocumentEntity.USER.eq( settings2.getLogin() ) );
 
       WhereAndOr<RxScalar<Integer>> queryCount =
         dataStore
           .count(RDocument.class)
-          .where(RDocumentEntity.USER.eq( settings.getString("login").get() ));
+          .where(RDocumentEntity.USER.eq( settings2.getLogin() ));
 
       Boolean hsdFavorites = false;
 
@@ -503,7 +505,7 @@ public class DBQueryBuilder {
       .distinct()
       .join(RDocumentEntity.class)
       .on( RDocumentEntity.SIGNER_ID.eq(RSignerEntity.ID) )
-      .where(RDocumentEntity.USER.eq( settings.getString("login").get() ));
+      .where(RDocumentEntity.USER.eq( settings2.getLogin() ));
 
     if ( conditions.size() > 0 ){
 
@@ -570,7 +572,7 @@ public class DBQueryBuilder {
   public int getFavoritesCount(){
     return dataStore
       .count(RDocumentEntity.UID)
-      .where(RDocumentEntity.USER.eq( settings.getString("login").get() ) )
+      .where(RDocumentEntity.USER.eq( settings2.getLogin() ) )
       .and(RDocumentEntity.FAVORITES.eq(true))
       .and(RDocumentEntity.FILTER.ne("link"))
       .get().value();

@@ -7,12 +7,16 @@ import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import org.greenrobot.eventbus.EventBus;
 
+import javax.inject.Inject;
+
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.events.service.CheckNetworkResultEvent;
 import sapotero.rxtest.retrofit.Api.AuthService;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
+import sapotero.rxtest.utils.Settings;
 import timber.log.Timber;
 
 // Checks network connection by getting current user info
@@ -20,26 +24,22 @@ public class CheckNetworkTask implements Runnable {
 
   final String TAG = CheckNetworkTask.class.getSimpleName();
 
-  private Context context;
-  private RxSharedPreferences settings;
-  private OkHttpClient okHttpClient;
+  @Inject Context context;
+  @Inject RxSharedPreferences settings;
+  @Inject Settings settings2;
+  @Inject OkHttpClient okHttpClient;
 
   private Preference<String> HOST;
-  private Preference<String> LOGIN;
   private Preference<String> TOKEN;
   private Preference<Boolean> IS_CONNECTED;
 
-  public CheckNetworkTask(Context context, RxSharedPreferences settings, OkHttpClient okHttpClient) {
-    this.context = context;
-    this.settings = settings;
-    this.okHttpClient = okHttpClient;
-
+  public CheckNetworkTask() {
+    EsdApplication.getNetworkComponent().inject(this);
     initSettings();
   }
 
   private void initSettings() {
     HOST = settings.getString("settings_username_host");
-    LOGIN = settings.getString("login");
     TOKEN = settings.getString("token");
     IS_CONNECTED = settings.getBoolean("isConnectedToInternet");
   }
@@ -51,7 +51,7 @@ public class CheckNetworkTask implements Runnable {
 
     Timber.tag(TAG).d("Checking internet connectivity");
 
-    auth.getUserInfoV2(LOGIN.get(), TOKEN.get())
+    auth.getUserInfoV2(settings2.getLogin(), TOKEN.get())
       .subscribeOn(Schedulers.io())
       .observeOn(Schedulers.computation())
       .subscribe(

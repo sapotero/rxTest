@@ -50,6 +50,7 @@ import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.retrofit.utils.OshsService;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.adapters.PrimaryConsiderationAdapter;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 import sapotero.rxtest.views.dialogs.DecisionTextDialog;
@@ -60,6 +61,7 @@ import timber.log.Timber;
 public class DecisionFragment extends Fragment implements PrimaryConsiderationAdapter.Callback, SelectOshsDialogFragment.Callback, SelectTemplateDialogFragment.Callback {
 
   @Inject RxSharedPreferences settings;
+  @Inject Settings settings2;
 
   @BindView(R.id.card_toolbar)  Toolbar  card_toolbar;
   @BindView(R.id.decision_text) EditText decision_text;
@@ -468,8 +470,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   }
 
   private void loadSettings() {
-    Preference<String> _username = settings.getString("login");
-    login = _username.get();
+    login = settings2.getLogin();
 
     Preference<String> _token = settings.getString("token");
     token = _token.get();

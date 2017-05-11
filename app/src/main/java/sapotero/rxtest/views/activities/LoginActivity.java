@@ -51,7 +51,6 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
   private String TAG = this.getClass().getSimpleName();
 
   private Preference<String> TOKEN;
-  private Preference<String> LOGIN;
   private Preference<String> PASSWORD;
   private Preference<String> HOST;
 
@@ -245,7 +244,6 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
   }
 
   private void initialize() {
-    LOGIN    = settings.getString("login");
     PASSWORD = settings.getString("password");
     TOKEN    = settings.getString("token");
     HOST     = settings.getString("settings_username_host");

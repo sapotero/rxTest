@@ -79,7 +79,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   private Preference<String> TOKEN;
   private Preference<String> LAST_SEEN_UID;
-  private Preference<String> LOGIN;
   private Preference<String> PASSWORD;
   private Preference<String> UID;
   private Preference<String> DOCUMENT_UID;
@@ -200,7 +199,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   }
 
   private void loadSettings() {
-    LOGIN    = settings.getString("login");
     UID      = settings.getString("activity_main_menu.uid");
     LAST_SEEN_UID = settings.getString("activity_main_menu.last_seen_uid");
     PASSWORD = settings.getString("password");
@@ -211,7 +209,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     IS_PROCESSED = settings.getBoolean("activity_main_menu.from_sign");
     REG_NUMBER = settings.getString("activity_main_menu.regnumber");
     REG_DATE = settings.getString("activity_main_menu.date");
-
   }
 
 

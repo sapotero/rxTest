@@ -34,7 +34,6 @@ public class ApproveDecisionDelayed extends AbstractCommand {
   private String TAG = this.getClass().getSimpleName();
 
   private Preference<String> TOKEN;
-  private Preference<String> LOGIN;
   private Preference<String> HOST;
   private Preference<String> PIN;
 
@@ -52,7 +51,6 @@ public class ApproveDecisionDelayed extends AbstractCommand {
   }
 
   private void loadSettings(){
-    LOGIN = settings.getString("login");
     TOKEN = settings.getString("token");
     HOST  = settings.getString("settings_username_host");
     PIN = settings.getString("PIN");
@@ -153,7 +151,7 @@ public class ApproveDecisionDelayed extends AbstractCommand {
 
       Observable<DecisionError> info = operationService.update(
         params.getDecisionId(),
-        LOGIN.get(),
+        settings2.getLogin(),
         TOKEN.get(),
         json
       );

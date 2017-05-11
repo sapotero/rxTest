@@ -58,6 +58,7 @@ import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.Performer;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.adapters.models.FontItem;
 import sapotero.rxtest.views.adapters.models.UrgencyItem;
 import sapotero.rxtest.views.custom.SpinnerWithLabel;
@@ -71,6 +72,7 @@ import timber.log.Timber;
 public class DecisionConstructorActivity extends AppCompatActivity implements DecisionFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, OperationManager.Callback, SelectOshsDialogFragment.Callback, SelectTemplateDialogFragment.Callback {
 
   @Inject RxSharedPreferences settings;
+  @Inject Settings settings2;
   @Inject OperationManager operationManager;
   @Inject SingleEntityStore<Persistable> dataStore;
 
@@ -425,7 +427,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       urgency_selector.setVisibility(View.VISIBLE);
       dataStore
         .select(RUrgencyEntity.class)
-        .where(RUrgencyEntity.USER.eq( settings.getString("login").get() ))
+        .where(RUrgencyEntity.USER.eq( settings2.getLogin() ))
         .get()
         .toObservable()
         .filter(rUrgencyEntity -> {

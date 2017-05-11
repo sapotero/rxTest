@@ -32,7 +32,6 @@ public class UpdateLinkJob extends BaseJob {
 
   public static final int PRIORITY = 1;
 
-  private Preference<String> LOGIN = null;
   private Preference<String> TOKEN = null;
   private Preference<String> HOST;
 
@@ -55,7 +54,6 @@ public class UpdateLinkJob extends BaseJob {
   public void onRun() throws Throwable {
 
     HOST  = settings.getString("settings_username_host");
-    LOGIN = settings.getString("login");
     TOKEN = settings.getString("token");
 
     Retrofit retrofit = new Retrofit.Builder()
@@ -69,7 +67,7 @@ public class UpdateLinkJob extends BaseJob {
 
     Observable<DocumentInfo> info = documentService.getInfo(
       uid,
-      LOGIN.get(),
+      settings2.getLogin(),
       TOKEN.get()
     );
 
@@ -124,7 +122,7 @@ public class UpdateLinkJob extends BaseJob {
 
     RDocumentEntity rd = new RDocumentEntity();
     rd.setUid( d.getUid() );
-    rd.setUser( LOGIN.get() );
+    rd.setUser( settings2.getLogin() );
     rd.setFilter( filter.toString() );
     rd.setMd5( d.getMd5() );
     rd.setSortKey( d.getSortKey() );

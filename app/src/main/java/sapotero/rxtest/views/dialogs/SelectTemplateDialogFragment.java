@@ -20,12 +20,14 @@ import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RTemplateEntity;
+import sapotero.rxtest.utils.Settings;
 
 public class SelectTemplateDialogFragment extends DialogFragment implements View.OnClickListener {
 
 
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject RxSharedPreferences settings;
+  @Inject Settings settings2;
 
   private String TAG = this.getClass().getSimpleName();
   Callback callback;
@@ -55,7 +57,7 @@ public class SelectTemplateDialogFragment extends DialogFragment implements View
 
     List<RTemplateEntity> templates = dataStore
       .select( RTemplateEntity.class)
-      .where(  RTemplateEntity.USER.eq( settings.getString("login").get() ))
+      .where(  RTemplateEntity.USER.eq( settings2.getLogin() ))
       .and(RTemplateEntity.TYPE.eq(type))
       .get().toList();
 

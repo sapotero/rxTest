@@ -76,7 +76,6 @@ public class DataLoaderManager {
   private Preference<String> TOKEN;
   private Preference<String> CURRENT_USER;
   private Preference<String> CURRENT_USER_ORGANIZATION;
-  private Preference<String> LOGIN;
   private Preference<String> PASSWORD;
   private Preference<String> HOST;
   private Preference<String> CURRENT_USER_ID;
@@ -112,7 +111,7 @@ public class DataLoaderManager {
 
     subscriptionInitV2.add(
       // получаем данные о пользователе
-      auth.getUserInfoV2(LOGIN.get(), TOKEN.get())
+      auth.getUserInfoV2(settings2.getLogin(), TOKEN.get())
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(
@@ -125,7 +124,7 @@ public class DataLoaderManager {
 
               // получаем папки
               subscriptionInitV2.add(
-                auth.getFolders(LOGIN.get(), TOKEN.get())
+                auth.getFolders(settings2.getLogin(), TOKEN.get())
                   .subscribeOn(Schedulers.io())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( data -> {
@@ -137,7 +136,7 @@ public class DataLoaderManager {
 
 
               subscriptionInitV2.add(
-                auth.getPrimaryConsiderationUsers(LOGIN.get(), TOKEN.get())
+                auth.getPrimaryConsiderationUsers(settings2.getLogin(), TOKEN.get())
                   .subscribeOn(Schedulers.io())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( data -> {
@@ -149,7 +148,7 @@ public class DataLoaderManager {
 
               // загрузка срочности
               subscriptionInitV2.add(
-                auth.getUrgency(LOGIN.get(), TOKEN.get(), "urgency")
+                auth.getUrgency(settings2.getLogin(), TOKEN.get(), "urgency")
                   .subscribeOn(Schedulers.io())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( urgencies -> {
@@ -161,7 +160,7 @@ public class DataLoaderManager {
 
               // загрузка шаблонов резолюции
               subscriptionInitV2.add(
-                auth.getTemplates(LOGIN.get(), TOKEN.get(), null)
+                auth.getTemplates(settings2.getLogin(), TOKEN.get(), null)
                   .subscribeOn(Schedulers.io())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( templates -> {
@@ -173,7 +172,7 @@ public class DataLoaderManager {
 
               // загрузка шаблонов отклонения
               subscriptionInitV2.add(
-                auth.getTemplates(LOGIN.get(), TOKEN.get(), "rejection")
+                auth.getTemplates(settings2.getLogin(), TOKEN.get(), "rejection")
                   .subscribeOn(Schedulers.io())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( templates -> {
@@ -185,7 +184,7 @@ public class DataLoaderManager {
 
               // получаем группу Избранное(МП)
               subscriptionInitV2.add(
-                auth.getFavoriteUsers(LOGIN.get(), TOKEN.get())
+                auth.getFavoriteUsers(settings2.getLogin(), TOKEN.get())
                   .subscribeOn(Schedulers.io())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( data -> {
@@ -198,7 +197,7 @@ public class DataLoaderManager {
               // Доработка api для возврата ВРИО/по поручению
               // https://tasks.n-core.ru/browse/MVDESD-11453
               subscriptionInitV2.add(
-                auth.getAssistant(LOGIN.get(), TOKEN.get(), CURRENT_USER_ID.get())
+                auth.getAssistant(settings2.getLogin(), TOKEN.get(), CURRENT_USER_ID.get())
                   .subscribeOn(Schedulers.io())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( data -> {
@@ -220,7 +219,6 @@ public class DataLoaderManager {
   }
 
   private void initialize() {
-    LOGIN    = settings.getString("login");
     PASSWORD = settings.getString("password");
     TOKEN    = settings.getString("token");
     HOST     = settings.getString("settings_username_host");
@@ -244,7 +242,7 @@ public class DataLoaderManager {
   }
 
   private void setLogin( String login ){
-    LOGIN.set(login);
+    settings2.setLogin(login);
   }
 
   private void setHost( String host ){
@@ -556,7 +554,7 @@ public class DataLoaderManager {
             requestCount++;
             subscription.add(
               docService
-                .getDocumentsByIndexes(LOGIN.get(), TOKEN.get(), index, status, "group", 500)
+                .getDocumentsByIndexes(settings2.getLogin(), TOKEN.get(), index, status, "group", 500)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(Schedulers.computation())
                 .subscribe(
@@ -597,7 +595,7 @@ public class DataLoaderManager {
 
           subscription.add(
             docService
-              .getDocumentsByIndexes(LOGIN.get(), TOKEN.get(), index, status, shared ? "group" : null , 500)
+              .getDocumentsByIndexes(settings2.getLogin(), TOKEN.get(), index, status, shared ? "group" : null , 500)
               .subscribeOn(Schedulers.computation())
               .observeOn(Schedulers.computation())
               .subscribe(
@@ -651,7 +649,7 @@ public class DataLoaderManager {
           requestCount++;
           subscription.add(
             docService
-              .getDocuments(LOGIN.get(), TOKEN.get(), code, "group" , 500, 0)
+              .getDocuments(settings2.getLogin(), TOKEN.get(), code, "group" , 500, 0)
               .subscribeOn(Schedulers.computation())
               .observeOn(Schedulers.computation())
               .subscribe(
@@ -674,7 +672,7 @@ public class DataLoaderManager {
         }
         subscription.add(
           docService
-            .getDocuments(LOGIN.get(), TOKEN.get(), code, shared ? "group" : null , 500, 0)
+            .getDocuments(settings2.getLogin(), TOKEN.get(), code, shared ? "group" : null , 500, 0)
             .subscribeOn(Schedulers.computation())
             .observeOn(Schedulers.computation())
             .subscribe(
@@ -763,7 +761,7 @@ public class DataLoaderManager {
 
       authSubscription = auth.getAuthBySign(json);
     } else {
-      authSubscription = auth.getAuth( LOGIN.get(), PASSWORD.get() );
+      authSubscription = auth.getAuth( settings2.getLogin(), PASSWORD.get() );
     }
 
     return authSubscription;
@@ -780,7 +778,7 @@ public class DataLoaderManager {
     RFolderEntity favorites_folder = dataStore
             .select(RFolderEntity.class)
             .where(RFolderEntity.TYPE.eq("favorites"))
-            .and(RFolderEntity.USER.eq( settings.getString("login").get() ))
+            .and(RFolderEntity.USER.eq( settings2.getLogin() ))
             .get().firstOrNull();
 
     if ( favorites_folder != null ) {
@@ -789,7 +787,7 @@ public class DataLoaderManager {
       jobCountFavorites = 0;
 
       subscription.add(
-        docService.getByFolders(LOGIN.get(), TOKEN.get(), null, 500, 0, favorites_folder.getUid(), null)
+        docService.getByFolders(settings2.getLogin(), TOKEN.get(), null, 500, 0, favorites_folder.getUid(), null)
           .subscribeOn( Schedulers.io() )
           .observeOn( AndroidSchedulers.mainThread() )
           .subscribe(
@@ -821,7 +819,7 @@ public class DataLoaderManager {
     RFolderEntity processed_folder = dataStore
       .select(RFolderEntity.class)
       .where(RFolderEntity.TYPE.eq("processed"))
-      .and(RFolderEntity.USER.eq( settings.getString("login").get() ))
+      .and(RFolderEntity.USER.eq( settings2.getLogin() ))
       .get().firstOrNull();
 
     if ( processed_folder != null ) {
@@ -834,7 +832,7 @@ public class DataLoaderManager {
       Timber.tag(TAG).e("PROCESSED EXIST! %s", date);
 
       subscription.add(
-        docService.getByFolders(LOGIN.get(), TOKEN.get(), null, 500, 0, processed_folder.getUid(), date)
+        docService.getByFolders(settings2.getLogin(), TOKEN.get(), null, 500, 0, processed_folder.getUid(), date)
           .subscribeOn( Schedulers.io() )
           .observeOn( AndroidSchedulers.mainThread() )
           .subscribe(

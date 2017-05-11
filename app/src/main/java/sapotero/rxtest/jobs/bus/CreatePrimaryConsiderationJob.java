@@ -54,7 +54,7 @@ public class CreatePrimaryConsiderationJob extends BaseJob {
     data.setName( user.getName() );
     data.setIsGroup( user.getIsGroup() );
     data.setIsOrganization( user.getIsOrganization() );
-    data.setUser( settings.getString("login").get() );
+    data.setUser( settings2.getLogin() );
 
     dataStore
       .insert(data)
@@ -75,7 +75,7 @@ public class CreatePrimaryConsiderationJob extends BaseJob {
     Integer count = dataStore
       .count(RPrimaryConsiderationEntity.UID)
       .where(RPrimaryConsiderationEntity.UID.eq(uid))
-      .and(RPrimaryConsiderationEntity.USER.eq(settings.getString("login").get()))
+      .and(RPrimaryConsiderationEntity.USER.eq(settings2.getLogin()))
       .get().value();
 
     if( count != 0 ){

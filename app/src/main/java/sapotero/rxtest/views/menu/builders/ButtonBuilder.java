@@ -36,12 +36,14 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.validation.Validation;
+import sapotero.rxtest.utils.Settings;
 import timber.log.Timber;
 
 public class ButtonBuilder {
 
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject RxSharedPreferences settings;
+  @Inject Settings settings2;
   @Inject Validation validation;
 
   private ConditionBuilder[] conditions;
@@ -131,7 +133,7 @@ public class ButtonBuilder {
 
     WhereAndOr<RxScalar<Integer>> query = dataStore
       .count(RDocumentEntity.class)
-      .where(RDocumentEntity.USER.eq(settings.getString("login").get()))
+      .where(RDocumentEntity.USER.eq(settings2.getLogin()))
       .and(RDocumentEntity.WITH_DECISION.eq(true))
       .and( RDocumentEntity.DOCUMENT_TYPE.in( validation.getSelectedJournals() ) )
       .and(RDocumentEntity.FROM_LINKS.eq(false));
@@ -186,7 +188,7 @@ public class ButtonBuilder {
 
     WhereAndOr<RxScalar<Integer>> query = dataStore
       .count(RDocumentEntity.class)
-      .where( RDocumentEntity.USER.eq( settings.getString("login").get() ) );
+      .where( RDocumentEntity.USER.eq( settings2.getLogin() ) );
 
     // проекты, подпись, согласование
     if ( !Arrays.asList(1,5,6,4,7).contains(index) ){

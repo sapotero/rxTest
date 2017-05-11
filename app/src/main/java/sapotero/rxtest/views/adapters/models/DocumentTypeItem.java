@@ -14,6 +14,7 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.db.requery.utils.validation.Validation;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import sapotero.rxtest.views.menu.fields.MainMenuButton;
 import sapotero.rxtest.views.menu.fields.MainMenuItem;
@@ -21,6 +22,7 @@ import sapotero.rxtest.views.menu.fields.MainMenuItem;
 public class DocumentTypeItem {
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject RxSharedPreferences settings;
+  @Inject Settings settings2;
   @Inject Validation validation;
 
   private final MainMenuItem mainMenuItem;
@@ -46,7 +48,7 @@ public class DocumentTypeItem {
 
       Integer total = dataStore
         .count(RDocumentEntity.class)
-        .where( RDocumentEntity.USER.eq( settings.getString("login").get() )   )
+        .where( RDocumentEntity.USER.eq( settings2.getLogin() )   )
         .and( RDocumentEntity.DOCUMENT_TYPE.in( validation.getSelectedJournals() ) )
         .and( RDocumentEntity.PROCESSED.eq( false ) )
         .and( RDocumentEntity.ADDRESSED_TO_TYPE.eq( "" ) )
@@ -58,7 +60,7 @@ public class DocumentTypeItem {
         projects = dataStore
           .count(RDocumentEntity.class)
           .where( RDocumentEntity.FILTER.in( MainMenuButton.ButtonStatus.getProject() )   )
-          .and( RDocumentEntity.USER.eq( settings.getString("login").get() ) )
+          .and( RDocumentEntity.USER.eq( settings2.getLogin() ) )
           .and( RDocumentEntity.ADDRESSED_TO_TYPE.eq( "" ) )
           .get()
           .value();
@@ -87,14 +89,14 @@ public class DocumentTypeItem {
       ){
         query = dataStore
           .count(RDocumentEntity.class)
-          .where(RDocumentEntity.USER.eq(settings.getString("login").get()))
+          .where(RDocumentEntity.USER.eq(settings2.getLogin()))
           .and(RDocumentEntity.FILTER.ne( Fields.Status.LINK.getValue() ));
 
 
       } else {
         query = dataStore
           .count(RDocumentEntity.class)
-          .where( RDocumentEntity.USER.eq( settings.getString("login").get() ) )
+          .where( RDocumentEntity.USER.eq( settings2.getLogin() ) )
           .and( RDocumentEntity.WITH_DECISION.eq(true) )
           .and( RDocumentEntity.FILTER.ne( Fields.Status.LINK.getValue() ) );
       }

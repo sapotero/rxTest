@@ -21,7 +21,6 @@ public class UpdateTemplate extends AbstractCommand {
   private String TAG = this.getClass().getSimpleName();
 
   private Preference<String> TOKEN;
-  private Preference<String> LOGIN;
   private Preference<String> HOST;
 
   public UpdateTemplate(DocumentReceiver document){
@@ -38,7 +37,6 @@ public class UpdateTemplate extends AbstractCommand {
   }
 
   private void loadSettings(){
-    LOGIN = settings.getString("login");
     HOST  = settings.getString("settings_username_host");
     TOKEN = settings.getString("token");
   }
@@ -79,7 +77,7 @@ public class UpdateTemplate extends AbstractCommand {
 
     Observable<Template> info = templatesService.update(
       params.getUuid(),
-      LOGIN.get(),
+      settings2.getLogin(),
       TOKEN.get(),
       params.getComment()
     );

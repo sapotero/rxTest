@@ -128,7 +128,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private String TAG = MainActivity.class.getSimpleName();
 
   private Preference<String> TOKEN;
-  private Preference<String> LOGIN;
   private Preference<String> HOST;
   private Preference<String> PASSWORD;
 
@@ -212,7 +211,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       .withOrganizationSelector( ORGANIZATION_SELECTOR )
       .withFavoritesButton( favorites_button )
       .withJournalSelector( DOCUMENT_TYPE_SELECTOR )
-      .withUser( LOGIN.get() )
+      .withUser( settings2.getLogin() )
       .registerCallBack(this);
     menuBuilder.build();
 
@@ -295,7 +294,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
                     result.add(
                       dataStore
                         .select(RDocumentEntity.class)
-                        .where( RDocumentEntity.USER.eq( settings.getString("login").get() ) )
+                        .where( RDocumentEntity.USER.eq( settings2.getLogin() ) )
                         .and(RDocumentEntity.REGISTRATION_NUMBER.like("%" + newText + "%"))
                         .and(RDocumentEntity.FROM_PROCESSED_FOLDER.eq(false) )
                         .get().toList()
@@ -308,7 +307,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
                     result.add(
                       dataStore
                         .select(RDocumentEntity.class)
-                        .where( RDocumentEntity.USER.eq( settings.getString("login").get() ) )
+                        .where( RDocumentEntity.USER.eq( settings2.getLogin() ) )
                         .and(RDocumentEntity.SHORT_DESCRIPTION.like("%" + newText + "%"))
                         .and(RDocumentEntity.FROM_PROCESSED_FOLDER.eq(false) )
                         .get().toList()
@@ -688,7 +687,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void loadSettings() {
-    LOGIN = settings.getString("login");
     PASSWORD = settings.getString("password");
     TOKEN = settings.getString("token");
     HOST = settings.getString("settings_username_host");

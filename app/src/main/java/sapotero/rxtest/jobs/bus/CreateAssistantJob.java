@@ -49,7 +49,7 @@ public class CreateAssistantJob extends BaseJob {
     data.setForDecision( user.getForDecision() );
     data.setHeadId( user.getHeadId() );
     data.setHeadName( user.getHeadName() );
-    data.setUser( settings.getString("login").get() );
+    data.setUser( settings2.getLogin() );
 
 
     dataStore
@@ -71,7 +71,7 @@ public class CreateAssistantJob extends BaseJob {
     Integer count = dataStore
       .count(RAssistantEntity.ASSISTANT_ID)
       .where(RAssistantEntity.ASSISTANT_ID.eq(id))
-      .and(RAssistantEntity.USER.eq(settings.getString("login").get()))
+      .and(RAssistantEntity.USER.eq(settings2.getLogin()))
       .get().value();
 
     if( count != 0 ){

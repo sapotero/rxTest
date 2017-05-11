@@ -60,7 +60,6 @@ public class CreateDocumentsJob extends BaseJob {
   private Boolean isProcessed = null;
   private Boolean isFavorites = null;
 
-  private Preference<String> LOGIN = null;
   private Preference<String> TOKEN = null;
   private Preference<String> HOST;
 
@@ -92,7 +91,6 @@ public class CreateDocumentsJob extends BaseJob {
   public void onRun() throws Throwable {
 
     HOST  = settings.getString("settings_username_host");
-    LOGIN = settings.getString("login");
     TOKEN = settings.getString("token");
 
     Retrofit retrofit = new Retrofit.Builder()
@@ -106,7 +104,7 @@ public class CreateDocumentsJob extends BaseJob {
 
     Observable<DocumentInfo> info = documentService.getInfo(
       uid,
-      LOGIN.get(),
+      settings2.getLogin(),
       TOKEN.get()
     );
 
@@ -135,7 +133,7 @@ public class CreateDocumentsJob extends BaseJob {
     doc.setFromFavoritesFolder( false );
     doc.setUid( document.getUid() );
     doc.setFromLinks( false );
-    doc.setUser( LOGIN.get() );
+    doc.setUser( settings2.getLogin() );
 
     doc.setMd5( document.getMd5() );
     doc.setSortKey( document.getSortKey() );
@@ -171,7 +169,7 @@ public class CreateDocumentsJob extends BaseJob {
       doc.setOrganization("Без организации" );
     }
 
-    doc.setUser( LOGIN.get() );
+    doc.setUser( settings2.getLogin() );
     doc.setFavorites(false);
     doc.setProcessed(false);
     doc.setControl(false);

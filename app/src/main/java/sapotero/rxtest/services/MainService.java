@@ -853,7 +853,7 @@ public class MainService extends Service {
         dataLoaderInterface.updateAuth(SIGN);
       });
 
-    settings.getString("login")
+    settings2.getLoginPreference()
       .asObservable()
       .subscribe(username -> {
         user = username;
@@ -1038,7 +1038,7 @@ public class MainService extends Service {
     // Start new checking network connection task, if requested by the event
     if ( event.isStart() ) {
       futureNetwork = scheduller.scheduleWithFixedDelay(
-              new CheckNetworkTask(getApplicationContext(), settings, okHttpClient),  0 , 10, TimeUnit.SECONDS );
+              new CheckNetworkTask(),  0 , 10, TimeUnit.SECONDS );
     }
   }
 }

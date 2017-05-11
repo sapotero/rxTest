@@ -29,7 +29,6 @@ public class PrevPerson extends AbstractCommand {
   private String TAG = this.getClass().getSimpleName();
 
   private Preference<String> TOKEN;
-  private Preference<String> LOGIN;
   private Preference<String> UID;
   private Preference<String> HOST;
   private Preference<String> STATUS_CODE;
@@ -51,7 +50,6 @@ public class PrevPerson extends AbstractCommand {
   }
 
   private void loadSettings(){
-    LOGIN = settings.getString("login");
     TOKEN = settings.getString("token");
     UID   = settings.getString("activity_main_menu.uid");
     HOST  = settings.getString("settings_username_host");
@@ -129,7 +127,7 @@ public class PrevPerson extends AbstractCommand {
 
     Observable<OperationResult> info = operationService.sign(
       getType(),
-      LOGIN.get(),
+      settings2.getLogin(),
       TOKEN.get(),
       uids,
       comment,

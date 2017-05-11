@@ -34,7 +34,6 @@ public class NextPerson extends AbstractCommand {
   private String TAG = this.getClass().getSimpleName();
 
   private Preference<String> TOKEN;
-  private Preference<String> LOGIN;
   private Preference<String> UID;
   private Preference<String> HOST;
   private Preference<String> STATUS_CODE;
@@ -56,7 +55,6 @@ public class NextPerson extends AbstractCommand {
   }
 
   private void loadSettings(){
-    LOGIN = settings.getString("login");
     TOKEN = settings.getString("token");
     HOST  = settings.getString("settings_username_host");
     STATUS_CODE = settings.getString("activity_main_menu.star");
@@ -136,7 +134,7 @@ public class NextPerson extends AbstractCommand {
 
     Observable<OperationResult> info = operationService.sign(
       getType(),
-      LOGIN.get(),
+      settings2.getLogin(),
       TOKEN.get(),
       uids,
       comment,
@@ -185,7 +183,7 @@ public class NextPerson extends AbstractCommand {
 
           CommandFactory.Operation operation = CommandFactory.Operation.FILE_SIGN;
           CommandParams params = new CommandParams();
-          params.setUser( LOGIN.get() );
+          params.setUser( settings2.getLogin() );
           params.setDocument( document.getUid() );
           params.setLabel( image.getTitle() );
           params.setFilePath( String.format( "%s_%s", image.getMd5(), image.getTitle()) );

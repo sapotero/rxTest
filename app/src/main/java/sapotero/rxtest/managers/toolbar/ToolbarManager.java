@@ -41,6 +41,7 @@ import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.Oshs;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
 import timber.log.Timber;
@@ -49,10 +50,10 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject RxSharedPreferences settings;
+  @Inject Settings settings2;
   @Inject OperationManager operationManager;
 
   private final String TAG = this.getClass().getSimpleName();
-  private Preference<String> LOGIN;
   private Preference<String> REG_DATE;
   private Preference<String> UID;
   private Preference<String> REG_NUMBER;
@@ -109,7 +110,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
         CommandFactory.Operation operation;
         CommandParams params = new CommandParams();
-        params.setUser( LOGIN.get() );
+        params.setUser( settings2.getLogin() );
         params.setDocument( UID.get() );
 
         switch ( item.getItemId() ){
@@ -370,7 +371,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
 
   private void loadSettings() {
-    LOGIN    = settings.getString("login");
     UID      = settings.getString("activity_main_menu.uid");
 //    PASSWORD = settings.getString("password");
 //    TOKEN    = settings.getString("token");
@@ -720,7 +720,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         CommandFactory.Operation operation = CommandFactory.Operation.CHECK_FOR_CONTROL;
 
         CommandParams params = new CommandParams();
-        params.setUser( LOGIN.get() );
+        params.setUser( settings2.getLogin() );
         params.setDocument( UID.get() );
 
         operationManager.execute( operation, params );
@@ -743,7 +743,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         operation = !isApproval ? CommandFactory.Operation.APPROVAL_NEXT_PERSON: CommandFactory.Operation.SIGNING_NEXT_PERSON;
 
         CommandParams params = new CommandParams();
-        params.setUser( LOGIN.get() );
+        params.setUser( settings2.getLogin() );
         params.setDocument( UID.get() );
         params.setSign( "SignFileCommand" );
 
@@ -768,7 +768,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         operation = isApproval ? CommandFactory.Operation.APPROVAL_PREV_PERSON : CommandFactory.Operation.SIGNING_PREV_PERSON;
 
 
-        params.setUser(LOGIN.get());
+        params.setUser(settings2.getLogin());
         params.setSign("SignFileCommand");
 
         // если есть комментарий

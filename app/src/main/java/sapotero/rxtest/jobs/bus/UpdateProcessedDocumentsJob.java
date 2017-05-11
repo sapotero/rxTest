@@ -52,7 +52,6 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
 
   private String processed_folder;
 
-  private Preference<String> LOGIN = null;
   private Preference<String> TOKEN = null;
   private Preference<String> HOST;
 
@@ -75,7 +74,6 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
   public void onRun() throws Throwable {
 
     HOST  = settings.getString("settings_username_host");
-    LOGIN = settings.getString("login");
     TOKEN = settings.getString("token");
 
     Retrofit retrofit = new Retrofit.Builder()
@@ -89,7 +87,7 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
 
     Observable<DocumentInfo> info = documentService.getInfo(
       uid,
-      LOGIN.get(),
+      settings2.getLogin(),
       TOKEN.get()
     );
 
@@ -159,7 +157,7 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
 
     RDocumentEntity rd = new RDocumentEntity();
     rd.setUid(  d.getUid() );
-    rd.setUser( LOGIN.get() );
+    rd.setUser( settings2.getLogin() );
     rd.setFilter( "" );
     rd.setMd5( d.getMd5() );
     rd.setSortKey( d.getSortKey() );
@@ -238,7 +236,7 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
       rDoc.setFromProcessedFolder(true);
       rDoc.setProcessed(true);
 
-      rDoc.setUser( LOGIN.get() );
+      rDoc.setUser( settings2.getLogin() );
 
       if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
         rDoc.getDecisions().clear();
@@ -445,7 +443,7 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
         signer.setType( document.getSigner().getType() );
       }
 
-      doc.setUser( LOGIN.get() );
+      doc.setUser( settings2.getLogin() );
 
       if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
         doc.getDecisions().clear();

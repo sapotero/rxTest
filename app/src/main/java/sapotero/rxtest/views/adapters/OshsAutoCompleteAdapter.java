@@ -30,6 +30,7 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.utils.OshsAdapterService;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
+import sapotero.rxtest.utils.Settings;
 
 public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable {
 
@@ -41,8 +42,8 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
 
   @Inject OkHttpClient okHttpClient;
   @Inject RxSharedPreferences settings;
+  @Inject Settings settings2;
 
-  private Preference<String> login;
   private Preference<String> token;
   private Preference<String> HOST;
 
@@ -132,7 +133,7 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
 
     Retrofit retrofit = new RetrofitManager( context, HOST.get() + "/v2/", okHttpClient).process();
     OshsAdapterService documentsService = retrofit.create( OshsAdapterService.class );
-    Call<Oshs[]> call = documentsService.find(login.get(), token.get(), term);
+    Call<Oshs[]> call = documentsService.find(settings2.getLogin(), token.get(), term);
 
     Oshs[] data = call.execute().body();
 
@@ -158,10 +159,8 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
   }
 
   private void loadSettings(){
-    login = settings.getString("login");
     token = settings.getString("token");
     HOST  = settings.getString("settings_username_host");
-
   }
 
   public void setIgnoreUsers(ArrayList<String> users) {

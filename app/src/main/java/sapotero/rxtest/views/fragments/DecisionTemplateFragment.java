@@ -35,6 +35,7 @@ import sapotero.rxtest.events.decision.AddDecisionTemplateEvent;
 import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.adapters.DecisionTemplateRecyclerAdapter;
 import sapotero.rxtest.views.adapters.decorators.DividerItemDecoration;
 import timber.log.Timber;
@@ -42,6 +43,7 @@ import timber.log.Timber;
 public class DecisionTemplateFragment extends Fragment {
 
   @Inject RxSharedPreferences settings;
+  @Inject Settings settings2;
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject OperationManager operationManager;
 
@@ -161,7 +163,7 @@ public class DecisionTemplateFragment extends Fragment {
   private void invalidateDecisions() {
     dataStore
       .select(RTemplateEntity.class)
-      .where(RTemplateEntity.USER.eq( settings.getString("login").get() ))
+      .where(RTemplateEntity.USER.eq( settings2.getLogin() ))
       .and(RTemplateEntity.TYPE.eq(DECISION))
       .get()
       .toObservable()

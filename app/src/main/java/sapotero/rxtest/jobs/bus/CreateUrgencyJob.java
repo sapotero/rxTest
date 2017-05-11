@@ -46,7 +46,7 @@ public class CreateUrgencyJob extends BaseJob {
     data.setUid( urgency.getId() );
     data.setCode( urgency.getCode() );
     data.setName( urgency.getName() );
-    data.setUser( settings.getString("login").get() );
+    data.setUser( settings2.getLogin() );
 
 
     dataStore

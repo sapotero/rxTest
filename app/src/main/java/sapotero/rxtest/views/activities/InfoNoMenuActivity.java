@@ -66,7 +66,6 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
   private byte[] CARD;
 
   private Preference<String> TOKEN;
-  private Preference<String> LOGIN;
   private Preference<String> PASSWORD;
   private Preference<String> DOCUMENT_UID;
   private Preference<String> STATUS_CODE;
@@ -221,13 +220,11 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
 
 
   private void loadSettings() {
-    LOGIN    = settings.getString("login");
     PASSWORD = settings.getString("password");
     TOKEN    = settings.getString("token");
     POSITION = settings.getInteger("position");
     DOCUMENT_UID = settings.getString("document.uid");
     STATUS_CODE = settings.getString("activity_main_menu.star");
-
   }
 
   @Override

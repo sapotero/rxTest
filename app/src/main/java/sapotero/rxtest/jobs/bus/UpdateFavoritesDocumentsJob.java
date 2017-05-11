@@ -59,7 +59,6 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
   private Boolean isProcessed = null;
   private Boolean isFavorites = null;
 
-  private Preference<String> LOGIN = null;
   private Preference<String> TOKEN = null;
   private Preference<String> HOST;
 
@@ -86,7 +85,6 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
   public void onRun() throws Throwable {
 
     HOST  = settings.getString("settings_username_host");
-    LOGIN = settings.getString("login");
     TOKEN = settings.getString("token");
 
     Retrofit retrofit = new Retrofit.Builder()
@@ -100,7 +98,7 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
 
     Observable<DocumentInfo> info = documentService.getInfo(
       uid,
-      LOGIN.get(),
+      settings2.getLogin(),
       TOKEN.get()
     );
 
@@ -181,7 +179,7 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
     rd.setFromFavoritesFolder( false );
     rd.setUid( d.getUid() );
     rd.setFromLinks( false );
-    rd.setUser( LOGIN.get() );
+    rd.setUser( settings2.getLogin() );
 
 
     rd.setDocumentType("");
@@ -282,7 +280,7 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
     rDoc.setProcessed(isProcessed);
 
     rDoc.setControl(onControl);
-    rDoc.setUser( LOGIN.get() );
+    rDoc.setUser( settings2.getLogin() );
     rDoc.setFromLinks( false );
     rDoc.setChanged( false );
     rDoc.setProcessed(false);
