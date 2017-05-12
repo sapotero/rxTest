@@ -73,7 +73,6 @@ public class DataLoaderManager {
   @Inject JobManager jobManager;
   @Inject SingleEntityStore<Persistable> dataStore;
 
-  private Preference<String> CURRENT_USER;
   private Preference<String> CURRENT_USER_ORGANIZATION;
 
   private SimpleDateFormat dateFormat;
@@ -215,7 +214,6 @@ public class DataLoaderManager {
   }
 
   private void initialize() {
-    CURRENT_USER = settings.getString("current_user");
     CURRENT_USER_ORGANIZATION = settings.getString("current_user_organization");
   }
 
@@ -242,7 +240,7 @@ public class DataLoaderManager {
   }
 
   private void setCurrentUser( String user ){
-    CURRENT_USER.set(user);
+    settings2.setCurrentUser(user);
   }
 
   public void setCurrentUserId(String currentUserId) {

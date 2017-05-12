@@ -1006,7 +1006,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   }
 
   private String getCurrentUserName() {
-    return settings.getString("current_user").get();
+    return settings2.getCurrentUser();
   }
 
   private String getCurrentUserOrganization() {

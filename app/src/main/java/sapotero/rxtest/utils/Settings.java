@@ -19,6 +19,7 @@ public class Settings {
   public static final String UID_KEY = "activity_main_menu.uid";
   public static final String STATUS_CODE_KEY = "activity_main_menu.star";
   public static final String CURRENT_USER_ID_KEY = "current_user_id";
+  public static final String CURRENT_USER_KEY = "current_user";
 
   public static String FIRST_RUN_KEY;
   public static String HOST_KEY;
@@ -38,6 +39,7 @@ public class Settings {
   private Preference<String> uid;
   private Preference<String> statusCode;
   private Preference<String> currentUserId;
+  private Preference<String> currentUser;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -61,6 +63,7 @@ public class Settings {
     uid = settings.getString(UID_KEY);
     statusCode = settings.getString(STATUS_CODE_KEY);
     currentUserId = settings.getString(CURRENT_USER_ID_KEY);
+    currentUser = settings.getString(CURRENT_USER_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -221,5 +224,13 @@ public class Settings {
 
   public void setCurrentUserId(String value) {
     setString(currentUserId, value);
+  }
+
+  public String getCurrentUser() {
+    return getString(currentUser);
+  }
+
+  public void setCurrentUser(String value) {
+    setString(currentUser, value);
   }
 }
