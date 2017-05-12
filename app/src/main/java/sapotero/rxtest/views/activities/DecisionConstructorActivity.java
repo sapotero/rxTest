@@ -839,6 +839,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
               performer.setOrganizationText(p.getOrganizationText());
               performer.setIsOriginal(p.isIsOriginal());
               performer.setIsResponsible(p.isIsResponsible());
+              performer.setOrganization(p.isIsOrganization());
 
               block.getPerformers().add(performer);
             }

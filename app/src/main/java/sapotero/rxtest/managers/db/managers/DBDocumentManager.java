@@ -147,6 +147,7 @@ public class DBDocumentManager {
             raw_performer.setOrganizationText(performer.getOrganizationText());
             raw_performer.setIsOriginal(performer.isIsOriginal());
             raw_performer.setIsResponsible(performer.isIsResponsible());
+            raw_performer.setOrganization(performer.isIsOrganization());
 
             raw_block.getPerformers().add(raw_performer);
           }

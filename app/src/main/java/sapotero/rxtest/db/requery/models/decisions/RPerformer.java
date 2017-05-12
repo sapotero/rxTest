@@ -19,6 +19,7 @@ public abstract class RPerformer {
   String organizationText;
   Boolean isOriginal;
   Boolean isResponsible;
+  Boolean isOrganization;
 
   @ManyToOne
   RBlock block;
