@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.file;
 
-import com.f2prateek.rx.preferences.Preference;
-
 import java.io.File;
 
 import retrofit2.Retrofit;
@@ -25,7 +23,6 @@ public class SignFile extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> STATUS_CODE;
   private String official_id;
   private String sign;
 
@@ -42,14 +39,8 @@ public class SignFile extends AbstractCommand {
     this.callback = callback;
   }
 
-  private void loadSettings(){
-    STATUS_CODE = settings.getString("activity_main_menu.star");
-  }
-
   @Override
   public void execute() {
-    loadSettings();
-
     queueManager.add(this);
   }
 
@@ -70,8 +61,6 @@ public class SignFile extends AbstractCommand {
 
   @Override
   public void executeRemote() {
-    loadSettings();
-
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
     Retrofit retrofit = new Retrofit.Builder()

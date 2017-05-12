@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.signing;
 
-import com.f2prateek.rx.preferences.Preference;
-
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
@@ -28,7 +26,6 @@ public class ChangePerson extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> STATUS_CODE;
   private String official_id;
 
   public ChangePerson(DocumentReceiver document){
@@ -40,9 +37,6 @@ public class ChangePerson extends AbstractCommand {
     this.callback = callback;
   }
 
-  private void loadSettings(){
-    STATUS_CODE = settings.getString("activity_main_menu.star");
-  }
   public ChangePerson withPerson(String uid){
     official_id = uid;
     return this;
@@ -61,8 +55,6 @@ public class ChangePerson extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    loadSettings();
-
     int count = dataStore
       .update(RDocumentEntity.class)
 //      .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue() )
@@ -80,7 +72,6 @@ public class ChangePerson extends AbstractCommand {
 
   @Override
   public void executeRemote() {
-    loadSettings();
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
     Retrofit retrofit = new Retrofit.Builder()
@@ -115,7 +106,7 @@ public class ChangePerson extends AbstractCommand {
       settings2.getToken(),
       uids,
       comment,
-      STATUS_CODE.get(),
+      settings2.getStatusCode(),
       official_id,
       sign
     );

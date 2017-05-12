@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.report;
 
-import com.f2prateek.rx.preferences.Preference;
-
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
@@ -28,8 +26,6 @@ public class FromTheReport extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> STATUS_CODE;
-
   public FromTheReport(DocumentReceiver document){
     super();
     this.document = document;
@@ -41,10 +37,6 @@ public class FromTheReport extends AbstractCommand {
 
   public void registerCallBack(Callback callback){
     this.callback = callback;
-  }
-
-  private void loadSettings(){
-    STATUS_CODE = settings.getString("activity_main_menu.star");
   }
 
   @Override
@@ -87,8 +79,6 @@ public class FromTheReport extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    loadSettings();
-
     if (callback != null){
       callback.onCommandExecuteSuccess(getType());
     }
@@ -98,7 +88,6 @@ public class FromTheReport extends AbstractCommand {
 
   @Override
   public void executeRemote() {
-    loadSettings();
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
     Retrofit retrofit = new Retrofit.Builder()
@@ -136,7 +125,7 @@ public class FromTheReport extends AbstractCommand {
       settings2.getToken(),
       uids,
       comment,
-      STATUS_CODE.get()
+      settings2.getStatusCode()
     );
 
     info.subscribeOn( Schedulers.computation() )

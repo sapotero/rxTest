@@ -62,9 +62,7 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapte
       Preference<String> rxReg = rxPreferences.getString("activity_main_menu.regnumber");
       rxReg.set( doc.getRegistrationNumber() );
 
-      Preference<String> rxStatus = rxPreferences.getString("activity_main_menu.star");
-      rxStatus.set( doc.getFilter() );
-
+      settings.setStatusCode( doc.getFilter() );
 
       Preference<String> rxDate = rxPreferences.getString("activity_main_menu.date");
       rxDate.set( doc.getRegistrationDate() );

@@ -1,6 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.decision;
 
-import com.f2prateek.rx.preferences.Preference;
 import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
@@ -35,7 +34,6 @@ public class AddAndApproveDecision extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> STATUS_CODE;
   private String decisionId;
 
   public AddAndApproveDecision(DocumentReceiver document){
@@ -49,10 +47,6 @@ public class AddAndApproveDecision extends AbstractCommand {
 
   public void registerCallBack(Callback callback){
     this.callback = callback;
-  }
-
-  private void loadSettings(){
-    STATUS_CODE = settings.getString("activity_main_menu.star");
   }
 
   @Override
@@ -133,7 +127,6 @@ public class AddAndApproveDecision extends AbstractCommand {
 
   @Override
   public void executeRemote() {
-    loadSettings();
     queueManager.setAsRunning(this);
 
     Timber.tag(TAG).i( "type: %s", new Gson().toJson(params) );

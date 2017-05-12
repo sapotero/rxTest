@@ -1,6 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.decision;
 
-import com.f2prateek.rx.preferences.Preference;
 import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
@@ -38,7 +37,6 @@ public class SaveDecision extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> STATUS_CODE;
   private RDecisionEntity decision;
   private String decisionId;
   private boolean withSign = false;
@@ -56,9 +54,6 @@ public class SaveDecision extends AbstractCommand {
     this.callback = callback;
   }
 
-  private void loadSettings(){
-    STATUS_CODE = settings.getString("activity_main_menu.star");
-  }
   public SaveDecision withDecision(RDecisionEntity decision){
     this.decision = decision;
     return this;
@@ -210,8 +205,6 @@ public class SaveDecision extends AbstractCommand {
 
   @Override
   public void executeRemote() {
-    loadSettings();
-
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
     Retrofit retrofit = new Retrofit.Builder()

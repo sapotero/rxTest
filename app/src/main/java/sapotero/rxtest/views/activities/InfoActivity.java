@@ -81,7 +81,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   private Preference<String> LAST_SEEN_UID;
   private Preference<String> DOCUMENT_UID;
-  private Preference<String> STATUS_CODE;
   private Preference<Integer> POSITION;
   private Preference<String> REG_NUMBER;
   private Preference<String> REG_DATE;
@@ -124,7 +123,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
     setLastSeen();
 
-    status  = Fields.Status.findStatus( STATUS_CODE.get() );
+    status  = Fields.Status.findStatus( settings2.getStatusCode() );
     journal = Fields.getJournalByUid( settings2.getUid() );
 
     setTabContent();
@@ -201,7 +200,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     LAST_SEEN_UID = settings.getString("activity_main_menu.last_seen_uid");
     POSITION = settings.getInteger("position");
     DOCUMENT_UID = settings.getString("document.uid");
-    STATUS_CODE = settings.getString("activity_main_menu.star");
     IS_PROCESSED = settings.getBoolean("activity_main_menu.from_sign");
     REG_NUMBER = settings.getString("activity_main_menu.regnumber");
     REG_DATE = settings.getString("activity_main_menu.date");

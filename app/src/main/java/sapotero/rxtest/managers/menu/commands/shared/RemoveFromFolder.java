@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.shared;
 
-import com.f2prateek.rx.preferences.Preference;
-
 import java.util.ArrayList;
 
 import retrofit2.Retrofit;
@@ -24,7 +22,6 @@ public class RemoveFromFolder extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> STATUS_CODE;
   private String folder_id;
   private String document_id;
 
@@ -41,10 +38,6 @@ public class RemoveFromFolder extends AbstractCommand {
     this.callback = callback;
   }
 
-  private void loadSettings(){
-    STATUS_CODE = settings.getString("activity_main_menu.star");
-  }
-
   public RemoveFromFolder withFolder(String uid){
     folder_id = uid;
     return this;
@@ -57,9 +50,6 @@ public class RemoveFromFolder extends AbstractCommand {
 
   @Override
   public void execute() {
-
-    loadSettings();
-
     Integer count = dataStore
       .update(RDocumentEntity.class)
       .set( RDocumentEntity.FAVORITES, false)
@@ -89,7 +79,6 @@ public class RemoveFromFolder extends AbstractCommand {
 
   @Override
   public void executeRemote() {
-    loadSettings();
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
@@ -108,7 +97,7 @@ public class RemoveFromFolder extends AbstractCommand {
       settings2.getToken(),
       uids,
       document_id == null ? settings2.getUid() : document_id,
-      STATUS_CODE.get(),
+      settings2.getStatusCode(),
       folder_id,
       null
     );

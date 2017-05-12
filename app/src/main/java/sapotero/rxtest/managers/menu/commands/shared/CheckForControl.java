@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.shared;
 
-import com.f2prateek.rx.preferences.Preference;
-
 import java.util.ArrayList;
 
 import retrofit2.Retrofit;
@@ -24,7 +22,6 @@ public class CheckForControl extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> STATUS_CODE;
   private String document_id;
 
   public CheckForControl(DocumentReceiver document){
@@ -38,10 +35,6 @@ public class CheckForControl extends AbstractCommand {
 
   public void registerCallBack(Callback callback){
     this.callback = callback;
-  }
-
-  private void loadSettings(){
-    STATUS_CODE = settings.getString("activity_main_menu.star");
   }
 
   @Override
@@ -59,8 +52,6 @@ public class CheckForControl extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    loadSettings();
-
     dataStore
       .select(RDocumentEntity.class)
       .where(RDocumentEntity.UID.eq( document_id ))
@@ -106,8 +97,6 @@ public class CheckForControl extends AbstractCommand {
 
   @Override
   public void executeRemote() {
-    loadSettings();
-
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
     Retrofit retrofit = new Retrofit.Builder()
@@ -128,7 +117,7 @@ public class CheckForControl extends AbstractCommand {
       settings2.getToken(),
       uids,
       document_id == null ? settings2.getUid() : document_id,
-      STATUS_CODE.get(),
+      settings2.getStatusCode(),
       null,
       null
     );

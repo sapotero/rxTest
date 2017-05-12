@@ -38,7 +38,6 @@ public class ApproveDecision extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> STATUS_CODE;
   private RDecisionEntity decision;
   private String decisionId;
   private Preference<String> CURRENT_USER_ID;
@@ -57,7 +56,6 @@ public class ApproveDecision extends AbstractCommand {
   }
 
   private void loadSettings(){
-    STATUS_CODE = settings.getString("activity_main_menu.star");
     CURRENT_USER_ID = settings.getString("current_user_id");
   }
   public ApproveDecision withDecision(RDecisionEntity decision){

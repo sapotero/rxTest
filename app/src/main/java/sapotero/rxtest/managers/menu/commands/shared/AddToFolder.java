@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.shared;
 
-import com.f2prateek.rx.preferences.Preference;
-
 import java.util.ArrayList;
 
 import retrofit2.Retrofit;
@@ -24,7 +22,6 @@ public class AddToFolder extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> STATUS_CODE;
   private String folder_id;
   private String document_id;
 
@@ -39,10 +36,6 @@ public class AddToFolder extends AbstractCommand {
 
   public void registerCallBack(Callback callback){
     this.callback = callback;
-  }
-
-  private void loadSettings(){
-    STATUS_CODE = settings.getString("activity_main_menu.star");
   }
 
   public AddToFolder withFolder(String uid){
@@ -68,8 +61,6 @@ public class AddToFolder extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    loadSettings();
-
     Integer count = dataStore
       .update(RDocumentEntity.class)
       .set( RDocumentEntity.FAVORITES, true)
@@ -86,8 +77,6 @@ public class AddToFolder extends AbstractCommand {
 
   @Override
   public void executeRemote() {
-    loadSettings();
-
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
@@ -106,7 +95,7 @@ public class AddToFolder extends AbstractCommand {
       settings2.getToken(),
       uids,
       document_id == null ? settings2.getUid() : document_id,
-      STATUS_CODE.get(),
+      settings2.getStatusCode(),
       folder_id,
       null
     );

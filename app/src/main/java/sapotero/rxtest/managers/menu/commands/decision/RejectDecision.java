@@ -37,7 +37,6 @@ public class RejectDecision extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> STATUS_CODE;
   private String folder_id;
   private RDecisionEntity decision;
   private String decisionId;
@@ -57,7 +56,6 @@ public class RejectDecision extends AbstractCommand {
   }
 
   private void loadSettings(){
-    STATUS_CODE = settings.getString("activity_main_menu.star");
     CURRENT_USER_ID = settings.getString("current_user_id");
   }
   public RejectDecision withDecision(RDecisionEntity decision){

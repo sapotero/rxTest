@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.shared;
 
-import com.f2prateek.rx.preferences.Preference;
-
 import java.util.ArrayList;
 
 import retrofit2.Retrofit;
@@ -23,7 +21,6 @@ public class SkipControlLabel extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> STATUS_CODE;
   private String label_id;
 
   public SkipControlLabel(DocumentReceiver document){
@@ -44,10 +41,6 @@ public class SkipControlLabel extends AbstractCommand {
     this.callback = callback;
   }
 
-  private void loadSettings(){
-    STATUS_CODE = settings.getString("activity_main_menu.star");
-  }
-
   @Override
   public void execute() {
     queueManager.add(this);
@@ -60,13 +53,11 @@ public class SkipControlLabel extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    loadSettings();
     queueManager.setExecutedLocal(this);
   }
 
   @Override
   public void executeRemote() {
-    loadSettings();
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
     Retrofit retrofit = new Retrofit.Builder()
@@ -87,7 +78,7 @@ public class SkipControlLabel extends AbstractCommand {
       settings2.getToken(),
       uids,
       settings2.getUid(),
-      STATUS_CODE.get(),
+      settings2.getStatusCode(),
       null,
       label_id
     );

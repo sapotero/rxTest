@@ -56,7 +56,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   private final String TAG = this.getClass().getSimpleName();
   private Preference<String> REG_DATE;
   private Preference<String> REG_NUMBER;
-  private Preference<String> STATUS_CODE;
 
   //  private Fields.Journal journal;
   //  private Preference<String> DOCUMENT_UID;
@@ -369,7 +368,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   private void loadSettings() {
 //    POSITION = settings.getInteger("position");
 //    DOCUMENT_UID = settings.getString("document.uid");
-    STATUS_CODE = settings.getString("activity_main_menu.star");
     REG_NUMBER = settings.getString("activity_main_menu.regnumber");
     REG_DATE = settings.getString("activity_main_menu.date");
 //    CURRENT_USER_ID = settings.getString("current_user_id");
@@ -383,7 +381,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       String code = null;
 
       try {
-        code = STATUS_CODE.get();
+        code = settings2.getStatusCode();
       } catch (Exception e) {
         e.printStackTrace();
       }
@@ -395,7 +393,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       if (code == null){
         menu = R.menu.info_menu;
       } else {
-        switch ( STATUS_CODE.get() ){
+        switch ( settings2.getStatusCode() ){
           case "sent_to_the_report":
             menu = R.menu.info_menu_sent_to_the_report;
             break;
@@ -672,7 +670,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 //    journal = Fields.getJournalByUid( UID.get() );
 
 
-    Timber.tag("MENU").e( "STATUS CODE: %s", STATUS_CODE.get() );
+    Timber.tag("MENU").e( "STATUS CODE: %s", settings2.getStatusCode() );
 
     invalidate();
 

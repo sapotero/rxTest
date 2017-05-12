@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.report;
 
-import com.f2prateek.rx.preferences.Preference;
-
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
@@ -26,8 +24,6 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> STATUS_CODE;
-
   public ReturnToPrimaryConsideration(DocumentReceiver document){
     super();
     this.document = document;
@@ -41,14 +37,8 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
     this.callback = callback;
   }
 
-  private void loadSettings(){
-    STATUS_CODE = settings.getString("activity_main_menu.star");
-  }
-
   @Override
   public void execute() {
-    loadSettings();
-
     EventBus.getDefault().post( new ShowNextDocumentEvent());
 
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
@@ -71,7 +61,7 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
       settings2.getToken(),
       uids,
       settings2.getUid(),
-      STATUS_CODE.get()
+      settings2.getStatusCode()
     );
 
     info.subscribeOn( Schedulers.computation() )

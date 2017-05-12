@@ -127,9 +127,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
     context = this;
 
-    Preference<String> STATUS_CODE = settings.getString("activity_main_menu.star");
-    status  = Fields.Status.findStatus( STATUS_CODE.get() );
-
+    status  = Fields.Status.findStatus( settings2.getStatusCode() );
 
     toolbar.setTitleTextColor( getResources().getColor( R.color.md_grey_100 ) );
     toolbar.setSubtitleTextColor( getResources().getColor( R.color.md_grey_400 ) );

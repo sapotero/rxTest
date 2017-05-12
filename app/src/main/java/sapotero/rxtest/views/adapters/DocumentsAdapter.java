@@ -335,7 +335,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       settings2.setUid( item.getUid() );
       settings.getInteger("activity_main_menu.position").set( viewHolder.getAdapterPosition() );
       settings.getString("activity_main_menu.regnumber").set( item.getRegistrationNumber() );
-      settings.getString("activity_main_menu.star").set( item.getFilter() );
+      settings2.setStatusCode( item.getFilter() );
       settings.getBoolean("load_from_search").set( false );
 
 //      settings.getBoolean("activity_main_menu.from_sign").set( item.isFromSign() );
@@ -450,7 +450,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       settings.getInteger("activity_main_menu.position").set(position);
       settings2.setUid(item.getUid());
       settings.getString("activity_main_menu.regnumber").set(item.getRegistrationNumber());
-      settings.getString("activity_main_menu.star").set(item.getFilter());
+      settings2.setStatusCode(item.getFilter());
       settings.getString("activity_main_menu.date").set(item.getRegistrationDate());
     }
 
@@ -478,7 +478,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       settings.getInteger("activity_main_menu.position").set(position);
       settings2.setUid( item.getUid() );
       settings.getString("activity_main_menu.regnumber").set( item.getRegistrationNumber() );
-      settings.getString("activity_main_menu.star").set( item.getFilter() );
+      settings2.setStatusCode( item.getFilter() );
 //      settings.getBoolean("activity_main_menu.from_sign").set( item.isFromSign() );
       settings.getString("activity_main_menu.date").set( item.getRegistrationDate() );
     }

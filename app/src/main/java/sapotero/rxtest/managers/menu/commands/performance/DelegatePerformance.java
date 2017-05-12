@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.performance;
 
-import com.f2prateek.rx.preferences.Preference;
-
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
@@ -26,7 +24,6 @@ public class DelegatePerformance extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> STATUS_CODE;
   private String official_id;
 
   public DelegatePerformance(DocumentReceiver document){
@@ -42,10 +39,6 @@ public class DelegatePerformance extends AbstractCommand {
     this.callback = callback;
   }
 
-  private void loadSettings(){
-    STATUS_CODE = settings.getString("activity_main_menu.star");
-  }
-
   public DelegatePerformance withPerson(String uid){
     official_id = uid;
     return this;
@@ -53,7 +46,6 @@ public class DelegatePerformance extends AbstractCommand {
 
   @Override
   public void execute() {
-    loadSettings();
     EventBus.getDefault().post( new ShowNextDocumentEvent());
 
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
@@ -76,7 +68,7 @@ public class DelegatePerformance extends AbstractCommand {
       settings2.getToken(),
       uids,
       settings2.getUid(),
-      STATUS_CODE.get(),
+      settings2.getStatusCode(),
       official_id
     );
 

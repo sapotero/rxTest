@@ -39,6 +39,7 @@ import sapotero.rxtest.db.requery.models.RFolderEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.bus.MassInsertDoneEvent;
 import sapotero.rxtest.retrofit.models.Oshs;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.adapters.TabSigningPagerAdapter;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
@@ -61,12 +62,12 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
   @BindView(R.id.tabs) TabLayout tabLayout;
 
   @Inject RxSharedPreferences settings;
+  @Inject Settings settings2;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   private byte[] CARD;
 
   private Preference<String> DOCUMENT_UID;
-  private Preference<String> STATUS_CODE;
   private Preference<Integer> POSITION;
 
 
@@ -147,14 +148,12 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
       }
     );
 
-
-
-    status  = Fields.Status.findStatus(STATUS_CODE.get());
+    status  = Fields.Status.findStatus(settings2.getStatusCode());
     journal = Fields.getJournalByUid( UID );
 
     toolbar.setTitle( String.format("%s от %s", doc.getRegistrationNumber(), doc.getRegistrationDate() ) );
 
-    Timber.tag("MENU").e( "STATUS CODE: %s", STATUS_CODE.get() );
+    Timber.tag("MENU").e( "STATUS CODE: %s", settings2.getStatusCode() );
 
   }
   private void setTabContent() {
@@ -219,7 +218,6 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
   private void loadSettings() {
     POSITION = settings.getInteger("position");
     DOCUMENT_UID = settings.getString("document.uid");
-    STATUS_CODE = settings.getString("activity_main_menu.star");
   }
 
   @Override
