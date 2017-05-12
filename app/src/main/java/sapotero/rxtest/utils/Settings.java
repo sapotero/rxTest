@@ -21,6 +21,7 @@ public class Settings {
   public static final String CURRENT_USER_ID_KEY = "current_user_id";
   public static final String CURRENT_USER_KEY = "current_user";
   public static final String CURRENT_USER_ORGANIZATION_KEY = "current_user_organization";
+  public static final String POSITION_KEY = "position";
 
   public static String FIRST_RUN_KEY;
   public static String HOST_KEY;
@@ -42,6 +43,7 @@ public class Settings {
   private Preference<String> currentUserId;
   private Preference<String> currentUser;
   private Preference<String> currentUserOrganization;
+  private Preference<Integer> position;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -67,6 +69,7 @@ public class Settings {
     currentUserId = settings.getString(CURRENT_USER_ID_KEY);
     currentUser = settings.getString(CURRENT_USER_KEY);
     currentUserOrganization = settings.getString(CURRENT_USER_ORGANIZATION_KEY);
+    position = settings.getInteger(POSITION_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -243,5 +246,13 @@ public class Settings {
 
   public void setCurrentUserOrganization(String value) {
     setString(currentUserOrganization, value);
+  }
+
+  public int getPosition() {
+    return getInteger(position);
+  }
+
+  public void setPosition(int value) {
+    setInteger(position, value);
   }
 }

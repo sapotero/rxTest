@@ -58,7 +58,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   private Preference<String> REG_NUMBER;
 
   //  private Fields.Journal journal;
-  //  private Preference<Integer> POSITION;
   //  private String SIGN;
   //  private Fields.Status status;
   //  private SelectOshsDialogFragment oshs;
@@ -364,7 +363,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
 
   private void loadSettings() {
-//    POSITION = settings.getInteger("position");
     REG_NUMBER = settings.getString("activity_main_menu.regnumber");
     REG_DATE = settings.getString("activity_main_menu.date");
   }

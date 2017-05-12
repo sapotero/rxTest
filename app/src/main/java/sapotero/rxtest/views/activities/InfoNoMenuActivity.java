@@ -67,9 +67,6 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
 
   private byte[] CARD;
 
-  private Preference<Integer> POSITION;
-
-
 //  private CurrentDocumentManager documentManager;
   private String TAG = this.getClass().getSimpleName();
 
@@ -113,8 +110,6 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
         .where(RDocumentEntity.UID.eq(UID)).get().first();
     }
 
-
-    loadSettings();
     setToolbar();
 
     setPreview();
@@ -211,11 +206,6 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
     tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
     tabLayout.setupWithViewPager(viewPager);
 
-  }
-
-
-  private void loadSettings() {
-    POSITION = settings.getInteger("position");
   }
 
   @Override

@@ -54,9 +54,8 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapte
 
       SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
       RxSharedPreferences rxPreferences = RxSharedPreferences.create(preferences);
-      Preference<Integer> rxPosition = rxPreferences.getInteger("position");
-      rxPosition.set(position);
 
+      settings.setPosition(position);
       settings.setUid( doc.getUid() );
 
       Preference<String> rxReg = rxPreferences.getString("activity_main_menu.regnumber");

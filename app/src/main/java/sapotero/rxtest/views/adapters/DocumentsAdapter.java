@@ -327,11 +327,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
     viewHolder.cv.setOnClickListener(view -> {
 
-      SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-      RxSharedPreferences rxPreferences = RxSharedPreferences.create(preferences);
-      Preference<Integer> rxPosition = rxPreferences.getInteger("position");
-      rxPosition.set(position);
-
+      settings2.setPosition(position);
       settings2.setUid( item.getUid() );
       settings.getInteger("activity_main_menu.position").set( viewHolder.getAdapterPosition() );
       settings.getString("activity_main_menu.regnumber").set( item.getRegistrationNumber() );
