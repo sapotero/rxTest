@@ -676,6 +676,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       .subscribe(doc -> {
 
         this.doc = doc;
+        settings.getString("_status").set( doc.getFilter() );
 
 //        Timber.tag("loadFromDb").i( "loaded %s", doc.getId() );
 

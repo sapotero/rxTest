@@ -114,6 +114,12 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   private ArrayList<UrgencyItem> urgency = new ArrayList<UrgencyItem>();
 
   @Override
+  public void finish() {
+    settings.getString("_status").set( "" );
+    super.finish();
+  }
+
+  @Override
   protected void onCreate(Bundle savedInstanceState) {
 
     setTheme(R.style.AppTheme);
@@ -636,7 +642,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     // При создании новой резолюции, кнопка "Сохранить и подписать"
     // должна быть только в том случае, если Подписант=текущему пользователю.
     // В остальных случаях, кнопки "Сохранить и подписать" быть не должно.
-    if ( !settings.getBoolean("settings_view_show_approve_on_primary").get() ){
+    if ( !settings.getBoolean("settings_view_show_approve_on_primary").get() && Objects.equals(settings.getString("_status").get(), "primary_consideration")){
       if (
           manager.getDecision() != null &&
             manager.getDecision().getSignerId() != null &&
