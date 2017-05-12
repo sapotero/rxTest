@@ -67,7 +67,6 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
 
   private byte[] CARD;
 
-  private Preference<String> DOCUMENT_UID;
   private Preference<Integer> POSITION;
 
 
@@ -217,7 +216,6 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
 
   private void loadSettings() {
     POSITION = settings.getInteger("position");
-    DOCUMENT_UID = settings.getString("document.uid");
   }
 
   @Override
