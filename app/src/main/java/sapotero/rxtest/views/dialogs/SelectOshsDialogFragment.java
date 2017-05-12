@@ -247,7 +247,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe( user -> {
-           adapter.add( new PrimaryConsiderationPeople( user.getHeadId(), user.getTitle(), "", "", user.getAssistantId(), "" ) );
+           adapter.add( new PrimaryConsiderationPeople( user.getHeadId(), user.getTitle(), "", "", user.getAssistantId(), "", false ) );
         });
     }
 
@@ -262,7 +262,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe( user -> {
-           adapter.add( new PrimaryConsiderationPeople( user.getUid(), user.getName(), user.getPosition(), user.getOrganization(), null, user.getGender() ) );
+           adapter.add( new PrimaryConsiderationPeople( user.getUid(), user.getName(), user.getPosition(), user.getOrganization(), null, user.getGender(), user.isIsOrganization() ) );
         });
     } else {
 
@@ -282,7 +282,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe( user -> {
-           adapter.add( new PrimaryConsiderationPeople( user.getUid(), user.getName(), user.getPosition(), user.getOrganization(), null, user.getGender() ) );
+           adapter.add( new PrimaryConsiderationPeople( user.getUid(), user.getName(), user.getPosition(), user.getOrganization(), null, user.getGender(), user.isIsOrganization() ) );
         });
     }
 
@@ -350,7 +350,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
 //            callback.onSearchSuccess( user, operation);
           }
 
-          user = new PrimaryConsiderationPeople( _user.getId(), _user.getName(), _user.getPosition(), _user.getOrganization(), _user.getAssistantId(), _user.getGender());
+          user = new PrimaryConsiderationPeople( _user.getId(), _user.getName(), _user.getPosition(), _user.getOrganization(), _user.getAssistantId(), _user.getGender(), _user.getIsOrganization());
           title.setText( _user.getName() );
           title.cancelPendingInputEvents();
           title.hideIndicator();
