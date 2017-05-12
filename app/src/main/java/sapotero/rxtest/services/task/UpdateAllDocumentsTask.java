@@ -2,6 +2,9 @@ package sapotero.rxtest.services.task;
 
 import android.content.Context;
 
+import org.greenrobot.eventbus.EventBus;
+
+import sapotero.rxtest.events.view.UpdateMainActivityEvent;
 import sapotero.rxtest.managers.DataLoaderManager;
 import sapotero.rxtest.views.menu.fields.MainMenuItem;
 import timber.log.Timber;
@@ -18,5 +21,6 @@ public class UpdateAllDocumentsTask implements Runnable {
   @Override
   public void run() {
     dataLoaderInterface.updateByCurrentStatus(MainMenuItem.ALL, null, false);
+    EventBus.getDefault().post( new UpdateMainActivityEvent() );
   }
 }
