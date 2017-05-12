@@ -95,7 +95,7 @@ public class AddAndApproveDecision extends AbstractCommand {
 
 
     if (
-      Objects.equals(params.getDecisionModel().getSignerId(), settings.getString("current_user_id").get())
+      Objects.equals(params.getDecisionModel().getSignerId(), settings2.getCurrentUserId())
       // или если подписывающий министр
       || ( red != null && red.get(0).equals(true) )
       ){

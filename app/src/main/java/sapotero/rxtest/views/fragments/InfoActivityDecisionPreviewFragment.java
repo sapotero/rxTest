@@ -438,7 +438,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   private void setAdapter() {
 
     ArrayList<DecisionSpinnerItem> decisionSpinnerItems = new ArrayList<>();
-    decision_spinner_adapter = new DecisionSpinnerAdapter(getContext(), settings.getString("current_user_id").get() , decisionSpinnerItems);
+    decision_spinner_adapter = new DecisionSpinnerAdapter(getContext(), settings2.getCurrentUserId(), decisionSpinnerItems);
     decision_spinner.setAdapter(decision_spinner_adapter);
 
     decision_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -500,7 +500,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     if ( doc.getFilter() != null && doc.getFilter().equals("primary_consideration") ){
       if ( current_decision != null &&
            current_decision.getSignerId() != null &&
-           current_decision.getSignerId().equals( settings.getString("current_user_id").get() ) ){
+           current_decision.getSignerId().equals( settings2.getCurrentUserId() ) ){
         next_person_button.setText( getString(R.string.menu_info_next_person));
         setSignEnabled(true);
       } else {

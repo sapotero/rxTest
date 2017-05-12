@@ -1,6 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.decision;
 
-import com.f2prateek.rx.preferences.Preference;
 import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
@@ -40,7 +39,6 @@ public class RejectDecision extends AbstractCommand {
   private String folder_id;
   private RDecisionEntity decision;
   private String decisionId;
-  private Preference<String> CURRENT_USER_ID;
 
   public RejectDecision(DocumentReceiver document){
     super();
@@ -55,9 +53,6 @@ public class RejectDecision extends AbstractCommand {
     this.callback = callback;
   }
 
-  private void loadSettings(){
-    CURRENT_USER_ID = settings.getString("current_user_id");
-  }
   public RejectDecision withDecision(RDecisionEntity decision){
     this.decision = decision;
     return this;
@@ -90,7 +85,7 @@ public class RejectDecision extends AbstractCommand {
 
     String uid = null;
 
-    if (Objects.equals(params.getDecisionModel().getSignerId(), settings.getString("current_user_id").get())){
+    if (Objects.equals(params.getDecisionModel().getSignerId(), settings2.getCurrentUserId())){
 
       if (params.getDecisionModel().getDocumentUid() != null && !Objects.equals(params.getDecisionModel().getDocumentUid(), "")){
         uid = params.getDecisionModel().getDocumentUid();
@@ -140,8 +135,6 @@ public class RejectDecision extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-
-    loadSettings();
     if ( callback != null ){
       callback.onCommandExecuteSuccess( getType() );
     }
@@ -151,7 +144,6 @@ public class RejectDecision extends AbstractCommand {
 
   @Override
   public void executeRemote() {
-    loadSettings();
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
     Retrofit retrofit = new Retrofit.Builder()

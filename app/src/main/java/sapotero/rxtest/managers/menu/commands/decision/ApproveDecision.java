@@ -1,6 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.decision;
 
-import com.f2prateek.rx.preferences.Preference;
 import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
@@ -40,7 +39,6 @@ public class ApproveDecision extends AbstractCommand {
 
   private RDecisionEntity decision;
   private String decisionId;
-  private Preference<String> CURRENT_USER_ID;
 
   public ApproveDecision(DocumentReceiver document){
     super();
@@ -55,9 +53,6 @@ public class ApproveDecision extends AbstractCommand {
     this.callback = callback;
   }
 
-  private void loadSettings(){
-    CURRENT_USER_ID = settings.getString("current_user_id");
-  }
   public ApproveDecision withDecision(RDecisionEntity decision){
     this.decision = decision;
     return this;
@@ -101,7 +96,7 @@ public class ApproveDecision extends AbstractCommand {
 
     if (
         // если активная резолюция
-        Objects.equals(params.getDecisionModel().getSignerId(), settings.getString("current_user_id").get())
+        Objects.equals(params.getDecisionModel().getSignerId(), settings2.getCurrentUserId())
 
         // или если подписывающий министр
         || ( red != null && red.get(0).equals(true) )
@@ -156,10 +151,6 @@ public class ApproveDecision extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    loadSettings();
-
-
-
     if ( callback != null ){
       callback.onCommandExecuteSuccess( getType() );
     }
@@ -168,8 +159,6 @@ public class ApproveDecision extends AbstractCommand {
 
   @Override
   public void executeRemote() {
-    loadSettings();
-
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
     Retrofit retrofit = new Retrofit.Builder()

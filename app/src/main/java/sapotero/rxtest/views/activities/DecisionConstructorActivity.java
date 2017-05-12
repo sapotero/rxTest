@@ -614,7 +614,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
     if ( rDecisionEntity != null &&
       rDecisionEntity.getSignerId() != null &&
-      !rDecisionEntity.getSignerId().equals( settings.getString("current_user_id").get() ) &&
+      !rDecisionEntity.getSignerId().equals( settings2.getCurrentUserId() ) &&
       !settings.getBoolean("settings_view_show_approve_on_primary").get() ){
 
       // resolved https://tasks.n-core.ru/browse/MVDESD-13438
@@ -1002,7 +1002,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   }
 
   private String getCurrentUserId() {
-    return settings.getString("current_user_id").get();
+    return settings2.getCurrentUserId();
   }
 
   private String getCurrentUserName() {

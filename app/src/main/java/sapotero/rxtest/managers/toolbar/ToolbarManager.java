@@ -62,7 +62,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   //  private Preference<Integer> POSITION;
   //  private String SIGN;
   //  private Fields.Status status;
-  //  private Preference<String> CURRENT_USER_ID;
   //  private SelectOshsDialogFragment oshs;
 
   private int decision_count;
@@ -135,7 +134,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
           // sent_to_the_report (отправлен на доклад)
           case R.id.menu_info_delegate_performance:
             operation = CommandFactory.Operation.DELEGATE_PERFORMANCE;
-            params.setPerson( settings.getString("current_user_id").get() );
+            params.setPerson( settings2.getCurrentUserId() );
             break;
           case R.id.menu_info_to_the_approval_performance:
 
@@ -146,7 +145,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
               showFromTheReportDialog();
             } else {
               operation = CommandFactory.Operation.FROM_THE_REPORT;
-              params.setPerson( settings.getString("current_user_id").get() );
+              params.setPerson( settings2.getCurrentUserId() );
             }
             break;
 
@@ -370,7 +369,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 //    DOCUMENT_UID = settings.getString("document.uid");
     REG_NUMBER = settings.getString("activity_main_menu.regnumber");
     REG_DATE = settings.getString("activity_main_menu.date");
-//    CURRENT_USER_ID = settings.getString("current_user_id");
   }
 
   public void invalidate() {
@@ -556,7 +554,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       if (doc != null && doc.getDecisions().size() > 0){
         for ( RDecision _decision: doc.getDecisions() ) {
           RDecisionEntity decision = (RDecisionEntity) _decision;
-          if (!decision.isApproved() && Objects.equals(decision.getSignerId(), settings.getString("current_user_id").get())){
+          if (!decision.isApproved() && Objects.equals(decision.getSignerId(), settings2.getCurrentUserId())){
             result = true;
           }
         }
@@ -804,7 +802,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         CommandFactory.Operation operation;
 
         operation = CommandFactory.Operation.FROM_THE_REPORT;
-        params.setPerson( settings.getString("current_user_id").get() );
+        params.setPerson( settings2.getCurrentUserId() );
         params.setDocument( settings2.getUid() );
         if ( settings.getBoolean("settings_view_show_comment_post").get() ) {
           params.setComment(dialog1.getInputEditText().getText().toString());

@@ -75,7 +75,6 @@ public class DataLoaderManager {
 
   private Preference<String> CURRENT_USER;
   private Preference<String> CURRENT_USER_ORGANIZATION;
-  private Preference<String> CURRENT_USER_ID;
 
   private SimpleDateFormat dateFormat;
   private CompositeSubscription subscription;
@@ -194,7 +193,7 @@ public class DataLoaderManager {
               // Доработка api для возврата ВРИО/по поручению
               // https://tasks.n-core.ru/browse/MVDESD-11453
               subscriptionInitV2.add(
-                auth.getAssistant(settings2.getLogin(), settings2.getToken(), CURRENT_USER_ID.get())
+                auth.getAssistant(settings2.getLogin(), settings2.getToken(), settings2.getCurrentUserId())
                   .subscribeOn(Schedulers.io())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( data -> {
@@ -217,7 +216,6 @@ public class DataLoaderManager {
 
   private void initialize() {
     CURRENT_USER = settings.getString("current_user");
-    CURRENT_USER_ID = settings.getString("current_user_id");
     CURRENT_USER_ORGANIZATION = settings.getString("current_user_organization");
   }
 
@@ -248,7 +246,7 @@ public class DataLoaderManager {
   }
 
   public void setCurrentUserId(String currentUserId) {
-    CURRENT_USER_ID.set(currentUserId);
+    settings2.setCurrentUserId(currentUserId);
   }
 
   private void setCurrentUserOrganization(String organization) {

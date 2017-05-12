@@ -108,9 +108,9 @@ public class SaveAndApproveDecision extends AbstractCommand {
       .value();
 
 
-    Timber.tag(TAG).e("-------- %s %s", params.getDecisionModel().getSignerId(), settings.getString("current_user_id").get());
+    Timber.tag(TAG).e("-------- %s %s", params.getDecisionModel().getSignerId(), settings2.getCurrentUserId());
     if (
-      Objects.equals(params.getDecisionModel().getSignerId(), settings.getString("current_user_id").get())
+      Objects.equals(params.getDecisionModel().getSignerId(), settings2.getCurrentUserId())
       // или если подписывающий министр
 //      || ( red != null && red.get(0).equals(true) )
       ){

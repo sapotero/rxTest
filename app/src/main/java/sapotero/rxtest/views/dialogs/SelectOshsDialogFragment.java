@@ -249,7 +249,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
     if (withPrimaryConsideration){
       WhereAndOr<RxResult<RPrimaryConsiderationEntity>> query = dataStore
         .select(RPrimaryConsiderationEntity.class)
-        .where(RPrimaryConsiderationEntity.UID.ne( settings.getString("current_user_id").get() ))
+        .where(RPrimaryConsiderationEntity.UID.ne( settings2.getCurrentUserId() ))
         .and(  RPrimaryConsiderationEntity.USER.eq( settings2.getLogin() ));
 
       query.get()
