@@ -68,6 +68,9 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
   private boolean withConfirm = false;
   private boolean withChangePerson = false;
 
+  // If true, organizations will be included in search results
+  private boolean withOrganizations = false;
+
   private PrimaryConsiderationPeople user = null;
   private OshsAutoCompleteAdapter autocomplete_adapter;
   private String documentUid = null;
@@ -100,6 +103,10 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
 
   public void withChangePerson(boolean withChangePerson) {
     this.withChangePerson = withChangePerson;
+  }
+
+  public void withOrganizations(boolean withOrganizations) {
+    this.withOrganizations = withOrganizations;
   }
 
   public interface Callback {
@@ -295,6 +302,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
 
     if (withSearch){
       autocomplete_adapter = new OshsAutoCompleteAdapter(getActivity(), title);
+      autocomplete_adapter.withOrganizations(withOrganizations);
       autocomplete_adapter.setIgnoreUsers(user_ids);
       autocomplete_adapter.setThreshold(title.getThreshold());
       title.setAdapter( autocomplete_adapter );
