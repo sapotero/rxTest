@@ -54,6 +54,7 @@ import sapotero.rxtest.events.view.UpdateCurrentInfoActivityEvent;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.managers.toolbar.ToolbarManager;
 import sapotero.rxtest.services.task.UpdateCurrentDocumentTask;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.adapters.TabSigningPagerAdapter;
 import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
@@ -76,9 +77,9 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   @Inject JobManager jobManager;
   @Inject RxSharedPreferences settings;
+  @Inject Settings settings2;
 
   private Preference<String> LAST_SEEN_UID;
-  private Preference<String> UID;
   private Preference<String> DOCUMENT_UID;
   private Preference<String> STATUS_CODE;
   private Preference<Integer> POSITION;
@@ -124,7 +125,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     setLastSeen();
 
     status  = Fields.Status.findStatus( STATUS_CODE.get() );
-    journal = Fields.getJournalByUid( UID.get() );
+    journal = Fields.getJournalByUid( settings2.getUid() );
 
     setTabContent();
     setPreview();
@@ -197,7 +198,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   }
 
   private void loadSettings() {
-    UID      = settings.getString("activity_main_menu.uid");
     LAST_SEEN_UID = settings.getString("activity_main_menu.last_seen_uid");
     POSITION = settings.getInteger("position");
     DOCUMENT_UID = settings.getString("document.uid");
@@ -207,20 +207,15 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     REG_DATE = settings.getString("activity_main_menu.date");
   }
 
-
-
-
   @OnClick(R.id.activity_info_prev_document)
   public void prev_doc(){
     showNextDocument();
   }
+
   @OnClick(R.id.activity_info_next_document)
   public void next_doc(){
     showPrevDocument();
   }
-
-
-
 
   @OnClick(R.id.activity_info_left_button)
   public void prev(){
@@ -265,15 +260,15 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   }
 
   public void exitIfAlreadySeenThisFuckingDocument(){
-    if (LAST_SEEN_UID.get() != null && UID.get() != null) {
-      if (Objects.equals(LAST_SEEN_UID.get(), UID.get())){
+    if (LAST_SEEN_UID.get() != null && settings2.getUid() != null) {
+      if (Objects.equals(LAST_SEEN_UID.get(), settings2.getUid())){
         finish();
       }
     }
   }
 
   public void setLastSeen(){
-    LAST_SEEN_UID.set( UID.get() );
+    LAST_SEEN_UID.set( settings2.getUid() );
   }
 
 
@@ -317,7 +312,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   private void startThreadedUpdate() {
     scheduller = new ScheduledThreadPoolExecutor(1);
-    scheduller.scheduleWithFixedDelay( new UpdateCurrentDocumentTask(UID.get()), 0 ,5, TimeUnit.SECONDS );
+    scheduller.scheduleWithFixedDelay( new UpdateCurrentDocumentTask(settings2.getUid()), 0 ,5, TimeUnit.SECONDS );
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
@@ -460,7 +455,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   public void updateCurrent(){
 
-    jobManager.addJobInBackground(new UpdateDocumentJob( UID.get(), status ));
+    jobManager.addJobInBackground(new UpdateDocumentJob( settings2.getUid(), status ));
 
     unsubscribe();
     subscription.add(
@@ -469,7 +464,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(interval -> {
-          jobManager.addJobInBackground(new UpdateDocumentJob( UID.get(), status ));
+          jobManager.addJobInBackground(new UpdateDocumentJob( settings2.getUid(), status ));
         })
     );
 

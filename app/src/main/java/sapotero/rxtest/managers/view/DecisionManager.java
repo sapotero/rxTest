@@ -28,6 +28,7 @@ import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.Performer;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.managers.view.builders.DecisionBuilder;
 import sapotero.rxtest.managers.view.builders.PreviewBuilder;
@@ -38,6 +39,7 @@ import timber.log.Timber;
 public class DecisionManager implements DecisionInterface, DecisionBuilder.Callback, PreviewBuilder.Callback {
 
   @Inject SingleEntityStore<Persistable> dataStore;
+  @Inject Settings settings;
 
   private Decision decision;
   private final String md5;
@@ -115,15 +117,11 @@ public class DecisionManager implements DecisionInterface, DecisionBuilder.Callb
 
     Decision d = decision;
 
-    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-    RxSharedPreferences rxPreferences = RxSharedPreferences.create(preferences);
-    Preference<String> uid = rxPreferences.getString("activity_main_menu.uid");
-
-    Timber.tag(TAG).w("[%s] -  %s:%s ", uid.get(), d.getId(), d.getLetterhead() );
+    Timber.tag(TAG).w("[%s] -  %s:%s ", settings.getUid(), d.getId(), d.getLetterhead() );
 
     RDocumentEntity document = dataStore
       .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq(uid.get()))
+      .where(RDocumentEntity.UID.eq(settings.getUid()))
       .get().first();
 
     document.setChanged(true);

@@ -46,6 +46,7 @@ import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.adapter.UpdateDocumentAdapterEvent;
 import sapotero.rxtest.events.utils.NoDocumentsEvent;
 import sapotero.rxtest.retrofit.models.documents.Document;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.activities.InfoActivity;
 import sapotero.rxtest.views.activities.MainActivity;
 import timber.log.Timber;
@@ -53,6 +54,7 @@ import timber.log.Timber;
 public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.DocumentViewHolder> implements Action1<List<Document>> {
 
   @Inject RxSharedPreferences settings;
+  @Inject Settings settings2;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   private Context mContext;
@@ -330,7 +332,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       Preference<Integer> rxPosition = rxPreferences.getInteger("position");
       rxPosition.set(position);
 
-      settings.getString("activity_main_menu.uid").set( item.getUid() );
+      settings2.setUid( item.getUid() );
       settings.getInteger("activity_main_menu.position").set( viewHolder.getAdapterPosition() );
       settings.getString("activity_main_menu.regnumber").set( item.getRegistrationNumber() );
       settings.getString("activity_main_menu.star").set( item.getFilter() );
@@ -446,7 +448,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       RDocumentEntity item = documents.get(position);
 
       settings.getInteger("activity_main_menu.position").set(position);
-      settings.getString("activity_main_menu.uid").set(item.getUid());
+      settings2.setUid(item.getUid());
       settings.getString("activity_main_menu.regnumber").set(item.getRegistrationNumber());
       settings.getString("activity_main_menu.star").set(item.getFilter());
       settings.getString("activity_main_menu.date").set(item.getRegistrationDate());
@@ -474,7 +476,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       RDocumentEntity item = documents.get(position);
 
       settings.getInteger("activity_main_menu.position").set(position);
-      settings.getString("activity_main_menu.uid").set( item.getUid() );
+      settings2.setUid( item.getUid() );
       settings.getString("activity_main_menu.regnumber").set( item.getRegistrationNumber() );
       settings.getString("activity_main_menu.star").set( item.getFilter() );
 //      settings.getBoolean("activity_main_menu.from_sign").set( item.isFromSign() );

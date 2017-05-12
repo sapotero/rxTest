@@ -16,6 +16,7 @@ public class Settings {
   public static final String PASSWORD_KEY = "password";
   public static final String PIN_KEY = "PIN";
   public static final String SIGN_KEY = "START_UP_SIGN";
+  public static final String UID_KEY = "activity_main_menu.uid";
 
   public static String FIRST_RUN_KEY;
   public static String HOST_KEY;
@@ -32,6 +33,7 @@ public class Settings {
   private Preference<String> password;
   private Preference<String> pin;
   private Preference<String> sign;
+  private Preference<String> uid;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -52,6 +54,7 @@ public class Settings {
     password = settings.getString(PASSWORD_KEY);
     pin = settings.getString(PIN_KEY);
     sign = settings.getString(SIGN_KEY);
+    uid = settings.getString(UID_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -188,5 +191,13 @@ public class Settings {
 
   public void setSign(String value) {
     setString(sign, value);
+  }
+
+  public String getUid() {
+    return getString(uid);
+  }
+
+  public void setUid(String value) {
+    setString(uid, value);
   }
 }

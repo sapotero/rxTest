@@ -26,7 +26,6 @@ public class DelegatePerformance extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> UID;
   private Preference<String> STATUS_CODE;
   private String official_id;
 
@@ -44,7 +43,6 @@ public class DelegatePerformance extends AbstractCommand {
   }
 
   private void loadSettings(){
-    UID   = settings.getString("activity_main_menu.uid");
     STATUS_CODE = settings.getString("activity_main_menu.star");
   }
 
@@ -70,14 +68,14 @@ public class DelegatePerformance extends AbstractCommand {
     OperationService operationService = retrofit.create( OperationService.class );
 
     ArrayList<String> uids = new ArrayList<>();
-    uids.add( UID.get() );
+    uids.add( settings2.getUid() );
 
     Observable<OperationResult> info = operationService.performance(
       getType(),
       settings2.getLogin(),
       settings2.getToken(),
       uids,
-      UID.get(),
+      settings2.getUid(),
       STATUS_CODE.get(),
       official_id
     );

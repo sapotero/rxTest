@@ -28,7 +28,6 @@ public class PrimaryConsideration extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> UID;
   private Preference<String> STATUS_CODE;
   private String official_id;
 
@@ -42,7 +41,6 @@ public class PrimaryConsideration extends AbstractCommand {
   }
 
   private void loadSettings(){
-    UID   = settings.getString("activity_main_menu.uid");
     STATUS_CODE = settings.getString("activity_main_menu.star");
   }
   public PrimaryConsideration withPerson(String uid){
@@ -107,7 +105,7 @@ public class PrimaryConsideration extends AbstractCommand {
       .set( RDocumentEntity.PROCESSED, true)
       .set( RDocumentEntity.MD5, "" )
       .set( RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq(params.getDocument() != null ? params.getDocument(): UID.get()))
+      .where(RDocumentEntity.UID.eq(params.getDocument() != null ? params.getDocument(): settings2.getUid()))
       .get()
       .value();
     if ( callback != null ){
@@ -135,14 +133,14 @@ public class PrimaryConsideration extends AbstractCommand {
     OperationService operationService = retrofit.create( OperationService.class );
 
     ArrayList<String> uids = new ArrayList<>();
-    uids.add( params.getDocument() != null ? params.getDocument(): UID.get() );
+    uids.add( params.getDocument() != null ? params.getDocument(): settings2.getUid() );
 
     Observable<OperationResult> info = operationService.consideration(
       getType(),
       settings2.getLogin(),
       settings2.getToken(),
       uids,
-      UID.get(),
+      settings2.getUid(),
       STATUS_CODE.get(),
       official_id
     );

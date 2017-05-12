@@ -189,7 +189,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
                 CommandParams params = new CommandParams();
                 params.setDecisionModel( decision );
 
-                decision.setDocumentUid( settings.getString("activity_main_menu.uid").get() );
+                decision.setDocumentUid( settings2.getUid() );
 
                 if (rDecisionEntity != null) {
 //                  params.setDecision( rDecisionEntity );
@@ -197,13 +197,13 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
                   params.setDecisionId( rDecisionEntity.getUid() );
 
                   RDocumentEntity doc = (RDocumentEntity) rDecisionEntity.getDocument();
-                  params.setDocument( settings.getString("activity_main_menu.uid").get() );
+                  params.setDocument( settings2.getUid() );
 
                   if (doc != null) {
                     params.setDocument(doc.getUid());
                   }
                 } else {
-                  params.setDocument( settings.getString("activity_main_menu.uid").get() );
+                  params.setDocument( settings2.getUid() );
                 }
 
 
@@ -227,7 +227,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
                   params = new CommandParams();
                   params.setDecisionModel( decision );
 
-                  decision.setDocumentUid( settings.getString("activity_main_menu.uid").get() );
+                  decision.setDocumentUid( settings2.getUid() );
 
                   if (rDecisionEntity != null) {
                     params.setDecisionModel( DecisionConverter.formatDecision(rDecisionEntity) );
@@ -304,7 +304,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
             params = new CommandParams();
             params.setDecisionModel( decision );
 
-            decision.setDocumentUid( settings.getString("activity_main_menu.uid").get() );
+            decision.setDocumentUid( settings2.getUid() );
 
             if (rDecisionEntity != null) {
               params.setDecisionModel( DecisionConverter.formatDecision(rDecisionEntity) );

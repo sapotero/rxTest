@@ -15,9 +15,6 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.f2prateek.rx.preferences.Preference;
-import com.f2prateek.rx.preferences.RxSharedPreferences;
-
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Set;
@@ -36,6 +33,7 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RLinks;
 import sapotero.rxtest.db.requery.models.RLinksEntity;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.activities.InfoNoMenuActivity;
 import sapotero.rxtest.views.adapters.LinkAdapter;
 import sapotero.rxtest.views.adapters.models.Link;
@@ -44,8 +42,7 @@ import timber.log.Timber;
 
 public class InfoCardLinksFragment extends Fragment {
 
-
-  @Inject RxSharedPreferences settings;
+  @Inject Settings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   @BindView(R.id.fragment_info_card_link_wrapper) Spinner wrapper;
@@ -126,13 +123,11 @@ public class InfoCardLinksFragment extends Fragment {
   private void loadSettings() {
     Timber.e( " loadSettings");
 
-    Preference<String> DOCUMENT_UID = settings.getString("activity_main_menu.uid");
-
     adapter.add( new Link( "0", "Нет связанных документов" ) );
 
     dataStore
       .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq(uid == null ? DOCUMENT_UID.get() : uid ))
+      .where(RDocumentEntity.UID.eq(uid == null ? settings.getUid() : uid ))
       .get()
       .toObservable()
       .subscribeOn(Schedulers.io())

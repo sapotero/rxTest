@@ -37,7 +37,6 @@ public class SaveAndApproveDecision extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> UID;
   private Preference<String> STATUS_CODE;
   private RDecisionEntity decision;
   private String decisionId;
@@ -57,7 +56,6 @@ public class SaveAndApproveDecision extends AbstractCommand {
   }
 
   private void loadSettings(){
-    UID   = settings.getString("activity_main_menu.uid");
     STATUS_CODE = settings.getString("activity_main_menu.star");
   }
   public SaveAndApproveDecision withDecision(RDecisionEntity decision){

@@ -106,11 +106,9 @@ public class DocumentInfocardFullScreenActivity extends AppCompatActivity {
   }
 
   private void setDocument() {
-    Preference<String> UID = settings.getString("activity_main_menu.uid");
-
     dataStore
       .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq( UID.get() ))
+      .where(RDocumentEntity.UID.eq( settings2.getUid() ))
       .get()
       .toObservable()
       .subscribeOn(Schedulers.newThread())

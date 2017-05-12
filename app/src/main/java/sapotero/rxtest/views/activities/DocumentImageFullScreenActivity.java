@@ -21,6 +21,7 @@ import butterknife.ButterKnife;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.retrofit.models.document.Image;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.adapters.DocumentLinkAdapter;
 import sapotero.rxtest.views.fragments.InfoCardDocumentsFragment;
 import timber.log.Timber;
@@ -37,8 +38,7 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity implement
 //  @BindView(R.id.pdf_fullscreen_document_counter) TextView document_counter;
 //  @BindView(R.id.pdf_fullscreen_page_counter)     TextView page_counter;
 
-
-  @Inject RxSharedPreferences settings;
+  @Inject Settings settings;
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -58,7 +58,7 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity implement
 
     InfoCardDocumentsFragment fragment = new InfoCardDocumentsFragment();
     fragment.withOutZoom(true);
-    fragment.withUid(settings.getString("activity_main_menu.uid").get() );
+    fragment.withUid( settings.getUid() );
 
     FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
     fragmentTransaction.add(R.id.activity_document_image_full_screen_wrapper, fragment);

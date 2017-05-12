@@ -28,7 +28,6 @@ public class PrevPerson extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> UID;
   private Preference<String> STATUS_CODE;
   private String official_id;
   private String sign;
@@ -47,7 +46,6 @@ public class PrevPerson extends AbstractCommand {
   }
 
   private void loadSettings(){
-    UID   = settings.getString("activity_main_menu.uid");
     STATUS_CODE = settings.getString("activity_main_menu.star");
   }
   public PrevPerson withPerson(String uid){

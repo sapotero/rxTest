@@ -15,9 +15,6 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.RelativeLayout;
 
-import com.f2prateek.rx.preferences.Preference;
-import com.f2prateek.rx.preferences.RxSharedPreferences;
-
 import javax.inject.Inject;
 
 import butterknife.BindView;
@@ -27,6 +24,7 @@ import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.activities.DocumentInfocardFullScreenActivity;
 import sapotero.rxtest.views.adapters.utils.OnSwipeTouchListener;
 
@@ -35,8 +33,7 @@ public class InfoCardWebViewFragment extends Fragment {
   @BindView(R.id.web_infocard) WebView infocard;
   @BindView(R.id.fragment_info_card_web_wrapper) RelativeLayout wrapper;
 
-
-  @Inject RxSharedPreferences settings;
+  @Inject Settings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   private OnFragmentInteractionListener mListener;
@@ -44,7 +41,6 @@ public class InfoCardWebViewFragment extends Fragment {
   private String document;
   private String TAG = this.getClass().getSimpleName();
   private String uid;
-  private Preference<String> UID;
 
   public InfoCardWebViewFragment() {
   }
@@ -61,16 +57,11 @@ public class InfoCardWebViewFragment extends Fragment {
     }
   }
 
-  private void loadSettings() {
-    UID  = settings.getString("activity_main_menu.uid");
-  }
-
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.fragment_info_card_web_view, container, false);
     ButterKnife.bind(this, view);
     EsdApplication.getDataComponent().inject( this );
-    loadSettings();
 
     final GestureDetector gestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener() {
       @Override
@@ -106,7 +97,7 @@ public class InfoCardWebViewFragment extends Fragment {
 
       RDocumentEntity doc = dataStore
         .select(RDocumentEntity.class)
-        .where(RDocumentEntity.UID.eq( uid == null ? UID.get() : uid ))
+        .where(RDocumentEntity.UID.eq( uid == null ? settings.getUid() : uid ))
         .get().first();
       document = doc.getInfoCard();
 //    } else {

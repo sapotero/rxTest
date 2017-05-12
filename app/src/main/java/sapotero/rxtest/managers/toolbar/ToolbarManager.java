@@ -55,7 +55,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
   private final String TAG = this.getClass().getSimpleName();
   private Preference<String> REG_DATE;
-  private Preference<String> UID;
   private Preference<String> REG_NUMBER;
   private Preference<String> STATUS_CODE;
 
@@ -96,7 +95,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   private void getFirstForLenovo() {
     doc = dataStore
       .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq(UID.get())).get().first();
+      .where(RDocumentEntity.UID.eq(settings2.getUid())).get().first();
   }
 
   private void setListener() {
@@ -108,7 +107,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         CommandFactory.Operation operation;
         CommandParams params = new CommandParams();
         params.setUser( settings2.getLogin() );
-        params.setDocument( UID.get() );
+        params.setDocument( settings2.getUid() );
 
         switch ( item.getItemId() ){
           // sent_to_the_report (отправлен на доклад)
@@ -128,7 +127,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             dialogFragment.withConfirm(true);
             dialogFragment.withChangePerson(true);
             dialogFragment.registerCallBack( this );
-            dialogFragment.withDocumentUid( UID.get() );
+            dialogFragment.withDocumentUid( settings2.getUid() );
             dialogFragment.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
 
             operation = CommandFactory.Operation.INCORRECT;
@@ -191,7 +190,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             approveDialogFragment.withPrimaryConsideration(false);
             approveDialogFragment.withChangePerson(true);
             approveDialogFragment.registerCallBack( this );
-            approveDialogFragment.withDocumentUid( UID.get() );
+            approveDialogFragment.withDocumentUid( settings2.getUid() );
             approveDialogFragment.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
 //
             break;
@@ -208,7 +207,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             sign.withPrimaryConsideration(false);
             sign.withChangePerson(true);
             sign.registerCallBack( this );
-            sign.withDocumentUid( UID.get() );
+            sign.withDocumentUid( settings2.getUid() );
             sign.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
 
           break;
@@ -291,7 +290,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
               .get().first().getUid();
 
             params.setFolder(favorites);
-            params.setDocument( UID.get() );
+            params.setDocument( settings2.getUid() );
 
 
             break;
@@ -299,14 +298,14 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             // настройка
             // Показывать подтверждения о постановке на контроль документов для раздела «Обращение граждан»
 
-            if ( settings.getBoolean("settings_view_show_control_confirm").get() && UID.get().startsWith( Fields.Journal.CITIZEN_REQUESTS.getValue() ) ){
+            if ( settings.getBoolean("settings_view_show_control_confirm").get() && settings2.getUid().startsWith( Fields.Journal.CITIZEN_REQUESTS.getValue() ) ){
               operation = CommandFactory.Operation.INCORRECT;
 
               showToControlDialog();
 
             } else {
               operation = CommandFactory.Operation.CHECK_FOR_CONTROL;
-              params.setDocument( UID.get() );
+              params.setDocument( settings2.getUid() );
             }
             break;
 
@@ -368,7 +367,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
 
   private void loadSettings() {
-    UID      = settings.getString("activity_main_menu.uid");
 //    POSITION = settings.getInteger("position");
 //    DOCUMENT_UID = settings.getString("document.uid");
     STATUS_CODE = settings.getString("activity_main_menu.star");
@@ -715,7 +713,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
         CommandParams params = new CommandParams();
         params.setUser( settings2.getLogin() );
-        params.setDocument( UID.get() );
+        params.setDocument( settings2.getUid() );
 
         operationManager.execute( operation, params );
       })
@@ -738,7 +736,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
         CommandParams params = new CommandParams();
         params.setUser( settings2.getLogin() );
-        params.setDocument( UID.get() );
+        params.setDocument( settings2.getUid() );
         params.setSign( "SignFileCommand" );
 
         operationManager.execute( operation, params );
@@ -772,7 +770,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             params.setComment(dialog1.getInputEditText().getText().toString());
           }
         }
-        params.setDocument( UID.get() );
+        params.setDocument( settings2.getUid() );
 
 
         operationManager.execute(operation, params);
@@ -809,7 +807,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
         operation = CommandFactory.Operation.FROM_THE_REPORT;
         params.setPerson( settings.getString("current_user_id").get() );
-        params.setDocument( UID.get() );
+        params.setDocument( settings2.getUid() );
         if ( settings.getBoolean("settings_view_show_comment_post").get() ) {
           params.setComment(dialog1.getInputEditText().getText().toString());
         }

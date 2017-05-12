@@ -24,7 +24,6 @@ public class RemoveFromFolder extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> UID;
   private Preference<String> STATUS_CODE;
   private String folder_id;
   private String document_id;
@@ -43,7 +42,6 @@ public class RemoveFromFolder extends AbstractCommand {
   }
 
   private void loadSettings(){
-    UID   = settings.getString("activity_main_menu.uid");
     STATUS_CODE = settings.getString("activity_main_menu.star");
   }
 
@@ -102,14 +100,14 @@ public class RemoveFromFolder extends AbstractCommand {
     OperationService operationService = retrofit.create(OperationService.class);
 
     ArrayList<String> uids = new ArrayList<>();
-    uids.add(UID.get());
+    uids.add(settings2.getUid());
 
     Observable<OperationResult> info = operationService.shared(
       getType(),
       settings2.getLogin(),
       settings2.getToken(),
       uids,
-      document_id == null ? UID.get() : document_id,
+      document_id == null ? settings2.getUid() : document_id,
       STATUS_CODE.get(),
       folder_id,
       null

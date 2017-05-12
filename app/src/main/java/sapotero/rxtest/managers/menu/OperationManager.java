@@ -1,26 +1,23 @@
 package sapotero.rxtest.managers.menu;
 
-import com.f2prateek.rx.preferences.RxSharedPreferences;
-
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.invokers.OperationExecutor;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.managers.menu.utils.OperationHistory;
+import sapotero.rxtest.utils.Settings;
 import timber.log.Timber;
 
 public class OperationManager implements CommandFactory.Callback {
 
-  private RxSharedPreferences settings;
+  private Settings settings;
 
   private final String TAG = this.getClass().getSimpleName();
 
   private  CommandFactory commandBuilder;
   private final OperationHistory histrory;
   private final OperationExecutor operationExecutor;
-
-  private String uid;
 
   Callback callback;
 
@@ -33,8 +30,8 @@ public class OperationManager implements CommandFactory.Callback {
     this.callback = callback;
   }
 
-  public OperationManager(RxSharedPreferences rxSharedPreferences) {
-    settings = rxSharedPreferences;
+  public OperationManager(Settings settings) {
+    this.settings = settings;
 
     histrory          = new OperationHistory();
     operationExecutor = new OperationExecutor();
@@ -48,7 +45,7 @@ public class OperationManager implements CommandFactory.Callback {
     Timber.tag(TAG).i("execute start");
 
     Command command = commandBuilder
-      .withDocument( new DocumentReceiver( settings.getString("activity_main_menu.uid").get() ) )
+      .withDocument( new DocumentReceiver( settings.getUid() ) )
       .withParams( params )
       .build( operation );
 

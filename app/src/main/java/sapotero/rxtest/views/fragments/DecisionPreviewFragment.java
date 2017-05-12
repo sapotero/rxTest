@@ -44,11 +44,13 @@ import sapotero.rxtest.managers.view.interfaces.DecisionInterface;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.Performer;
+import sapotero.rxtest.utils.Settings;
 import timber.log.Timber;
 
 public class DecisionPreviewFragment extends Fragment implements DecisionInterface {
 
   @Inject RxSharedPreferences settings;
+  @Inject Settings settings2;
   @Inject OperationManager operationManager;
 
   private OnFragmentInteractionListener mListener;
@@ -152,7 +154,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
 
           params.setDecisionId( decision.getId() );
           params.setDecisionModel( decision );
-          params.setDocument( settings.getString("activity_main_menu.uid").get() );
+          params.setDocument( settings2.getUid() );
 
           operationManager.execute(operation, params);
 
@@ -170,7 +172,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
 
       params.setDecisionId( decision.getId() );
       params.setDecisionModel( decision );
-      params.setDocument( settings.getString("activity_main_menu.uid").get() );
+      params.setDocument( settings2.getUid() );
 
       operationManager.execute(operation, params);
     }
@@ -225,7 +227,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
       CommandParams params = new CommandParams();
       params.setDecisionId( decision.getId() );
       params.setDecisionModel( decision );
-      params.setDocument( settings.getString("activity_main_menu.uid").get() );
+      params.setDocument( settings2.getUid() );
 
       operationManager.execute(operation, params);
     }

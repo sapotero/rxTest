@@ -78,6 +78,7 @@ import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.managers.toolbar.ToolbarManager;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.adapters.DecisionSpinnerAdapter;
@@ -91,14 +92,13 @@ import timber.log.Timber;
 public class InfoActivityDecisionPreviewFragment extends Fragment implements SelectTemplateDialogFragment.Callback{
 
   @Inject RxSharedPreferences settings;
+  @Inject Settings settings2;
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject OperationManager operationManager;
   @Inject QueueManager queue;
 
   private ToolbarManager toolbarManager;
   private OnFragmentInteractionListener mListener;
-
-  private Preference<String> UID;
 
   @BindView(R.id.activity_info_decision_preview_head) LinearLayout preview_head;
 
@@ -174,7 +174,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
             params.setDecisionId( current_decision.getUid() );
             params.setDecisionModel( DecisionConverter.formatDecision(current_decision) );
 
-            params.setDocument( settings.getString("activity_main_menu.uid").get() );
+            params.setDocument( settings2.getUid() );
             params.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
 
             operationManager.execute(operation, params);
@@ -194,7 +194,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       params.setDecisionId( current_decision.getUid() );
 //      params.setDecision( current_decision );
       params.setDecisionModel( DecisionConverter.formatDecision(current_decision) );
-      params.setDocument( settings.getString("activity_main_menu.uid").get() );
+      params.setDocument( settings2.getUid() );
       params.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
 
       operationManager.execute(operation, params);
@@ -301,7 +301,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       .update(RDocumentEntity.class)
       .set(RDocumentEntity.CHANGED, true)
       .set(RDocumentEntity.MD5, "")
-      .where(RDocumentEntity.UID.eq( UID.get() ))
+      .where(RDocumentEntity.UID.eq( settings2.getUid() ))
       .get()
       .value();
   }
@@ -592,9 +592,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   }
 
   private void loadSettings() {
-    UID      = settings.getString("activity_main_menu.uid");
     REG_NUMBER = settings.getString("activity_main_menu.regnumber");
-
   }
 
   @OnClick(R.id.activity_info_button_magnifer)
@@ -645,7 +643,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   private Boolean documentExist(){
     Integer count = dataStore
       .count( RDocumentEntity.class )
-      .where( RDocumentEntity.UID.eq( uid == null? UID.get() : uid ) )
+      .where( RDocumentEntity.UID.eq( uid == null? settings2.getUid() : uid ) )
       .get()
       .value();
 
@@ -653,7 +651,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   }
 
   private void loadDocument() {
-    Timber.tag(TAG).v("loadDocument | exist %s | %s", documentExist(), UID.get() );
+    Timber.tag(TAG).v("loadDocument | exist %s | %s", documentExist(), settings2.getUid() );
 
     if ( documentExist() ){
       loadFromDb();
@@ -668,7 +666,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
     dataStore
       .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq( uid == null? UID.get() : uid ))
+      .where(RDocumentEntity.UID.eq( uid == null? settings2.getUid() : uid ))
       .get()
       .toObservable()
       .subscribeOn(Schedulers.newThread())
@@ -1228,7 +1226,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(UpdateCurrentDocumentEvent event) throws Exception {
     Timber.tag(TAG).w("UpdateCurrentDocumentEvent %s", event.uid);
-    if (Objects.equals(event.uid, UID.get())){
+    if (Objects.equals(event.uid, settings2.getUid())){
       invalidate();
     }
   }

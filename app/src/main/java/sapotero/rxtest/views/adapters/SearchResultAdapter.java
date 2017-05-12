@@ -16,17 +16,25 @@ import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import sapotero.rxtest.R;
+import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.activities.InfoActivity;
 
 public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapter.ViewHolder> {
   private final Context context;
   private final List<RDocumentEntity> mDataset;
 
+  @Inject Settings settings;
+
   public SearchResultAdapter(Context context, List<RDocumentEntity> mDataset) {
     this.context = context;
     this.mDataset = mDataset;
+
+    EsdApplication.getDataComponent().inject(this);
   }
 
   @Override
@@ -49,8 +57,7 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapte
       Preference<Integer> rxPosition = rxPreferences.getInteger("position");
       rxPosition.set(position);
 
-      Preference<String> rxUid = rxPreferences.getString("activity_main_menu.uid");
-      rxUid.set( doc.getUid() );
+      settings.setUid( doc.getUid() );
 
       Preference<String> rxReg = rxPreferences.getString("activity_main_menu.regnumber");
       rxReg.set( doc.getRegistrationNumber() );
