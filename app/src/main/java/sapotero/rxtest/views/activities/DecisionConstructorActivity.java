@@ -1010,7 +1010,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   }
 
   private String getCurrentUserOrganization() {
-    return settings.getString("current_user_organization").get();
+    return settings2.getCurrentUserOrganization();
   }
 
   @Override

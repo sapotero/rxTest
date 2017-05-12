@@ -6,8 +6,6 @@ import android.net.NetworkInfo;
 
 import com.birbit.android.jobqueue.JobManager;
 import com.birbit.android.jobqueue.TagConstraint;
-import com.f2prateek.rx.preferences.Preference;
-import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import org.greenrobot.eventbus.EventBus;
 import org.json.JSONObject;
@@ -68,12 +66,9 @@ public class DataLoaderManager {
   private final String TAG = this.getClass().getSimpleName();
 
   @Inject OkHttpClient okHttpClient;
-  @Inject RxSharedPreferences settings;
   @Inject Settings settings2;
   @Inject JobManager jobManager;
   @Inject SingleEntityStore<Persistable> dataStore;
-
-  private Preference<String> CURRENT_USER_ORGANIZATION;
 
   private SimpleDateFormat dateFormat;
   private CompositeSubscription subscription;
@@ -91,10 +86,7 @@ public class DataLoaderManager {
 
   public DataLoaderManager(Context context) {
     this.context = context;
-
     EsdApplication.getManagerComponent().inject(this);
-
-    initialize();
   }
 
   private void initV2() {
@@ -213,10 +205,6 @@ public class DataLoaderManager {
 
   }
 
-  private void initialize() {
-    CURRENT_USER_ORGANIZATION = settings.getString("current_user_organization");
-  }
-
   public void unregister(){
     if ( isRegistered() ){
       EventBus.getDefault().unregister(this);
@@ -248,7 +236,7 @@ public class DataLoaderManager {
   }
 
   private void setCurrentUserOrganization(String organization) {
-    CURRENT_USER_ORGANIZATION.set(organization);
+    settings2.setCurrentUserOrganization(organization);
   }
 
   public void setPassword(String password) {

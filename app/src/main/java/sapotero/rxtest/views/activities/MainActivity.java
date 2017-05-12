@@ -656,7 +656,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       .withHeaderBackground(R.drawable.header)
       .addProfiles(
         new ProfileDrawerItem()
-          .withName(  settings.getString("current_user_organization").get() )
+          .withName( settings2.getCurrentUserOrganization() )
           .withEmail( settings2.getCurrentUser() )
           .withSetSelected(true)
           .withIcon(R.drawable.gerb)
