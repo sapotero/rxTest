@@ -71,6 +71,7 @@ import sapotero.rxtest.events.service.SuperVisorUpdateEvent;
 import sapotero.rxtest.events.service.UpdateAllDocumentsEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.events.view.RemoveDocumentFromAdapterEvent;
+import sapotero.rxtest.events.view.UpdateMainActivityEvent;
 import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
 import sapotero.rxtest.managers.DataLoaderManager;
 import sapotero.rxtest.services.MainService;
@@ -241,6 +242,10 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     updateToken();
 
+  }
+
+  private void recreateView() {
+    menuBuilder.recreate();
   }
 
   private void setFirstRunFalse() {
@@ -779,7 +784,15 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     dbQueryBuilder.invalidateDocumentEvent(event);
   }
 
+  @Subscribe( threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(UpdateMainActivityEvent event) {
+    Timber.tag(TAG).v("UpdateMainActivityEvent");
+    updateActivity();
+  }
 
+  private void updateActivity() {
+    recreateView();
+  }
 
   @RequiresApi(api = Build.VERSION_CODES.M)
   @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
