@@ -68,7 +68,7 @@ public class DocumentInfo {
     private List<ControlLabel> controlLabels = new ArrayList<ControlLabel>();
     @SerializedName("actions")
     @Expose
-    private List<Object> actions = new ArrayList<Object>();
+    private List<DocumentInfoAction> actions = new ArrayList<DocumentInfoAction>();
     @SerializedName("route")
     @Expose
     private Route route;
@@ -451,7 +451,7 @@ public class DocumentInfo {
      * @return
      *     The actions
      */
-    public List<Object> getActions() {
+    public List<DocumentInfoAction> getActions() {
         return actions;
     }
 
@@ -460,7 +460,7 @@ public class DocumentInfo {
      * @param actions
      *     The actions
      */
-    public void setActions(List<Object> actions) {
+    public void setActions(List<DocumentInfoAction> actions) {
         this.actions = actions;
     }
 

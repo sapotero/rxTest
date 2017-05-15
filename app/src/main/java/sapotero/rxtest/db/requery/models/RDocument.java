@@ -12,6 +12,7 @@ import io.requery.Key;
 import io.requery.OneToMany;
 import io.requery.OneToOne;
 import io.requery.Persistable;
+import sapotero.rxtest.db.requery.models.actions.RAction;
 import sapotero.rxtest.db.requery.models.control_labels.RControlLabels;
 import sapotero.rxtest.db.requery.models.decisions.RDecision;
 import sapotero.rxtest.db.requery.models.exemplars.RExemplar;
@@ -116,12 +117,15 @@ public abstract class RDocument implements Persistable {
   @OneToMany(mappedBy = "document", cascade = {CascadeAction.DELETE, CascadeAction.SAVE})
   Set<RControlLabels> controlLabels;
 
+  @OneToMany(mappedBy = "document", cascade = {CascadeAction.DELETE, CascadeAction.SAVE})
+  Set<RAction> actions;
+
   @ForeignKey
   @OneToOne
   RRoute route;
 
 //  String links;
-  @OneToMany(mappedBy = "document")
+  @OneToMany(mappedBy = "document", cascade = {CascadeAction.DELETE, CascadeAction.SAVE})
   Set<RLinks> links;
 
 //  exemplars: Тип массив структур Экземпляры документа,

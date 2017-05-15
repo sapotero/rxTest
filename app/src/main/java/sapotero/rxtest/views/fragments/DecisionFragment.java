@@ -26,8 +26,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import com.afollestad.materialdialogs.MaterialDialog;
-import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.google.gson.Gson;
@@ -41,7 +39,6 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import okhttp3.OkHttpClient;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
@@ -411,7 +408,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   public Block getBlock(){
 
     String appealText = "";
-    if (button_ask_to_report.isChecked()) {
+    if (  button_ask_to_report.isChecked()) {
       appealText = button_ask_to_report.getTextOn().toString();
     } else if (button_ask_to_acquaint.isChecked()) {
       appealText = button_ask_to_acquaint.getTextOn().toString();
