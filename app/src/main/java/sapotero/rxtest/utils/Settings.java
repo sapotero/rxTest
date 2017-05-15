@@ -25,6 +25,7 @@ public class Settings {
   public static final String MAIN_MENU_POSITION_KEY = "activity_main_menu.position";
   public static final String REGNUMBER_KEY = "activity_main_menu.regnumber";
   public static final String REGDATE_KEY = "activity_main_menu.date";
+  public static final String LOAD_FROM_SEARCH_KEY = "load_from_search";
 
   public static String FIRST_RUN_KEY;
   public static String HOST_KEY;
@@ -50,6 +51,7 @@ public class Settings {
   private Preference<Integer> mainMenuPosition;
   private Preference<String> regNumber;
   private Preference<String> regDate;
+  private Preference<Boolean> loadFromSearch;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -79,6 +81,7 @@ public class Settings {
     mainMenuPosition = settings.getInteger(MAIN_MENU_POSITION_KEY);
     regNumber = settings.getString(REGNUMBER_KEY);
     regDate = settings.getString(REGDATE_KEY);
+    loadFromSearch = settings.getBoolean(LOAD_FROM_SEARCH_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -287,5 +290,13 @@ public class Settings {
 
   public void setRegDate(String value) {
     setString(regDate, value);
+  }
+
+  public boolean isLoadFromSearch( ) {
+    return getBoolean(loadFromSearch);
+  }
+
+  public void setLoadFromSearch(boolean value) {
+    setBoolean(loadFromSearch, value);
   }
 }

@@ -51,18 +51,12 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapte
     holder.mTitle.setText(  doc.getShortDescription() );
 
     holder.mCard.setOnClickListener(v -> {
-
-      SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-      RxSharedPreferences rxPreferences = RxSharedPreferences.create(preferences);
-
       settings.setPosition(position);
       settings.setUid( doc.getUid() );
       settings.setRegNumber( doc.getRegistrationNumber() );
       settings.setStatusCode( doc.getFilter() );
       settings.setRegDate( doc.getRegistrationDate() );
-
-      Preference<Boolean> rxFromSearch = rxPreferences.getBoolean("load_from_search");
-      rxFromSearch.set( true );
+      settings.setLoadFromSearch( true );
 
       Intent intent = new Intent(context, InfoActivity.class);
       context.startActivity(intent);

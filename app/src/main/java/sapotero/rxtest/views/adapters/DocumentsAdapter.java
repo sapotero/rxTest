@@ -332,7 +332,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       settings2.setMainMenuPosition( viewHolder.getAdapterPosition() );
       settings2.setRegNumber( item.getRegistrationNumber() );
       settings2.setStatusCode( item.getFilter() );
-      settings.getBoolean("load_from_search").set( false );
+      settings2.setLoadFromSearch( false );
 //      settings.getBoolean("activity_main_menu.from_sign").set( item.isFromSign() );
       settings2.setRegDate( item.getRegistrationDate() );
 

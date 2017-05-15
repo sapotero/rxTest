@@ -286,7 +286,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   private void invalidateArrows() {
     // если пришли из поиска - дизейблим стрелки
     try {
-      if ( settings.getBoolean("load_from_search").get() ){
+      if ( settings2.isLoadFromSearch() ){
         ImageButton prev = (ImageButton) findViewById(R.id.activity_info_prev_document);
         ImageButton next = (ImageButton) findViewById(R.id.activity_info_next_document);
 
