@@ -13,14 +13,16 @@ public class PrimaryConsiderationPeople {
   private String gender;
   private boolean isOriginal = false;
   private boolean isResponsible = false;
+  private boolean isOrganization = false;
 
-  public PrimaryConsiderationPeople(String id, String name, String position, String organization, String assistantId, String gender) {
+  public PrimaryConsiderationPeople(String id, String name, String position, String organization, String assistantId, String gender, boolean isOrganization) {
     this.id = id;
     this.name = name;
     this.position = position;
     this.organization = organization;
     this.assistantId = assistantId;
     this.gender = gender;
+    this.isOrganization = isOrganization;
   }
 
   public PrimaryConsiderationPeople(Performer u) {
@@ -31,17 +33,17 @@ public class PrimaryConsiderationPeople {
       this.position = String.valueOf( u.getNumber() );
       this.organization = u.getOrganizationText();
       this.gender = u.getPerformerGender();
-      if (u.getIsOriginal() != null) {
-        this.isOriginal = u.getIsOriginal();
-      } else {
-        this.isOriginal = false;
-      }
+      this.isOriginal = getBooleanValue(u.getIsOriginal());
+      this.isResponsible = getBooleanValue(u.getIsResponsible());
+      this.isOrganization = getBooleanValue(u.getOrganization());
+    }
+  }
 
-      if (u.getIsResponsible() != null) {
-        this.isResponsible = u.getIsResponsible();
-      } else {
-        this.isResponsible = false;
-      }
+  private boolean getBooleanValue(Boolean value) {
+    if (value != null) {
+      return value;
+    } else {
+      return false;
     }
   }
 
@@ -109,5 +111,13 @@ public class PrimaryConsiderationPeople {
 
   public void setGender(String gender) {
     this.gender = gender;
+  }
+
+  public boolean isOrganization() {
+    return isOrganization;
+  }
+
+  public void setIsOrganization(boolean organization) {
+    isOrganization = organization;
   }
 }

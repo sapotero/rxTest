@@ -172,6 +172,7 @@ public class SaveDecision extends AbstractCommand {
         perf.setOrganizationText(_perf.getOrganizationText());
         perf.setIsOriginal(_perf.getIsOriginal());
         perf.setIsResponsible(_perf.getIsResponsible());
+        perf.setIsOrganization(_perf.getOrganization());
         perf.setBlock(block);
         block.getPerformers().add(perf);
       }

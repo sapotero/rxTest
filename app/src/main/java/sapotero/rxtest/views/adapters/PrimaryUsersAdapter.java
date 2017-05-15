@@ -77,6 +77,7 @@ public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
     oshs.setPosition( item.getPosition());
     oshs.setId( item.getId());
     oshs.setGender( item.getGender());
+    oshs.setIsOrganization( item.isOrganization() );
 
     return oshs;
   }

@@ -446,6 +446,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
         p.setPerformerGender( item.getGender() );
         p.setOrganizationText( item.getOrganization() );
         p.setNumber( i );
+        p.setOrganization( item.isOrganization() );
 
         performers.add(p);
       }
@@ -480,6 +481,10 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
 
     //resolved https://tasks.n-core.ru/browse/MVDESD-13231 - убрать врио
     oshs.showWithAssistant(false);
+
+    // resolved https://tasks.n-core.ru/browse/MVDESD-13440
+    // Показывать организации в поиске исполнителей
+    oshs.withOrganizations(true);
 
     oshs.registerCallBack( this );
 
@@ -582,7 +587,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   public void onSearchSuccess(Oshs user, CommandFactory.Operation operation, String uid) {
     Timber.tag("FROM DIALOG").i( "[%s] %s | %s", user.getId(), user.getName(), user.getOrganization());
 
-    adapter.add( new PrimaryConsiderationPeople( user.getId(), user.getName(), user.getPosition(), user.getOrganization(), null, user.getGender() ) );
+    adapter.add( new PrimaryConsiderationPeople( user.getId(), user.getName(), user.getPosition(), user.getOrganization(), null, user.getGender(), user.getIsOrganization() ) );
     updateUsers();
 
     if (callback != null) {

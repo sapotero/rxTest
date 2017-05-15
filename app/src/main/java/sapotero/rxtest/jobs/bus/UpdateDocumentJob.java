@@ -407,6 +407,7 @@ public class UpdateDocumentJob extends BaseJob {
                 performer.setOrganizationText(p.getOrganizationText());
                 performer.setIsOriginal(p.getIsOriginal());
                 performer.setIsResponsible(p.getIsResponsible());
+                performer.setIsOrganization(p.getOrganization());
 
                 performer.setBlock(block);
                 block.getPerformers().add(performer);
@@ -647,6 +648,7 @@ public class UpdateDocumentJob extends BaseJob {
                   performer.setOrganizationText(p.getOrganizationText());
                   performer.setIsOriginal(p.getIsOriginal());
                   performer.setIsResponsible(p.getIsResponsible());
+                  performer.setIsOrganization(p.getOrganization());
 
                   performer.setBlock(block);
                   block.getPerformers().add(performer);
