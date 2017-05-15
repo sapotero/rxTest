@@ -17,7 +17,6 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.birbit.android.jobqueue.JobManager;
-import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import org.greenrobot.eventbus.EventBus;
@@ -88,7 +87,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   private Fields.Journal journal;
   private Fields.Status  status;
   private MaterialDialog.Builder loadingDialog;
-  private Preference<Boolean> IS_PROCESSED;
   private ScheduledThreadPoolExecutor scheduller;
 
   @Override
@@ -105,8 +103,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   }
 
   private void initInfoActivity() {
-    loadSettings();
-
     if (EventBus.getDefault().isRegistered(this)) {
       EventBus.getDefault().unregister(this);
     }
@@ -139,7 +135,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 //    Timber.tag(TAG).e("IS_PROCESSED.get() %s | %s -> %s", status, STATUS_CODE.get(), IS_PROCESSED.get() );
 
 
-    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || IS_PROCESSED.get()  ){
+    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || settings2.isFromSign() ){
       TabSigningPagerAdapter adapter = new TabSigningPagerAdapter( getSupportFragmentManager() );
       viewPager.setAdapter(adapter);
     } else {
@@ -181,17 +177,13 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
       e.printStackTrace();
     }
 
-    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || IS_PROCESSED.get()  ){
+    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || settings2.isFromSign() ){
       fragmentTransaction.add( R.id.activity_info_preview_container, new RoutePreviewFragment() );
     } else {
       fragmentTransaction.add( R.id.activity_info_preview_container, new InfoActivityDecisionPreviewFragment(toolbarManager) );
     }
 
     fragmentTransaction.commit();
-  }
-
-  private void loadSettings() {
-    IS_PROCESSED = settings.getBoolean("activity_main_menu.from_sign");
   }
 
   @OnClick(R.id.activity_info_prev_document)

@@ -333,7 +333,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       settings2.setRegNumber( item.getRegistrationNumber() );
       settings2.setStatusCode( item.getFilter() );
       settings2.setLoadFromSearch( false );
-//      settings.getBoolean("activity_main_menu.from_sign").set( item.isFromSign() );
+//      settings.setFromSign( item.isFromSign() );
       settings2.setRegDate( item.getRegistrationDate() );
 
       Intent intent = new Intent(mContext, InfoActivity.class);
@@ -474,7 +474,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       settings2.setUid( item.getUid() );
       settings2.setRegNumber( item.getRegistrationNumber() );
       settings2.setStatusCode( item.getFilter() );
-//      settings.getBoolean("activity_main_menu.from_sign").set( item.isFromSign() );
+//      settings.setFromSign( item.isFromSign() );
       settings2.setRegDate( item.getRegistrationDate() );
     }
 

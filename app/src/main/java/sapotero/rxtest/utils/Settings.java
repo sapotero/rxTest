@@ -27,6 +27,7 @@ public class Settings {
   public static final String REGDATE_KEY = "activity_main_menu.date";
   public static final String LOAD_FROM_SEARCH_KEY = "load_from_search";
   public static final String LAST_SEEN_UID_KEY = "activity_main_menu.last_seen_uid";
+  public static final String FROM_SIGN_KEY = "activity_main_menu.from_sign";
 
   public static String FIRST_RUN_KEY;
   public static String HOST_KEY;
@@ -54,6 +55,7 @@ public class Settings {
   private Preference<String> regDate;
   private Preference<Boolean> loadFromSearch;
   private Preference<String> lastSeenUid;
+  private Preference<Boolean> fromSign;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -85,6 +87,7 @@ public class Settings {
     regDate = settings.getString(REGDATE_KEY);
     loadFromSearch = settings.getBoolean(LOAD_FROM_SEARCH_KEY);
     lastSeenUid = settings.getString(LAST_SEEN_UID_KEY);
+    fromSign = settings.getBoolean(FROM_SIGN_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -295,7 +298,7 @@ public class Settings {
     setString(regDate, value);
   }
 
-  public boolean isLoadFromSearch( ) {
+  public boolean isLoadFromSearch() {
     return getBoolean(loadFromSearch);
   }
 
@@ -309,5 +312,13 @@ public class Settings {
 
   public void setLastSeenUid(String value) {
     setString(lastSeenUid, value);
+  }
+
+  public boolean isFromSign() {
+    return getBoolean(fromSign);
+  }
+
+  public void setFromSign(boolean value) {
+    setBoolean(fromSign, value);
   }
 }
