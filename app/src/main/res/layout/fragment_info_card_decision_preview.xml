@@ -153,27 +153,56 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="vertical"
             >
 
-            <Button
-                android:id="@+id/activity_info_decision_preview_next_person"
-                android:text="@string/menu_info_next_person"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:drawableStart="@drawable/sign_small"
-                android:visibility="gone"
-                style="@style/Widget.AppCompat.Button.Borderless"/>
+            <LinearLayout
+                android:id="@+id/activity_info_decision_preview_acition_wrapper"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
 
-            <Button
-                android:id="@+id/activity_info_decision_preview_prev_person"
-                android:text="@string/menu_info_prev_person"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:drawableStart="@drawable/close_small"
-                android:layout_weight="1"
-                android:visibility="gone"
-                style="@style/Widget.AppCompat.Button.Borderless"/>
+                <TextView
+                    android:id="@+id/activity_info_decision_preview_acition_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:padding="@dimen/half_date_offset"
+                    android:gravity="center|start"
+                    android:textSize="12sp"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:singleLine="true"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Caption"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <Button
+                    android:id="@+id/activity_info_decision_preview_prev_person"
+                    android:text="@string/menu_info_prev_person"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableStart="@drawable/close_small"
+                    android:layout_weight="1"
+                    android:visibility="gone"
+                    style="@style/Widget.AppCompat.Button.Borderless"/>
+
+                <Button
+                    android:id="@+id/activity_info_decision_preview_next_person"
+                    android:text="@string/menu_info_next_person"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:drawableStart="@drawable/sign_small"
+                    android:visibility="gone"
+                    style="@style/Widget.AppCompat.Button.Borderless"/>
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/activity_info_decision_preview_approved_text"
@@ -184,10 +213,12 @@
                 android:gravity="center|start"
                 android:visibility="gone"
                 android:textSize="16sp"
+                android:layout_weight="1"
                 android:textAppearance="@style/TextAppearance.AppCompat.Caption"/>
 
         </LinearLayout>
         <!-- убрать в проде-->
+
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
