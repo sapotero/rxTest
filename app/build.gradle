@@ -38,7 +38,6 @@ android {
             applicationId "sapotero.rxtest"
             versionCode 15
             versionName "3.0.6"
-//            versionName "1.16.0"
         }
     }
 
