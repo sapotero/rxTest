@@ -55,7 +55,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
   private final String TAG = this.getClass().getSimpleName();
   private Preference<String> REG_DATE;
-  private Preference<String> REG_NUMBER;
 
   //  private Fields.Journal journal;
   //  private String SIGN;
@@ -376,7 +375,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
 
   private void loadSettings() {
-    REG_NUMBER = settings.getString("activity_main_menu.regnumber");
     REG_DATE = settings.getString("activity_main_menu.date");
   }
 
@@ -681,7 +679,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
     invalidate();
 
-    toolbar.setTitle( String.format("%s от %s", REG_NUMBER.get(), REG_DATE.get()) );
+    toolbar.setTitle( String.format("%s от %s", settings2.getRegNumber(), REG_DATE.get()) );
     if (doc!=null && doc.getDocumentType() != null){
       toolbar.setSubtitle( String.format("%s", Fields.getJournalName(doc.getDocumentType()) ) );
     }

@@ -330,7 +330,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       settings2.setPosition(position);
       settings2.setUid( item.getUid() );
       settings2.setMainMenuPosition( viewHolder.getAdapterPosition() );
-      settings.getString("activity_main_menu.regnumber").set( item.getRegistrationNumber() );
+      settings2.setRegNumber( item.getRegistrationNumber() );
       settings2.setStatusCode( item.getFilter() );
       settings.getBoolean("load_from_search").set( false );
 
@@ -445,7 +445,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
       settings2.setMainMenuPosition(position);
       settings2.setUid(item.getUid());
-      settings.getString("activity_main_menu.regnumber").set(item.getRegistrationNumber());
+      settings2.setRegNumber(item.getRegistrationNumber());
       settings2.setStatusCode(item.getFilter());
       settings.getString("activity_main_menu.date").set(item.getRegistrationDate());
     }
@@ -473,7 +473,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
       settings2.setMainMenuPosition(position);
       settings2.setUid( item.getUid() );
-      settings.getString("activity_main_menu.regnumber").set( item.getRegistrationNumber() );
+      settings2.setRegNumber( item.getRegistrationNumber() );
       settings2.setStatusCode( item.getFilter() );
 //      settings.getBoolean("activity_main_menu.from_sign").set( item.isFromSign() );
       settings.getString("activity_main_menu.date").set( item.getRegistrationDate() );

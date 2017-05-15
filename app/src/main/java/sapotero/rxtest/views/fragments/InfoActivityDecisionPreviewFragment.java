@@ -133,7 +133,6 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   private Preview preview;
 
   private Unbinder binder;
-  private Preference<String> REG_NUMBER;
   private String uid;
   private RDecisionEntity current_decision;
   private String TAG = this.getClass().getSimpleName();
@@ -406,7 +405,6 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
   private void invalidate() {
     initEvents();
-    loadSettings();
 
     initToolBar();
 
@@ -650,10 +648,6 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     void onFragmentInteraction(Uri uri);
   }
 
-  private void loadSettings() {
-    REG_NUMBER = settings.getString("activity_main_menu.regnumber");
-  }
-
   @OnClick(R.id.activity_info_button_magnifer)
   public void magnifer(){
     Timber.tag(TAG).v("magnifer");
@@ -663,7 +657,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     if ( decision_spinner_adapter.size() > 0 ){
       decision = decision_spinner_adapter.getItem( decision_spinner.getSelectedItemPosition() );
       magnifer.setDecision( decision );
-      magnifer.setRegNumber( REG_NUMBER.get() );
+      magnifer.setRegNumber( settings2.getRegNumber() );
     }
 
     magnifer.show( getFragmentManager() , "DecisionMagniferFragment");
@@ -1008,7 +1002,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
         }
       }
 
-      printSigner( decision, REG_NUMBER.get() );
+      printSigner( decision, settings2.getRegNumber() );
     }
 
     private void showEmpty(){
