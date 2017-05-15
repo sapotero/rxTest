@@ -22,6 +22,7 @@ public class Settings {
   public static final String CURRENT_USER_KEY = "current_user";
   public static final String CURRENT_USER_ORGANIZATION_KEY = "current_user_organization";
   public static final String POSITION_KEY = "position";
+  public static final String MAIN_MENU_POSITION_KEY = "activity_main_menu.position";
 
   public static String FIRST_RUN_KEY;
   public static String HOST_KEY;
@@ -44,6 +45,7 @@ public class Settings {
   private Preference<String> currentUser;
   private Preference<String> currentUserOrganization;
   private Preference<Integer> position;
+  private Preference<Integer> mainMenuPosition;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -70,6 +72,7 @@ public class Settings {
     currentUser = settings.getString(CURRENT_USER_KEY);
     currentUserOrganization = settings.getString(CURRENT_USER_ORGANIZATION_KEY);
     position = settings.getInteger(POSITION_KEY);
+    mainMenuPosition = settings.getInteger(MAIN_MENU_POSITION_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -254,5 +257,13 @@ public class Settings {
 
   public void setPosition(int value) {
     setInteger(position, value);
+  }
+
+  public int getMainMenuPosition() {
+    return getInteger(mainMenuPosition);
+  }
+
+  public void setMainMenuPosition(int value) {
+    setInteger(mainMenuPosition, value);
   }
 }

@@ -329,7 +329,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
       settings2.setPosition(position);
       settings2.setUid( item.getUid() );
-      settings.getInteger("activity_main_menu.position").set( viewHolder.getAdapterPosition() );
+      settings2.setMainMenuPosition( viewHolder.getAdapterPosition() );
       settings.getString("activity_main_menu.regnumber").set( item.getRegistrationNumber() );
       settings2.setStatusCode( item.getFilter() );
       settings.getBoolean("load_from_search").set( false );
@@ -443,7 +443,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
       RDocumentEntity item = documents.get(position);
 
-      settings.getInteger("activity_main_menu.position").set(position);
+      settings2.setMainMenuPosition(position);
       settings2.setUid(item.getUid());
       settings.getString("activity_main_menu.regnumber").set(item.getRegistrationNumber());
       settings2.setStatusCode(item.getFilter());
@@ -471,7 +471,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
       RDocumentEntity item = documents.get(position);
 
-      settings.getInteger("activity_main_menu.position").set(position);
+      settings2.setMainMenuPosition(position);
       settings2.setUid( item.getUid() );
       settings.getString("activity_main_menu.regnumber").set( item.getRegistrationNumber() );
       settings2.setStatusCode( item.getFilter() );

@@ -386,7 +386,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     Timber.tag("SHOW_PREV").e("info_act");
 
 
-    MainActivity.RAdapter.getPrevFromPosition( settings.getInteger("activity_main_menu.position").get() );
+    MainActivity.RAdapter.getPrevFromPosition( settings2.getMainMenuPosition() );
 
     exitIfAlreadySeenThisFuckingDocument();
 
@@ -415,7 +415,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     Timber.tag("SHOW_NEXT").e("info_act");
 
 
-    MainActivity.RAdapter.getNextFromPosition( settings.getInteger("activity_main_menu.position").get() );
+    MainActivity.RAdapter.getNextFromPosition( settings2.getMainMenuPosition() );
 
     exitIfAlreadySeenThisFuckingDocument();
 
