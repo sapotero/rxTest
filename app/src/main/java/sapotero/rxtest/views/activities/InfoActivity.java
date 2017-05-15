@@ -79,8 +79,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   @Inject RxSharedPreferences settings;
   @Inject Settings settings2;
 
-  private Preference<String> LAST_SEEN_UID;
-
   private String TAG = this.getClass().getSimpleName();
   private CompositeSubscription subscription;
 
@@ -193,7 +191,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   }
 
   private void loadSettings() {
-    LAST_SEEN_UID = settings.getString("activity_main_menu.last_seen_uid");
     IS_PROCESSED = settings.getBoolean("activity_main_menu.from_sign");
   }
 
@@ -250,15 +247,13 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   }
 
   public void exitIfAlreadySeenThisFuckingDocument(){
-    if (LAST_SEEN_UID.get() != null && settings2.getUid() != null) {
-      if (Objects.equals(LAST_SEEN_UID.get(), settings2.getUid())){
-        finish();
-      }
+    if (Objects.equals(settings2.getLastSeenUid(), settings2.getUid())){
+      finish();
     }
   }
 
   public void setLastSeen(){
-    LAST_SEEN_UID.set( settings2.getUid() );
+    settings2.setLastSeenUid( settings2.getUid() );
   }
 
 
