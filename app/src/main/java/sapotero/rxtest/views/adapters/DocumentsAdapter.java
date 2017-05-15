@@ -333,9 +333,8 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       settings2.setRegNumber( item.getRegistrationNumber() );
       settings2.setStatusCode( item.getFilter() );
       settings.getBoolean("load_from_search").set( false );
-
 //      settings.getBoolean("activity_main_menu.from_sign").set( item.isFromSign() );
-      settings.getString("activity_main_menu.date").set( item.getRegistrationDate() );
+      settings2.setRegDate( item.getRegistrationDate() );
 
       Intent intent = new Intent(mContext, InfoActivity.class);
 
@@ -447,7 +446,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       settings2.setUid(item.getUid());
       settings2.setRegNumber(item.getRegistrationNumber());
       settings2.setStatusCode(item.getFilter());
-      settings.getString("activity_main_menu.date").set(item.getRegistrationDate());
+      settings2.setRegDate(item.getRegistrationDate());
     }
 
   }
@@ -476,7 +475,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       settings2.setRegNumber( item.getRegistrationNumber() );
       settings2.setStatusCode( item.getFilter() );
 //      settings.getBoolean("activity_main_menu.from_sign").set( item.isFromSign() );
-      settings.getString("activity_main_menu.date").set( item.getRegistrationDate() );
+      settings2.setRegDate( item.getRegistrationDate() );
     }
 
 

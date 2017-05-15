@@ -80,7 +80,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   @Inject Settings settings2;
 
   private Preference<String> LAST_SEEN_UID;
-  private Preference<String> REG_DATE;
 
   private String TAG = this.getClass().getSimpleName();
   private CompositeSubscription subscription;
@@ -196,7 +195,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   private void loadSettings() {
     LAST_SEEN_UID = settings.getString("activity_main_menu.last_seen_uid");
     IS_PROCESSED = settings.getBoolean("activity_main_menu.from_sign");
-    REG_DATE = settings.getString("activity_main_menu.date");
   }
 
   @OnClick(R.id.activity_info_prev_document)

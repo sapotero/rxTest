@@ -59,9 +59,7 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapte
       settings.setUid( doc.getUid() );
       settings.setRegNumber( doc.getRegistrationNumber() );
       settings.setStatusCode( doc.getFilter() );
-
-      Preference<String> rxDate = rxPreferences.getString("activity_main_menu.date");
-      rxDate.set( doc.getRegistrationDate() );
+      settings.setRegDate( doc.getRegistrationDate() );
 
       Preference<Boolean> rxFromSearch = rxPreferences.getBoolean("load_from_search");
       rxFromSearch.set( true );

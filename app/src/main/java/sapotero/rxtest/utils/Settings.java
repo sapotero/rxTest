@@ -24,6 +24,7 @@ public class Settings {
   public static final String POSITION_KEY = "position";
   public static final String MAIN_MENU_POSITION_KEY = "activity_main_menu.position";
   public static final String REGNUMBER_KEY = "activity_main_menu.regnumber";
+  public static final String REGDATE_KEY = "activity_main_menu.date";
 
   public static String FIRST_RUN_KEY;
   public static String HOST_KEY;
@@ -48,6 +49,7 @@ public class Settings {
   private Preference<Integer> position;
   private Preference<Integer> mainMenuPosition;
   private Preference<String> regNumber;
+  private Preference<String> regDate;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -76,6 +78,7 @@ public class Settings {
     position = settings.getInteger(POSITION_KEY);
     mainMenuPosition = settings.getInteger(MAIN_MENU_POSITION_KEY);
     regNumber = settings.getString(REGNUMBER_KEY);
+    regDate = settings.getString(REGDATE_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -276,5 +279,13 @@ public class Settings {
 
   public void setRegNumber(String value) {
     setString(regNumber, value);
+  }
+
+  public String getRegDate() {
+    return getString(regDate);
+  }
+
+  public void setRegDate(String value) {
+    setString(regDate, value);
   }
 }
