@@ -135,7 +135,11 @@ public class Performer {
      *     The performerText
      */
     public String getPerformerText() {
-        return performerText;
+        if (performerType != null && performerType.endsWith("organisation")) {
+            return organizationText;
+        } else {
+            return performerText;
+        }
     }
 
     /**
