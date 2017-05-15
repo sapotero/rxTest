@@ -47,6 +47,9 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
   
   private View view;
 
+  // If true, organizations will be included in search results
+  private boolean withOrganizations = false;
+
   public OshsAutoCompleteAdapter(Context context, View view) {
     mContext = context;
     EsdApplication.getNetworkComponent().inject( this );
@@ -137,6 +140,12 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
         String oshsId = oshs.getId();
         Boolean isGroup = oshs.getIsGroup();
         Boolean isOrganization = oshs.getIsOrganization();
+
+        if ( withOrganizations ) {
+          // To include organizations in search results consider all items as not organizations
+          isOrganization = false;
+        }
+
         if (oshsId != null && isGroup != null && isOrganization != null) {
           if (!isGroup && !isOrganization) {
             if ( ignore_user_ids != null && ignore_user_ids.contains(oshsId) ) {
@@ -160,5 +169,9 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
 
   public void setThreshold(int threshold) {
     this.threshold = threshold;
+  }
+
+  public void withOrganizations(boolean withOrganizations) {
+    this.withOrganizations = withOrganizations;
   }
 }

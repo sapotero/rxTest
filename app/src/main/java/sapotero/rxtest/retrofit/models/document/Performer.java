@@ -34,9 +34,14 @@ public class Performer {
     @SerializedName("is_group")
     @Expose
     private Boolean isGroup = false;
+
     @SerializedName("is_organization")
     @Expose
     private Boolean isOrganization = false;
+
+    @SerializedName("is_organisation")
+    @Expose
+    private Boolean isOrganisation = false;
 
     public Boolean getOriginal() {
         return isOriginal;
@@ -63,11 +68,24 @@ public class Performer {
     }
 
     public Boolean getOrganization() {
-        return isOrganization;
+        if ( isPerformerTypeOrganization() ) {
+            return true;
+        } else {
+            return isOrganization;
+        }
+    }
+
+    private boolean isPerformerTypeOrganization() {
+        if (performerType != null && performerType.endsWith("organisation")) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public void setOrganization(Boolean organization) {
         isOrganization = organization;
+        isOrganisation = organization;
     }
 
     /**
@@ -130,7 +148,11 @@ public class Performer {
      *     The performerText
      */
     public String getPerformerText() {
-        return performerText;
+        if ( isPerformerTypeOrganization() ) {
+            return organizationText;
+        } else {
+            return performerText;
+        }
     }
 
     /**

@@ -993,14 +993,16 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
           printAppealText( block, isOnlyOneBlock );
 
           if ( block.isTextBefore() ){
-            printBlockText( block.getText() );
-            if ( block.isHidePerformers() != null && !block.isHidePerformers())
+
+            printBlockText( block, isOnlyOneBlock );
+            if ( block.isHidePerformers() != null && !block.isHidePerformers()){
               printBlockPerformers( block, isOnlyOneBlock );
+            }
 
           } else {
             if ( block.isHidePerformers() != null && !block.isHidePerformers())
               printBlockPerformers( block, isOnlyOneBlock );
-            printBlockText( block.getText() );
+            printBlockText( block, isOnlyOneBlock);
           }
 
         }
@@ -1161,11 +1163,16 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       preview_head.addView( delimiter );
     }
 
-    private void printBlockText(String text) {
+    private void printBlockText(RBlockEntity block, Boolean isOnlyOneBlock) {
       TextView block_view = new TextView(context);
-      block_view.setText( "\u00A0     " + text );
       block_view.setTextColor( Color.BLACK );
       block_view.setTypeface( Typeface.create("sans-serif-light", Typeface.NORMAL) );
+
+      if ( !isOnlyOneBlock && block.isHidePerformers() != null && block.isHidePerformers() ){
+        block_view.setText( String.format( "%s. %s", block.getNumber(), block.getText() ) );
+      } else {
+        block_view.setText( block.getText() );
+      }
 
       LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
       params.setMargins(0, 10, 0, 10);
@@ -1202,13 +1209,12 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       RBlockEntity block = (RBlockEntity) _block;
 
       boolean numberPrinted = false;
+
       LinearLayout users_view = new LinearLayout(context);
       users_view.setOrientation(LinearLayout.VERTICAL);
       users_view.setPadding(40,5,5,5);
 
       if( block.getPerformers().size() > 0 ){
-
-
 
         Set<RPerformer> users = block.getPerformers();
         ArrayList<RPerformerEntity> _users = new ArrayList<>();
@@ -1221,13 +1227,14 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
         Collections.sort(_users, (o1, o2) -> o1.getNumber().compareTo( o2.getNumber() ));
 
         for (RPerformerEntity user: _users){
-//
-//
-//          RPerformerEntity user = (RPerformerEntity) _user;
+
           String performerName = "";
 
-          String tempPerformerName =
-                  DecisionConverter.getPerformerNameForDecisionPreview(user.getPerformerText(), user.getPerformerGender(), block.getAppealText());
+          String tempPerformerName = DecisionConverter.getPerformerNameForDecisionPreview(
+            user.getPerformerText(),
+            user.getPerformerGender(),
+            block.getAppealText()
+          );
 
           if ( block.getAppealText() == null && !numberPrinted && !isOnlyOneBlock ){
             performerName += block.getNumber().toString() + ". ";

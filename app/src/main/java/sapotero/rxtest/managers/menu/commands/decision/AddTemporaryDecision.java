@@ -163,6 +163,7 @@ public class AddTemporaryDecision extends AbstractCommand {
           perf.setIsOriginal( _perf.getIsOriginal() );
           perf.setIsResponsible( _perf.getIsResponsible() );
           perf.setIsResponsible( _perf.getIsResponsible() );
+          perf.setIsOrganization( _perf.getOrganization() );
 
           perf.setBlock(block);
           block.getPerformers().add(perf);
