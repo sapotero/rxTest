@@ -178,14 +178,14 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
           printAppealText( block, isOnlyOneBlock );
 
           if ( block.isTextBefore() ){
-            printBlockText( block.getText() );
+            printBlockText( block, isOnlyOneBlock );
             if ( block.isHidePerformers() != null && !block.isHidePerformers())
               printBlockPerformers( block, isOnlyOneBlock );
 
           } else {
             if ( block.isHidePerformers() != null && !block.isHidePerformers())
               printBlockPerformers( block, isOnlyOneBlock );
-            printBlockText( block.getText() );
+            printBlockText( block, isOnlyOneBlock );
           }
 
         }
@@ -322,11 +322,17 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
       preview_head.addView( letterHead );
     }
 
-    private void printBlockText(String text) {
+    private void printBlockText(RBlockEntity block, Boolean isOnlyOneBlock) {
       TextView block_view = new TextView(context);
-      block_view.setText( "\u00A0     " + text );
       block_view.setTextColor( Color.BLACK );
       block_view.setTypeface( Typeface.create("sans-serif-light", Typeface.NORMAL) );
+
+      if ( !isOnlyOneBlock && block.isHidePerformers() != null && block.isHidePerformers() ){
+        block_view.setText( String.format( "%s. %s", block.getNumber(), block.getText() ) );
+      } else {
+        block_view.setText( block.getText() );
+      }
+
 
       LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
       params.setMargins(0, 10, 0, 10);
