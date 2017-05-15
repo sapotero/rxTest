@@ -11,7 +11,7 @@
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/document_image_toolbar"
-        android:layout_width="match_parent"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:elevation="8dp"
         android:paddingTop="@dimen/half_date_offset"

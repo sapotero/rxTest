@@ -30,13 +30,6 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity implement
 
   @BindView(R.id.document_image_toolbar) Toolbar toolbar;
   @BindView(R.id.activity_document_image_full_screen_wrapper) FrameLayout wrapper;
-//  @BindView(R.id.document_image_fullscreen)  PDFView pdfView;
-//  @BindView(R.id.document_image_urgency_title) TextView urgency;
-//
-//  @BindView(R.id.pdf_fullscreen_prev_document)    CircleLeftArrow prev_document;
-//  @BindView(R.id.pdf_fullscreen_next_document)    CircleRightArrow next_document;
-//  @BindView(R.id.pdf_fullscreen_document_counter) TextView document_counter;
-//  @BindView(R.id.pdf_fullscreen_page_counter)     TextView page_counter;
 
   @Inject Settings settings;
 
@@ -70,6 +63,9 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity implement
         finish();
       }
     );
+    toolbar.setOnClickListener(view -> {
+      finish();
+    });
 
     Drawable drawable = toolbar.getNavigationIcon();
     assert drawable != null;

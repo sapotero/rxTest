@@ -60,6 +60,9 @@ public class DocumentInfocardFullScreenActivity extends AppCompatActivity {
         finish();
       }
     );
+    toolbar.setOnClickListener(view -> {
+      finish();
+    });
 
     Drawable drawable = toolbar.getNavigationIcon();
     assert drawable != null;

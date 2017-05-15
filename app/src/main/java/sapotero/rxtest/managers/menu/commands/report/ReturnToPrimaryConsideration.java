@@ -3,6 +3,7 @@ package sapotero.rxtest.managers.menu.commands.report;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
@@ -10,7 +11,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import sapotero.rxtest.events.view.ShowNextDocumentEvent;
+import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.events.view.ShowPrevDocumentEvent;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
@@ -39,8 +41,55 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
 
   @Override
   public void execute() {
-    EventBus.getDefault().post( new ShowNextDocumentEvent());
+    queueManager.add(this);
+    update();
+  }
 
+  private void update() {
+    String uid = getUid();
+
+    dataStore
+      .update(RDocumentEntity.class)
+      .set( RDocumentEntity.PROCESSED, true)
+      .set( RDocumentEntity.MD5, "" )
+      .set( RDocumentEntity.CHANGED, true)
+      .where(RDocumentEntity.UID.eq(uid))
+      .get()
+      .value();
+
+    EventBus.getDefault().post( new ShowPrevDocumentEvent());
+  }
+
+  private String getUid() {
+    String uid = null;
+
+    if (params.getDocument() != null && !Objects.equals(params.getDocument(), "")) {
+      uid = params.getDocument();
+    }
+
+    if (document.getUid() != null && !Objects.equals(document.getUid(), "")) {
+      uid = document.getUid();
+    }
+
+    return uid;
+  }
+
+  @Override
+  public String getType() {
+    return "return_to_the_primary_consideration";
+  }
+
+  @Override
+  public void executeLocal() {
+    if (callback != null){
+      callback.onCommandExecuteSuccess(getType());
+    }
+
+    queueManager.setExecutedLocal(this);
+  }
+
+  @Override
+  public void executeRemote() {
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
     Retrofit retrofit = new Retrofit.Builder()
@@ -53,14 +102,17 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
     OperationService operationService = retrofit.create( OperationService.class );
 
     ArrayList<String> uids = new ArrayList<>();
-    uids.add( settings2.getUid() );
+
+    String uid = getUid();
+
+    uids.add( uid );
 
     Observable<OperationResult> info = operationService.report(
       getType(),
       settings2.getLogin(),
       settings2.getToken(),
       uids,
-      settings2.getUid(),
+      uid,
       settings2.getStatusCode()
     );
 
@@ -72,9 +124,7 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
           Timber.tag(TAG).i("error: %s", data.getMessage());
           Timber.tag(TAG).i("type: %s", data.getType());
 
-          if (callback != null){
-            callback.onCommandExecuteSuccess(getType());
-          }
+          queueManager.setExecutedRemote(this);
         },
         error -> {
           if (callback != null){
@@ -82,22 +132,6 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
           }
         }
       );
-
-  }
-
-  @Override
-  public String getType() {
-    return "return_to_the_primary_consideration";
-  }
-
-  @Override
-  public void executeLocal() {
-
-  }
-
-  @Override
-  public void executeRemote() {
-
   }
 
   @Override

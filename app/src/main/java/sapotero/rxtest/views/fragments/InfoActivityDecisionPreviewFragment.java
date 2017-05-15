@@ -47,6 +47,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
@@ -61,6 +63,8 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.db.requery.models.actions.RAction;
+import sapotero.rxtest.db.requery.models.actions.RActionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RBlock;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecision;
@@ -101,6 +105,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   private OnFragmentInteractionListener mListener;
 
   @BindView(R.id.activity_info_decision_preview_head) LinearLayout preview_head;
+  @BindView(R.id.activity_info_decision_preview_acition_wrapper) LinearLayout action_wrapper;
 
   @BindView(R.id.activity_info_decision_preview_body) LinearLayout preview_body;
   @BindView(R.id.activity_info_decision_preview_bottom) LinearLayout preview_bottom;
@@ -117,6 +122,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   @BindView(R.id.activity_info_decision_preview_next_person) Button next_person_button;
   @BindView(R.id.activity_info_decision_preview_prev_person) Button prev_person_button;
   @BindView(R.id.activity_info_decision_preview_approved_text) TextView approved_text;
+  @BindView(R.id.activity_info_decision_preview_acition_text)  TextView action_text;
   @BindView(R.id.activity_info_decision_preview_temporary) TextView temporary;
   @BindView(R.id.activity_info_decision_preview_count) TextView decision_count;
 
@@ -530,6 +536,59 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       temporary.setVisibility(View.GONE);
     }
 
+    // resolved https://tasks.n-core.ru/browse/MVDESD-13423
+    //  Отображать информацию от кого поступила резолюция
+    updateActionText();
+
+  }
+
+  private void updateActionText() {
+    if (doc != null && doc.getActions() != null && doc.getActions().size() > 0){
+      String action_temporary_text = "";
+
+      ArrayList<RActionEntity> list = new ArrayList<>();
+
+      for ( RAction act: doc.getActions() ) {
+        RActionEntity _act = (RActionEntity) act;
+
+        if (Objects.equals(_act.getAddressedToId(), settings.getString("current_user_id").get())){
+          list.add( _act );
+        }
+      }
+
+      if ( list.size() == 1 ){
+        setActionText(list.get(0).getToS());
+      } else if ( list.size() >= 2 ){
+        Collections.sort(list, (a1, a2) -> a1.getUpdatedAt().compareTo( a2.getUpdatedAt() ));
+        setActionText( list.get( list.size()-1 ).getToS() );
+      } else {
+        action_wrapper.setVisibility(View.GONE);
+      }
+
+    } else {
+      action_wrapper.setVisibility(View.GONE);
+    }
+  }
+
+  private void setActionText(String action_temporary_text) {
+    String organization = "";
+    String user = "";
+
+    int organization_index = action_temporary_text.indexOf("(");
+
+    organization = action_temporary_text.substring( organization_index, action_temporary_text.length() );
+
+    String pattern = "(\\w+\\s.\\.)";
+
+    Pattern r = Pattern.compile(pattern);
+    Matcher m = r.matcher( action_temporary_text.substring( 0, organization_index-1 ) );
+
+    if (m.find()) {
+      action_wrapper.setVisibility(View.VISIBLE);
+      action_text.setText( String.format("%s %s", m.group(0), organization) );
+    } else {
+      action_wrapper.setVisibility(View.GONE);
+    }
   }
 
   private void setSignEnabled(boolean active) {
@@ -674,6 +733,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       .subscribe(doc -> {
 
         this.doc = doc;
+        settings.getString("_status").set( doc.getFilter() );
 
 //        Timber.tag("loadFromDb").i( "loaded %s", doc.getId() );
 

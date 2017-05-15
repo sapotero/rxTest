@@ -24,6 +24,7 @@ import sapotero.rxtest.db.requery.models.RLinksEntity;
 import sapotero.rxtest.db.requery.models.RRouteEntity;
 import sapotero.rxtest.db.requery.models.RSignerEntity;
 import sapotero.rxtest.db.requery.models.RStepEntity;
+import sapotero.rxtest.db.requery.models.actions.RActionEntity;
 import sapotero.rxtest.db.requery.models.control_labels.RControlLabelsEntity;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
@@ -41,6 +42,7 @@ import sapotero.rxtest.retrofit.models.document.Card;
 import sapotero.rxtest.retrofit.models.document.ControlLabel;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
+import sapotero.rxtest.retrofit.models.document.DocumentInfoAction;
 import sapotero.rxtest.retrofit.models.document.Exemplar;
 import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.retrofit.models.document.Performer;
@@ -716,6 +718,23 @@ public class UpdateDocumentJob extends BaseJob {
           image.setComplete(false);
           image.setError(false);
           doc.getImages().add(image);
+        }
+      }
+
+      if ( document.getActions() != null && document.getActions().size() >= 1 ){
+        doc.getActions().clear();
+        for (DocumentInfoAction act: document.getActions() ) {
+          RActionEntity action = new RActionEntity();
+
+          action.setOfficialId(act.getOfficialId());
+          action.setAction(act.getAction());
+          action.setActionDescription(act.getActionDescription());
+          action.setAddressedToId(act.getAddressedToId());
+          action.setOfficialId(act.getOfficialId());
+          action.setToS(act.getToS());
+
+          action.setDocument(doc);
+          doc.getActions().add(action);
         }
       }
 

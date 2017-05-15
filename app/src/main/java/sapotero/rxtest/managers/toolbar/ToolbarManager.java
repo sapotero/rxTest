@@ -315,6 +315,19 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             activity.startActivity(create_assigment_intent);
             break;
 
+          // resolved https://tasks.n-core.ru/browse/MVDESD-13368
+          // Кнопка "Отклонить" в документах "На рассмотрение" и "Первичное рассмотрение"
+          case R.id.menu_info_report_dismiss:
+            if ( settings.getBoolean("settings_view_show_actions_confirm").get() ){
+              operation = CommandFactory.Operation.INCORRECT;
+              showDismissDialog();
+            } else {
+              operation = CommandFactory.Operation.RETURN_TO_THE_PRIMARY_CONSIDERATION;
+              params.setDocument( UID.get() );
+            }
+
+            break;
+
           default:
             operation = CommandFactory.Operation.INCORRECT;
             break;
@@ -820,6 +833,27 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
 
     fromTheReportDialog.build().show();
+  }
+
+  // resolved https://tasks.n-core.ru/browse/MVDESD-13368
+  // Подтверждение отклонения с возвратом на первичное рассмотрение
+  private void showDismissDialog() {
+    CommandParams params = new CommandParams();
+
+    new MaterialDialog.Builder(context)
+      .content(R.string.dialog_reject_body)
+      .cancelable(true)
+      .positiveText(R.string.yes)
+      .negativeText(R.string.no)
+      .onPositive((dialog1, which) -> {
+        CommandFactory.Operation operation;
+        operation = CommandFactory.Operation.RETURN_TO_THE_PRIMARY_CONSIDERATION;
+        params.setDocument( UID.get() );
+        operationManager.execute(operation, params);
+      })
+      .autoDismiss(true)
+      .build()
+      .show();
   }
 
   // OSHS selector

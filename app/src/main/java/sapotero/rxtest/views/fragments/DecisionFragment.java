@@ -408,7 +408,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   public Block getBlock(){
 
     String appealText = "";
-    if (button_ask_to_report.isChecked()) {
+    if (  button_ask_to_report.isChecked()) {
       appealText = button_ask_to_report.getTextOn().toString();
     } else if (button_ask_to_acquaint.isChecked()) {
       appealText = button_ask_to_acquaint.getTextOn().toString();
