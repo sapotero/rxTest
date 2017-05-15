@@ -275,7 +275,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
         setAppealText( block, isOnlyOneBlock );
 
         if ( block.getTextBefore() != null && block.getTextBefore() ){
-          setBlockText( block.getText() );
+          setBlockText( block, isOnlyOneBlock );
 
           if (!block.getHidePerformers()){
             setBlockPerformers( block, isOnlyOneBlock );
@@ -284,7 +284,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
           if (!block.getHidePerformers()) {
             setBlockPerformers( block, isOnlyOneBlock );
           }
-          setBlockText( block.getText() );
+          setBlockText( block, isOnlyOneBlock );
         }
       }
     }
@@ -333,11 +333,17 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
     decision_preview_body.addView( users_view );
   }
 
-  private void setBlockText(String text) {
+  private void setBlockText(Block block, Boolean isOnlyOneBlock) {
     TextView block_view = new TextView( getActivity() );
-    block_view.setText( "\u00A0     " + text );
     block_view.setTextColor( Color.BLACK );
     block_view.setTypeface( Typeface.create("sans-serif-light", Typeface.NORMAL) );
+
+
+    if ( !isOnlyOneBlock && block.getHidePerformers() != null && block.getHidePerformers() ){
+      block_view.setText( String.format( "%s. %s", block.getNumber(), block.getText() ) );
+    } else {
+      block_view.setText( block.getText() );
+    }
 
     LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
     params.setMargins(0, 10, 0, 10);
