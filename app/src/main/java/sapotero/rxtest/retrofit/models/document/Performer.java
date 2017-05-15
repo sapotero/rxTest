@@ -68,11 +68,24 @@ public class Performer {
     }
 
     public Boolean getOrganization() {
-        return isOrganization;
+        if ( isPerformerTypeOrganization() ) {
+            return true;
+        } else {
+            return isOrganization;
+        }
+    }
+
+    private boolean isPerformerTypeOrganization() {
+        if (performerType != null && performerType.endsWith("organisation")) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public void setOrganization(Boolean organization) {
         isOrganization = organization;
+        isOrganisation = organization;
     }
 
     /**
@@ -135,7 +148,7 @@ public class Performer {
      *     The performerText
      */
     public String getPerformerText() {
-        if (performerType != null && performerType.endsWith("organisation")) {
+        if ( isPerformerTypeOrganization() ) {
             return organizationText;
         } else {
             return performerText;
@@ -211,13 +224,5 @@ public class Performer {
 
     public void setPerformerGender(String performerGender) {
         this.performerGender = performerGender;
-    }
-
-    public Boolean getOrganisation() {
-        return isOrganisation;
-    }
-
-    public void setOrganisation(Boolean organisation) {
-        isOrganisation = organisation;
     }
 }
