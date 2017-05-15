@@ -840,6 +840,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
               performer.setIsOriginal(p.isIsOriginal());
               performer.setIsResponsible(p.isIsResponsible());
               performer.setOrganization(p.isIsOrganization());
+              performer.setOrganisation(p.isIsOrganization());
 
               block.getPerformers().add(performer);
             }

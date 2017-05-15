@@ -450,6 +450,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
         p.setOrganizationText( item.getOrganization() );
         p.setNumber( i );
         p.setOrganization( item.isOrganization() );
+        p.setOrganisation( item.isOrganization() );
 
         performers.add(p);
       }

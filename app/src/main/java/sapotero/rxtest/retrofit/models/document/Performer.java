@@ -34,9 +34,14 @@ public class Performer {
     @SerializedName("is_group")
     @Expose
     private Boolean isGroup = false;
+
     @SerializedName("is_organization")
     @Expose
     private Boolean isOrganization = false;
+
+    @SerializedName("is_organisation")
+    @Expose
+    private Boolean isOrganisation = false;
 
     public Boolean getOriginal() {
         return isOriginal;
@@ -202,5 +207,13 @@ public class Performer {
 
     public void setPerformerGender(String performerGender) {
         this.performerGender = performerGender;
+    }
+
+    public Boolean getOrganisation() {
+        return isOrganisation;
+    }
+
+    public void setOrganisation(Boolean organisation) {
+        isOrganisation = organisation;
     }
 }

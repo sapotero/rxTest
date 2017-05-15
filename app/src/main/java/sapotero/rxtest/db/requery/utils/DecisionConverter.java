@@ -56,6 +56,7 @@ public class DecisionConverter {
             formated_performer.setIsResponsible( performer.isIsResponsible() );
             formated_performer.setGroup( false );
             formated_performer.setOrganization( performer.isIsOrganization() );
+            formated_performer.setOrganisation( performer.isIsOrganization() );
 
             formated_block.getPerformers().add(formated_performer);
           }
