@@ -502,8 +502,17 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
            current_decision.getSignerId() != null &&
            current_decision.getSignerId().equals( settings.getString("current_user_id").get() ) ){
         next_person_button.setText( getString(R.string.menu_info_next_person));
+        setSignEnabled(true);
       } else {
         next_person_button.setText( getString(R.string.menu_info_sign_next_person) );
+
+        // resolved https://tasks.n-core.ru/browse/MVDESD-13438
+        // Добавить настройку наличия кнопки Согласовать в Первичном рассмотрении
+        if (!settings.getBoolean("settings_view_show_approve_on_primary").get()){
+          setSignEnabled(false);
+        } else {
+          setSignEnabled(true);
+        }
       }
     }
 
@@ -522,6 +531,20 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     }
 
   }
+
+  private void setSignEnabled(boolean active) {
+
+    if (active){
+      next_person_button.setAlpha(1f);
+    } else {
+      next_person_button.setAlpha(0.2f);
+    }
+
+    next_person_button.setClickable(active);
+    next_person_button.setFocusable(active);
+    next_person_button.setEnabled(active);
+  }
+
 
   private void showDecisionCardTollbarMenuItems(boolean visible) {
     try {
@@ -653,6 +676,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       .subscribe(doc -> {
 
         this.doc = doc;
+        settings.getString("_status").set( doc.getFilter() );
 
 //        Timber.tag("loadFromDb").i( "loaded %s", doc.getId() );
 

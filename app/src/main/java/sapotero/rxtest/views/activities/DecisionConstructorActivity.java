@@ -114,6 +114,12 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   private ArrayList<UrgencyItem> urgency = new ArrayList<UrgencyItem>();
 
   @Override
+  public void finish() {
+    settings.getString("_status").set( "" );
+    super.finish();
+  }
+
+  @Override
   protected void onCreate(Bundle savedInstanceState) {
 
     setTheme(R.style.AppTheme);
@@ -387,7 +393,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       return false;
     });
 
-
     raw_decision = null;
     Gson gson = new Gson();
 
@@ -498,6 +503,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
               getCurrentUserOrganization(),
               null
       );
+
+      invalidateSaveAndSignButton();
     });
 
     if ( rDecisionEntity != null ){
@@ -612,6 +619,39 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     originalSignerBlankText = raw_decision.getSignerBlankText();
     originalSignerAssistantId = raw_decision.getAssistantId();
 
+
+    if ( rDecisionEntity != null &&
+      rDecisionEntity.getSignerId() != null &&
+      !rDecisionEntity.getSignerId().equals( settings.getString("current_user_id").get() ) &&
+      !settings.getBoolean("settings_view_show_approve_on_primary").get() ){
+
+      // resolved https://tasks.n-core.ru/browse/MVDESD-13438
+      // Добавить настройку наличия кнопки Согласовать в Первичном рассмотрении
+      toolbar.getMenu().findItem(R.id.action_constructor_create_and_sign).setVisible(false);
+
+    } else {
+      toolbar.getMenu().findItem(R.id.action_constructor_create_and_sign).setVisible(true);
+    }
+
+  }
+
+  private void invalidateSaveAndSignButton(){
+
+    Timber.tag(TAG).e("invalidateSaveAndSignButton" );
+    // resolved https://tasks.n-core.ru/browse/MVDESD-13438
+    // При создании новой резолюции, кнопка "Сохранить и подписать"
+    // должна быть только в том случае, если Подписант=текущему пользователю.
+    // В остальных случаях, кнопки "Сохранить и подписать" быть не должно.
+    if ( !settings.getBoolean("settings_view_show_approve_on_primary").get() && Objects.equals(settings.getString("_status").get(), "primary_consideration")){
+      if (
+          manager.getDecision() != null &&
+            manager.getDecision().getSignerId() != null &&
+          Objects.equals(manager.getDecision().getSignerId(), settings.getString("current_user_id").get())){
+        toolbar.getMenu().findItem(R.id.action_constructor_create_and_sign).setVisible(true);
+      } else {
+        toolbar.getMenu().findItem(R.id.action_constructor_create_and_sign).setVisible(false);
+      }
+    }
   }
 
   private boolean checkDecision() {
@@ -943,6 +983,12 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     Timber.tag(TAG).e("USER: %s", new Gson().toJson(user) );
 
     updateSigner(user.getId(), user.getName(), user.getOrganization(), user.getAssistantId());
+
+    // resolved https://tasks.n-core.ru/browse/MVDESD-13438
+    // Добавить настройку наличия кнопки Согласовать в Первичном рассмотрении
+    if ( !settings.getBoolean("settings_view_show_approve_on_primary").get() ){
+      invalidateSaveAndSignButton();
+    }
   }
 
   @Override

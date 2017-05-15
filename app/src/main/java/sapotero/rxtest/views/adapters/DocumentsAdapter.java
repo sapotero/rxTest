@@ -16,7 +16,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
-import com.birbit.android.jobqueue.JobManager;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
@@ -46,8 +45,6 @@ import sapotero.rxtest.db.requery.models.RSignerEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.adapter.UpdateDocumentAdapterEvent;
 import sapotero.rxtest.events.utils.NoDocumentsEvent;
-import sapotero.rxtest.managers.db.managers.DBDocumentManager;
-import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.views.activities.InfoActivity;
 import sapotero.rxtest.views.activities.MainActivity;
@@ -395,8 +392,15 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
     if (item.isRed() != null && item.isRed()){
       viewHolder.cv.setBackground( ContextCompat.getDrawable(mContext, R.drawable.top_border) );
+
+
+      // resolved https://tasks.n-core.ru/browse/MVDESD-13426
+      // Выделять номер документа красным на плитке
+      viewHolder.date.setTextColor( ContextCompat.getColor(mContext, R.color.md_red_A700 ) );
+
     } else {
       viewHolder.cv.setBackground( ContextCompat.getDrawable(mContext, R.color.md_white_1000 ) );
+      viewHolder.date.setTextColor( ContextCompat.getColor(mContext, R.color.md_grey_800 ) );
     }
 
 
