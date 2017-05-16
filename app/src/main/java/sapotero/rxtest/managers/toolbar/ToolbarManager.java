@@ -305,7 +305,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             // настройка
             // Показывать подтверждения о постановке на контроль документов для раздела «Обращение граждан»
             operation = CommandFactory.Operation.INCORRECT;
-            settings.getBoolean("decision_with_assigment").set(true);
+            settings2.setDecisionWithAssignment(true);
             settings.getString("decision.active.id").set(null);
             Intent create_assigment_intent = new Intent(context, DecisionConstructorActivity.class);
             activity.startActivity(create_assigment_intent);

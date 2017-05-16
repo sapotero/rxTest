@@ -152,8 +152,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
       Decision _dec_ = manager.getDecision();
 
-      if ( settings.getBoolean("decision_with_assigment").get() ){
-        Timber.tag(TAG).w("ASSIGNMENT: %s", settings.getBoolean("decision_with_assigment").get() );
+      if ( settings2.isDecisionWithAssignment() ){
+        Timber.tag(TAG).w("ASSIGNMENT: %s", settings2.isDecisionWithAssignment() );
         _dec_.setAssignment(true);
       }
 
@@ -162,7 +162,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
 
       Timber.tag(TAG).w("DECISION: %s", json );
-      Timber.tag(TAG).w("ASSIGNMENT: %s", settings.getBoolean("decision_with_assigment").get() );
+      Timber.tag(TAG).w("ASSIGNMENT: %s", settings2.isDecisionWithAssignment() );
 
       Decision save_decision = manager.getDecision();
 
@@ -172,7 +172,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
         String content = "Резолюция была изменена";
 
-        if ( settings.getBoolean("decision_with_assigment").get() ){
+        if ( settings2.isDecisionWithAssignment() ){
           content = "Поручение не отправлено. Вернуться назад и удалить поручение?";
         }
 
@@ -225,7 +225,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
 
 
-                if ( settings.getBoolean("decision_with_assigment").get() ){
+                if ( settings2.isDecisionWithAssignment() ){
                   decision = manager.getDecision();
 
                   params = new CommandParams();
@@ -323,8 +323,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
               params.setDecisionModel( manager.getDecision() );
             }
 
-            if ( settings.getBoolean("decision_with_assigment").get() ){
-              Timber.tag(TAG).w("ASSIGNMENT: %s", settings.getBoolean("decision_with_assigment").get() );
+            if ( settings2.isDecisionWithAssignment() ){
+              Timber.tag(TAG).w("ASSIGNMENT: %s", settings2.isDecisionWithAssignment() );
               params.setAssignment(true);
               decision.setAssignment(true);
             }
@@ -358,8 +358,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 //            params.setDecision( rDecisionEntity );
             params.setDecisionModel( DecisionConverter.formatDecision(rDecisionEntity) );
 
-            if ( settings.getBoolean("decision_with_assigment").get() ){
-              Timber.tag(TAG).w("ASSIGNMENT: %s", settings.getBoolean("decision_with_assigment").get() );
+            if ( settings2.isDecisionWithAssignment() ){
+              Timber.tag(TAG).w("ASSIGNMENT: %s", settings2.isDecisionWithAssignment() );
               params.setAssignment(true);
             }
             operationManager.execute(operation, params);
@@ -945,8 +945,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 //        params.setDecision( rDecisionEntity );
         params.setDecisionModel( DecisionConverter.formatDecision(rDecisionEntity) );
 
-        if ( settings.getBoolean("decision_with_assigment").get() ){
-          Timber.tag(TAG).w("ASSIGNMENT: %s", settings.getBoolean("decision_with_assigment").get() );
+        if ( settings2.isDecisionWithAssignment() ){
+          Timber.tag(TAG).w("ASSIGNMENT: %s", settings2.isDecisionWithAssignment() );
           params.setAssignment(true);
         }
 

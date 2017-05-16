@@ -258,7 +258,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   protected void onResume() {
     super.onResume();
 
-    settings.getBoolean("decision_with_assigment").set(false);
+    settings2.setDecisionWithAssignment(false);
 
     initInfoActivity();
     updateCurrent();

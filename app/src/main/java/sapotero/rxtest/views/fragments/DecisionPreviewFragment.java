@@ -118,7 +118,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
     }
 
 
-    if ( settings.getBoolean("decision_with_assigment").get() ){
+    if ( settings2.isDecisionWithAssignment() ){
       wrapper.setVisibility(View.GONE);
     }
 //
