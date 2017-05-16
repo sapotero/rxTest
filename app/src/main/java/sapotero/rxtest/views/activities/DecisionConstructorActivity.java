@@ -429,7 +429,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
           Timber.d("filter: %s", new Gson().toJson(rUrgencyEntity) );
 
-          if ( settings.getBoolean("settings_view_only_urgent").get() ){
+          if ( settings2.isOnlyUrgent() ){
             if (!Objects.equals(rUrgencyEntity.getName().toLowerCase(), "срочно")){
               result = false;
             }

@@ -40,8 +40,8 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
     subscriptions = new CompositeSubscription();
     subscriptions.add(
       settings2.getShowUrgencyPreference().asObservable().subscribe( active -> {
-        findPreference("settings_view_only_urgent").setEnabled(active);
-        settings.getBoolean("settings_view_only_urgent").set(active);
+        findPreference( context.getResources().getString(R.string.only_urgent_key) ).setEnabled(active);
+        settings2.setOnlyUrgent(active);
       },Timber::e)
     );
 

@@ -54,7 +54,7 @@
             android:defaultValue="true" />
         <!--*-->
         <CheckBoxPreference
-            android:key="settings_view_only_urgent"
+            android:key="@string/only_urgent_key"
             android:title="C одним типом «Срочно»"
             android:defaultValue="false" />
         <!--*-->
