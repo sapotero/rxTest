@@ -47,6 +47,7 @@ public class Settings {
   public static String HIDE_PRIMARY_CONSIDERATION_KEY;
   public static String HIDE_BUTTONS_KEY;
   public static String SHOW_DECISION_DATE_UPDATE_KEY;
+  public static String SHOW_DECISION_CHANGE_FONT_KEY;
 
   private Context context;
   private RxSharedPreferences settings;
@@ -86,6 +87,7 @@ public class Settings {
   private Preference<Boolean> hidePrimaryConsideration;
   private Preference<Boolean> hideButtons;
   private Preference<Boolean> showDecisionDateUpdate;
+  private Preference<Boolean> showDecisionChangeFont;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -107,6 +109,7 @@ public class Settings {
     HIDE_PRIMARY_CONSIDERATION_KEY = context.getResources().getString(R.string.hide_primary_consideration_key);
     HIDE_BUTTONS_KEY = context.getResources().getString(R.string.hide_buttons_key);
     SHOW_DECISION_DATE_UPDATE_KEY = context.getResources().getString(R.string.show_decision_date_update_key);
+    SHOW_DECISION_CHANGE_FONT_KEY = context.getResources().getString(R.string.show_decision_change_font_key);
 
     firstRunFlag = settings.getBoolean(FIRST_RUN_KEY);
     signWithDc = settings.getBoolean(SIGN_WITH_DC_KEY);
@@ -143,6 +146,7 @@ public class Settings {
     hidePrimaryConsideration = settings.getBoolean(HIDE_PRIMARY_CONSIDERATION_KEY);
     hideButtons = settings.getBoolean(HIDE_BUTTONS_KEY);
     showDecisionDateUpdate = settings.getBoolean(SHOW_DECISION_DATE_UPDATE_KEY);
+    showDecisionChangeFont = settings.getBoolean(SHOW_DECISION_CHANGE_FONT_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -479,5 +483,9 @@ public class Settings {
 
   public boolean isShowDecisionDateUpdate() {
     return getBoolean(showDecisionDateUpdate);
+  }
+
+  public boolean isShowDecisionChangeFont() {
+    return getBoolean(showDecisionChangeFont);
   }
 }

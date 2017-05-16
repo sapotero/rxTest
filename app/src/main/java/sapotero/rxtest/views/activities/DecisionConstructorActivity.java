@@ -581,7 +581,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     });
 
     // настройка
-    if (settings.getBoolean("settings_view_show_decision_change_font").get()){
+    if (settings2.isShowDecisionChangeFont()){
       List<FontItem> fonts = new ArrayList<>();
       fonts.add(new FontItem("10", "10"));
       fonts.add(new FontItem("11", "11"));

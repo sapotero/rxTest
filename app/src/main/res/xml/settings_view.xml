@@ -65,7 +65,7 @@
             android:defaultValue="true" />
 
         <CheckBoxPreference
-            android:key="settings_view_show_decision_change_font"
+            android:key="@string/show_decision_change_font_key"
             android:title="Возможность выбора размера шрифта"
             android:defaultValue="true" />
         <!--*-->
