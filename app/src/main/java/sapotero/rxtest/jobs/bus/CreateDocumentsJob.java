@@ -335,15 +335,15 @@ public class CreateDocumentsJob extends BaseJob {
       }
     }
 
-    if ( document.getActions() != null && document.getActions().size() >= 1 ){
+    if ( document.getActions() != null && document.getActions().size() > 0 ){
       for (DocumentInfoAction act: document.getActions() ) {
         RActionEntity action = new RActionEntity();
 
         action.setOfficialId(act.getOfficialId());
+        action.setAddressedToId(act.getAddressedToId());
         action.setAction(act.getAction());
         action.setActionDescription(act.getActionDescription());
-        action.setAddressedToId(act.getAddressedToId());
-        action.setOfficialId(act.getOfficialId());
+        action.setUpdatedAt(act.getUpdatedAt());
         action.setToS(act.getToS());
 
         action.setDocument(doc);
