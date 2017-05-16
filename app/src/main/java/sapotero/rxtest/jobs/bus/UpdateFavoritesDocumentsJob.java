@@ -398,6 +398,7 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
         image.setLoading(false);
         image.setComplete(false);
         image.setError(false);
+        image.setCreatedAt(i.getCreatedAt());
         rDoc.getImages().add(image);
       }
     }
@@ -416,15 +417,15 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
       }
     }
 
-    if ( document.getActions() != null && document.getActions().size() >= 1 ){
+    if ( document.getActions() != null && document.getActions().size() >= 0 ){
       for (DocumentInfoAction act: document.getActions() ) {
         RActionEntity action = new RActionEntity();
 
         action.setOfficialId(act.getOfficialId());
+        action.setAddressedToId(act.getAddressedToId());
         action.setAction(act.getAction());
         action.setActionDescription(act.getActionDescription());
-        action.setAddressedToId(act.getAddressedToId());
-        action.setOfficialId(act.getOfficialId());
+        action.setUpdatedAt(act.getUpdatedAt());
         action.setToS(act.getToS());
 
         action.setDocument(rDoc);
@@ -672,20 +673,21 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
           image.setLoading(false);
           image.setComplete(false);
           image.setError(false);
+          image.setCreatedAt(i.getCreatedAt());
           doc.getImages().add(image);
         }
       }
 
-      if ( document.getActions() != null && document.getActions().size() >= 1 ){
+      if ( document.getActions() != null && document.getActions().size() >= 0 ){
         doc.getActions().clear();
         for (DocumentInfoAction act: document.getActions() ) {
           RActionEntity action = new RActionEntity();
 
           action.setOfficialId(act.getOfficialId());
+          action.setAddressedToId(act.getAddressedToId());
           action.setAction(act.getAction());
           action.setActionDescription(act.getActionDescription());
-          action.setAddressedToId(act.getAddressedToId());
-          action.setOfficialId(act.getOfficialId());
+          action.setUpdatedAt(act.getUpdatedAt());
           action.setToS(act.getToS());
 
           action.setDocument(doc);

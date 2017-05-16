@@ -20,6 +20,7 @@ public abstract class RImage {
   String md5;
   String path;
   String contentType;
+  String createdAt;
   Boolean signed;
 
 
