@@ -32,6 +32,7 @@ public class Settings {
   public static final String FROM_SIGN_KEY = "activity_main_menu.from_sign";
   public static final String DECISION_WITH_ASSIGNMENT_KEY = "decision_with_assignment";
   public static final String DECISION_ACTIVE_ID_KEY = "decision.active.id";
+  public static final String PREV_DIALOG_COMMENT_KEY = "prev_dialog_comment";
 
   public static String FIRST_RUN_KEY;
   public static String HOST_KEY;
@@ -74,6 +75,7 @@ public class Settings {
   private Preference<Boolean> showUrgency;
   private Preference<Boolean> onlyUrgent;
   private Preference<Set<String>> journals;
+  private Preference<String> prevDialogComment;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -120,6 +122,7 @@ public class Settings {
     showUrgency = settings.getBoolean(SHOW_URGENCY_KEY);
     onlyUrgent = settings.getBoolean(ONLY_URGENT_KEY);
     journals = settings.getStringSet(JOURNALS_KEY);
+    prevDialogComment = settings.getString(PREV_DIALOG_COMMENT_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -428,5 +431,13 @@ public class Settings {
 
   public Preference<Set<String>> getJournalsPreference() {
     return journals;
+  }
+
+  public String getPrevDialogComment() {
+    return getString(prevDialogComment);
+  }
+
+  public void setPrevDialogComment(String value) {
+    setString(prevDialogComment, value);
   }
 }
