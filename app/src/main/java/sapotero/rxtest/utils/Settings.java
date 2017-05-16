@@ -36,6 +36,7 @@ public class Settings {
   public static String ACTIONS_CONFIRM_KEY;
   public static String CONTROL_CONFIRM_KEY;
   public static String SHOW_COMMENT_POST_KEY;
+  public static String SHOW_URGENCY_KEY;
 
   private Context context;
   private RxSharedPreferences settings;
@@ -66,6 +67,7 @@ public class Settings {
   private Preference<Boolean> actionsConfirm;
   private Preference<Boolean> controlConfirm;
   private Preference<Boolean> showCommentPost;
+  private Preference<Boolean> showUrgency;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -79,6 +81,7 @@ public class Settings {
     ACTIONS_CONFIRM_KEY = context.getResources().getString(R.string.actions_confirm_key);
     CONTROL_CONFIRM_KEY = context.getResources().getString(R.string.control_confirm_key);
     SHOW_COMMENT_POST_KEY = context.getResources().getString(R.string.show_comment_post_key);
+    SHOW_URGENCY_KEY = context.getResources().getString(R.string.show_urgency_key);
 
     firstRunFlag = settings.getBoolean(FIRST_RUN_KEY);
     signWithDc = settings.getBoolean(SIGN_WITH_DC_KEY);
@@ -106,6 +109,7 @@ public class Settings {
     actionsConfirm = settings.getBoolean(ACTIONS_CONFIRM_KEY);
     controlConfirm = settings.getBoolean(CONTROL_CONFIRM_KEY);
     showCommentPost = settings.getBoolean(SHOW_COMMENT_POST_KEY);
+    showUrgency = settings.getBoolean(SHOW_URGENCY_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -382,5 +386,17 @@ public class Settings {
 
   public void setShowCommentPost(boolean value) {
     setBoolean(showCommentPost, value);
+  }
+
+  public boolean isShowUrgency() {
+    return getBoolean(showUrgency);
+  }
+
+  public void setShowUrgency(boolean value) {
+    setBoolean(showUrgency, value);
+  }
+
+  public Preference<Boolean> getShowUrgencyPreference() {
+    return showUrgency;
   }
 }

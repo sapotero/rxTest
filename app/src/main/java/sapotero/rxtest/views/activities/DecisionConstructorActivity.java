@@ -414,7 +414,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
 
     // настройка
-    if (!settings.getBoolean("settings_view_show_urgency").get()){
+    if (!settings2.isShowUrgency()){
       urgency_selector.setVisibility(View.GONE);
     } else {
 

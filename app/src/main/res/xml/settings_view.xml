@@ -49,7 +49,7 @@
             android:defaultValue="false" />
         <!--*-->
         <CheckBoxPreference
-            android:key="settings_view_show_urgency"
+            android:key="@string/show_urgency_key"
             android:title="Отображать настройки срочности"
             android:defaultValue="true" />
         <!--*-->
