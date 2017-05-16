@@ -249,7 +249,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
           case R.id.menu_info_decision_create:
             operation = CommandFactory.Operation.INCORRECT;
 
-            settings.getString("decision.active.id").set(null);
+            settings2.setDecisionActiveIdString(null);
 
             Intent create_intent = new Intent(context, DecisionConstructorActivity.class);
             activity.startActivity(create_intent);
@@ -306,7 +306,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             // Показывать подтверждения о постановке на контроль документов для раздела «Обращение граждан»
             operation = CommandFactory.Operation.INCORRECT;
             settings2.setDecisionWithAssignment(true);
-            settings.getString("decision.active.id").set(null);
+            settings2.setDecisionActiveIdString(null);
             Intent create_assigment_intent = new Intent(context, DecisionConstructorActivity.class);
             activity.startActivity(create_assigment_intent);
             break;

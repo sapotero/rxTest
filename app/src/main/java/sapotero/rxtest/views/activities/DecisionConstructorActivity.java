@@ -787,8 +787,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   }
 
   private void loadDecision() {
-//    settings.getInteger("decision.active.id").set( current_decision.getId() );
-    Integer decision_id = settings.getInteger("decision.active.id").get();
+//    settings2.setDecisionActiveIdInteger( current_decision.getId() );
+    Integer decision_id = settings2.getDecisionActiveIdInteger();
 
     rDecisionEntity = dataStore
       .select(RDecisionEntity.class)
@@ -941,7 +941,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
         operation =CommandFactory.Operation.APPROVE_DECISION;
 
         CommandParams params = new CommandParams();
-        params.setDecisionId( settings.getString("decision.active.id").get() );
+        params.setDecisionId( settings2.getDecisionActiveIdStringRaw() );
 //        params.setDecision( rDecisionEntity );
         params.setDecisionModel( DecisionConverter.formatDecision(rDecisionEntity) );
 

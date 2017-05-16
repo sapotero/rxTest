@@ -29,6 +29,8 @@ public class Settings {
   public static final String LAST_SEEN_UID_KEY = "activity_main_menu.last_seen_uid";
   public static final String FROM_SIGN_KEY = "activity_main_menu.from_sign";
   public static final String DECISION_WITH_ASSIGNMENT_KEY = "decision_with_assignment";
+  public static final String DECISION_ACTIVE_ID_INTEGER_KEY = "decision.active.id.integer";
+  public static final String DECISION_ACTIVE_ID_STRING_KEY = "decision.active.id.string";
 
   public static String FIRST_RUN_KEY;
   public static String HOST_KEY;
@@ -58,6 +60,8 @@ public class Settings {
   private Preference<String> lastSeenUid;
   private Preference<Boolean> fromSign;
   private Preference<Boolean> decisionWithAssignment;
+  private Preference<Integer> decisionActiveIdInteger;
+  private Preference<String> decisionActiveIdString;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -91,6 +95,8 @@ public class Settings {
     lastSeenUid = settings.getString(LAST_SEEN_UID_KEY);
     fromSign = settings.getBoolean(FROM_SIGN_KEY);
     decisionWithAssignment = settings.getBoolean(DECISION_WITH_ASSIGNMENT_KEY);
+    decisionActiveIdInteger = settings.getInteger(DECISION_ACTIVE_ID_INTEGER_KEY);
+    decisionActiveIdString = settings.getString(DECISION_ACTIVE_ID_STRING_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -183,8 +189,12 @@ public class Settings {
     }
   }
 
+  private String getStringRaw(Preference<String> stringPreference) {
+    return stringPreference.get();
+  }
+
   private void setString(Preference<String> stringPreference, String value) {
-    if (stringPreference != null && value != null) {
+    if (stringPreference != null) {
       stringPreference.set(value);
     }
   }
@@ -331,5 +341,21 @@ public class Settings {
 
   public void setDecisionWithAssignment(boolean value) {
     setBoolean(decisionWithAssignment, value);
+  }
+
+  public int getDecisionActiveIdInteger() {
+    return getInteger(decisionActiveIdInteger);
+  }
+
+  public void setDecisionActiveIdInteger(int value) {
+    setInteger(decisionActiveIdInteger, value);
+  }
+
+  public String getDecisionActiveIdStringRaw() {
+    return getStringRaw(decisionActiveIdString);
+  }
+
+  public void setDecisionActiveIdString(String value) {
+    setString(decisionActiveIdString, value);
   }
 }
