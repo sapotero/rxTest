@@ -470,6 +470,7 @@
     <string name="show_without_project_key">settings_view_type_show_without_project</string>
     <string name="hide_primary_consideration_key">settings_view_hide_primary_consideration</string>
     <string name="hide_buttons_key">settings_view_hide_buttons</string>
+    <string name="show_decision_date_update_key">settings_view_show_decision_date_update</string>
 
     <!--CRYPTO PRO-->
 

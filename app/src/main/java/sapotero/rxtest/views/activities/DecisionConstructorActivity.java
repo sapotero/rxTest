@@ -535,7 +535,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     }
 
     // настройка
-    if ( settings.getBoolean("settings_view_show_decision_date_update").get() ){
+    if ( settings2.isShowDecisionDateUpdate() ){
       SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
       Calendar cal = Calendar.getInstance();
       String date = dateFormat.format(cal.getTime());

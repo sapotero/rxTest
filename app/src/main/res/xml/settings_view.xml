@@ -60,7 +60,7 @@
         <!--*-->
 
         <CheckBoxPreference
-            android:key="settings_view_show_decision_date_update"
+            android:key="@string/show_decision_date_update_key"
             android:title="Обновлять автоматически дату резолюции"
             android:defaultValue="true" />
 

@@ -46,6 +46,7 @@ public class Settings {
   public static String SHOW_WITHOUT_PROJECT_KEY;
   public static String HIDE_PRIMARY_CONSIDERATION_KEY;
   public static String HIDE_BUTTONS_KEY;
+  public static String SHOW_DECISION_DATE_UPDATE_KEY;
 
   private Context context;
   private RxSharedPreferences settings;
@@ -84,6 +85,7 @@ public class Settings {
   private Preference<Boolean> showWithoutProject;
   private Preference<Boolean> hidePrimaryConsideration;
   private Preference<Boolean> hideButtons;
+  private Preference<Boolean> showDecisionDateUpdate;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -104,6 +106,7 @@ public class Settings {
     SHOW_WITHOUT_PROJECT_KEY = context.getResources().getString(R.string.show_without_project_key);
     HIDE_PRIMARY_CONSIDERATION_KEY = context.getResources().getString(R.string.hide_primary_consideration_key);
     HIDE_BUTTONS_KEY = context.getResources().getString(R.string.hide_buttons_key);
+    SHOW_DECISION_DATE_UPDATE_KEY = context.getResources().getString(R.string.show_decision_date_update_key);
 
     firstRunFlag = settings.getBoolean(FIRST_RUN_KEY);
     signWithDc = settings.getBoolean(SIGN_WITH_DC_KEY);
@@ -139,6 +142,7 @@ public class Settings {
     showWithoutProject = settings.getBoolean(SHOW_WITHOUT_PROJECT_KEY);
     hidePrimaryConsideration = settings.getBoolean(HIDE_PRIMARY_CONSIDERATION_KEY);
     hideButtons = settings.getBoolean(HIDE_BUTTONS_KEY);
+    showDecisionDateUpdate = settings.getBoolean(SHOW_DECISION_DATE_UPDATE_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -471,5 +475,9 @@ public class Settings {
 
   public boolean isHideButtons() {
     return getBoolean(hideButtons);
+  }
+
+  public boolean isShowDecisionDateUpdate() {
+    return getBoolean(showDecisionDateUpdate);
   }
 }
