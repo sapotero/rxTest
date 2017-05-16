@@ -32,7 +32,7 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
 
     EsdApplication.getDataComponent().inject(this);
 
-    Timber.tag("SETTINGS").d("settings_view_journals %s", settings.getStringSet("settings_view_journals").get() );
+    Timber.tag("SETTINGS").d("settings_view_journals %s", settings2.getJournals() );
 
     findPreference( context.getResources().getString(R.string.show_comment_post_key) )
             .setDependency( context.getResources().getString(R.string.actions_confirm_key) );

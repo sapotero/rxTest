@@ -713,8 +713,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     Map<Integer, String> map = new HashMap<>();
     int index = 0;
 
-    Preference<Set<String>> set = settings.getStringSet("settings_view_journals");
-    for (String journal : set.get()) {
+    for (String journal : settings2.getJournals()) {
       index = Arrays.asList((getResources().getStringArray(R.array.settings_view_start_page_values))).indexOf(journal);
       map.put(index, journal);
     }

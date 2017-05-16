@@ -5,6 +5,8 @@ import android.content.Context;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
+import java.util.Set;
+
 import sapotero.rxtest.R;
 
 public class Settings {
@@ -38,6 +40,7 @@ public class Settings {
   public static String SHOW_COMMENT_POST_KEY;
   public static String SHOW_URGENCY_KEY;
   public static String ONLY_URGENT_KEY;
+  public static String JOURNALS_KEY;
 
   private Context context;
   private RxSharedPreferences settings;
@@ -70,6 +73,7 @@ public class Settings {
   private Preference<Boolean> showCommentPost;
   private Preference<Boolean> showUrgency;
   private Preference<Boolean> onlyUrgent;
+  private Preference<Set<String>> journals;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -85,6 +89,7 @@ public class Settings {
     SHOW_COMMENT_POST_KEY = context.getResources().getString(R.string.show_comment_post_key);
     SHOW_URGENCY_KEY = context.getResources().getString(R.string.show_urgency_key);
     ONLY_URGENT_KEY = context.getResources().getString(R.string.only_urgent_key);
+    JOURNALS_KEY = context.getResources().getString(R.string.journals_key);
 
     firstRunFlag = settings.getBoolean(FIRST_RUN_KEY);
     signWithDc = settings.getBoolean(SIGN_WITH_DC_KEY);
@@ -114,6 +119,7 @@ public class Settings {
     showCommentPost = settings.getBoolean(SHOW_COMMENT_POST_KEY);
     showUrgency = settings.getBoolean(SHOW_URGENCY_KEY);
     onlyUrgent = settings.getBoolean(ONLY_URGENT_KEY);
+    journals = settings.getStringSet(JOURNALS_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -410,5 +416,17 @@ public class Settings {
 
   public void setOnlyUrgent(boolean value) {
     setBoolean(onlyUrgent, value);
+  }
+
+  private Set<String> getStringSet(Preference<Set<String>> stringSetPreference) {
+    return stringSetPreference.get();
+  }
+
+  public Set<String> getJournals() {
+    return getStringSet(journals);
+  }
+
+  public Preference<Set<String>> getJournalsPreference() {
+    return journals;
   }
 }
