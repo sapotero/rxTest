@@ -45,6 +45,7 @@ public class Settings {
   public static String START_PAGE_KEY;
   public static String SHOW_WITHOUT_PROJECT_KEY;
   public static String HIDE_PRIMARY_CONSIDERATION_KEY;
+  public static String HIDE_BUTTONS_KEY;
 
   private Context context;
   private RxSharedPreferences settings;
@@ -82,6 +83,7 @@ public class Settings {
   private Preference<String> startPage;
   private Preference<Boolean> showWithoutProject;
   private Preference<Boolean> hidePrimaryConsideration;
+  private Preference<Boolean> hideButtons;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -101,6 +103,7 @@ public class Settings {
     START_PAGE_KEY = context.getResources().getString(R.string.start_page_key);
     SHOW_WITHOUT_PROJECT_KEY = context.getResources().getString(R.string.show_without_project_key);
     HIDE_PRIMARY_CONSIDERATION_KEY = context.getResources().getString(R.string.hide_primary_consideration_key);
+    HIDE_BUTTONS_KEY = context.getResources().getString(R.string.hide_buttons_key);
 
     firstRunFlag = settings.getBoolean(FIRST_RUN_KEY);
     signWithDc = settings.getBoolean(SIGN_WITH_DC_KEY);
@@ -135,6 +138,7 @@ public class Settings {
     startPage = settings.getString(START_PAGE_KEY);
     showWithoutProject = settings.getBoolean(SHOW_WITHOUT_PROJECT_KEY);
     hidePrimaryConsideration = settings.getBoolean(HIDE_PRIMARY_CONSIDERATION_KEY);
+    hideButtons = settings.getBoolean(HIDE_BUTTONS_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -463,5 +467,9 @@ public class Settings {
 
   public boolean isHidePrimaryConsideration() {
     return getBoolean(hidePrimaryConsideration);
+  }
+
+  public boolean isHideButtons() {
+    return getBoolean(hideButtons);
   }
 }

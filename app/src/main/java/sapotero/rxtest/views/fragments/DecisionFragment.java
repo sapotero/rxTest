@@ -316,7 +316,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
 
     // настройка
     // Не отображать кнопки «Прошу доложить» и «Прошу ознакомить»
-    if (settings.getBoolean("settings_view_hide_buttons").get()){
+    if (settings2.isHideButtons()){
       button_ask_to_acquaint.setVisibility(View.GONE);
       button_ask_to_report.setVisibility(View.GONE);
       buttons.setVisibility(View.GONE);

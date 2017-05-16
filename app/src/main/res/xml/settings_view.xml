@@ -44,7 +44,7 @@
     <android.support.v7.preference.PreferenceCategory
     android:title="Настройки резолюции">
         <SwitchPreference
-            android:key="settings_view_hide_buttons"
+            android:key="@string/hide_buttons_key"
             android:title="Не отображать кнопки «Прошу доложить» и «Прошу ознакомить»"
             android:defaultValue="false" />
         <!--*-->
