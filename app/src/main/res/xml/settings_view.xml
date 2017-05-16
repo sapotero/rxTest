@@ -97,7 +97,7 @@
             android:title="Показывать комментарий при отклонении документа/резолюции/без ответа"
             android:defaultValue="true" />
         <SwitchPreference
-            android:key="settings_view_show_actions_confirm"
+            android:key="@string/actions_confirm_key"
             android:title="Показывать подтверждения о действиях с документом"
             android:defaultValue="true" />
         <SwitchPreference

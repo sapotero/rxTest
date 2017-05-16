@@ -457,8 +457,10 @@
         <item>1.5</item>
     </string-array>
 
+    <!--SharedPreferences keys-->
     <string name="first_run_key">is_first_run</string>
     <string name="host_key">settings_username_host</string>
+    <string name="actions_confirm_key">settings_view_show_actions_confirm</string>
 
     <!--CRYPTO PRO-->
 

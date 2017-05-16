@@ -161,7 +161,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   public void decision_preview_next(){
     Timber.tag(TAG).v("decision_preview_next star");
 
-    if ( settings.getBoolean("settings_view_show_actions_confirm").get() ){
+    if ( settings2.isActionsConfirm() ){
       // resolved https://tasks.n-core.ru/browse/MVDESD-12765
       // выводить подтверждение при подписании резолюции
 

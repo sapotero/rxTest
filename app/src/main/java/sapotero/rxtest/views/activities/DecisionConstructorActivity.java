@@ -344,7 +344,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
         case R.id.action_constructor_next:
           // настройка
           // Показывать подтверждения о действиях с документом
-          if ( settings.getBoolean("settings_view_show_actions_confirm").get() ){
+          if ( settings2.isActionsConfirm() ){
             showNextDialog();
           } else {
 
@@ -369,7 +369,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
           // настройка
           // Показывать подтверждения о действиях с документом
-          if ( settings.getBoolean("settings_view_show_actions_confirm").get() ){
+          if ( settings2.isActionsConfirm() ){
             showPrevDialog();
           } else {
 //            operationManager.registerCallBack(this);

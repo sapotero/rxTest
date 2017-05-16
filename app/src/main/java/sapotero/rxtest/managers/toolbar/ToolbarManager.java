@@ -133,7 +133,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
             // настройка
             // Показывать подтверждения о действиях с документом
-            if ( settings.getBoolean("settings_view_show_actions_confirm").get() ){
+            if ( settings2.isActionsConfirm() ){
               operation = CommandFactory.Operation.INCORRECT;
               showFromTheReportDialog();
             } else {
@@ -147,7 +147,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
             // настройка
             // Показывать подтверждения о действиях с документом
-            if ( settings.getBoolean("settings_view_show_actions_confirm").get() ){
+            if ( settings2.isActionsConfirm() ){
               operation = CommandFactory.Operation.INCORRECT;
               showNextDialog(false);
             } else {
@@ -158,7 +158,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
           case R.id.menu_info_approval_prev_person:
             // настройка
             // Показывать подтверждения о действиях с документом
-            if ( settings.getBoolean("settings_view_show_actions_confirm").get() ){
+            if ( settings2.isActionsConfirm() ){
               operation = CommandFactory.Operation.INCORRECT;
               showPrevDialog(true);
             } else {
@@ -210,7 +210,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
               // настройка
               // Показывать подтверждения о действиях с документом
-              if ( settings.getBoolean("settings_view_show_actions_confirm").get() ){
+              if ( settings2.isActionsConfirm() ){
                 operation = CommandFactory.Operation.INCORRECT;
                 showNextDialog(true);
               } else {
@@ -236,7 +236,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
             // настройка
             // Показывать подтверждения о действиях с документом
-            if ( settings.getBoolean("settings_view_show_actions_confirm").get() ){
+            if ( settings2.isActionsConfirm() ){
               operation = CommandFactory.Operation.INCORRECT;
               showPrevDialog(false);
             } else {
@@ -313,7 +313,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
           // resolved https://tasks.n-core.ru/browse/MVDESD-13368
           // Кнопка "Отклонить" в документах "На рассмотрение" и "Первичное рассмотрение"
           case R.id.menu_info_report_dismiss:
-            if ( settings.getBoolean("settings_view_show_actions_confirm").get() ){
+            if ( settings2.isActionsConfirm() ){
               operation = CommandFactory.Operation.INCORRECT;
               showDismissDialog();
             } else {

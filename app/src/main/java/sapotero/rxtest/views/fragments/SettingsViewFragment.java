@@ -1,5 +1,6 @@
 package sapotero.rxtest.views.fragments;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceFragmentCompat;
@@ -16,6 +17,7 @@ import timber.log.Timber;
 
 public class SettingsViewFragment extends PreferenceFragmentCompat {
   private CompositeSubscription subscriptions;
+  @Inject Context context;
   @Inject RxSharedPreferences settings;
   @Inject Settings settings2;
 
@@ -32,7 +34,7 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
 
     Timber.tag("SETTINGS").d("settings_view_journals %s", settings.getStringSet("settings_view_journals").get() );
 
-    findPreference("settings_view_show_comment_post").setDependency("settings_view_show_actions_confirm");
+    findPreference("settings_view_show_comment_post").setDependency( context.getResources().getString(R.string.actions_confirm_key) );
 
     subscriptions = new CompositeSubscription();
     subscriptions.add(
@@ -45,7 +47,7 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
     // resolved https://tasks.n-core.ru/browse/MVDESD-13341
     // При отклонении проекта не отображается окно ввода комментария
     subscriptions.add(
-      settings.getBoolean("settings_view_show_actions_confirm")
+      settings2.getActionsConfirmPreference()
         .asObservable()
         .subscribe(
           active -> {
