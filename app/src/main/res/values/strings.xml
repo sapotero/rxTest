@@ -461,6 +461,7 @@
     <string name="first_run_key">is_first_run</string>
     <string name="host_key">settings_username_host</string>
     <string name="actions_confirm_key">settings_view_show_actions_confirm</string>
+    <string name="control_confirm_key">settings_view_show_control_confirm</string>
 
     <!--CRYPTO PRO-->
 

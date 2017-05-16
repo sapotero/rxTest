@@ -289,7 +289,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             // настройка
             // Показывать подтверждения о постановке на контроль документов для раздела «Обращение граждан»
 
-            if ( settings.getBoolean("settings_view_show_control_confirm").get() && settings2.getUid().startsWith( Fields.Journal.CITIZEN_REQUESTS.getValue() ) ){
+            if ( settings2.isControlConfirm() && settings2.getUid().startsWith( Fields.Journal.CITIZEN_REQUESTS.getValue() ) ){
               operation = CommandFactory.Operation.INCORRECT;
 
               showToControlDialog();

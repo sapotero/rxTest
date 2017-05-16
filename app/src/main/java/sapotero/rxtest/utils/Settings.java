@@ -34,6 +34,7 @@ public class Settings {
   public static String FIRST_RUN_KEY;
   public static String HOST_KEY;
   public static String ACTIONS_CONFIRM_KEY;
+  public static String CONTROL_CONFIRM_KEY;
 
   private Context context;
   private RxSharedPreferences settings;
@@ -62,6 +63,7 @@ public class Settings {
   private Preference<Boolean> decisionWithAssignment;
   private Preference<Integer> decisionActiveId;
   private Preference<Boolean> actionsConfirm;
+  private Preference<Boolean> controlConfirm;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -73,6 +75,7 @@ public class Settings {
     FIRST_RUN_KEY = context.getResources().getString(R.string.first_run_key);
     HOST_KEY = context.getResources().getString(R.string.host_key);
     ACTIONS_CONFIRM_KEY = context.getResources().getString(R.string.actions_confirm_key);
+    CONTROL_CONFIRM_KEY = context.getResources().getString(R.string.control_confirm_key);
 
     firstRunFlag = settings.getBoolean(FIRST_RUN_KEY);
     signWithDc = settings.getBoolean(SIGN_WITH_DC_KEY);
@@ -98,6 +101,7 @@ public class Settings {
     decisionWithAssignment = settings.getBoolean(DECISION_WITH_ASSIGNMENT_KEY);
     decisionActiveId = settings.getInteger(DECISION_ACTIVE_ID_KEY);
     actionsConfirm = settings.getBoolean(ACTIONS_CONFIRM_KEY);
+    controlConfirm = settings.getBoolean(CONTROL_CONFIRM_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -358,5 +362,13 @@ public class Settings {
 
   public Preference<Boolean> getActionsConfirmPreference() {
     return actionsConfirm;
+  }
+
+  public boolean isControlConfirm() {
+    return getBoolean(controlConfirm);
+  }
+
+  public void setControlConfirm(boolean value) {
+    setBoolean(controlConfirm, value);
   }
 }
