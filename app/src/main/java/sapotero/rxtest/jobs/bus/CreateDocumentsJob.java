@@ -312,6 +312,7 @@ public class CreateDocumentsJob extends BaseJob {
         image.setPath(i.getPath());
         image.setContentType(i.getContentType());
         image.setSigned(i.getSigned());
+        image.setCreatedAt(i.getCreatedAt());
         image.setImageId( i.getPath().substring(11, 35) );
         image.setDocument(doc);
         image.setLoading(false);

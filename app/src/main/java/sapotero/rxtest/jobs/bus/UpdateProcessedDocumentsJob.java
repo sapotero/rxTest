@@ -335,6 +335,7 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
           image.setLoading(false);
           image.setComplete(false);
           image.setError(false);
+          image.setCreatedAt(i.getCreatedAt());
           rDoc.getImages().add(image);
         }
       }
@@ -571,6 +572,7 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
           image.setLoading(false);
           image.setComplete(false);
           image.setError(false);
+          image.setCreatedAt(i.getCreatedAt());
           doc.getImages().add(image);
         }
       }
