@@ -15,7 +15,6 @@ import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -787,8 +786,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   }
 
   private void loadDecision() {
-//    settings2.setDecisionActiveIdInteger( current_decision.getId() );
-    Integer decision_id = settings2.getDecisionActiveIdInteger();
+//    settings2.setDecisionActiveId( current_decision.getId() );
+    Integer decision_id = settings2.getDecisionActiveId();
 
     rDecisionEntity = dataStore
       .select(RDecisionEntity.class)
@@ -941,7 +940,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
         operation =CommandFactory.Operation.APPROVE_DECISION;
 
         CommandParams params = new CommandParams();
-        params.setDecisionId( settings2.getDecisionActiveIdStringRaw() );
+        params.setDecisionId( rDecisionEntity.getUid() );
 //        params.setDecision( rDecisionEntity );
         params.setDecisionModel( DecisionConverter.formatDecision(rDecisionEntity) );
 

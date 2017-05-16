@@ -14,7 +14,6 @@ import android.widget.EditText;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import org.greenrobot.eventbus.EventBus;
@@ -249,7 +248,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
           case R.id.menu_info_decision_create:
             operation = CommandFactory.Operation.INCORRECT;
 
-            settings2.setDecisionActiveIdString(null);
+            settings2.setDecisionActiveId(0);
 
             Intent create_intent = new Intent(context, DecisionConstructorActivity.class);
             activity.startActivity(create_intent);
@@ -306,7 +305,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             // Показывать подтверждения о постановке на контроль документов для раздела «Обращение граждан»
             operation = CommandFactory.Operation.INCORRECT;
             settings2.setDecisionWithAssignment(true);
-            settings2.setDecisionActiveIdString(null);
+            settings2.setDecisionActiveId(0);
             Intent create_assigment_intent = new Intent(context, DecisionConstructorActivity.class);
             activity.startActivity(create_assigment_intent);
             break;

@@ -379,7 +379,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
         if ( doc.isFromLinks() != null && !doc.isFromLinks() &&
           current_decision == null ){
 
-          settings2.setDecisionActiveIdString(null);
+          settings2.setDecisionActiveId(0);
           Context context = getContext();
           Intent create_intent = new Intent(context, DecisionConstructorActivity.class);
           context.startActivity(create_intent);
@@ -825,7 +825,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
       preview.show( current_decision );
 
-      settings2.setDecisionActiveIdInteger( current_decision.getId() );
+      settings2.setDecisionActiveId( current_decision.getId() );
 
       if (toolbarManager != null) {
         toolbarManager.setEditDecisionMenuItemVisible( !current_decision.isApproved() );
