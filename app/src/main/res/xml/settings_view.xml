@@ -71,7 +71,7 @@
         <!--*-->
 
         <CheckBoxPreference
-            android:key="settings_view_show_origin"
+            android:key="@string/show_origin_key"
             android:title="Отображать настройки подлинника"
             android:defaultValue="true" />
 

@@ -17,13 +17,14 @@ import javax.inject.Inject;
 
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.adapters.models.PrimaryConsiderationAdapterViewModel;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 import timber.log.Timber;
 
 public class PrimaryConsiderationAdapter extends BaseAdapter {
 
-  @Inject RxSharedPreferences settings;
+  @Inject Settings settings;
 
   private Context context;
   private final ArrayList<PrimaryConsiderationPeople> items;
@@ -96,7 +97,7 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
 
       // настройка
       // Отображать настройки подлинника
-      if (settings.getBoolean("settings_view_show_origin").get()){
+      if (settings.isShowOrigin()){
         viewHolder.is_responsible.setVisibility(View.VISIBLE);
       }
       view.setTag(viewHolder);
