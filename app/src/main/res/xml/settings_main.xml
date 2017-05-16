@@ -8,7 +8,7 @@
             android:title="Показывать кнопку «Создать поручение»"
             android:defaultValue="false" />
         <SwitchPreference
-            android:key="settings_view_show_comment_post"
+            android:key="@string/show_comment_post_key"
             android:title="Показывать комментарий при отклонении"
             android:defaultValue="true" />
         <SwitchPreference

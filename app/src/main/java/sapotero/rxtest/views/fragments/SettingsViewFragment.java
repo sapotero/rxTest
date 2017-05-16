@@ -34,7 +34,8 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
 
     Timber.tag("SETTINGS").d("settings_view_journals %s", settings.getStringSet("settings_view_journals").get() );
 
-    findPreference("settings_view_show_comment_post").setDependency( context.getResources().getString(R.string.actions_confirm_key) );
+    findPreference( context.getResources().getString(R.string.show_comment_post_key) )
+            .setDependency( context.getResources().getString(R.string.actions_confirm_key) );
 
     subscriptions = new CompositeSubscription();
     subscriptions.add(
@@ -52,11 +53,11 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
         .subscribe(
           active -> {
             if (active){
-              settings.getBoolean("settings_view_show_comment_post").set(true);
-              findPreference("settings_view_show_comment_post").setEnabled(true);
+              settings2.setShowCommentPost(true);
+              findPreference( context.getResources().getString(R.string.show_comment_post_key) ).setEnabled(true);
             } else {
-              settings.getBoolean("settings_view_show_comment_post").set(false);
-              findPreference("settings_view_show_comment_post").setEnabled(false);
+              settings2.setShowCommentPost(false);
+              findPreference( context.getResources().getString(R.string.show_comment_post_key) ).setEnabled(false);
             }
           },
           Timber::e

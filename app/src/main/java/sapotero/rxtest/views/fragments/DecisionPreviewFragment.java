@@ -189,7 +189,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
     // resolved https://tasks.n-core.ru/browse/MVDESD-12765
     // Добавить ввод комментариев на "Отклонить резолюцию" и "без ответа"
 
-    if ( settings.getBoolean("settings_view_show_comment_post").get() ){
+    if ( settings2.isShowCommentPost() ){
 
       MaterialDialog.Builder prev_dialog = new MaterialDialog.Builder( getContext() )
         .content(R.string.decision_reject_body)
@@ -211,7 +211,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
 
       // настройка
       // Показывать комментарий при отклонении
-      if ( settings.getBoolean("settings_view_show_comment_post").get() ){
+      if ( settings2.isShowCommentPost() ){
         prev_dialog.inputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES )
           .input(R.string.comment_hint, R.string.dialog_empty_value, (dialog12, input) -> {});
       }

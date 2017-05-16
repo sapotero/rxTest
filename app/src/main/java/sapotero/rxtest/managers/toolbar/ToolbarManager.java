@@ -758,9 +758,9 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         params.setSign("SignFileCommand");
 
         // если есть комментарий
-        if (settings.getString("prev_dialog_comment").get() != null && settings.getBoolean("settings_view_show_comment_post").get() ) {
+        if (settings.getString("prev_dialog_comment").get() != null && settings2.isShowCommentPost() ) {
 //          params.setComment("SignFileCommand");
-          if ( settings.getBoolean("settings_view_show_comment_post").get() ) {
+          if ( settings2.isShowCommentPost() ) {
             params.setComment(dialog1.getInputEditText().getText().toString());
           }
         }
@@ -773,7 +773,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
       // настройка
       // Показывать комментарий при отклонении
-      if ( settings.getBoolean("settings_view_show_comment_post").get() ){
+      if ( settings2.isShowCommentPost() ){
         prev_dialog.inputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES )
           .input(R.string.comment_hint, R.string.dialog_empty_value, (dialog12, input) -> {
             settings.getString("prev_dialog_comment").set( input.toString() );
@@ -802,7 +802,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         operation = CommandFactory.Operation.FROM_THE_REPORT;
         params.setPerson( settings2.getCurrentUserId() );
         params.setDocument( settings2.getUid() );
-        if ( settings.getBoolean("settings_view_show_comment_post").get() ) {
+        if ( settings2.isShowCommentPost() ) {
           params.setComment(dialog1.getInputEditText().getText().toString());
         }
 
@@ -812,7 +812,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
     // настройка
     // Показывать комментарий при отклонении
-    if ( settings.getBoolean("settings_view_show_comment_post").get() ){
+    if ( settings2.isShowCommentPost() ){
       fromTheReportDialog.inputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES )
         .input(R.string.comment_hint, R.string.dialog_empty_value, (dialog12, input) -> {
           settings.getString("prev_dialog_comment").set( input.toString() );

@@ -218,7 +218,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     // resolved https://tasks.n-core.ru/browse/MVDESD-12765
     // Добавить ввод комментариев на "Отклонить резолюцию" и "без ответа"
 
-    if ( settings.getBoolean("settings_view_show_comment_post").get() ){
+    if ( settings2.isShowCommentPost() ){
 
       showPrevDialog(null);
 
@@ -255,7 +255,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
         commandParams.setDecisionModel( DecisionConverter.formatDecision(current_decision) );
         commandParams.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
 
-        if ( settings.getBoolean("settings_view_show_comment_post").get() ) {
+        if ( settings2.isShowCommentPost() ) {
           commandParams.setComment(dialog1.getInputEditText().getText().toString());
         }
 
@@ -267,7 +267,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
     // настройка
     // Показывать комментарий при отклонении
-    if ( settings.getBoolean("settings_view_show_comment_post").get() ){
+    if ( settings2.isShowCommentPost() ){
       prev_dialog
         .inputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES )
         .input(R.string.comment_hint, R.string.dialog_empty_value, (dialog12, input) -> {})

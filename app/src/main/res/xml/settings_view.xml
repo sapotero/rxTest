@@ -93,7 +93,7 @@
             android:defaultValue="false" />
         <!-- // resolved https://tasks.n-core.ru/browse/MVDESD-12765-->
         <SwitchPreference
-            android:key="settings_view_show_comment_post"
+            android:key="@string/show_comment_post_key"
             android:title="Показывать комментарий при отклонении документа/резолюции/без ответа"
             android:defaultValue="true" />
         <SwitchPreference

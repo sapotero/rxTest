@@ -462,6 +462,7 @@
     <string name="host_key">settings_username_host</string>
     <string name="actions_confirm_key">settings_view_show_actions_confirm</string>
     <string name="control_confirm_key">settings_view_show_control_confirm</string>
+    <string name="show_comment_post_key">settings_view_show_comment_post</string>
 
     <!--CRYPTO PRO-->
 
