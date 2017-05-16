@@ -24,6 +24,7 @@ import javax.inject.Inject;
 
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.events.service.UpdateDocumentsByStatusEvent;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.adapters.DocumentTypeAdapter;
 import sapotero.rxtest.views.adapters.models.DocumentTypeItem;
 import sapotero.rxtest.views.custom.OrganizationSpinner;
@@ -36,6 +37,7 @@ import timber.log.Timber;
 public class ItemsBuilder implements ButtonBuilder.Callback {
 
   @Inject RxSharedPreferences settings;
+  @Inject Settings settings2;
 
   private String TAG = this.getClass().getSimpleName();
   private final Context context;
@@ -164,7 +166,7 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
         // Стартовая страница: Должен быть выбор отображаемого раздела документов при запуске
         // На рассмотрение, Первичное рассмотрение, Рассмотренные
 
-        switch (settings.getString("settings_view_start_page").get()){
+        switch (settings2.getStartPage()){
           case "report":
             if ( button.getIndex() == 2 ) {
               ((RadioButton) button_group.getChildAt(i)).setChecked(true);

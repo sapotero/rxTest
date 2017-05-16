@@ -42,6 +42,7 @@ public class Settings {
   public static String SHOW_URGENCY_KEY;
   public static String ONLY_URGENT_KEY;
   public static String JOURNALS_KEY;
+  public static String START_PAGE_KEY;
 
   private Context context;
   private RxSharedPreferences settings;
@@ -76,6 +77,7 @@ public class Settings {
   private Preference<Boolean> onlyUrgent;
   private Preference<Set<String>> journals;
   private Preference<String> prevDialogComment;
+  private Preference<String> startPage;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -92,6 +94,7 @@ public class Settings {
     SHOW_URGENCY_KEY = context.getResources().getString(R.string.show_urgency_key);
     ONLY_URGENT_KEY = context.getResources().getString(R.string.only_urgent_key);
     JOURNALS_KEY = context.getResources().getString(R.string.journals_key);
+    START_PAGE_KEY = context.getResources().getString(R.string.start_page_key);
 
     firstRunFlag = settings.getBoolean(FIRST_RUN_KEY);
     signWithDc = settings.getBoolean(SIGN_WITH_DC_KEY);
@@ -123,6 +126,7 @@ public class Settings {
     onlyUrgent = settings.getBoolean(ONLY_URGENT_KEY);
     journals = settings.getStringSet(JOURNALS_KEY);
     prevDialogComment = settings.getString(PREV_DIALOG_COMMENT_KEY);
+    startPage = settings.getString(START_PAGE_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -439,5 +443,9 @@ public class Settings {
 
   public void setPrevDialogComment(String value) {
     setString(prevDialogComment, value);
+  }
+
+  public String getStartPage() {
+    return getString(startPage);
   }
 }
