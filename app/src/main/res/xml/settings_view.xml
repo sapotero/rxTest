@@ -35,7 +35,7 @@
             android:defaultValue="true" />
         <!--*-->
         <CheckBoxPreference
-            android:key="settings_view_hide_primary_consideration"
+            android:key="@string/hide_primary_consideration_key"
             android:title="Не отображать статус «Первичное рассмотрение»"
             android:defaultValue="false" />
         <!--*-->

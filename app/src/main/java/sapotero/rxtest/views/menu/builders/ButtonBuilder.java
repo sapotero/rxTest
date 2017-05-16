@@ -281,7 +281,7 @@ public class ButtonBuilder {
 
 
     // настройка показывать первичное рассмотрение
-    if ( settings.getBoolean("settings_view_hide_primary_consideration").get() ){
+    if ( settings2.isHidePrimaryConsideration() ){
       boolean matches = Pattern.matches("Перви.*", label);
       if (matches){
         view.setVisibility(View.GONE);

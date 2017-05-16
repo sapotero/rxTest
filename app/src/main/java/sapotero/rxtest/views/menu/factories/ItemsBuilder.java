@@ -193,7 +193,7 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
       }
 
       // если отключена первичка, но она есть в кнопках
-      if (settings.getBoolean("settings_view_hide_primary_consideration").get()){
+      if (settings2.isHidePrimaryConsideration()){
         ((RadioButton) button_group.getChildAt(0)).setChecked(true);
       }
 

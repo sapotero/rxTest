@@ -44,6 +44,7 @@ public class Settings {
   public static String JOURNALS_KEY;
   public static String START_PAGE_KEY;
   public static String SHOW_WITHOUT_PROJECT_KEY;
+  public static String HIDE_PRIMARY_CONSIDERATION_KEY;
 
   private Context context;
   private RxSharedPreferences settings;
@@ -80,6 +81,7 @@ public class Settings {
   private Preference<String> prevDialogComment;
   private Preference<String> startPage;
   private Preference<Boolean> showWithoutProject;
+  private Preference<Boolean> hidePrimaryConsideration;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -98,6 +100,7 @@ public class Settings {
     JOURNALS_KEY = context.getResources().getString(R.string.journals_key);
     START_PAGE_KEY = context.getResources().getString(R.string.start_page_key);
     SHOW_WITHOUT_PROJECT_KEY = context.getResources().getString(R.string.show_without_project_key);
+    HIDE_PRIMARY_CONSIDERATION_KEY = context.getResources().getString(R.string.hide_primary_consideration_key);
 
     firstRunFlag = settings.getBoolean(FIRST_RUN_KEY);
     signWithDc = settings.getBoolean(SIGN_WITH_DC_KEY);
@@ -131,6 +134,7 @@ public class Settings {
     prevDialogComment = settings.getString(PREV_DIALOG_COMMENT_KEY);
     startPage = settings.getString(START_PAGE_KEY);
     showWithoutProject = settings.getBoolean(SHOW_WITHOUT_PROJECT_KEY);
+    hidePrimaryConsideration = settings.getBoolean(HIDE_PRIMARY_CONSIDERATION_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -455,5 +459,9 @@ public class Settings {
 
   public boolean isShowWithoutProject() {
     return getBoolean(showWithoutProject);
+  }
+
+  public boolean isHidePrimaryConsideration() {
+    return getBoolean(hidePrimaryConsideration);
   }
 }
