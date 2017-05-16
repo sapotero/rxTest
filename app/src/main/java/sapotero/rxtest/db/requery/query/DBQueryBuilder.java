@@ -424,7 +424,7 @@ public class DBQueryBuilder {
   private void addDocument(RDocumentEntity doc) {
     // настройка
     // если включена настройка "Отображать документы без резолюции"
-    if ( settings.getBoolean("settings_view_type_show_without_project").get() ){
+    if ( settings2.isShowWithoutProject() ){
       addOne(doc);
     } else {
       if ( menuBuilder.getItem().isShowAnyWay() ){

@@ -30,7 +30,7 @@
             android:entryValues="@array/settings_view_journals_values" />
 
         <CheckBoxPreference
-            android:key="settings_view_type_show_without_project"
+            android:key="@string/show_without_project_key"
             android:title="Отображать документы без резолюции"
             android:defaultValue="true" />
         <!--*-->

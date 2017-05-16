@@ -82,7 +82,7 @@ public class DocumentTypeItem {
       // настройка
       // если включена настройка "Отображать документы без резолюции"
       WhereAndOr<RxScalar<Integer>> query;
-      if ( settings.getBoolean("settings_view_type_show_without_project").get()
+      if ( settings2.isShowWithoutProject()
         || mainMenuItem.getIndex() == 3  // подписание/согласование
         || mainMenuItem.getIndex() == 8  // контроль
         || mainMenuItem.getIndex() == 10 // избранное

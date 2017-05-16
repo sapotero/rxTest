@@ -112,7 +112,7 @@ public class ButtonBuilder {
   private void getCount() {
 
     // Отображать документы без резолюции
-    if ( settings.getBoolean("settings_view_type_show_without_project").get() ){
+    if ( settings2.isShowWithoutProject() ){
       getCountWithoutDecisons();
     } else {
       // для некоторых журналов показываем всё независимо от настроек
