@@ -111,7 +111,7 @@
             android:defaultValue="true" />
 
         <EditTextPreference
-            android:key="settings_view_show_max_image_size"
+            android:key="@string/max_image_size_key"
             android:title="Максимальный размер файла для подписи"
             android:dialogTitle="Максимальный размер файла для подписи"
             android:defaultValue="10"

@@ -352,10 +352,10 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       for (RImage _image: doc.getImages()) {
         RImageEntity image = (RImageEntity) _image;
 
-        int max_size = parseIntOrDefault( settings.getString("settings_view_show_max_image_size").get(), 20 )*1024*1024;
+        int max_size = parseIntOrDefault( settings2.getMaxImageSize(), 20 )*1024*1024;
 
         if (max_size > 20*1024*1024){
-          settings.getString("settings_view_show_max_image_size").set("20");
+          settings2.setMaxImageSize("20");
           result = false;
         }
 

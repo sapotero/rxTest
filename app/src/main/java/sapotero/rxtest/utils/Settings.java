@@ -52,6 +52,7 @@ public class Settings {
   public static String SHOW_CHANGE_SIGNER_KEY;
   public static String SHOW_CREATE_DECISION_POST_KEY;
   public static String SHOW_APPROVE_ON_PRIMARY_KEY;
+  public static String MAX_IMAGE_SIZE_KEY;
 
   private Context context;
   private RxSharedPreferences settings;
@@ -96,6 +97,7 @@ public class Settings {
   private Preference<Boolean> showChangeSigner;
   private Preference<Boolean> showCreateDecisionPost;
   private Preference<Boolean> showApproveOnPrimary;
+  private Preference<String> maxImageSize;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -122,6 +124,7 @@ public class Settings {
     SHOW_CHANGE_SIGNER_KEY = context.getResources().getString(R.string.show_change_signer_key);
     SHOW_CREATE_DECISION_POST_KEY = context.getResources().getString(R.string.show_create_decision_post_key);
     SHOW_APPROVE_ON_PRIMARY_KEY = context.getResources().getString(R.string.show_approve_on_primary_key);
+    MAX_IMAGE_SIZE_KEY = context.getResources().getString(R.string.max_image_size_key);
 
     firstRunFlag = settings.getBoolean(FIRST_RUN_KEY);
     signWithDc = settings.getBoolean(SIGN_WITH_DC_KEY);
@@ -163,6 +166,7 @@ public class Settings {
     showChangeSigner = settings.getBoolean(SHOW_CHANGE_SIGNER_KEY);
     showCreateDecisionPost = settings.getBoolean(SHOW_CREATE_DECISION_POST_KEY);
     showApproveOnPrimary = settings.getBoolean(SHOW_APPROVE_ON_PRIMARY_KEY);
+    maxImageSize = settings.getString(MAX_IMAGE_SIZE_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -519,5 +523,13 @@ public class Settings {
 
   public boolean isShowApproveOnPrimary() {
     return getBoolean(showApproveOnPrimary);
+  }
+
+  public String getMaxImageSize() {
+    return getString(maxImageSize);
+  }
+
+  public void setMaxImageSize(String value) {
+    setString(maxImageSize, value);
   }
 }
