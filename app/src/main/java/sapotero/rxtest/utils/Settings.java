@@ -8,6 +8,7 @@ import com.f2prateek.rx.preferences.RxSharedPreferences;
 import java.util.Set;
 
 import sapotero.rxtest.R;
+import sapotero.rxtest.views.custom.stepper.util.AuthType;
 
 public class Settings {
 
@@ -34,6 +35,7 @@ public class Settings {
   public static final String DECISION_ACTIVE_ID_KEY = "decision.active.id";
   public static final String PREV_DIALOG_COMMENT_KEY = "prev_dialog_comment";
   public static final String START_LOAD_DATA_KEY = "start_load_data";
+  public static final String STEPPER_AUTH_TYPE_KEY = "stepper.auth_type";
 
   public static String FIRST_RUN_KEY;
   public static String HOST_KEY;
@@ -102,6 +104,7 @@ public class Settings {
   private Preference<String> maxImageSize;
   private Preference<Boolean> debugEnabled;
   private Preference<Boolean> startLoadData;
+  private Preference<AuthType> authType;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -174,6 +177,7 @@ public class Settings {
     maxImageSize = settings.getString(MAX_IMAGE_SIZE_KEY);
     debugEnabled = settings.getBoolean(DEBUG_ENABLED_KEY);
     startLoadData = settings.getBoolean(START_LOAD_DATA_KEY);
+    authType = settings.getEnum(STEPPER_AUTH_TYPE_KEY, AuthType.class);
   }
 
   public boolean isFirstRun( ) {
@@ -550,5 +554,17 @@ public class Settings {
 
   public void setStartLoadData(boolean value) {
     setBoolean(startLoadData, value);
+  }
+
+  public AuthType getAuthType() {
+    return authType.get();
+  }
+
+  public void setAuthType(AuthType value) {
+    authType.set(value);
+  }
+
+  public Preference<AuthType> getAuthTypePreference() {
+    return authType;
   }
 }

@@ -12,7 +12,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -29,8 +28,7 @@ import sapotero.rxtest.views.custom.stepper.util.AuthType;
 import timber.log.Timber;
 
 public class StepperChooseAuthTypeFragment extends Fragment implements Step, View.OnClickListener {
-  @Inject RxSharedPreferences settings;
-  @Inject Settings settings2;
+  @Inject Settings settings;
 
   private MaterialDialog dialog;
 
@@ -125,17 +123,17 @@ public class StepperChooseAuthTypeFragment extends Fragment implements Step, Vie
     EventBus.getDefault().post( new StepperNextStepEvent() );
   }
 
-  private void setAuthType( AuthType type ){
-    settings.getEnum("stepper.auth_type", AuthType.class).set( type );
+  private void setAuthType( AuthType type ) {
+    settings.setAuthType( type );
   }
 
   private void setAuthTypeDc() {
     setAuthType( AuthType.DS );
-    settings2.setSignedWithDc( true );
+    settings.setSignedWithDc( true );
   }
 
   private void setAuthTypeLogin() {
     setAuthType( AuthType.PASSWORD );
-    settings2.setSignedWithDc( false );
+    settings.setSignedWithDc( false );
   }
 }

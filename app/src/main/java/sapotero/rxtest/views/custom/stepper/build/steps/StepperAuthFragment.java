@@ -13,8 +13,6 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.f2prateek.rx.preferences.Preference;
-import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -40,8 +38,7 @@ import timber.log.Timber;
 
 public class StepperAuthFragment extends Fragment implements BlockingStep {
 
-  @Inject RxSharedPreferences settings;
-  @Inject Settings settings2;
+  @Inject Settings settings;
 
   final String TAG = this.getClass().getSimpleName();
 
@@ -97,13 +94,11 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
   }
 
   private void attachSettings() {
-    Preference<AuthType> auth_type = settings.getEnum("stepper.auth_type", AuthType.class);
-
-    if (auth_type.get() == null) {
-      auth_type.set( authType );
+    if (settings.getAuthType() == null) {
+      settings.setAuthType( authType );
     }
 
-    auth_type_subscription = auth_type.asObservable().subscribe(type -> {
+    auth_type_subscription = settings.getAuthTypePreference().asObservable().subscribe(type -> {
       switch ( type ){
         case DS:
           authType = AuthType.DS;
@@ -164,7 +159,7 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
           new StepperLoginCheckEvent(
             login.getText().toString(),
             pwd.getText().toString(),
-            settings2.getHost()
+            settings.getHost()
           )
         );
         break;
@@ -200,7 +195,7 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
     if (authType != AuthType.PASSWORD){
       loadingDialog.show();
     }
-    settings2.setStartLoadData( true );
+    settings.setStartLoadData( true );
     this.callback = callback;
   }
 
@@ -213,11 +208,11 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
   }
 
   private void setAuthType( AuthType type ) {
-    settings.getEnum("stepper.auth_type", AuthType.class).set( type );
+    settings.setAuthType( type );
   }
 
   private void setSignWithDc( Boolean signWithDc ) {
-    settings2.setSignedWithDc( signWithDc );
+    settings.setSignedWithDc( signWithDc );
   }
 
   private void setAuthTypeDc() {
