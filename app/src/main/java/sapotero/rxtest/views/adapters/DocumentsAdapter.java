@@ -321,13 +321,11 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
     viewHolder.cv.setOnClickListener(view -> {
 
-      settings.setPosition(position);
       settings.setUid( item.getUid() );
       settings.setMainMenuPosition( viewHolder.getAdapterPosition() );
       settings.setRegNumber( item.getRegistrationNumber() );
       settings.setStatusCode( item.getFilter() );
       settings.setLoadFromSearch( false );
-//      settings.setFromSign( item.isFromSign() );
       settings.setRegDate( item.getRegistrationDate() );
 
       Intent intent = new Intent(mContext, InfoActivity.class);

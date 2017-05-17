@@ -46,7 +46,6 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapte
     holder.mTitle.setText(  doc.getShortDescription() );
 
     holder.mCard.setOnClickListener(v -> {
-      settings.setPosition(position);
       settings.setUid( doc.getUid() );
       settings.setRegNumber( doc.getRegistrationNumber() );
       settings.setStatusCode( doc.getFilter() );
