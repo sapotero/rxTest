@@ -96,7 +96,7 @@ public class ApproveDecision extends AbstractCommand {
 
     if (
         // если активная резолюция
-        Objects.equals(params.getDecisionModel().getSignerId(), settings2.getCurrentUserId())
+        Objects.equals(params.getDecisionModel().getSignerId(), settings.getCurrentUserId())
 
         // или если подписывающий министр
         || ( red != null && red.get(0).equals(true) )
@@ -164,14 +164,14 @@ public class ApproveDecision extends AbstractCommand {
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( settings2.getHost() )
+      .baseUrl( settings.getHost() )
       .client( okHttpClient )
       .build();
 
     String sign = null;
 
     try {
-      sign = MainService.getFakeSign( settings2.getPin(), null );
+      sign = MainService.getFakeSign( settings.getPin(), null );
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -205,8 +205,8 @@ public class ApproveDecision extends AbstractCommand {
 
     Observable<DecisionError> info = operationService.update(
       decisionId,
-      settings2.getLogin(),
-      settings2.getToken(),
+      settings.getLogin(),
+      settings.getToken(),
       json
     );
 

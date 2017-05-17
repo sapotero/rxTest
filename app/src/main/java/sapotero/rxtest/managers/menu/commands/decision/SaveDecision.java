@@ -211,7 +211,7 @@ public class SaveDecision extends AbstractCommand {
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( settings2.getHost() )
+      .baseUrl( settings.getHost() )
       .client( okHttpClient )
       .build();
 
@@ -245,8 +245,8 @@ public class SaveDecision extends AbstractCommand {
 
     Observable<DecisionError> info = operationService.update(
       decisionId,
-      settings2.getLogin(),
-      settings2.getToken(),
+      settings.getLogin(),
+      settings.getToken(),
       json
     );
 

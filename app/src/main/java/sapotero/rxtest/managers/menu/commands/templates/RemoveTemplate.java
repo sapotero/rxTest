@@ -56,7 +56,7 @@ public class RemoveTemplate extends AbstractCommand {
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( settings2.getHost() )
+      .baseUrl( settings.getHost() )
       .client( okHttpClient )
       .build();
 
@@ -64,8 +64,8 @@ public class RemoveTemplate extends AbstractCommand {
 
     Observable<Template> info = templatesService.remove(
       params.getUuid(),
-      settings2.getLogin(),
-      settings2.getToken()
+      settings.getLogin(),
+      settings.getToken()
     );
 
     info

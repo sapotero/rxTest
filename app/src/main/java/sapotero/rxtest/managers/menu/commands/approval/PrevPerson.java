@@ -89,7 +89,7 @@ public class PrevPerson extends AbstractCommand {
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( settings2.getHost() + "v3/operations/" )
+      .baseUrl( settings.getHost() + "v3/operations/" )
       .client( okHttpClient )
       .build();
 
@@ -104,18 +104,18 @@ public class PrevPerson extends AbstractCommand {
     }
 
     try {
-      sign = MainService.getFakeSign( settings2.getPin(), null );
+      sign = MainService.getFakeSign( settings.getPin(), null );
     } catch (Exception e) {
       e.printStackTrace();
     }
 
     Observable<OperationResult> info = operationService.approval(
       getType(),
-      settings2.getLogin(),
-      settings2.getToken(),
+      settings.getLogin(),
+      settings.getToken(),
       uids,
       comment,
-      settings2.getStatusCode(),
+      settings.getStatusCode(),
       official_id,
       sign
     );

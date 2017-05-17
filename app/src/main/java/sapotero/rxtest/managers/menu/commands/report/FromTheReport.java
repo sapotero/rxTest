@@ -93,7 +93,7 @@ public class FromTheReport extends AbstractCommand {
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( settings2.getHost() + "v3/operations/" )
+      .baseUrl( settings.getHost() + "v3/operations/" )
       .client( okHttpClient )
       .build();
 
@@ -121,11 +121,11 @@ public class FromTheReport extends AbstractCommand {
 
     Observable<OperationResult> info = operationService.report(
       getType(),
-      settings2.getLogin(),
-      settings2.getToken(),
+      settings.getLogin(),
+      settings.getToken(),
       uids,
       comment,
-      settings2.getStatusCode()
+      settings.getStatusCode()
     );
 
     info.subscribeOn( Schedulers.computation() )

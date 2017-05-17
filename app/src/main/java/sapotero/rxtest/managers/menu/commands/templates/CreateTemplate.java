@@ -61,7 +61,7 @@ public class CreateTemplate extends AbstractCommand {
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( settings2.getHost() )
+      .baseUrl( settings.getHost() )
       .client( okHttpClient )
       .build();
 
@@ -73,8 +73,8 @@ public class CreateTemplate extends AbstractCommand {
     }
 
     Observable<Template> info = templatesService.create(
-      settings2.getLogin(),
-      settings2.getToken(),
+      settings.getLogin(),
+      settings.getToken(),
       params.getComment(),
       type
     );
@@ -105,7 +105,7 @@ public class CreateTemplate extends AbstractCommand {
     template.setUid(data.getId());
     template.setType(params.getLabel());
     template.setTitle(data.getText());
-    template.setUser(settings2.getLogin());
+    template.setUser(settings.getLogin());
 
     dataStore
       .insert(template)

@@ -66,7 +66,7 @@ public class SignFile extends AbstractCommand {
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( settings2.getHost() )
+      .baseUrl( settings.getHost() )
       .client( okHttpClient )
       .build();
 
@@ -76,7 +76,7 @@ public class SignFile extends AbstractCommand {
 
     String file_sign = null;
     try {
-      file_sign = MainService.getFakeSign( settings2.getPin(), file );
+      file_sign = MainService.getFakeSign( settings.getPin(), file );
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -84,8 +84,8 @@ public class SignFile extends AbstractCommand {
     if (file_sign != null) {
       Observable<Object> info = imagesService.update(
         getParams().getImageId(),
-        settings2.getLogin(),
-        settings2.getToken(),
+        settings.getLogin(),
+        settings.getToken(),
         file_sign
       );
 

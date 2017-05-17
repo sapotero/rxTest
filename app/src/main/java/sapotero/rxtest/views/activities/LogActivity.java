@@ -7,8 +7,6 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.widget.ImageView;
 
-import com.f2prateek.rx.preferences.RxSharedPreferences;
-
 import java.util.ArrayList;
 import java.util.List;
 

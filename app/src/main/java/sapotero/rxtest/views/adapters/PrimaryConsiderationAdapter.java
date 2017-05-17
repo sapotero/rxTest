@@ -9,8 +9,6 @@ import android.widget.Button;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import com.f2prateek.rx.preferences.RxSharedPreferences;
-
 import java.util.ArrayList;
 
 import javax.inject.Inject;

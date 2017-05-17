@@ -61,7 +61,7 @@ public class ChangePerson extends AbstractCommand {
       .set( RDocumentEntity.PROCESSED, true)
       .set( RDocumentEntity.MD5, "" )
       .set( RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq(params.getDocument() != null ? params.getDocument(): settings2.getUid()))
+      .where(RDocumentEntity.UID.eq(params.getDocument() != null ? params.getDocument(): settings.getUid()))
       .get()
       .value();
     if (callback != null){
@@ -77,14 +77,14 @@ public class ChangePerson extends AbstractCommand {
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( settings2.getHost() + "v3/operations/" )
+      .baseUrl( settings.getHost() + "v3/operations/" )
       .client( okHttpClient )
       .build();
 
     OperationService operationService = retrofit.create( OperationService.class );
 
     ArrayList<String> uids = new ArrayList<>();
-    uids.add( params.getDocument() != null ? params.getDocument(): settings2.getUid() );
+    uids.add( params.getDocument() != null ? params.getDocument(): settings.getUid() );
 
     String comment = null;
     if ( params.getComment() != null ){
@@ -94,7 +94,7 @@ public class ChangePerson extends AbstractCommand {
     String sign = null;
 
     try {
-      sign = MainService.getFakeSign( settings2.getPin(), null );
+      sign = MainService.getFakeSign( settings.getPin(), null );
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -102,11 +102,11 @@ public class ChangePerson extends AbstractCommand {
 
     Observable<OperationResult> info = operationService.sign(
       getType(),
-      settings2.getLogin(),
-      settings2.getToken(),
+      settings.getLogin(),
+      settings.getToken(),
       uids,
       comment,
-      settings2.getStatusCode(),
+      settings.getStatusCode(),
       official_id,
       sign
     );

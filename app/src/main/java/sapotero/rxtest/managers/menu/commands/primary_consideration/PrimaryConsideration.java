@@ -97,7 +97,7 @@ public class PrimaryConsideration extends AbstractCommand {
       .set( RDocumentEntity.PROCESSED, true)
       .set( RDocumentEntity.MD5, "" )
       .set( RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq(params.getDocument() != null ? params.getDocument(): settings2.getUid()))
+      .where(RDocumentEntity.UID.eq(params.getDocument() != null ? params.getDocument(): settings.getUid()))
       .get()
       .value();
     if ( callback != null ){
@@ -116,22 +116,22 @@ public class PrimaryConsideration extends AbstractCommand {
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( settings2.getHost() + "v3/operations/" )
+      .baseUrl( settings.getHost() + "v3/operations/" )
       .client( okHttpClient )
       .build();
 
     OperationService operationService = retrofit.create( OperationService.class );
 
     ArrayList<String> uids = new ArrayList<>();
-    uids.add( params.getDocument() != null ? params.getDocument(): settings2.getUid() );
+    uids.add( params.getDocument() != null ? params.getDocument(): settings.getUid() );
 
     Observable<OperationResult> info = operationService.consideration(
       getType(),
-      settings2.getLogin(),
-      settings2.getToken(),
+      settings.getLogin(),
+      settings.getToken(),
       uids,
-      settings2.getUid(),
-      settings2.getStatusCode(),
+      settings.getUid(),
+      settings.getStatusCode(),
       official_id
     );
 

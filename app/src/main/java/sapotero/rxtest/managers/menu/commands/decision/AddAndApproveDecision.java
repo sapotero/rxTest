@@ -95,7 +95,7 @@ public class AddAndApproveDecision extends AbstractCommand {
 
 
     if (
-      Objects.equals(params.getDecisionModel().getSignerId(), settings2.getCurrentUserId())
+      Objects.equals(params.getDecisionModel().getSignerId(), settings.getCurrentUserId())
       // или если подписывающий министр
       || ( red != null && red.get(0).equals(true) )
       ){
@@ -134,7 +134,7 @@ public class AddAndApproveDecision extends AbstractCommand {
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( settings2.getHost() )
+      .baseUrl( settings.getHost() )
       .client( okHttpClient )
       .build();
 
@@ -153,7 +153,7 @@ public class AddAndApproveDecision extends AbstractCommand {
     String sign = null;
 
     try {
-      sign = MainService.getFakeSign( settings2.getPin(), null );
+      sign = MainService.getFakeSign( settings.getPin(), null );
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -173,8 +173,8 @@ public class AddAndApproveDecision extends AbstractCommand {
     DocumentService operationService = retrofit.create( DocumentService.class );
 
     Observable<DecisionError> info = operationService.createAndSign(
-      settings2.getLogin(),
-      settings2.getToken(),
+      settings.getLogin(),
+      settings.getToken(),
       json
     );
 

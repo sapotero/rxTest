@@ -60,22 +60,22 @@ public class ApprovalPerformance extends AbstractCommand {
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( settings2.getHost() + "v3/operations/" )
+      .baseUrl( settings.getHost() + "v3/operations/" )
       .client( okHttpClient )
       .build();
 
     OperationService operationService = retrofit.create( OperationService.class );
 
     ArrayList<String> uids = new ArrayList<>();
-    uids.add( settings2.getUid() );
+    uids.add( settings.getUid() );
 
     Observable<OperationResult> info = operationService.performance(
       getType(),
-      settings2.getLogin(),
-      settings2.getToken(),
+      settings.getLogin(),
+      settings.getToken(),
       uids,
-      settings2.getUid(),
-      settings2.getStatusCode(),
+      settings.getUid(),
+      settings.getStatusCode(),
       official_id
     );
 
@@ -104,7 +104,7 @@ public class ApprovalPerformance extends AbstractCommand {
       .set( RDocumentEntity.PROCESSED, true)
       .set( RDocumentEntity.MD5, "" )
       .set( RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq(settings2.getUid()))
+      .where(RDocumentEntity.UID.eq(settings.getUid()))
       .get()
       .value();
 

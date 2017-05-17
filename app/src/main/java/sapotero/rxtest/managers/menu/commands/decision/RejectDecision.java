@@ -85,7 +85,7 @@ public class RejectDecision extends AbstractCommand {
 
     String uid = null;
 
-    if (Objects.equals(params.getDecisionModel().getSignerId(), settings2.getCurrentUserId())){
+    if (Objects.equals(params.getDecisionModel().getSignerId(), settings.getCurrentUserId())){
 
       if (params.getDecisionModel().getDocumentUid() != null && !Objects.equals(params.getDecisionModel().getDocumentUid(), "")){
         uid = params.getDecisionModel().getDocumentUid();
@@ -149,7 +149,7 @@ public class RejectDecision extends AbstractCommand {
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( settings2.getHost() )
+      .baseUrl( settings.getHost() )
       .client( okHttpClient )
       .build();
 
@@ -188,8 +188,8 @@ public class RejectDecision extends AbstractCommand {
 
     Observable<DecisionError> info = operationService.update(
       decisionId,
-      settings2.getLogin(),
-      settings2.getToken(),
+      settings.getLogin(),
+      settings.getToken(),
       json
     );
 

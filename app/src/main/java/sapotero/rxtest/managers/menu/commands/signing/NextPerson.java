@@ -95,7 +95,7 @@ public class NextPerson extends AbstractCommand {
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( settings2.getHost() + "v3/operations/" )
+      .baseUrl( settings.getHost() + "v3/operations/" )
       .client( okHttpClient )
       .build();
 
@@ -111,18 +111,18 @@ public class NextPerson extends AbstractCommand {
     }
 
     try {
-      sign = MainService.getFakeSign( settings2.getPin(), null );
+      sign = MainService.getFakeSign( settings.getPin(), null );
     } catch (Exception e) {
       e.printStackTrace();
     }
 
     Observable<OperationResult> info = operationService.sign(
       getType(),
-      settings2.getLogin(),
-      settings2.getToken(),
+      settings.getLogin(),
+      settings.getToken(),
       uids,
       comment,
-      settings2.getStatusCode(),
+      settings.getStatusCode(),
       official_id,
       sign
     );
@@ -167,7 +167,7 @@ public class NextPerson extends AbstractCommand {
 
           CommandFactory.Operation operation = CommandFactory.Operation.FILE_SIGN;
           CommandParams params = new CommandParams();
-          params.setUser( settings2.getLogin() );
+          params.setUser( settings.getLogin() );
           params.setDocument( document.getUid() );
           params.setLabel( image.getTitle() );
           params.setFilePath( String.format( "%s_%s", image.getMd5(), image.getTitle()) );

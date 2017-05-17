@@ -10,8 +10,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.widget.FrameLayout;
 
-import com.f2prateek.rx.preferences.RxSharedPreferences;
-
 import java.util.ArrayList;
 
 import javax.inject.Inject;

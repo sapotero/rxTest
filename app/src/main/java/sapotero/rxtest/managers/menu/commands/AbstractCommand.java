@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands;
 
-import com.f2prateek.rx.preferences.RxSharedPreferences;
-
 import java.io.Serializable;
 
 import javax.inject.Inject;
@@ -20,8 +18,7 @@ import sapotero.rxtest.managers.menu.utils.CommandParams;
 public abstract class AbstractCommand implements Serializable, Command, Operation {
 
   @Inject public OkHttpClient okHttpClient;
-  @Inject public RxSharedPreferences settings;
-  @Inject public Settings settings2;
+  @Inject public Settings settings;
   @Inject public SingleEntityStore<Persistable> dataStore;
   @Inject public QueueManager queueManager;
 

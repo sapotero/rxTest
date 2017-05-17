@@ -108,9 +108,9 @@ public class SaveAndApproveDecision extends AbstractCommand {
       .value();
 
 
-    Timber.tag(TAG).e("-------- %s %s", params.getDecisionModel().getSignerId(), settings2.getCurrentUserId());
+    Timber.tag(TAG).e("-------- %s %s", params.getDecisionModel().getSignerId(), settings.getCurrentUserId());
     if (
-      Objects.equals(params.getDecisionModel().getSignerId(), settings2.getCurrentUserId())
+      Objects.equals(params.getDecisionModel().getSignerId(), settings.getCurrentUserId())
       // или если подписывающий министр
 //      || ( red != null && red.get(0).equals(true) )
       ){
@@ -136,7 +136,7 @@ public class SaveAndApproveDecision extends AbstractCommand {
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( settings2.getHost() )
+      .baseUrl( settings.getHost() )
       .client( okHttpClient )
       .build();
 
@@ -151,10 +151,10 @@ public class SaveAndApproveDecision extends AbstractCommand {
     _decision.setApproved(true);
 
     try {
-      if ( settings2.isSignedWithDc() ){
+      if ( settings.isSignedWithDc() ){
         String fake_sign = null;
 
-        fake_sign = MainService.getFakeSign( settings2.getPin(), null );
+        fake_sign = MainService.getFakeSign( settings.getPin(), null );
 
         if (fake_sign != null) {
           _decision.setSign(fake_sign);
@@ -183,8 +183,8 @@ public class SaveAndApproveDecision extends AbstractCommand {
 
     Observable<DecisionError> info = operationService.update(
       decisionId,
-      settings2.getLogin(),
-      settings2.getToken(),
+      settings.getLogin(),
+      settings.getToken(),
       json
     );
 

@@ -102,22 +102,22 @@ public class CheckForControl extends AbstractCommand {
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( settings2.getHost() + "v3/operations/" )
+      .baseUrl( settings.getHost() + "v3/operations/" )
       .client( okHttpClient )
       .build();
 
     OperationService operationService = retrofit.create( OperationService.class );
 
     ArrayList<String> uids = new ArrayList<>();
-    uids.add( settings2.getUid() );
+    uids.add( settings.getUid() );
 
     Observable<OperationResult> info = operationService.shared(
       getType(),
-      settings2.getLogin(),
-      settings2.getToken(),
+      settings.getLogin(),
+      settings.getToken(),
       uids,
-      document_id == null ? settings2.getUid() : document_id,
-      settings2.getStatusCode(),
+      document_id == null ? settings.getUid() : document_id,
+      settings.getStatusCode(),
       null,
       null
     );

@@ -91,14 +91,14 @@ public class ApproveDecisionDelayed extends AbstractCommand {
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( settings2.getHost() )
+      .baseUrl( settings.getHost() )
       .client( okHttpClient )
       .build();
 
     String sign = null;
 
     try {
-      sign = MainService.getFakeSign( settings2.getPin(), null );
+      sign = MainService.getFakeSign( settings.getPin(), null );
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -136,8 +136,8 @@ public class ApproveDecisionDelayed extends AbstractCommand {
 
       Observable<DecisionError> info = operationService.update(
         params.getDecisionId(),
-        settings2.getLogin(),
-        settings2.getToken(),
+        settings.getLogin(),
+        settings.getToken(),
         json
       );
 
