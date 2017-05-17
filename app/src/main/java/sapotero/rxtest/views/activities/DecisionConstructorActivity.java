@@ -645,7 +645,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       if (
           manager.getDecision() != null &&
             manager.getDecision().getSignerId() != null &&
-          Objects.equals(manager.getDecision().getSignerId(), settings.getString("current_user_id").get())){
+          Objects.equals(manager.getDecision().getSignerId(), settings2.getCurrentUserId())){
         toolbar.getMenu().findItem(R.id.action_constructor_create_and_sign).setVisible(true);
       } else {
         toolbar.getMenu().findItem(R.id.action_constructor_create_and_sign).setVisible(false);

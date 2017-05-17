@@ -549,7 +549,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       for ( RAction act: doc.getActions() ) {
         RActionEntity _act = (RActionEntity) act;
 
-        if (Objects.equals(_act.getAddressedToId(), settings.getString("current_user_id").get())){
+        if (Objects.equals(_act.getAddressedToId(), settings2.getCurrentUserId())){
           list.add( _act );
         }
       }
