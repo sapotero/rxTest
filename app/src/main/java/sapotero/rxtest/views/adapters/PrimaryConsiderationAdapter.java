@@ -98,7 +98,7 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
       // настройка
       // Отображать настройки подлинника
       if (settings.isShowOrigin()){
-        viewHolder.is_responsible.setVisibility(View.VISIBLE);
+        viewHolder.is_original.setVisibility(View.VISIBLE);
       }
       view.setTag(viewHolder);
 

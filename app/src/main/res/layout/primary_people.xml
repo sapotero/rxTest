@@ -22,6 +22,7 @@
         <Switch
             android:id="@+id/is_original"
             android:text="@string/primary_people_copy"
+            android:visibility="gone"
             android:checked="false"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -34,7 +35,6 @@
         <Switch
             android:id="@+id/is_responsible"
             android:text="@string/primary_people_responsible"
-            android:visibility="gone"
             android:checked="false"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
