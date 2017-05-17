@@ -15,7 +15,6 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -44,8 +43,7 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
   private static final int PERM_REQUEST_CODE = 0;
   private static final int PERM_SYSTEM_SETTINGS_REQUEST_CODE = 1;
 
-  @Inject RxSharedPreferences settings;
-  @Inject sapotero.rxtest.utils.Settings settings2;
+  @Inject sapotero.rxtest.utils.Settings settings;
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -262,7 +260,7 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
     EventBus.getDefault().register(this);
 
     // If not first run and CryptoPro installed, immediately move to main activity
-    if ( !settings2.isFirstRun() && cryptoProInstalled ) {
+    if ( !settings.isFirstRun() && cryptoProInstalled ) {
       onCompleted(null);
     }
   }

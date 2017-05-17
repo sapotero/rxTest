@@ -13,8 +13,6 @@ import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
-import com.f2prateek.rx.preferences.RxSharedPreferences;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -42,8 +40,7 @@ import timber.log.Timber;
 public class ButtonBuilder {
 
   @Inject SingleEntityStore<Persistable> dataStore;
-  @Inject RxSharedPreferences settings;
-  @Inject Settings settings2;
+  @Inject Settings settings;
   @Inject Validation validation;
 
   private ConditionBuilder[] conditions;
@@ -112,7 +109,7 @@ public class ButtonBuilder {
   private void getCount() {
 
     // Отображать документы без резолюции
-    if ( settings2.isShowWithoutProject() ){
+    if ( settings.isShowWithoutProject() ){
       getCountWithoutDecisons();
     } else {
       // для некоторых журналов показываем всё независимо от настроек
@@ -133,7 +130,7 @@ public class ButtonBuilder {
 
     WhereAndOr<RxScalar<Integer>> query = dataStore
       .count(RDocumentEntity.class)
-      .where(RDocumentEntity.USER.eq(settings2.getLogin()))
+      .where(RDocumentEntity.USER.eq(settings.getLogin()))
       .and(RDocumentEntity.WITH_DECISION.eq(true))
       .and( RDocumentEntity.DOCUMENT_TYPE.in( validation.getSelectedJournals() ) )
       .and(RDocumentEntity.FROM_LINKS.eq(false));
@@ -188,7 +185,7 @@ public class ButtonBuilder {
 
     WhereAndOr<RxScalar<Integer>> query = dataStore
       .count(RDocumentEntity.class)
-      .where( RDocumentEntity.USER.eq( settings2.getLogin() ) );
+      .where( RDocumentEntity.USER.eq( settings.getLogin() ) );
 
     // проекты, подпись, согласование
     if ( !Arrays.asList(1,5,6,4,7).contains(index) ){
@@ -281,7 +278,7 @@ public class ButtonBuilder {
 
 
     // настройка показывать первичное рассмотрение
-    if ( settings2.isHidePrimaryConsideration() ){
+    if ( settings.isHidePrimaryConsideration() ){
       boolean matches = Pattern.matches("Перви.*", label);
       if (matches){
         view.setVisibility(View.GONE);

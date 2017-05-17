@@ -14,10 +14,6 @@ import android.view.Menu;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.birbit.android.jobqueue.JobManager;
-import com.f2prateek.rx.preferences.Preference;
-import com.f2prateek.rx.preferences.RxSharedPreferences;
-
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -28,10 +24,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
-import okhttp3.OkHttpClient;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
@@ -55,14 +49,12 @@ import timber.log.Timber;
 
 public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivityDecisionPreviewFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, RoutePreviewFragment.OnFragmentInteractionListener, InfoCardDocumentsFragment.OnFragmentInteractionListener, InfoCardWebViewFragment.OnFragmentInteractionListener, InfoCardLinksFragment.OnFragmentInteractionListener, InfoCardFieldsFragment.OnFragmentInteractionListener, /*CurrentDocumentManager.Callback,*/ SelectOshsDialogFragment.Callback {
 
-
   @BindView(R.id.activity_info_preview_container) LinearLayout preview_container;
 
   @BindView(R.id.tab_main) ViewPager viewPager;
   @BindView(R.id.tabs) TabLayout tabLayout;
 
-  @Inject RxSharedPreferences settings;
-  @Inject Settings settings2;
+  @Inject Settings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   private byte[] CARD;
@@ -142,12 +134,12 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
       }
     );
 
-    status  = Fields.Status.findStatus(settings2.getStatusCode());
+    status  = Fields.Status.findStatus(settings.getStatusCode());
     journal = Fields.getJournalByUid( UID );
 
     toolbar.setTitle( String.format("%s от %s", doc.getRegistrationNumber(), doc.getRegistrationDate() ) );
 
-    Timber.tag("MENU").e( "STATUS CODE: %s", settings2.getStatusCode() );
+    Timber.tag("MENU").e( "STATUS CODE: %s", settings.getStatusCode() );
 
   }
   private void setTabContent() {

@@ -21,8 +21,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.birbit.android.jobqueue.JobManager;
-import com.f2prateek.rx.preferences.Preference;
-import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.mikepenz.material_design_iconic_typeface_library.MaterialDesignIconic;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
@@ -42,7 +40,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
@@ -92,8 +89,7 @@ import timber.log.Timber;
 public class MainActivity extends AppCompatActivity implements MenuBuilder.Callback, SearchView.OnVisibilityChangeListener {
 
   @Inject JobManager jobManager;
-  @Inject RxSharedPreferences settings;
-  @Inject Settings settings2;
+  @Inject Settings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   @Inject QueueManager queue;
@@ -207,7 +203,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       .withOrganizationSelector( ORGANIZATION_SELECTOR )
       .withFavoritesButton( favorites_button )
       .withJournalSelector( DOCUMENT_TYPE_SELECTOR )
-      .withUser( settings2.getLogin() )
+      .withUser( settings.getLogin() )
       .registerCallBack(this);
     menuBuilder.build();
 
@@ -243,19 +239,19 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void setFirstRunFalse() {
-    boolean isFirstRun = settings2.isFirstRun();
-    boolean isSignedWithDc = settings2.isSignedWithDc();
+    boolean isFirstRun = settings.isFirstRun();
+    boolean isSignedWithDc = settings.isSignedWithDc();
 
     // If signed with login and password, do not set first run flag to false
     if ( isFirstRun && isSignedWithDc ) {
-      settings2.setFirstRun(false);
+      settings.setFirstRun(false);
     }
 
     EventBus.getDefault().post( new UpdateAllDocumentsEvent());
   }
 
   private void updateToken() {
-    String sign = settings2.getSign();
+    String sign = settings.getSign();
     if (sign == null) {
       sign = "";
     }
@@ -294,7 +290,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
                     result.add(
                       dataStore
                         .select(RDocumentEntity.class)
-                        .where( RDocumentEntity.USER.eq( settings2.getLogin() ) )
+                        .where( RDocumentEntity.USER.eq( settings.getLogin() ) )
                         .and(RDocumentEntity.REGISTRATION_NUMBER.like("%" + newText + "%"))
                         .and(RDocumentEntity.FROM_PROCESSED_FOLDER.eq(false) )
                         .get().toList()
@@ -307,7 +303,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
                     result.add(
                       dataStore
                         .select(RDocumentEntity.class)
-                        .where( RDocumentEntity.USER.eq( settings2.getLogin() ) )
+                        .where( RDocumentEntity.USER.eq( settings.getLogin() ) )
                         .and(RDocumentEntity.SHORT_DESCRIPTION.like("%" + newText + "%"))
                         .and(RDocumentEntity.FROM_PROCESSED_FOLDER.eq(false) )
                         .get().toList()
@@ -374,7 +370,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     setToolbarClickListener();
 
-    if (!settings2.isDebugEnabled()){
+    if (!settings.isDebugEnabled()){
       toolbar.getMenu().findItem(R.id.removeQueue).setVisible(false);
       toolbar.getMenu().findItem(R.id.checkQueue).setVisible(false);
     }
@@ -559,7 +555,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
           .withIdentifier(SETTINGS_DECISION_TEMPLATES)
       );
 
-    if (settings2.isDebugEnabled()){
+    if (settings.isDebugEnabled()){
       drawer
         .addDrawerItems(
           new SectionDrawerItem().withName(R.string.drawer_item_debug),
@@ -672,8 +668,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       .withHeaderBackground(R.drawable.header)
       .addProfiles(
         new ProfileDrawerItem()
-          .withName( settings2.getCurrentUserOrganization() )
-          .withEmail( settings2.getCurrentUser() )
+          .withName( settings.getCurrentUserOrganization() )
+          .withEmail( settings.getCurrentUser() )
           .withSetSelected(true)
           .withIcon(R.drawable.gerb)
       )
@@ -713,7 +709,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     Map<Integer, String> map = new HashMap<>();
     int index = 0;
 
-    for (String journal : settings2.getJournals()) {
+    for (String journal : settings.getJournals()) {
       index = Arrays.asList((getResources().getStringArray(R.array.settings_view_start_page_values))).indexOf(journal);
       map.put(index, journal);
     }
@@ -847,7 +843,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private int getLoadedDocumentsPercent() {
-    float result = 100f * loaded / settings2.getJobCount();
+    float result = 100f * loaded / settings.getJobCount();
     if (result > 100 ){
       result = 100f;
     }

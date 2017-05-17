@@ -18,7 +18,6 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -49,8 +48,7 @@ import timber.log.Timber;
 
 public class SelectOshsDialogFragment extends DialogFragment implements View.OnClickListener {
 
-  @Inject RxSharedPreferences settings;
-  @Inject Settings settings2;
+  @Inject Settings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   private String TAG = this.getClass().getSimpleName();
@@ -245,7 +243,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
     if (showWithAssistant){
       dataStore
         .select(RAssistantEntity.class)
-        .where(RAssistantEntity.USER.eq( settings2.getLogin() ))
+        .where(RAssistantEntity.USER.eq( settings.getLogin() ))
         .get().toObservable()
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
@@ -257,8 +255,8 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
     if (withPrimaryConsideration){
       WhereAndOr<RxResult<RPrimaryConsiderationEntity>> query = dataStore
         .select(RPrimaryConsiderationEntity.class)
-        .where(RPrimaryConsiderationEntity.UID.ne( settings2.getCurrentUserId() ))
-        .and(  RPrimaryConsiderationEntity.USER.eq( settings2.getLogin() ));
+        .where(RPrimaryConsiderationEntity.UID.ne( settings.getCurrentUserId() ))
+        .and(  RPrimaryConsiderationEntity.USER.eq( settings.getLogin() ));
 
       query.get()
         .toObservable()
@@ -273,7 +271,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
         dataStore
           .select(RFavoriteUserEntity.class)
           .where(RFavoriteUserEntity.UID.ne(""))
-          .and(  RFavoriteUserEntity.USER.eq( settings2.getLogin() ));
+          .and(  RFavoriteUserEntity.USER.eq( settings.getLogin() ));
 
       if (user_ids != null){
         query = query.and(RFavoriteUserEntity.UID.notIn(user_ids));

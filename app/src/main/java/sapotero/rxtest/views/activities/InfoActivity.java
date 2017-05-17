@@ -17,7 +17,6 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.birbit.android.jobqueue.JobManager;
-import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -67,7 +66,6 @@ import timber.log.Timber;
 
 public class InfoActivity extends AppCompatActivity implements InfoActivityDecisionPreviewFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, RoutePreviewFragment.OnFragmentInteractionListener, InfoCardDocumentsFragment.OnFragmentInteractionListener, InfoCardWebViewFragment.OnFragmentInteractionListener, InfoCardLinksFragment.OnFragmentInteractionListener, InfoCardFieldsFragment.OnFragmentInteractionListener{
 
-
   @BindView(R.id.activity_info_preview_container) LinearLayout preview_container;
 
   @BindView(R.id.tab_main) ViewPager viewPager;
@@ -75,8 +73,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   @BindView(R.id.activity_info_wrapper) View wrapper;
 
   @Inject JobManager jobManager;
-  @Inject RxSharedPreferences settings;
-  @Inject Settings settings2;
+  @Inject Settings settings;
 
   private String TAG = this.getClass().getSimpleName();
   private CompositeSubscription subscription;
@@ -113,8 +110,8 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
     setLastSeen();
 
-    status  = Fields.Status.findStatus( settings2.getStatusCode() );
-    journal = Fields.getJournalByUid( settings2.getUid() );
+    status  = Fields.Status.findStatus( settings.getStatusCode() );
+    journal = Fields.getJournalByUid( settings.getUid() );
 
     setTabContent();
     setPreview();
@@ -135,7 +132,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 //    Timber.tag(TAG).e("IS_PROCESSED.get() %s | %s -> %s", status, STATUS_CODE.get(), IS_PROCESSED.get() );
 
 
-    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || settings2.isFromSign() ){
+    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || settings.isFromSign() ){
       TabSigningPagerAdapter adapter = new TabSigningPagerAdapter( getSupportFragmentManager() );
       viewPager.setAdapter(adapter);
     } else {
@@ -177,7 +174,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
       e.printStackTrace();
     }
 
-    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || settings2.isFromSign() ){
+    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || settings.isFromSign() ){
       fragmentTransaction.add( R.id.activity_info_preview_container, new RoutePreviewFragment() );
     } else {
       fragmentTransaction.add( R.id.activity_info_preview_container, new InfoActivityDecisionPreviewFragment(toolbarManager) );
@@ -239,13 +236,13 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   }
 
   public void exitIfAlreadySeenThisFuckingDocument(){
-    if (Objects.equals(settings2.getLastSeenUid(), settings2.getUid())){
+    if (Objects.equals(settings.getLastSeenUid(), settings.getUid())){
       finish();
     }
   }
 
   public void setLastSeen(){
-    settings2.setLastSeenUid( settings2.getUid() );
+    settings.setLastSeenUid( settings.getUid() );
   }
 
 
@@ -258,7 +255,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   protected void onResume() {
     super.onResume();
 
-    settings2.setDecisionWithAssignment(false);
+    settings.setDecisionWithAssignment(false);
 
     initInfoActivity();
     updateCurrent();
@@ -273,7 +270,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   private void invalidateArrows() {
     // если пришли из поиска - дизейблим стрелки
     try {
-      if ( settings2.isLoadFromSearch() ){
+      if ( settings.isLoadFromSearch() ){
         ImageButton prev = (ImageButton) findViewById(R.id.activity_info_prev_document);
         ImageButton next = (ImageButton) findViewById(R.id.activity_info_next_document);
 
@@ -289,7 +286,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   private void startThreadedUpdate() {
     scheduller = new ScheduledThreadPoolExecutor(1);
-    scheduller.scheduleWithFixedDelay( new UpdateCurrentDocumentTask(settings2.getUid()), 0 ,5, TimeUnit.SECONDS );
+    scheduller.scheduleWithFixedDelay( new UpdateCurrentDocumentTask(settings.getUid()), 0 ,5, TimeUnit.SECONDS );
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
@@ -369,7 +366,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     Timber.tag("SHOW_PREV").e("info_act");
 
 
-    MainActivity.RAdapter.getPrevFromPosition( settings2.getMainMenuPosition() );
+    MainActivity.RAdapter.getPrevFromPosition( settings.getMainMenuPosition() );
 
     exitIfAlreadySeenThisFuckingDocument();
 
@@ -398,7 +395,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     Timber.tag("SHOW_NEXT").e("info_act");
 
 
-    MainActivity.RAdapter.getNextFromPosition( settings2.getMainMenuPosition() );
+    MainActivity.RAdapter.getNextFromPosition( settings.getMainMenuPosition() );
 
     exitIfAlreadySeenThisFuckingDocument();
 
@@ -432,7 +429,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   public void updateCurrent(){
 
-    jobManager.addJobInBackground(new UpdateDocumentJob( settings2.getUid(), status ));
+    jobManager.addJobInBackground(new UpdateDocumentJob( settings.getUid(), status ));
 
     unsubscribe();
     subscription.add(
@@ -441,7 +438,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(interval -> {
-          jobManager.addJobInBackground(new UpdateDocumentJob( settings2.getUid(), status ));
+          jobManager.addJobInBackground(new UpdateDocumentJob( settings.getUid(), status ));
         })
     );
 

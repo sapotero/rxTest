@@ -26,7 +26,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -56,8 +55,7 @@ import timber.log.Timber;
 
 public class DecisionFragment extends Fragment implements PrimaryConsiderationAdapter.Callback, SelectOshsDialogFragment.Callback, SelectTemplateDialogFragment.Callback {
 
-  @Inject RxSharedPreferences settings;
-  @Inject Settings settings2;
+  @Inject Settings settings;
 
   @BindView(R.id.card_toolbar)  Toolbar  card_toolbar;
   @BindView(R.id.decision_text) EditText decision_text;
@@ -316,7 +314,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
 
     // настройка
     // Не отображать кнопки «Прошу доложить» и «Прошу ознакомить»
-    if (settings2.isHideButtons()){
+    if (settings.isHideButtons()){
       button_ask_to_acquaint.setVisibility(View.GONE);
       button_ask_to_report.setVisibility(View.GONE);
       buttons.setVisibility(View.GONE);
@@ -466,8 +464,8 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   }
 
   private void loadSettings() {
-    login = settings2.getLogin();
-    token = settings2.getToken();
+    login = settings.getLogin();
+    token = settings.getToken();
   }
 
   private void showAddOshsDialog() {

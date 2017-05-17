@@ -12,8 +12,6 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 
-import com.f2prateek.rx.preferences.RxSharedPreferences;
-
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
@@ -36,8 +34,7 @@ import timber.log.Timber;
 
 public class ItemsBuilder implements ButtonBuilder.Callback {
 
-  @Inject RxSharedPreferences settings;
-  @Inject Settings settings2;
+  @Inject Settings settings;
 
   private String TAG = this.getClass().getSimpleName();
   private final Context context;
@@ -166,7 +163,7 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
         // Стартовая страница: Должен быть выбор отображаемого раздела документов при запуске
         // На рассмотрение, Первичное рассмотрение, Рассмотренные
 
-        switch (settings2.getStartPage()){
+        switch (settings.getStartPage()){
           case "report":
             if ( button.getIndex() == 2 ) {
               ((RadioButton) button_group.getChildAt(i)).setChecked(true);
@@ -193,7 +190,7 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
       }
 
       // если отключена первичка, но она есть в кнопках
-      if (settings2.isHidePrimaryConsideration()){
+      if (settings.isHidePrimaryConsideration()){
         ((RadioButton) button_group.getChildAt(0)).setChecked(true);
       }
 

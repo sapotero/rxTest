@@ -14,7 +14,6 @@ import android.view.ViewGroup;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -42,8 +41,7 @@ import timber.log.Timber;
 
 public class DecisionTemplateFragment extends Fragment {
 
-  @Inject RxSharedPreferences settings;
-  @Inject Settings settings2;
+  @Inject Settings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject OperationManager operationManager;
 
@@ -163,7 +161,7 @@ public class DecisionTemplateFragment extends Fragment {
   private void invalidateDecisions() {
     dataStore
       .select(RTemplateEntity.class)
-      .where(RTemplateEntity.USER.eq( settings2.getLogin() ))
+      .where(RTemplateEntity.USER.eq( settings.getLogin() ))
       .and(RTemplateEntity.TYPE.eq(DECISION))
       .get()
       .toObservable()

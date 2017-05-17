@@ -3,8 +3,6 @@ package sapotero.rxtest.views.adapters;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -15,9 +13,6 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
-
-import com.f2prateek.rx.preferences.Preference;
-import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -53,8 +48,7 @@ import timber.log.Timber;
 
 public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.DocumentViewHolder> implements Action1<List<Document>> {
 
-  @Inject RxSharedPreferences settings;
-  @Inject Settings settings2;
+  @Inject Settings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   private Context mContext;
@@ -327,14 +321,14 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
     viewHolder.cv.setOnClickListener(view -> {
 
-      settings2.setPosition(position);
-      settings2.setUid( item.getUid() );
-      settings2.setMainMenuPosition( viewHolder.getAdapterPosition() );
-      settings2.setRegNumber( item.getRegistrationNumber() );
-      settings2.setStatusCode( item.getFilter() );
-      settings2.setLoadFromSearch( false );
+      settings.setPosition(position);
+      settings.setUid( item.getUid() );
+      settings.setMainMenuPosition( viewHolder.getAdapterPosition() );
+      settings.setRegNumber( item.getRegistrationNumber() );
+      settings.setStatusCode( item.getFilter() );
+      settings.setLoadFromSearch( false );
 //      settings.setFromSign( item.isFromSign() );
-      settings2.setRegDate( item.getRegistrationDate() );
+      settings.setRegDate( item.getRegistrationDate() );
 
       Intent intent = new Intent(mContext, InfoActivity.class);
 
@@ -442,11 +436,11 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
       RDocumentEntity item = documents.get(position);
 
-      settings2.setMainMenuPosition(position);
-      settings2.setUid(item.getUid());
-      settings2.setRegNumber(item.getRegistrationNumber());
-      settings2.setStatusCode(item.getFilter());
-      settings2.setRegDate(item.getRegistrationDate());
+      settings.setMainMenuPosition(position);
+      settings.setUid(item.getUid());
+      settings.setRegNumber(item.getRegistrationNumber());
+      settings.setStatusCode(item.getFilter());
+      settings.setRegDate(item.getRegistrationDate());
     }
 
   }
@@ -470,12 +464,12 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
       RDocumentEntity item = documents.get(position);
 
-      settings2.setMainMenuPosition(position);
-      settings2.setUid( item.getUid() );
-      settings2.setRegNumber( item.getRegistrationNumber() );
-      settings2.setStatusCode( item.getFilter() );
+      settings.setMainMenuPosition(position);
+      settings.setUid( item.getUid() );
+      settings.setRegNumber( item.getRegistrationNumber() );
+      settings.setStatusCode( item.getFilter() );
 //      settings.setFromSign( item.isFromSign() );
-      settings2.setRegDate( item.getRegistrationDate() );
+      settings.setRegDate( item.getRegistrationDate() );
     }
 
 

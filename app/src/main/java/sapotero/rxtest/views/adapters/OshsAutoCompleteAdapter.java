@@ -11,8 +11,6 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
 
-import com.f2prateek.rx.preferences.RxSharedPreferences;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,8 +36,7 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
   private String TAG = this.getClass().getSimpleName();
 
   @Inject OkHttpClient okHttpClient;
-  @Inject RxSharedPreferences settings;
-  @Inject Settings settings2;
+  @Inject Settings settings;
 
   private ArrayList<String> ignore_user_ids;
 
@@ -127,9 +124,9 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
 
   private List<Oshs> findOshs(Context context, String term) throws IOException {
 
-    Retrofit retrofit = new RetrofitManager( context, settings2.getHost() + "/v2/", okHttpClient).process();
+    Retrofit retrofit = new RetrofitManager( context, settings.getHost() + "/v2/", okHttpClient).process();
     OshsAdapterService documentsService = retrofit.create( OshsAdapterService.class );
-    Call<Oshs[]> call = documentsService.find(settings2.getLogin(), settings2.getToken(), term);
+    Call<Oshs[]> call = documentsService.find(settings.getLogin(), settings.getToken(), term);
 
     Oshs[] data = call.execute().body();
 
