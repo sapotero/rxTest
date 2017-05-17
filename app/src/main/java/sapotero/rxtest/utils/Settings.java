@@ -12,51 +12,51 @@ import sapotero.rxtest.views.custom.stepper.util.AuthType;
 
 public class Settings {
 
-  public static final String SIGN_WITH_DC_KEY = "SIGN_WITH_DC";
-  public static final String DOCUMENTS_COUNT_KEY = "documents.count";
-  public static final String LOGIN_KEY = "login";
-  public static final String TOKEN_KEY = "token";
-  public static final String PASSWORD_KEY = "password";
-  public static final String PIN_KEY = "PIN";
-  public static final String SIGN_KEY = "START_UP_SIGN";
-  public static final String UID_KEY = "activity_main_menu.uid";
-  public static final String STATUS_CODE_KEY = "activity_main_menu.star";
-  public static final String CURRENT_USER_ID_KEY = "current_user_id";
-  public static final String CURRENT_USER_KEY = "current_user";
-  public static final String CURRENT_USER_ORGANIZATION_KEY = "current_user_organization";
-  public static final String POSITION_KEY = "position";
-  public static final String MAIN_MENU_POSITION_KEY = "activity_main_menu.position";
-  public static final String REGNUMBER_KEY = "activity_main_menu.regnumber";
-  public static final String REGDATE_KEY = "activity_main_menu.date";
-  public static final String LOAD_FROM_SEARCH_KEY = "load_from_search";
-  public static final String LAST_SEEN_UID_KEY = "activity_main_menu.last_seen_uid";
-  public static final String FROM_SIGN_KEY = "activity_main_menu.from_sign";
-  public static final String DECISION_WITH_ASSIGNMENT_KEY = "decision_with_assignment";
-  public static final String DECISION_ACTIVE_ID_KEY = "decision.active.id";
-  public static final String PREV_DIALOG_COMMENT_KEY = "prev_dialog_comment";
-  public static final String START_LOAD_DATA_KEY = "start_load_data";
-  public static final String STEPPER_AUTH_TYPE_KEY = "stepper.auth_type";
+  private static final String SIGN_WITH_DC_KEY = "SIGN_WITH_DC";
+  private static final String DOCUMENTS_COUNT_KEY = "documents.count";
+  private static final String LOGIN_KEY = "login";
+  private static final String TOKEN_KEY = "token";
+  private static final String PASSWORD_KEY = "password";
+  private static final String PIN_KEY = "PIN";
+  private static final String SIGN_KEY = "START_UP_SIGN";
+  private static final String UID_KEY = "activity_main_menu.uid";
+  private static final String STATUS_CODE_KEY = "activity_main_menu.stat";
+  private static final String CURRENT_USER_ID_KEY = "current_user_id";
+  private static final String CURRENT_USER_KEY = "current_user";
+  private static final String CURRENT_USER_ORGANIZATION_KEY = "current_user_organization";
+  private static final String POSITION_KEY = "position";
+  private static final String MAIN_MENU_POSITION_KEY = "activity_main_menu.position";
+  private static final String REGNUMBER_KEY = "activity_main_menu.regnumber";
+  private static final String REGDATE_KEY = "activity_main_menu.date";
+  private static final String LOAD_FROM_SEARCH_KEY = "load_from_search";
+  private static final String LAST_SEEN_UID_KEY = "activity_main_menu.last_seen_uid";
+  private static final String FROM_SIGN_KEY = "activity_main_menu.from_sign";
+  private static final String DECISION_WITH_ASSIGNMENT_KEY = "decision_with_assignment";
+  private static final String DECISION_ACTIVE_ID_KEY = "decision.active.id";
+  private static final String PREV_DIALOG_COMMENT_KEY = "prev_dialog_comment";
+  private static final String START_LOAD_DATA_KEY = "start_load_data";
+  private static final String STEPPER_AUTH_TYPE_KEY = "stepper.auth_type";
 
   public static String FIRST_RUN_KEY;
-  public static String HOST_KEY;
-  public static String ACTIONS_CONFIRM_KEY;
-  public static String CONTROL_CONFIRM_KEY;
-  public static String SHOW_COMMENT_POST_KEY;
-  public static String SHOW_URGENCY_KEY;
-  public static String ONLY_URGENT_KEY;
-  public static String JOURNALS_KEY;
-  public static String START_PAGE_KEY;
-  public static String SHOW_WITHOUT_PROJECT_KEY;
-  public static String HIDE_PRIMARY_CONSIDERATION_KEY;
-  public static String HIDE_BUTTONS_KEY;
-  public static String SHOW_DECISION_DATE_UPDATE_KEY;
-  public static String SHOW_DECISION_CHANGE_FONT_KEY;
-  public static String SHOW_ORIGIN_KEY;
-  public static String SHOW_CHANGE_SIGNER_KEY;
-  public static String SHOW_CREATE_DECISION_POST_KEY;
-  public static String SHOW_APPROVE_ON_PRIMARY_KEY;
-  public static String MAX_IMAGE_SIZE_KEY;
-  public static String DEBUG_ENABLED_KEY;
+  private static String HOST_KEY;
+  private static String ACTIONS_CONFIRM_KEY;
+  private static String CONTROL_CONFIRM_KEY;
+  private static String SHOW_COMMENT_POST_KEY;
+  private static String SHOW_URGENCY_KEY;
+  private static String ONLY_URGENT_KEY;
+  private static String JOURNALS_KEY;
+  private static String START_PAGE_KEY;
+  private static String SHOW_WITHOUT_PROJECT_KEY;
+  private static String HIDE_PRIMARY_CONSIDERATION_KEY;
+  private static String HIDE_BUTTONS_KEY;
+  private static String SHOW_DECISION_DATE_UPDATE_KEY;
+  private static String SHOW_DECISION_CHANGE_FONT_KEY;
+  private static String SHOW_ORIGIN_KEY;
+  private static String SHOW_CHANGE_SIGNER_KEY;
+  private static String SHOW_CREATE_DECISION_POST_KEY;
+  private static String SHOW_APPROVE_ON_PRIMARY_KEY;
+  private static String MAX_IMAGE_SIZE_KEY;
+  private static String DEBUG_ENABLED_KEY;
 
   private Context context;
   private RxSharedPreferences settings;
@@ -432,20 +432,12 @@ public class Settings {
     return getBoolean(actionsConfirm);
   }
 
-  public void setActionsConfirm(boolean value) {
-    setBoolean(actionsConfirm, value);
-  }
-
   public Preference<Boolean> getActionsConfirmPreference() {
     return actionsConfirm;
   }
 
   public boolean isControlConfirm() {
     return getBoolean(controlConfirm);
-  }
-
-  public void setControlConfirm(boolean value) {
-    setBoolean(controlConfirm, value);
   }
 
   public boolean isShowCommentPost() {
@@ -458,10 +450,6 @@ public class Settings {
 
   public boolean isShowUrgency() {
     return getBoolean(showUrgency);
-  }
-
-  public void setShowUrgency(boolean value) {
-    setBoolean(showUrgency, value);
   }
 
   public Preference<Boolean> getShowUrgencyPreference() {
