@@ -10,8 +10,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 
-import com.f2prateek.rx.preferences.RxSharedPreferences;
-
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -106,8 +104,7 @@ public class MainService extends Service {
   private ScheduledFuture futureNetwork;
 
   @Inject OkHttpClient okHttpClient;
-  @Inject RxSharedPreferences settings;
-  @Inject Settings settings2;
+  @Inject Settings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   @Inject QueueManager queue;
@@ -750,9 +747,9 @@ public class MainService extends Service {
 
         SIGN = enc.encode(signature);
 
-        settings2.setSign( SIGN );
-        settings2.setSignedWithDc( true );
-        settings2.setPin( password );
+        settings.setSign( SIGN );
+        settings.setSignedWithDc( true );
+        settings.setPin( password );
 
         dataLoaderInterface.tryToSignWithDc( SIGN );
 
@@ -761,7 +758,7 @@ public class MainService extends Service {
         EventBus.getDefault().post( new StepperDcCheckFailEvent("Pin is invalid") );
       }
     } else {
-      settings2.setPin("");
+      settings.setPin("");
       EventBus.getDefault().post( new StepperDcCheckFailEvent("Ошибка! Проверьте SD карту") );
     }
   }
@@ -853,7 +850,7 @@ public class MainService extends Service {
         dataLoaderInterface.updateAuth(SIGN);
       });
 
-    settings2.getLoginPreference()
+    settings.getLoginPreference()
       .asObservable()
       .subscribe(username -> {
         user = username;
@@ -1009,7 +1006,7 @@ public class MainService extends Service {
       type = "";
     }
     if ( type.equals("favorites") ) {
-      if ( settings2.isFirstRun() ) {
+      if ( settings.isFirstRun() ) {
         dataLoaderInterface.updateFavorites();
       }
     }

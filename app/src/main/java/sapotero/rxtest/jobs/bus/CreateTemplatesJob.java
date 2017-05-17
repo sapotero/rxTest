@@ -49,7 +49,7 @@ public class CreateTemplatesJob extends BaseJob {
     data.setUid( template.getId() );
     data.setTitle( template.getText() );
     data.setType( type != null && !Objects.equals(type, "") ? type : "decision");
-    data.setUser( settings2.getLogin() );
+    data.setUser( settings.getLogin() );
 
 
     dataStore

@@ -14,7 +14,6 @@ import android.widget.EditText;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -48,8 +47,7 @@ import timber.log.Timber;
 public class ToolbarManager  implements SelectOshsDialogFragment.Callback, OperationManager.Callback {
 
   @Inject SingleEntityStore<Persistable> dataStore;
-  @Inject RxSharedPreferences settings;
-  @Inject Settings settings2;
+  @Inject Settings settings;
   @Inject OperationManager operationManager;
 
   private final String TAG = this.getClass().getSimpleName();
@@ -86,7 +84,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   private void getFirstForLenovo() {
     doc = dataStore
       .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq(settings2.getUid())).get().first();
+      .where(RDocumentEntity.UID.eq(settings.getUid())).get().first();
   }
 
   private void setListener() {
@@ -97,8 +95,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
         CommandFactory.Operation operation;
         CommandParams params = new CommandParams();
-        params.setUser( settings2.getLogin() );
-        params.setDocument( settings2.getUid() );
+        params.setUser( settings.getLogin() );
+        params.setDocument( settings.getUid() );
 
         switch ( item.getItemId() ){
           // sent_to_the_report (отправлен на доклад)
@@ -118,7 +116,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             dialogFragment.withConfirm(true);
             dialogFragment.withChangePerson(true);
             dialogFragment.registerCallBack( this );
-            dialogFragment.withDocumentUid( settings2.getUid() );
+            dialogFragment.withDocumentUid( settings.getUid() );
             dialogFragment.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
 
             operation = CommandFactory.Operation.INCORRECT;
@@ -127,18 +125,18 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
           // sent_to_the_report (отправлен на доклад)
           case R.id.menu_info_delegate_performance:
             operation = CommandFactory.Operation.DELEGATE_PERFORMANCE;
-            params.setPerson( settings2.getCurrentUserId() );
+            params.setPerson( settings.getCurrentUserId() );
             break;
           case R.id.menu_info_to_the_approval_performance:
 
             // настройка
             // Показывать подтверждения о действиях с документом
-            if ( settings2.isActionsConfirm() ){
+            if ( settings.isActionsConfirm() ){
               operation = CommandFactory.Operation.INCORRECT;
               showFromTheReportDialog();
             } else {
               operation = CommandFactory.Operation.FROM_THE_REPORT;
-              params.setPerson( settings2.getCurrentUserId() );
+              params.setPerson( settings.getCurrentUserId() );
             }
             break;
 
@@ -147,7 +145,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
             // настройка
             // Показывать подтверждения о действиях с документом
-            if ( settings2.isActionsConfirm() ){
+            if ( settings.isActionsConfirm() ){
               operation = CommandFactory.Operation.INCORRECT;
               showNextDialog(false);
             } else {
@@ -158,7 +156,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
           case R.id.menu_info_approval_prev_person:
             // настройка
             // Показывать подтверждения о действиях с документом
-            if ( settings2.isActionsConfirm() ){
+            if ( settings.isActionsConfirm() ){
               operation = CommandFactory.Operation.INCORRECT;
               showPrevDialog(true);
             } else {
@@ -181,7 +179,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             approveDialogFragment.withPrimaryConsideration(false);
             approveDialogFragment.withChangePerson(true);
             approveDialogFragment.registerCallBack( this );
-            approveDialogFragment.withDocumentUid( settings2.getUid() );
+            approveDialogFragment.withDocumentUid( settings.getUid() );
             approveDialogFragment.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
 //
             break;
@@ -198,7 +196,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             sign.withPrimaryConsideration(false);
             sign.withChangePerson(true);
             sign.registerCallBack( this );
-            sign.withDocumentUid( settings2.getUid() );
+            sign.withDocumentUid( settings.getUid() );
             sign.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
 
           break;
@@ -210,7 +208,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
               // настройка
               // Показывать подтверждения о действиях с документом
-              if ( settings2.isActionsConfirm() ){
+              if ( settings.isActionsConfirm() ){
                 operation = CommandFactory.Operation.INCORRECT;
                 showNextDialog(true);
               } else {
@@ -236,7 +234,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
             // настройка
             // Показывать подтверждения о действиях с документом
-            if ( settings2.isActionsConfirm() ){
+            if ( settings.isActionsConfirm() ){
               operation = CommandFactory.Operation.INCORRECT;
               showPrevDialog(false);
             } else {
@@ -248,7 +246,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
           case R.id.menu_info_decision_create:
             operation = CommandFactory.Operation.INCORRECT;
 
-            settings2.setDecisionActiveId(0);
+            settings.setDecisionActiveId(0);
 
             Intent create_intent = new Intent(context, DecisionConstructorActivity.class);
             activity.startActivity(create_intent);
@@ -281,7 +279,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
               .get().first().getUid();
 
             params.setFolder(favorites);
-            params.setDocument( settings2.getUid() );
+            params.setDocument( settings.getUid() );
 
 
             break;
@@ -289,14 +287,14 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             // настройка
             // Показывать подтверждения о постановке на контроль документов для раздела «Обращение граждан»
 
-            if ( settings2.isControlConfirm() && settings2.getUid().startsWith( Fields.Journal.CITIZEN_REQUESTS.getValue() ) ){
+            if ( settings.isControlConfirm() && settings.getUid().startsWith( Fields.Journal.CITIZEN_REQUESTS.getValue() ) ){
               operation = CommandFactory.Operation.INCORRECT;
 
               showToControlDialog();
 
             } else {
               operation = CommandFactory.Operation.CHECK_FOR_CONTROL;
-              params.setDocument( settings2.getUid() );
+              params.setDocument( settings.getUid() );
             }
             break;
 
@@ -304,8 +302,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             // настройка
             // Показывать подтверждения о постановке на контроль документов для раздела «Обращение граждан»
             operation = CommandFactory.Operation.INCORRECT;
-            settings2.setDecisionWithAssignment(true);
-            settings2.setDecisionActiveId(0);
+            settings.setDecisionWithAssignment(true);
+            settings.setDecisionActiveId(0);
             Intent create_assigment_intent = new Intent(context, DecisionConstructorActivity.class);
             activity.startActivity(create_assigment_intent);
             break;
@@ -313,12 +311,12 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
           // resolved https://tasks.n-core.ru/browse/MVDESD-13368
           // Кнопка "Отклонить" в документах "На рассмотрение" и "Первичное рассмотрение"
           case R.id.menu_info_report_dismiss:
-            if ( settings2.isActionsConfirm() ){
+            if ( settings.isActionsConfirm() ){
               operation = CommandFactory.Operation.INCORRECT;
               showDismissDialog();
             } else {
               operation = CommandFactory.Operation.RETURN_TO_THE_PRIMARY_CONSIDERATION;
-              params.setDocument( settings2.getUid() );
+              params.setDocument( settings.getUid() );
             }
 
             break;
@@ -352,10 +350,10 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       for (RImage _image: doc.getImages()) {
         RImageEntity image = (RImageEntity) _image;
 
-        int max_size = parseIntOrDefault( settings2.getMaxImageSize(), 20 )*1024*1024;
+        int max_size = parseIntOrDefault( settings.getMaxImageSize(), 20 )*1024*1024;
 
         if (max_size > 20*1024*1024){
-          settings2.setMaxImageSize("20");
+          settings.setMaxImageSize("20");
           result = false;
         }
 
@@ -377,7 +375,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       String code = null;
 
       try {
-        code = settings2.getStatusCode();
+        code = settings.getStatusCode();
       } catch (Exception e) {
         e.printStackTrace();
       }
@@ -389,7 +387,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       if (code == null){
         menu = R.menu.info_menu;
       } else {
-        switch ( settings2.getStatusCode() ){
+        switch ( settings.getStatusCode() ){
           case "sent_to_the_report":
             menu = R.menu.info_menu_sent_to_the_report;
             break;
@@ -463,7 +461,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       // настройка
       // Показывать кнопку «Создать поручение»
       try {
-        if (!settings2.isShowCreateDecisionPost() && doc.isFromFavoritesFolder() != null && doc.isFromFavoritesFolder() ) {
+        if (!settings.isShowCreateDecisionPost() && doc.isFromFavoritesFolder() != null && doc.isFromFavoritesFolder() ) {
           if ( isProcessed() ){
             toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(false);
           }
@@ -552,7 +550,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       if (doc != null && doc.getDecisions().size() > 0){
         for ( RDecision _decision: doc.getDecisions() ) {
           RDecisionEntity decision = (RDecisionEntity) _decision;
-          if (!decision.isApproved() && Objects.equals(decision.getSignerId(), settings2.getCurrentUserId())){
+          if (!decision.isApproved() && Objects.equals(decision.getSignerId(), settings.getCurrentUserId())){
             result = true;
           }
         }
@@ -666,11 +664,11 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 //    journal = Fields.getJournalByUid( UID.get() );
 
 
-    Timber.tag("MENU").e( "STATUS CODE: %s", settings2.getStatusCode() );
+    Timber.tag("MENU").e( "STATUS CODE: %s", settings.getStatusCode() );
 
     invalidate();
 
-    toolbar.setTitle( String.format("%s от %s", settings2.getRegNumber(), settings2.getRegDate()) );
+    toolbar.setTitle( String.format("%s от %s", settings.getRegNumber(), settings.getRegDate()) );
     if (doc!=null && doc.getDocumentType() != null){
       toolbar.setSubtitle( String.format("%s", Fields.getJournalName(doc.getDocumentType()) ) );
     }
@@ -706,8 +704,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         CommandFactory.Operation operation = CommandFactory.Operation.CHECK_FOR_CONTROL;
 
         CommandParams params = new CommandParams();
-        params.setUser( settings2.getLogin() );
-        params.setDocument( settings2.getUid() );
+        params.setUser( settings.getLogin() );
+        params.setDocument( settings.getUid() );
 
         operationManager.execute( operation, params );
       })
@@ -729,8 +727,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         operation = !isApproval ? CommandFactory.Operation.APPROVAL_NEXT_PERSON: CommandFactory.Operation.SIGNING_NEXT_PERSON;
 
         CommandParams params = new CommandParams();
-        params.setUser( settings2.getLogin() );
-        params.setDocument( settings2.getUid() );
+        params.setUser( settings.getLogin() );
+        params.setDocument( settings.getUid() );
         params.setSign( "SignFileCommand" );
 
         operationManager.execute( operation, params );
@@ -754,17 +752,17 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         operation = isApproval ? CommandFactory.Operation.APPROVAL_PREV_PERSON : CommandFactory.Operation.SIGNING_PREV_PERSON;
 
 
-        params.setUser(settings2.getLogin());
+        params.setUser(settings.getLogin());
         params.setSign("SignFileCommand");
 
         // если есть комментарий
-        if (settings2.getPrevDialogComment() != null && settings2.isShowCommentPost() ) {
+        if (settings.getPrevDialogComment() != null && settings.isShowCommentPost() ) {
 //          params.setComment("SignFileCommand");
-          if ( settings2.isShowCommentPost() ) {
+          if ( settings.isShowCommentPost() ) {
             params.setComment(dialog1.getInputEditText().getText().toString());
           }
         }
-        params.setDocument( settings2.getUid() );
+        params.setDocument( settings.getUid() );
 
 
         operationManager.execute(operation, params);
@@ -773,10 +771,10 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
       // настройка
       // Показывать комментарий при отклонении
-      if ( settings2.isShowCommentPost() ){
+      if ( settings.isShowCommentPost() ){
         prev_dialog.inputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES )
           .input(R.string.comment_hint, R.string.dialog_empty_value, (dialog12, input) -> {
-            settings2.setPrevDialogComment( input.toString() );
+            settings.setPrevDialogComment( input.toString() );
             params.setComment( input.toString() );
           });
       }
@@ -800,9 +798,9 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         CommandFactory.Operation operation;
 
         operation = CommandFactory.Operation.FROM_THE_REPORT;
-        params.setPerson( settings2.getCurrentUserId() );
-        params.setDocument( settings2.getUid() );
-        if ( settings2.isShowCommentPost() ) {
+        params.setPerson( settings.getCurrentUserId() );
+        params.setDocument( settings.getUid() );
+        if ( settings.isShowCommentPost() ) {
           params.setComment(dialog1.getInputEditText().getText().toString());
         }
 
@@ -812,10 +810,10 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
     // настройка
     // Показывать комментарий при отклонении
-    if ( settings2.isShowCommentPost() ){
+    if ( settings.isShowCommentPost() ){
       fromTheReportDialog.inputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES )
         .input(R.string.comment_hint, R.string.dialog_empty_value, (dialog12, input) -> {
-          settings2.setPrevDialogComment( input.toString() );
+          settings.setPrevDialogComment( input.toString() );
           params.setComment( input.toString() );
         });
     }
@@ -837,7 +835,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       .onPositive((dialog1, which) -> {
         CommandFactory.Operation operation;
         operation = CommandFactory.Operation.RETURN_TO_THE_PRIMARY_CONSIDERATION;
-        params.setDocument( settings2.getUid() );
+        params.setDocument( settings.getUid() );
         operationManager.execute(operation, params);
       })
       .autoDismiss(true)

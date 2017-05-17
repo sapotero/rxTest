@@ -6,7 +6,6 @@ import android.support.annotation.Nullable;
 import com.birbit.android.jobqueue.CancelReason;
 import com.birbit.android.jobqueue.Params;
 import com.birbit.android.jobqueue.RetryConstraint;
-import com.f2prateek.rx.preferences.Preference;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -127,10 +126,10 @@ public class DownloadFileJob  extends BaseJob {
   }
 
   private void loadFile(){
-    String admin = settings2.getLogin();
-    String token = settings2.getToken();
+    String admin = settings.getLogin();
+    String token = settings.getToken();
 
-    Retrofit retrofit = new RetrofitManager(getApplicationContext(), settings2.getHost(), okHttpClient).process();
+    Retrofit retrofit = new RetrofitManager(getApplicationContext(), settings.getHost(), okHttpClient).process();
     DocumentLinkService documentLinkService = retrofit.create(DocumentLinkService.class);
 
     strUrl = strUrl.replace("?expired_link=1", "");
@@ -158,8 +157,8 @@ public class DownloadFileJob  extends BaseJob {
 
     Timber.tag(TAG).v( "downloadFile ..." );
 
-    String admin = settings2.getLogin();
-    String token = settings2.getToken();
+    String admin = settings.getLogin();
+    String token = settings.getToken();
 
     Timber.tag(TAG).d("host: '%s' | link: '%s'", host.substring(0, host.length()-1), link.getExpiredLink() );
 
@@ -171,7 +170,7 @@ public class DownloadFileJob  extends BaseJob {
       .build();
 
 
-    Retrofit retrofit = new RetrofitManager(getApplicationContext(), settings2.getHost(), okHttpClient).process();
+    Retrofit retrofit = new RetrofitManager(getApplicationContext(), settings.getHost(), okHttpClient).process();
     DocumentLinkService documentLinkService = retrofit.create(DocumentLinkService.class);
 
     Observable<Response<ResponseBody>> call = documentLinkService.download(new_builtUri.toString(), admin, token);

@@ -5,7 +5,6 @@ import android.support.annotation.Nullable;
 import com.birbit.android.jobqueue.CancelReason;
 import com.birbit.android.jobqueue.Params;
 import com.birbit.android.jobqueue.RetryConstraint;
-import com.f2prateek.rx.preferences.Preference;
 import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
@@ -92,7 +91,7 @@ public class CreateDocumentsJob extends BaseJob {
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl(settings2.getHost() + "v3/documents/")
+      .baseUrl(settings.getHost() + "v3/documents/")
       .client(okHttpClient)
       .build();
 
@@ -100,8 +99,8 @@ public class CreateDocumentsJob extends BaseJob {
 
     Observable<DocumentInfo> info = documentService.getInfo(
       uid,
-      settings2.getLogin(),
-      settings2.getToken()
+      settings.getLogin(),
+      settings.getToken()
     );
 
     info
@@ -129,7 +128,7 @@ public class CreateDocumentsJob extends BaseJob {
     doc.setFromFavoritesFolder( false );
     doc.setUid( document.getUid() );
     doc.setFromLinks( false );
-    doc.setUser( settings2.getLogin() );
+    doc.setUser( settings.getLogin() );
 
     doc.setMd5( document.getMd5() );
     doc.setSortKey( document.getSortKey() );
@@ -165,7 +164,7 @@ public class CreateDocumentsJob extends BaseJob {
       doc.setOrganization("Без организации" );
     }
 
-    doc.setUser( settings2.getLogin() );
+    doc.setUser( settings.getLogin() );
     doc.setFavorites(false);
     doc.setProcessed(false);
     doc.setControl(false);
@@ -379,7 +378,7 @@ public class CreateDocumentsJob extends BaseJob {
             for (RImage _image : result.getImages()) {
               jobCount++;
               RImageEntity image = (RImageEntity) _image;
-              jobManager.addJobInBackground( new DownloadFileJob(settings2.getHost(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
+              jobManager.addJobInBackground( new DownloadFileJob(settings.getHost(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
             }
           }
 
@@ -410,7 +409,7 @@ public class CreateDocumentsJob extends BaseJob {
             }
           }
 
-          settings2.addJobCount(jobCount);
+          settings.addJobCount(jobCount);
 
           EventBus.getDefault().post( new UpdateDocumentAdapterEvent( result.getUid(), result.getDocumentType(), result.getFilter() ) );
 

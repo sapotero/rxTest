@@ -6,7 +6,6 @@ import android.support.annotation.Nullable;
 import com.birbit.android.jobqueue.CancelReason;
 import com.birbit.android.jobqueue.Params;
 import com.birbit.android.jobqueue.RetryConstraint;
-import com.f2prateek.rx.preferences.Preference;
 import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
@@ -73,7 +72,7 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl(settings2.getHost() + "v3/documents/")
+      .baseUrl(settings.getHost() + "v3/documents/")
       .client(okHttpClient)
       .build();
 
@@ -81,8 +80,8 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
 
     Observable<DocumentInfo> info = documentService.getInfo(
       uid,
-      settings2.getLogin(),
-      settings2.getToken()
+      settings.getLogin(),
+      settings.getToken()
     );
 
     info
@@ -151,7 +150,7 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
 
     RDocumentEntity rd = new RDocumentEntity();
     rd.setUid(  d.getUid() );
-    rd.setUser( settings2.getLogin() );
+    rd.setUser( settings.getLogin() );
     rd.setFilter( "" );
     rd.setMd5( d.getMd5() );
     rd.setSortKey( d.getSortKey() );
@@ -230,7 +229,7 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
       rDoc.setFromProcessedFolder(true);
       rDoc.setProcessed(true);
 
-      rDoc.setUser( settings2.getLogin() );
+      rDoc.setUser( settings.getLogin() );
 
       if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
         rDoc.getDecisions().clear();
@@ -406,7 +405,7 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
               for (RImage _image : result.getImages()) {
 
                 RImageEntity image = (RImageEntity) _image;
-                jobManager.addJobInBackground( new DownloadFileJob(settings2.getHost(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
+                jobManager.addJobInBackground( new DownloadFileJob(settings.getHost(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
               }
 
             }
@@ -438,7 +437,7 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
         signer.setType( document.getSigner().getType() );
       }
 
-      doc.setUser( settings2.getLogin() );
+      doc.setUser( settings.getLogin() );
 
       if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
         doc.getDecisions().clear();
@@ -613,7 +612,7 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
               for (RImage _image : result.getImages()) {
 
                 RImageEntity image = (RImageEntity) _image;
-                jobManager.addJobInBackground( new DownloadFileJob(settings2.getHost(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
+                jobManager.addJobInBackground( new DownloadFileJob(settings.getHost(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
               }
 
             }

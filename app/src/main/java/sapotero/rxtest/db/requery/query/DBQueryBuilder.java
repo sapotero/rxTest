@@ -6,8 +6,6 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.f2prateek.rx.preferences.RxSharedPreferences;
-
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
@@ -46,8 +44,7 @@ import timber.log.Timber;
 public class DBQueryBuilder {
 
   @Inject SingleEntityStore<Persistable> dataStore;
-  @Inject RxSharedPreferences settings;
-  @Inject Settings settings2;
+  @Inject Settings settings;
   @Inject Validation validation;
 
   private final String TAG = this.getClass().getSimpleName();
@@ -115,12 +112,12 @@ public class DBQueryBuilder {
       WhereAndOr<RxResult<RDocumentEntity>> query =
         dataStore
           .select(RDocumentEntity.class)
-          .where(RDocumentEntity.USER.eq( settings2.getLogin() ) );
+          .where(RDocumentEntity.USER.eq( settings.getLogin() ) );
 
       WhereAndOr<RxScalar<Integer>> queryCount =
         dataStore
           .count(RDocument.class)
-          .where(RDocumentEntity.USER.eq( settings2.getLogin() ));
+          .where(RDocumentEntity.USER.eq( settings.getLogin() ));
 
       Boolean hsdFavorites = false;
 
@@ -424,7 +421,7 @@ public class DBQueryBuilder {
   private void addDocument(RDocumentEntity doc) {
     // настройка
     // если включена настройка "Отображать документы без резолюции"
-    if ( settings2.isShowWithoutProject() ){
+    if ( settings.isShowWithoutProject() ){
       addOne(doc);
     } else {
       if ( menuBuilder.getItem().isShowAnyWay() ){
@@ -505,7 +502,7 @@ public class DBQueryBuilder {
       .distinct()
       .join(RDocumentEntity.class)
       .on( RDocumentEntity.SIGNER_ID.eq(RSignerEntity.ID) )
-      .where(RDocumentEntity.USER.eq( settings2.getLogin() ));
+      .where(RDocumentEntity.USER.eq( settings.getLogin() ));
 
     if ( conditions.size() > 0 ){
 
@@ -572,7 +569,7 @@ public class DBQueryBuilder {
   public int getFavoritesCount(){
     return dataStore
       .count(RDocumentEntity.UID)
-      .where(RDocumentEntity.USER.eq( settings2.getLogin() ) )
+      .where(RDocumentEntity.USER.eq( settings.getLogin() ) )
       .and(RDocumentEntity.FAVORITES.eq(true))
       .and(RDocumentEntity.FILTER.ne("link"))
       .get().value();
