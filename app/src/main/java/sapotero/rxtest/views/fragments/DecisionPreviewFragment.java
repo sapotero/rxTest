@@ -481,7 +481,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
     date_and_number_view.setOrientation(LinearLayout.HORIZONTAL);
 
     TextView numberView = new TextView(getActivity());
-    numberView.setText( "№ " + settings.getDocumentNumber() );
+    numberView.setText( "№ " + settings.getRegNumber() );
     numberView.setTextColor( Color.BLACK );
     LinearLayout.LayoutParams numberViewParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f);
     numberView.setLayoutParams(numberViewParams);
