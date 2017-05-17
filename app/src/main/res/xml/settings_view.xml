@@ -125,7 +125,7 @@
         android:title="Расширенные настройки">
 
         <SwitchPreference
-            android:key="debug_enabled"
+            android:key="@string/debug_enabled_key"
             android:title="Режим отладки"
             android:defaultValue="false" />
 

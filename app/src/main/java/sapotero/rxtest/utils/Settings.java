@@ -53,6 +53,7 @@ public class Settings {
   public static String SHOW_CREATE_DECISION_POST_KEY;
   public static String SHOW_APPROVE_ON_PRIMARY_KEY;
   public static String MAX_IMAGE_SIZE_KEY;
+  public static String DEBUG_ENABLED_KEY;
 
   private Context context;
   private RxSharedPreferences settings;
@@ -98,6 +99,7 @@ public class Settings {
   private Preference<Boolean> showCreateDecisionPost;
   private Preference<Boolean> showApproveOnPrimary;
   private Preference<String> maxImageSize;
+  private Preference<Boolean> debugEnabled;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -125,6 +127,7 @@ public class Settings {
     SHOW_CREATE_DECISION_POST_KEY = context.getResources().getString(R.string.show_create_decision_post_key);
     SHOW_APPROVE_ON_PRIMARY_KEY = context.getResources().getString(R.string.show_approve_on_primary_key);
     MAX_IMAGE_SIZE_KEY = context.getResources().getString(R.string.max_image_size_key);
+    DEBUG_ENABLED_KEY = context.getResources().getString(R.string.debug_enabled_key);
 
     firstRunFlag = settings.getBoolean(FIRST_RUN_KEY);
     signWithDc = settings.getBoolean(SIGN_WITH_DC_KEY);
@@ -167,6 +170,7 @@ public class Settings {
     showCreateDecisionPost = settings.getBoolean(SHOW_CREATE_DECISION_POST_KEY);
     showApproveOnPrimary = settings.getBoolean(SHOW_APPROVE_ON_PRIMARY_KEY);
     maxImageSize = settings.getString(MAX_IMAGE_SIZE_KEY);
+    debugEnabled = settings.getBoolean(DEBUG_ENABLED_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -531,5 +535,9 @@ public class Settings {
 
   public void setMaxImageSize(String value) {
     setString(maxImageSize, value);
+  }
+
+  public boolean isDebugEnabled() {
+    return getBoolean(debugEnabled);
   }
 }

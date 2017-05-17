@@ -374,7 +374,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     setToolbarClickListener();
 
-    if (!settings.getBoolean("debug_enabled").get()){
+    if (!settings2.isDebugEnabled()){
       toolbar.getMenu().findItem(R.id.removeQueue).setVisible(false);
       toolbar.getMenu().findItem(R.id.checkQueue).setVisible(false);
     }
@@ -559,7 +559,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
           .withIdentifier(SETTINGS_DECISION_TEMPLATES)
       );
 
-    if (settings.getBoolean("debug_enabled").get()){
+    if (settings2.isDebugEnabled()){
       drawer
         .addDrawerItems(
           new SectionDrawerItem().withName(R.string.drawer_item_debug),
