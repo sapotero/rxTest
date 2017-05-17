@@ -49,6 +49,7 @@ public class Settings {
   public static String SHOW_DECISION_DATE_UPDATE_KEY;
   public static String SHOW_DECISION_CHANGE_FONT_KEY;
   public static String SHOW_ORIGIN_KEY;
+  public static String SHOW_CHANGE_SIGNER_KEY;
 
   private Context context;
   private RxSharedPreferences settings;
@@ -90,6 +91,7 @@ public class Settings {
   private Preference<Boolean> showDecisionDateUpdate;
   private Preference<Boolean> showDecisionChangeFont;
   private Preference<Boolean> showOrigin;
+  private Preference<Boolean> showChangeSigner;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -113,6 +115,7 @@ public class Settings {
     SHOW_DECISION_DATE_UPDATE_KEY = context.getResources().getString(R.string.show_decision_date_update_key);
     SHOW_DECISION_CHANGE_FONT_KEY = context.getResources().getString(R.string.show_decision_change_font_key);
     SHOW_ORIGIN_KEY = context.getResources().getString(R.string.show_origin_key);
+    SHOW_CHANGE_SIGNER_KEY = context.getResources().getString(R.string.show_change_signer_key);
 
     firstRunFlag = settings.getBoolean(FIRST_RUN_KEY);
     signWithDc = settings.getBoolean(SIGN_WITH_DC_KEY);
@@ -151,6 +154,7 @@ public class Settings {
     showDecisionDateUpdate = settings.getBoolean(SHOW_DECISION_DATE_UPDATE_KEY);
     showDecisionChangeFont = settings.getBoolean(SHOW_DECISION_CHANGE_FONT_KEY);
     showOrigin = settings.getBoolean(SHOW_ORIGIN_KEY);
+    showChangeSigner = settings.getBoolean(SHOW_CHANGE_SIGNER_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -495,5 +499,9 @@ public class Settings {
 
   public boolean isShowOrigin() {
     return getBoolean(showOrigin);
+  }
+
+  public boolean isShowChangeSigner() {
+    return getBoolean(showChangeSigner);
   }
 }

@@ -473,6 +473,7 @@
     <string name="show_decision_date_update_key">settings_view_show_decision_date_update</string>
     <string name="show_decision_change_font_key">settings_view_show_decision_change_font</string>
     <string name="show_origin_key">settings_view_show_origin</string>
+    <string name="show_change_signer_key">settings_view_show_change_signer</string>
 
     <!--CRYPTO PRO-->
 

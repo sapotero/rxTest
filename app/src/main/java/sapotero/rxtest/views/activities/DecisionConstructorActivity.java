@@ -550,7 +550,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
     if ( status == Fields.Status.SENT_TO_THE_REPORT ){
       // настройка
-      if ( !settings.getBoolean("settings_view_show_change_signer").get() ){
+      if ( !settings2.isShowChangeSigner() ){
         select_oshs_wrapper.setVisibility(View.GONE);
       }
     }

@@ -76,7 +76,7 @@
             android:defaultValue="true" />
 
         <CheckBoxPreference
-            android:key="settings_view_show_change_signer"
+            android:key="@string/show_change_signer_key"
             android:title="Возможность смены подписавшего резолюцию для статуса «На рассмотрение»"
             android:defaultValue="true"
             />
