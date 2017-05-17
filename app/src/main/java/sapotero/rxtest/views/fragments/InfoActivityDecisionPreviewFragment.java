@@ -533,57 +533,121 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
     // resolved https://tasks.n-core.ru/browse/MVDESD-13423
     //  Отображать информацию от кого поступила резолюция
-    updateActionText();
+    updateActionText(true);
 
   }
 
-  private void updateActionText() {
+  // resolved https://tasks.n-core.ru/browse/MVDESD-13423
+  // Так нужно отображать, но есть проблемы на стороне СЭДика
+  // Поэтому пока не используем честный способ, а просто показываем последнее действие
+  private void updateActionText(Boolean showAsFake) {
+
+
+    dataStore
+      .select(RActionEntity.class)
+      .where(RActionEntity.DOCUMENT_ID.eq(doc.getId()))
+      .orderBy(RActionEntity.UPDATED_AT.desc())
+      .limit(1)
+      .get()
+      .toObservable()
+      .subscribeOn(Schedulers.newThread())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(
+        data -> {
+          Timber.tag(TAG).w(" %s | %s", data.getUpdatedAt(), data.getToS() );
+          setActionText( data.getToS() );
+        },
+        error -> {
+          Timber.tag(TAG).e(error);
+        }
+      );
+
+
     if (doc != null && doc.getActions() != null && doc.getActions().size() > 0){
       String action_temporary_text = "";
 
-      ArrayList<RActionEntity> list = new ArrayList<>();
+      // refactor
+      // убрать эту дичь
+      if( showAsFake ){
+//
+//        ArrayList<RActionEntity> list = new ArrayList<>();
+//
+//        for ( RAction act: doc.getActions() ) {
+//          RActionEntity _act = (RActionEntity) act;
+//          list.add(_act);
+//        }
+//
+//        Timber.tag(TAG).i("list: %s", list);
+//
+//
+//          if ( list.size() == 1 ){
+//            setActionText(list.get(0).getToS());
+//          } else if ( list.size() >= 2 ){
+//            Collections.sort(list, (a1, a2) -> a1.getUpdatedAt().compareTo( a2.getUpdatedAt() ));
+//            setActionText( list.get( list.size()-1 ).getToS() );
+//          }
+//        } catch (Exception e) {
+//          Timber.tag(TAG).e(e);
+//          action_wrapper.setVisibility(View.GONE);
+//        }
 
-      for ( RAction act: doc.getActions() ) {
-        RActionEntity _act = (RActionEntity) act;
 
-        if (Objects.equals(_act.getAddressedToId(), settings.getCurrentUserId())){
-          list.add( _act );
-        }
-      }
-
-      if ( list.size() == 1 ){
-        setActionText(list.get(0).getToS());
-      } else if ( list.size() >= 2 ){
-        Collections.sort(list, (a1, a2) -> a1.getUpdatedAt().compareTo( a2.getUpdatedAt() ));
-        setActionText( list.get( list.size()-1 ).getToS() );
       } else {
-        action_wrapper.setVisibility(View.GONE);
+
+        ArrayList<RActionEntity> list = new ArrayList<>();
+
+        for ( RAction act: doc.getActions() ) {
+          RActionEntity _act = (RActionEntity) act;
+
+          if (Objects.equals(_act.getAddressedToId(), settings.getCurrentUserId())){
+            list.add( _act );
+          }
+        }
+
+        if ( list.size() == 1 ){
+          setActionText(list.get(0).getToS());
+        } else if ( list.size() >= 2 ){
+          Collections.sort(list, (a1, a2) -> a1.getUpdatedAt().compareTo( a2.getUpdatedAt() ));
+          setActionText( list.get( list.size()-1 ).getToS() );
+        } else {
+          action_wrapper.setVisibility(View.GONE);
+        }
+
       }
 
     } else {
       action_wrapper.setVisibility(View.GONE);
     }
+
+
   }
 
   private void setActionText(String action_temporary_text) {
     String organization = "";
     String user = "";
 
+    Timber.tag(TAG).e("action_temporary_text: %s", action_temporary_text);
+
     int organization_index = action_temporary_text.indexOf("(");
 
-    organization = action_temporary_text.substring( organization_index, action_temporary_text.length() );
+    if ( organization_index != -1 ){
+      organization = action_temporary_text.substring( organization_index, action_temporary_text.length() );
 
-    String pattern = "(\\w+\\s.\\.)";
+      String pattern = "(\\w+\\s.\\.)";
 
-    Pattern r = Pattern.compile(pattern);
-    Matcher m = r.matcher( action_temporary_text.substring( 0, organization_index-1 ) );
+      Pattern r = Pattern.compile(pattern);
+      Matcher m = r.matcher( action_temporary_text.substring( 0, organization_index-1 ) );
 
-    if (m.find()) {
-      action_wrapper.setVisibility(View.VISIBLE);
-      action_text.setText( String.format("%s %s", m.group(0), organization) );
+      if (m.find()) {
+        action_wrapper.setVisibility(View.VISIBLE);
+        action_text.setText( String.format("%s %s", m.group(0), organization) );
+      } else {
+        action_wrapper.setVisibility(View.GONE);
+      }
     } else {
       action_wrapper.setVisibility(View.GONE);
     }
+
   }
 
   private void setSignEnabled(boolean active) {
@@ -784,6 +848,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
           invalidateSpinner(false);
           showDecisionCardTollbarMenuItems(false);
           EventBus.getDefault().post( new HasNoActiveDecisionConstructor() );
+
+          updateActionText(true);
         }
 
       }, error -> {

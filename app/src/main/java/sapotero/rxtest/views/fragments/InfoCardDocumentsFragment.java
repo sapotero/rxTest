@@ -27,6 +27,8 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.io.File;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 import javax.inject.Inject;
@@ -133,10 +135,23 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     if (document.getImages().size() > 0){
       adapter.clear();
 
+      List<RImageEntity> tmp = new ArrayList<>();
+
       for (RImage image : document.getImages()) {
         RImageEntity img = (RImageEntity) image;
         Timber.tag(TAG).i("image " + img.getTitle() );
-        adapter.add( img );
+        tmp.add(img);
+      }
+
+      try {
+        Collections.sort(tmp, (o1, o2) -> o1.getCreatedAt().compareTo( o2.getCreatedAt() ));
+        Collections.sort(tmp, (o1, o2) -> o1.getNumber().compareTo( o2.getNumber() ));
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+
+      for (RImageEntity image : tmp) {
+        adapter.add( image );
       }
 
     }

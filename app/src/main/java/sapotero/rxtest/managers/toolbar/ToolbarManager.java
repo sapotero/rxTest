@@ -52,11 +52,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
   private final String TAG = this.getClass().getSimpleName();
 
-  //  private Fields.Journal journal;
-  //  private String SIGN;
-  //  private Fields.Status status;
-  //  private SelectOshsDialogFragment oshs;
-
   private int decision_count;
 
   private final Toolbar toolbar;
@@ -250,21 +245,12 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
             Intent create_intent = new Intent(context, DecisionConstructorActivity.class);
             activity.startActivity(create_intent);
-//            activity.overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
 
             break;
 
           case R.id.menu_info_decision_edit:
             EventBus.getDefault().post( new ShowDecisionConstructor() );
-
-//            intent.putExtra("decision", json);
-
             operation = CommandFactory.Operation.INCORRECT;
-//            operation = CommandFactory.Operation.CREATE_DECISION;
-//
-//            Intent edit_intent = new Intent(context, DecisionConstructorActivity.class);
-//            context.startActivity(edit_intent);
-
             break;
           case R.id.menu_info_shared_to_favorites:
 
@@ -421,9 +407,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         toolbar.inflateMenu(R.menu.info_menu);
 
         try {
-          toolbar.getMenu().findItem(R.id.menu_info_shared_to_favorites).setVisible(false);
-          toolbar.getMenu().findItem(R.id.menu_info_shared_to_control).setVisible(false);
-          toolbar.getMenu().findItem(R.id.menu_info_decision_edit).setVisible(false);
+          showAsProcessed(true);
         } catch (Exception e) {
           e.printStackTrace();
         }
@@ -431,7 +415,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
       // Из папки избранное
       if (isFromFavoritesFolder() ){
-        showAsProcessed();
+        showAsProcessed(false);
       }
 
       decision_count = doc.getDecisions().size();
@@ -525,15 +509,15 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     toolbar.getMenu().clear();
   }
 
-  private void showAsProcessed() {
+  private void showAsProcessed(Boolean showCreateButton) {
     toolbar.getMenu().clear();
     toolbar.inflateMenu(R.menu.info_menu);
 
     try {
-      toolbar.getMenu().findItem(R.id.menu_info_shared_to_control).setVisible(false);
-      toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(false);
+      toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(showCreateButton);
       toolbar.getMenu().findItem(R.id.menu_info_decision_edit).setVisible(false);
-      toolbar.getMenu().findItem(R.id.menu_info_shared_to_favorites).setVisible(false);
+      toolbar.getMenu().findItem(R.id.menu_info_shared_to_control).setVisible(true);
+      toolbar.getMenu().findItem(R.id.menu_info_shared_to_favorites).setVisible(true);
     } catch (Exception e) {
       e.printStackTrace();
     }

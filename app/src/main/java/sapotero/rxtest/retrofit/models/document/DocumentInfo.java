@@ -66,9 +66,11 @@ public class DocumentInfo {
     @SerializedName("control_labels")
     @Expose
     private List<ControlLabel> controlLabels = new ArrayList<ControlLabel>();
+
     @SerializedName("actions")
     @Expose
     private List<DocumentInfoAction> actions = new ArrayList<DocumentInfoAction>();
+
     @SerializedName("route")
     @Expose
     private Route route;
