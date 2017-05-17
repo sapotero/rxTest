@@ -200,7 +200,7 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
     if (authType != AuthType.PASSWORD){
       loadingDialog.show();
     }
-    settings.getBoolean("start_load_data").set( true );
+    settings2.setStartLoadData( true );
     this.callback = callback;
   }
 

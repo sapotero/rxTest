@@ -33,6 +33,7 @@ public class Settings {
   public static final String DECISION_WITH_ASSIGNMENT_KEY = "decision_with_assignment";
   public static final String DECISION_ACTIVE_ID_KEY = "decision.active.id";
   public static final String PREV_DIALOG_COMMENT_KEY = "prev_dialog_comment";
+  public static final String START_LOAD_DATA_KEY = "start_load_data";
 
   public static String FIRST_RUN_KEY;
   public static String HOST_KEY;
@@ -100,6 +101,7 @@ public class Settings {
   private Preference<Boolean> showApproveOnPrimary;
   private Preference<String> maxImageSize;
   private Preference<Boolean> debugEnabled;
+  private Preference<Boolean> startLoadData;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -171,6 +173,7 @@ public class Settings {
     showApproveOnPrimary = settings.getBoolean(SHOW_APPROVE_ON_PRIMARY_KEY);
     maxImageSize = settings.getString(MAX_IMAGE_SIZE_KEY);
     debugEnabled = settings.getBoolean(DEBUG_ENABLED_KEY);
+    startLoadData = settings.getBoolean(START_LOAD_DATA_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -539,5 +542,13 @@ public class Settings {
 
   public boolean isDebugEnabled() {
     return getBoolean(debugEnabled);
+  }
+
+  public boolean isStartLoadData() {
+    return getBoolean(startLoadData);
+  }
+
+  public void setStartLoadData(boolean value) {
+    setBoolean(startLoadData, value);
   }
 }

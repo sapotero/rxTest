@@ -9,8 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.f2prateek.rx.preferences.RxSharedPreferences;
-
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -35,8 +33,7 @@ import timber.log.Timber;
 
 public class StepperLoadDataFragment extends Fragment implements Step {
 
-  @Inject RxSharedPreferences settings;
-  @Inject Settings settings2;
+  @Inject Settings settings;
 
   private String TAG = this.getClass().getSimpleName();
   private int loaded = 0;
@@ -92,7 +89,7 @@ public class StepperLoadDataFragment extends Fragment implements Step {
 //      Toast.makeText( getContext(), error.getErrorMessage(), Toast.LENGTH_SHORT ).show();
     }
 
-    if ( !settings2.isFirstRun() ) {
+    if ( !settings.isFirstRun() ) {
       error = null;
       unsubscribe();
 
@@ -113,16 +110,11 @@ public class StepperLoadDataFragment extends Fragment implements Step {
   public void onSelected() {
     Timber.tag(TAG).d("mRingProgressBar init");
 
-    Boolean startLoadData = settings.getBoolean("start_load_data").get();
-    if (startLoadData == null) {
-      startLoadData = true;
-    }
-
-    if ( startLoadData ) {
+    if ( settings.isStartLoadData() ) {
       isReceivedJobCount = false;
       loaded = 0;
       mRingProgressBar.setProgress( 0 );
-      settings.getBoolean("start_load_data").set( false );
+      settings.setStartLoadData( false );
 
       unsubscribe();
       subscription = new CompositeSubscription();
@@ -174,7 +166,7 @@ public class StepperLoadDataFragment extends Fragment implements Step {
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(StepperDocumentCountReadyEvent event) {
     isReceivedJobCount = true;
-    if (settings2.getJobCount() == 0) {
+    if (settings.getJobCount() == 0) {
       // No documents to download, set download complete
       mRingProgressBar.setProgress( 100 );
     } else {
@@ -185,7 +177,7 @@ public class StepperLoadDataFragment extends Fragment implements Step {
   private void updateProgressBar(String message) {
     loaded++;
 
-    int jobCount = settings2.getJobCount();
+    int jobCount = settings.getJobCount();
 
     Timber.tag(TAG).d("TOTAL: %s/%s | %s", jobCount, loaded, message );
 
