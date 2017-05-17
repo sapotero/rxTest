@@ -778,7 +778,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   }
 
   private void loadDecision() {
-//    settings.setDecisionActiveId( current_decision.getId() );
     Integer decision_id = settings.getDecisionActiveId();
 
     rDecisionEntity = dataStore
