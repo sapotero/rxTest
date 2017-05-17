@@ -153,13 +153,20 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
       }
 
       try {
-        Collections.sort(tmp, (o1, o2) -> o1.getCreatedAt().compareTo( o2.getCreatedAt() ));
+        Collections.sort(tmp, (o1, o2) -> o1.getCreatedAt().compareTo(o2.getCreatedAt()));
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+
+      try {
         Collections.sort(tmp, (o1, o2) -> o1.getNumber().compareTo( o2.getNumber() ));
       } catch (Exception e) {
         e.printStackTrace();
       }
 
+
       for (RImageEntity image : tmp) {
+        Timber.tag(TAG).e("image: %s %s", image.getNumber(), image.getCreatedAt());
         adapter.add( image );
       }
 

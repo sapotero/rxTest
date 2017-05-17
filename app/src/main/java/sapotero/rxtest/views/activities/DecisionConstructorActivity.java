@@ -642,14 +642,21 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     // При создании новой резолюции, кнопка "Сохранить и подписать"
     // должна быть только в том случае, если Подписант=текущему пользователю.
     // В остальных случаях, кнопки "Сохранить и подписать" быть не должно.
-    if ( !settings.getBoolean("settings_view_show_approve_on_primary").get() && Objects.equals(settings.getString("_status").get(), "primary_consideration")){
-      if (
+
+    if (rDecisionEntity != null) {
+
+      RDocumentEntity doc = (RDocumentEntity) rDecisionEntity.getDocument();
+      Timber.tag(TAG).e("rDecisionEntity %s", doc.getUid());
+
+      if ( !settings.getBoolean("settings_view_show_approve_on_primary").get() && Objects.equals(doc.getFilter(), "primary_consideration")){
+        if (
           manager.getDecision() != null &&
             manager.getDecision().getSignerId() != null &&
-          Objects.equals(manager.getDecision().getSignerId(), settings.getString("current_user_id").get())){
-        toolbar.getMenu().findItem(R.id.action_constructor_create_and_sign).setVisible(true);
-      } else {
-        toolbar.getMenu().findItem(R.id.action_constructor_create_and_sign).setVisible(false);
+            Objects.equals(manager.getDecision().getSignerId(), settings.getString("current_user_id").get())){
+          toolbar.getMenu().findItem(R.id.action_constructor_create_and_sign).setVisible(true);
+        } else {
+          toolbar.getMenu().findItem(R.id.action_constructor_create_and_sign).setVisible(false);
+        }
       }
     }
   }
