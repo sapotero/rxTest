@@ -132,7 +132,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 //    Timber.tag(TAG).e("IS_PROCESSED.get() %s | %s -> %s", status, STATUS_CODE.get(), IS_PROCESSED.get() );
 
 
-    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || settings.isFromSign() ){
+    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL ){
       TabSigningPagerAdapter adapter = new TabSigningPagerAdapter( getSupportFragmentManager() );
       viewPager.setAdapter(adapter);
     } else {
@@ -174,7 +174,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
       e.printStackTrace();
     }
 
-    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || settings.isFromSign() ){
+    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL ){
       fragmentTransaction.add( R.id.activity_info_preview_container, new RoutePreviewFragment() );
     } else {
       fragmentTransaction.add( R.id.activity_info_preview_container, new InfoActivityDecisionPreviewFragment(toolbarManager) );

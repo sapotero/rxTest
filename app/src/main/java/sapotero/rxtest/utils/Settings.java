@@ -30,7 +30,6 @@ public class Settings {
   private static final String REGDATE_KEY = "activity_main_menu.date";
   private static final String LOAD_FROM_SEARCH_KEY = "load_from_search";
   private static final String LAST_SEEN_UID_KEY = "activity_main_menu.last_seen_uid";
-  private static final String FROM_SIGN_KEY = "activity_main_menu.from_sign";
   private static final String DECISION_WITH_ASSIGNMENT_KEY = "decision_with_assignment";
   private static final String DECISION_ACTIVE_ID_KEY = "decision.active.id";
   private static final String PREV_DIALOG_COMMENT_KEY = "prev_dialog_comment";
@@ -81,7 +80,6 @@ public class Settings {
   private Preference<String> regDate;
   private Preference<Boolean> loadFromSearch;
   private Preference<String> lastSeenUid;
-  private Preference<Boolean> fromSign;
   private Preference<Boolean> decisionWithAssignment;
   private Preference<Integer> decisionActiveId;
   private Preference<Boolean> actionsConfirm;
@@ -154,7 +152,6 @@ public class Settings {
     regDate = settings.getString(REGDATE_KEY);
     loadFromSearch = settings.getBoolean(LOAD_FROM_SEARCH_KEY);
     lastSeenUid = settings.getString(LAST_SEEN_UID_KEY);
-    fromSign = settings.getBoolean(FROM_SIGN_KEY);
     decisionWithAssignment = settings.getBoolean(DECISION_WITH_ASSIGNMENT_KEY);
     decisionActiveId = settings.getInteger(DECISION_ACTIVE_ID_KEY);
     actionsConfirm = settings.getBoolean(ACTIONS_CONFIRM_KEY);
@@ -402,14 +399,6 @@ public class Settings {
 
   public void setLastSeenUid(String value) {
     setString(lastSeenUid, value);
-  }
-
-  public boolean isFromSign() {
-    return getBoolean(fromSign);
-  }
-
-  public void setFromSign(boolean value) {
-    setBoolean(fromSign, value);
   }
 
   public boolean isDecisionWithAssignment() {
