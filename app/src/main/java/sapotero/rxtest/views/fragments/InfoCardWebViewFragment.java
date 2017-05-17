@@ -18,6 +18,11 @@ import android.widget.RelativeLayout;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
+import java.util.Objects;
+
 import javax.inject.Inject;
 
 import butterknife.BindView;
@@ -27,8 +32,10 @@ import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.views.activities.DocumentInfocardFullScreenActivity;
 import sapotero.rxtest.views.adapters.utils.OnSwipeTouchListener;
+import timber.log.Timber;
 
 public class InfoCardWebViewFragment extends Fragment {
 
@@ -103,18 +110,11 @@ public class InfoCardWebViewFragment extends Fragment {
 
   public void setWebView() {
 
-//    Gson gson = new Gson();
-//    Preference<String> data = settings.getString("document.infoCard");
-
       RDocumentEntity doc = dataStore
         .select(RDocumentEntity.class)
         .where(RDocumentEntity.UID.eq( uid == null ? UID.get() : uid ))
         .get().first();
       document = doc.getInfoCard();
-//    } else {
-//      document = data.get();
-//    }
-
 
 
     try {
@@ -165,5 +165,17 @@ public class InfoCardWebViewFragment extends Fragment {
 
   public interface OnFragmentInteractionListener {
     void onFragmentInteraction(Uri uri);
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(UpdateCurrentDocumentEvent event) throws Exception {
+    Timber.tag(TAG).w("UpdateCurrentDocumentEvent %s", event.uid);
+    if (Objects.equals(event.uid, UID.get())){
+      updateDocument();
+    }
+  }
+
+  private void updateDocument() {
+    setWebView();
   }
 }
