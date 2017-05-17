@@ -4,7 +4,7 @@
     <android.support.v7.preference.PreferenceCategory
         android:title="Настройки операций">
         <SwitchPreference
-            android:key="settings_view_show_create_decision_post"
+            android:key="@string/show_create_decision_post_key"
             android:title="Показывать кнопку «Создать поручение»"
             android:defaultValue="false" />
         <SwitchPreference
