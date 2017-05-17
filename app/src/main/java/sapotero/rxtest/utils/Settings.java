@@ -51,6 +51,7 @@ public class Settings {
   public static String SHOW_ORIGIN_KEY;
   public static String SHOW_CHANGE_SIGNER_KEY;
   public static String SHOW_CREATE_DECISION_POST_KEY;
+  public static String SHOW_APPROVE_ON_PRIMARY_KEY;
 
   private Context context;
   private RxSharedPreferences settings;
@@ -94,6 +95,7 @@ public class Settings {
   private Preference<Boolean> showOrigin;
   private Preference<Boolean> showChangeSigner;
   private Preference<Boolean> showCreateDecisionPost;
+  private Preference<Boolean> showApproveOnPrimary;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -119,6 +121,7 @@ public class Settings {
     SHOW_ORIGIN_KEY = context.getResources().getString(R.string.show_origin_key);
     SHOW_CHANGE_SIGNER_KEY = context.getResources().getString(R.string.show_change_signer_key);
     SHOW_CREATE_DECISION_POST_KEY = context.getResources().getString(R.string.show_create_decision_post_key);
+    SHOW_APPROVE_ON_PRIMARY_KEY = context.getResources().getString(R.string.show_approve_on_primary_key);
 
     firstRunFlag = settings.getBoolean(FIRST_RUN_KEY);
     signWithDc = settings.getBoolean(SIGN_WITH_DC_KEY);
@@ -159,6 +162,7 @@ public class Settings {
     showOrigin = settings.getBoolean(SHOW_ORIGIN_KEY);
     showChangeSigner = settings.getBoolean(SHOW_CHANGE_SIGNER_KEY);
     showCreateDecisionPost = settings.getBoolean(SHOW_CREATE_DECISION_POST_KEY);
+    showApproveOnPrimary = settings.getBoolean(SHOW_APPROVE_ON_PRIMARY_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -511,5 +515,9 @@ public class Settings {
 
   public boolean isShowCreateDecisionPost() {
     return getBoolean(showCreateDecisionPost);
+  }
+
+  public boolean isShowApproveOnPrimary() {
+    return getBoolean(showApproveOnPrimary);
   }
 }

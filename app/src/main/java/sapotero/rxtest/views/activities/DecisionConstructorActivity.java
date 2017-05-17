@@ -622,7 +622,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     if ( rDecisionEntity != null &&
       rDecisionEntity.getSignerId() != null &&
       !rDecisionEntity.getSignerId().equals( settings2.getCurrentUserId() ) &&
-      !settings.getBoolean("settings_view_show_approve_on_primary").get() ){
+      !settings2.isShowApproveOnPrimary() ){
 
       // resolved https://tasks.n-core.ru/browse/MVDESD-13438
       // Добавить настройку наличия кнопки Согласовать в Первичном рассмотрении
@@ -641,7 +641,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     // При создании новой резолюции, кнопка "Сохранить и подписать"
     // должна быть только в том случае, если Подписант=текущему пользователю.
     // В остальных случаях, кнопки "Сохранить и подписать" быть не должно.
-    if ( !settings.getBoolean("settings_view_show_approve_on_primary").get() && Objects.equals(settings.getString("_status").get(), "primary_consideration")){
+    if ( !settings2.isShowApproveOnPrimary() && Objects.equals(settings.getString("_status").get(), "primary_consideration")){
       if (
           manager.getDecision() != null &&
             manager.getDecision().getSignerId() != null &&
@@ -986,7 +986,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
     // resolved https://tasks.n-core.ru/browse/MVDESD-13438
     // Добавить настройку наличия кнопки Согласовать в Первичном рассмотрении
-    if ( !settings.getBoolean("settings_view_show_approve_on_primary").get() ){
+    if ( !settings2.isShowApproveOnPrimary() ){
       invalidateSaveAndSignButton();
     }
   }

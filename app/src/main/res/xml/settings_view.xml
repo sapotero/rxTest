@@ -106,7 +106,7 @@
             android:defaultValue="true" />
 
         <SwitchPreference
-            android:key="settings_view_show_approve_on_primary"
+            android:key="@string/show_approve_on_primary_key"
             android:title="Возможность согласования документов на первичном рассмотрении"
             android:defaultValue="true" />
 

@@ -512,7 +512,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
         // resolved https://tasks.n-core.ru/browse/MVDESD-13438
         // Добавить настройку наличия кнопки Согласовать в Первичном рассмотрении
-        if (!settings.getBoolean("settings_view_show_approve_on_primary").get()){
+        if (!settings2.isShowApproveOnPrimary()){
           setSignEnabled(false);
         } else {
           setSignEnabled(true);
