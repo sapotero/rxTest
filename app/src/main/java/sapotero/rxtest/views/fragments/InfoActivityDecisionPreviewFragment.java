@@ -35,8 +35,6 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.f2prateek.rx.preferences.Preference;
-import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -95,8 +93,7 @@ import timber.log.Timber;
 @SuppressLint("ValidFragment")
 public class InfoActivityDecisionPreviewFragment extends Fragment implements SelectTemplateDialogFragment.Callback{
 
-  @Inject RxSharedPreferences settings;
-  @Inject Settings settings2;
+  @Inject Settings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject OperationManager operationManager;
   @Inject QueueManager queue;
@@ -161,7 +158,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   public void decision_preview_next(){
     Timber.tag(TAG).v("decision_preview_next star");
 
-    if ( settings2.isActionsConfirm() ){
+    if ( settings.isActionsConfirm() ){
       // resolved https://tasks.n-core.ru/browse/MVDESD-12765
       // выводить подтверждение при подписании резолюции
 
@@ -179,7 +176,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
             params.setDecisionId( current_decision.getUid() );
             params.setDecisionModel( DecisionConverter.formatDecision(current_decision) );
 
-            params.setDocument( settings2.getUid() );
+            params.setDocument( settings.getUid() );
             params.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
 
             operationManager.execute(operation, params);
@@ -199,7 +196,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       params.setDecisionId( current_decision.getUid() );
 //      params.setDecision( current_decision );
       params.setDecisionModel( DecisionConverter.formatDecision(current_decision) );
-      params.setDocument( settings2.getUid() );
+      params.setDocument( settings.getUid() );
       params.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
 
       operationManager.execute(operation, params);
@@ -218,7 +215,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     // resolved https://tasks.n-core.ru/browse/MVDESD-12765
     // Добавить ввод комментариев на "Отклонить резолюцию" и "без ответа"
 
-    if ( settings2.isShowCommentPost() ){
+    if ( settings.isShowCommentPost() ){
 
       showPrevDialog(null);
 
@@ -255,7 +252,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
         commandParams.setDecisionModel( DecisionConverter.formatDecision(current_decision) );
         commandParams.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
 
-        if ( settings2.isShowCommentPost() ) {
+        if ( settings.isShowCommentPost() ) {
           commandParams.setComment(dialog1.getInputEditText().getText().toString());
         }
 
@@ -267,7 +264,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
     // настройка
     // Показывать комментарий при отклонении
-    if ( settings2.isShowCommentPost() ){
+    if ( settings.isShowCommentPost() ){
       prev_dialog
         .inputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES )
         .input(R.string.comment_hint, R.string.dialog_empty_value, (dialog12, input) -> {})
@@ -306,7 +303,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       .update(RDocumentEntity.class)
       .set(RDocumentEntity.CHANGED, true)
       .set(RDocumentEntity.MD5, "")
-      .where(RDocumentEntity.UID.eq( settings2.getUid() ))
+      .where(RDocumentEntity.UID.eq( settings.getUid() ))
       .get()
       .value();
   }
@@ -379,7 +376,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
         if ( doc.isFromLinks() != null && !doc.isFromLinks() &&
           current_decision == null ){
 
-          settings2.setDecisionActiveId(0);
+          settings.setDecisionActiveId(0);
           Context context = getContext();
           Intent create_intent = new Intent(context, DecisionConstructorActivity.class);
           context.startActivity(create_intent);
@@ -442,7 +439,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   private void setAdapter() {
 
     ArrayList<DecisionSpinnerItem> decisionSpinnerItems = new ArrayList<>();
-    decision_spinner_adapter = new DecisionSpinnerAdapter(getContext(), settings2.getCurrentUserId(), decisionSpinnerItems);
+    decision_spinner_adapter = new DecisionSpinnerAdapter(getContext(), settings.getCurrentUserId(), decisionSpinnerItems);
     decision_spinner.setAdapter(decision_spinner_adapter);
 
     decision_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -504,7 +501,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     if ( doc.getFilter() != null && doc.getFilter().equals("primary_consideration") ){
       if ( current_decision != null &&
            current_decision.getSignerId() != null &&
-           current_decision.getSignerId().equals( settings2.getCurrentUserId() ) ){
+           current_decision.getSignerId().equals( settings.getCurrentUserId() ) ){
         next_person_button.setText( getString(R.string.menu_info_next_person));
         setSignEnabled(true);
       } else {
@@ -512,7 +509,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
         // resolved https://tasks.n-core.ru/browse/MVDESD-13438
         // Добавить настройку наличия кнопки Согласовать в Первичном рассмотрении
-        if (!settings2.isShowApproveOnPrimary()){
+        if (!settings.isShowApproveOnPrimary()){
           setSignEnabled(false);
         } else {
           setSignEnabled(true);
@@ -549,7 +546,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       for ( RAction act: doc.getActions() ) {
         RActionEntity _act = (RActionEntity) act;
 
-        if (Objects.equals(_act.getAddressedToId(), settings2.getCurrentUserId())){
+        if (Objects.equals(_act.getAddressedToId(), settings.getCurrentUserId())){
           list.add( _act );
         }
       }
@@ -657,7 +654,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     if ( decision_spinner_adapter.size() > 0 ){
       decision = decision_spinner_adapter.getItem( decision_spinner.getSelectedItemPosition() );
       magnifer.setDecision( decision );
-      magnifer.setRegNumber( settings2.getRegNumber() );
+      magnifer.setRegNumber( settings.getRegNumber() );
     }
 
     magnifer.show( getFragmentManager() , "DecisionMagniferFragment");
@@ -696,7 +693,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   private Boolean documentExist(){
     Integer count = dataStore
       .count( RDocumentEntity.class )
-      .where( RDocumentEntity.UID.eq( uid == null? settings2.getUid() : uid ) )
+      .where( RDocumentEntity.UID.eq( uid == null? settings.getUid() : uid ) )
       .get()
       .value();
 
@@ -704,7 +701,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   }
 
   private void loadDocument() {
-    Timber.tag(TAG).v("loadDocument | exist %s | %s", documentExist(), settings2.getUid() );
+    Timber.tag(TAG).v("loadDocument | exist %s | %s", documentExist(), settings.getUid() );
 
     if ( documentExist() ){
       loadFromDb();
@@ -719,7 +716,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
     dataStore
       .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq( uid == null? settings2.getUid() : uid ))
+      .where(RDocumentEntity.UID.eq( uid == null? settings.getUid() : uid ))
       .get()
       .toObservable()
       .subscribeOn(Schedulers.newThread())
@@ -727,12 +724,11 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       .subscribe(doc -> {
 
         this.doc = doc;
-        settings2.setStatus( doc.getFilter() );
+        settings.setStatus( doc.getFilter() );
 
 //        Timber.tag("loadFromDb").i( "loaded %s", doc.getId() );
 
-        Preference<String> documentNumber = settings.getString("document.number");
-        documentNumber.set( doc.getRegistrationNumber() );
+        settings.setDocumentNumber( doc.getRegistrationNumber() );
 
         preview.showEmpty();
 
@@ -825,7 +821,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
       preview.show( current_decision );
 
-      settings2.setDecisionActiveId( current_decision.getId() );
+      settings.setDecisionActiveId( current_decision.getId() );
 
       if (toolbarManager != null) {
         toolbarManager.setEditDecisionMenuItemVisible( !current_decision.isApproved() );
@@ -1002,7 +998,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
         }
       }
 
-      printSigner( decision, settings2.getRegNumber() );
+      printSigner( decision, settings.getRegNumber() );
     }
 
     private void showEmpty(){
@@ -1287,7 +1283,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(UpdateCurrentDocumentEvent event) throws Exception {
     Timber.tag(TAG).w("UpdateCurrentDocumentEvent %s", event.uid);
-    if (Objects.equals(event.uid, settings2.getUid())){
+    if (Objects.equals(event.uid, settings.getUid())){
       invalidate();
     }
   }

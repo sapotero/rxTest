@@ -37,6 +37,7 @@ public class Settings {
   public static final String START_LOAD_DATA_KEY = "start_load_data";
   public static final String STEPPER_AUTH_TYPE_KEY = "stepper.auth_type";
   public static final String STATUS_KEY = "_status";
+  public static final String DOCUMENT_NUMBER_KEY = "document.number";
 
   public static String FIRST_RUN_KEY;
   public static String HOST_KEY;
@@ -107,6 +108,7 @@ public class Settings {
   private Preference<Boolean> startLoadData;
   private Preference<AuthType> authType;
   private Preference<String> status;
+  private Preference<String> documentNumber;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -181,6 +183,7 @@ public class Settings {
     startLoadData = settings.getBoolean(START_LOAD_DATA_KEY);
     authType = settings.getEnum(STEPPER_AUTH_TYPE_KEY, AuthType.class);
     status = settings.getString(STATUS_KEY);
+    documentNumber = settings.getString(DOCUMENT_NUMBER_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -577,5 +580,13 @@ public class Settings {
 
   public void setStatus(String value) {
     setString(status, value);
+  }
+
+  public String getDocumentNumber() {
+    return getString(documentNumber);
+  }
+
+  public void setDocumentNumber(String value) {
+    setString(documentNumber, value);
   }
 }

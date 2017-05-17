@@ -20,7 +20,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -49,8 +48,7 @@ import timber.log.Timber;
 
 public class DecisionPreviewFragment extends Fragment implements DecisionInterface {
 
-  @Inject RxSharedPreferences settings;
-  @Inject Settings settings2;
+  @Inject Settings settings;
   @Inject OperationManager operationManager;
 
   private OnFragmentInteractionListener mListener;
@@ -118,7 +116,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
     }
 
 
-    if ( settings2.isDecisionWithAssignment() ){
+    if ( settings.isDecisionWithAssignment() ){
       wrapper.setVisibility(View.GONE);
     }
 //
@@ -136,7 +134,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
   public void decision_preview_next(){
     Timber.tag(TAG).v("decision_preview_next star");
 
-    if ( settings2.isActionsConfirm() ){
+    if ( settings.isActionsConfirm() ){
       // resolved https://tasks.n-core.ru/browse/MVDESD-12765
       // выводить подтверждение при подписании резолюции
 
@@ -154,7 +152,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
 
           params.setDecisionId( decision.getId() );
           params.setDecisionModel( decision );
-          params.setDocument( settings2.getUid() );
+          params.setDocument( settings.getUid() );
 
           operationManager.execute(operation, params);
 
@@ -172,7 +170,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
 
       params.setDecisionId( decision.getId() );
       params.setDecisionModel( decision );
-      params.setDocument( settings2.getUid() );
+      params.setDocument( settings.getUid() );
 
       operationManager.execute(operation, params);
     }
@@ -189,7 +187,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
     // resolved https://tasks.n-core.ru/browse/MVDESD-12765
     // Добавить ввод комментариев на "Отклонить резолюцию" и "без ответа"
 
-    if ( settings2.isShowCommentPost() ){
+    if ( settings.isShowCommentPost() ){
 
       MaterialDialog.Builder prev_dialog = new MaterialDialog.Builder( getContext() )
         .content(R.string.decision_reject_body)
@@ -211,7 +209,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
 
       // настройка
       // Показывать комментарий при отклонении
-      if ( settings2.isShowCommentPost() ){
+      if ( settings.isShowCommentPost() ){
         prev_dialog.inputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES )
           .input(R.string.comment_hint, R.string.dialog_empty_value, (dialog12, input) -> {});
       }
@@ -227,7 +225,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
       CommandParams params = new CommandParams();
       params.setDecisionId( decision.getId() );
       params.setDecisionModel( decision );
-      params.setDocument( settings2.getUid() );
+      params.setDocument( settings.getUid() );
 
       operationManager.execute(operation, params);
     }
@@ -483,7 +481,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
     date_and_number_view.setOrientation(LinearLayout.HORIZONTAL);
 
     TextView numberView = new TextView(getActivity());
-    numberView.setText( "№ " + settings.getString("document.number").get() );
+    numberView.setText( "№ " + settings.getDocumentNumber() );
     numberView.setTextColor( Color.BLACK );
     LinearLayout.LayoutParams numberViewParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f);
     numberView.setLayoutParams(numberViewParams);
