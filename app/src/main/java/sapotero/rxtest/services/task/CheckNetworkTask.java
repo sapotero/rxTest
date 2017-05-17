@@ -2,9 +2,6 @@ package sapotero.rxtest.services.task;
 
 import android.content.Context;
 
-import com.f2prateek.rx.preferences.Preference;
-import com.f2prateek.rx.preferences.RxSharedPreferences;
-
 import org.greenrobot.eventbus.EventBus;
 
 import javax.inject.Inject;
@@ -25,40 +22,30 @@ public class CheckNetworkTask implements Runnable {
   final String TAG = CheckNetworkTask.class.getSimpleName();
 
   @Inject Context context;
-  @Inject RxSharedPreferences settings;
-  @Inject Settings settings2;
+  @Inject Settings settings;
   @Inject OkHttpClient okHttpClient;
-
-  private Preference<Boolean> IS_CONNECTED;
 
   public CheckNetworkTask() {
     EsdApplication.getNetworkComponent().inject(this);
-    initSettings();
-  }
-
-  private void initSettings() {
-    IS_CONNECTED = settings.getBoolean("isConnectedToInternet");
   }
 
   @Override
   public void run() {
-    Retrofit retrofit = new RetrofitManager(context, settings2.getHost(), okHttpClient).process();
+    Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
     AuthService auth = retrofit.create(AuthService.class);
 
     Timber.tag(TAG).d("Checking internet connectivity");
 
-    auth.getUserInfoV2(settings2.getLogin(), settings2.getToken())
+    auth.getUserInfoV2(settings.getLogin(), settings.getToken())
       .subscribeOn(Schedulers.io())
       .observeOn(Schedulers.computation())
       .subscribe(
         v2 -> {
           Timber.tag(TAG).d("Internet connectivity: true");
-          IS_CONNECTED.set( true );
           EventBus.getDefault().post(new CheckNetworkResultEvent( true ));
         },
         error -> {
           Timber.tag(TAG).d("Internet connectivity: false");
-          IS_CONNECTED.set( false );
           EventBus.getDefault().post(new CheckNetworkResultEvent( false ));
         });
   }

@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import org.greenrobot.eventbus.EventBus;
@@ -44,8 +43,6 @@ public class StepperLoadDataFragment extends Fragment implements Step {
 
   private RingProgressBar mRingProgressBar;
 
-  private Preference<Boolean> IS_CONNECTED;
-
   private VerificationError error;
   private CompositeSubscription subscription;
 
@@ -60,8 +57,6 @@ public class StepperLoadDataFragment extends Fragment implements Step {
     }
     EventBus.getDefault().register(this);
     EsdApplication.getDataComponent().inject(this);
-
-    loadRxSettings();
 
     mRingProgressBar = (RingProgressBar) view.findViewById(R.id.stepper_test_ring_progress);
     mRingProgressBar.setProgress(0);
@@ -215,9 +210,5 @@ public class StepperLoadDataFragment extends Fragment implements Step {
     }
 
     return (int) Math.ceil(result);
-  }
-
-  private void loadRxSettings() {
-    IS_CONNECTED = settings.getBoolean("isConnectedToInternet");
   }
 }
