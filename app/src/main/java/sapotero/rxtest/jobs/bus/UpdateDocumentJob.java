@@ -482,6 +482,7 @@ public class UpdateDocumentJob extends BaseJob {
         RRouteEntity route = new RRouteEntity();
         route.setText( document.getRoute().getTitle() );
 
+        route.getSteps().clear();
 
         for (Step step: document.getRoute().getSteps() ) {
 
@@ -676,6 +677,8 @@ public class UpdateDocumentJob extends BaseJob {
         RRouteEntity route = (RRouteEntity) doc.getRoute();
         route.setText( document.getRoute().getTitle() );
 
+        route.getSteps().clear();
+
 
         for (Step step: document.getRoute().getSteps() ) {
 
@@ -859,6 +862,36 @@ public class UpdateDocumentJob extends BaseJob {
       doc.setFromFavoritesFolder(true);
     } else {
       doc.setFromFavoritesFolder(false);
+    }
+
+
+    if ( document.getRoute() != null  ){
+      RRouteEntity route = new RRouteEntity();
+      route.setText( document.getRoute().getTitle() );
+
+      route.getSteps().clear();
+
+      for (Step step: document.getRoute().getSteps() ) {
+
+        RStepEntity r_step = new RStepEntity();
+        r_step.setTitle( step.getTitle() );
+        r_step.setNumber( step.getNumber() );
+
+        if ( step.getPeople() != null && step.getPeople().size() > 0 ){
+          r_step.setPeople(  new Gson().toJson( step.getPeople() )  );
+        }
+        if ( step.getCards() != null && step.getCards().size() > 0 ){
+          r_step.setCards(  new Gson().toJson( step.getCards() )  );
+        }
+        if ( step.getAnotherApprovals() != null && step.getAnotherApprovals().size() > 0 ){
+          r_step.setAnother_approvals(  new Gson().toJson( step.getAnotherApprovals() )  );
+        }
+
+        route.getSteps().add( r_step );
+      }
+
+      doc.setRoute( route );
+
     }
 
     dataStore

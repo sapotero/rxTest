@@ -46,6 +46,7 @@ import sapotero.rxtest.db.requery.models.RRouteEntity;
 import sapotero.rxtest.db.requery.models.RStep;
 import sapotero.rxtest.db.requery.models.RStepEntity;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
+import sapotero.rxtest.retrofit.models.document.Action;
 import sapotero.rxtest.retrofit.models.document.AnotherApproval;
 import sapotero.rxtest.retrofit.models.document.Card;
 import sapotero.rxtest.retrofit.models.document.Person;
@@ -119,7 +120,6 @@ public class RoutePreviewFragment extends Fragment {
     }
   }
 
-  @RequiresApi(api = Build.VERSION_CODES.M)
   private void loadSettings() {
     DOCUMENT_UID = settings.getString("activity_main_menu.uid");
 
@@ -199,13 +199,17 @@ public class RoutePreviewFragment extends Fragment {
 
                     if ( user.getSignPng() != null ){
                       Timber.tag("SIGN+").e("assigned!");
-                      item.withSign();
+                      item.setWithSign();
                     }
 
 
                     if (user.getActions() != null && user.getActions().size() > 0) {
                       Timber.tag("actions").w("%s", new Gson().toJson( user.getActions()));
-                      item.withAction( String.format( "%s - %s", user.getActions().get(user.getActions().size()-1).getDate(), user.getActions().get(user.getActions().size()-1).getStatus()  ) );
+
+                      for ( Action action: user.getActions() ) {
+                        item.withAction( String.format( "%s - %s", action.getDate(), action.getStatus()  ) );
+                      }
+
                     }
                     items.add( item );
                   }
@@ -237,9 +241,7 @@ public class RoutePreviewFragment extends Fragment {
               }
 
               if (valid){
-//
                 panel.withItems( items );
-
                 hashMap.put(Integer.valueOf(r_step.getNumber()), panel );
               }
 
@@ -350,23 +352,24 @@ public class RoutePreviewFragment extends Fragment {
     private String name;
     private String action;
     private FrameLayout nameView;
-    private FrameLayout actionView;
+    private LinearLayout actionView;
     private String uid;
-    private boolean withSign = false;
+    private boolean withSign;
 
     public ItemBuilder(Context context) {
       this.context = context;
+      actionView = new LinearLayout(context);
+      actionView.setOrientation(LinearLayout.VERTICAL);
     }
 
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     public ItemBuilder withName(String name) {
       this.name = name;
 
       nameView = new FrameLayout(context);
 
       TextView text = new TextView(context);
-      text.setTextColor( context.getColor(R.color.md_grey_900) );
+      text.setTextColor( ContextCompat.getColor(context, R.color.md_grey_900) );
       text.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
       text.setTypeface( Typeface.create("sans-serif", Typeface.NORMAL) );
       text.setText(name);
@@ -376,15 +379,29 @@ public class RoutePreviewFragment extends Fragment {
       return this;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     public ItemBuilder withAction(String action) {
       this.action = action;
 
-      actionView = new FrameLayout(context);
-
-
       TextView text = new TextView(context);
-      text.setTextColor( context.getColor(R.color.md_grey_600) );
+
+      text.setTextColor( ContextCompat.getColor(context, R.color.md_grey_600) );
+
+      if (action.contains("На ")){
+        text.setTextColor( ContextCompat.getColor(context, R.color.md_blue_600) );
+      }
+
+      if (action.contains("Отклонено")){
+        text.setTextColor( ContextCompat.getColor(context, R.color.md_red_600) );
+      }
+
+      if (action.contains("Отправлен") || action.contains("Согласовано")|| action.contains("Подписано")  ){
+        text.setTextColor( ContextCompat.getColor(context, R.color.md_green_600) );
+      }
+
+      if (action.contains("передано")){
+        text.setTextColor( ContextCompat.getColor(context, R.color.md_yellow_800) );
+      }
+
       text.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
       text.setTypeface( Typeface.create("sans-serif", Typeface.NORMAL) );
       text.setText(action);
@@ -445,13 +462,12 @@ public class RoutePreviewFragment extends Fragment {
       return final_layout;
     }
 
-    public void withNameCallback(String uid) {
+    void withNameCallback(String uid) {
       this.uid = uid;
     }
 
-    public ItemBuilder withSign() {
+    void setWithSign() {
       withSign = true;
-      return this;
     }
   }
 
