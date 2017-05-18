@@ -262,12 +262,16 @@ public class DataLoaderManager {
   }
 
   private void unsubscribe(){
-    if ( subscription == null ){
+    if ( !isSubscriptionExist() ){
       subscription = new CompositeSubscription();
     }
     if (subscription.hasSubscriptions()){
       subscription.clear();
     }
+  }
+
+  private boolean isSubscriptionExist() {
+    return subscription != null;
   }
 
   private void unsubscribeInitV2() {
@@ -423,7 +427,7 @@ public class DataLoaderManager {
   public void updateByCurrentStatus(MainMenuItem items, MainMenuButton button, Boolean firstRunShared) {
     Timber.tag(TAG).e("updateByCurrentStatus: %s %s", items, button );
 
-    if ( !settings.isFirstRun() ) {
+    if ( !isSubscriptionExist() ) {
       unsubscribe();
     }
 
