@@ -4,4 +4,5 @@ package sapotero.rxtest.db.mapper;
 public interface Mapper<M, E> {
   E toEntity(M model);
   M toModel(E entity);
+  boolean hasDiff(E entity, E entity2);
 }

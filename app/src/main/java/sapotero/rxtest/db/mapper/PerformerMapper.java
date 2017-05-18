@@ -40,6 +40,11 @@ public class PerformerMapper implements Mapper<Performer, RPerformerEntity> {
     return model;
   }
 
+  @Override
+  public boolean hasDiff(RPerformerEntity entity, RPerformerEntity entity2) {
+    return !entity.equals(entity2);
+  }
+
   public Performer toFormattedModel(RPerformerEntity entity) {
     Performer formattedModel = new Performer();
 
