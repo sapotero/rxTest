@@ -445,11 +445,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       // настройка
       // Показывать кнопку «Создать поручение»
       try {
-<<<<<<< HEAD
-        if (!settings.getBoolean("settings_view_show_create_decision_post").get() && isFromFavoritesFolder() ) {
-=======
-        if (!settings.isShowCreateDecisionPost() && doc.isFromFavoritesFolder() != null && doc.isFromFavoritesFolder() ) {
->>>>>>> 73474575e6f996a21c385b0cdb312c006c499dfb
+        if (!settings.isShowCreateDecisionPost() && isFromFavoritesFolder() ) {
           if ( isProcessed() ){
             toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(false);
           }
