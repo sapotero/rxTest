@@ -608,18 +608,9 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     originalSignerAssistantId = raw_decision.getAssistantId();
 
 
-    if ( rDecisionEntity != null &&
-      rDecisionEntity.getSignerId() != null &&
-      !rDecisionEntity.getSignerId().equals( settings.getCurrentUserId() ) &&
-      !settings.isShowApproveOnPrimary() ){
 
-      // resolved https://tasks.n-core.ru/browse/MVDESD-13438
-      // Добавить настройку наличия кнопки Согласовать в Первичном рассмотрении
-      toolbar.getMenu().findItem(R.id.action_constructor_create_and_sign).setVisible(false);
+    invalidateSaveAndSignButton();
 
-    } else {
-      toolbar.getMenu().findItem(R.id.action_constructor_create_and_sign).setVisible(true);
-    }
 
   }
 
@@ -636,6 +627,18 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       RDocumentEntity doc = (RDocumentEntity) rDecisionEntity.getDocument();
       Timber.tag(TAG).e("rDecisionEntity %s", doc.getUid());
 
+      if (!settings.isShowApproveOnPrimary() && Objects.equals(doc.getFilter(), "primary_consideration")) {
+        if (
+          manager.getDecision() != null &&
+            manager.getDecision().getSignerId() != null &&
+            Objects.equals(manager.getDecision().getSignerId(), settings.getCurrentUserId())) {
+          toolbar.getMenu().findItem(R.id.action_constructor_create_and_sign).setVisible(true);
+        } else {
+          toolbar.getMenu().findItem(R.id.action_constructor_create_and_sign).setVisible(false);
+        }
+      }
+    } else {
+      // если новая резолюция
       if (!settings.isShowApproveOnPrimary() && Objects.equals(settings.getStatusCode(), "primary_consideration")) {
         if (
           manager.getDecision() != null &&
