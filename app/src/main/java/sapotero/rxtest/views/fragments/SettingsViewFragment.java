@@ -1,22 +1,23 @@
 package sapotero.rxtest.views.fragments;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceFragmentCompat;
-
-import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import javax.inject.Inject;
 
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.utils.FirstRun;
+import sapotero.rxtest.utils.Settings;
 import timber.log.Timber;
 
 public class SettingsViewFragment extends PreferenceFragmentCompat {
   private CompositeSubscription subscriptions;
-  @Inject RxSharedPreferences settings;
+
+  @Inject Context context;
+  @Inject Settings settings;
 
   @Override
   public void onCreatePreferences(Bundle bundle, String s) {
@@ -29,31 +30,32 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
 
     EsdApplication.getDataComponent().inject(this);
 
-    Timber.tag("SETTINGS").d("settings_view_journals %s", settings.getStringSet("settings_view_journals").get() );
+    Timber.tag("SETTINGS").d("settings_view_journals %s", settings.getJournals() );
 
-    findPreference("settings_view_show_comment_post").setDependency("settings_view_show_actions_confirm");
+    findPreference( context.getResources().getString(R.string.show_comment_post_key) )
+            .setDependency( context.getResources().getString(R.string.actions_confirm_key) );
 
     subscriptions = new CompositeSubscription();
     subscriptions.add(
-      settings.getBoolean("settings_view_show_urgency").asObservable().subscribe( active -> {
-        findPreference("settings_view_only_urgent").setEnabled(active);
-        settings.getBoolean("settings_view_only_urgent").set(active);
+      settings.getShowUrgencyPreference().asObservable().subscribe(active -> {
+        findPreference( context.getResources().getString(R.string.only_urgent_key) ).setEnabled(active);
+        settings.setOnlyUrgent(active);
       },Timber::e)
     );
 
     // resolved https://tasks.n-core.ru/browse/MVDESD-13341
     // При отклонении проекта не отображается окно ввода комментария
     subscriptions.add(
-      settings.getBoolean("settings_view_show_actions_confirm")
+      settings.getActionsConfirmPreference()
         .asObservable()
         .subscribe(
           active -> {
             if (active){
-              settings.getBoolean("settings_view_show_comment_post").set(true);
-              findPreference("settings_view_show_comment_post").setEnabled(true);
+              settings.setShowCommentPost(true);
+              findPreference( context.getResources().getString(R.string.show_comment_post_key) ).setEnabled(true);
             } else {
-              settings.getBoolean("settings_view_show_comment_post").set(false);
-              findPreference("settings_view_show_comment_post").setEnabled(false);
+              settings.setShowCommentPost(false);
+              findPreference( context.getResources().getString(R.string.show_comment_post_key) ).setEnabled(false);
             }
           },
           Timber::e
@@ -67,9 +69,8 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
     subscriptions = new CompositeSubscription();
 
     // Enable First run flag preference only if not first run
-    FirstRun firstRun = new FirstRun(settings);
-    boolean isFirstRun = firstRun.isFirstRun();
-    Preference firstFlagPreference = findPreference("is_first_run");
+    boolean isFirstRun = settings.isFirstRun();
+    Preference firstFlagPreference = findPreference(Settings.FIRST_RUN_KEY);
     if (firstFlagPreference != null) {
       firstFlagPreference.setEnabled(!isFirstRun);
     }

@@ -10,8 +10,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 
-import com.f2prateek.rx.preferences.RxSharedPreferences;
-
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -87,7 +85,7 @@ import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.services.task.CheckNetworkTask;
 import sapotero.rxtest.services.task.UpdateAllDocumentsTask;
 import sapotero.rxtest.services.task.UpdateQueueTask;
-import sapotero.rxtest.utils.FirstRun;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.utils.cryptopro.AlgorithmSelector;
 import sapotero.rxtest.utils.cryptopro.CMSSignExample;
 import sapotero.rxtest.utils.cryptopro.ContainerAdapter;
@@ -106,7 +104,7 @@ public class MainService extends Service {
   private ScheduledFuture futureNetwork;
 
   @Inject OkHttpClient okHttpClient;
-  @Inject RxSharedPreferences settings;
+  @Inject Settings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   @Inject QueueManager queue;
@@ -136,9 +134,6 @@ public class MainService extends Service {
     EsdApplication.getManagerComponent().inject(this);
 
     dataLoaderInterface = new DataLoaderManager(getApplicationContext());
-
-
-//    settings.getBoolean("SIGN_WITH_DC").set( false );
 
     Provider[] providers = Security.getProviders();
 
@@ -752,9 +747,9 @@ public class MainService extends Service {
 
         SIGN = enc.encode(signature);
 
-        settings.getString("START_UP_SIGN").set( SIGN );
-        settings.getBoolean("SIGN_WITH_DC").set( true );
-        settings.getString("PIN").set( password );
+        settings.setSign( SIGN );
+        settings.setSignedWithDc( true );
+        settings.setPin( password );
 
         dataLoaderInterface.tryToSignWithDc( SIGN );
 
@@ -763,7 +758,7 @@ public class MainService extends Service {
         EventBus.getDefault().post( new StepperDcCheckFailEvent("Pin is invalid") );
       }
     } else {
-      settings.getString("PIN").set("");
+      settings.setPin("");
       EventBus.getDefault().post( new StepperDcCheckFailEvent("Ошибка! Проверьте SD карту") );
     }
   }
@@ -855,7 +850,7 @@ public class MainService extends Service {
         dataLoaderInterface.updateAuth(SIGN);
       });
 
-    settings.getString("login")
+    settings.getLoginPreference()
       .asObservable()
       .subscribe(username -> {
         user = username;
@@ -1011,7 +1006,7 @@ public class MainService extends Service {
       type = "";
     }
     if ( type.equals("favorites") ) {
-      if ( isFirstRun() ) {
+      if ( settings.isFirstRun() ) {
         dataLoaderInterface.updateFavorites();
       }
     }
@@ -1028,11 +1023,6 @@ public class MainService extends Service {
     add_new_key();
   }
 
-  private boolean isFirstRun() {
-    FirstRun firstRun = new FirstRun(settings);
-    return firstRun.isFirstRun();
-  }
-
   // resolved https://tasks.n-core.ru/browse/MVDESD-13314
   // Старт / стоп проверки наличия сети
   @Subscribe(threadMode = ThreadMode.MAIN)
@@ -1045,7 +1035,7 @@ public class MainService extends Service {
     // Start new checking network connection task, if requested by the event
     if ( event.isStart() ) {
       futureNetwork = scheduller.scheduleWithFixedDelay(
-              new CheckNetworkTask(getApplicationContext(), settings, okHttpClient),  0 , 10, TimeUnit.SECONDS );
+              new CheckNetworkTask(),  0 , 10, TimeUnit.SECONDS );
     }
   }
 }

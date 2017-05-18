@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.decision;
 
-import com.f2prateek.rx.preferences.Preference;
-
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.Objects;
@@ -29,12 +27,6 @@ public class AddTemporaryDecision extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> TOKEN;
-  private Preference<String> LOGIN;
-  private Preference<String> UID;
-  private Preference<String> HOST;
-  private Preference<String> STATUS_CODE;
-  private Preference<String> PIN;
   private String decisionId;
 
   public AddTemporaryDecision(DocumentReceiver document){
@@ -48,15 +40,6 @@ public class AddTemporaryDecision extends AbstractCommand {
 
   public void registerCallBack(Callback callback){
     this.callback = callback;
-  }
-
-  private void loadSettings(){
-    LOGIN = settings.getString("login");
-    TOKEN = settings.getString("token");
-    UID   = settings.getString("activity_main_menu.uid");
-    HOST  = settings.getString("settings_username_host");
-    STATUS_CODE = settings.getString("activity_main_menu.star");
-    PIN = settings.getString("PIN");
   }
 
   public AddTemporaryDecision withDecisionId(String decisionId){

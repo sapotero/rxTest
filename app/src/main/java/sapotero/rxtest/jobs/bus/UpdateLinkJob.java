@@ -6,7 +6,6 @@ import android.support.annotation.Nullable;
 import com.birbit.android.jobqueue.CancelReason;
 import com.birbit.android.jobqueue.Params;
 import com.birbit.android.jobqueue.RetryConstraint;
-import com.f2prateek.rx.preferences.Preference;
 import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
@@ -32,10 +31,6 @@ public class UpdateLinkJob extends BaseJob {
 
   public static final int PRIORITY = 1;
 
-  private Preference<String> LOGIN = null;
-  private Preference<String> TOKEN = null;
-  private Preference<String> HOST;
-
   private Fields.Status filter;
   private String uid;
   private String TAG = this.getClass().getSimpleName();
@@ -54,14 +49,10 @@ public class UpdateLinkJob extends BaseJob {
   @Override
   public void onRun() throws Throwable {
 
-    HOST  = settings.getString("settings_username_host");
-    LOGIN = settings.getString("login");
-    TOKEN = settings.getString("token");
-
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl(HOST.get() + "v3/documents/")
+      .baseUrl(settings.getHost() + "v3/documents/")
       .client(okHttpClient)
       .build();
 
@@ -69,8 +60,8 @@ public class UpdateLinkJob extends BaseJob {
 
     Observable<DocumentInfo> info = documentService.getInfo(
       uid,
-      LOGIN.get(),
-      TOKEN.get()
+      settings.getLogin(),
+      settings.getToken()
     );
 
     info
@@ -124,7 +115,7 @@ public class UpdateLinkJob extends BaseJob {
 
     RDocumentEntity rd = new RDocumentEntity();
     rd.setUid( d.getUid() );
-    rd.setUser( LOGIN.get() );
+    rd.setUser( settings.getLogin() );
     rd.setFilter( filter.toString() );
     rd.setMd5( d.getMd5() );
     rd.setSortKey( d.getSortKey() );

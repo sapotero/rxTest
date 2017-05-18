@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.file;
 
-import com.f2prateek.rx.preferences.Preference;
-
 import java.io.File;
 
 import retrofit2.Retrofit;
@@ -25,12 +23,6 @@ public class SignFile extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> TOKEN;
-  private Preference<String> LOGIN;
-  private Preference<String> UID;
-  private Preference<String> HOST;
-  private Preference<String> STATUS_CODE;
-  private Preference<String> PIN;
   private String official_id;
   private String sign;
 
@@ -47,19 +39,8 @@ public class SignFile extends AbstractCommand {
     this.callback = callback;
   }
 
-  private void loadSettings(){
-    LOGIN = settings.getString("login");
-    TOKEN = settings.getString("token");
-    UID   = settings.getString("activity_main_menu.uid");
-    HOST  = settings.getString("settings_username_host");
-    STATUS_CODE = settings.getString("activity_main_menu.star");
-    PIN = settings.getString("PIN");
-  }
-
   @Override
   public void execute() {
-    loadSettings();
-
     queueManager.add(this);
   }
 
@@ -80,14 +61,12 @@ public class SignFile extends AbstractCommand {
 
   @Override
   public void executeRemote() {
-    loadSettings();
-
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( HOST.get() )
+      .baseUrl( settings.getHost() )
       .client( okHttpClient )
       .build();
 
@@ -97,7 +76,7 @@ public class SignFile extends AbstractCommand {
 
     String file_sign = null;
     try {
-      file_sign = MainService.getFakeSign( PIN.get(), file );
+      file_sign = MainService.getFakeSign( settings.getPin(), file );
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -105,8 +84,8 @@ public class SignFile extends AbstractCommand {
     if (file_sign != null) {
       Observable<Object> info = imagesService.update(
         getParams().getImageId(),
-        LOGIN.get(),
-        TOKEN.get(),
+        settings.getLogin(),
+        settings.getToken(),
         file_sign
       );
 

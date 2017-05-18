@@ -1,6 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.decision;
 
-import com.f2prateek.rx.preferences.Preference;
 import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
@@ -35,12 +34,6 @@ public class AddAndApproveDecision extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> TOKEN;
-  private Preference<String> LOGIN;
-  private Preference<String> UID;
-  private Preference<String> HOST;
-  private Preference<String> STATUS_CODE;
-  private Preference<String> PIN;
   private String decisionId;
 
   public AddAndApproveDecision(DocumentReceiver document){
@@ -54,15 +47,6 @@ public class AddAndApproveDecision extends AbstractCommand {
 
   public void registerCallBack(Callback callback){
     this.callback = callback;
-  }
-
-  private void loadSettings(){
-    LOGIN = settings.getString("login");
-    TOKEN = settings.getString("token");
-    UID   = settings.getString("activity_main_menu.uid");
-    HOST  = settings.getString("settings_username_host");
-    STATUS_CODE = settings.getString("activity_main_menu.star");
-    PIN = settings.getString("PIN");
   }
 
   @Override
@@ -111,7 +95,7 @@ public class AddAndApproveDecision extends AbstractCommand {
 
 
     if (
-      Objects.equals(params.getDecisionModel().getSignerId(), settings.getString("current_user_id").get())
+      Objects.equals(params.getDecisionModel().getSignerId(), settings.getCurrentUserId())
       // или если подписывающий министр
       || ( red != null && red.get(0).equals(true) )
       ){
@@ -143,7 +127,6 @@ public class AddAndApproveDecision extends AbstractCommand {
 
   @Override
   public void executeRemote() {
-    loadSettings();
     queueManager.setAsRunning(this);
 
     Timber.tag(TAG).i( "type: %s", new Gson().toJson(params) );
@@ -151,7 +134,7 @@ public class AddAndApproveDecision extends AbstractCommand {
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( HOST.get() )
+      .baseUrl( settings.getHost() )
       .client( okHttpClient )
       .build();
 
@@ -170,7 +153,7 @@ public class AddAndApproveDecision extends AbstractCommand {
     String sign = null;
 
     try {
-      sign = MainService.getFakeSign( PIN.get(), null );
+      sign = MainService.getFakeSign( settings.getPin(), null );
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -190,8 +173,8 @@ public class AddAndApproveDecision extends AbstractCommand {
     DocumentService operationService = retrofit.create( DocumentService.class );
 
     Observable<DecisionError> info = operationService.createAndSign(
-      LOGIN.get(),
-      TOKEN.get(),
+      settings.getLogin(),
+      settings.getToken(),
       json
     );
 

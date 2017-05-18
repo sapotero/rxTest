@@ -9,10 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.birbit.android.jobqueue.JobManager;
-import com.f2prateek.rx.preferences.Preference;
-import com.f2prateek.rx.preferences.RxSharedPreferences;
-
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -23,8 +19,6 @@ import javax.inject.Inject;
 
 import io.netopen.hotbitmapgg.library.view.RingProgressBar;
 import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
@@ -32,28 +26,23 @@ import sapotero.rxtest.events.bus.FileDownloadedEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckFailEvent;
 import sapotero.rxtest.events.stepper.load.StepperDocumentCountReadyEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
-import sapotero.rxtest.jobs.utils.JobCounter;
-import sapotero.rxtest.utils.FirstRun;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.custom.stepper.Step;
 import sapotero.rxtest.views.custom.stepper.VerificationError;
 import timber.log.Timber;
 
 public class StepperLoadDataFragment extends Fragment implements Step {
 
-  @Inject RxSharedPreferences settings;
+  @Inject Settings settings;
 
   private String TAG = this.getClass().getSimpleName();
   private int loaded = 0;
 
   private RingProgressBar mRingProgressBar;
 
-  private Preference<Integer> COUNT;
-  private Preference<Boolean> IS_CONNECTED;
-
   private VerificationError error;
   private CompositeSubscription subscription;
 
-  private JobCounter jobCounter;
   private boolean isReceivedJobCount = false;
 
   @Override
@@ -65,8 +54,6 @@ public class StepperLoadDataFragment extends Fragment implements Step {
     }
     EventBus.getDefault().register(this);
     EsdApplication.getDataComponent().inject(this);
-
-    loadRxSettings();
 
     mRingProgressBar = (RingProgressBar) view.findViewById(R.id.stepper_test_ring_progress);
     mRingProgressBar.setProgress(0);
@@ -102,7 +89,7 @@ public class StepperLoadDataFragment extends Fragment implements Step {
 //      Toast.makeText( getContext(), error.getErrorMessage(), Toast.LENGTH_SHORT ).show();
     }
 
-    if ( !isFirstRun() ) {
+    if ( !settings.isFirstRun() ) {
       error = null;
       unsubscribe();
 
@@ -119,25 +106,15 @@ public class StepperLoadDataFragment extends Fragment implements Step {
     return error;
   }
 
-  private boolean isFirstRun() {
-    FirstRun firstRun = new FirstRun(settings);
-    return firstRun.isFirstRun();
-  }
-
   @Override
   public void onSelected() {
     Timber.tag(TAG).d("mRingProgressBar init");
 
-    Boolean startLoadData = settings.getBoolean("start_load_data").get();
-    if (startLoadData == null) {
-      startLoadData = true;
-    }
-
-    if ( startLoadData ) {
+    if ( settings.isStartLoadData() ) {
       isReceivedJobCount = false;
       loaded = 0;
       mRingProgressBar.setProgress( 0 );
-      settings.getBoolean("start_load_data").set( false );
+      settings.setStartLoadData( false );
 
       unsubscribe();
       subscription = new CompositeSubscription();
@@ -189,7 +166,7 @@ public class StepperLoadDataFragment extends Fragment implements Step {
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(StepperDocumentCountReadyEvent event) {
     isReceivedJobCount = true;
-    if (jobCounter.getJobCount() == 0) {
+    if (settings.getJobCount() == 0) {
       // No documents to download, set download complete
       mRingProgressBar.setProgress( 100 );
     } else {
@@ -200,7 +177,7 @@ public class StepperLoadDataFragment extends Fragment implements Step {
   private void updateProgressBar(String message) {
     loaded++;
 
-    int jobCount = jobCounter.getJobCount();
+    int jobCount = settings.getJobCount();
 
     Timber.tag(TAG).d("TOTAL: %s/%s | %s", jobCount, loaded, message );
 
@@ -225,11 +202,5 @@ public class StepperLoadDataFragment extends Fragment implements Step {
     }
 
     return (int) Math.ceil(result);
-  }
-
-  private void loadRxSettings() {
-    COUNT = settings.getInteger("documents.count");
-    IS_CONNECTED = settings.getBoolean("isConnectedToInternet");
-    jobCounter = new JobCounter(settings);
   }
 }

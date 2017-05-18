@@ -6,7 +6,6 @@ import android.support.annotation.Nullable;
 import com.birbit.android.jobqueue.CancelReason;
 import com.birbit.android.jobqueue.Params;
 import com.birbit.android.jobqueue.RetryConstraint;
-import com.f2prateek.rx.preferences.Preference;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -24,7 +23,6 @@ import rx.Observable;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.events.bus.FileDownloadedEvent;
-import sapotero.rxtest.jobs.utils.JobCounter;
 import sapotero.rxtest.retrofit.DocumentLinkService;
 import sapotero.rxtest.retrofit.models.DownloadLink;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
@@ -39,7 +37,6 @@ public class DownloadFileJob  extends BaseJob {
   private String host;
   private String strUrl;
   private String fileName;
-  private Preference<String> HOST;
   private RImageEntity image;
 
   DownloadFileJob(String host, String strUrl, String fileName, int id) {
@@ -129,12 +126,10 @@ public class DownloadFileJob  extends BaseJob {
   }
 
   private void loadFile(){
-    HOST = settings.getString("settings_username_host");
+    String admin = settings.getLogin();
+    String token = settings.getToken();
 
-    String admin = settings.getString("login").get();
-    String token = settings.getString("token").get();
-
-    Retrofit retrofit = new RetrofitManager(getApplicationContext(), HOST.get(), okHttpClient).process();
+    Retrofit retrofit = new RetrofitManager(getApplicationContext(), settings.getHost(), okHttpClient).process();
     DocumentLinkService documentLinkService = retrofit.create(DocumentLinkService.class);
 
     strUrl = strUrl.replace("?expired_link=1", "");
@@ -162,8 +157,8 @@ public class DownloadFileJob  extends BaseJob {
 
     Timber.tag(TAG).v( "downloadFile ..." );
 
-    String admin = settings.getString("login").get();
-    String token = settings.getString("token").get();
+    String admin = settings.getLogin();
+    String token = settings.getToken();
 
     Timber.tag(TAG).d("host: '%s' | link: '%s'", host.substring(0, host.length()-1), link.getExpiredLink() );
 
@@ -175,7 +170,7 @@ public class DownloadFileJob  extends BaseJob {
       .build();
 
 
-    Retrofit retrofit = new RetrofitManager(getApplicationContext(), HOST.get(), okHttpClient).process();
+    Retrofit retrofit = new RetrofitManager(getApplicationContext(), settings.getHost(), okHttpClient).process();
     DocumentLinkService documentLinkService = retrofit.create(DocumentLinkService.class);
 
     Observable<Response<ResponseBody>> call = documentLinkService.download(new_builtUri.toString(), admin, token);

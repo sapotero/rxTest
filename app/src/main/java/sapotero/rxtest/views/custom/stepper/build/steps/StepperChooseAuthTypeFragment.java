@@ -12,7 +12,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -20,9 +19,8 @@ import javax.inject.Inject;
 
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.events.stepper.auth.StepperDcCheckEvent;
 import sapotero.rxtest.events.stepper.shared.StepperNextStepEvent;
-import sapotero.rxtest.utils.FirstRun;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.activities.SettingsActivity;
 import sapotero.rxtest.views.custom.stepper.Step;
 import sapotero.rxtest.views.custom.stepper.VerificationError;
@@ -30,7 +28,8 @@ import sapotero.rxtest.views.custom.stepper.util.AuthType;
 import timber.log.Timber;
 
 public class StepperChooseAuthTypeFragment extends Fragment implements Step, View.OnClickListener {
-  @Inject RxSharedPreferences settings;
+  @Inject Settings settings;
+
   private MaterialDialog dialog;
 
   @Override
@@ -124,17 +123,17 @@ public class StepperChooseAuthTypeFragment extends Fragment implements Step, Vie
     EventBus.getDefault().post( new StepperNextStepEvent() );
   }
 
-  private void setAuthType( AuthType type ){
-    settings.getEnum("stepper.auth_type", AuthType.class).set( type );
+  private void setAuthType( AuthType type ) {
+    settings.setAuthType( type );
   }
 
   private void setAuthTypeDc() {
     setAuthType( AuthType.DS );
-    settings.getBoolean("SIGN_WITH_DC").set(true);
+    settings.setSignedWithDc( true );
   }
 
   private void setAuthTypeLogin() {
     setAuthType( AuthType.PASSWORD );
-    settings.getBoolean("SIGN_WITH_DC").set(false);
+    settings.setSignedWithDc( false );
   }
 }

@@ -17,8 +17,6 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.birbit.android.jobqueue.JobManager;
-import com.f2prateek.rx.preferences.Preference;
-import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -54,6 +52,7 @@ import sapotero.rxtest.events.view.UpdateCurrentInfoActivityEvent;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.managers.toolbar.ToolbarManager;
 import sapotero.rxtest.services.task.UpdateCurrentDocumentTask;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.adapters.TabSigningPagerAdapter;
 import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
@@ -67,7 +66,6 @@ import timber.log.Timber;
 
 public class InfoActivity extends AppCompatActivity implements InfoActivityDecisionPreviewFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, RoutePreviewFragment.OnFragmentInteractionListener, InfoCardDocumentsFragment.OnFragmentInteractionListener, InfoCardWebViewFragment.OnFragmentInteractionListener, InfoCardLinksFragment.OnFragmentInteractionListener, InfoCardFieldsFragment.OnFragmentInteractionListener{
 
-
   @BindView(R.id.activity_info_preview_container) LinearLayout preview_container;
 
   @BindView(R.id.tab_main) ViewPager viewPager;
@@ -75,18 +73,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   @BindView(R.id.activity_info_wrapper) View wrapper;
 
   @Inject JobManager jobManager;
-  @Inject RxSharedPreferences settings;
-
-  private Preference<String> TOKEN;
-  private Preference<String> LAST_SEEN_UID;
-  private Preference<String> LOGIN;
-  private Preference<String> PASSWORD;
-  private Preference<String> UID;
-  private Preference<String> DOCUMENT_UID;
-  private Preference<String> STATUS_CODE;
-  private Preference<Integer> POSITION;
-  private Preference<String> REG_NUMBER;
-  private Preference<String> REG_DATE;
+  @Inject Settings settings;
 
   private String TAG = this.getClass().getSimpleName();
   private CompositeSubscription subscription;
@@ -97,7 +84,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   private Fields.Journal journal;
   private Fields.Status  status;
   private MaterialDialog.Builder loadingDialog;
-  private Preference<Boolean> IS_PROCESSED;
   private ScheduledThreadPoolExecutor scheduller;
 
   @Override
@@ -114,8 +100,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   }
 
   private void initInfoActivity() {
-    loadSettings();
-
     if (EventBus.getDefault().isRegistered(this)) {
       EventBus.getDefault().unregister(this);
     }
@@ -126,8 +110,8 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
     setLastSeen();
 
-    status  = Fields.Status.findStatus( STATUS_CODE.get() );
-    journal = Fields.getJournalByUid( UID.get() );
+    status  = Fields.Status.findStatus( settings.getStatusCode() );
+    journal = Fields.getJournalByUid( settings.getUid() );
 
     setTabContent();
     setPreview();
@@ -148,7 +132,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 //    Timber.tag(TAG).e("IS_PROCESSED.get() %s | %s -> %s", status, STATUS_CODE.get(), IS_PROCESSED.get() );
 
 
-    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || IS_PROCESSED.get()  ){
+    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL ){
       TabSigningPagerAdapter adapter = new TabSigningPagerAdapter( getSupportFragmentManager() );
       viewPager.setAdapter(adapter);
     } else {
@@ -190,7 +174,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
       e.printStackTrace();
     }
 
-    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || IS_PROCESSED.get()  ){
+    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL ){
       fragmentTransaction.add( R.id.activity_info_preview_container, new RoutePreviewFragment() );
     } else {
       fragmentTransaction.add( R.id.activity_info_preview_container, new InfoActivityDecisionPreviewFragment(toolbarManager) );
@@ -199,35 +183,15 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     fragmentTransaction.commit();
   }
 
-  private void loadSettings() {
-    LOGIN    = settings.getString("login");
-    UID      = settings.getString("activity_main_menu.uid");
-    LAST_SEEN_UID = settings.getString("activity_main_menu.last_seen_uid");
-    PASSWORD = settings.getString("password");
-    TOKEN    = settings.getString("token");
-    POSITION = settings.getInteger("position");
-    DOCUMENT_UID = settings.getString("document.uid");
-    STATUS_CODE = settings.getString("activity_main_menu.star");
-    IS_PROCESSED = settings.getBoolean("activity_main_menu.from_sign");
-    REG_NUMBER = settings.getString("activity_main_menu.regnumber");
-    REG_DATE = settings.getString("activity_main_menu.date");
-
-  }
-
-
-
-
   @OnClick(R.id.activity_info_prev_document)
   public void prev_doc(){
     showNextDocument();
   }
+
   @OnClick(R.id.activity_info_next_document)
   public void next_doc(){
     showPrevDocument();
   }
-
-
-
 
   @OnClick(R.id.activity_info_left_button)
   public void prev(){
@@ -272,15 +236,13 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   }
 
   public void exitIfAlreadySeenThisFuckingDocument(){
-    if (LAST_SEEN_UID.get() != null && UID.get() != null) {
-      if (Objects.equals(LAST_SEEN_UID.get(), UID.get())){
-        finish();
-      }
+    if (Objects.equals(settings.getLastSeenUid(), settings.getUid())){
+      finish();
     }
   }
 
   public void setLastSeen(){
-    LAST_SEEN_UID.set( UID.get() );
+    settings.setLastSeenUid( settings.getUid() );
   }
 
 
@@ -293,7 +255,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   protected void onResume() {
     super.onResume();
 
-    settings.getBoolean("decision_with_assigment").set(false);
+    settings.setDecisionWithAssignment(false);
 
     initInfoActivity();
     updateCurrent();
@@ -308,7 +270,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   private void invalidateArrows() {
     // если пришли из поиска - дизейблим стрелки
     try {
-      if ( settings.getBoolean("load_from_search").get() ){
+      if ( settings.isLoadFromSearch() ){
         ImageButton prev = (ImageButton) findViewById(R.id.activity_info_prev_document);
         ImageButton next = (ImageButton) findViewById(R.id.activity_info_next_document);
 
@@ -324,7 +286,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   private void startThreadedUpdate() {
     scheduller = new ScheduledThreadPoolExecutor(1);
-    scheduller.scheduleWithFixedDelay( new UpdateCurrentDocumentTask(UID.get()), 0 ,5, TimeUnit.SECONDS );
+    scheduller.scheduleWithFixedDelay( new UpdateCurrentDocumentTask(settings.getUid()), 0 ,5, TimeUnit.SECONDS );
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
@@ -404,7 +366,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     Timber.tag("SHOW_PREV").e("info_act");
 
 
-    MainActivity.RAdapter.getPrevFromPosition( settings.getInteger("activity_main_menu.position").get() );
+    MainActivity.RAdapter.getPrevFromPosition( settings.getMainMenuPosition() );
 
     exitIfAlreadySeenThisFuckingDocument();
 
@@ -433,7 +395,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     Timber.tag("SHOW_NEXT").e("info_act");
 
 
-    MainActivity.RAdapter.getNextFromPosition( settings.getInteger("activity_main_menu.position").get() );
+    MainActivity.RAdapter.getNextFromPosition( settings.getMainMenuPosition() );
 
     exitIfAlreadySeenThisFuckingDocument();
 
@@ -467,7 +429,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   public void updateCurrent(){
 
-    jobManager.addJobInBackground(new UpdateDocumentJob( UID.get(), status ));
+    jobManager.addJobInBackground(new UpdateDocumentJob( settings.getUid(), status ));
 
     unsubscribe();
     subscription.add(
@@ -476,7 +438,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(interval -> {
-          jobManager.addJobInBackground(new UpdateDocumentJob( UID.get(), status ));
+          jobManager.addJobInBackground(new UpdateDocumentJob( settings.getUid(), status ));
         })
     );
 

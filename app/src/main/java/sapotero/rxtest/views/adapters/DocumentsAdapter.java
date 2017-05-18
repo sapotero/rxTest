@@ -3,8 +3,6 @@ package sapotero.rxtest.views.adapters;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -15,9 +13,6 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
-
-import com.f2prateek.rx.preferences.Preference;
-import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -46,13 +41,14 @@ import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.adapter.UpdateDocumentAdapterEvent;
 import sapotero.rxtest.events.utils.NoDocumentsEvent;
 import sapotero.rxtest.retrofit.models.documents.Document;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.activities.InfoActivity;
 import sapotero.rxtest.views.activities.MainActivity;
 import timber.log.Timber;
 
 public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.DocumentViewHolder> implements Action1<List<Document>> {
 
-  @Inject RxSharedPreferences settings;
+  @Inject Settings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   private Context mContext;
@@ -325,19 +321,12 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
     viewHolder.cv.setOnClickListener(view -> {
 
-      SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-      RxSharedPreferences rxPreferences = RxSharedPreferences.create(preferences);
-      Preference<Integer> rxPosition = rxPreferences.getInteger("position");
-      rxPosition.set(position);
-
-      settings.getString("activity_main_menu.uid").set( item.getUid() );
-      settings.getInteger("activity_main_menu.position").set( viewHolder.getAdapterPosition() );
-      settings.getString("activity_main_menu.regnumber").set( item.getRegistrationNumber() );
-      settings.getString("activity_main_menu.star").set( item.getFilter() );
-      settings.getBoolean("load_from_search").set( false );
-
-//      settings.getBoolean("activity_main_menu.from_sign").set( item.isFromSign() );
-      settings.getString("activity_main_menu.date").set( item.getRegistrationDate() );
+      settings.setUid( item.getUid() );
+      settings.setMainMenuPosition( viewHolder.getAdapterPosition() );
+      settings.setRegNumber( item.getRegistrationNumber() );
+      settings.setStatusCode( item.getFilter() );
+      settings.setLoadFromSearch( false );
+      settings.setRegDate( item.getRegistrationDate() );
 
       Intent intent = new Intent(mContext, InfoActivity.class);
 
@@ -445,11 +434,11 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
       RDocumentEntity item = documents.get(position);
 
-      settings.getInteger("activity_main_menu.position").set(position);
-      settings.getString("activity_main_menu.uid").set(item.getUid());
-      settings.getString("activity_main_menu.regnumber").set(item.getRegistrationNumber());
-      settings.getString("activity_main_menu.star").set(item.getFilter());
-      settings.getString("activity_main_menu.date").set(item.getRegistrationDate());
+      settings.setMainMenuPosition(position);
+      settings.setUid(item.getUid());
+      settings.setRegNumber(item.getRegistrationNumber());
+      settings.setStatusCode(item.getFilter());
+      settings.setRegDate(item.getRegistrationDate());
     }
 
   }
@@ -473,12 +462,12 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
       RDocumentEntity item = documents.get(position);
 
-      settings.getInteger("activity_main_menu.position").set(position);
-      settings.getString("activity_main_menu.uid").set( item.getUid() );
-      settings.getString("activity_main_menu.regnumber").set( item.getRegistrationNumber() );
-      settings.getString("activity_main_menu.star").set( item.getFilter() );
-//      settings.getBoolean("activity_main_menu.from_sign").set( item.isFromSign() );
-      settings.getString("activity_main_menu.date").set( item.getRegistrationDate() );
+      settings.setMainMenuPosition(position);
+      settings.setUid( item.getUid() );
+      settings.setRegNumber( item.getRegistrationNumber() );
+      settings.setStatusCode( item.getFilter() );
+//      settings.setFromSign( item.isFromSign() );
+      settings.setRegDate( item.getRegistrationDate() );
     }
 
 

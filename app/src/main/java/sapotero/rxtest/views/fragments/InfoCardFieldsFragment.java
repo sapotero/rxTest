@@ -10,9 +10,6 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.f2prateek.rx.preferences.Preference;
-import com.f2prateek.rx.preferences.RxSharedPreferences;
-
 import javax.inject.Inject;
 
 import butterknife.BindView;
@@ -24,12 +21,12 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.adapters.utils.OnSwipeTouchListener;
 
 public class InfoCardFieldsFragment extends Fragment {
 
-
-  @Inject RxSharedPreferences settings;
+  @Inject Settings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   private String TAG = this.getClass().getSimpleName();
@@ -86,11 +83,9 @@ public class InfoCardFieldsFragment extends Fragment {
 
 
   private void loadSettings() {
-    Preference<String> DOCUMENT_UID = settings.getString("activity_main_menu.uid");
-
     dataStore
       .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq(uid == null ? DOCUMENT_UID.get() : uid ))
+      .where(RDocumentEntity.UID.eq(uid == null ? settings.getUid() : uid ))
       .get()
       .toObservable()
       .subscribeOn(Schedulers.io())

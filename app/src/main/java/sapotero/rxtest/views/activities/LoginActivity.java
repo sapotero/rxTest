@@ -15,9 +15,6 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.birbit.android.jobqueue.JobManager;
-import com.f2prateek.rx.preferences.Preference;
-import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -27,7 +24,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import okhttp3.OkHttpClient;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.events.bus.FileDownloadedEvent;
@@ -36,8 +32,6 @@ import sapotero.rxtest.events.crypto.SelectKeyStoreEvent;
 import sapotero.rxtest.events.crypto.SelectKeysEvent;
 import sapotero.rxtest.events.stepper.shared.StepperNextStepEvent;
 import sapotero.rxtest.services.MainService;
-import sapotero.rxtest.utils.FirstRun;
-import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.custom.stepper.StepperLayout;
 import sapotero.rxtest.views.custom.stepper.VerificationError;
 import sapotero.rxtest.views.custom.stepper.build.StepperAdapter;
@@ -49,14 +43,9 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
   private static final int PERM_REQUEST_CODE = 0;
   private static final int PERM_SYSTEM_SETTINGS_REQUEST_CODE = 1;
 
-  @Inject RxSharedPreferences settings;
+  @Inject sapotero.rxtest.utils.Settings settings;
 
   private String TAG = this.getClass().getSimpleName();
-
-  private Preference<String> TOKEN;
-  private Preference<String> LOGIN;
-  private Preference<String> PASSWORD;
-  private Preference<String> HOST;
 
   private StepperLayout stepperLayout;
   private StepperAdapter adapter;
@@ -248,11 +237,6 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
   }
 
   private void initialize() {
-    LOGIN    = settings.getString("login");
-    PASSWORD = settings.getString("password");
-    TOKEN    = settings.getString("token");
-    HOST     = settings.getString("settings_username_host");
-
     PreferenceManager.setDefaultValues(this, R.xml.settings_view, false);
   }
 
@@ -276,7 +260,7 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
     EventBus.getDefault().register(this);
 
     // If not first run and CryptoPro installed, immediately move to main activity
-    if ( !isFirstRun() && cryptoProInstalled ) {
+    if ( !settings.isFirstRun() && cryptoProInstalled ) {
       onCompleted(null);
     }
   }
@@ -309,11 +293,6 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
   @Override
   public void onReturn() {
 //    Toast.makeText( getApplicationContext(), "onReturn", Toast.LENGTH_SHORT ).show();
-  }
-
-  private boolean isFirstRun() {
-    FirstRun firstRun = new FirstRun(settings);
-    return firstRun.isFirstRun();
   }
 
   @Subscribe(threadMode = ThreadMode.BACKGROUND)

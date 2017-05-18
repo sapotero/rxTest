@@ -2,8 +2,6 @@ package sapotero.rxtest.views.adapters.models;
 
 import android.content.Context;
 
-import com.f2prateek.rx.preferences.RxSharedPreferences;
-
 import javax.inject.Inject;
 
 import io.requery.Persistable;
@@ -14,13 +12,14 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.db.requery.utils.validation.Validation;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import sapotero.rxtest.views.menu.fields.MainMenuButton;
 import sapotero.rxtest.views.menu.fields.MainMenuItem;
 
 public class DocumentTypeItem {
   @Inject SingleEntityStore<Persistable> dataStore;
-  @Inject RxSharedPreferences settings;
+  @Inject Settings settings;
   @Inject Validation validation;
 
   private final MainMenuItem mainMenuItem;
@@ -46,7 +45,7 @@ public class DocumentTypeItem {
 
       Integer total = dataStore
         .count(RDocumentEntity.class)
-        .where( RDocumentEntity.USER.eq( settings.getString("login").get() )   )
+        .where( RDocumentEntity.USER.eq( settings.getLogin() )   )
         .and( RDocumentEntity.DOCUMENT_TYPE.in( validation.getSelectedJournals() ) )
         .and( RDocumentEntity.PROCESSED.eq( false ) )
         .and( RDocumentEntity.ADDRESSED_TO_TYPE.eq( "" ) )
@@ -58,7 +57,7 @@ public class DocumentTypeItem {
         projects = dataStore
           .count(RDocumentEntity.class)
           .where( RDocumentEntity.FILTER.in( MainMenuButton.ButtonStatus.getProject() )   )
-          .and( RDocumentEntity.USER.eq( settings.getString("login").get() ) )
+          .and( RDocumentEntity.USER.eq( settings.getLogin() ) )
           .and( RDocumentEntity.ADDRESSED_TO_TYPE.eq( "" ) )
           .get()
           .value();
@@ -80,21 +79,21 @@ public class DocumentTypeItem {
       // настройка
       // если включена настройка "Отображать документы без резолюции"
       WhereAndOr<RxScalar<Integer>> query;
-      if ( settings.getBoolean("settings_view_type_show_without_project").get()
+      if ( settings.isShowWithoutProject()
         || mainMenuItem.getIndex() == 3  // подписание/согласование
         || mainMenuItem.getIndex() == 8  // контроль
         || mainMenuItem.getIndex() == 10 // избранное
       ){
         query = dataStore
           .count(RDocumentEntity.class)
-          .where(RDocumentEntity.USER.eq(settings.getString("login").get()))
+          .where(RDocumentEntity.USER.eq(settings.getLogin()))
           .and(RDocumentEntity.FILTER.ne( Fields.Status.LINK.getValue() ));
 
 
       } else {
         query = dataStore
           .count(RDocumentEntity.class)
-          .where( RDocumentEntity.USER.eq( settings.getString("login").get() ) )
+          .where( RDocumentEntity.USER.eq( settings.getLogin() ) )
           .and( RDocumentEntity.WITH_DECISION.eq(true) )
           .and( RDocumentEntity.FILTER.ne( Fields.Status.LINK.getValue() ) );
       }

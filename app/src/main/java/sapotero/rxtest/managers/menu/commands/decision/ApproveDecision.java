@@ -1,6 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.decision;
 
-import com.f2prateek.rx.preferences.Preference;
 import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
@@ -38,15 +37,8 @@ public class ApproveDecision extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> TOKEN;
-  private Preference<String> LOGIN;
-  private Preference<String> UID;
-  private Preference<String> HOST;
-  private Preference<String> STATUS_CODE;
-  private Preference<String> PIN;
   private RDecisionEntity decision;
   private String decisionId;
-  private Preference<String> CURRENT_USER_ID;
 
   public ApproveDecision(DocumentReceiver document){
     super();
@@ -61,15 +53,6 @@ public class ApproveDecision extends AbstractCommand {
     this.callback = callback;
   }
 
-  private void loadSettings(){
-    LOGIN = settings.getString("login");
-    TOKEN = settings.getString("token");
-    UID   = settings.getString("activity_main_menu.uid");
-    HOST  = settings.getString("settings_username_host");
-    STATUS_CODE = settings.getString("activity_main_menu.star");
-    CURRENT_USER_ID = settings.getString("current_user_id");
-    PIN = settings.getString("PIN");
-  }
   public ApproveDecision withDecision(RDecisionEntity decision){
     this.decision = decision;
     return this;
@@ -113,7 +96,7 @@ public class ApproveDecision extends AbstractCommand {
 
     if (
         // если активная резолюция
-        Objects.equals(params.getDecisionModel().getSignerId(), settings.getString("current_user_id").get())
+        Objects.equals(params.getDecisionModel().getSignerId(), settings.getCurrentUserId())
 
         // или если подписывающий министр
         || ( red != null && red.get(0).equals(true) )
@@ -168,10 +151,6 @@ public class ApproveDecision extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    loadSettings();
-
-
-
     if ( callback != null ){
       callback.onCommandExecuteSuccess( getType() );
     }
@@ -180,21 +159,19 @@ public class ApproveDecision extends AbstractCommand {
 
   @Override
   public void executeRemote() {
-    loadSettings();
-
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( HOST.get() )
+      .baseUrl( settings.getHost() )
       .client( okHttpClient )
       .build();
 
     String sign = null;
 
     try {
-      sign = MainService.getFakeSign( PIN.get(), null );
+      sign = MainService.getFakeSign( settings.getPin(), null );
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -228,8 +205,8 @@ public class ApproveDecision extends AbstractCommand {
 
     Observable<DecisionError> info = operationService.update(
       decisionId,
-      LOGIN.get(),
-      TOKEN.get(),
+      settings.getLogin(),
+      settings.getToken(),
       json
     );
 

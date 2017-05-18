@@ -58,7 +58,7 @@ public class CreateFavoriteUsersJob extends BaseJob {
     data.setName( user.getName() );
     data.setIsGroup( user.getIsGroup() );
     data.setIsOrganization( user.getIsOrganization() );
-    data.setUser( settings.getString("login").get() );
+    data.setUser( settings.getLogin() );
 
     dataStore
       .insert(data)
@@ -79,7 +79,7 @@ public class CreateFavoriteUsersJob extends BaseJob {
     Integer count = dataStore
       .count(RFavoriteUserEntity.UID)
       .where(RFavoriteUserEntity.UID.eq(uid))
-      .and(RFavoriteUserEntity.USER.eq(settings.getString("login").get()))
+      .and(RFavoriteUserEntity.USER.eq(settings.getLogin()))
       .get().value();
 
     if( count != 0 ){

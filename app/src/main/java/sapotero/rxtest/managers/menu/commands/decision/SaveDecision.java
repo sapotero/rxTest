@@ -1,6 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.decision;
 
-import com.f2prateek.rx.preferences.Preference;
 import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
@@ -38,12 +37,6 @@ public class SaveDecision extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> TOKEN;
-  private Preference<String> LOGIN;
-  private Preference<String> UID;
-  private Preference<String> HOST;
-  private Preference<String> STATUS_CODE;
-  private Preference<String> PIN;
   private RDecisionEntity decision;
   private String decisionId;
   private boolean withSign = false;
@@ -61,14 +54,6 @@ public class SaveDecision extends AbstractCommand {
     this.callback = callback;
   }
 
-  private void loadSettings(){
-    LOGIN = settings.getString("login");
-    TOKEN = settings.getString("token");
-    UID   = settings.getString("activity_main_menu.uid");
-    HOST  = settings.getString("settings_username_host");
-    STATUS_CODE = settings.getString("activity_main_menu.star");
-    PIN = settings.getString("PIN");
-  }
   public SaveDecision withDecision(RDecisionEntity decision){
     this.decision = decision;
     return this;
@@ -221,14 +206,12 @@ public class SaveDecision extends AbstractCommand {
 
   @Override
   public void executeRemote() {
-    loadSettings();
-
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( HOST.get() )
+      .baseUrl( settings.getHost() )
       .client( okHttpClient )
       .build();
 
@@ -262,8 +245,8 @@ public class SaveDecision extends AbstractCommand {
 
     Observable<DecisionError> info = operationService.update(
       decisionId,
-      LOGIN.get(),
-      TOKEN.get(),
+      settings.getLogin(),
+      settings.getToken(),
       json
     );
 

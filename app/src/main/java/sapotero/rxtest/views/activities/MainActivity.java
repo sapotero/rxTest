@@ -21,8 +21,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.birbit.android.jobqueue.JobManager;
-import com.f2prateek.rx.preferences.Preference;
-import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.mikepenz.material_design_iconic_typeface_library.MaterialDesignIconic;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
@@ -42,7 +40,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
@@ -75,7 +72,7 @@ import sapotero.rxtest.events.view.UpdateMainActivityEvent;
 import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
 import sapotero.rxtest.managers.DataLoaderManager;
 import sapotero.rxtest.services.MainService;
-import sapotero.rxtest.utils.FirstRun;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
@@ -92,7 +89,7 @@ import timber.log.Timber;
 public class MainActivity extends AppCompatActivity implements MenuBuilder.Callback, SearchView.OnVisibilityChangeListener {
 
   @Inject JobManager jobManager;
-  @Inject RxSharedPreferences settings;
+  @Inject Settings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   @Inject QueueManager queue;
@@ -126,12 +123,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
 
   private String TAG = MainActivity.class.getSimpleName();
-
-  private Preference<String> TOKEN;
-  private Preference<String> LOGIN;
-  private Preference<String> HOST;
-  private Preference<String> PASSWORD;
-  private Preference<Integer> COUNT;
 
   private int loaded = 0;
 
@@ -201,7 +192,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     ButterKnife.bind(this);
     EsdApplication.getManagerComponent().inject(this);
-    loadSettings();
     context = this;
 
     initAdapters();
@@ -213,7 +203,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       .withOrganizationSelector( ORGANIZATION_SELECTOR )
       .withFavoritesButton( favorites_button )
       .withJournalSelector( DOCUMENT_TYPE_SELECTOR )
-      .withUser( LOGIN.get() )
+      .withUser( settings.getLogin() )
       .registerCallBack(this);
     menuBuilder.build();
 
@@ -249,21 +239,19 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void setFirstRunFalse() {
-    FirstRun firstRun = new FirstRun(settings);
-
-    boolean isFirstRun = firstRun.isFirstRun();
-    boolean isSignedWithDc = firstRun.getBooleanFromSettings("SIGN_WITH_DC");
+    boolean isFirstRun = settings.isFirstRun();
+    boolean isSignedWithDc = settings.isSignedWithDc();
 
     // If signed with login and password, do not set first run flag to false
     if ( isFirstRun && isSignedWithDc ) {
-      firstRun.setFirstRun(false);
+      settings.setFirstRun(false);
     }
 
     EventBus.getDefault().post( new UpdateAllDocumentsEvent());
   }
 
   private void updateToken() {
-    String sign = settings.getString("START_UP_SIGN").get();
+    String sign = settings.getSign();
     if (sign == null) {
       sign = "";
     }
@@ -302,7 +290,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
                     result.add(
                       dataStore
                         .select(RDocumentEntity.class)
-                        .where( RDocumentEntity.USER.eq( settings.getString("login").get() ) )
+                        .where( RDocumentEntity.USER.eq( settings.getLogin() ) )
                         .and(RDocumentEntity.REGISTRATION_NUMBER.like("%" + newText + "%"))
                         .and(RDocumentEntity.FROM_PROCESSED_FOLDER.eq(false) )
                         .get().toList()
@@ -315,7 +303,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
                     result.add(
                       dataStore
                         .select(RDocumentEntity.class)
-                        .where( RDocumentEntity.USER.eq( settings.getString("login").get() ) )
+                        .where( RDocumentEntity.USER.eq( settings.getLogin() ) )
                         .and(RDocumentEntity.SHORT_DESCRIPTION.like("%" + newText + "%"))
                         .and(RDocumentEntity.FROM_PROCESSED_FOLDER.eq(false) )
                         .get().toList()
@@ -382,7 +370,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     setToolbarClickListener();
 
-    if (!settings.getBoolean("debug_enabled").get()){
+    if (!settings.isDebugEnabled()){
       toolbar.getMenu().findItem(R.id.removeQueue).setVisible(false);
       toolbar.getMenu().findItem(R.id.checkQueue).setVisible(false);
     }
@@ -567,7 +555,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
           .withIdentifier(SETTINGS_DECISION_TEMPLATES)
       );
 
-    if (settings.getBoolean("debug_enabled").get()){
+    if (settings.isDebugEnabled()){
       drawer
         .addDrawerItems(
           new SectionDrawerItem().withName(R.string.drawer_item_debug),
@@ -680,8 +668,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       .withHeaderBackground(R.drawable.header)
       .addProfiles(
         new ProfileDrawerItem()
-          .withName(  settings.getString("current_user_organization").get() )
-          .withEmail( settings.getString("current_user").get() )
+          .withName( settings.getCurrentUserOrganization() )
+          .withEmail( settings.getCurrentUser() )
           .withSetSelected(true)
           .withIcon(R.drawable.gerb)
       )
@@ -705,14 +693,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     );
   }
 
-  private void loadSettings() {
-    LOGIN = settings.getString("login");
-    PASSWORD = settings.getString("password");
-    TOKEN = settings.getString("token");
-    HOST = settings.getString("settings_username_host");
-    COUNT = settings.getInteger("documents.count");
-  }
-
   private void drawer_add_item(int index, String title, Long identifier) {
     Timber.tag("drawer_add_item").v(" !index " + index + " " + title);
 
@@ -729,8 +709,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     Map<Integer, String> map = new HashMap<>();
     int index = 0;
 
-    Preference<Set<String>> set = settings.getStringSet("settings_view_journals");
-    for (String journal : set.get()) {
+    for (String journal : settings.getJournals()) {
       index = Arrays.asList((getResources().getStringArray(R.array.settings_view_start_page_values))).indexOf(journal);
       map.put(index, journal);
     }
@@ -864,11 +843,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private int getLoadedDocumentsPercent() {
-    if ( COUNT.get() == null ){
-      COUNT.set(1);
-    }
-
-    float result = 100f * loaded / COUNT.get();
+    float result = 100f * loaded / settings.getJobCount();
     if (result > 100 ){
       result = 100f;
     }

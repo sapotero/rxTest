@@ -18,7 +18,6 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -40,6 +39,7 @@ import sapotero.rxtest.db.requery.models.RFavoriteUserEntity;
 import sapotero.rxtest.db.requery.models.RPrimaryConsiderationEntity;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.retrofit.models.Oshs;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.adapters.OshsAutoCompleteAdapter;
 import sapotero.rxtest.views.adapters.PrimaryUsersAdapter;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
@@ -48,7 +48,7 @@ import timber.log.Timber;
 
 public class SelectOshsDialogFragment extends DialogFragment implements View.OnClickListener {
 
-  @Inject RxSharedPreferences settings;
+  @Inject Settings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   private String TAG = this.getClass().getSimpleName();
@@ -243,7 +243,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
     if (showWithAssistant){
       dataStore
         .select(RAssistantEntity.class)
-        .where(RAssistantEntity.USER.eq( settings.getString("login").get() ))
+        .where(RAssistantEntity.USER.eq( settings.getLogin() ))
         .get().toObservable()
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
@@ -255,8 +255,8 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
     if (withPrimaryConsideration){
       WhereAndOr<RxResult<RPrimaryConsiderationEntity>> query = dataStore
         .select(RPrimaryConsiderationEntity.class)
-        .where(RPrimaryConsiderationEntity.UID.ne( settings.getString("current_user_id").get() ))
-        .and(  RPrimaryConsiderationEntity.USER.eq( settings.getString("login").get() ));
+        .where(RPrimaryConsiderationEntity.UID.ne( settings.getCurrentUserId() ))
+        .and(  RPrimaryConsiderationEntity.USER.eq( settings.getLogin() ));
 
       query.get()
         .toObservable()
@@ -271,7 +271,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
         dataStore
           .select(RFavoriteUserEntity.class)
           .where(RFavoriteUserEntity.UID.ne(""))
-          .and(  RFavoriteUserEntity.USER.eq( settings.getString("login").get() ));
+          .and(  RFavoriteUserEntity.USER.eq( settings.getLogin() ));
 
       if (user_ids != null){
         query = query.and(RFavoriteUserEntity.UID.notIn(user_ids));

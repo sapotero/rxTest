@@ -1,6 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.templates;
 
-import com.f2prateek.rx.preferences.Preference;
 import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
@@ -28,10 +27,6 @@ public class CreateTemplate extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> TOKEN;
-  private Preference<String> LOGIN;
-  private Preference<String> HOST;
-
   public CreateTemplate(DocumentReceiver document){
     super();
     this.document = document;
@@ -43,12 +38,6 @@ public class CreateTemplate extends AbstractCommand {
 
   public void registerCallBack(Callback callback){
     this.callback = callback;
-  }
-
-  private void loadSettings(){
-    LOGIN = settings.getString("login");
-    HOST  = settings.getString("settings_username_host");
-    TOKEN = settings.getString("token");
   }
 
   @Override
@@ -69,12 +58,10 @@ public class CreateTemplate extends AbstractCommand {
 
   @Override
   public void executeRemote() {
-    loadSettings();
-
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( HOST.get() )
+      .baseUrl( settings.getHost() )
       .client( okHttpClient )
       .build();
 
@@ -86,8 +73,8 @@ public class CreateTemplate extends AbstractCommand {
     }
 
     Observable<Template> info = templatesService.create(
-      LOGIN.get(),
-      TOKEN.get(),
+      settings.getLogin(),
+      settings.getToken(),
       params.getComment(),
       type
     );
@@ -118,7 +105,7 @@ public class CreateTemplate extends AbstractCommand {
     template.setUid(data.getId());
     template.setType(params.getLabel());
     template.setTitle(data.getText());
-    template.setUser(LOGIN.get());
+    template.setUser(settings.getLogin());
 
     dataStore
       .insert(template)

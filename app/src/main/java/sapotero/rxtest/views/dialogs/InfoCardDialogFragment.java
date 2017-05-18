@@ -12,9 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 
-import com.f2prateek.rx.preferences.Preference;
-import com.f2prateek.rx.preferences.RxSharedPreferences;
-
 import javax.inject.Inject;
 
 import butterknife.BindView;
@@ -27,17 +24,17 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.utils.Settings;
 import timber.log.Timber;
 
 public class InfoCardDialogFragment extends DialogFragment implements View.OnClickListener {
 
   private String TAG = this.getClass().getSimpleName();
 
-  @Inject RxSharedPreferences settings;
+  @Inject Settings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   @BindView(R.id.fragment_preview_main_infocard) WebView infocard;
-  private Preference<String> DOCUMENT_UID;
   private String uid;
 
   @RequiresApi(api = Build.VERSION_CODES.M)
@@ -52,11 +49,9 @@ public class InfoCardDialogFragment extends DialogFragment implements View.OnCli
 
   @RequiresApi(api = Build.VERSION_CODES.M)
   private void loadSettings() {
-    DOCUMENT_UID = settings.getString("activity_main_menu.uid");
-
     dataStore
       .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq( uid == null? DOCUMENT_UID.get() : uid  ))
+      .where(RDocumentEntity.UID.eq( uid == null? settings.getUid() : uid  ))
       .get()
       .toObservable()
       .subscribeOn(Schedulers.io())

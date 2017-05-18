@@ -11,17 +11,12 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
 
-import com.f2prateek.rx.preferences.Preference;
-import com.f2prateek.rx.preferences.RxSharedPreferences;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
-import io.requery.Persistable;
-import io.requery.rx.SingleEntityStore;
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Retrofit;
@@ -30,6 +25,7 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.utils.OshsAdapterService;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
+import sapotero.rxtest.utils.Settings;
 
 public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable {
 
@@ -40,11 +36,7 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
   private String TAG = this.getClass().getSimpleName();
 
   @Inject OkHttpClient okHttpClient;
-  @Inject RxSharedPreferences settings;
-
-  private Preference<String> login;
-  private Preference<String> token;
-  private Preference<String> HOST;
+  @Inject Settings settings;
 
   private ArrayList<String> ignore_user_ids;
 
@@ -59,7 +51,6 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
     mContext = context;
     EsdApplication.getNetworkComponent().inject( this );
     this.view = view;
-    loadSettings();
   }
 
   @Override
@@ -133,9 +124,9 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
 
   private List<Oshs> findOshs(Context context, String term) throws IOException {
 
-    Retrofit retrofit = new RetrofitManager( context, HOST.get() + "/v2/", okHttpClient).process();
+    Retrofit retrofit = new RetrofitManager( context, settings.getHost() + "/v2/", okHttpClient).process();
     OshsAdapterService documentsService = retrofit.create( OshsAdapterService.class );
-    Call<Oshs[]> call = documentsService.find(login.get(), token.get(), term);
+    Call<Oshs[]> call = documentsService.find(settings.getLogin(), settings.getToken(), term);
 
     Oshs[] data = call.execute().body();
 
@@ -164,13 +155,6 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
     }
 
     return result;
-  }
-
-  private void loadSettings(){
-    login = settings.getString("login");
-    token = settings.getString("token");
-    HOST  = settings.getString("settings_username_host");
-
   }
 
   public void setIgnoreUsers(ArrayList<String> users) {

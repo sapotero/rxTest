@@ -6,7 +6,6 @@ import android.support.annotation.Nullable;
 import com.birbit.android.jobqueue.CancelReason;
 import com.birbit.android.jobqueue.Params;
 import com.birbit.android.jobqueue.RetryConstraint;
-import com.f2prateek.rx.preferences.Preference;
 import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
@@ -54,10 +53,6 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
 
   private String processed_folder;
 
-  private Preference<String> LOGIN = null;
-  private Preference<String> TOKEN = null;
-  private Preference<String> HOST;
-
   private String uid;
   private String TAG = this.getClass().getSimpleName();
   private DocumentInfo document;
@@ -76,14 +71,10 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
   @Override
   public void onRun() throws Throwable {
 
-    HOST  = settings.getString("settings_username_host");
-    LOGIN = settings.getString("login");
-    TOKEN = settings.getString("token");
-
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl(HOST.get() + "v3/documents/")
+      .baseUrl(settings.getHost() + "v3/documents/")
       .client(okHttpClient)
       .build();
 
@@ -91,8 +82,8 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
 
     Observable<DocumentInfo> info = documentService.getInfo(
       uid,
-      LOGIN.get(),
-      TOKEN.get()
+      settings.getLogin(),
+      settings.getToken()
     );
 
     info
@@ -160,7 +151,7 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
 
     RDocumentEntity rd = new RDocumentEntity();
     rd.setUid(  d.getUid() );
-    rd.setUser( LOGIN.get() );
+    rd.setUser( settings.getLogin() );
     rd.setFilter( "" );
     rd.setMd5( d.getMd5() );
     rd.setSortKey( d.getSortKey() );
@@ -239,7 +230,7 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
       rDoc.setFromProcessedFolder(true);
       rDoc.setProcessed(true);
 
-      rDoc.setUser( LOGIN.get() );
+      rDoc.setUser( settings.getLogin() );
 
       if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
         rDoc.getDecisions().clear();
@@ -416,7 +407,7 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
               for (RImage _image : result.getImages()) {
 
                 RImageEntity image = (RImageEntity) _image;
-                jobManager.addJobInBackground( new DownloadFileJob(HOST.get(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
+                jobManager.addJobInBackground( new DownloadFileJob(settings.getHost(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
               }
 
             }
@@ -448,7 +439,7 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
         signer.setType( document.getSigner().getType() );
       }
 
-      doc.setUser( LOGIN.get() );
+      doc.setUser( settings.getLogin() );
 
       if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
         doc.getDecisions().clear();
@@ -641,7 +632,7 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
               for (RImage _image : result.getImages()) {
 
                 RImageEntity image = (RImageEntity) _image;
-                jobManager.addJobInBackground( new DownloadFileJob(HOST.get(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
+                jobManager.addJobInBackground( new DownloadFileJob(settings.getHost(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
               }
 
             }
