@@ -39,4 +39,16 @@ public class PerformerMapper implements Mapper<Performer, RPerformerEntity> {
 
     return model;
   }
+
+  public Performer toFormattedModel(RPerformerEntity entity) {
+    Performer formattedModel = new Performer();
+
+    formattedModel.setPerformerId( entity.getPerformerId() );
+    formattedModel.setIsOriginal( entity.isIsOriginal() );
+    formattedModel.setIsResponsible( entity.isIsResponsible() );
+    formattedModel.setGroup( false );
+    formattedModel.setOrganization( entity.isIsOrganization() );
+
+    return formattedModel;
+  }
 }

@@ -3,6 +3,7 @@ package sapotero.rxtest.db.requery.utils;
 import java.util.Arrays;
 
 import padeg.lib.Padeg;
+import sapotero.rxtest.db.mapper.PerformerMapper;
 import sapotero.rxtest.db.requery.models.decisions.RBlock;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
@@ -13,7 +14,7 @@ import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.Performer;
 import timber.log.Timber;
 
-
+@Deprecated
 public class DecisionConverter {
 
   public static Decision formatDecision(RDecisionEntity decision) {
@@ -49,14 +50,7 @@ public class DecisionConverter {
         if ( block.getPerformers().size() > 0 ) {
           for (RPerformer _p : block.getPerformers()) {
             RPerformerEntity performer = (RPerformerEntity) _p;
-            Performer formated_performer = new Performer();
-
-            formated_performer.setPerformerId( performer.getPerformerId() );
-            formated_performer.setIsOriginal( performer.isIsOriginal() );
-            formated_performer.setIsResponsible( performer.isIsResponsible() );
-            formated_performer.setGroup( false );
-            formated_performer.setOrganization( performer.isIsOrganization() );
-
+            Performer formated_performer = new PerformerMapper().toFormattedModel(performer);
             formated_block.getPerformers().add(formated_performer);
           }
         }

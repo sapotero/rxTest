@@ -37,6 +37,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.mapper.PerformerMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RUrgencyEntity;
 import sapotero.rxtest.db.requery.models.decisions.RBlock;
@@ -827,20 +828,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
             if (b.getPerformers() != null && b.getPerformers().size() >= 1) {
 
               for (RPerformer _performer : b.getPerformers()) {
-
                 RPerformerEntity p = (RPerformerEntity) _performer;
-                Performer performer = new Performer();
-
-                performer.setNumber(p.getNumber());
-                performer.setPerformerId(p.getPerformerId());
-                performer.setPerformerType(p.getPerformerType());
-                performer.setPerformerText(p.getPerformerText());
-                performer.setPerformerGender(p.getPerformerGender());
-                performer.setOrganizationText(p.getOrganizationText());
-                performer.setIsOriginal(p.isIsOriginal());
-                performer.setIsResponsible(p.isIsResponsible());
-                performer.setOrganization(p.isIsOrganization());
-
+                Performer performer = new PerformerMapper().toModel(p);
                 block.getPerformers().add(performer);
               }
             }

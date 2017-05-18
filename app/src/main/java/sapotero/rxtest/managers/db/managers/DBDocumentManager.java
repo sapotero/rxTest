@@ -10,6 +10,7 @@ import io.requery.Persistable;
 import io.requery.query.Result;
 import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.mapper.PerformerMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RSignerEntity;
 import sapotero.rxtest.db.requery.models.decisions.RBlock;
@@ -137,18 +138,7 @@ public class DBDocumentManager {
 
           for (RPerformer rPerformer : block.getPerformers()) {
             RPerformerEntity performer = (RPerformerEntity) rPerformer;
-            Performer raw_performer = new Performer();
-
-            raw_performer.setNumber(performer.getNumber());
-            raw_performer.setPerformerId(performer.getPerformerId());
-            raw_performer.setPerformerType(performer.getPerformerType());
-            raw_performer.setPerformerText(performer.getPerformerText());
-            raw_performer.setPerformerGender(performer.getPerformerGender());
-            raw_performer.setOrganizationText(performer.getOrganizationText());
-            raw_performer.setIsOriginal(performer.isIsOriginal());
-            raw_performer.setIsResponsible(performer.isIsResponsible());
-            raw_performer.setOrganization(performer.isIsOrganization());
-
+            Performer raw_performer = new PerformerMapper().toModel(performer);
             raw_block.getPerformers().add(raw_performer);
           }
 
