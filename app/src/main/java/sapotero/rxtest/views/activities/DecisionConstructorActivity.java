@@ -75,9 +75,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
   @BindView(R.id.toolbar) Toolbar toolbar;
 
-//  @BindView(R.id.fragment_decision_autocomplete_field) DelayAutoCompleteTextView user_autocomplete;
-//  @BindView(R.id.fragment_decision_autocomplete_field_loading_indicator) ProgressBar indicator;
-
   @BindView(R.id.activity_decision_constructor_wrapper) RelativeLayout wrapper;
   @BindView(R.id.decision_constructor_decision_preview) RelativeLayout testWrapper;
 
@@ -633,131 +630,120 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     // При создании новой резолюции, кнопка "Сохранить и подписать"
     // должна быть только в том случае, если Подписант=текущему пользователю.
     // В остальных случаях, кнопки "Сохранить и подписать" быть не должно.
-<<<<<<< HEAD
 
     if (rDecisionEntity != null) {
 
       RDocumentEntity doc = (RDocumentEntity) rDecisionEntity.getDocument();
       Timber.tag(TAG).e("rDecisionEntity %s", doc.getUid());
 
-      if ( !settings.getBoolean("settings_view_show_approve_on_primary").get() && Objects.equals(doc.getFilter(), "primary_consideration")){
+      if (!settings.isShowApproveOnPrimary() && Objects.equals(settings.getStatusCode(), "primary_consideration")) {
         if (
           manager.getDecision() != null &&
             manager.getDecision().getSignerId() != null &&
-            Objects.equals(manager.getDecision().getSignerId(), settings.getString("current_user_id").get())){
+            Objects.equals(manager.getDecision().getSignerId(), settings.getCurrentUserId())) {
           toolbar.getMenu().findItem(R.id.action_constructor_create_and_sign).setVisible(true);
         } else {
           toolbar.getMenu().findItem(R.id.action_constructor_create_and_sign).setVisible(false);
         }
-=======
-    if ( !settings.isShowApproveOnPrimary() && Objects.equals(settings.getStatusCode(), "primary_consideration")){
-      if (
-          manager.getDecision() != null &&
-            manager.getDecision().getSignerId() != null &&
-          Objects.equals(manager.getDecision().getSignerId(), settings.getCurrentUserId())){
-        toolbar.getMenu().findItem(R.id.action_constructor_create_and_sign).setVisible(true);
-      } else {
-        toolbar.getMenu().findItem(R.id.action_constructor_create_and_sign).setVisible(false);
->>>>>>> 73474575e6f996a21c385b0cdb312c006c499dfb
       }
     }
   }
 
-  private boolean checkDecision() {
-    boolean showSaveDialog = true;
+    private boolean checkDecision () {
+      boolean showSaveDialog = true;
 
-    if ( !manager.allSignersSet() ) {
-      showSaveDialog = false;
-      new MaterialDialog.Builder(this)
-              .title("Внимание")
-              .content("Укажите хотя бы одного исполнителя")
-              .positiveText("Ок")
-              .negativeText("Выход")
-              .onPositive(
-                      (dialog, which) -> {
-                        dialog.dismiss();
-                      }
-              )
-              .onNegative(
-                      (dialog, which) -> {
-                        finish();
-                      }
-              )
-              .show();
-    }
+      if (!manager.allSignersSet()) {
+        showSaveDialog = false;
+        new MaterialDialog.Builder(this)
+          .title("Внимание")
+          .content("Укажите хотя бы одного исполнителя")
+          .positiveText("Ок")
+          .negativeText("Выход")
+          .onPositive(
+            (dialog, which) -> {
+              dialog.dismiss();
+            }
+          )
+          .onNegative(
+            (dialog, which) -> {
+              finish();
+            }
+          )
+          .show();
+      }
 
-    if ( showSaveDialog && !manager.hasBlocks() ) {
-      showSaveDialog = false;
-      new MaterialDialog.Builder(this)
-              .title("Внимание")
-              .content("Необходимо добавить хотя бы один блок")
-              .positiveText("Ок")
-              .onPositive(
-                      (dialog, which) -> {
-                        dialog.dismiss();
-                      }
-              )
-              .show();
+      if (showSaveDialog && !manager.hasBlocks()) {
+        showSaveDialog = false;
+        new MaterialDialog.Builder(this)
+          .title("Внимание")
+          .content("Необходимо добавить хотя бы один блок")
+          .positiveText("Ок")
+          .onPositive(
+            (dialog, which) -> {
+              dialog.dismiss();
+            }
+          )
+          .show();
 
-    }
+      }
 
-    if ( showSaveDialog && !manager.hasSigner() ) {
-      showSaveDialog = false;
-      new MaterialDialog.Builder(this)
-              .title("Внимание")
-              .content("Необходимо выбрать подписавшего")
-              .positiveText("Ок")
-              .onPositive(
-                      (dialog, which) -> {
-                        dialog.dismiss();
-                      }
-              )
-              .show();
-    }
+      if (showSaveDialog && !manager.hasSigner()) {
+        showSaveDialog = false;
+        new MaterialDialog.Builder(this)
+          .title("Внимание")
+          .content("Необходимо выбрать подписавшего")
+          .positiveText("Ок")
+          .onPositive(
+            (dialog, which) -> {
+              dialog.dismiss();
+            }
+          )
+          .show();
+      }
 
-    // Check if signer and performers are different persons
-    if ( showSaveDialog && manager.hasBlocks() && manager.hasSigner() ) {
-      Decision decision = manager.getDecision();
-      if (decision != null) {
-        String signerId = decision.getSignerId();
-        String assistantId = decision.getAssistantId();
-        boolean signerEqualsPerformer = false;
-        List<Block> blocks = decision.getBlocks();
+      // Check if signer and performers are different persons
+      if (showSaveDialog && manager.hasBlocks() && manager.hasSigner()) {
+        Decision decision = manager.getDecision();
+        if (decision != null) {
+          String signerId = decision.getSignerId();
+          String assistantId = decision.getAssistantId();
+          boolean signerEqualsPerformer = false;
+          List<Block> blocks = decision.getBlocks();
 
-        for (Block block : blocks) {
-          List<Performer> performers = block.getPerformers();
-          for (Performer performer : performers) {
-            String performerId = performer.getPerformerId();
+          for (Block block : blocks) {
+            List<Performer> performers = block.getPerformers();
+            for (Performer performer : performers) {
+              String performerId = performer.getPerformerId();
 
-            // fix null pointer exception
-            if ( signerId!= null && performerId.equals(signerId) || assistantId != null && performerId.equals(assistantId) ) {
-              signerEqualsPerformer = true;
+              // fix null pointer exception
+              if (signerId != null && performerId.equals(signerId) || assistantId != null && performerId.equals(assistantId)) {
+                signerEqualsPerformer = true;
+                break;
+              }
+            }
+            if (signerEqualsPerformer) {
               break;
             }
           }
+
           if (signerEqualsPerformer) {
-            break;
+            showSaveDialog = false;
+            new MaterialDialog.Builder(this)
+              .title("Внимание")
+              .content("Подписавший и исполнитель совпадают")
+              .positiveText("Ок")
+              .onPositive(
+                (dialog, which) -> {
+                  dialog.dismiss();
+                }
+              )
+              .show();
           }
         }
-
-        if (signerEqualsPerformer) {
-          showSaveDialog = false;
-          new MaterialDialog.Builder(this)
-                  .title("Внимание")
-                  .content("Подписавший и исполнитель совпадают")
-                  .positiveText("Ок")
-                  .onPositive(
-                          (dialog, which) -> {
-                            dialog.dismiss();
-                          }
-                  )
-                  .show();
-        }
       }
-    }
 
-    return showSaveDialog;
-  }
+      return showSaveDialog;
+    }
 
 
 //  @Override
@@ -787,276 +773,274 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 //    }
 //  }
 
-  @Override
-  protected void onResume() {
-    super.onPostResume();
+    @Override
+    protected void onResume () {
+      super.onPostResume();
 
 
-    operationManager.registerCallBack(this);
-  }
+      operationManager.registerCallBack(this);
+    }
 
-  private void loadDecision() {
-    Integer decision_id = settings.getDecisionActiveId();
+    private void loadDecision () {
+      Integer decision_id = settings.getDecisionActiveId();
 
-    rDecisionEntity = dataStore
-      .select(RDecisionEntity.class)
-      .where(RDecisionEntity.ID.eq(decision_id))
-      .get().firstOrNull();
+      rDecisionEntity = dataStore
+        .select(RDecisionEntity.class)
+        .where(RDecisionEntity.ID.eq(decision_id))
+        .get().firstOrNull();
 
-    if (rDecisionEntity != null) {
-      raw_decision = new Decision();
+      if (rDecisionEntity != null) {
+        raw_decision = new Decision();
 
-      raw_decision.setId( rDecisionEntity.getUid() );
-      raw_decision.setLetterhead(rDecisionEntity.getLetterhead());
-      raw_decision.setApproved(rDecisionEntity.isApproved());
-      raw_decision.setSigner(rDecisionEntity.getSigner());
-      raw_decision.setSignerId(rDecisionEntity.getSignerId());
-      raw_decision.setAssistantId(rDecisionEntity.getAssistantId());
-      raw_decision.setSignerBlankText(rDecisionEntity.getSignerBlankText());
-      raw_decision.setSignerIsManager(rDecisionEntity.isSignerIsManager());
-      raw_decision.setComment(rDecisionEntity.getComment());
-      raw_decision.setDate(rDecisionEntity.getDate());
-      raw_decision.setUrgencyText(rDecisionEntity.getUrgencyText());
-      raw_decision.setShowPosition(rDecisionEntity.isShowPosition());
-      raw_decision.setLetterheadFontSize(rDecisionEntity.getLetterheadFontSize());
-      raw_decision.setPerformersFontSize(rDecisionEntity.getPerformerFontSize());
+        raw_decision.setId(rDecisionEntity.getUid());
+        raw_decision.setLetterhead(rDecisionEntity.getLetterhead());
+        raw_decision.setApproved(rDecisionEntity.isApproved());
+        raw_decision.setSigner(rDecisionEntity.getSigner());
+        raw_decision.setSignerId(rDecisionEntity.getSignerId());
+        raw_decision.setAssistantId(rDecisionEntity.getAssistantId());
+        raw_decision.setSignerBlankText(rDecisionEntity.getSignerBlankText());
+        raw_decision.setSignerIsManager(rDecisionEntity.isSignerIsManager());
+        raw_decision.setComment(rDecisionEntity.getComment());
+        raw_decision.setDate(rDecisionEntity.getDate());
+        raw_decision.setUrgencyText(rDecisionEntity.getUrgencyText());
+        raw_decision.setShowPosition(rDecisionEntity.isShowPosition());
+        raw_decision.setLetterheadFontSize(rDecisionEntity.getLetterheadFontSize());
+        raw_decision.setPerformersFontSize(rDecisionEntity.getPerformerFontSize());
 
-      if ( rDecisionEntity.getBlocks() != null && rDecisionEntity.getBlocks().size() >= 1 ){
+        if (rDecisionEntity.getBlocks() != null && rDecisionEntity.getBlocks().size() >= 1) {
 
-        ArrayList<Block> list = new ArrayList<>();
+          ArrayList<Block> list = new ArrayList<>();
 
-        for (RBlock _block: rDecisionEntity.getBlocks() ) {
+          for (RBlock _block : rDecisionEntity.getBlocks()) {
 
-          RBlockEntity b = (RBlockEntity) _block;
-          Block block = new Block();
-          block.setNumber(b.getNumber());
-          block.setFontSize(b.getFontSize());
-          block.setText(b.getText());
-          block.setAppealText(b.getAppealText());
-          block.setTextBefore(b.isTextBefore());
-          block.setHidePerformers(b.isHidePerformers());
-          block.setToCopy(b.isToCopy());
-          block.setToFamiliarization(b.isToFamiliarization());
+            RBlockEntity b = (RBlockEntity) _block;
+            Block block = new Block();
+            block.setNumber(b.getNumber());
+            block.setFontSize(b.getFontSize());
+            block.setText(b.getText());
+            block.setAppealText(b.getAppealText());
+            block.setTextBefore(b.isTextBefore());
+            block.setHidePerformers(b.isHidePerformers());
+            block.setToCopy(b.isToCopy());
+            block.setToFamiliarization(b.isToFamiliarization());
 
-          if ( b.getPerformers() != null && b.getPerformers().size() >= 1 ) {
+            if (b.getPerformers() != null && b.getPerformers().size() >= 1) {
 
-            for (RPerformer _performer : b.getPerformers()) {
+              for (RPerformer _performer : b.getPerformers()) {
 
-              RPerformerEntity p = (RPerformerEntity) _performer;
-              Performer performer = new Performer();
+                RPerformerEntity p = (RPerformerEntity) _performer;
+                Performer performer = new Performer();
 
-              performer.setNumber(p.getNumber());
-              performer.setPerformerId(p.getPerformerId());
-              performer.setPerformerType(p.getPerformerType());
-              performer.setPerformerText(p.getPerformerText());
-              performer.setPerformerGender(p.getPerformerGender());
-              performer.setOrganizationText(p.getOrganizationText());
-              performer.setIsOriginal(p.isIsOriginal());
-              performer.setIsResponsible(p.isIsResponsible());
-              performer.setOrganization(p.isIsOrganization());
+                performer.setNumber(p.getNumber());
+                performer.setPerformerId(p.getPerformerId());
+                performer.setPerformerType(p.getPerformerType());
+                performer.setPerformerText(p.getPerformerText());
+                performer.setPerformerGender(p.getPerformerGender());
+                performer.setOrganizationText(p.getOrganizationText());
+                performer.setIsOriginal(p.isIsOriginal());
+                performer.setIsResponsible(p.isIsResponsible());
+                performer.setOrganization(p.isIsOrganization());
 
-              block.getPerformers().add(performer);
+                block.getPerformers().add(performer);
+              }
             }
+
+            Collections.sort(block.getPerformers(), (o1, o2) -> o1.getNumber().compareTo(o2.getNumber()));
+            list.add(block);
           }
 
-          Collections.sort(block.getPerformers(), (o1, o2) -> o1.getNumber().compareTo( o2.getNumber() ));
-          list.add(block);
+          Collections.sort(list, (o1, o2) -> o1.getNumber().compareTo(o2.getNumber()));
+          raw_decision.setBlocks(list);
         }
+      } else {
 
-        Collections.sort(list, (o1, o2) -> o1.getNumber().compareTo( o2.getNumber() ));
-        raw_decision.setBlocks(list);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+        Calendar cal = Calendar.getInstance();
+        String date = dateFormat.format(cal.getTime());
+
+        String signerName = getCurrentUserName();
+        String signerOrganization = getCurrentUserOrganization();
+
+        raw_decision = new Decision();
+        raw_decision.setLetterhead("Бланк резолюции");
+        raw_decision.setShowPosition(true);
+        raw_decision.setSignerId(getCurrentUserId());
+        raw_decision.setSigner(makeSignerWithOrganizationText(signerName, signerOrganization));
+        raw_decision.setSignerBlankText(signerName);
+        raw_decision.setUrgencyText("");
+        raw_decision.setId(null);
+        raw_decision.setDate(date);
+        raw_decision.setBlocks(new ArrayList<>());
+
       }
-    } else {
-
-      SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-      Calendar cal = Calendar.getInstance();
-      String date = dateFormat.format(cal.getTime());
-
-      String signerName = getCurrentUserName();
-      String signerOrganization = getCurrentUserOrganization();
-
-      raw_decision = new Decision();
-      raw_decision.setLetterhead("Бланк резолюции");
-      raw_decision.setShowPosition(true);
-      raw_decision.setSignerId( getCurrentUserId() );
-      raw_decision.setSigner( makeSignerWithOrganizationText(signerName, signerOrganization) );
-      raw_decision.setSignerBlankText( signerName );
-      raw_decision.setUrgencyText("");
-      raw_decision.setId(null);
-      raw_decision.setDate( date );
-      raw_decision.setBlocks(new ArrayList<>());
 
     }
 
-  }
+    @Override
+    public void onFragmentInteraction (Uri uri){
+    }
 
-  @Override
-  public void onFragmentInteraction(Uri uri) {
-  }
+    @Override
+    public void onStart () {
+      super.onStart();
+    }
+    @Override protected void onPause () {
+      super.onPause();
+    }
 
-  @Override
-  public void onStart() {
-    super.onStart();
-  }
-  @Override protected void onPause() {
-    super.onPause();
-  }
-
-  @Override
-  public void onStop() {
-    super.onStop();
-  }
+    @Override
+    public void onStop () {
+      super.onStop();
+    }
 
 
+    private void showPrevDialog () {
+      // decision_assignment_approve_body
 
+      MaterialDialog.Builder prev_dialog = new MaterialDialog.Builder(this)
+        .content(R.string.decision_reject_body)
+        .cancelable(true)
+        .positiveText(R.string.yes)
+        .negativeText(R.string.no)
+        .onPositive((dialog1, which) -> {
+          CommandFactory.Operation operation;
+          operation = CommandFactory.Operation.REJECT_DECISION;
 
-  private void showPrevDialog() {
-    // decision_assignment_approve_body
-
-    MaterialDialog.Builder prev_dialog = new MaterialDialog.Builder(this)
-      .content(R.string.decision_reject_body)
-      .cancelable(true)
-      .positiveText(R.string.yes)
-      .negativeText(R.string.no)
-      .onPositive((dialog1, which) -> {
-        CommandFactory.Operation operation;
-        operation =CommandFactory.Operation.REJECT_DECISION;
-
-        CommandParams params = new CommandParams();
-        params.setDecisionId( rDecisionEntity.getUid() );
+          CommandParams params = new CommandParams();
+          params.setDecisionId(rDecisionEntity.getUid());
 //        params.setDecision( rDecisionEntity );
-        params.setDecisionModel( DecisionConverter.formatDecision(rDecisionEntity) );
+          params.setDecisionModel(DecisionConverter.formatDecision(rDecisionEntity));
 
-        operationManager.execute(operation, params);
-      })
-      .autoDismiss(true);
+          operationManager.execute(operation, params);
+        })
+        .autoDismiss(true);
 
-    prev_dialog.build().show();
-  }
+      prev_dialog.build().show();
+    }
 
-  private void showNextDialog() {
+    private void showNextDialog () {
 
-    MaterialDialog.Builder prev_dialog = new MaterialDialog.Builder(this)
-      .content(R.string.decision_approve_body)
-      .cancelable(true)
-      .positiveText(R.string.yes)
-      .negativeText(R.string.no)
-      .onPositive((dialog1, which) -> {
+      MaterialDialog.Builder prev_dialog = new MaterialDialog.Builder(this)
+        .content(R.string.decision_approve_body)
+        .cancelable(true)
+        .positiveText(R.string.yes)
+        .negativeText(R.string.no)
+        .onPositive((dialog1, which) -> {
 
-        raw_decision.setApproved(true);
+          raw_decision.setApproved(true);
 
-        CommandFactory.Operation operation;
-        operation =CommandFactory.Operation.APPROVE_DECISION;
+          CommandFactory.Operation operation;
+          operation = CommandFactory.Operation.APPROVE_DECISION;
 
-        CommandParams params = new CommandParams();
-        params.setDecisionId( rDecisionEntity.getUid() );
+          CommandParams params = new CommandParams();
+          params.setDecisionId(rDecisionEntity.getUid());
 //        params.setDecision( rDecisionEntity );
-        params.setDecisionModel( DecisionConverter.formatDecision(rDecisionEntity) );
+          params.setDecisionModel(DecisionConverter.formatDecision(rDecisionEntity));
 
-        if ( settings.isDecisionWithAssignment() ){
-          Timber.tag(TAG).w("ASSIGNMENT: %s", settings.isDecisionWithAssignment() );
-          params.setAssignment(true);
-        }
+          if (settings.isDecisionWithAssignment()) {
+            Timber.tag(TAG).w("ASSIGNMENT: %s", settings.isDecisionWithAssignment());
+            params.setAssignment(true);
+          }
 
-        operationManager.execute(operation, params);
-      })
-      .autoDismiss(true);
+          operationManager.execute(operation, params);
+        })
+        .autoDismiss(true);
 
-    prev_dialog.build().show();
-  }
+      prev_dialog.build().show();
+    }
 
-  @Override
-  public void onExecuteSuccess(String command) {
-    if ( Objects.equals(command, "approve_decision") ) {
-      finish();
+    @Override
+    public void onExecuteSuccess (String command){
+      if (Objects.equals(command, "approve_decision")) {
+        finish();
 //      activity.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
-      EventBus.getDefault().post( new ApproveDecisionEvent() );
-    }
+        EventBus.getDefault().post(new ApproveDecisionEvent());
+      }
 
-    if ( Objects.equals(command, "reject_decision") ) {
-      finish();
+      if (Objects.equals(command, "reject_decision")) {
+        finish();
 //      activity.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
 
-      EventBus.getDefault().post( new RejectDecisionEvent() );
-    }
-  }
-
-
-  @Override
-  public void onExecuteError() {
-
-  }
-
-  @Override
-  public void onSearchSuccess(Oshs user, CommandFactory.Operation operation, String uid) {
-    Timber.tag(TAG).e("USER: %s", new Gson().toJson(user) );
-
-    updateSigner(user.getId(), user.getName(), user.getOrganization(), user.getAssistantId());
-
-    // resolved https://tasks.n-core.ru/browse/MVDESD-13438
-    // Добавить настройку наличия кнопки Согласовать в Первичном рассмотрении
-    if ( !settings.isShowApproveOnPrimary() ){
-      invalidateSaveAndSignButton();
-    }
-  }
-
-  @Override
-  public void onSearchError(Throwable error) {
-
-  }
-
-  private void updateSigner(String signerId, String signerName, String signerOrganization, String assistantId) {
-
-    String name = makeSignerWithOrganizationText(signerName, signerOrganization);
-
-    if (rDecisionEntity != null) {
-      rDecisionEntity.setSignerId( signerId );
-      rDecisionEntity.setSigner( name );
-      rDecisionEntity.setSignerBlankText( signerName );
-
-      if ( assistantId != null ){
-        rDecisionEntity.setAssistantId( assistantId );
+        EventBus.getDefault().post(new RejectDecisionEvent());
       }
     }
 
-    manager.setSignerId(signerId);
-    manager.setSigner(name);
-    manager.setSignerBlankText(signerName);
 
-    if ( assistantId != null ){
-      manager.setAssistantId(assistantId);
+    @Override
+    public void onExecuteError () {
+
     }
 
-    signer_oshs_selector.setText( name );
+    @Override
+    public void onSearchSuccess (Oshs user, CommandFactory.Operation operation, String uid){
+      Timber.tag(TAG).e("USER: %s", new Gson().toJson(user));
+
+      updateSigner(user.getId(), user.getName(), user.getOrganization(), user.getAssistantId());
+
+      // resolved https://tasks.n-core.ru/browse/MVDESD-13438
+      // Добавить настройку наличия кнопки Согласовать в Первичном рассмотрении
+      if (!settings.isShowApproveOnPrimary()) {
+        invalidateSaveAndSignButton();
+      }
+    }
+
+    @Override
+    public void onSearchError (Throwable error){
+
+    }
+
+    private void updateSigner (String signerId, String signerName, String signerOrganization, String
+    assistantId){
+
+      String name = makeSignerWithOrganizationText(signerName, signerOrganization);
+
+      if (rDecisionEntity != null) {
+        rDecisionEntity.setSignerId(signerId);
+        rDecisionEntity.setSigner(name);
+        rDecisionEntity.setSignerBlankText(signerName);
+
+        if (assistantId != null) {
+          rDecisionEntity.setAssistantId(assistantId);
+        }
+      }
+
+      manager.setSignerId(signerId);
+      manager.setSigner(name);
+      manager.setSignerBlankText(signerName);
+
+      if (assistantId != null) {
+        manager.setAssistantId(assistantId);
+      }
+
+      signer_oshs_selector.setText(name);
 
 //    manager.setDecision( DecisionConverter.formatDecision(rDecisionEntity) );
-    manager.update();
-  }
-
-  private String makeSignerWithOrganizationText(String signerName, String signerOrganization) {
-    String name = signerName;
-
-    if (!name.endsWith(")")){
-      name = String.format("%s (%s)", name, signerOrganization );
+      manager.update();
     }
 
-    return name;
-  }
+    private String makeSignerWithOrganizationText (String signerName, String signerOrganization){
+      String name = signerName;
 
-  private String getCurrentUserId() {
-    return settings.getCurrentUserId();
-  }
+      if (!name.endsWith(")")) {
+        name = String.format("%s (%s)", name, signerOrganization);
+      }
 
-  private String getCurrentUserName() {
-    return settings.getCurrentUser();
-  }
+      return name;
+    }
 
-  private String getCurrentUserOrganization() {
-    return settings.getCurrentUserOrganization();
-  }
+    private String getCurrentUserId () {
+      return settings.getCurrentUserId();
+    }
 
-  @Override
-  public void onSelectTemplate(String template) {
+    private String getCurrentUserName () {
+      return settings.getCurrentUser();
+    }
 
-  }
+    private String getCurrentUserOrganization () {
+      return settings.getCurrentUserOrganization();
+    }
+
+    @Override
+    public void onSelectTemplate (String template){
+    }
 }
