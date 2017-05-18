@@ -468,7 +468,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       // настройка
       // Показывать кнопку «Создать поручение»
       try {
-        if (!settings.getBoolean("settings_view_show_create_decision_post").get() && doc.isFromFavoritesFolder() != null && doc.isFromFavoritesFolder() ) {
+        if (!settings.getBoolean("settings_view_show_create_decision_post").get() && isFromFavoritesFolder() ) {
           if ( isProcessed() ){
             toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(false);
           }
@@ -477,7 +477,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         e.printStackTrace();
       }
 
-      if (Objects.equals(doc.getFilter(), Fields.Status.SIGNING.getValue()) || Objects.equals(doc.getFilter(), Fields.Status.APPROVAL.getValue()) || doc.isFromFavoritesFolder() != null && doc.isFromFavoritesFolder() ) {
+      if (Objects.equals(doc.getFilter(), Fields.Status.SIGNING.getValue()) || Objects.equals(doc.getFilter(), Fields.Status.APPROVAL.getValue()) || isFromFavoritesFolder() ) {
         // resolved https://tasks.n-core.ru/browse/MVDESD-12765
         // убрать кнопку "К" у проектов из раздела на согласование("на подписание" её также быть не должно)
         try {
@@ -530,6 +530,24 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
   private void clearToolbar() {
     toolbar.getMenu().clear();
+    if ( doc != null && doc.getFilter() != null && Objects.equals(doc.getFilter(), Fields.Status.PRIMARY_CONSIDERATION.getValue())){
+      toolbar.inflateMenu(R.menu.info_menu_primary_consideration);
+
+      decision_count = doc.getDecisions().size();
+      switch (decision_count) {
+        case 0:
+          processEmptyDecisions();
+          break;
+        default:
+          try {
+            toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(false);
+            toolbar.getMenu().findItem(R.id.menu_info_decision_edit).setVisible(false);
+          } catch (Exception e) {
+            Timber.tag(TAG).v(e);
+          }
+          break;
+      }
+    }
   }
 
   private void showAsProcessed(Boolean showCreateButton) {

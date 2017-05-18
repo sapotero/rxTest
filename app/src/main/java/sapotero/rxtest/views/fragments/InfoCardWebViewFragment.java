@@ -18,6 +18,12 @@ import android.widget.RelativeLayout;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
+import java.util.Objects;
+
 import javax.inject.Inject;
 
 import butterknife.BindView;
@@ -27,8 +33,10 @@ import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.views.activities.DocumentInfocardFullScreenActivity;
 import sapotero.rxtest.views.adapters.utils.OnSwipeTouchListener;
+import timber.log.Timber;
 
 public class InfoCardWebViewFragment extends Fragment {
 
@@ -40,11 +48,8 @@ public class InfoCardWebViewFragment extends Fragment {
   @Inject SingleEntityStore<Persistable> dataStore;
 
   private OnFragmentInteractionListener mListener;
-  private Context mContext;
-  private String document;
   private String TAG = this.getClass().getSimpleName();
   private String uid;
-  private Preference<String> HOST;
   private Preference<String> UID;
 
   public InfoCardWebViewFragment() {
@@ -64,7 +69,6 @@ public class InfoCardWebViewFragment extends Fragment {
 
   private void loadSettings() {
     UID  = settings.getString("activity_main_menu.uid");
-    HOST = settings.getString("settings_username_host");
   }
 
   @Override
@@ -73,6 +77,8 @@ public class InfoCardWebViewFragment extends Fragment {
     ButterKnife.bind(this, view);
     EsdApplication.getDataComponent().inject( this );
     loadSettings();
+
+    initEvents();
 
     final GestureDetector gestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener() {
       @Override
@@ -88,47 +94,6 @@ public class InfoCardWebViewFragment extends Fragment {
 
     infocard.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
 
-    wrapper.setOnTouchListener( new OnSwipeTouchListener( getContext() ) );
-
-    setWebView();
-
-    return view;
-  }
-
-  public void onButtonPressed(Uri uri) {
-    if (mListener != null) {
-      mListener.onFragmentInteraction(uri);
-    }
-  }
-
-  public void setWebView() {
-
-//    Gson gson = new Gson();
-//    Preference<String> data = settings.getString("document.infoCard");
-
-      RDocumentEntity doc = dataStore
-        .select(RDocumentEntity.class)
-        .where(RDocumentEntity.UID.eq( uid == null ? UID.get() : uid ))
-        .get().first();
-      document = doc.getInfoCard();
-//    } else {
-//      document = data.get();
-//    }
-
-
-
-    try {
-      if ( document != null ){
-
-        String htmlData = "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />" + new String(Base64.decode( document, Base64.DEFAULT) );
-        infocard.loadDataWithBaseURL("file:///android_asset/", htmlData, "text/html", "UTF-8", null);
-        infocard.getSettings().setBuiltInZoomControls(false);
-        infocard.getSettings().setDisplayZoomControls(true);
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
     final WebSettings webSettings = infocard.getSettings();
     webSettings.setRenderPriority(WebSettings.RenderPriority.HIGH);
     webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
@@ -139,6 +104,43 @@ public class InfoCardWebViewFragment extends Fragment {
     webSettings.setNeedInitialFocus(false);
     webSettings.setSaveFormData(false);
 
+    wrapper.setOnTouchListener( new OnSwipeTouchListener( getContext() ) );
+
+    setWebView();
+
+    return view;
+  }
+
+  private void initEvents() {
+    Timber.tag(TAG).v("initEvents");
+    if (EventBus.getDefault().isRegistered(this)) {
+      EventBus.getDefault().unregister(this);
+    }
+    EventBus.getDefault().register(this);
+  }
+
+  public void onButtonPressed(Uri uri) {
+    if (mListener != null) {
+      mListener.onFragmentInteraction(uri);
+    }
+  }
+
+  public void setWebView() {
+    infocard.loadUrl("about:blank");
+
+    Timber.tag(TAG).w("setWebView");
+    RDocumentEntity doc = dataStore
+        .select(RDocumentEntity.class)
+        .where(RDocumentEntity.UID.eq( uid == null ? UID.get() : uid ))
+        .get().firstOrNull();
+
+    if (doc != null && doc.getInfoCard() != null) {
+
+      Timber.tag(TAG).w("md5: %s %s", doc.getMd5(), doc.getUid());
+
+      String htmlData = "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />" + new String(Base64.decode( doc.getInfoCard(), Base64.DEFAULT) );
+      infocard.loadDataWithBaseURL("file:///android_asset/", htmlData, "text/html", "UTF-8", null);
+    }
   }
 
   @Override
@@ -146,7 +148,6 @@ public class InfoCardWebViewFragment extends Fragment {
     super.onAttach(context);
     if (context instanceof OnFragmentInteractionListener) {
       mListener = (OnFragmentInteractionListener) context;
-      mContext = context;
     } else {
       throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
     }
@@ -165,5 +166,13 @@ public class InfoCardWebViewFragment extends Fragment {
 
   public interface OnFragmentInteractionListener {
     void onFragmentInteraction(Uri uri);
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(UpdateCurrentDocumentEvent event) throws Exception {
+    Timber.tag(TAG).w("UpdateCurrentDocumentEvent %s", event.uid);
+    if (Objects.equals(event.uid, uid != null ? uid : UID.get())){
+      setWebView();
+    }
   }
 }
