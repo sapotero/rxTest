@@ -18,6 +18,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.db.mapper.PerformerMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RLinksEntity;
 import sapotero.rxtest.db.requery.models.RRouteEntity;
@@ -388,17 +389,7 @@ public class UpdateDocumentJob extends BaseJob {
             if ( b.getPerformers() != null && b.getPerformers().size() >= 1 ) {
 
               for (Performer p : b.getPerformers()) {
-                RPerformerEntity performer = new RPerformerEntity();
-                performer.setNumber(p.getNumber());
-                performer.setPerformerId(p.getPerformerId());
-                performer.setPerformerType(p.getPerformerType());
-                performer.setPerformerText(p.getPerformerText());
-                performer.setPerformerGender(p.getPerformerGender());
-                performer.setOrganizationText(p.getOrganizationText());
-                performer.setIsOriginal(p.getIsOriginal());
-                performer.setIsResponsible(p.getIsResponsible());
-                performer.setIsOrganization(p.getOrganization());
-
+                RPerformerEntity performer = new PerformerMapper().toEntity(p);
                 performer.setBlock(block);
                 block.getPerformers().add(performer);
               }
@@ -631,17 +622,7 @@ public class UpdateDocumentJob extends BaseJob {
               if ( b.getPerformers() != null && b.getPerformers().size() >= 1 ) {
 
                 for (Performer p : b.getPerformers()) {
-                  RPerformerEntity performer = new RPerformerEntity();
-                  performer.setNumber(p.getNumber());
-                  performer.setPerformerId(p.getPerformerId());
-                  performer.setPerformerType(p.getPerformerType());
-                  performer.setPerformerText(p.getPerformerText());
-                  performer.setPerformerGender(p.getPerformerGender());
-                  performer.setOrganizationText(p.getOrganizationText());
-                  performer.setIsOriginal(p.getIsOriginal());
-                  performer.setIsResponsible(p.getIsResponsible());
-                  performer.setIsOrganization(p.getOrganization());
-
+                  RPerformerEntity performer = new PerformerMapper().toEntity(p);
                   performer.setBlock(block);
                   block.getPerformers().add(performer);
                 }

@@ -14,6 +14,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.db.mapper.PerformerMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
@@ -148,16 +149,7 @@ public class SaveDecision extends AbstractCommand {
 
 
       for (Performer _perf : _block.getPerformers()) {
-        RPerformerEntity perf = new RPerformerEntity();
-
-        perf.setPerformerId(_perf.getPerformerId());
-        perf.setNumber(_perf.getNumber());
-        perf.setPerformerText(_perf.getPerformerText());
-        perf.setPerformerGender(_perf.getPerformerGender());
-        perf.setOrganizationText(_perf.getOrganizationText());
-        perf.setIsOriginal(_perf.getIsOriginal());
-        perf.setIsResponsible(_perf.getIsResponsible());
-        perf.setIsOrganization(_perf.getOrganization());
+        RPerformerEntity perf = new PerformerMapper().toEntity(_perf);
         perf.setBlock(block);
         block.getPerformers().add(perf);
       }

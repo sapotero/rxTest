@@ -17,6 +17,7 @@ import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
 import rx.Subscription;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.mapper.PerformerMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
@@ -158,18 +159,7 @@ public class DecisionManager implements DecisionInterface, DecisionBuilder.Callb
         if ( b.getPerformers() != null && b.getPerformers().size() >= 1 ) {
 
           for (Performer p : b.getPerformers()) {
-            RPerformerEntity performer = new RPerformerEntity();
-
-            performer.setNumber(p.getNumber());
-            performer.setPerformerId(p.getPerformerId());
-            performer.setPerformerType(p.getPerformerType());
-            performer.setPerformerText(p.getPerformerText());
-            performer.setPerformerGender(p.getPerformerGender());
-            performer.setOrganizationText(p.getOrganizationText());
-            performer.setIsOriginal(p.getIsOriginal());
-            performer.setIsResponsible(p.getIsResponsible());
-            performer.setIsOrganization(p.getOrganization());
-
+            RPerformerEntity performer = new PerformerMapper().toEntity(p);
             performer.setBlock(block);
             block.getPerformers().add(performer);
           }
