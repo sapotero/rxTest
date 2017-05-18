@@ -13,7 +13,6 @@ import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.Performer;
 import timber.log.Timber;
 
-
 public class DecisionConverter {
 
   public static Decision formatDecision(RDecisionEntity decision) {
