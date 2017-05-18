@@ -14,10 +14,6 @@ import android.view.Menu;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.birbit.android.jobqueue.JobManager;
-import com.f2prateek.rx.preferences.Preference;
-import com.f2prateek.rx.preferences.RxSharedPreferences;
-
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -28,10 +24,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
-import okhttp3.OkHttpClient;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
@@ -39,6 +33,7 @@ import sapotero.rxtest.db.requery.models.RFolderEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.bus.MassInsertDoneEvent;
 import sapotero.rxtest.retrofit.models.Oshs;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.adapters.TabSigningPagerAdapter;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
@@ -54,30 +49,20 @@ import timber.log.Timber;
 
 public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivityDecisionPreviewFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, RoutePreviewFragment.OnFragmentInteractionListener, InfoCardDocumentsFragment.OnFragmentInteractionListener, InfoCardWebViewFragment.OnFragmentInteractionListener, InfoCardLinksFragment.OnFragmentInteractionListener, InfoCardFieldsFragment.OnFragmentInteractionListener, /*CurrentDocumentManager.Callback,*/ SelectOshsDialogFragment.Callback {
 
-
   @BindView(R.id.activity_info_preview_container) LinearLayout preview_container;
 
   @BindView(R.id.tab_main) ViewPager viewPager;
   @BindView(R.id.tabs) TabLayout tabLayout;
 
-  @Inject RxSharedPreferences settings;
+  @Inject Settings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   private byte[] CARD;
-
-  private Preference<String> TOKEN;
-  private Preference<String> LOGIN;
-  private Preference<String> PASSWORD;
-  private Preference<String> DOCUMENT_UID;
-  private Preference<String> STATUS_CODE;
-  private Preference<Integer> POSITION;
-
 
 //  private CurrentDocumentManager documentManager;
   private String TAG = this.getClass().getSimpleName();
 
   @BindView(R.id.toolbar) Toolbar toolbar;
-  private Preference<String> HOST;
   //  private Preview preview;
   private Fields.Status status;
   private Fields.Journal journal;
@@ -117,8 +102,6 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
         .where(RDocumentEntity.UID.eq(UID)).get().first();
     }
 
-
-    loadSettings();
     setToolbar();
 
     setPreview();
@@ -151,14 +134,12 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
       }
     );
 
-
-
-    status  = Fields.Status.findStatus(STATUS_CODE.get());
+    status  = Fields.Status.findStatus(settings.getStatusCode());
     journal = Fields.getJournalByUid( UID );
 
     toolbar.setTitle( String.format("%s от %s", doc.getRegistrationNumber(), doc.getRegistrationDate() ) );
 
-    Timber.tag("MENU").e( "STATUS CODE: %s", STATUS_CODE.get() );
+    Timber.tag("MENU").e( "STATUS CODE: %s", settings.getStatusCode() );
 
   }
   private void setTabContent() {
@@ -216,17 +197,6 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
 
     tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
     tabLayout.setupWithViewPager(viewPager);
-
-  }
-
-
-  private void loadSettings() {
-    LOGIN    = settings.getString("login");
-    PASSWORD = settings.getString("password");
-    TOKEN    = settings.getString("token");
-    POSITION = settings.getInteger("position");
-    DOCUMENT_UID = settings.getString("document.uid");
-    STATUS_CODE = settings.getString("activity_main_menu.star");
 
   }
 

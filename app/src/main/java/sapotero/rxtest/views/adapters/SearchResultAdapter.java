@@ -2,8 +2,6 @@ package sapotero.rxtest.views.adapters;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -11,22 +9,27 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.f2prateek.rx.preferences.Preference;
-import com.f2prateek.rx.preferences.RxSharedPreferences;
-
 import java.util.List;
 
+import javax.inject.Inject;
+
 import sapotero.rxtest.R;
+import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.activities.InfoActivity;
 
 public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapter.ViewHolder> {
   private final Context context;
   private final List<RDocumentEntity> mDataset;
 
+  @Inject Settings settings;
+
   public SearchResultAdapter(Context context, List<RDocumentEntity> mDataset) {
     this.context = context;
     this.mDataset = mDataset;
+
+    EsdApplication.getDataComponent().inject(this);
   }
 
   @Override
@@ -43,27 +46,11 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapte
     holder.mTitle.setText(  doc.getShortDescription() );
 
     holder.mCard.setOnClickListener(v -> {
-
-      SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-      RxSharedPreferences rxPreferences = RxSharedPreferences.create(preferences);
-      Preference<Integer> rxPosition = rxPreferences.getInteger("position");
-      rxPosition.set(position);
-
-      Preference<String> rxUid = rxPreferences.getString("activity_main_menu.uid");
-      rxUid.set( doc.getUid() );
-
-      Preference<String> rxReg = rxPreferences.getString("activity_main_menu.regnumber");
-      rxReg.set( doc.getRegistrationNumber() );
-
-      Preference<String> rxStatus = rxPreferences.getString("activity_main_menu.star");
-      rxStatus.set( doc.getFilter() );
-
-
-      Preference<String> rxDate = rxPreferences.getString("activity_main_menu.date");
-      rxDate.set( doc.getRegistrationDate() );
-
-      Preference<Boolean> rxFromSearch = rxPreferences.getBoolean("load_from_search");
-      rxFromSearch.set( true );
+      settings.setUid( doc.getUid() );
+      settings.setRegNumber( doc.getRegistrationNumber() );
+      settings.setStatusCode( doc.getFilter() );
+      settings.setRegDate( doc.getRegistrationDate() );
+      settings.setLoadFromSearch( true );
 
       Intent intent = new Intent(context, InfoActivity.class);
       context.startActivity(intent);

@@ -10,8 +10,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.widget.FrameLayout;
 
-import com.f2prateek.rx.preferences.RxSharedPreferences;
-
 import java.util.ArrayList;
 
 import javax.inject.Inject;
@@ -21,6 +19,7 @@ import butterknife.ButterKnife;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.retrofit.models.document.Image;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.adapters.DocumentLinkAdapter;
 import sapotero.rxtest.views.fragments.InfoCardDocumentsFragment;
 import timber.log.Timber;
@@ -30,8 +29,7 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity implement
   @BindView(R.id.document_image_toolbar) Toolbar toolbar;
   @BindView(R.id.activity_document_image_full_screen_wrapper) FrameLayout wrapper;
 
-
-  @Inject RxSharedPreferences settings;
+  @Inject Settings settings;
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -51,7 +49,7 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity implement
 
     InfoCardDocumentsFragment fragment = new InfoCardDocumentsFragment();
     fragment.withOutZoom(true);
-    fragment.withUid(settings.getString("activity_main_menu.uid").get() );
+    fragment.withUid( settings.getUid() );
 
     FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
     fragmentTransaction.add(R.id.activity_document_image_full_screen_wrapper, fragment);

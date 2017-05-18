@@ -1,6 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.decision;
 
-import com.f2prateek.rx.preferences.Preference;
 import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
@@ -37,12 +36,6 @@ public class SaveAndApproveDecision extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> TOKEN;
-  private Preference<String> LOGIN;
-  private Preference<String> UID;
-  private Preference<String> HOST;
-  private Preference<String> STATUS_CODE;
-  private Preference<String> PIN;
   private RDecisionEntity decision;
   private String decisionId;
   private boolean withSign = false;
@@ -60,14 +53,6 @@ public class SaveAndApproveDecision extends AbstractCommand {
     this.callback = callback;
   }
 
-  private void loadSettings(){
-    LOGIN = settings.getString("login");
-    TOKEN = settings.getString("token");
-    UID   = settings.getString("activity_main_menu.uid");
-    HOST  = settings.getString("settings_username_host");
-    STATUS_CODE = settings.getString("activity_main_menu.star");
-    PIN = settings.getString("PIN");
-  }
   public SaveAndApproveDecision withDecision(RDecisionEntity decision){
     this.decision = decision;
     return this;
@@ -123,9 +108,9 @@ public class SaveAndApproveDecision extends AbstractCommand {
       .value();
 
 
-    Timber.tag(TAG).e("-------- %s %s", params.getDecisionModel().getSignerId(), settings.getString("current_user_id").get());
+    Timber.tag(TAG).e("-------- %s %s", params.getDecisionModel().getSignerId(), settings.getCurrentUserId());
     if (
-      Objects.equals(params.getDecisionModel().getSignerId(), settings.getString("current_user_id").get())
+      Objects.equals(params.getDecisionModel().getSignerId(), settings.getCurrentUserId())
       // или если подписывающий министр
 //      || ( red != null && red.get(0).equals(true) )
       ){
@@ -146,17 +131,12 @@ public class SaveAndApproveDecision extends AbstractCommand {
 
   @Override
   public void executeRemote() {
-    loadSettings();
-
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
-
-
-
 
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( HOST.get() )
+      .baseUrl( settings.getHost() )
       .client( okHttpClient )
       .build();
 
@@ -171,10 +151,10 @@ public class SaveAndApproveDecision extends AbstractCommand {
     _decision.setApproved(true);
 
     try {
-      if ( settings.getBoolean("SIGN_WITH_DC").get() ){
+      if ( settings.isSignedWithDc() ){
         String fake_sign = null;
 
-        fake_sign = MainService.getFakeSign( PIN.get(), null );
+        fake_sign = MainService.getFakeSign( settings.getPin(), null );
 
         if (fake_sign != null) {
           _decision.setSign(fake_sign);
@@ -203,8 +183,8 @@ public class SaveAndApproveDecision extends AbstractCommand {
 
     Observable<DecisionError> info = operationService.update(
       decisionId,
-      LOGIN.get(),
-      TOKEN.get(),
+      settings.getLogin(),
+      settings.getToken(),
       json
     );
 

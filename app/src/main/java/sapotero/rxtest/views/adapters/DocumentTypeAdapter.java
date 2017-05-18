@@ -8,8 +8,6 @@ import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.f2prateek.rx.preferences.RxSharedPreferences;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -19,10 +17,11 @@ import javax.inject.Inject;
 
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.adapters.models.DocumentTypeItem;
 
 public class DocumentTypeAdapter extends BaseAdapter {
-  @Inject RxSharedPreferences settings;
+  @Inject Settings settings;
 
   private List<DocumentTypeItem> documents;
   private Context context;
@@ -82,7 +81,7 @@ public class DocumentTypeAdapter extends BaseAdapter {
   public View getDropDownView(int position, View convertView, ViewGroup parent) {
     View v = null;
 
-    Set<String> visible_journals = settings.getStringSet("settings_view_journals").get();
+    Set<String> visible_journals = settings.getJournals();
     int index =  documents.get(position).getMainMenuItem().getIndex();
 
     if ( !Arrays.asList(0,8,9,10,11).contains(index) ){

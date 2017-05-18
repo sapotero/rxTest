@@ -16,14 +16,12 @@ import android.webkit.WebView;
 import android.widget.RelativeLayout;
 
 import com.f2prateek.rx.preferences.Preference;
-import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.Objects;
-
 import javax.inject.Inject;
 
 import butterknife.BindView;
@@ -34,6 +32,8 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
+
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.activities.DocumentInfocardFullScreenActivity;
 import sapotero.rxtest.views.adapters.utils.OnSwipeTouchListener;
 import timber.log.Timber;
@@ -43,8 +43,7 @@ public class InfoCardWebViewFragment extends Fragment {
   @BindView(R.id.web_infocard) WebView infocard;
   @BindView(R.id.fragment_info_card_web_wrapper) RelativeLayout wrapper;
 
-
-  @Inject RxSharedPreferences settings;
+  @Inject Settings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   private OnFragmentInteractionListener mListener;
@@ -67,16 +66,11 @@ public class InfoCardWebViewFragment extends Fragment {
     }
   }
 
-  private void loadSettings() {
-    UID  = settings.getString("activity_main_menu.uid");
-  }
-
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.fragment_info_card_web_view, container, false);
     ButterKnife.bind(this, view);
     EsdApplication.getDataComponent().inject( this );
-    loadSettings();
 
     initEvents();
 
@@ -130,9 +124,9 @@ public class InfoCardWebViewFragment extends Fragment {
 
     Timber.tag(TAG).w("setWebView");
     RDocumentEntity doc = dataStore
-        .select(RDocumentEntity.class)
-        .where(RDocumentEntity.UID.eq( uid == null ? UID.get() : uid ))
-        .get().firstOrNull();
+      .select(RDocumentEntity.class)
+      .where(RDocumentEntity.UID.eq( uid == null ? settings.getUid() : uid ))
+      .get().firstOrNull();
 
     if (doc != null && doc.getInfoCard() != null) {
 

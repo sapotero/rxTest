@@ -26,8 +26,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import com.f2prateek.rx.preferences.Preference;
-import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -47,6 +45,7 @@ import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.retrofit.utils.OshsService;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.adapters.PrimaryConsiderationAdapter;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 import sapotero.rxtest.views.dialogs.DecisionTextDialog;
@@ -56,7 +55,7 @@ import timber.log.Timber;
 
 public class DecisionFragment extends Fragment implements PrimaryConsiderationAdapter.Callback, SelectOshsDialogFragment.Callback, SelectTemplateDialogFragment.Callback {
 
-  @Inject RxSharedPreferences settings;
+  @Inject Settings settings;
 
   @BindView(R.id.card_toolbar)  Toolbar  card_toolbar;
   @BindView(R.id.decision_text) EditText decision_text;
@@ -92,7 +91,6 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   private OshsService oshsService;
   private int number;
   private Block block;
-  private Preference<String> HOST;
   private PrimaryConsiderationAdapter adapter;
   private SelectOshsDialogFragment oshs;
   private SelectTemplateDialogFragment templates;
@@ -316,7 +314,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
 
     // настройка
     // Не отображать кнопки «Прошу доложить» и «Прошу ознакомить»
-    if (settings.getBoolean("settings_view_hide_buttons").get()){
+    if (settings.isHideButtons()){
       button_ask_to_acquaint.setVisibility(View.GONE);
       button_ask_to_report.setVisibility(View.GONE);
       buttons.setVisibility(View.GONE);
@@ -466,13 +464,8 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   }
 
   private void loadSettings() {
-    Preference<String> _username = settings.getString("login");
-    login = _username.get();
-
-    Preference<String> _token = settings.getString("token");
-    token = _token.get();
-
-    HOST = settings.getString("settings_username_host");
+    login = settings.getLogin();
+    token = settings.getToken();
   }
 
   private void showAddOshsDialog() {

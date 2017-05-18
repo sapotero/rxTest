@@ -6,7 +6,6 @@ import android.support.annotation.Nullable;
 import com.birbit.android.jobqueue.CancelReason;
 import com.birbit.android.jobqueue.Params;
 import com.birbit.android.jobqueue.RetryConstraint;
-import com.f2prateek.rx.preferences.Preference;
 import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
@@ -36,7 +35,6 @@ import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.adapter.UpdateDocumentAdapterEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
-import sapotero.rxtest.jobs.utils.JobCounter;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Card;
@@ -62,10 +60,6 @@ public class UpdateDocumentJob extends BaseJob {
   private Boolean onControl;
   private Boolean isProcessed = null;
   private Boolean isFavorites = null;
-
-  private Preference<String> LOGIN = null;
-  private Preference<String> TOKEN = null;
-  private Preference<String> HOST;
 
   private Fields.Status filter;
   private String uid;
@@ -109,14 +103,10 @@ public class UpdateDocumentJob extends BaseJob {
   @Override
   public void onRun() throws Throwable {
 
-    HOST  = settings.getString("settings_username_host");
-    LOGIN = settings.getString("login");
-    TOKEN = settings.getString("token");
-
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl(HOST.get() + "v3/documents/")
+      .baseUrl(settings.getHost() + "v3/documents/")
       .client(okHttpClient)
       .build();
 
@@ -124,8 +114,8 @@ public class UpdateDocumentJob extends BaseJob {
 
     Observable<DocumentInfo> info = documentService.getInfo(
       uid,
-      LOGIN.get(),
-      TOKEN.get()
+      settings.getLogin(),
+      settings.getToken()
     );
 
     info
@@ -164,7 +154,7 @@ public class UpdateDocumentJob extends BaseJob {
             }
           }
 
-          addPrefJobCounter(jobCount);
+          addPrefJobCount(jobCount);
         },
         error -> {
           error.printStackTrace();
@@ -227,7 +217,7 @@ public class UpdateDocumentJob extends BaseJob {
     rd.setFromFavoritesFolder( false );
     rd.setUid( d.getUid() );
     rd.setFromLinks( false );
-    rd.setUser( LOGIN.get() );
+    rd.setUser( settings.getLogin() );
 
     if (journal != null) {
       rd.setDocumentType( journal );
@@ -342,7 +332,7 @@ public class UpdateDocumentJob extends BaseJob {
 
       rDoc.setProcessed(isProcessed);
 
-      rDoc.setUser( LOGIN.get() );
+      rDoc.setUser( settings.getLogin() );
       rDoc.setFromLinks( false );
       rDoc.setChanged( false );
       rDoc.setProcessed(false);
@@ -550,12 +540,12 @@ public class UpdateDocumentJob extends BaseJob {
               for (RImage _image : result.getImages()) {
                 jobCount++;
                 RImageEntity image = (RImageEntity) _image;
-                jobManager.addJobInBackground( new DownloadFileJob(HOST.get(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
+                jobManager.addJobInBackground( new DownloadFileJob(settings.getHost(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
               }
 
             }
 
-            addPrefJobCounter(jobCount);
+            addPrefJobCount(jobCount);
           },
           error ->{
             error.printStackTrace();
@@ -585,7 +575,7 @@ public class UpdateDocumentJob extends BaseJob {
       }
 
 //      doc.setControl(onControl);
-      doc.setUser( LOGIN.get() );
+      doc.setUser( settings.getLogin() );
       doc.setFromLinks( false );
       doc.setChanged( false );
 
@@ -911,12 +901,12 @@ public class UpdateDocumentJob extends BaseJob {
             for (RImage _image : result.getImages()) {
               jobCount++;
               RImageEntity image = (RImageEntity) _image;
-              jobManager.addJobInBackground( new DownloadFileJob(HOST.get(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
+              jobManager.addJobInBackground( new DownloadFileJob(settings.getHost(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
             }
 
           }
 
-          addPrefJobCounter(jobCount);
+          addPrefJobCount(jobCount);
         },
         error -> {
           Timber.tag(TAG).e("%s", error);
@@ -934,8 +924,7 @@ public class UpdateDocumentJob extends BaseJob {
     EventBus.getDefault().post( new StepperLoadDocumentEvent("Error updating document (job cancelled)") );
   }
 
-  private void addPrefJobCounter(int value) {
-    JobCounter jobCounter = new JobCounter(settings);
-    jobCounter.addJobCount(value);
+  private void addPrefJobCount(int value) {
+    settings.addJobCount(value);
   }
 }

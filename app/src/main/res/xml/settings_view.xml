@@ -4,7 +4,7 @@
     <android.support.v7.preference.PreferenceCategory
         android:title="Настройки доступа">
         <EditTextPreference
-            android:key="settings_username_host"
+            android:key="@string/host_key"
             android:title="Домен"
             android:defaultValue="http://mobile.sed.mvd.ru/"/>
         <!--android:defaultValue="http://mobile.sed.a-soft.org/"/>-->
@@ -14,7 +14,7 @@
         android:title="Настройки главного окна">
 
         <ListPreference
-            android:key="settings_view_start_page"
+            android:key="@string/start_page_key"
             android:title="Стартовая страница"
             android:summary="Выберете страницу, которая будет отображаться по умолчанию"
             android:defaultValue="report"
@@ -22,7 +22,7 @@
             android:entryValues="@array/settings_view_start_page_values" />
 
         <MultiSelectListPreference
-            android:key="settings_view_journals"
+            android:key="@string/journals_key"
             android:title="Журналы"
             android:summary="Выберете журналы, отображаемые в приложении"
             android:defaultValue="@array/settings_view_journals_values"
@@ -30,12 +30,12 @@
             android:entryValues="@array/settings_view_journals_values" />
 
         <CheckBoxPreference
-            android:key="settings_view_type_show_without_project"
+            android:key="@string/show_without_project_key"
             android:title="Отображать документы без резолюции"
             android:defaultValue="true" />
         <!--*-->
         <CheckBoxPreference
-            android:key="settings_view_hide_primary_consideration"
+            android:key="@string/hide_primary_consideration_key"
             android:title="Не отображать статус «Первичное рассмотрение»"
             android:defaultValue="false" />
         <!--*-->
@@ -44,39 +44,39 @@
     <android.support.v7.preference.PreferenceCategory
     android:title="Настройки резолюции">
         <SwitchPreference
-            android:key="settings_view_hide_buttons"
+            android:key="@string/hide_buttons_key"
             android:title="Не отображать кнопки «Прошу доложить» и «Прошу ознакомить»"
             android:defaultValue="false" />
         <!--*-->
         <CheckBoxPreference
-            android:key="settings_view_show_urgency"
+            android:key="@string/show_urgency_key"
             android:title="Отображать настройки срочности"
             android:defaultValue="true" />
         <!--*-->
         <CheckBoxPreference
-            android:key="settings_view_only_urgent"
+            android:key="@string/only_urgent_key"
             android:title="C одним типом «Срочно»"
             android:defaultValue="false" />
         <!--*-->
 
         <CheckBoxPreference
-            android:key="settings_view_show_decision_date_update"
+            android:key="@string/show_decision_date_update_key"
             android:title="Обновлять автоматически дату резолюции"
             android:defaultValue="true" />
 
         <CheckBoxPreference
-            android:key="settings_view_show_decision_change_font"
+            android:key="@string/show_decision_change_font_key"
             android:title="Возможность выбора размера шрифта"
             android:defaultValue="true" />
         <!--*-->
 
         <CheckBoxPreference
-            android:key="settings_view_show_origin"
+            android:key="@string/show_origin_key"
             android:title="Отображать настройки подлинника"
             android:defaultValue="true" />
 
         <CheckBoxPreference
-            android:key="settings_view_show_change_signer"
+            android:key="@string/show_change_signer_key"
             android:title="Возможность смены подписавшего резолюцию для статуса «На рассмотрение»"
             android:defaultValue="true"
             />
@@ -88,30 +88,30 @@
     <android.support.v7.preference.PreferenceCategory
         android:title="Настройки операций">
         <SwitchPreference
-            android:key="settings_view_show_create_decision_post"
+            android:key="@string/show_create_decision_post_key"
             android:title="Показывать кнопку «Создать поручение»"
             android:defaultValue="false" />
         <!-- // resolved https://tasks.n-core.ru/browse/MVDESD-12765-->
         <SwitchPreference
-            android:key="settings_view_show_comment_post"
+            android:key="@string/show_comment_post_key"
             android:title="Показывать комментарий при отклонении документа/резолюции/без ответа"
             android:defaultValue="true" />
         <SwitchPreference
-            android:key="settings_view_show_actions_confirm"
+            android:key="@string/actions_confirm_key"
             android:title="Показывать подтверждения о действиях с документом"
             android:defaultValue="true" />
         <SwitchPreference
-            android:key="settings_view_show_control_confirm"
+            android:key="@string/control_confirm_key"
             android:title="Показывать подтверждения о постановке на контроль документов для раздела «Обращение граждан»"
             android:defaultValue="true" />
 
         <SwitchPreference
-            android:key="settings_view_show_approve_on_primary"
+            android:key="@string/show_approve_on_primary_key"
             android:title="Возможность согласования документов на первичном рассмотрении"
             android:defaultValue="true" />
 
         <EditTextPreference
-            android:key="settings_view_show_max_image_size"
+            android:key="@string/max_image_size_key"
             android:title="Максимальный размер файла для подписи"
             android:dialogTitle="Максимальный размер файла для подписи"
             android:defaultValue="10"
@@ -125,12 +125,12 @@
         android:title="Расширенные настройки">
 
         <SwitchPreference
-            android:key="debug_enabled"
+            android:key="@string/debug_enabled_key"
             android:title="Режим отладки"
             android:defaultValue="false" />
 
         <SwitchPreference
-            android:key="is_first_run"
+            android:key="@string/first_run_key"
             android:title="Отображение окна авторизации"
             android:defaultValue="true" />
     </android.support.v7.preference.PreferenceCategory>

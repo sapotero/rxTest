@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
 import sapotero.rxtest.events.bus.FolderCreatedEvent;
-import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.retrofit.models.Folder;
 import timber.log.Timber;
 
@@ -53,7 +52,7 @@ public class CreateFoldersJob extends BaseJob {
     data.setUid( template.getId() );
     data.setTitle( template.getTitle() );
     data.setType( template.getType() );
-    data.setUser( settings.getString("login").get() );
+    data.setUser( settings.getLogin() );
 
 
     dataStore
@@ -76,7 +75,7 @@ public class CreateFoldersJob extends BaseJob {
     Integer count = dataStore
       .count(RFolderEntity.UID)
       .where(RFolderEntity.UID.eq(uid))
-      .and(RFolderEntity.USER.eq(settings.getString("login").get()))
+      .and(RFolderEntity.USER.eq(settings.getLogin()))
       .get().value();
 
     if( count != 0 ){

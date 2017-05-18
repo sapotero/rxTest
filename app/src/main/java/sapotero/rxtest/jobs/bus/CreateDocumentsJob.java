@@ -5,7 +5,6 @@ import android.support.annotation.Nullable;
 import com.birbit.android.jobqueue.CancelReason;
 import com.birbit.android.jobqueue.Params;
 import com.birbit.android.jobqueue.RetryConstraint;
-import com.f2prateek.rx.preferences.Preference;
 import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
@@ -37,7 +36,6 @@ import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.adapter.UpdateDocumentAdapterEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
-import sapotero.rxtest.jobs.utils.JobCounter;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Card;
@@ -62,10 +60,6 @@ public class CreateDocumentsJob extends BaseJob {
   private Boolean onControl;
   private Boolean isProcessed = null;
   private Boolean isFavorites = null;
-
-  private Preference<String> LOGIN = null;
-  private Preference<String> TOKEN = null;
-  private Preference<String> HOST;
 
   private Fields.Status filter;
   private String uid;
@@ -94,14 +88,10 @@ public class CreateDocumentsJob extends BaseJob {
   @Override
   public void onRun() throws Throwable {
 
-    HOST  = settings.getString("settings_username_host");
-    LOGIN = settings.getString("login");
-    TOKEN = settings.getString("token");
-
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl(HOST.get() + "v3/documents/")
+      .baseUrl(settings.getHost() + "v3/documents/")
       .client(okHttpClient)
       .build();
 
@@ -109,8 +99,8 @@ public class CreateDocumentsJob extends BaseJob {
 
     Observable<DocumentInfo> info = documentService.getInfo(
       uid,
-      LOGIN.get(),
-      TOKEN.get()
+      settings.getLogin(),
+      settings.getToken()
     );
 
     info
@@ -138,7 +128,7 @@ public class CreateDocumentsJob extends BaseJob {
     doc.setFromFavoritesFolder( false );
     doc.setUid( document.getUid() );
     doc.setFromLinks( false );
-    doc.setUser( LOGIN.get() );
+    doc.setUser( settings.getLogin() );
 
     doc.setMd5( document.getMd5() );
     doc.setSortKey( document.getSortKey() );
@@ -174,7 +164,7 @@ public class CreateDocumentsJob extends BaseJob {
       doc.setOrganization("Без организации" );
     }
 
-    doc.setUser( LOGIN.get() );
+    doc.setUser( settings.getLogin() );
     doc.setFavorites(false);
     doc.setProcessed(false);
     doc.setControl(false);
@@ -389,7 +379,7 @@ public class CreateDocumentsJob extends BaseJob {
             for (RImage _image : result.getImages()) {
               jobCount++;
               RImageEntity image = (RImageEntity) _image;
-              jobManager.addJobInBackground( new DownloadFileJob(HOST.get(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
+              jobManager.addJobInBackground( new DownloadFileJob(settings.getHost(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
             }
           }
 
@@ -420,8 +410,7 @@ public class CreateDocumentsJob extends BaseJob {
             }
           }
 
-          JobCounter jobCounter = new JobCounter(settings);
-          jobCounter.addJobCount(jobCount);
+          settings.addJobCount(jobCount);
 
           EventBus.getDefault().post( new UpdateDocumentAdapterEvent( result.getUid(), result.getDocumentType(), result.getFilter() ) );
 

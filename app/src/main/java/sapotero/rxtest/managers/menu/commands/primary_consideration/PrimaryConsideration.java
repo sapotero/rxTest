@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.primary_consideration;
 
-import com.f2prateek.rx.preferences.Preference;
-
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
@@ -28,12 +26,6 @@ public class PrimaryConsideration extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> TOKEN;
-  private Preference<String> LOGIN;
-  private Preference<String> UID;
-  private Preference<String> HOST;
-  private Preference<String> STATUS_CODE;
-  private Preference<String> PIN;
   private String official_id;
 
   public PrimaryConsideration(DocumentReceiver document){
@@ -45,14 +37,6 @@ public class PrimaryConsideration extends AbstractCommand {
     this.callback = callback;
   }
 
-  private void loadSettings(){
-    LOGIN = settings.getString("login");
-    TOKEN = settings.getString("token");
-    UID   = settings.getString("activity_main_menu.uid");
-    HOST  = settings.getString("settings_username_host");
-    STATUS_CODE = settings.getString("activity_main_menu.star");
-    PIN = settings.getString("PIN");
-  }
   public PrimaryConsideration withPerson(String uid){
     official_id = uid;
     return this;
@@ -107,15 +91,13 @@ public class PrimaryConsideration extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    loadSettings();
-
     int count = dataStore
       .update(RDocumentEntity.class)
 //      .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue() )
       .set( RDocumentEntity.PROCESSED, true)
       .set( RDocumentEntity.MD5, "" )
       .set( RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq(params.getDocument() != null ? params.getDocument(): UID.get()))
+      .where(RDocumentEntity.UID.eq(params.getDocument() != null ? params.getDocument(): settings.getUid()))
       .get()
       .value();
     if ( callback != null ){
@@ -129,29 +111,27 @@ public class PrimaryConsideration extends AbstractCommand {
 
   @Override
   public void executeRemote() {
-    loadSettings();
-
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( HOST.get() + "v3/operations/" )
+      .baseUrl( settings.getHost() + "v3/operations/" )
       .client( okHttpClient )
       .build();
 
     OperationService operationService = retrofit.create( OperationService.class );
 
     ArrayList<String> uids = new ArrayList<>();
-    uids.add( params.getDocument() != null ? params.getDocument(): UID.get() );
+    uids.add( params.getDocument() != null ? params.getDocument(): settings.getUid() );
 
     Observable<OperationResult> info = operationService.consideration(
       getType(),
-      LOGIN.get(),
-      TOKEN.get(),
+      settings.getLogin(),
+      settings.getToken(),
       uids,
-      UID.get(),
-      STATUS_CODE.get(),
+      settings.getUid(),
+      settings.getStatusCode(),
       official_id
     );
 

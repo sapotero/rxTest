@@ -1,6 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.decision;
 
-import com.f2prateek.rx.preferences.Preference;
 import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
@@ -33,11 +32,6 @@ public class ApproveDecisionDelayed extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> TOKEN;
-  private Preference<String> LOGIN;
-  private Preference<String> HOST;
-  private Preference<String> PIN;
-
   public ApproveDecisionDelayed(DocumentReceiver document){
     super();
     this.document = document;
@@ -49,13 +43,6 @@ public class ApproveDecisionDelayed extends AbstractCommand {
 
   public void registerCallBack(Callback callback){
     this.callback = callback;
-  }
-
-  private void loadSettings(){
-    LOGIN = settings.getString("login");
-    TOKEN = settings.getString("token");
-    HOST  = settings.getString("settings_username_host");
-    PIN = settings.getString("PIN");
   }
 
   @Override
@@ -88,8 +75,6 @@ public class ApproveDecisionDelayed extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    loadSettings();
-
     update();
 
     if ( callback != null ){
@@ -101,21 +86,19 @@ public class ApproveDecisionDelayed extends AbstractCommand {
 
   @Override
   public void executeRemote() {
-    loadSettings();
-
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( HOST.get() )
+      .baseUrl( settings.getHost() )
       .client( okHttpClient )
       .build();
 
     String sign = null;
 
     try {
-      sign = MainService.getFakeSign( PIN.get(), null );
+      sign = MainService.getFakeSign( settings.getPin(), null );
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -153,8 +136,8 @@ public class ApproveDecisionDelayed extends AbstractCommand {
 
       Observable<DecisionError> info = operationService.update(
         params.getDecisionId(),
-        LOGIN.get(),
-        TOKEN.get(),
+        settings.getLogin(),
+        settings.getToken(),
         json
       );
 

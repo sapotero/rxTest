@@ -6,8 +6,6 @@ import android.net.NetworkInfo;
 
 import com.birbit.android.jobqueue.JobManager;
 import com.birbit.android.jobqueue.TagConstraint;
-import com.f2prateek.rx.preferences.Preference;
-import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import org.greenrobot.eventbus.EventBus;
 import org.json.JSONObject;
@@ -51,7 +49,6 @@ import sapotero.rxtest.jobs.bus.InvalidateDocumentsJob;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.jobs.bus.UpdateFavoritesDocumentsJob;
 import sapotero.rxtest.jobs.bus.UpdateProcessedDocumentsJob;
-import sapotero.rxtest.jobs.utils.JobCounter;
 import sapotero.rxtest.retrofit.Api.AuthService;
 import sapotero.rxtest.retrofit.DocumentsService;
 import sapotero.rxtest.retrofit.models.AuthSignToken;
@@ -59,7 +56,7 @@ import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.retrofit.models.v2.v2UserOshs;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.services.MainService;
-import sapotero.rxtest.utils.FirstRun;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.menu.fields.MainMenuButton;
 import sapotero.rxtest.views.menu.fields.MainMenuItem;
 import timber.log.Timber;
@@ -67,21 +64,11 @@ import timber.log.Timber;
 public class DataLoaderManager {
 
   private final String TAG = this.getClass().getSimpleName();
-  private final FirstRun firstRun;
 
   @Inject OkHttpClient okHttpClient;
-  @Inject RxSharedPreferences settings;
+  @Inject Settings settings;
   @Inject JobManager jobManager;
   @Inject SingleEntityStore<Persistable> dataStore;
-
-  private Preference<String> TOKEN;
-  private Preference<String> CURRENT_USER;
-  private Preference<String> CURRENT_USER_ORGANIZATION;
-  private Preference<String> LOGIN;
-  private Preference<String> PASSWORD;
-  private Preference<String> HOST;
-  private Preference<Integer> COUNT;
-  private Preference<String> CURRENT_USER_ID;
 
   private SimpleDateFormat dateFormat;
   private CompositeSubscription subscription;
@@ -97,20 +84,13 @@ public class DataLoaderManager {
   private int jobCount;
   private int jobCountFavorites;
 
-  private JobCounter jobCounter;
-
   public DataLoaderManager(Context context) {
     this.context = context;
-
     EsdApplication.getManagerComponent().inject(this);
-
-    initialize();
-    firstRun = new FirstRun(settings);
-
   }
 
   private void initV2() {
-    Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
+    Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
 
     AuthService auth = retrofit.create(AuthService.class);
 
@@ -118,7 +98,7 @@ public class DataLoaderManager {
 
     subscriptionInitV2.add(
       // получаем данные о пользователе
-      auth.getUserInfoV2(LOGIN.get(), TOKEN.get())
+      auth.getUserInfoV2(settings.getLogin(), settings.getToken())
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(
@@ -131,7 +111,7 @@ public class DataLoaderManager {
 
               // получаем папки
               subscriptionInitV2.add(
-                auth.getFolders(LOGIN.get(), TOKEN.get())
+                auth.getFolders(settings.getLogin(), settings.getToken())
                   .subscribeOn(Schedulers.io())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( data -> {
@@ -143,7 +123,7 @@ public class DataLoaderManager {
 
 
               subscriptionInitV2.add(
-                auth.getPrimaryConsiderationUsers(LOGIN.get(), TOKEN.get())
+                auth.getPrimaryConsiderationUsers(settings.getLogin(), settings.getToken())
                   .subscribeOn(Schedulers.io())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( data -> {
@@ -155,7 +135,7 @@ public class DataLoaderManager {
 
               // загрузка срочности
               subscriptionInitV2.add(
-                auth.getUrgency(LOGIN.get(), TOKEN.get(), "urgency")
+                auth.getUrgency(settings.getLogin(), settings.getToken(), "urgency")
                   .subscribeOn(Schedulers.io())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( urgencies -> {
@@ -167,7 +147,7 @@ public class DataLoaderManager {
 
               // загрузка шаблонов резолюции
               subscriptionInitV2.add(
-                auth.getTemplates(LOGIN.get(), TOKEN.get(), null)
+                auth.getTemplates(settings.getLogin(), settings.getToken(), null)
                   .subscribeOn(Schedulers.io())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( templates -> {
@@ -179,7 +159,7 @@ public class DataLoaderManager {
 
               // загрузка шаблонов отклонения
               subscriptionInitV2.add(
-                auth.getTemplates(LOGIN.get(), TOKEN.get(), "rejection")
+                auth.getTemplates(settings.getLogin(), settings.getToken(), "rejection")
                   .subscribeOn(Schedulers.io())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( templates -> {
@@ -191,7 +171,7 @@ public class DataLoaderManager {
 
               // получаем группу Избранное(МП)
               subscriptionInitV2.add(
-                auth.getFavoriteUsers(LOGIN.get(), TOKEN.get())
+                auth.getFavoriteUsers(settings.getLogin(), settings.getToken())
                   .subscribeOn(Schedulers.io())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( data -> {
@@ -204,7 +184,7 @@ public class DataLoaderManager {
               // Доработка api для возврата ВРИО/по поручению
               // https://tasks.n-core.ru/browse/MVDESD-11453
               subscriptionInitV2.add(
-                auth.getAssistant(LOGIN.get(), TOKEN.get(), CURRENT_USER_ID.get())
+                auth.getAssistant(settings.getLogin(), settings.getToken(), settings.getCurrentUserId())
                   .subscribeOn(Schedulers.io())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( data -> {
@@ -225,18 +205,6 @@ public class DataLoaderManager {
 
   }
 
-  private void initialize() {
-    LOGIN    = settings.getString("login");
-    PASSWORD = settings.getString("password");
-    TOKEN    = settings.getString("token");
-    HOST     = settings.getString("settings_username_host");
-    COUNT    = settings.getInteger("documents.count");
-    CURRENT_USER = settings.getString("current_user");
-    CURRENT_USER_ID = settings.getString("current_user_id");
-    CURRENT_USER_ORGANIZATION = settings.getString("current_user_organization");
-    jobCounter = new JobCounter(settings);
-  }
-
   public void unregister(){
     if ( isRegistered() ){
       EventBus.getDefault().unregister(this);
@@ -248,31 +216,31 @@ public class DataLoaderManager {
   }
 
   private void setToken( String token ){
-    TOKEN.set(token);
+    settings.setToken(token);
   }
 
   private void setLogin( String login ){
-    LOGIN.set(login);
+    settings.setLogin(login);
   }
 
   private void setHost( String host ){
-    HOST.set(host);
+    settings.setHost(host);
   }
 
   private void setCurrentUser( String user ){
-    CURRENT_USER.set(user);
+    settings.setCurrentUser(user);
   }
 
   public void setCurrentUserId(String currentUserId) {
-    CURRENT_USER_ID.set(currentUserId);
+    settings.setCurrentUserId(currentUserId);
   }
 
   private void setCurrentUserOrganization(String organization) {
-    CURRENT_USER_ORGANIZATION.set(organization);
+    settings.setCurrentUserOrganization(organization);
   }
 
   public void setPassword(String password) {
-    PASSWORD.set(password);
+    settings.setPassword(password);
   }
 
 
@@ -323,7 +291,7 @@ public class DataLoaderManager {
   public void updateAuth( String sign ){
     Timber.tag(TAG).i("updateAuth: %s", sign );
 
-    Retrofit retrofit = new RetrofitManager( context, HOST.get(), okHttpClient).process();
+    Retrofit retrofit = new RetrofitManager( context, settings.getHost(), okHttpClient).process();
     AuthService auth = retrofit.create( AuthService.class );
 
     Map<String, Object> map = new HashMap<>();
@@ -362,7 +330,7 @@ public class DataLoaderManager {
   public void tryToSignWithDc(String sign){
     Timber.tag(TAG).i("tryToSignWithDc: %s", sign );
 
-    Retrofit retrofit = new RetrofitManager( context, HOST.get(), okHttpClient).process();
+    Retrofit retrofit = new RetrofitManager( context, settings.getHost(), okHttpClient).process();
     AuthService auth = retrofit.create( AuthService.class );
 
     Map<String, Object> map = new HashMap<>();
@@ -455,7 +423,7 @@ public class DataLoaderManager {
   public void updateByCurrentStatus(MainMenuItem items, MainMenuButton button, Boolean firstRunShared) {
     Timber.tag(TAG).e("updateByCurrentStatus: %s %s", items, button );
 
-    if ( firstRun != null && !firstRun.isFirstRun() ) {
+    if ( !settings.isFirstRun() ) {
       unsubscribe();
     }
 
@@ -537,7 +505,7 @@ public class DataLoaderManager {
 
       Timber.tag(TAG).e("data: %s %s", indexes, statuses );
 
-      Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
+      Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
       DocumentsService docService = retrofit.create(DocumentsService.class);
 
       // resolved https://tasks.n-core.ru/browse/MVDESD-13343
@@ -553,7 +521,7 @@ public class DataLoaderManager {
 
       requestCount = 0;
       jobCount = 0;
-      jobCounter.setJobCount(0);
+      settings.setJobCount(0);
 
       for (String index: indexes ) {
         for (String status: statuses ) {
@@ -564,7 +532,7 @@ public class DataLoaderManager {
             requestCount++;
             subscription.add(
               docService
-                .getDocumentsByIndexes(LOGIN.get(), TOKEN.get(), index, status, "group", 500)
+                .getDocumentsByIndexes(settings.getLogin(), settings.getToken(), index, status, "group", 500)
                 .subscribeOn(Schedulers.computation())
                 .observeOn(Schedulers.computation())
                 .subscribe(
@@ -605,7 +573,7 @@ public class DataLoaderManager {
 
           subscription.add(
             docService
-              .getDocumentsByIndexes(LOGIN.get(), TOKEN.get(), index, status, shared ? "group" : null , 500)
+              .getDocumentsByIndexes(settings.getLogin(), settings.getToken(), index, status, shared ? "group" : null , 500)
               .subscribeOn(Schedulers.computation())
               .observeOn(Schedulers.computation())
               .subscribe(
@@ -635,7 +603,7 @@ public class DataLoaderManager {
                       }
                     }
 
-                    if ( settings.getBoolean("is_first_run").get() != null && !settings.getBoolean("is_first_run").get() ) {
+                    if ( !settings.isFirstRun() ) {
                       Timber.tag(TAG).e("isInvalidate" );
                       jobManager.addJobInBackground(new InvalidateDocumentsJob(data.getDocuments(), index, status));
                     }
@@ -659,7 +627,7 @@ public class DataLoaderManager {
           requestCount++;
           subscription.add(
             docService
-              .getDocuments(LOGIN.get(), TOKEN.get(), code, "group" , 500, 0)
+              .getDocuments(settings.getLogin(), settings.getToken(), code, "group" , 500, 0)
               .subscribeOn(Schedulers.computation())
               .observeOn(Schedulers.computation())
               .subscribe(
@@ -682,7 +650,7 @@ public class DataLoaderManager {
         }
         subscription.add(
           docService
-            .getDocuments(LOGIN.get(), TOKEN.get(), code, shared ? "group" : null , 500, 0)
+            .getDocuments(settings.getLogin(), settings.getToken(), code, shared ? "group" : null , 500, 0)
             .subscribeOn(Schedulers.computation())
             .observeOn(Schedulers.computation())
             .subscribe(
@@ -715,7 +683,7 @@ public class DataLoaderManager {
     if (0 == requestCount) {
       // Received responses on all requests, now jobCount contains total initial job count value.
       // Update counter in preferences with this value.
-      jobCounter.addJobCount(jobCount);
+      settings.addJobCount(jobCount);
       EventBus.getDefault().post( new StepperDocumentCountReadyEvent() );
     }
   }
@@ -747,16 +715,16 @@ public class DataLoaderManager {
   }
 
   private Observable<AuthSignToken> getAuthSubscription() {
-    Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
+    Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
     AuthService auth = retrofit.create(AuthService.class);
 
     Observable<AuthSignToken> authSubscription;
 
-    if ( settings.getBoolean("SIGN_WITH_DC").get() ){
+    if ( settings.isSignedWithDc() ){
 
       String sign = "";
       try {
-        sign = MainService.getFakeSign( settings.getString("PIN").get(), null );
+        sign = MainService.getFakeSign( settings.getPin(), null );
       } catch (Exception e) {
         e.printStackTrace();
       }
@@ -771,7 +739,7 @@ public class DataLoaderManager {
 
       authSubscription = auth.getAuthBySign(json);
     } else {
-      authSubscription = auth.getAuth( LOGIN.get(), PASSWORD.get() );
+      authSubscription = auth.getAuth( settings.getLogin(), settings.getPassword() );
     }
 
     return authSubscription;
@@ -782,13 +750,13 @@ public class DataLoaderManager {
   }
 
   public void updateFavorites() {
-    Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
+    Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
     DocumentsService docService = retrofit.create(DocumentsService.class);
 
     RFolderEntity favorites_folder = dataStore
             .select(RFolderEntity.class)
             .where(RFolderEntity.TYPE.eq("favorites"))
-            .and(RFolderEntity.USER.eq( settings.getString("login").get() ))
+            .and(RFolderEntity.USER.eq( settings.getLogin() ))
             .get().firstOrNull();
 
     if ( favorites_folder != null ) {
@@ -797,7 +765,7 @@ public class DataLoaderManager {
       jobCountFavorites = 0;
 
       subscription.add(
-        docService.getByFolders(LOGIN.get(), TOKEN.get(), null, 500, 0, favorites_folder.getUid(), null)
+        docService.getByFolders(settings.getLogin(), settings.getToken(), null, 500, 0, favorites_folder.getUid(), null)
           .subscribeOn( Schedulers.io() )
           .observeOn( AndroidSchedulers.mainThread() )
           .subscribe(
@@ -813,7 +781,7 @@ public class DataLoaderManager {
 
                 }
               }
-              jobCounter.addJobCount(jobCountFavorites);
+              settings.addJobCount(jobCountFavorites);
             }, error -> {
               Timber.tag(TAG).e(error);
             }
@@ -823,13 +791,13 @@ public class DataLoaderManager {
   }
 
   public void updateProcessed() {
-    Retrofit retrofit = new RetrofitManager(context, HOST.get(), okHttpClient).process();
+    Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
     DocumentsService docService = retrofit.create(DocumentsService.class);
 
     RFolderEntity processed_folder = dataStore
       .select(RFolderEntity.class)
       .where(RFolderEntity.TYPE.eq("processed"))
-      .and(RFolderEntity.USER.eq( settings.getString("login").get() ))
+      .and(RFolderEntity.USER.eq( settings.getLogin() ))
       .get().firstOrNull();
 
     if ( processed_folder != null ) {
@@ -842,7 +810,7 @@ public class DataLoaderManager {
       Timber.tag(TAG).e("PROCESSED EXIST! %s", date);
 
       subscription.add(
-        docService.getByFolders(LOGIN.get(), TOKEN.get(), null, 500, 0, processed_folder.getUid(), date)
+        docService.getByFolders(settings.getLogin(), settings.getToken(), null, 500, 0, processed_folder.getUid(), date)
           .subscribeOn( Schedulers.io() )
           .observeOn( AndroidSchedulers.mainThread() )
           .subscribe(

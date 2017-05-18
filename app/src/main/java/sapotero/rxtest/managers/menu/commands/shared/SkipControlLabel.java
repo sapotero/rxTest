@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.shared;
 
-import com.f2prateek.rx.preferences.Preference;
-
 import java.util.ArrayList;
 
 import retrofit2.Retrofit;
@@ -23,12 +21,6 @@ public class SkipControlLabel extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> TOKEN;
-  private Preference<String> LOGIN;
-  private Preference<String> UID;
-  private Preference<String> HOST;
-  private Preference<String> STATUS_CODE;
-  private Preference<String> PIN;
   private String label_id;
 
   public SkipControlLabel(DocumentReceiver document){
@@ -49,15 +41,6 @@ public class SkipControlLabel extends AbstractCommand {
     this.callback = callback;
   }
 
-  private void loadSettings(){
-    LOGIN = settings.getString("login");
-    TOKEN = settings.getString("token");
-    UID   = settings.getString("activity_main_menu.uid");
-    HOST  = settings.getString("settings_username_host");
-    STATUS_CODE = settings.getString("activity_main_menu.star");
-    PIN = settings.getString("PIN");
-  }
-
   @Override
   public void execute() {
     queueManager.add(this);
@@ -70,34 +53,32 @@ public class SkipControlLabel extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    loadSettings();
     queueManager.setExecutedLocal(this);
   }
 
   @Override
   public void executeRemote() {
-    loadSettings();
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( HOST.get() + "v3/operations/" )
+      .baseUrl( settings.getHost() + "v3/operations/" )
       .client( okHttpClient )
       .build();
 
     OperationService operationService = retrofit.create( OperationService.class );
 
     ArrayList<String> uids = new ArrayList<>();
-    uids.add( UID.get() );
+    uids.add( settings.getUid() );
 
     Observable<OperationResult> info = operationService.shared(
       getType(),
-      LOGIN.get(),
-      TOKEN.get(),
+      settings.getLogin(),
+      settings.getToken(),
       uids,
-      UID.get(),
-      STATUS_CODE.get(),
+      settings.getUid(),
+      settings.getStatusCode(),
       null,
       label_id
     );

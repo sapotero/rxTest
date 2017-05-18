@@ -11,9 +11,6 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.SeekBar;
 
-import com.f2prateek.rx.preferences.Preference;
-import com.f2prateek.rx.preferences.RxSharedPreferences;
-
 import javax.inject.Inject;
 
 import butterknife.BindView;
@@ -26,6 +23,7 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.utils.Settings;
 import timber.log.Timber;
 
 public class DocumentInfocardFullScreenActivity extends AppCompatActivity {
@@ -34,8 +32,7 @@ public class DocumentInfocardFullScreenActivity extends AppCompatActivity {
   @BindView(R.id.fullscreen_web_infocard) WebView webview;
   @BindView(R.id.fullscreen_web_infocard_zoomer) SeekBar zoom;
 
-
-  @Inject RxSharedPreferences settings;
+  @Inject Settings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   private String TAG = this.getClass().getSimpleName();
@@ -107,11 +104,9 @@ public class DocumentInfocardFullScreenActivity extends AppCompatActivity {
   }
 
   private void setDocument() {
-    Preference<String> UID = settings.getString("activity_main_menu.uid");
-
     dataStore
       .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq( UID.get() ))
+      .where(RDocumentEntity.UID.eq( settings.getUid() ))
       .get()
       .toObservable()
       .subscribeOn(Schedulers.newThread())
@@ -160,7 +155,7 @@ public class DocumentInfocardFullScreenActivity extends AppCompatActivity {
 
   @Override protected void onResume() {
     super.onResume();
-    Timber.tag(TAG).i( " settings_username_host - " + settings.getString("settings_username_host").get() );
+    Timber.tag(TAG).i( " settings_username_host - " + settings.getHost() );
   }
 
   @Override protected void onPause() {

@@ -15,8 +15,6 @@ import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.f2prateek.rx.preferences.Preference;
-import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -58,6 +56,7 @@ import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.Performer;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.adapters.models.FontItem;
 import sapotero.rxtest.views.adapters.models.UrgencyItem;
 import sapotero.rxtest.views.custom.SpinnerWithLabel;
@@ -70,7 +69,7 @@ import timber.log.Timber;
 
 public class DecisionConstructorActivity extends AppCompatActivity implements DecisionFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, OperationManager.Callback, SelectOshsDialogFragment.Callback, SelectTemplateDialogFragment.Callback {
 
-  @Inject RxSharedPreferences settings;
+  @Inject Settings settings;
   @Inject OperationManager operationManager;
   @Inject SingleEntityStore<Persistable> dataStore;
 
@@ -114,12 +113,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   private ArrayList<UrgencyItem> urgency = new ArrayList<UrgencyItem>();
 
   @Override
-  public void finish() {
-    settings.getString("_status").set( "" );
-    super.finish();
-  }
-
-  @Override
   protected void onCreate(Bundle savedInstanceState) {
 
     setTheme(R.style.AppTheme);
@@ -131,9 +124,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
     context = this;
 
-    Preference<String> STATUS_CODE = settings.getString("activity_main_menu.star");
-    status  = Fields.Status.findStatus( STATUS_CODE.get() );
-
+    status  = Fields.Status.findStatus( settings.getStatusCode() );
 
     toolbar.setTitleTextColor( getResources().getColor( R.color.md_grey_100 ) );
     toolbar.setSubtitleTextColor( getResources().getColor( R.color.md_grey_400 ) );
@@ -152,8 +143,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
       Decision _dec_ = manager.getDecision();
 
-      if ( settings.getBoolean("decision_with_assigment").get() ){
-        Timber.tag(TAG).w("ASSIGNMENT: %s", settings.getBoolean("decision_with_assigment").get() );
+      if ( settings.isDecisionWithAssignment() ){
+        Timber.tag(TAG).w("ASSIGNMENT: %s", settings.isDecisionWithAssignment() );
         _dec_.setAssignment(true);
       }
 
@@ -162,7 +153,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
 
       Timber.tag(TAG).w("DECISION: %s", json );
-      Timber.tag(TAG).w("ASSIGNMENT: %s", settings.getBoolean("decision_with_assigment").get() );
+      Timber.tag(TAG).w("ASSIGNMENT: %s", settings.isDecisionWithAssignment() );
 
       Decision save_decision = manager.getDecision();
 
@@ -172,7 +163,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
         String content = "Резолюция была изменена";
 
-        if ( settings.getBoolean("decision_with_assigment").get() ){
+        if ( settings.isDecisionWithAssignment() ){
           content = "Поручение не отправлено. Вернуться назад и удалить поручение?";
         }
 
@@ -193,7 +184,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
                 CommandParams params = new CommandParams();
                 params.setDecisionModel( decision );
 
-                decision.setDocumentUid( settings.getString("activity_main_menu.uid").get() );
+                decision.setDocumentUid( settings.getUid() );
 
                 if (rDecisionEntity != null) {
 //                  params.setDecision( rDecisionEntity );
@@ -201,13 +192,13 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
                   params.setDecisionId( rDecisionEntity.getUid() );
 
                   RDocumentEntity doc = (RDocumentEntity) rDecisionEntity.getDocument();
-                  params.setDocument( settings.getString("activity_main_menu.uid").get() );
+                  params.setDocument( settings.getUid() );
 
                   if (doc != null) {
                     params.setDocument(doc.getUid());
                   }
                 } else {
-                  params.setDocument( settings.getString("activity_main_menu.uid").get() );
+                  params.setDocument( settings.getUid() );
                 }
 
 
@@ -225,13 +216,13 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
 
 
-                if ( settings.getBoolean("decision_with_assigment").get() ){
+                if ( settings.isDecisionWithAssignment() ){
                   decision = manager.getDecision();
 
                   params = new CommandParams();
                   params.setDecisionModel( decision );
 
-                  decision.setDocumentUid( settings.getString("activity_main_menu.uid").get() );
+                  decision.setDocumentUid( settings.getUid() );
 
                   if (rDecisionEntity != null) {
                     params.setDecisionModel( DecisionConverter.formatDecision(rDecisionEntity) );
@@ -308,7 +299,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
             params = new CommandParams();
             params.setDecisionModel( decision );
 
-            decision.setDocumentUid( settings.getString("activity_main_menu.uid").get() );
+            decision.setDocumentUid( settings.getUid() );
 
             if (rDecisionEntity != null) {
               params.setDecisionModel( DecisionConverter.formatDecision(rDecisionEntity) );
@@ -323,8 +314,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
               params.setDecisionModel( manager.getDecision() );
             }
 
-            if ( settings.getBoolean("decision_with_assigment").get() ){
-              Timber.tag(TAG).w("ASSIGNMENT: %s", settings.getBoolean("decision_with_assigment").get() );
+            if ( settings.isDecisionWithAssignment() ){
+              Timber.tag(TAG).w("ASSIGNMENT: %s", settings.isDecisionWithAssignment() );
               params.setAssignment(true);
               decision.setAssignment(true);
             }
@@ -345,7 +336,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
         case R.id.action_constructor_next:
           // настройка
           // Показывать подтверждения о действиях с документом
-          if ( settings.getBoolean("settings_view_show_actions_confirm").get() ){
+          if ( settings.isActionsConfirm() ){
             showNextDialog();
           } else {
 
@@ -358,8 +349,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 //            params.setDecision( rDecisionEntity );
             params.setDecisionModel( DecisionConverter.formatDecision(rDecisionEntity) );
 
-            if ( settings.getBoolean("decision_with_assigment").get() ){
-              Timber.tag(TAG).w("ASSIGNMENT: %s", settings.getBoolean("decision_with_assigment").get() );
+            if ( settings.isDecisionWithAssignment() ){
+              Timber.tag(TAG).w("ASSIGNMENT: %s", settings.isDecisionWithAssignment() );
               params.setAssignment(true);
             }
             operationManager.execute(operation, params);
@@ -370,7 +361,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
           // настройка
           // Показывать подтверждения о действиях с документом
-          if ( settings.getBoolean("settings_view_show_actions_confirm").get() ){
+          if ( settings.isActionsConfirm() ){
             showPrevDialog();
           } else {
 //            operationManager.registerCallBack(this);
@@ -415,14 +406,14 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
 
     // настройка
-    if (!settings.getBoolean("settings_view_show_urgency").get()){
+    if (!settings.isShowUrgency()){
       urgency_selector.setVisibility(View.GONE);
     } else {
 
       urgency_selector.setVisibility(View.VISIBLE);
       dataStore
         .select(RUrgencyEntity.class)
-        .where(RUrgencyEntity.USER.eq( settings.getString("login").get() ))
+        .where(RUrgencyEntity.USER.eq( settings.getLogin() ))
         .get()
         .toObservable()
         .filter(rUrgencyEntity -> {
@@ -430,7 +421,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
           Timber.d("filter: %s", new Gson().toJson(rUrgencyEntity) );
 
-          if ( settings.getBoolean("settings_view_only_urgent").get() ){
+          if ( settings.isOnlyUrgent() ){
             if (!Objects.equals(rUrgencyEntity.getName().toLowerCase(), "срочно")){
               result = false;
             }
@@ -536,7 +527,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     }
 
     // настройка
-    if ( settings.getBoolean("settings_view_show_decision_date_update").get() ){
+    if ( settings.isShowDecisionDateUpdate() ){
       SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
       Calendar cal = Calendar.getInstance();
       String date = dateFormat.format(cal.getTime());
@@ -551,7 +542,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
     if ( status == Fields.Status.SENT_TO_THE_REPORT ){
       // настройка
-      if ( !settings.getBoolean("settings_view_show_change_signer").get() ){
+      if ( !settings.isShowChangeSigner() ){
         select_oshs_wrapper.setVisibility(View.GONE);
       }
     }
@@ -582,7 +573,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     });
 
     // настройка
-    if (settings.getBoolean("settings_view_show_decision_change_font").get()){
+    if (settings.isShowDecisionChangeFont()){
       List<FontItem> fonts = new ArrayList<>();
       fonts.add(new FontItem("10", "10"));
       fonts.add(new FontItem("11", "11"));
@@ -622,8 +613,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
     if ( rDecisionEntity != null &&
       rDecisionEntity.getSignerId() != null &&
-      !rDecisionEntity.getSignerId().equals( settings.getString("current_user_id").get() ) &&
-      !settings.getBoolean("settings_view_show_approve_on_primary").get() ){
+      !rDecisionEntity.getSignerId().equals( settings.getCurrentUserId() ) &&
+      !settings.isShowApproveOnPrimary() ){
 
       // resolved https://tasks.n-core.ru/browse/MVDESD-13438
       // Добавить настройку наличия кнопки Согласовать в Первичном рассмотрении
@@ -642,6 +633,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     // При создании новой резолюции, кнопка "Сохранить и подписать"
     // должна быть только в том случае, если Подписант=текущему пользователю.
     // В остальных случаях, кнопки "Сохранить и подписать" быть не должно.
+<<<<<<< HEAD
 
     if (rDecisionEntity != null) {
 
@@ -657,6 +649,16 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
         } else {
           toolbar.getMenu().findItem(R.id.action_constructor_create_and_sign).setVisible(false);
         }
+=======
+    if ( !settings.isShowApproveOnPrimary() && Objects.equals(settings.getStatusCode(), "primary_consideration")){
+      if (
+          manager.getDecision() != null &&
+            manager.getDecision().getSignerId() != null &&
+          Objects.equals(manager.getDecision().getSignerId(), settings.getCurrentUserId())){
+        toolbar.getMenu().findItem(R.id.action_constructor_create_and_sign).setVisible(true);
+      } else {
+        toolbar.getMenu().findItem(R.id.action_constructor_create_and_sign).setVisible(false);
+>>>>>>> 73474575e6f996a21c385b0cdb312c006c499dfb
       }
     }
   }
@@ -794,8 +796,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   }
 
   private void loadDecision() {
-//    settings.getInteger("decision.active.id").set( current_decision.getId() );
-    Integer decision_id = settings.getInteger("decision.active.id").get();
+    Integer decision_id = settings.getDecisionActiveId();
 
     rDecisionEntity = dataStore
       .select(RDecisionEntity.class)
@@ -948,12 +949,12 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
         operation =CommandFactory.Operation.APPROVE_DECISION;
 
         CommandParams params = new CommandParams();
-        params.setDecisionId( settings.getString("decision.active.id").get() );
+        params.setDecisionId( rDecisionEntity.getUid() );
 //        params.setDecision( rDecisionEntity );
         params.setDecisionModel( DecisionConverter.formatDecision(rDecisionEntity) );
 
-        if ( settings.getBoolean("decision_with_assigment").get() ){
-          Timber.tag(TAG).w("ASSIGNMENT: %s", settings.getBoolean("decision_with_assigment").get() );
+        if ( settings.isDecisionWithAssignment() ){
+          Timber.tag(TAG).w("ASSIGNMENT: %s", settings.isDecisionWithAssignment() );
           params.setAssignment(true);
         }
 
@@ -994,7 +995,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
     // resolved https://tasks.n-core.ru/browse/MVDESD-13438
     // Добавить настройку наличия кнопки Согласовать в Первичном рассмотрении
-    if ( !settings.getBoolean("settings_view_show_approve_on_primary").get() ){
+    if ( !settings.isShowApproveOnPrimary() ){
       invalidateSaveAndSignButton();
     }
   }
@@ -1043,15 +1044,15 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   }
 
   private String getCurrentUserId() {
-    return settings.getString("current_user_id").get();
+    return settings.getCurrentUserId();
   }
 
   private String getCurrentUserName() {
-    return settings.getString("current_user").get();
+    return settings.getCurrentUser();
   }
 
   private String getCurrentUserOrganization() {
-    return settings.getString("current_user_organization").get();
+    return settings.getCurrentUserOrganization();
   }
 
   @Override

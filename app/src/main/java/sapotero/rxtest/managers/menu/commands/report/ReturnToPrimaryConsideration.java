@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.report;
 
-import com.f2prateek.rx.preferences.Preference;
-
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
@@ -28,11 +26,6 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private Preference<String> TOKEN;
-  private Preference<String> LOGIN;
-  private Preference<String> HOST;
-  private Preference<String> STATUS_CODE;
-
   public ReturnToPrimaryConsideration(DocumentReceiver document){
     super();
     this.document = document;
@@ -44,13 +37,6 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
 
   public void registerCallBack(Callback callback){
     this.callback = callback;
-  }
-
-  private void loadSettings(){
-    LOGIN = settings.getString("login");
-    TOKEN = settings.getString("token");
-    HOST  = settings.getString("settings_username_host");
-    STATUS_CODE = settings.getString("activity_main_menu.star");
   }
 
   @Override
@@ -104,13 +90,12 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
 
   @Override
   public void executeRemote() {
-    loadSettings();
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
     Retrofit retrofit = new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( HOST.get() + "v3/operations/" )
+      .baseUrl( settings.getHost() + "v3/operations/" )
       .client( okHttpClient )
       .build();
 
@@ -124,11 +109,11 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
 
     Observable<OperationResult> info = operationService.report(
       getType(),
-      LOGIN.get(),
-      TOKEN.get(),
+      settings.getLogin(),
+      settings.getToken(),
       uids,
       uid,
-      STATUS_CODE.get()
+      settings.getStatusCode()
     );
 
     info.subscribeOn( Schedulers.computation() )

@@ -13,8 +13,6 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.f2prateek.rx.preferences.Preference;
-import com.f2prateek.rx.preferences.RxSharedPreferences;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -25,15 +23,13 @@ import javax.inject.Inject;
 import rx.Subscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.application.config.Constant;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckFailEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckSuccesEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckFailEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckSuccessEvent;
-import sapotero.rxtest.events.stepper.shared.StepperNextStepEvent;
-import sapotero.rxtest.utils.FirstRun;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.custom.stepper.BlockingStep;
 import sapotero.rxtest.views.custom.stepper.StepperLayout;
 import sapotero.rxtest.views.custom.stepper.VerificationError;
@@ -42,7 +38,7 @@ import timber.log.Timber;
 
 public class StepperAuthFragment extends Fragment implements BlockingStep {
 
-  @Inject RxSharedPreferences settings;
+  @Inject Settings settings;
 
   final String TAG = this.getClass().getSimpleName();
 
@@ -59,7 +55,6 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
   private VerificationError error = new VerificationError("error");
 
   private StepperLayout.OnNextClickedCallback callback;
-  private Preference<String> host;
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -85,16 +80,6 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
     hideAllFields();
     attachSettings();
     prepareDialog();
-    setHostDefault();
-  }
-
-  private void setHostDefault() {
-  // EditText host  = (EditText) stepper_auth_password_wrapper.findViewById(R.id.stepper_auth_host);
-  // if ( Objects.equals(host.getText().toString(), "") ){
-  //   host.setText( settings.getString("settings_username_host").get() );
-  // }
-//    settings.getString("settings_username_host").get()
-
   }
 
   private void prepareDialog() {
@@ -109,19 +94,11 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
   }
 
   private void attachSettings() {
-    Preference<AuthType> auth_type = settings.getEnum("stepper.auth_type", AuthType.class);
-
-    host = settings.getString("settings_username_host");
-
-    if (host.get() == null){
-      host.set(Constant.HOST);
+    if (settings.getAuthType() == null) {
+      settings.setAuthType( authType );
     }
 
-    if (auth_type.get() == null) {
-      auth_type.set( authType );
-    }
-
-    auth_type_subscription = auth_type.asObservable().subscribe(type -> {
+    auth_type_subscription = settings.getAuthTypePreference().asObservable().subscribe(type -> {
       switch ( type ){
         case DS:
           authType = AuthType.DS;
@@ -182,7 +159,7 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
           new StepperLoginCheckEvent(
             login.getText().toString(),
             pwd.getText().toString(),
-            host.get()
+            settings.getHost()
           )
         );
         break;
@@ -218,7 +195,7 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
     if (authType != AuthType.PASSWORD){
       loadingDialog.show();
     }
-    settings.getBoolean("start_load_data").set( true );
+    settings.setStartLoadData( true );
     this.callback = callback;
   }
 
@@ -231,11 +208,11 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
   }
 
   private void setAuthType( AuthType type ) {
-    settings.getEnum("stepper.auth_type", AuthType.class).set( type );
+    settings.setAuthType( type );
   }
 
   private void setSignWithDc( Boolean signWithDc ) {
-    settings.getBoolean("SIGN_WITH_DC").set( signWithDc );
+    settings.setSignedWithDc( signWithDc );
   }
 
   private void setAuthTypeDc() {

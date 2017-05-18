@@ -4,15 +4,15 @@
     <android.support.v7.preference.PreferenceCategory
         android:title="Настройки операций">
         <SwitchPreference
-            android:key="settings_view_show_create_decision_post"
+            android:key="@string/show_create_decision_post_key"
             android:title="Показывать кнопку «Создать поручение»"
             android:defaultValue="false" />
         <SwitchPreference
-            android:key="settings_view_show_comment_post"
+            android:key="@string/show_comment_post_key"
             android:title="Показывать комментарий при отклонении"
             android:defaultValue="true" />
         <SwitchPreference
-            android:key="settings_view_show_actions_confirm"
+            android:key="@string/actions_confirm_key"
             android:title="Показывать подтверждения о действиях с документом"
             android:defaultValue="true" />
         <SwitchPreference
@@ -20,7 +20,7 @@
             android:title="Показывать подтверждения о подписании документа/резолюции"
             android:defaultValue="true" />
         <SwitchPreference
-            android:key="settings_view_show_control_confirm"
+            android:key="@string/control_confirm_key"
             android:title="Показывать подтверждения о постановке на контроль документов для раздела «Обращение граждан»"
             android:defaultValue="true" />
 

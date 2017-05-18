@@ -17,8 +17,6 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.f2prateek.rx.preferences.Preference;
-import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
@@ -50,18 +48,17 @@ import sapotero.rxtest.retrofit.models.document.Action;
 import sapotero.rxtest.retrofit.models.document.AnotherApproval;
 import sapotero.rxtest.retrofit.models.document.Card;
 import sapotero.rxtest.retrofit.models.document.Person;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.activities.InfoNoMenuActivity;
 import timber.log.Timber;
 
 public class RoutePreviewFragment extends Fragment {
 
-  @Inject RxSharedPreferences settings;
+  @Inject Settings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   @BindView(R.id.fragment_route_wrapper) LinearLayout wrapper;
 
-
-  private Preference<String> DOCUMENT_UID;
   private OnFragmentInteractionListener mListener;
   private String uid;
   private String TAG = this.getClass().getSimpleName();
@@ -121,11 +118,9 @@ public class RoutePreviewFragment extends Fragment {
   }
 
   private void loadSettings() {
-    DOCUMENT_UID = settings.getString("activity_main_menu.uid");
-
     dataStore
       .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq( uid == null? DOCUMENT_UID.get() : uid  ))
+      .where(RDocumentEntity.UID.eq( uid == null? settings.getUid() : uid  ))
       .orderBy( RDocumentEntity.ROUTE_ID.asc() )
       .get()
       .toObservable()
@@ -484,7 +479,7 @@ public class RoutePreviewFragment extends Fragment {
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(UpdateCurrentDocumentEvent event) throws Exception {
     Timber.tag(TAG).w("UpdateCurrentDocumentEvent %s", event.uid);
-    if (Objects.equals(event.uid, DOCUMENT_UID.get())){
+    if (Objects.equals(event.uid, settings.getUid())){
       loadSettings();
     }
   }
