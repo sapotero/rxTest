@@ -507,24 +507,26 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
   private void clearToolbar() {
     toolbar.getMenu().clear();
-    if ( doc != null && doc.getFilter() != null && Objects.equals(doc.getFilter(), Fields.Status.PRIMARY_CONSIDERATION.getValue())){
-      toolbar.inflateMenu(R.menu.info_menu_primary_consideration);
-
-      decision_count = doc.getDecisions().size();
-      switch (decision_count) {
-        case 0:
-          processEmptyDecisions();
-          break;
-        default:
-          try {
-            toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(false);
-            toolbar.getMenu().findItem(R.id.menu_info_decision_edit).setVisible(false);
-          } catch (Exception e) {
-            Timber.tag(TAG).v(e);
-          }
-          break;
-      }
-    }
+    // раскоментить в следующей версии
+    // когда будет понимание как всё должно работать
+//    if ( doc != null && doc.getFilter() != null && Objects.equals(doc.getFilter(), Fields.Status.PRIMARY_CONSIDERATION.getValue())){
+//      toolbar.inflateMenu(R.menu.info_menu_primary_consideration);
+//
+//      decision_count = doc.getDecisions().size();
+//      switch (decision_count) {
+//        case 0:
+//          processEmptyDecisions();
+//          break;
+//        default:
+//          try {
+//            toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(false);
+//            toolbar.getMenu().findItem(R.id.menu_info_decision_edit).setVisible(false);
+//          } catch (Exception e) {
+//            Timber.tag(TAG).v(e);
+//          }
+//          break;
+//      }
+//    }
   }
 
   private void showAsProcessed(Boolean showCreateButton) {
