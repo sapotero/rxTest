@@ -137,6 +137,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 //    }
 
     notifyDataSetChanged();
+
   }
 
   public void removeAllWithRange() {

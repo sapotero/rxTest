@@ -29,12 +29,12 @@
             android:entries="@array/settings_view_journals"
             android:entryValues="@array/settings_view_journals_values" />
 
-        <CheckBoxPreference
+        <SwitchPreference
             android:key="@string/show_without_project_key"
             android:title="Отображать документы без резолюции"
             android:defaultValue="true" />
         <!--*-->
-        <CheckBoxPreference
+        <SwitchPreference
             android:key="@string/hide_primary_consideration_key"
             android:title="Не отображать статус «Первичное рассмотрение»"
             android:defaultValue="false" />
@@ -48,34 +48,34 @@
             android:title="Не отображать кнопки «Прошу доложить» и «Прошу ознакомить»"
             android:defaultValue="false" />
         <!--*-->
-        <CheckBoxPreference
+        <SwitchPreference
             android:key="@string/show_urgency_key"
             android:title="Отображать настройки срочности"
             android:defaultValue="true" />
         <!--*-->
-        <CheckBoxPreference
+        <SwitchPreference
             android:key="@string/only_urgent_key"
             android:title="C одним типом «Срочно»"
             android:defaultValue="false" />
         <!--*-->
 
-        <CheckBoxPreference
+        <SwitchPreference
             android:key="@string/show_decision_date_update_key"
             android:title="Обновлять автоматически дату резолюции"
             android:defaultValue="true" />
 
-        <CheckBoxPreference
+        <SwitchPreference
             android:key="@string/show_decision_change_font_key"
             android:title="Возможность выбора размера шрифта"
             android:defaultValue="true" />
         <!--*-->
 
-        <CheckBoxPreference
+        <SwitchPreference
             android:key="@string/show_origin_key"
             android:title="Отображать настройки подлинника"
             android:defaultValue="true" />
 
-        <CheckBoxPreference
+        <SwitchPreference
             android:key="@string/show_change_signer_key"
             android:title="Возможность смены подписавшего резолюцию для статуса «На рассмотрение»"
             android:defaultValue="true"

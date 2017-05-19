@@ -163,7 +163,7 @@ public class Fields {
     INCOMING_ORDERS    ( 4  , "INCOMING_ORDERS"    , "НПА" ),
     ORDERS             ( 5  , "ORDERS"             , "Приказы" ),
     ORDERS_DDO         ( 6  , "ORDERS_DDO"         , "Приказы ДДО" ),
-    IN_DOCUMENTS       ( 7  , "IN_DOCUMENTS"       , "Внутренние документ" ),
+    IN_DOCUMENTS       ( 7  , "IN_DOCUMENTS"       , "Внутренние документы" ),
     ON_CONTROL         ( 8  , "ON_CONTROL"         , "На контроле" ),
     PROCESSED          ( 9  , "PROCESSED"          , "Обработанное" ),
     FAVORITES          ( 10 , "FAVORITES"          , "Избранное" );
