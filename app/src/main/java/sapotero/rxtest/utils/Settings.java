@@ -12,6 +12,7 @@ import sapotero.rxtest.views.custom.stepper.util.AuthType;
 
 public class Settings {
 
+  private static final String CURRENT_ACTIVITY_KEY = "current_activity_key";
   private static final String SIGN_WITH_DC_KEY = "SIGN_WITH_DC";
   private static final String DOCUMENTS_COUNT_KEY = "documents.count";
   private static final String LOGIN_KEY = "login";
@@ -64,6 +65,7 @@ public class Settings {
   private Preference<Integer> jobCount;
   private Preference<String> login;
   private Preference<String> token;
+  private Preference<String> current_activity;
   private Preference<String> host;
   private Preference<String> password;
   private Preference<String> pin;
@@ -134,6 +136,7 @@ public class Settings {
     signWithDc                     = settings.getBoolean(SIGN_WITH_DC_KEY);
     jobCount                       = settings.getInteger(DOCUMENTS_COUNT_KEY);
     login                          = settings.getString(LOGIN_KEY);
+    login                          = settings.getString(LOGIN_KEY);
     token                          = settings.getString(TOKEN_KEY);
     host                           = settings.getString(HOST_KEY);
     password                       = settings.getString(PASSWORD_KEY);
@@ -172,6 +175,7 @@ public class Settings {
     debugEnabled                   = settings.getBoolean(DEBUG_ENABLED_KEY);
     startLoadData                  = settings.getBoolean(START_LOAD_DATA_KEY);
     authType                       = settings.getEnum(STEPPER_AUTH_TYPE_KEY, AuthType.class);
+    current_activity               = settings.getString(CURRENT_ACTIVITY_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -246,6 +250,7 @@ public class Settings {
     return getString(login);
   }
 
+
   public void setLogin(String value) {
     setString(login, value);
   }
@@ -268,6 +273,14 @@ public class Settings {
     if (stringPreference != null) {
       stringPreference.set(value);
     }
+  }
+
+  public Preference<String> getCurrentActivity() {
+    return current_activity;
+  }
+
+  public void setCurrentActivity(Preference<String> current_activity) {
+    this.current_activity = current_activity;
   }
 
   public String getToken() {

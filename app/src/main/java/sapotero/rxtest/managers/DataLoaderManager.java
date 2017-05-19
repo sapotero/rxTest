@@ -90,17 +90,17 @@ public class DataLoaderManager {
     this.context = context;
     EsdApplication.getManagerComponent().inject(this);
 
-    store
-      .getPublishSubject()
-      .observeOn(Schedulers.computation())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(
-        data -> {
-          Timber.tag(TAG).w("LOG: %s", data.toString() );
-        }, error ->{
-          Timber.tag(TAG).e(error);
-        }
-      );
+//    store
+//      .getPublishSubject()
+//      .observeOn(Schedulers.computation())
+//      .observeOn(AndroidSchedulers.mainThread())
+//      .subscribe(
+//        data -> {
+//          Timber.tag(TAG).w("LOG: %s", data.toString() );
+//        }, error ->{
+//          Timber.tag(TAG).e(error);
+//        }
+//      );
   }
 
   private void initV2() {
