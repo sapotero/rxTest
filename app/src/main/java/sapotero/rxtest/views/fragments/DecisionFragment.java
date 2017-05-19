@@ -39,6 +39,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.mapper.PerformerMapper;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.view.builders.BlockFactory;
 import sapotero.rxtest.retrofit.models.Oshs;
@@ -433,19 +434,8 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
       ArrayList<Performer> performers = new ArrayList<>();
 
       for (int i = 0; i < adapter.getCount(); i++) {
-        Performer p = new Performer();
         PrimaryConsiderationPeople item = adapter.getItem(i);
-
-        p.setPerformerId( item.getId() );
-        p.setIsResponsible( item.isResponsible() );
-        p.setIsOriginal( item.isOriginal() );
-        p.setPerformerId( item.getId() );
-        p.setPerformerText( item.getName() );
-        p.setPerformerGender( item.getGender() );
-        p.setOrganizationText( item.getOrganization() );
-        p.setNumber( i );
-        p.setOrganization( item.isOrganization() );
-
+        Performer p = new PerformerMapper().fromPrimaryConsiderationPeople(item, i);
         performers.add(p);
       }
 

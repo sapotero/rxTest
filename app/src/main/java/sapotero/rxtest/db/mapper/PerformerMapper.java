@@ -2,6 +2,7 @@ package sapotero.rxtest.db.mapper;
 
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.retrofit.models.document.Performer;
+import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 
 // Maps between Performer and RPerformerEntity
 public class PerformerMapper implements Mapper<Performer, RPerformerEntity> {
@@ -55,5 +56,20 @@ public class PerformerMapper implements Mapper<Performer, RPerformerEntity> {
     formattedModel.setOrganization( entity.isIsOrganization() );
 
     return formattedModel;
+  }
+
+  public Performer fromPrimaryConsiderationPeople(PrimaryConsiderationPeople item, int number) {
+    Performer p = new Performer();
+
+    p.setNumber( number );
+    p.setPerformerId( item.getId() );
+    p.setPerformerText( item.getName() );
+    p.setPerformerGender( item.getGender() );
+    p.setOrganizationText( item.getOrganization() );
+    p.setIsOriginal( item.isOriginal() );
+    p.setIsResponsible( item.isResponsible() );
+    p.setOrganization( item.isOrganization() );
+
+    return p;
   }
 }
