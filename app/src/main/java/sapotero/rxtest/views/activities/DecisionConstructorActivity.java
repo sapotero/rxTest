@@ -37,6 +37,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.mapper.BlockMapper;
 import sapotero.rxtest.db.mapper.PerformerMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RUrgencyEntity;
@@ -816,28 +817,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
           ArrayList<Block> list = new ArrayList<>();
 
           for (RBlock _block : rDecisionEntity.getBlocks()) {
-
             RBlockEntity b = (RBlockEntity) _block;
-            Block block = new Block();
-            block.setNumber(b.getNumber());
-            block.setFontSize(b.getFontSize());
-            block.setText(b.getText());
-            block.setAppealText(b.getAppealText());
-            block.setTextBefore(b.isTextBefore());
-            block.setHidePerformers(b.isHidePerformers());
-            block.setToCopy(b.isToCopy());
-            block.setToFamiliarization(b.isToFamiliarization());
-
-            if (b.getPerformers() != null && b.getPerformers().size() >= 1) {
-
-              for (RPerformer _performer : b.getPerformers()) {
-                RPerformerEntity p = (RPerformerEntity) _performer;
-                Performer performer = new PerformerMapper().toModel(p);
-                block.getPerformers().add(performer);
-              }
-            }
-
-            Collections.sort(block.getPerformers(), (o1, o2) -> o1.getNumber().compareTo(o2.getNumber()));
+            Block block = new BlockMapper().toModel(b);
             list.add(block);
           }
 

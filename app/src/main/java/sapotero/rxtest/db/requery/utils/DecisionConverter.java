@@ -3,6 +3,7 @@ package sapotero.rxtest.db.requery.utils;
 import java.util.Arrays;
 
 import padeg.lib.Padeg;
+import sapotero.rxtest.db.mapper.BlockMapper;
 import sapotero.rxtest.db.mapper.PerformerMapper;
 import sapotero.rxtest.db.requery.models.decisions.RBlock;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
@@ -38,25 +39,8 @@ public class DecisionConverter {
     if ( decision.getBlocks().size() > 0 ){
       for (RBlock _b:decision.getBlocks() ) {
         RBlockEntity block = (RBlockEntity) _b;
-        Block formated_block = new Block();
-        formated_block.setNumber( block.getNumber() );
-        formated_block.setText( block.getText() );
-        formated_block.setAppealText( block.getAppealText() );
-        formated_block.setTextBefore( block.isTextBefore() );
-        formated_block.setHidePerformers( block.isHidePerformers() );
-        formated_block.setIndentation( "1" );
-        formated_block.setFontSize( "14" );
-
-        if ( block.getPerformers().size() > 0 ) {
-          for (RPerformer _p : block.getPerformers()) {
-            RPerformerEntity performer = (RPerformerEntity) _p;
-            Performer formated_performer = new PerformerMapper().toFormattedModel(performer);
-            formated_block.getPerformers().add(formated_performer);
-          }
-        }
-
+        Block formated_block = new BlockMapper().toFormattedModel(block);
         formated_decision.getBlocks().add(formated_block);
-
       }
     }
 

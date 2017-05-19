@@ -18,6 +18,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.db.mapper.BlockMapper;
 import sapotero.rxtest.db.mapper.PerformerMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RLinksEntity;
@@ -317,25 +318,7 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
         if ( d.getBlocks() != null && d.getBlocks().size() >= 1 ){
 
           for (Block b: d.getBlocks() ) {
-            RBlockEntity block = new RBlockEntity();
-            block.setNumber(b.getNumber());
-            block.setText(b.getText());
-            block.setAppealText(b.getAppealText());
-            block.setTextBefore(b.getTextBefore());
-            block.setHidePerformers(b.getHidePerformers());
-            block.setToCopy(b.getToCopy());
-            block.setToFamiliarization(b.getToFamiliarization());
-
-            if ( b.getPerformers() != null && b.getPerformers().size() >= 1 ) {
-
-              for (Performer p : b.getPerformers()) {
-                RPerformerEntity performer = new PerformerMapper().toEntity(p);
-                performer.setBlock(block);
-                block.getPerformers().add(performer);
-              }
-            }
-
-
+            RBlockEntity block = new BlockMapper().toEntity(b);
             block.setDecision(decision);
             decision.getBlocks().add(block);
           }
@@ -554,25 +537,7 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
           if ( d.getBlocks() != null && d.getBlocks().size() >= 1 ){
 
             for (Block b: d.getBlocks() ) {
-              RBlockEntity block = new RBlockEntity();
-              block.setNumber(b.getNumber());
-              block.setText(b.getText());
-              block.setAppealText(b.getAppealText());
-              block.setTextBefore(b.getTextBefore());
-              block.setHidePerformers(b.getHidePerformers());
-              block.setToCopy(b.getToCopy());
-              block.setToFamiliarization(b.getToFamiliarization());
-
-              if ( b.getPerformers() != null && b.getPerformers().size() >= 1 ) {
-
-                for (Performer p : b.getPerformers()) {
-                  RPerformerEntity performer = new PerformerMapper().toEntity(p);
-                  performer.setBlock(block);
-                  block.getPerformers().add(performer);
-                }
-              }
-
-
+              RBlockEntity block = new BlockMapper().toEntity(b);
               block.setDecision(decision);
               decision.getBlocks().add(block);
             }

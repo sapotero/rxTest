@@ -10,6 +10,7 @@ import io.requery.Persistable;
 import io.requery.query.Result;
 import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.mapper.BlockMapper;
 import sapotero.rxtest.db.mapper.PerformerMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RSignerEntity;
@@ -126,22 +127,7 @@ public class DBDocumentManager {
 
         for (RBlock rBlock : decision.getBlocks()) {
           RBlockEntity block = (RBlockEntity) rBlock;
-          Block raw_block = new Block();
-
-          raw_block.setNumber(block.getNumber());
-          raw_block.setText(block.getText());
-          raw_block.setAppealText(block.getAppealText());
-          raw_block.setTextBefore(block.isTextBefore());
-          raw_block.setHidePerformers(block.isHidePerformers());
-          raw_block.setToCopy(block.isToCopy());
-          raw_block.setToFamiliarization(block.isToFamiliarization());
-
-          for (RPerformer rPerformer : block.getPerformers()) {
-            RPerformerEntity performer = (RPerformerEntity) rPerformer;
-            Performer raw_performer = new PerformerMapper().toModel(performer);
-            raw_block.getPerformers().add(raw_performer);
-          }
-
+          Block raw_block = new BlockMapper().toModel(block);
           raw_decision.getBlocks().add(raw_block);
         }
 

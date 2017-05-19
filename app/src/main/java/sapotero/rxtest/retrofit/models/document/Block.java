@@ -227,5 +227,4 @@ public class Block implements Serializable{
     public void setPerformers(List<Performer> performers) {
         this.performers = performers;
     }
-
 }

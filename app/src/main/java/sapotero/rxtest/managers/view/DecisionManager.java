@@ -17,6 +17,7 @@ import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
 import rx.Subscription;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.mapper.BlockMapper;
 import sapotero.rxtest.db.mapper.PerformerMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
@@ -147,25 +148,7 @@ public class DecisionManager implements DecisionInterface, DecisionBuilder.Callb
       ArrayList<RBlockEntity> list = new ArrayList<>();
 
       for (Block b: d.getBlocks() ) {
-        RBlockEntity block = new RBlockEntity();
-        block.setNumber(b.getNumber());
-        block.setText(b.getText());
-        block.setAppealText(b.getAppealText());
-        block.setTextBefore(b.getTextBefore());
-        block.setHidePerformers(b.getHidePerformers());
-        block.setToCopy(b.getToCopy());
-        block.setToFamiliarization(b.getToFamiliarization());
-
-        if ( b.getPerformers() != null && b.getPerformers().size() >= 1 ) {
-
-          for (Performer p : b.getPerformers()) {
-            RPerformerEntity performer = new PerformerMapper().toEntity(p);
-            performer.setBlock(block);
-            block.getPerformers().add(performer);
-          }
-        }
-
-
+        RBlockEntity block = new BlockMapper().toEntity(b);
         block.setDecision(dec);
         list.add(block);
       }
