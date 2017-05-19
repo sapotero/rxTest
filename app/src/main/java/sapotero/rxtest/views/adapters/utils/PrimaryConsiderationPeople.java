@@ -29,20 +29,6 @@ public class PrimaryConsiderationPeople implements IPerformer {
     this.isOrganization = isOrganization;
   }
 
-  public PrimaryConsiderationPeople(Performer u) {
-    if (u != null) {
-      this.id = u.getPerformerId();
-
-      this.name = u.getPerformerText();
-      this.position = String.valueOf( u.getNumber() );
-      this.organization = u.getOrganizationText();
-      this.gender = u.getPerformerGender();
-      this.isOriginal = getBooleanValue(u.getIsOriginal());
-      this.isResponsible = getBooleanValue(u.getIsResponsible());
-      this.isOrganization = getBooleanValue(u.getOrganization());
-    }
-  }
-
   private boolean getBooleanValue(Boolean value) {
     if (value != null) {
       return value;
@@ -51,7 +37,6 @@ public class PrimaryConsiderationPeople implements IPerformer {
     }
   }
 
-  private String uid;
   public String getAssistantId() {
     return assistantId;
   }
@@ -246,7 +231,7 @@ public class PrimaryConsiderationPeople implements IPerformer {
 
   @Override
   public void setIsIPerformerOriginal(Boolean isOriginal) {
-    setOriginal(isOriginal);
+    setOriginal( getBooleanValue(isOriginal) );
   }
 
   @Override
@@ -256,7 +241,7 @@ public class PrimaryConsiderationPeople implements IPerformer {
 
   @Override
   public void setIsIPerformerResponsible(Boolean isResponsible) {
-    setResponsible(isResponsible);
+    setResponsible( getBooleanValue(isResponsible) );
   }
 
   @Override
@@ -275,6 +260,6 @@ public class PrimaryConsiderationPeople implements IPerformer {
 
   @Override
   public void setIsIPerformerOrganization(Boolean isOrganization) {
-    setIsOrganization(isOrganization);
+    setIsOrganization( getBooleanValue(isOrganization) );
   }
 }

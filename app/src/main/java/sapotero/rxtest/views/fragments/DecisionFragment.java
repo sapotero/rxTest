@@ -330,7 +330,8 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
       for ( Performer u: block.getPerformers() ) {
         Timber.tag(TAG).w("USER: %s [ %s | %s ]", u.getPerformerText(), u.getIsOriginal(), u.getIsResponsible() );
         Timber.tag(TAG).w("USER: %s ", new Gson().toJson(u) );
-        PrimaryConsiderationPeople user = new PrimaryConsiderationPeople( u );
+        PrimaryConsiderationPeople user =
+                (PrimaryConsiderationPeople) new PerformerMapper().toIPerformer(u, PerformerMapper.DestinationType.PRIMARYCONSIDERATIONPEOPLE);
 
         people.add(user);
       }
