@@ -1,8 +1,9 @@
 package sapotero.rxtest.views.adapters.utils;
 
+import sapotero.rxtest.retrofit.models.document.IPerformer;
 import sapotero.rxtest.retrofit.models.document.Performer;
 
-public class PrimaryConsiderationPeople {
+public class PrimaryConsiderationPeople implements IPerformer {
 
   private String assistantId = null;
 
@@ -14,6 +15,9 @@ public class PrimaryConsiderationPeople {
   private boolean isOriginal = false;
   private boolean isResponsible = false;
   private boolean isOrganization = false;
+
+  public PrimaryConsiderationPeople() {
+  }
 
   public PrimaryConsiderationPeople(String id, String name, String position, String organization, String assistantId, String gender, boolean isOrganization) {
     this.id = id;
@@ -119,5 +123,158 @@ public class PrimaryConsiderationPeople {
 
   public void setIsOrganization(boolean organization) {
     isOrganization = organization;
+  }
+
+  @Override
+  public Integer getIPerformerNumber() {
+    return null;
+  }
+
+  @Override
+  public void setIPerformerNumber(Integer number) {
+  }
+
+  @Override
+  public String getIPerformerId() {
+    return getId();
+  }
+
+  @Override
+  public void setIPerformerId(String id) {
+    setId(id);
+  }
+
+  @Override
+  public String getIPerformerType() {
+    return null;
+  }
+
+  @Override
+  public void setIPerformerType(String type) {
+  }
+
+  @Override
+  public String getIPerformerName() {
+    return getName();
+  }
+
+  @Override
+  public void setIPerformerName(String name) {
+    setName(name);
+  }
+
+  @Override
+  public String getIPerformerGender() {
+    return getGender();
+  }
+
+  @Override
+  public void setIPerformerGender(String gender) {
+    setGender(gender);
+  }
+
+  @Override
+  public String getIPerformerOrganizationName() {
+    return getOrganization();
+  }
+
+  @Override
+  public void setIPerformerOrganizationName(String organizationName) {
+    setOrganization(organizationName);
+  }
+
+  @Override
+  public String getIPerformerAssistantId() {
+    return getAssistantId();
+  }
+
+  @Override
+  public void setIPerformerAssistantId(String assistantId) {
+    setAssistantId(assistantId);
+  }
+
+  @Override
+  public String getIPerformerPosition() {
+    return getPosition();
+  }
+
+  @Override
+  public void setIPerformerPosition(String position) {
+    setPosition(position);
+  }
+
+  @Override
+  public String getIPerformerLastName() {
+    return null;
+  }
+
+  @Override
+  public void setIPerformerLastName(String lastName) {
+  }
+
+  @Override
+  public String getIPerformerFirstName() {
+    return null;
+  }
+
+  @Override
+  public void setIPerformerFirstName(String firstName) {
+  }
+
+  @Override
+  public String getIPerformerMiddleName() {
+    return null;
+  }
+
+  @Override
+  public void setIPerformerMiddleName(String middleName) {
+  }
+
+  @Override
+  public String getIPerformerImage() {
+    return null;
+  }
+
+  @Override
+  public void setIPerformerImage(String image) {
+  }
+
+  @Override
+  public Boolean isIPerformerOriginal() {
+    return isOriginal();
+  }
+
+  @Override
+  public void setIsIPerformerOriginal(Boolean isOriginal) {
+    setOriginal(isOriginal);
+  }
+
+  @Override
+  public Boolean isIPerformerResponsible() {
+    return isResponsible();
+  }
+
+  @Override
+  public void setIsIPerformerResponsible(Boolean isResponsible) {
+    setResponsible(isResponsible);
+  }
+
+  @Override
+  public Boolean isIPerformerGroup() {
+    return null;
+  }
+
+  @Override
+  public void setIsIPerformerGroup(Boolean isGroup) {
+  }
+
+  @Override
+  public Boolean isIPerformerOrganization() {
+    return isOrganization();
+  }
+
+  @Override
+  public void setIsIPerformerOrganization(Boolean isOrganization) {
+    setIsOrganization(isOrganization);
   }
 }

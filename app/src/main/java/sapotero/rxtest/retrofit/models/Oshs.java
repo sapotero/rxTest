@@ -5,7 +5,9 @@ import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 
-public class Oshs implements Serializable {
+import sapotero.rxtest.retrofit.models.document.IPerformer;
+
+public class Oshs implements Serializable, IPerformer {
 
   @SerializedName("id")
   @Expose
@@ -252,4 +254,159 @@ public class Oshs implements Serializable {
     this.image = image;
   }
 
+  @Override
+  public Integer getIPerformerNumber() {
+    return null;
+  }
+
+  @Override
+  public void setIPerformerNumber(Integer number) {
+  }
+
+  @Override
+  public String getIPerformerId() {
+    return getId();
+  }
+
+  @Override
+  public void setIPerformerId(String id) {
+    setId(id);
+  }
+
+  @Override
+  public String getIPerformerType() {
+    return null;
+  }
+
+  @Override
+  public void setIPerformerType(String type) {
+  }
+
+  @Override
+  public String getIPerformerName() {
+    return getName();
+  }
+
+  @Override
+  public void setIPerformerName(String name) {
+    setName(name);
+  }
+
+  @Override
+  public String getIPerformerGender() {
+    return getGender();
+  }
+
+  @Override
+  public void setIPerformerGender(String gender) {
+    setGender(gender);
+  }
+
+  @Override
+  public String getIPerformerOrganizationName() {
+    return getOrganization();
+  }
+
+  @Override
+  public void setIPerformerOrganizationName(String organizationName) {
+    setOrganization(organizationName);
+  }
+
+  @Override
+  public String getIPerformerAssistantId() {
+    return getAssistantId();
+  }
+
+  @Override
+  public void setIPerformerAssistantId(String assistantId) {
+    setAssistantId(assistantId);
+  }
+
+  @Override
+  public String getIPerformerPosition() {
+    return getPosition();
+  }
+
+  @Override
+  public void setIPerformerPosition(String position) {
+    setPosition(position);
+  }
+
+  @Override
+  public String getIPerformerLastName() {
+    return getLastName();
+  }
+
+  @Override
+  public void setIPerformerLastName(String lastName) {
+    setLastName(lastName);
+  }
+
+  @Override
+  public String getIPerformerFirstName() {
+    return getFirstName();
+  }
+
+  @Override
+  public void setIPerformerFirstName(String firstName) {
+    setFirstName(firstName);
+  }
+
+  @Override
+  public String getIPerformerMiddleName() {
+    return getMiddleName();
+  }
+
+  @Override
+  public void setIPerformerMiddleName(String middleName) {
+    setMiddleName(middleName);
+  }
+
+  @Override
+  public String getIPerformerImage() {
+    return getImage();
+  }
+
+  @Override
+  public void setIPerformerImage(String image) {
+    setImage(image);
+  }
+
+  @Override
+  public Boolean isIPerformerOriginal() {
+    return null;
+  }
+
+  @Override
+  public void setIsIPerformerOriginal(Boolean isOriginal) {
+  }
+
+  @Override
+  public Boolean isIPerformerResponsible() {
+    return null;
+  }
+
+  @Override
+  public void setIsIPerformerResponsible(Boolean isResponsible) {
+  }
+
+  @Override
+  public Boolean isIPerformerGroup() {
+    return getIsGroup();
+  }
+
+  @Override
+  public void setIsIPerformerGroup(Boolean isGroup) {
+    setIsGroup(isGroup);
+  }
+
+  @Override
+  public Boolean isIPerformerOrganization() {
+    return getIsOrganization();
+  }
+
+  @Override
+  public void setIsIPerformerOrganization(Boolean isOrganization) {
+    setIsOrganization(isOrganization);
+  }
 }

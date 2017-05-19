@@ -4,7 +4,7 @@ package sapotero.rxtest.retrofit.models.document;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Performer {
+public class Performer implements IPerformer {
 
     @SerializedName("number")
     @Expose
@@ -224,5 +224,158 @@ public class Performer {
 
     public void setPerformerGender(String performerGender) {
         this.performerGender = performerGender;
+    }
+
+    @Override
+    public Integer getIPerformerNumber() {
+        return getNumber();
+    }
+
+    @Override
+    public void setIPerformerNumber(Integer number) {
+        setNumber(number);
+    }
+
+    @Override
+    public String getIPerformerId() {
+        return getPerformerId();
+    }
+
+    @Override
+    public void setIPerformerId(String id) {
+        setPerformerId(id);
+    }
+
+    @Override
+    public String getIPerformerType() {
+        return getPerformerType();
+    }
+
+    @Override
+    public void setIPerformerType(String type) {
+        setPerformerType(type);
+    }
+
+    @Override
+    public String getIPerformerName() {
+        return getPerformerText();
+    }
+
+    @Override
+    public void setIPerformerName(String name) {
+        setPerformerText(name);
+    }
+
+    @Override
+    public String getIPerformerGender() {
+        return getPerformerGender();
+    }
+
+    @Override
+    public void setIPerformerGender(String gender) {
+        setPerformerGender(gender);
+    }
+
+    @Override
+    public String getIPerformerOrganizationName() {
+        return getOrganizationText();
+    }
+
+    @Override
+    public void setIPerformerOrganizationName(String organizationName) {
+        setOrganizationText(organizationName);
+    }
+
+    @Override
+    public String getIPerformerAssistantId() {
+        return null;
+    }
+
+    @Override
+    public void setIPerformerAssistantId(String assistantId) {
+    }
+
+    @Override
+    public String getIPerformerPosition() {
+        return null;
+    }
+
+    @Override
+    public void setIPerformerPosition(String position) {
+    }
+
+    @Override
+    public String getIPerformerLastName() {
+        return null;
+    }
+
+    @Override
+    public void setIPerformerLastName(String lastName) {
+    }
+
+    @Override
+    public String getIPerformerFirstName() {
+        return null;
+    }
+
+    @Override
+    public void setIPerformerFirstName(String firstName) {
+    }
+
+    @Override
+    public String getIPerformerMiddleName() {
+        return null;
+    }
+
+    @Override
+    public void setIPerformerMiddleName(String middleName) {
+    }
+
+    @Override
+    public String getIPerformerImage() {
+        return null;
+    }
+
+    @Override
+    public void setIPerformerImage(String image) {
+    }
+
+    @Override
+    public Boolean isIPerformerOriginal() {
+        return getIsOriginal();
+    }
+
+    @Override
+    public void setIsIPerformerOriginal(Boolean isOriginal) {
+        setIsOriginal(isOriginal);
+    }
+
+    @Override
+    public Boolean isIPerformerResponsible() {
+        return getIsResponsible();
+    }
+
+    @Override
+    public void setIsIPerformerResponsible(Boolean isResponsible) {
+        setIsResponsible(isResponsible);
+    }
+
+    @Override
+    public Boolean isIPerformerGroup() {
+        return null;
+    }
+
+    @Override
+    public void setIsIPerformerGroup(Boolean isGroup) {
+    }
+
+    @Override
+    public Boolean isIPerformerOrganization() {
+        return getOrganization();
+    }
+
+    @Override
+    public void setIsIPerformerOrganization(Boolean isOrganization) {
+        setOrganization(isOrganization);
     }
 }

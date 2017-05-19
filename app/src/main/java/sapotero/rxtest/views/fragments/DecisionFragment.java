@@ -435,7 +435,8 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
 
       for (int i = 0; i < adapter.getCount(); i++) {
         PrimaryConsiderationPeople item = adapter.getItem(i);
-        Performer p = new PerformerMapper().fromPrimaryConsiderationPeople(item, i);
+        Performer p = (Performer) new PerformerMapper().toIPerformer(item, PerformerMapper.DestinationType.PERFORMER);
+        p.setNumber(i);
         performers.add(p);
       }
 
