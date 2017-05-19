@@ -1,7 +1,6 @@
 package sapotero.rxtest.views.adapters.utils;
 
 import sapotero.rxtest.retrofit.models.document.IPerformer;
-import sapotero.rxtest.retrofit.models.document.Performer;
 
 public class PrimaryConsiderationPeople implements IPerformer {
 

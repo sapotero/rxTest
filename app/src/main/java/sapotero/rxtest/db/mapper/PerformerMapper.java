@@ -7,7 +7,7 @@ import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 
 // Maps between Performer, RPerformerEntity, PrimaryConsiderationPeople and Oshs
-public class PerformerMapper implements Mapper<Performer, RPerformerEntity> {
+public class PerformerMapper extends AbstractMapper<Performer, RPerformerEntity> {
 
   public static enum DestinationType {
     PERFORMER,
@@ -47,11 +47,6 @@ public class PerformerMapper implements Mapper<Performer, RPerformerEntity> {
     model.setOrganization(entity.isIsOrganization());
 
     return model;
-  }
-
-  @Override
-  public boolean hasDiff(RPerformerEntity entity, RPerformerEntity entity2) {
-    return !entity.equals(entity2);
   }
 
   public Performer toFormattedModel(RPerformerEntity entity) {
