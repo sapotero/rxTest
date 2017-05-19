@@ -89,6 +89,18 @@ public class DataLoaderManager {
   public DataLoaderManager(Context context) {
     this.context = context;
     EsdApplication.getManagerComponent().inject(this);
+
+    store
+      .getPublishSubject()
+      .observeOn(Schedulers.computation())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(
+        data -> {
+          Timber.tag(TAG).w("LOG: %s", data.toString() );
+        }, error ->{
+          Timber.tag(TAG).e(error);
+        }
+      );
   }
 
   private void initV2() {
@@ -369,7 +381,7 @@ public class DataLoaderManager {
             initV2();
 
             updateByCurrentStatus(MainMenuItem.ALL, null, false);
-            updateByCurrentStatus(MainMenuItem.ALL, null, true);
+//            updateByCurrentStatus(MainMenuItem.ALL, null, true);
 
 //            updateFavoritesAndProcessed();
           },
@@ -548,8 +560,6 @@ public class DataLoaderManager {
 
                       for (Document doc: data.getDocuments() ) {
 
-                        store.add(doc);
-
                         if ( isExist(doc) ){
 
                           Timber.tag(TAG).e("isExist %s", finalShared );
@@ -590,10 +600,11 @@ public class DataLoaderManager {
                   if (data.getDocuments().size() > 0){
 
                     for (Document doc: data.getDocuments() ) {
+
+                      Timber.tag(TAG).e("doc: %s", doc.getUid() );
                       store.add(doc);
 
-                      // Timber.tag(TAG).e("index: %s | status: %s ",index, status );
-                      // Timber.tag(TAG).e("exist: %s | md5: %s", isExist(doc), !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) );
+//                       Timber.tag(TAG).e("index: %s | status: %s ",index, status );
 
                       if ( isExist(doc) ){
 
@@ -644,7 +655,6 @@ public class DataLoaderManager {
                   requestCount--;
                   if (data.getDocuments().size() > 0){
                     for (Document doc: data.getDocuments() ) {
-                      store.add(doc);
                       jobCount++;
                       jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), code, true) );
                     }
@@ -668,7 +678,6 @@ public class DataLoaderManager {
                 requestCount--;
                 if (data.getDocuments().size() > 0){
                   for (Document doc: data.getDocuments() ) {
-                    store.add(doc);
                     jobCount++;
                     jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), code, finalShared1) );
                   }

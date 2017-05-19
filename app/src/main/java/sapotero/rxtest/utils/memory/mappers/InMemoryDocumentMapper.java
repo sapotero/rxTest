@@ -6,6 +6,7 @@ import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 public class InMemoryDocumentMapper {
 
   public static InMemoryDocument toMemoryModel(Document document) {
+
     InMemoryDocument imd = new InMemoryDocument();
     imd.setUid( document.getUid() );
     imd.setMd5( document.getMd5() );

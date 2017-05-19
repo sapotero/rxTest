@@ -1,5 +1,7 @@
 package sapotero.rxtest.utils.memory.models;
 
+import java.io.Serializable;
+
 import sapotero.rxtest.utils.memory.fields.InMemoryStatus;
 
 /**
@@ -8,10 +10,13 @@ import sapotero.rxtest.utils.memory.fields.InMemoryStatus;
 
 
 
-public class InMemoryDocument {
+public class InMemoryDocument implements Serializable {
   public String uid;
   public String md5;
   public InMemoryStatus action = InMemoryStatus.NEW;
+
+  public InMemoryDocument() {
+  }
 
   public void setAsLoading(){
     action = InMemoryStatus.LOADING;
@@ -43,10 +48,10 @@ public class InMemoryDocument {
 
   @Override
   public String toString() {
-    return "InMemoryDocument{" +
+    return "InMemoryDocument{ " +
       "uid='" + uid + '\'' +
       ", md5='" + md5 + '\'' +
       ", action=" + action +
-      '}';
+      " }";
   }
 }

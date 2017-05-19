@@ -148,7 +148,7 @@ public class ButtonBuilder {
     if ( item_conditions.length > 0 ){
 
       for (ConditionBuilder condition : item_conditions ){
-        Timber.tag(TAG).i( "I %s", condition.toString() );
+//        Timber.tag(TAG).i( "I %s", condition.toString() );
         switch ( condition.getCondition() ){
           case AND:
             query = query.and( condition.getField() );
@@ -164,7 +164,7 @@ public class ButtonBuilder {
     if ( conditions.length > 0 ){
 
       for (ConditionBuilder condition : conditions ){
-        Timber.tag(TAG).i( "C %s", condition.toString() );
+//        Timber.tag(TAG).i( "C %s", condition.toString() );
         switch ( condition.getCondition() ){
           case AND:
             query = query.and( condition.getField() );
@@ -233,16 +233,16 @@ public class ButtonBuilder {
 
     Integer size = query.get().value();
 
-    for (ConditionBuilder condition : conditions ) {
-      Timber.tag(TAG).i("condition %s", condition.toString());
-    }
-
-    for (ConditionBuilder condition : item_conditions ) {
-      Timber.tag(TAG).i("condition %s", condition.toString());
-    }
-
-    Timber.tag(TAG).i("size %s",  conditions.length);
-    Timber.tag(TAG).i("total %s", size);
+//    for (ConditionBuilder condition : conditions ) {
+//      Timber.tag(TAG).i("condition %s", condition.toString());
+//    }
+//
+//    for (ConditionBuilder condition : item_conditions ) {
+//      Timber.tag(TAG).i("condition %s", condition.toString());
+//    }
+//
+//    Timber.tag(TAG).i("size %s",  conditions.length);
+//    Timber.tag(TAG).i("total %s", size);
 
     view.setText( String.format( label, size ) );
   }
@@ -293,13 +293,13 @@ public class ButtonBuilder {
     getCount();
 
     view.setOnCheckedChangeListener((buttonView, isChecked) -> {
-      Timber.tag("setOnCheckedChangeListener").i("change");
+//      Timber.tag("setOnCheckedChangeListener").i("change");
       setActive(isChecked);
 
 //      getCount();
 
       if (isChecked){
-        Timber.tag("setOnCheckedChangeListener").i("change");
+//        Timber.tag("setOnCheckedChangeListener").i("change");
         callback.onButtonBuilderUpdate(index);
       }
     });

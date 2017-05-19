@@ -12,23 +12,29 @@ import timber.log.Timber;
 
 public class InMemoryDocumentStorage {
 
-  private final PublishSubject<InMemoryDocument>  publish = PublishSubject.create();
-  private final HashMap<String, InMemoryDocument> documents  = new HashMap<>();
-  private final InMemoryLogger logger  = new InMemoryLogger();
+  private String TAG = this.getClass().getSimpleName();
+
+  private final InMemoryLogger logger;
+
+  private final PublishSubject<InMemoryDocument>  publish;
+  private final HashMap<String, InMemoryDocument> documents;
 
   public InMemoryDocumentStorage() {
-    initInMemoryLogger();
+
+    Timber.tag(TAG).e("initialize");
+
+    this.publish   = PublishSubject.create();
+    this.documents = new HashMap<>();
+    this.logger    = new InMemoryLogger();
   }
 
-  private void initInMemoryLogger() {
-
-    publish.subscribe(
-      logger::log,
-      Timber::e
-    );
+  public PublishSubject<InMemoryDocument> getPublishSubject(){
+    return publish;
   }
 
   public void add(Document document){
+
+    Timber.tag(TAG).e("recv: %s", document.getUid());
 
     if ( documents.containsKey(document.getUid()) ){
 
@@ -42,8 +48,8 @@ public class InMemoryDocumentStorage {
     } else {
 
       // если нет - эмитим новый документ
-      InMemoryDocument inMemoryDocument = documents.put(document.getUid(), InMemoryDocumentMapper.toMemoryModel(document));
-      publish.onNext(inMemoryDocument);
+      documents.put(document.getUid(), InMemoryDocumentMapper.toMemoryModel(document));
+      publish.onNext( documents.get(document.getUid()) );
     }
 
   }
