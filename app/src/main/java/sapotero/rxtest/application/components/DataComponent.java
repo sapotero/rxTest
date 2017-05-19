@@ -5,6 +5,7 @@ import sapotero.rxtest.application.modules.EsdModule;
 import sapotero.rxtest.application.modules.SettingsModule;
 import sapotero.rxtest.application.scopes.DataScope;
 import sapotero.rxtest.db.mapper.AbstractMapper;
+import sapotero.rxtest.db.mapper.AssistantMapper;
 import sapotero.rxtest.db.mapper.FavoriteUserMapper;
 import sapotero.rxtest.db.mapper.PrimaryConsiderationMapper;
 import sapotero.rxtest.db.requery.utils.RequeryDbModule;
@@ -85,4 +86,5 @@ public interface DataComponent {
 
   void inject(PrimaryConsiderationMapper primaryConsiderationMapper);
   void inject(FavoriteUserMapper favoriteUserMapper);
+  void inject(AssistantMapper assistantMapper);
 }

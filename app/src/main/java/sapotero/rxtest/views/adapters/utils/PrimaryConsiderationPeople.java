@@ -18,16 +18,6 @@ public class PrimaryConsiderationPeople implements IPerformer {
   public PrimaryConsiderationPeople() {
   }
 
-  public PrimaryConsiderationPeople(String id, String name, String position, String organization, String assistantId, String gender, boolean isOrganization) {
-    this.id = id;
-    this.name = name;
-    this.position = position;
-    this.organization = organization;
-    this.assistantId = assistantId;
-    this.gender = gender;
-    this.isOrganization = isOrganization;
-  }
-
   private boolean getBooleanValue(Boolean value) {
     if (value != null) {
       return value;

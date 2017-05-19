@@ -34,6 +34,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.mapper.AssistantMapper;
 import sapotero.rxtest.db.mapper.FavoriteUserMapper;
 import sapotero.rxtest.db.mapper.PerformerMapper;
 import sapotero.rxtest.db.mapper.PrimaryConsiderationMapper;
@@ -243,7 +244,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe( user -> {
-           adapter.add( new PrimaryConsiderationPeople( user.getHeadId(), user.getTitle(), "", "", user.getAssistantId(), "", false ) );
+           adapter.add( new AssistantMapper().toPrimaryConsiderationPeople(user) );
         });
     }
 
