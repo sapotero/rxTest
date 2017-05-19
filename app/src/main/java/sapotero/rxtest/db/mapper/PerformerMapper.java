@@ -68,7 +68,7 @@ public class PerformerMapper implements Mapper<Performer, RPerformerEntity> {
 
   // Returns IPerformer of destinationType, converted from IPerformer source
   // Used for conversions between Performer, PrimaryConsiderationPeople and Oshs
-  public IPerformer toIPerformer(IPerformer source, DestinationType destinationType) {
+  public IPerformer convert(IPerformer source, DestinationType destinationType) {
     IPerformer destination;
 
     switch ( destinationType ) {

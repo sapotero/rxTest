@@ -34,9 +34,11 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.mapper.PerformerMapper;
 import sapotero.rxtest.db.requery.models.RAssistantEntity;
 import sapotero.rxtest.db.requery.models.RFavoriteUserEntity;
 import sapotero.rxtest.db.requery.models.RPrimaryConsiderationEntity;
+import sapotero.rxtest.managers.menu.commands.primary_consideration.PrimaryConsideration;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.utils.Settings;
@@ -150,16 +152,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
 
     view.findViewById(R.id.dialog_oshs_add).setOnClickListener( v ->{
       if ( callback != null && user != null ) {
-
-        Oshs oshs = new Oshs();
-        oshs.setId( user.getId() );
-        oshs.setOrganization( user.getOrganization() );
-        oshs.setAssistantId( user.getAssistantId() );
-        oshs.setPosition( user.getPosition() );
-        oshs.setName( user.getName() );
-        oshs.setGender( user.getGender() );
-        oshs.setIsOrganization( user.isOrganization() );
-
+        Oshs oshs = (Oshs) new PerformerMapper().convert(user, PerformerMapper.DestinationType.OSHS);
         Timber.e("setOnItemClickListener OPERATION: %s", operation.toString());
         callback.onSearchSuccess(oshs, operation, documentUid);
         dismiss();
@@ -351,7 +344,8 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
 //            callback.onSearchSuccess( user, operation);
           }
 
-          user = new PrimaryConsiderationPeople( _user.getId(), _user.getName(), _user.getPosition(), _user.getOrganization(), _user.getAssistantId(), _user.getGender(), _user.getIsOrganization());
+          user = (PrimaryConsiderationPeople) new PerformerMapper().convert(_user, PerformerMapper.DestinationType.PRIMARYCONSIDERATIONPEOPLE);
+
           title.setText( _user.getName() );
           title.cancelPendingInputEvents();
           title.hideIndicator();

@@ -331,7 +331,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
         Timber.tag(TAG).w("USER: %s [ %s | %s ]", u.getPerformerText(), u.getIsOriginal(), u.getIsResponsible() );
         Timber.tag(TAG).w("USER: %s ", new Gson().toJson(u) );
         PrimaryConsiderationPeople user =
-                (PrimaryConsiderationPeople) new PerformerMapper().toIPerformer(u, PerformerMapper.DestinationType.PRIMARYCONSIDERATIONPEOPLE);
+                (PrimaryConsiderationPeople) new PerformerMapper().convert(u, PerformerMapper.DestinationType.PRIMARYCONSIDERATIONPEOPLE);
 
         people.add(user);
       }
@@ -436,7 +436,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
 
       for (int i = 0; i < adapter.getCount(); i++) {
         PrimaryConsiderationPeople item = adapter.getItem(i);
-        Performer p = (Performer) new PerformerMapper().toIPerformer(item, PerformerMapper.DestinationType.PERFORMER);
+        Performer p = (Performer) new PerformerMapper().convert(item, PerformerMapper.DestinationType.PERFORMER);
         p.setNumber(i);
         performers.add(p);
       }
@@ -572,7 +572,10 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   public void onSearchSuccess(Oshs user, CommandFactory.Operation operation, String uid) {
     Timber.tag("FROM DIALOG").i( "[%s] %s | %s", user.getId(), user.getName(), user.getOrganization());
 
-    adapter.add( new PrimaryConsiderationPeople( user.getId(), user.getName(), user.getPosition(), user.getOrganization(), null, user.getGender(), user.getIsOrganization() ) );
+    PrimaryConsiderationPeople item =
+            (PrimaryConsiderationPeople) new PerformerMapper().convert(user, PerformerMapper.DestinationType.PRIMARYCONSIDERATIONPEOPLE);
+
+    adapter.add( item );
     updateUsers();
 
     if (callback != null) {

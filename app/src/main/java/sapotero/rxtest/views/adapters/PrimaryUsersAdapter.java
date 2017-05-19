@@ -15,6 +15,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import sapotero.rxtest.R;
+import sapotero.rxtest.db.mapper.PerformerMapper;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 
@@ -68,17 +69,8 @@ public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
   }
 
   public Oshs getOshs(int position){
-
     PrimaryConsiderationPeople item = resultItems.get(position);
-
-    Oshs oshs = new Oshs();
-    oshs.setOrganization( item.getOrganization());
-    oshs.setName( item.getName());
-    oshs.setPosition( item.getPosition());
-    oshs.setId( item.getId());
-    oshs.setGender( item.getGender());
-    oshs.setIsOrganization( item.isOrganization() );
-
+    Oshs oshs = (Oshs) new PerformerMapper().convert(item, PerformerMapper.DestinationType.OSHS);
     return oshs;
   }
 
