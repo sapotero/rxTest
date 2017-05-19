@@ -367,7 +367,7 @@ public class DataLoaderManager {
             initV2();
 
             updateByCurrentStatus(MainMenuItem.ALL, null, false);
-            updateByCurrentStatus(MainMenuItem.ALL, null, true);
+//            updateByCurrentStatus(MainMenuItem.ALL, null, true);
 
 //            updateFavoritesAndProcessed();
           },
