@@ -1,4 +1,4 @@
-package sapotero.rxtest.utils.memory.utils;
+package sapotero.rxtest.utils.memory.fields;
 
 public  enum InMemoryStatus {
   LOADING,

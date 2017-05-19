@@ -10,6 +10,8 @@ public class InMemoryLogger {
   }
 
   public void log(InMemoryDocument inMemoryDocument) {
-    Timber.tag(TAG).d( inMemoryDocument.toString() );
+    if (inMemoryDocument != null) {
+      Timber.tag(TAG).d( inMemoryDocument.toString() );
+    }
   }
 }

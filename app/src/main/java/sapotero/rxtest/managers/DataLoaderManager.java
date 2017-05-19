@@ -57,6 +57,7 @@ import sapotero.rxtest.retrofit.models.v2.v2UserOshs;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.memory.InMemoryDocumentStorage;
 import sapotero.rxtest.views.menu.fields.MainMenuButton;
 import sapotero.rxtest.views.menu.fields.MainMenuItem;
 import timber.log.Timber;
@@ -69,6 +70,7 @@ public class DataLoaderManager {
   @Inject Settings settings;
   @Inject JobManager jobManager;
   @Inject SingleEntityStore<Persistable> dataStore;
+  @Inject InMemoryDocumentStorage store;
 
   private SimpleDateFormat dateFormat;
   private CompositeSubscription subscription;
@@ -546,6 +548,8 @@ public class DataLoaderManager {
 
                       for (Document doc: data.getDocuments() ) {
 
+                        store.add(doc);
+
                         if ( isExist(doc) ){
 
                           Timber.tag(TAG).e("isExist %s", finalShared );
@@ -586,6 +590,7 @@ public class DataLoaderManager {
                   if (data.getDocuments().size() > 0){
 
                     for (Document doc: data.getDocuments() ) {
+                      store.add(doc);
 
                       // Timber.tag(TAG).e("index: %s | status: %s ",index, status );
                       // Timber.tag(TAG).e("exist: %s | md5: %s", isExist(doc), !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) );
@@ -639,6 +644,7 @@ public class DataLoaderManager {
                   requestCount--;
                   if (data.getDocuments().size() > 0){
                     for (Document doc: data.getDocuments() ) {
+                      store.add(doc);
                       jobCount++;
                       jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), code, true) );
                     }
@@ -662,6 +668,7 @@ public class DataLoaderManager {
                 requestCount--;
                 if (data.getDocuments().size() > 0){
                   for (Document doc: data.getDocuments() ) {
+                    store.add(doc);
                     jobCount++;
                     jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), code, finalShared1) );
                   }

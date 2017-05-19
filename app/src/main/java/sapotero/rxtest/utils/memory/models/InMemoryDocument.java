@@ -1,6 +1,6 @@
 package sapotero.rxtest.utils.memory.models;
 
-import sapotero.rxtest.utils.memory.utils.InMemoryStatus;
+import sapotero.rxtest.utils.memory.fields.InMemoryStatus;
 
 /**
  * In Memory Document Storage

@@ -9,6 +9,7 @@ import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.utils.OperationManagerModule;
 import sapotero.rxtest.managers.toolbar.ToolbarManager;
 import sapotero.rxtest.services.MainService;
+import sapotero.rxtest.utils.memory.utils.InMemoryStoreModule;
 import sapotero.rxtest.utils.queue.utils.QueueManagerModule;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.activities.InfoActivity;
@@ -25,6 +26,7 @@ import sapotero.rxtest.views.fragments.InfoActivityDecisionPreviewFragment;
   JobModule.class,
   QueueManagerModule.class,
   OperationManagerModule.class,
+  InMemoryStoreModule.class,
 })
 
 public interface ManagerComponent {

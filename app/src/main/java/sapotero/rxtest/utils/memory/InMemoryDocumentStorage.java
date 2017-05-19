@@ -8,6 +8,7 @@ import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.memory.mappers.InMemoryDocumentMapper;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.utils.memory.utils.InMemoryLogger;
+import timber.log.Timber;
 
 public class InMemoryDocumentStorage {
 
@@ -21,7 +22,10 @@ public class InMemoryDocumentStorage {
 
   private void initInMemoryLogger() {
 
-    publish.subscribe(logger::log);
+    publish.subscribe(
+      logger::log,
+      Timber::e
+    );
   }
 
   public void add(Document document){

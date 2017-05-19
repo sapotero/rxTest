@@ -92,6 +92,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @Inject Settings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
+
   @Inject QueueManager queue;
 
   @BindView(R.id.toolbar) Toolbar toolbar;

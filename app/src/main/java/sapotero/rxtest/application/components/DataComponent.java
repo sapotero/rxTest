@@ -10,7 +10,6 @@ import sapotero.rxtest.managers.CurrentDocumentManager;
 import sapotero.rxtest.managers.db.managers.DBDocumentManager;
 import sapotero.rxtest.managers.view.DecisionManager;
 import sapotero.rxtest.retrofit.utils.OkHttpModule;
-import sapotero.rxtest.utils.memory.utils.InMemoryStoreModule;
 import sapotero.rxtest.utils.queue.db.QueueDBManager;
 import sapotero.rxtest.views.activities.DocumentImageFullScreenActivity;
 import sapotero.rxtest.views.activities.DocumentInfocardFullScreenActivity;
@@ -42,7 +41,6 @@ import sapotero.rxtest.views.menu.factories.ItemsBuilder;
   EsdModule.class,
   SettingsModule.class,
   RequeryDbModule.class,
-  InMemoryStoreModule.class,
 })
 
 public interface DataComponent {
