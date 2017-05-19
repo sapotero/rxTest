@@ -18,6 +18,7 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.mapper.BlockMapper;
+import sapotero.rxtest.db.mapper.DecisionMapper;
 import sapotero.rxtest.db.mapper.PerformerMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RLinks;
@@ -183,38 +184,10 @@ public class CreateDocumentsJob extends BaseJob {
       with_decision = true;
 
       for (Decision d: document.getDecisions() ) {
-        RDecisionEntity decision = new RDecisionEntity();
-        decision.setUid( d.getId() );
-        decision.setLetterhead(d.getLetterhead());
-        decision.setApproved(d.getApproved());
-        decision.setTemporary(false);
-        decision.setSigner(d.getSigner());
-        decision.setSignerId(d.getSignerId());
-        decision.setAssistantId(d.getAssistantId());
-        decision.setSignerBlankText(d.getSignerBlankText());
-        decision.setSignerIsManager(d.getSignerIsManager());
-        decision.setSignerPositionS(d.getSignerPositionS());
-        decision.setComment(d.getComment());
-        decision.setDate(d.getDate());
-        decision.setUrgencyText(d.getUrgencyText());
-        decision.setShowPosition(d.getShowPosition());
-        decision.setSignBase64(d.getSignBase64());
-        decision.setRed(d.getRed());
-        decision.setLetterheadFontSize(d.getLetterhead());
-        decision.setPerformerFontSize(d.getPerformersFontSize());
+        RDecisionEntity decision = new DecisionMapper().toEntity(d);
 
-        if (d.getRed()){
-          red= true;
-        }
-
-        if ( d.getBlocks() != null && d.getBlocks().size() >= 1 ){
-
-          for (Block b: d.getBlocks() ) {
-            RBlockEntity block = new BlockMapper().toEntity(b);
-            block.setDecision(decision);
-            decision.getBlocks().add(block);
-          }
-
+        if ( d.getRed() ){
+          red = true;
         }
 
         decision.setDocument(doc);

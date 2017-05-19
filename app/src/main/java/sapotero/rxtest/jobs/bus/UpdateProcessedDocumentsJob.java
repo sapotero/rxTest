@@ -19,6 +19,7 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.mapper.BlockMapper;
+import sapotero.rxtest.db.mapper.DecisionMapper;
 import sapotero.rxtest.db.mapper.PerformerMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RLinksEntity;
@@ -237,35 +238,7 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
       if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
         rDoc.getDecisions().clear();
         for (Decision d: document.getDecisions() ) {
-
-          RDecisionEntity decision = new RDecisionEntity();
-          decision.setUid( d.getId() );
-          decision.setLetterhead(d.getLetterhead());
-          decision.setApproved(d.getApproved());
-          decision.setSigner(d.getSigner());
-          decision.setSignerId(d.getSignerId());
-          decision.setAssistantId(d.getAssistantId());
-          decision.setSignerBlankText(d.getSignerBlankText());
-          decision.setSignerIsManager(d.getSignerIsManager());
-          decision.setSignerPositionS(d.getSignerPositionS());
-          decision.setComment(d.getComment());
-          decision.setDate(d.getDate());
-          decision.setUrgencyText(d.getUrgencyText());
-          decision.setShowPosition(d.getShowPosition());
-          decision.setSignBase64(d.getSignBase64());
-          decision.setRed(d.getRed());
-
-          if ( d.getBlocks() != null && d.getBlocks().size() >= 1 ){
-
-            for (Block b: d.getBlocks() ) {
-              RBlockEntity block = new BlockMapper().toEntity(b);
-              block.setDecision(decision);
-              decision.getBlocks().add(block);
-            }
-
-          }
-
-          //FIX DECISION
+          RDecisionEntity decision = new DecisionMapper().toEntity(d);
           decision.setDocument(rDoc);
           rDoc.getDecisions().add(decision);
         }
@@ -417,35 +390,7 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
       if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
         doc.getDecisions().clear();
         for (Decision d: document.getDecisions() ) {
-
-          RDecisionEntity decision = new RDecisionEntity();
-          decision.setUid( d.getId() );
-          decision.setLetterhead(d.getLetterhead());
-          decision.setApproved(d.getApproved());
-          decision.setSigner(d.getSigner());
-          decision.setSignerId(d.getSignerId());
-          decision.setAssistantId(d.getAssistantId());
-          decision.setSignerBlankText(d.getSignerBlankText());
-          decision.setSignerIsManager(d.getSignerIsManager());
-          decision.setSignerPositionS(d.getSignerPositionS());
-          decision.setComment(d.getComment());
-          decision.setDate(d.getDate());
-          decision.setUrgencyText(d.getUrgencyText());
-          decision.setShowPosition(d.getShowPosition());
-          decision.setSignBase64(d.getSignBase64());
-          decision.setRed(d.getRed());
-
-          if ( d.getBlocks() != null && d.getBlocks().size() >= 1 ){
-
-            for (Block b: d.getBlocks() ) {
-              RBlockEntity block = new BlockMapper().toEntity(b);
-              block.setDecision(decision);
-              decision.getBlocks().add(block);
-            }
-
-          }
-
-          //FIX DECISION
+          RDecisionEntity decision = new DecisionMapper().toEntity(d);
           decision.setDocument(doc);
           doc.getDecisions().add(decision);
         }
