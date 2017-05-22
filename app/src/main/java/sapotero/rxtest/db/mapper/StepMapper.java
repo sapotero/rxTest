@@ -1,8 +1,12 @@
 package sapotero.rxtest.db.mapper;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import java.lang.reflect.Type;
 
 import sapotero.rxtest.db.requery.models.RStepEntity;
 import sapotero.rxtest.retrofit.models.document.Step;
@@ -41,11 +45,36 @@ public class StepMapper extends AbstractMapper<Step, RStepEntity> {
 
   @Override
   public Step toModel(RStepEntity entity) {
-    // Method is not used
-    return null;
+    Step model = new Step();
+
+    model.setTitle( entity.getTitle() );
+    model.setNumber( entity.getNumber() );
+
+    if ( stringNotEmpty( entity.getPeople() ) ) {
+      model.setPeople( jsonToList( entity.getPeople() ) );
+    }
+
+    if ( stringNotEmpty( entity.getCards() ) ) {
+      model.setCards( jsonToList( entity.getCards() ) );
+    }
+
+    if ( stringNotEmpty( entity.getAnother_approvals() ) ) {
+      model.setAnotherApprovals( jsonToList( entity.getAnother_approvals() ) );
+    }
+
+    return model;
   }
 
   private <T> String listToJson(List<T> list) {
     return gson.toJson( list );
+  }
+
+  private <T> ArrayList<T> jsonToList(String jsonString) {
+    Type listType = new TypeToken<ArrayList<T>>(){}.getType();
+    return gson.fromJson(jsonString, listType);
+  }
+
+  private boolean stringNotEmpty(String s) {
+    return s != null && !s.equals("");
   }
 }
