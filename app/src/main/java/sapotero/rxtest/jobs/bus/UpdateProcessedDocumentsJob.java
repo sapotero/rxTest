@@ -18,6 +18,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.db.mapper.ActionMapper;
 import sapotero.rxtest.db.mapper.BlockMapper;
 import sapotero.rxtest.db.mapper.DecisionMapper;
 import sapotero.rxtest.db.mapper.ExemplarMapper;
@@ -468,16 +469,10 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
 
       if ( document.getActions() != null && document.getActions().size() >= 1 ){
         doc.getActions().clear();
+        ActionMapper actionMapper = new ActionMapper();
+
         for (DocumentInfoAction act: document.getActions() ) {
-          RActionEntity action = new RActionEntity();
-
-          action.setOfficialId(act.getOfficialId());
-          action.setAddressedToId(act.getAddressedToId());
-          action.setAction(act.getAction());
-          action.setActionDescription(act.getActionDescription());
-          action.setUpdatedAt(act.getUpdatedAt());
-          action.setToS(act.getToS());
-
+          RActionEntity action = actionMapper.toEntity(act);
           action.setDocument(doc);
           doc.getActions().add(action);
         }
