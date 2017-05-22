@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import padeg.lib.Padeg;
 import sapotero.rxtest.db.mapper.BlockMapper;
+import sapotero.rxtest.db.mapper.DecisionMapper;
 import sapotero.rxtest.db.mapper.PerformerMapper;
 import sapotero.rxtest.db.requery.models.decisions.RBlock;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
@@ -19,32 +20,8 @@ import timber.log.Timber;
 public class DecisionConverter {
 
   public static Decision formatDecision(RDecisionEntity decision) {
-    Decision formated_decision = new Decision();
-
-    formated_decision.setId( decision.getUid() );
-    formated_decision.setLetterhead( decision.getLetterhead() );
-    formated_decision.setApproved( decision.isApproved() );
-    formated_decision.setSigner( decision.getSigner() );
-    formated_decision.setSignerId( decision.getSignerId() );
-    formated_decision.setSignerBlankText( decision.getSignerBlankText() );
-    formated_decision.setSignerPositionS( decision.getSignerPositionS() );
-    formated_decision.setSignerIsManager( decision.isSignerIsManager() );
-    formated_decision.setSignBase64( decision.getSignBase64() );
-    formated_decision.setAssistantId( decision.getAssistantId() );
-    formated_decision.setComment( decision.getComment() );
-    formated_decision.setDate( decision.getDate() );
-    formated_decision.setUrgencyText( decision.getUrgencyText() );
-    formated_decision.setShowPosition( decision.isShowPosition() );
-
-    if ( decision.getBlocks().size() > 0 ){
-      for (RBlock _b:decision.getBlocks() ) {
-        RBlockEntity block = (RBlockEntity) _b;
-        Block formated_block = new BlockMapper().toFormattedModel(block);
-        formated_decision.getBlocks().add(formated_block);
-      }
-    }
-
-    return formated_decision;
+    Decision formattedDecision = new DecisionMapper().toFormattedModel(decision);
+    return formattedDecision;
   }
 
   public static String formatName(String name){

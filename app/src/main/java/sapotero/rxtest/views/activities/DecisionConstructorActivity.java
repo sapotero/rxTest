@@ -38,6 +38,7 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.mapper.BlockMapper;
+import sapotero.rxtest.db.mapper.DecisionMapper;
 import sapotero.rxtest.db.mapper.PerformerMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RUrgencyEntity;
@@ -795,36 +796,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
         .get().firstOrNull();
 
       if (rDecisionEntity != null) {
-        raw_decision = new Decision();
-
-        raw_decision.setId(rDecisionEntity.getUid());
-        raw_decision.setLetterhead(rDecisionEntity.getLetterhead());
-        raw_decision.setApproved(rDecisionEntity.isApproved());
-        raw_decision.setSigner(rDecisionEntity.getSigner());
-        raw_decision.setSignerId(rDecisionEntity.getSignerId());
-        raw_decision.setAssistantId(rDecisionEntity.getAssistantId());
-        raw_decision.setSignerBlankText(rDecisionEntity.getSignerBlankText());
-        raw_decision.setSignerIsManager(rDecisionEntity.isSignerIsManager());
-        raw_decision.setComment(rDecisionEntity.getComment());
-        raw_decision.setDate(rDecisionEntity.getDate());
-        raw_decision.setUrgencyText(rDecisionEntity.getUrgencyText());
-        raw_decision.setShowPosition(rDecisionEntity.isShowPosition());
-        raw_decision.setLetterheadFontSize(rDecisionEntity.getLetterheadFontSize());
-        raw_decision.setPerformersFontSize(rDecisionEntity.getPerformerFontSize());
-
-        if (rDecisionEntity.getBlocks() != null && rDecisionEntity.getBlocks().size() >= 1) {
-
-          ArrayList<Block> list = new ArrayList<>();
-
-          for (RBlock _block : rDecisionEntity.getBlocks()) {
-            RBlockEntity b = (RBlockEntity) _block;
-            Block block = new BlockMapper().toModel(b);
-            list.add(block);
-          }
-
-          Collections.sort(list, (o1, o2) -> o1.getNumber().compareTo(o2.getNumber()));
-          raw_decision.setBlocks(list);
-        }
+        raw_decision = new DecisionMapper().toModel(rDecisionEntity);
       } else {
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");

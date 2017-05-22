@@ -11,6 +11,7 @@ import io.requery.query.Result;
 import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.mapper.BlockMapper;
+import sapotero.rxtest.db.mapper.DecisionMapper;
 import sapotero.rxtest.db.mapper.PerformerMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RSignerEntity;
@@ -105,32 +106,11 @@ public class DBDocumentManager {
 
     if (document.getDecisions().size() >= 1) {
       ArrayList<Decision> decisions_list = new ArrayList<Decision>();
-
+      DecisionMapper decisionMapper = new DecisionMapper();
 
       for (RDecision rDecision : document.getDecisions()) {
-        Decision raw_decision = new Decision();
-
-        RDecisionEntity decision = (RDecisionEntity) rDecision;
-
-        raw_decision.setId(String.valueOf(decision.getUid()));
-        raw_decision.setLetterhead(decision.getLetterhead());
-        raw_decision.setSigner(decision.getSigner());
-        raw_decision.setSignerId(decision.getSignerId());
-        raw_decision.setAssistantId(decision.getAssistantId());
-        raw_decision.setSignerBlankText(decision.getSignerBlankText());
-        raw_decision.setComment(decision.getComment());
-        raw_decision.setDate(decision.getDate());
-        raw_decision.setApproved(decision.isApproved());
-        raw_decision.setUrgencyText(decision.getUrgencyText());
-        raw_decision.setSignerIsManager(decision.isSignerIsManager());
-        raw_decision.setShowPosition(decision.isShowPosition());
-
-        for (RBlock rBlock : decision.getBlocks()) {
-          RBlockEntity block = (RBlockEntity) rBlock;
-          Block raw_block = new BlockMapper().toModel(block);
-          raw_decision.getBlocks().add(raw_block);
-        }
-
+        RDecisionEntity decisionEntity = (RDecisionEntity) rDecision;
+        Decision raw_decision = decisionMapper.toModel(decisionEntity);
         decisions_list.add(raw_decision);
       }
 

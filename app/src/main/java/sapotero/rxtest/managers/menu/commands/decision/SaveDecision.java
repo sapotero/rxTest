@@ -136,8 +136,10 @@ public class SaveDecision extends AbstractCommand {
       decision.getBlocks().clear();
     }
 
+    BlockMapper blockMapper = new BlockMapper();
+
     for (Block _block : dec.getBlocks()) {
-      RBlockEntity block = new BlockMapper().toEntity(_block);
+      RBlockEntity block = blockMapper.toEntity(_block);
       block.setDecision(decision);
       decision.getBlocks().add(block);
     }
