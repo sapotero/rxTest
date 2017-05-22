@@ -18,6 +18,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.db.mapper.SignerMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RSignerEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
@@ -141,12 +142,7 @@ public class UpdateLinkJob extends BaseJob {
       rd.setOrganization("Без организации" );
     }
 
-    RSignerEntity signer = new RSignerEntity();
-    signer.setUid( d.getSigner().getId() );
-    signer.setName( d.getSigner().getName() );
-    signer.setOrganisation( d.getSigner().getOrganisation() );
-    signer.setType( d.getSigner().getType() );
-
+    RSignerEntity signer = new SignerMapper().toEntity(d.getSigner());
     rd.setSigner( signer );
 
     return dataStore.insert( rd ).toObservable();

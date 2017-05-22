@@ -22,6 +22,7 @@ import sapotero.rxtest.db.mapper.BlockMapper;
 import sapotero.rxtest.db.mapper.DecisionMapper;
 import sapotero.rxtest.db.mapper.ExemplarMapper;
 import sapotero.rxtest.db.mapper.PerformerMapper;
+import sapotero.rxtest.db.mapper.SignerMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RLinksEntity;
 import sapotero.rxtest.db.requery.models.RRouteEntity;
@@ -261,12 +262,7 @@ public class UpdateDocumentJob extends BaseJob {
       rd.setOrganization("Без организации" );
     }
 
-    RSignerEntity signer = new RSignerEntity();
-    signer.setUid( d.getSigner().getId() );
-    signer.setName( d.getSigner().getName() );
-    signer.setOrganisation( d.getSigner().getOrganisation() );
-    signer.setType( d.getSigner().getType() );
-
+    RSignerEntity signer = new SignerMapper().toEntity(d.getSigner());
     rd.setSigner( signer );
 
     return dataStore.insert( rd ).toObservable();
@@ -313,12 +309,7 @@ public class UpdateDocumentJob extends BaseJob {
 
       if (document.getSigner() != null){
         Signer _signer = document.getSigner();
-        RSignerEntity signer = new RSignerEntity();
-        signer.setUid( _signer.getId() );
-        signer.setName( _signer.getName() );
-        signer.setOrganisation( _signer.getOrganisation() );
-        signer.setType( _signer.getType() );
-
+        RSignerEntity signer = new SignerMapper().toEntity(_signer);
         rDoc.setSigner( signer );
       }
 
@@ -511,10 +502,7 @@ public class UpdateDocumentJob extends BaseJob {
 
       if (document.getSigner() != null){
         RSignerEntity signer = (RSignerEntity) doc.getSigner();
-        signer.setUid( document.getSigner().getId() );
-        signer.setName( document.getSigner().getName() );
-        signer.setOrganisation( document.getSigner().getOrganisation() );
-        signer.setType( document.getSigner().getType() );
+        new SignerMapper().updateEntity(signer, document.getSigner());
       }
 
 //      doc.setControl(onControl);

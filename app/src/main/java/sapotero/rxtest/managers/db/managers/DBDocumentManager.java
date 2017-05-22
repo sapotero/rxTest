@@ -14,6 +14,7 @@ import sapotero.rxtest.db.mapper.BlockMapper;
 import sapotero.rxtest.db.mapper.DecisionMapper;
 import sapotero.rxtest.db.mapper.ExemplarMapper;
 import sapotero.rxtest.db.mapper.PerformerMapper;
+import sapotero.rxtest.db.mapper.SignerMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RSignerEntity;
 import sapotero.rxtest.db.requery.models.decisions.RBlock;
@@ -96,12 +97,7 @@ public class DBDocumentManager {
     RSignerEntity raw_signer = (RSignerEntity) document.getSigner();
 
     if (raw_signer != null){
-      Signer signer = new Signer();
-      signer.setId(raw_signer.getUid());
-      signer.setName(raw_signer.getName());
-      signer.setOrganisation(raw_signer.getOrganisation());
-      signer.setType(raw_signer.getType());
-
+      Signer signer = new SignerMapper().toModel(raw_signer);
       doc.setSigner(signer);
     }
 

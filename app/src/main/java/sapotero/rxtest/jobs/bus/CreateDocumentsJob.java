@@ -21,6 +21,7 @@ import sapotero.rxtest.db.mapper.BlockMapper;
 import sapotero.rxtest.db.mapper.DecisionMapper;
 import sapotero.rxtest.db.mapper.ExemplarMapper;
 import sapotero.rxtest.db.mapper.PerformerMapper;
+import sapotero.rxtest.db.mapper.SignerMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RLinks;
 import sapotero.rxtest.db.requery.models.RLinksEntity;
@@ -153,12 +154,7 @@ public class CreateDocumentsJob extends BaseJob {
     doc.setMd5( document.getMd5() );
 
     if (document.getSigner() != null){
-      RSignerEntity signer = new RSignerEntity();
-      signer.setUid( document.getSigner().getId() );
-      signer.setName( document.getSigner().getName() );
-      signer.setOrganisation( document.getSigner().getOrganisation() );
-      signer.setType( document.getSigner().getType() );
-
+      RSignerEntity signer = new SignerMapper().toEntity(document.getSigner());
       doc.setSigner(signer);
     }
 
