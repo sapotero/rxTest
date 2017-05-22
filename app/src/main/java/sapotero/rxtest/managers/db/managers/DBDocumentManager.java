@@ -12,6 +12,7 @@ import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.mapper.BlockMapper;
 import sapotero.rxtest.db.mapper.DecisionMapper;
+import sapotero.rxtest.db.mapper.ExemplarMapper;
 import sapotero.rxtest.db.mapper.PerformerMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RSignerEntity;
@@ -121,17 +122,12 @@ public class DBDocumentManager {
 
     if (document.getExemplars().size() >= 1) {
       ArrayList<Exemplar> exemplar_list = new ArrayList<Exemplar>();
+      ExemplarMapper exemplarMapper = new ExemplarMapper();
 
       for (RExemplar ex: document.getExemplars() ) {
         RExemplarEntity e = (RExemplarEntity) ex;
-
-        Exemplar exemplar = new Exemplar();
-        exemplar.setNumber(Integer.valueOf(e.getNumber()));
-        exemplar.setIsOriginal(e.isIsOriginal());
-        exemplar.setStatusCode(e.getStatusCode());
-        exemplar.setAddressedToId(e.getAddressedToId());
-        exemplar.setAddressedToName(e.getAddressedToName());
-        exemplar.setDate(e.getDate());
+        Exemplar exemplar = exemplarMapper.toModel(e);
+        exemplar_list.add(exemplar);
       }
 
       doc.setExemplars(exemplar_list);

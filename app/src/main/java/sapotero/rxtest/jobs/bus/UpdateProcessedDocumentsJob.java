@@ -20,6 +20,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.mapper.BlockMapper;
 import sapotero.rxtest.db.mapper.DecisionMapper;
+import sapotero.rxtest.db.mapper.ExemplarMapper;
 import sapotero.rxtest.db.mapper.PerformerMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RLinksEntity;
@@ -245,14 +246,10 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
       }
 
       if ( document.getExemplars() != null && document.getExemplars().size() >= 1 ){
+        ExemplarMapper exemplarMapper = new ExemplarMapper();
+
         for (Exemplar e: document.getExemplars() ) {
-          RExemplarEntity exemplar = new RExemplarEntity();
-          exemplar.setNumber(String.valueOf(e.getNumber()));
-          exemplar.setIsOriginal(e.getIsOriginal());
-          exemplar.setStatusCode(e.getStatusCode());
-          exemplar.setAddressedToId(e.getAddressedToId());
-          exemplar.setAddressedToName(e.getAddressedToName());
-          exemplar.setDate(e.getDate());
+          RExemplarEntity exemplar = exemplarMapper.toEntity(e);
           exemplar.setDocument(rDoc);
           rDoc.getExemplars().add(exemplar);
         }
@@ -424,14 +421,10 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
 
       if ( document.getExemplars() != null && document.getExemplars().size() >= 1 ){
         doc.getExemplars().clear();
+        ExemplarMapper exemplarMapper = new ExemplarMapper();
+
         for (Exemplar e: document.getExemplars() ) {
-          RExemplarEntity exemplar = new RExemplarEntity();
-          exemplar.setNumber(String.valueOf(e.getNumber()));
-          exemplar.setIsOriginal(e.getIsOriginal());
-          exemplar.setStatusCode(e.getStatusCode());
-          exemplar.setAddressedToId(e.getAddressedToId());
-          exemplar.setAddressedToName(e.getAddressedToName());
-          exemplar.setDate(e.getDate());
+          RExemplarEntity exemplar = exemplarMapper.toEntity(e);
           exemplar.setDocument(doc);
           doc.getExemplars().add(exemplar);
         }

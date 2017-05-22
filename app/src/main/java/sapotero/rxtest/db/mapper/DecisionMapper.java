@@ -1,6 +1,5 @@
 package sapotero.rxtest.db.mapper;
 
-import java.util.ArrayList;
 import java.util.Collections;
 
 import sapotero.rxtest.db.requery.models.decisions.RBlock;
