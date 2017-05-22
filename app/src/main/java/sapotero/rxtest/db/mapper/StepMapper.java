@@ -3,7 +3,6 @@ package sapotero.rxtest.db.mapper;
 import com.google.gson.Gson;
 
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import sapotero.rxtest.db.requery.models.RStepEntity;
 import sapotero.rxtest.retrofit.models.document.Step;
@@ -44,10 +43,6 @@ public class StepMapper extends AbstractMapper<Step, RStepEntity> {
   public Step toModel(RStepEntity entity) {
     // Method is not used
     return null;
-  }
-
-  private <T> boolean listNotEmpty(List<T> list) {
-    return list != null && list.size() > 0;
   }
 
   private <T> String listToJson(List<T> list) {
