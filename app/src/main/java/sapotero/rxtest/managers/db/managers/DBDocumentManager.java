@@ -13,6 +13,7 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.mapper.BlockMapper;
 import sapotero.rxtest.db.mapper.DecisionMapper;
 import sapotero.rxtest.db.mapper.ExemplarMapper;
+import sapotero.rxtest.db.mapper.ImageMapper;
 import sapotero.rxtest.db.mapper.PerformerMapper;
 import sapotero.rxtest.db.mapper.SignerMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
@@ -131,18 +132,12 @@ public class DBDocumentManager {
 
     if ( document.getImages().size() >= 1 ){
       ArrayList<Image> image_list = new ArrayList<Image>();
+      ImageMapper imageMapper = new ImageMapper();
 
       for (RImage im: document.getImages() ) {
-
         RImageEntity i = (RImageEntity) im;
-        Image image = new Image();
-        image.setTitle(i.getTitle());
-        image.setNumber(i.getNumber());
-        image.setMd5(i.getMd5());
-        image.setSize(i.getSize());
-        image.setPath(i.getPath());
-        image.setContentType(i.getContentType());
-        image.setSigned(i.isSigned());
+        Image image = imageMapper.toModel(i);
+        image_list.add(image);
       }
       doc.setImages(image_list);
     }

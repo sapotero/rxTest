@@ -10,6 +10,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import sapotero.rxtest.R;
+import sapotero.rxtest.db.mapper.ImageMapper;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.retrofit.models.document.Image;
 
@@ -56,13 +57,7 @@ public class DocumentLinkAdapter extends BaseAdapter {
   }
 
   public void add(RImageEntity img) {
-    Image image = new Image();
-    image.setTitle(img.getTitle());
-    image.setPath(img.getPath());
-    image.setMd5(img.getMd5());
-    image.setContentType(img.getContentType());
-    image.setNumber(img.getNumber());
-    image.setSize(img.getSize());
+    Image image = new ImageMapper().toModel(img);
     images.add( image );
     notifyDataSetChanged();
   }

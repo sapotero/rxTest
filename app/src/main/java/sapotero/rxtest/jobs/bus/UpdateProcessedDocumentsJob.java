@@ -1,5 +1,6 @@
 package sapotero.rxtest.jobs.bus;
 
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -23,6 +24,7 @@ import sapotero.rxtest.db.mapper.BlockMapper;
 import sapotero.rxtest.db.mapper.ControlLabelMapper;
 import sapotero.rxtest.db.mapper.DecisionMapper;
 import sapotero.rxtest.db.mapper.ExemplarMapper;
+import sapotero.rxtest.db.mapper.ImageMapper;
 import sapotero.rxtest.db.mapper.PerformerMapper;
 import sapotero.rxtest.db.mapper.SignerMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
@@ -249,20 +251,11 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
       }
 
       if ( document.getImages() != null && document.getImages().size() >= 1 ){
+        ImageMapper imageMapper = new ImageMapper();
+
         for (Image i: document.getImages() ) {
-          RImageEntity image = new RImageEntity();
-          image.setTitle(i.getTitle());
-          image.setNumber(i.getNumber());
-          image.setMd5(i.getMd5());
-          image.setSize(i.getSize());
-          image.setPath(i.getPath());
-          image.setContentType(i.getContentType());
-          image.setSigned(i.getSigned());
+          RImageEntity image = imageMapper.toEntity(i);
           image.setDocument(rDoc);
-          image.setLoading(false);
-          image.setComplete(false);
-          image.setError(false);
-          image.setCreatedAt(i.getCreatedAt());
           rDoc.getImages().add(image);
         }
       }
@@ -418,20 +411,11 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
 
       if ( document.getImages() != null && document.getImages().size() >= 1 ){
         doc.getImages().clear();
+        ImageMapper imageMapper = new ImageMapper();
+
         for (Image i: document.getImages() ) {
-          RImageEntity image = new RImageEntity();
-          image.setTitle(i.getTitle());
-          image.setNumber(i.getNumber());
-          image.setMd5(i.getMd5());
-          image.setSize(i.getSize());
-          image.setPath(i.getPath());
-          image.setContentType(i.getContentType());
-          image.setSigned(i.getSigned());
+          RImageEntity image = imageMapper.toEntity(i);
           image.setDocument(doc);
-          image.setLoading(false);
-          image.setComplete(false);
-          image.setError(false);
-          image.setCreatedAt(i.getCreatedAt());
           doc.getImages().add(image);
         }
       }
