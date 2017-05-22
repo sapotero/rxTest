@@ -20,6 +20,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.mapper.ActionMapper;
 import sapotero.rxtest.db.mapper.BlockMapper;
+import sapotero.rxtest.db.mapper.ControlLabelMapper;
 import sapotero.rxtest.db.mapper.DecisionMapper;
 import sapotero.rxtest.db.mapper.ExemplarMapper;
 import sapotero.rxtest.db.mapper.PerformerMapper;
@@ -267,14 +268,10 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
       }
 
       if ( document.getControlLabels() != null && document.getControlLabels().size() >= 1 ){
+        ControlLabelMapper controlLabelMapper = new ControlLabelMapper();
+
         for (ControlLabel l: document.getControlLabels() ) {
-          RControlLabelsEntity label = new RControlLabelsEntity();
-          label.setCreatedAt(l.getCreatedAt());
-          label.setOfficialId(l.getOfficialId());
-          label.setOfficialName(l.getOfficialName());
-          label.setSkippedOfficialId(l.getSkippedOfficialId());
-          label.setSkippedOfficialName(l.getSkippedOfficialName());
-          label.setState(l.getState());
+          RControlLabelsEntity label = controlLabelMapper.toEntity(l);
           label.setDocument(rDoc);
           rDoc.getControlLabels().add(label);
         }
@@ -441,14 +438,10 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
 
       if ( document.getControlLabels() != null && document.getControlLabels().size() >= 1 ){
         doc.getControlLabels().clear();
+        ControlLabelMapper controlLabelMapper = new ControlLabelMapper();
+
         for (ControlLabel l: document.getControlLabels() ) {
-          RControlLabelsEntity label = new RControlLabelsEntity();
-          label.setCreatedAt(l.getCreatedAt());
-          label.setOfficialId(l.getOfficialId());
-          label.setOfficialName(l.getOfficialName());
-          label.setSkippedOfficialId(l.getSkippedOfficialId());
-          label.setSkippedOfficialName(l.getSkippedOfficialName());
-          label.setState(l.getState());
+          RControlLabelsEntity label = controlLabelMapper.toEntity(l);
           label.setDocument(doc);
           doc.getControlLabels().add(label);
         }
