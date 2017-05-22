@@ -2,18 +2,9 @@ package sapotero.rxtest.db.requery.utils;
 
 import java.util.Arrays;
 
-import padeg.lib.Padeg;
-import sapotero.rxtest.db.mapper.BlockMapper;
 import sapotero.rxtest.db.mapper.DecisionMapper;
-import sapotero.rxtest.db.mapper.PerformerMapper;
-import sapotero.rxtest.db.requery.models.decisions.RBlock;
-import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
-import sapotero.rxtest.db.requery.models.decisions.RPerformer;
-import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
-import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
-import sapotero.rxtest.retrofit.models.document.Performer;
 import timber.log.Timber;
 
 @Deprecated
@@ -47,65 +38,5 @@ public class DecisionConverter {
     }
 
     return name;
-  }
-
-  public static String getPerformerNameForDecisionPreview(String name, String genderString, String appealText) {
-
-    String tempName = "";
-
-    if (name != null) {
-      tempName = name;
-    }
-
-    boolean forAcquaint = false;
-
-    if ( appealText != null && appealText.contains("озн") ) {
-      forAcquaint = true;
-    }
-
-    // true - мужской, false - женский
-    boolean gender = true;
-    // true - склонять, false - не склонять
-    boolean decl = false;
-
-    if ( genderString != null && !genderString.equals("") ) {
-      // пол указан
-      if ( genderString.toLowerCase().trim().startsWith("м") ) {
-        // мужской
-        gender = true;
-        decl = true;
-      } else if ( genderString.toLowerCase().trim().startsWith("ж") ) {
-        // женский
-        gender = false;
-        decl = true;
-      } else {
-        // пол неизвестен, не склонять
-        decl = false;
-      }
-    } else {
-      // пол не указан, не склонять
-      decl = false;
-    }
-
-    // 1 - именительный падеж
-    // 2 - родительный падеж
-    // 3 - дательный падеж
-    // 4 - винительный падеж
-    // 5 - творительный падеж
-    // 6 - предложный падеж
-
-    if (decl) {
-      if (forAcquaint) {
-        // Если Прошу ознакомить, то винительный падеж
-        tempName = Padeg.getFIOPadegFS(tempName, gender, 4);
-      } else {
-        // По умолчанию и если Прошу доложить, то дательный падеж
-        tempName = Padeg.getFIOPadegFS(tempName, gender, 3);
-      }
-    }
-
-    tempName = formatName( tempName );
-
-    return tempName;
   }
 }

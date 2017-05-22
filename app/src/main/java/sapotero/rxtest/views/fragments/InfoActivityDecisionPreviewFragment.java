@@ -81,6 +81,7 @@ import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.managers.toolbar.ToolbarManager;
 import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.padeg.Declension;
 import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.adapters.DecisionSpinnerAdapter;
@@ -1288,7 +1289,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
           String performerName = "";
 
-          String tempPerformerName = DecisionConverter.getPerformerNameForDecisionPreview(
+          String tempPerformerName = Declension.getPerformerNameForDecisionPreview(
             user.getPerformerText(),
             user.getPerformerGender(),
             block.getAppealText()

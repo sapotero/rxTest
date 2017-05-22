@@ -44,6 +44,7 @@ import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.padeg.Declension;
 import timber.log.Timber;
 
 public class DecisionPreviewFragment extends Fragment implements DecisionInterface {
@@ -304,7 +305,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
         String performerName = "";
 
         String tempPerformerName =
-                DecisionConverter.getPerformerNameForDecisionPreview(user.getPerformerText(), user.getPerformerGender(), block.getAppealText());
+                Declension.getPerformerNameForDecisionPreview(user.getPerformerText(), user.getPerformerGender(), block.getAppealText());
 
         Timber.tag("TEST").w("null? - %s | %s", block.getAppealText() == null, block.getAppealText() );
         Timber.tag("TEST").w("user %s", new Gson().toJson( user ) );

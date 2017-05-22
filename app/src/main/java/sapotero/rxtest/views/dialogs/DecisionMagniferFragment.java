@@ -35,6 +35,7 @@ import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RPerformer;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.db.requery.utils.DecisionConverter;
+import sapotero.rxtest.utils.padeg.Declension;
 import sapotero.rxtest.views.adapters.models.DecisionSpinnerItem;
 import timber.log.Timber;
 
@@ -384,7 +385,7 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
           String performerName = "";
 
           String tempPerformerName =
-                  DecisionConverter.getPerformerNameForDecisionPreview(user.getPerformerText(), user.getPerformerGender(), block.getAppealText());
+                  Declension.getPerformerNameForDecisionPreview(user.getPerformerText(), user.getPerformerGender(), block.getAppealText());
 
           if ( block.getAppealText() == null && !numberPrinted && !isOnlyOneBlock ){
             performerName += block.getNumber().toString() + ". ";
