@@ -26,6 +26,7 @@ import sapotero.rxtest.db.mapper.ExemplarMapper;
 import sapotero.rxtest.db.mapper.ImageMapper;
 import sapotero.rxtest.db.mapper.PerformerMapper;
 import sapotero.rxtest.db.mapper.SignerMapper;
+import sapotero.rxtest.db.mapper.StepMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RLinksEntity;
 import sapotero.rxtest.db.requery.models.RRouteEntity;
@@ -396,28 +397,15 @@ public class UpdateDocumentJob extends BaseJob {
         route.setText( document.getRoute().getTitle() );
 
         route.getSteps().clear();
+        StepMapper stepMapper = new StepMapper();
 
         for (Step step: document.getRoute().getSteps() ) {
-
-          RStepEntity r_step = new RStepEntity();
-          r_step.setTitle( step.getTitle() );
-          r_step.setNumber( step.getNumber() );
-
-          if ( step.getPeople() != null && step.getPeople().size() > 0 ){
-            r_step.setPeople(  new Gson().toJson( step.getPeople() )  );
-          }
-          if ( step.getCards() != null && step.getCards().size() > 0 ){
-            r_step.setCards(  new Gson().toJson( step.getCards() )  );
-          }
-          if ( step.getAnotherApprovals() != null && step.getAnotherApprovals().size() > 0 ){
-            r_step.setAnother_approvals(  new Gson().toJson( step.getAnotherApprovals() )  );
-          }
-
+          RStepEntity r_step = stepMapper.toEntity(step);
+          r_step.setRoute(route);
           route.getSteps().add( r_step );
         }
 
         rDoc.setRoute( route );
-
       }
 
       if ( document.getLinks() != null){
@@ -531,27 +519,13 @@ public class UpdateDocumentJob extends BaseJob {
         route.setText( document.getRoute().getTitle() );
 
         route.getSteps().clear();
-
+        StepMapper stepMapper = new StepMapper();
 
         for (Step step: document.getRoute().getSteps() ) {
-
-          RStepEntity r_step = new RStepEntity();
-          r_step.setTitle( step.getTitle() );
-          r_step.setNumber( step.getNumber() );
-
-          if ( step.getPeople() != null && step.getPeople().size() > 0 ){
-            r_step.setPeople(  new Gson().toJson( step.getPeople() )  );
-          }
-          if ( step.getCards() != null && step.getCards().size() > 0 ){
-            r_step.setCards(  new Gson().toJson( step.getCards() )  );
-          }
-          if ( step.getAnotherApprovals() != null && step.getAnotherApprovals().size() > 0 ){
-            r_step.setAnother_approvals(  new Gson().toJson( step.getAnotherApprovals() )  );
-          }
-
+          RStepEntity r_step = stepMapper.toEntity(step);
+          r_step.setRoute(route);
           route.getSteps().add( r_step );
         }
-
       }
 
       if ( document.getExemplars() != null && document.getExemplars().size() >= 1 ){
@@ -699,28 +673,15 @@ public class UpdateDocumentJob extends BaseJob {
       route.setText( document.getRoute().getTitle() );
 
       route.getSteps().clear();
+      StepMapper stepMapper = new StepMapper();
 
       for (Step step: document.getRoute().getSteps() ) {
-
-        RStepEntity r_step = new RStepEntity();
-        r_step.setTitle( step.getTitle() );
-        r_step.setNumber( step.getNumber() );
-
-        if ( step.getPeople() != null && step.getPeople().size() > 0 ){
-          r_step.setPeople(  new Gson().toJson( step.getPeople() )  );
-        }
-        if ( step.getCards() != null && step.getCards().size() > 0 ){
-          r_step.setCards(  new Gson().toJson( step.getCards() )  );
-        }
-        if ( step.getAnotherApprovals() != null && step.getAnotherApprovals().size() > 0 ){
-          r_step.setAnother_approvals(  new Gson().toJson( step.getAnotherApprovals() )  );
-        }
-
+        RStepEntity r_step = stepMapper.toEntity(step);
+        r_step.setRoute(route);
         route.getSteps().add( r_step );
       }
 
       doc.setRoute( route );
-
     }
 
     dataStore
