@@ -56,10 +56,6 @@ public class StepMapper extends AbstractMapper<Step, RStepEntity> {
     return gson.fromJson(jsonString, listType);
   }
 
-  private boolean stringNotEmpty(String s) {
-    return s != null && !s.equals("");
-  }
-
   private interface StringFieldSetter {
     void setField(String s);
   }

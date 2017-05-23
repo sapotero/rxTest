@@ -21,6 +21,7 @@ import sapotero.rxtest.db.mapper.ActionMapper;
 import sapotero.rxtest.db.mapper.BlockMapper;
 import sapotero.rxtest.db.mapper.ControlLabelMapper;
 import sapotero.rxtest.db.mapper.DecisionMapper;
+import sapotero.rxtest.db.mapper.DocumentMapper;
 import sapotero.rxtest.db.mapper.ExemplarMapper;
 import sapotero.rxtest.db.mapper.ImageMapper;
 import sapotero.rxtest.db.mapper.PerformerMapper;
@@ -130,150 +131,18 @@ public class CreateDocumentsJob extends BaseJob {
   }
 
   private void create(DocumentInfo document){
-
-
-    RDocumentEntity doc = new RDocumentEntity();
-    doc.setFromProcessedFolder( false );
-    doc.setFromFavoritesFolder( false );
-    doc.setUid( document.getUid() );
-    doc.setFromLinks( false );
-    doc.setUser( settings.getLogin() );
-
-    doc.setMd5( document.getMd5() );
-    doc.setSortKey( document.getSortKey() );
-    doc.setTitle( document.getTitle() );
-    doc.setRegistrationNumber( document.getRegistrationNumber() );
-    doc.setRegistrationDate( document.getRegistrationDate() );
-    doc.setUrgency( document.getUrgency() );
-    doc.setShortDescription( document.getShortDescription() );
-    doc.setComment( document.getComment() );
-    doc.setExternalDocumentNumber( document.getExternalDocumentNumber() );
-    doc.setReceiptDate( document.getReceiptDate() );
-    doc.setViewed( document.getViewed() );
-
-
-
-    Timber.tag(TAG).d("signer %s", new Gson().toJson( document.getSigner() ) );
-
-    doc.setMd5( document.getMd5() );
-
-    if (document.getSigner() != null){
-      RSignerEntity signer = new SignerMapper().toEntity(document.getSigner());
-      doc.setSigner(signer);
-    }
-
-    if ( document.getSigner().getOrganisation() != null && !Objects.equals(document.getSigner().getOrganisation(), "")){
-      doc.setOrganization( document.getSigner().getOrganisation() );
-    } else {
-      doc.setOrganization("Без организации" );
-    }
-
-    doc.setUser( settings.getLogin() );
-    doc.setFavorites(false);
-    doc.setProcessed(false);
-    doc.setControl(false);
-    doc.setFromLinks( false );
-    doc.setFromProcessedFolder( false );
-    doc.setFromFavoritesFolder( false );
-    doc.setChanged( false );
-
-
-    Boolean red = false;
-    Boolean with_decision = false;
-
-    if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
-      with_decision = true;
-
-      for (Decision d: document.getDecisions() ) {
-        RDecisionEntity decision = new DecisionMapper().toEntity(d);
-
-        if ( d.getRed() ){
-          red = true;
-        }
-
-        decision.setDocument(doc);
-        doc.getDecisions().add(decision);
-      }
-    }
-
-    doc.setWithDecision(with_decision);
-    doc.setRed(red);
-
-    if ( document.getRoute() != null  ){
-      RRouteEntity route = (RRouteEntity) doc.getRoute();
-      route.setText( document.getRoute().getTitle() );
-
-      StepMapper stepMapper = new StepMapper();
-
-      for (Step step: document.getRoute().getSteps() ) {
-        RStepEntity r_step = stepMapper.toEntity(step);
-        r_step.setRoute(route);
-        route.getSteps().add( r_step );
-      }
-    }
-
-    if ( document.getExemplars() != null && document.getExemplars().size() >= 1 ){
-      doc.getExemplars().clear();
-      ExemplarMapper exemplarMapper = new ExemplarMapper();
-
-      for (Exemplar e: document.getExemplars() ) {
-        RExemplarEntity exemplar = exemplarMapper.toEntity(e);
-        exemplar.setDocument(doc);
-        doc.getExemplars().add(exemplar);
-      }
-    }
-
-    if ( document.getImages() != null && document.getImages().size() >= 1 ){
-      ImageMapper imageMapper = new ImageMapper();
-
-      for (Image i: document.getImages() ) {
-        RImageEntity image = imageMapper.toEntity(i);
-        image.setDocument(doc);
-        doc.getImages().add(image);
-      }
-    }
-
-    if ( document.getControlLabels() != null && document.getControlLabels().size() >= 1 ){
-      ControlLabelMapper controlLabelMapper = new ControlLabelMapper();
-
-      for (ControlLabel l: document.getControlLabels() ) {
-        RControlLabelsEntity label = controlLabelMapper.toEntity(l);
-        label.setDocument(doc);
-        doc.getControlLabels().add(label);
-      }
-    }
-
-    if ( document.getActions() != null && document.getActions().size() > 0 ){
-      ActionMapper actionMapper = new ActionMapper();
-
-      for (DocumentInfoAction act: document.getActions() ) {
-        RActionEntity action = actionMapper.toEntity(act);
-        action.setDocument(doc);
-        doc.getActions().add(action);
-      }
-    }
-
-    if ( document.getLinks() != null){
-      for (String _link: document.getLinks()) {
-        RLinksEntity link = new RLinksEntity();
-        link.setUid(_link);
-        doc.getLinks().add(link);
-      }
-    }
-
-    if ( document.getInfoCard() != null){
-      doc.setInfoCard( document.getInfoCard() );
-    }
-
+    RDocumentEntity doc = new DocumentMapper().toEntity(document);
 
     doc.setFilter(status);
     doc.setDocumentType(journal);
 
-    if (shared || Objects.equals(doc.getAddressedToType(), "group")) {
+    if (shared) {
       doc.setAddressedToType("group");
     } else {
       doc.setAddressedToType("");
     }
+
+    Timber.tag(TAG).d("signer %s", new Gson().toJson( document.getSigner() ) );
 
     dataStore
       .insert( doc )

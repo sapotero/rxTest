@@ -1,6 +1,7 @@
 package sapotero.rxtest.db.mapper;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 public abstract class AbstractMapper<M, E> implements Mapper<M, E> {
@@ -16,5 +17,9 @@ public abstract class AbstractMapper<M, E> implements Mapper<M, E> {
 
   public <T> boolean setNotEmpty(Set<T> set) {
     return set != null && set.size() > 0;
+  }
+
+  public boolean stringNotEmpty(String s) {
+    return s != null && !Objects.equals(s, "");
   }
 }

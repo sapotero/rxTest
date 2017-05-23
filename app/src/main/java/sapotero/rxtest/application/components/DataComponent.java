@@ -4,8 +4,8 @@ import dagger.Component;
 import sapotero.rxtest.application.modules.EsdModule;
 import sapotero.rxtest.application.modules.SettingsModule;
 import sapotero.rxtest.application.scopes.DataScope;
-import sapotero.rxtest.db.mapper.AbstractMapper;
 import sapotero.rxtest.db.mapper.AssistantMapper;
+import sapotero.rxtest.db.mapper.DocumentMapper;
 import sapotero.rxtest.db.mapper.FavoriteUserMapper;
 import sapotero.rxtest.db.mapper.PrimaryConsiderationMapper;
 import sapotero.rxtest.db.mapper.TemplateMapper;
@@ -91,4 +91,5 @@ public interface DataComponent {
   void inject(FavoriteUserMapper favoriteUserMapper);
   void inject(AssistantMapper assistantMapper);
   void inject(TemplateMapper templateMapper);
+  void inject(DocumentMapper documentMapper);
 }
