@@ -1,8 +1,5 @@
 package sapotero.rxtest.db.mapper;
 
-import java.util.List;
-import java.util.Objects;
-
 import javax.inject.Inject;
 
 import sapotero.rxtest.application.EsdApplication;
@@ -145,9 +142,11 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     }
 
     if ( listNotEmpty( model.getLinks() ) ) {
+      LinkMapper linkMapper = new LinkMapper();
+
       for (String linkModel : model.getLinks()) {
-        RLinksEntity linkEntity = new RLinksEntity();
-        linkEntity.setUid( linkModel );
+        RLinksEntity linkEntity = linkMapper.toEntity( linkModel );
+        linkEntity.setDocument( entity );
         entity.getLinks().add( linkEntity );
       }
     }
