@@ -22,6 +22,7 @@ import sapotero.rxtest.db.mapper.ActionMapper;
 import sapotero.rxtest.db.mapper.BlockMapper;
 import sapotero.rxtest.db.mapper.ControlLabelMapper;
 import sapotero.rxtest.db.mapper.DecisionMapper;
+import sapotero.rxtest.db.mapper.DocumentMapper;
 import sapotero.rxtest.db.mapper.ExemplarMapper;
 import sapotero.rxtest.db.mapper.ImageMapper;
 import sapotero.rxtest.db.mapper.PerformerMapper;
@@ -176,54 +177,14 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
 
   @NonNull
   private Observable<RDocumentEntity> create(DocumentInfo d){
-
-
     RDocumentEntity rd = new RDocumentEntity();
-    rd.setFromProcessedFolder( false );
-    rd.setFromFavoritesFolder( false );
-    rd.setUid( d.getUid() );
-    rd.setFromLinks( false );
-    rd.setUser( settings.getLogin() );
+    DocumentMapper documentMapper = new DocumentMapper();
 
-
-    rd.setDocumentType("");
-    rd.setFromFavoritesFolder(true);
-    rd.setFilter("");
+    documentMapper.simpleFieldsToEntity(rd, d);
+    documentMapper.setFieldsInEntity(rd, false, "", "", false);
     rd.setFolder(folder);
-
-    rd.setMd5( d.getMd5() );
-    rd.setSortKey( d.getSortKey() );
-    rd.setTitle( d.getTitle() );
-    rd.setRegistrationNumber( d.getRegistrationNumber() );
-    rd.setRegistrationDate( d.getRegistrationDate() );
-    rd.setUrgency( d.getUrgency() );
-    rd.setShortDescription( d.getShortDescription() );
-    rd.setComment( d.getComment() );
-    rd.setExternalDocumentNumber( d.getExternalDocumentNumber() );
-    rd.setReceiptDate( d.getReceiptDate() );
-    rd.setViewed( d.getViewed() );
-    rd.setChanged( false );
-
-    rd.setFavorites(false);
-    rd.setProcessed(false);
-
-    rd.setControl(false);
-
-    if ( d.getSigner().getOrganisation() != null && !Objects.equals(d.getSigner().getOrganisation(), "")){
-      rd.setOrganization( d.getSigner().getOrganisation() );
-    } else {
-      rd.setOrganization("Без организации" );
-    }
-
-    RSignerEntity signer = new SignerMapper().toEntity(d.getSigner());
-    rd.setSigner( signer );
-
-    rd.setDocumentType("");
     rd.setFromFavoritesFolder(true);
     rd.setFavorites(true);
-    rd.setFilter("");
-    rd.setFolder(folder);
-
 
     return dataStore.insert( rd ).toObservable();
   }
