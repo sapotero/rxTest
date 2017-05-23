@@ -8,6 +8,7 @@ import sapotero.rxtest.db.mapper.AbstractMapper;
 import sapotero.rxtest.db.mapper.AssistantMapper;
 import sapotero.rxtest.db.mapper.FavoriteUserMapper;
 import sapotero.rxtest.db.mapper.PrimaryConsiderationMapper;
+import sapotero.rxtest.db.mapper.TemplateMapper;
 import sapotero.rxtest.db.requery.utils.RequeryDbModule;
 import sapotero.rxtest.db.requery.utils.validation.ValidationModule;
 import sapotero.rxtest.managers.CurrentDocumentManager;
@@ -89,4 +90,5 @@ public interface DataComponent {
   void inject(PrimaryConsiderationMapper primaryConsiderationMapper);
   void inject(FavoriteUserMapper favoriteUserMapper);
   void inject(AssistantMapper assistantMapper);
+  void inject(TemplateMapper templateMapper);
 }
