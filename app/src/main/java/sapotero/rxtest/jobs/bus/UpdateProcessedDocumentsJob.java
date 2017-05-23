@@ -153,8 +153,8 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
     RDocumentEntity rd = new RDocumentEntity();
     DocumentMapper documentMapper = new DocumentMapper();
 
-    documentMapper.simpleFieldsToEntity(rd, d);
-    documentMapper.setFieldsInEntity(rd, false, "", "", false);
+    documentMapper.convertSimpleFields(rd, d);
+    documentMapper.setFilter(rd, "");
     rd.setFolder(processed_folder);
     rd.setProcessed(true);
     rd.setFromProcessedFolder(true);

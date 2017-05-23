@@ -174,8 +174,9 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
     RDocumentEntity rd = new RDocumentEntity();
     DocumentMapper documentMapper = new DocumentMapper();
 
-    documentMapper.simpleFieldsToEntity(rd, d);
-    documentMapper.setFieldsInEntity(rd, false, "", "", false);
+    documentMapper.convertSimpleFields(rd, d);
+    documentMapper.setJournal(rd, "");
+    documentMapper.setFilter(rd, "");
     rd.setFolder(folder);
     rd.setFromFavoritesFolder(true);
     rd.setFavorites(true);

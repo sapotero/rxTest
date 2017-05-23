@@ -107,7 +107,9 @@ public class CreateDocumentsJob extends BaseJob {
   private void create(DocumentInfo document){
     DocumentMapper documentMapper = new DocumentMapper();
     RDocumentEntity doc = documentMapper.toEntity(document);
-    documentMapper.setFieldsInEntity(doc, false, journal, status, shared);
+    documentMapper.setJournal(doc, journal);
+    documentMapper.setFilter(doc, status);
+    documentMapper.setShared(doc, shared);
 
     Timber.tag(TAG).d("signer %s", new Gson().toJson( document.getSigner() ) );
 

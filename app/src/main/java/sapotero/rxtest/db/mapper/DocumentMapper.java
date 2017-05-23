@@ -1,5 +1,7 @@
 package sapotero.rxtest.db.mapper;
 
+import java.util.Objects;
+
 import javax.inject.Inject;
 
 import sapotero.rxtest.application.EsdApplication;
@@ -35,7 +37,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
   public RDocumentEntity toEntity(DocumentInfo model) {
     RDocumentEntity entity = new RDocumentEntity();
 
-    simpleFieldsToEntity(entity, model);
+    convertSimpleFields(entity, model);
 
     Boolean red = false;
     Boolean with_decision = false;
@@ -132,7 +134,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     return null;
   }
 
-  public void simpleFieldsToEntity(RDocumentEntity entity, DocumentInfo model) {
+  public void convertSimpleFields(RDocumentEntity entity, DocumentInfo model) {
     entity.setUid( model.getUid() );
     entity.setUser( settings.getLogin() );
     entity.setFavorites( false );
@@ -167,24 +169,20 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     }
   }
 
-  public void setFieldsInEntity(
-          RDocumentEntity entity,
-          boolean onControl,
-          String journal,
-          String filter,
-          boolean shared) {
-
-    entity.setControl( onControl );
-
+  public void setJournal(RDocumentEntity entity, String journal) {
     if ( exist( journal ) ) {
       entity.setDocumentType( journal );
     }
+  }
 
+  public void setFilter(RDocumentEntity entity, String filter) {
     if ( exist( filter ) ) {
       entity.setFilter( filter );
     }
+  }
 
-    if ( shared ) {
+  public void setShared(RDocumentEntity entity, boolean shared) {
+    if ( shared || Objects.equals(entity.getAddressedToType(), "group") ) {
       entity.setAddressedToType("group");
     } else {
       entity.setAddressedToType("");

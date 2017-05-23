@@ -215,7 +215,7 @@ public class UpdateDocumentJob extends BaseJob {
     RDocumentEntity rd = new RDocumentEntity();
     DocumentMapper documentMapper = new DocumentMapper();
 
-    documentMapper.simpleFieldsToEntity(rd, d);
+    documentMapper.convertSimpleFields(rd, d);
 
     String filterString = null;
 
@@ -227,7 +227,10 @@ public class UpdateDocumentJob extends BaseJob {
       filterString = filter.toString();
     }
 
-    documentMapper.setFieldsInEntity(rd, onControl, journal, filterString, shared);
+    rd.setControl(onControl);
+    documentMapper.setJournal(rd, journal);
+    documentMapper.setFilter(rd, filterString);
+    documentMapper.setShared(rd, shared);
 
     return dataStore.insert( rd ).toObservable();
   }
