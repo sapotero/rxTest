@@ -40,18 +40,9 @@ public class StepMapper extends AbstractMapper<Step, RStepEntity> {
 
     model.setTitle( entity.getTitle() );
     model.setNumber( entity.getNumber() );
-
-    if ( stringNotEmpty( entity.getPeople() ) ) {
-      model.setPeople( jsonToList( entity.getPeople() ) );
-    }
-
-    if ( stringNotEmpty( entity.getCards() ) ) {
-      model.setCards( jsonToList( entity.getCards() ) );
-    }
-
-    if ( stringNotEmpty( entity.getAnother_approvals() ) ) {
-      model.setAnotherApprovals( jsonToList( entity.getAnother_approvals() ) );
-    }
+    set ( model::setPeople, entity.getPeople() );
+    set ( model::setCards, entity.getCards() );
+    set ( model::setAnotherApprovals, entity.getAnother_approvals() );
 
     return model;
   }
@@ -69,13 +60,23 @@ public class StepMapper extends AbstractMapper<Step, RStepEntity> {
     return s != null && !s.equals("");
   }
 
-  private interface FieldSetter {
+  private interface StringFieldSetter {
     void setField(String s);
   }
 
-  private <T> void set(FieldSetter fieldSetter, List<T> list) {
+  private interface ListFieldSetter<T> {
+    void setField(List<T> list);
+  }
+
+  private <T> void set(StringFieldSetter stringFieldSetter, List<T> list) {
     if ( listNotEmpty( list ) ) {
-      fieldSetter.setField( listToJson( list ) );
+      stringFieldSetter.setField( listToJson( list ) );
+    }
+  }
+
+  private <T> void set(ListFieldSetter<T> listFieldSetter, String jsonString) {
+    if ( stringNotEmpty( jsonString ) ) {
+      listFieldSetter.setField( jsonToList( jsonString ) );
     }
   }
 }
