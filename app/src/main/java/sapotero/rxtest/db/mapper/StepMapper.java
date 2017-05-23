@@ -27,18 +27,9 @@ public class StepMapper extends AbstractMapper<Step, RStepEntity> {
 
     entity.setTitle( model.getTitle() );
     entity.setNumber( model.getNumber() );
-
-    if ( listNotEmpty( model.getPeople() ) ) {
-      entity.setPeople( listToJson( model.getPeople() ) );
-    }
-
-    if ( listNotEmpty( model.getCards() ) ) {
-      entity.setCards( listToJson( model.getCards() ) );
-    }
-
-    if ( listNotEmpty( model.getAnotherApprovals() ) ) {
-      entity.setAnother_approvals( listToJson( model.getAnotherApprovals() ) );
-    }
+    set( entity::setPeople, model.getPeople() );
+    set (entity::setCards, model.getCards() );
+    set (entity::setAnother_approvals, model.getAnotherApprovals() );
 
     return entity;
   }
@@ -76,5 +67,15 @@ public class StepMapper extends AbstractMapper<Step, RStepEntity> {
 
   private boolean stringNotEmpty(String s) {
     return s != null && !s.equals("");
+  }
+
+  private interface FieldSetter {
+    void setField(String s);
+  }
+
+  private <T> void set(FieldSetter fieldSetter, List<T> list) {
+    if ( listNotEmpty( list ) ) {
+      fieldSetter.setField( listToJson( list ) );
+    }
   }
 }
