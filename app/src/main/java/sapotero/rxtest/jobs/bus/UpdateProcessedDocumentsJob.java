@@ -1,13 +1,11 @@
 package sapotero.rxtest.jobs.bus;
 
-import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.birbit.android.jobqueue.CancelReason;
 import com.birbit.android.jobqueue.Params;
 import com.birbit.android.jobqueue.RetryConstraint;
-import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -20,12 +18,11 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.mapper.ActionMapper;
-import sapotero.rxtest.db.mapper.BlockMapper;
 import sapotero.rxtest.db.mapper.ControlLabelMapper;
 import sapotero.rxtest.db.mapper.DecisionMapper;
+import sapotero.rxtest.db.mapper.DocumentMapper;
 import sapotero.rxtest.db.mapper.ExemplarMapper;
 import sapotero.rxtest.db.mapper.ImageMapper;
-import sapotero.rxtest.db.mapper.PerformerMapper;
 import sapotero.rxtest.db.mapper.SignerMapper;
 import sapotero.rxtest.db.mapper.StepMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
@@ -35,16 +32,13 @@ import sapotero.rxtest.db.requery.models.RSignerEntity;
 import sapotero.rxtest.db.requery.models.RStepEntity;
 import sapotero.rxtest.db.requery.models.actions.RActionEntity;
 import sapotero.rxtest.db.requery.models.control_labels.RControlLabelsEntity;
-import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
-import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.db.requery.models.exemplars.RExemplarEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.retrofit.DocumentService;
-import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Card;
 import sapotero.rxtest.retrofit.models.document.ControlLabel;
 import sapotero.rxtest.retrofit.models.document.Decision;
@@ -52,7 +46,6 @@ import sapotero.rxtest.retrofit.models.document.DocumentInfo;
 import sapotero.rxtest.retrofit.models.document.DocumentInfoAction;
 import sapotero.rxtest.retrofit.models.document.Exemplar;
 import sapotero.rxtest.retrofit.models.document.Image;
-import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.retrofit.models.document.Signer;
 import sapotero.rxtest.retrofit.models.document.Step;
 import timber.log.Timber;
@@ -157,36 +150,14 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
 
   @NonNull
   private Observable<RDocumentEntity> create(DocumentInfo d){
-
-
     RDocumentEntity rd = new RDocumentEntity();
-    rd.setUid(  d.getUid() );
-    rd.setUser( settings.getLogin() );
-    rd.setFilter( "" );
-    rd.setMd5( d.getMd5() );
-    rd.setSortKey( d.getSortKey() );
-    rd.setTitle( d.getTitle() );
-    rd.setRegistrationNumber( d.getRegistrationNumber() );
-    rd.setRegistrationDate( d.getRegistrationDate() );
-    rd.setUrgency( d.getUrgency() );
-    rd.setShortDescription( d.getShortDescription() );
-    rd.setComment( d.getComment() );
-    rd.setExternalDocumentNumber( d.getExternalDocumentNumber() );
-    rd.setReceiptDate( d.getReceiptDate() );
-    rd.setViewed( d.getViewed() );
+    DocumentMapper documentMapper = new DocumentMapper();
 
-    rd.setProcessed(true);
+    documentMapper.simpleFieldsToEntity(rd, d);
+    documentMapper.setFieldsInEntity(rd, false, "", "", false);
     rd.setFolder(processed_folder);
+    rd.setProcessed(true);
     rd.setFromProcessedFolder(true);
-
-    if ( d.getSigner().getOrganisation() != null && !Objects.equals(d.getSigner().getOrganisation(), "")){
-      rd.setOrganization( d.getSigner().getOrganisation() );
-    } else {
-      rd.setOrganization("Без организации" );
-    }
-
-    RSignerEntity signer = new SignerMapper().toEntity(d.getSigner());
-    rd.setSigner( signer );
 
     return dataStore.insert( rd ).toObservable();
   }
