@@ -22,4 +22,8 @@ public abstract class AbstractMapper<M, E> implements Mapper<M, E> {
   public boolean stringNotEmpty(String s) {
     return s != null && !Objects.equals(s, "");
   }
+
+  public boolean exist(Object obj) {
+    return obj != null;
+  }
 }

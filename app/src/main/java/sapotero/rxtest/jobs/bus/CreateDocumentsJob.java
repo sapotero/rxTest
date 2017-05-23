@@ -131,16 +131,9 @@ public class CreateDocumentsJob extends BaseJob {
   }
 
   private void create(DocumentInfo document){
-    RDocumentEntity doc = new DocumentMapper().toEntity(document);
-
-    doc.setFilter(status);
-    doc.setDocumentType(journal);
-
-    if (shared) {
-      doc.setAddressedToType("group");
-    } else {
-      doc.setAddressedToType("");
-    }
+    DocumentMapper documentMapper = new DocumentMapper();
+    RDocumentEntity doc = documentMapper.toEntity(document);
+    documentMapper.setFieldsInEntity(doc, false, journal, status, shared);
 
     Timber.tag(TAG).d("signer %s", new Gson().toJson( document.getSigner() ) );
 

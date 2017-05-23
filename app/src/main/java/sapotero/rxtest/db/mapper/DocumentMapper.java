@@ -35,38 +35,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
   public RDocumentEntity toEntity(DocumentInfo model) {
     RDocumentEntity entity = new RDocumentEntity();
 
-    entity.setUid( model.getUid() );
-    entity.setUser( settings.getLogin() );
-    entity.setFavorites( false );
-    entity.setProcessed( false );
-    entity.setControl( false );
-    entity.setFromLinks( false );
-    entity.setFromProcessedFolder( false );
-    entity.setFromFavoritesFolder( false );
-    entity.setChanged( false );
-
-    entity.setMd5( model.getMd5() );
-    entity.setSortKey( model.getSortKey() );
-    entity.setTitle( model.getTitle() );
-    entity.setRegistrationNumber( model.getRegistrationNumber() );
-    entity.setRegistrationDate( model.getRegistrationDate() );
-    entity.setUrgency( model.getUrgency() );
-    entity.setShortDescription( model.getShortDescription() );
-    entity.setComment( model.getComment() );
-    entity.setExternalDocumentNumber( model.getExternalDocumentNumber() );
-    entity.setReceiptDate( model.getReceiptDate() );
-    entity.setViewed( model.getViewed() );
-
-    if ( exist( model.getSigner() ) ) {
-      RSignerEntity signer = new SignerMapper().toEntity(model.getSigner());
-      entity.setSigner(signer);
-    }
-
-    if ( stringNotEmpty( model.getSigner().getOrganisation() ) ) {
-      entity.setOrganization( model.getSigner().getOrganisation() );
-    } else {
-      entity.setOrganization( "Без организации" );
-    }
+    simpleFieldsToEntity(entity, model);
 
     Boolean red = false;
     Boolean with_decision = false;
@@ -163,7 +132,62 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     return null;
   }
 
-  private boolean exist(Object obj) {
-    return obj != null;
+  public void simpleFieldsToEntity(RDocumentEntity entity, DocumentInfo model) {
+    entity.setUid( model.getUid() );
+    entity.setUser( settings.getLogin() );
+    entity.setFavorites( false );
+    entity.setProcessed( false );
+    entity.setControl( false );
+    entity.setFromLinks( false );
+    entity.setFromProcessedFolder( false );
+    entity.setFromFavoritesFolder( false );
+    entity.setChanged( false );
+
+    entity.setMd5( model.getMd5() );
+    entity.setSortKey( model.getSortKey() );
+    entity.setTitle( model.getTitle() );
+    entity.setRegistrationNumber( model.getRegistrationNumber() );
+    entity.setRegistrationDate( model.getRegistrationDate() );
+    entity.setUrgency( model.getUrgency() );
+    entity.setShortDescription( model.getShortDescription() );
+    entity.setComment( model.getComment() );
+    entity.setExternalDocumentNumber( model.getExternalDocumentNumber() );
+    entity.setReceiptDate( model.getReceiptDate() );
+    entity.setViewed( model.getViewed() );
+
+    if ( exist( model.getSigner() ) ) {
+      RSignerEntity signer = new SignerMapper().toEntity(model.getSigner());
+      entity.setSigner(signer);
+    }
+
+    if ( stringNotEmpty( model.getSigner().getOrganisation() ) ) {
+      entity.setOrganization( model.getSigner().getOrganisation() );
+    } else {
+      entity.setOrganization( "Без организации" );
+    }
+  }
+
+  public void setFieldsInEntity(
+          RDocumentEntity entity,
+          boolean onControl,
+          String journal,
+          String filter,
+          boolean shared) {
+
+    entity.setControl( onControl );
+
+    if ( exist( journal ) ) {
+      entity.setDocumentType( journal );
+    }
+
+    if ( exist( filter ) ) {
+      entity.setFilter( filter );
+    }
+
+    if ( shared ) {
+      entity.setAddressedToType("group");
+    } else {
+      entity.setAddressedToType("");
+    }
   }
 }
