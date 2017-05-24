@@ -119,12 +119,12 @@ public class UpdateDocumentJob extends BaseJob {
     );
 
     info
-      .subscribeOn( Schedulers.io() )
-      .observeOn( AndroidSchedulers.mainThread() )
+      .subscribeOn( Schedulers.newThread() )
+//      .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         doc -> {
           document = doc;
-          Timber.tag(TAG).d("recv title - %s %s", doc.getTitle(), shared );
+//          Timber.tag(TAG).d("recv title - %s %s", doc.getTitle(), shared );
 
           update( exist(doc.getUid()) );
 
