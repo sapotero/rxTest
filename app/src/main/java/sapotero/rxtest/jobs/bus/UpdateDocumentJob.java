@@ -216,20 +216,12 @@ public class UpdateDocumentJob extends BaseJob {
     DocumentMapper documentMapper = new DocumentMapper();
 
     documentMapper.convertSimpleFields(rd, d);
-
-    String filterString = null;
-
-    if (status != null) {
-      filterString = status;
-    }
-
-    if (filter != null) {
-      filterString = filter.toString();
-    }
-
     rd.setControl(onControl);
     documentMapper.setJournal(rd, journal);
-    documentMapper.setFilter(rd, filterString);
+    documentMapper.setFilter(rd, status);
+    if (filter != null) {
+      documentMapper.setFilter(rd, filter.toString());
+    }
     documentMapper.setShared(rd, shared);
 
     return dataStore.insert( rd ).toObservable();
