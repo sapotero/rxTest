@@ -243,7 +243,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
   }
 
   public void updateProcessed(RDocumentEntity entity, String journal, String status, Fields.Status filter) {
-    // если прилетоло обновление - уберем из обработанных
+    // если прилетело обновление - уберем из обработанных
     if ( filter != null && filter.getValue() != null && status != null && entity.isProcessed() ) {
       entity.setProcessed( false );
     }
