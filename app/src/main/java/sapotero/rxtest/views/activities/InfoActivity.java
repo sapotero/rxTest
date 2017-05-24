@@ -32,6 +32,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import rx.Observable;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
@@ -88,6 +89,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   private Fields.Status  status;
   private MaterialDialog.Builder loadingDialog;
   private ScheduledThreadPoolExecutor scheduller;
+  private Subscription loggerSubscription;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -118,8 +120,22 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
     setTabContent();
     setPreview();
+
+    initLogger();
   }
 
+  private void initLogger() {
+    loggerSubscription = store.getPublishSubject()
+      .filter( inMemoryDocument -> inMemoryDocument.getStatus() == Fields.Status.SIGNING )
+      .subscribeOn(Schedulers.computation())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(
+        doc -> {
+          Timber.tag(TAG).d(doc.toString());
+        },
+        Timber::e
+      );
+  }
 
 
   private void setTabContent() {
@@ -231,6 +247,10 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
     if (scheduller != null){
       scheduller.shutdown();
+    }
+
+    if (loggerSubscription != null) {
+      loggerSubscription.unsubscribe();
     }
 
     unsubscribe();

@@ -2,7 +2,8 @@ package sapotero.rxtest.utils.memory.models;
 
 import java.io.Serializable;
 
-import sapotero.rxtest.utils.memory.fields.InMemoryStatus;
+import sapotero.rxtest.db.requery.utils.Fields;
+import sapotero.rxtest.utils.memory.fields.InMemoryState;
 
 /**
  * In Memory Document Storage
@@ -13,21 +14,22 @@ import sapotero.rxtest.utils.memory.fields.InMemoryStatus;
 public class InMemoryDocument implements Serializable {
   public String uid;
   public String md5;
-  public InMemoryStatus action = InMemoryStatus.NEW;
+  public Fields.Status status;
+  private InMemoryState action = InMemoryState.NEW;
 
   public InMemoryDocument() {
   }
 
   public void setAsLoading(){
-    action = InMemoryStatus.LOADING;
+    action = InMemoryState.LOADING;
   }
 
   public void setAsDeleted(){
-    action = InMemoryStatus.DELETE;
+    action = InMemoryState.DELETE;
   }
 
   public void setAsNew(){
-    action = InMemoryStatus.NEW;
+    action = InMemoryState.NEW;
   }
 
   public String getMd5() {
@@ -46,11 +48,20 @@ public class InMemoryDocument implements Serializable {
     this.uid = uid;
   }
 
+  public Fields.Status getStatus() {
+    return status;
+  }
+
+  public void setStatus(Fields.Status status) {
+    this.status = status;
+  }
+
   @Override
   public String toString() {
-    return "InMemoryDocument{ " +
+    return "InMemoryDocument { " +
       "uid='" + uid + '\'' +
       ", md5='" + md5 + '\'' +
+      ", status=" + status +
       ", action=" + action +
       " }";
   }

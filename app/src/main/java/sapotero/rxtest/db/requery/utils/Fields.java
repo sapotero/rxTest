@@ -49,6 +49,10 @@ public class Fields {
 
       return status;
     }
+
+    public static Status getRandom() {
+      return values()[(int) (Math.random() * values().length)];
+    }
   }
 
   public enum Journal {

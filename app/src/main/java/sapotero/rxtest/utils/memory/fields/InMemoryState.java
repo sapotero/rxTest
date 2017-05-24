@@ -1,6 +1,6 @@
 package sapotero.rxtest.utils.memory.fields;
 
-public  enum InMemoryStatus {
+public  enum InMemoryState {
   LOADING,
   NEW,
   DELETE

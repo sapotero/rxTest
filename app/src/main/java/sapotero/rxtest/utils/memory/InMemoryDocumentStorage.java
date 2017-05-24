@@ -6,9 +6,11 @@ import java.util.UUID;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
+import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.memory.mappers.InMemoryDocumentMapper;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
@@ -25,6 +27,7 @@ public class InMemoryDocumentStorage {
 
   private final PublishSubject<InMemoryDocument> publish;
   private final HashMap<String, InMemoryDocument> documents;
+  private Subscription loggerSubscription;
 
   public InMemoryDocumentStorage() {
 
@@ -35,12 +38,12 @@ public class InMemoryDocumentStorage {
     this.logger     = new InMemoryLogger();
     this.scheduller = new ScheduledThreadPoolExecutor(1);
 
-    initScheduller();
+//    initScheduller();
     initLogger();
   }
 
   private void initScheduller() {
-    scheduller.scheduleWithFixedDelay( new GenerateRandomDocument(this), 0 ,10, TimeUnit.SECONDS );
+    scheduller.scheduleWithFixedDelay( new GenerateRandomDocument(this), 0 ,1, TimeUnit.SECONDS );
   }
 
   private void initLogger(){
@@ -59,12 +62,15 @@ public class InMemoryDocumentStorage {
 
   public void generateFakeDocumentEntity(){
 
+    Timber.tag(TAG).e("total: %s", documents.size());
+
     String uid = UUID.randomUUID().toString();
 
     InMemoryDocument fake = new InMemoryDocument();
     fake.setUid(uid);
     fake.setMd5("fake_md5");
     fake.setAsLoading();
+    fake.setStatus( Fields.Status.getRandom() );
 
     documents.put(uid, fake);
     publish.onNext(documents.get(uid));
