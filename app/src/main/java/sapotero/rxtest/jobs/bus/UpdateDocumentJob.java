@@ -17,23 +17,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import sapotero.rxtest.db.mapper.ActionMapper;
-import sapotero.rxtest.db.mapper.ControlLabelMapper;
-import sapotero.rxtest.db.mapper.DecisionMapper;
 import sapotero.rxtest.db.mapper.DocumentMapper;
-import sapotero.rxtest.db.mapper.ExemplarMapper;
-import sapotero.rxtest.db.mapper.ImageMapper;
-import sapotero.rxtest.db.mapper.SignerMapper;
-import sapotero.rxtest.db.mapper.StepMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.models.RLinksEntity;
-import sapotero.rxtest.db.requery.models.RRouteEntity;
-import sapotero.rxtest.db.requery.models.RSignerEntity;
-import sapotero.rxtest.db.requery.models.RStepEntity;
-import sapotero.rxtest.db.requery.models.actions.RActionEntity;
-import sapotero.rxtest.db.requery.models.control_labels.RControlLabelsEntity;
-import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
-import sapotero.rxtest.db.requery.models.exemplars.RExemplarEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
@@ -42,13 +27,7 @@ import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Card;
-import sapotero.rxtest.retrofit.models.document.ControlLabel;
-import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
-import sapotero.rxtest.retrofit.models.document.DocumentInfoAction;
-import sapotero.rxtest.retrofit.models.document.Exemplar;
-import sapotero.rxtest.retrofit.models.document.Image;
-import sapotero.rxtest.retrofit.models.document.Signer;
 import sapotero.rxtest.retrofit.models.document.Step;
 import timber.log.Timber;
 
@@ -310,155 +289,39 @@ public class UpdateDocumentJob extends BaseJob {
 
   private void updateDocumentInfo(){
 
-
     RDocumentEntity doc = dataStore
       .select(RDocumentEntity.class)
       .where(RDocumentEntity.UID.eq(uid))
       .get().first();
 
+    DocumentMapper documentMapper = new DocumentMapper();
+
     if ( !Objects.equals( document.getMd5(), doc.getMd5() ) ){
       Timber.tag("MD5").d("not equal %s - %s",document.getMd5(), doc.getMd5() );
 
       doc.setMd5( document.getMd5() );
-
-      if (document.getSigner() != null){
-        RSignerEntity signer = (RSignerEntity) doc.getSigner();
-        new SignerMapper().updateEntity(signer, document.getSigner());
-      }
-
-//      doc.setControl(onControl);
       doc.setUser( settings.getLogin() );
       doc.setFromLinks( false );
       doc.setChanged( false );
 
-      Boolean red = false;
-      Boolean with_decision = false;
-
-      if ( document.getDecisions() != null && document.getDecisions().size() >= 0 ){
-        doc.getDecisions().clear();
-        dataStore.delete(RDecisionEntity.class).where(RDecisionEntity.DOCUMENT_ID.eq(doc.getId())).get().value();
-      }
-
-      if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
-        with_decision = true;
-
-        for (Decision d: document.getDecisions() ) {
-          RDecisionEntity decision = new DecisionMapper().toEntity(d);
-
-          if ( d.getRed() ){
-            red = true;
-          }
-
-          //FIX DECISION
-          decision.setDocument(doc);
-          doc.getDecisions().add(decision);
-        }
-      }
-
-      doc.setWithDecision(with_decision);
-      doc.setRed(red);
-
-      if ( document.getRoute() != null  ){
-        RRouteEntity route = (RRouteEntity) doc.getRoute();
-        route.setText( document.getRoute().getTitle() );
-
-        route.getSteps().clear();
-        StepMapper stepMapper = new StepMapper();
-
-        for (Step step: document.getRoute().getSteps() ) {
-          RStepEntity r_step = stepMapper.toEntity(step);
-          r_step.setRoute(route);
-          route.getSteps().add( r_step );
-        }
-      }
-
-      if ( document.getExemplars() != null && document.getExemplars().size() >= 1 ){
-        doc.getExemplars().clear();
-        ExemplarMapper exemplarMapper = new ExemplarMapper();
-
-        for (Exemplar e: document.getExemplars() ) {
-          RExemplarEntity exemplar = exemplarMapper.toEntity(e);
-          exemplar.setDocument(doc);
-          doc.getExemplars().add(exemplar);
-        }
-      }
-
-      if ( document.getImages() != null && document.getImages().size() >= 1 ){
-        doc.getImages().clear();
-        ImageMapper imageMapper = new ImageMapper();
-
-        for (Image i: document.getImages() ) {
-          RImageEntity image = imageMapper.toEntity(i);
-          image.setDocument(doc);
-          doc.getImages().add(image);
-        }
-      }
-
-      if ( document.getActions() != null && document.getActions().size() > 0 ){
-        doc.getActions().clear();
-        ActionMapper actionMapper = new ActionMapper();
-
-        for (DocumentInfoAction act: document.getActions() ) {
-          RActionEntity action = actionMapper.toEntity(act);
-          action.setDocument(doc);
-          doc.getActions().add(action);
-        }
-      }
-
-      if ( document.getControlLabels() != null && document.getControlLabels().size() >= 1 ){
-        doc.getControlLabels().clear();
-        ControlLabelMapper controlLabelMapper = new ControlLabelMapper();
-
-        for (ControlLabel l: document.getControlLabels() ) {
-          RControlLabelsEntity label = controlLabelMapper.toEntity(l);
-          label.setDocument(doc);
-          doc.getControlLabels().add(label);
-        }
-      }
-
-      if ( document.getLinks() != null){
-        doc.getLinks().clear();
-        for (String _link: document.getLinks()) {
-          RLinksEntity link = new RLinksEntity();
-          link.setUid(_link);
-          doc.getLinks().add(link);
-        }
-      }
-
-      if ( document.getInfoCard() != null){
-        doc.setInfoCard( document.getInfoCard() );
-      }
-
-
-      // если прилетоло обновление - уберем из обработанных
-      if ( filter != null && filter.getValue() != null && status != null && doc.isProcessed()  ){
-        doc.setProcessed( false );
-      }
-
-      // если подписание/согласование
-      if ( journal == null && doc.getDocumentType()  == null && status != null && doc.isProcessed()  ){
-        doc.setProcessed( false );
-      }
-
+      documentMapper.setSigner(doc, document.getSigner());
+      documentMapper.deleteDecisions(doc, document, dataStore);
+      documentMapper.convertNestedFields(doc, document);
+      documentMapper.updateProcessed(doc, journal, status, filter);
 
       EventBus.getDefault().post( new UpdateCurrentDocumentEvent( doc.getUid() ) );
+
     } else {
       Timber.tag("MD5").d("equal");
 
-      if (journal != null) {
-        doc.setDocumentType( journal );
-      }
-
-
+      documentMapper.setJournal(doc, journal);
 
       if (status != null) {
-
         if (!Objects.equals(doc.getFilter(), status)){
           doc.setFilter( status );
-//          doc.setProcessed(false);
         }
-
       }
+
       if (filter != null) {
         doc.setFilter( filter.toString() );
         if (!Objects.equals(doc.getFilter(), filter.getValue())){
@@ -468,18 +331,8 @@ public class UpdateDocumentJob extends BaseJob {
 
       doc.setChanged(false);
 
-
-      if ( filter != null && filter.getValue() != null && status != null && doc.isProcessed()  ){
-        doc.setProcessed( false );
-      }
-
-      // если подписание/согласование
-      if ( journal == null && doc.getDocumentType()  == null && status != null && doc.isProcessed()  ){
-        doc.setProcessed( false );
-      }
-
+      documentMapper.updateProcessed(doc, journal, status, filter);
     }
-
 
     if (doc.isFavorites() != null && doc.isFavorites()){
       doc.setFavorites(true);
@@ -511,22 +364,7 @@ public class UpdateDocumentJob extends BaseJob {
       doc.setFromFavoritesFolder(false);
     }
 
-
-    if ( document.getRoute() != null  ){
-      RRouteEntity route = new RRouteEntity();
-      route.setText( document.getRoute().getTitle() );
-
-      route.getSteps().clear();
-      StepMapper stepMapper = new StepMapper();
-
-      for (Step step: document.getRoute().getSteps() ) {
-        RStepEntity r_step = stepMapper.toEntity(step);
-        r_step.setRoute(route);
-        route.getSteps().add( r_step );
-      }
-
-      doc.setRoute( route );
-    }
+    documentMapper.setRoute(doc, document.getRoute());
 
     dataStore
       .update( doc )

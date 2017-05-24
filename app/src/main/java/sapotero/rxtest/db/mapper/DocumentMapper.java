@@ -5,6 +5,8 @@ import java.util.Objects;
 
 import javax.inject.Inject;
 
+import io.requery.Persistable;
+import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RLinksEntity;
@@ -16,6 +18,7 @@ import sapotero.rxtest.db.requery.models.control_labels.RControlLabelsEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.exemplars.RExemplarEntity;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
+import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.retrofit.models.document.ControlLabel;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
@@ -131,6 +134,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
 
   public void setLinks(RDocumentEntity entity, List<String> links) {
     if ( listNotEmpty( links ) ) {
+      entity.getLinks().clear();
       LinkMapper linkMapper = new LinkMapper();
 
       for (String linkModel : links) {
@@ -143,6 +147,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
 
   public void setControlLabels(RDocumentEntity entity, List<ControlLabel> controlLabels) {
     if ( listNotEmpty( controlLabels ) ) {
+      entity.getControlLabels().clear();
       ControlLabelMapper controlLabelMapper = new ControlLabelMapper();
 
       for (ControlLabel labelModel : controlLabels ) {
@@ -155,6 +160,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
 
   public void setImages(RDocumentEntity entity, List<Image> images) {
     if ( listNotEmpty( images ) ) {
+      entity.getImages().clear();
       ImageMapper imageMapper = new ImageMapper();
 
       for (Image imageModel : images ) {
@@ -167,6 +173,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
 
   public void setExemplars(RDocumentEntity entity, List<Exemplar> exemplars) {
     if ( listNotEmpty( exemplars ) ) {
+      entity.getExemplars().clear();
       ExemplarMapper exemplarMapper = new ExemplarMapper();
 
       for (Exemplar exemplarModel : exemplars ) {
@@ -179,6 +186,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
 
   public void setActions(RDocumentEntity entity, List<DocumentInfoAction> actions) {
     if ( listNotEmpty( actions ) ) {
+      entity.getActions().clear();
       ActionMapper actionMapper = new ActionMapper();
 
       for (DocumentInfoAction actionModel: actions ) {
@@ -193,6 +201,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     if ( exist( route ) ) {
       RRouteEntity routeEntity = (RRouteEntity) entity.getRoute();
       routeEntity.setText( route.getTitle() );
+      routeEntity.getSteps().clear();
       StepMapper stepMapper = new StepMapper();
 
       for (Step stepModel : route.getSteps() ) {
@@ -224,5 +233,24 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
 
     entity.setWithDecision( with_decision );
     entity.setRed( red );
+  }
+
+  public void deleteDecisions(RDocumentEntity entity, DocumentInfo model, SingleEntityStore<Persistable> dataStore) {
+    if ( listNotEmpty( model.getDecisions() ) ) {
+      entity.getDecisions().clear();
+      dataStore.delete(RDecisionEntity.class).where(RDecisionEntity.DOCUMENT_ID.eq(entity.getId())).get().value();
+    }
+  }
+
+  public void updateProcessed(RDocumentEntity entity, String journal, String status, Fields.Status filter) {
+    // если прилетоло обновление - уберем из обработанных
+    if ( filter != null && filter.getValue() != null && status != null && entity.isProcessed() ) {
+      entity.setProcessed( false );
+    }
+
+    // если подписание/согласование
+    if ( journal == null && entity.getDocumentType() == null && status != null && entity.isProcessed() ) {
+      entity.setProcessed( false );
+    }
   }
 }
