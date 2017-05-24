@@ -1,5 +1,6 @@
 package sapotero.rxtest.db.mapper;
 
+import java.util.List;
 import java.util.Objects;
 
 import javax.inject.Inject;
@@ -21,6 +22,8 @@ import sapotero.rxtest.retrofit.models.document.DocumentInfo;
 import sapotero.rxtest.retrofit.models.document.DocumentInfoAction;
 import sapotero.rxtest.retrofit.models.document.Exemplar;
 import sapotero.rxtest.retrofit.models.document.Image;
+import sapotero.rxtest.retrofit.models.document.Route;
+import sapotero.rxtest.retrofit.models.document.Signer;
 import sapotero.rxtest.retrofit.models.document.Step;
 import sapotero.rxtest.utils.Settings;
 
@@ -38,93 +41,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     RDocumentEntity entity = new RDocumentEntity();
 
     convertSimpleFields(entity, model);
-
-    Boolean red = false;
-    Boolean with_decision = false;
-
-    if ( listNotEmpty( model.getDecisions() ) ) {
-      with_decision = true;
-      DecisionMapper decisionMapper = new DecisionMapper();
-
-      for (Decision decisionModel : model.getDecisions() ) {
-        if ( decisionModel.getRed() ) {
-          red = true;
-        }
-
-        RDecisionEntity decisionEntity = decisionMapper.toEntity( decisionModel );
-        decisionEntity.setDocument( entity );
-        entity.getDecisions().add( decisionEntity );
-      }
-    }
-
-    entity.setWithDecision( with_decision );
-    entity.setRed( red );
-
-    if ( exist( model.getRoute() ) ) {
-      RRouteEntity routeEntity = (RRouteEntity) entity.getRoute();
-      routeEntity.setText( model.getRoute().getTitle() );
-      StepMapper stepMapper = new StepMapper();
-
-      for (Step stepModel : model.getRoute().getSteps() ) {
-        RStepEntity stepEntity = stepMapper.toEntity( stepModel );
-        stepEntity.setRoute( routeEntity );
-        routeEntity.getSteps().add( stepEntity );
-      }
-    }
-
-    if ( listNotEmpty( model.getExemplars() ) ) {
-      ExemplarMapper exemplarMapper = new ExemplarMapper();
-
-      for (Exemplar exemplarModel : model.getExemplars() ) {
-        RExemplarEntity exemplarEntity = exemplarMapper.toEntity( exemplarModel );
-        exemplarEntity.setDocument( entity );
-        entity.getExemplars().add( exemplarEntity );
-      }
-    }
-
-    if ( listNotEmpty( model.getImages() ) ) {
-      ImageMapper imageMapper = new ImageMapper();
-
-      for (Image imageModel : model.getImages() ) {
-        RImageEntity imageEntity = imageMapper.toEntity( imageModel );
-        imageEntity.setDocument( entity );
-        entity.getImages().add( imageEntity );
-      }
-    }
-
-    if ( listNotEmpty( model.getControlLabels() ) ) {
-      ControlLabelMapper controlLabelMapper = new ControlLabelMapper();
-
-      for (ControlLabel labelModel : model.getControlLabels() ) {
-        RControlLabelsEntity labelEntity = controlLabelMapper.toEntity( labelModel );
-        labelEntity.setDocument( entity );
-        entity.getControlLabels().add( labelEntity );
-      }
-    }
-
-    if ( listNotEmpty( model.getActions() ) ) {
-      ActionMapper actionMapper = new ActionMapper();
-
-      for (DocumentInfoAction actionModel: model.getActions() ) {
-        RActionEntity actionEntity = actionMapper.toEntity( actionModel );
-        actionEntity.setDocument( entity );
-        entity.getActions().add( actionEntity );
-      }
-    }
-
-    if ( listNotEmpty( model.getLinks() ) ) {
-      LinkMapper linkMapper = new LinkMapper();
-
-      for (String linkModel : model.getLinks()) {
-        RLinksEntity linkEntity = linkMapper.toEntity( linkModel );
-        linkEntity.setDocument( entity );
-        entity.getLinks().add( linkEntity );
-      }
-    }
-
-    if ( exist( model.getInfoCard() ) ) {
-      entity.setInfoCard( model.getInfoCard() );
-    }
+    convertNestedFields(entity, model);
 
     return entity;
   }
@@ -157,16 +74,26 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     entity.setReceiptDate( model.getReceiptDate() );
     entity.setViewed( model.getViewed() );
 
-    if ( exist( model.getSigner() ) ) {
-      RSignerEntity signer = new SignerMapper().toEntity(model.getSigner());
-      entity.setSigner(signer);
-    }
+    setSigner( entity, model.getSigner() );
 
-    if ( stringNotEmpty( model.getSigner().getOrganisation() ) ) {
-      entity.setOrganization( model.getSigner().getOrganisation() );
-    } else {
-      entity.setOrganization( "Без организации" );
+    if ( exist( model.getSigner() ) ) {
+      if ( stringNotEmpty( model.getSigner().getOrganisation() ) ) {
+        entity.setOrganization( model.getSigner().getOrganisation() );
+      } else {
+        entity.setOrganization( "Без организации" );
+      }
     }
+  }
+
+  public void convertNestedFields(RDocumentEntity entity, DocumentInfo model) {
+    setDecisions(entity, model.getDecisions());
+    setRoute(entity, model.getRoute());
+    setExemplars(entity, model.getExemplars());
+    setImages(entity, model.getImages());
+    setControlLabels(entity, model.getControlLabels());
+    setActions(entity, model.getActions());
+    setLinks(entity, model.getLinks());
+    setInfoCard(entity, model.getInfoCard());
   }
 
   public void setJournal(RDocumentEntity entity, String journal) {
@@ -187,5 +114,115 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     } else {
       entity.setAddressedToType("");
     }
+  }
+
+  public void setSigner(RDocumentEntity entity, Signer signerModel) {
+    if ( exist( signerModel ) ) {
+      RSignerEntity signerEntity = new SignerMapper().toEntity( signerModel );
+      entity.setSigner( signerEntity );
+    }
+  }
+
+  public void setInfoCard(RDocumentEntity entity, String infoCard) {
+    if ( exist( infoCard ) ) {
+      entity.setInfoCard( infoCard );
+    }
+  }
+
+  public void setLinks(RDocumentEntity entity, List<String> links) {
+    if ( listNotEmpty( links ) ) {
+      LinkMapper linkMapper = new LinkMapper();
+
+      for (String linkModel : links) {
+        RLinksEntity linkEntity = linkMapper.toEntity( linkModel );
+        linkEntity.setDocument( entity );
+        entity.getLinks().add( linkEntity );
+      }
+    }
+  }
+
+  public void setControlLabels(RDocumentEntity entity, List<ControlLabel> controlLabels) {
+    if ( listNotEmpty( controlLabels ) ) {
+      ControlLabelMapper controlLabelMapper = new ControlLabelMapper();
+
+      for (ControlLabel labelModel : controlLabels ) {
+        RControlLabelsEntity labelEntity = controlLabelMapper.toEntity( labelModel );
+        labelEntity.setDocument( entity );
+        entity.getControlLabels().add( labelEntity );
+      }
+    }
+  }
+
+  public void setImages(RDocumentEntity entity, List<Image> images) {
+    if ( listNotEmpty( images ) ) {
+      ImageMapper imageMapper = new ImageMapper();
+
+      for (Image imageModel : images ) {
+        RImageEntity imageEntity = imageMapper.toEntity( imageModel );
+        imageEntity.setDocument( entity );
+        entity.getImages().add( imageEntity );
+      }
+    }
+  }
+
+  public void setExemplars(RDocumentEntity entity, List<Exemplar> exemplars) {
+    if ( listNotEmpty( exemplars ) ) {
+      ExemplarMapper exemplarMapper = new ExemplarMapper();
+
+      for (Exemplar exemplarModel : exemplars ) {
+        RExemplarEntity exemplarEntity = exemplarMapper.toEntity( exemplarModel );
+        exemplarEntity.setDocument( entity );
+        entity.getExemplars().add( exemplarEntity );
+      }
+    }
+  }
+
+  public void setActions(RDocumentEntity entity, List<DocumentInfoAction> actions) {
+    if ( listNotEmpty( actions ) ) {
+      ActionMapper actionMapper = new ActionMapper();
+
+      for (DocumentInfoAction actionModel: actions ) {
+        RActionEntity actionEntity = actionMapper.toEntity( actionModel );
+        actionEntity.setDocument( entity );
+        entity.getActions().add( actionEntity );
+      }
+    }
+  }
+
+  public void setRoute(RDocumentEntity entity, Route route) {
+    if ( exist( route ) ) {
+      RRouteEntity routeEntity = (RRouteEntity) entity.getRoute();
+      routeEntity.setText( route.getTitle() );
+      StepMapper stepMapper = new StepMapper();
+
+      for (Step stepModel : route.getSteps() ) {
+        RStepEntity stepEntity = stepMapper.toEntity( stepModel );
+        stepEntity.setRoute( routeEntity );
+        routeEntity.getSteps().add( stepEntity );
+      }
+    }
+  }
+
+  public void setDecisions(RDocumentEntity entity, List<Decision> decisions) {
+    Boolean red = false;
+    Boolean with_decision = false;
+
+    if ( listNotEmpty( decisions ) ) {
+      with_decision = true;
+      DecisionMapper decisionMapper = new DecisionMapper();
+
+      for (Decision decisionModel : decisions ) {
+        if ( decisionModel.getRed() ) {
+          red = true;
+        }
+
+        RDecisionEntity decisionEntity = decisionMapper.toEntity( decisionModel );
+        decisionEntity.setDocument( entity );
+        entity.getDecisions().add( decisionEntity );
+      }
+    }
+
+    entity.setWithDecision( with_decision );
+    entity.setRed( red );
   }
 }

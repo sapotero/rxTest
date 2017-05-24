@@ -183,12 +183,7 @@ public class UpdateDocumentJob extends BaseJob {
 
       if (doc != null) {
 
-        if (shared || Objects.equals(doc.getAddressedToType(), "group")) {
-          doc.setAddressedToType("group");
-        } else {
-          doc.setAddressedToType("");
-        }
-
+        new DocumentMapper().setShared(doc, shared);
 
         dataStore
           .update(doc)
@@ -248,175 +243,69 @@ public class UpdateDocumentJob extends BaseJob {
 
   private void createNewDocument(RDocumentEntity documentEntity){
 
-      RDocumentEntity rDoc;
+    RDocumentEntity rDoc;
 
-      if (documentEntity != null){
-        rDoc = documentEntity;
-      } else {
-        rDoc = dataStore
-          .select(RDocumentEntity.class)
-          .where(RDocumentEntity.UID.eq( document.getUid() ))
-          .get()
-          .first();
-      }
-
-      Timber.tag(TAG).v("createNewDocument " + rDoc.getRegistrationNumber() );
-      Timber.tag(TAG).v("getImages " + document.getImages().size() );
-      Timber.tag(TAG).v("getDecisions " + rDoc.getDecisions().size() );
-      Timber.tag(TAG).v("getExemplars " + rDoc.getExemplars().size() );
-      Timber.tag(TAG).v("getControlLabels " + rDoc.getControlLabels().size() );
-
-      if (document.getSigner() != null){
-        Signer _signer = document.getSigner();
-        RSignerEntity signer = new SignerMapper().toEntity(_signer);
-        rDoc.setSigner( signer );
-      }
-
-//      if (rDoc.isFavorites() != null && rDoc.isFavorites()){
-//        rDoc.setFavorites(true);
-//      } else {
-//        rDoc.setFavorites(false);
-//      }
-//
-//      if (rDoc.isControl() != null && rDoc.isControl()){
-//        rDoc.setControl(true);
-//      } else {
-//        rDoc.setControl(false);
-//      }
-
-      rDoc.setProcessed(isProcessed);
-
-      rDoc.setUser( settings.getLogin() );
-      rDoc.setFromLinks( false );
-      rDoc.setChanged( false );
-      rDoc.setProcessed(false);
-
-      rDoc.setFromProcessedFolder( false );
-      rDoc.setFromFavoritesFolder( false );
-
-    Boolean red = false;
-    Boolean with_decision = false;
-
-    if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
-      with_decision = true;
-      rDoc.getDecisions().clear();
-
-      for (Decision d: document.getDecisions() ) {
-        RDecisionEntity decision = new DecisionMapper().toEntity(d);
-
-        if ( d.getRed() ){
-          red = true;
-        }
-
-        //FIX DECISION
-        decision.setDocument(rDoc);
-        rDoc.getDecisions().add(decision);
-      }
+    if (documentEntity != null){
+      rDoc = documentEntity;
+    } else {
+      rDoc = dataStore
+        .select(RDocumentEntity.class)
+        .where(RDocumentEntity.UID.eq( document.getUid() ))
+        .get()
+        .first();
     }
 
-    rDoc.setWithDecision(with_decision);
-    rDoc.setRed(red);
+    Timber.tag(TAG).v("createNewDocument " + rDoc.getRegistrationNumber() );
+    Timber.tag(TAG).v("getImages " + document.getImages().size() );
+    Timber.tag(TAG).v("getDecisions " + rDoc.getDecisions().size() );
+    Timber.tag(TAG).v("getExemplars " + rDoc.getExemplars().size() );
+    Timber.tag(TAG).v("getControlLabels " + rDoc.getControlLabels().size() );
 
-      if ( document.getExemplars() != null && document.getExemplars().size() >= 1 ){
-        ExemplarMapper exemplarMapper = new ExemplarMapper();
+    rDoc.setUser( settings.getLogin() );
+    rDoc.setProcessed(false);
+    rDoc.setFromLinks( false );
+    rDoc.setFromProcessedFolder( false );
+    rDoc.setFromFavoritesFolder( false );
+    rDoc.setChanged( false );
 
-        for (Exemplar e: document.getExemplars() ) {
-          RExemplarEntity exemplar = exemplarMapper.toEntity(e);
-          exemplar.setDocument(rDoc);
-          rDoc.getExemplars().add(exemplar);
-        }
-      }
+    DocumentMapper documentMapper = new DocumentMapper();
 
-      if ( document.getImages() != null && document.getImages().size() >= 1 ){
-        ImageMapper imageMapper = new ImageMapper();
-
-        for (Image i: document.getImages() ) {
-          RImageEntity image = imageMapper.toEntity(i);
-          image.setDocument(rDoc);
-          rDoc.getImages().add(image);
-        }
-      }
-
-      if ( document.getControlLabels() != null && document.getControlLabels().size() >= 1 ){
-        ControlLabelMapper controlLabelMapper = new ControlLabelMapper();
-
-        for (ControlLabel l: document.getControlLabels() ) {
-          RControlLabelsEntity label = controlLabelMapper.toEntity(l);
-          label.setDocument(rDoc);
-          rDoc.getControlLabels().add(label);
-        }
-      }
-
-      if ( document.getRoute() != null  ){
-        RRouteEntity route = new RRouteEntity();
-        route.setText( document.getRoute().getTitle() );
-
-        route.getSteps().clear();
-        StepMapper stepMapper = new StepMapper();
-
-        for (Step step: document.getRoute().getSteps() ) {
-          RStepEntity r_step = stepMapper.toEntity(step);
-          r_step.setRoute(route);
-          route.getSteps().add( r_step );
-        }
-
-        rDoc.setRoute( route );
-      }
-
-      if ( document.getLinks() != null){
-        for (String _link: document.getLinks()) {
-
-          RLinksEntity link = new RLinksEntity();
-          link.setUid(_link);
-
-          rDoc.getLinks().add(link);
-        }
-      }
-
-      if ( document.getInfoCard() != null){
-        rDoc.setInfoCard( document.getInfoCard() );
-      }
-
-    if (journal != null) {
-      rDoc.setDocumentType( journal );
-    }
-
-    if (status != null) {
-      rDoc.setFilter( status );
-    }
-
+    documentMapper.setSigner( rDoc, document.getSigner() );
+    documentMapper.setJournal( rDoc, journal );
+    documentMapper.setFilter( rDoc, status );
     if (filter != null) {
-      rDoc.setFilter( filter.toString() );
+      documentMapper.setFilter( rDoc, filter.toString() );
     }
 
+    documentMapper.convertNestedFields(rDoc, document);
 
-      dataStore.update(rDoc)
-        .toObservable()
-        .subscribeOn( Schedulers.computation() )
-        .observeOn( AndroidSchedulers.mainThread() )
-        .subscribe(
-          result -> {
-            Timber.tag(TAG).d("updated " + result.getUid());
-            Timber.tag(TAG).e("%s", shared);
+    dataStore.update(rDoc)
+      .toObservable()
+      .subscribeOn( Schedulers.computation() )
+      .observeOn( AndroidSchedulers.mainThread() )
+      .subscribe(
+        result -> {
+          Timber.tag(TAG).d("updated " + result.getUid());
+          Timber.tag(TAG).e("%s", shared);
 
-            jobCount = 0;
+          jobCount = 0;
 
-            if ( result.getImages() != null && result.getImages().size() > 0 && ( isFavorites != null && !isFavorites ) ){
+          if ( result.getImages() != null && result.getImages().size() > 0 && ( isFavorites != null && !isFavorites ) ){
 
-              for (RImage _image : result.getImages()) {
-                jobCount++;
-                RImageEntity image = (RImageEntity) _image;
-                jobManager.addJobInBackground( new DownloadFileJob(settings.getHost(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
-              }
-
+            for (RImage _image : result.getImages()) {
+              jobCount++;
+              RImageEntity image = (RImageEntity) _image;
+              jobManager.addJobInBackground( new DownloadFileJob(settings.getHost(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
             }
 
-            addPrefJobCount(jobCount);
-          },
-          error ->{
-            error.printStackTrace();
           }
-        );
+
+          addPrefJobCount(jobCount);
+        },
+        error ->{
+          error.printStackTrace();
+        }
+      );
   }
 
   private void updateDocumentInfo(){
