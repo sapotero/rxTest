@@ -99,7 +99,7 @@ public class DataLoaderManager {
     subscriptionInitV2.add(
       // получаем данные о пользователе
       auth.getUserInfoV2(settings.getLogin(), settings.getToken())
-        .subscribeOn(Schedulers.io())
+        .subscribeOn(Schedulers.computation())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(
           v2 -> {
@@ -112,7 +112,7 @@ public class DataLoaderManager {
               // получаем папки
               subscriptionInitV2.add(
                 auth.getFolders(settings.getLogin(), settings.getToken())
-                  .subscribeOn(Schedulers.io())
+                  .subscribeOn(Schedulers.computation())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( data -> {
                     jobManager.addJobInBackground(new CreateFoldersJob(data));
@@ -124,7 +124,7 @@ public class DataLoaderManager {
 
               subscriptionInitV2.add(
                 auth.getPrimaryConsiderationUsers(settings.getLogin(), settings.getToken())
-                  .subscribeOn(Schedulers.io())
+                  .subscribeOn(Schedulers.computation())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( data -> {
                     jobManager.addJobInBackground(new CreatePrimaryConsiderationJob(data));
@@ -136,7 +136,7 @@ public class DataLoaderManager {
               // загрузка срочности
               subscriptionInitV2.add(
                 auth.getUrgency(settings.getLogin(), settings.getToken(), "urgency")
-                  .subscribeOn(Schedulers.io())
+                  .subscribeOn(Schedulers.computation())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( urgencies -> {
                     jobManager.addJobInBackground(new CreateUrgencyJob(urgencies));
@@ -148,7 +148,7 @@ public class DataLoaderManager {
               // загрузка шаблонов резолюции
               subscriptionInitV2.add(
                 auth.getTemplates(settings.getLogin(), settings.getToken(), null)
-                  .subscribeOn(Schedulers.io())
+                  .subscribeOn(Schedulers.computation())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( templates -> {
                     jobManager.addJobInBackground(new CreateTemplatesJob(templates, null));
@@ -160,7 +160,7 @@ public class DataLoaderManager {
               // загрузка шаблонов отклонения
               subscriptionInitV2.add(
                 auth.getTemplates(settings.getLogin(), settings.getToken(), "rejection")
-                  .subscribeOn(Schedulers.io())
+                  .subscribeOn(Schedulers.computation())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( templates -> {
                     jobManager.addJobInBackground(new CreateTemplatesJob(templates, "rejection"));
@@ -172,7 +172,7 @@ public class DataLoaderManager {
               // получаем группу Избранное(МП)
               subscriptionInitV2.add(
                 auth.getFavoriteUsers(settings.getLogin(), settings.getToken())
-                  .subscribeOn(Schedulers.io())
+                  .subscribeOn(Schedulers.computation())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( data -> {
                     jobManager.addJobInBackground(new CreateFavoriteUsersJob(data));
@@ -185,7 +185,7 @@ public class DataLoaderManager {
               // https://tasks.n-core.ru/browse/MVDESD-11453
               subscriptionInitV2.add(
                 auth.getAssistant(settings.getLogin(), settings.getToken(), settings.getCurrentUserId())
-                  .subscribeOn(Schedulers.io())
+                  .subscribeOn(Schedulers.computation())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( data -> {
                     jobManager.addJobInBackground(new CreateAssistantJob(data));
@@ -399,7 +399,7 @@ public class DataLoaderManager {
     subscription.add(
       auth
         .getAuth(login, password)
-        .subscribeOn(Schedulers.io())
+        .subscribeOn(Schedulers.computation())
         .observeOn(AndroidSchedulers.mainThread())
         .unsubscribeOn(Schedulers.io())
         .subscribe(
@@ -531,49 +531,49 @@ public class DataLoaderManager {
         for (String status: statuses ) {
           requestCount++;
           boolean finalShared = shared;
-
-          if (firstRunShared){
-            requestCount++;
-            subscription.add(
-              docService
-                .getDocumentsByIndexes(settings.getLogin(), settings.getToken(), index, status, "group", 500)
-                .subscribeOn(Schedulers.computation())
-                .observeOn(Schedulers.computation())
-                .subscribe(
-                  data -> {
-                    requestCount--;
-                    if (data.getDocuments().size() > 0){
-
-                      for (Document doc: data.getDocuments() ) {
-
-                        if ( isExist(doc) ){
-
-                          Timber.tag(TAG).e("isExist %s", finalShared );
-
-                          if ( !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) ){
-                            Timber.tag(TAG).e("isUpdate" );
-                            jobCount++;
-                            jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), index, status, true) );
-                          }
-
-                        } else {
-                          Timber.tag(TAG).e("isCreate" );
-                          jobCount++;
-                          jobManager.addJobInBackground( new CreateDocumentsJob(doc.getUid(), index, status, true) );
-                        }
-                      }
-                    }
-                    updatePrefJobCount();
-                  },
-                  error -> {
-                    requestCount--;
-                    updatePrefJobCount();
-                    Timber.tag(TAG).e(error);
-                  })
-            );
-
-
-          }
+//
+//          if (firstRunShared){
+//            requestCount++;
+//            subscription.add(
+//              docService
+//                .getDocumentsByIndexes(settings.getLogin(), settings.getToken(), index, status, "group", 500)
+//                .subscribeOn(Schedulers.computation())
+//                .observeOn(Schedulers.computation())
+//                .subscribe(
+//                  data -> {
+//                    requestCount--;
+//                    if (data.getDocuments().size() > 0){
+//
+//                      for (Document doc: data.getDocuments() ) {
+//
+//                        if ( isExist(doc) ){
+//
+//                          Timber.tag(TAG).e("isExist %s", finalShared );
+//
+//                          if ( !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) ){
+//                            Timber.tag(TAG).e("isUpdate" );
+//                            jobCount++;
+//                            jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), index, status, true) );
+//                          }
+//
+//                        } else {
+//                          Timber.tag(TAG).e("isCreate" );
+//                          jobCount++;
+//                          jobManager.addJobInBackground( new CreateDocumentsJob(doc.getUid(), index, status, true) );
+//                        }
+//                      }
+//                    }
+//                    updatePrefJobCount();
+//                  },
+//                  error -> {
+//                    requestCount--;
+//                    updatePrefJobCount();
+//                    Timber.tag(TAG).e(error);
+//                  })
+//            );
+//
+//
+//          }
 
           subscription.add(
             docService
@@ -627,36 +627,36 @@ public class DataLoaderManager {
         requestCount++;
         boolean finalShared1 = shared;
 
-        if (firstRunShared){
-          requestCount++;
-          subscription.add(
-            docService
-              .getDocuments(settings.getLogin(), settings.getToken(), code, "group" , 500, 0)
-              .subscribeOn(Schedulers.computation())
-              .observeOn(Schedulers.computation())
-              .subscribe(
-                data -> {
-                  requestCount--;
-                  if (data.getDocuments().size() > 0){
-                    for (Document doc: data.getDocuments() ) {
-                      jobCount++;
-                      jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), code, true) );
-                    }
-                  }
-                  updatePrefJobCount();
-                },
-                error -> {
-                  requestCount--;
-                  updatePrefJobCount();
-                  Timber.tag(TAG).e(error);
-                })
-          );
-        }
+//        if (firstRunShared){
+//          requestCount++;
+//          subscription.add(
+//            docService
+//              .getDocuments(settings.getLogin(), settings.getToken(), code, "group" , 500, 0)
+//              .subscribeOn(Schedulers.computation())
+//              .observeOn(Schedulers.computation())
+//              .subscribe(
+//                data -> {
+//                  requestCount--;
+//                  if (data.getDocuments().size() > 0){
+//                    for (Document doc: data.getDocuments() ) {
+//                      jobCount++;
+//                      jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), code, true) );
+//                    }
+//                  }
+//                  updatePrefJobCount();
+//                },
+//                error -> {
+//                  requestCount--;
+//                  updatePrefJobCount();
+//                  Timber.tag(TAG).e(error);
+//                })
+//          );
+//        }
         subscription.add(
           docService
             .getDocuments(settings.getLogin(), settings.getToken(), code, shared ? "group" : null , 500, 0)
             .subscribeOn(Schedulers.computation())
-            .observeOn(Schedulers.computation())
+            .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
               data -> {
                 requestCount--;

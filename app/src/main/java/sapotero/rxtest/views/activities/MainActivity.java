@@ -2,10 +2,8 @@ package sapotero.rxtest.views.activities;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -67,7 +65,6 @@ import sapotero.rxtest.events.service.CheckNetworkResultEvent;
 import sapotero.rxtest.events.service.SuperVisorUpdateEvent;
 import sapotero.rxtest.events.service.UpdateAllDocumentsEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
-import sapotero.rxtest.events.view.RemoveDocumentFromAdapterEvent;
 import sapotero.rxtest.events.view.UpdateMainActivityEvent;
 import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
 import sapotero.rxtest.managers.DataLoaderManager;
@@ -770,8 +767,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   @Subscribe( threadMode = ThreadMode.MAIN)
   public void onMessageEvent(UpdateDocumentAdapterEvent event) {
-    Timber.tag(TAG).v("UpdateDocumentAdapterEvent");
-    dbQueryBuilder.invalidateDocumentEvent(event);
+//    Timber.tag(TAG).v("UpdateDocumentAdapterEvent");
+//    dbQueryBuilder.invalidateDocumentEvent(event);
   }
 
   @Subscribe( threadMode = ThreadMode.MAIN)
@@ -784,19 +781,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     recreateView();
   }
 
-  @RequiresApi(api = Build.VERSION_CODES.M)
-  @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(RemoveDocumentFromAdapterEvent event) {
-    Timber.tag(TAG).v("RemoveDocumentFromAdapterEvent %s", event.uid );
 
-//    if ( !IS_HIDDEN.containsKey(event.uid) ){
-//      IS_HIDDEN.put(event.uid, true);
-//    }
-//    RAdapter.removeItem(event.uid);
-
-//    menuBuilder.update();
-
-  }
 
   /* MenuBuilder.Callback */
   @Override
