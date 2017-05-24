@@ -1,7 +1,5 @@
 package sapotero.rxtest.db.mapper;
 
-import android.app.assist.AssistStructure;
-
 import javax.inject.Inject;
 
 import sapotero.rxtest.application.EsdApplication;

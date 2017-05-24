@@ -10,7 +10,10 @@ public class SignerMapper extends AbstractMapper<Signer, RSignerEntity> {
   public RSignerEntity toEntity(Signer model) {
     RSignerEntity entity = new RSignerEntity();
 
-    updateEntity( entity, model );
+    entity.setUid( model.getId() );
+    entity.setName( model.getName() );
+    entity.setOrganisation( model.getOrganisation() );
+    entity.setType( model.getType() );
 
     return entity;
   }
@@ -25,12 +28,5 @@ public class SignerMapper extends AbstractMapper<Signer, RSignerEntity> {
     model.setType(entity.getType());
 
     return model;
-  }
-
-  public void updateEntity(RSignerEntity entity, Signer model) {
-    entity.setUid( model.getId() );
-    entity.setName( model.getName() );
-    entity.setOrganisation( model.getOrganisation() );
-    entity.setType( model.getType() );
   }
 }
