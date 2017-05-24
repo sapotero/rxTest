@@ -215,7 +215,7 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
     documentMapper.setJournal(rDoc, "");
     documentMapper.setFilter(rDoc, "");
 
-    documentMapper.convertNestedFields(rDoc, document);
+    documentMapper.convertNestedFields(rDoc, document, false);
 
     dataStore.update(rDoc)
       .toObservable()
@@ -264,7 +264,7 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
       }
 
       documentMapper.setSigner(doc, document.getSigner());
-      documentMapper.convertNestedFields(doc, document);
+      documentMapper.convertNestedFields(doc, document, false);
       documentMapper.updateProcessed(doc, journal, folder, filter);
 
       EventBus.getDefault().post( new UpdateCurrentDocumentEvent( doc.getUid() ) );

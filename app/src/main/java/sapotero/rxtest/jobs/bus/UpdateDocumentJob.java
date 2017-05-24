@@ -19,6 +19,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.mapper.DocumentMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
@@ -256,7 +257,7 @@ public class UpdateDocumentJob extends BaseJob {
       documentMapper.setFilter( rDoc, filter.toString() );
     }
 
-    documentMapper.convertNestedFields(rDoc, document);
+    documentMapper.convertNestedFields(rDoc, document, false);
 
     dataStore.update(rDoc)
       .toObservable()
@@ -305,8 +306,13 @@ public class UpdateDocumentJob extends BaseJob {
       doc.setChanged( false );
 
       documentMapper.setSigner(doc, document.getSigner());
-      documentMapper.deleteDecisions(doc, document, dataStore);
-      documentMapper.convertNestedFields(doc, document);
+
+      if ( documentMapper.listNotEmpty( document.getDecisions() ) ) {
+        doc.getDecisions().clear();
+        dataStore.delete(RDecisionEntity.class).where(RDecisionEntity.DOCUMENT_ID.eq(doc.getId())).get().value();
+      }
+
+      documentMapper.convertNestedFields(doc, document, false);
       documentMapper.updateProcessed(doc, journal, status, filter);
 
       EventBus.getDefault().post( new UpdateCurrentDocumentEvent( doc.getUid() ) );

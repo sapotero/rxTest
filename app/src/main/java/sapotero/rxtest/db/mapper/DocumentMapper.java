@@ -44,7 +44,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     RDocumentEntity entity = new RDocumentEntity();
 
     convertSimpleFields(entity, model);
-    convertNestedFields(entity, model);
+    convertNestedFields(entity, model, false);
 
     return entity;
   }
@@ -88,8 +88,8 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     }
   }
 
-  public void convertNestedFields(RDocumentEntity entity, DocumentInfo model) {
-    setDecisions(entity, model.getDecisions());
+  public void convertNestedFields(RDocumentEntity entity, DocumentInfo model, boolean processed) {
+    setDecisions(entity, model.getDecisions(), processed);
     setRoute(entity, model.getRoute());
     setExemplars(entity, model.getExemplars());
     setImages(entity, model.getImages());
@@ -212,12 +212,13 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     }
   }
 
-  public void setDecisions(RDocumentEntity entity, List<Decision> decisions) {
+  public void setDecisions(RDocumentEntity entity, List<Decision> decisions, Boolean processed) {
     Boolean red = false;
     Boolean with_decision = false;
 
     if ( listNotEmpty( decisions ) ) {
       with_decision = true;
+      entity.getDecisions().clear();
       DecisionMapper decisionMapper = new DecisionMapper();
 
       for (Decision decisionModel : decisions ) {
@@ -231,14 +232,9 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
       }
     }
 
-    entity.setWithDecision( with_decision );
-    entity.setRed( red );
-  }
-
-  public void deleteDecisions(RDocumentEntity entity, DocumentInfo model, SingleEntityStore<Persistable> dataStore) {
-    if ( listNotEmpty( model.getDecisions() ) ) {
-      entity.getDecisions().clear();
-      dataStore.delete(RDecisionEntity.class).where(RDecisionEntity.DOCUMENT_ID.eq(entity.getId())).get().value();
+    if ( !processed ) {
+      entity.setWithDecision( with_decision );
+      entity.setRed( red );
     }
   }
 

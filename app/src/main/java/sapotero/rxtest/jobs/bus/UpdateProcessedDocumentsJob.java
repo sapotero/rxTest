@@ -179,231 +179,74 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
 
   private void createNewDocument(RDocumentEntity documentEntity){
 
-      RDocumentEntity rDoc;
+    RDocumentEntity rDoc;
 
-      if (documentEntity != null){
-        rDoc = documentEntity;
-      } else {
-        rDoc = dataStore
-          .select(RDocumentEntity.class)
-          .where(RDocumentEntity.UID.eq( document.getUid() ))
-          .get()
-          .first();
-      }
+    if (documentEntity != null){
+      rDoc = documentEntity;
+    } else {
+      rDoc = dataStore
+        .select(RDocumentEntity.class)
+        .where(RDocumentEntity.UID.eq( document.getUid() ))
+        .get()
+        .first();
+    }
 
-      if (document.getSigner() != null){
-        Signer _signer = document.getSigner();
-        RSignerEntity signer = new SignerMapper().toEntity(_signer);
-        rDoc.setSigner( signer );
-      }
+    rDoc.setUser( settings.getLogin() );
+    rDoc.setFromProcessedFolder(true);
+    rDoc.setProcessed(true);
+    rDoc.setFolder(processed_folder);
 
-      rDoc.setFolder(processed_folder);
-      rDoc.setFromProcessedFolder(true);
-      rDoc.setProcessed(true);
+    DocumentMapper documentMapper = new DocumentMapper();
 
-      rDoc.setUser( settings.getLogin() );
+    documentMapper.setSigner(rDoc, document.getSigner());
+    documentMapper.setFilter(rDoc, "");
 
-      if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
-        rDoc.getDecisions().clear();
-        for (Decision d: document.getDecisions() ) {
-          RDecisionEntity decision = new DecisionMapper().toEntity(d);
-          decision.setDocument(rDoc);
-          rDoc.getDecisions().add(decision);
-        }
-      }
+    documentMapper.convertNestedFields(rDoc, document, true);
 
-      if ( document.getExemplars() != null && document.getExemplars().size() >= 1 ){
-        ExemplarMapper exemplarMapper = new ExemplarMapper();
+    dataStore.update(rDoc)
+      .toObservable()
+      .subscribeOn( Schedulers.io() )
+      .observeOn( Schedulers.io() )
+      .subscribe(
+        result -> {
+          Timber.tag(TAG).d("updated " + result.getUid());
 
-        for (Exemplar e: document.getExemplars() ) {
-          RExemplarEntity exemplar = exemplarMapper.toEntity(e);
-          exemplar.setDocument(rDoc);
-          rDoc.getExemplars().add(exemplar);
-        }
-      }
+          if ( result.getImages() != null && result.getImages().size() > 0 ){
 
-      if ( document.getImages() != null && document.getImages().size() >= 1 ){
-        ImageMapper imageMapper = new ImageMapper();
+            for (RImage _image : result.getImages()) {
 
-        for (Image i: document.getImages() ) {
-          RImageEntity image = imageMapper.toEntity(i);
-          image.setDocument(rDoc);
-          rDoc.getImages().add(image);
-        }
-      }
-
-      if ( document.getControlLabels() != null && document.getControlLabels().size() >= 1 ){
-        ControlLabelMapper controlLabelMapper = new ControlLabelMapper();
-
-        for (ControlLabel l: document.getControlLabels() ) {
-          RControlLabelsEntity label = controlLabelMapper.toEntity(l);
-          label.setDocument(rDoc);
-          rDoc.getControlLabels().add(label);
-        }
-      }
-
-      if ( document.getRoute() != null  ){
-        RRouteEntity route = new RRouteEntity();
-        route.setText( document.getRoute().getTitle() );
-
-        StepMapper stepMapper = new StepMapper();
-
-        for (Step step: document.getRoute().getSteps() ) {
-          RStepEntity r_step = stepMapper.toEntity(step);
-          r_step.setRoute(route);
-          route.getSteps().add( r_step );
-        }
-
-        rDoc.setRoute( route );
-      }
-
-      if ( document.getLinks() != null){
-        for (String _link: document.getLinks()) {
-
-          RLinksEntity link = new RLinksEntity();
-          link.setUid(_link);
-
-          rDoc.getLinks().add(link);
-        }
-      }
-
-      if ( document.getInfoCard() != null){
-        rDoc.setInfoCard( document.getInfoCard() );
-      }
-
-      rDoc.setFilter( "" );
-      rDoc.setFolder(processed_folder);
-      rDoc.setFromProcessedFolder(true);
-      rDoc.setProcessed(true);
-
-
-
-      dataStore.update(rDoc)
-        .toObservable()
-        .subscribeOn( Schedulers.io() )
-        .observeOn( Schedulers.io() )
-        .subscribe(
-          result -> {
-            Timber.tag(TAG).d("updated " + result.getUid());
-
-            if ( result.getImages() != null && result.getImages().size() > 0 ){
-
-              for (RImage _image : result.getImages()) {
-
-                RImageEntity image = (RImageEntity) _image;
-                jobManager.addJobInBackground( new DownloadFileJob(settings.getHost(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
-              }
-
+              RImageEntity image = (RImageEntity) _image;
+              jobManager.addJobInBackground( new DownloadFileJob(settings.getHost(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
             }
-          },
-          error ->{
-            error.printStackTrace();
+
           }
-        );
+        },
+        error ->{
+          error.printStackTrace();
+        }
+      );
   }
 
   private void updateDocumentInfo(){
-
 
     RDocumentEntity doc = dataStore
       .select(RDocumentEntity.class)
       .where(RDocumentEntity.UID.eq(uid))
       .get().first();
 
+    DocumentMapper documentMapper = new DocumentMapper();
+
     if ( !Objects.equals( document.getMd5(), doc.getMd5() ) ){
       Timber.tag("MD5").d("not equal %s - %s",document.getMd5(), doc.getMd5() );
 
       doc.setMd5( document.getMd5() );
-
-      if (document.getSigner() != null){
-        RSignerEntity signer = (RSignerEntity) doc.getSigner();
-        new SignerMapper().updateEntity(signer, document.getSigner());
-      }
-
       doc.setUser( settings.getLogin() );
-
-      if ( document.getDecisions() != null && document.getDecisions().size() >= 1 ){
-        doc.getDecisions().clear();
-        for (Decision d: document.getDecisions() ) {
-          RDecisionEntity decision = new DecisionMapper().toEntity(d);
-          decision.setDocument(doc);
-          doc.getDecisions().add(decision);
-        }
-      }
-
-      if ( document.getRoute() != null  ){
-        RRouteEntity route = (RRouteEntity) doc.getRoute();
-        route.setText( document.getRoute().getTitle() );
-
-        StepMapper stepMapper = new StepMapper();
-
-        for (Step step: document.getRoute().getSteps() ) {
-          RStepEntity r_step = stepMapper.toEntity(step);
-          r_step.setRoute(route);
-          route.getSteps().add( r_step );
-        }
-      }
-
-      if ( document.getExemplars() != null && document.getExemplars().size() >= 1 ){
-        doc.getExemplars().clear();
-        ExemplarMapper exemplarMapper = new ExemplarMapper();
-
-        for (Exemplar e: document.getExemplars() ) {
-          RExemplarEntity exemplar = exemplarMapper.toEntity(e);
-          exemplar.setDocument(doc);
-          doc.getExemplars().add(exemplar);
-        }
-      }
-
-      if ( document.getImages() != null && document.getImages().size() >= 1 ){
-        doc.getImages().clear();
-        ImageMapper imageMapper = new ImageMapper();
-
-        for (Image i: document.getImages() ) {
-          RImageEntity image = imageMapper.toEntity(i);
-          image.setDocument(doc);
-          doc.getImages().add(image);
-        }
-      }
-
-      if ( document.getControlLabels() != null && document.getControlLabels().size() >= 1 ){
-        doc.getControlLabels().clear();
-        ControlLabelMapper controlLabelMapper = new ControlLabelMapper();
-
-        for (ControlLabel l: document.getControlLabels() ) {
-          RControlLabelsEntity label = controlLabelMapper.toEntity(l);
-          label.setDocument(doc);
-          doc.getControlLabels().add(label);
-        }
-      }
-
-      if ( document.getLinks() != null){
-        doc.getLinks().clear();
-        for (String _link: document.getLinks()) {
-          RLinksEntity link = new RLinksEntity();
-          link.setUid(_link);
-          doc.getLinks().add(link);
-        }
-      }
-
-      if ( document.getInfoCard() != null){
-        doc.setInfoCard( document.getInfoCard() );
-      }
-
-      if ( document.getActions() != null && document.getActions().size() >= 1 ){
-        doc.getActions().clear();
-        ActionMapper actionMapper = new ActionMapper();
-
-        for (DocumentInfoAction act: document.getActions() ) {
-          RActionEntity action = actionMapper.toEntity(act);
-          action.setDocument(doc);
-          doc.getActions().add(action);
-        }
-      }
-
       doc.setFromProcessedFolder(true);
       doc.setProcessed(true);
       doc.setFolder(processed_folder);
+
+      documentMapper.setSigner(doc, document.getSigner());
+      documentMapper.convertNestedFields(doc, document, true);
 
       dataStore
         .update( doc )
