@@ -307,31 +307,16 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
 
   public void setRoute(RDocumentEntity entity, Route route) {
     if ( exist( route ) ) {
-      RRouteEntity routeEntity = (RRouteEntity) entity.getRoute();
-      routeEntity.setText( route.getTitle() );
-      routeEntity.getSteps().clear();
-      StepMapper stepMapper = new StepMapper();
-
-      for (Step stepModel : route.getSteps() ) {
-        RStepEntity stepEntity = stepMapper.toEntity( stepModel );
-        stepEntity.setRoute( routeEntity );
-        routeEntity.getSteps().add( stepEntity );
-      }
+      RRouteEntity routeEntity = new RouteMapper().toEntity( route );
+      entity.setRoute( routeEntity );
     }
   }
 
   private void setRoute(DocumentInfo model, RRoute route) {
     if ( exist( route ) ) {
       RRouteEntity routeEntity = (RRouteEntity) route;
-      Route routeModel = model.getRoute();
-      routeModel.setTitle( routeEntity.getText() );
-      StepMapper stepMapper = new StepMapper();
-
-      for (RStep step : routeEntity.getSteps() ) {
-        RStepEntity stepEntity = (RStepEntity) step;
-        Step stepModel = stepMapper.toModel( stepEntity );
-        routeModel.getSteps().add( stepModel );
-      }
+      Route routeModel = new RouteMapper().toModel( routeEntity );
+      model.setRoute( routeModel );
     }
   }
 
