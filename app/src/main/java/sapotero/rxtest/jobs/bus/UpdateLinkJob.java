@@ -112,7 +112,7 @@ public class UpdateLinkJob extends BaseJob {
     RDocumentEntity rd = new RDocumentEntity();
 
     DocumentMapper documentMapper = new DocumentMapper();
-    documentMapper.convertSimpleFields(rd, d);
+    documentMapper.setSimpleFields(rd, d);
     if (filter != null) {
       documentMapper.setFilter(rd, filter.toString());
     }

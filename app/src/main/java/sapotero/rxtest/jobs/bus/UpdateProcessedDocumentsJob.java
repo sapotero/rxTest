@@ -17,36 +17,15 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import sapotero.rxtest.db.mapper.ActionMapper;
-import sapotero.rxtest.db.mapper.ControlLabelMapper;
-import sapotero.rxtest.db.mapper.DecisionMapper;
 import sapotero.rxtest.db.mapper.DocumentMapper;
-import sapotero.rxtest.db.mapper.ExemplarMapper;
-import sapotero.rxtest.db.mapper.ImageMapper;
-import sapotero.rxtest.db.mapper.SignerMapper;
-import sapotero.rxtest.db.mapper.StepMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.models.RLinksEntity;
-import sapotero.rxtest.db.requery.models.RRouteEntity;
-import sapotero.rxtest.db.requery.models.RSignerEntity;
-import sapotero.rxtest.db.requery.models.RStepEntity;
-import sapotero.rxtest.db.requery.models.actions.RActionEntity;
-import sapotero.rxtest.db.requery.models.control_labels.RControlLabelsEntity;
-import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
-import sapotero.rxtest.db.requery.models.exemplars.RExemplarEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Card;
-import sapotero.rxtest.retrofit.models.document.ControlLabel;
-import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
-import sapotero.rxtest.retrofit.models.document.DocumentInfoAction;
-import sapotero.rxtest.retrofit.models.document.Exemplar;
-import sapotero.rxtest.retrofit.models.document.Image;
-import sapotero.rxtest.retrofit.models.document.Signer;
 import sapotero.rxtest.retrofit.models.document.Step;
 import timber.log.Timber;
 
@@ -153,7 +132,7 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
     RDocumentEntity rd = new RDocumentEntity();
     DocumentMapper documentMapper = new DocumentMapper();
 
-    documentMapper.convertSimpleFields(rd, d);
+    documentMapper.setSimpleFields(rd, d);
     documentMapper.setFilter(rd, "");
     rd.setFolder(processed_folder);
     rd.setProcessed(true);
@@ -201,7 +180,7 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
     documentMapper.setSigner(rDoc, document.getSigner());
     documentMapper.setFilter(rDoc, "");
 
-    documentMapper.convertNestedFields(rDoc, document, true);
+    documentMapper.setNestedFields(rDoc, document, true);
 
     dataStore.update(rDoc)
       .toObservable()
@@ -246,7 +225,7 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
       doc.setFolder(processed_folder);
 
       documentMapper.setSigner(doc, document.getSigner());
-      documentMapper.convertNestedFields(doc, document, true);
+      documentMapper.setNestedFields(doc, document, true);
 
       dataStore
         .update( doc )

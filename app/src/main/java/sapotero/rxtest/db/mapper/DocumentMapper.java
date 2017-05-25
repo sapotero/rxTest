@@ -51,8 +51,8 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
   public RDocumentEntity toEntity(DocumentInfo model) {
     RDocumentEntity entity = new RDocumentEntity();
 
-    convertSimpleFields(entity, model);
-    convertNestedFields(entity, model, false);
+    setSimpleFields(entity, model);
+    setNestedFields(entity, model, false);
 
     return entity;
   }
@@ -61,13 +61,13 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
   public DocumentInfo toModel(RDocumentEntity entity) {
     DocumentInfo model = new DocumentInfo();
 
-    convertSimpleFields(model, entity);
-    convertNestedFields(model, entity);
+    setSimpleFields(model, entity);
+    setNestedFields(model, entity);
 
     return model;
   }
 
-  public void convertSimpleFields(RDocumentEntity entity, DocumentInfo model) {
+  public void setSimpleFields(RDocumentEntity entity, DocumentInfo model) {
     entity.setUid( model.getUid() );
     entity.setUser( settings.getLogin() );
     entity.setFavorites( false );
@@ -101,7 +101,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     }
   }
 
-  public void convertSimpleFields(DocumentInfo model, RDocumentEntity entity) {
+  private void setSimpleFields(DocumentInfo model, RDocumentEntity entity) {
     model.setUid( entity.getUid() );
     model.setMd5( entity.getMd5() );
     model.setSortKey( entity.getSortKey() );
@@ -118,7 +118,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     setSigner( model, entity.getSigner() );
   }
 
-  public void convertNestedFields(RDocumentEntity entity, DocumentInfo model, boolean processed) {
+  public void setNestedFields(RDocumentEntity entity, DocumentInfo model, boolean processed) {
     setDecisions(entity, model.getDecisions(), processed);
     setRoute(entity, model.getRoute());
     setExemplars(entity, model.getExemplars());
@@ -129,7 +129,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     setInfoCard(entity, model.getInfoCard());
   }
 
-  public void convertNestedFields(DocumentInfo model, RDocumentEntity entity) {
+  private void setNestedFields(DocumentInfo model, RDocumentEntity entity) {
     setDecisions(model, entity.getDecisions());
     setRoute(model, entity.getRoute());
     setExemplars(model, entity.getExemplars());
@@ -141,15 +141,11 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
   }
 
   public void setJournal(RDocumentEntity entity, String journal) {
-    if ( exist( journal ) ) {
-      entity.setDocumentType( journal );
-    }
+    set( entity::setDocumentType, journal );
   }
 
   public void setFilter(RDocumentEntity entity, String filter) {
-    if ( exist( filter ) ) {
-      entity.setFilter( filter );
-    }
+    set( entity::setFilter, filter );
   }
 
   public void setShared(RDocumentEntity entity, boolean shared) {
@@ -176,19 +172,15 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     }
   }
 
-  public void setInfoCard(RDocumentEntity entity, String infoCard) {
-    if ( exist( infoCard ) ) {
-      entity.setInfoCard( infoCard );
-    }
+  private void setInfoCard(RDocumentEntity entity, String infoCard) {
+    set( entity::setInfoCard, infoCard );
   }
 
-  public void setInfoCard(DocumentInfo model, String infoCard) {
-    if ( exist( infoCard ) ) {
-      model.setInfoCard( infoCard );
-    }
+  private void setInfoCard(DocumentInfo model, String infoCard) {
+    set( model::setInfoCard, infoCard );
   }
 
-  public void setLinks(RDocumentEntity entity, List<String> links) {
+  private void setLinks(RDocumentEntity entity, List<String> links) {
     if ( notEmpty( links ) ) {
       entity.getLinks().clear();
       LinkMapper linkMapper = new LinkMapper();
@@ -201,7 +193,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     }
   }
 
-  public void setLinks(DocumentInfo model, Set<RLinks> links) {
+  private void setLinks(DocumentInfo model, Set<RLinks> links) {
     if ( notEmpty( links ) ) {
       LinkMapper linkMapper = new LinkMapper();
 
@@ -213,7 +205,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     }
   }
 
-  public void setControlLabels(RDocumentEntity entity, List<ControlLabel> controlLabels) {
+  private void setControlLabels(RDocumentEntity entity, List<ControlLabel> controlLabels) {
     if ( notEmpty( controlLabels ) ) {
       entity.getControlLabels().clear();
       ControlLabelMapper controlLabelMapper = new ControlLabelMapper();
@@ -226,7 +218,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     }
   }
 
-  public void setControlLabels(DocumentInfo model, Set<RControlLabels> controlLabels) {
+  private void setControlLabels(DocumentInfo model, Set<RControlLabels> controlLabels) {
     if ( notEmpty( controlLabels ) ) {
       ControlLabelMapper controlLabelMapper = new ControlLabelMapper();
 
@@ -238,7 +230,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     }
   }
 
-  public void setImages(RDocumentEntity entity, List<Image> images) {
+  private void setImages(RDocumentEntity entity, List<Image> images) {
     if ( notEmpty( images ) ) {
       entity.getImages().clear();
       ImageMapper imageMapper = new ImageMapper();
@@ -251,7 +243,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     }
   }
 
-  public void setImages(DocumentInfo model, Set<RImage> images) {
+  private void setImages(DocumentInfo model, Set<RImage> images) {
     if ( notEmpty( images ) ) {
       ImageMapper imageMapper = new ImageMapper();
 
@@ -263,7 +255,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     }
   }
 
-  public void setExemplars(RDocumentEntity entity, List<Exemplar> exemplars) {
+  private void setExemplars(RDocumentEntity entity, List<Exemplar> exemplars) {
     if ( notEmpty( exemplars ) ) {
       entity.getExemplars().clear();
       ExemplarMapper exemplarMapper = new ExemplarMapper();
@@ -276,7 +268,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     }
   }
 
-  public void setExemplars(DocumentInfo model, Set<RExemplar> exemplars) {
+  private void setExemplars(DocumentInfo model, Set<RExemplar> exemplars) {
     if ( notEmpty( exemplars ) ) {
       ExemplarMapper exemplarMapper = new ExemplarMapper();
 
@@ -288,7 +280,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     }
   }
 
-  public void setActions(RDocumentEntity entity, List<DocumentInfoAction> actions) {
+  private void setActions(RDocumentEntity entity, List<DocumentInfoAction> actions) {
     if ( notEmpty( actions ) ) {
       entity.getActions().clear();
       ActionMapper actionMapper = new ActionMapper();
@@ -301,7 +293,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     }
   }
 
-  public void setActions(DocumentInfo model, Set<RAction> actions) {
+  private void setActions(DocumentInfo model, Set<RAction> actions) {
     if ( notEmpty( actions ) ) {
       ActionMapper actionMapper = new ActionMapper();
 
@@ -328,7 +320,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     }
   }
 
-  public void setRoute(DocumentInfo model, RRoute route) {
+  private void setRoute(DocumentInfo model, RRoute route) {
     if ( exist( route ) ) {
       RRouteEntity routeEntity = (RRouteEntity) route;
       Route routeModel = model.getRoute();
@@ -343,7 +335,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     }
   }
 
-  public void setDecisions(RDocumentEntity entity, List<Decision> decisions, Boolean processed) {
+  private void setDecisions(RDocumentEntity entity, List<Decision> decisions, Boolean processed) {
     Boolean red = false;
     Boolean with_decision = false;
 
@@ -369,7 +361,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     }
   }
 
-  public void setDecisions(DocumentInfo model, Set<RDecision> decisions) {
+  private void setDecisions(DocumentInfo model, Set<RDecision> decisions) {
     if ( notEmpty( decisions ) ) {
       DecisionMapper decisionMapper = new DecisionMapper();
 

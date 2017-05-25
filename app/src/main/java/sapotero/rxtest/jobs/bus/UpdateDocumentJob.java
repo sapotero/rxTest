@@ -190,7 +190,7 @@ public class UpdateDocumentJob extends BaseJob {
     RDocumentEntity rd = new RDocumentEntity();
     DocumentMapper documentMapper = new DocumentMapper();
 
-    documentMapper.convertSimpleFields(rd, d);
+    documentMapper.setSimpleFields(rd, d);
     rd.setControl(onControl);
     documentMapper.setJournal(rd, journal);
     documentMapper.setFilter(rd, status);
@@ -257,7 +257,7 @@ public class UpdateDocumentJob extends BaseJob {
       documentMapper.setFilter( rDoc, filter.toString() );
     }
 
-    documentMapper.convertNestedFields(rDoc, document, false);
+    documentMapper.setNestedFields(rDoc, document, false);
 
     dataStore.update(rDoc)
       .toObservable()
@@ -312,7 +312,7 @@ public class UpdateDocumentJob extends BaseJob {
         dataStore.delete(RDecisionEntity.class).where(RDecisionEntity.DOCUMENT_ID.eq(doc.getId())).get().value();
       }
 
-      documentMapper.convertNestedFields(doc, document, false);
+      documentMapper.setNestedFields(doc, document, false);
       documentMapper.updateProcessed(doc, journal, status, filter);
 
       EventBus.getDefault().post( new UpdateCurrentDocumentEvent( doc.getUid() ) );
