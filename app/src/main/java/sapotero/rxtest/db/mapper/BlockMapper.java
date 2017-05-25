@@ -24,7 +24,7 @@ public class BlockMapper extends AbstractMapper<Block, RBlockEntity> {
     entity.setToCopy(model.getToCopy());
     entity.setToFamiliarization(model.getToFamiliarization());
 
-    if ( listNotEmpty(model.getPerformers() ) ) {
+    if ( notEmpty(model.getPerformers() ) ) {
       PerformerMapper performerMapper = new PerformerMapper();
 
       for (Performer performerModel : model.getPerformers()) {
@@ -50,7 +50,7 @@ public class BlockMapper extends AbstractMapper<Block, RBlockEntity> {
     model.setToCopy(entity.isToCopy());
     model.setToFamiliarization(entity.isToFamiliarization());
 
-    if ( setNotEmpty( entity.getPerformers() ) ) {
+    if ( notEmpty( entity.getPerformers() ) ) {
       PerformerMapper performerMapper = new PerformerMapper();
 
       for (RPerformer _performer : entity.getPerformers()) {
@@ -76,7 +76,7 @@ public class BlockMapper extends AbstractMapper<Block, RBlockEntity> {
     formattedModel.setHidePerformers( entity.isHidePerformers() );
     formattedModel.setIndentation( "1" );
 
-    if ( setNotEmpty( entity.getPerformers() ) ) {
+    if ( notEmpty( entity.getPerformers() ) ) {
       PerformerMapper performerMapper = new PerformerMapper();
 
       for (RPerformer _p : entity.getPerformers()) {

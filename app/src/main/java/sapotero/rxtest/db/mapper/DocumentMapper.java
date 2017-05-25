@@ -93,7 +93,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     setSigner( entity, model.getSigner() );
 
     if ( exist( model.getSigner() ) ) {
-      if ( stringNotEmpty( model.getSigner().getOrganisation() ) ) {
+      if ( notEmpty( model.getSigner().getOrganisation() ) ) {
         entity.setOrganization( model.getSigner().getOrganisation() );
       } else {
         entity.setOrganization( "Без организации" );
@@ -189,7 +189,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
   }
 
   public void setLinks(RDocumentEntity entity, List<String> links) {
-    if ( listNotEmpty( links ) ) {
+    if ( notEmpty( links ) ) {
       entity.getLinks().clear();
       LinkMapper linkMapper = new LinkMapper();
 
@@ -202,7 +202,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
   }
 
   public void setLinks(DocumentInfo model, Set<RLinks> links) {
-    if ( setNotEmpty( links ) ) {
+    if ( notEmpty( links ) ) {
       LinkMapper linkMapper = new LinkMapper();
 
       for (RLinks link : links) {
@@ -214,7 +214,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
   }
 
   public void setControlLabels(RDocumentEntity entity, List<ControlLabel> controlLabels) {
-    if ( listNotEmpty( controlLabels ) ) {
+    if ( notEmpty( controlLabels ) ) {
       entity.getControlLabels().clear();
       ControlLabelMapper controlLabelMapper = new ControlLabelMapper();
 
@@ -227,7 +227,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
   }
 
   public void setControlLabels(DocumentInfo model, Set<RControlLabels> controlLabels) {
-    if ( setNotEmpty( controlLabels ) ) {
+    if ( notEmpty( controlLabels ) ) {
       ControlLabelMapper controlLabelMapper = new ControlLabelMapper();
 
       for (RControlLabels label : controlLabels ) {
@@ -239,7 +239,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
   }
 
   public void setImages(RDocumentEntity entity, List<Image> images) {
-    if ( listNotEmpty( images ) ) {
+    if ( notEmpty( images ) ) {
       entity.getImages().clear();
       ImageMapper imageMapper = new ImageMapper();
 
@@ -252,7 +252,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
   }
 
   public void setImages(DocumentInfo model, Set<RImage> images) {
-    if ( setNotEmpty( images ) ) {
+    if ( notEmpty( images ) ) {
       ImageMapper imageMapper = new ImageMapper();
 
       for (RImage image : images ) {
@@ -264,7 +264,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
   }
 
   public void setExemplars(RDocumentEntity entity, List<Exemplar> exemplars) {
-    if ( listNotEmpty( exemplars ) ) {
+    if ( notEmpty( exemplars ) ) {
       entity.getExemplars().clear();
       ExemplarMapper exemplarMapper = new ExemplarMapper();
 
@@ -277,7 +277,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
   }
 
   public void setExemplars(DocumentInfo model, Set<RExemplar> exemplars) {
-    if ( setNotEmpty( exemplars ) ) {
+    if ( notEmpty( exemplars ) ) {
       ExemplarMapper exemplarMapper = new ExemplarMapper();
 
       for (RExemplar exemplar : exemplars ) {
@@ -289,7 +289,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
   }
 
   public void setActions(RDocumentEntity entity, List<DocumentInfoAction> actions) {
-    if ( listNotEmpty( actions ) ) {
+    if ( notEmpty( actions ) ) {
       entity.getActions().clear();
       ActionMapper actionMapper = new ActionMapper();
 
@@ -302,7 +302,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
   }
 
   public void setActions(DocumentInfo model, Set<RAction> actions) {
-    if ( setNotEmpty( actions ) ) {
+    if ( notEmpty( actions ) ) {
       ActionMapper actionMapper = new ActionMapper();
 
       for (RAction action : actions ) {
@@ -347,7 +347,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     Boolean red = false;
     Boolean with_decision = false;
 
-    if ( listNotEmpty( decisions ) ) {
+    if ( notEmpty( decisions ) ) {
       with_decision = true;
       entity.getDecisions().clear();
       DecisionMapper decisionMapper = new DecisionMapper();
@@ -370,7 +370,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
   }
 
   public void setDecisions(DocumentInfo model, Set<RDecision> decisions) {
-    if ( setNotEmpty( decisions ) ) {
+    if ( notEmpty( decisions ) ) {
       DecisionMapper decisionMapper = new DecisionMapper();
 
       for (RDecision decision : decisions ) {

@@ -34,7 +34,7 @@ public class DecisionMapper extends AbstractMapper<Decision, RDecisionEntity> {
     entity.setLetterheadFontSize(model.getLetterhead());
     entity.setPerformerFontSize(model.getPerformersFontSize());
 
-    if ( listNotEmpty( model.getBlocks() ) ) {
+    if ( notEmpty( model.getBlocks() ) ) {
       BlockMapper blockMapper = new BlockMapper();
 
       for (Block blockModel: model.getBlocks() ) {
@@ -69,7 +69,7 @@ public class DecisionMapper extends AbstractMapper<Decision, RDecisionEntity> {
     model.setLetterheadFontSize(entity.getLetterheadFontSize());
     model.setPerformersFontSize(entity.getPerformerFontSize());
 
-    if ( setNotEmpty( entity.getBlocks() ) ) {
+    if ( notEmpty( entity.getBlocks() ) ) {
       BlockMapper blockMapper = new BlockMapper();
 
       for (RBlock _block : entity.getBlocks()) {
@@ -102,7 +102,7 @@ public class DecisionMapper extends AbstractMapper<Decision, RDecisionEntity> {
     formattedModel.setShowPosition( entity.isShowPosition() );
     formattedModel.setSignBase64( entity.getSignBase64() );
 
-    if ( setNotEmpty( entity.getBlocks() ) ) {
+    if ( notEmpty( entity.getBlocks() ) ) {
       BlockMapper blockMapper = new BlockMapper();
 
       for (RBlock _block : entity.getBlocks() ) {

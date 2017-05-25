@@ -307,7 +307,7 @@ public class UpdateDocumentJob extends BaseJob {
 
       documentMapper.setSigner(doc, document.getSigner());
 
-      if ( documentMapper.listNotEmpty( document.getDecisions() ) ) {
+      if ( documentMapper.notEmpty( document.getDecisions() ) ) {
         doc.getDecisions().clear();
         dataStore.delete(RDecisionEntity.class).where(RDecisionEntity.DOCUMENT_ID.eq(doc.getId())).get().value();
       }

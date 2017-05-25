@@ -65,13 +65,13 @@ public class StepMapper extends AbstractMapper<Step, RStepEntity> {
   }
 
   private <T> void set(StringFieldSetter stringFieldSetter, List<T> list) {
-    if ( listNotEmpty( list ) ) {
+    if ( notEmpty( list ) ) {
       stringFieldSetter.setField( listToJson( list ) );
     }
   }
 
   private <T> void set(ListFieldSetter<T> listFieldSetter, String jsonString) {
-    if ( stringNotEmpty( jsonString ) ) {
+    if ( notEmpty( jsonString ) ) {
       listFieldSetter.setField( jsonToList( jsonString ) );
     }
   }
