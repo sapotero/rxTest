@@ -7,344 +7,382 @@ import java.io.Serializable;
 
 public class Document implements Serializable {
 
-    @SerializedName("uid")
-    @Expose
-    private String uid;
-    @SerializedName("md5")
-    @Expose
-    private String md5;
-    @SerializedName("sort_key")
-    @Expose
-    private Integer sortKey;
+  @SerializedName("uid")
+  @Expose
+  private String uid;
+  @SerializedName("md5")
+  @Expose
+  private String md5;
+  @SerializedName("sort_key")
+  @Expose
+  private Integer sortKey;
 
-    @SerializedName("title")
-    @Expose
-    private String title;
+  @SerializedName("title")
+  @Expose
+  private String title;
 
-    @SerializedName("registration_number")
-    @Expose
-    private String registrationNumber;
+  @SerializedName("registration_number")
+  @Expose
+  private String registrationNumber;
 
-    @SerializedName("registration_date")
-    @Expose
-    private String registrationDate;
+  @SerializedName("registration_date")
+  @Expose
+  private String registrationDate;
 
-    @SerializedName("urgency")
-    @Expose
-    private String urgency;
+  @SerializedName("urgency")
+  @Expose
+  private String urgency;
 
-    @SerializedName("short_description")
-    @Expose
-    private String shortDescription;
+  @SerializedName("short_description")
+  @Expose
+  private String shortDescription;
 
-    @SerializedName("comment")
-    @Expose
-    private String comment;
+  @SerializedName("comment")
+  @Expose
+  private String comment;
 
-    @SerializedName("external_document_number")
-    @Expose
-    private String externalDocumentNumber;
+  @SerializedName("external_document_number")
+  @Expose
+  private String externalDocumentNumber;
 
-    @SerializedName("receipt_date")
-    @Expose
-    private String receiptDate;
+  @SerializedName("receipt_date")
+  @Expose
+  private String receiptDate;
 
-    @SerializedName("signer")
-    @Expose
-    private Signer signer;
+  @SerializedName("signer")
+  @Expose
+  private Signer signer;
 
-    @SerializedName("viewed")
-    @Expose
-    private Boolean viewed;
+  @SerializedName("viewed")
+  @Expose
+  private Boolean viewed;
 
-    @SerializedName("control")
-    @Expose
-    private Boolean control;
+  @SerializedName("control")
+  @Expose
+  private Boolean control;
 
-    @SerializedName("favorites")
-    @Expose
-    private Boolean favorites;
+  @SerializedName("favorites")
+  @Expose
+  private Boolean favorites;
 
-    public Boolean getControl() {
-        return control;
-    }
+  private boolean red;
+  private boolean fromFavoritesFolder;
+  private boolean fromProcessedFolder;
 
-    public void setControl(Boolean control) {
-        this.control = control;
-    }
+  private String firstLink = "";
 
-    public Boolean getFavorites() {
-        return favorites;
-    }
-    public void setFavorites(Boolean favorites) {
-        this.favorites = favorites;
-    }
+  public String getFirstLink() {
+    return firstLink;
+  }
 
-    public String getOrganization() {
-        return organization;
-    }
+  public void setFirstLink(String firstLink) {
+    this.firstLink = firstLink;
+  }
 
-    public void setOrganization(String organization) {
-        this.organization = organization;
-    }
+  public Boolean getControl() {
+      return control;
+  }
 
-    public String organization;
+  public void setControl(Boolean control) {
+      this.control = control;
+  }
+
+  public Boolean getFavorites() {
+      return favorites;
+  }
+  public void setFavorites(Boolean favorites) {
+      this.favorites = favorites;
+  }
+
+  public String getOrganization() {
+      return organization;
+  }
+
+  public void setOrganization(String organization) {
+      this.organization = organization;
+  }
+
+  public String organization;
 
 
-    public Boolean changed;
+  public Boolean changed;
 
-    public Boolean getChanged() {
-        return changed;
-    }
+  public Boolean getChanged() {
+      return changed;
+  }
 
-    public void setChanged(Boolean changed) {
-        this.changed = changed;
-    }
+  public void setChanged(Boolean changed) {
+      this.changed = changed;
+  }
 
 
 
-    public String statusCode;
+  public String statusCode;
 
-    public String getStatusCode() {
-        return statusCode;
-    }
-    public void setStatusCode(String statusCode) {
-        this.statusCode = statusCode;
+  public String getStatusCode() {
+      return statusCode;
+  }
+  public void setStatusCode(String statusCode) {
+      this.statusCode = statusCode;
 
-    }
+  }
 
-    /**
-     * 
-     * @return
-     *     The uid
-     */
-    public String getUid() {
-        return uid;
-    }
+  /**
+   *
+   * @return
+   *     The uid
+   */
+  public String getUid() {
+      return uid;
+  }
 
-    /**
-     * 
-     * @param uid
-     *     The uid
-     */
-    public void setUid(String uid) {
-        this.uid = uid;
-    }
+  /**
+   *
+   * @param uid
+   *     The uid
+   */
+  public void setUid(String uid) {
+      this.uid = uid;
+  }
 
-    /**
-     * 
-     * @return
-     *     The md5
-     */
-    public String getMd5() {
-        return md5;
-    }
+  /**
+   *
+   * @return
+   *     The md5
+   */
+  public String getMd5() {
+      return md5;
+  }
 
-    /**
-     * 
-     * @param md5
-     *     The md5
-     */
-    public void setMd5(String md5) {
-        this.md5 = md5;
-    }
+  /**
+   *
+   * @param md5
+   *     The md5
+   */
+  public void setMd5(String md5) {
+      this.md5 = md5;
+  }
 
-    /**
-     * 
-     * @return
-     *     The sortKey
-     */
-    public Integer getSortKey() {
-        return sortKey;
-    }
+  /**
+   *
+   * @return
+   *     The sortKey
+   */
+  public Integer getSortKey() {
+      return sortKey;
+  }
 
-    /**
-     * 
-     * @param sortKey
-     *     The sort_key
-     */
-    public void setSortKey(Integer sortKey) {
-        this.sortKey = sortKey;
-    }
+  /**
+   *
+   * @param sortKey
+   *     The sort_key
+   */
+  public void setSortKey(Integer sortKey) {
+      this.sortKey = sortKey;
+  }
 
-    /**
-     * 
-     * @return
-     *     The position
-     */
-    public String getTitle() {
-        return title;
-    }
+  /**
+   *
+   * @return
+   *     The position
+   */
+  public String getTitle() {
+      return title;
+  }
 
-    /**
-     * 
-     * @param title
-     *     The position
-     */
-    public void setTitle(String title) {
-        this.title = title;
-    }
+  /**
+   *
+   * @param title
+   *     The position
+   */
+  public void setTitle(String title) {
+      this.title = title;
+  }
 
-    /**
-     * 
-     * @return
-     *     The registrationNumber
-     */
-    public String getRegistrationNumber() {
-        return registrationNumber;
-    }
+  /**
+   *
+   * @return
+   *     The registrationNumber
+   */
+  public String getRegistrationNumber() {
+      return registrationNumber;
+  }
 
-    /**
-     * 
-     * @param registrationNumber
-     *     The registration_number
-     */
-    public void setRegistrationNumber(String registrationNumber) {
-        this.registrationNumber = registrationNumber;
-    }
+  /**
+   *
+   * @param registrationNumber
+   *     The registration_number
+   */
+  public void setRegistrationNumber(String registrationNumber) {
+      this.registrationNumber = registrationNumber;
+  }
 
-    /**
-     * 
-     * @return
-     *     The registrationDate
-     */
-    public String getRegistrationDate() {
-        return registrationDate;
-    }
+  /**
+   *
+   * @return
+   *     The registrationDate
+   */
+  public String getRegistrationDate() {
+      return registrationDate;
+  }
 
-    /**
-     * 
-     * @param registrationDate
-     *     The registration_date
-     */
-    public void setRegistrationDate(String registrationDate) {
-        this.registrationDate = registrationDate;
-    }
+  /**
+   *
+   * @param registrationDate
+   *     The registration_date
+   */
+  public void setRegistrationDate(String registrationDate) {
+      this.registrationDate = registrationDate;
+  }
 
-    /**
-     * 
-     * @return
-     *     The urgency
-     */
-    public String getUrgency() {
-        return urgency;
-    }
+  /**
+   *
+   * @return
+   *     The urgency
+   */
+  public String getUrgency() {
+      return urgency;
+  }
 
-    /**
-     * 
-     * @param urgency
-     *     The urgency
-     */
-    public void setUrgency(String urgency) {
-        this.urgency = urgency;
-    }
+  /**
+   *
+   * @param urgency
+   *     The urgency
+   */
+  public void setUrgency(String urgency) {
+      this.urgency = urgency;
+  }
 
-    /**
-     * 
-     * @return
-     *     The shortDescription
-     */
-    public String getShortDescription() {
-        return shortDescription;
-    }
+  /**
+   *
+   * @return
+   *     The shortDescription
+   */
+  public String getShortDescription() {
+      return shortDescription;
+  }
 
-    /**
-     * 
-     * @param shortDescription
-     *     The short_description
-     */
-    public void setShortDescription(String shortDescription) {
-        this.shortDescription = shortDescription;
-    }
+  /**
+   *
+   * @param shortDescription
+   *     The short_description
+   */
+  public void setShortDescription(String shortDescription) {
+      this.shortDescription = shortDescription;
+  }
 
-    /**
-     * 
-     * @return
-     *     The comment
-     */
-    public String getComment() {
-        return comment;
-    }
+  /**
+   *
+   * @return
+   *     The comment
+   */
+  public String getComment() {
+      return comment;
+  }
 
-    /**
-     * 
-     * @param comment
-     *     The comment
-     */
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
+  /**
+   *
+   * @param comment
+   *     The comment
+   */
+  public void setComment(String comment) {
+      this.comment = comment;
+  }
 
-    /**
-     * 
-     * @return
-     *     The externalDocumentNumber
-     */
-    public String getExternalDocumentNumber() {
-        return externalDocumentNumber;
-    }
+  /**
+   *
+   * @return
+   *     The externalDocumentNumber
+   */
+  public String getExternalDocumentNumber() {
+      return externalDocumentNumber;
+  }
 
-    /**
-     * 
-     * @param externalDocumentNumber
-     *     The external_document_number
-     */
-    public void setExternalDocumentNumber(String externalDocumentNumber) {
-        this.externalDocumentNumber = externalDocumentNumber;
-    }
+  /**
+   *
+   * @param externalDocumentNumber
+   *     The external_document_number
+   */
+  public void setExternalDocumentNumber(String externalDocumentNumber) {
+      this.externalDocumentNumber = externalDocumentNumber;
+  }
 
-    /**
-     * 
-     * @return
-     *     The receiptDate
-     */
-    public String getReceiptDate() {
-        return receiptDate;
-    }
+  /**
+   *
+   * @return
+   *     The receiptDate
+   */
+  public String getReceiptDate() {
+      return receiptDate;
+  }
 
-    /**
-     * 
-     * @param receiptDate
-     *     The receipt_date
-     */
-    public void setReceiptDate(String receiptDate) {
-        this.receiptDate = receiptDate;
-    }
+  /**
+   *
+   * @param receiptDate
+   *     The receipt_date
+   */
+  public void setReceiptDate(String receiptDate) {
+      this.receiptDate = receiptDate;
+  }
 
-    /**
-     * 
-     * @return
-     *     The signer
-     */
-    public Signer getSigner() {
-        return signer;
-    }
+  /**
+   *
+   * @return
+   *     The signer
+   */
+  public Signer getSigner() {
+      return signer;
+  }
 
-    /**
-     * 
-     * @param signer
-     *     The signer
-     */
-    public void setSigner(Signer signer) {
-        this.signer = signer;
-    }
+  /**
+   *
+   * @param signer
+   *     The signer
+   */
+  public void setSigner(Signer signer) {
+      this.signer = signer;
+  }
 
-    /**
-     * 
-     * @return
-     *     The viewed
-     */
-    public Boolean getViewed() {
-        return viewed;
-    }
+  /**
+   *
+   * @return
+   *     The viewed
+   */
+  public Boolean getViewed() {
+      return viewed;
+  }
 
-    /**
-     * 
-     * @param viewed
-     *     The viewed
-     */
-    public void setViewed(Boolean viewed) {
-        this.viewed = viewed;
-    }
+  /**
+   *
+   * @param viewed
+   *     The viewed
+   */
+  public void setViewed(Boolean viewed) {
+      this.viewed = viewed;
+  }
 
+  public void setRed(boolean red) {
+      this.red = red;
+  }
+
+  public boolean isRed() {
+      return red;
+  }
+
+
+  public void setFromFavoritesFolder(boolean fromFavoritesFolder) {
+      this.fromFavoritesFolder = fromFavoritesFolder;
+  }
+
+  public void setFromProcessedFolder(boolean fromProcessedFolder) {
+      this.fromProcessedFolder = fromProcessedFolder;
+  }
+
+  public boolean isFromFavoritesFolder() {
+      return fromFavoritesFolder;
+  }
+
+  public boolean isFromProcessedFolder() {
+      return fromProcessedFolder;
+  }
 }

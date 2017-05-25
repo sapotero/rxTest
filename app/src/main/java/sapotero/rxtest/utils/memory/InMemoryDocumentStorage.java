@@ -1,16 +1,25 @@
 package sapotero.rxtest.utils.memory;
 
+import com.birbit.android.jobqueue.JobManager;
+
 import java.util.HashMap;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
+import io.requery.Persistable;
+import io.requery.rx.SingleEntityStore;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import rx.subjects.PublishSubject;
+import rx.subjects.ReplaySubject;
+import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
+import sapotero.rxtest.jobs.bus.CreateDocumentsJob;
+import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.memory.mappers.InMemoryDocumentMapper;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
@@ -20,12 +29,15 @@ import timber.log.Timber;
 
 public class InMemoryDocumentStorage {
 
+  @Inject JobManager jobManager;
+  @Inject SingleEntityStore<Persistable> dataStore;
+
   private final ScheduledThreadPoolExecutor scheduller;
   private String TAG = this.getClass().getSimpleName();
 
   private final InMemoryLogger logger;
 
-  private final PublishSubject<InMemoryDocument> publish;
+  private final ReplaySubject<InMemoryDocument> publish;
   private final HashMap<String, InMemoryDocument> documents;
   private Subscription loggerSubscription;
 
@@ -33,13 +45,20 @@ public class InMemoryDocumentStorage {
 
     Timber.tag(TAG).e("initialize");
 
-    this.publish    = PublishSubject.create();
+    this.publish    = ReplaySubject.createWithSize(500);
     this.documents  = new HashMap<>();
     this.logger     = new InMemoryLogger();
     this.scheduller = new ScheduledThreadPoolExecutor(1);
 
+    EsdApplication.getManagerComponent().inject(this);
+
 //    initScheduller();
+    loadFromDB();
     initLogger();
+  }
+
+  public HashMap<String, InMemoryDocument> getDocuments() {
+    return documents;
   }
 
   private void initScheduller() {
@@ -56,7 +75,7 @@ public class InMemoryDocumentStorage {
       );
   }
 
-  public PublishSubject<InMemoryDocument> getPublishSubject(){
+  public ReplaySubject<InMemoryDocument> getPublishSubject(){
     return publish;
   }
 
@@ -77,25 +96,77 @@ public class InMemoryDocumentStorage {
 
   }
 
-  public void add(Document document){
+  public void add(Document document, String index, String filter){
 
-    Timber.tag(TAG).e("recv: %s", document.getUid());
+//    Timber.tag(TAG).e("recv: %s", document.getUid());
 
     if ( documents.containsKey(document.getUid()) ){
+      Timber.tag(TAG).e("contains: %s | %s %s", document.getUid(), index, filter );
+
 
       // если есть - проводим инвалидацию
       InMemoryDocument inMemoryDocument = documents.get(document.getUid());
-      if (!Objects.equals(document.getMd5(), inMemoryDocument.getMd5())){
-        inMemoryDocument.setAsLoading();
+      if ( DocumentValidation.isMd5Changed( inMemoryDocument.getMd5(), document.getMd5() ) ){
+        Timber.tag(TAG).e("update: %s", document.getUid());
+
+        inMemoryDocument = InMemoryDocumentMapper.fromJson(document);
+        inMemoryDocument.setFilter(filter);
+        inMemoryDocument.setIndex(index);
+
         publish.onNext(inMemoryDocument);
+        if (index != null) {
+          jobManager.addJobInBackground( new UpdateDocumentJob(document.getUid(), index, filter, false) );
+        } else {
+          jobManager.addJobInBackground( new UpdateDocumentJob(document.getUid(), filter, false) );
+        }
+
       }
 
     } else {
+      Timber.tag(TAG).e("new: %s", document.getUid());
 
       // если нет - эмитим новый документ
-      documents.put(document.getUid(), InMemoryDocumentMapper.toMemoryModel(document));
+      documents.put(document.getUid(), InMemoryDocumentMapper.fromJson(document));
+
+      InMemoryDocument inMemoryDocument = documents.get(document.getUid());
+      inMemoryDocument.setFilter(filter);
+      inMemoryDocument.setIndex(index);
+
       publish.onNext( documents.get(document.getUid()) );
+
+      // refactor
+      // если указан индекс - создаем честно
+      // если нет - то по старому для проектов
+      if (index != null) {
+        jobManager.addJobInBackground( new CreateDocumentsJob(document.getUid(), index, filter, false) );
+      } else {
+        jobManager.addJobInBackground( new UpdateDocumentJob(document.getUid(), filter, false) );
+      }
     }
+
+  }
+
+  private static class DocumentValidation{
+    static Boolean isMd5Changed(String m1, String m2){
+      return !m1.equals( m2 );
+    }
+  }
+
+  private void loadFromDB() {
+    dataStore
+      .select(RDocumentEntity.class)
+      .where(RDocumentEntity.FROM_LINKS.eq(false))
+      .and(RDocumentEntity.FROM_PROCESSED_FOLDER.eq(false))
+      .and(RDocumentEntity.FROM_FAVORITES_FOLDER.eq(false))
+      .get().toObservable()
+      .subscribeOn(Schedulers.computation())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(
+        doc -> {
+          documents.put(doc.getUid(), InMemoryDocumentMapper.fromDB(doc));
+        },
+        Timber::e
+      );
 
   }
 

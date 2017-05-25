@@ -2,6 +2,7 @@ package sapotero.rxtest.application.components;
 
 import dagger.Subcomponent;
 import sapotero.rxtest.application.scopes.ManagerScope;
+import sapotero.rxtest.db.requery.query.DBQueryBuilder;
 import sapotero.rxtest.jobs.bus.BaseJob;
 import sapotero.rxtest.jobs.utils.JobModule;
 import sapotero.rxtest.managers.DataLoaderManager;
@@ -9,6 +10,7 @@ import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.utils.OperationManagerModule;
 import sapotero.rxtest.managers.toolbar.ToolbarManager;
 import sapotero.rxtest.services.MainService;
+import sapotero.rxtest.utils.memory.InMemoryDocumentStorage;
 import sapotero.rxtest.utils.memory.utils.InMemoryStoreModule;
 import sapotero.rxtest.utils.queue.utils.QueueManagerModule;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
@@ -26,7 +28,7 @@ import sapotero.rxtest.views.fragments.InfoActivityDecisionPreviewFragment;
   JobModule.class,
   QueueManagerModule.class,
   OperationManagerModule.class,
-  InMemoryStoreModule.class,
+  InMemoryStoreModule.class
 })
 
 public interface ManagerComponent {
@@ -47,6 +49,11 @@ public interface ManagerComponent {
   void inject(BaseJob job);
 
   void inject(ToolbarManager toolbarManager);
-  void inject(DataLoaderManager dataLoaderManager);
   void inject(AbstractCommand abstractCommand);
+
+
+  void inject(DataLoaderManager dataLoaderManager);
+
+  void inject(DBQueryBuilder activity);
+  void inject(InMemoryDocumentStorage activity);
 }

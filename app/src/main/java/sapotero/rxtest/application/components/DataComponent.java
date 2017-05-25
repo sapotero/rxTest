@@ -40,7 +40,7 @@ import sapotero.rxtest.views.menu.factories.ItemsBuilder;
 @Component(modules = {
   EsdModule.class,
   SettingsModule.class,
-  RequeryDbModule.class,
+  RequeryDbModule.class
 })
 
 public interface DataComponent {

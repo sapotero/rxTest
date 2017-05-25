@@ -39,14 +39,11 @@ import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckSuccessEvent;
 import sapotero.rxtest.events.stepper.load.StepperDocumentCountReadyEvent;
 import sapotero.rxtest.jobs.bus.CreateAssistantJob;
-import sapotero.rxtest.jobs.bus.CreateDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateFavoriteUsersJob;
 import sapotero.rxtest.jobs.bus.CreateFoldersJob;
 import sapotero.rxtest.jobs.bus.CreatePrimaryConsiderationJob;
 import sapotero.rxtest.jobs.bus.CreateTemplatesJob;
 import sapotero.rxtest.jobs.bus.CreateUrgencyJob;
-import sapotero.rxtest.jobs.bus.InvalidateDocumentsJob;
-import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.jobs.bus.UpdateFavoritesDocumentsJob;
 import sapotero.rxtest.jobs.bus.UpdateProcessedDocumentsJob;
 import sapotero.rxtest.retrofit.Api.AuthService;
@@ -87,6 +84,7 @@ public class DataLoaderManager {
   private int jobCountFavorites;
 
   public DataLoaderManager(Context context) {
+
     this.context = context;
     EsdApplication.getManagerComponent().inject(this);
 
@@ -528,11 +526,11 @@ public class DataLoaderManager {
 
       // resolved https://tasks.n-core.ru/browse/MVDESD-13343
       // если общие документы
-
-      boolean shared = false;
-      if (items.getIndex() == 11){
-        shared = true;
-      }
+//
+//      boolean shared = false;
+//      if (items.getIndex() == 11){
+//        shared = true;
+//      }
 
 
       jobManager.cancelJobsInBackground(null, TagConstraint.ANY, "SyncDocument");
@@ -544,88 +542,42 @@ public class DataLoaderManager {
       for (String index: indexes ) {
         for (String status: statuses ) {
           requestCount++;
-          boolean finalShared = shared;
-
-          if (firstRunShared){
-            requestCount++;
-            subscription.add(
-              docService
-                .getDocumentsByIndexes(settings.getLogin(), settings.getToken(), index, status, "group", 500)
-                .subscribeOn(Schedulers.computation())
-                .observeOn(Schedulers.computation())
-                .subscribe(
-                  data -> {
-                    requestCount--;
-                    if (data.getDocuments().size() > 0){
-
-                      for (Document doc: data.getDocuments() ) {
-
-                        if ( isExist(doc) ){
-
-                          Timber.tag(TAG).e("isExist %s", finalShared );
-
-                          if ( !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) ){
-                            Timber.tag(TAG).e("isUpdate" );
-                            jobCount++;
-                            jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), index, status, true) );
-                          }
-
-                        } else {
-                          Timber.tag(TAG).e("isCreate" );
-                          jobCount++;
-                          jobManager.addJobInBackground( new CreateDocumentsJob(doc.getUid(), index, status, true) );
-                        }
-                      }
-                    }
-                    updatePrefJobCount();
-                  },
-                  error -> {
-                    requestCount--;
-                    updatePrefJobCount();
-                    Timber.tag(TAG).e(error);
-                  })
-            );
-
-
-          }
 
           subscription.add(
             docService
-              .getDocumentsByIndexes(settings.getLogin(), settings.getToken(), index, status, shared ? "group" : null , 500)
+//              .getDocumentsByIndexes(settings.getLogin(), settings.getToken(), index, status, shared ? "group" : null , 500)
+              .getDocumentsByIndexes(settings.getLogin(), settings.getToken(), index, status, null , 500)
               .subscribeOn(Schedulers.computation())
               .observeOn(Schedulers.computation())
               .subscribe(
                 data -> {
-                  requestCount--;
+//                  requestCount--;
                   if (data.getDocuments().size() > 0){
 
                     for (Document doc: data.getDocuments() ) {
-
-                      Timber.tag(TAG).e("doc: %s", doc.getUid() );
-                      store.add(doc);
-
-//                       Timber.tag(TAG).e("index: %s | status: %s ",index, status );
-
-                      if ( isExist(doc) ){
-
-                        Timber.tag(TAG).e("isExist %s", finalShared );
-
-                        if ( !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) ){
-                          Timber.tag(TAG).e("isUpdate" );
-                          jobCount++;
-                          jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), index, status, finalShared) );
-                        }
-
-                      } else {
-                        Timber.tag(TAG).e("isCreate" );
-                        jobCount++;
-                        jobManager.addJobInBackground( new CreateDocumentsJob(doc.getUid(), index, status, finalShared) );
-                      }
-                    }
-
-                    if ( !settings.isFirstRun() ) {
-                      Timber.tag(TAG).e("isInvalidate" );
-                      jobManager.addJobInBackground(new InvalidateDocumentsJob(data.getDocuments(), index, status));
+//
+//                      Timber.tag(TAG).e("doc: %s", doc.getUid() );
+                      store.add(doc, index, status);
+//
+////                       Timber.tag(TAG).e("index: %s | status: %s ",index, status );
+//
+//                      if ( isExist(doc) ){
+//
+//                        if ( !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) ){
+//                          Timber.tag(TAG).e("isUpdate" );
+//                          jobCount++;
+//                          jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), index, status, false) );
+//                        }
+//
+//                      } else {
+//                        Timber.tag(TAG).e("isCreate" );
+//                        jobCount++;
+//                        jobManager.addJobInBackground( new CreateDocumentsJob(doc.getUid(), index, status, false) );
+//                      }
+//                    }
+//                    if ( !settings.isFirstRun() ) {
+//                      Timber.tag(TAG).e("isInvalidate" );
+//                      jobManager.addJobInBackground(new InvalidateDocumentsJob(data.getDocuments(), index, status));
                     }
                   }
                   updatePrefJobCount();
@@ -641,45 +593,22 @@ public class DataLoaderManager {
 
       for (String code: sp ) {
         requestCount++;
-        boolean finalShared1 = shared;
 
-        if (firstRunShared){
-          requestCount++;
-          subscription.add(
-            docService
-              .getDocuments(settings.getLogin(), settings.getToken(), code, "group" , 500, 0)
-              .subscribeOn(Schedulers.computation())
-              .observeOn(Schedulers.computation())
-              .subscribe(
-                data -> {
-                  requestCount--;
-                  if (data.getDocuments().size() > 0){
-                    for (Document doc: data.getDocuments() ) {
-                      jobCount++;
-                      jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), code, true) );
-                    }
-                  }
-                  updatePrefJobCount();
-                },
-                error -> {
-                  requestCount--;
-                  updatePrefJobCount();
-                  Timber.tag(TAG).e(error);
-                })
-          );
-        }
         subscription.add(
           docService
-            .getDocuments(settings.getLogin(), settings.getToken(), code, shared ? "group" : null , 500, 0)
+//            .getDocuments(settings.getLogin(), settings.getToken(), code, shared ? "group" : null , 500, 0)
+            .getDocuments(settings.getLogin(), settings.getToken(), code, null , 500, 0)
             .subscribeOn(Schedulers.computation())
             .observeOn(Schedulers.computation())
             .subscribe(
               data -> {
+
                 requestCount--;
                 if (data.getDocuments().size() > 0){
                   for (Document doc: data.getDocuments() ) {
-                    jobCount++;
-                    jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), code, finalShared1) );
+                    store.add(doc, null, code);
+//                    jobCount++;
+//                    jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), code, false) );
                   }
                 }
                 updatePrefJobCount();

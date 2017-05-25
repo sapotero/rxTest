@@ -54,7 +54,6 @@ import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.managers.toolbar.ToolbarManager;
 import sapotero.rxtest.services.task.UpdateCurrentDocumentTask;
 import sapotero.rxtest.utils.Settings;
-import sapotero.rxtest.utils.memory.InMemoryDocumentStorage;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.adapters.TabSigningPagerAdapter;
 import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
@@ -77,7 +76,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   @Inject JobManager jobManager;
   @Inject Settings settings;
 
-  @Inject InMemoryDocumentStorage store;
+//  @Inject InMemoryDocumentStorage store;
 
   private String TAG = this.getClass().getSimpleName();
   private CompositeSubscription subscription;
@@ -121,21 +120,21 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     setTabContent();
     setPreview();
 
-    initLogger();
+//    initLogger();
   }
 
-  private void initLogger() {
-    loggerSubscription = store.getPublishSubject()
-      .filter( inMemoryDocument -> inMemoryDocument.getStatus() == Fields.Status.SIGNING )
-      .subscribeOn(Schedulers.computation())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(
-        doc -> {
-          Timber.tag(TAG).d(doc.toString());
-        },
-        Timber::e
-      );
-  }
+//  private void initLogger() {
+//    loggerSubscription = store.getPublishSubject()
+//      .filter( inMemoryDocument -> inMemoryDocument.getStatus() == Fields.Status.SIGNING )
+//      .subscribeOn(Schedulers.computation())
+//      .observeOn(AndroidSchedulers.mainThread())
+//      .subscribe(
+//        doc -> {
+//          Timber.tag(TAG).d(doc.toString());
+//        },
+//        Timber::e
+//      );
+//  }
 
 
   private void setTabContent() {

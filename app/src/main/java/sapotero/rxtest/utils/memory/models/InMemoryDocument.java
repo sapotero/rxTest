@@ -3,6 +3,7 @@ package sapotero.rxtest.utils.memory.models;
 import java.io.Serializable;
 
 import sapotero.rxtest.db.requery.utils.Fields;
+import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.memory.fields.InMemoryState;
 
 /**
@@ -14,10 +15,37 @@ import sapotero.rxtest.utils.memory.fields.InMemoryState;
 public class InMemoryDocument implements Serializable {
   public String uid;
   public String md5;
+  public String index;
+  public String filter;
+  public Document document;
   public Fields.Status status;
   private InMemoryState action = InMemoryState.NEW;
 
   public InMemoryDocument() {
+  }
+
+  public Document getDocument() {
+    return document;
+  }
+
+  public void setDocument(Document document) {
+    this.document = document;
+  }
+
+  public String getIndex() {
+    return index;
+  }
+
+  public void setIndex(String index) {
+    this.index = index;
+  }
+
+  public String getFilter() {
+    return filter;
+  }
+
+  public void setFilter(String filter) {
+    this.filter = filter;
   }
 
   public void setAsLoading(){

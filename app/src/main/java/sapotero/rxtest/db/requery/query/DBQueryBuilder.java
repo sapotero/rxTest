@@ -6,12 +6,8 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import org.greenrobot.eventbus.EventBus;
-
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -21,6 +17,7 @@ import io.requery.query.WhereAndOr;
 import io.requery.rx.RxResult;
 import io.requery.rx.RxScalar;
 import io.requery.rx.SingleEntityStore;
+import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
@@ -28,10 +25,9 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocument;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RSignerEntity;
-import sapotero.rxtest.db.requery.utils.validation.Validation;
-import sapotero.rxtest.events.adapter.UpdateDocumentAdapterEvent;
-import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.memory.InMemoryDocumentStorage;
+import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
 import sapotero.rxtest.views.adapters.models.OrganizationItem;
@@ -45,7 +41,8 @@ public class DBQueryBuilder {
 
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject Settings settings;
-  @Inject Validation validation;
+//  @Inject Validation validation;
+  @Inject InMemoryDocumentStorage store;
 
   private final String TAG = this.getClass().getSimpleName();
 
@@ -67,7 +64,7 @@ public class DBQueryBuilder {
 
   public DBQueryBuilder(Context context) {
     this.context = context;
-    EsdApplication.getValidationComponent().inject(this);
+    EsdApplication.getManagerComponent().inject(this);
   }
 
   public DBQueryBuilder withAdapter(DocumentsAdapter rAdapter) {
@@ -95,6 +92,7 @@ public class DBQueryBuilder {
     return this;
   }
 
+  //old realization
   public void execute(Boolean refreshSpinner){
 
     menuBuilder.updateCount();
@@ -227,10 +225,10 @@ public class DBQueryBuilder {
 
             return result;
           })
-          .filter(documentEntity -> validation.filterDocumentInSelectedJournals(finalWithFavorites || finalHasProcessed, documentEntity.getDocumentType(), documentEntity.getFilter()))
+//          .filter(documentEntity -> validation.filterDocumentInSelectedJournals(finalWithFavorites || finalHasProcessed, documentEntity.getDocumentType(), documentEntity.getFilter()))
           .toList()
           .debounce(300, TimeUnit.MILLISECONDS)
-          .subscribeOn(Schedulers.newThread())
+          .subscribeOn(Schedulers.computation())
           .observeOn(AndroidSchedulers.mainThread())
           .subscribe(
             data -> {
@@ -315,26 +313,101 @@ public class DBQueryBuilder {
     }
   }
 
+  //new realization
+  public void execute(){
+
+    Timber.tag(TAG).i("NEW execute" );
+
+    if ( conditions.size() > 0 ){
+
+      Timber.tag(TAG).i("conditions: %s", conditions.size() );
+
+      query_status = "";
+      query_type   = "";
+
+      for (ConditionBuilder condition : conditions ){
+        if (condition.getField().getLeftOperand() == RDocumentEntity.FILTER){
+          query_status = String.valueOf(condition.getField().getRightOperand());
+//          Timber.tag("!!!").w("filter: %s", query_status);
+        }
+
+        if (condition.getField().getLeftOperand() == RDocumentEntity.DOCUMENT_TYPE){
+          query_type = String.valueOf(condition.getField().getRightOperand());
+//          Timber.tag("!!!").w("type: %s", query_type);
+        }
+      }
+
+
+
+      Timber.tag(TAG).i("size: %s", store.getDocuments().values().size() );
+
+
+
+      Observable
+        .from( store.getDocuments().values() )
+        .filter( inMemoryDocument -> inMemoryDocument.getFilter().equals(query_status) )
+//        .filter(inMemoryDocument -> {
+//          Boolean result = true;
+//          if (
+//              !Objects.equals(query_type, "") &&
+//              inMemoryDocument.getIndex() != null &&
+//              !Objects.equals(inMemoryDocument.getIndex(), "")
+//            ) {
+//            result = false;
+//          }
+//          return result;
+//        })
+//        .filter(inMemoryDocument -> {
+//          Boolean result = true;
+//          if (
+//            !Objects.equals(query_status, "") &&
+//              inMemoryDocument.getFilter() != null &&
+//              !Objects.equals(inMemoryDocument.getFilter(), "")
+//            ) {
+//            result = false;
+//          }
+//          return !result;
+//        })
+        .toSortedList(
+          (imd1, imd2) -> {
+            int result = -1;
+
+            if (imd1.getDocument().getSortKey() != null && imd2.getDocument().getSortKey() != null) {
+              result = imd1.getDocument().getSortKey().compareTo( imd2.getDocument().getSortKey() );
+            }
+
+            return result;
+          })
+        .subscribeOn(Schedulers.computation())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(
+          docs -> {
+            Timber.tag(TAG).i("new docs: %s", docs.size() );
+            adapter.removeAllWithRange();
+
+            if (docs.size() > 0){
+              hideEmpty();
+              for (InMemoryDocument doc: docs ) {
+                adapter.addItem(doc);
+              }
+
+            } else {
+              showEmpty();
+            }
+          },
+          Timber::e
+        );
+    }
+
+
+  }
 
 
   private void addByOneInAdapter(RDocumentEntity documentEntity) {
     hideEmpty();
-    adapter.addItem(documentEntity);
+//    adapter.addItem(documentEntity);
   }
 
-  private void addAllInAdapter(List<RDocumentEntity> rDocumentEntities) {
-
-    Timber.tag(TAG).e("addAllInAdapter size: %s", rDocumentEntities.size() );
-
-    if (rDocumentEntities.size() > 0){
-      hideEmpty();
-      addList(rDocumentEntities);
-    } else{
-      showEmpty();
-      adapter.clear();
-    }
-
-  }
 
 //
 //  private void addMany(List<RDocumentEntity> results) {
@@ -419,19 +492,19 @@ public class DBQueryBuilder {
 //  }
 
   private void addDocument(RDocumentEntity doc) {
-    // настройка
-    // если включена настройка "Отображать документы без резолюции"
-    if ( settings.isShowWithoutProject() ){
-      addOne(doc);
-    } else {
-      if ( menuBuilder.getItem().isShowAnyWay() ){
-        addOne(doc);
-      } else {
-        if (doc.isWithDecision() != null && doc.isWithDecision()){
-          addOne(doc);
-        }
-      }
-    }
+//    // настройка
+//    // если включена настройка "Отображать документы без резолюции"
+//    if ( settings.isShowWithoutProject() ){
+//      addOne(doc);
+//    } else {
+//      if ( menuBuilder.getItem().isShowAnyWay() ){
+//        addOne(doc);
+//      } else {
+//        if (doc.isWithDecision() != null && doc.isWithDecision()){
+//          addOne(doc);
+//        }
+//      }
+//    }
   }
 
 //  public void addList(Result<RDocumentEntity> docs){
@@ -460,27 +533,14 @@ public class DBQueryBuilder {
     this.item = item;
     this.conditions = conditions;
     this.withFavorites = withFavorites;
-    execute(true);
-  }
-  private void addList(List<RDocumentEntity> docs) {
-    if ( docs.size() == 0 ){
-      showEmpty();
-    } else {
-      hideEmpty();
-      EventBus.getDefault().post(new UpdateCountEvent());
-    }
-
-    progressBar.setVisibility(ProgressBar.GONE);
-
-    adapter.clear();
-    adapter.setDocuments(docs);
-
+//    execute(true);
+    execute();
   }
 
-  private void addOne(RDocumentEntity _document) {
-    progressBar.setVisibility(ProgressBar.GONE);
-    adapter.addItem(_document);
-  }
+//  private void addOne(RDocumentEntity _document) {
+//    progressBar.setVisibility(ProgressBar.GONE);
+//    adapter.addItem(_document);
+//  }
 
   private void showEmpty(){
     progressBar.setVisibility(ProgressBar.GONE);
@@ -586,15 +646,15 @@ public class DBQueryBuilder {
     return this;
   }
 
-  public void invalidateDocumentEvent(UpdateDocumentAdapterEvent event) {
-
-    if (!Objects.equals(query_status, "") && !Objects.equals(query_type, "")){
-      if (Objects.equals(event.status, query_status) && Objects.equals(query_type, event.type)){
-        RDocumentEntity doc = dataStore.select(RDocumentEntity.class).where(RDocumentEntity.UID.eq(event.uid)).get().firstOrNull();
-        if (doc != null) {
-          adapter.addItem(doc);
-        }
-      }
-    }
-  }
+//  public void invalidateDocumentEvent(UpdateDocumentAdapterEvent event) {
+//
+//    if (!Objects.equals(query_status, "") && !Objects.equals(query_type, "")){
+//      if (Objects.equals(event.status, query_status) && Objects.equals(query_type, event.type)){
+//        RDocumentEntity doc = dataStore.select(RDocumentEntity.class).where(RDocumentEntity.UID.eq(event.uid)).get().firstOrNull();
+//        if (doc != null) {
+//          adapter.addItem(doc);
+//        }
+//      }
+//    }
+//  }
 }

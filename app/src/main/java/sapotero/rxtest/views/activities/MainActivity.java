@@ -352,7 +352,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     organization_adapter = new OrganizationAdapter(this, new ArrayList<>());
     ORGANIZATION_SELECTOR.setAdapter(organization_adapter, true, selected -> {
-      dbQueryBuilder.execute(false);
+//      dbQueryBuilder.execute(false);
+      dbQueryBuilder.execute();
     });
   }
 
@@ -492,7 +493,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     initEvents();
 
     Timber.tag(TAG).v("onResume");
-    invalidate();
+//    invalidate();
 
     menuBuilder.getItem().recalcuate();
     dropLoadProgress(false);
@@ -511,10 +512,10 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     EventBus.getDefault().post(new CheckNetworkEvent( false ));
   }
 
-  public static void invalidate(){
-    RAdapter.clear();
-    dbQueryBuilder.execute(true);
-  }
+//  public static void invalidate(){
+//    RAdapter.clear();
+//    dbQueryBuilder.execute(true);
+//  }
 
   @Override
   protected void onPause() {
@@ -772,7 +773,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @Subscribe( threadMode = ThreadMode.MAIN)
   public void onMessageEvent(UpdateDocumentAdapterEvent event) {
     Timber.tag(TAG).v("UpdateDocumentAdapterEvent");
-    dbQueryBuilder.invalidateDocumentEvent(event);
+//    dbQueryBuilder.invalidateDocumentEvent(event);
   }
 
   @Subscribe( threadMode = ThreadMode.MAIN)
