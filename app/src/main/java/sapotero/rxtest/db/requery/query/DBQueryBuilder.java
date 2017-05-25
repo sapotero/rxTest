@@ -25,6 +25,8 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocument;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RSignerEntity;
+import sapotero.rxtest.retrofit.models.documents.Document;
+import sapotero.rxtest.retrofit.models.documents.Signer;
 import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.utils.memory.InMemoryDocumentStorage;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
@@ -315,6 +317,7 @@ public class DBQueryBuilder {
 
   //new realization
   public void execute(){
+    findOrganizations(true);
 
     if ( conditions.size() > 0 ){
 
@@ -335,6 +338,33 @@ public class DBQueryBuilder {
         .from( store.getDocuments().values() )
         .filter( doc -> filters.contains(doc.getFilter()) )
         .filter( doc -> indexes.contains(doc.getIndex())  )
+
+        // resolved https://tasks.n-core.ru/browse/MVDESD-12625
+        // *1) *Фильтр по организациям.
+        .filter(doc -> {
+          boolean   result = true;
+          boolean[] selected_index = organizationSelector.getSelected();
+
+          String organization = doc.getDocument().getSigner().getOrganisation();
+
+          if (selected_index.length > 0) {
+            ArrayList<String> ids = new ArrayList<>();
+
+            for (int i = 0; i < selected_index.length; i++) {
+              if ( selected_index[i] ) {
+                ids.add( organizationAdapter.getItem(i).getName() );
+              }
+            }
+
+            if ( !ids.contains(organization) ) {
+              result = false;
+            }
+          }
+
+          return result;
+        })
+
+        // Cортируем по sort_key
         .toSortedList(
           (imd1, imd2) -> {
             int result = -1;
@@ -345,6 +375,7 @@ public class DBQueryBuilder {
 
             return result;
           })
+
         .subscribeOn(Schedulers.newThread())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(
@@ -518,6 +549,74 @@ public class DBQueryBuilder {
     documents_empty_list.setVisibility(View.GONE);
     progressBar.setVisibility(ProgressBar.GONE);
   }
+
+  private void findOrganizations(boolean b) {
+    Timber.i( "findOrganizations" );
+    organizationAdapter.clear();
+    organizationSelector.clear();
+
+    if ( conditions.size() > 0 ) {
+
+      ArrayList<String> filters = new ArrayList<>();
+      ArrayList<String> indexes = new ArrayList<>();
+
+      for (ConditionBuilder condition : conditions) {
+        if (condition.getField().getLeftOperand() == RDocumentEntity.FILTER) {
+          filters.add(String.valueOf(condition.getField().getRightOperand()));
+        }
+
+        if (condition.getField().getLeftOperand() == RDocumentEntity.DOCUMENT_TYPE) {
+          indexes.add(String.valueOf(condition.getField().getRightOperand()));
+        }
+      }
+
+      Observable
+        .from( store.getDocuments().values() )
+        .filter( doc -> filters.contains(doc.getFilter()) )
+        .filter( doc -> indexes.contains(doc.getIndex())  )
+        .subscribeOn(Schedulers.computation())
+        .observeOn(AndroidSchedulers.mainThread())
+        .map(InMemoryDocument::getDocument)
+        .filter(document -> document.getSigner() != null)
+        .map(Document::getSigner)
+        .toList()
+        .subscribe(
+          signers -> {
+
+            // resolved https://tasks.n-core.ru/browse/MVDESD-12625
+            // Фильтр по организациям.
+
+            HashMap< String, Integer> organizations = new HashMap< String, Integer>();
+
+
+            for (Signer signer: signers){
+              String key = signer.getOrganisation();
+
+              if ( !organizations.containsKey( key ) ){
+                organizations.put(key, 0);
+              }
+
+              Integer value = organizations.get(key);
+              value += 1;
+
+              organizations.put( key, value  );
+            }
+
+            for ( String organization: organizations.keySet()) {
+              organizationAdapter.add( new OrganizationItem( organization, organizations.get(organization) ) );
+            }
+
+            organizationSelector.refreshSpinner();
+
+          },
+          Timber::e
+
+        );
+
+    }
+
+  }
+
 
   private void findOrganizations() {
     Timber.i( "findOrganizations" );

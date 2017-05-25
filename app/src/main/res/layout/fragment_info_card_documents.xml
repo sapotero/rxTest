@@ -105,15 +105,15 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:id="@+id/info_card_pdf_fullscreen_button"
-                        android:foreground="@drawable/card_foreground"
+                        android:clickable="true"
+                        android:foreground="?selectableItemBackground"
                         android:layout_weight="4">
 
                         <ImageButton
                             android:background="@drawable/fullscreen"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_weight="4"
-                            android:padding="@dimen/half_date_offset"
+                            android:padding="@dimen/date_offset"
                             android:layout_gravity="center"
                             />
 

@@ -32,7 +32,6 @@ import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.views.activities.InfoActivity;
 import sapotero.rxtest.views.activities.MainActivity;
-import timber.log.Timber;
 
 public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.DocumentViewHolder> implements Action1<List<Document>> {
 
@@ -420,9 +419,6 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
   }
 
   public void getNextFromPosition(int position) {
-    Timber.tag(TAG).e("getNextFromPosition %s", position);
-    Timber.tag(TAG).e("documents.size() %s", documents.size());
-
     position += 1;
 
     if ( documents.size() == 0 ){
@@ -433,15 +429,12 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
         position = 0;
       }
 
-      Timber.tag(TAG).e("position: %s", position);
-//
-//      RDocumentEntity item = documents.get(position);
-//
-//      settings.setMainMenuPosition(position);
-//      settings.setUid(item.getUid());
-//      settings.setRegNumber(item.getRegistrationNumber());
-//      settings.setStatusCode(item.getFilter());
-//      settings.setRegDate(item.getRegistrationDate());
+      InMemoryDocument item = documents.get(position);
+      settings.setMainMenuPosition(position);
+      settings.setUid(item.getUid());
+      settings.setRegNumber(item.getDocument().getRegistrationNumber());
+      settings.setStatusCode(item.getFilter());
+      settings.setRegDate(item.getDocument().getRegistrationDate());
     }
 
   }
@@ -450,7 +443,6 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     position -= 1;
 
     if ( documents.size() == 0 ){
-      Timber.e("noDocuments %s", documents.size());
       EventBus.getDefault().post( new NoDocumentsEvent() );
     } else {
       if ( position < 0 ){
@@ -460,17 +452,12 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
         position = 0;
       }
 
-      Timber.tag(TAG).e("position: %s", position);
-
-
-//      RDocumentEntity item = documents.get(position);
-//
-//      settings.setMainMenuPosition(position);
-//      settings.setUid( item.getUid() );
-//      settings.setRegNumber( item.getRegistrationNumber() );
-//      settings.setStatusCode( item.getFilter() );
-////      settings.setFromSign( item.isFromSign() );
-//      settings.setRegDate( item.getRegistrationDate() );
+      InMemoryDocument item = documents.get(position);
+      settings.setMainMenuPosition(position);
+      settings.setUid(item.getUid());
+      settings.setRegNumber(item.getDocument().getRegistrationNumber());
+      settings.setStatusCode(item.getFilter());
+      settings.setRegDate(item.getDocument().getRegistrationDate());
     }
 
 
