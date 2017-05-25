@@ -36,29 +36,30 @@ public class PerformerMapper extends AbstractMapper<Performer, RPerformerEntity>
   public Performer toModel(RPerformerEntity entity) {
     Performer model = new Performer();
 
+    setBaseFields(model, entity);
     model.setNumber(entity.getNumber());
-    model.setPerformerId(entity.getPerformerId());
     model.setPerformerType(entity.getPerformerType());
     model.setPerformerText(entity.getPerformerText());
     model.setPerformerGender(entity.getPerformerGender());
     model.setOrganizationText(entity.getOrganizationText());
-    model.setIsOriginal(entity.isIsOriginal());
-    model.setIsResponsible(entity.isIsResponsible());
-    model.setOrganization(entity.isIsOrganization());
 
     return model;
   }
 
-  public Performer toFormattedModel(RPerformerEntity entity) {
+  Performer toFormattedModel(RPerformerEntity entity) {
     Performer formattedModel = new Performer();
 
-    formattedModel.setPerformerId( entity.getPerformerId() );
-    formattedModel.setIsOriginal( entity.isIsOriginal() );
-    formattedModel.setIsResponsible( entity.isIsResponsible() );
+    setBaseFields( formattedModel, entity );
     formattedModel.setGroup( false );
-    formattedModel.setOrganization( entity.isIsOrganization() );
 
     return formattedModel;
+  }
+
+  private void setBaseFields(Performer model, RPerformerEntity entity) {
+    model.setPerformerId( entity.getPerformerId() );
+    model.setIsOriginal( entity.isIsOriginal() );
+    model.setIsResponsible( entity.isIsResponsible() );
+    model.setOrganization( entity.isIsOrganization() );
   }
 
   // Returns IPerformer of destinationType, converted from IPerformer source

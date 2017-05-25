@@ -41,51 +41,47 @@ public class BlockMapper extends AbstractMapper<Block, RBlockEntity> {
   public Block toModel(RBlockEntity entity) {
     Block model = new Block();
 
-    model.setNumber(entity.getNumber());
-    model.setText(entity.getText());
-    model.setFontSize(entity.getFontSize());
-    model.setAppealText(entity.getAppealText());
-    model.setTextBefore(entity.isTextBefore());
-    model.setHidePerformers(entity.isHidePerformers());
-    model.setToCopy(entity.isToCopy());
-    model.setToFamiliarization(entity.isToFamiliarization());
+    setBaseFields( model, entity );
+    model.setFontSize( entity.getFontSize() );
+    model.setToCopy( entity.isToCopy() );
+    model.setToFamiliarization( entity.isToFamiliarization() );
+    setPerformers( model, entity, false );
 
+    return model;
+  }
+
+  Block toFormattedModel(RBlockEntity entity) {
+    Block formattedModel = new Block();
+
+    setBaseFields( formattedModel, entity );
+    formattedModel.setFontSize( "14" );
+    formattedModel.setIndentation( "1" );
+    setPerformers( formattedModel, entity, true );
+
+    return formattedModel;
+  }
+
+  private void setBaseFields(Block model, RBlockEntity entity) {
+    model.setNumber( entity.getNumber() );
+    model.setText( entity.getText() );
+    model.setAppealText( entity.getAppealText() );
+    model.setTextBefore( entity.isTextBefore() );
+    model.setHidePerformers( entity.isHidePerformers() );
+  }
+
+  private void setPerformers(Block model, RBlockEntity entity, boolean formatted) {
     if ( notEmpty( entity.getPerformers() ) ) {
       PerformerMapper performerMapper = new PerformerMapper();
 
       for (RPerformer _performer : entity.getPerformers()) {
         RPerformerEntity performerEntity = (RPerformerEntity) _performer;
-        Performer performerModel = performerMapper.toModel(performerEntity);
+        Performer performerModel = formatted ? performerMapper.toFormattedModel(performerEntity) : performerMapper.toModel(performerEntity);
         model.getPerformers().add(performerModel);
       }
-    }
 
-    Collections.sort(model.getPerformers(), (o1, o2) -> o1.getNumber().compareTo(o2.getNumber()));
-
-    return model;
-  }
-
-  public Block toFormattedModel(RBlockEntity entity) {
-    Block formattedModel = new Block();
-
-    formattedModel.setNumber( entity.getNumber() );
-    formattedModel.setText( entity.getText() );
-    formattedModel.setFontSize( "14" );
-    formattedModel.setAppealText( entity.getAppealText() );
-    formattedModel.setTextBefore( entity.isTextBefore() );
-    formattedModel.setHidePerformers( entity.isHidePerformers() );
-    formattedModel.setIndentation( "1" );
-
-    if ( notEmpty( entity.getPerformers() ) ) {
-      PerformerMapper performerMapper = new PerformerMapper();
-
-      for (RPerformer _p : entity.getPerformers()) {
-        RPerformerEntity performerEntity = (RPerformerEntity) _p;
-        Performer formattedPerformerModel = performerMapper.toFormattedModel(performerEntity);
-        formattedModel.getPerformers().add(formattedPerformerModel);
+      if ( !formatted ) {
+        Collections.sort(model.getPerformers(), (o1, o2) -> o1.getNumber().compareTo(o2.getNumber()));
       }
     }
-
-    return formattedModel;
   }
 }

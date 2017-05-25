@@ -51,35 +51,11 @@ public class DecisionMapper extends AbstractMapper<Decision, RDecisionEntity> {
   public Decision toModel(RDecisionEntity entity) {
     Decision model = new Decision();
 
-    model.setId(entity.getUid());
-    model.setLetterhead(entity.getLetterhead());
-    model.setApproved(entity.isApproved());
-    model.setSigner(entity.getSigner());
-    model.setSignerId(entity.getSignerId());
-    model.setSignerBlankText(entity.getSignerBlankText());
-    model.setSignerIsManager(entity.isSignerIsManager());
-    model.setSignerPositionS(entity.getSignerPositionS());
-    model.setAssistantId(entity.getAssistantId());
-    model.setComment(entity.getComment());
-    model.setDate(entity.getDate());
-    model.setUrgencyText(entity.getUrgencyText());
-    model.setShowPosition(entity.isShowPosition());
-    model.setSignBase64(entity.getSignBase64());
-    model.setRed(entity.isRed());
-    model.setLetterheadFontSize(entity.getLetterheadFontSize());
-    model.setPerformersFontSize(entity.getPerformerFontSize());
-
-    if ( notEmpty( entity.getBlocks() ) ) {
-      BlockMapper blockMapper = new BlockMapper();
-
-      for (RBlock _block : entity.getBlocks()) {
-        RBlockEntity blockEntity = (RBlockEntity) _block;
-        Block blockModel = blockMapper.toModel(blockEntity);
-        model.getBlocks().add(blockModel);
-      }
-
-      Collections.sort(model.getBlocks(), (o1, o2) -> o1.getNumber().compareTo(o2.getNumber()));
-    }
+    setBaseFields( model, entity );
+    model.setRed( entity.isRed() );
+    model.setLetterheadFontSize( entity.getLetterheadFontSize() );
+    model.setPerformersFontSize( entity.getPerformerFontSize() );
+    setBlocks( model, entity, false );
 
     return model;
   }
@@ -87,31 +63,42 @@ public class DecisionMapper extends AbstractMapper<Decision, RDecisionEntity> {
   public Decision toFormattedModel(RDecisionEntity entity) {
     Decision formattedModel = new Decision();
 
-    formattedModel.setId( entity.getUid() );
-    formattedModel.setLetterhead( entity.getLetterhead() );
-    formattedModel.setApproved( entity.isApproved() );
-    formattedModel.setSigner( entity.getSigner() );
-    formattedModel.setSignerId( entity.getSignerId() );
-    formattedModel.setSignerBlankText( entity.getSignerBlankText() );
-    formattedModel.setSignerIsManager( entity.isSignerIsManager() );
-    formattedModel.setSignerPositionS( entity.getSignerPositionS() );
-    formattedModel.setAssistantId( entity.getAssistantId() );
-    formattedModel.setComment( entity.getComment() );
-    formattedModel.setDate( entity.getDate() );
-    formattedModel.setUrgencyText( entity.getUrgencyText() );
-    formattedModel.setShowPosition( entity.isShowPosition() );
-    formattedModel.setSignBase64( entity.getSignBase64() );
+    setBaseFields( formattedModel, entity );
+    setBlocks( formattedModel, entity, true );
 
+    return formattedModel;
+  }
+
+  private void setBaseFields(Decision model, RDecisionEntity entity) {
+    model.setId( entity.getUid() );
+    model.setLetterhead( entity.getLetterhead() );
+    model.setApproved( entity.isApproved() );
+    model.setSigner( entity.getSigner() );
+    model.setSignerId( entity.getSignerId() );
+    model.setSignerBlankText( entity.getSignerBlankText() );
+    model.setSignerIsManager( entity.isSignerIsManager() );
+    model.setSignerPositionS( entity.getSignerPositionS() );
+    model.setAssistantId( entity.getAssistantId() );
+    model.setComment( entity.getComment() );
+    model.setDate( entity.getDate() );
+    model.setUrgencyText( entity.getUrgencyText() );
+    model.setShowPosition( entity.isShowPosition() );
+    model.setSignBase64( entity.getSignBase64() );
+  }
+
+  private void setBlocks(Decision model, RDecisionEntity entity, boolean formatted) {
     if ( notEmpty( entity.getBlocks() ) ) {
       BlockMapper blockMapper = new BlockMapper();
 
-      for (RBlock _block : entity.getBlocks() ) {
+      for (RBlock _block : entity.getBlocks()) {
         RBlockEntity blockEntity = (RBlockEntity) _block;
-        Block formattedBlock = blockMapper.toFormattedModel(blockEntity);
-        formattedModel.getBlocks().add(formattedBlock);
+        Block blockModel = formatted ? blockMapper.toFormattedModel(blockEntity) : blockMapper.toModel(blockEntity);
+        model.getBlocks().add(blockModel);
+      }
+
+      if ( !formatted ) {
+        Collections.sort(model.getBlocks(), (o1, o2) -> o1.getNumber().compareTo(o2.getNumber()));
       }
     }
-
-    return formattedModel;
   }
 }
