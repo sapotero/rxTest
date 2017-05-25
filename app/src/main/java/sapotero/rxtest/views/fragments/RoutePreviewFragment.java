@@ -90,7 +90,7 @@ public class RoutePreviewFragment extends Fragment {
     card      = (FrameLayout)  view.findViewById(R.id.route_preview_fragment_card_view);
     button.setOnClickListener(this::changeState);
 
-    state  = State.LAST;
+    state  = State.ALL;
 
     EsdApplication.getDataComponent().inject(this);
     ButterKnife.bind(view);
@@ -244,6 +244,7 @@ public class RoutePreviewFragment extends Fragment {
       Observable
         .from( ((RRouteEntity) doc.getRoute()).getSteps() )
         .map( rStep -> (RStepEntity) rStep )
+        .filter(rStepEntity -> rStepEntity != null)
         .sorted( (e1, e2) -> e1.getNumber().compareTo(e2.getNumber()) )
         .map(PanelBuilder::new)
         .subscribeOn( Schedulers.computation() )
