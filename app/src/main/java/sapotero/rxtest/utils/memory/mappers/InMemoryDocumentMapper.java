@@ -31,6 +31,7 @@ public class InMemoryDocumentMapper {
     document.setMd5( doc.getMd5() );
     document.setSortKey( doc.getSortKey() );
     document.setTitle( doc.getTitle() );
+    document.setOrganization( doc.getOrganization() );
     document.setRegistrationNumber( doc.getRegistrationNumber() );
     document.setRegistrationDate( doc.getRegistrationDate() );
     document.setUrgency( doc.getUrgency() );

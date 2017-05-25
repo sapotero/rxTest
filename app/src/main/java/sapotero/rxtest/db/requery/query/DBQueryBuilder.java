@@ -316,58 +316,25 @@ public class DBQueryBuilder {
   //new realization
   public void execute(){
 
-    Timber.tag(TAG).i("NEW execute" );
-
     if ( conditions.size() > 0 ){
 
-      Timber.tag(TAG).i("conditions: %s", conditions.size() );
-
-      query_status = "";
-      query_type   = "";
+      ArrayList<String> filters = new ArrayList<>();
+      ArrayList<String> indexes = new ArrayList<>();
 
       for (ConditionBuilder condition : conditions ){
         if (condition.getField().getLeftOperand() == RDocumentEntity.FILTER){
-          query_status = String.valueOf(condition.getField().getRightOperand());
-//          Timber.tag("!!!").w("filter: %s", query_status);
+          filters.add( String.valueOf(condition.getField().getRightOperand()) );
         }
 
         if (condition.getField().getLeftOperand() == RDocumentEntity.DOCUMENT_TYPE){
-          query_type = String.valueOf(condition.getField().getRightOperand());
-//          Timber.tag("!!!").w("type: %s", query_type);
+          indexes.add( String.valueOf(condition.getField().getRightOperand()) );
         }
       }
 
-
-
-      Timber.tag(TAG).i("size: %s", store.getDocuments().values().size() );
-
-
-
       Observable
         .from( store.getDocuments().values() )
-        .filter( inMemoryDocument -> inMemoryDocument.getFilter().equals(query_status) )
-//        .filter(inMemoryDocument -> {
-//          Boolean result = true;
-//          if (
-//              !Objects.equals(query_type, "") &&
-//              inMemoryDocument.getIndex() != null &&
-//              !Objects.equals(inMemoryDocument.getIndex(), "")
-//            ) {
-//            result = false;
-//          }
-//          return result;
-//        })
-//        .filter(inMemoryDocument -> {
-//          Boolean result = true;
-//          if (
-//            !Objects.equals(query_status, "") &&
-//              inMemoryDocument.getFilter() != null &&
-//              !Objects.equals(inMemoryDocument.getFilter(), "")
-//            ) {
-//            result = false;
-//          }
-//          return !result;
-//        })
+        .filter( doc -> filters.contains(doc.getFilter()) )
+        .filter( doc -> indexes.contains(doc.getIndex())  )
         .toSortedList(
           (imd1, imd2) -> {
             int result = -1;
@@ -378,11 +345,11 @@ public class DBQueryBuilder {
 
             return result;
           })
-        .subscribeOn(Schedulers.computation())
+        .subscribeOn(Schedulers.newThread())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(
           docs -> {
-            Timber.tag(TAG).i("new docs: %s", docs.size() );
+
             adapter.removeAllWithRange();
 
             if (docs.size() > 0){

@@ -111,7 +111,7 @@ public class DataLoaderManager {
     subscriptionInitV2.add(
       // получаем данные о пользователе
       auth.getUserInfoV2(settings.getLogin(), settings.getToken())
-        .subscribeOn(Schedulers.io())
+        .subscribeOn(Schedulers.computation())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(
           v2 -> {
@@ -124,7 +124,7 @@ public class DataLoaderManager {
               // получаем папки
               subscriptionInitV2.add(
                 auth.getFolders(settings.getLogin(), settings.getToken())
-                  .subscribeOn(Schedulers.io())
+                  .subscribeOn(Schedulers.computation())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( data -> {
                     jobManager.addJobInBackground(new CreateFoldersJob(data));
@@ -136,7 +136,7 @@ public class DataLoaderManager {
 
               subscriptionInitV2.add(
                 auth.getPrimaryConsiderationUsers(settings.getLogin(), settings.getToken())
-                  .subscribeOn(Schedulers.io())
+                  .subscribeOn(Schedulers.computation())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( data -> {
                     jobManager.addJobInBackground(new CreatePrimaryConsiderationJob(data));
@@ -148,7 +148,7 @@ public class DataLoaderManager {
               // загрузка срочности
               subscriptionInitV2.add(
                 auth.getUrgency(settings.getLogin(), settings.getToken(), "urgency")
-                  .subscribeOn(Schedulers.io())
+                  .subscribeOn(Schedulers.computation())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( urgencies -> {
                     jobManager.addJobInBackground(new CreateUrgencyJob(urgencies));
@@ -160,7 +160,7 @@ public class DataLoaderManager {
               // загрузка шаблонов резолюции
               subscriptionInitV2.add(
                 auth.getTemplates(settings.getLogin(), settings.getToken(), null)
-                  .subscribeOn(Schedulers.io())
+                  .subscribeOn(Schedulers.computation())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( templates -> {
                     jobManager.addJobInBackground(new CreateTemplatesJob(templates, null));
@@ -172,7 +172,7 @@ public class DataLoaderManager {
               // загрузка шаблонов отклонения
               subscriptionInitV2.add(
                 auth.getTemplates(settings.getLogin(), settings.getToken(), "rejection")
-                  .subscribeOn(Schedulers.io())
+                  .subscribeOn(Schedulers.computation())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( templates -> {
                     jobManager.addJobInBackground(new CreateTemplatesJob(templates, "rejection"));
@@ -184,7 +184,7 @@ public class DataLoaderManager {
               // получаем группу Избранное(МП)
               subscriptionInitV2.add(
                 auth.getFavoriteUsers(settings.getLogin(), settings.getToken())
-                  .subscribeOn(Schedulers.io())
+                  .subscribeOn(Schedulers.computation())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( data -> {
                     jobManager.addJobInBackground(new CreateFavoriteUsersJob(data));
@@ -197,7 +197,7 @@ public class DataLoaderManager {
               // https://tasks.n-core.ru/browse/MVDESD-11453
               subscriptionInitV2.add(
                 auth.getAssistant(settings.getLogin(), settings.getToken(), settings.getCurrentUserId())
-                  .subscribeOn(Schedulers.io())
+                  .subscribeOn(Schedulers.computation())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( data -> {
                     jobManager.addJobInBackground(new CreateAssistantJob(data));
@@ -411,7 +411,7 @@ public class DataLoaderManager {
     subscription.add(
       auth
         .getAuth(login, password)
-        .subscribeOn(Schedulers.io())
+        .subscribeOn(Schedulers.computation())
         .observeOn(AndroidSchedulers.mainThread())
         .unsubscribeOn(Schedulers.io())
         .subscribe(

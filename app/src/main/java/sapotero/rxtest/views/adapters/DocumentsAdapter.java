@@ -89,18 +89,11 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
       //resolved https://tasks.n-core.ru/browse/MVDESD-12625
       //  На плитке Обращения и НПА не показывать строку "Без организации", если её действительно нет(
-      //    Timber.d("star with: %s %s", item.getUid().startsWith( Fields.Journal.INCOMING_ORDERS.getValue() ), item.getUid().startsWith( Fields.Journal.CITIZEN_REQUESTS.getValue() ));
-      if(
-        Arrays.asList(
-          Fields.Journal.INCOMING_ORDERS.getValue(),
-          Fields.Journal.CITIZEN_REQUESTS.getValue()
-        ).contains( imd.getIndex() ) ) {
+      if( Arrays.asList( "incoming_orders", "citizen_requests" ).contains( imd.getIndex() ) ) {
 
-        if ( item.getOrganization().toLowerCase().contains("без организации") ){
-          Timber.d("empty organization" );
+        if ( item.getOrganization() != null && item.getOrganization().toLowerCase().contains("без организации") ){
           viewHolder.from.setText("");
         } else {
-          Timber.e( "SIGNER %s", item.getSigner() );
           if ( item.getSigner() != null ){
             viewHolder.from.setText( item.getSigner().getOrganisation() );
           }
@@ -121,8 +114,9 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       if( Arrays.asList( Fields.Status.SIGNING.getValue(), Fields.Status.APPROVAL.getValue() ).contains(imd.getFilter()) ){
 
         if (!Objects.equals(item.getFirstLink(), "")){
-
+          viewHolder.date.setText( item.getTitle() + " на " + item.getFirstLink() );
         }
+
         // рефактор апи!
 //        Timber.tag("Status LINKS").e("size: %s", item.getLinks().size() );
 //
