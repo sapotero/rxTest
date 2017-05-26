@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -20,10 +19,6 @@ import com.github.barteksc.pdfviewer.PDFView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -32,7 +27,6 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -46,8 +40,6 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
-import sapotero.rxtest.events.bus.FileDownloadedEvent;
-import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.activities.DocumentImageFullScreenActivity;
@@ -96,9 +88,9 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    if ( !EventBus.getDefault().isRegistered(this) ){
-      EventBus.getDefault().register(this);
-    }
+//    if ( !EventBus.getDefault().isRegistered(this) ){
+//      EventBus.getDefault().register(this);
+//    }
 
   }
 
@@ -166,7 +158,12 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
         adapter.add( image );
       }
 
-      setPdfPreview();
+      try {
+        setPdfPreview();
+      } catch (FileNotFoundException e) {
+        Timber.e(e);
+      }
+
       no_files.setVisibility(View.GONE);
       pdf_wrapper.setVisibility(View.VISIBLE);
 
@@ -247,7 +244,11 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     }
     Timber.tag(TAG).i( "AFTER %s - %s", index, adapter.getCount() );
 
-    setPdfPreview();
+    try {
+      setPdfPreview();
+    } catch (FileNotFoundException e) {
+      Timber.e(e);
+    }
   }
 
   @OnClick(R.id.info_card_pdf_fullscreen_next_document)
@@ -260,7 +261,11 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     }
     Timber.tag(TAG).i( "AFTER %s - %s", index, adapter.getCount() );
 
-    setPdfPreview();
+    try {
+      setPdfPreview();
+    } catch (FileNotFoundException e) {
+      Timber.e(e);
+    }
   }
 
   @OnClick(R.id.info_card_pdf_fullscreen_button)
@@ -290,9 +295,9 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   public void onDetach() {
     super.onDetach();
 
-    if ( EventBus.getDefault().isRegistered(this) ){
-      EventBus.getDefault().unregister(this);
-    }
+//    if ( EventBus.getDefault().isRegistered(this) ){
+//      EventBus.getDefault().unregister(this);
+//    }
 
     pdfView.recycle();
   }

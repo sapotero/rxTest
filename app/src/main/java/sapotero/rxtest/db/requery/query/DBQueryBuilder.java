@@ -332,8 +332,13 @@ public class DBQueryBuilder {
 
       for (ConditionBuilder condition : conditions ){
         if (condition.getField().getLeftOperand() == RDocumentEntity.FILTER){
-          filters.add( String.valueOf(condition.getField().getRightOperand()) );
-          Timber.tag(TAG).w("new filter: %s", String.valueOf(condition.getField().getRightOperand()));
+
+          try {
+            filters.addAll(((ArrayList<String>) condition.getField().getRightOperand()));
+          } catch (Exception e) {
+            filters.add( String.valueOf(condition.getField().getRightOperand()) );
+          }
+
         }
 
         if (condition.getField().getLeftOperand() == RDocumentEntity.DOCUMENT_TYPE){
