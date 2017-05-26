@@ -109,68 +109,6 @@ public class DecisionManager implements DecisionInterface, DecisionBuilder.Callb
     preview_builder.update();
   }
 
-  public void saveDecision(){
-
-    Decision d = decision;
-
-    Timber.tag(TAG).w("[%s] -  %s:%s ", settings.getUid(), d.getId(), d.getLetterhead() );
-
-    RDocumentEntity document = dataStore
-      .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq(settings.getUid()))
-      .get().first();
-
-    document.setChanged(true);
-
-    RDecisionEntity dec = dataStore
-      .select(RDecisionEntity.class)
-      .where(RDecisionEntity.UID.eq(d.getId()))
-      .get().first();
-
-    dec.setUid( d.getId() );
-    dec.setLetterhead(d.getLetterhead());
-    dec.setApproved(d.getApproved());
-    dec.setSigner(d.getSigner());
-    dec.setSignerId(d.getSignerId());
-    dec.setAssistantId(d.getAssistantId());
-    dec.setSignerBlankText(d.getSignerBlankText());
-    dec.setSignerIsManager(d.getSignerIsManager());
-    dec.setComment(d.getComment());
-    dec.setDate(d.getDate());
-    dec.setUrgencyText(d.getUrgencyText());
-    dec.setShowPosition(d.getShowPosition());
-    dec.setChanged(true);
-
-    if ( d.getBlocks() != null && d.getBlocks().size() >= 1 ){
-
-      ArrayList<RBlockEntity> list = new ArrayList<>();
-
-      for (Block b: d.getBlocks() ) {
-        RBlockEntity block = mappers.getBlockMapper().toEntity(b);
-        block.setDecision(dec);
-        list.add(block);
-      }
-
-      dec.getBlocks().clear();
-      dec.getBlocks().addAll(list);
-    }
-
-      //FIX DECISION
-    dec.setDocument(document);
-
-//    RDecisionEntity temp = dataStore.addByOne(dec).toBlocking().value();
-    Subscription temp = dataStore
-      .update(dec)
-      .subscribe( data ->{
-        Timber.tag(TAG).w( "addByOne : %s", data.getBlocks().isEmpty() );
-      }, error -> {
-        Timber.e( String.valueOf(error.getStackTrace()) );
-      });
-
-
-
-  }
-
   /* DecisionInterface */
   @Override
   public Decision getDecision() {

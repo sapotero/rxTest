@@ -1,20 +1,13 @@
 package sapotero.rxtest.application.components;
 
 import dagger.Component;
-import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.application.modules.EsdModule;
 import sapotero.rxtest.application.modules.SettingsModule;
 import sapotero.rxtest.application.scopes.DataScope;
-import sapotero.rxtest.db.mapper.AssistantMapper;
-import sapotero.rxtest.db.mapper.DocumentMapper;
-import sapotero.rxtest.db.mapper.FavoriteUserMapper;
-import sapotero.rxtest.db.mapper.PrimaryConsiderationMapper;
-import sapotero.rxtest.db.mapper.TemplateMapper;
 import sapotero.rxtest.db.mapper.utils.MappersModule;
 import sapotero.rxtest.db.requery.utils.RequeryDbModule;
 import sapotero.rxtest.db.requery.utils.validation.ValidationModule;
 import sapotero.rxtest.managers.CurrentDocumentManager;
-import sapotero.rxtest.managers.db.managers.DBDocumentManager;
 import sapotero.rxtest.managers.view.DecisionManager;
 import sapotero.rxtest.retrofit.utils.OkHttpModule;
 import sapotero.rxtest.utils.memory.utils.InMemoryStoreModule;
@@ -89,7 +82,6 @@ public interface DataComponent {
 
   void inject(ItemsBuilder itemsBuilder);
   void inject(QueueDBManager queueDBManager);
-  void inject(DBDocumentManager dbDocumentManager);
   void inject(CurrentDocumentManager currentDocumentManager);
 
   void inject(DecisionManager decisionManager);
