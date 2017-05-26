@@ -21,8 +21,6 @@ import sapotero.rxtest.utils.Settings;
 // Keeps all mappers in one place
 public class Mappers {
 
-  private static Mappers mappers;
-
   private ActionMapper actionMapper;
   private AssistantMapper assistantMapper;
   private BlockMapper blockMapper;
@@ -41,8 +39,6 @@ public class Mappers {
   private TemplateMapper templateMapper;
 
   public Mappers(Settings settings) {
-    mappers = this;
-
     actionMapper = new ActionMapper(settings, this);
     assistantMapper = new AssistantMapper(settings, this);
     blockMapper = new BlockMapper(settings, this);
@@ -59,10 +55,6 @@ public class Mappers {
     signerMapper = new SignerMapper(settings, this);
     stepMapper = new StepMapper(settings, this);
     templateMapper = new TemplateMapper(settings, this);
-  }
-
-  public static Mappers getMappers() {
-    return mappers;
   }
 
   public ActionMapper getActionMapper() {
