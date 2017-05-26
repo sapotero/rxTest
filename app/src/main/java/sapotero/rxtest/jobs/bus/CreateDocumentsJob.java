@@ -10,8 +10,6 @@ import com.google.gson.Gson;
 import org.greenrobot.eventbus.EventBus;
 
 import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
-import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -24,7 +22,6 @@ import sapotero.rxtest.db.requery.models.RStep;
 import sapotero.rxtest.db.requery.models.RStepEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
-import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.adapter.UpdateDocumentAdapterEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
@@ -36,33 +33,22 @@ import timber.log.Timber;
 public class CreateDocumentsJob extends BaseJob {
 
   public static final int PRIORITY = 1;
-  private boolean shared = false;
-  private boolean not_processed;
+
+  private String TAG = this.getClass().getSimpleName();
+  private String uid;
+
   private String status;
   private String journal;
-
-  private Boolean onControl;
-  private Boolean isProcessed = null;
-  private Boolean isFavorites = null;
-
-  private Fields.Status filter;
-  private String uid;
-  private String TAG = this.getClass().getSimpleName();
-  private DocumentInfo document;
+  private boolean shared = false;
 
   private int jobCount;
 
   public CreateDocumentsJob(String uid, String journal, String status, boolean shared) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
+    this.journal = getJournalName(journal);
+    this.status = status;
     this.shared = shared;
-
-    if (journal != null) {
-      String[] index = journal.split("_production_db_");
-      this.journal = index[0];
-    }
-
-    this.status  = status;
   }
 
   @Override
@@ -72,15 +58,8 @@ public class CreateDocumentsJob extends BaseJob {
   @Override
   public void onRun() throws Throwable {
 
-    Retrofit retrofit = new Retrofit.Builder()
-      .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-      .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl(settings.getHost() + "v3/documents/")
-      .client(okHttpClient)
-      .build();
-
+    Retrofit retrofit = getRetrofit();
     DocumentService documentService = retrofit.create( DocumentService.class );
-
     Observable<DocumentInfo> info = documentService.getInfo(
       uid,
       settings.getLogin(),
@@ -93,14 +72,12 @@ public class CreateDocumentsJob extends BaseJob {
       .subscribe(
         doc -> {
           create( doc );
-
           EventBus.getDefault().post( new StepperLoadDocumentEvent(doc.getUid()) );
         },
         error -> {
           Timber.tag(TAG).e(error);
           EventBus.getDefault().post( new StepperLoadDocumentEvent("Error downloading document info on create") );
         }
-
       );
   }
 
@@ -162,13 +139,10 @@ public class CreateDocumentsJob extends BaseJob {
           settings.addJobCount(jobCount);
 
           EventBus.getDefault().post( new UpdateDocumentAdapterEvent( result.getUid(), result.getDocumentType(), result.getFilter() ) );
-
-
         },
         error -> {
           Timber.tag(TAG).e(error);
         }
-
       );
   }
 
