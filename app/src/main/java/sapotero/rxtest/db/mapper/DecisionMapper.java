@@ -2,14 +2,20 @@ package sapotero.rxtest.db.mapper;
 
 import java.util.Collections;
 
+import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.decisions.RBlock;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
+import sapotero.rxtest.utils.Settings;
 
 // Maps between Decision and RDecisionEntity
 public class DecisionMapper extends AbstractMapper<Decision, RDecisionEntity> {
+
+  public DecisionMapper(Settings settings, Mappers mappers) {
+    super(settings, mappers);
+  }
 
   @Override
   public RDecisionEntity toEntity(Decision model) {
@@ -35,7 +41,7 @@ public class DecisionMapper extends AbstractMapper<Decision, RDecisionEntity> {
     entity.setPerformerFontSize(model.getPerformersFontSize());
 
     if ( notEmpty( model.getBlocks() ) ) {
-      BlockMapper blockMapper = new BlockMapper();
+      BlockMapper blockMapper = mappers.getBlockMapper();
 
       for (Block blockModel: model.getBlocks() ) {
         RBlockEntity blockEntity = blockMapper.toEntity(blockModel);
@@ -88,7 +94,7 @@ public class DecisionMapper extends AbstractMapper<Decision, RDecisionEntity> {
 
   private void setBlocks(Decision model, RDecisionEntity entity, boolean formatted) {
     if ( notEmpty( entity.getBlocks() ) ) {
-      BlockMapper blockMapper = new BlockMapper();
+      BlockMapper blockMapper = mappers.getBlockMapper();
 
       for (RBlock _block : entity.getBlocks()) {
         RBlockEntity blockEntity = (RBlockEntity) _block;

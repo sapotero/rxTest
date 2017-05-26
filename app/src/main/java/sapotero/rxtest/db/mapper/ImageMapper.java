@@ -1,10 +1,16 @@
 package sapotero.rxtest.db.mapper;
 
+import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.retrofit.models.document.Image;
+import sapotero.rxtest.utils.Settings;
 
 // Maps between Image and RImageEntity
 public class ImageMapper extends AbstractMapper<Image, RImageEntity> {
+
+  public ImageMapper(Settings settings, Mappers mappers) {
+    super(settings, mappers);
+  }
 
   @Override
   public RImageEntity toEntity(Image model) {

@@ -43,22 +43,22 @@ public class Mappers {
   public Mappers(Settings settings) {
     mappers = this;
 
-    actionMapper = new ActionMapper();
-    assistantMapper = new AssistantMapper();
-    blockMapper = new BlockMapper();
-    controlLabelMapper = new ControlLabelMapper();
-    decisionMapper = new DecisionMapper();
-    documentMapper = new DocumentMapper();
-    exemplarMapper = new ExemplarMapper();
-    favoriteUserMapper = new FavoriteUserMapper();
-    imageMapper = new ImageMapper();
-    linkMapper = new LinkMapper();
-    performerMapper = new PerformerMapper();
-    primaryConsiderationMapper = new PrimaryConsiderationMapper();
-    routeMapper = new RouteMapper();
-    signerMapper = new SignerMapper();
-    stepMapper = new StepMapper();
-    templateMapper = new TemplateMapper();
+    actionMapper = new ActionMapper(settings, this);
+    assistantMapper = new AssistantMapper(settings, this);
+    blockMapper = new BlockMapper(settings, this);
+    controlLabelMapper = new ControlLabelMapper(settings, this);
+    decisionMapper = new DecisionMapper(settings, this);
+    documentMapper = new DocumentMapper(settings, this);
+    exemplarMapper = new ExemplarMapper(settings, this);
+    favoriteUserMapper = new FavoriteUserMapper(settings, this);
+    imageMapper = new ImageMapper(settings, this);
+    linkMapper = new LinkMapper(settings, this);
+    performerMapper = new PerformerMapper(settings, this);
+    primaryConsiderationMapper = new PrimaryConsiderationMapper(settings, this);
+    routeMapper = new RouteMapper(settings, this);
+    signerMapper = new SignerMapper(settings, this);
+    stepMapper = new StepMapper(settings, this);
+    templateMapper = new TemplateMapper(settings, this);
   }
 
   public static Mappers getMappers() {

@@ -163,7 +163,7 @@ public class UpdateDocumentJob extends BaseJob {
 
       if (doc != null) {
 
-        new DocumentMapper().setShared(doc, shared);
+        mappers.getDocumentMapper().setShared(doc, shared);
 
         dataStore
           .update(doc)
@@ -188,7 +188,7 @@ public class UpdateDocumentJob extends BaseJob {
   @NonNull
   private Observable<RDocumentEntity> create(DocumentInfo d){
     RDocumentEntity rd = new RDocumentEntity();
-    DocumentMapper documentMapper = new DocumentMapper();
+    DocumentMapper documentMapper = mappers.getDocumentMapper();
 
     documentMapper.setSimpleFields(rd, d);
     rd.setControl(onControl);
@@ -248,7 +248,7 @@ public class UpdateDocumentJob extends BaseJob {
     rDoc.setFromFavoritesFolder( false );
     rDoc.setChanged( false );
 
-    DocumentMapper documentMapper = new DocumentMapper();
+    DocumentMapper documentMapper = mappers.getDocumentMapper();
 
     documentMapper.setSigner( rDoc, document.getSigner() );
     documentMapper.setJournal( rDoc, journal );
@@ -295,7 +295,7 @@ public class UpdateDocumentJob extends BaseJob {
       .where(RDocumentEntity.UID.eq(uid))
       .get().first();
 
-    DocumentMapper documentMapper = new DocumentMapper();
+    DocumentMapper documentMapper = mappers.getDocumentMapper();
 
     if ( !Objects.equals( document.getMd5(), doc.getMd5() ) ){
       Timber.tag("MD5").d("not equal %s - %s",document.getMd5(), doc.getMd5() );

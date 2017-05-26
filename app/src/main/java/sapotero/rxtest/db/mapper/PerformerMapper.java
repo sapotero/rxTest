@@ -1,13 +1,19 @@
 package sapotero.rxtest.db.mapper;
 
+import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.models.document.IPerformer;
 import sapotero.rxtest.retrofit.models.document.Performer;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 
 // Maps between Performer, RPerformerEntity, PrimaryConsiderationPeople and Oshs
 public class PerformerMapper extends AbstractMapper<Performer, RPerformerEntity> {
+
+  public PerformerMapper(Settings settings, Mappers mappers) {
+    super(settings, mappers);
+  }
 
   public static enum DestinationType {
     PERFORMER,

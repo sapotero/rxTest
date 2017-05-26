@@ -2,14 +2,20 @@ package sapotero.rxtest.db.mapper;
 
 import java.util.Collections;
 
+import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RPerformer;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Performer;
+import sapotero.rxtest.utils.Settings;
 
 // Maps between Block and RBlockEntity
 public class BlockMapper extends AbstractMapper<Block, RBlockEntity> {
+
+  public BlockMapper(Settings settings, Mappers mappers) {
+    super(settings, mappers);
+  }
 
   @Override
   public RBlockEntity toEntity(Block model) {
@@ -25,7 +31,7 @@ public class BlockMapper extends AbstractMapper<Block, RBlockEntity> {
     entity.setToFamiliarization(model.getToFamiliarization());
 
     if ( notEmpty(model.getPerformers() ) ) {
-      PerformerMapper performerMapper = new PerformerMapper();
+      PerformerMapper performerMapper = mappers.getPerformerMapper();
 
       for (Performer performerModel : model.getPerformers()) {
         RPerformerEntity performerEntity = performerMapper.toEntity(performerModel);
@@ -71,7 +77,7 @@ public class BlockMapper extends AbstractMapper<Block, RBlockEntity> {
 
   private void setPerformers(Block model, RBlockEntity entity, boolean formatted) {
     if ( notEmpty( entity.getPerformers() ) ) {
-      PerformerMapper performerMapper = new PerformerMapper();
+      PerformerMapper performerMapper = mappers.getPerformerMapper();
 
       for (RPerformer _performer : entity.getPerformers()) {
         RPerformerEntity performerEntity = (RPerformerEntity) _performer;

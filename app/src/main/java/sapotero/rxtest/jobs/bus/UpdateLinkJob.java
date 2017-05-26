@@ -111,7 +111,7 @@ public class UpdateLinkJob extends BaseJob {
   private Observable<RDocumentEntity> create(DocumentInfo d){
     RDocumentEntity rd = new RDocumentEntity();
 
-    DocumentMapper documentMapper = new DocumentMapper();
+    DocumentMapper documentMapper = mappers.getDocumentMapper();
     documentMapper.setSimpleFields(rd, d);
     if (filter != null) {
       documentMapper.setFilter(rd, filter.toString());

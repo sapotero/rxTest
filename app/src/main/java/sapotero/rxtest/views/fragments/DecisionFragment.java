@@ -40,6 +40,7 @@ import butterknife.OnClick;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.mapper.PerformerMapper;
+import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.view.builders.BlockFactory;
 import sapotero.rxtest.retrofit.models.Oshs;
@@ -57,6 +58,7 @@ import timber.log.Timber;
 public class DecisionFragment extends Fragment implements PrimaryConsiderationAdapter.Callback, SelectOshsDialogFragment.Callback, SelectTemplateDialogFragment.Callback {
 
   @Inject Settings settings;
+  @Inject Mappers mappers;
 
   @BindView(R.id.card_toolbar)  Toolbar  card_toolbar;
   @BindView(R.id.decision_text) EditText decision_text;
@@ -331,7 +333,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
         Timber.tag(TAG).w("USER: %s [ %s | %s ]", u.getPerformerText(), u.getIsOriginal(), u.getIsResponsible() );
         Timber.tag(TAG).w("USER: %s ", new Gson().toJson(u) );
         PrimaryConsiderationPeople user =
-                (PrimaryConsiderationPeople) new PerformerMapper().convert(u, PerformerMapper.DestinationType.PRIMARYCONSIDERATIONPEOPLE);
+                (PrimaryConsiderationPeople) mappers.getPerformerMapper().convert(u, PerformerMapper.DestinationType.PRIMARYCONSIDERATIONPEOPLE);
 
         people.add(user);
       }
@@ -436,7 +438,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
 
       for (int i = 0; i < adapter.getCount(); i++) {
         PrimaryConsiderationPeople item = adapter.getItem(i);
-        Performer p = (Performer) new PerformerMapper().convert(item, PerformerMapper.DestinationType.PERFORMER);
+        Performer p = (Performer) mappers.getPerformerMapper().convert(item, PerformerMapper.DestinationType.PERFORMER);
         p.setNumber(i);
         performers.add(p);
       }
@@ -573,7 +575,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     Timber.tag("FROM DIALOG").i( "[%s] %s | %s", user.getId(), user.getName(), user.getOrganization());
 
     PrimaryConsiderationPeople item =
-            (PrimaryConsiderationPeople) new PerformerMapper().convert(user, PerformerMapper.DestinationType.PRIMARYCONSIDERATIONPEOPLE);
+            (PrimaryConsiderationPeople) mappers.getPerformerMapper().convert(user, PerformerMapper.DestinationType.PRIMARYCONSIDERATIONPEOPLE);
 
     adapter.add( item );
     updateUsers();

@@ -10,7 +10,6 @@ import com.birbit.android.jobqueue.RetryConstraint;
 import java.util.ArrayList;
 
 import rx.schedulers.Schedulers;
-import sapotero.rxtest.db.mapper.FavoriteUserMapper;
 import sapotero.rxtest.db.requery.models.RFavoriteUserEntity;
 import sapotero.rxtest.retrofit.models.Oshs;
 import timber.log.Timber;
@@ -48,7 +47,7 @@ public class CreateFavoriteUsersJob extends BaseJob {
   }
 
   private void add(Oshs user) {
-    RFavoriteUserEntity data = new FavoriteUserMapper().toEntity(user);
+    RFavoriteUserEntity data = mappers.getFavoriteUserMapper().toEntity(user);
 
     dataStore
       .insert(data)

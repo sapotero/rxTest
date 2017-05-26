@@ -1,6 +1,7 @@
 package sapotero.rxtest.application.components;
 
 import dagger.Component;
+import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.application.modules.EsdModule;
 import sapotero.rxtest.application.modules.SettingsModule;
 import sapotero.rxtest.application.scopes.DataScope;
@@ -9,6 +10,7 @@ import sapotero.rxtest.db.mapper.DocumentMapper;
 import sapotero.rxtest.db.mapper.FavoriteUserMapper;
 import sapotero.rxtest.db.mapper.PrimaryConsiderationMapper;
 import sapotero.rxtest.db.mapper.TemplateMapper;
+import sapotero.rxtest.db.mapper.utils.MappersModule;
 import sapotero.rxtest.db.requery.utils.RequeryDbModule;
 import sapotero.rxtest.db.requery.utils.validation.ValidationModule;
 import sapotero.rxtest.managers.CurrentDocumentManager;
@@ -23,9 +25,11 @@ import sapotero.rxtest.views.activities.FileSignActivity;
 import sapotero.rxtest.views.activities.InfoNoMenuActivity;
 import sapotero.rxtest.views.activities.LogActivity;
 import sapotero.rxtest.views.activities.LoginActivity;
+import sapotero.rxtest.views.adapters.DocumentLinkAdapter;
 import sapotero.rxtest.views.adapters.DocumentTypeAdapter;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.PrimaryConsiderationAdapter;
+import sapotero.rxtest.views.adapters.PrimaryUsersAdapter;
 import sapotero.rxtest.views.adapters.SearchResultAdapter;
 import sapotero.rxtest.views.custom.stepper.build.steps.StepperAuthFragment;
 import sapotero.rxtest.views.custom.stepper.build.steps.StepperChooseAuthTypeFragment;
@@ -48,6 +52,7 @@ import sapotero.rxtest.views.menu.factories.ItemsBuilder;
   SettingsModule.class,
   RequeryDbModule.class,
   InMemoryStoreModule.class,
+  MappersModule.class
 })
 
 public interface DataComponent {
@@ -66,6 +71,8 @@ public interface DataComponent {
   void inject(DocumentTypeAdapter adapter);
   void inject(PrimaryConsiderationAdapter adapter);
   void inject(SearchResultAdapter searchResultAdapter);
+  void inject(DocumentLinkAdapter documentLinkAdapter);
+  void inject(PrimaryUsersAdapter primaryUsersAdapter);
 
   void inject(StepperLoadDataFragment fragment);
   void inject(DecisionFragment fragment);
@@ -86,10 +93,4 @@ public interface DataComponent {
   void inject(CurrentDocumentManager currentDocumentManager);
 
   void inject(DecisionManager decisionManager);
-
-  void inject(PrimaryConsiderationMapper primaryConsiderationMapper);
-  void inject(FavoriteUserMapper favoriteUserMapper);
-  void inject(AssistantMapper assistantMapper);
-  void inject(TemplateMapper templateMapper);
-  void inject(DocumentMapper documentMapper);
 }

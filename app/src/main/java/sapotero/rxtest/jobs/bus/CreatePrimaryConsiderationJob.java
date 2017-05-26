@@ -10,7 +10,6 @@ import com.birbit.android.jobqueue.RetryConstraint;
 import java.util.ArrayList;
 
 import rx.schedulers.Schedulers;
-import sapotero.rxtest.db.mapper.PrimaryConsiderationMapper;
 import sapotero.rxtest.db.requery.models.RPrimaryConsiderationEntity;
 import sapotero.rxtest.retrofit.models.Oshs;
 import timber.log.Timber;
@@ -44,7 +43,7 @@ public class CreatePrimaryConsiderationJob extends BaseJob {
   }
 
   private void add(Oshs user) {
-    RPrimaryConsiderationEntity data = new PrimaryConsiderationMapper().toEntity(user);
+    RPrimaryConsiderationEntity data = mappers.getPrimaryConsiderationMapper().toEntity(user);
 
     dataStore
       .insert(data)

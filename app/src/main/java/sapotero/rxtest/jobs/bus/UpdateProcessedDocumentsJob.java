@@ -130,7 +130,7 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
   @NonNull
   private Observable<RDocumentEntity> create(DocumentInfo d){
     RDocumentEntity rd = new RDocumentEntity();
-    DocumentMapper documentMapper = new DocumentMapper();
+    DocumentMapper documentMapper = mappers.getDocumentMapper();
 
     documentMapper.setSimpleFields(rd, d);
     documentMapper.setFilter(rd, "");
@@ -175,7 +175,7 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
     rDoc.setProcessed(true);
     rDoc.setFolder(processed_folder);
 
-    DocumentMapper documentMapper = new DocumentMapper();
+    DocumentMapper documentMapper = mappers.getDocumentMapper();
 
     documentMapper.setSigner(rDoc, document.getSigner());
     documentMapper.setFilter(rDoc, "");
@@ -213,7 +213,7 @@ public class UpdateProcessedDocumentsJob extends BaseJob {
       .where(RDocumentEntity.UID.eq(uid))
       .get().first();
 
-    DocumentMapper documentMapper = new DocumentMapper();
+    DocumentMapper documentMapper = mappers.getDocumentMapper();
 
     if ( !Objects.equals( document.getMd5(), doc.getMd5() ) ){
       Timber.tag("MD5").d("not equal %s - %s",document.getMd5(), doc.getMd5() );

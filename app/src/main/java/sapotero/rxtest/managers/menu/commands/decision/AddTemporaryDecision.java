@@ -7,11 +7,9 @@ import java.util.UUID;
 
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import sapotero.rxtest.db.mapper.BlockMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
-import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.db.requery.utils.DecisionConverter;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
@@ -19,7 +17,6 @@ import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
-import sapotero.rxtest.retrofit.models.document.Performer;
 import timber.log.Timber;
 
 public class AddTemporaryDecision extends AbstractCommand {
@@ -141,7 +138,7 @@ public class AddTemporaryDecision extends AbstractCommand {
       decision.setDate( dec.getDate() );
 
       for (Block _block: dec.getBlocks()) {
-        RBlockEntity block = new BlockMapper().toEntity(_block);
+        RBlockEntity block = mappers.getBlockMapper().toEntity(_block);
         block.setDecision(decision);
         decision.getBlocks().add(block);
       }

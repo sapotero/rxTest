@@ -151,7 +151,7 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
   @NonNull
   private Observable<RDocumentEntity> create(DocumentInfo d){
     RDocumentEntity rd = new RDocumentEntity();
-    DocumentMapper documentMapper = new DocumentMapper();
+    DocumentMapper documentMapper = mappers.getDocumentMapper();
 
     documentMapper.setSimpleFields(rd, d);
     documentMapper.setJournal(rd, "");
@@ -209,7 +209,7 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
     rDoc.setControl(onControl);
     rDoc.setFolder(folder);
 
-    DocumentMapper documentMapper = new DocumentMapper();
+    DocumentMapper documentMapper = mappers.getDocumentMapper();
 
     documentMapper.setSigner(rDoc, document.getSigner());
     documentMapper.setJournal(rDoc, "");
@@ -252,7 +252,7 @@ public class UpdateFavoritesDocumentsJob extends BaseJob {
       .where(RDocumentEntity.UID.eq(uid))
       .get().first();
 
-    DocumentMapper documentMapper = new DocumentMapper();
+    DocumentMapper documentMapper = mappers.getDocumentMapper();
 
     if ( !Objects.equals( document.getMd5(), doc.getMd5() ) ){
       Timber.tag("MD5").d("not equal %s - %s",document.getMd5(), doc.getMd5() );

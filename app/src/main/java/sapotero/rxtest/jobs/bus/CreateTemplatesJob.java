@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 import rx.schedulers.Schedulers;
-import sapotero.rxtest.db.mapper.TemplateMapper;
 import sapotero.rxtest.db.requery.models.RTemplateEntity;
 import sapotero.rxtest.retrofit.models.Template;
 import timber.log.Timber;
@@ -46,7 +45,7 @@ public class CreateTemplatesJob extends BaseJob {
   }
 
   private void add(Template template) {
-    RTemplateEntity data = new TemplateMapper().toEntity(template);
+    RTemplateEntity data = mappers.getTemplateMapper().toEntity(template);
     data.setType( type != null && !Objects.equals(type, "") ? type : "decision");
 
     dataStore

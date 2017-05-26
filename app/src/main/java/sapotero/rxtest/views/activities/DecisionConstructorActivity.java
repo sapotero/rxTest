@@ -23,7 +23,6 @@ import org.greenrobot.eventbus.EventBus;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -37,16 +36,10 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.db.mapper.BlockMapper;
-import sapotero.rxtest.db.mapper.DecisionMapper;
-import sapotero.rxtest.db.mapper.PerformerMapper;
+import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RUrgencyEntity;
-import sapotero.rxtest.db.requery.models.decisions.RBlock;
-import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
-import sapotero.rxtest.db.requery.models.decisions.RPerformer;
-import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.db.requery.utils.DecisionConverter;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.decision.ApproveDecisionEvent;
@@ -73,6 +66,7 @@ import timber.log.Timber;
 public class DecisionConstructorActivity extends AppCompatActivity implements DecisionFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, OperationManager.Callback, SelectOshsDialogFragment.Callback, SelectTemplateDialogFragment.Callback {
 
   @Inject Settings settings;
+  @Inject Mappers mappers;
   @Inject OperationManager operationManager;
   @Inject SingleEntityStore<Persistable> dataStore;
 
@@ -796,7 +790,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
         .get().firstOrNull();
 
       if (rDecisionEntity != null) {
-        raw_decision = new DecisionMapper().toModel(rDecisionEntity);
+        raw_decision = mappers.getDecisionMapper().toModel(rDecisionEntity);
       } else {
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");

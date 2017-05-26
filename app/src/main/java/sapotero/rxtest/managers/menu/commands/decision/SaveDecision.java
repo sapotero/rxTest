@@ -15,11 +15,9 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.mapper.BlockMapper;
-import sapotero.rxtest.db.mapper.PerformerMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
-import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
@@ -29,7 +27,6 @@ import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
-import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
 import timber.log.Timber;
 
@@ -136,7 +133,7 @@ public class SaveDecision extends AbstractCommand {
       decision.getBlocks().clear();
     }
 
-    BlockMapper blockMapper = new BlockMapper();
+    BlockMapper blockMapper = mappers.getBlockMapper();
 
     for (Block _block : dec.getBlocks()) {
       RBlockEntity block = blockMapper.toEntity(_block);

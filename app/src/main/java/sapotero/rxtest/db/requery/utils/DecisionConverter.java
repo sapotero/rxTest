@@ -2,7 +2,7 @@ package sapotero.rxtest.db.requery.utils;
 
 import java.util.Arrays;
 
-import sapotero.rxtest.db.mapper.DecisionMapper;
+import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import timber.log.Timber;
@@ -11,7 +11,7 @@ import timber.log.Timber;
 public class DecisionConverter {
 
   public static Decision formatDecision(RDecisionEntity decision) {
-    Decision formattedDecision = new DecisionMapper().toFormattedModel(decision);
+    Decision formattedDecision = Mappers.getMappers().getDecisionMapper().toFormattedModel(decision);
     return formattedDecision;
   }
 

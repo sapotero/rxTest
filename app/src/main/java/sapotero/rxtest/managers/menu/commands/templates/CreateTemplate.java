@@ -12,7 +12,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import sapotero.rxtest.db.mapper.TemplateMapper;
 import sapotero.rxtest.db.requery.models.RTemplateEntity;
 import sapotero.rxtest.events.decision.AddDecisionTemplateEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
@@ -98,7 +97,7 @@ public class CreateTemplate extends AbstractCommand {
   }
 
   private void insertTemplate(Template data) {
-    RTemplateEntity template = new TemplateMapper().toEntity(data);
+    RTemplateEntity template = mappers.getTemplateMapper().toEntity(data);
     template.setType(params.getLabel());
 
     dataStore

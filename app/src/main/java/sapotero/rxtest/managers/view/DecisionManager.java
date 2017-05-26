@@ -17,15 +17,12 @@ import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
 import rx.Subscription;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.db.mapper.BlockMapper;
-import sapotero.rxtest.db.mapper.PerformerMapper;
+import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
-import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
-import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.managers.view.builders.DecisionBuilder;
@@ -38,6 +35,7 @@ public class DecisionManager implements DecisionInterface, DecisionBuilder.Callb
 
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject Settings settings;
+  @Inject Mappers mappers;
 
   private Decision decision;
   private final String md5;
@@ -148,7 +146,7 @@ public class DecisionManager implements DecisionInterface, DecisionBuilder.Callb
       ArrayList<RBlockEntity> list = new ArrayList<>();
 
       for (Block b: d.getBlocks() ) {
-        RBlockEntity block = new BlockMapper().toEntity(b);
+        RBlockEntity block = mappers.getBlockMapper().toEntity(b);
         block.setDecision(dec);
         list.add(block);
       }

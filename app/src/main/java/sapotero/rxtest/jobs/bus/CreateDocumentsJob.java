@@ -105,7 +105,7 @@ public class CreateDocumentsJob extends BaseJob {
   }
 
   private void create(DocumentInfo document){
-    DocumentMapper documentMapper = new DocumentMapper();
+    DocumentMapper documentMapper = mappers.getDocumentMapper();
     RDocumentEntity doc = documentMapper.toEntity(document);
     documentMapper.setJournal(doc, journal);
     documentMapper.setFilter(doc, status);

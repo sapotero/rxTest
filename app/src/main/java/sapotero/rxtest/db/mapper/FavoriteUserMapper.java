@@ -1,8 +1,6 @@
 package sapotero.rxtest.db.mapper;
 
-import javax.inject.Inject;
-
-import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RFavoriteUserEntity;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.utils.Settings;
@@ -12,10 +10,8 @@ import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 // (model for RFavoriteUserEntity is Oshs)
 public class FavoriteUserMapper extends AbstractMapper<Oshs, RFavoriteUserEntity> {
 
-  @Inject Settings settings;
-
-  public FavoriteUserMapper() {
-    EsdApplication.getDataComponent().inject(this);
+  public FavoriteUserMapper(Settings settings, Mappers mappers) {
+    super(settings, mappers);
   }
 
   @Override
@@ -58,7 +54,7 @@ public class FavoriteUserMapper extends AbstractMapper<Oshs, RFavoriteUserEntity
   public PrimaryConsiderationPeople toPrimaryConsiderationPeople(RFavoriteUserEntity entity) {
     Oshs model = toModel(entity);
     PrimaryConsiderationPeople people =
-            (PrimaryConsiderationPeople) new PerformerMapper().convert(model, PerformerMapper.DestinationType.PRIMARYCONSIDERATIONPEOPLE);
+            (PrimaryConsiderationPeople) mappers.getPerformerMapper().convert(model, PerformerMapper.DestinationType.PRIMARYCONSIDERATIONPEOPLE);
     return people;
   }
 }

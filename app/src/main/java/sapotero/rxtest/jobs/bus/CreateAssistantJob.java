@@ -10,7 +10,6 @@ import com.birbit.android.jobqueue.RetryConstraint;
 import java.util.ArrayList;
 
 import rx.schedulers.Schedulers;
-import sapotero.rxtest.db.mapper.AssistantMapper;
 import sapotero.rxtest.db.requery.models.RAssistantEntity;
 import sapotero.rxtest.retrofit.models.Assistant;
 import timber.log.Timber;
@@ -43,7 +42,7 @@ public class CreateAssistantJob extends BaseJob {
   }
 
   private void add(Assistant user) {
-    RAssistantEntity data = new AssistantMapper().toEntity(user);
+    RAssistantEntity data = mappers.getAssistantMapper().toEntity(user);
 
     dataStore
       .insert(data)
