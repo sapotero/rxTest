@@ -9,11 +9,11 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.retrofit.OperationService;
-import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.retrofit.OperationService;
+import sapotero.rxtest.retrofit.models.OperationResult;
 import timber.log.Timber;
 
 public class AddToFolder extends AbstractCommand {
@@ -70,6 +70,10 @@ public class AddToFolder extends AbstractCommand {
 
     queueManager.setExecutedLocal(this);
 
+
+    store.setFavoriteLabel(document_id);
+
+
     if ( callback != null ){
       callback.onCommandExecuteSuccess( getType() );
     }
@@ -114,6 +118,8 @@ public class AddToFolder extends AbstractCommand {
           if (callback != null){
             callback.onCommandExecuteError(getType());
           }
+
+          store.removeFavoriteLabel(document_id);
         }
       );
   }

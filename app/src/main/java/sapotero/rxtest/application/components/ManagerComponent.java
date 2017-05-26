@@ -18,6 +18,7 @@ import sapotero.rxtest.views.activities.InfoActivity;
 import sapotero.rxtest.views.activities.MainActivity;
 import sapotero.rxtest.views.activities.SettingsTemplatesActivity;
 import sapotero.rxtest.views.adapters.DecisionAdapter;
+import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
 import sapotero.rxtest.views.fragments.DecisionRejectionTemplateFragment;
 import sapotero.rxtest.views.fragments.DecisionTemplateFragment;
@@ -56,4 +57,6 @@ public interface ManagerComponent {
 
   void inject(DBQueryBuilder activity);
   void inject(InMemoryDocumentStorage activity);
+
+  void inject(DocumentsAdapter adapter);
 }

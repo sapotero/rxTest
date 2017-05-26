@@ -657,12 +657,12 @@ public class DBQueryBuilder {
         .from( store.getDocuments().values() )
         .filter( doc -> byStatus(filters, doc))
         .filter( doc -> byType(indexes, doc))
-        .subscribeOn(Schedulers.computation())
-        .observeOn(AndroidSchedulers.mainThread())
         .map(InMemoryDocument::getDocument)
         .filter(document -> document.getSigner() != null)
         .map(Document::getSigner)
         .toList()
+        .subscribeOn(Schedulers.computation())
+        .observeOn(AndroidSchedulers.mainThread())
         .subscribe(
           signers -> {
 

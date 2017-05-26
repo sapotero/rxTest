@@ -22,21 +22,26 @@ import javax.inject.Inject;
 
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.utils.NoDocumentsEvent;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.memory.InMemoryDocumentStorage;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.views.activities.InfoActivity;
 import sapotero.rxtest.views.activities.MainActivity;
+import timber.log.Timber;
 
 public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.DocumentViewHolder> implements Action1<List<Document>> {
 
   @Inject Settings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
+  @Inject InMemoryDocumentStorage store;
 
   //  private List<RDocumentEntity> documents;
   //  private ObservableDocumentList real_docs;
@@ -65,7 +70,31 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     this.mContext  = context;
     this.documents = documents;
 
-    EsdApplication.getDataComponent().inject(this);
+    EsdApplication.getManagerComponent().inject(this);
+
+    initSubscription();
+  }
+
+  private void initSubscription() {
+    store
+      .getPublishSubject()
+      .filter( doc -> Holder.MAP.containsKey(doc.getUid()) )
+      .subscribeOn(Schedulers.computation())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(
+        this::updateDocumentCard,
+        Timber::e
+      );
+  }
+
+  private void updateDocumentCard(InMemoryDocument doc) {
+    for (int i = 0; i < documents.size(); i++) {
+      if ( Objects.equals(documents.get(i).getUid(), doc.getUid()) ){
+        documents.set( i, doc);
+        notifyItemChanged( i,  doc);
+        break;
+      }
+    }
   }
 
   @Override

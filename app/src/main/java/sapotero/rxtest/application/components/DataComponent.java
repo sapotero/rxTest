@@ -18,7 +18,6 @@ import sapotero.rxtest.views.activities.InfoNoMenuActivity;
 import sapotero.rxtest.views.activities.LogActivity;
 import sapotero.rxtest.views.activities.LoginActivity;
 import sapotero.rxtest.views.adapters.DocumentTypeAdapter;
-import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.PrimaryConsiderationAdapter;
 import sapotero.rxtest.views.adapters.SearchResultAdapter;
 import sapotero.rxtest.views.custom.stepper.build.steps.StepperAuthFragment;
@@ -55,7 +54,6 @@ public interface DataComponent {
   void inject(DocumentInfocardFullScreenActivity activity);
   void inject(InfoNoMenuActivity activity);
 
-  void inject(DocumentsAdapter adapter);
   void inject(DocumentTypeAdapter adapter);
   void inject(PrimaryConsiderationAdapter adapter);
   void inject(SearchResultAdapter searchResultAdapter);
