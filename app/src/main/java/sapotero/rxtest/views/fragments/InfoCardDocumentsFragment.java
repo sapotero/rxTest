@@ -25,6 +25,9 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -132,6 +135,8 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
       urgency.setVisibility(View.VISIBLE);
     }
 
+    index = 0;
+
     if (document.getImages().size() > 0){
       adapter.clear();
 
@@ -161,44 +166,35 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
         adapter.add( image );
       }
 
-    }
-
-
-    index = 0;
-
-
-    if (adapter.getCount() > 0) {
-
-      try {
-        setPdfPreview();
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-
+      setPdfPreview();
       no_files.setVisibility(View.GONE);
       pdf_wrapper.setVisibility(View.VISIBLE);
+
     } else {
       no_files.setVisibility(View.VISIBLE);
       pdf_wrapper.setVisibility(View.GONE);
     }
+
   }
 
-  private void setPdfPreview() {
+  private void setPdfPreview() throws FileNotFoundException {
+
     Image image = adapter.getItem(index);
 
     document_title.setText( image.getTitle() );
 
     File file = new File(getContext().getFilesDir(), String.format( "%s_%s", image.getMd5(), image.getTitle() ));
 
+    InputStream targetStream = new FileInputStream(file);
 
     if (file.exists()){
       pdfView
-        .fromFile( file )
+        .fromStream( targetStream )
+//        .fromFile( file )
         .enableSwipe(true)
         .enableDoubletap(true)
         .defaultPage(0)
         .swipeHorizontal(false)
-//        .enableAntialiasing(true)
         .onRender((nbPages, pageWidth, pageHeight) -> pdfView.fitToWidth())
         .onLoad(nbPages -> {
           Timber.tag(TAG).i(" onLoad");
@@ -206,17 +202,24 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
         .onError(t -> {
           Timber.tag(TAG).i(" onError");
         })
+        .onDraw((canvas, pageWidth, pageHeight, displayedPage) -> {
+          Timber.tag(TAG).i(" onDraw");
+        })
         .onPageChange((page, pageCount) -> {
           Timber.tag(TAG).i(" onPageChange");
           updatePageCount();
         })
-        .enableAnnotationRendering(false)
-//        .password(null)
+        .enableAnnotationRendering(true)
         .scrollHandle(null)
         .load();
+//        pdfView.useBestQuality(true);
+//        pdfView.
+
+
       updateDocumentCount();
       updatePageCount();
       updateZoomVisibility();
+
     }
   }
 
@@ -290,11 +293,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     if ( EventBus.getDefault().isRegistered(this) ){
       EventBus.getDefault().unregister(this);
     }
-  }
 
-  @Override
-  public void onDestroyView() {
-    super.onDestroyView();
     pdfView.recycle();
   }
 
@@ -334,19 +333,19 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   }
 
 
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(FileDownloadedEvent event) {
-    Log.d("FileDownloadedEvent", event.path);
-
-  }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(UpdateCurrentDocumentEvent event) throws Exception {
-    Timber.tag(TAG).w("UpdateCurrentDocumentEvent %s", event.uid);
-    if (Objects.equals(event.uid, settings.getUid())){
-      updateDocument();
-    }
-  }
+//  @Subscribe(threadMode = ThreadMode.MAIN)
+//  public void onMessageEvent(FileDownloadedEvent event) {
+//    Log.d("FileDownloadedEvent", event.path);
+//
+//  }
+//
+//  @Subscribe(threadMode = ThreadMode.MAIN)
+//  public void onMessageEvent(UpdateCurrentDocumentEvent event) throws Exception {
+//    Timber.tag(TAG).w("UpdateCurrentDocumentEvent %s", event.uid);
+//    if (Objects.equals(event.uid, settings.getUid())){
+//      updateDocument();
+//    }
+//  }
 
 
 }
