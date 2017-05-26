@@ -58,6 +58,9 @@ public class RemoveFromFolder extends AbstractCommand {
       .get().value();
     Timber.tag(TAG).w( "updated: %s", count );
 
+    store.setFavoriteLabel(document_id);
+    store.setChangeLabel(document_id);
+
     queueManager.add(this);
   }
 
@@ -112,11 +115,16 @@ public class RemoveFromFolder extends AbstractCommand {
 
           queueManager.setExecutedRemote(this);
 
+          store.removeFavoriteLabel(document_id);
+          store.removeChangeLabel(document_id);
+
         },
         error -> {
           if (callback != null) {
             callback.onCommandExecuteError(getType());
           }
+
+          store.removeChangeLabel(document_id);
         }
       );
   }

@@ -72,6 +72,8 @@ public class AddToFolder extends AbstractCommand {
 
 
     store.setFavoriteLabel(document_id);
+    store.setChangeLabel(document_id);
+
 
 
     if ( callback != null ){
@@ -113,6 +115,7 @@ public class AddToFolder extends AbstractCommand {
           Timber.tag(TAG).i("type: %s", data.getType());
 
           queueManager.setExecutedRemote(this);
+          store.removeChangeLabel(document_id);
         },
         error -> {
           if (callback != null){
@@ -120,6 +123,7 @@ public class AddToFolder extends AbstractCommand {
           }
 
           store.removeFavoriteLabel(document_id);
+          store.removeChangeLabel(document_id);
         }
       );
   }

@@ -8,6 +8,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.TextView;
 
 import org.greenrobot.eventbus.EventBus;
@@ -43,14 +45,10 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject InMemoryDocumentStorage store;
 
-  //  private List<RDocumentEntity> documents;
-  //  private ObservableDocumentList real_docs;
   private List<InMemoryDocument> documents;
   private Context mContext;
-
-  private String TAG = this.getClass().getSimpleName();
-
-  private int lastPosition = -1;
+  final private AlphaAnimation in = new AlphaAnimation(0.0f, 1.0f);
+  final private Animation out = new AlphaAnimation(1.0f, 0.0f);
 
 
   @Override
@@ -60,7 +58,6 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
 
   public void removeAllWithRange() {
-//    notifyItemRangeRemoved(0, documents.size());
     Holder.MAP.clear();
     documents.clear();
     notifyDataSetChanged();
@@ -72,7 +69,13 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
     EsdApplication.getManagerComponent().inject(this);
 
+    initAnimation();
     initSubscription();
+  }
+
+  private void initAnimation() {
+    in.setDuration(300);
+    out.setDuration(300);
   }
 
   private void initSubscription() {
@@ -247,7 +250,6 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     }
 
   }
-
 
 //  @Override
 //  public void onBindViewHolder(final DocumentViewHolder viewHolder, final int position) {

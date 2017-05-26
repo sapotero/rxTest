@@ -188,7 +188,25 @@ public class InMemoryDocumentStorage {
   public void removeFavoriteLabel(String uid) {
     InMemoryDocument doc = documents.get(uid);
     if (doc != null) {
-      doc.getDocument().setFavorites(true);
+      doc.getDocument().setFavorites(false);
+      publish.onNext( doc );
+    }
+  }
+
+  public void setChangeLabel(String uid) {
+    InMemoryDocument doc = documents.get(uid);
+    if (doc != null) {
+      doc.getDocument().setChanged(true);
+      publish.onNext( doc );
+    }
+
+
+  }
+
+  public void removeChangeLabel(String uid) {
+    InMemoryDocument doc = documents.get(uid);
+    if (doc != null) {
+      doc.getDocument().setChanged(false);
       publish.onNext( doc );
     }
   }
