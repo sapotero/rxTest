@@ -1,6 +1,7 @@
 package sapotero.rxtest.db.requery.query;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -53,7 +54,7 @@ public class DBQueryBuilder {
   private ArrayList<ConditionBuilder> conditions;
   private ProgressBar progressBar;
   private TextView documents_empty_list;
-  private CompositeSubscription subscribe;
+  private CompositeSubscription compositeSubscription;
   private OrganizationAdapter organizationAdapter;
   private OrganizationSpinner organizationSelector;
   private Boolean withFavorites;
@@ -186,7 +187,7 @@ public class DBQueryBuilder {
 
       Boolean finalWithFavorites = hsdFavorites;
       Boolean finalHasProcessed = hasProcessed;
-      subscribe.add(
+      compositeSubscription.add(
 
         query
           .orderBy( RDocumentEntity.SORT_KEY.desc() )
@@ -257,7 +258,7 @@ public class DBQueryBuilder {
 //            .toSelfObservable()
 //            .subscribeOn(Schedulers.io())
 //            .observeOn( AndroidSchedulers.mainThread() )
-//            .subscribe(this::addByOne, this::error)
+//            .compositeSubscription(this::addByOne, this::error)
 //        query
 //          .orderBy( RDocumentEntity.SORT_KEY.desc() )
 //          .get()
@@ -297,12 +298,12 @@ public class DBQueryBuilder {
 //          .subscribeOn(Schedulers.newThread())
 //          .observeOn( AndroidSchedulers.mainThread() )
 //
-//          .subscribe(this::addByOneInAdapter, this::error)
+//          .compositeSubscription(this::addByOneInAdapter, this::error)
 
 
         // Добавляем всё сразу
         // .toList()
-        //.subscribe(this::addAllInAdapter, this::error)
+        //.compositeSubscription(this::addAllInAdapter, this::error)
       );
 //
 //      if (count == 0){
@@ -317,87 +318,168 @@ public class DBQueryBuilder {
 
   //new realization
   public void execute(){
-    findOrganizations(true);
 
     if ( conditions.size() > 0 ){
+
+      findOrganizations(true);
 
       ArrayList<String> filters = new ArrayList<>();
       ArrayList<String> indexes = new ArrayList<>();
 
+      Boolean isProcessed = false;
+      Boolean isFavotires = false;
+      Boolean isControl   = false;
+
       for (ConditionBuilder condition : conditions ){
         if (condition.getField().getLeftOperand() == RDocumentEntity.FILTER){
           filters.add( String.valueOf(condition.getField().getRightOperand()) );
+          Timber.tag(TAG).w("new filter: %s", String.valueOf(condition.getField().getRightOperand()));
         }
 
         if (condition.getField().getLeftOperand() == RDocumentEntity.DOCUMENT_TYPE){
           indexes.add( String.valueOf(condition.getField().getRightOperand()) );
+          Timber.tag(TAG).w("new index: %s", String.valueOf(condition.getField().getRightOperand()));
         }
-      }
 
-      Observable
-        .from( store.getDocuments().values() )
-        .filter( doc -> filters.contains(doc.getFilter()) )
-        .filter( doc -> indexes.contains(doc.getIndex())  )
-
-        // resolved https://tasks.n-core.ru/browse/MVDESD-12625
-        // *1) *Фильтр по организациям.
-        .filter(doc -> {
-          boolean   result = true;
-          boolean[] selected_index = organizationSelector.getSelected();
-
-          String organization = doc.getDocument().getSigner().getOrganisation();
-
-          if (selected_index.length > 0) {
-            ArrayList<String> ids = new ArrayList<>();
-
-            for (int i = 0; i < selected_index.length; i++) {
-              if ( selected_index[i] ) {
-                ids.add( organizationAdapter.getItem(i).getName() );
-              }
-            }
-
-            if ( !ids.contains(organization) ) {
-              result = false;
-            }
+        if (condition.getField().getLeftOperand() == RDocumentEntity.CONTROL){
+          if ( condition.getField().getRightOperand().equals(true)  ){
+            isControl = true;
           }
+        }
 
-          return result;
-        })
+        if ( condition.getField().getLeftOperand() == RDocumentEntity.PROCESSED ){
+          if ( condition.getField().getRightOperand().equals(true)  ){
+            isProcessed = true;
+          }
+        }
 
-        // Cортируем по sort_key
-        .toSortedList(
-          (imd1, imd2) -> {
-            int result = -1;
+        if (condition.getField().getLeftOperand() == RDocumentEntity.FAVORITES){
+          if ( condition.getField().getRightOperand().equals(true)  ){
+            isFavotires = true;
+          }
+        }
 
-            if (imd1.getDocument().getSortKey() != null && imd2.getDocument().getSortKey() != null) {
-              result = imd1.getDocument().getSortKey().compareTo( imd2.getDocument().getSortKey() );
-            }
+      }
+      unsubscribe();
 
-            return result;
-          })
+      Boolean processed = isProcessed;
+      Boolean control = isControl;
+      Boolean favorites = isFavotires;
 
-        .subscribeOn(Schedulers.newThread())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(
-          docs -> {
+      Timber.tag(TAG).w("!!!!! f: %s | p: %s | c: %s", favorites, processed, control);
 
-            adapter.removeAllWithRange();
+      compositeSubscription.add(
+        Observable
+          .from( store.getDocuments().values() )
+          .filter( doc -> byControl(control, doc) )
+          .filter( doc -> byFavorites(favorites, doc) )
+          .filter( doc -> byProcessed(processed, doc) )
 
-            if (docs.size() > 0){
-              hideEmpty();
-              for (InMemoryDocument doc: docs ) {
-                adapter.addItem(doc);
+          .filter( doc -> byType(indexes, doc) )
+          .filter( doc -> byStatus(filters, doc) )
+          .filter( this::byOrganization )
+
+          .toSortedList( this::bySortKey)
+          .subscribeOn(Schedulers.computation())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe(
+            docs -> {
+
+              adapter.removeAllWithRange();
+
+              if (docs.size() > 0){
+                hideEmpty();
+                for (InMemoryDocument doc: docs ) {
+                  adapter.addItem(doc);
+                }
+
+              } else {
+                showEmpty();
               }
+            },
+            Timber::e
+          )
+      );
 
-            } else {
-              showEmpty();
-            }
-          },
-          Timber::e
-        );
     }
 
 
+  }
+
+
+  private boolean byType(ArrayList<String> indexes, InMemoryDocument doc) {
+    Timber.tag(TAG).e("byType?   %s | %s", doc.getUid(), indexes.size() );
+
+    return indexes.size() <= 0 || indexes.contains(doc.getIndex());
+  }
+
+  private boolean byStatus(ArrayList<String> filters, InMemoryDocument doc) {
+    Timber.tag(TAG).e("byStatus? %s | %s", doc.getUid(), filters.size());
+    return filters.size() <= 0 || filters.contains(doc.getFilter());
+  }
+
+  private boolean byProcessed(Boolean withProcessed, InMemoryDocument doc) {
+    Timber.tag(TAG).e("processed? %s", doc.getDocument().isProcessed() );
+    return !withProcessed || doc.getDocument().isProcessed();
+  }
+
+  private boolean byControl(Boolean withControl, InMemoryDocument doc) {
+    Timber.tag(TAG).e("control? %s", doc.getDocument().getControl() );
+
+    Boolean result = true;
+
+    if ( withControl ){
+      result = doc.getDocument().getControl();
+    }
+
+    return result;
+  }
+
+  private boolean byFavorites(Boolean withFavorites, InMemoryDocument doc) {
+    Timber.tag(TAG).e("favorites? %s", doc.getDocument().getFavorites() );
+
+    Boolean result = true;
+
+    if ( withFavorites ){
+      result = doc.getDocument().getFavorites() || doc.getDocument().isFromFavoritesFolder();
+    }
+
+    return result;
+  }
+
+  @NonNull
+  private Integer bySortKey(InMemoryDocument imd1, InMemoryDocument imd2) {
+    int result = -1;
+
+    if (imd1.getDocument().getSortKey() != null && imd2.getDocument().getSortKey() != null) {
+      result = imd1.getDocument().getSortKey().compareTo( imd2.getDocument().getSortKey() );
+    }
+
+    return result;
+  }
+
+  @NonNull
+  private Boolean byOrganization(InMemoryDocument doc) {
+    boolean   result = true;
+    boolean[] selected_index = organizationSelector.getSelected();
+
+    String organization = doc.getDocument().getSigner().getOrganisation();
+
+    if (selected_index.length > 0) {
+      ArrayList<String> ids = new ArrayList<>();
+
+      for (int i = 0; i < selected_index.length; i++) {
+        if ( selected_index[i] ) {
+          ids.add( organizationAdapter.getItem(i).getName() );
+        }
+      }
+
+      if ( !ids.contains(organization) ) {
+        result = false;
+      }
+    }
+
+    return result;
   }
 
 
@@ -459,7 +541,7 @@ public class DBQueryBuilder {
 //    docs()
 //      .subscribeOn(Schedulers.io())
 //      .observeOn( AndroidSchedulers.mainThread() )
-//      .subscribe( doc -> {
+//      .compositeSubscription( doc -> {
 //
 //
 //        RSignerEntity signer = (RSignerEntity) doc.getSigner();
@@ -512,18 +594,18 @@ public class DBQueryBuilder {
 //      .subscribeOn(Schedulers.io())
 //      .observeOn( AndroidSchedulers.mainThread() )
 //      .toList()
-//      .subscribe( list -> {
+//      .compositeSubscription( list -> {
 //        addList(list);
 //      }, this::error);
 //
 //  }
 
   private void unsubscribe() {
-    if (subscribe == null) {
-      subscribe = new CompositeSubscription();
+    if (compositeSubscription == null) {
+      compositeSubscription = new CompositeSubscription();
     }
-    if (subscribe.hasSubscriptions()) {
-      subscribe.clear();
+    if (compositeSubscription.hasSubscriptions()) {
+      compositeSubscription.clear();
     }
   }
 
@@ -535,11 +617,6 @@ public class DBQueryBuilder {
     execute();
   }
 
-//  private void addOne(RDocumentEntity _document) {
-//    progressBar.setVisibility(ProgressBar.GONE);
-//    adapter.addItem(_document);
-//  }
-
   private void showEmpty(){
     progressBar.setVisibility(ProgressBar.GONE);
     documents_empty_list.setVisibility(View.VISIBLE);
@@ -549,6 +626,7 @@ public class DBQueryBuilder {
     documents_empty_list.setVisibility(View.GONE);
     progressBar.setVisibility(ProgressBar.GONE);
   }
+
 
   private void findOrganizations(boolean b) {
     Timber.i( "findOrganizations" );
@@ -572,8 +650,8 @@ public class DBQueryBuilder {
 
       Observable
         .from( store.getDocuments().values() )
-        .filter( doc -> filters.contains(doc.getFilter()) )
-        .filter( doc -> indexes.contains(doc.getIndex())  )
+        .filter( doc -> byStatus(filters, doc))
+        .filter( doc -> byType(indexes, doc))
         .subscribeOn(Schedulers.computation())
         .observeOn(AndroidSchedulers.mainThread())
         .map(InMemoryDocument::getDocument)
@@ -616,6 +694,7 @@ public class DBQueryBuilder {
     }
 
   }
+
 
 
   private void findOrganizations() {
@@ -692,16 +771,6 @@ public class DBQueryBuilder {
 
   }
 
-  public int getFavoritesCount(){
-    return dataStore
-      .count(RDocumentEntity.UID)
-      .where(RDocumentEntity.USER.eq( settings.getLogin() ) )
-      .and(RDocumentEntity.FAVORITES.eq(true))
-      .and(RDocumentEntity.FILTER.ne("link"))
-      .get().value();
-  }
-
-
   public DBQueryBuilder withItem(MenuBuilder menuBuilder) {
     this.menuBuilder = menuBuilder;
     return this;
@@ -712,15 +781,4 @@ public class DBQueryBuilder {
     return this;
   }
 
-//  public void invalidateDocumentEvent(UpdateDocumentAdapterEvent event) {
-//
-//    if (!Objects.equals(query_status, "") && !Objects.equals(query_type, "")){
-//      if (Objects.equals(event.status, query_status) && Objects.equals(query_type, event.type)){
-//        RDocumentEntity doc = dataStore.select(RDocumentEntity.class).where(RDocumentEntity.UID.eq(event.uid)).get().firstOrNull();
-//        if (doc != null) {
-//          adapter.addItem(doc);
-//        }
-//      }
-//    }
-//  }
 }

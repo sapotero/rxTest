@@ -14,7 +14,7 @@ import io.requery.rx.SingleEntityStore;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import rx.subjects.ReplaySubject;
+import rx.subjects.PublishSubject;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
@@ -37,7 +37,7 @@ public class InMemoryDocumentStorage {
 
   private final InMemoryLogger logger;
 
-  private final ReplaySubject<InMemoryDocument> publish;
+  private final PublishSubject<InMemoryDocument> publish;
   private final HashMap<String, InMemoryDocument> documents;
   private Subscription loggerSubscription;
 
@@ -45,7 +45,7 @@ public class InMemoryDocumentStorage {
 
     Timber.tag(TAG).e("initialize");
 
-    this.publish    = ReplaySubject.createWithSize(500);
+    this.publish    = PublishSubject.create();
     this.documents  = new HashMap<>();
     this.logger     = new InMemoryLogger();
     this.scheduller = new ScheduledThreadPoolExecutor(1);
@@ -75,7 +75,7 @@ public class InMemoryDocumentStorage {
       );
   }
 
-  public ReplaySubject<InMemoryDocument> getPublishSubject(){
+  public PublishSubject<InMemoryDocument> getPublishSubject(){
     return publish;
   }
 

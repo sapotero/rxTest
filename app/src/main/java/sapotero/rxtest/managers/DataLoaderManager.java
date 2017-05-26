@@ -436,6 +436,7 @@ public class DataLoaderManager {
         )
     );
   }
+
   public void updateByCurrentStatus(MainMenuItem items, MainMenuButton button, Boolean firstRunShared) {
     Timber.tag(TAG).e("updateByCurrentStatus: %s %s", items, button );
 
@@ -539,6 +540,11 @@ public class DataLoaderManager {
       jobCount = 0;
       settings.setJobCount(0);
 
+
+      if (subscription != null) {
+        subscription.clear();
+      }
+
       for (String index: indexes ) {
         for (String status: statuses ) {
           requestCount++;
@@ -547,25 +553,24 @@ public class DataLoaderManager {
             docService
 //              .getDocumentsByIndexes(settings.getLogin(), settings.getToken(), index, status, shared ? "group" : null , 500)
               .getDocumentsByIndexes(settings.getLogin(), settings.getToken(), index, status, null , 500)
-              .subscribeOn(Schedulers.computation())
-              .observeOn(Schedulers.computation())
+              .subscribeOn(Schedulers.newThread())
+              .observeOn(AndroidSchedulers.mainThread())
               .subscribe(
                 data -> {
-//                  requestCount--;
+                  requestCount--;
                   if (data.getDocuments().size() > 0){
 
                     for (Document doc: data.getDocuments() ) {
+                      store.add(doc, index, status);
+                      jobCount++;
 //
 //                      Timber.tag(TAG).e("doc: %s", doc.getUid() );
-                      store.add(doc, index, status);
-//
 ////                       Timber.tag(TAG).e("index: %s | status: %s ",index, status );
 //
 //                      if ( isExist(doc) ){
 //
 //                        if ( !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) ){
 //                          Timber.tag(TAG).e("isUpdate" );
-//                          jobCount++;
 //                          jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), index, status, false) );
 //                        }
 //
@@ -598,8 +603,8 @@ public class DataLoaderManager {
           docService
 //            .getDocuments(settings.getLogin(), settings.getToken(), code, shared ? "group" : null , 500, 0)
             .getDocuments(settings.getLogin(), settings.getToken(), code, null , 500, 0)
-            .subscribeOn(Schedulers.computation())
-            .observeOn(Schedulers.computation())
+            .subscribeOn(Schedulers.newThread())
+            .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
               data -> {
 
@@ -607,7 +612,7 @@ public class DataLoaderManager {
                 if (data.getDocuments().size() > 0){
                   for (Document doc: data.getDocuments() ) {
                     store.add(doc, null, code);
-//                    jobCount++;
+                    jobCount++;
 //                    jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), code, false) );
                   }
                 }

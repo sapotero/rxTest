@@ -65,14 +65,28 @@ public class Document implements Serializable {
   @Expose
   private Boolean favorites;
 
-  private boolean red;
-  private boolean fromFavoritesFolder;
-  private boolean fromProcessedFolder;
 
-  private String firstLink = "";
 
+  // Дополнительные поля, которые не будут сериализованы
+  private transient boolean red;
+  private transient boolean fromFavoritesFolder;
+  private transient boolean fromProcessedFolder;
+  private transient boolean processed = false;
+
+  private transient String firstLink = "";
   public String getFirstLink() {
     return firstLink;
+  }
+
+
+
+
+  public boolean isProcessed() {
+    return processed;
+  }
+
+  public void setProcessed(boolean processed) {
+    this.processed = processed;
   }
 
   public void setFirstLink(String firstLink) {

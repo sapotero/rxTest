@@ -43,6 +43,7 @@ public class InMemoryDocumentMapper {
     document.setChanged( doc.isChanged() );
     document.setControl( doc.isControl() );
     document.setFavorites( doc.isFavorites() );
+    document.setProcessed( doc.isProcessed() );
     document.setFromFavoritesFolder( doc.isFromFavoritesFolder() );
     document.setFromProcessedFolder( doc.isFromProcessedFolder() );
 

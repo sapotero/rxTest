@@ -18,8 +18,8 @@ public final class JobModule {
   @ManagerScope
   JobManager provideJobModule(Context context) {
     Configuration.Builder builder = new Configuration.Builder(context)
-      .minConsumerCount(0)
-      .maxConsumerCount(32)
+      .minConsumerCount(8)
+      .maxConsumerCount(16)
       .injector(job -> EsdApplication.getManagerComponent().inject((BaseJob) job))
       .consumerKeepAlive(60);
 
