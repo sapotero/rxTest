@@ -34,7 +34,6 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.db.requery.utils.DecisionConverter;
 import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -461,7 +460,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
     }
 
     TextView signerBlankTextView = new TextView(getActivity());
-    signerBlankTextView.setText( DecisionConverter.formatName(decision.getSignerBlankText()) );
+    signerBlankTextView.setText( Declension.formatName(decision.getSignerBlankText()) );
     signerBlankTextView.setTextColor( Color.BLACK );
     signerBlankTextView.setGravity( Gravity.END);
     signerBlankTextView.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );

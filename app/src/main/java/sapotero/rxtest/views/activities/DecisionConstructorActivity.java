@@ -40,7 +40,6 @@ import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RUrgencyEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
-import sapotero.rxtest.db.requery.utils.DecisionConverter;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.decision.ApproveDecisionEvent;
 import sapotero.rxtest.events.decision.RejectDecisionEvent;
@@ -182,7 +181,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
                 if (rDecisionEntity != null) {
 //                  params.setDecision( rDecisionEntity );
-                  params.setDecisionModel( DecisionConverter.formatDecision(rDecisionEntity) );
+                  params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
                   params.setDecisionId( rDecisionEntity.getUid() );
 
                   RDocumentEntity doc = (RDocumentEntity) rDecisionEntity.getDocument();
@@ -219,7 +218,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
                   decision.setDocumentUid( settings.getUid() );
 
                   if (rDecisionEntity != null) {
-                    params.setDecisionModel( DecisionConverter.formatDecision(rDecisionEntity) );
+                    params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
                     params.setDecisionId( rDecisionEntity.getUid() );
                   }
 
@@ -296,7 +295,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
             decision.setDocumentUid( settings.getUid() );
 
             if (rDecisionEntity != null) {
-              params.setDecisionModel( DecisionConverter.formatDecision(rDecisionEntity) );
+              params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
               params.setDecisionId( rDecisionEntity.getUid() );
             }
 
@@ -341,7 +340,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
             params = new CommandParams();
             params.setDecisionId( rDecisionEntity.getUid() );
 //            params.setDecision( rDecisionEntity );
-            params.setDecisionModel( DecisionConverter.formatDecision(rDecisionEntity) );
+            params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
 
             if ( settings.isDecisionWithAssignment() ){
               Timber.tag(TAG).w("ASSIGNMENT: %s", settings.isDecisionWithAssignment() );
@@ -365,7 +364,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
             params = new CommandParams();
             params.setDecisionId( rDecisionEntity.getUid() );
 //            params.setDecision( rDecisionEntity );
-            params.setDecisionModel( DecisionConverter.formatDecision(rDecisionEntity) );
+            params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
             operationManager.execute(operation, params);
           }
 
@@ -848,7 +847,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
           CommandParams params = new CommandParams();
           params.setDecisionId(rDecisionEntity.getUid());
 //        params.setDecision( rDecisionEntity );
-          params.setDecisionModel(DecisionConverter.formatDecision(rDecisionEntity));
+          params.setDecisionModel(mappers.getDecisionMapper().toFormattedModel(rDecisionEntity));
 
           operationManager.execute(operation, params);
         })
@@ -874,7 +873,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
           CommandParams params = new CommandParams();
           params.setDecisionId(rDecisionEntity.getUid());
 //        params.setDecision( rDecisionEntity );
-          params.setDecisionModel(DecisionConverter.formatDecision(rDecisionEntity));
+          params.setDecisionModel(mappers.getDecisionMapper().toFormattedModel(rDecisionEntity));
 
           if (settings.isDecisionWithAssignment()) {
             Timber.tag(TAG).w("ASSIGNMENT: %s", settings.isDecisionWithAssignment());

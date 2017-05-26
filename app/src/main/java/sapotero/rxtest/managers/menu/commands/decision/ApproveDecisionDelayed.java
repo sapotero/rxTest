@@ -13,7 +13,6 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
-import sapotero.rxtest.db.requery.utils.DecisionConverter;
 import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
@@ -106,7 +105,7 @@ public class ApproveDecisionDelayed extends AbstractCommand {
     RDecisionEntity decision= getDecision(params.getDecisionId());
     if ( decision != null) {
 
-      Decision _decision = DecisionConverter.formatDecision(decision);
+      Decision _decision = mappers.getDecisionMapper().toFormattedModel(decision);
       _decision.setDocumentUid( null );
       _decision.setDocumentUid( null );
       _decision.setApproved(true);

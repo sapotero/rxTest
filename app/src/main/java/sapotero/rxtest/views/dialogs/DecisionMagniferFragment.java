@@ -34,7 +34,6 @@ import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RPerformer;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
-import sapotero.rxtest.db.requery.utils.DecisionConverter;
 import sapotero.rxtest.utils.padeg.Declension;
 import sapotero.rxtest.views.adapters.models.DecisionSpinnerItem;
 import timber.log.Timber;
@@ -234,7 +233,7 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
       }
 
       TextView signerBlankTextView = new TextView(context);
-      signerBlankTextView.setText( DecisionConverter.formatName( decision.getSignerBlankText() ) );
+      signerBlankTextView.setText( Declension.formatName( decision.getSignerBlankText() ) );
       signerBlankTextView.setTextColor( Color.BLACK );
       signerBlankTextView.setGravity( Gravity.END);
       signerBlankTextView.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );

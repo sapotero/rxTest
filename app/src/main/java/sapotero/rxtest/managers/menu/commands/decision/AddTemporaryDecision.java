@@ -10,13 +10,13 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
-import sapotero.rxtest.db.requery.utils.DecisionConverter;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
+import sapotero.rxtest.utils.padeg.Declension;
 import timber.log.Timber;
 
 public class AddTemporaryDecision extends AbstractCommand {
@@ -116,7 +116,7 @@ public class AddTemporaryDecision extends AbstractCommand {
 
       try {
 
-        name = DecisionConverter.formatName(dec.getSignerText());
+        name = Declension.formatName(dec.getSignerText());
       } catch (Exception e) {
         e.printStackTrace();
       }
