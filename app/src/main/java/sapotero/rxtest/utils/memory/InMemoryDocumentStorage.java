@@ -3,14 +3,11 @@ package sapotero.rxtest.utils.memory;
 import com.birbit.android.jobqueue.JobManager;
 
 import java.util.HashMap;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
-import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
@@ -23,9 +20,7 @@ import sapotero.rxtest.utils.memory.fields.FieldType;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import sapotero.rxtest.utils.memory.mappers.InMemoryDocumentMapper;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
-import sapotero.rxtest.utils.memory.utils.GenerateRandomDocument;
 import sapotero.rxtest.utils.memory.utils.IMDFilter;
-import sapotero.rxtest.utils.memory.utils.InMemoryLogger;
 import timber.log.Timber;
 
 public class InMemoryDocumentStorage {
@@ -33,36 +28,22 @@ public class InMemoryDocumentStorage {
   @Inject JobManager jobManager;
   @Inject SingleEntityStore<Persistable> dataStore;
 
-  private final ScheduledThreadPoolExecutor scheduller;
   private String TAG = this.getClass().getSimpleName();
-
-  private final InMemoryLogger logger;
 
   private final PublishSubject<InMemoryDocument> publish;
   private final HashMap<String, InMemoryDocument> documents;
-  private Subscription loggerSubscription;
 
   public InMemoryDocumentStorage() {
-
-    Timber.tag(TAG).e("initialize");
-
     this.publish    = PublishSubject.create();
     this.documents  = new HashMap<>();
-    this.logger     = new InMemoryLogger();
-    this.scheduller = new ScheduledThreadPoolExecutor(1);
 
     EsdApplication.getManagerComponent().inject(this);
-
-//    initScheduller();
     loadFromDB();
   }
 
+
   public HashMap<String, InMemoryDocument> getDocuments() {
     return documents;
-  }
-
-  private void initScheduller() {
-    scheduller.scheduleWithFixedDelay( new GenerateRandomDocument(this), 0 ,1, TimeUnit.SECONDS );
   }
 
 
