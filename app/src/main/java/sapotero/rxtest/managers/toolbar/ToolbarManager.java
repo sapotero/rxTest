@@ -17,6 +17,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 import javax.inject.Inject;
@@ -424,44 +425,21 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
           processEmptyDecisions();
           break;
         default:
-          try {
-            toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(false);
-            toolbar.getMenu().findItem(R.id.menu_info_decision_edit).setVisible(false);
-          } catch (Exception e) {
-            Timber.tag(TAG).v(e);
-          }
+          safeSetVisibility(R.id.menu_info_decision_create, false);
+          safeSetVisibility(R.id.menu_info_decision_edit, false);
           break;
       }
 
       // Если документ обработан - то изменяем резолюции на поручения
       if ( isProcessed() ) {
-        try {
-          toolbar.getMenu().findItem(R.id.menu_info_decision_edit).setVisible(false);
-          toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(true);
-        } catch (Exception e) {
-          Timber.tag(TAG).v(e);
-        }
-      }
-      // настройка
-      // Показывать кнопку «Создать поручение»
-      try {
-        if (!settings.isShowCreateDecisionPost() && isFromFavoritesFolder() ) {
-          if ( isProcessed() ){
-            toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(false);
-          }
-        }
-      } catch (Exception e) {
-        e.printStackTrace();
+        safeSetVisibility(R.id.menu_info_decision_edit, false);
+        safeSetVisibility(R.id.menu_info_decision_create, true);
       }
 
-      if (Objects.equals(doc.getFilter(), Fields.Status.SIGNING.getValue()) || Objects.equals(doc.getFilter(), Fields.Status.APPROVAL.getValue()) || isFromFavoritesFolder() ) {
+      if (isFromProject() || isFromFavoritesFolder() ) {
         // resolved https://tasks.n-core.ru/browse/MVDESD-12765
         // убрать кнопку "К" у проектов из раздела на согласование("на подписание" её также быть не должно)
-        try {
-          toolbar.getMenu().findItem(R.id.menu_info_shared_to_control).setVisible(false);
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
+        safeSetVisibility(R.id.menu_info_shared_to_control, false);
       }
 
 
@@ -488,11 +466,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       // resolved https://tasks.n-core.ru/browse/MVDESD-13330
       // Или если нет активной резолюции
       if ( hasActiveDecision() ){
-        try {
-          toolbar.getMenu().findItem(R.id.menu_info_to_the_approval_performance).setVisible(false);
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
+        safeSetVisibility(R.id.menu_info_to_the_approval_performance, false);
       }
 
 
@@ -502,7 +476,30 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         clearToolbar();
       }
 
+
+      if ( isProcessed() ){
+        safeSetVisibility(R.id.menu_info_decision_create_with_assignment, settings.isShowCreateDecisionPost());
+        safeSetVisibility(R.id.menu_info_decision_create, settings.isShowCreateDecisionPost());
+
+        if (isFromProject()){
+          safeSetVisibility(R.id.menu_info_decision_create_with_assignment, false);
+        }
+      }
+
     }
+  }
+
+  private void safeSetVisibility(int item, boolean value) {
+    if (toolbar.getMenu() != null) {
+      if (toolbar.getMenu().findItem(item) != null) {
+        toolbar.getMenu().findItem(item).setVisible(value);
+      }
+    }
+  }
+
+
+  private boolean isFromProject() {
+    return doc != null && doc.getFilter() != null && Arrays.asList( Fields.Status.APPROVAL.getValue(), Fields.Status.SIGNING.getValue() ).contains(doc.getFilter());
   }
 
   private void clearToolbar() {
@@ -533,14 +530,11 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     toolbar.getMenu().clear();
     toolbar.inflateMenu(R.menu.info_menu);
 
-    try {
-      toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(showCreateButton);
-      toolbar.getMenu().findItem(R.id.menu_info_decision_edit).setVisible(false);
-      toolbar.getMenu().findItem(R.id.menu_info_shared_to_control).setVisible(true);
-      toolbar.getMenu().findItem(R.id.menu_info_shared_to_favorites).setVisible(true);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    safeSetVisibility(R.id.menu_info_decision_create, showCreateButton);
+    safeSetVisibility(R.id.menu_info_decision_edit, false);
+    safeSetVisibility(R.id.menu_info_shared_to_control, true);
+    safeSetVisibility(R.id.menu_info_shared_to_favorites, true);
+
   }
 
   private boolean isShared() {
@@ -584,29 +578,17 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
   //REFACTOR переделать это
   private void processEmptyDecisions() {
-    try {
-      toolbar.getMenu().findItem( R.id.menu_info_decision_edit  ).setVisible(false);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    try {
-      toolbar.getMenu().findItem( R.id.menu_info_decision_create).setVisible(true);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    safeSetVisibility( R.id.menu_info_decision_edit  , false);
+    safeSetVisibility( R.id.menu_info_decision_create, true);
   }
 
   public void setEditDecisionMenuItemVisible(boolean visible){
-    Timber.e("setEditDecisionMenuItemVisible %s", visible);
-    try {
-      if (visible){
-        toolbar.getMenu().findItem( R.id.menu_info_decision_edit).setVisible(false);
-      } else {
-        toolbar.getMenu().findItem( R.id.menu_info_decision_edit).setVisible(false);
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    safeSetVisibility( R.id.menu_info_decision_edit, false);
+    // if (visible){
+    //   safeSetVisibility( R.id.menu_info_decision_edit, false);
+    // } else {
+    //   safeSetVisibility( R.id.menu_info_decision_edit, false);
+    // }
   }
 
   public void add( int id, String title ){
@@ -679,10 +661,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   }
 
   public void showCreateDecisionButton() {
-    try {
-      toolbar.getMenu().findItem( R.id.menu_info_decision_create).setVisible(true);
-    } catch (Exception e) {
-      e.printStackTrace();
+    if (!isFromProject()){
+      safeSetVisibility( R.id.menu_info_decision_create, true);
     }
   }
 

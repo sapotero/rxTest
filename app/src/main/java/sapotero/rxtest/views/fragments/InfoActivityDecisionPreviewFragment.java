@@ -309,9 +309,14 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   }
 
   private void updateAfteButtonPressed() {
-    decision_spinner_adapter.setCurrentAsTemporary( decision_spinner.getSelectedItemPosition() );
-    current_decision = decision_spinner_adapter.getItem(decision_spinner.getSelectedItemPosition()).getDecision();
-    displayDecision();
+    try {
+      decision_spinner_adapter.setCurrentAsTemporary( decision_spinner.getSelectedItemPosition() );
+      current_decision = decision_spinner_adapter.getItem(decision_spinner.getSelectedItemPosition()).getDecision();
+      displayDecision();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
     setAsFakeProcessed();
   }
 

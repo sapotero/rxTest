@@ -549,11 +549,57 @@ public class DataLoaderManager {
         for (String status: statuses ) {
           requestCount++;
 
+//          boolean finalShared = shared;
+//
+//          if (firstRunShared){
+//            requestCount++;
+//            subscription.add(
+//              docService
+//                .getDocumentsByIndexes(settings.getLogin(), settings.getToken(), index, status, "group", 500)
+//                .subscribeOn(Schedulers.computation())
+//                .observeOn(Schedulers.computation())
+//                .subscribe(
+//                  data -> {
+//                    requestCount--;
+//                    if (data.getDocuments().size() > 0){
+//
+//                      for (Document doc: data.getDocuments() ) {
+//
+//                        if ( isExist(doc) ){
+//
+//                          Timber.tag(TAG).e("isExist %s", finalShared );
+//
+//                          if ( !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) ){
+//                            Timber.tag(TAG).e("isUpdate" );
+//                            jobCount++;
+//                            jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), index, status, true) );
+//                          }
+//
+//                        } else {
+//                          Timber.tag(TAG).e("isCreate" );
+//                          jobCount++;
+//                          jobManager.addJobInBackground( new CreateDocumentsJob(doc.getUid(), index, status, true) );
+//                        }
+//                      }
+//                    }
+//                    updatePrefJobCount();
+//                  },
+//                  error -> {
+//                    requestCount--;
+//                    updatePrefJobCount();
+//                    Timber.tag(TAG).e(error);
+//                  })
+//            );
+//
+//
+//          }
+
+
           subscription.add(
             docService
 //              .getDocumentsByIndexes(settings.getLogin(), settings.getToken(), index, status, shared ? "group" : null , 500)
               .getDocumentsByIndexes(settings.getLogin(), settings.getToken(), index, status, null , 500)
-              .subscribeOn(Schedulers.newThread())
+              .subscribeOn(Schedulers.computation())
               .observeOn(AndroidSchedulers.mainThread())
               .subscribe(
                 data -> {
@@ -603,7 +649,7 @@ public class DataLoaderManager {
           docService
 //            .getDocuments(settings.getLogin(), settings.getToken(), code, shared ? "group" : null , 500, 0)
             .getDocuments(settings.getLogin(), settings.getToken(), code, null , 500, 0)
-            .subscribeOn(Schedulers.newThread())
+            .subscribeOn(Schedulers.computation())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
               data -> {

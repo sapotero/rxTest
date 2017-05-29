@@ -4,16 +4,21 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.RotateAnimation;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -24,10 +29,8 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
-import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -35,13 +38,13 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
+import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RRouteEntity;
-import sapotero.rxtest.db.requery.models.RStep;
 import sapotero.rxtest.db.requery.models.RStepEntity;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.retrofit.models.document.Action;
@@ -59,9 +62,17 @@ public class RoutePreviewFragment extends Fragment {
 
   @BindView(R.id.fragment_route_wrapper) LinearLayout wrapper;
 
-  private OnFragmentInteractionListener mListener;
-  private String uid;
   private String TAG = this.getClass().getSimpleName();
+  private String uid;
+
+  private State state;
+  private ArrayList<ItemBuilder> views = new ArrayList<>();
+
+  private ImageButton button;
+
+  private OnFragmentInteractionListener mListener;
+  private FrameLayout card;
+  private FrameLayout frame;
 
 
   @Override
@@ -70,18 +81,111 @@ public class RoutePreviewFragment extends Fragment {
 
   }
 
-  @RequiresApi(api = Build.VERSION_CODES.M)
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.fragment_route_preview, container, false);
+    wrapper   = (LinearLayout) view.findViewById(R.id.fragment_route_wrapper);
+    button    = (ImageButton)  view.findViewById(R.id.route_preview_fragment_change_state);
+    frame     = (FrameLayout)  view.findViewById(R.id.route_preview_fragment_frame_view);
+    card      = (FrameLayout)  view.findViewById(R.id.route_preview_fragment_card_view);
+    button.setOnClickListener(this::changeState);
+
+    state  = State.ALL;
 
     EsdApplication.getDataComponent().inject(this);
     ButterKnife.bind(view);
 
-    loadSettings();
     initEvents();
 
+    showPreview();
+    loadRoute();
+
     return view;
+  }
+
+
+  private void changeState(View view){
+    switch (state){
+      case ALL:
+        state = State.LAST;
+        break;
+      default:
+        state = State.ALL;
+        break;
+    }
+
+    showPreview();
+    updateButtonView();
+    loadRoute();
+  }
+
+  private void showPreview() {
+
+    frame.setVisibility(View.VISIBLE);
+
+    int durationMillis = 300;
+
+    Animation fadeIn = new AlphaAnimation(0, 1);
+    fadeIn.setInterpolator(new DecelerateInterpolator());
+    fadeIn.setDuration(durationMillis);
+
+    Animation fadeOut = new AlphaAnimation(1, 0);
+    fadeOut.setInterpolator(new AccelerateInterpolator());
+    fadeOut.setStartOffset(durationMillis);
+    fadeOut.setDuration(durationMillis);
+
+    AnimationSet animation = new AnimationSet(false);
+    AnimationSet wrapperAnimation = new AnimationSet(false);
+
+    wrapperAnimation.addAnimation(fadeIn);
+    animation.addAnimation(fadeOut);
+
+    frame.setAnimation(animation);
+    wrapper.setAnimation(wrapperAnimation);
+
+    Observable.just("")
+      .delay(durationMillis, TimeUnit.MILLISECONDS)
+      .subscribeOn( Schedulers.computation() )
+      .observeOn( AndroidSchedulers.mainThread() )
+      .subscribe(
+        data  -> {
+          frame.setVisibility(View.GONE);
+        },
+        Timber::e
+      );
+
+  }
+
+  private void updateButtonView() {
+    int fromDegrees;
+    int toDegrees;
+
+    switch (state){
+      case ALL:
+        fromDegrees = -180;
+        toDegrees   = 0;
+        break;
+      default:
+        fromDegrees = 0;
+        toDegrees   = -180;
+        break;
+    }
+
+    AnimationSet animSet = new AnimationSet(true);
+    animSet.setInterpolator(new DecelerateInterpolator());
+    animSet.setFillAfter(true);
+    animSet.setFillEnabled(true);
+
+    final RotateAnimation animRotate = new RotateAnimation(fromDegrees, toDegrees,
+      RotateAnimation.RELATIVE_TO_SELF, 0.5f,
+      RotateAnimation.RELATIVE_TO_SELF, 0.5f);
+
+    animRotate.setDuration(300);
+    animRotate.setFillAfter(true);
+    animSet.addAnimation(animRotate);
+
+    button.startAnimation(animSet);
+
   }
 
   @Override
@@ -105,8 +209,13 @@ public class RoutePreviewFragment extends Fragment {
     return this;
   }
 
+  private String getUid() {
+    return uid == null ? settings.getUid() : uid ;
+  }
+
   public interface OnFragmentInteractionListener {
     void onFragmentInteraction(Uri uri);
+
   }
 
   @Override
@@ -117,175 +226,196 @@ public class RoutePreviewFragment extends Fragment {
     }
   }
 
-  private void loadSettings() {
-    dataStore
-      .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq( uid == null? settings.getUid() : uid  ))
+  private void loadRoute() {
+
+    RDocumentEntity doc = dataStore
+      .select( RDocumentEntity.class )
+      .where( RDocumentEntity.UID.eq( getUid()) )
       .orderBy( RDocumentEntity.ROUTE_ID.asc() )
       .get()
-      .toObservable()
-      .subscribeOn(Schedulers.io())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(doc -> {
-        Timber.tag("LOAD").e(" doc: %s ", doc.getUid() );
+      .firstOrNull();
 
-        if ( doc.getRoute() != null ){
-          RRouteEntity route = (RRouteEntity) doc.getRoute();
+    if (doc != null) {
 
+      if (wrapper != null) {
+        wrapper.removeAllViews();
+      }
 
+      Observable
+        .from( ((RRouteEntity) doc.getRoute()).getSteps() )
+        .map( rStep -> (RStepEntity) rStep )
+        .filter(rStepEntity -> rStepEntity != null)
+        .sorted( (e1, e2) -> e1.getNumber().compareTo(e2.getNumber()) )
+        .map(PanelBuilder::new)
+        .subscribeOn( Schedulers.computation() )
+        .observeOn( AndroidSchedulers.mainThread() )
+        .subscribe(
+          panel -> {
+            LinearLayout build = panel.build();
 
-          Timber.tag("ROUTE").e(" is: %s | %s - %s", route.getId(), route.getText(), route.getSteps().size() );
-
-
-
-          if ( route.getSteps() != null && route.getSteps().size() > 0  ){
-
-
-            HashMap< Integer, PanelBuilder > hashMap = new HashMap<>();
-
-            for (RStep step : route.getSteps() ){
-              RStepEntity r_step = (RStepEntity) step;
-
-
-              PanelBuilder panel = new PanelBuilder( getContext() ).withTitle( r_step.getTitle() );
-
-
-              ArrayList<ItemBuilder> items = new ArrayList<ItemBuilder>();
-
-              Boolean valid = false;
-
-              Timber.tag("STEP").e(" %s | %s - %s", r_step.getId(), r_step.getNumber(), r_step.getTitle() );
-
-              if ( r_step.getCards() != null ){
-                Timber.tag("cards").e(" %s", r_step.getCards() );
-
-                Card[] users = new Gson().fromJson( r_step.getCards(), Card[].class );
-
-                for (Card card: users) {
-                  valid = true;
-
-                  if (card.getOriginalApproval() != null) {
-                    ItemBuilder item = new ItemBuilder(getContext());
-
-                    item.withNameCallback( card.getUid() );
-                    item.withName( card.getFullTextApproval() );
-
-                    item.withAction( card.getOriginalApproval() );
-
-                    items.add(item);
-                  }
-                }
-
-              }
-
-
-              if ( r_step.getPeople() != null ){
-                Timber.tag("people").e(" %s", r_step.getPeople() );
-
-                Person[] users = new Gson().fromJson( r_step.getPeople(), Person[].class );
-
-                for (Person user: users){
-                  valid = true;
-
-                  if ( user.getOfficialId() != null && user.getOfficialName()!= null ) {
-                    ItemBuilder item = new ItemBuilder(getContext());
-
-                    item.withName( user.getOfficialName());
-
-                    if ( user.getSignPng() != null ){
-                      Timber.tag("SIGN+").e("assigned!");
-                      item.setWithSign();
-                    }
-
-
-                    if (user.getActions() != null && user.getActions().size() > 0) {
-                      Timber.tag("actions").w("%s", new Gson().toJson( user.getActions()));
-
-                      for ( Action action: user.getActions() ) {
-                        item.withAction( String.format( "%s - %s", action.getDate(), action.getStatus()  ) );
-                      }
-
-                    }
-                    items.add( item );
-                  }
-                }
-
-
-
-              }
-              if ( r_step.getAnother_approvals() != null ){
-                Timber.tag("another_approvals").e(" %s", r_step.getAnother_approvals() );
-
-                AnotherApproval[] anotherApprovals = new Gson().fromJson( r_step.getAnother_approvals(), AnotherApproval[].class );
-
-                for (AnotherApproval user: anotherApprovals){
-                  valid = true;
-
-                  if ( user.getOfficialName() != null || user.getComment()!= null ) {
-                    ItemBuilder item = new ItemBuilder(getContext());
-
-                    item.withName( user.getOfficialName());
-
-                    if (user.getComment() != null ) {
-                      item.withAction( user.getComment() );
-                    }
-                    items.add( item );
-                  }
-                }
-
-              }
-
-              if (valid){
-                panel.withItems( items );
-                hashMap.put(Integer.valueOf(r_step.getNumber()), panel );
-              }
-
+            if (build != null) {
+              wrapper.addView(build);
             }
-
-            if (hashMap.values().size() > 0){
-              LinearLayout wrapper = (LinearLayout) getView().findViewById(R.id.fragment_route_wrapper);
-              wrapper.removeAllViews();
-
-              Map<Integer, PanelBuilder> map = new TreeMap<>(hashMap);
-
-              for (PanelBuilder panel: map.values()){
-                wrapper.addView( panel.build() );
-              }
-
-              for (Integer number: map.keySet()){
-                Timber.tag("SORT").i( "ORDER: %s", number );
-              }
-            }
-
+          },
+          error -> {
+            Timber.tag(TAG).e(error);
           }
+        );
 
-
-
-        }
-
-
-
-
-      });
+    }
 
   }
 
+  private enum PanelType {
+    PEOPLE,
+    CARD,
+    APPROVAL
+  };
+
+  private enum State {
+    ALL,
+    LAST
+  };
+
   class PanelBuilder{
+
+
     private final Context context;
-    private String title;
-    private ArrayList<ItemBuilder> items;
+    private final RStepEntity rStepEntity;
+    private PanelType type;
+
+    private ArrayList<ItemBuilder> items = new ArrayList<>();
     private LinearLayout titleView;
     private LinearLayout layout;
 
-    public PanelBuilder(Context context) {
-      this.context = context;
+    PanelBuilder(RStepEntity RStepEntity) {
+      this.context     = getContext();
+      this.rStepEntity = RStepEntity;
+      this.type = null;
+
+      prebuild();
     }
 
-    public PanelBuilder withTitle(String title) {
-      this.title = title;
+    private void prebuild() {
 
+      if ( rStepEntity != null ){
+        if ( !Objects.equals(rStepEntity.getTitle(), "")){
+          withTitle( rStepEntity.getTitle() );
+        }
+        setType();
+      }
+    }
+
+    private void setType() {
+      if (rStepEntity.getPeople() != null){
+        type = PanelType.PEOPLE;
+      }
+
+      if (rStepEntity.getAnother_approvals() != null){
+        type = PanelType.APPROVAL;
+      }
+
+      if (rStepEntity.getCards() != null){
+        type = PanelType.CARD;
+      }
+
+      if (type != null) {
+        switch (type){
+          case PEOPLE:
+            addPeople();
+            break;
+          case APPROVAL:
+            addApproval();
+            break;
+          case CARD:
+            addCard();
+            break;
+          default:
+            break;
+        }
+      }
+    }
+
+    private void addApproval() {
+      AnotherApproval[] anotherApprovals = new Gson().fromJson(rStepEntity.getAnother_approvals(), AnotherApproval[].class);
+
+      for (AnotherApproval user : anotherApprovals) {
+
+        if (user.getOfficialName() != null || user.getComment() != null) {
+          ItemBuilder item = new ItemBuilder(getContext());
+
+          item.withName(user.getOfficialName());
+
+          if (user.getComment() != null) {
+            item.withAction(user.getComment());
+          }
+          items.add(item);
+        }
+      }
+    }
+
+    private void addCard() {
+      Card[] users = new Gson().fromJson(rStepEntity.getCards(), Card[].class);
+      for (Card card : users) {
+
+        if (card.getOriginalApproval() != null) {
+          ItemBuilder item = new ItemBuilder(getContext());
+
+          item.withNameCallback(card.getUid());
+          item.withName(card.getFullTextApproval());
+
+          item.withAction(card.getOriginalApproval());
+
+          items.add(item);
+        }
+      }
+    }
+
+    private void addPeople() {
+      Person[] users = new Gson().fromJson( rStepEntity.getPeople(), Person[].class);
+
+      for (Person user : users) {
+
+        if (user.getOfficialId() != null && user.getOfficialName() != null) {
+          ItemBuilder item = new ItemBuilder(getContext());
+
+          item.withName(user.getOfficialName());
+
+          if (user.getSignPng() != null) {
+            Timber.tag("SIGN+").e("assigned!");
+            item.setWithSign();
+          }
+
+
+          if (user.getActions() != null && user.getActions().size() > 0) {
+            Timber.tag("actions").w("%s", new Gson().toJson(user.getActions()));
+
+
+            switch ( state ){
+              case ALL:
+                for (Action action : user.getActions()) {
+                  item.withAction(String.format("%s - %s", action.getDate(), action.getStatus()));
+                }
+                break;
+              case LAST:
+                Action action = user.getActions().get( user.getActions().size()-1 );
+                item.withAction(String.format("%s - %s", action.getDate(), action.getStatus()));
+                break;
+              default:
+                break;
+            }
+
+
+
+          }
+          items.add(item);
+        }
+      }
+    }
+
+
+    PanelBuilder withTitle(String title) {
       titleView = new LinearLayout( context );
-//      titleView.setBackground( ContextCompat.getDrawable( getContext() ,R.drawable.panel_builder_title) );
 
       TextView text = new TextView(context);
       text.setTextColor( ContextCompat.getColor(context, R.color.md_grey_600) );
@@ -298,38 +428,42 @@ public class RoutePreviewFragment extends Fragment {
 
       return this;
     }
+
     public PanelBuilder withItems(ArrayList<ItemBuilder> items) {
       this.items = items;
       return this;
     }
 
     public LinearLayout build(){
-      layout = new LinearLayout(context);
-      layout.setOrientation(LinearLayout.VERTICAL);
 
-      layout.setPadding(4,8,4,8);
+      if ( items.size() > 0 && type != null) {
+        layout = new LinearLayout(context);
+        layout.setOrientation(LinearLayout.VERTICAL);
+
+        layout.setPadding(4, 8, 4, 8);
 
 
-      if (titleView != null) {
-        layout.addView( titleView );
-      }
+        if (titleView != null) {
+          layout.addView(titleView);
+        }
 
-      if (items != null && items.size() > 0) {
+
         LinearLayout itemsLayout = new LinearLayout(context);
         itemsLayout.setOrientation(LinearLayout.VERTICAL);
-//        itemsLayout.setBackground( ContextCompat.getDrawable( getContext() ,R.drawable.panel_builder_body) );
 
-        for ( ItemBuilder item: items ){
-          itemsLayout.addView( item.build() );
+
+        for (ItemBuilder item : items) {
+          itemsLayout.addView(item.build());
         }
 
         layout.addView(itemsLayout);
-      }
 
-      View delimiter = new View(context);
-      delimiter.setMinimumHeight(1);
-      delimiter.setBackground( ContextCompat.getDrawable(context, R.color.md_grey_300) );
-      layout.addView(delimiter);
+
+        View delimiter = new View(context);
+        delimiter.setMinimumHeight(1);
+        delimiter.setBackground(ContextCompat.getDrawable(context, R.color.md_grey_300));
+        layout.addView(delimiter);
+      }
 
       return layout;
     }
@@ -338,6 +472,18 @@ public class RoutePreviewFragment extends Fragment {
       if (layout != null) {
         layout.removeAllViews();
       }
+    }
+
+    public void add(ItemBuilder item) {
+      items.add( item );
+    }
+
+    public ArrayList<ItemBuilder> getItems() {
+      return items;
+    }
+
+    public RStepEntity getStep() {
+      return rStepEntity;
     }
   }
 
@@ -351,14 +497,13 @@ public class RoutePreviewFragment extends Fragment {
     private String uid;
     private boolean withSign;
 
-    public ItemBuilder(Context context) {
+    ItemBuilder(Context context) {
       this.context = context;
       actionView = new LinearLayout(context);
       actionView.setOrientation(LinearLayout.VERTICAL);
     }
 
-
-    public ItemBuilder withName(String name) {
+    ItemBuilder withName(String name) {
       this.name = name;
 
       nameView = new FrameLayout(context);
@@ -374,18 +519,19 @@ public class RoutePreviewFragment extends Fragment {
       return this;
     }
 
-    public ItemBuilder withAction(String action) {
+    //refactor
+    ItemBuilder withAction(String action) {
       this.action = action;
 
       TextView text = new TextView(context);
 
       text.setTextColor( ContextCompat.getColor(context, R.color.md_grey_600) );
 
-      if (action.contains("На ")){
+      if (action.contains("На ") || action.contains("К ")){
         text.setTextColor( ContextCompat.getColor(context, R.color.md_blue_600) );
       }
 
-      if (action.contains("Отклонено")){
+      if (action.contains("Отклонено")  || action.contains("Возвращен")){
         text.setTextColor( ContextCompat.getColor(context, R.color.md_red_600) );
       }
 
@@ -475,12 +621,11 @@ public class RoutePreviewFragment extends Fragment {
     EventBus.getDefault().register(this);
   }
 
-  @RequiresApi(api = Build.VERSION_CODES.M)
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(UpdateCurrentDocumentEvent event) throws Exception {
     Timber.tag(TAG).w("UpdateCurrentDocumentEvent %s", event.uid);
     if (Objects.equals(event.uid, settings.getUid())){
-      loadSettings();
+      loadRoute();
     }
   }
 

@@ -54,8 +54,6 @@ public class InMemoryDocumentStorage {
   public void add(Document document, String index, String filter){
 
     if ( documents.containsKey(document.getUid()) ){
-      Timber.tag(TAG).e("contains: %s | %s %s", document.getUid(), index, filter );
-
 
       // если есть - проводим инвалидацию
       InMemoryDocument inMemoryDocument = documents.get(document.getUid());
@@ -76,8 +74,6 @@ public class InMemoryDocumentStorage {
       }
 
     } else {
-      Timber.tag(TAG).e("new: %s", document.getUid());
-
       // если нет - эмитим новый документ
       documents.put(document.getUid(), InMemoryDocumentMapper.fromJson(document));
 
@@ -123,19 +119,19 @@ public class InMemoryDocumentStorage {
   }
 
   public void update(RDocumentEntity db, String filter, String index){
-    InMemoryDocument inMemoryDocument = documents.get( db.getUid() );
-
-    if (inMemoryDocument != null) {
-      InMemoryDocument doc = InMemoryDocumentMapper.fromDB(db);
-
-      documents.remove( doc.getUid() );
-      documents.put( doc.getUid(), doc);
-
-      doc.setFilter(filter);
-      doc.setIndex(index);
-
-      publish.onNext( doc );
-    }
+//    InMemoryDocument inMemoryDocument = documents.get( db.getUid() );
+//
+//    if (inMemoryDocument != null) {
+//      InMemoryDocument doc = InMemoryDocumentMapper.fromDB(db);
+//
+//      documents.remove( doc.getUid() );
+//      documents.put( doc.getUid(), doc);
+//
+//      doc.setFilter(filter);
+//      doc.setIndex(index);
+//
+//      publish.onNext( doc );
+//    }
   }
 
 

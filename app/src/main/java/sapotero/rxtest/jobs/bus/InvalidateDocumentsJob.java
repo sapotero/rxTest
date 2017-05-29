@@ -5,12 +5,10 @@ import android.support.annotation.Nullable;
 import com.birbit.android.jobqueue.CancelReason;
 import com.birbit.android.jobqueue.Params;
 import com.birbit.android.jobqueue.RetryConstraint;
-import com.f2prateek.rx.preferences.Preference;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import rx.Single;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
 import sapotero.rxtest.retrofit.models.documents.Document;
@@ -54,7 +52,9 @@ public class InvalidateDocumentsJob extends BaseJob {
       .get()
       .toList();
 
-    ArrayList<String> db_uids = new ArrayList<String>();
+
+    ArrayList<String> api_uids = new ArrayList<String>();
+    ArrayList<String> db_uids  = new ArrayList<String>();
 
     if (dbDocs.size() > 0){
       for (RDocumentEntity doc :dbDocs ) {
@@ -62,14 +62,12 @@ public class InvalidateDocumentsJob extends BaseJob {
         db_uids.add( doc.getUid() );
       }
     }
-
-    ArrayList<String> api_uids = new ArrayList<String>();
     if ( uids.size() > 0 ){
       for (Document doc :uids ) {
         api_uids.add( doc.getUid() );
-
       }
     }
+
 
     for ( String uid: api_uids ) {
       Timber.tag(TAG).e("api_uid: %s", uid);
@@ -78,36 +76,35 @@ public class InvalidateDocumentsJob extends BaseJob {
       }
     }
 
-    List<Single<RDocumentEntity>> transactions = new ArrayList<>();
+
+    for ( String uid: db_uids ) {
+      Timber.tag(TAG).e("result db_uid: %s", uid);
+    }
+
+    for ( String uid: api_uids ) {
+      Timber.tag(TAG).e("result api_uid: %s", uid);
+    }
+
 
     if (db_uids.size() > 0){
-      for (String uid: db_uids ) {
-        updateAsProcessed(uid, true);
-//        transactions.add( updateAsProcessed(uid, true) );
-//        dataStore.runInTransaction( updateAsProcessed(uid, true) );
-      }
+      updateAsProcessed(db_uids, true);
     }
 
     if (api_uids.size() > 0){
-      for (String uid: api_uids ) {
-        updateAsProcessed(uid, false);
-//        transactions.add( updateAsProcessed(uid, false) );
-//        dataStore.runInTransaction( updateAsProcessed(uid, false) );
-      }
+      updateAsProcessed(api_uids, false);
     }
 
 
   }
 
-  private void updateAsProcessed(String uid, Boolean processed) {
+  private void updateAsProcessed(ArrayList<String> uid, Boolean processed) {
 
     dataStore
       .update(RDocumentEntity.class)
       .set(RDocumentEntity.PROCESSED, processed)
-      .where(RDocumentEntity.UID.eq(uid))
+      .where(RDocumentEntity.UID.in(uid))
       .get().value();
   }
-
 
   @Override
   protected RetryConstraint shouldReRunOnThrowable(Throwable throwable, int runCount, int maxRunCount) {

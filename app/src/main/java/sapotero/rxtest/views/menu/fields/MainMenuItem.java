@@ -204,19 +204,20 @@ public enum MainMenuItem {
 
     },
     true, true
-  ),
-  SHARED ( 11, "Общие документы %s", new MainMenuButton[]{
-    MainMenuButton.SHARED_PRIMARY,
-    MainMenuButton.ASSIGN,
-    MainMenuButton.APPROVAL,
-    MainMenuButton.VIEWED,
-  }, true,
-    new ConditionBuilder[]{
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq( "group" ) ),
-    },
-    new ConditionBuilder[]{
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq( "group" ) ),
-    },  false, false
+    // Общие документы - аппараты - пока не нужны от слова совсем
+    // ),
+    //  SHARED ( 11, "Общие документы %s", new MainMenuButton[]{
+    //    MainMenuButton.SHARED_PRIMARY,
+    //    MainMenuButton.ASSIGN,
+    //    MainMenuButton.APPROVAL,
+    //    MainMenuButton.VIEWED,
+    //    }, true,
+    //    new ConditionBuilder[]{
+    //      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq( "group" ) ),
+    //    },
+    //    new ConditionBuilder[]{
+    //      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq( "group" ) ),
+    //    },  false, false
   );
 
   private static final String TAG = "MainMenuItem";
