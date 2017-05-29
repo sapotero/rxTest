@@ -43,6 +43,7 @@ import sapotero.rxtest.jobs.bus.CreateDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateFavoriteUsersJob;
 import sapotero.rxtest.jobs.bus.CreateFoldersJob;
 import sapotero.rxtest.jobs.bus.CreatePrimaryConsiderationJob;
+import sapotero.rxtest.jobs.bus.CreateProjectsJob;
 import sapotero.rxtest.jobs.bus.CreateTemplatesJob;
 import sapotero.rxtest.jobs.bus.CreateUrgencyJob;
 import sapotero.rxtest.jobs.bus.InvalidateDocumentsJob;
@@ -663,7 +664,7 @@ public class DataLoaderManager {
                 if (data.getDocuments().size() > 0){
                   for (Document doc: data.getDocuments() ) {
                     jobCount++;
-                    jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), code, finalShared1) );
+                    jobManager.addJobInBackground( new CreateProjectsJob(doc.getUid(), code, finalShared1) );
                   }
                 }
                 updatePrefJobCount();

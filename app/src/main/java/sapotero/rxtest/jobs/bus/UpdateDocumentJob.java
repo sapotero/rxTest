@@ -69,15 +69,6 @@ public class UpdateDocumentJob extends BaseJob {
     this.not_processed = true;
   }
 
-  public UpdateDocumentJob(String uid, String status, boolean shared) {
-    super( new Params(PRIORITY).requireNetwork().persist().addTags("SyncDocument") );
-    this.uid     = uid;
-    if (!Objects.equals(status, "")){
-      this.status  = status;
-    }
-    this.shared = shared;
-  }
-
   @Override
   public void onAdded() {
   }

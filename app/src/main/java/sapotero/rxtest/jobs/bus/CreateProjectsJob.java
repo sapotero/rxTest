@@ -9,15 +9,14 @@ import com.birbit.android.jobqueue.RetryConstraint;
 import org.greenrobot.eventbus.EventBus;
 
 import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
 import timber.log.Timber;
 
-// Creates ordinary documents (statuses: primary_consideration and sent_to_the_report)
-public class CreateDocumentsJob extends BaseJob {
+// Creates projects (statuses: approval and signing)
+public class CreateProjectsJob extends BaseJob {
 
   public static final int PRIORITY = 1;
 
@@ -25,13 +24,11 @@ public class CreateDocumentsJob extends BaseJob {
 
   private String uid;
   private String status;
-  private String journal;
   private boolean shared = false;
 
-  public CreateDocumentsJob(String uid, String journal, String status, boolean shared) {
+  public CreateProjectsJob(String uid, String status, boolean shared) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
-    this.journal = getJournalName(journal);
     this.status = status;
     this.shared = shared;
   }
@@ -46,8 +43,7 @@ public class CreateDocumentsJob extends BaseJob {
     Observable<DocumentInfo> info = getDocumentInfoObservable(uid);
 
     info
-      .subscribeOn( Schedulers.io() )
-      .observeOn( AndroidSchedulers.mainThread() )
+      .subscribeOn( Schedulers.newThread() )
       .subscribe(
         doc -> {
           create( doc );
@@ -55,14 +51,13 @@ public class CreateDocumentsJob extends BaseJob {
         },
         error -> {
           Timber.tag(TAG).e(error);
-          EventBus.getDefault().post( new StepperLoadDocumentEvent("Error downloading document info on create") );
+          EventBus.getDefault().post( new StepperLoadDocumentEvent("Error downloading document info on update") );
         }
       );
   }
 
-  private void create(DocumentInfo document){
+  private void create(DocumentInfo document) {
     RDocumentEntity doc = createDocument(document, status, shared);
-    mappers.getDocumentMapper().setJournal(doc, journal);
     saveDocument(document, doc, TAG);
   }
 
@@ -73,6 +68,6 @@ public class CreateDocumentsJob extends BaseJob {
   @Override
   protected void onCancel(@CancelReason int cancelReason, @Nullable Throwable throwable) {
     // Job has exceeded retry attempts or shouldReRunOnThrowable() has decided to cancel.
-    EventBus.getDefault().post( new StepperLoadDocumentEvent("Error creating document (job cancelled)") );
+    EventBus.getDefault().post( new StepperLoadDocumentEvent("Error creating project (job cancelled)") );
   }
 }
