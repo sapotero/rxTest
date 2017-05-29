@@ -14,6 +14,7 @@ import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
+import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
 public class AddToFolder extends AbstractCommand {
@@ -71,8 +72,9 @@ public class AddToFolder extends AbstractCommand {
     queueManager.setExecutedLocal(this);
 
 
-    store.setFavoriteLabel(document_id);
-    store.setChangeLabel(document_id);
+    store.setLabel(LabelType.SYNC ,document_id);
+    store.setLabel(LabelType.FAVORITES ,document_id);
+
 
 
 
@@ -115,15 +117,17 @@ public class AddToFolder extends AbstractCommand {
           Timber.tag(TAG).i("type: %s", data.getType());
 
           queueManager.setExecutedRemote(this);
-          store.removeChangeLabel(document_id);
+
+
+          store.removeLabel(LabelType.SYNC ,document_id);
         },
         error -> {
           if (callback != null){
             callback.onCommandExecuteError(getType());
           }
 
-          store.removeFavoriteLabel(document_id);
-          store.removeChangeLabel(document_id);
+          store.removeLabel(LabelType.SYNC ,document_id);
+          store.removeLabel(LabelType.FAVORITES ,document_id);
         }
       );
   }

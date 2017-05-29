@@ -14,6 +14,7 @@ import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
+import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
 public class RemoveFromFolder extends AbstractCommand {
@@ -58,8 +59,8 @@ public class RemoveFromFolder extends AbstractCommand {
       .get().value();
     Timber.tag(TAG).w( "updated: %s", count );
 
-    store.setFavoriteLabel(document_id);
-    store.setChangeLabel(document_id);
+    store.removeLabel(LabelType.FAVORITES ,document_id);
+    store.setLabel(LabelType.SYNC ,document_id);
 
     queueManager.add(this);
   }
@@ -115,8 +116,7 @@ public class RemoveFromFolder extends AbstractCommand {
 
           queueManager.setExecutedRemote(this);
 
-          store.removeFavoriteLabel(document_id);
-          store.removeChangeLabel(document_id);
+          store.removeLabel(LabelType.SYNC ,document_id);
 
         },
         error -> {
@@ -124,7 +124,8 @@ public class RemoveFromFolder extends AbstractCommand {
             callback.onCommandExecuteError(getType());
           }
 
-          store.removeChangeLabel(document_id);
+          store.removeLabel(LabelType.SYNC ,document_id);
+          store.setLabel(LabelType.FAVORITES ,document_id);
         }
       );
   }

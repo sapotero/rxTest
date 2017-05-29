@@ -14,14 +14,13 @@ import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
 public class CheckForControl extends AbstractCommand {
 
   private final DocumentReceiver document;
-
   private String TAG = this.getClass().getSimpleName();
-
   private String document_id;
 
   public CheckForControl(DocumentReceiver document){
@@ -43,6 +42,9 @@ public class CheckForControl extends AbstractCommand {
     Timber.tag(TAG).i("execute for %s - %s",getType(),document_id);
     queueManager.add(this);
 
+    store.setLabel(LabelType.CONTROL ,document_id);
+    store.setLabel(LabelType.SYNC ,document_id);
+
   }
 
   @Override
@@ -50,6 +52,9 @@ public class CheckForControl extends AbstractCommand {
     return "check_for_control";
   }
 
+
+  // refactor
+  // ПЕРЕПИСАТЬ НОРМАЛЬНО
   @Override
   public void executeLocal() {
     dataStore
@@ -67,12 +72,7 @@ public class CheckForControl extends AbstractCommand {
               value = false;
             }
 
-            dataStore
-              .update(RDocumentEntity.class)
-              .set( RDocumentEntity.CONTROL, !value)
-              .where(RDocumentEntity.UID.eq(document_id))
-              .get()
-              .call();
+
 
             queueManager.setExecutedLocal(this);
             if ( callback != null ){
@@ -85,12 +85,20 @@ public class CheckForControl extends AbstractCommand {
               callback.onCommandExecuteError(getType());
             }
           }
+
+
+          store.removeLabel(LabelType.SYNC ,document_id);
         },
         error -> {
           Timber.tag(TAG).i("error %s",error);
           if ( callback != null ){
             callback.onCommandExecuteError(getType());
           }
+
+
+          store.removeLabel(LabelType.CONTROL ,document_id);
+          store.removeLabel(LabelType.SYNC ,document_id);
+
         });
 
   }
@@ -136,6 +144,8 @@ public class CheckForControl extends AbstractCommand {
           if (callback != null){
             callback.onCommandExecuteError(getType());
           }
+
+
         }
       );
 

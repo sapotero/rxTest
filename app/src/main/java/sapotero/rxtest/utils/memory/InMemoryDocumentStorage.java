@@ -21,9 +21,12 @@ import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.jobs.bus.CreateDocumentsJob;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.retrofit.models.documents.Document;
+import sapotero.rxtest.utils.memory.fields.FieldType;
+import sapotero.rxtest.utils.memory.fields.LabelType;
 import sapotero.rxtest.utils.memory.mappers.InMemoryDocumentMapper;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.utils.memory.utils.GenerateRandomDocument;
+import sapotero.rxtest.utils.memory.utils.IMDValidation;
 import sapotero.rxtest.utils.memory.utils.InMemoryLogger;
 import timber.log.Timber;
 
@@ -98,27 +101,25 @@ public class InMemoryDocumentStorage {
 
   public void add(Document document, String index, String filter){
 
-//    Timber.tag(TAG).e("recv: %s", document.getUid());
-
     if ( documents.containsKey(document.getUid()) ){
       Timber.tag(TAG).e("contains: %s | %s %s", document.getUid(), index, filter );
 
 
       // если есть - проводим инвалидацию
       InMemoryDocument inMemoryDocument = documents.get(document.getUid());
-      if ( DocumentValidation.isMd5Changed( inMemoryDocument.getMd5(), document.getMd5() ) ){
+      if ( IMDValidation.isMd5Changed( inMemoryDocument.getMd5(), document.getMd5() ) ){
         Timber.tag(TAG).e("update: %s", document.getUid());
 
         inMemoryDocument = InMemoryDocumentMapper.fromJson(document);
         inMemoryDocument.setFilter(filter);
         inMemoryDocument.setIndex(index);
 
-        publish.onNext(inMemoryDocument);
         if (index != null) {
           jobManager.addJobInBackground( new UpdateDocumentJob(document.getUid(), index, filter, false) );
         } else {
           jobManager.addJobInBackground( new UpdateDocumentJob(document.getUid(), filter, false) );
         }
+        publish.onNext(inMemoryDocument);
 
       }
 
@@ -146,11 +147,7 @@ public class InMemoryDocumentStorage {
 
   }
 
-  private static class DocumentValidation{
-    static Boolean isMd5Changed(String m1, String m2){
-      return !m1.equals( m2 );
-    }
-  }
+
 
   private void loadFromDB() {
     dataStore
@@ -167,47 +164,76 @@ public class InMemoryDocumentStorage {
         },
         Timber::e
       );
-
   }
-
 
   public InMemoryDocument get(String uid){
     return documents.get(uid);
   }
 
-  public void setFavoriteLabel(String uid) {
-    InMemoryDocument doc = documents.get(uid);
-    if (doc != null) {
-      doc.getDocument().setFavorites(true);
+  public void update(RDocumentEntity db, String filter, String index){
+    InMemoryDocument inMemoryDocument = documents.get( db.getUid() );
+
+    if (inMemoryDocument != null) {
+      InMemoryDocument doc = InMemoryDocumentMapper.fromDB(db);
+
+      documents.remove( doc.getUid() );
+      documents.put( doc.getUid(), doc);
+
+      doc.setFilter(filter);
+      doc.setIndex(index);
+
       publish.onNext( doc );
     }
-
-
   }
 
-  public void removeFavoriteLabel(String uid) {
+
+
+
+
+  public void setField(FieldType type, Boolean value, String uid) {
     InMemoryDocument doc = documents.get(uid);
     if (doc != null) {
-      doc.getDocument().setFavorites(false);
+
+      switch (type){
+        case PROCESSED:
+          doc.getDocument().setProcessed(value);
+          break;
+      }
+
       publish.onNext( doc );
+
     }
   }
 
-  public void setChangeLabel(String uid) {
+  private void changeLabel(LabelType type, Boolean value, String uid) {
     InMemoryDocument doc = documents.get(uid);
     if (doc != null) {
-      doc.getDocument().setChanged(true);
+
+      switch (type){
+        case CONTROL:
+          doc.getDocument().setControl(value);
+          break;
+        case LOCK:
+          doc.getDocument().setFromProcessedFolder(value);
+          break;
+        case SYNC:
+          doc.getDocument().setChanged(value);
+          break;
+        case FAVORITES:
+          doc.getDocument().setFavorites(value);
+          break;
+      }
+
       publish.onNext( doc );
+
     }
-
-
   }
 
-  public void removeChangeLabel(String uid) {
-    InMemoryDocument doc = documents.get(uid);
-    if (doc != null) {
-      doc.getDocument().setChanged(false);
-      publish.onNext( doc );
-    }
+  public void setLabel(LabelType type, String uid) {
+    changeLabel(type, true, uid);
+  }
+
+  public void removeLabel(LabelType type, String uid) {
+    changeLabel(type, false, uid);
   }
 }

@@ -886,7 +886,7 @@ public class UpdateDocumentJob extends BaseJob {
 
     dataStore
       .update( doc )
-      .subscribeOn( Schedulers.io() )
+      .subscribeOn( Schedulers.computation() )
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         result -> {
@@ -906,7 +906,11 @@ public class UpdateDocumentJob extends BaseJob {
 
           }
 
+
+
           addPrefJobCount(jobCount);
+
+          store.update(result, status, journal );
         },
         error -> {
           Timber.tag(TAG).e("%s", error);

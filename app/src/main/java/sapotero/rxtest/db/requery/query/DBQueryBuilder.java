@@ -7,6 +7,8 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
@@ -323,8 +325,8 @@ public class DBQueryBuilder {
 
       findOrganizations(true);
 
-      ArrayList<String> filters = new ArrayList<>();
-      ArrayList<String> indexes = new ArrayList<>();
+      ArrayList<String> statuses = new ArrayList<>();
+      ArrayList<String> types = new ArrayList<>();
 
       Boolean isProcessed = false;
       Boolean isFavotires = false;
@@ -334,15 +336,15 @@ public class DBQueryBuilder {
         if (condition.getField().getLeftOperand() == RDocumentEntity.FILTER){
 
           try {
-            filters.addAll(((ArrayList<String>) condition.getField().getRightOperand()));
+            statuses.addAll(((ArrayList<String>) condition.getField().getRightOperand()));
           } catch (Exception e) {
-            filters.add( String.valueOf(condition.getField().getRightOperand()) );
+            statuses.add( String.valueOf(condition.getField().getRightOperand()) );
           }
 
         }
 
         if (condition.getField().getLeftOperand() == RDocumentEntity.DOCUMENT_TYPE){
-          indexes.add( String.valueOf(condition.getField().getRightOperand()) );
+          types.add( String.valueOf(condition.getField().getRightOperand()) );
           Timber.tag(TAG).w("new index: %s", String.valueOf(condition.getField().getRightOperand()));
         }
 
@@ -365,6 +367,7 @@ public class DBQueryBuilder {
         }
 
       }
+
       unsubscribe();
 
       Boolean processed = isProcessed;
@@ -372,6 +375,8 @@ public class DBQueryBuilder {
       Boolean favorites = isFavotires;
 
       Timber.tag(TAG).w("!!!!! f: %s | p: %s | c: %s", favorites, processed, control);
+      Timber.tag(TAG).w("!!!!! statuses: %s ", new Gson().toJson(statuses) );
+      Timber.tag(TAG).w("!!!!! indexes: %s ", new Gson().toJson(types) );
 
       compositeSubscription.add(
         Observable
@@ -380,8 +385,8 @@ public class DBQueryBuilder {
           .filter( doc -> byFavorites(favorites, doc) )
           .filter( doc -> byProcessed(processed, doc) )
 
-          .filter( doc -> byType(indexes, doc) )
-          .filter( doc -> byStatus(filters, doc) )
+          .filter( doc -> byType(types, doc) )
+          .filter( doc -> byStatus(statuses, doc) )
           .filter( this::byOrganization )
 
           .toSortedList( this::bySortKey)
@@ -411,16 +416,14 @@ public class DBQueryBuilder {
 
   }
 
-
   private boolean byType(ArrayList<String> indexes, InMemoryDocument doc) {
     Timber.tag(TAG).e("byType?   %s | %s", doc.getUid(), indexes.size() );
-
-    return indexes.size() <= 0 || indexes.contains(doc.getIndex());
+    return indexes.size() == 0 || indexes.contains(doc.getIndex());
   }
 
   private boolean byStatus(ArrayList<String> filters, InMemoryDocument doc) {
     Timber.tag(TAG).e("byStatus? %s | %s", doc.getUid(), filters.size());
-    return filters.size() <= 0 || filters.contains(doc.getFilter());
+    return filters.size() == 0 || filters.contains(doc.getFilter());
   }
 
   private boolean byProcessed(Boolean withProcessed, InMemoryDocument doc) {
@@ -429,7 +432,7 @@ public class DBQueryBuilder {
   }
 
   private boolean byControl(Boolean withControl, InMemoryDocument doc) {
-    Timber.tag(TAG).e("control? %s", doc.getDocument().getControl() );
+//    Timber.tag(TAG).e("control? %s", doc.getDocument().getControl() );
 
     Boolean result = true;
 
@@ -441,7 +444,7 @@ public class DBQueryBuilder {
   }
 
   private boolean byFavorites(Boolean withFavorites, InMemoryDocument doc) {
-    Timber.tag(TAG).e("favorites? %s", doc.getDocument().getFavorites() );
+//    Timber.tag(TAG).e("favorites? %s", doc.getDocument().getFavorites() );
 
     Boolean result = true;
 

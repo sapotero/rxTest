@@ -18,6 +18,8 @@ import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.services.MainService;
+import sapotero.rxtest.utils.memory.fields.FieldType;
+import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
 public class PrevPerson extends AbstractCommand {
@@ -56,6 +58,10 @@ public class PrevPerson extends AbstractCommand {
     EventBus.getDefault().post( new ShowNextDocumentEvent());
 
     queueManager.add(this);
+
+    String uid = params.getDocument() != null ? params.getDocument() : document.getUid();
+    store.setLabel(LabelType.SYNC ,uid);
+    store.setField(FieldType.PROCESSED ,true ,uid);
   }
 
   @Override
@@ -96,7 +102,8 @@ public class PrevPerson extends AbstractCommand {
     OperationService operationService = retrofit.create( OperationService.class );
 
     ArrayList<String> uids = new ArrayList<>();
-    uids.add( params.getDocument() != null ? params.getDocument(): document.getUid() );
+    String uid = params.getDocument() != null ? params.getDocument() : document.getUid();
+    uids.add(uid);
 
     String comment = null;
     if ( params.getComment() != null ){
@@ -129,12 +136,15 @@ public class PrevPerson extends AbstractCommand {
           Timber.tag(TAG).i("type: %s", data.getType());
 
           queueManager.setExecutedRemote(this);
+          store.removeLabel(LabelType.SYNC ,uid);
+          store.setField(FieldType.PROCESSED ,true ,uid);
         },
         error -> {
           if (callback != null) {
             callback.onCommandExecuteError(getType());
           }
-
+          store.removeLabel(LabelType.SYNC ,uid);
+          store.setField(FieldType.PROCESSED ,false ,uid);
         }
       );
 

@@ -10,6 +10,7 @@ import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
 import okhttp3.OkHttpClient;
 import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.memory.InMemoryDocumentStorage;
 
 public abstract class BaseJob extends Job {
 
@@ -17,6 +18,7 @@ public abstract class BaseJob extends Job {
   @Inject OkHttpClient okHttpClient;
   @Inject Settings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
+  @Inject InMemoryDocumentStorage store;
 
   protected BaseJob(Params params) {
     super(params);

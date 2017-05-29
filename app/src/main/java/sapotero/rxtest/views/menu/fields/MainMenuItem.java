@@ -186,13 +186,12 @@ public enum MainMenuItem {
     true,
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq( true ) ),
-      new ConditionBuilder( ConditionBuilder.Condition.OR, RDocumentEntity.FROM_PROCESSED_FOLDER.eq( true ) ),
     },
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq( true ) ),
-      new ConditionBuilder( ConditionBuilder.Condition.OR, RDocumentEntity.FROM_PROCESSED_FOLDER.eq( true ) ),
     },
     true, true),
+
   FAVORITES ( 10, "Избранное %s", new MainMenuButton[]{},
     true,
     new ConditionBuilder[]{
