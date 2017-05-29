@@ -49,7 +49,7 @@ import sapotero.rxtest.events.view.ShowPrevDocumentEvent;
 import sapotero.rxtest.events.view.ShowSnackEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentInfoActivityEvent;
-import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
+import sapotero.rxtest.jobs.bus.UpdateDocJob;
 import sapotero.rxtest.jobs.bus.UpdateProjectJob;
 import sapotero.rxtest.managers.toolbar.ToolbarManager;
 import sapotero.rxtest.services.task.UpdateCurrentDocumentTask;
@@ -450,7 +450,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL ) {
       jobManager.addJobInBackground( new UpdateProjectJob( settings.getUid() ) );
     } else {
-      jobManager.addJobInBackground(new UpdateDocumentJob( settings.getUid(), status ));
+      jobManager.addJobInBackground(new UpdateDocJob( settings.getUid() ));
     }
   }
 

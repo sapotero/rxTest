@@ -47,7 +47,7 @@ import sapotero.rxtest.jobs.bus.CreateProjectsJob;
 import sapotero.rxtest.jobs.bus.CreateTemplatesJob;
 import sapotero.rxtest.jobs.bus.CreateUrgencyJob;
 import sapotero.rxtest.jobs.bus.InvalidateDocumentsJob;
-import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
+import sapotero.rxtest.jobs.bus.UpdateDocJob;
 import sapotero.rxtest.jobs.bus.UpdateFavoritesDocumentsJob;
 import sapotero.rxtest.jobs.bus.UpdateProcessedDocumentsJob;
 import sapotero.rxtest.jobs.bus.UpdateProjectJob;
@@ -599,7 +599,7 @@ public class DataLoaderManager {
                         if ( !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) ){
                           Timber.tag(TAG).e("isUpdate" );
                           jobCount++;
-                          jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), index, status, finalShared) );
+                          jobManager.addJobInBackground( new UpdateDocJob( doc.getUid() ) );
                         }
 
                       } else {
