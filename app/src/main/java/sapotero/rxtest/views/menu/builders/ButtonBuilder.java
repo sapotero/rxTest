@@ -15,6 +15,7 @@ import android.widget.RadioGroup;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -55,6 +56,8 @@ public class ButtonBuilder {
 
   private Callback callback;
   private RadioButton view;
+
+  private final HashMap<String, String> mapper = new HashMap<>();
 
 
   private String TAG = this.getClass().getSimpleName();
@@ -224,16 +227,41 @@ public class ButtonBuilder {
       .filter( filter::byStatus)
 
       .map( InMemoryDocument::getUid )
-      .toList()
+//      .toList()
       .subscribeOn( Schedulers.computation() )
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
-        list -> {
-          view.setText( String.format( label, list.size() ) );
+        doc -> {
+          if ( !mapper.containsKey(doc) ){
+            mapper.put(doc, doc);
+            view.setText( String.format( label, mapper.size() ) );
+          }
         },
         Timber::e
       );
 
+    store
+      .getPublishSubject()
+
+      .filter( filter::isProcessed )
+      .filter( filter::isFavorites )
+      .filter( filter::isControl )
+      .filter( filter::byType)
+      .filter( filter::byStatus)
+
+      .map( InMemoryDocument::getUid )
+
+      .subscribeOn( Schedulers.computation() )
+      .observeOn( AndroidSchedulers.mainThread() )
+      .subscribe(
+        doc -> {
+          if (mapper.containsKey(doc)){
+            mapper.put(doc, doc);
+            view.setText( String.format( label, mapper.size() ) );
+          }
+        },
+        Timber::e
+      );
   }
 
   @RequiresApi(api = Build.VERSION_CODES.M)
