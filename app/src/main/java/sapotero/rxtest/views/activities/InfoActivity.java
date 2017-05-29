@@ -50,6 +50,7 @@ import sapotero.rxtest.events.view.ShowSnackEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentInfoActivityEvent;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
+import sapotero.rxtest.jobs.bus.UpdateProjectJob;
 import sapotero.rxtest.managers.toolbar.ToolbarManager;
 import sapotero.rxtest.services.task.UpdateCurrentDocumentTask;
 import sapotero.rxtest.utils.Settings;
@@ -429,7 +430,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   public void updateCurrent(){
 
-    jobManager.addJobInBackground(new UpdateDocumentJob( settings.getUid(), status ));
+    updateDocument();
 
     unsubscribe();
     subscription.add(
@@ -438,11 +439,19 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(interval -> {
-          jobManager.addJobInBackground(new UpdateDocumentJob( settings.getUid(), status ));
+          updateDocument();
         })
     );
 
     toolbarManager.invalidate();
+  }
+
+  private void updateDocument() {
+    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL ) {
+      jobManager.addJobInBackground( new UpdateProjectJob( settings.getUid() ) );
+    } else {
+      jobManager.addJobInBackground(new UpdateDocumentJob( settings.getUid(), status ));
+    }
   }
 
   private void unsubscribe(){
