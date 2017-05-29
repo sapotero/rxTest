@@ -28,6 +28,8 @@ import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
 import sapotero.rxtest.retrofit.models.wrapper.DecisionWrapper;
+import sapotero.rxtest.utils.memory.fields.FieldType;
+import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
 public class RejectDecision extends AbstractCommand {
@@ -66,6 +68,11 @@ public class RejectDecision extends AbstractCommand {
   public void execute() {
 
     queueManager.add(this);
+
+    String uid = params.getDecisionModel().getId();
+    store.setLabel(LabelType.SYNC, uid);
+    store.setField(FieldType.PROCESSED, true, uid);
+
     updateLocal();
 
   }
@@ -209,6 +216,9 @@ public class RejectDecision extends AbstractCommand {
             }
 
             queueManager.setExecutedRemote(this);
+
+            String uid = document.getUid();
+            store.removeLabel(LabelType.SYNC, uid);
           }
 
         },
@@ -218,6 +228,11 @@ public class RejectDecision extends AbstractCommand {
             callback.onCommandExecuteError(getType());
           }
 //          queueManager.setExecutedWithError(this, Collections.singletonList("http_error"));
+
+          String uid = document.getUid();
+          store.removeLabel(LabelType.SYNC, uid);
+          store.setField(FieldType.PROCESSED, false, uid);
+
           EventBus.getDefault().post( new ForceUpdateDocumentEvent( params.getDecisionModel().getDocumentUid() ));
         }
       );

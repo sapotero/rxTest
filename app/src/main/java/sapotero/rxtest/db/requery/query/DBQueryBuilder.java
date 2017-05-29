@@ -324,7 +324,7 @@ public class DBQueryBuilder {
 
     if ( conditions.size() > 0 ){
 
-      findOrganizations(true);
+//      findOrganizations(true);
       unsubscribe();
 
       IMDFilter filter = new IMDFilter(conditions);
@@ -344,18 +344,20 @@ public class DBQueryBuilder {
           .filter( filter::byType)
           .filter( filter::byStatus)
 
-          .toSortedList( IMDFilter::bySortKey )
+          .toSortedList(IMDFilter::bySortKey)
 
           .subscribeOn(Schedulers.computation())
           .observeOn(AndroidSchedulers.mainThread())
           .subscribe(
             docs -> {
 
+              Timber.tag(TAG).w("size %s", docs.size() );
               adapter.removeAllWithRange();
 
               if (docs.size() > 0){
                 hideEmpty();
                 for (InMemoryDocument doc: docs ) {
+                  Timber.tag(TAG).w("add %s", doc.getUid() );
                   adapter.addItem(doc);
                 }
 
@@ -603,7 +605,7 @@ public class DBQueryBuilder {
 
       Observable
         .from( store.getDocuments().values() )
-        .filter( doc -> byStatus(filters, doc))
+        .filter( doc -> byStatus(filters, doc) )
         .filter( doc -> byType(indexes, doc))
         .map(InMemoryDocument::getDocument)
         .filter(document -> document.getSigner() != null)

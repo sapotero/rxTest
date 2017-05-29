@@ -16,19 +16,29 @@ public class InMemoryDocument implements Serializable {
   public String md5;
   public String index;
   public String filter;
-  public Boolean decision;
+  public Boolean hasDecision = false;
+  public Boolean processed   = false;
+
   public Document document;
   private InMemoryState action = InMemoryState.NEW;
 
   public InMemoryDocument() {
   }
 
-  public Boolean hasDecision() {
-    return decision;
+  public void setProcessed(Boolean processed) {
+    this.processed = processed;
   }
 
-  public void setDecision(Boolean decision) {
-    this.decision = decision;
+  public Boolean isProcessed() {
+    return processed;
+  }
+
+  public Boolean hasDecision() {
+    return hasDecision;
+  }
+
+  public void setHasDecision(Boolean hasDecision) {
+    this.hasDecision = hasDecision;
   }
 
   public Document getDocument() {

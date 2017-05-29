@@ -8,8 +8,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
 import android.widget.TextView;
 
 import org.greenrobot.eventbus.EventBus;
@@ -47,9 +45,6 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
   private List<InMemoryDocument> documents;
   private Context mContext;
-  final private AlphaAnimation in = new AlphaAnimation(0.0f, 1.0f);
-  final private Animation out = new AlphaAnimation(1.0f, 0.0f);
-
 
   @Override
   public void call(List<Document> documents) {
@@ -69,19 +64,13 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
     EsdApplication.getManagerComponent().inject(this);
 
-    initAnimation();
     initSubscription();
-  }
-
-  private void initAnimation() {
-    in.setDuration(300);
-    out.setDuration(300);
   }
 
   private void initSubscription() {
     store
       .getPublishSubject()
-      .filter( doc -> Holder.MAP.containsKey(doc.getUid()) )
+      .filter( doc -> Holder.MAP.containsKey( doc.getUid() ) )
       .subscribeOn(Schedulers.computation())
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(
@@ -91,13 +80,22 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
   }
 
   private void updateDocumentCard(InMemoryDocument doc) {
+    Timber.tag("UpdateDocumentCard").w("%s - %s", doc.getUid(), doc.isProcessed() );
+
     for (int i = 0; i < documents.size(); i++) {
       if ( Objects.equals(documents.get(i).getUid(), doc.getUid()) ){
         documents.set( i, doc);
         notifyItemChanged( i,  doc);
+
+        if ( doc.isProcessed() ){
+          notifyItemRemoved(i);
+          documents.remove(i);
+        }
+
         break;
       }
     }
+
   }
 
   @Override

@@ -83,7 +83,7 @@ public class InMemoryDocumentMapper {
     imd.setFilter(document.getFilter());
     imd.setIndex(document.getDocumentType());
     imd.setDocument( convert(document) );
-    imd.setAsNew();
+    imd.setProcessed( imd.getDocument().isProcessed() );
 
     return imd;
   }

@@ -14,6 +14,7 @@ import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
+import sapotero.rxtest.utils.memory.fields.FieldType;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
@@ -117,6 +118,7 @@ public class RemoveFromFolder extends AbstractCommand {
           queueManager.setExecutedRemote(this);
 
           store.removeLabel(LabelType.SYNC ,document_id);
+          store.setField(FieldType.PROCESSED, true, document_id);
 
         },
         error -> {

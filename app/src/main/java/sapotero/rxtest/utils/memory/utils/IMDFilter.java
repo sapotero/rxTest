@@ -80,7 +80,7 @@ public class IMDFilter {
 
 
   public Boolean isProcessed(InMemoryDocument doc) {
-    return !isProcessed || doc.getDocument().isProcessed();
+    return isProcessed == doc.isProcessed();
   }
 
   public Boolean isFavorites(InMemoryDocument doc) {

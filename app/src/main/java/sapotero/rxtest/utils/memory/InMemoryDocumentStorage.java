@@ -55,31 +55,35 @@ public class InMemoryDocumentStorage {
 
     if ( documents.containsKey(document.getUid()) ){
 
-      // если есть - проводим инвалидацию
-      InMemoryDocument inMemoryDocument = documents.get(document.getUid());
-      if ( IMDFilter.isMd5Changed( inMemoryDocument.getMd5(), document.getMd5() ) ){
+      InMemoryDocument doc = documents.get(document.getUid());
+
+      if ( IMDFilter.isMd5Changed( doc.getMd5(), document.getMd5() ) ){
         Timber.tag(TAG).e("update: %s", document.getUid());
 
-        inMemoryDocument = InMemoryDocumentMapper.fromJson(document);
-        inMemoryDocument.setFilter(filter);
-        inMemoryDocument.setIndex(index);
+        doc = InMemoryDocumentMapper.fromJson(document);
+        doc.setFilter(filter);
+        doc.setIndex(index);
 
         if (index != null) {
           jobManager.addJobInBackground( new UpdateDocumentJob(document.getUid(), index, filter, false) );
         } else {
           jobManager.addJobInBackground( new UpdateDocumentJob(document.getUid(), filter, false) );
         }
-        publish.onNext(inMemoryDocument);
 
+        publish.onNext(doc);
       }
 
+
     } else {
+      Timber.tag(TAG).e("new: %s", document.getUid());
+
       // если нет - эмитим новый документ
       documents.put(document.getUid(), InMemoryDocumentMapper.fromJson(document));
 
-      InMemoryDocument inMemoryDocument = documents.get(document.getUid());
-      inMemoryDocument.setFilter(filter);
-      inMemoryDocument.setIndex(index);
+      InMemoryDocument doc = documents.get(document.getUid());
+      doc.setFilter(filter);
+      doc.setIndex(index);
+      doc.setProcessed(false);
 
       publish.onNext( documents.get(document.getUid()) );
 
@@ -145,6 +149,7 @@ public class InMemoryDocumentStorage {
       switch (type){
         case PROCESSED:
           doc.getDocument().setProcessed(value);
+          doc.setProcessed(value);
           break;
       }
 
