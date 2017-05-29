@@ -52,6 +52,22 @@ public abstract class BaseJob extends Job {
     super(params);
   }
 
+  public <T> boolean notEmpty(Collection<T> collection) {
+    return collection != null && collection.size() > 0;
+  }
+
+  public boolean notEmpty(String s) {
+    return s != null && !Objects.equals(s, "");
+  }
+
+  public boolean exist(Object obj) {
+    return obj != null;
+  }
+
+  public void addPrefJobCount(int value) {
+    settings.addJobCount(value);
+  }
+
   public String getJournalName(String journal) {
     String journalName = "";
 
@@ -63,15 +79,6 @@ public abstract class BaseJob extends Job {
     return journalName;
   }
 
-  public Retrofit getRetrofit() {
-    return new Retrofit.Builder()
-                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create())
-                .baseUrl(settings.getHost() + "v3/documents/")
-                .client(okHttpClient)
-                .build();
-  }
-
   public Observable<DocumentInfo> getDocumentInfoObservable(String uid) {
     Retrofit retrofit = getRetrofit();
     DocumentService documentService = retrofit.create( DocumentService.class );
@@ -80,6 +87,52 @@ public abstract class BaseJob extends Job {
             settings.getLogin(),
             settings.getToken()
     );
+  }
+
+  public Retrofit getRetrofit() {
+    return new Retrofit.Builder()
+            .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create())
+            .baseUrl(settings.getHost() + "v3/documents/")
+            .client(okHttpClient)
+            .build();
+  }
+
+  public RDocumentEntity createDocument(DocumentInfo documentReceived, String status, boolean shared) {
+    DocumentMapper documentMapper = mappers.getDocumentMapper();
+    RDocumentEntity doc = documentMapper.toEntity(documentReceived);
+
+    documentMapper.setFilter(doc, status);
+    documentMapper.setShared(doc, shared);
+
+    return doc;
+  }
+
+  public void saveDocument(DocumentInfo documentReceived, RDocumentEntity documentToSave, String TAG) {
+    dataStore
+      .insert( documentToSave )
+      .toObservable()
+      .subscribeOn( Schedulers.computation() )
+      .observeOn( AndroidSchedulers.mainThread() )
+      .subscribe(
+        result -> {
+          Timber.tag(TAG).d("Created " + result.getUid());
+          loadLinkedData( documentReceived, result );
+        },
+        error -> {
+          Timber.tag(TAG).e(error);
+        }
+      );
+  }
+
+  public void loadLinkedData(DocumentInfo documentReceived, RDocumentEntity documentSaved) {
+    int jobCount = 0;
+
+    jobCount += loadImages( documentSaved.getImages() );
+    jobCount += loadLinks( documentReceived.getLinks() );
+    jobCount += loadCards( documentReceived.getRoute() );
+
+    addPrefJobCount(jobCount);
   }
 
   public int loadImages(Set<RImage> images) {
@@ -142,58 +195,5 @@ public abstract class BaseJob extends Job {
     }
 
     return jobCount;
-  }
-
-  public void loadLinkedData(DocumentInfo documentReceived, RDocumentEntity documentSaved) {
-    int jobCount = 0;
-
-    jobCount += loadImages( documentSaved.getImages() );
-    jobCount += loadLinks( documentReceived.getLinks() );
-    jobCount += loadCards( documentReceived.getRoute() );
-
-    addPrefJobCount(jobCount);
-  }
-
-  public RDocumentEntity createDocument(DocumentInfo documentReceived, String status, boolean shared) {
-    DocumentMapper documentMapper = mappers.getDocumentMapper();
-    RDocumentEntity doc = documentMapper.toEntity(documentReceived);
-
-    documentMapper.setFilter(doc, status);
-    documentMapper.setShared(doc, shared);
-
-    return doc;
-  }
-
-  public void saveDocument(DocumentInfo documentReceived, RDocumentEntity documentToSave, String TAG) {
-    dataStore
-      .insert( documentToSave )
-      .toObservable()
-      .subscribeOn( Schedulers.computation() )
-      .observeOn( AndroidSchedulers.mainThread() )
-      .subscribe(
-        result -> {
-          Timber.tag(TAG).d("Created " + result.getUid());
-          loadLinkedData( documentReceived, result );
-        },
-        error -> {
-          Timber.tag(TAG).e(error);
-        }
-      );
-  }
-
-  public <T> boolean notEmpty(Collection<T> collection) {
-    return collection != null && collection.size() > 0;
-  }
-
-  public boolean notEmpty(String s) {
-    return s != null && !Objects.equals(s, "");
-  }
-
-  public boolean exist(Object obj) {
-    return obj != null;
-  }
-
-  public void addPrefJobCount(int value) {
-    settings.addJobCount(value);
   }
 }
