@@ -15,18 +15,10 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.mapper.DocumentMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.models.RLinks;
-import sapotero.rxtest.db.requery.models.RLinksEntity;
-import sapotero.rxtest.db.requery.models.RRouteEntity;
-import sapotero.rxtest.db.requery.models.RStep;
-import sapotero.rxtest.db.requery.models.RStepEntity;
-import sapotero.rxtest.db.requery.models.images.RImage;
-import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.events.adapter.UpdateDocumentAdapterEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.retrofit.DocumentService;
-import sapotero.rxtest.retrofit.models.document.Card;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
 import timber.log.Timber;
 
@@ -101,42 +93,11 @@ public class CreateDocumentsJob extends BaseJob {
 
           jobCount = 0;
 
-          if ( result.getImages() != null && result.getImages().size() > 0 ){
-            for (RImage _image : result.getImages()) {
-              jobCount++;
-              RImageEntity image = (RImageEntity) _image;
-              jobManager.addJobInBackground( new DownloadFileJob(settings.getHost(), image.getPath(), image.getMd5()+"_"+image.getTitle(), image.getId() ) );
-            }
-          }
+          jobCount += loadImages( result.getImages() );
+          jobCount += loadLinks( document.getLinks() );
+          jobCount += loadCards( document.getRoute() );
 
-          if ( doc.getLinks() != null && doc.getLinks().size() > 0 ){
-            for (RLinks _link: doc.getLinks()) {
-              jobCount++;
-              RLinksEntity link = (RLinksEntity) _link;
-              jobManager.addJobInBackground( new UpdateLinkJob( link.getUid() ) );
-            }
-          }
-
-          if ( doc.getRoute() != null ){
-            for (RStep _step: ((RRouteEntity) doc.getRoute()).getSteps() ) {
-              RStepEntity step = (RStepEntity) _step;
-
-              if ( step.getCards() != null ){
-                Card[] cards = new Gson().fromJson(step.getCards(), Card[].class);
-
-                if (cards.length > 0){
-                  for (Card card: cards ) {
-                    if (card.getUid() != null) {
-                      jobCount++;
-                      jobManager.addJobInBackground( new UpdateLinkJob( card.getUid() ) );
-                    }
-                  }
-                }
-              }
-            }
-          }
-
-          settings.addJobCount(jobCount);
+          addPrefJobCount(jobCount);
 
           EventBus.getDefault().post( new UpdateDocumentAdapterEvent( result.getUid(), result.getDocumentType(), result.getFilter() ) );
         },

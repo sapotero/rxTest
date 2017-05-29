@@ -411,8 +411,4 @@ public class UpdateDocumentJob extends BaseJob {
     // Job has exceeded retry attempts or shouldReRunOnThrowable() has decided to cancel.
     EventBus.getDefault().post( new StepperLoadDocumentEvent("Error updating document (job cancelled)") );
   }
-
-  private void addPrefJobCount(int value) {
-    settings.addJobCount(value);
-  }
 }
