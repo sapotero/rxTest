@@ -67,8 +67,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
   }
 
   public void setSimpleFields(RDocumentEntity entity, DocumentInfo model) {
-    entity.setUid( model.getUid() );
-    entity.setUser( settings.getLogin() );
+    setBaseFields( entity, model );
     entity.setFavorites( false );
     entity.setProcessed( false );
     entity.setControl( false );
@@ -76,6 +75,11 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     entity.setFromProcessedFolder( false );
     entity.setFromFavoritesFolder( false );
     entity.setChanged( false );
+  }
+
+  public void setBaseFields(RDocumentEntity entity, DocumentInfo model) {
+    entity.setUid( model.getUid() );
+    entity.setUser( settings.getLogin() );
 
     entity.setMd5( model.getMd5() );
     entity.setSortKey( model.getSortKey() );

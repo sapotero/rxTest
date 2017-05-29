@@ -14,7 +14,7 @@ import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
 
 // Creates projects (statuses: approval and signing)
-public class CreateProjectsJob extends CreateDocProjJob {
+public class CreateProjectsJob extends DocProjJob {
 
   public static final int PRIORITY = 1;
 
@@ -41,7 +41,7 @@ public class CreateProjectsJob extends CreateDocProjJob {
   }
 
   @Override
-  public void create(DocumentInfo document) {
+  public void doAfterLoad(DocumentInfo document) {
     RDocumentEntity doc = createDocument(document, status, shared);
     saveDocument(document, doc, TAG);
   }

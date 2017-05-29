@@ -394,9 +394,10 @@ public class UpdateDocumentJob extends BaseJob {
   }
 
   @Override
-  protected RetryConstraint shouldReRunOnThrowable(Throwable throwable, int runCount, int maxRunCount) {
+  protected RetryConstraint shouldReRunOnThrowable(@NonNull Throwable throwable, int runCount, int maxRunCount) {
     return RetryConstraint.createExponentialBackoff(runCount, 1000);
   }
+
   @Override
   protected void onCancel(@CancelReason int cancelReason, @Nullable Throwable throwable) {
     // Job has exceeded retry attempts or shouldReRunOnThrowable() has decided to cancel.

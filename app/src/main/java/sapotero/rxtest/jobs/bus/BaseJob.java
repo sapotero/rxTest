@@ -5,6 +5,8 @@ import com.birbit.android.jobqueue.JobManager;
 import com.birbit.android.jobqueue.Params;
 import com.google.gson.Gson;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -31,6 +33,7 @@ import sapotero.rxtest.db.requery.models.RStep;
 import sapotero.rxtest.db.requery.models.RStepEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
+import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Card;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
@@ -118,6 +121,23 @@ public abstract class BaseJob extends Job {
         result -> {
           Timber.tag(TAG).d("Created " + result.getUid());
           loadLinkedData( documentReceived, result );
+        },
+        error -> {
+          Timber.tag(TAG).e(error);
+        }
+      );
+  }
+
+  public void updateDocument(DocumentInfo documentReceived, RDocumentEntity documentToUpdate, String TAG) {
+    dataStore
+      .update( documentToUpdate )
+      .subscribeOn( Schedulers.io() )
+      .observeOn( AndroidSchedulers.mainThread() )
+      .subscribe(
+        result -> {
+          Timber.tag(TAG).d("Updated MD5 " + result.getMd5());
+          loadLinkedData( documentReceived, result );
+          EventBus.getDefault().post( new UpdateCurrentDocumentEvent( result.getUid() ) );
         },
         error -> {
           Timber.tag(TAG).e(error);

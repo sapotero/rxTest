@@ -9,28 +9,26 @@ import com.birbit.android.jobqueue.RetryConstraint;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.Objects;
+
+import sapotero.rxtest.db.mapper.DocumentMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
+import timber.log.Timber;
 
-// Creates ordinary documents (statuses: primary_consideration and sent_to_the_report)
-public class CreateDocumentsJob extends DocProjJob {
+// Updates existing projects (statuses: approval and signing)
+public class UpdateProjectJob extends DocProjJob {
 
   public static final int PRIORITY = 1;
 
   private String TAG = this.getClass().getSimpleName();
 
   private String uid;
-  private String status;
-  private String journal;
-  private boolean shared = false;
 
-  public CreateDocumentsJob(String uid, String journal, String status, boolean shared) {
+  public UpdateProjectJob(String uid) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
-    this.journal = getJournalName(journal);
-    this.status = status;
-    this.shared = shared;
   }
 
   @Override
@@ -43,10 +41,28 @@ public class CreateDocumentsJob extends DocProjJob {
   }
 
   @Override
-  public void doAfterLoad(DocumentInfo document){
-    RDocumentEntity doc = createDocument(document, status, shared);
-    mappers.getDocumentMapper().setJournal(doc, journal);
-    saveDocument(document, doc, TAG);
+  public void doAfterLoad(DocumentInfo documentReceived) {
+
+    RDocumentEntity documentExisting = dataStore
+      .select(RDocumentEntity.class)
+      .where(RDocumentEntity.UID.eq(uid))
+      .get().firstOrNull();
+
+    if ( exist( documentExisting ) ) {
+      if ( !Objects.equals( documentReceived.getMd5(), documentExisting.getMd5() ) ) {
+        Timber.tag(TAG).d( "MD5 not equal %s - %s", documentReceived.getMd5(), documentExisting.getMd5() );
+
+        DocumentMapper documentMapper = mappers.getDocumentMapper();
+        documentMapper.setBaseFields(documentExisting, documentReceived);
+        documentMapper.setNestedFields(documentExisting, documentReceived, false);
+        documentExisting.setProcessed( false );
+
+        updateDocument(documentReceived, documentExisting, TAG);
+
+      } else {
+        Timber.tag(TAG).d("MD5 equal");
+      }
+    }
   }
 
   @Override
@@ -57,6 +73,6 @@ public class CreateDocumentsJob extends DocProjJob {
   @Override
   protected void onCancel(@CancelReason int cancelReason, @Nullable Throwable throwable) {
     // Job has exceeded retry attempts or shouldReRunOnThrowable() has decided to cancel.
-    EventBus.getDefault().post( new StepperLoadDocumentEvent("Error creating document (job cancelled)") );
+    EventBus.getDefault().post( new StepperLoadDocumentEvent("Error updating project (job cancelled)") );
   }
 }

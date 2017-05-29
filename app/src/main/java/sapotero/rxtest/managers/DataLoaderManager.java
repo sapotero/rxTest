@@ -50,6 +50,7 @@ import sapotero.rxtest.jobs.bus.InvalidateDocumentsJob;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.jobs.bus.UpdateFavoritesDocumentsJob;
 import sapotero.rxtest.jobs.bus.UpdateProcessedDocumentsJob;
+import sapotero.rxtest.jobs.bus.UpdateProjectJob;
 import sapotero.rxtest.retrofit.Api.AuthService;
 import sapotero.rxtest.retrofit.DocumentsService;
 import sapotero.rxtest.retrofit.models.AuthSignToken;
@@ -663,8 +664,17 @@ public class DataLoaderManager {
                 requestCount--;
                 if (data.getDocuments().size() > 0){
                   for (Document doc: data.getDocuments() ) {
-                    jobCount++;
-                    jobManager.addJobInBackground( new CreateProjectsJob(doc.getUid(), code, finalShared1) );
+                    if ( isExist(doc) ) {
+
+                      if ( !isDocumentMd5Changed( doc.getUid(), doc.getMd5() ) ) {
+                        jobCount++;
+                        jobManager.addJobInBackground( new UpdateProjectJob( doc.getUid() ) );
+                      }
+
+                    } else {
+                      jobCount++;
+                      jobManager.addJobInBackground( new CreateProjectsJob(doc.getUid(), code, finalShared1) );
+                    }
                   }
                 }
                 updatePrefJobCount();
