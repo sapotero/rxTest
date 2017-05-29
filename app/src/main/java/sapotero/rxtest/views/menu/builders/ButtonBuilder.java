@@ -13,8 +13,8 @@ import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -33,15 +33,18 @@ import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.utils.validation.Validation;
 import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.memory.InMemoryDocumentStorage;
+import sapotero.rxtest.utils.memory.models.InMemoryDocument;
+import sapotero.rxtest.utils.memory.utils.IMDFilter;
 import timber.log.Timber;
 
 public class ButtonBuilder {
 
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject Settings settings;
-  @Inject Validation validation;
+//  @Inject Validation validation;
+  @Inject InMemoryDocumentStorage store;
 
   private ConditionBuilder[] conditions;
   private ConditionBuilder[] item_conditions;
@@ -49,7 +52,6 @@ public class ButtonBuilder {
   private Integer index;
   private String label;
   private boolean active;
-  private Corner corner;
 
   private Callback callback;
   private RadioButton view;
@@ -83,12 +85,6 @@ public class ButtonBuilder {
   }
 
 
-  private enum Corner{
-    LEFT,
-    RIGHT,
-    NONE
-  }
-
   public Integer getIndex() {
     return index;
   }
@@ -99,10 +95,9 @@ public class ButtonBuilder {
     this.item_conditions = item_conditions;
     this.showDecisionForse = showDecisionForse;
     this.index = index;
-    this.corner = Corner.NONE;
     this.active = false;
 
-    EsdApplication.getValidationComponent().inject(this);
+    EsdApplication.getManagerComponent().inject(this);
   }
 
 
@@ -132,7 +127,7 @@ public class ButtonBuilder {
       .count(RDocumentEntity.class)
       .where(RDocumentEntity.USER.eq(settings.getLogin()))
       .and(RDocumentEntity.WITH_DECISION.eq(true))
-      .and( RDocumentEntity.DOCUMENT_TYPE.in( validation.getSelectedJournals() ) )
+//      .and( RDocumentEntity.DOCUMENT_TYPE.in( validation.getSelectedJournals() ) )
       .and(RDocumentEntity.FROM_LINKS.eq(false));
 
 //    if (index == 4 || index == 7){
@@ -183,68 +178,62 @@ public class ButtonBuilder {
 
   private void getCountWithoutDecisons() {
 
-    WhereAndOr<RxScalar<Integer>> query = dataStore
-      .count(RDocumentEntity.class)
-      .where( RDocumentEntity.USER.eq( settings.getLogin() ) );
+//    Boolean processed = false;
+//
+//    WhereAndOr<RxScalar<Integer>> query = dataStore
+//      .count(RDocumentEntity.class)
+//      .where( RDocumentEntity.USER.eq( settings.getLogin() ) );
 
     // проекты, подпись, согласование
-    if ( !Arrays.asList(1,5,6,4,7).contains(index) ){
-      List<String> journals = validation.getSelectedJournals();
-      if ( journals.size() > 0){
-        query = query.and( RDocumentEntity.DOCUMENT_TYPE.in( validation.getSelectedJournals() ) );
-      }
-    }
+//    if ( !Arrays.asList(1,5,6,4,7).contains(index) ){
+//      List<String> journals = validation.getSelectedJournals();
+//      if ( journals.size() > 0){
+//        query = query.and( RDocumentEntity.DOCUMENT_TYPE.in( validation.getSelectedJournals() ) );
+//      }
+//    }
 
-    // обработанные и Рассмотренные
-    if ( Arrays.asList(4,7).contains(index) ){
-      query = query.and(RDocumentEntity.PROCESSED.eq(true));
-    } else {
-      query = query.and(RDocumentEntity.PROCESSED.eq(false));
-    }
+//    // обработанные и Рассмотренные
+//    if ( Arrays.asList(4,7).contains(index) ){
+//      query = query.and(RDocumentEntity.PROCESSED.eq(true));
+//
+//      processed = true;
+//    } else {
+//      query = query.and(RDocumentEntity.PROCESSED.eq(false));
+//    }
+
+
+    ArrayList<ConditionBuilder> _conditions = new ArrayList<>();
 
     if ( item_conditions.length > 0 ){
-      for (ConditionBuilder condition : item_conditions ){
-        switch ( condition.getCondition() ){
-          case AND:
-            query = query.and( condition.getField() );
-            break;
-          case OR:
-            query = query.or( condition.getField() );
-            break;
-          default:
-            break;
-        }
-      }
+      Collections.addAll(_conditions, item_conditions);
     }
     if ( conditions.length > 0 ){
-      for (ConditionBuilder condition : conditions ){
-        switch ( condition.getCondition() ){
-          case AND:
-            query = query.and( condition.getField() );
-            break;
-          case OR:
-            query = query.or( condition.getField() );
-            break;
-          default:
-            break;
-        }
-      }
+      Collections.addAll(_conditions, conditions);
     }
 
-    Integer size = query.get().value();
 
-//    for (ConditionBuilder condition : conditions ) {
-//      Timber.tag(TAG).i("condition %s", condition.toString());
-//    }
-//
-//    for (ConditionBuilder condition : item_conditions ) {
-//      Timber.tag(TAG).i("condition %s", condition.toString());
-//    }
-//
-//    Timber.tag(TAG).i("size %s",  conditions.length);
-//    Timber.tag(TAG).i("total %s", size);
+    IMDFilter filter = new IMDFilter(_conditions);
 
-    view.setText( String.format( label, size ) );
+    Observable
+      .from( store.getDocuments().values() )
+
+      .filter( filter::isProcessed )
+      .filter( filter::isFavorites )
+      .filter( filter::isControl )
+      .filter( filter::byType)
+      .filter( filter::byStatus)
+
+      .map( InMemoryDocument::getUid )
+      .toList()
+      .subscribeOn( Schedulers.computation() )
+      .observeOn( AndroidSchedulers.mainThread() )
+      .subscribe(
+        list -> {
+          view.setText( String.format( label, list.size() ) );
+        },
+        Timber::e
+      );
+
   }
 
   @RequiresApi(api = Build.VERSION_CODES.M)
@@ -285,9 +274,9 @@ public class ButtonBuilder {
       }
     }
 
-    if (!validation.hasSigningAndApproval() && index == 1){
-      view.setVisibility(View.GONE);
-    }
+//    if (!validation.hasSigningAndApproval() && index == 1){
+//      view.setVisibility(View.GONE);
+//    }
 
 
     getCount();
@@ -315,16 +304,6 @@ public class ButtonBuilder {
 
   public RadioButton getButton(){
     return view;
-  }
-
-  public void setLeftCorner() {
-    corner = Corner.LEFT;
-  }
-  public void setRightCorner() {
-    corner = Corner.RIGHT;
-  }
-  public void setNoneCorner() {
-    corner = Corner.NONE;
   }
 
   public boolean isActive() {

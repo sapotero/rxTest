@@ -3,7 +3,6 @@ package sapotero.rxtest.utils.memory;
 import com.birbit.android.jobqueue.JobManager;
 
 import java.util.HashMap;
-import java.util.UUID;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -17,7 +16,6 @@ import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.jobs.bus.CreateDocumentsJob;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.retrofit.models.documents.Document;
@@ -26,7 +24,7 @@ import sapotero.rxtest.utils.memory.fields.LabelType;
 import sapotero.rxtest.utils.memory.mappers.InMemoryDocumentMapper;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.utils.memory.utils.GenerateRandomDocument;
-import sapotero.rxtest.utils.memory.utils.IMDValidation;
+import sapotero.rxtest.utils.memory.utils.IMDFilter;
 import sapotero.rxtest.utils.memory.utils.InMemoryLogger;
 import timber.log.Timber;
 
@@ -57,7 +55,6 @@ public class InMemoryDocumentStorage {
 
 //    initScheduller();
     loadFromDB();
-    initLogger();
   }
 
   public HashMap<String, InMemoryDocument> getDocuments() {
@@ -68,35 +65,9 @@ public class InMemoryDocumentStorage {
     scheduller.scheduleWithFixedDelay( new GenerateRandomDocument(this), 0 ,1, TimeUnit.SECONDS );
   }
 
-  private void initLogger(){
-    publish
-      .subscribeOn(Schedulers.computation())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(
-        logger::log,
-        Timber::e
-      );
-  }
 
   public PublishSubject<InMemoryDocument> getPublishSubject(){
     return publish;
-  }
-
-  public void generateFakeDocumentEntity(){
-
-    Timber.tag(TAG).e("total: %s", documents.size());
-
-    String uid = UUID.randomUUID().toString();
-
-    InMemoryDocument fake = new InMemoryDocument();
-    fake.setUid(uid);
-    fake.setMd5("fake_md5");
-    fake.setAsLoading();
-    fake.setStatus( Fields.Status.getRandom() );
-
-    documents.put(uid, fake);
-    publish.onNext(documents.get(uid));
-
   }
 
   public void add(Document document, String index, String filter){
@@ -107,7 +78,7 @@ public class InMemoryDocumentStorage {
 
       // если есть - проводим инвалидацию
       InMemoryDocument inMemoryDocument = documents.get(document.getUid());
-      if ( IMDValidation.isMd5Changed( inMemoryDocument.getMd5(), document.getMd5() ) ){
+      if ( IMDFilter.isMd5Changed( inMemoryDocument.getMd5(), document.getMd5() ) ){
         Timber.tag(TAG).e("update: %s", document.getUid());
 
         inMemoryDocument = InMemoryDocumentMapper.fromJson(document);

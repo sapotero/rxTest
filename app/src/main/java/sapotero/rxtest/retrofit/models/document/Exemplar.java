@@ -27,7 +27,7 @@ public class Exemplar {
     @SerializedName("date")
     @Expose
     private String date;
-    @SerializedName("statuses")
+    @SerializedName("byStatus")
     @Expose
     private List<Status> statuses = new ArrayList<Status>();
 
@@ -142,7 +142,7 @@ public class Exemplar {
     /**
      * 
      * @return
-     *     The statuses
+     *     The byStatus
      */
     public List<Status> getStatuses() {
         return statuses;
@@ -151,7 +151,7 @@ public class Exemplar {
     /**
      * 
      * @param statuses
-     *     The statuses
+     *     The byStatus
      */
     public void setStatuses(List<Status> statuses) {
         this.statuses = statuses;

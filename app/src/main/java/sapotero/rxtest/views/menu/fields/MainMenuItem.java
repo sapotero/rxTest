@@ -294,14 +294,6 @@ public enum MainMenuItem {
             mainMenuButtons[i].getIndex()
           );
 
-          if (i == 0){
-            button.setLeftCorner();
-          } else if ( i == length ){
-            button.setRightCorner();
-          } else {
-            button.setNoneCorner();
-          }
-
           buttonsList.add( button );
         }
       }

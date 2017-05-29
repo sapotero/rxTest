@@ -23,6 +23,7 @@ import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
 import sapotero.rxtest.views.fragments.DecisionRejectionTemplateFragment;
 import sapotero.rxtest.views.fragments.DecisionTemplateFragment;
 import sapotero.rxtest.views.fragments.InfoActivityDecisionPreviewFragment;
+import sapotero.rxtest.views.menu.builders.ButtonBuilder;
 
 @ManagerScope
 @Subcomponent(modules = {
@@ -59,4 +60,5 @@ public interface ManagerComponent {
   void inject(InMemoryDocumentStorage activity);
 
   void inject(DocumentsAdapter adapter);
+  void inject(ButtonBuilder buttonBuilder);
 }

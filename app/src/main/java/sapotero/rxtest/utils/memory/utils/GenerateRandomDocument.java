@@ -12,6 +12,6 @@ public class GenerateRandomDocument implements Runnable {
 
   @Override
   public void run() {
-    publish.generateFakeDocumentEntity();
+//    publish.generateFakeDocumentEntity();
   }
 }

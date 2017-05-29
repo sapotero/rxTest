@@ -33,6 +33,7 @@ import sapotero.rxtest.retrofit.models.documents.Signer;
 import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.utils.memory.InMemoryDocumentStorage;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
+import sapotero.rxtest.utils.memory.utils.IMDFilter;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
 import sapotero.rxtest.views.adapters.models.OrganizationItem;
@@ -324,72 +325,27 @@ public class DBQueryBuilder {
     if ( conditions.size() > 0 ){
 
       findOrganizations(true);
-
-      ArrayList<String> statuses = new ArrayList<>();
-      ArrayList<String> types = new ArrayList<>();
-
-      Boolean isProcessed = false;
-      Boolean isFavotires = false;
-      Boolean isControl   = false;
-
-      for (ConditionBuilder condition : conditions ){
-        if (condition.getField().getLeftOperand() == RDocumentEntity.FILTER){
-
-          try {
-            statuses.addAll(((ArrayList<String>) condition.getField().getRightOperand()));
-          } catch (Exception e) {
-            statuses.add( String.valueOf(condition.getField().getRightOperand()) );
-          }
-
-        }
-
-        if (condition.getField().getLeftOperand() == RDocumentEntity.DOCUMENT_TYPE){
-          types.add( String.valueOf(condition.getField().getRightOperand()) );
-          Timber.tag(TAG).w("new index: %s", String.valueOf(condition.getField().getRightOperand()));
-        }
-
-        if (condition.getField().getLeftOperand() == RDocumentEntity.CONTROL){
-          if ( condition.getField().getRightOperand().equals(true)  ){
-            isControl = true;
-          }
-        }
-
-        if ( condition.getField().getLeftOperand() == RDocumentEntity.PROCESSED ){
-          if ( condition.getField().getRightOperand().equals(true)  ){
-            isProcessed = true;
-          }
-        }
-
-        if (condition.getField().getLeftOperand() == RDocumentEntity.FAVORITES){
-          if ( condition.getField().getRightOperand().equals(true)  ){
-            isFavotires = true;
-          }
-        }
-
-      }
-
       unsubscribe();
 
-      Boolean processed = isProcessed;
-      Boolean control = isControl;
-      Boolean favorites = isFavotires;
+      IMDFilter filter = new IMDFilter(conditions);
 
-      Timber.tag(TAG).w("!!!!! f: %s | p: %s | c: %s", favorites, processed, control);
-      Timber.tag(TAG).w("!!!!! statuses: %s ", new Gson().toJson(statuses) );
-      Timber.tag(TAG).w("!!!!! indexes: %s ", new Gson().toJson(types) );
+      Timber.tag(TAG).w("!!!!! byStatus : %s", new Gson().toJson( filter.getStatuses() ) );
+      Timber.tag(TAG).w("!!!!! indexes  : %s", new Gson().toJson(  filter.getTypes() ) );
 
       compositeSubscription.add(
         Observable
           .from( store.getDocuments().values() )
-          .filter( doc -> byControl(control, doc) )
-          .filter( doc -> byFavorites(favorites, doc) )
-          .filter( doc -> byProcessed(processed, doc) )
 
-          .filter( doc -> byType(types, doc) )
-          .filter( doc -> byStatus(statuses, doc) )
-          .filter( this::byOrganization )
+//          .filter( this::byOrganization )
 
-          .toSortedList( this::bySortKey)
+          .filter( filter::isProcessed )
+          .filter( filter::isFavorites )
+          .filter( filter::isControl )
+          .filter( filter::byType)
+          .filter( filter::byStatus)
+
+          .toSortedList( IMDFilter::bySortKey )
+
           .subscribeOn(Schedulers.computation())
           .observeOn(AndroidSchedulers.mainThread())
           .subscribe(
@@ -450,17 +406,6 @@ public class DBQueryBuilder {
 
     if ( withFavorites ){
       result = doc.getDocument().getFavorites() || doc.getDocument().isFromFavoritesFolder();
-    }
-
-    return result;
-  }
-
-  @NonNull
-  private Integer bySortKey(InMemoryDocument imd1, InMemoryDocument imd2) {
-    int result = -1;
-
-    if (imd1.getDocument().getSortKey() != null && imd2.getDocument().getSortKey() != null) {
-      result = imd1.getDocument().getSortKey().compareTo( imd2.getDocument().getSortKey() );
     }
 
     return result;
