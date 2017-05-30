@@ -101,7 +101,7 @@ public class DBQueryBuilder {
   //old realization
   public void execute(Boolean refreshSpinner){
 
-    menuBuilder.updateCount();
+//    menuBuilder.updateCount();
 
     if (conditions != null) {
 

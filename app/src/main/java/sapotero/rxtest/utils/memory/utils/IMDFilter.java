@@ -111,7 +111,7 @@ public class IMDFilter {
     return statuses.size() == 0 || statuses.contains( document.getFilter() );
   }
 
-  public static Boolean isMd5Changed(String m1, String m2){
+  public static Boolean isChanged(String m1, String m2){
     return !m1.equals( m2 );
   }
 

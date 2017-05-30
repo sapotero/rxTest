@@ -12,12 +12,10 @@ import android.widget.Spinner;
 import java.util.ArrayList;
 
 import sapotero.rxtest.R;
-import sapotero.rxtest.views.adapters.DocumentTypeAdapter;
 import sapotero.rxtest.views.custom.OrganizationSpinner;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import sapotero.rxtest.views.menu.factories.ItemsBuilder;
 import sapotero.rxtest.views.menu.fields.MainMenuItem;
-import timber.log.Timber;
 
 public class MenuBuilder implements ItemsBuilder.Callback{
   private final ItemsBuilder itemsBuilder;
@@ -52,7 +50,7 @@ public class MenuBuilder implements ItemsBuilder.Callback{
 
   public void updateCount() {
     itemsBuilder.getSelectedItem().recalcuate();
-    update();
+//    update();
   }
 
   @TargetApi(Build.VERSION_CODES.M)
@@ -143,9 +141,9 @@ public class MenuBuilder implements ItemsBuilder.Callback{
   }
 
   public void update() {
-    //test update adapter
-    int index = journalSpinner.getSelectedItemPosition();
-    DocumentTypeAdapter tmp_adapter = (DocumentTypeAdapter) journalSpinner.getAdapter();
+//    //test update adapter
+//    int index = journalSpinner.getSelectedItemPosition();
+//    DocumentTypeAdapter tmp_adapter = (DocumentTypeAdapter) journalSpinner.getAdapter();
 
   }
 
@@ -175,14 +173,14 @@ public class MenuBuilder implements ItemsBuilder.Callback{
 //    }
 
 
-    Timber.tag(TAG).i( "onMenuUpdate" );
+//    Timber.tag(TAG).i( "onMenuUpdate" );
 
     view = new FrameLayout(context);
 
     RadioGroup tmp_view = itemsBuilder.getView();
 
-    int index_selected = tmp_view.indexOfChild(tmp_view.findViewById(tmp_view.getCheckedRadioButtonId()));
-    Timber.tag(TAG).i( "checked: %s", index_selected );
+//    int index_selected = tmp_view.indexOfChild(tmp_view.findViewById(tmp_view.getCheckedRadioButtonId()));
+//    Timber.tag(TAG).i( "checked: %s", index_selected );
 
     buttons.removeAllViews();
     buttons.addView( tmp_view );

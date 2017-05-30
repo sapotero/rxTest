@@ -52,17 +52,28 @@ public class InMemoryDocumentStorage {
   }
 
   public void add(Document document, String index, String filter){
+    Timber.tag(TAG).e("-> %s / %s@%5.10s  ", document.getUid(), filter, index );
 
     if ( documents.containsKey(document.getUid()) ){
 
       InMemoryDocument doc = documents.get(document.getUid());
 
-      if ( IMDFilter.isMd5Changed( doc.getMd5(), document.getMd5() ) ){
+      if ( IMDFilter.isChanged( doc.getMd5(), document.getMd5() ) ){
+
         Timber.tag(TAG).e("update: %s", document.getUid());
+        Timber.tag(TAG).e("-> %s / %s  ", filter, doc.getFilter() );
+
+        if ( IMDFilter.isChanged( doc.getFilter(), filter) ){
+          setField( FieldType.PROCESSED, false, doc.getUid() );
+        }
 
         doc = InMemoryDocumentMapper.fromJson(document);
         doc.setFilter(filter);
         doc.setIndex(index);
+
+        documents.remove( doc.getUid() );
+        documents.put( doc.getUid(), doc );
+
 
         if (index != null) {
           jobManager.addJobInBackground( new UpdateDocumentJob(document.getUid(), index, filter, false) );
@@ -139,9 +150,6 @@ public class InMemoryDocumentStorage {
   }
 
 
-
-
-
   public void setField(FieldType type, Boolean value, String uid) {
     InMemoryDocument doc = documents.get(uid);
     if (doc != null) {
@@ -152,8 +160,31 @@ public class InMemoryDocumentStorage {
           doc.setProcessed(value);
           break;
       }
-
       publish.onNext( doc );
+
+    }
+  }
+
+  public void setField(FieldType type, String value, String uid) {
+    InMemoryDocument doc = documents.get(uid);
+    if (doc != null) {
+
+      switch (type){
+        case MD5:
+          doc.getDocument().setMd5(value);
+          doc.setMd5(value);
+          break;
+        case FILTER:
+          doc.setFilter(value);
+          break;
+
+      }
+
+
+      documents.remove( uid );
+      documents.put( uid, doc );
+      publish.onNext( doc );
+
 
     }
   }
@@ -177,6 +208,7 @@ public class InMemoryDocumentStorage {
           break;
       }
 
+      documents.put( uid, doc );
       publish.onNext( doc );
 
     }

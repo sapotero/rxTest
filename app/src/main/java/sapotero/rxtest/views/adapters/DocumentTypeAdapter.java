@@ -104,24 +104,24 @@ public class DocumentTypeAdapter extends BaseAdapter {
   }
 
 
-  private DocumentTypeItem getOrganizationItem(int position) {
-    return getItem(position);
-  }
+//  private DocumentTypeItem getOrganizationItem(int position) {
+//    return getItem(position);
+//  }
 
   public int getPosition() {
     return mPos;
   }
 
 
-  public void add(DocumentTypeItem organizationItem) {
-    this.documents.add(organizationItem);
-    notifyDataSetChanged();
-  }
+//  public void add(DocumentTypeItem organizationItem) {
+//    this.documents.add(organizationItem);
+//    notifyDataSetChanged();
+//  }
 
-  public void clear() {
-    this.documents.clear();
-    notifyDataSetChanged();
-  }
+//  public void clear() {
+//    this.documents.clear();
+//    notifyDataSetChanged();
+//  }
 
 //  public Integer findByValue(String value) {
 //
@@ -137,10 +137,10 @@ public class DocumentTypeAdapter extends BaseAdapter {
 //
 //    return index;
 //  }
-
-  public void updateCountByType(String uid) {
-    String type = String.format("%.2s", uid);
-  }
+//
+//  public void updateCountByType(String uid) {
+//    String type = String.format("%.2s", uid);
+//  }
 
   public int prev() {
     if (documents == null || documents.size() == 0){
@@ -174,8 +174,8 @@ public class DocumentTypeAdapter extends BaseAdapter {
     notifyDataSetChanged();
   }
 
-  private void addAll(List<DocumentTypeItem> documents) {
-    this.documents.clear();
-    this.documents = documents;
-  }
+//  private void addAll(List<DocumentTypeItem> documents) {
+//    this.documents.clear();
+//    this.documents = documents;
+//  }
 }

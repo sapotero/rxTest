@@ -114,7 +114,7 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
   }
 
   public void setSpinnerDefaults() {
-
+    Timber.i( "setSpinnerDefaults" );
     List<DocumentTypeItem> document_types = new ArrayList<>();
 
     for ( MainMenuItem mainMenuItem : MainMenuItem.values()) {
@@ -141,7 +141,6 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
   }
 
 
-  @RequiresApi(api = Build.VERSION_CODES.M)
   private void updateView() {
     if (view == null){
       view = new RadioGroup(context);

@@ -669,7 +669,6 @@ public class UpdateDocumentJob extends BaseJob {
 
         route.getSteps().clear();
 
-
         for (Step step: document.getRoute().getSteps() ) {
 
           RStepEntity r_step = new RStepEntity();

@@ -3,8 +3,6 @@ package sapotero.rxtest.views.menu.builders;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.graphics.drawable.StateListDrawable;
-import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.support.v4.content.ContextCompat;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -241,7 +239,6 @@ public class ButtonBuilder {
       );
   }
 
-  @RequiresApi(api = Build.VERSION_CODES.M)
   public RadioButton getView(Context context){
 
     Timber.tag(TAG).e("create new");
@@ -265,7 +262,7 @@ public class ButtonBuilder {
     view.setButtonDrawable( ContextCompat.getDrawable(context, R.drawable.toggle_selector_button) );
 
     view.setBackground( ContextCompat.getDrawable(context, R.drawable.toggle_selector_button) );
-    view.setForeground( context.getDrawable(R.drawable.card_foreground) );
+//    view.setForeground( ContextCompat.getDrawable(context, R.drawable.card_foreground) );
 
     view.setText( String.format( label, 0) );
 

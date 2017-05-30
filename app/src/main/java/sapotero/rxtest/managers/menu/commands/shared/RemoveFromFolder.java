@@ -121,7 +121,10 @@ public class RemoveFromFolder extends AbstractCommand {
           queueManager.setExecutedRemote(this);
 
           store.removeLabel(LabelType.SYNC ,document_id);
+
           store.setField(FieldType.PROCESSED, true, document_id);
+          store.setField(FieldType.MD5, "", document_id);
+          store.setField(FieldType.FILTER, "processed", document_id);
 
           EventBus.getDefault().post( new RecalculateMenuEvent() );
         },

@@ -96,6 +96,11 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       }
     }
 
+    // разобраться с добавление документа
+    if ( !documents.contains(doc) ){
+      addItem(doc);
+    }
+
   }
 
   @Override
@@ -501,8 +506,8 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
   public void addItem(InMemoryDocument document) {
     if ( !Holder.MAP.containsKey( document.getUid()) ){
       Holder.MAP.put( document.getUid(), document );
-      documents.add(document);
-      notifyItemInserted(documents.size());
+      documents.add(0, document);
+      notifyItemInserted(0);
     }
   }
 

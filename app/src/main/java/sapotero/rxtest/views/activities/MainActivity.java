@@ -450,7 +450,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     Toast.makeText(this, "Обновление данных...", Toast.LENGTH_SHORT).show();
 
-    menuBuilder.build();
+//    menuBuilder.build();
 
   }
 
