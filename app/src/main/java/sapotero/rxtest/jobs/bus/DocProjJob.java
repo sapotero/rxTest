@@ -16,7 +16,6 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.mapper.DocumentMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
@@ -89,14 +88,6 @@ abstract class DocProjJob extends BaseJob {
     documentMapper.setShared(doc, shared);
 
     return doc;
-  }
-
-  void deleteDecisions(RDocumentEntity documentExisting) {
-    documentExisting.getDecisions().clear();
-    dataStore
-      .delete(RDecisionEntity.class)
-      .where(RDecisionEntity.DOCUMENT_ID.eq(documentExisting.getId()))
-      .get().value();
   }
 
   void saveDocument(DocumentInfo documentReceived, RDocumentEntity documentToSave, String TAG) {

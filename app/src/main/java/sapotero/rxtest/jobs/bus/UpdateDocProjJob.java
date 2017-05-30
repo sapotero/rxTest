@@ -13,6 +13,7 @@ import java.util.Objects;
 
 import sapotero.rxtest.db.mapper.DocumentMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
 import timber.log.Timber;
@@ -66,6 +67,14 @@ public class UpdateDocProjJob extends DocProjJob {
         Timber.tag(TAG).d("MD5 equal");
       }
     }
+  }
+
+  private void deleteDecisions(RDocumentEntity documentExisting) {
+    documentExisting.getDecisions().clear();
+    dataStore
+      .delete(RDecisionEntity.class)
+      .where(RDecisionEntity.DOCUMENT_ID.eq(documentExisting.getId()))
+      .get().value();
   }
 
   @Override
