@@ -13,7 +13,6 @@ import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.mapper.DocumentMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
@@ -128,7 +127,7 @@ abstract class DocProjJob extends BaseJob {
 
     jobCount += loadImages( documentSaved.getImages() );
     jobCount += loadLinks( documentReceived.getLinks() );
-    jobCount += loadCards( documentReceived.getRoute() );
+    loadCards( documentReceived.getRoute() );
 
     addPrefJobCount(jobCount);
   }
@@ -157,31 +156,26 @@ abstract class DocProjJob extends BaseJob {
     if ( notEmpty( links) ) {
       for (String link : links) {
         jobCount++;
-        jobManager.addJobInBackground( new CreateLinksJob( link ) );
+        loadCardByUid(link);
       }
     }
 
     return jobCount;
   }
 
-  private int loadCards(Route route) {
-    int jobCount = 0;
+  private void loadCards(Route route) {
+    Observable
+      .just( route )
+      .map(Route::getSteps).flatMap(Observable::from)
+      .map(Step::getCards).flatMap(Observable::from)
+      .map(Card::getUid)
+      .subscribeOn(Schedulers.computation())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(this::loadCardByUid, Timber::e);
+  }
 
-    if ( exist( route ) ) {
-      if ( notEmpty( route.getSteps() ) ) {
-        for (Step step : route.getSteps()) {
-          if ( notEmpty( step.getCards() ) ) {
-            for (Card card : step.getCards()) {
-              if ( exist( card.getUid() ) ) {
-                jobCount++;
-                jobManager.addJobInBackground( new CreateLinksJob( card.getUid() ) );
-              }
-            }
-          }
-        }
-      }
-    }
-
-    return jobCount;
+  private void loadCardByUid(String uid) {
+    jobManager.addJobInBackground( new CreateLinksJob( uid ) );
+    addPrefJobCount(1);
   }
 }
