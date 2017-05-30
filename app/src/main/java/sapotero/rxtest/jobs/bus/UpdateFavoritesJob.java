@@ -17,8 +17,8 @@ import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
 import timber.log.Timber;
 
-// Updates ordinary documents and projects (statuses: primary_consideration, sent_to_the_report, approval and signing)
-public class UpdateDocProjJob extends DocProjJob {
+// Updates documents from favorites folder (no journal, no status)
+public class UpdateFavoritesJob extends DocProjJob {
 
   public static final int PRIORITY = 1;
 
@@ -26,7 +26,7 @@ public class UpdateDocProjJob extends DocProjJob {
 
   private String uid;
 
-  public UpdateDocProjJob(String uid) {
+  public UpdateFavoritesJob(String uid) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
   }
@@ -76,6 +76,6 @@ public class UpdateDocProjJob extends DocProjJob {
   @Override
   protected void onCancel(@CancelReason int cancelReason, @Nullable Throwable throwable) {
     // Job has exceeded retry attempts or shouldReRunOnThrowable() has decided to cancel.
-    EventBus.getDefault().post( new StepperLoadDocumentEvent("Error updating document (job cancelled)") );
+    EventBus.getDefault().post( new StepperLoadDocumentEvent("Error updating favorite document (job cancelled)") );
   }
 }
