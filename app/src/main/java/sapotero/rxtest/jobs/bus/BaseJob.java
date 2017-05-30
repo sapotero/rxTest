@@ -23,8 +23,4 @@ public abstract class BaseJob extends Job {
   protected BaseJob(Params params) {
     super(params);
   }
-
-  void addPrefJobCount(int value) {
-    settings.addJobCount(value);
-  }
 }

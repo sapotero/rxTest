@@ -18,7 +18,7 @@ import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
 import timber.log.Timber;
 
-// Updates ordinary documents and projects (statuses: primary_consideration, sent_to_the_report, approval and signing)
+// Updates ordinary documents, projects, documents from favorite folder and documents from processed folder
 public class UpdateDocProjJob extends DocProjJob {
 
   public static final int PRIORITY = 1;
