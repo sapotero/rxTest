@@ -44,6 +44,7 @@ import sapotero.rxtest.jobs.bus.CreateFavoriteUsersJob;
 import sapotero.rxtest.jobs.bus.CreateFavoritesJob;
 import sapotero.rxtest.jobs.bus.CreateFoldersJob;
 import sapotero.rxtest.jobs.bus.CreatePrimaryConsiderationJob;
+import sapotero.rxtest.jobs.bus.CreateProcessedJob;
 import sapotero.rxtest.jobs.bus.CreateProjectsJob;
 import sapotero.rxtest.jobs.bus.CreateTemplatesJob;
 import sapotero.rxtest.jobs.bus.CreateUrgencyJob;
@@ -835,7 +836,13 @@ public class DataLoaderManager {
               if ( data.getDocuments().size() > 0 ) {
                 Timber.tag("PROCESSED").e("DOCUMENTS COUNT: %s", data.getDocuments().size() );
                 for (Document doc : data.getDocuments()) {
-                  jobManager.addJobInBackground( new UpdateProcessedDocumentsJob(doc.getUid(), processed_folder.getUid() ) );
+                  if ( isExist(doc) ) {
+                    if ( !isDocumentMd5Changed( doc.getUid(), doc.getMd5() ) ) {
+                      jobManager.addJobInBackground( new UpdateProcessedDocumentsJob(doc.getUid(), processed_folder.getUid() ) );
+                    }
+                  } else {
+                    jobManager.addJobInBackground( new CreateProcessedJob( doc.getUid(), processed_folder.getUid() ) );
+                  }
                 }
               }
             }, error -> {
