@@ -59,10 +59,6 @@ public abstract class BaseJob extends Job {
     return collection != null && collection.size() > 0;
   }
 
-  public boolean notEmpty(String s) {
-    return s != null && !Objects.equals(s, "");
-  }
-
   public boolean exist(Object obj) {
     return obj != null;
   }
@@ -163,20 +159,6 @@ public abstract class BaseJob extends Job {
         jobCount++;
         RImageEntity image = (RImageEntity) _image;
         jobManager.addJobInBackground( new DownloadFileJob( settings.getHost(), image.getPath(), image.getMd5() + "_" + image.getTitle(), image.getId() ) );
-      }
-    }
-
-    return jobCount;
-  }
-
-  public int loadLinks(Set<RLinks> links) {
-    int jobCount = 0;
-
-    if ( notEmpty( links) ) {
-      for (RLinks _link : links) {
-        jobCount++;
-        RLinksEntity link = (RLinksEntity) _link;
-        jobManager.addJobInBackground( new UpdateLinkJob( link.getUid() ) );
       }
     }
 

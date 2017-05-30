@@ -18,8 +18,8 @@ import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
 import timber.log.Timber;
 
-// Updates ordinary documents (statuses: primary_consideration and sent_to_the_report)
-public class UpdateDocJob extends DocProjJob {
+// Updates ordinary documents and projects (statuses: primary_consideration, sent_to_the_report, approval and signing)
+public class UpdateDocProjJob extends DocProjJob {
 
   public static final int PRIORITY = 1;
 
@@ -27,7 +27,7 @@ public class UpdateDocJob extends DocProjJob {
 
   private String uid;
 
-  public UpdateDocJob(String uid) {
+  public UpdateDocProjJob(String uid) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
   }
@@ -54,12 +54,14 @@ public class UpdateDocJob extends DocProjJob {
         Timber.tag(TAG).d( "MD5 not equal %s - %s", documentReceived.getMd5(), documentExisting.getMd5() );
 
         DocumentMapper documentMapper = mappers.getDocumentMapper();
-        documentMapper.setBaseFields(documentExisting, documentReceived);
-        deleteDecisions(documentExisting, documentReceived);
-        documentMapper.setNestedFields(documentExisting, documentReceived, false);
+        documentMapper.setBaseFields( documentExisting, documentReceived );
+        deleteDecisions( documentExisting );
+        documentMapper.setNestedFields( documentExisting, documentReceived, false );
+
+        // если прилетело обновление - уберем из обработанных
         documentExisting.setProcessed( false );
 
-        updateDocument(documentReceived, documentExisting, TAG);
+        updateDocument( documentReceived, documentExisting, TAG );
 
       } else {
         Timber.tag(TAG).d("MD5 equal");
@@ -67,14 +69,12 @@ public class UpdateDocJob extends DocProjJob {
     }
   }
 
-  private void deleteDecisions(RDocumentEntity documentExisting, DocumentInfo documentReceived) {
-    if ( notEmpty( documentReceived.getDecisions() ) ) {
-      documentExisting.getDecisions().clear();
-      dataStore
-        .delete(RDecisionEntity.class)
-        .where(RDecisionEntity.DOCUMENT_ID.eq(documentExisting.getId()))
-        .get().value();
-    }
+  private void deleteDecisions(RDocumentEntity documentExisting) {
+    documentExisting.getDecisions().clear();
+    dataStore
+      .delete(RDecisionEntity.class)
+      .where(RDecisionEntity.DOCUMENT_ID.eq(documentExisting.getId()))
+      .get().value();
   }
 
   @Override
