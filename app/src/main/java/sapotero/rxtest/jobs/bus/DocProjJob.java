@@ -90,7 +90,7 @@ abstract class DocProjJob extends BaseJob {
     return doc;
   }
 
-  void saveDocument(DocumentInfo documentReceived, RDocumentEntity documentToSave, String TAG) {
+  void saveDocument(DocumentInfo documentReceived, RDocumentEntity documentToSave, boolean isLink, String TAG) {
     dataStore
       .insert( documentToSave )
       .toObservable()
@@ -99,9 +99,7 @@ abstract class DocProjJob extends BaseJob {
       .subscribe(
         result -> {
           Timber.tag(TAG).d("Created " + result.getUid());
-          if ( exist( documentReceived ) ) {
-            loadLinkedData( documentReceived, result );
-          }
+          loadLinkedData( documentReceived, result, isLink );
         },
         error -> Timber.tag(TAG).e(error)
       );
@@ -115,15 +113,18 @@ abstract class DocProjJob extends BaseJob {
       .subscribe(
         result -> {
           Timber.tag(TAG).d("Updated MD5 " + result.getMd5());
-          loadLinkedData( documentReceived, result );
+          loadLinkedData( documentReceived, result, false );
           EventBus.getDefault().post( new UpdateCurrentDocumentEvent( result.getUid() ) );
         },
         error -> Timber.tag(TAG).e(error)
       );
   }
 
-  private void loadLinkedData(DocumentInfo documentReceived, RDocumentEntity documentSaved) {
-    loadImages( documentSaved.getImages() );
+  private void loadLinkedData(DocumentInfo documentReceived, RDocumentEntity documentSaved, boolean isLink) {
+    if ( !isLink ) {
+      loadImages( documentSaved.getImages() );
+    }
+
     loadLinks( documentReceived.getLinks() );
     loadCards( documentReceived.getRoute() );
   }
@@ -151,14 +152,38 @@ abstract class DocProjJob extends BaseJob {
   }
 
   private void loadCards(Route route) {
-    Observable
-      .just( route )
-      .flatMapIterable(Route::getSteps)
-      .flatMapIterable(Step::getCards)
-      .map(Card::getUid)
-      .subscribeOn(Schedulers.computation())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(this::loadLinkedDoc, Timber::e);
+//    Observable
+//      .just( route )
+//      .flatMapIterable(Route::getSteps)
+//      .flatMapIterable(Step::getCards)
+//      .map(Card::getUid)
+//      .subscribeOn(Schedulers.computation())
+//      .observeOn(AndroidSchedulers.mainThread())
+//      .subscribe(this::loadLinkedDoc, Timber::e);
+
+//    Observable
+//      .just( route )
+//      .map(Route::getSteps).flatMap(Observable::from)
+//      .map(Step::getCards).flatMap(Observable::from)
+//      .map(Card::getUid)
+//      .subscribeOn(Schedulers.computation())
+//      .observeOn(AndroidSchedulers.mainThread())
+//      .subscribe(this::loadLinkedDoc, Timber::e);
+
+    if ( exist( route ) ) {
+      if ( notEmpty( route.getSteps() ) ) {
+        for (Step step : route.getSteps()) {
+          if ( notEmpty( step.getCards() ) ) {
+            for (Card card : step.getCards()) {
+              if ( exist( card.getUid() ) ) {
+                loadLinkedDoc( card.getUid() );
+              }
+            }
+          }
+        }
+      }
+    }
+
   }
 
   private void loadLinkedDoc(String uid) {

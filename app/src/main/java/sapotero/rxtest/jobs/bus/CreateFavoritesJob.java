@@ -51,7 +51,7 @@ public class CreateFavoritesJob extends DocProjJob {
     doc.setFromFavoritesFolder(true);
     doc.setFavorites(true);
 
-    saveDocument(document, doc, TAG);
+    saveDocument(document, doc, false, TAG);
   }
 
   @Override

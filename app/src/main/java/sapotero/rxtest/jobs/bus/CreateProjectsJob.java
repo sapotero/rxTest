@@ -43,7 +43,7 @@ public class CreateProjectsJob extends DocProjJob {
   @Override
   public void doAfterLoad(DocumentInfo document) {
     RDocumentEntity doc = createDocument(document, status, shared);
-    saveDocument(document, doc, TAG);
+    saveDocument(document, doc, false, TAG);
   }
 
   @Override

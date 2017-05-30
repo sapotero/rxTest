@@ -75,7 +75,7 @@ public class CreateLinksJob extends DocProjJob {
     doc.setFolder("");
     doc.setFromLinks(true);
 
-    saveDocument(null, doc, TAG);
+    saveDocument(document, doc, true, TAG);
   }
 
   @Override

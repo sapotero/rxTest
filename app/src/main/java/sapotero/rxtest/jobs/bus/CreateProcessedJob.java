@@ -54,7 +54,7 @@ public class CreateProcessedJob extends DocProjJob {
     doc.setFromProcessedFolder(true);
     doc.setProcessed(true);
 
-    saveDocument(document, doc, TAG);
+    saveDocument(document, doc, false, TAG);
   }
 
   @Override
