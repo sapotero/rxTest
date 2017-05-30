@@ -4,9 +4,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import javax.inject.Inject;
-
-import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RLinks;
@@ -15,8 +12,6 @@ import sapotero.rxtest.db.requery.models.RRoute;
 import sapotero.rxtest.db.requery.models.RRouteEntity;
 import sapotero.rxtest.db.requery.models.RSigner;
 import sapotero.rxtest.db.requery.models.RSignerEntity;
-import sapotero.rxtest.db.requery.models.RStep;
-import sapotero.rxtest.db.requery.models.RStepEntity;
 import sapotero.rxtest.db.requery.models.actions.RAction;
 import sapotero.rxtest.db.requery.models.actions.RActionEntity;
 import sapotero.rxtest.db.requery.models.control_labels.RControlLabels;
@@ -27,7 +22,6 @@ import sapotero.rxtest.db.requery.models.exemplars.RExemplar;
 import sapotero.rxtest.db.requery.models.exemplars.RExemplarEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
-import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.retrofit.models.document.ControlLabel;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
@@ -36,7 +30,6 @@ import sapotero.rxtest.retrofit.models.document.Exemplar;
 import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.retrofit.models.document.Route;
 import sapotero.rxtest.retrofit.models.document.Signer;
-import sapotero.rxtest.retrofit.models.document.Step;
 import sapotero.rxtest.utils.Settings;
 
 // Maps between DocumentInfo and RDocumentEntity
@@ -308,7 +301,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     }
   }
 
-  public void setRoute(RDocumentEntity entity, Route route) {
+  private void setRoute(RDocumentEntity entity, Route route) {
     if ( exist( route ) ) {
       RRouteEntity routeEntity = mappers.getRouteMapper().toEntity( route );
       entity.setRoute( routeEntity );
@@ -358,18 +351,6 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
         Decision decisionModel = decisionMapper.toModel( decisionEntity );
         model.getDecisions().add( decisionModel );
       }
-    }
-  }
-
-  public void updateProcessed(RDocumentEntity entity, String journal, String status, Fields.Status filter) {
-    // если прилетело обновление - уберем из обработанных
-    if ( filter != null && filter.getValue() != null && status != null && entity.isProcessed() ) {
-      entity.setProcessed( false );
-    }
-
-    // если подписание/согласование
-    if ( journal == null && entity.getDocumentType() == null && status != null && entity.isProcessed() ) {
-      entity.setProcessed( false );
     }
   }
 }

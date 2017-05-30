@@ -56,10 +56,15 @@ public class UpdateDocProjJob extends DocProjJob {
         DocumentMapper documentMapper = mappers.getDocumentMapper();
         documentMapper.setBaseFields( documentExisting, documentReceived );
         deleteDecisions( documentExisting );
-        documentMapper.setNestedFields( documentExisting, documentReceived, false );
 
-        // если прилетело обновление - уберем из обработанных
-        documentExisting.setProcessed( false );
+        boolean isFromProcessedFolder = Boolean.TRUE.equals( documentExisting.isFromProcessedFolder() );
+
+        documentMapper.setNestedFields( documentExisting, documentReceived, isFromProcessedFolder );
+
+        if ( !isFromProcessedFolder ) {
+          // если прилетело обновление и документ не из папки обработанных - уберем из обработанных
+          documentExisting.setProcessed( false );
+        }
 
         updateDocument( documentReceived, documentExisting, TAG );
 
