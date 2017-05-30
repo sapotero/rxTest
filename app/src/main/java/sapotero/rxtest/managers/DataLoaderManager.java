@@ -41,6 +41,7 @@ import sapotero.rxtest.events.stepper.load.StepperDocumentCountReadyEvent;
 import sapotero.rxtest.jobs.bus.CreateAssistantJob;
 import sapotero.rxtest.jobs.bus.CreateDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateFavoriteUsersJob;
+import sapotero.rxtest.jobs.bus.CreateFavoritesJob;
 import sapotero.rxtest.jobs.bus.CreateFoldersJob;
 import sapotero.rxtest.jobs.bus.CreatePrimaryConsiderationJob;
 import sapotero.rxtest.jobs.bus.CreateProjectsJob;
@@ -787,12 +788,15 @@ public class DataLoaderManager {
               if ( data.getDocuments().size() > 0 ) {
                 Timber.tag("FAVORITES").e("DOCUMENTS COUNT: %s", data.getDocuments().size() );
                 for (Document doc : data.getDocuments()) {
-
-                  if ( !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) ){
+                  if ( isExist(doc) ) {
+                    if ( !isDocumentMd5Changed( doc.getUid(), doc.getMd5() ) ) {
+                      jobCountFavorites++;
+                      jobManager.addJobInBackground(new UpdateFavoritesDocumentsJob(doc.getUid(), favorites_folder.getUid() ) );
+                    }
+                  } else {
                     jobCountFavorites++;
-                    jobManager.addJobInBackground(new UpdateFavoritesDocumentsJob(doc.getUid(), favorites_folder.getUid() ) );
+                    jobManager.addJobInBackground( new CreateFavoritesJob( doc.getUid(), favorites_folder.getUid() ) );
                   }
-
                 }
               }
               settings.addJobCount(jobCountFavorites);
