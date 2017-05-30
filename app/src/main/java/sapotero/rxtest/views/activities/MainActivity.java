@@ -59,6 +59,7 @@ import sapotero.rxtest.events.service.CheckNetworkEvent;
 import sapotero.rxtest.events.service.CheckNetworkResultEvent;
 import sapotero.rxtest.events.service.SuperVisorUpdateEvent;
 import sapotero.rxtest.events.service.UpdateAllDocumentsEvent;
+import sapotero.rxtest.events.utils.RecalculateMenuEvent;
 import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
 import sapotero.rxtest.managers.DataLoaderManager;
 import sapotero.rxtest.services.MainService;
@@ -159,23 +160,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     setTheme(R.style.AppTheme);
-
-
-
-    /*
-    *
-    *
-    * Сделать InvalidationManager
-    * назначение - инвалидация документов по мд5
-
-    * Суть его - хранилка в памяти, где лежат ид доков и их мд5
-    *
-    * Назначение
-    * - не делать 100 запросов на обновление - если мд5 в памяти совпадают
-    * - обновлять доки пачками
-    *
-    *
-    * */
 
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
@@ -833,6 +817,14 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 //
 //    return (int) Math.ceil(result);
 //  }
+
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(RecalculateMenuEvent event) {
+    if (menuBuilder != null) {
+      menuBuilder.invalidate();
+    }
+  }
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13314
   // Обновление иконки В сети / Не в сети

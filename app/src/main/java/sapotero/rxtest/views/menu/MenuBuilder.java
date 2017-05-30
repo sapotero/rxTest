@@ -65,6 +65,11 @@ public class MenuBuilder implements ItemsBuilder.Callback{
 
   }
 
+  public void invalidate() {
+    getItem().recalcuate();
+    itemsBuilder.invalidate();
+  }
+
 
   public interface Callback {
 

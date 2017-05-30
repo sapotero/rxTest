@@ -16,7 +16,6 @@ import android.widget.RadioGroup;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import javax.inject.Inject;
@@ -64,20 +63,21 @@ public class ButtonBuilder {
   private final CompositeSubscription subscription = new CompositeSubscription();
 
   public void recalculate() {
-    Observable
-      .just("")
-      .debounce(100, TimeUnit.MILLISECONDS)
-      .subscribeOn(Schedulers.newThread())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(
-        data -> {
-          Timber.tag(TAG).e("recalculate");
-          if (view != null) {
-            getCount();
-          }
-        },
-        Timber::e
-      );
+    getCount();
+//    Observable
+//      .just("")
+//      .debounce(100, TimeUnit.MILLISECONDS)
+//      .subscribeOn(Schedulers.newThread())
+//      .observeOn(AndroidSchedulers.mainThread())
+//      .subscribe(
+//        data -> {
+//          Timber.tag(TAG).e("recalculate");
+//          if (view != null) {
+//            getCount();
+//          }
+//        },
+//        Timber::e
+//      );
   }
 
   public interface Callback {
@@ -227,38 +227,15 @@ public class ButtonBuilder {
       .filter( filter::byStatus)
 
       .map( InMemoryDocument::getUid )
-//      .toList()
+      .toList()
       .subscribeOn( Schedulers.computation() )
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
-        doc -> {
-          if ( !mapper.containsKey(doc) ){
-            mapper.put(doc, doc);
-            view.setText( String.format( label, mapper.size() ) );
-          }
-        },
-        Timber::e
-      );
+        list -> {
 
-    store
-      .getPublishSubject()
+          Timber.e( label, list.size() );
+          view.setText( String.format( label, list.size() ) );
 
-      .filter( filter::isProcessed )
-      .filter( filter::isFavorites )
-      .filter( filter::isControl )
-      .filter( filter::byType)
-      .filter( filter::byStatus)
-
-      .map( InMemoryDocument::getUid )
-
-      .subscribeOn( Schedulers.computation() )
-      .observeOn( AndroidSchedulers.mainThread() )
-      .subscribe(
-        doc -> {
-          if (mapper.containsKey(doc)){
-            mapper.put(doc, doc);
-            view.setText( String.format( label, mapper.size() ) );
-          }
         },
         Timber::e
       );

@@ -57,6 +57,10 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
     this.user = user;
   }
 
+  public void invalidate() {
+    journalSpinnerAdapter.invalidate();
+  }
+
 
   public interface Callback {
     void onMenuUpdate(ArrayList<ConditionBuilder> result);
@@ -80,7 +84,7 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
       @RequiresApi(api = Build.VERSION_CODES.M)
       @Override
       public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-        Timber.tag(TAG).w( journalSpinnerAdapter.getItem(position).getName() );
+//        Timber.tag(TAG).w( journalSpinnerAdapter.getItem(position).getName() );
 
         updateView();
       }
@@ -90,6 +94,8 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
       }
     });
   }
+
+
 
   public void setOrganizationsLayout(LinearLayout organizationsLayout) {
     this.organizationsLayout = organizationsLayout;

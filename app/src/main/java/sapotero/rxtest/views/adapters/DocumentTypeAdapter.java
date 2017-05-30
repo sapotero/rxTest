@@ -10,7 +10,6 @@ import android.widget.TextView;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -71,7 +70,8 @@ public class DocumentTypeAdapter extends BaseAdapter {
 
 
     text = ( (TextView) view.findViewById(R.id.document_type_name)  );
-    text.setText( item.getName()  );
+    item.setText(text);
+//    text.setText( item.getName()  );
 
 
     return view;
@@ -79,7 +79,7 @@ public class DocumentTypeAdapter extends BaseAdapter {
 
   @Override
   public View getDropDownView(int position, View convertView, ViewGroup parent) {
-    View v = null;
+    View v;
 
     Set<String> visible_journals = settings.getJournals();
     int index =  documents.get(position).getMainMenuItem().getIndex();
@@ -112,6 +112,7 @@ public class DocumentTypeAdapter extends BaseAdapter {
     return mPos;
   }
 
+
   public void add(DocumentTypeItem organizationItem) {
     this.documents.add(organizationItem);
     notifyDataSetChanged();
@@ -122,20 +123,20 @@ public class DocumentTypeAdapter extends BaseAdapter {
     notifyDataSetChanged();
   }
 
-  public Integer findByValue(String value) {
-
-    int index = Arrays.asList((context.getResources().getStringArray(R.array.settings_view_start_page_values))).indexOf(String.valueOf(value));
-    List<String> names = Arrays.asList((context.getResources().getStringArray(R.array.settings_view_start_page)));
-
-    for (int i = 0; i < documents.size(); i++) {
-      if ( Objects.equals(documents.get(i).getName(), names.get(index)) ){
-        index = i;
-        break;
-      }
-    }
-
-    return index;
-  }
+//  public Integer findByValue(String value) {
+//
+//    int index = Arrays.asList((context.getResources().getStringArray(R.array.settings_view_start_page_values))).indexOf(String.valueOf(value));
+//    List<String> names = Arrays.asList((context.getResources().getStringArray(R.array.settings_view_start_page)));
+//
+//    for (int i = 0; i < documents.size(); i++) {
+//      if ( Objects.equals(documents.get(i).getName(), names.get(index)) ){
+//        index = i;
+//        break;
+//      }
+//    }
+//
+//    return index;
+//  }
 
   public void updateCountByType(String uid) {
     String type = String.format("%.2s", uid);
@@ -170,8 +171,6 @@ public class DocumentTypeAdapter extends BaseAdapter {
   }
 
   public void invalidate() {
-    clear();
-    addAll(documents);
     notifyDataSetChanged();
   }
 

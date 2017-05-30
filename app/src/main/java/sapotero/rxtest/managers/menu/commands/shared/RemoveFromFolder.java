@@ -1,5 +1,7 @@
 package sapotero.rxtest.managers.menu.commands.shared;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.ArrayList;
 
 import retrofit2.Retrofit;
@@ -9,6 +11,7 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.events.utils.RecalculateMenuEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -120,6 +123,7 @@ public class RemoveFromFolder extends AbstractCommand {
           store.removeLabel(LabelType.SYNC ,document_id);
           store.setField(FieldType.PROCESSED, true, document_id);
 
+          EventBus.getDefault().post( new RecalculateMenuEvent() );
         },
         error -> {
           if (callback != null) {
