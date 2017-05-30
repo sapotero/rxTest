@@ -123,59 +123,46 @@ abstract class DocProjJob extends BaseJob {
   }
 
   private void loadLinkedData(DocumentInfo documentReceived, RDocumentEntity documentSaved) {
-    int jobCount = 0;
-
-    jobCount += loadImages( documentSaved.getImages() );
-    jobCount += loadLinks( documentReceived.getLinks() );
+    loadImages( documentSaved.getImages() );
+    loadLinks( documentReceived.getLinks() );
     loadCards( documentReceived.getRoute() );
-
-    addPrefJobCount(jobCount);
   }
 
   private void addPrefJobCount(int value) {
     settings.addJobCount(value);
   }
 
-  private int loadImages(Set<RImage> images) {
-    int jobCount = 0;
-
+  private void loadImages(Set<RImage> images) {
     if ( notEmpty( images ) ) {
       for (RImage _image : images) {
-        jobCount++;
+        addPrefJobCount(1);
         RImageEntity image = (RImageEntity) _image;
         jobManager.addJobInBackground( new DownloadFileJob( settings.getHost(), image.getPath(), image.getMd5() + "_" + image.getTitle(), image.getId() ) );
       }
     }
-
-    return jobCount;
   }
 
-  private int loadLinks(List<String> links) {
-    int jobCount = 0;
-
+  private void loadLinks(List<String> links) {
     if ( notEmpty( links) ) {
       for (String link : links) {
-        jobCount++;
-        loadCardByUid(link);
+        loadLinkedDoc( link );
       }
     }
-
-    return jobCount;
   }
 
   private void loadCards(Route route) {
     Observable
       .just( route )
-      .map(Route::getSteps).flatMap(Observable::from)
-      .map(Step::getCards).flatMap(Observable::from)
+      .flatMapIterable(Route::getSteps)
+      .flatMapIterable(Step::getCards)
       .map(Card::getUid)
       .subscribeOn(Schedulers.computation())
       .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(this::loadCardByUid, Timber::e);
+      .subscribe(this::loadLinkedDoc, Timber::e);
   }
 
-  private void loadCardByUid(String uid) {
-    jobManager.addJobInBackground( new CreateLinksJob( uid ) );
+  private void loadLinkedDoc(String uid) {
     addPrefJobCount(1);
+    jobManager.addJobInBackground( new CreateLinksJob( uid ) );
   }
 }

@@ -67,6 +67,8 @@ public class CreateLinksJob extends DocProjJob {
     RDocumentEntity doc = new RDocumentEntity();
 
     documentMapper.setSimpleFields(doc, document);
+    documentMapper.setNestedFields(doc, document, false);
+
     documentMapper.setJournal(doc, "");
     documentMapper.setFilter(doc, filter.toString());
     documentMapper.setShared(doc, false);
