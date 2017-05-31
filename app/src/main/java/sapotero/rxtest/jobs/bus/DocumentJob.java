@@ -34,7 +34,7 @@ abstract class DocumentJob extends BaseJob {
     super(params);
   }
 
-  private <T> boolean notEmpty(Collection<T> collection) {
+  public <T> boolean notEmpty(Collection<T> collection) {
     return collection != null && collection.size() > 0;
   }
 
