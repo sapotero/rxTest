@@ -46,7 +46,7 @@ abstract class DocumentJob extends BaseJob {
     Observable<DocumentInfo> info = getDocumentInfoObservable(uid);
 
     info
-      .subscribeOn( Schedulers.computation() )
+      .subscribeOn( Schedulers.io() )
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         doc -> {
@@ -95,7 +95,7 @@ abstract class DocumentJob extends BaseJob {
     dataStore
       .insert( documentToSave )
       .toObservable()
-      .subscribeOn( Schedulers.computation() )
+      .subscribeOn( Schedulers.io() )
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         result -> {
@@ -109,7 +109,7 @@ abstract class DocumentJob extends BaseJob {
   void updateDocument(DocumentInfo documentReceived, RDocumentEntity documentToUpdate, String TAG) {
     dataStore
       .update( documentToUpdate )
-      .subscribeOn( Schedulers.computation() )
+      .subscribeOn( Schedulers.io() )
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         result -> {
@@ -127,10 +127,9 @@ abstract class DocumentJob extends BaseJob {
   private void loadLinkedData(DocumentInfo documentReceived, RDocumentEntity documentSaved, boolean isLink) {
     if ( !isLink ) {
       loadImages( documentSaved.getImages() );
+      loadLinks( documentReceived.getLinks() );
+      loadCards( documentReceived.getRoute() );
     }
-
-    loadLinks( documentReceived.getLinks() );
-    loadCards( documentReceived.getRoute() );
   }
 
   private void addPrefJobCount(int value) {
