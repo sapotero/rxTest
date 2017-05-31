@@ -218,9 +218,9 @@ public class UpdateDocumentJob extends DocumentJob {
   private void deleteLinks(RDocumentEntity document) {
     if ( notEmpty( document.getLinks() ) ) {
       int count = dataStore
-              .delete( RLinksEntity.class )
-              .where( RLinksEntity.DOCUMENT_ID.eq( document.getId() ) )
-              .get().value();
+        .delete( RLinksEntity.class )
+        .where( RLinksEntity.DOCUMENT_ID.eq( document.getId() ) )
+        .get().value();
 
       Timber.tag(TAG).d("Deleted " + count + " links from document with ID " + document.getId());
     }
@@ -229,9 +229,9 @@ public class UpdateDocumentJob extends DocumentJob {
   private void deleteSigner() {
     if ( oldSignerId > 0 ) {
       int count = dataStore
-              .delete( RSignerEntity.class )
-              .where( RSignerEntity.ID.eq( oldSignerId ) )
-              .get().value();
+        .delete( RSignerEntity.class )
+        .where( RSignerEntity.ID.eq( oldSignerId ) )
+        .get().value();
 
       Timber.tag(TAG).d("Deleted " + count + " signers with ID " + oldSignerId);
     }
@@ -242,9 +242,9 @@ public class UpdateDocumentJob extends DocumentJob {
       deleteSteps( oldRouteId );
 
       int count = dataStore
-              .delete( RRouteEntity.class )
-              .where( RRouteEntity.ID.eq( oldRouteId ) )
-              .get().value();
+        .delete( RRouteEntity.class )
+        .where( RRouteEntity.ID.eq( oldRouteId ) )
+        .get().value();
 
       Timber.tag(TAG).d("Deleted " + count + " routes with ID " + oldRouteId);
     }
@@ -252,9 +252,9 @@ public class UpdateDocumentJob extends DocumentJob {
 
   private void deleteSteps(int routeId) {
     int count = dataStore
-            .delete( RStepEntity.class )
-            .where( RStepEntity.ROUTE_ID.eq( routeId ) )
-            .get().value();
+      .delete( RStepEntity.class )
+      .where( RStepEntity.ROUTE_ID.eq( routeId ) )
+      .get().value();
 
     Timber.tag(TAG).d("Deleted " + count + " steps from route with ID " + routeId);
   }
