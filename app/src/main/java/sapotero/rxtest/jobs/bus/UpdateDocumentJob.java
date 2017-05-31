@@ -13,15 +13,19 @@ import java.util.Objects;
 
 import sapotero.rxtest.db.mapper.DocumentMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.db.requery.models.RLinksEntity;
 import sapotero.rxtest.db.requery.models.RRouteEntity;
 import sapotero.rxtest.db.requery.models.RSignerEntity;
 import sapotero.rxtest.db.requery.models.RStepEntity;
+import sapotero.rxtest.db.requery.models.actions.RActionEntity;
+import sapotero.rxtest.db.requery.models.control_labels.RControlLabelsEntity;
 import sapotero.rxtest.db.requery.models.decisions.RBlock;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecision;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
-import sapotero.rxtest.db.requery.models.decisions.RPerformer;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
+import sapotero.rxtest.db.requery.models.exemplars.RExemplarEntity;
+import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
 import timber.log.Timber;
@@ -68,6 +72,11 @@ public class UpdateDocumentJob extends DocumentJob {
         documentMapper.setBaseFields( documentExisting, documentReceived );
 
         deleteDecisions( documentExisting );
+        deleteExemplars( documentExisting );
+        deleteImages( documentExisting );
+        deleteControlLabels( documentExisting );
+        deleteActions( documentExisting );
+        deleteLinks( documentExisting );
 
         boolean isFromProcessedFolder = Boolean.TRUE.equals( documentExisting.isFromProcessedFolder() );
 
@@ -81,8 +90,7 @@ public class UpdateDocumentJob extends DocumentJob {
         updateDocument( documentReceived, documentExisting, TAG );
 
         deleteSigner( oldSignerId );
-        deleteSteps( oldRouteId );
-//        deleteRoute( oldRouteId );
+        deleteRoute( oldRouteId );
 
       } else {
         Timber.tag(TAG).d("MD5 equal");
@@ -178,6 +186,61 @@ public class UpdateDocumentJob extends DocumentJob {
       .get().value();
 
     Timber.tag(TAG).d("Deleted " + count + " performers from block with ID " + block.getId());
+  }
+
+  private void deleteExemplars(RDocumentEntity document) {
+    if ( notEmpty( document.getExemplars() ) ) {
+      int count = dataStore
+        .delete( RExemplarEntity.class )
+        .where( RExemplarEntity.DOCUMENT_ID.eq( document.getId() ) )
+        .get().value();
+
+      Timber.tag(TAG).d("Deleted " + count + " exemplars from document with ID " + document.getId());
+    }
+  }
+
+  private void deleteImages(RDocumentEntity document) {
+    if ( notEmpty( document.getImages() ) ) {
+      int count = dataStore
+        .delete( RImageEntity.class )
+        .where( RImageEntity.DOCUMENT_ID.eq( document.getId() ) )
+        .get().value();
+
+      Timber.tag(TAG).d("Deleted " + count + " images from document with ID " + document.getId());
+    }
+  }
+
+  private void deleteControlLabels(RDocumentEntity document) {
+    if ( notEmpty( document.getControlLabels() ) ) {
+      int count = dataStore
+        .delete( RControlLabelsEntity.class )
+        .where( RControlLabelsEntity.DOCUMENT_ID.eq( document.getId() ) )
+        .get().value();
+
+      Timber.tag(TAG).d("Deleted " + count + " control labels from document with ID " + document.getId());
+    }
+  }
+
+  private void deleteActions(RDocumentEntity document) {
+    if ( notEmpty( document.getActions() ) ) {
+      int count = dataStore
+        .delete( RActionEntity.class )
+        .where( RActionEntity.DOCUMENT_ID.eq( document.getId() ) )
+        .get().value();
+
+      Timber.tag(TAG).d("Deleted " + count + " actions from document with ID " + document.getId());
+    }
+  }
+
+  private void deleteLinks(RDocumentEntity document) {
+    if ( notEmpty( document.getLinks() ) ) {
+      int count = dataStore
+              .delete( RLinksEntity.class )
+              .where( RLinksEntity.DOCUMENT_ID.eq( document.getId() ) )
+              .get().value();
+
+      Timber.tag(TAG).d("Deleted " + count + " links from document with ID " + document.getId());
+    }
   }
 
   @Override
