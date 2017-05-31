@@ -46,7 +46,7 @@ abstract class DocumentJob extends BaseJob {
     Observable<DocumentInfo> info = getDocumentInfoObservable(uid);
 
     info
-      .subscribeOn( Schedulers.io() )
+      .subscribeOn( Schedulers.computation() )
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         doc -> {
@@ -109,7 +109,7 @@ abstract class DocumentJob extends BaseJob {
   void updateDocument(DocumentInfo documentReceived, RDocumentEntity documentToUpdate, String TAG) {
     dataStore
       .update( documentToUpdate )
-      .subscribeOn( Schedulers.io() )
+      .subscribeOn( Schedulers.computation() )
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         result -> {
