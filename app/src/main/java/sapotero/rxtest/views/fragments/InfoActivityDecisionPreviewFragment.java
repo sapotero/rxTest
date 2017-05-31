@@ -586,10 +586,10 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 //
 //
 //          if ( list.size() == 1 ){
-//            setActionText(list.get(0).getToS());
+//            setActionText(list.startTransactionFor(0).getToS());
 //          } else if ( list.size() >= 2 ){
 //            Collections.sort(list, (a1, a2) -> a1.getUpdatedAt().compareTo( a2.getUpdatedAt() ));
-//            setActionText( list.get( list.size()-1 ).getToS() );
+//            setActionText( list.startTransactionFor( list.size()-1 ).getToS() );
 //          }
 //        } catch (Exception e) {
 //          Timber.tag(TAG).e(e);
@@ -912,16 +912,16 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 //    Retrofit retrofit = new Retrofit.Builder()
 //      .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
 //      .addConverterFactory(GsonConverterFactory.create())
-//      .baseUrl(HOST.get() + "v3/documents/")
+//      .baseUrl(HOST.startTransactionFor() + "v3/documents/")
 //      .client(okHttpClient)
 //      .build();
 //
 //    DocumentService documentService = retrofit.create( DocumentService.class );
 //
 //    Observable<DocumentInfo> activity_main_menu = documentService.getInfo(
-//      UID.get(),
-//      LOGIN.get(),
-//      TOKEN.get()
+//      UID.startTransactionFor(),
+//      LOGIN.startTransactionFor(),
+//      TOKEN.startTransactionFor()
 //    );
 //
 //    activity_main_menu.subscribeOn( Schedulers.newThread() )

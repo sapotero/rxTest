@@ -19,6 +19,7 @@ import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.utils.memory.fields.FieldType;
 import sapotero.rxtest.utils.memory.fields.LabelType;
+import sapotero.rxtest.utils.memory.utils.Transaction;
 import timber.log.Timber;
 
 public class RemoveFromFolder extends AbstractCommand {
@@ -61,10 +62,13 @@ public class RemoveFromFolder extends AbstractCommand {
       .set( RDocumentEntity.FROM_FAVORITES_FOLDER, false)
       .where(RDocumentEntity.UID.eq(document_id))
       .get().value();
-    Timber.tag(TAG).w( "updated: %s", count );
 
-    store.removeLabel(LabelType.FAVORITES ,document_id);
-    store.setLabel(LabelType.SYNC ,document_id);
+
+    Transaction transaction = store.startTransactionFor(document_id);
+    transaction
+      .removeLabel(LabelType.FAVORITES)
+      .setLabel(LabelType.SYNC)
+      .commit();
 
     queueManager.add(this);
   }
@@ -120,11 +124,12 @@ public class RemoveFromFolder extends AbstractCommand {
 
           queueManager.setExecutedRemote(this);
 
-          store.removeLabel(LabelType.SYNC ,document_id);
-
-          store.setField(FieldType.PROCESSED, true, document_id);
-          store.setField(FieldType.MD5, "", document_id);
-          store.setField(FieldType.FILTER, "processed", document_id);
+          Transaction transaction = store.startTransactionFor(document_id);
+          transaction
+            .removeLabel(LabelType.SYNC)
+            .setField(FieldType.PROCESSED, true)
+            .setField(FieldType.MD5, "")
+            .commit();
 
           EventBus.getDefault().post( new RecalculateMenuEvent() );
         },
@@ -133,8 +138,13 @@ public class RemoveFromFolder extends AbstractCommand {
             callback.onCommandExecuteError(getType());
           }
 
-          store.removeLabel(LabelType.SYNC ,document_id);
-          store.setLabel(LabelType.FAVORITES ,document_id);
+          Transaction transaction = store.startTransactionFor(document_id);
+          transaction
+            .removeLabel(LabelType.SYNC)
+            .setLabel(LabelType.FAVORITES)
+            .commit();
+
+
         }
       );
   }

@@ -71,7 +71,7 @@ public class DocumentTypeItem {
 //          .where( RDocumentEntity.FILTER.in( MainMenuButton.ButtonStatus.getProject() )   )
 //          .and( RDocumentEntity.USER.eq( settings.getLogin() ) )
 //          .and( RDocumentEntity.ADDRESSED_TO_TYPE.eq( "" ) )
-//          .get()
+//          .startTransactionFor()
 //          .value();
 //      }
 

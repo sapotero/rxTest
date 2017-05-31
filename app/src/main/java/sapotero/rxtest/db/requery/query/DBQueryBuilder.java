@@ -257,14 +257,14 @@ public class DBQueryBuilder {
             })
 //          query
 //            .orderBy( RDocumentEntity.SORT_KEY.desc() )
-//            .get()
+//            .startTransactionFor()
 //            .toSelfObservable()
 //            .subscribeOn(Schedulers.io())
 //            .observeOn( AndroidSchedulers.mainThread() )
 //            .compositeSubscription(this::addByOne, this::error)
 //        query
 //          .orderBy( RDocumentEntity.SORT_KEY.desc() )
-//          .get()
+//          .startTransactionFor()
 //          .toObservable()
 //          .filter(documentEntity -> {
 //

@@ -530,7 +530,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
 
   public void update() {
     try{
-//      Timber.tag(TAG).w( "UPDATE: %s", decision.getBlocks().get(0).getText() );
+//      Timber.tag(TAG).w( "UPDATE: %s", decision.getBlocks().startTransactionFor(0).getText() );
       updateView();
     }
     catch (Error e){

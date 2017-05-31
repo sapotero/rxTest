@@ -180,7 +180,7 @@ public class MainService extends Service {
     scheduller.setRemoveOnCancelPolicy(true);
 
 
-    scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 0 ,5*60, TimeUnit.SECONDS );
+    scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 5*60 ,5*60, TimeUnit.SECONDS );
     scheduller.scheduleWithFixedDelay( new UpdateQueueTask(queue), 0 ,5, TimeUnit.SECONDS );
   }
 
@@ -448,7 +448,7 @@ public class MainService extends Service {
 //        .items(keyStoreTypeList)
 //        .itemsCallbackSingleChoice(-1, (dialog, view, which, text) -> {
 //
-//          KeyStoreType.saveCurrentType(keyStoreTypeList.get(which));
+//          KeyStoreType.saveCurrentType(keyStoreTypeList.startTransactionFor(which));
 //          keyStoreTypeIndex = which;
 //
 //          add_new_key(containerFolder);
@@ -716,7 +716,7 @@ public class MainService extends Service {
     if (aliasesList.size() > 0){
       EventBus.getDefault().post( new AuthServiceAuthEvent( aliasesList.toString() ) );
 
-//    ContainerAdapter adapter = new ContainerAdapter(aliasesList.get( aliasesList.size()-1 ), null, aliasesList.get( aliasesList.size()-1 ), null);
+//    ContainerAdapter adapter = new ContainerAdapter(aliasesList.startTransactionFor( aliasesList.size()-1 ), null, aliasesList.startTransactionFor( aliasesList.size()-1 ), null);
       ContainerAdapter adapter = new ContainerAdapter(aliasesList.get( 0 ), null, aliasesList.get( 0 ), null);
 
       adapter.setProviderType(ProviderType.currentProviderType());

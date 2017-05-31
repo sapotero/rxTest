@@ -15,6 +15,7 @@ import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.utils.memory.fields.LabelType;
+import sapotero.rxtest.utils.memory.utils.Transaction;
 import timber.log.Timber;
 
 public class AddToFolder extends AbstractCommand {
@@ -71,11 +72,11 @@ public class AddToFolder extends AbstractCommand {
 
     queueManager.setExecutedLocal(this);
 
-
-    store.setLabel(LabelType.SYNC ,document_id);
-    store.setLabel(LabelType.FAVORITES ,document_id);
-
-
+    Transaction transaction = store.startTransactionFor(document_id);
+    transaction
+      .setLabel(LabelType.SYNC)
+      .setLabel(LabelType.FAVORITES)
+      .commit();
 
 
     if ( callback != null ){
@@ -118,16 +119,23 @@ public class AddToFolder extends AbstractCommand {
 
           queueManager.setExecutedRemote(this);
 
-
-          store.removeLabel(LabelType.SYNC ,document_id);
+          Transaction transaction = store.startTransactionFor(document_id);
+          transaction
+            .removeLabel(LabelType.SYNC)
+            .commit();
         },
         error -> {
           if (callback != null){
             callback.onCommandExecuteError(getType());
           }
 
-          store.removeLabel(LabelType.SYNC ,document_id);
-          store.removeLabel(LabelType.FAVORITES ,document_id);
+          Transaction transaction = store.startTransactionFor(document_id);
+          transaction
+            .removeLabel(LabelType.SYNC )
+            .removeLabel(LabelType.FAVORITES)
+            .commit();
+
+
         }
       );
   }

@@ -104,43 +104,9 @@ public class DocumentTypeAdapter extends BaseAdapter {
   }
 
 
-//  private DocumentTypeItem getOrganizationItem(int position) {
-//    return getItem(position);
-//  }
-
   public int getPosition() {
     return mPos;
   }
-
-
-//  public void add(DocumentTypeItem organizationItem) {
-//    this.documents.add(organizationItem);
-//    notifyDataSetChanged();
-//  }
-
-//  public void clear() {
-//    this.documents.clear();
-//    notifyDataSetChanged();
-//  }
-
-//  public Integer findByValue(String value) {
-//
-//    int index = Arrays.asList((context.getResources().getStringArray(R.array.settings_view_start_page_values))).indexOf(String.valueOf(value));
-//    List<String> names = Arrays.asList((context.getResources().getStringArray(R.array.settings_view_start_page)));
-//
-//    for (int i = 0; i < documents.size(); i++) {
-//      if ( Objects.equals(documents.get(i).getName(), names.get(index)) ){
-//        index = i;
-//        break;
-//      }
-//    }
-//
-//    return index;
-//  }
-//
-//  public void updateCountByType(String uid) {
-//    String type = String.format("%.2s", uid);
-//  }
 
   public int prev() {
     if (documents == null || documents.size() == 0){
@@ -156,6 +122,7 @@ public class DocumentTypeAdapter extends BaseAdapter {
     }
 
   }
+
   public int next() {
     if (documents == null || documents.size() == 0){
       return 0;
@@ -174,8 +141,4 @@ public class DocumentTypeAdapter extends BaseAdapter {
     notifyDataSetChanged();
   }
 
-//  private void addAll(List<DocumentTypeItem> documents) {
-//    this.documents.clear();
-//    this.documents = documents;
-//  }
 }

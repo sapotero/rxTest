@@ -112,7 +112,7 @@ public class SaveAndApproveDecision extends AbstractCommand {
     if (
       Objects.equals(params.getDecisionModel().getSignerId(), settings.getCurrentUserId())
       // или если подписывающий министр
-//      || ( red != null && red.get(0).equals(true) )
+//      || ( red != null && red.startTransactionFor(0).equals(true) )
       ){
       Integer dec = dataStore
         .update(RDocumentEntity.class)

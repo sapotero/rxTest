@@ -910,6 +910,7 @@ public class UpdateDocumentJob extends BaseJob {
           addPrefJobCount(jobCount);
 
           store.update(result, status, journal );
+//          EventBus.getDefault().post( new RecalculateMenuEvent() );
         },
         error -> {
           Timber.tag(TAG).e("%s", error);

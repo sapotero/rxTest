@@ -2,6 +2,7 @@ package sapotero.rxtest.views.adapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.TransitionDrawable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -17,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -45,6 +47,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
   private List<InMemoryDocument> documents;
   private Context mContext;
+  private final String TAG = this.getClass().getSimpleName();
 
   @Override
   public void call(List<Document> documents) {
@@ -59,18 +62,21 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
   }
 
   public DocumentsAdapter(Context context, List<InMemoryDocument> documents) {
+    Timber.tag(TAG).e("INIT");
+
     this.mContext  = context;
     this.documents = documents;
 
     EsdApplication.getManagerComponent().inject(this);
-
     initSubscription();
   }
 
   private void initSubscription() {
     store
       .getPublishSubject()
-      .filter( doc -> Holder.MAP.containsKey( doc.getUid() ) )
+      .onBackpressureBuffer(32)
+      .buffer(100, TimeUnit.MILLISECONDS)
+      .onBackpressureDrop()
       .subscribeOn(Schedulers.computation())
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(
@@ -79,26 +85,30 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       );
   }
 
-  private void updateDocumentCard(InMemoryDocument doc) {
-    Timber.tag("UpdateDocumentCard").w("%s - %s", doc.getUid(), doc.isProcessed() );
+  private void updateDocumentCard(List<InMemoryDocument> docs) {
 
-    for (int i = 0; i < documents.size(); i++) {
-      if ( Objects.equals(documents.get(i).getUid(), doc.getUid()) ){
-        documents.set( i, doc);
-        notifyItemChanged( i,  doc);
+    for (InMemoryDocument doc : docs ) {
+
+//      Timber.tag(TAG).e("!!!!!!! %s - %s \n", doc.getUid(), doc.isProcessed() );
+
+      if ( Holder.MAP.containsKey( doc.getUid() ) ){
+
+        Integer index = Holder.MAP.get(doc.getUid());
+        documents.set( index, doc);
+        notifyItemChanged( index,  doc);
 
         if ( doc.isProcessed() ){
-          notifyItemRemoved(i);
-          documents.remove(i);
+          notifyItemRemoved(index);
+          Holder.MAP.remove(doc.getUid());
+          documents.remove(doc);
         }
 
-        break;
+      } else {
+        Timber.tag(TAG).w("NEW %s", doc.getUid() );
+        if ( !doc.isProcessed() ){
+          addItem(doc);
+        }
       }
-    }
-
-    // разобраться с добавление документа
-    if ( !documents.contains(doc) ){
-      addItem(doc);
     }
 
   }
@@ -112,18 +122,18 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
   @Override
   public void onBindViewHolder(final DocumentViewHolder viewHolder, final int position) {
-    final InMemoryDocument imd = documents.get(position);
+    final InMemoryDocument doc = documents.get(position);
 
-    if (imd.getDocument() != null) {
+    if (doc.getDocument() != null) {
 
-      Document item = imd.getDocument();
+      Document item = doc.getDocument();
 
       viewHolder.title.setText( item.getShortDescription() );
       viewHolder.subtitle.setText( item.getComment() );
 
       //resolved https://tasks.n-core.ru/browse/MVDESD-12625
       //  На плитке Обращения и НПА не показывать строку "Без организации", если её действительно нет(
-      if( Arrays.asList( "incoming_orders", "citizen_requests" ).contains( imd.getIndex() ) ) {
+      if( Arrays.asList( "incoming_orders", "citizen_requests" ).contains( doc.getIndex() ) ) {
 
         if ( item.getOrganization() != null && item.getOrganization().toLowerCase().contains("без организации") ){
           viewHolder.from.setText("");
@@ -145,7 +155,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
       viewHolder.date.setText( item.getTitle() );
 
-      if( Arrays.asList( Fields.Status.SIGNING.getValue(), Fields.Status.APPROVAL.getValue() ).contains(imd.getFilter()) ){
+      if( Arrays.asList( Fields.Status.SIGNING.getValue(), Fields.Status.APPROVAL.getValue() ).contains(doc.getFilter()) ){
 
         if (!Objects.equals(item.getFirstLink(), "")){
           viewHolder.date.setText( item.getTitle() + " на " + item.getFirstLink() );
@@ -164,13 +174,13 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 //              arrayList.add(str);
 //            }
 //
-//            RLinksEntity _link = (RLinksEntity) arrayList.get(0);
+//            RLinksEntity _link = (RLinksEntity) arrayList.startTransactionFor(0);
 //            Timber.tag("Status LINKS").e("size > 0 | first: %s", _link.getUid() );
 //
 //            RDocumentEntity doc = dataStore
 //              .select(RDocumentEntity.class)
 //              .where(RDocumentEntity.UID.eq( _link.getUid() ))
-//              .get().first();
+//              .startTransactionFor().first();
 //
 //            viewHolder.date.setText( item.getTitle() + " на " + doc.getRegistrationNumber() );
 //          } catch (NoSuchElementException e) {
@@ -214,7 +224,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
         settings.setUid( item.getUid() );
         settings.setMainMenuPosition( viewHolder.getAdapterPosition() );
         settings.setRegNumber( item.getRegistrationNumber() );
-        settings.setStatusCode( imd.getFilter() );
+        settings.setStatusCode( doc.getFilter() );
         settings.setLoadFromSearch( false );
         settings.setRegDate( item.getRegistrationDate() );
 
@@ -244,7 +254,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
         // resolved https://tasks.n-core.ru/browse/MVDESD-13426
         // Выделять номер документа красным на плитке
         viewHolder.date.setTextColor( ContextCompat.getColor(mContext, R.color.md_red_A700 ) );
-
+        viewHolder.cv.setCardElevation(4f);
       } else {
         viewHolder.cv.setBackground( ContextCompat.getDrawable(mContext, R.color.md_white_1000 ) );
         viewHolder.date.setTextColor( ContextCompat.getColor(mContext, R.color.md_grey_800 ) );
@@ -252,11 +262,36 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
     }
 
+
+    switch ( doc.getState() ){
+
+      case LOADING:
+        viewHolder.cv.setCardElevation(0f);
+        viewHolder.cv.setBackground( ContextCompat.getDrawable( mContext, R.drawable.color_change_to_dark) );
+        TransitionDrawable transition = (TransitionDrawable) viewHolder.cv.getBackground();
+        transition.startTransition(300);
+        transition.setCrossFadeEnabled(true);
+
+        viewHolder.sync_label.setVisibility(View.VISIBLE);
+        viewHolder.cv.setClickable(false);
+        viewHolder.cv.setFocusable(false);
+
+        break;
+      case READY:
+        viewHolder.cv.setCardElevation(4f);
+        viewHolder.cv.setClickable(true);
+        viewHolder.cv.setFocusable(true);
+        break;
+    }
+
+
+
+
   }
 
 //  @Override
 //  public void onBindViewHolder(final DocumentViewHolder viewHolder, final int position) {
-//    final RDocumentEntity item = documents.get(position);
+//    final RDocumentEntity item = documents.startTransactionFor(position);
 //
 //    viewHolder.title.setText( item.getShortDescription() );
 //    viewHolder.subtitle.setText( item.getComment() );
@@ -307,13 +342,13 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 //            arrayList.add(str);
 //          }
 //
-//          RLinksEntity _link = (RLinksEntity) arrayList.get(0);
+//          RLinksEntity _link = (RLinksEntity) arrayList.startTransactionFor(0);
 //          Timber.tag("Status LINKS").e("size > 0 | first: %s", _link.getUid() );
 //
 //          RDocumentEntity doc = dataStore
 //            .select(RDocumentEntity.class)
 //            .where(RDocumentEntity.UID.eq( _link.getUid() ))
-//            .get().first();
+//            .startTransactionFor().first();
 //
 //          viewHolder.date.setText( item.getTitle() + " на " + doc.getRegistrationNumber() );
 //        } catch (NoSuchElementException e) {
@@ -377,11 +412,11 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 //    viewHolder.cv.setOnLongClickListener(view -> {
 //
 //
-////      documentManager.get( item.getUid() ).toJson();
+////      documentManager.startTransactionFor( item.getUid() ).toJson();
 //
 //
 ////      String _title = documentManager.getDocument(item.getUid()).getTitle();
-////      String _title = manager.get(item.getUid()).getTitle();
+////      String _title = manager.startTransactionFor(item.getUid()).getTitle();
 ////      Timber.e("title : %s", _title);
 ////
 ////      Notification builder =
@@ -438,7 +473,6 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
   public int getItemCount() {
     return documents == null ? 0 : documents.size();
   }
-
 
   public InMemoryDocument getItem(int position) {
     if ( documents.size() == 0 ){
@@ -505,12 +539,21 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
   public void addItem(InMemoryDocument document) {
     if ( !Holder.MAP.containsKey( document.getUid()) ){
-      Holder.MAP.put( document.getUid(), document );
-      documents.add(0, document);
-      notifyItemInserted(0);
+      documents.add(document);
+      notifyItemInserted( documents.size() );
+//      Holder.MAP.put( document.getUid(), documents.s );
+      recreateHash();
     }
   }
 
+  private void recreateHash() {
+
+    Holder.MAP = new HashMap<>();
+
+    for (int i = 0; i < documents.size(); i++) {
+      Holder.MAP.put( documents.get(i).getUid(), i );
+    }
+  }
 
   class DocumentViewHolder extends RecyclerView.ViewHolder {
     private TextView sync_label;
@@ -547,7 +590,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
   }
 
   private static class Holder {
-    static Map<String, InMemoryDocument> MAP = new HashMap<>();
+    static Map<String, Integer> MAP = new HashMap<>();
   }
 
 }

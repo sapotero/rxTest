@@ -150,7 +150,6 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
 
 
     MainMenuItem mainMenuItem = getSelectedItem();
-    Timber.tag(TAG).i( "CURRENT BUTTONS: %s", mainMenuItem.getMainMenuButtons().size() );
 
     RadioGroup button_group = getButtonGroupLayout(context);
 
@@ -251,7 +250,6 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
     return view;
   }
 
-  @RequiresApi(api = Build.VERSION_CODES.M)
   public void update() {
     updateView();
   }

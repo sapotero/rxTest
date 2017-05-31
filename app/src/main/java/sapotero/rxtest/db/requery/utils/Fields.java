@@ -13,6 +13,7 @@ public class Fields {
     APPROVAL                ("approval",                "Согласование проектов документов"),
     SIGNING                 ("signing",                 "Подписание проектов документов"),
     LINK                    ("link",                    "Связанный документ"),
+    PROJECTS                ("project",                 "Проекты"),
     PROCESSED               ("processed",               "Рассмотренные");
 
     private final String value;

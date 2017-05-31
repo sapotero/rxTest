@@ -17,10 +17,11 @@ import sapotero.rxtest.jobs.bus.CreateDocumentsJob;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.memory.fields.FieldType;
-import sapotero.rxtest.utils.memory.fields.LabelType;
+import sapotero.rxtest.utils.memory.fields.InMemoryState;
 import sapotero.rxtest.utils.memory.mappers.InMemoryDocumentMapper;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.utils.memory.utils.IMDFilter;
+import sapotero.rxtest.utils.memory.utils.Transaction;
 import timber.log.Timber;
 
 public class InMemoryDocumentStorage {
@@ -42,38 +43,64 @@ public class InMemoryDocumentStorage {
   }
 
 
+  private void loadFromDB() {
+    dataStore
+      .select(RDocumentEntity.class)
+      .where(RDocumentEntity.FROM_LINKS.eq(false))
+      .and(RDocumentEntity.FROM_PROCESSED_FOLDER.eq(false))
+      .and(RDocumentEntity.FROM_FAVORITES_FOLDER.eq(false))
+      .get().toObservable()
+      .toList()
+      .subscribeOn(Schedulers.immediate())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(
+        docs -> {
+          for (RDocumentEntity doc : docs) {
+
+
+            documents.put(doc.getUid(), InMemoryDocumentMapper.fromDB(doc));
+          }
+        },
+        Timber::e
+      );
+  }
+
+  public Transaction startTransactionFor(String uid){
+    return new Transaction( documents.get(uid), publish );
+  }
+
   public HashMap<String, InMemoryDocument> getDocuments() {
     return documents;
   }
-
 
   public PublishSubject<InMemoryDocument> getPublishSubject(){
     return publish;
   }
 
+
   public void add(Document document, String index, String filter){
     Timber.tag(TAG).e("-> %s / %s@%5.10s  ", document.getUid(), filter, index );
 
     if ( documents.containsKey(document.getUid()) ){
-
       InMemoryDocument doc = documents.get(document.getUid());
+      Timber.tag(TAG).e("filters : %s | %s", doc.getFilter(), filter);
+      Timber.tag(TAG).e("md5     : %s | %s", doc.getMd5(), document.getMd5());
+
 
       if ( IMDFilter.isChanged( doc.getMd5(), document.getMd5() ) ){
-
         Timber.tag(TAG).e("update: %s", document.getUid());
-        Timber.tag(TAG).e("-> %s / %s  ", filter, doc.getFilter() );
 
-        if ( IMDFilter.isChanged( doc.getFilter(), filter) ){
-          setField( FieldType.PROCESSED, false, doc.getUid() );
-        }
+        // если изменилось md5
 
-        doc = InMemoryDocumentMapper.fromJson(document);
-        doc.setFilter(filter);
-        doc.setIndex(index);
+        Transaction transaction = startTransactionFor(doc.getUid());
+        InMemoryDocument new_doc = transaction
+          .from(InMemoryDocumentMapper.fromJson(document))
+          .withFilter(filter)
+          .withFilter(index)
+          .setField(FieldType.PROCESSED, false)
+          .commit();
 
-        documents.remove( doc.getUid() );
-        documents.put( doc.getUid(), doc );
-
+        documents.put( doc.getUid(), new_doc );
 
         if (index != null) {
           jobManager.addJobInBackground( new UpdateDocumentJob(document.getUid(), index, filter, false) );
@@ -81,7 +108,19 @@ public class InMemoryDocumentStorage {
           jobManager.addJobInBackground( new UpdateDocumentJob(document.getUid(), filter, false) );
         }
 
-        publish.onNext(doc);
+      } else {
+
+        // если не изменилось md5
+        if ( IMDFilter.isChanged( doc.getFilter(), filter) ){
+
+          Transaction transaction = startTransactionFor(doc.getUid());
+          InMemoryDocument new_doc = transaction
+            .setField(FieldType.PROCESSED, false)
+            .commit();
+
+          documents.put( doc.getUid(), new_doc );
+
+        }
       }
 
 
@@ -90,13 +129,16 @@ public class InMemoryDocumentStorage {
 
       // если нет - эмитим новый документ
       documents.put(document.getUid(), InMemoryDocumentMapper.fromJson(document));
-
       InMemoryDocument doc = documents.get(document.getUid());
-      doc.setFilter(filter);
-      doc.setIndex(index);
-      doc.setProcessed(false);
 
-      publish.onNext( documents.get(document.getUid()) );
+      Transaction transaction = startTransactionFor(doc.getUid());
+      InMemoryDocument new_doc = transaction
+        .withFilter(filter)
+        .withFilter(index)
+        .setField(FieldType.PROCESSED, false)
+        .commit();
+
+      documents.put( doc.getUid(), new_doc );
 
       // refactor
       // если указан индекс - создаем честно
@@ -106,119 +148,25 @@ public class InMemoryDocumentStorage {
       } else {
         jobManager.addJobInBackground( new UpdateDocumentJob(document.getUid(), filter, false) );
       }
+
     }
 
-  }
-
-
-
-  private void loadFromDB() {
-    dataStore
-      .select(RDocumentEntity.class)
-      .where(RDocumentEntity.FROM_LINKS.eq(false))
-      .and(RDocumentEntity.FROM_PROCESSED_FOLDER.eq(false))
-      .and(RDocumentEntity.FROM_FAVORITES_FOLDER.eq(false))
-      .get().toObservable()
-      .subscribeOn(Schedulers.computation())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(
-        doc -> {
-          documents.put(doc.getUid(), InMemoryDocumentMapper.fromDB(doc));
-        },
-        Timber::e
-      );
-  }
-
-  public InMemoryDocument get(String uid){
-    return documents.get(uid);
   }
 
   public void update(RDocumentEntity db, String filter, String index){
-//    InMemoryDocument inMemoryDocument = documents.get( db.getUid() );
-//
-//    if (inMemoryDocument != null) {
-//      InMemoryDocument doc = InMemoryDocumentMapper.fromDB(db);
-//
-//      documents.remove( doc.getUid() );
-//      documents.put( doc.getUid(), doc);
-//
-//      doc.setFilter(filter);
-//      doc.setIndex(index);
-//
-//      publish.onNext( doc );
-//    }
+
+    Transaction transaction = startTransactionFor(db.getUid());
+    InMemoryDocument new_doc = transaction
+      .from( InMemoryDocumentMapper.fromDB(db) )
+      .withFilter(filter)
+      .withFilter(index)
+      .setField(FieldType.PROCESSED, false)
+      .setState(InMemoryState.READY)
+      .commit();
+
+    documents.put( new_doc.getUid(), new_doc);
+
   }
 
 
-  public void setField(FieldType type, Boolean value, String uid) {
-    InMemoryDocument doc = documents.get(uid);
-    if (doc != null) {
-
-      switch (type){
-        case PROCESSED:
-          doc.getDocument().setProcessed(value);
-          doc.setProcessed(value);
-          break;
-      }
-      publish.onNext( doc );
-
-    }
-  }
-
-  public void setField(FieldType type, String value, String uid) {
-    InMemoryDocument doc = documents.get(uid);
-    if (doc != null) {
-
-      switch (type){
-        case MD5:
-          doc.getDocument().setMd5(value);
-          doc.setMd5(value);
-          break;
-        case FILTER:
-          doc.setFilter(value);
-          break;
-
-      }
-
-
-      documents.remove( uid );
-      documents.put( uid, doc );
-      publish.onNext( doc );
-
-
-    }
-  }
-
-  private void changeLabel(LabelType type, Boolean value, String uid) {
-    InMemoryDocument doc = documents.get(uid);
-    if (doc != null) {
-
-      switch (type){
-        case CONTROL:
-          doc.getDocument().setControl(value);
-          break;
-        case LOCK:
-          doc.getDocument().setFromProcessedFolder(value);
-          break;
-        case SYNC:
-          doc.getDocument().setChanged(value);
-          break;
-        case FAVORITES:
-          doc.getDocument().setFavorites(value);
-          break;
-      }
-
-      documents.put( uid, doc );
-      publish.onNext( doc );
-
-    }
-  }
-
-  public void setLabel(LabelType type, String uid) {
-    changeLabel(type, true, uid);
-  }
-
-  public void removeLabel(LabelType type, String uid) {
-    changeLabel(type, false, uid);
-  }
 }

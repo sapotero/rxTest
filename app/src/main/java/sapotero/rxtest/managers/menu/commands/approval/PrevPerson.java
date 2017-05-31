@@ -18,8 +18,6 @@ import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.services.MainService;
-import sapotero.rxtest.utils.memory.fields.FieldType;
-import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
 public class PrevPerson extends AbstractCommand {
@@ -60,8 +58,8 @@ public class PrevPerson extends AbstractCommand {
     queueManager.add(this);
 
     String uid = params.getDocument() != null ? params.getDocument() : document.getUid();
-    store.setLabel(LabelType.SYNC ,uid);
-    store.setField(FieldType.PROCESSED ,true ,uid);
+//    store.setLabel(LabelType.SYNC ,uid);
+//    store.setField(FieldType.PROCESSED ,true ,uid);
   }
 
   @Override
@@ -136,15 +134,15 @@ public class PrevPerson extends AbstractCommand {
           Timber.tag(TAG).i("type: %s", data.getType());
 
           queueManager.setExecutedRemote(this);
-          store.removeLabel(LabelType.SYNC ,uid);
-          store.setField(FieldType.PROCESSED ,true ,uid);
+//          store.removeLabel(LabelType.SYNC ,uid);
+//          store.setField(FieldType.PROCESSED ,true ,uid);
         },
         error -> {
           if (callback != null) {
             callback.onCommandExecuteError(getType());
           }
-          store.removeLabel(LabelType.SYNC ,uid);
-          store.setField(FieldType.PROCESSED ,false ,uid);
+//          store.removeLabel(LabelType.SYNC ,uid);
+//          store.setField(FieldType.PROCESSED ,false ,uid);
         }
       );
 

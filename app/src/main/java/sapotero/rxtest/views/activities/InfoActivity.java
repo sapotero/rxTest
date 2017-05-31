@@ -434,7 +434,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 //
 ////    MainActivity.invalidate();
 //
-//    MainActivity.RAdapter.getPrevFromPosition(settings.getInteger("activity_main_menu.position").get());
+//    MainActivity.RAdapter.getPrevFromPosition(settings.getInteger("activity_main_menu.position").startTransactionFor());
 //    activity.startActivity(intent);
 //      activity.overridePendingTransition(R.anim.slide_to_right, R.anim.slide_from_left);
 //      activity.overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
@@ -464,7 +464,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 //
 //    MainActivity.invalidate();
 //
-//    MainActivity.RAdapter.getNextFromPosition( settings.getInteger("activity_main_menu.position").get() );
+//    MainActivity.RAdapter.getNextFromPosition( settings.getInteger("activity_main_menu.position").startTransactionFor() );
 //    activity.startActivity(intent);
 //    activity.overridePendingTransition(R.anim.slide_to_left, R.anim.slide_from_right);
 //    activity.overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);

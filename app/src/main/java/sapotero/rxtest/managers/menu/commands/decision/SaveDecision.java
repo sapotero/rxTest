@@ -103,7 +103,7 @@ public class SaveDecision extends AbstractCommand {
 //    int count = dataStore
 //      .delete(RDecisionEntity.class)
 //      .where(RDecisionEntity.UID.eq(dec.getId()))
-//      .get().value();
+//      .startTransactionFor().value();
 //    Timber.tag(TAG).e("DELETED %s", count);
 
 
@@ -169,7 +169,7 @@ public class SaveDecision extends AbstractCommand {
 //    RDocumentEntity doc = dataStore
 //      .select(RDocumentEntity.class)
 //      .where(RDocumentEntity.UID.eq(dec.getDocumentUid()))
-//      .get()
+//      .startTransactionFor()
 //      .first();
 //
 //    decision.setDocument( doc );
@@ -198,7 +198,7 @@ public class SaveDecision extends AbstractCommand {
 //      .update(RDecisionEntity.class)
 //      .set(RDecisionEntity.TEMPORARY, true)
 //      .where(RDecisionEntity.UID.eq(dec.getId()))
-//      .get().value();
+//      .startTransactionFor().value();
 
 //    Timber.tag(TAG).i( "2 update decision: %s", count );
 

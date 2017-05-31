@@ -15,7 +15,7 @@ public class Document implements Serializable {
   private String md5;
   @SerializedName("sort_key")
   @Expose
-  private Integer sortKey;
+  private Integer sortKey = -1;
 
   @SerializedName("title")
   @Expose
@@ -55,31 +55,29 @@ public class Document implements Serializable {
 
   @SerializedName("viewed")
   @Expose
-  private Boolean viewed;
+  private Boolean viewed = false;
 
   @SerializedName("control")
   @Expose
-  private Boolean control;
+  private Boolean control = false;
 
   @SerializedName("favorites")
   @Expose
-  private Boolean favorites;
+  private Boolean favorites = false;
 
 
 
   // Дополнительные поля, которые не будут сериализованы
-  private transient boolean red;
-  private transient boolean fromFavoritesFolder;
-  private transient boolean fromProcessedFolder;
+  private transient boolean red = false;
+  private transient boolean fromFavoritesFolder = false;
+  private transient boolean fromProcessedFolder = false;
   private transient boolean processed = false;
 
   private transient String firstLink = "";
+
   public String getFirstLink() {
     return firstLink;
   }
-
-
-
 
   public boolean isProcessed() {
     return processed;

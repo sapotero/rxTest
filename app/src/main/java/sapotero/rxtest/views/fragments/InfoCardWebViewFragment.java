@@ -163,7 +163,7 @@ public class InfoCardWebViewFragment extends Fragment {
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(UpdateCurrentDocumentEvent event) throws Exception {
     Timber.tag(TAG).w("UpdateCurrentDocumentEvent %s", event.uid);
-//    if (Objects.equals(event.uid, uid != null ? uid : UID.get())){
+//    if (Objects.equals(event.uid, uid != null ? uid : UID.startTransactionFor())){
 //
 //      setWebView();
 //    }

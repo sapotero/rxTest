@@ -20,7 +20,7 @@ public class InMemoryDocument implements Serializable {
   public Boolean processed   = false;
 
   public Document document;
-  private InMemoryState action = InMemoryState.NEW;
+  private InMemoryState state = InMemoryState.LOADING;
 
   public InMemoryDocument() {
   }
@@ -65,17 +65,18 @@ public class InMemoryDocument implements Serializable {
     this.filter = filter;
   }
 
+  public InMemoryState getState() {
+    return state;
+  }
+
   public void setAsLoading(){
-    action = InMemoryState.LOADING;
+    state = InMemoryState.LOADING;
   }
 
-  public void setAsDeleted(){
-    action = InMemoryState.DELETE;
+  public void setAsReady(){
+    state = InMemoryState.READY;
   }
 
-  public void setAsNew(){
-    action = InMemoryState.NEW;
-  }
 
   public String getMd5() {
     return md5;
@@ -98,7 +99,7 @@ public class InMemoryDocument implements Serializable {
     return "InMemoryDocument { " +
       "uid='" + uid + '\'' +
       ", md5='" + md5 + '\'' +
-      ", action=" + action +
+      ", action=" + state +
       " }";
   }
 }

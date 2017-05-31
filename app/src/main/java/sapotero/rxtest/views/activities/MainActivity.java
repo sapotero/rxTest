@@ -9,7 +9,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -34,11 +33,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 import javax.inject.Inject;
 
@@ -57,7 +52,6 @@ import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.bus.GetDocumentInfoEvent;
 import sapotero.rxtest.events.service.CheckNetworkEvent;
 import sapotero.rxtest.events.service.CheckNetworkResultEvent;
-import sapotero.rxtest.events.service.SuperVisorUpdateEvent;
 import sapotero.rxtest.events.service.UpdateAllDocumentsEvent;
 import sapotero.rxtest.events.utils.RecalculateMenuEvent;
 import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
@@ -147,8 +141,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @SuppressLint("StaticFieldLeak")
   public static DocumentsAdapter RAdapter;
 
-  @SuppressLint("StaticFieldLeak")
-  public static DBQueryBuilder dbQueryBuilder;
+  public DBQueryBuilder dbQueryBuilder;
 
   public  MenuBuilder menuBuilder;
   private DataLoaderManager dataLoader;
@@ -192,11 +185,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     dataLoader = new DataLoaderManager(this);
 
-    progressBar.setVisibility(ProgressBar.GONE);
 
     initToolbar();
 
-    initEvents();
 
     rxSettings();
 
@@ -206,10 +197,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     updateToken();
 
-  }
-
-  private void recreateView() {
-    menuBuilder.recreate();
   }
 
   private void setFirstRunFalse() {
@@ -388,42 +375,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       return false;
     });
   }
-//
-//  private void updateProgressBar() {
-//    dropLoadProgress(true);
-//
-//    subscription.add(
-//    Observable
-//      .interval( 1, TimeUnit.SECONDS)
-//      .subscribeOn(AndroidSchedulers.mainThread())
-//      .observeOn(AndroidSchedulers.mainThread())
-//      .subscribe( data-> {
-//        int value = update_progressbar.getProgress();
-//        update_progressbar.setProgress( value + 1 );
-//
-//        Timber.tag(TAG).w("TICK %s > %s = %s", getLoadedDocumentsPercent() , value, getLoadedDocumentsPercent() > value);
-//        if ( getLoadedDocumentsPercent() >= value  && getLoadedDocumentsPercent() > 0){
-//          subscription.unsubscribe();
-//        }
-//
-//
-//      })
-//    );
-//
-//  }
-
-  private void dropLoadProgress(Boolean visible) {
-    loaded = 0;
-
-    if (subscription != null) {
-      subscription.clear();
-    }
-
-    if ( update_progressbar != null){
-      update_progressbar.setProgress(0);
-      update_progressbar.setVisibility(visible ? View.VISIBLE : View.GONE);
-    }
-  }
 
   private void initEvents() {
     Timber.tag(TAG).v("initEvents");
@@ -432,13 +383,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     }
     EventBus.getDefault().register(this);
 
-
     Intent serviceIntent = new Intent(this, MainService.class);
-    if(startService(serviceIntent) != null) {
-//      Toast.makeText(getBaseContext(), "Service is already running", Toast.LENGTH_SHORT).show();
-    } else {
-      EventBus.getDefault().post(new SuperVisorUpdateEvent());
-    }
 
     if (subscription == null){
       subscription = new CompositeSubscription();
@@ -447,33 +392,15 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   private void updateByStatus() {
     dataLoader.updateByCurrentStatus( menuBuilder.getItem(), null, false);
-
     Toast.makeText(this, "Обновление данных...", Toast.LENGTH_SHORT).show();
-
-//    menuBuilder.build();
-
   }
 
-  @Override
-  public void onStart() {
-    super.onStart();
-  }
 
   @Override
   public void onResume() {
     super.onResume();
-
     initEvents();
-
-    Timber.tag(TAG).v("onResume");
-//    invalidate();
-
-    menuBuilder.getItem().recalcuate();
-    dropLoadProgress(false);
-
     startNetworkCheck();
-
-//    EventBus.getDefault().post( new UpdateAllDocumentsEvent());
 
   }
 
@@ -485,10 +412,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     EventBus.getDefault().post(new CheckNetworkEvent( false ));
   }
 
-//  public static void invalidate(){
-//    RAdapter.clear();
-//    dbQueryBuilder.execute(true);
-//  }
 
   @Override
   protected void onPause() {
@@ -680,18 +603,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   public void rxSettings() {
     drawer_build_head();
-
-    Map<Integer, String> map = new HashMap<>();
-    int index = 0;
-
-    for (String journal : settings.getJournals()) {
-      index = Arrays.asList((getResources().getStringArray(R.array.settings_view_start_page_values))).indexOf(journal);
-      map.put(index, journal);
-    }
-
-    Map<Integer, String> treeMap = new TreeMap<>(map);
-    String[] identifier = (getResources().getStringArray(R.array.settings_view_start_page_identifier));
-    String[] title = (getResources().getStringArray(R.array.settings_view_start_page));
 
     for(Fields.Menu menu: Fields.Menu.values() ){
       drawer_add_item( menu.getIndex() , menu.getTitle(), Long.valueOf( menu.getIndex()) );

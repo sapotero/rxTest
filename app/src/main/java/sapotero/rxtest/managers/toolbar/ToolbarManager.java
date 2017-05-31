@@ -646,8 +646,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       }
     );
 
-//    status  = Fields.Status.findStatus(STATUS_CODE.get());
-//    journal = Fields.getJournalByUid( UID.get() );
+//    status  = Fields.Status.findStatus(STATUS_CODE.startTransactionFor());
+//    journal = Fields.getJournalByUid( UID.startTransactionFor() );
 
 
     Timber.tag("MENU").e( "STATUS CODE: %s", settings.getStatusCode() );
@@ -862,7 +862,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       default:
 
         toolbar.inflateMenu(R.menu.info_menu);
-//        EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
+//        EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.startTransactionFor() ) );
 //        EventBus.getDefault().post( new ShowNextDocumentEvent() );
         break;
     }

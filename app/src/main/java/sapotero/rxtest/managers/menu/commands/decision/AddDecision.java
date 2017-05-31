@@ -83,7 +83,7 @@ public class AddDecision extends AbstractCommand {
 //        .update(RDocumentEntity.class)
 //        .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue())
 //        .where(RDocumentEntity.UID.eq( document_uid ))
-//        .get()
+//        .startTransactionFor()
 //        .call();
 //
 //      dataStore

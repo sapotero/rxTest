@@ -107,7 +107,7 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
         .items(keyStoreTypeList)
         .itemsCallbackSingleChoice(-1, (dialog, view, which, text) -> {
 
-//          KeyStoreType.saveCurrentType(keyStoreTypeList.get(which));
+//          KeyStoreType.saveCurrentType(keyStoreTypeList.startTransactionFor(which));
 
           EventBus.getDefault().post( new SelectKeyStoreEvent(keyStoreTypeList.get(which)));
 

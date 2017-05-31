@@ -26,6 +26,10 @@ public class OkHttpModule {
           HttpLoggingInterceptor.Level.BASIC
         )
       )
+      // refactor
+      // for test only!!!
+//      .addInterceptor( new NetworkSlowdown() )
+
       .addInterceptor( new StethoInterceptor())
       .addInterceptor(
         chain -> {

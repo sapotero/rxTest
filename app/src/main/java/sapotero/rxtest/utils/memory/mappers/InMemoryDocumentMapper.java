@@ -18,7 +18,7 @@ public class InMemoryDocumentMapper {
     InMemoryDocument imd = new InMemoryDocument();
     imd.setUid( document.getUid() );
     imd.setMd5( document.getMd5() );
-    imd.setAsNew();
+    imd.setAsLoading();
     imd.setDocument(document);
 
     return imd;
@@ -84,6 +84,8 @@ public class InMemoryDocumentMapper {
     imd.setIndex(document.getDocumentType());
     imd.setDocument( convert(document) );
     imd.setProcessed( imd.getDocument().isProcessed() );
+
+    imd.setAsReady();
 
     return imd;
   }

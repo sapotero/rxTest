@@ -1,6 +1,12 @@
 package sapotero.rxtest.utils.memory.utils;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.List;
 
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
@@ -29,9 +35,23 @@ public class IMDFilter {
       for (ConditionBuilder condition : conditions ){
         if (condition.getField().getLeftOperand() == RDocumentEntity.FILTER){
 
+//          try {
+//            statuses.addAll(((ArrayList<String>) condition.getField().getRightOperand()));
+//          } catch (Exception e) {
+//            statuses.add( String.valueOf(condition.getField().getRightOperand()) );
+//          }
+
           try {
-            statuses.addAll(((ArrayList<String>) condition.getField().getRightOperand()));
-          } catch (Exception e) {
+            Type listType = new TypeToken<List<String>>() {}.getType();
+            List<String> array = new Gson().fromJson(String.valueOf(condition.getField().getRightOperand()), listType);
+
+            for (String st: array ) {
+              statuses.add(st);
+            }
+
+            Timber.tag(TAG).e( "$$ %s | %s", array, array.size() );
+          } catch (JsonSyntaxException e) {
+
             statuses.add( String.valueOf(condition.getField().getRightOperand()) );
           }
 
@@ -87,7 +107,7 @@ public class IMDFilter {
     Boolean result = true;
 
     if ( isFavorites ){
-      result = doc.getDocument().getFavorites() || doc.getDocument().isFromFavoritesFolder();
+      result = doc != null && doc.getDocument() != null && doc.getDocument().getFavorites() != null &&  doc.getDocument().getFavorites() || doc != null && doc.getDocument() != null && doc.getDocument().isFromFavoritesFolder();
     }
 
     return result;
@@ -97,7 +117,7 @@ public class IMDFilter {
     Boolean result = true;
 
     if ( isControl ){
-      result = doc.getDocument().getControl();
+      result = doc != null && doc.getDocument() != null && doc.getDocument().getControl() != null && doc.getDocument().getControl();
     }
 
     return result;
@@ -111,8 +131,8 @@ public class IMDFilter {
     return statuses.size() == 0 || statuses.contains( document.getFilter() );
   }
 
-  public static Boolean isChanged(String m1, String m2){
-    return !m1.equals( m2 );
+  public static Boolean isChanged(String s1, String s2){
+    return !android.text.TextUtils.equals(s1, s2);
   }
 
   public static Integer bySortKey(InMemoryDocument imd1, InMemoryDocument imd2) {

@@ -15,6 +15,7 @@ import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.utils.memory.fields.LabelType;
+import sapotero.rxtest.utils.memory.utils.Transaction;
 import timber.log.Timber;
 
 public class CheckForControl extends AbstractCommand {
@@ -42,8 +43,11 @@ public class CheckForControl extends AbstractCommand {
     Timber.tag(TAG).i("execute for %s - %s",getType(),document_id);
     queueManager.add(this);
 
-    store.setLabel(LabelType.CONTROL ,document_id);
-    store.setLabel(LabelType.SYNC ,document_id);
+    Transaction transaction = store.startTransactionFor(document_id);
+    transaction
+      .setLabel(LabelType.SYNC)
+      .setLabel(LabelType.CONTROL)
+      .commit();
 
   }
 
@@ -87,7 +91,10 @@ public class CheckForControl extends AbstractCommand {
           }
 
 
-          store.removeLabel(LabelType.SYNC ,document_id);
+          Transaction transaction = store.startTransactionFor(document_id);
+          transaction
+            .removeLabel(LabelType.SYNC)
+            .commit();
         },
         error -> {
           Timber.tag(TAG).i("error %s",error);
@@ -95,9 +102,11 @@ public class CheckForControl extends AbstractCommand {
             callback.onCommandExecuteError(getType());
           }
 
-
-          store.removeLabel(LabelType.CONTROL ,document_id);
-          store.removeLabel(LabelType.SYNC ,document_id);
+          Transaction transaction = store.startTransactionFor(document_id);
+          transaction
+            .removeLabel(LabelType.CONTROL)
+            .removeLabel(LabelType.SYNC)
+            .commit();
 
         });
 
