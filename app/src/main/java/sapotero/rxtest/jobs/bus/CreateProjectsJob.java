@@ -13,8 +13,8 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
 
-// Creates ordinary documents (statuses: primary_consideration and sent_to_the_report)
-public class CreateDocumentsJob extends DocumentJob {
+// Creates projects (statuses: approval and signing)
+public class CreateProjectsJob extends DocumentJob {
 
   public static final int PRIORITY = 1;
 
@@ -22,26 +22,13 @@ public class CreateDocumentsJob extends DocumentJob {
 
   private String uid;
   private String status;
-  private String journal;
   private boolean shared = false;
 
-  public CreateDocumentsJob(String uid, String journal, String status, boolean shared) {
+  public CreateProjectsJob(String uid, String status, boolean shared) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
-    this.journal = getJournalName(journal);
     this.status = status;
     this.shared = shared;
-  }
-
-  private String getJournalName(String journal) {
-    String journalName = "";
-
-    if ( exist( journal ) ) {
-      String[] index = journal.split("_production_db_");
-      journalName = index[0];
-    }
-
-    return journalName;
   }
 
   @Override
@@ -54,9 +41,8 @@ public class CreateDocumentsJob extends DocumentJob {
   }
 
   @Override
-  public void doAfterLoad(DocumentInfo document){
+  public void doAfterLoad(DocumentInfo document) {
     RDocumentEntity doc = createDocument(document, status, shared);
-    mappers.getDocumentMapper().setJournal(doc, journal);
     saveDocument(document, doc, false, TAG);
   }
 
@@ -72,6 +58,6 @@ public class CreateDocumentsJob extends DocumentJob {
   @Override
   protected void onCancel(@CancelReason int cancelReason, @Nullable Throwable throwable) {
     // Job has exceeded retry attempts or shouldReRunOnThrowable() has decided to cancel.
-    EventBus.getDefault().post( new StepperLoadDocumentEvent("Error creating document (job cancelled)") );
+    EventBus.getDefault().post( new StepperLoadDocumentEvent("Error creating project (job cancelled)") );
   }
 }

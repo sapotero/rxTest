@@ -484,7 +484,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   public void updateCurrent(){
 
-    jobManager.addJobInBackground(new UpdateDocumentJob( settings.getUid(), status ));
+    updateDocument();
 
     unsubscribe();
     subscription.add(
@@ -493,11 +493,15 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(interval -> {
-          jobManager.addJobInBackground(new UpdateDocumentJob( settings.getUid(), status ));
+          updateDocument();
         })
     );
 
     toolbarManager.invalidate();
+  }
+
+  private void updateDocument() {
+    jobManager.addJobInBackground( new UpdateDocumentJob( settings.getUid() ) );
   }
 
   private void unsubscribe(){

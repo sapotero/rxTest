@@ -42,15 +42,7 @@ public class CreateAssistantJob extends BaseJob {
   }
 
   private void add(Assistant user) {
-    RAssistantEntity data = new RAssistantEntity();
-    data.setTitle( user.getToS() );
-    data.setAssistantId( user.getAssistantId() );
-    data.setAssistantName( user.getAssistantName() );
-    data.setForDecision( user.getForDecision() );
-    data.setHeadId( user.getHeadId() );
-    data.setHeadName( user.getHeadName() );
-    data.setUser( settings.getLogin() );
-
+    RAssistantEntity data = mappers.getAssistantMapper().toEntity(user);
 
     dataStore
       .insert(data)

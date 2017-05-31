@@ -14,11 +14,18 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import sapotero.rxtest.R;
+import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.mapper.PerformerMapper;
+import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 
 public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
+
+  @Inject Mappers mappers;
 
   private Context context;
   private final ArrayList<PrimaryConsiderationPeople> sourceItems;
@@ -29,6 +36,8 @@ public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
     this.sourceItems = items;
     this.resultItems = items;
     this.context = context;
+
+    EsdApplication.getDataComponent().inject(this);
   }
 
 
@@ -68,17 +77,8 @@ public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
   }
 
   public Oshs getOshs(int position){
-
     PrimaryConsiderationPeople item = resultItems.get(position);
-
-    Oshs oshs = new Oshs();
-    oshs.setOrganization( item.getOrganization());
-    oshs.setName( item.getName());
-    oshs.setPosition( item.getPosition());
-    oshs.setId( item.getId());
-    oshs.setGender( item.getGender());
-    oshs.setIsOrganization( item.isOrganization() );
-
+    Oshs oshs = (Oshs) mappers.getPerformerMapper().convert(item, PerformerMapper.DestinationType.OSHS);
     return oshs;
   }
 

@@ -9,39 +9,25 @@ import com.birbit.android.jobqueue.RetryConstraint;
 
 import org.greenrobot.eventbus.EventBus;
 
+import sapotero.rxtest.db.mapper.DocumentMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
 
-// Creates ordinary documents (statuses: primary_consideration and sent_to_the_report)
-public class CreateDocumentsJob extends DocumentJob {
+// Creates documents from favorites folder (no journal, no status)
+public class CreateFavoriteDocumentsJob extends DocumentJob {
 
   public static final int PRIORITY = 1;
 
   private String TAG = this.getClass().getSimpleName();
 
   private String uid;
-  private String status;
-  private String journal;
-  private boolean shared = false;
+  private String folder;
 
-  public CreateDocumentsJob(String uid, String journal, String status, boolean shared) {
+  public CreateFavoriteDocumentsJob(String uid, String folder) {
     super( new Params(PRIORITY).requireNetwork().persist() );
-    this.uid = uid;
-    this.journal = getJournalName(journal);
-    this.status = status;
-    this.shared = shared;
-  }
-
-  private String getJournalName(String journal) {
-    String journalName = "";
-
-    if ( exist( journal ) ) {
-      String[] index = journal.split("_production_db_");
-      journalName = index[0];
-    }
-
-    return journalName;
+    this.uid     = uid;
+    this.folder = folder;
   }
 
   @Override
@@ -54,9 +40,17 @@ public class CreateDocumentsJob extends DocumentJob {
   }
 
   @Override
-  public void doAfterLoad(DocumentInfo document){
-    RDocumentEntity doc = createDocument(document, status, shared);
-    mappers.getDocumentMapper().setJournal(doc, journal);
+  public void doAfterLoad(DocumentInfo document) {
+    DocumentMapper documentMapper = mappers.getDocumentMapper();
+    RDocumentEntity doc = documentMapper.toEntity(document);
+
+    documentMapper.setJournal(doc, "");
+    documentMapper.setFilter(doc, "");
+    documentMapper.setShared(doc, false);
+    doc.setFolder(folder);
+    doc.setFromFavoritesFolder(true);
+    doc.setFavorites(true);
+
     saveDocument(document, doc, false, TAG);
   }
 
@@ -72,6 +66,6 @@ public class CreateDocumentsJob extends DocumentJob {
   @Override
   protected void onCancel(@CancelReason int cancelReason, @Nullable Throwable throwable) {
     // Job has exceeded retry attempts or shouldReRunOnThrowable() has decided to cancel.
-    EventBus.getDefault().post( new StepperLoadDocumentEvent("Error creating document (job cancelled)") );
+    EventBus.getDefault().post( new StepperLoadDocumentEvent("Error creating favorite document (job cancelled)") );
   }
 }

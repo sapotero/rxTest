@@ -14,6 +14,7 @@ import rx.subjects.PublishSubject;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.jobs.bus.CreateDocumentsJob;
+import sapotero.rxtest.jobs.bus.CreateProjectsJob;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.memory.fields.FieldType;
@@ -102,11 +103,12 @@ public class InMemoryDocumentStorage {
 
         documents.put( doc.getUid(), new_doc );
 
-        if (index != null) {
-          jobManager.addJobInBackground( new UpdateDocumentJob(document.getUid(), index, filter, false) );
-        } else {
-          jobManager.addJobInBackground( new UpdateDocumentJob(document.getUid(), filter, false) );
-        }
+        jobManager.addJobInBackground( new UpdateDocumentJob( doc.getUid(), index, filter ) );
+//        if (index != null) {
+//          jobManager.addJobInBackground( new UpdateDocumentJob(document.getUid(), index, filter, false) );
+//        } else {
+//          jobManager.addJobInBackground( new UpdateDocumentJob(document.getUid(), filter, false) );
+//        }
 
       } else {
 
@@ -143,10 +145,13 @@ public class InMemoryDocumentStorage {
       // refactor
       // если указан индекс - создаем честно
       // если нет - то по старому для проектов
+
+
+
       if (index != null) {
-        jobManager.addJobInBackground( new CreateDocumentsJob(document.getUid(), index, filter, false) );
+        jobManager.addJobInBackground( new CreateDocumentsJob(doc.getUid(), index, filter, false) );
       } else {
-        jobManager.addJobInBackground( new UpdateDocumentJob(document.getUid(), filter, false) );
+        jobManager.addJobInBackground( new CreateProjectsJob(doc.getUid(), filter, false) );
       }
 
     }

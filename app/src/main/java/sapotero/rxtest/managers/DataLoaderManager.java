@@ -39,11 +39,14 @@ import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckSuccessEvent;
 import sapotero.rxtest.events.stepper.load.StepperDocumentCountReadyEvent;
 import sapotero.rxtest.jobs.bus.CreateAssistantJob;
+import sapotero.rxtest.jobs.bus.CreateFavoriteDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateFavoriteUsersJob;
 import sapotero.rxtest.jobs.bus.CreateFoldersJob;
 import sapotero.rxtest.jobs.bus.CreatePrimaryConsiderationJob;
+import sapotero.rxtest.jobs.bus.CreateProcessedDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateTemplatesJob;
 import sapotero.rxtest.jobs.bus.CreateUrgencyJob;
+import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.retrofit.Api.AuthService;
 import sapotero.rxtest.retrofit.DocumentsService;
 import sapotero.rxtest.retrofit.models.AuthSignToken;
@@ -559,28 +562,55 @@ public class DataLoaderManager {
                   if (data.getDocuments().size() > 0){
 
                     for (Document doc: data.getDocuments() ) {
+//<<<<<<< HEAD
                       store.add(doc, index, status);
                       jobCount++;
+////
+////                      Timber.tag(TAG).e("doc: %s", doc.getUid() );
+//////                       Timber.tag(TAG).e("index: %s | status: %s ",index, status );
+////
+////                      if ( isExist(doc) ){
+////
+////                        if ( !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) ){
+////                          Timber.tag(TAG).e("isUpdate" );
+////                          jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), index, status, false) );
+////                        }
+////
+////                      } else {
+////                        Timber.tag(TAG).e("isCreate" );
+////                        jobCount++;
+////                        jobManager.addJobInBackground( new CreateDocumentsJob(doc.getUid(), index, status, false) );
+////                      }
+////                    }
+////                    if ( !settings.isFirstRun() ) {
+////                      Timber.tag(TAG).e("isInvalidate" );
+////                      jobManager.addJobInBackground(new InvalidateDocumentsJob(data.getDocuments(), index, status));
+//=======
 //
-//                      Timber.tag(TAG).e("doc: %s", doc.getUid() );
-////                       Timber.tag(TAG).e("index: %s | status: %s ",index, status );
+//                      // Timber.tag(TAG).e("index: %s | status: %s ",index, status );
+//                      // Timber.tag(TAG).e("exist: %s | md5: %s", isExist(doc), !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) );
 //
 //                      if ( isExist(doc) ){
 //
+//                        Timber.tag(TAG).e("isExist %s", finalShared );
+//
 //                        if ( !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) ){
 //                          Timber.tag(TAG).e("isUpdate" );
-//                          jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), index, status, false) );
+//                          jobCount++;
+//                          jobManager.addJobInBackground( new UpdateDocumentJob( doc.getUid() ) );
 //                        }
 //
 //                      } else {
 //                        Timber.tag(TAG).e("isCreate" );
 //                        jobCount++;
-//                        jobManager.addJobInBackground( new CreateDocumentsJob(doc.getUid(), index, status, false) );
+//                        jobManager.addJobInBackground( new CreateDocumentsJob(doc.getUid(), index, status, finalShared) );
 //                      }
 //                    }
+//
 //                    if ( !settings.isFirstRun() ) {
 //                      Timber.tag(TAG).e("isInvalidate" );
 //                      jobManager.addJobInBackground(new InvalidateDocumentsJob(data.getDocuments(), index, status));
+//>>>>>>> ncore/13433_Mapper
                     }
                   }
                   updatePrefJobCount();
@@ -609,9 +639,23 @@ public class DataLoaderManager {
                 requestCount--;
                 if (data.getDocuments().size() > 0){
                   for (Document doc: data.getDocuments() ) {
+//<<<<<<< HEAD
                     store.add(doc, null, code);
                     jobCount++;
 //                    jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), code, false) );
+//=======
+//                    if ( isExist(doc) ) {
+//
+//                      if ( !isDocumentMd5Changed( doc.getUid(), doc.getMd5() ) ) {
+//                        jobCount++;
+//                        jobManager.addJobInBackground( new UpdateDocumentJob( doc.getUid() ) );
+//                      }
+//
+//                    } else {
+//                      jobCount++;
+//                      jobManager.addJobInBackground( new CreateProjectsJob(doc.getUid(), code, finalShared1) );
+//                    }
+//>>>>>>> ncore/13433_Mapper
                   }
                 }
                 updatePrefJobCount();
@@ -725,12 +769,15 @@ public class DataLoaderManager {
               if ( data.getDocuments().size() > 0 ) {
                 Timber.tag("FAVORITES").e("DOCUMENTS COUNT: %s", data.getDocuments().size() );
                 for (Document doc : data.getDocuments()) {
-
-                  if ( !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) ){
+                  if ( isExist(doc) ) {
+                    if ( !isDocumentMd5Changed( doc.getUid(), doc.getMd5() ) ) {
+                      jobCountFavorites++;
+                      jobManager.addJobInBackground(new UpdateDocumentJob( doc.getUid() ) );
+                    }
+                  } else {
                     jobCountFavorites++;
-//                    jobManager.addJobInBackground(new UpdateFavoritesDocumentsJob(doc.getUid(), favorites_folder.getUid() ) );
+                    jobManager.addJobInBackground( new CreateFavoriteDocumentsJob( doc.getUid(), favorites_folder.getUid() ) );
                   }
-
                 }
               }
               settings.addJobCount(jobCountFavorites);
@@ -770,7 +817,13 @@ public class DataLoaderManager {
               if ( data.getDocuments().size() > 0 ) {
                 Timber.tag("PROCESSED").e("DOCUMENTS COUNT: %s", data.getDocuments().size() );
                 for (Document doc : data.getDocuments()) {
-//                  jobManager.addJobInBackground( new UpdateProcessedDocumentsJob(doc.getUid(), processed_folder.getUid() ) );
+                  if ( isExist(doc) ) {
+                    if ( !isDocumentMd5Changed( doc.getUid(), doc.getMd5() ) ) {
+                      jobManager.addJobInBackground( new UpdateDocumentJob( doc.getUid() ) );
+                    }
+                  } else {
+                    jobManager.addJobInBackground( new CreateProcessedDocumentsJob( doc.getUid(), processed_folder.getUid() ) );
+                  }
                 }
               }
             }, error -> {

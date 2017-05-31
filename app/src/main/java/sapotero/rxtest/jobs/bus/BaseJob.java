@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
 import okhttp3.OkHttpClient;
+import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.utils.memory.InMemoryDocumentStorage;
 
@@ -17,12 +18,11 @@ public abstract class BaseJob extends Job {
   @Inject JobManager jobManager;
   @Inject OkHttpClient okHttpClient;
   @Inject Settings settings;
+  @Inject Mappers mappers;
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject InMemoryDocumentStorage store;
 
   protected BaseJob(Params params) {
     super(params);
   }
-
-
 }

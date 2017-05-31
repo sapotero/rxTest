@@ -4,12 +4,13 @@ import dagger.Component;
 import sapotero.rxtest.application.modules.EsdModule;
 import sapotero.rxtest.application.modules.SettingsModule;
 import sapotero.rxtest.application.scopes.DataScope;
+import sapotero.rxtest.db.mapper.utils.MappersModule;
 import sapotero.rxtest.db.requery.utils.RequeryDbModule;
 import sapotero.rxtest.db.requery.utils.validation.ValidationModule;
 import sapotero.rxtest.managers.CurrentDocumentManager;
-import sapotero.rxtest.managers.db.managers.DBDocumentManager;
 import sapotero.rxtest.managers.view.DecisionManager;
 import sapotero.rxtest.retrofit.utils.OkHttpModule;
+import sapotero.rxtest.utils.memory.utils.InMemoryStoreModule;
 import sapotero.rxtest.utils.queue.db.QueueDBManager;
 import sapotero.rxtest.views.activities.DocumentImageFullScreenActivity;
 import sapotero.rxtest.views.activities.DocumentInfocardFullScreenActivity;
@@ -17,8 +18,10 @@ import sapotero.rxtest.views.activities.FileSignActivity;
 import sapotero.rxtest.views.activities.InfoNoMenuActivity;
 import sapotero.rxtest.views.activities.LogActivity;
 import sapotero.rxtest.views.activities.LoginActivity;
+import sapotero.rxtest.views.adapters.DocumentLinkAdapter;
 import sapotero.rxtest.views.adapters.DocumentTypeAdapter;
 import sapotero.rxtest.views.adapters.PrimaryConsiderationAdapter;
+import sapotero.rxtest.views.adapters.PrimaryUsersAdapter;
 import sapotero.rxtest.views.adapters.SearchResultAdapter;
 import sapotero.rxtest.views.custom.stepper.build.steps.StepperAuthFragment;
 import sapotero.rxtest.views.custom.stepper.build.steps.StepperChooseAuthTypeFragment;
@@ -39,7 +42,9 @@ import sapotero.rxtest.views.menu.factories.ItemsBuilder;
 @Component(modules = {
   EsdModule.class,
   SettingsModule.class,
-  RequeryDbModule.class
+  RequeryDbModule.class,
+  InMemoryStoreModule.class,
+  MappersModule.class
 })
 
 public interface DataComponent {
@@ -57,6 +62,8 @@ public interface DataComponent {
   void inject(DocumentTypeAdapter adapter);
   void inject(PrimaryConsiderationAdapter adapter);
   void inject(SearchResultAdapter searchResultAdapter);
+  void inject(DocumentLinkAdapter documentLinkAdapter);
+  void inject(PrimaryUsersAdapter primaryUsersAdapter);
 
   void inject(StepperLoadDataFragment fragment);
   void inject(DecisionFragment fragment);
@@ -73,7 +80,6 @@ public interface DataComponent {
 
   void inject(ItemsBuilder itemsBuilder);
   void inject(QueueDBManager queueDBManager);
-  void inject(DBDocumentManager dbDocumentManager);
   void inject(CurrentDocumentManager currentDocumentManager);
 
   void inject(DecisionManager decisionManager);

@@ -97,15 +97,8 @@ public class CreateTemplate extends AbstractCommand {
   }
 
   private void insertTemplate(Template data) {
-
-    String type = null;
-
-
-    RTemplateEntity template = new RTemplateEntity();
-    template.setUid(data.getId());
+    RTemplateEntity template = mappers.getTemplateMapper().toEntity(data);
     template.setType(params.getLabel());
-    template.setTitle(data.getText());
-    template.setUser(settings.getLogin());
 
     dataStore
       .insert(template)

@@ -60,6 +60,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.actions.RAction;
 import sapotero.rxtest.db.requery.models.actions.RActionEntity;
@@ -69,7 +70,6 @@ import sapotero.rxtest.db.requery.models.decisions.RDecision;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RPerformer;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
-import sapotero.rxtest.db.requery.utils.DecisionConverter;
 import sapotero.rxtest.events.decision.ApproveDecisionEvent;
 import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
 import sapotero.rxtest.events.decision.RejectDecisionEvent;
@@ -81,6 +81,7 @@ import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.managers.toolbar.ToolbarManager;
 import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.padeg.Declension;
 import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.adapters.DecisionSpinnerAdapter;
@@ -94,6 +95,7 @@ import timber.log.Timber;
 public class InfoActivityDecisionPreviewFragment extends Fragment implements SelectTemplateDialogFragment.Callback{
 
   @Inject Settings settings;
+  @Inject Mappers mappers;
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject OperationManager operationManager;
   @Inject QueueManager queue;
@@ -174,7 +176,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
             CommandParams params = new CommandParams();
 
             params.setDecisionId( current_decision.getUid() );
-            params.setDecisionModel( DecisionConverter.formatDecision(current_decision) );
+            params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(current_decision) );
 
             params.setDocument( settings.getUid() );
             params.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
@@ -195,7 +197,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
       params.setDecisionId( current_decision.getUid() );
 //      params.setDecision( current_decision );
-      params.setDecisionModel( DecisionConverter.formatDecision(current_decision) );
+      params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(current_decision) );
       params.setDocument( settings.getUid() );
       params.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
 
@@ -227,7 +229,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       CommandParams params = new CommandParams();
       params.setDecisionId( current_decision.getUid() );
 //      params.setDecision( current_decision );
-      params.setDecisionModel( DecisionConverter.formatDecision(current_decision) );
+      params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(current_decision) );
       params.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
 
       operationManager.execute(operation, params);
@@ -249,7 +251,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
         CommandParams commandParams = new CommandParams();
         commandParams.setDecisionId( current_decision.getUid() );
 //          commandParams.setDecision( current_decision );
-        commandParams.setDecisionModel( DecisionConverter.formatDecision(current_decision) );
+        commandParams.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(current_decision) );
         commandParams.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
 
         if ( settings.isShowCommentPost() ) {
@@ -1127,7 +1129,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       }
 
       TextView signerBlankTextView = new TextView(context);
-      signerBlankTextView.setText( DecisionConverter.formatName( decision.getSignerBlankText() ) );
+      signerBlankTextView.setText( Declension.formatName( decision.getSignerBlankText() ) );
       signerBlankTextView.setTextColor( Color.BLACK );
       signerBlankTextView.setGravity( Gravity.END);
       signerBlankTextView.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
@@ -1288,7 +1290,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
           String performerName = "";
 
-          String tempPerformerName = DecisionConverter.getPerformerNameForDecisionPreview(
+          String tempPerformerName = Declension.getPerformerNameForDecisionPreview(
             user.getPerformerText(),
             user.getPerformerGender(),
             block.getAppealText()

@@ -8,14 +8,12 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
-import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
-import sapotero.rxtest.retrofit.models.document.Performer;
 import timber.log.Timber;
 
 public class SaveTemporaryDecision extends AbstractCommand {
@@ -93,36 +91,7 @@ public class SaveTemporaryDecision extends AbstractCommand {
       }
 
       for (Block _block : dec.getBlocks()) {
-        RBlockEntity block = new RBlockEntity();
-
-        block.setTextBefore(_block.getTextBefore());
-        block.setText(_block.getText());
-        block.setAppealText(_block.getAppealText());
-        block.setNumber(_block.getNumber());
-        block.setFontSize(_block.getFontSize());
-
-
-        block.setToCopy(_block.getToCopy());
-        block.setHidePerformers(_block.getHidePerformers());
-        block.setToFamiliarization(_block.getToFamiliarization());
-
-
-        for (Performer _perf : _block.getPerformers()) {
-          RPerformerEntity perf = new RPerformerEntity();
-
-          perf.setNumber(_perf.getNumber());
-          perf.setPerformerText(_perf.getPerformerText());
-          perf.setPerformerGender(_perf.getPerformerGender());
-          perf.setOrganizationText(_perf.getOrganizationText());
-          perf.setIsOriginal(_perf.getIsOriginal());
-          perf.setIsResponsible(_perf.getIsResponsible());
-          perf.setIsResponsible(_perf.getIsResponsible());
-          perf.setIsOrganization(_perf.getOrganization());
-
-          perf.setBlock(block);
-          block.getPerformers().add(perf);
-        }
-
+        RBlockEntity block = mappers.getBlockMapper().toEntity(_block);
         block.setDecision(decision);
         decision.getBlocks().add(block);
       }

@@ -17,7 +17,6 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
-import sapotero.rxtest.db.requery.utils.DecisionConverter;
 import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
@@ -163,7 +162,7 @@ public class RejectDecision extends AbstractCommand {
     if ( params.getDecisionModel() != null ){
       formated_decision = params.getDecisionModel();
     } else {
-      formated_decision = DecisionConverter.formatDecision( decision );
+      formated_decision = mappers.getDecisionMapper().toFormattedModel( decision );
     }
 
     formated_decision.setApproved(false);
