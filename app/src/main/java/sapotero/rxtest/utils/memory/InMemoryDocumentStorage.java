@@ -153,6 +153,7 @@ public class InMemoryDocumentStorage {
 
   }
 
+  // v4.0 start
   public void update(RDocumentEntity db, String filter, String index){
 
     Transaction transaction = startTransactionFor(db.getUid());
@@ -165,6 +166,7 @@ public class InMemoryDocumentStorage {
       .commit();
 
     documents.put( new_doc.getUid(), new_doc);
+
 
   }
 
