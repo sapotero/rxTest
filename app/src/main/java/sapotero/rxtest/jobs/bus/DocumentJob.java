@@ -114,12 +114,15 @@ abstract class DocumentJob extends BaseJob {
       .subscribe(
         result -> {
           Timber.tag(TAG).d("Updated MD5 " + result.getMd5());
+          doAfterUpdate();
           loadLinkedData( documentReceived, result, false );
           EventBus.getDefault().post( new UpdateCurrentDocumentEvent( result.getUid() ) );
         },
         error -> Timber.tag(TAG).e(error)
       );
   }
+
+  abstract public void doAfterUpdate();
 
   private void loadLinkedData(DocumentInfo documentReceived, RDocumentEntity documentSaved, boolean isLink) {
     if ( !isLink ) {

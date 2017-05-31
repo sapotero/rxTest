@@ -39,6 +39,9 @@ public class UpdateDocumentJob extends DocumentJob {
 
   private String uid;
 
+  private int oldSignerId;
+  private int oldRouteId;
+
   public UpdateDocumentJob(String uid) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
@@ -65,23 +68,15 @@ public class UpdateDocumentJob extends DocumentJob {
       if ( !Objects.equals( documentReceived.getMd5(), documentExisting.getMd5() ) ) {
         Timber.tag(TAG).d( "MD5 not equal %s - %s", documentReceived.getMd5(), documentExisting.getMd5() );
 
-        int oldSignerId = getOldSignerId( documentExisting );
-        int oldRouteId = getOldRouteId( documentExisting );
+        saveIdsToDelete( documentExisting );
 
         DocumentMapper documentMapper = mappers.getDocumentMapper();
         documentMapper.setBaseFields( documentExisting, documentReceived );
 
-        deleteDecisions( documentExisting );
-        deleteExemplars( documentExisting );
-        deleteImages( documentExisting );
-        deleteControlLabels( documentExisting );
-        deleteActions( documentExisting );
-        deleteLinks( documentExisting );
+        deleteLinkedDataPartOne( documentExisting );
 
         boolean isFromProcessedFolder = Boolean.TRUE.equals( documentExisting.isFromProcessedFolder() );
-
         documentMapper.setNestedFields( documentExisting, documentReceived, isFromProcessedFolder );
-
         if ( !isFromProcessedFolder ) {
           // если прилетело обновление и документ не из папки обработанных - уберем из обработанных
           documentExisting.setProcessed( false );
@@ -89,13 +84,20 @@ public class UpdateDocumentJob extends DocumentJob {
 
         updateDocument( documentReceived, documentExisting, TAG );
 
-        deleteSigner( oldSignerId );
-        deleteRoute( oldRouteId );
-
       } else {
         Timber.tag(TAG).d("MD5 equal");
       }
     }
+  }
+
+  @Override
+  public void doAfterUpdate() {
+    deleteLinkedDataPartTwo();
+  }
+
+  private void saveIdsToDelete(RDocumentEntity document) {
+    oldSignerId = getOldSignerId( document );
+    oldRouteId = getOldRouteId( document );
   }
 
   private int getOldSignerId(RDocumentEntity document) {
@@ -114,37 +116,18 @@ public class UpdateDocumentJob extends DocumentJob {
     }
   }
 
-  private void deleteSigner(int id) {
-    if ( id > 0 ) {
-      int count = dataStore
-        .delete( RSignerEntity.class )
-        .where( RSignerEntity.ID.eq( id ) )
-        .get().value();
-
-      Timber.tag(TAG).d("Deleted " + count + " signers with ID " + id);
-    }
+  private void deleteLinkedDataPartOne(RDocumentEntity document) {
+    deleteDecisions( document );
+    deleteExemplars( document );
+    deleteImages( document );
+    deleteControlLabels( document );
+    deleteActions( document );
+    deleteLinks( document );
   }
 
-  private void deleteRoute(int id) {
-    if ( id > 0 ) {
-      deleteSteps( id );
-
-      int count = dataStore
-        .delete( RRouteEntity.class )
-        .where( RRouteEntity.ID.eq( id ) )
-        .get().value();
-
-      Timber.tag(TAG).d("Deleted " + count + " routes with ID " + id);
-    }
-  }
-
-  private void deleteSteps(int routeId) {
-    int count = dataStore
-      .delete( RStepEntity.class )
-      .where( RStepEntity.ROUTE_ID.eq( routeId ) )
-      .get().value();
-
-    Timber.tag(TAG).d("Deleted " + count + " steps from route with ID " + routeId);
+  private void deleteLinkedDataPartTwo() {
+    deleteSigner();
+    deleteRoute();
   }
 
   private void deleteDecisions(RDocumentEntity document) {
@@ -241,6 +224,39 @@ public class UpdateDocumentJob extends DocumentJob {
 
       Timber.tag(TAG).d("Deleted " + count + " links from document with ID " + document.getId());
     }
+  }
+
+  private void deleteSigner() {
+    if ( oldSignerId > 0 ) {
+      int count = dataStore
+              .delete( RSignerEntity.class )
+              .where( RSignerEntity.ID.eq( oldSignerId ) )
+              .get().value();
+
+      Timber.tag(TAG).d("Deleted " + count + " signers with ID " + oldSignerId);
+    }
+  }
+
+  private void deleteRoute() {
+    if ( oldRouteId > 0 ) {
+      deleteSteps( oldRouteId );
+
+      int count = dataStore
+              .delete( RRouteEntity.class )
+              .where( RRouteEntity.ID.eq( oldRouteId ) )
+              .get().value();
+
+      Timber.tag(TAG).d("Deleted " + count + " routes with ID " + oldRouteId);
+    }
+  }
+
+  private void deleteSteps(int routeId) {
+    int count = dataStore
+            .delete( RStepEntity.class )
+            .where( RStepEntity.ROUTE_ID.eq( routeId ) )
+            .get().value();
+
+    Timber.tag(TAG).d("Deleted " + count + " steps from route with ID " + routeId);
   }
 
   @Override

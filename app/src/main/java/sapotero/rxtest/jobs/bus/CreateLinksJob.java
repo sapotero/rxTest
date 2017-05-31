@@ -79,6 +79,10 @@ public class CreateLinksJob extends DocumentJob {
   }
 
   @Override
+  public void doAfterUpdate() {
+  }
+
+  @Override
   protected RetryConstraint shouldReRunOnThrowable(@NonNull Throwable throwable, int runCount, int maxRunCount) {
     return RetryConstraint.createExponentialBackoff(runCount, 1000);
   }
