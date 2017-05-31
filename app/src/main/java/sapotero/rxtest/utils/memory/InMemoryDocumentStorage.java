@@ -92,6 +92,7 @@ public class InMemoryDocumentStorage {
         Timber.tag(TAG).e("update: %s", document.getUid());
 
         // если изменилось md5
+        // Починить добавление
 
         Transaction transaction = startTransactionFor(doc.getUid());
         InMemoryDocument new_doc = transaction
