@@ -15,7 +15,7 @@ import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
 
 // Creates documents from favorites folder (no journal, no status)
-public class CreateFavoritesJob extends DocProjJob {
+public class CreateFavoriteDocumentsJob extends DocumentJob {
 
   public static final int PRIORITY = 1;
 
@@ -24,7 +24,7 @@ public class CreateFavoritesJob extends DocProjJob {
   private String uid;
   private String folder;
 
-  public CreateFavoritesJob(String uid, String folder) {
+  public CreateFavoriteDocumentsJob(String uid, String folder) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid     = uid;
     this.folder = folder;

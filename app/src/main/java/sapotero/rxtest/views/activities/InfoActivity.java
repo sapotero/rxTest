@@ -49,7 +49,7 @@ import sapotero.rxtest.events.view.ShowPrevDocumentEvent;
 import sapotero.rxtest.events.view.ShowSnackEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentInfoActivityEvent;
-import sapotero.rxtest.jobs.bus.UpdateDocProjJob;
+import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.managers.toolbar.ToolbarManager;
 import sapotero.rxtest.services.task.UpdateCurrentDocumentTask;
 import sapotero.rxtest.utils.Settings;
@@ -446,7 +446,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   }
 
   private void updateDocument() {
-    jobManager.addJobInBackground( new UpdateDocProjJob( settings.getUid() ) );
+    jobManager.addJobInBackground( new UpdateDocumentJob( settings.getUid() ) );
   }
 
   private void unsubscribe(){

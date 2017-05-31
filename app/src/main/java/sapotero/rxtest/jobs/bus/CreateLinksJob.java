@@ -17,7 +17,7 @@ import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
 
 // Creates links (no index, status: link)
-public class CreateLinksJob extends DocProjJob {
+public class CreateLinksJob extends DocumentJob {
 
   public static final int PRIORITY = 1;
 

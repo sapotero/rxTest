@@ -41,15 +41,15 @@ import sapotero.rxtest.events.stepper.load.StepperDocumentCountReadyEvent;
 import sapotero.rxtest.jobs.bus.CreateAssistantJob;
 import sapotero.rxtest.jobs.bus.CreateDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateFavoriteUsersJob;
-import sapotero.rxtest.jobs.bus.CreateFavoritesJob;
+import sapotero.rxtest.jobs.bus.CreateFavoriteDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateFoldersJob;
 import sapotero.rxtest.jobs.bus.CreatePrimaryConsiderationJob;
-import sapotero.rxtest.jobs.bus.CreateProcessedJob;
+import sapotero.rxtest.jobs.bus.CreateProcessedDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateProjectsJob;
 import sapotero.rxtest.jobs.bus.CreateTemplatesJob;
 import sapotero.rxtest.jobs.bus.CreateUrgencyJob;
 import sapotero.rxtest.jobs.bus.InvalidateDocumentsJob;
-import sapotero.rxtest.jobs.bus.UpdateDocProjJob;
+import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.retrofit.Api.AuthService;
 import sapotero.rxtest.retrofit.DocumentsService;
 import sapotero.rxtest.retrofit.models.AuthSignToken;
@@ -598,7 +598,7 @@ public class DataLoaderManager {
                         if ( !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) ){
                           Timber.tag(TAG).e("isUpdate" );
                           jobCount++;
-                          jobManager.addJobInBackground( new UpdateDocProjJob( doc.getUid() ) );
+                          jobManager.addJobInBackground( new UpdateDocumentJob( doc.getUid() ) );
                         }
 
                       } else {
@@ -667,7 +667,7 @@ public class DataLoaderManager {
 
                       if ( !isDocumentMd5Changed( doc.getUid(), doc.getMd5() ) ) {
                         jobCount++;
-                        jobManager.addJobInBackground( new UpdateDocProjJob( doc.getUid() ) );
+                        jobManager.addJobInBackground( new UpdateDocumentJob( doc.getUid() ) );
                       }
 
                     } else {
@@ -790,11 +790,11 @@ public class DataLoaderManager {
                   if ( isExist(doc) ) {
                     if ( !isDocumentMd5Changed( doc.getUid(), doc.getMd5() ) ) {
                       jobCountFavorites++;
-                      jobManager.addJobInBackground(new UpdateDocProjJob( doc.getUid() ) );
+                      jobManager.addJobInBackground(new UpdateDocumentJob( doc.getUid() ) );
                     }
                   } else {
                     jobCountFavorites++;
-                    jobManager.addJobInBackground( new CreateFavoritesJob( doc.getUid(), favorites_folder.getUid() ) );
+                    jobManager.addJobInBackground( new CreateFavoriteDocumentsJob( doc.getUid(), favorites_folder.getUid() ) );
                   }
                 }
               }
@@ -837,10 +837,10 @@ public class DataLoaderManager {
                 for (Document doc : data.getDocuments()) {
                   if ( isExist(doc) ) {
                     if ( !isDocumentMd5Changed( doc.getUid(), doc.getMd5() ) ) {
-                      jobManager.addJobInBackground( new UpdateDocProjJob( doc.getUid() ) );
+                      jobManager.addJobInBackground( new UpdateDocumentJob( doc.getUid() ) );
                     }
                   } else {
-                    jobManager.addJobInBackground( new CreateProcessedJob( doc.getUid(), processed_folder.getUid() ) );
+                    jobManager.addJobInBackground( new CreateProcessedDocumentsJob( doc.getUid(), processed_folder.getUid() ) );
                   }
                 }
               }

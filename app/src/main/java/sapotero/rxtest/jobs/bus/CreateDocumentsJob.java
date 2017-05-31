@@ -14,7 +14,7 @@ import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
 
 // Creates ordinary documents (statuses: primary_consideration and sent_to_the_report)
-public class CreateDocumentsJob extends DocProjJob {
+public class CreateDocumentsJob extends DocumentJob {
 
   public static final int PRIORITY = 1;
 

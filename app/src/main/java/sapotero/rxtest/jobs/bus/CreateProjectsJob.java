@@ -14,7 +14,7 @@ import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
 
 // Creates projects (statuses: approval and signing)
-public class CreateProjectsJob extends DocProjJob {
+public class CreateProjectsJob extends DocumentJob {
 
   public static final int PRIORITY = 1;
 

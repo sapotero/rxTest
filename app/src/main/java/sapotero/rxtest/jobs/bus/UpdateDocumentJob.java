@@ -19,7 +19,7 @@ import sapotero.rxtest.retrofit.models.document.DocumentInfo;
 import timber.log.Timber;
 
 // Updates ordinary documents, projects, documents from favorite folder and documents from processed folder
-public class UpdateDocProjJob extends DocProjJob {
+public class UpdateDocumentJob extends DocumentJob {
 
   public static final int PRIORITY = 1;
 
@@ -27,7 +27,7 @@ public class UpdateDocProjJob extends DocProjJob {
 
   private String uid;
 
-  public UpdateDocProjJob(String uid) {
+  public UpdateDocumentJob(String uid) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
   }

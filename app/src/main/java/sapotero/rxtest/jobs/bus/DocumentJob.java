@@ -5,6 +5,7 @@ import com.birbit.android.jobqueue.Params;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -27,9 +28,9 @@ import sapotero.rxtest.retrofit.models.document.Route;
 import sapotero.rxtest.retrofit.models.document.Step;
 import timber.log.Timber;
 
-abstract class DocProjJob extends BaseJob {
+abstract class DocumentJob extends BaseJob {
 
-  DocProjJob(Params params) {
+  DocumentJob(Params params) {
     super(params);
   }
 
@@ -152,42 +153,24 @@ abstract class DocProjJob extends BaseJob {
   }
 
   private void loadCards(Route route) {
-//    Observable
-//      .just( route )
-//      .flatMapIterable(Route::getSteps)
-//      .flatMapIterable(Step::getCards)
-//      .map(Card::getUid)
-//      .subscribeOn(Schedulers.computation())
-//      .observeOn(AndroidSchedulers.mainThread())
-//      .subscribe(this::loadLinkedDoc, Timber::e);
-
-//    Observable
-//      .just( route )
-//      .map(Route::getSteps).flatMap(Observable::from)
-//      .map(Step::getCards).flatMap(Observable::from)
-//      .map(Card::getUid)
-//      .subscribeOn(Schedulers.computation())
-//      .observeOn(AndroidSchedulers.mainThread())
-//      .subscribe(this::loadLinkedDoc, Timber::e);
-
     if ( exist( route ) ) {
-      if ( notEmpty( route.getSteps() ) ) {
-        for (Step step : route.getSteps()) {
-          if ( notEmpty( step.getCards() ) ) {
-            for (Card card : step.getCards()) {
-              if ( exist( card.getUid() ) ) {
-                loadLinkedDoc( card.getUid() );
-              }
-            }
-          }
+      for (Step step : nullGuard( route.getSteps() )) {
+        for (Card card : nullGuard( step.getCards() )) {
+          loadLinkedDoc( card.getUid() );
         }
       }
     }
+  }
 
+  // Return empty list if input list is null
+  private <T> List<T> nullGuard(List<T> list) {
+    return list != null ? list : Collections.EMPTY_LIST;
   }
 
   private void loadLinkedDoc(String uid) {
-    addPrefJobCount(1);
-    jobManager.addJobInBackground( new CreateLinksJob( uid ) );
+    if ( exist( uid ) ) {
+      addPrefJobCount(1);
+      jobManager.addJobInBackground( new CreateLinksJob( uid ) );
+    }
   }
 }

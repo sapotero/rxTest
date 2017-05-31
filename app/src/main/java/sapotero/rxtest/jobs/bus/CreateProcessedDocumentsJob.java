@@ -15,7 +15,7 @@ import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
 
 // Creates documents from processed folder (no journal,
-public class CreateProcessedJob extends DocProjJob {
+public class CreateProcessedDocumentsJob extends DocumentJob {
 
   public static final int PRIORITY = 1;
 
@@ -24,7 +24,7 @@ public class CreateProcessedJob extends DocProjJob {
   private String uid;
   private String folder;
 
-  public CreateProcessedJob(String uid, String folder) {
+  public CreateProcessedDocumentsJob(String uid, String folder) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
     this.folder = folder;
