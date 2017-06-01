@@ -12,6 +12,7 @@ import org.greenrobot.eventbus.EventBus;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
+import timber.log.Timber;
 
 // Creates ordinary documents (statuses: primary_consideration and sent_to_the_report)
 public class CreateDocumentsJob extends DocumentJob {
@@ -62,6 +63,11 @@ public class CreateDocumentsJob extends DocumentJob {
 
   @Override
   public void doAfterUpdate(RDocumentEntity document) {
+
+    if (document != null) {
+      Timber.tag(TAG).e( "doAfterUpdate %s - %s / %s", uid, journal, status );
+      store.updateFromJob( document, journal, status );
+    }
   }
 
   @Override

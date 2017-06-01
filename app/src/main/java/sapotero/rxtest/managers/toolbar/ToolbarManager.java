@@ -847,7 +847,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   /* OperationManager.Callback */
   @Override
   public void onExecuteSuccess(String command) {
-    Timber.tag(TAG).w("update %s", command );
+    Timber.tag(TAG).w("updateFromJob %s", command );
 
     switch (command){
       case "check_for_control":

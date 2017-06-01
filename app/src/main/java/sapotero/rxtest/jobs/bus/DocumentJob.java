@@ -99,6 +99,7 @@ abstract class DocumentJob extends BaseJob {
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         result -> {
+
           Timber.tag(TAG).d("Created " + result.getUid());
           loadLinkedData( documentReceived, result, isLink );
         },

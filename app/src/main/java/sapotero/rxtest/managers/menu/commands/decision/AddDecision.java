@@ -80,14 +80,14 @@ public class AddDecision extends AbstractCommand {
 //      String document_uid = document.getUid();
 //
 //      dataStore
-//        .update(RDocumentEntity.class)
+//        .updateFromJob(RDocumentEntity.class)
 //        .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue())
 //        .where(RDocumentEntity.UID.eq( document_uid ))
 //        .startTransactionFor()
 //        .call();
 //
 //      dataStore
-//        .update(decision).toObservable().subscribe();
+//        .updateFromJob(decision).toObservable().subscribe();
 
     // resolved https://tasks.n-core.ru/browse/MVDESD-13366
     // ставим плашку всегда

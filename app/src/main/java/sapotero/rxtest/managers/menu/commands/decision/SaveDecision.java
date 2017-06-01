@@ -166,16 +166,16 @@ public class SaveDecision extends AbstractCommand {
         }
       );
 
-    Timber.tag(TAG).e("1 update params%s", new Gson().toJson( params ));
+    Timber.tag(TAG).e("1 updateFromJob params%s", new Gson().toJson( params ));
 
 //
 //    Integer count = dataStore
-//      .update(RDecisionEntity.class)
+//      .updateFromJob(RDecisionEntity.class)
 //      .set(RDecisionEntity.TEMPORARY, true)
 //      .where(RDecisionEntity.UID.eq(dec.getId()))
 //      .startTransactionFor().value();
 
-//    Timber.tag(TAG).i( "2 update decision: %s", count );
+//    Timber.tag(TAG).i( "2 updateFromJob decision: %s", count );
 
   }
 

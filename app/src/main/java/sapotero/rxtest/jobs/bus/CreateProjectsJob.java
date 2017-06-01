@@ -12,6 +12,7 @@ import org.greenrobot.eventbus.EventBus;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
+import timber.log.Timber;
 
 // Creates projects (statuses: approval and signing)
 public class CreateProjectsJob extends DocumentJob {
@@ -48,6 +49,10 @@ public class CreateProjectsJob extends DocumentJob {
 
   @Override
   public void doAfterUpdate(RDocumentEntity document) {
+    if (document != null) {
+      Timber.tag(TAG).e( "doAfterUpdate %s - %s / %s", uid, null, status );
+      store.updateFromJob( document, null, status );
+    }
   }
 
   @Override

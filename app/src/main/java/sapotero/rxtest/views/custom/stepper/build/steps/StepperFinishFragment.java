@@ -8,16 +8,25 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import javax.inject.Inject;
+
 import sapotero.rxtest.R;
+import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.utils.memory.InMemoryDocumentStorage;
 import sapotero.rxtest.views.custom.stepper.Step;
 import sapotero.rxtest.views.custom.stepper.VerificationError;
 
 public class StepperFinishFragment extends Fragment implements Step {
 
+  @Inject InMemoryDocumentStorage store;
+
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
     View view = inflater.inflate(R.layout.stepper_final_view, container, false);
+
+    EsdApplication.getManagerComponent().inject(this);
+    store.invalidate();
 
     return view;
   }

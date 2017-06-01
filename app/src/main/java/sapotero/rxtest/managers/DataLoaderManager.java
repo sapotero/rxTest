@@ -14,6 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -552,67 +553,28 @@ public class DataLoaderManager {
 
           subscription.add(
             docService
-//              .getDocumentsByIndexes(settings.getLogin(), settings.getToken(), index, status, shared ? "group" : null , 500)
               .getDocumentsByIndexes(settings.getLogin(), settings.getToken(), index, status, null , 500)
               .subscribeOn(Schedulers.newThread())
-//              .observeOn(AndroidSchedulers.mainThread())
+              .observeOn(AndroidSchedulers.mainThread())
               .subscribe(
                 data -> {
                   requestCount--;
                   if (data.getDocuments().size() > 0){
 
                     for (Document doc: data.getDocuments() ) {
-//<<<<<<< HEAD
                       store.add(doc, index, status);
                       jobCount++;
-////
-////                      Timber.tag(TAG).e("doc: %s", doc.getUid() );
-//////                       Timber.tag(TAG).e("index: %s | status: %s ",index, status );
-////
-////                      if ( isExist(doc) ){
-////
-////                        if ( !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) ){
-////                          Timber.tag(TAG).e("isUpdate" );
-////                          jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), index, status, false) );
-////                        }
-////
-////                      } else {
-////                        Timber.tag(TAG).e("isCreate" );
-////                        jobCount++;
-////                        jobManager.addJobInBackground( new CreateDocumentsJob(doc.getUid(), index, status, false) );
-////                      }
-////                    }
-////                    if ( !settings.isFirstRun() ) {
-////                      Timber.tag(TAG).e("isInvalidate" );
-////                      jobManager.addJobInBackground(new InvalidateDocumentsJob(data.getDocuments(), index, status));
-//=======
-//
-//                      // Timber.tag(TAG).e("index: %s | status: %s ",index, status );
-//                      // Timber.tag(TAG).e("exist: %s | md5: %s", isExist(doc), !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) );
-//
-//                      if ( isExist(doc) ){
-//
-//                        Timber.tag(TAG).e("isExist %s", finalShared );
-//
-//                        if ( !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) ){
-//                          Timber.tag(TAG).e("isUpdate" );
-//                          jobCount++;
-//                          jobManager.addJobInBackground( new UpdateDocumentJob( doc.getUid() ) );
-//                        }
-//
-//                      } else {
-//                        Timber.tag(TAG).e("isCreate" );
-//                        jobCount++;
-//                        jobManager.addJobInBackground( new CreateDocumentsJob(doc.getUid(), index, status, finalShared) );
-//                      }
-//                    }
-//
-//                    if ( !settings.isFirstRun() ) {
-//                      Timber.tag(TAG).e("isInvalidate" );
-//                      jobManager.addJobInBackground(new InvalidateDocumentsJob(data.getDocuments(), index, status));
-//>>>>>>> ncore/13433_Mapper
                     }
+
+                    Observable<List<String>> api = Observable
+                      .from(data.getDocuments())
+                      .map(Document::getUid)
+                      .toList();
+
+                    store.intersect( api, status, index );
                   }
+
+
                   updatePrefJobCount();
                 },
                 error -> {
@@ -629,34 +591,27 @@ public class DataLoaderManager {
 
         subscription.add(
           docService
-//            .getDocuments(settings.getLogin(), settings.getToken(), code, shared ? "group" : null , 500, 0)
             .getDocuments(settings.getLogin(), settings.getToken(), code, null , 500, 0)
-            .subscribeOn(Schedulers.newThread())
-//            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(Schedulers.computation())
+            .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
               data -> {
 
                 requestCount--;
                 if (data.getDocuments().size() > 0){
                   for (Document doc: data.getDocuments() ) {
-//<<<<<<< HEAD
+//                    Timber.tag(TAG).i("project -> %s | %s", doc.getUid(), code);
                     store.add(doc, null, code);
                     jobCount++;
-//                    jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), code, false) );
-//=======
-//                    if ( isExist(doc) ) {
-//
-//                      if ( !isDocumentMd5Changed( doc.getUid(), doc.getMd5() ) ) {
-//                        jobCount++;
-//                        jobManager.addJobInBackground( new UpdateDocumentJob( doc.getUid() ) );
-//                      }
-//
-//                    } else {
-//                      jobCount++;
-//                      jobManager.addJobInBackground( new CreateProjectsJob(doc.getUid(), code, finalShared1) );
-//                    }
-//>>>>>>> ncore/13433_Mapper
+
                   }
+
+                  Observable<List<String>> api = Observable
+                    .from(data.getDocuments())
+                    .map(Document::getUid)
+                    .toList();
+
+                  store.intersect( api, code );
                 }
                 updatePrefJobCount();
               },

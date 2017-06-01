@@ -48,7 +48,7 @@ public class MenuBuilder implements ItemsBuilder.Callback{
 
   public void updateCount() {
     itemsBuilder.getSelectedItem().recalcuate();
-//    update();
+//    updateFromJob();
   }
 
   public void invalidate() {
@@ -129,7 +129,7 @@ public class MenuBuilder implements ItemsBuilder.Callback{
   }
 
   public void update() {
-//    //test update adapter
+//    //test updateFromJob adapter
 //    int index = journalSpinner.getSelectedItemPosition();
 //    DocumentTypeAdapter tmp_adapter = (DocumentTypeAdapter) journalSpinner.getAdapter();
 

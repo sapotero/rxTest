@@ -2,28 +2,38 @@ package sapotero.rxtest.utils.memory;
 
 import com.birbit.android.jobqueue.JobManager;
 
+import org.greenrobot.eventbus.EventBus;
+
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
+import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
+import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.events.utils.RecalculateMenuEvent;
 import sapotero.rxtest.jobs.bus.CreateDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateProjectsJob;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.memory.fields.FieldType;
 import sapotero.rxtest.utils.memory.fields.InMemoryState;
+import sapotero.rxtest.utils.memory.fields.LabelType;
 import sapotero.rxtest.utils.memory.mappers.InMemoryDocumentMapper;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
-import sapotero.rxtest.utils.memory.supervisor.IMDSuperVisor;
 import sapotero.rxtest.utils.memory.utils.IMDFilter;
 import sapotero.rxtest.utils.memory.utils.Transaction;
+import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import timber.log.Timber;
 
 public class InMemoryDocumentStorage {
@@ -33,23 +43,48 @@ public class InMemoryDocumentStorage {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private final PublishSubject<InMemoryDocument> publish;
   private final HashMap<String, InMemoryDocument> documents;
 
-  private final IMDSuperVisor supervisor;
+  private final CompositeSubscription subscription;
+  private final PublishSubject<InMemoryDocument> pub;
+  private final PublishSubject<InMemoryDocument> sub;
 
   public InMemoryDocumentStorage() {
-    this.publish    = PublishSubject.create();
+    this.pub = PublishSubject.create();
+    this.sub = PublishSubject.create();
     this.documents  = new HashMap<>();
-    this.supervisor = new IMDSuperVisor(this);
+
+    this.subscription = new CompositeSubscription();
 
     EsdApplication.getManagerComponent().inject(this);
-    init();
+    loadFromDB();
+
+    log();
   }
 
-  private void init() {
+  private void log() {
+
+    subscription.clear();
+    subscription.add(
+      Observable
+        .interval( 5, TimeUnit.SECONDS )
+        .subscribeOn(Schedulers.computation())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(
+          data -> {
+            for (InMemoryDocument doc: getDocuments().values() ) {
+              Timber.tag(TAG).i("[*] %s@%s : %s / %s", doc.getState(), doc.getUid(), doc.getFilter(), doc.getIndex() );
+            }
+          },
+          Timber::e
+        )
+    );
+
+  }
+
+  public void invalidate(){
+    documents.clear();
     loadFromDB();
-    supervisor.start();
   }
 
   private void loadFromDB() {
@@ -73,7 +108,7 @@ public class InMemoryDocumentStorage {
   }
 
   public Transaction startTransactionFor(String uid){
-    return new Transaction( documents.get(uid), publish );
+    return new Transaction( documents.get(uid), pub);
   }
 
   public HashMap<String, InMemoryDocument> getDocuments() {
@@ -81,7 +116,11 @@ public class InMemoryDocumentStorage {
   }
 
   public PublishSubject<InMemoryDocument> getPublishSubject(){
-    return publish;
+    return pub;
+  }
+
+  public PublishSubject<InMemoryDocument> getSubscribeSubject(){
+    return sub;
   }
 
 
@@ -90,16 +129,15 @@ public class InMemoryDocumentStorage {
 
     if ( documents.containsKey(document.getUid()) ){
       InMemoryDocument doc = documents.get(document.getUid());
+
       Timber.tag(TAG).e("filters : %s | %s", doc.getFilter(), filter);
       Timber.tag(TAG).e("md5     : %s | %s", doc.getMd5(), document.getMd5());
 
 
       if ( IMDFilter.isChanged( doc.getMd5(), document.getMd5() ) ){
-        Timber.tag(TAG).e("update: %s", document.getUid());
 
         // если изменилось md5
         // Починить добавление
-
         Transaction transaction = startTransactionFor(doc.getUid());
         InMemoryDocument new_doc = transaction
           .from(InMemoryDocumentMapper.fromJson(document))
@@ -109,13 +147,7 @@ public class InMemoryDocumentStorage {
           .commit();
 
         documents.put( doc.getUid(), new_doc );
-
-        jobManager.addJobInBackground( new UpdateDocumentJob( doc.getUid(), index, filter ) );
-//        if (index != null) {
-//          jobManager.addJobInBackground( new UpdateDocumentJob(document.getUid(), index, filter, false) );
-//        } else {
-//          jobManager.addJobInBackground( new UpdateDocumentJob(document.getUid(), filter, false) );
-//        }
+        updateJob(index, filter, doc);
 
       } else {
 
@@ -137,50 +169,126 @@ public class InMemoryDocumentStorage {
       Timber.tag(TAG).e("new: %s", document.getUid());
 
       // если нет - эмитим новый документ
-      documents.put(document.getUid(), InMemoryDocumentMapper.fromJson(document));
-      InMemoryDocument doc = documents.get(document.getUid());
 
-      Transaction transaction = startTransactionFor(doc.getUid());
+      Transaction transaction = startTransactionFor(document.getUid());
       InMemoryDocument new_doc = transaction
+        .from(InMemoryDocumentMapper.fromJson(document))
         .withFilter(filter)
         .withFilter(index)
         .setField(FieldType.PROCESSED, false)
         .commit();
 
-      documents.put( doc.getUid(), new_doc );
+      documents.put( document.getUid(), new_doc );
 
       // refactor
       // если указан индекс - создаем честно
       // если нет - то по старому для проектов
 
-
-
-      if (index != null) {
-        jobManager.addJobInBackground( new CreateDocumentsJob(doc.getUid(), index, filter, false) );
-      } else {
-        jobManager.addJobInBackground( new CreateProjectsJob(doc.getUid(), filter, false) );
-      }
+      createJob(document, index, filter);
 
     }
 
+    log();
+
+  }
+
+  private void updateJob(String index, String filter, InMemoryDocument doc) {
+    jobManager.addJobInBackground( new UpdateDocumentJob( doc.getUid(), index, filter ) );
+  }
+
+  private void createJob(Document document, String index, String filter) {
+    if (index != null) {
+      jobManager.addJobInBackground( new CreateDocumentsJob(document.getUid(), index, filter, false) );
+    } else {
+      jobManager.addJobInBackground( new CreateProjectsJob(document.getUid(), filter, false) );
+    }
   }
 
   // v4.0 start
-  public void update(RDocumentEntity db, String filter, String index){
+  public void updateFromJob(RDocumentEntity db, String filter, String index){
 
     Transaction transaction = startTransactionFor(db.getUid());
     InMemoryDocument new_doc = transaction
       .from( InMemoryDocumentMapper.fromDB(db) )
       .withFilter(filter)
       .withFilter(index)
-      .setField(FieldType.PROCESSED, false)
+      .setState(InMemoryState.READY)
+      .removeLabel(LabelType.SYNC)
+      .commit();
+
+    documents.put( new_doc.getUid(), new_doc);
+  }
+
+  private void update(String uid, String filter, String index, Boolean processed){
+    Transaction transaction = startTransactionFor(uid);
+    InMemoryDocument new_doc = transaction
+      .withFilter(filter)
+      .withFilter(index)
+      .setField(FieldType.PROCESSED, processed)
       .setState(InMemoryState.READY)
       .commit();
 
     documents.put( new_doc.getUid(), new_doc);
+  }
+
+  public ArrayList<String> intersect(Observable<List<String>> api, String filter, String index){
+
+    ArrayList<String> uids = new ArrayList<>();
+    ArrayList<ConditionBuilder> conditions = new ArrayList<>();
+
+    if (filter != null) {
+      conditions.add( new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq( filter )  ) );
+    }
+    if (index != null) {
+      conditions.add( new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( index )  ) );
+    }
+
+    IMDFilter imdFilter = new IMDFilter(conditions);
+
+    Observable<List<String>> memory = Observable
+      .from(documents.values())
+      .filter(imdFilter::byType)
+      .filter(imdFilter::byStatus)
+      .map(InMemoryDocument::getUid)
+      .toList();
+
+    Observable
+      .zip(memory, api, (original, selected) -> {
+        Timber.tag(TAG).e("original: %s", original.size() );
+        Timber.tag(TAG).e("selected: %s", selected.size() );
+
+        List<String> add = new ArrayList<>(selected);
+        add.removeAll(original);
+
+        List<String> remove = new ArrayList<>(original);
+        remove.removeAll(selected);
+
+        Timber.tag(TAG).e("add: %s", add.size() );
+        Timber.tag(TAG).e("rem: %s", remove.size() );
 
 
+        for (String uid: remove) {
+          update(uid, filter, index, true);
+        }
+
+        return Collections.singletonList("");
+      })
+      .buffer(500, TimeUnit.MILLISECONDS)
+      .subscribeOn(Schedulers.immediate())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(
+        data -> {
+          EventBus.getDefault().post( new RecalculateMenuEvent() );
+        },
+        Timber::e
+      );
+
+
+    return uids;
   }
 
 
+  public void intersect(Observable<List<String>> api, String filter) {
+    intersect(api, filter, null);
+  }
 }

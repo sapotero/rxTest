@@ -38,7 +38,7 @@ public class SaveTemporaryDecision extends AbstractCommand {
   @Override
   public void execute() {
     Timber.tag(TAG).e("execute %s", params);
-//    update();
+//    updateFromJob();
     queueManager.add(this);
   }
 

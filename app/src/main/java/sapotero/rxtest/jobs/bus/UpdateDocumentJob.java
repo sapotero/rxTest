@@ -101,6 +101,7 @@ public class UpdateDocumentJob extends DocumentJob {
           // если прилетело обновление и документ не из папки обработанных - уберем из обработанных
           documentExisting.setProcessed( false );
         }
+        documentExisting.setChanged( false );
 
         updateDocument( documentReceived, documentExisting, TAG );
 
@@ -116,7 +117,7 @@ public class UpdateDocumentJob extends DocumentJob {
 
     if (document != null) {
       Timber.tag(TAG).e( "doAfterUpdate %s - %s / %s", uid, index, filter );
-      store.update( document, index, filter );
+      store.updateFromJob( document, index, filter );
     }
 
   }

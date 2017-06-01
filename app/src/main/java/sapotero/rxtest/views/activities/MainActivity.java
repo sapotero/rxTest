@@ -671,7 +671,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 ////    }
 ////    RAdapter.removeItem(event.uid);
 //
-////    menuBuilder.update();
+////    menuBuilder.updateFromJob();
 //
 //  }
 
