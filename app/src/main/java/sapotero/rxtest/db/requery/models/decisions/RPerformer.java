@@ -11,6 +11,8 @@ public abstract class RPerformer {
   @Generated
   int id;
 
+  String uid;
+
   Integer number;
   String performerId;
   String performerType;

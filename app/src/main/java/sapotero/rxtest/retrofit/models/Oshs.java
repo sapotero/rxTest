@@ -255,6 +255,15 @@ public class Oshs implements Serializable, IPerformer {
   }
 
   @Override
+  public String getIPerformerUid() {
+    return null;
+  }
+
+  @Override
+  public void setIPerformerUid(String uid) {
+  }
+
+  @Override
   public Integer getIPerformerNumber() {
     return null;
   }

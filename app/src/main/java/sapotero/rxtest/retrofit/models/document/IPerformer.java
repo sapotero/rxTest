@@ -2,6 +2,8 @@ package sapotero.rxtest.retrofit.models.document;
 
 // Used for conversions between Performer, PrimaryConsiderationPeople and Oshs
 public interface IPerformer {
+  String getIPerformerUid();
+  void setIPerformerUid(String uid);
   Integer getIPerformerNumber();
   void setIPerformerNumber(Integer number);
   String getIPerformerId();

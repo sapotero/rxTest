@@ -69,7 +69,7 @@ public class BlockMapper extends AbstractMapper<Block, RBlockEntity> {
   }
 
   private void setBaseFields(Block model, RBlockEntity entity) {
-    model.setId(entity.getUid());
+    model.setId( entity.getUid() );
     model.setNumber( entity.getNumber() );
     model.setText( entity.getText() );
     model.setAppealText( entity.getAppealText() );
