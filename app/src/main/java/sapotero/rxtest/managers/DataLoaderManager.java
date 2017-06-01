@@ -524,13 +524,12 @@ public class DataLoaderManager {
 
       jobManager.cancelJobsInBackground(null, TagConstraint.ANY, "SyncDocument");
 
-      requestCount = 0;
+      requestCount = indexes.size() * statuses.size() + sp.size();
       jobCount = 0;
       settings.setJobCount(0);
 
       for (String index: indexes ) {
         for (String status: statuses ) {
-          requestCount++;
           boolean finalShared = shared;
 //
 //          if (firstRunShared){
@@ -625,7 +624,6 @@ public class DataLoaderManager {
       }
 
       for (String code: sp ) {
-        requestCount++;
         boolean finalShared1 = shared;
 
 //        if (firstRunShared){
