@@ -85,6 +85,8 @@ public class DataLoaderManager {
   private int jobCount;
   private int jobCountFavorites;
 
+  private boolean isDocumentCountSent;
+
   public DataLoaderManager(Context context) {
     this.context = context;
     EsdApplication.getManagerComponent().inject(this);
@@ -525,6 +527,7 @@ public class DataLoaderManager {
       jobManager.cancelJobsInBackground(null, TagConstraint.ANY, "SyncDocument");
 
       requestCount = indexes.size() * statuses.size() + sp.size();
+      isDocumentCountSent = false;
       jobCount = 0;
       settings.setJobCount(0);
 
@@ -692,9 +695,10 @@ public class DataLoaderManager {
   // resolved https://tasks.n-core.ru/browse/MVDESD-13145
   // Передача количества документов в экран загрузки
   private void updatePrefJobCount() {
-    if (0 == requestCount) {
+    if (0 == requestCount && !isDocumentCountSent) {
       // Received responses on all requests, now jobCount contains total initial job count value.
       // Update counter in preferences with this value.
+      isDocumentCountSent = true;
       settings.addJobCount(jobCount);
       EventBus.getDefault().post( new StepperDocumentCountReadyEvent() );
     }
