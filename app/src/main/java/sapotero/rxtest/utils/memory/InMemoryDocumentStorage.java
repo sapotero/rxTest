@@ -60,6 +60,11 @@ public class InMemoryDocumentStorage {
     loadFromDB();
 
     log();
+
+    // сразу захерачить стор
+    // хранилку для documentTypeItem
+    // чтобы всё там счилось по типам документов
+    // и чтобы он туда ходил, а не ломился и не считал всё каждый раз
   }
 
   private void log() {

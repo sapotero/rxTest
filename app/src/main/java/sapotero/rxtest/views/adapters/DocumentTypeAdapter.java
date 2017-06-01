@@ -20,6 +20,7 @@ import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.adapters.models.DocumentTypeItem;
 
 public class DocumentTypeAdapter extends BaseAdapter {
+
   @Inject Settings settings;
 
   private List<DocumentTypeItem> documents;
@@ -71,8 +72,6 @@ public class DocumentTypeAdapter extends BaseAdapter {
 
     text = ( (TextView) view.findViewById(R.id.document_type_name)  );
     item.setText(text);
-//    text.setText( item.getName()  );
-
 
     return view;
   }
