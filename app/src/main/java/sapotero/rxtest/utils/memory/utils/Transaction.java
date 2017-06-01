@@ -70,12 +70,16 @@ public class Transaction {
   }
 
   public Transaction withFilter(String filter) {
-    document.setFilter(filter);
+    if (filter != null) {
+      document.setFilter(filter);
+    }
     return this;
   }
 
   public Transaction withIndex(String index) {
-    document.setIndex(index);
+    if (index != null) {
+      document.setIndex(index);
+    }
     return this;
   }
 

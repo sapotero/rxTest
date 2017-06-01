@@ -19,6 +19,7 @@ import javax.inject.Inject;
 
 import io.netopen.hotbitmapgg.library.view.RingProgressBar;
 import rx.Observable;
+import rx.subjects.PublishSubject;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
@@ -44,6 +45,8 @@ public class StepperLoadDataFragment extends Fragment implements Step {
   private CompositeSubscription subscription;
 
   private boolean isReceivedJobCount = false;
+
+  private PublishSubject publish = PublishSubject.create();
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -74,6 +77,10 @@ public class StepperLoadDataFragment extends Fragment implements Step {
       EventBus.getDefault().unregister(this);
     }
 
+  }
+
+  public PublishSubject getSubscribe(){
+    return publish;
   }
 
   @Override

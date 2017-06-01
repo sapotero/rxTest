@@ -21,6 +21,7 @@ import sapotero.rxtest.utils.memory.fields.FieldType;
 import sapotero.rxtest.utils.memory.fields.InMemoryState;
 import sapotero.rxtest.utils.memory.mappers.InMemoryDocumentMapper;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
+import sapotero.rxtest.utils.memory.supervisor.IMDSuperVisor;
 import sapotero.rxtest.utils.memory.utils.IMDFilter;
 import sapotero.rxtest.utils.memory.utils.Transaction;
 import timber.log.Timber;
@@ -35,14 +36,21 @@ public class InMemoryDocumentStorage {
   private final PublishSubject<InMemoryDocument> publish;
   private final HashMap<String, InMemoryDocument> documents;
 
+  private final IMDSuperVisor supervisor;
+
   public InMemoryDocumentStorage() {
     this.publish    = PublishSubject.create();
     this.documents  = new HashMap<>();
+    this.supervisor = new IMDSuperVisor(this);
 
     EsdApplication.getManagerComponent().inject(this);
-    loadFromDB();
+    init();
   }
 
+  private void init() {
+    loadFromDB();
+    supervisor.start();
+  }
 
   private void loadFromDB() {
     dataStore
@@ -57,8 +65,6 @@ public class InMemoryDocumentStorage {
       .subscribe(
         docs -> {
           for (RDocumentEntity doc : docs) {
-
-
             documents.put(doc.getUid(), InMemoryDocumentMapper.fromDB(doc));
           }
         },
@@ -98,7 +104,7 @@ public class InMemoryDocumentStorage {
         InMemoryDocument new_doc = transaction
           .from(InMemoryDocumentMapper.fromJson(document))
           .withFilter(filter)
-          .withFilter(index)
+          .withIndex(index)
           .setField(FieldType.PROCESSED, false)
           .commit();
 

@@ -40,6 +40,7 @@ public class UpdateDocumentJob extends DocumentJob {
   private String uid;
   private String index  = null;
   private String filter = null;
+  private Boolean forceUpdate = false;
 
   private int oldSignerId;
   private int oldRouteId;
@@ -52,9 +53,16 @@ public class UpdateDocumentJob extends DocumentJob {
 
   public UpdateDocumentJob(String uid, String index, String filter) {
     super( new Params(PRIORITY).requireNetwork().persist() );
+
+    Timber.tag(TAG).e( "create %s - %s / %s", uid, index, filter );
+
     this.uid = uid;
     this.index = index;
     this.filter = filter;
+
+    // если создаем с указанием типа журнала и статуса
+    // то принудительно обновляем документ
+    this.forceUpdate = true;
   }
 
   @Override
@@ -75,7 +83,7 @@ public class UpdateDocumentJob extends DocumentJob {
       .get().firstOrNull();
 
     if ( exist( documentExisting ) ) {
-      if ( !Objects.equals( documentReceived.getMd5(), documentExisting.getMd5() ) ) {
+      if ( !Objects.equals( documentReceived.getMd5(), documentExisting.getMd5() ) || forceUpdate ) {
         Timber.tag(TAG).d( "MD5 not equal %s - %s", documentReceived.getMd5(), documentExisting.getMd5() );
 
         saveIdsToDelete( documentExisting );
@@ -107,7 +115,8 @@ public class UpdateDocumentJob extends DocumentJob {
     deleteLinkedDataPartTwo();
 
     if (document != null) {
-      store.update( document, document.getFilter(), document.getDocumentType() );
+      Timber.tag(TAG).e( "doAfterUpdate %s - %s / %s", uid, index, filter );
+      store.update( document, index, filter );
     }
 
   }
