@@ -15,6 +15,8 @@ public abstract class RBlock {
   @Generated
   int id;
 
+  String uid;
+
   Integer number;
   String text;
   String appealText;

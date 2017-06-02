@@ -93,6 +93,8 @@ public class UpdateDocumentJob extends DocumentJob {
           // если прилетело обновление и документ не из папки обработанных - уберем из обработанных
           documentExisting.setProcessed( false );
         }
+        documentExisting.setFromLinks( false );
+        documentExisting.setChanged( false );
 
         updateDocument( documentReceived, documentExisting, TAG );
 

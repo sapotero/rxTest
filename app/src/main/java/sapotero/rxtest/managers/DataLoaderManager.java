@@ -39,13 +39,16 @@ import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckSuccessEvent;
 import sapotero.rxtest.events.stepper.load.StepperDocumentCountReadyEvent;
 import sapotero.rxtest.jobs.bus.CreateAssistantJob;
+import sapotero.rxtest.jobs.bus.CreateDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateFavoriteDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateFavoriteUsersJob;
 import sapotero.rxtest.jobs.bus.CreateFoldersJob;
 import sapotero.rxtest.jobs.bus.CreatePrimaryConsiderationJob;
 import sapotero.rxtest.jobs.bus.CreateProcessedDocumentsJob;
+import sapotero.rxtest.jobs.bus.CreateProjectsJob;
 import sapotero.rxtest.jobs.bus.CreateTemplatesJob;
 import sapotero.rxtest.jobs.bus.CreateUrgencyJob;
+import sapotero.rxtest.jobs.bus.InvalidateDocumentsJob;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.retrofit.Api.AuthService;
 import sapotero.rxtest.retrofit.DocumentsService;
@@ -84,6 +87,8 @@ public class DataLoaderManager {
   private int jobCount;
   private int jobCountFavorites;
 
+  private boolean isDocumentCountSent;
+
   public DataLoaderManager(Context context) {
 
     this.context = context;
@@ -102,7 +107,7 @@ public class DataLoaderManager {
 //      );
   }
 
-  private void initV2() {
+  private void initV2(boolean loadAllDocs) {
     Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
 
     AuthService auth = retrofit.create(AuthService.class);
@@ -116,6 +121,7 @@ public class DataLoaderManager {
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(
           v2 -> {
+              Timber.tag("LoadSequence").d("Received user info");
 //            try {
               v2UserOshs user = v2.get(0);
               setCurrentUser(user.getName());
@@ -128,9 +134,12 @@ public class DataLoaderManager {
                   .subscribeOn(Schedulers.computation())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( data -> {
+                    Timber.tag("LoadSequence").d("Received list of folders");
                     jobManager.addJobInBackground(new CreateFoldersJob(data));
+                    loadAllDocs( loadAllDocs );
                   }, error -> {
                     Timber.tag(TAG).e(error);
+                    loadAllDocs( loadAllDocs );
                   })
               );
 
@@ -213,9 +222,16 @@ public class DataLoaderManager {
           },
           error -> {
             Timber.tag("USER_INFO").e( "ERROR: %s", error);
+            loadAllDocs( loadAllDocs );
           })
     );
 
+  }
+
+  private void loadAllDocs(boolean load) {
+    if ( load ) {
+      updateByCurrentStatus(MainMenuItem.ALL, null, false);
+    }
   }
 
   public void unregister(){
@@ -335,7 +351,7 @@ public class DataLoaderManager {
             Timber.tag(TAG).i("updateAuth: token" + data.getAuthToken());
             setToken( data.getAuthToken() );
 
-            initV2();
+            initV2(false);
           },
           error -> {
             Timber.tag(TAG).i("updateAuth error: %s" , error );
@@ -377,9 +393,9 @@ public class DataLoaderManager {
 
             EventBus.getDefault().post( new AuthDcCheckSuccessEvent() );
 
-            initV2();
+            initV2(true);
 
-            updateByCurrentStatus(MainMenuItem.ALL, null, false);
+//            updateByCurrentStatus(MainMenuItem.ALL, null, false);
 //            updateByCurrentStatus(MainMenuItem.ALL, null, true);
 
 //            updateFavoritesAndProcessed();
@@ -426,8 +442,8 @@ public class DataLoaderManager {
 
             EventBus.getDefault().post(new AuthLoginCheckSuccessEvent());
 
-            initV2();
-            updateByCurrentStatus(MainMenuItem.ALL, null, false);
+            initV2(true);
+//            updateByCurrentStatus(MainMenuItem.ALL, null, false);
 //            updateFavoritesAndProcessed();
           },
           error -> {
@@ -453,7 +469,7 @@ public class DataLoaderManager {
 
       ArrayList<String> indexes = new ArrayList<>();
 
-      switch (items){
+      switch (items) {
         case CITIZEN_REQUESTS:
           indexes.add("citizen_requests_production_db_core_cards_citizen_requests_cards");
           break;
@@ -478,7 +494,7 @@ public class DataLoaderManager {
       ArrayList<String> statuses = new ArrayList<String>();
 
       if (button != null) {
-        switch (button){
+        switch (button) {
           case APPROVAL:
             sp.add("approval");
             break;
@@ -497,7 +513,7 @@ public class DataLoaderManager {
 
 
       // обновляем всё
-      if (items == MainMenuItem.ALL || items.getIndex() == 11 ){
+      if (items == MainMenuItem.ALL || items.getIndex() == 11) {
         statuses.add("primary_consideration");
         statuses.add("sent_to_the_report");
         sp.add("approval");
@@ -511,7 +527,7 @@ public class DataLoaderManager {
         indexes.add("incoming_orders_production_db_core_cards_incoming_orders_cards");
       }
 
-      if (button == null){
+      if (button == null) {
         statuses.add("primary_consideration");
         statuses.add("sent_to_the_report");
         sp.add("approval");
@@ -519,25 +535,24 @@ public class DataLoaderManager {
       }
 
 
-
-
-      Timber.tag(TAG).e("data: %s %s", indexes, statuses );
+      Timber.tag(TAG).e("data: %s %s", indexes, statuses);
 
       Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
       DocumentsService docService = retrofit.create(DocumentsService.class);
 
       // resolved https://tasks.n-core.ru/browse/MVDESD-13343
       // если общие документы
-//
-//      boolean shared = false;
-//      if (items.getIndex() == 11){
-//        shared = true;
-//      }
+      //
+      // boolean shared = false;
+      // if (items.getIndex() == 11){
+      //   shared = true;
+      // }
 
 
       jobManager.cancelJobsInBackground(null, TagConstraint.ANY, "SyncDocument");
 
-      requestCount = 0;
+      requestCount = indexes.size() * statuses.size() + sp.size();
+      isDocumentCountSent = false;
       jobCount = 0;
       settings.setJobCount(0);
 
@@ -546,71 +561,39 @@ public class DataLoaderManager {
         subscription.clear();
       }
 
+
       for (String index: indexes ) {
         for (String status: statuses ) {
-          requestCount++;
 
           subscription.add(
             docService
-//              .getDocumentsByIndexes(settings.getLogin(), settings.getToken(), index, status, shared ? "group" : null , 500)
               .getDocumentsByIndexes(settings.getLogin(), settings.getToken(), index, status, null , 500)
-              .subscribeOn(Schedulers.newThread())
-//              .observeOn(AndroidSchedulers.mainThread())
+              .subscribeOn(Schedulers.computation())
+              .observeOn(Schedulers.computation())
               .subscribe(
                 data -> {
+                  Timber.tag("LoadSequence").d("Received list of documents");
                   requestCount--;
                   if (data.getDocuments().size() > 0){
-
                     for (Document doc: data.getDocuments() ) {
-//<<<<<<< HEAD
-                      store.add(doc, index, status);
-                      jobCount++;
-////
-////                      Timber.tag(TAG).e("doc: %s", doc.getUid() );
-//////                       Timber.tag(TAG).e("index: %s | status: %s ",index, status );
-////
-////                      if ( isExist(doc) ){
-////
-////                        if ( !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) ){
-////                          Timber.tag(TAG).e("isUpdate" );
-////                          jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), index, status, false) );
-////                        }
-////
-////                      } else {
-////                        Timber.tag(TAG).e("isCreate" );
-////                        jobCount++;
-////                        jobManager.addJobInBackground( new CreateDocumentsJob(doc.getUid(), index, status, false) );
-////                      }
-////                    }
-////                    if ( !settings.isFirstRun() ) {
-////                      Timber.tag(TAG).e("isInvalidate" );
-////                      jobManager.addJobInBackground(new InvalidateDocumentsJob(data.getDocuments(), index, status));
-//=======
-//
-//                      // Timber.tag(TAG).e("index: %s | status: %s ",index, status );
-//                      // Timber.tag(TAG).e("exist: %s | md5: %s", isExist(doc), !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) );
-//
-//                      if ( isExist(doc) ){
-//
-//                        Timber.tag(TAG).e("isExist %s", finalShared );
-//
-//                        if ( !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) ){
-//                          Timber.tag(TAG).e("isUpdate" );
-//                          jobCount++;
-//                          jobManager.addJobInBackground( new UpdateDocumentJob( doc.getUid() ) );
-//                        }
-//
-//                      } else {
-//                        Timber.tag(TAG).e("isCreate" );
-//                        jobCount++;
-//                        jobManager.addJobInBackground( new CreateDocumentsJob(doc.getUid(), index, status, finalShared) );
-//                      }
-//                    }
-//
-//                    if ( !settings.isFirstRun() ) {
-//                      Timber.tag(TAG).e("isInvalidate" );
-//                      jobManager.addJobInBackground(new InvalidateDocumentsJob(data.getDocuments(), index, status));
-//>>>>>>> ncore/13433_Mapper
+                      // Timber.tag(TAG).e("index: %s | status: %s ",index, status );
+                      // Timber.tag(TAG).e("exist: %s | md5: %s", isExist(doc), !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) );
+                      if ( isExist(doc) ){
+                        Timber.tag(TAG).e("isExist %s", false );
+                        if ( !isDocumentMd5Changed(doc.getUid(), doc.getMd5()) ){
+                          Timber.tag(TAG).e("isUpdate" );
+                          jobCount++;
+                          jobManager.addJobInBackground( new UpdateDocumentJob( doc.getUid() ) );
+                        }
+                      } else {
+                        Timber.tag(TAG).e("isCreate" );
+                        jobCount++;
+                        jobManager.addJobInBackground( new CreateDocumentsJob(doc.getUid(), index, status, false) );
+                      }
+                    }
+                    if ( !settings.isFirstRun() ) {
+                      Timber.tag(TAG).e("isInvalidate" );
+                      jobManager.addJobInBackground(new InvalidateDocumentsJob(data.getDocuments(), index, status));
                     }
                   }
                   updatePrefJobCount();
@@ -624,38 +607,28 @@ public class DataLoaderManager {
         }
       }
 
-      for (String code: sp ) {
-        requestCount++;
 
+      for (String code : sp) {
         subscription.add(
           docService
-//            .getDocuments(settings.getLogin(), settings.getToken(), code, shared ? "group" : null , 500, 0)
-            .getDocuments(settings.getLogin(), settings.getToken(), code, null , 500, 0)
-            .subscribeOn(Schedulers.newThread())
-//            .observeOn(AndroidSchedulers.mainThread())
+            .getDocuments(settings.getLogin(), settings.getToken(), code, null, 500, 0)
+            .subscribeOn(Schedulers.computation())
+            .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
               data -> {
-
+                Timber.tag("LoadSequence").d("Received list of projects");
                 requestCount--;
-                if (data.getDocuments().size() > 0){
-                  for (Document doc: data.getDocuments() ) {
-//<<<<<<< HEAD
-                    store.add(doc, null, code);
-                    jobCount++;
-//                    jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), code, false) );
-//=======
-//                    if ( isExist(doc) ) {
-//
-//                      if ( !isDocumentMd5Changed( doc.getUid(), doc.getMd5() ) ) {
-//                        jobCount++;
-//                        jobManager.addJobInBackground( new UpdateDocumentJob( doc.getUid() ) );
-//                      }
-//
-//                    } else {
-//                      jobCount++;
-//                      jobManager.addJobInBackground( new CreateProjectsJob(doc.getUid(), code, finalShared1) );
-//                    }
-//>>>>>>> ncore/13433_Mapper
+                if (data.getDocuments().size() > 0) {
+                  for (Document doc : data.getDocuments()) {
+                    if (isExist(doc)) {
+                      if (!isDocumentMd5Changed(doc.getUid(), doc.getMd5())) {
+                        jobCount++;
+                        jobManager.addJobInBackground(new UpdateDocumentJob(doc.getUid()));
+                      }
+                    } else {
+                      jobCount++;
+                      jobManager.addJobInBackground(new CreateProjectsJob(doc.getUid(), code, false));
+                    }
                   }
                 }
                 updatePrefJobCount();
@@ -667,18 +640,16 @@ public class DataLoaderManager {
               })
         );
       }
-
-
-
     }
   }
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13145
   // Передача количества документов в экран загрузки
   private void updatePrefJobCount() {
-    if (0 == requestCount) {
+    if (0 == requestCount && !isDocumentCountSent) {
       // Received responses on all requests, now jobCount contains total initial job count value.
       // Update counter in preferences with this value.
+      isDocumentCountSent = true;
       settings.addJobCount(jobCount);
       EventBus.getDefault().post( new StepperDocumentCountReadyEvent() );
     }
@@ -766,6 +737,7 @@ public class DataLoaderManager {
           .observeOn( AndroidSchedulers.mainThread() )
           .subscribe(
             data -> {
+              Timber.tag("LoadSequence").d("Received list of favorites");
               if ( data.getDocuments().size() > 0 ) {
                 Timber.tag("FAVORITES").e("DOCUMENTS COUNT: %s", data.getDocuments().size() );
                 for (Document doc : data.getDocuments()) {

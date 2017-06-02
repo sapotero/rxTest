@@ -25,6 +25,7 @@ public class PerformerMapper extends AbstractMapper<Performer, RPerformerEntity>
   public RPerformerEntity toEntity(Performer model) {
     RPerformerEntity entity = new RPerformerEntity();
 
+    entity.setUid(model.getId());
     entity.setNumber(model.getNumber());
     entity.setPerformerId(model.getPerformerId());
     entity.setPerformerType(model.getPerformerType());
@@ -62,6 +63,7 @@ public class PerformerMapper extends AbstractMapper<Performer, RPerformerEntity>
   }
 
   private void setBaseFields(Performer model, RPerformerEntity entity) {
+    model.setId( entity.getUid() );
     model.setPerformerId( entity.getPerformerId() );
     model.setIsOriginal( entity.isIsOriginal() );
     model.setIsResponsible( entity.isIsResponsible() );
@@ -88,6 +90,7 @@ public class PerformerMapper extends AbstractMapper<Performer, RPerformerEntity>
         break;
     }
 
+    destination.setIPerformerUid( source.getIPerformerUid() );
     destination.setIPerformerNumber( source.getIPerformerNumber() );
     destination.setIPerformerId( source.getIPerformerId() );
     destination.setIPerformerType( source.getIPerformerType() );

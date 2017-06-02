@@ -6,6 +6,10 @@ import com.google.gson.annotations.SerializedName;
 
 public class Performer implements IPerformer {
 
+    @SerializedName("_id")
+    @Expose
+    private String id;
+
     @SerializedName("number")
     @Expose
     private Integer number;
@@ -42,6 +46,14 @@ public class Performer implements IPerformer {
     @SerializedName("is_organisation")
     @Expose
     private Boolean isOrganisation = false;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public Boolean getOriginal() {
         return isOriginal;
@@ -224,6 +236,16 @@ public class Performer implements IPerformer {
 
     public void setPerformerGender(String performerGender) {
         this.performerGender = performerGender;
+    }
+
+    @Override
+    public String getIPerformerUid() {
+        return getId();
+    }
+
+    @Override
+    public void setIPerformerUid(String uid) {
+        setId(uid);
     }
 
     @Override
