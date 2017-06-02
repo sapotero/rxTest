@@ -12,9 +12,7 @@ import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -32,21 +30,17 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.models.RFolderEntity;
 import sapotero.rxtest.events.auth.AuthDcCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthDcCheckSuccessEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckSuccessEvent;
 import sapotero.rxtest.events.stepper.load.StepperDocumentCountReadyEvent;
 import sapotero.rxtest.jobs.bus.CreateAssistantJob;
-import sapotero.rxtest.jobs.bus.CreateFavoriteDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateFavoriteUsersJob;
 import sapotero.rxtest.jobs.bus.CreateFoldersJob;
 import sapotero.rxtest.jobs.bus.CreatePrimaryConsiderationJob;
-import sapotero.rxtest.jobs.bus.CreateProcessedDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateTemplatesJob;
 import sapotero.rxtest.jobs.bus.CreateUrgencyJob;
-import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.retrofit.Api.AuthService;
 import sapotero.rxtest.retrofit.DocumentsService;
 import sapotero.rxtest.retrofit.models.AuthSignToken;
@@ -701,92 +695,92 @@ public class DataLoaderManager {
   }
 
   public void updateFavorites() {
-    Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
-    DocumentsService docService = retrofit.create(DocumentsService.class);
-
-    RFolderEntity favorites_folder = dataStore
-            .select(RFolderEntity.class)
-            .where(RFolderEntity.TYPE.eq("favorites"))
-            .and(RFolderEntity.USER.eq( settings.getLogin() ))
-            .get().firstOrNull();
-
-    if ( favorites_folder != null ) {
-      Timber.tag(TAG).e("FAVORITES EXIST!");
-
-      jobCountFavorites = 0;
-
-      subscription.add(
-        docService.getByFolders(settings.getLogin(), settings.getToken(), null, 500, 0, favorites_folder.getUid(), null)
-          .subscribeOn( Schedulers.io() )
-          .observeOn( AndroidSchedulers.mainThread() )
-          .subscribe(
-            data -> {
-              if ( data.getDocuments().size() > 0 ) {
-                Timber.tag("FAVORITES").e("DOCUMENTS COUNT: %s", data.getDocuments().size() );
-                for (Document doc : data.getDocuments()) {
-                  if ( isExist(doc) ) {
-                    if ( !isDocumentMd5Changed( doc.getUid(), doc.getMd5() ) ) {
-                      jobCountFavorites++;
-                      jobManager.addJobInBackground(new UpdateDocumentJob( doc.getUid() ) );
-                    }
-                  } else {
-                    jobCountFavorites++;
-                    jobManager.addJobInBackground( new CreateFavoriteDocumentsJob( doc.getUid(), favorites_folder.getUid() ) );
-                  }
-                }
-              }
-              settings.addJobCount(jobCountFavorites);
-            }, error -> {
-              Timber.tag(TAG).e(error);
-            }
-          )
-      );
-    }
+//    Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
+//    DocumentsService docService = retrofit.create(DocumentsService.class);
+//
+//    RFolderEntity favorites_folder = dataStore
+//            .select(RFolderEntity.class)
+//            .where(RFolderEntity.TYPE.eq("favorites"))
+//            .and(RFolderEntity.USER.eq( settings.getLogin() ))
+//            .get().firstOrNull();
+//
+//    if ( favorites_folder != null ) {
+//      Timber.tag(TAG).e("FAVORITES EXIST!");
+//
+//      jobCountFavorites = 0;
+//
+//      subscription.add(
+//        docService.getByFolders(settings.getLogin(), settings.getToken(), null, 500, 0, favorites_folder.getUid(), null)
+//          .subscribeOn( Schedulers.io() )
+//          .observeOn( AndroidSchedulers.mainThread() )
+//          .subscribe(
+//            data -> {
+//              if ( data.getDocuments().size() > 0 ) {
+//                Timber.tag("FAVORITES").e("DOCUMENTS COUNT: %s", data.getDocuments().size() );
+//                for (Document doc : data.getDocuments()) {
+//                  if ( isExist(doc) ) {
+//                    if ( !isDocumentMd5Changed( doc.getUid(), doc.getMd5() ) ) {
+//                      jobCountFavorites++;
+//                      jobManager.addJobInBackground(new UpdateDocumentJob( doc.getUid() ) );
+//                    }
+//                  } else {
+//                    jobCountFavorites++;
+//                    jobManager.addJobInBackground( new CreateFavoriteDocumentsJob( doc.getUid(), favorites_folder.getUid() ) );
+//                  }
+//                }
+//              }
+//              settings.addJobCount(jobCountFavorites);
+//            }, error -> {
+//              Timber.tag(TAG).e(error);
+//            }
+//          )
+//      );
+//    }
   }
 
   public void updateProcessed() {
-    Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
-    DocumentsService docService = retrofit.create(DocumentsService.class);
-
-    RFolderEntity processed_folder = dataStore
-      .select(RFolderEntity.class)
-      .where(RFolderEntity.TYPE.eq("processed"))
-      .and(RFolderEntity.USER.eq( settings.getLogin() ))
-      .get().firstOrNull();
-
-    if ( processed_folder != null ) {
-
-      dateFormat = new SimpleDateFormat("dd.MM.yyyy", new Locale("RU"));
-      Calendar cal = Calendar.getInstance();
-      cal.add(Calendar.HOUR, -20*24);
-      String date = dateFormat.format(cal.getTime());
-
-      Timber.tag(TAG).e("PROCESSED EXIST! %s", date);
-
-      subscription.add(
-        docService.getByFolders(settings.getLogin(), settings.getToken(), null, 500, 0, processed_folder.getUid(), date)
-          .subscribeOn( Schedulers.io() )
-          .observeOn( AndroidSchedulers.mainThread() )
-          .subscribe(
-            data -> {
-              if ( data.getDocuments().size() > 0 ) {
-                Timber.tag("PROCESSED").e("DOCUMENTS COUNT: %s", data.getDocuments().size() );
-                for (Document doc : data.getDocuments()) {
-                  if ( isExist(doc) ) {
-                    if ( !isDocumentMd5Changed( doc.getUid(), doc.getMd5() ) ) {
-                      jobManager.addJobInBackground( new UpdateDocumentJob( doc.getUid() ) );
-                    }
-                  } else {
-                    jobManager.addJobInBackground( new CreateProcessedDocumentsJob( doc.getUid(), processed_folder.getUid() ) );
-                  }
-                }
-              }
-            }, error -> {
-              Timber.tag(TAG).e(error);
-            }
-          )
-      );
-    }
+//    Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
+//    DocumentsService docService = retrofit.create(DocumentsService.class);
+//
+//    RFolderEntity processed_folder = dataStore
+//      .select(RFolderEntity.class)
+//      .where(RFolderEntity.TYPE.eq("processed"))
+//      .and(RFolderEntity.USER.eq( settings.getLogin() ))
+//      .get().firstOrNull();
+//
+//    if ( processed_folder != null ) {
+//
+//      dateFormat = new SimpleDateFormat("dd.MM.yyyy", new Locale("RU"));
+//      Calendar cal = Calendar.getInstance();
+//      cal.add(Calendar.HOUR, -20*24);
+//      String date = dateFormat.format(cal.getTime());
+//
+//      Timber.tag(TAG).e("PROCESSED EXIST! %s", date);
+//
+//      subscription.add(
+//        docService.getByFolders(settings.getLogin(), settings.getToken(), null, 500, 0, processed_folder.getUid(), date)
+//          .subscribeOn( Schedulers.io() )
+//          .observeOn( AndroidSchedulers.mainThread() )
+//          .subscribe(
+//            data -> {
+//              if ( data.getDocuments().size() > 0 ) {
+//                Timber.tag("PROCESSED").e("DOCUMENTS COUNT: %s", data.getDocuments().size() );
+//                for (Document doc : data.getDocuments()) {
+//                  if ( isExist(doc) ) {
+//                    if ( !isDocumentMd5Changed( doc.getUid(), doc.getMd5() ) ) {
+//                      jobManager.addJobInBackground( new UpdateDocumentJob( doc.getUid() ) );
+//                    }
+//                  } else {
+//                    jobManager.addJobInBackground( new CreateProcessedDocumentsJob( doc.getUid(), processed_folder.getUid() ) );
+//                  }
+//                }
+//              }
+//            }, error -> {
+//              Timber.tag(TAG).e(error);
+//            }
+//          )
+//      );
+//    }
   }
 
 //  @Subscribe(threadMode = ThreadMode.BACKGROUND)

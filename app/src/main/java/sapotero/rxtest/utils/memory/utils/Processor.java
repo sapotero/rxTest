@@ -34,7 +34,6 @@ public class Processor {
 
   enum Source {
     EMPTY,
-    JSON,
     DB,
     INTERSECT;
   }
@@ -44,8 +43,6 @@ public class Processor {
 
   private String filter;
   private String index;
-  private Observable<List<String>> api;
-  private Document document_from_api;
   private RDocumentEntity document_from_db;
   private HashMap<String, Document> documents;
   private Source source = Source.EMPTY;
@@ -73,14 +70,6 @@ public class Processor {
     return this;
   }
 
-  public Processor withDocument(Document document) {
-    if (document != null) {
-      this.document_from_api = document;
-      this.source = Source.JSON;
-    }
-    return this;
-  }
-
   public Processor withDocument(RDocumentEntity document) {
     if (document != null) {
       this.document_from_db = document;
@@ -102,14 +91,6 @@ public class Processor {
     Transaction transaction = new Transaction();
 
     switch (source){
-      case JSON:
-        validate(document_from_api);
-
-        transaction.from(document_from_api)
-          .setState(InMemoryState.LOADING);
-
-        commit( transaction );
-        break;
       case DB:
         transaction
           .from(InMemoryDocumentMapper.fromDB(document_from_db))
@@ -140,20 +121,8 @@ public class Processor {
     sub.onNext( transaction.commit() );
   }
 
-  private void update(String uid, String filter, String index, Boolean processed){
-//    Transaction Transaction = startTransactionFor(uid);
-//    InMemoryDocument new_doc = Transaction
-//      .withFilter(filter)
-//      .withFilter(index)
-//      .setField(FieldType.PROCESSED, processed)
-//      .setState(InMemoryState.READY)
-//      .commit();
-
-  }
-
-
   private void validate(Document document){
-    Timber.tag(TAG).e("-> %s / %s@%5.10s  ", document.getUid(), filter, index );
+    Timber.tag(TAG).e("->      : %s / %s@%5.10s  ", document.getUid(), filter, index );
 
     HashMap<String, InMemoryDocument> documents = store.getDocuments();
 
@@ -161,10 +130,10 @@ public class Processor {
       InMemoryDocument doc = documents.get(document.getUid());
 
       Timber.tag(TAG).e("filters : %s | %s", doc.getFilter(), filter);
-      Timber.tag(TAG).e("md5     : %s | %s", doc.getMd5(), document.getMd5());
 
       // изменилось MD5
       if ( Filter.isChanged( doc.getMd5(), document.getMd5() ) ){
+        Timber.tag(TAG).e("md5     : %s | %s", doc.getMd5(), document.getMd5());
         updateJob( doc.getUid() );
       }
 
@@ -173,22 +142,6 @@ public class Processor {
       createJob(document.getUid());
     }
 
-  }
-
-  private void updateJob(String uid) {
-    jobManager.addJobInBackground( new UpdateDocumentJob( uid, index, filter ) );
-  }
-
-  private void updateAndSetProcessed(String uid) {
-    jobManager.addJobInBackground( new UpdateDocumentJob( uid, index, filter, true ) );
-  }
-
-  private void createJob(String uid) {
-    if (index != null) {
-      jobManager.addJobInBackground( new CreateDocumentsJob(uid, index, filter, false) );
-    } else {
-      jobManager.addJobInBackground( new CreateProjectsJob(uid, filter, false) );
-    }
   }
 
   private ArrayList<String> intersect(){
@@ -201,6 +154,7 @@ public class Processor {
 
     Observable<List<String>> imd = Observable
       .from( store.getDocuments().values() )
+      .filter(imdFilter::isProcessed)
       .filter(imdFilter::byType)
       .filter(imdFilter::byStatus)
       .map(InMemoryDocument::getUid)
@@ -226,12 +180,8 @@ public class Processor {
           updateAndSetProcessed( uid );
         }
 
-        for (String uid : add) {
-          if (store.getDocuments().containsKey(uid)){
-            updateJob( uid );
-          } else {
-            createJob( uid );
-          }
+        for ( Document doc : documents.values() ) {
+          validate( doc );
         }
 
         return Collections.singletonList("");
@@ -261,6 +211,23 @@ public class Processor {
     }
 
     return conditions;
+  }
+
+
+  private void createJob(String uid) {
+    if (index != null) {
+      jobManager.addJobInBackground( new CreateDocumentsJob(uid, index, filter, false) );
+    } else {
+      jobManager.addJobInBackground( new CreateProjectsJob(uid, filter, false) );
+    }
+  }
+
+  private void updateJob(String uid) {
+    jobManager.addJobInBackground( new UpdateDocumentJob( uid, index, filter ) );
+  }
+
+  private void updateAndSetProcessed(String uid) {
+    jobManager.addJobInBackground( new UpdateDocumentJob( uid, index, filter, true ) );
   }
 
 

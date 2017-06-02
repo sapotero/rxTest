@@ -124,42 +124,48 @@ public class MainService extends Service {
   public void onCreate() {
     super.onCreate();
 
-    if ( EventBus.getDefault().isRegistered(this) ){
-      EventBus.getDefault().unregister(this);
-    }
-    EventBus.getDefault().register(this);
+    Observable.just(true)
+      .subscribeOn(Schedulers.computation())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe( data -> {
 
-    EsdApplication.getManagerComponent().inject(this);
+        if ( EventBus.getDefault().isRegistered(this) ){
+          EventBus.getDefault().unregister(this);
+        }
+        EventBus.getDefault().register(this);
 
-    dataLoaderInterface = new DataLoaderManager(getApplicationContext());
+        EsdApplication.getManagerComponent().inject(this);
 
-    Provider[] providers = Security.getProviders();
+        dataLoaderInterface = new DataLoaderManager(getApplicationContext());
+
+        Provider[] providers = Security.getProviders();
 
 
 
-    // 1. Инициализация RxSharedPreferences
+        // 1. Инициализация RxSharedPreferences
 //        initialize();
 
-    // 2. Инициализация провайдеров: CSP и java-провайдеров (Обязательная часть).
-    if (!initCSPProviders()) {
-      Log.i(Constants.APP_LOGGER_TAG, "Couldn't initialize CSP.");
-    }
-    initJavaProviders();
+        // 2. Инициализация провайдеров: CSP и java-провайдеров (Обязательная часть).
+        if (!initCSPProviders()) {
+          Log.i(Constants.APP_LOGGER_TAG, "Couldn't initialize CSP.");
+        }
+        initJavaProviders();
 
-    // 4. Инициируем объект для управления выбором типа контейнера (Настройки).
-    KeyStoreType.init(this);
+        // 4. Инициируем объект для управления выбором типа контейнера (Настройки).
+        KeyStoreType.init(this);
 
-    // 5. Инициируем объект для управления выбором типа провайдера (Настройки).
-    ProviderType.init(this);
+        // 5. Инициируем объект для управления выбором типа провайдера (Настройки).
+        ProviderType.init(this);
 
 
 
-    aliases( KeyStoreType.currentType(), ProviderType.currentProviderType() );
+        aliases( KeyStoreType.currentType(), ProviderType.currentProviderType() );
 
-    loadParams();
+        loadParams();
 
-    initScheduller();
+        initScheduller();
 
+      }, Timber::e);
   }
 
   private void loadParams() {

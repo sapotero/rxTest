@@ -49,10 +49,6 @@ public class MemoryStore implements Processable{
 
     startSub();
 
-    // сразу захерачить стор
-    // хранилку для documentTypeItem
-    // чтобы всё там счилось по типам документов
-    // и чтобы он туда ходил, а не ломился и не считал всё каждый раз
   }
 
   private void startSub() {
@@ -96,6 +92,10 @@ public class MemoryStore implements Processable{
 
   }
 
+  public void load(){
+    documents.clear();
+    loadFromDB();
+  };
 
   private void loadFromDB() {
     dataStore
@@ -129,54 +129,12 @@ public class MemoryStore implements Processable{
     return pub;
   }
 
-
-
-//  @Override
-//  public void process(Observable<List<String>> api, String filter, String index) {
-//    new Processor(sub)
-//      .withFilter(filter)
-//      .withIndex(index)
-//      .withApi(api)
-//      .execute();
-//  }
-//
-//  @Override
-//  public void process(Observable<List<String>> api, String filter) {
-//    new Processor(sub)
-//      .withFilter(filter)
-//      .withApi(api)
-//      .execute();
-//  }
-
-  @Override
-  public void process(Document doc) {
-    new Processor(sub)
-      .withDocument(doc)
-      .execute();
-  }
-
-  @Override
-  public void process(Document doc, String filter, String index) {
-    new Processor(sub)
-      .withDocument(doc)
-      .withFilter(filter)
-      .withIndex(index)
-      .execute();
-  }
-
   @Override
   public void process(HashMap<String, Document> docs, String filter, String index) {
     new Processor(sub)
       .withDocuments(docs)
       .withFilter(filter)
       .withIndex(index)
-      .execute();
-  }
-
-  @Override
-  public void process(RDocumentEntity doc) {
-    new Processor(sub)
-      .withDocument(doc)
       .execute();
   }
 

@@ -32,6 +32,9 @@ public class CreateDocumentsJob extends DocumentJob {
     this.journal = getJournalName(journal);
     this.status = status;
     this.shared = shared;
+
+
+    Timber.tag(TAG).e( "new %s - %s / %s", uid, journal, status );
   }
 
   private String getJournalName(String journal) {
