@@ -21,7 +21,6 @@ public class Transaction {
     this.document = new InMemoryDocument();
   }
 
-
   public Transaction setField(FieldType type, Boolean value) {
     switch (type){
       case PROCESSED:

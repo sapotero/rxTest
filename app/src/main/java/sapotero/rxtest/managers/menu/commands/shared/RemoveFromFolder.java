@@ -17,7 +17,6 @@ import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
-import sapotero.rxtest.utils.memory.fields.FieldType;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import sapotero.rxtest.utils.memory.utils.Transaction;
 import timber.log.Timber;
@@ -64,11 +63,12 @@ public class RemoveFromFolder extends AbstractCommand {
       .get().value();
 
 
-    Transaction Transaction = store.startTransactionFor(document_id);
-    Transaction
-      .removeLabel(LabelType.FAVORITES)
+    Transaction transaction = new Transaction();
+    transaction
+      .from( store.getDocuments().get(document_id) )
       .setLabel(LabelType.SYNC)
-      .commit();
+      .removeLabel(LabelType.FAVORITES);
+    store.process( transaction );
 
     queueManager.add(this);
   }
@@ -124,12 +124,12 @@ public class RemoveFromFolder extends AbstractCommand {
 
           queueManager.setExecutedRemote(this);
 
-          Transaction Transaction = store.startTransactionFor(document_id);
-          Transaction
+          Transaction transaction = new Transaction();
+          transaction
+            .from( store.getDocuments().get(document_id) )
             .removeLabel(LabelType.SYNC)
-            .setField(FieldType.PROCESSED, true)
-            .setField(FieldType.MD5, "")
-            .commit();
+            .removeLabel(LabelType.FAVORITES);
+          store.process( transaction );
 
           EventBus.getDefault().post( new RecalculateMenuEvent() );
         },
@@ -138,11 +138,12 @@ public class RemoveFromFolder extends AbstractCommand {
             callback.onCommandExecuteError(getType());
           }
 
-          Transaction Transaction = store.startTransactionFor(document_id);
-          Transaction
+          Transaction transaction = new Transaction();
+          transaction
+            .from( store.getDocuments().get(document_id) )
             .removeLabel(LabelType.SYNC)
-            .setLabel(LabelType.FAVORITES)
-            .commit();
+            .setLabel(LabelType.FAVORITES);
+          store.process( transaction );
 
 
         }

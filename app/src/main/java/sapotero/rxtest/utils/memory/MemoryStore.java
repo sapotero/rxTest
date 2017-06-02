@@ -139,6 +139,13 @@ public class MemoryStore implements Processable{
   }
 
   @Override
+  public void process(Transaction transaction) {
+    new Processor(sub)
+      .withTransaction(transaction)
+      .execute();
+  }
+
+  @Override
   public void process(RDocumentEntity doc, String filter, String index) {
     Timber.tag(TAG).e("process: %s %s %s", doc.getUid(), filter, index);
 

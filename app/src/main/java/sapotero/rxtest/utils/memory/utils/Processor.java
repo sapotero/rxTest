@@ -31,11 +31,12 @@ public class Processor {
   @Inject MemoryStore store;
   @Inject JobManager jobManager;
 
-
   enum Source {
     EMPTY,
     DB,
+    TRANSACTION,
     INTERSECT;
+
   }
 
   private final String TAG = this.getClass().getSimpleName();
@@ -43,8 +44,10 @@ public class Processor {
 
   private String filter;
   private String index;
+
   private RDocumentEntity document_from_db;
   private HashMap<String, Document> documents;
+  private Transaction transaction;
   private Source source = Source.EMPTY;
 
   public Processor(PublishSubject<InMemoryDocument> subscribeSubject) {
@@ -78,13 +81,19 @@ public class Processor {
     return this;
   }
 
+  public Processor withTransaction(Transaction transaction) {
+    if (transaction != null) {
+      this.transaction = transaction;
+      this.source = Source.TRANSACTION;
+    }
+    return this;
+  }
 
   public Processor withDocuments(HashMap<String, Document> docs) {
     this.documents = docs;
     this.source = Source.INTERSECT;
     return this;
   }
-
 
   public void execute() {
 
@@ -97,6 +106,9 @@ public class Processor {
           .setState(InMemoryState.READY);
 
         commit( transaction );
+        break;
+      case TRANSACTION:
+        commit( this.transaction );
         break;
       case INTERSECT:
         intersect();

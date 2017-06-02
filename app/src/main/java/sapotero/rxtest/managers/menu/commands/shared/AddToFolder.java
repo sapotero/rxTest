@@ -52,6 +52,14 @@ public class AddToFolder extends AbstractCommand {
 
   @Override
   public void execute() {
+
+    Transaction transaction = new Transaction();
+    transaction
+      .from( store.getDocuments().get(document_id) )
+      .setLabel(LabelType.SYNC)
+      .setLabel(LabelType.FAVORITES);
+    store.process( transaction );
+
     Timber.tag(TAG).i("execute for %s - %s",getType(),document_id);
     queueManager.add(this);
   }
@@ -71,13 +79,6 @@ public class AddToFolder extends AbstractCommand {
     Timber.tag(TAG).w( "updated: %s", count );
 
     queueManager.setExecutedLocal(this);
-
-    Transaction Transaction = store.startTransactionFor(document_id);
-    Transaction
-      .setLabel(LabelType.SYNC)
-      .setLabel(LabelType.FAVORITES)
-      .commit();
-
 
     if ( callback != null ){
       callback.onCommandExecuteSuccess( getType() );
@@ -119,21 +120,25 @@ public class AddToFolder extends AbstractCommand {
 
           queueManager.setExecutedRemote(this);
 
-          Transaction Transaction = store.startTransactionFor(document_id);
-          Transaction
+          Transaction transaction = new Transaction();
+          transaction
+            .from( store.getDocuments().get(document_id) )
             .removeLabel(LabelType.SYNC)
-            .commit();
+            .setLabel(LabelType.FAVORITES);
+          store.process( transaction );
+
         },
         error -> {
           if (callback != null){
             callback.onCommandExecuteError(getType());
           }
 
-          Transaction Transaction = store.startTransactionFor(document_id);
-          Transaction
-            .removeLabel(LabelType.SYNC )
-            .removeLabel(LabelType.FAVORITES)
-            .commit();
+          Transaction transaction = new Transaction();
+          transaction
+            .from( store.getDocuments().get(document_id) )
+            .removeLabel(LabelType.SYNC)
+            .removeLabel(LabelType.FAVORITES);
+          store.process( transaction );
 
 
         }
