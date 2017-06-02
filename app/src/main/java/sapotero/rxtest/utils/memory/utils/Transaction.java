@@ -1,8 +1,10 @@
 package sapotero.rxtest.utils.memory.utils;
 
+import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.memory.fields.FieldType;
 import sapotero.rxtest.utils.memory.fields.InMemoryState;
 import sapotero.rxtest.utils.memory.fields.LabelType;
+import sapotero.rxtest.utils.memory.mappers.InMemoryDocumentMapper;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 
 public class Transaction {
@@ -86,11 +88,6 @@ public class Transaction {
     return this;
   }
 
-  public Transaction from(InMemoryDocument document) {
-    this.document = document;
-    return this;
-  }
-
   public Transaction setState(InMemoryState state) {
     switch ( state ){
       case READY:
@@ -103,8 +100,18 @@ public class Transaction {
     return this;
   }
 
+  public Transaction from(InMemoryDocument document) {
+    this.document = document;
+    return this;
+  }
+
+  public void from(Document json) {
+    if (json != null) {
+      this.document = InMemoryDocumentMapper.fromJson( json );
+    }
+  }
+
   public InMemoryDocument commit(){
-//    publish.onNext(document);
     return document;
   }
 }

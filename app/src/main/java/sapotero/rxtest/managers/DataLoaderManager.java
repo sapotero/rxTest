@@ -552,7 +552,7 @@ public class DataLoaderManager {
                   if (data.getDocuments().size() > 0){
 
                     for (Document doc: data.getDocuments() ) {
-                      store.add(doc, index, status);
+                      store.process(doc, index, status);
                       jobCount++;
                     }
 
@@ -591,7 +591,7 @@ public class DataLoaderManager {
                 if (data.getDocuments().size() > 0){
                   for (Document doc: data.getDocuments() ) {
 //                    Timber.tag(TAG).i("project -> %s | %s", doc.getUid(), code);
-                    store.add(doc, null, code);
+                    store.process(doc, null, code);
                     jobCount++;
 
                   }

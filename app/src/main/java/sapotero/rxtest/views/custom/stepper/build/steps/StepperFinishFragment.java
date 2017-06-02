@@ -27,7 +27,7 @@ public class StepperFinishFragment extends Fragment implements Step {
     View view = inflater.inflate(R.layout.stepper_final_view, container, false);
 
     EsdApplication.getManagerComponent().inject(this);
-    store.invalidate();
+//    store.invalidate();
 
     return view;
   }
