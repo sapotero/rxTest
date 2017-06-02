@@ -15,4 +15,6 @@ public interface Processable {
   void process( RDocumentEntity doc, String filter, String index );
   void process( Document doc );
   void process( Document doc, String filter, String index  );
+
+  void process( List<Document> docs, String filter, String index  );
 }

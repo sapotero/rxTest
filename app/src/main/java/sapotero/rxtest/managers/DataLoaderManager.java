@@ -562,6 +562,7 @@ public class DataLoaderManager {
                       .toList();
 
                     store.process( api, status, index );
+                    store.process( data.getDocuments(), status, index );
                   }
 
 

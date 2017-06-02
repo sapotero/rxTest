@@ -105,10 +105,11 @@ public class Transaction {
     return this;
   }
 
-  public void from(Document json) {
+  public Transaction from(Document json) {
     if (json != null) {
       this.document = InMemoryDocumentMapper.fromJson( json );
     }
+    return this;
   }
 
   public InMemoryDocument commit(){

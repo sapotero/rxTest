@@ -22,6 +22,7 @@ import sapotero.rxtest.jobs.bus.CreateProjectsJob;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.memory.MemoryStore;
+import sapotero.rxtest.utils.memory.fields.InMemoryState;
 import sapotero.rxtest.utils.memory.mappers.InMemoryDocumentMapper;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
@@ -100,11 +101,17 @@ public class Processor {
     switch (source){
       case JSON:
         validate(document_from_api);
-        transaction.from(document_from_api);
+
+        transaction.from(document_from_api)
+          .setState(InMemoryState.LOADING);
+
         commit( transaction );
         break;
       case DB:
-        transaction.from(InMemoryDocumentMapper.fromDB(document_from_db));
+        transaction
+          .from(InMemoryDocumentMapper.fromDB(document_from_db))
+          .setState(InMemoryState.READY);
+
         commit( transaction );
         break;
       case INTERSECT:
