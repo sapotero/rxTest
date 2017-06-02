@@ -14,7 +14,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -551,18 +550,22 @@ public class DataLoaderManager {
                   requestCount--;
                   if (data.getDocuments().size() > 0){
 
+//                    for (Document doc: data.getDocuments() ) {
+//                      store.process(doc, index, status);
+//                      jobCount++;
+//                    }
+
+//                    Observable<List<String>> api = Observable
+//                      .from(data.getDocuments())
+//                      .map(Document::getUid)
+//                      .toList();
+
+//                    store.process( api, status, index );
+                    HashMap<String, Document> doc_hash = new HashMap<String, Document>();
                     for (Document doc: data.getDocuments() ) {
-                      store.process(doc, index, status);
-                      jobCount++;
+                      doc_hash.put( doc.getUid(), doc );
                     }
-
-                    Observable<List<String>> api = Observable
-                      .from(data.getDocuments())
-                      .map(Document::getUid)
-                      .toList();
-
-                    store.process( api, status, index );
-                    store.process( data.getDocuments(), status, index );
+                    store.process( doc_hash, status, index );
                   }
 
 
@@ -590,19 +593,25 @@ public class DataLoaderManager {
 
                 requestCount--;
                 if (data.getDocuments().size() > 0){
+//                  for (Document doc: data.getDocuments() ) {
+////                    Timber.tag(TAG).i("project -> %s | %s", doc.getUid(), code);
+//                    store.process(doc, null, code);
+//                    jobCount++;
+//
+//                  }
+//
+//                  Observable<List<String>> api = Observable
+//                    .from(data.getDocuments())
+//                    .map(Document::getUid)
+//                    .toList();
+
+//                  store.process( api, code );
+
+                  HashMap<String, Document> doc_hash = new HashMap<String, Document>();
                   for (Document doc: data.getDocuments() ) {
-//                    Timber.tag(TAG).i("project -> %s | %s", doc.getUid(), code);
-                    store.process(doc, null, code);
-                    jobCount++;
-
+                    doc_hash.put( doc.getUid(), doc );
                   }
-
-                  Observable<List<String>> api = Observable
-                    .from(data.getDocuments())
-                    .map(Document::getUid)
-                    .toList();
-
-                  store.process( api, code );
+                  store.process( doc_hash, code, null );
                 }
                 updatePrefJobCount();
               },

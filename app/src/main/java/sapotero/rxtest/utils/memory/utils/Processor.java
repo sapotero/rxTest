@@ -11,7 +11,6 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 import rx.Observable;
-import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
@@ -32,11 +31,12 @@ public class Processor {
   @Inject MemoryStore store;
   @Inject JobManager jobManager;
 
+
   enum Source {
     EMPTY,
     JSON,
     DB,
-    INTERSECT
+    INTERSECT;
   }
 
   private final String TAG = this.getClass().getSimpleName();
@@ -47,6 +47,7 @@ public class Processor {
   private Observable<List<String>> api;
   private Document document_from_api;
   private RDocumentEntity document_from_db;
+  private HashMap<String, Document> documents;
   private Source source = Source.EMPTY;
 
   public Processor(PublishSubject<InMemoryDocument> subscribeSubject) {
@@ -72,12 +73,6 @@ public class Processor {
     return this;
   }
 
-  public Processor withApi(Observable<List<String>> api) {
-    this.api = api;
-    this.source = Source.INTERSECT;
-    return this;
-  }
-
   public Processor withDocument(Document document) {
     if (document != null) {
       this.document_from_api = document;
@@ -93,6 +88,14 @@ public class Processor {
     }
     return this;
   }
+
+
+  public Processor withDocuments(HashMap<String, Document> docs) {
+    this.documents = docs;
+    this.source = Source.INTERSECT;
+    return this;
+  }
+
 
   public void execute() {
 
@@ -115,7 +118,7 @@ public class Processor {
         commit( transaction );
         break;
       case INTERSECT:
-        intersect(api);
+        intersect();
         break;
       case EMPTY:
         break;
@@ -135,62 +138,6 @@ public class Processor {
 
 
     sub.onNext( transaction.commit() );
-  }
-
-  private ArrayList<String> intersect(Observable<List<String>> api){
-
-    ArrayList<String> uids = new ArrayList<>();
-    ArrayList<ConditionBuilder> conditions = new ArrayList<>();
-
-    if (filter != null) {
-      conditions.add( new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq( filter )  ) );
-    }
-    if (index != null) {
-      conditions.add( new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( index )  ) );
-    }
-
-    Filter imdFilter = new Filter(conditions);
-
-    Observable<List<String>> memory = Observable
-      .from( store.getDocuments().values() )
-      .filter(imdFilter::byType)
-      .filter(imdFilter::byStatus)
-      .map(InMemoryDocument::getUid)
-      .toList();
-
-    Subscription subscribe = Observable
-      .zip(memory, api, (original, selected) -> {
-        Timber.tag(TAG).e("original: %s", original.size());
-        Timber.tag(TAG).e("selected: %s", selected.size());
-
-        List<String> add = new ArrayList<>(selected);
-        add.removeAll(original);
-
-        List<String> remove = new ArrayList<>(original);
-        remove.removeAll(selected);
-
-        Timber.tag(TAG).e("add: %s", add.size());
-        Timber.tag(TAG).e("rem: %s", remove.size());
-
-
-        for (String uid : remove) {
-          update(uid, filter, index, true);
-        }
-
-        return Collections.singletonList("");
-      })
-      .buffer(500, TimeUnit.MILLISECONDS)
-      .subscribeOn(Schedulers.immediate())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(
-        data -> {
-//          EventBus.getDefault().post(new RecalculateMenuEvent());
-        },
-        Timber::e
-      );
-
-
-    return uids;
   }
 
   private void update(String uid, String filter, String index, Boolean processed){
@@ -218,29 +165,103 @@ public class Processor {
 
       // изменилось MD5
       if ( Filter.isChanged( doc.getMd5(), document.getMd5() ) ){
-        updateJob(doc);
+        updateJob( doc.getUid() );
       }
 
     } else {
       Timber.tag(TAG).e("new: %s", document.getUid());
-      createJob(document);
+      createJob(document.getUid());
     }
 
   }
 
-
-  private void updateJob(InMemoryDocument doc) {
-    jobManager.addJobInBackground( new UpdateDocumentJob( doc.getUid(), index, filter ) );
+  private void updateJob(String uid) {
+    jobManager.addJobInBackground( new UpdateDocumentJob( uid, index, filter ) );
   }
 
-  private void createJob(Document document) {
+  private void updateAndSetProcessed(String uid) {
+    jobManager.addJobInBackground( new UpdateDocumentJob( uid, index, filter, true ) );
+  }
+
+  private void createJob(String uid) {
     if (index != null) {
-      jobManager.addJobInBackground( new CreateDocumentsJob(document.getUid(), index, filter, false) );
+      jobManager.addJobInBackground( new CreateDocumentsJob(uid, index, filter, false) );
     } else {
-      jobManager.addJobInBackground( new CreateProjectsJob(document.getUid(), filter, false) );
+      jobManager.addJobInBackground( new CreateProjectsJob(uid, filter, false) );
     }
   }
 
+  private ArrayList<String> intersect(){
+
+    Filter imdFilter = new Filter( conditions() );
+
+    Observable<List<String>> docs = Observable
+      .from(documents.keySet())
+      .toList();
+
+    Observable<List<String>> imd = Observable
+      .from( store.getDocuments().values() )
+      .filter(imdFilter::byType)
+      .filter(imdFilter::byStatus)
+      .map(InMemoryDocument::getUid)
+      .toList();
+
+
+    Observable
+      .zip(imd, docs, (memory, api) -> {
+        Timber.tag(TAG).e("memory: %s", memory.size());
+        Timber.tag(TAG).e("api: %s", api.size());
+
+        List<String> add = new ArrayList<>(api);
+        add.removeAll(memory);
+
+        List<String> remove = new ArrayList<>(memory);
+        remove.removeAll(api);
+
+        Timber.tag(TAG).e("add: %s", add.size());
+        Timber.tag(TAG).e("rem: %s", remove.size());
+
+
+        for (String uid : remove) {
+          updateAndSetProcessed( uid );
+        }
+
+        for (String uid : add) {
+          if (store.getDocuments().containsKey(uid)){
+            updateJob( uid );
+          } else {
+            createJob( uid );
+          }
+        }
+
+        return Collections.singletonList("");
+      })
+      .buffer(200, TimeUnit.MILLISECONDS)
+      .subscribeOn(Schedulers.immediate())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(
+        data -> {
+          Timber.tag(TAG).e("processed");
+        },
+        Timber::e
+      );
+
+
+    return new ArrayList<>();
+  }
+
+  private ArrayList<ConditionBuilder> conditions() {
+    ArrayList<ConditionBuilder> conditions = new ArrayList<>();
+
+    if (filter != null) {
+      conditions.add( new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq( filter )  ) );
+    }
+    if (index != null) {
+      conditions.add( new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( index )  ) );
+    }
+
+    return conditions;
+  }
 
 
 }

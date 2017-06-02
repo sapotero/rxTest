@@ -1,20 +1,19 @@
 package sapotero.rxtest.utils.memory.interfaces;
 
-import java.util.List;
+import java.util.HashMap;
 
-import rx.Observable;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.retrofit.models.documents.Document;
 
 public interface Processable {
 
-  void process( Observable<List<String>> api, String filter, String index );
-  void process( Observable<List<String>> api, String filter );
+//  void process( Observable<List<String>> api, String filter, String index );
+//  void process( Observable<List<String>> api, String filter );
 
   void process( RDocumentEntity doc );
   void process( RDocumentEntity doc, String filter, String index );
   void process( Document doc );
   void process( Document doc, String filter, String index  );
 
-  void process( List<Document> docs, String filter, String index  );
+  void process(HashMap<String, Document> docs, String filter, String index  );
 }

@@ -1,7 +1,6 @@
 package sapotero.rxtest.utils.memory;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -118,7 +117,6 @@ public class MemoryStore implements Processable{
       );
   }
 
-
   public Transaction startTransactionFor(String uid){
     return new Transaction( documents.get(uid) );
   }
@@ -133,22 +131,22 @@ public class MemoryStore implements Processable{
 
 
 
-  @Override
-  public void process(Observable<List<String>> api, String filter, String index) {
-    new Processor(sub)
-      .withFilter(filter)
-      .withIndex(index)
-      .withApi(api)
-      .execute();
-  }
-
-  @Override
-  public void process(Observable<List<String>> api, String filter) {
-    new Processor(sub)
-      .withFilter(filter)
-      .withApi(api)
-      .execute();
-  }
+//  @Override
+//  public void process(Observable<List<String>> api, String filter, String index) {
+//    new Processor(sub)
+//      .withFilter(filter)
+//      .withIndex(index)
+//      .withApi(api)
+//      .execute();
+//  }
+//
+//  @Override
+//  public void process(Observable<List<String>> api, String filter) {
+//    new Processor(sub)
+//      .withFilter(filter)
+//      .withApi(api)
+//      .execute();
+//  }
 
   @Override
   public void process(Document doc) {
@@ -161,6 +159,15 @@ public class MemoryStore implements Processable{
   public void process(Document doc, String filter, String index) {
     new Processor(sub)
       .withDocument(doc)
+      .withFilter(filter)
+      .withIndex(index)
+      .execute();
+  }
+
+  @Override
+  public void process(HashMap<String, Document> docs, String filter, String index) {
+    new Processor(sub)
+      .withDocuments(docs)
       .withFilter(filter)
       .withIndex(index)
       .execute();

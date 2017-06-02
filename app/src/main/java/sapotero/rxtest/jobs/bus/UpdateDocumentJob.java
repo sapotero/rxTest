@@ -40,7 +40,8 @@ public class UpdateDocumentJob extends DocumentJob {
   private String uid;
   private String index  = null;
   private String filter = null;
-  private Boolean forceUpdate = false;
+  private Boolean forceUpdate    = false;
+  private Boolean forceProcessed = false;
 
   private int oldSignerId;
   private int oldRouteId;
@@ -63,6 +64,18 @@ public class UpdateDocumentJob extends DocumentJob {
     // если создаем с указанием типа журнала и статуса
     // то принудительно обновляем документ
     this.forceUpdate = true;
+  }
+
+  public UpdateDocumentJob(String uid, String index, String filter, boolean forceProcessed) {
+    super( new Params(PRIORITY).requireNetwork().persist() );
+
+    Timber.tag(TAG).e( "create %s - %s / %s", uid, index, filter );
+
+    this.uid = uid;
+    this.index = index;
+    this.filter = filter;
+
+    this.forceProcessed = forceProcessed;
   }
 
   @Override
@@ -107,6 +120,10 @@ public class UpdateDocumentJob extends DocumentJob {
 
       } else {
         Timber.tag(TAG).d("MD5 equal");
+      }
+
+      if (forceProcessed){
+        documentExisting.setProcessed( true );
       }
     }
   }
