@@ -28,9 +28,9 @@ import sapotero.rxtest.db.requery.models.RSignerEntity;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.retrofit.models.documents.Signer;
 import sapotero.rxtest.utils.Settings;
-import sapotero.rxtest.utils.memory.InMemoryDocumentStorage;
+import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
-import sapotero.rxtest.utils.memory.utils.IMDFilter;
+import sapotero.rxtest.utils.memory.utils.Filter;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
 import sapotero.rxtest.views.adapters.models.OrganizationItem;
@@ -45,7 +45,8 @@ public class DBQueryBuilder {
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject Settings settings;
 //  @Inject Validation validation;
-  @Inject InMemoryDocumentStorage store;
+  @Inject
+MemoryStore store;
 
   private final String TAG = this.getClass().getSimpleName();
 
@@ -324,7 +325,7 @@ public class DBQueryBuilder {
 //      findOrganizations(true);
       unsubscribe();
 
-      IMDFilter filter = new IMDFilter(conditions);
+      Filter filter = new Filter(conditions);
 
       Timber.tag(TAG).w("!!!!! byStatus : %s", new Gson().toJson( filter.getStatuses() ) );
       Timber.tag(TAG).w("!!!!! indexes  : %s", new Gson().toJson(  filter.getTypes() ) );
@@ -341,7 +342,7 @@ public class DBQueryBuilder {
           .filter( filter::byType)
           .filter( filter::byStatus)
 
-          .toSortedList(IMDFilter::bySortKey)
+          .toSortedList(Filter::bySortKey)
 
           .subscribeOn(Schedulers.computation())
           .observeOn(AndroidSchedulers.mainThread())

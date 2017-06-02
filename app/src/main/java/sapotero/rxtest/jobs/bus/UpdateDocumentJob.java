@@ -117,7 +117,7 @@ public class UpdateDocumentJob extends DocumentJob {
 
     if (document != null) {
       Timber.tag(TAG).e( "doAfterUpdate %s - %s / %s", uid, index, filter );
-      store.updateFromJob( document, index, filter );
+      store.process( document, index, filter );
     }
 
   }

@@ -33,7 +33,7 @@ import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.utils.NoDocumentsEvent;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.Settings;
-import sapotero.rxtest.utils.memory.InMemoryDocumentStorage;
+import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.views.activities.InfoActivity;
 import sapotero.rxtest.views.activities.MainActivity;
@@ -43,7 +43,8 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
   @Inject Settings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
-  @Inject InMemoryDocumentStorage store;
+  @Inject
+  MemoryStore store;
 
   private List<InMemoryDocument> documents;
   private Context mContext;

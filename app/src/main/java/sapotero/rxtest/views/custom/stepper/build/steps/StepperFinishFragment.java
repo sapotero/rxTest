@@ -12,13 +12,14 @@ import javax.inject.Inject;
 
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.utils.memory.InMemoryDocumentStorage;
+import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.views.custom.stepper.Step;
 import sapotero.rxtest.views.custom.stepper.VerificationError;
 
 public class StepperFinishFragment extends Fragment implements Step {
 
-  @Inject InMemoryDocumentStorage store;
+  @Inject
+  MemoryStore store;
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

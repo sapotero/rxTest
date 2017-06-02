@@ -52,7 +52,6 @@ import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.bus.GetDocumentInfoEvent;
 import sapotero.rxtest.events.service.CheckNetworkEvent;
 import sapotero.rxtest.events.service.CheckNetworkResultEvent;
-import sapotero.rxtest.events.service.UpdateAllDocumentsEvent;
 import sapotero.rxtest.events.utils.RecalculateMenuEvent;
 import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
 import sapotero.rxtest.managers.DataLoaderManager;
@@ -208,7 +207,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       settings.setFirstRun(false);
     }
 
-    EventBus.getDefault().post( new UpdateAllDocumentsEvent());
   }
 
   private void updateToken() {

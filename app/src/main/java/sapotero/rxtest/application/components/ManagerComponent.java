@@ -10,8 +10,8 @@ import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.utils.OperationManagerModule;
 import sapotero.rxtest.managers.toolbar.ToolbarManager;
 import sapotero.rxtest.services.MainService;
-import sapotero.rxtest.utils.memory.InMemoryDocumentStorage;
-import sapotero.rxtest.utils.memory.utils.InMemoryStoreModule;
+import sapotero.rxtest.utils.memory.MemoryStore;
+import sapotero.rxtest.utils.memory.utils.MemoryStoreModule;
 import sapotero.rxtest.utils.queue.utils.QueueManagerModule;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.activities.InfoActivity;
@@ -32,7 +32,7 @@ import sapotero.rxtest.views.menu.builders.ButtonBuilder;
   JobModule.class,
   QueueManagerModule.class,
   OperationManagerModule.class,
-  InMemoryStoreModule.class
+  MemoryStoreModule.class
 })
 
 public interface ManagerComponent {
@@ -59,7 +59,7 @@ public interface ManagerComponent {
   void inject(DataLoaderManager dataLoaderManager);
 
   void inject(DBQueryBuilder activity);
-  void inject(InMemoryDocumentStorage activity);
+  void inject(MemoryStore activity);
 
   void inject(DocumentsAdapter adapter);
   void inject(ButtonBuilder buttonBuilder);

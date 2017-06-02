@@ -1,19 +1,22 @@
 package sapotero.rxtest.utils.memory.utils;
 
-import rx.subjects.PublishSubject;
 import sapotero.rxtest.utils.memory.fields.FieldType;
 import sapotero.rxtest.utils.memory.fields.InMemoryState;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 
 public class Transaction {
-  private final PublishSubject<InMemoryDocument> publish;
+//  private final PublishSubject<InMemoryDocument> publish;
   private InMemoryDocument document;
 
 
-  public Transaction(InMemoryDocument inMemoryDocument, PublishSubject<InMemoryDocument> publish) {
+  public Transaction(InMemoryDocument inMemoryDocument) {
     this.document = inMemoryDocument;
-    this.publish = publish;
+//    this.publish = publish;
+  }
+
+  public Transaction() {
+    this.document = new InMemoryDocument();
   }
 
 
@@ -101,7 +104,7 @@ public class Transaction {
   }
 
   public InMemoryDocument commit(){
-    publish.onNext(document);
+//    publish.onNext(document);
     return document;
   }
 }

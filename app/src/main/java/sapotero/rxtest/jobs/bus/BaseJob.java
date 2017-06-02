@@ -11,7 +11,7 @@ import io.requery.rx.SingleEntityStore;
 import okhttp3.OkHttpClient;
 import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.utils.Settings;
-import sapotero.rxtest.utils.memory.InMemoryDocumentStorage;
+import sapotero.rxtest.utils.memory.MemoryStore;
 
 public abstract class BaseJob extends Job {
 
@@ -20,7 +20,8 @@ public abstract class BaseJob extends Job {
   @Inject Settings settings;
   @Inject Mappers mappers;
   @Inject SingleEntityStore<Persistable> dataStore;
-  @Inject InMemoryDocumentStorage store;
+  @Inject
+  MemoryStore store;
 
   protected BaseJob(Params params) {
     super(params);

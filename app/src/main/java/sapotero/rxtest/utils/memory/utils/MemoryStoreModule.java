@@ -5,17 +5,17 @@ import javax.inject.Inject;
 import dagger.Module;
 import dagger.Provides;
 import sapotero.rxtest.application.scopes.ManagerScope;
-import sapotero.rxtest.utils.memory.InMemoryDocumentStorage;
+import sapotero.rxtest.utils.memory.MemoryStore;
 
 
 @Module
-public final class InMemoryStoreModule {
+public final class MemoryStoreModule {
 
   @Provides
   @Inject
   @ManagerScope
-  InMemoryDocumentStorage provideJobModule() {
-    return new InMemoryDocumentStorage();
+  MemoryStore provideJobModule() {
+    return new MemoryStore();
   }
 
 }

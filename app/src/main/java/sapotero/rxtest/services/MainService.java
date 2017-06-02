@@ -66,10 +66,8 @@ import sapotero.rxtest.events.crypto.SignDataWrongPinEvent;
 import sapotero.rxtest.events.decision.SignAfterCreateEvent;
 import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
-import sapotero.rxtest.events.document.UpdateUnprocessedDocumentsEvent;
 import sapotero.rxtest.events.service.AuthServiceAuthEvent;
 import sapotero.rxtest.events.service.CheckNetworkEvent;
-import sapotero.rxtest.events.service.UpdateAllDocumentsEvent;
 import sapotero.rxtest.events.service.UpdateDocumentsByStatusEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckFailEvent;
@@ -913,56 +911,12 @@ public class MainService extends Service {
     getSign( event.data );
   }
 
-  @Subscribe(threadMode = ThreadMode.BACKGROUND)
-  public void onMessageEvent(UpdateUnprocessedDocumentsEvent event) throws Exception {
-
-    dataStore
-      .select(RDocumentEntity.UID)
-      .where( RDocumentEntity.CHANGED.eq(true) )
-      .get()
-      .toObservable()
-      .subscribeOn(Schedulers.io())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(
-        doc -> {
-          String uid = doc.get(0).toString();
-          Timber.tag("Service[unproc]").e("unprocessed - %s", uid );
-        dataLoaderInterface.updateDocument( uid );
-        }, error -> {
-          Timber.tag("Service[unproc]").e("error %s", error);
-        }
-      );
-  }
-
-  public static boolean deleteDirectory(File directory) {
-    if(directory.exists()){
-      File[] files = directory.listFiles();
-      if(null!=files){
-        for(int i=0; i<files.length; i++) {
-          if(files[i].isDirectory()) {
-            deleteDirectory(files[i]);
-          }
-          else {
-            files[i].delete();
-          }
-        }
-      }
-    }
-    return(directory.delete());
-  }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(UpdateDocumentEvent event) throws Exception {
     EventBus.getDefault().post( new UpdateCurrentInfoActivityEvent() );
     dataLoaderInterface.updateDocument(event.uid);
   }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(UpdateAllDocumentsEvent event) throws Exception {
-    Timber.tag(TAG).e("updateAll");
-    updateAll();
-  }
-
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(SignAfterCreateEvent event) throws Exception {

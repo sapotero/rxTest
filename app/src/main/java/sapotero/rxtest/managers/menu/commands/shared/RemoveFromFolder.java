@@ -64,8 +64,8 @@ public class RemoveFromFolder extends AbstractCommand {
       .get().value();
 
 
-    Transaction transaction = store.startTransactionFor(document_id);
-    transaction
+    Transaction Transaction = store.startTransactionFor(document_id);
+    Transaction
       .removeLabel(LabelType.FAVORITES)
       .setLabel(LabelType.SYNC)
       .commit();
@@ -124,8 +124,8 @@ public class RemoveFromFolder extends AbstractCommand {
 
           queueManager.setExecutedRemote(this);
 
-          Transaction transaction = store.startTransactionFor(document_id);
-          transaction
+          Transaction Transaction = store.startTransactionFor(document_id);
+          Transaction
             .removeLabel(LabelType.SYNC)
             .setField(FieldType.PROCESSED, true)
             .setField(FieldType.MD5, "")
@@ -138,8 +138,8 @@ public class RemoveFromFolder extends AbstractCommand {
             callback.onCommandExecuteError(getType());
           }
 
-          Transaction transaction = store.startTransactionFor(document_id);
-          transaction
+          Transaction Transaction = store.startTransactionFor(document_id);
+          Transaction
             .removeLabel(LabelType.SYNC)
             .setLabel(LabelType.FAVORITES)
             .commit();

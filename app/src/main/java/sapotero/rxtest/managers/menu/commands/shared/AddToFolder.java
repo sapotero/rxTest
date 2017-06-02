@@ -72,8 +72,8 @@ public class AddToFolder extends AbstractCommand {
 
     queueManager.setExecutedLocal(this);
 
-    Transaction transaction = store.startTransactionFor(document_id);
-    transaction
+    Transaction Transaction = store.startTransactionFor(document_id);
+    Transaction
       .setLabel(LabelType.SYNC)
       .setLabel(LabelType.FAVORITES)
       .commit();
@@ -119,8 +119,8 @@ public class AddToFolder extends AbstractCommand {
 
           queueManager.setExecutedRemote(this);
 
-          Transaction transaction = store.startTransactionFor(document_id);
-          transaction
+          Transaction Transaction = store.startTransactionFor(document_id);
+          Transaction
             .removeLabel(LabelType.SYNC)
             .commit();
         },
@@ -129,8 +129,8 @@ public class AddToFolder extends AbstractCommand {
             callback.onCommandExecuteError(getType());
           }
 
-          Transaction transaction = store.startTransactionFor(document_id);
-          transaction
+          Transaction Transaction = store.startTransactionFor(document_id);
+          Transaction
             .removeLabel(LabelType.SYNC )
             .removeLabel(LabelType.FAVORITES)
             .commit();

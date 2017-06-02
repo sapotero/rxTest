@@ -56,7 +56,7 @@ import sapotero.rxtest.retrofit.models.v2.v2UserOshs;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.Settings;
-import sapotero.rxtest.utils.memory.InMemoryDocumentStorage;
+import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.views.menu.fields.MainMenuButton;
 import sapotero.rxtest.views.menu.fields.MainMenuItem;
 import timber.log.Timber;
@@ -69,7 +69,8 @@ public class DataLoaderManager {
   @Inject Settings settings;
   @Inject JobManager jobManager;
   @Inject SingleEntityStore<Persistable> dataStore;
-  @Inject InMemoryDocumentStorage store;
+  @Inject
+  MemoryStore store;
 
   private SimpleDateFormat dateFormat;
   private CompositeSubscription subscription;
@@ -90,17 +91,6 @@ public class DataLoaderManager {
     this.context = context;
     EsdApplication.getManagerComponent().inject(this);
 
-//    store
-//      .getPublishSubject()
-//      .observeOn(Schedulers.computation())
-//      .observeOn(AndroidSchedulers.mainThread())
-//      .subscribe(
-//        data -> {
-//          Timber.tag(TAG).w("LOG: %s", data.toString() );
-//        }, error ->{
-//          Timber.tag(TAG).e(error);
-//        }
-//      );
   }
 
   private void initV2() {
@@ -245,7 +235,7 @@ public class DataLoaderManager {
     settings.setCurrentUser(user);
   }
 
-  public void setCurrentUserId(String currentUserId) {
+  private void setCurrentUserId(String currentUserId) {
     settings.setCurrentUserId(currentUserId);
   }
 
@@ -256,7 +246,6 @@ public class DataLoaderManager {
   public void setPassword(String password) {
     settings.setPassword(password);
   }
-
 
 
   private boolean validateHost(String host) {
@@ -305,6 +294,7 @@ public class DataLoaderManager {
       subscriptionUpdateAuth.clear();
     }
   }
+
 
   public void updateAuth( String sign ){
     Timber.tag(TAG).i("updateAuth: %s", sign );
@@ -571,7 +561,7 @@ public class DataLoaderManager {
                       .map(Document::getUid)
                       .toList();
 
-                    store.intersect( api, status, index );
+                    store.process( api, status, index );
                   }
 
 
@@ -611,7 +601,7 @@ public class DataLoaderManager {
                     .map(Document::getUid)
                     .toList();
 
-                  store.intersect( api, code );
+                  store.process( api, code );
                 }
                 updatePrefJobCount();
               },

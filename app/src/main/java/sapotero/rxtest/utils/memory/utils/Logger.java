@@ -3,10 +3,10 @@ package sapotero.rxtest.utils.memory.utils;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import timber.log.Timber;
 
-public class InMemoryLogger {
+public class Logger {
   private String TAG = this.getClass().getSimpleName();
 
-  public InMemoryLogger() {
+  public Logger() {
   }
 
   public void log(InMemoryDocument inMemoryDocument) {

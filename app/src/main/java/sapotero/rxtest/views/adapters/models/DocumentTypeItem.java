@@ -16,9 +16,9 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.utils.Settings;
-import sapotero.rxtest.utils.memory.InMemoryDocumentStorage;
+import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
-import sapotero.rxtest.utils.memory.utils.IMDFilter;
+import sapotero.rxtest.utils.memory.utils.Filter;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import sapotero.rxtest.views.menu.fields.MainMenuItem;
 import timber.log.Timber;
@@ -27,7 +27,8 @@ public class DocumentTypeItem {
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject Settings settings;
   //  @Inject Validation validation;
-  @Inject InMemoryDocumentStorage store;
+  @Inject
+  MemoryStore store;
 
   private final MainMenuItem mainMenuItem;
   private final String user;
@@ -169,8 +170,8 @@ public class DocumentTypeItem {
     Collections.addAll( _projects, MainMenuItem.APPROVE_ASSIGN.getCountConditions() );
 
 
-    IMDFilter project_filter  = new IMDFilter(_projects);
-    IMDFilter document_filter = new IMDFilter(_conditions);
+    Filter project_filter  = new Filter(_projects);
+    Filter document_filter = new Filter(_conditions);
 
     Observable<Integer> all = Observable
       .from(store.getDocuments().values())
@@ -213,7 +214,7 @@ public class DocumentTypeItem {
     ArrayList<ConditionBuilder> _conditions = new ArrayList<ConditionBuilder>();
     Collections.addAll( _conditions, mainMenuItem.getCountConditions() );
 
-    IMDFilter filter = new IMDFilter(_conditions);
+    Filter filter = new Filter(_conditions);
 
     Observable
       .from( store.getDocuments().values() )

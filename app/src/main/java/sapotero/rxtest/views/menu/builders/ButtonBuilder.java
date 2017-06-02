@@ -32,9 +32,9 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.utils.Settings;
-import sapotero.rxtest.utils.memory.InMemoryDocumentStorage;
+import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
-import sapotero.rxtest.utils.memory.utils.IMDFilter;
+import sapotero.rxtest.utils.memory.utils.Filter;
 import timber.log.Timber;
 
 public class ButtonBuilder {
@@ -42,7 +42,8 @@ public class ButtonBuilder {
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject Settings settings;
 //  @Inject Validation validation;
-  @Inject InMemoryDocumentStorage store;
+  @Inject
+MemoryStore store;
 
   private ConditionBuilder[] conditions;
   private ConditionBuilder[] item_conditions;
@@ -213,7 +214,7 @@ public class ButtonBuilder {
     }
 
 
-    IMDFilter filter = new IMDFilter(_conditions);
+    Filter filter = new Filter(_conditions);
 
     Observable
       .from( store.getDocuments().values() )

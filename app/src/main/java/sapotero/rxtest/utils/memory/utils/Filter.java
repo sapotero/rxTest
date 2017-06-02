@@ -13,7 +13,7 @@ import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import timber.log.Timber;
 
-public class IMDFilter {
+public class Filter {
 
   private final String TAG = this.getClass().getSimpleName();
   private final ArrayList<ConditionBuilder> conditions;
@@ -25,7 +25,7 @@ public class IMDFilter {
   private Boolean isFavorites = false;
   private Boolean isControl   = false;
 
-  public IMDFilter(ArrayList<ConditionBuilder> conditions) {
+  public Filter(ArrayList<ConditionBuilder> conditions) {
     this.conditions = conditions;
     processConditions();
   }

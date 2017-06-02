@@ -66,7 +66,7 @@ public class CreateDocumentsJob extends DocumentJob {
 
     if (document != null) {
       Timber.tag(TAG).e( "doAfterUpdate %s - %s / %s", uid, journal, status );
-      store.updateFromJob( document, journal, status );
+      store.process( document, journal, status );
     }
   }
 

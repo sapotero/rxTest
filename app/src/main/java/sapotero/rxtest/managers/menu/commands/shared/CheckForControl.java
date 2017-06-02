@@ -43,8 +43,8 @@ public class CheckForControl extends AbstractCommand {
     Timber.tag(TAG).i("execute for %s - %s",getType(),document_id);
     queueManager.add(this);
 
-    Transaction transaction = store.startTransactionFor(document_id);
-    transaction
+    Transaction Transaction = store.startTransactionFor(document_id);
+    Transaction
       .setLabel(LabelType.SYNC)
       .setLabel(LabelType.CONTROL)
       .commit();
@@ -91,8 +91,8 @@ public class CheckForControl extends AbstractCommand {
           }
 
 
-          Transaction transaction = store.startTransactionFor(document_id);
-          transaction
+          Transaction Transaction = store.startTransactionFor(document_id);
+          Transaction
             .removeLabel(LabelType.SYNC)
             .commit();
         },
@@ -102,8 +102,8 @@ public class CheckForControl extends AbstractCommand {
             callback.onCommandExecuteError(getType());
           }
 
-          Transaction transaction = store.startTransactionFor(document_id);
-          transaction
+          Transaction Transaction = store.startTransactionFor(document_id);
+          Transaction
             .removeLabel(LabelType.CONTROL)
             .removeLabel(LabelType.SYNC)
             .commit();
