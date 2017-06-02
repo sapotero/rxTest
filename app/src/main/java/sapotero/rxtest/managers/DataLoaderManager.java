@@ -92,7 +92,7 @@ public class DataLoaderManager {
     EsdApplication.getManagerComponent().inject(this);
   }
 
-  private void initV2() {
+  private void initV2(boolean loadAllDocs) {
     Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
 
     AuthService auth = retrofit.create(AuthService.class);
@@ -106,6 +106,7 @@ public class DataLoaderManager {
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(
           v2 -> {
+              Timber.tag("LoadSequence").d("Received user info");
 //            try {
               v2UserOshs user = v2.get(0);
               setCurrentUser(user.getName());
@@ -118,9 +119,12 @@ public class DataLoaderManager {
                   .subscribeOn(Schedulers.computation())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( data -> {
+                    Timber.tag("LoadSequence").d("Received list of folders");
                     jobManager.addJobInBackground(new CreateFoldersJob(data));
+                    loadAllDocs( loadAllDocs );
                   }, error -> {
                     Timber.tag(TAG).e(error);
+                    loadAllDocs( loadAllDocs );
                   })
               );
 
@@ -203,9 +207,16 @@ public class DataLoaderManager {
           },
           error -> {
             Timber.tag("USER_INFO").e( "ERROR: %s", error);
+            loadAllDocs( loadAllDocs );
           })
     );
 
+  }
+
+  private void loadAllDocs(boolean load) {
+    if ( load ) {
+      updateByCurrentStatus(MainMenuItem.ALL, null, false);
+    }
   }
 
   public void unregister(){
@@ -325,7 +336,7 @@ public class DataLoaderManager {
             Timber.tag(TAG).i("updateAuth: token" + data.getAuthToken());
             setToken( data.getAuthToken() );
 
-            initV2();
+            initV2(false);
           },
           error -> {
             Timber.tag(TAG).i("updateAuth error: %s" , error );
@@ -367,9 +378,9 @@ public class DataLoaderManager {
 
             EventBus.getDefault().post( new AuthDcCheckSuccessEvent() );
 
-            initV2();
+            initV2(true);
 
-            updateByCurrentStatus(MainMenuItem.ALL, null, false);
+//            updateByCurrentStatus(MainMenuItem.ALL, null, false);
 //            updateByCurrentStatus(MainMenuItem.ALL, null, true);
 
 //            updateFavoritesAndProcessed();
@@ -416,8 +427,8 @@ public class DataLoaderManager {
 
             EventBus.getDefault().post(new AuthLoginCheckSuccessEvent());
 
-            initV2();
-            updateByCurrentStatus(MainMenuItem.ALL, null, false);
+            initV2(true);
+//            updateByCurrentStatus(MainMenuItem.ALL, null, false);
 //            updateFavoritesAndProcessed();
           },
           error -> {
@@ -585,6 +596,7 @@ public class DataLoaderManager {
               .observeOn(Schedulers.computation())
               .subscribe(
                 data -> {
+                  Timber.tag("LoadSequence").d("Received list of documents");
                   requestCount--;
                   if (data.getDocuments().size() > 0){
 
@@ -661,6 +673,7 @@ public class DataLoaderManager {
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
               data -> {
+                Timber.tag("LoadSequence").d("Received list of projects");
                 requestCount--;
                 if (data.getDocuments().size() > 0){
                   for (Document doc: data.getDocuments() ) {
@@ -786,6 +799,7 @@ public class DataLoaderManager {
           .observeOn( AndroidSchedulers.mainThread() )
           .subscribe(
             data -> {
+              Timber.tag("LoadSequence").d("Received list of favorites");
               if ( data.getDocuments().size() > 0 ) {
                 Timber.tag("FAVORITES").e("DOCUMENTS COUNT: %s", data.getDocuments().size() );
                 for (Document doc : data.getDocuments()) {
