@@ -115,16 +115,12 @@ public class DecisionManager implements DecisionInterface, DecisionBuilder.Callb
       if ( block.getAppealText() == null ) {
         block.setAppealText( "" );
       }
-      if ( block.getToFamiliarization() == null ) {
-        block.setToFamiliarization( false );
-      }
-      if ( block.getToCopy() == null ) {
-        block.setToCopy( false );
-      }
 
       block.setAskToReport( block.getAppealText().contains("дол") );
       block.setAskToAcquaint( block.getAppealText().contains("озн") );
       block.setNumber( null );
+      block.setToCopy( null );
+      block.setToFamiliarization( null );
 
       for ( Performer performer : nullGuard( block.getPerformers() ) ) {
         if ( performer.getIsOriginal() == null ) {
