@@ -103,7 +103,13 @@ public class AddTemporaryDecision extends AbstractCommand {
       RDecisionEntity decision = new RDecisionEntity();
       decision.setUid(UUID.randomUUID().toString() );
       decision.setUrgencyText( dec.getUrgencyText() );
-      decision.setComment( dec.getComment()+" " );
+
+      if (dec.getComment() != null & !Objects.equals(dec.getComment(), "")){
+        decision.setComment( dec.getComment());
+      } else {
+        decision.setComment("");
+      }
+
       decision.setDate( dec.getDate() );
       decision.setLetterhead( "Бланк резолюции" );
       decision.setShowPosition( false );

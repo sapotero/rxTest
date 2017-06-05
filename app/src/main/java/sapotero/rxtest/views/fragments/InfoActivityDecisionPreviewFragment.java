@@ -35,6 +35,7 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -80,6 +81,7 @@ import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.managers.toolbar.ToolbarManager;
+import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.utils.padeg.Declension;
 import sapotero.rxtest.utils.queue.QueueManager;
@@ -735,11 +737,49 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   public void comment(){
     Timber.tag(TAG).v("comment_button");
 
-    new MaterialDialog.Builder( getContext() )
+    MaterialDialog editDialog = new MaterialDialog.Builder(getContext())
+      .title("Комментарий резолюции")
+      .inputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE)
+      .input("Комментарий", current_decision.getComment(), (dialog, input) -> {})
+      .positiveText(R.string.constructor_save)
+      .onPositive((dialog, which) -> {
+
+        if ( dialog.getInputEditText().getText() != null && !Objects.equals(dialog.getInputEditText().getText().toString(), current_decision.getComment()) ) {
+
+          CommandFactory.Operation operation = CommandFactory.Operation.SAVE_DECISION;
+          CommandParams params = new CommandParams();
+
+          Decision decision = mappers.getDecisionMapper().toFormattedModel( current_decision );
+          decision.setComment( dialog.getInputEditText().getText().toString() );
+          params.setDecisionModel( decision );
+          params.setDecisionId( current_decision.getUid() );
+          params.setDocument( settings.getUid() );
+
+          Timber.e("DECISION %s", new Gson().toJson(decision));
+
+          operationManager.execute( operation, params );
+        }
+        dialog.dismiss();
+      })
+      .neutralText(R.string.constructor_close)
+      .onNeutral((dialog, which) -> dialog.dismiss())
+      .autoDismiss(false)
+      .build();
+
+    MaterialDialog materialDialog = new MaterialDialog.Builder(getContext())
       .title("Комментарий резолюции")
       .content( current_decision.getComment() )
       .positiveText(R.string.constructor_close)
-      .build().show();
+      .neutralText(R.string.decision_preview_edit)
+      .onPositive((dialog, which) -> { dialog.dismiss(); })
+      .onNeutral((dialog, which) -> {
+        dialog.dismiss();
+        editDialog.show();
+      })
+      .autoDismiss(false)
+      .build();
+
+    materialDialog.show();
   }
 
 
