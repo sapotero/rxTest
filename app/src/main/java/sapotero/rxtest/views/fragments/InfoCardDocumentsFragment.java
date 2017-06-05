@@ -212,6 +212,8 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 //        pdfView.useBestQuality(true);
 //        pdfView.
 
+//      pdfView.setDrawingCacheEnabled(true);
+//      pdfView.stopFling();
 
       updateDocumentCount();
       updatePageCount();

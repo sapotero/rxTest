@@ -35,6 +35,7 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -43,6 +44,9 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
+import rx.subjects.PublishSubject;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.BuildConfig;
 import sapotero.rxtest.R;
@@ -128,8 +132,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private SearchView searchView;
   private MainActivity context;
   private CompositeSubscription subscription;
+  private PublishSubject<Integer> searchSubject = PublishSubject.create();
 
-  @Override
   protected void onCreate(Bundle savedInstanceState) {
     setTheme(R.style.AppTheme);
 
@@ -139,6 +143,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     ButterKnife.bind(this);
     EsdApplication.getManagerComponent().inject(this);
     context = this;
+    searchSubject = PublishSubject.create();
 
     initAdapters();
 
@@ -175,6 +180,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     setFirstRunFalse();
 
     updateToken();
+    initSearchSub();
 
   }
 
@@ -347,8 +353,11 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 //          }
           break;
         case R.id.action_search:
-          searchView.onOptionsItemSelected(getFragmentManager(), item);
-          setEmptyToolbarClickListener();
+
+          searchSubject.onNext( item.getItemId() );
+
+//          searchView.onOptionsItemSelected(getFragmentManager(), item);
+//          setEmptyToolbarClickListener();
           break;
         default:
           jobManager.addJobInBackground(new UpdateAuthTokenJob());
@@ -356,6 +365,22 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       }
       return false;
     });
+  }
+
+  private void initSearchSub(){
+
+    searchSubject
+      .buffer( 500, TimeUnit.MILLISECONDS )
+      .subscribeOn(Schedulers.computation())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(
+        data -> {
+          if (data.size() > 0){
+            searchView.onOptionsItemSelected(getFragmentManager(), data.get(0));
+          }
+        },
+        Timber::e
+      );
   }
 
   private void initEvents() {

@@ -158,7 +158,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
       TabPagerAdapter adapter = new TabPagerAdapter ( getSupportFragmentManager() );
       viewPager.setAdapter(adapter);
     }
-//    viewPager.setOffscreenPageLimit(4);
+    viewPager.setOffscreenPageLimit(4);
 
     tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
       @Override

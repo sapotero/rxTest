@@ -510,9 +510,15 @@ public class SearchView extends BaseRestoreInstanceFragment implements DialogInt
 
     @SuppressWarnings("SameReturnValue")
     public boolean onOptionsItemSelected(FragmentManager manager, MenuItem item) {
-        this.mMenuItemId = item.getItemId();
-        show(manager);
-        return true;
+      this.mMenuItemId = item.getItemId();
+      show(manager);
+      return true;
+    }
+
+    public boolean onOptionsItemSelected(FragmentManager manager, Integer item) {
+      this.mMenuItemId = item;
+      show(manager);
+      return true;
     }
 
     public interface OnQueryTextListener {

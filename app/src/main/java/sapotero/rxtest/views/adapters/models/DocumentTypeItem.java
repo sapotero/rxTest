@@ -6,6 +6,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -148,7 +149,12 @@ public class DocumentTypeItem {
 
     switch ( mainMenuItem.getIndex() ){
       case 0:
-        setTextForAllDocument(view);
+        Observable
+          .just("")
+          .buffer(500, TimeUnit.MILLISECONDS)
+          .subscribe(data -> {
+            setTextForAllDocument(view);
+          }, Timber::e);
         break;
       default:
         setTextForNormalText(view);
