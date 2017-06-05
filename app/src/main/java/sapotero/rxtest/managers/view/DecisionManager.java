@@ -105,6 +105,8 @@ public class DecisionManager implements DecisionInterface, DecisionBuilder.Callb
     String data = gson.toJson(sourceDecision, Decision.class);
     Decision decisionForHash = gson.fromJson(data, Decision.class);
 
+    decisionForHash.setUrgency( null );
+
     if ( settings.isShowDecisionDateUpdate() ) {
       decisionForHash.setDate( null );
     }
@@ -113,12 +115,23 @@ public class DecisionManager implements DecisionInterface, DecisionBuilder.Callb
       if ( block.getAppealText() == null ) {
         block.setAppealText( "" );
       }
+      if ( block.getToFamiliarization() == null ) {
+        block.setToFamiliarization( false );
+      }
 
       block.setAskToReport( block.getAppealText().contains("дол") );
       block.setAskToAcquaint( block.getAppealText().contains("озн") );
       block.setNumber( null );
 
       for ( Performer performer : nullGuard( block.getPerformers() ) ) {
+        if ( performer.getIsOriginal() == null ) {
+          performer.setIsOriginal( false );
+        }
+
+        if ( performer.getIsResponsible() == null ) {
+          performer.setIsResponsible( false );
+        }
+
         performer.setPerformerType( null );
         performer.setNumber( null );
       }
