@@ -122,6 +122,7 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
     journalSpinnerAdapter = new DocumentTypeAdapter(context, document_types);
     journalSpinner.setAdapter(journalSpinnerAdapter);
 
+    // без привязки к доступным журналам
     if (settings.getStartJournal() != null){
       journalSpinner.setSelection( Integer.parseInt( settings.getStartJournal() ) );
     }
