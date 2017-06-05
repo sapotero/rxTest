@@ -25,6 +25,7 @@ public class Settings {
   private static final String CURRENT_USER_ID_KEY = "current_user_id";
   private static final String CURRENT_USER_KEY = "current_user";
   private static final String CURRENT_USER_ORGANIZATION_KEY = "current_user_organization";
+  private static final String CURRENT_USER_POSITION_KEY = "current_user_position";
   private static final String MAIN_MENU_POSITION_KEY = "activity_main_menu.position";
   private static final String REGNUMBER_KEY = "activity_main_menu.regnumber";
   private static final String REGDATE_KEY = "activity_main_menu.date";
@@ -76,6 +77,7 @@ public class Settings {
   private Preference<String> currentUserId;
   private Preference<String> currentUser;
   private Preference<String> currentUserOrganization;
+  private Preference<String> currentUserPosition;
   private Preference<Integer> mainMenuPosition;
   private Preference<String> regNumber;
   private Preference<String> regDate;
@@ -150,6 +152,7 @@ public class Settings {
     currentUserId                  = settings.getString(CURRENT_USER_ID_KEY);
     currentUser                    = settings.getString(CURRENT_USER_KEY);
     currentUserOrganization        = settings.getString(CURRENT_USER_ORGANIZATION_KEY);
+    currentUserPosition            = settings.getString(CURRENT_USER_POSITION_KEY);
     mainMenuPosition               = settings.getInteger(MAIN_MENU_POSITION_KEY);
     regNumber                      = settings.getString(REGNUMBER_KEY);
     regDate                        = settings.getString(REGDATE_KEY);
@@ -365,6 +368,14 @@ public class Settings {
 
   public void setCurrentUserOrganization(String value) {
     setString(currentUserOrganization, value);
+  }
+
+  public String getCurrentUserPosition() {
+    return getString(currentUserPosition);
+  }
+
+  public void setCurrentUserPosition(String value) {
+    setString(currentUserPosition, value);
   }
 
   public int getMainMenuPosition() {
