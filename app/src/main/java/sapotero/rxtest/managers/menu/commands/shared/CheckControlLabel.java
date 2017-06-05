@@ -19,6 +19,7 @@ import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
+import sapotero.rxtest.utils.memory.fields.FieldType;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
@@ -52,10 +53,11 @@ public class CheckControlLabel extends AbstractCommand {
     Timber.tag(TAG).i("execute for %s - %s",getType(),document_id);
     queueManager.add(this);
 
-    store.commit(
+    store.process(
       store.startTransactionFor(document_id)
-        .setLabel(LabelType.SYNC)
-        .setLabel(LabelType.CONTROL)
+      .setLabel(LabelType.SYNC)
+      .setLabel(LabelType.CONTROL)
+      .setField(FieldType.PROCESSED, true)
     );
 
   }
@@ -116,7 +118,7 @@ public class CheckControlLabel extends AbstractCommand {
             if (callback != null){
               callback.onCommandExecuteSuccess(getType());
             }
-            store.commit(
+            store.process(
               store.startTransactionFor(document_id)
                 .removeLabel(LabelType.SYNC)
             );
@@ -136,10 +138,11 @@ public class CheckControlLabel extends AbstractCommand {
   }
 
   private void setAsError() {
-    store.commit(
+    store.process(
       store.startTransactionFor(document_id)
         .removeLabel(LabelType.SYNC)
         .removeLabel(LabelType.CONTROL)
+        .setField(FieldType.PROCESSED, false)
     );
 
   }

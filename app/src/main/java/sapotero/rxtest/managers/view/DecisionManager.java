@@ -8,7 +8,6 @@ import android.support.v4.app.FragmentManager;
 
 import com.google.gson.Gson;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -17,19 +16,16 @@ import javax.inject.Inject;
 
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
-import rx.Subscription;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.mapper.utils.Mappers;
-import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
-import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
-import sapotero.rxtest.retrofit.models.document.Block;
-import sapotero.rxtest.retrofit.models.document.Decision;
-import sapotero.rxtest.utils.Settings;
-import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.managers.view.builders.DecisionBuilder;
 import sapotero.rxtest.managers.view.builders.PreviewBuilder;
 import sapotero.rxtest.managers.view.interfaces.DecisionInterface;
+import sapotero.rxtest.retrofit.models.document.Block;
+import sapotero.rxtest.retrofit.models.document.Decision;
+import sapotero.rxtest.retrofit.models.document.Performer;
+import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.adapters.models.UrgencyItem;
 import timber.log.Timber;
 

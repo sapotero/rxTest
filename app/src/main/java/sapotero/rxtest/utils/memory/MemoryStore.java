@@ -129,9 +129,6 @@ public class MemoryStore implements Processable{
     return pub;
   }
 
-  public void commit (Transaction transaction){
-    pub.onNext( transaction.commit() );
-  }
 
   @Override
   public void process(HashMap<String, Document> docs, String filter, String index) {

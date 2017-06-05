@@ -52,7 +52,7 @@ public class UncheckControlLabel extends AbstractCommand {
     Timber.tag(TAG).i("execute for %s - %s",getType(),document_id);
     queueManager.add(this);
 
-    store.commit(
+    store.process(
       store.startTransactionFor(document_id)
         .setLabel(LabelType.SYNC)
         .removeLabel(LabelType.CONTROL)
@@ -116,7 +116,7 @@ public class UncheckControlLabel extends AbstractCommand {
             if (callback != null){
               callback.onCommandExecuteSuccess(getType());
             }
-            store.commit(
+            store.process(
               store.startTransactionFor(document_id)
                 .removeLabel(LabelType.SYNC)
             );
@@ -138,7 +138,7 @@ public class UncheckControlLabel extends AbstractCommand {
   }
 
   private void setAsError() {
-    store.commit(
+    store.process(
       store.startTransactionFor(document_id)
         .removeLabel(LabelType.SYNC)
         .setLabel(LabelType.CONTROL)
