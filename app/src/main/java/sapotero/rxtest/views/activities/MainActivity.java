@@ -13,6 +13,7 @@ import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -79,46 +80,25 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @Inject QueueManager queue;
   @Inject MemoryStore store;
 
-
-  @BindView(R.id.toolbar) Toolbar toolbar;
-
-  @BindView(R.id.documentsRecycleView) RecyclerView rv;
-  @BindView(R.id.progressBar) ProgressBar progressBar;
-  @BindView(R.id.activity_main_update_progressbar) ProgressBar update_progressbar;
-
-  @BindView(R.id.activity_main_menu) LinearLayout activity_main_menu;
-
-  @BindView(R.id.activity_main_menu_builder_organization) LinearLayout menu_builder_organization;
-  @BindView(R.id.activity_main_menu_builder_buttons) FrameLayout menu_builder_buttons;
-
-
-
-
-  @BindView(R.id.DOCUMENT_TYPE) Spinner DOCUMENT_TYPE_SELECTOR;
-  @BindView(R.id.ORGANIZATION) OrganizationSpinner ORGANIZATION_SELECTOR;
-
-  @BindView(R.id.activity_main_right_button) CircleRightArrow rightArrow;
-
-  @BindView(R.id.activity_main_left_button) CircleLeftArrow leftArrow;
-  @BindView(R.id.favorites_button) CheckBox favorites_button;
-
-  @BindView(R.id.documents_empty_list) TextView documents_empty_list;
-
-  private DataLoaderManager dataLoaderInterface;
-
-
+  @BindView (R.id.toolbar)                          Toolbar             toolbar;
+  @BindView (R.id.documentsRecycleView)             RecyclerView        rv;
+  @BindView (R.id.progressBar)                      ProgressBar         progressBar;
+  @BindView (R.id.activity_main_update_progressbar) ProgressBar         update_progressbar;
+  @BindView (R.id.activity_main_menu)               LinearLayout        activity_main_menu;
+  @BindView (R.id.activity_main_wrapper)            RelativeLayout      wrapper;
+  @BindView (R.id.activity_main_menu_organization)  LinearLayout        menu_builder_organization;
+  @BindView (R.id.activity_main_menu_buttons)       FrameLayout         menu_builder_buttons;
+  @BindView (R.id.DOCUMENT_TYPE)                    Spinner             DOCUMENT_TYPE_SELECTOR;
+  @BindView (R.id.ORGANIZATION)                     OrganizationSpinner ORGANIZATION_SELECTOR;
+  @BindView (R.id.activity_main_right_button)       CircleRightArrow    rightArrow;
+  @BindView (R.id.activity_main_left_button)        CircleLeftArrow     leftArrow;
+  @BindView (R.id.favorites_button)                 CheckBox            favorites_button;
+  @BindView (R.id.documents_empty_list)             TextView            documents_empty_list;
 
   private String TAG = MainActivity.class.getSimpleName();
-
-  private int loaded = 0;
-
   private OrganizationAdapter organization_adapter;
-
-  private int total = 0;
   private DrawerBuilder drawer;
 
-  private CompositeSubscription subscriptions;
-  //  private String total;
   private final int ALL                = 0;
   private final int INCOMING_DOCUMENTS = 1;
   private final int CITIZEN_REQUESTS   = 2;
@@ -142,12 +122,10 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @SuppressLint("StaticFieldLeak")
   public static DocumentsAdapter RAdapter;
 
-  public DBQueryBuilder dbQueryBuilder;
-
+  public  DBQueryBuilder dbQueryBuilder;
   public  MenuBuilder menuBuilder;
   private DataLoaderManager dataLoader;
   private SearchView searchView;
-
   private MainActivity context;
   private CompositeSubscription subscription;
 
@@ -420,10 +398,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @Override
   protected void onPause() {
     super.onPause();
-    if (subscriptions != null) {
-      subscriptions.unsubscribe();
-    }
-
     stopNetworkCheck();
   }
 
@@ -732,7 +706,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 //
 //    return (int) Math.ceil(result);
 //  }
-
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(RecalculateMenuEvent event) {

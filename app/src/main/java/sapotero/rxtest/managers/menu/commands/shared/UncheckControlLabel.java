@@ -1,6 +1,10 @@
 package sapotero.rxtest.managers.menu.commands.shared;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Objects;
 
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
@@ -9,24 +13,29 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.retrofit.OperationService;
-import sapotero.rxtest.retrofit.models.OperationResult;
+import sapotero.rxtest.events.view.ShowSnackEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.retrofit.OperationService;
+import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.utils.memory.fields.LabelType;
-import sapotero.rxtest.utils.memory.utils.Transaction;
 import timber.log.Timber;
 
-public class CheckForControl extends AbstractCommand {
+public class UncheckControlLabel extends AbstractCommand {
 
   private final DocumentReceiver document;
   private String TAG = this.getClass().getSimpleName();
   private String document_id;
 
-  public CheckForControl(DocumentReceiver document){
+  public UncheckControlLabel(DocumentReceiver document){
     super();
     this.document = document;
+  }
+
+  public UncheckControlLabel withDocumentId(String uid) {
+    this.document_id = uid;
+    return this;
   }
 
   public String getInfo(){
@@ -43,73 +52,23 @@ public class CheckForControl extends AbstractCommand {
     Timber.tag(TAG).i("execute for %s - %s",getType(),document_id);
     queueManager.add(this);
 
-    Transaction Transaction = store.startTransactionFor(document_id);
-    Transaction
-      .setLabel(LabelType.SYNC)
-      .setLabel(LabelType.CONTROL)
-      .commit();
+    store.commit(
+      store.startTransactionFor(document_id)
+        .setLabel(LabelType.SYNC)
+        .removeLabel(LabelType.CONTROL)
+    );
 
+    queueManager.setExecutedLocal(this);
   }
 
   @Override
   public String getType() {
-    return "check_for_control";
+    return "uncheck_control_label";
   }
 
-
-  // refactor
-  // ПЕРЕПИСАТЬ НОРМАЛЬНО
   @Override
   public void executeLocal() {
-    dataStore
-      .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq( document_id ))
-      .get()
-      .toObservable()
-      .flatMap( doc -> Observable.just( doc.isControl() ) )
-      .subscribe(
-        value -> {
-          Timber.tag(TAG).i("executeLocal for %s: CONTROL: %s",document_id, value);
-          try {
-
-            if (value == null){
-              value = false;
-            }
-
-
-
-            queueManager.setExecutedLocal(this);
-            if ( callback != null ){
-              callback.onCommandExecuteSuccess( getType() );
-            }
-
-          } catch (Exception e) {
-            Timber.tag(TAG).e("error executeLocal for %s [%s]: %s", document_id, getType(), e);
-            if ( callback != null ){
-              callback.onCommandExecuteError(getType());
-            }
-          }
-
-
-          Transaction Transaction = store.startTransactionFor(document_id);
-          Transaction
-            .removeLabel(LabelType.SYNC)
-            .commit();
-        },
-        error -> {
-          Timber.tag(TAG).i("error %s",error);
-          if ( callback != null ){
-            callback.onCommandExecuteError(getType());
-          }
-
-          Transaction Transaction = store.startTransactionFor(document_id);
-          Transaction
-            .removeLabel(LabelType.CONTROL)
-            .removeLabel(LabelType.SYNC)
-            .commit();
-
-        });
-
+    setControl(false);
   }
 
   @Override
@@ -142,27 +101,54 @@ public class CheckForControl extends AbstractCommand {
     info.subscribeOn( Schedulers.computation() )
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
-        data -> {
-          Timber.tag(TAG).i("ok: %s", data.getOk());
-          Timber.tag(TAG).i("error: %s", data.getMessage());
-          Timber.tag(TAG).i("type: %s", data.getType());
+        result -> {
+          Timber.tag(TAG).i("ok: %s", result.getOk());
+          Timber.tag(TAG).i("error: %s", result.getMessage());
+          Timber.tag(TAG).i("type: %s", result.getType());
 
+          store.commit(
+            store.startTransactionFor(document_id)
+              .removeLabel(LabelType.SYNC)
+          );
+
+          if ( Objects.equals(result.getType(), "danger") && result.getMessage() != null){
+            EventBus.getDefault().post( new ShowSnackEvent( result.getMessage() ));
+            setAsError();
+            setControl(true);
+          }
+
+          if (callback != null){
+            callback.onCommandExecuteSuccess(getType());
+          }
           queueManager.setExecutedRemote(this);
         },
         error -> {
           if (callback != null){
             callback.onCommandExecuteError(getType());
           }
-
-
+          queueManager.setExecutedWithError(this, Collections.singletonList(error.getLocalizedMessage()));
+          setAsError();
+          setControl(true);
         }
       );
 
   }
 
-  public CheckForControl withDocumentId(String uid) {
-    this.document_id = uid;
-    return this;
+  private void setAsError() {
+    store.commit(
+      store.startTransactionFor(document_id)
+        .removeLabel(LabelType.SYNC)
+        .setLabel(LabelType.CONTROL)
+    );
+  }
+
+  private void setControl(Boolean control) {
+    dataStore
+      .update(RDocumentEntity.class)
+      .set( RDocumentEntity.CONTROL, control)
+      .where(RDocumentEntity.UID.eq(document_id))
+      .get()
+      .value();
   }
 
   @Override
