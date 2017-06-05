@@ -118,6 +118,9 @@ public class DecisionManager implements DecisionInterface, DecisionBuilder.Callb
       if ( block.getToFamiliarization() == null ) {
         block.setToFamiliarization( false );
       }
+      if ( block.getToCopy() == null ) {
+        block.setToCopy( false );
+      }
 
       block.setAskToReport( block.getAppealText().contains("дол") );
       block.setAskToAcquaint( block.getAppealText().contains("озн") );
@@ -127,7 +130,6 @@ public class DecisionManager implements DecisionInterface, DecisionBuilder.Callb
         if ( performer.getIsOriginal() == null ) {
           performer.setIsOriginal( false );
         }
-
         if ( performer.getIsResponsible() == null ) {
           performer.setIsResponsible( false );
         }
