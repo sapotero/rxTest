@@ -45,6 +45,7 @@ public class Settings {
   private static String ONLY_URGENT_KEY;
   private static String JOURNALS_KEY;
   private static String START_PAGE_KEY;
+  private static String START_JOURNAL_KEY;
   private static String SHOW_WITHOUT_PROJECT_KEY;
   private static String HIDE_PRIMARY_CONSIDERATION_KEY;
   private static String HIDE_BUTTONS_KEY;
@@ -90,6 +91,7 @@ public class Settings {
   private Preference<Set<String>> journals;
   private Preference<String> prevDialogComment;
   private Preference<String> startPage;
+  private Preference<String> startJournal;
   private Preference<Boolean> showWithoutProject;
   private Preference<Boolean> hidePrimaryConsideration;
   private Preference<Boolean> hideButtons;
@@ -120,6 +122,7 @@ public class Settings {
     ONLY_URGENT_KEY                = context.getResources().getString(R.string.only_urgent_key);
     JOURNALS_KEY                   = context.getResources().getString(R.string.journals_key);
     START_PAGE_KEY                 = context.getResources().getString(R.string.start_page_key);
+    START_JOURNAL_KEY                 = context.getResources().getString(R.string.start_journal_key);
     SHOW_WITHOUT_PROJECT_KEY       = context.getResources().getString(R.string.show_without_project_key);
     HIDE_PRIMARY_CONSIDERATION_KEY = context.getResources().getString(R.string.hide_primary_consideration_key);
     HIDE_BUTTONS_KEY               = context.getResources().getString(R.string.hide_buttons_key);
@@ -162,6 +165,7 @@ public class Settings {
     journals                       = settings.getStringSet(JOURNALS_KEY);
     prevDialogComment              = settings.getString(PREV_DIALOG_COMMENT_KEY);
     startPage                      = settings.getString(START_PAGE_KEY);
+    startJournal                   = settings.getString(START_JOURNAL_KEY);
     showWithoutProject             = settings.getBoolean(SHOW_WITHOUT_PROJECT_KEY);
     hidePrimaryConsideration       = settings.getBoolean(HIDE_PRIMARY_CONSIDERATION_KEY);
     hideButtons                    = settings.getBoolean(HIDE_BUTTONS_KEY);
@@ -477,6 +481,10 @@ public class Settings {
 
   public String getStartPage() {
     return getString(startPage);
+  }
+
+  public String getStartJournal() {
+    return getString(startJournal);
   }
 
   public boolean isShowWithoutProject() {

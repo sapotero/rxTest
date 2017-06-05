@@ -14,8 +14,16 @@
         android:title="Настройки главного окна">
 
         <ListPreference
-            android:key="@string/start_page_key"
+            android:key="@string/start_journal_key"
             android:title="Стартовая страница"
+            android:summary="Выберете страницу, которая будет отображаться по умолчанию"
+            android:defaultValue="0"
+            android:entries="@array/settings_view_start_journal"
+            android:entryValues="@array/settings_view_start_journal_values" />
+
+        <ListPreference
+            android:key="@string/start_page_key"
+            android:title="Стартовая вкладка"
             android:summary="Выберете страницу, которая будет отображаться по умолчанию"
             android:defaultValue="report"
             android:entries="@array/settings_view_start_page"
