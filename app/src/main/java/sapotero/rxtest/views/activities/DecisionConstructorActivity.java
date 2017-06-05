@@ -106,6 +106,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   private String originalSigner;
   private String originalSignerBlankText;
   private String originalSignerId;
+  private String originalSignerPosition;
   private String originalSignerAssistantId;
   private ArrayList<UrgencyItem> urgency = new ArrayList<UrgencyItem>();
 
@@ -247,12 +248,14 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
                 raw_decision.setSignerId(originalSignerId);
                 raw_decision.setSigner(originalSigner);
                 raw_decision.setSignerBlankText(originalSignerBlankText);
+                raw_decision.setSignerPositionS(originalSignerPosition);
                 raw_decision.setAssistantId(originalSignerAssistantId);
 
                 if (rDecisionEntity != null) {
                   rDecisionEntity.setSignerId(originalSignerId);
                   rDecisionEntity.setSigner(originalSigner);
                   rDecisionEntity.setSignerBlankText(originalSignerBlankText);
+                  rDecisionEntity.setSignerPositionS(originalSignerPosition);
                   rDecisionEntity.setAssistantId(originalSignerAssistantId);
                 }
 
@@ -489,6 +492,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
               getCurrentUserId(),
               getCurrentUserName(),
               getCurrentUserOrganization(),
+              getCurrentUserPosition(),
               null
       );
 
@@ -504,8 +508,9 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     } else {
       String signerName = getCurrentUserName();
       String signerOrganization = getCurrentUserOrganization();
+      String signerPosition = getCurrentUserPosition();
       raw_decision.setSignerId( getCurrentUserId() );
-      raw_decision.setSigner( makeSignerWithOrganizationText(signerName, signerOrganization) );
+      raw_decision.setSigner( makeSignerWithOrganizationText(signerName, signerOrganization, signerPosition) );
       raw_decision.setSignerBlankText( signerName );
       signer_oshs_selector.setText( raw_decision.getSigner() );
     }
@@ -605,6 +610,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     originalSignerId = raw_decision.getSignerId();
     originalSigner = raw_decision.getSigner();
     originalSignerBlankText = raw_decision.getSignerBlankText();
+    originalSignerPosition = raw_decision.getSignerPositionS();
     originalSignerAssistantId = raw_decision.getAssistantId();
 
 
@@ -803,6 +809,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
         raw_decision.setAssistantId(rDecisionEntity.getAssistantId());
         raw_decision.setSignerBlankText(rDecisionEntity.getSignerBlankText());
         raw_decision.setSignerIsManager(rDecisionEntity.isSignerIsManager());
+        raw_decision.setSignerPositionS(rDecisionEntity.getSignerPositionS());
         raw_decision.setComment(rDecisionEntity.getComment());
         raw_decision.setDate(rDecisionEntity.getDate());
         raw_decision.setUrgencyText(rDecisionEntity.getUrgencyText());
@@ -863,13 +870,15 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
         String signerName = getCurrentUserName();
         String signerOrganization = getCurrentUserOrganization();
+        String signerPosition = getCurrentUserPosition();
 
         raw_decision = new Decision();
         raw_decision.setLetterhead("Бланк резолюции");
         raw_decision.setShowPosition(true);
         raw_decision.setSignerId(getCurrentUserId());
-        raw_decision.setSigner(makeSignerWithOrganizationText(signerName, signerOrganization));
+        raw_decision.setSigner(makeSignerWithOrganizationText(signerName, signerOrganization, signerPosition));
         raw_decision.setSignerBlankText(signerName);
+        raw_decision.setSignerPositionS(signerPosition);
         raw_decision.setUrgencyText("");
         raw_decision.setId(null);
         raw_decision.setDate(date);
@@ -978,7 +987,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     public void onSearchSuccess (Oshs user, CommandFactory.Operation operation, String uid){
       Timber.tag(TAG).e("USER: %s", new Gson().toJson(user));
 
-      updateSigner(user.getId(), user.getName(), user.getOrganization(), user.getAssistantId());
+      updateSigner(user.getId(), user.getName(), user.getOrganization(), user.getPosition(), user.getAssistantId());
 
       // resolved https://tasks.n-core.ru/browse/MVDESD-13438
       // Добавить настройку наличия кнопки Согласовать в Первичном рассмотрении
@@ -992,15 +1001,16 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
     }
 
-    private void updateSigner (String signerId, String signerName, String signerOrganization, String
-    assistantId){
+    private void updateSigner (String signerId, String signerName, String signerOrganization,
+                               String signerPosition, String assistantId) {
 
-      String name = makeSignerWithOrganizationText(signerName, signerOrganization);
+      String name = makeSignerWithOrganizationText(signerName, signerOrganization, signerPosition);
 
       if (rDecisionEntity != null) {
         rDecisionEntity.setSignerId(signerId);
         rDecisionEntity.setSigner(name);
         rDecisionEntity.setSignerBlankText(signerName);
+        rDecisionEntity.setSignerPositionS(signerPosition);
 
         if (assistantId != null) {
           rDecisionEntity.setAssistantId(assistantId);
@@ -1010,6 +1020,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       manager.setSignerId(signerId);
       manager.setSigner(name);
       manager.setSignerBlankText(signerName);
+      manager.getDecision().setSignerPositionS(signerPosition);
 
       if (assistantId != null) {
         manager.setAssistantId(assistantId);
@@ -1021,11 +1032,15 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       manager.update();
     }
 
-    private String makeSignerWithOrganizationText (String signerName, String signerOrganization){
+    private String makeSignerWithOrganizationText (String signerName, String signerOrganization, String signerPosition) {
       String name = signerName;
 
       if (!name.endsWith(")")) {
-        name = String.format("%s (%s)", name, signerOrganization);
+        if (signerPosition != null && !Objects.equals(signerPosition, "")) {
+          name = String.format("%s (%s, %s)", name, signerOrganization, signerPosition);
+        } else {
+          name = String.format("%s (%s)", name, signerOrganization);
+        }
       }
 
       return name;
@@ -1041,6 +1056,10 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
     private String getCurrentUserOrganization () {
       return settings.getCurrentUserOrganization();
+    }
+
+    private String getCurrentUserPosition () {
+      return settings.getCurrentUserPosition();
     }
 
     @Override
