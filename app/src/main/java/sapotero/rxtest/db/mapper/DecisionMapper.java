@@ -37,7 +37,7 @@ public class DecisionMapper extends AbstractMapper<Decision, RDecisionEntity> {
     entity.setShowPosition(model.getShowPosition());
     entity.setSignBase64(model.getSignBase64());
     entity.setRed(model.getRed());
-    entity.setLetterheadFontSize(model.getLetterhead());
+    entity.setLetterheadFontSize(model.getLetterheadFontSize());
     entity.setPerformerFontSize(model.getPerformersFontSize());
 
     if ( notEmpty( model.getBlocks() ) ) {

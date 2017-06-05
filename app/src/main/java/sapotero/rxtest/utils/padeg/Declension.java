@@ -78,12 +78,16 @@ public class Declension {
     // 6 - предложный падеж
 
     if (decl) {
-      if (forAcquaint) {
-        // Если Прошу ознакомить, то винительный падеж
-        tempName = Padeg.getFIOPadegFS(tempName, gender, 4);
-      } else {
-        // По умолчанию и если Прошу доложить, то дательный падеж
-        tempName = Padeg.getFIOPadegFS(tempName, gender, 3);
+      try {
+        if (forAcquaint) {
+          // Если Прошу ознакомить, то винительный падеж
+          tempName = Padeg.getFIOPadegFS(tempName, gender, 4);
+        } else {
+          // По умолчанию и если Прошу доложить, то дательный падеж
+          tempName = Padeg.getFIOPadegFS(tempName, gender, 3);
+        }
+      } catch (Exception error) {
+        Timber.tag("Declension").e(error);
       }
     }
 

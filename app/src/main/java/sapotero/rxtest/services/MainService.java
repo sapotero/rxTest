@@ -959,7 +959,7 @@ public class MainService extends Service {
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13017
   // При первом запуске выгружаем все избранные с ЭО
-  @Subscribe(threadMode = ThreadMode.BACKGROUND)
+  @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(FolderCreatedEvent event){
     String type = event.getType();
     if (type == null) {

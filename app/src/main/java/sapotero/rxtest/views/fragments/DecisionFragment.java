@@ -417,6 +417,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     }
 
     Block block = new Block();
+    block.setId(this.block.getId());
     block.setNumber(number);
     block.setText( decision_text.getText().toString() );
     block.setAppealText( appealText );

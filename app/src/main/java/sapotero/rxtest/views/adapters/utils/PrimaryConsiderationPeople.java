@@ -6,6 +6,8 @@ public class PrimaryConsiderationPeople implements IPerformer {
 
   private String assistantId = null;
 
+  private String uid;
+
   private String id;
   private String name;
   private String position;
@@ -34,6 +36,13 @@ public class PrimaryConsiderationPeople implements IPerformer {
     this.assistantId = assistantId;
   }
 
+  public String getUid() {
+    return uid;
+  }
+
+  public void setUid(String uid) {
+    this.uid = uid;
+  }
 
   public String getPosition() {
     return position;
@@ -97,6 +106,16 @@ public class PrimaryConsiderationPeople implements IPerformer {
 
   public void setIsOrganization(boolean organization) {
     isOrganization = organization;
+  }
+
+  @Override
+  public String getIPerformerUid() {
+    return getUid();
+  }
+
+  @Override
+  public void setIPerformerUid(String uid) {
+    setUid(uid);
   }
 
   @Override
