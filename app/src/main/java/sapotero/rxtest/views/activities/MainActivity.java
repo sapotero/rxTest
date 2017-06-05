@@ -302,7 +302,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       store.clear();
     }
 
-
     int columnCount = 2;
     int spacing = 32;
 
@@ -364,8 +363,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
           dataLoader.updateAuth(null);
           updateByStatus();
-          store.clear();
-          dbQueryBuilder.execute();
 
 //          if (menuBuilder.getItem() != MainMenuItem.PROCESSED || menuBuilder.getItem() != MainMenuItem.FAVORITES ){
 //            updateProgressBar();
