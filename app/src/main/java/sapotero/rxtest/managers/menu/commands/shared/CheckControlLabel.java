@@ -107,18 +107,21 @@ public class CheckControlLabel extends AbstractCommand {
           Timber.tag(TAG).i("error: %s", result.getMessage());
           Timber.tag(TAG).i("type: %s", result.getType());
 
-          store.commit(
-            store.startTransactionFor(document_id)
-              .removeLabel(LabelType.SYNC)
-          );
-
           if ( Objects.equals(result.getType(), "danger") && result.getMessage() != null){
             EventBus.getDefault().post( new ShowSnackEvent( result.getMessage() ));
             setAsError();
             setControl(false);
+            queueManager.setExecutedWithError(this, Collections.singletonList( result.getMessage() ));
+          } else {
+            if (callback != null){
+              callback.onCommandExecuteSuccess(getType());
+            }
+            store.commit(
+              store.startTransactionFor(document_id)
+                .removeLabel(LabelType.SYNC)
+            );
+            queueManager.setExecutedRemote(this);
           }
-
-          queueManager.setExecutedRemote(this);
         },
         error -> {
           if (callback != null){
