@@ -106,6 +106,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   private String originalSigner;
   private String originalSignerBlankText;
   private String originalSignerId;
+  private String originalSignerPosition;
   private String originalSignerAssistantId;
   private ArrayList<UrgencyItem> urgency = new ArrayList<UrgencyItem>();
 
@@ -247,12 +248,14 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
                 raw_decision.setSignerId(originalSignerId);
                 raw_decision.setSigner(originalSigner);
                 raw_decision.setSignerBlankText(originalSignerBlankText);
+                raw_decision.setSignerPositionS(originalSignerPosition);
                 raw_decision.setAssistantId(originalSignerAssistantId);
 
                 if (rDecisionEntity != null) {
                   rDecisionEntity.setSignerId(originalSignerId);
                   rDecisionEntity.setSigner(originalSigner);
                   rDecisionEntity.setSignerBlankText(originalSignerBlankText);
+                  rDecisionEntity.setSignerPositionS(originalSignerPosition);
                   rDecisionEntity.setAssistantId(originalSignerAssistantId);
                 }
 
@@ -607,6 +610,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     originalSignerId = raw_decision.getSignerId();
     originalSigner = raw_decision.getSigner();
     originalSignerBlankText = raw_decision.getSignerBlankText();
+    originalSignerPosition = raw_decision.getSignerPositionS();
     originalSignerAssistantId = raw_decision.getAssistantId();
 
 
