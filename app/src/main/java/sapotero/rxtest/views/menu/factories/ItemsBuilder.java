@@ -84,8 +84,6 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
       @RequiresApi(api = Build.VERSION_CODES.M)
       @Override
       public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-//        Timber.tag(TAG).w( journalSpinnerAdapter.getItem(position).getName() );
-
         updateView();
       }
 
@@ -123,6 +121,10 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
 
     journalSpinnerAdapter = new DocumentTypeAdapter(context, document_types);
     journalSpinner.setAdapter(journalSpinnerAdapter);
+
+    if (settings.getStartJournal() != null){
+      journalSpinner.setSelection( Integer.parseInt( settings.getStartJournal() ) );
+    }
   }
 
   public void prev() {
@@ -249,12 +251,6 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
     view.setLayoutParams(params);
     return view;
   }
-
-  public void update() {
-    updateView();
-  }
-
-
 
   @Override
   public void onButtonBuilderUpdate(Integer index) {
