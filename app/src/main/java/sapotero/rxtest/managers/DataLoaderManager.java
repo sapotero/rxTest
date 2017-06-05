@@ -108,6 +108,7 @@ public class DataLoaderManager {
               setCurrentUser(user.getName());
               setCurrentUserId(user.getId());
               setCurrentUserOrganization(user.getOrganization());
+              setCurrentUserPosition(user.getPosition());
 
               // получаем папки
               subscriptionInitV2.add(
@@ -237,6 +238,10 @@ public class DataLoaderManager {
 
   private void setCurrentUserOrganization(String organization) {
     settings.setCurrentUserOrganization(organization);
+  }
+
+  private void setCurrentUserPosition(String position) {
+    settings.setCurrentUserPosition(position);
   }
 
   public void setPassword(String password) {
