@@ -92,7 +92,7 @@ public class MemoryStore implements Processable{
 
   }
 
-  public void load(){
+  public void clear(){
     documents.clear();
     loadFromDB();
   };

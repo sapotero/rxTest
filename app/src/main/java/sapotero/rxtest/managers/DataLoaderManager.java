@@ -62,8 +62,7 @@ public class DataLoaderManager {
   @Inject Settings settings;
   @Inject JobManager jobManager;
   @Inject SingleEntityStore<Persistable> dataStore;
-  @Inject
-  MemoryStore store;
+  @Inject MemoryStore store;
 
   private SimpleDateFormat dateFormat;
   private CompositeSubscription subscription;

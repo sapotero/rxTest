@@ -57,6 +57,7 @@ import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
 import sapotero.rxtest.managers.DataLoaderManager;
 import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
@@ -76,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @Inject Settings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject QueueManager queue;
+  @Inject MemoryStore store;
 
 
   @BindView(R.id.toolbar) Toolbar toolbar;
@@ -296,6 +298,11 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void initAdapters() {
+    if (settings.isFirstRun()){
+      store.clear();
+    }
+
+
     int columnCount = 2;
     int spacing = 32;
 
@@ -308,9 +315,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     rv.setAdapter(RAdapter);
 
 
+
     organization_adapter = new OrganizationAdapter(this, new ArrayList<>());
     ORGANIZATION_SELECTOR.setAdapter(organization_adapter, true, selected -> {
-//      dbQueryBuilder.execute(false);
       dbQueryBuilder.execute();
     });
   }
@@ -357,6 +364,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
           dataLoader.updateAuth(null);
           updateByStatus();
+          store.clear();
+          dbQueryBuilder.execute();
 
 //          if (menuBuilder.getItem() != MainMenuItem.PROCESSED || menuBuilder.getItem() != MainMenuItem.FAVORITES ){
 //            updateProgressBar();
