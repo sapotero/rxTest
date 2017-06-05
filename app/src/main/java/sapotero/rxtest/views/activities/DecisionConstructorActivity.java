@@ -1032,7 +1032,11 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       String name = signerName;
 
       if (!name.endsWith(")")) {
-        name = String.format("%s (%s, %s)", name, signerOrganization, signerPosition);
+        if (signerPosition != null && !Objects.equals(signerPosition, "")) {
+          name = String.format("%s (%s, %s)", name, signerOrganization, signerPosition);
+        } else {
+          name = String.format("%s (%s)", name, signerOrganization);
+        }
       }
 
       return name;
