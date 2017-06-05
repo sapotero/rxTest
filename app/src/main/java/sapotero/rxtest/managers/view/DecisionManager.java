@@ -9,6 +9,8 @@ import android.support.v4.app.FragmentManager;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 import javax.inject.Inject;
@@ -73,10 +75,14 @@ public class DecisionManager implements DecisionInterface, DecisionBuilder.Callb
 
   }
 
+  private <T> List<T> nullGuard(List<T> list) {
+    return list != null ? list : Collections.EMPTY_LIST;
+  }
+
   @NonNull
   private String setDecisionHash( Decision decision) {
 
-    String data = new Gson().toJson(decision, Decision.class);
+    String data = getDecisionJsonForHash( decision );
     StringBuilder sb = new StringBuilder();
 
     byte[] digest = data.getBytes();
@@ -89,6 +95,38 @@ public class DecisionManager implements DecisionInterface, DecisionBuilder.Callb
       }
     }
   return sb.toString();
+  }
+
+  // Return decision JSON with ignored fields
+  // (this is needed for correct detection of changes in decision)
+  private String getDecisionJsonForHash(Decision sourceDecision) {
+    // Create new decision from source decision (needed to keep source decision unchanged)
+    Gson gson = new Gson();
+    String data = gson.toJson(sourceDecision, Decision.class);
+    Decision decisionForHash = gson.fromJson(data, Decision.class);
+
+    if ( settings.isShowDecisionDateUpdate() ) {
+      decisionForHash.setDate( null );
+    }
+
+    for ( Block block : nullGuard( decisionForHash.getBlocks() ) ) {
+      if ( block.getAppealText() == null ) {
+        block.setAppealText( "" );
+      }
+
+      block.setAskToReport( block.getAppealText().contains("дол") );
+      block.setAskToAcquaint( block.getAppealText().contains("озн") );
+      block.setNumber( null );
+
+      for ( Performer performer : nullGuard( block.getPerformers() ) ) {
+        performer.setPerformerType( null );
+        performer.setNumber( null );
+      }
+    }
+
+    data = gson.toJson(decisionForHash, Decision.class);
+
+    return data;
   }
 
   public DecisionBuilder getDecisionBuilder(){
