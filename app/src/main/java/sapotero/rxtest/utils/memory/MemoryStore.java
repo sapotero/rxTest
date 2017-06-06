@@ -72,6 +72,10 @@ public class MemoryStore implements Processable{
             pub.onNext( doc );
           }
 
+          if (docs.size() > 0){
+            counterRecreate();
+          }
+
         },
         Timber::e
       );
@@ -82,7 +86,7 @@ public class MemoryStore implements Processable{
   }
 
   public void counterRecreate() {
-    counter.recreate(documents);
+//    counter.recreate(documents);
     EventBus.getDefault().post( new RecalculateMenuEvent());
   }
 

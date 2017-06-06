@@ -409,6 +409,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     initEvents();
     startNetworkCheck();
 
+    EventBus.getDefault().post( new RecalculateMenuEvent());
+
   }
 
   private void startNetworkCheck() {

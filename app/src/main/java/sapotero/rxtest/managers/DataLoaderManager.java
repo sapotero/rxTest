@@ -665,22 +665,26 @@ public class DataLoaderManager {
 
     if ( settings.isSignedWithDc() ){
 
-      String sign = "";
-      try {
-        sign = MainService.getFakeSign( settings.getPin(), null );
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
+      authSubscription= Observable.just("")
+        .map( data -> {
 
-      Map<String, Object> map = new HashMap<>();
-      map.put( "sign", sign );
+          String sign = "";
+          try {
+            sign = MainService.getFakeSign( settings.getPin(), null );
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
 
-      RequestBody json = RequestBody.create(
-        MediaType.parse("application/json"),
-        new JSONObject( map ).toString()
-      );
+          Map<String, Object> map = new HashMap<>();
+          map.put( "sign", sign );
 
-      authSubscription = auth.getAuthBySign(json);
+          return RequestBody.create(
+            MediaType.parse("application/json"),
+            new JSONObject( map ).toString()
+          );
+        })
+        .flatMap(auth::getAuthBySign);
+
     } else {
       authSubscription = auth.getAuth( settings.getLogin(), settings.getPassword() );
     }

@@ -11,12 +11,9 @@ import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
-import com.google.gson.Gson;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 import javax.inject.Inject;
@@ -34,7 +31,6 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.utils.memory.MemoryStore;
-import sapotero.rxtest.utils.memory.models.Counter;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.utils.memory.utils.Filter;
 import timber.log.Timber;
@@ -181,42 +177,42 @@ public class ButtonBuilder {
 
 
     Filter filter = new Filter(_conditions);
-
-    ArrayList<String> types    = filter.getTypes();
-    ArrayList<String> statuses = filter.getStatuses();
-
-    Timber.i( "type: %s, statuses: %s , processed: %s", new Gson().toJson(types),  new Gson().toJson(statuses), filter.getProcessed() );
-
-    Counter counter = store.getCounter();
-
-    Counter.Status status = null;
-    if (statuses.size() > 0){
-      status = Counter.Status.getStatus(filter.getStatuses().get(0));
-    }
-
-    Counter.Document type = null;
-
-    if (types.size() > 0){
-      type = Counter.Document.getType(types.get(0));
-    }
-    if ( filter.getProcessed() ){
-      type = Counter.Document.PROCESSED;
-    }
-
-
-    Timber.w("COUNTER: %s %s", status, type );
-
-    try {
-      if (type != null && status != null) {
-
-        Map<Counter.Document, Integer> docs = counter.getData().get(status);
-        if (docs != null && docs.containsKey(type)){
-          Timber.w("FROM COUNTER: %s", docs.get(type) );
-        }
-      }
-    } catch (Exception e) {
-      Timber.e(e);
-    }
+//
+//    ArrayList<String> types    = filter.getTypes();
+//    ArrayList<String> statuses = filter.getStatuses();
+//
+//    Timber.i( "type: %s, statuses: %s , processed: %s", new Gson().toJson(types),  new Gson().toJson(statuses), filter.getProcessed() );
+//
+//    Counter counter = store.getCounter();
+//
+//    Counter.Status status = null;
+//    if (statuses.size() > 0){
+//      status = Counter.Status.getStatus(filter.getStatuses().get(0));
+//    }
+//
+//    Counter.Document type = null;
+//
+//    if (types.size() > 0){
+//      type = Counter.Document.getType(types.get(0));
+//    }
+//    if ( filter.getProcessed() ){
+//      type = Counter.Document.PROCESSED;
+//    }
+//
+//
+//    Timber.w("COUNTER: %s %s", status, type );
+//
+//    try {
+//      if (type != null && status != null) {
+//
+//        Map<Counter.Document, Integer> docs = counter.getData().get(status);
+//        if (docs != null && docs.containsKey(type)){
+//          Timber.w("FROM COUNTER: %s", docs.get(type) );
+//        }
+//      }
+//    } catch (Exception e) {
+//      Timber.e(e);
+//    }
 
 
     Observable

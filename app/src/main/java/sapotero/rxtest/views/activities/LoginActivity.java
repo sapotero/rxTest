@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -61,14 +63,18 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
     EsdApplication.getDataComponent().inject(this);
 
     initialize();
+    LoginActivity context = this;
 
     cryptoProInstalled = appInstalled("ru.cprocsp.ACSP");
 
     if( cryptoProInstalled ) {
 
-      startService(new Intent(this, MainService.class));
 
-      // Check for permissions if the activity previously not existed
+
+      Handler handler = new Handler( Looper.getMainLooper() );
+
+      handler.postDelayed(() -> startService(new Intent(context, MainService.class)), 1000);
+
       if (null == savedInstanceState) {
         check_permissions();
       }
