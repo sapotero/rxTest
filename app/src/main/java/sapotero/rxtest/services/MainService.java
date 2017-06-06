@@ -852,13 +852,13 @@ public class MainService extends Service {
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(interval -> {
         dataLoaderInterface.updateAuth(SIGN);
-      });
+      }, Timber::e);
 
     settings.getLoginPreference()
       .asObservable()
       .subscribe(username -> {
         user = username;
-      });
+      }, Timber::e);
   }
 
   public void updateAll(){

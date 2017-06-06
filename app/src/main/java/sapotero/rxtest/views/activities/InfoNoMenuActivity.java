@@ -155,7 +155,7 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
         .subscribeOn(AndroidSchedulers.mainThread())
         .subscribe( folder -> {
           Timber.e( "%s - %s ", folder.getType(), folder.getTitle() );
-        });
+        }, Timber::e);
 
       if ( showInfoCard ){
 

@@ -109,7 +109,7 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
           showPassword();
           break;
       }
-    });
+    }, Timber::e);
   }
 
   private void hideAllFields(){

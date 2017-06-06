@@ -55,7 +55,7 @@ public class CreateTemplatesJob extends BaseJob {
       .observeOn(Schedulers.io())
       .subscribe(u -> {
         Timber.tag(TAG).v("addByOne " + u.getTitle() );
-      });
+      }, Timber::e);
   }
 
 

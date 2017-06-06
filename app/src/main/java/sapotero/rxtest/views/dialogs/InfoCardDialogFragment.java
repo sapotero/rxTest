@@ -68,7 +68,7 @@ public class InfoCardDialogFragment extends DialogFragment implements View.OnCli
           e.printStackTrace();
         }
 
-      });
+      }, Timber::e);
 
   }
 

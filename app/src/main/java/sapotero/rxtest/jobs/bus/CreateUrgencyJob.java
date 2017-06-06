@@ -56,7 +56,7 @@ public class CreateUrgencyJob extends BaseJob {
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(u -> {
         Timber.tag(TAG).v("addByOne " + u.getName() );
-      });
+      }, Timber::e);
   }
 
 
