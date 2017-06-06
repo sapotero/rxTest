@@ -4,8 +4,6 @@ import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.util.Objects;
-
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Retrofit;
@@ -15,8 +13,6 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.models.decisions.RDisplayFirstDecision;
-import sapotero.rxtest.db.requery.models.decisions.RDisplayFirstDecisionEntity;
 import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
@@ -161,26 +157,7 @@ public class AddDecision extends AbstractCommand {
             EventBus.getDefault().post( new ForceUpdateDocumentEvent( data.getDocumentUid() ));
           } else {
 
-            String decisionUid = data.getDecisionUid();
-
-            // Если создал резолюцию я и подписант я, то сохранить UID этой резолюции в отдельную таблицу
-            if ( decisionUid != null && !decisionUid.equals("") ) {
-              if ( Objects.equals( data.getDecisionSignerId(), settings.getCurrentUserId() ) ) {
-                RDisplayFirstDecisionEntity rDisplayFirstDecisionEntity = new RDisplayFirstDecisionEntity();
-                rDisplayFirstDecisionEntity.setDecisionUid( decisionUid );
-                rDisplayFirstDecisionEntity.setUserId( settings.getCurrentUserId() );
-
-                dataStore
-                  .insert( rDisplayFirstDecisionEntity )
-                  .toObservable()
-                  .subscribeOn(Schedulers.computation())
-                  .observeOn(AndroidSchedulers.mainThread())
-                  .subscribe(
-                    result -> Timber.tag(TAG).v("Added decision to display first decision table"),
-                    error -> Timber.tag(TAG).e(error)
-                  );
-              }
-            }
+            checkCreatorAndSignerIsCurrentUser(data, TAG);
 
             if (callback != null ){
               callback.onCommandExecuteSuccess( getType() );

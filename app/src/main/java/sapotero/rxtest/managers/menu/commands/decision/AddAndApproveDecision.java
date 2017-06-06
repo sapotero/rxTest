@@ -185,10 +185,12 @@ public class AddAndApproveDecision extends AbstractCommand {
 
           queueManager.setExecutedRemote(this);
 
-//          if (data.getErrors() !=null && data.getErrors().size() > 0){
+          if (data.getErrors() !=null && data.getErrors().size() > 0){
 //            queueManager.setExecutedWithError(this, data.getErrors());
 //            EventBus.getDefault().post( new ForceUpdateDocumentEvent( data.getDocumentUid() ));
-//          } else {
+          } else {
+
+              checkCreatorAndSignerIsCurrentUser(data, TAG);
 //
 //            if (callback != null ){
 //              callback.onCommandExecuteSuccess( getType() );
@@ -196,7 +198,7 @@ public class AddAndApproveDecision extends AbstractCommand {
 //            }
 //
 //            queueManager.setExecutedRemote(this);
-//          }
+          }
 
         },
         error -> {
