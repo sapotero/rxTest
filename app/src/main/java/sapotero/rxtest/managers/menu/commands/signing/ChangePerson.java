@@ -18,6 +18,8 @@ import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.services.MainService;
+import sapotero.rxtest.utils.memory.fields.FieldType;
+import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
 public class ChangePerson extends AbstractCommand {
@@ -46,6 +48,13 @@ public class ChangePerson extends AbstractCommand {
   public void execute() {
     queueManager.add(this);
     EventBus.getDefault().post( new ShowNextDocumentEvent());
+    store.process(
+      store.startTransactionFor( getUid() )
+        .setLabel(LabelType.SYNC)
+        .setField(FieldType.PROCESSED, true)
+        .setField(FieldType.MD5, "")
+    );
+
   }
 
   @Override
@@ -57,17 +66,21 @@ public class ChangePerson extends AbstractCommand {
   public void executeLocal() {
     int count = dataStore
       .update(RDocumentEntity.class)
-//      .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue() )
       .set( RDocumentEntity.PROCESSED, true)
       .set( RDocumentEntity.MD5, "" )
       .set( RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq(params.getDocument() != null ? params.getDocument(): settings.getUid()))
+      .where(RDocumentEntity.UID.eq(
+        getUid()))
       .get()
       .value();
     if (callback != null){
       callback.onCommandExecuteSuccess(getType());
     }
     queueManager.setExecutedLocal(this);
+  }
+
+  private String getUid() {
+    return params.getDocument() != null ? params.getDocument(): settings.getUid();
   }
 
   @Override
@@ -84,7 +97,7 @@ public class ChangePerson extends AbstractCommand {
     OperationService operationService = retrofit.create( OperationService.class );
 
     ArrayList<String> uids = new ArrayList<>();
-    uids.add( params.getDocument() != null ? params.getDocument(): settings.getUid() );
+    uids.add(getUid());
 
     String comment = null;
     if ( params.getComment() != null ){
@@ -119,11 +132,24 @@ public class ChangePerson extends AbstractCommand {
           Timber.tag(TAG).i("error: %s", data.getMessage());
           Timber.tag(TAG).i("type: %s", data.getType());
           queueManager.setExecutedRemote(this);
+
+          store.process(
+            store.startTransactionFor( getUid() )
+              .removeLabel(LabelType.SYNC)
+              .setField(FieldType.MD5, "")
+          );
         },
         error -> {
           if (callback != null){
             callback.onCommandExecuteError(getType());
           }
+
+          store.process(
+            store.startTransactionFor( getUid() )
+              .removeLabel(LabelType.SYNC)
+              .setField(FieldType.PROCESSED, false)
+          );
+
         }
       );
 

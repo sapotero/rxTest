@@ -25,7 +25,6 @@ import javax.inject.Inject;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
@@ -39,7 +38,7 @@ import sapotero.rxtest.views.activities.InfoActivity;
 import sapotero.rxtest.views.activities.MainActivity;
 import timber.log.Timber;
 
-public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.DocumentViewHolder> implements Action1<List<Document>> {
+public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.DocumentViewHolder> {
 
   @Inject Settings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
@@ -49,12 +48,6 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
   private List<InMemoryDocument> documents;
   private Context mContext;
   private final String TAG = this.getClass().getSimpleName();
-
-  @Override
-  public void call(List<Document> documents) {
-
-  }
-
 
   public void removeAllWithRange() {
     Holder.MAP.clear();
@@ -75,8 +68,8 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
   private void initSubscription() {
     store
       .getPublishSubject()
-      .onBackpressureBuffer(32)
-      .buffer(100, TimeUnit.MILLISECONDS)
+      .buffer(500, TimeUnit.MILLISECONDS)
+      .onBackpressureBuffer(64)
       .onBackpressureDrop()
       .subscribeOn(Schedulers.computation())
       .observeOn(AndroidSchedulers.mainThread())

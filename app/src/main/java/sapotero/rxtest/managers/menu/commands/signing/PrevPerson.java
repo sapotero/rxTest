@@ -20,7 +20,6 @@ import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.memory.fields.FieldType;
 import sapotero.rxtest.utils.memory.fields.LabelType;
-import sapotero.rxtest.utils.memory.utils.Transaction;
 import timber.log.Timber;
 
 public class PrevPerson extends AbstractCommand {
@@ -60,12 +59,12 @@ public class PrevPerson extends AbstractCommand {
     queueManager.add(this);
     EventBus.getDefault().post( new ShowNextDocumentEvent());
 
-    Transaction transaction = new Transaction();
-    transaction
-      .from( store.getDocuments().get(params.getDocument()) )
-      .setField(FieldType.PROCESSED, true)
-      .setLabel(LabelType.SYNC);
-    store.process( transaction );
+    store.process(
+      store.startTransactionFor( getUid() )
+        .setLabel(LabelType.SYNC)
+        .setField(FieldType.PROCESSED, true)
+        .setField(FieldType.MD5, "")
+    );
 
   }
 
@@ -82,7 +81,7 @@ public class PrevPerson extends AbstractCommand {
       .set( RDocumentEntity.PROCESSED, true)
       .set( RDocumentEntity.MD5, "" )
       .set( RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq(params.getDocument() != null ? params.getDocument(): document.getUid()))
+      .where(RDocumentEntity.UID.eq(getUid()))
       .get()
       .value();
 
@@ -107,7 +106,7 @@ public class PrevPerson extends AbstractCommand {
     OperationService operationService = retrofit.create( OperationService.class );
 
     ArrayList<String> uids = new ArrayList<>();
-    uids.add( params.getDocument() != null ? params.getDocument(): document.getUid() );
+    uids.add(getUid());
 
     String comment = null;
     if ( params.getComment() != null ){
@@ -141,28 +140,30 @@ public class PrevPerson extends AbstractCommand {
 
           queueManager.setExecutedRemote(this);
 
-
-          Transaction transaction = new Transaction();
-          transaction
-            .from( store.getDocuments().get(params.getDocument()) )
-            .removeLabel(LabelType.SYNC);
-          store.process( transaction );
-
+          store.process(
+            store.startTransactionFor( getUid() )
+              .removeLabel(LabelType.SYNC)
+              .setField(FieldType.MD5, "")
+          );
         },
         error -> {
           if (callback != null){
             callback.onCommandExecuteError(getType());
           }
 
-          Transaction transaction = new Transaction();
-          transaction
-            .from( store.getDocuments().get(params.getDocument()) )
-            .setField(FieldType.PROCESSED, false)
-            .removeLabel(LabelType.SYNC);
-          store.process( transaction );
+          store.process(
+            store.startTransactionFor( getUid() )
+              .removeLabel(LabelType.SYNC)
+              .setField(FieldType.PROCESSED, false)
+          );
+
         }
       );
 
+  }
+
+  private String getUid() {
+    return params.getDocument() != null ? params.getDocument(): document.getUid();
   }
 
   @Override

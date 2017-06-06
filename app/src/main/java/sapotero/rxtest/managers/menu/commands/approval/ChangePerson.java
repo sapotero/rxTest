@@ -18,6 +18,8 @@ import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.services.MainService;
+import sapotero.rxtest.utils.memory.fields.FieldType;
+import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
 public class ChangePerson extends AbstractCommand {
@@ -49,7 +51,19 @@ public class ChangePerson extends AbstractCommand {
   @Override
   public void execute() {
     queueManager.add(this);
+
+    store.process(
+      store.startTransactionFor( getUid() )
+        .setLabel(LabelType.SYNC)
+        .setField(FieldType.PROCESSED, true)
+        .setField(FieldType.MD5, "")
+    );
+
     EventBus.getDefault().post( new ShowNextDocumentEvent());
+  }
+
+  private String getUid() {
+    return params.getDocument() != null ? params.getDocument() : settings.getUid();
   }
 
   @Override
@@ -59,7 +73,7 @@ public class ChangePerson extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    String uid = params.getDocument() != null ? params.getDocument() : settings.getUid();
+    String uid = getUid();
 
     int count = dataStore
       .update(RDocumentEntity.class)
@@ -94,7 +108,7 @@ public class ChangePerson extends AbstractCommand {
     OperationService operationService = retrofit.create( OperationService.class );
 
     ArrayList<String> uids = new ArrayList<>();
-    String uid = params.getDocument() != null ? params.getDocument() : settings.getUid();
+    String uid = getUid();
 
     uids.add(uid);
 
@@ -132,16 +146,22 @@ public class ChangePerson extends AbstractCommand {
 
           queueManager.setExecutedRemote(this);
 
-//          store.removeLabel(LabelType.SYNC ,uid);
-//          store.setField(FieldType.PROCESSED ,true ,uid);
+          store.process(
+            store.startTransactionFor( getUid() )
+              .removeLabel(LabelType.SYNC)
+              .setField(FieldType.MD5, "")
+          );
         },
         error -> {
           if (callback != null){
             callback.onCommandExecuteError(getType());
           }
 
-//          store.removeLabel(LabelType.SYNC ,uid);
-//          store.setField(FieldType.PROCESSED ,false ,uid);
+          store.process(
+            store.startTransactionFor( getUid() )
+              .removeLabel(LabelType.SYNC)
+              .setField(FieldType.PROCESSED, false)
+          );
         }
       );
   }

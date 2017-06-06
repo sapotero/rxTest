@@ -176,7 +176,7 @@ public class MemoryStore implements Processable{
 
     new Processor(sub)
       .withFilter(filter)
-      .withFilter(index)
+      .withIndex(index)
       .withDocument(doc)
       .execute();
 
