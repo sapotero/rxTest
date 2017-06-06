@@ -391,6 +391,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     EventBus.getDefault().register(this);
 
     Intent serviceIntent = new Intent(this, MainService.class);
+    startService(serviceIntent);
 
     if (subscription == null){
       subscription = new CompositeSubscription();
@@ -409,7 +410,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     initEvents();
     startNetworkCheck();
 
-    EventBus.getDefault().post( new RecalculateMenuEvent());
+//    EventBus.getDefault().post( new RecalculateMenuEvent());
 
   }
 

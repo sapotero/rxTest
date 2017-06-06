@@ -1,7 +1,7 @@
 package sapotero.rxtest.services;
 
 import android.app.AlertDialog;
-import android.app.Service;
+import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -93,7 +93,7 @@ import sapotero.rxtest.utils.cryptopro.wrapper.CMSSign;
 import sapotero.rxtest.utils.queue.QueueManager;
 import timber.log.Timber;
 
-public class MainService extends Service {
+public class MainService extends IntentService {
 
 
   final String TAG = MainService.class.getSimpleName();
@@ -117,14 +117,16 @@ public class MainService extends Service {
   public static String user;
   private int keyStoreTypeIndex = 0;
 
+
   public MainService() {
+    super("MainService");
   }
 
   public void onCreate() {
     super.onCreate();
 
     Observable.just(true)
-      .subscribeOn(Schedulers.computation())
+      .subscribeOn(Schedulers.io())
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe( data -> {
 
@@ -136,10 +138,6 @@ public class MainService extends Service {
         EsdApplication.getManagerComponent().inject(this);
 
         dataLoaderInterface = new DataLoaderManager(getApplicationContext());
-
-        Provider[] providers = Security.getProviders();
-
-
 
         // 1. Инициализация RxSharedPreferences
 //        initialize();
@@ -211,6 +209,11 @@ public class MainService extends Service {
   public IBinder onBind(Intent intent) {
     Timber.tag(TAG).d("onBind");
     return null;
+  }
+
+  @Override
+  protected void onHandleIntent(Intent intent) {
+
   }
 
   /* ----------------------------------------- */
@@ -804,6 +807,8 @@ public class MainService extends Service {
   // Старт / стоп проверки наличия сети
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(CheckNetworkEvent event){
+
+    Timber.i("CheckNetworkEvent");
     // Stop previously started checking network connection task, if exists
     if ( futureNetwork != null && !futureNetwork.isCancelled() ) {
       futureNetwork.cancel(true);
@@ -811,8 +816,7 @@ public class MainService extends Service {
 
     // Start new checking network connection task, if requested by the event
     if ( event.isStart() ) {
-      futureNetwork = scheduller.scheduleWithFixedDelay(
-              new CheckNetworkTask(),  0 , 10, TimeUnit.SECONDS );
+      futureNetwork = scheduller.scheduleWithFixedDelay( new CheckNetworkTask(),  0 , 10, TimeUnit.SECONDS );
     }
   }
 }

@@ -5,8 +5,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -63,17 +61,10 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
     EsdApplication.getDataComponent().inject(this);
 
     initialize();
-    LoginActivity context = this;
 
     cryptoProInstalled = appInstalled("ru.cprocsp.ACSP");
 
     if( cryptoProInstalled ) {
-
-
-
-      Handler handler = new Handler( Looper.getMainLooper() );
-
-      handler.postDelayed(() -> startService(new Intent(context, MainService.class)), 1000);
 
       if (null == savedInstanceState) {
         check_permissions();
@@ -265,6 +256,9 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
     }
     EventBus.getDefault().register(this);
 
+    Intent serviceIntent = new Intent(this, MainService.class);
+    startService(serviceIntent);
+
     // If not first run and CryptoPro installed, immediately move to main activity
     if ( !settings.isFirstRun() && cryptoProInstalled ) {
       onCompleted(null);
@@ -274,9 +268,6 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
   /* Stepper */
   @Override
   public void onCompleted(View completeButton) {
-//    Toast.makeText( getApplicationContext(), "onCompleted", Toast.LENGTH_SHORT ).show();
-
-
     Intent intent = new Intent(this, MainActivity.class);
 
     Bundle bundle = ActivityOptionsCompat.makeCustomAnimation(this, android.R.anim.fade_in, android.R.anim.fade_out).toBundle();

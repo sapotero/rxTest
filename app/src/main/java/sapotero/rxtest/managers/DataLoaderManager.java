@@ -559,7 +559,7 @@ public class DataLoaderManager {
           subscription.add(
             docService
               .getDocumentsByIndexes(settings.getLogin(), settings.getToken(), index, status, null , 500)
-              .subscribeOn(Schedulers.newThread())
+              .subscribeOn(Schedulers.io())
               .observeOn(AndroidSchedulers.mainThread())
               .subscribe(
                 data -> {
@@ -591,7 +591,7 @@ public class DataLoaderManager {
         subscription.add(
           docService
             .getDocuments(settings.getLogin(), settings.getToken(), code, null , 500, 0)
-            .subscribeOn(Schedulers.computation())
+            .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
               data -> {
