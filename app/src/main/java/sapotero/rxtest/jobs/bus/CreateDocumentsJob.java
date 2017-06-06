@@ -37,17 +37,6 @@ public class CreateDocumentsJob extends DocumentJob {
     Timber.tag(TAG).e( "new %s - %s / %s", uid, journal, status );
   }
 
-  private String getJournalName(String journal) {
-    String journalName = "";
-
-    if ( exist( journal ) ) {
-      String[] index = journal.split("_production_db_");
-      journalName = index[0];
-    }
-
-    return journalName;
-  }
-
   @Override
   public void onAdded() {
   }

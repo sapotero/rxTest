@@ -58,7 +58,7 @@ public class UpdateDocumentJob extends DocumentJob {
     Timber.tag(TAG).e( "create %s - %s / %s", uid, index, filter );
 
     this.uid = uid;
-    this.index = index;
+    this.index = getJournalName(index);
     this.filter = filter;
 
     // если создаем с указанием типа журнала и статуса
@@ -72,7 +72,7 @@ public class UpdateDocumentJob extends DocumentJob {
     Timber.tag(TAG).e( "create %s - %s / %s", uid, index, filter );
 
     this.uid = uid;
-    this.index = index;
+    this.index = getJournalName(index);
     this.filter = filter;
 
     this.forceProcessed = forceProcessed;
