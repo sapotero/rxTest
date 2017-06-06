@@ -14,7 +14,7 @@ public class Settings {
 
   private static final String CURRENT_ACTIVITY_KEY = "current_activity_key";
   private static final String SIGN_WITH_DC_KEY = "SIGN_WITH_DC";
-  private static final String DOCUMENTS_COUNT_KEY = "documents.count";
+  private static final String DOCUMENTS_COUNT_KEY = "documents.put";
   private static final String LOGIN_KEY = "login";
   private static final String TOKEN_KEY = "token";
   private static final String PASSWORD_KEY = "password";

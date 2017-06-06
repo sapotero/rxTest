@@ -623,7 +623,7 @@ public class DataLoaderManager {
   // Передача количества документов в экран загрузки
   private void updatePrefJobCount() {
     if (0 == requestCount && !isDocumentCountSent) {
-      // Received responses on all requests, now jobCount contains total initial job count value.
+      // Received responses on all requests, now jobCount contains total initial job put value.
       // Update counter in preferences with this value.
       isDocumentCountSent = true;
       settings.addJobCount(jobCount);

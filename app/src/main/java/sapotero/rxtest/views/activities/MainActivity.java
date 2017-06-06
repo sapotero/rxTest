@@ -266,7 +266,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
 
           for (List<RDocumentEntity> list: result) {
-            Timber.tag(TAG).v("count: %s", list.size());
+            Timber.tag(TAG).v("put: %s", list.size());
             for ( RDocumentEntity doc : list ){
               docs.add( doc );
             }
@@ -735,6 +735,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(RecalculateMenuEvent event) {
     if (menuBuilder != null) {
+      Timber.tag(TAG).i("RecalculateMenuEvent");
       menuBuilder.invalidate();
     }
   }

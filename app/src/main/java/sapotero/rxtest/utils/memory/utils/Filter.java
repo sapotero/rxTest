@@ -84,20 +84,23 @@ public class Filter {
     }
   }
 
-  public ArrayList<String> getStatuses() {
-    return statuses;
-  }
   public Boolean hasStatuses() {
     return statuses.size() > 0;
-  }
-
-  public ArrayList<String> getTypes() {
-    return types;
   }
   public Boolean hasTypes() {
     return types.size() > 0;
   }
 
+  public ArrayList<String> getTypes() {
+    return types;
+  }
+  public ArrayList<String> getStatuses() {
+    return statuses;
+  }
+
+  public Boolean getProcessed() {
+    return isProcessed;
+  }
 
   public Boolean isProcessed(InMemoryDocument doc) {
     return isProcessed == doc.isProcessed();

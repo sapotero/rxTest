@@ -99,11 +99,11 @@ public class SaveDecision extends AbstractCommand {
     Decision dec = params.getDecisionModel();
     Timber.tag(TAG).e("UPDATE %s", new Gson().toJson(dec));
 //
-//    int count = dataStore
+//    int put = dataStore
 //      .delete(RDecisionEntity.class)
 //      .where(RDecisionEntity.UID.eq(dec.getId()))
 //      .startTransactionFor().value();
-//    Timber.tag(TAG).e("DELETED %s", count);
+//    Timber.tag(TAG).e("DELETED %s", put);
 
 
     // RDecisionEntity decision = new RDecisionEntity();
@@ -169,13 +169,13 @@ public class SaveDecision extends AbstractCommand {
     Timber.tag(TAG).e("1 updateFromJob params%s", new Gson().toJson( params ));
 
 //
-//    Integer count = dataStore
+//    Integer put = dataStore
 //      .updateFromJob(RDecisionEntity.class)
 //      .set(RDecisionEntity.TEMPORARY, true)
 //      .where(RDecisionEntity.UID.eq(dec.getId()))
 //      .startTransactionFor().value();
 
-//    Timber.tag(TAG).i( "2 updateFromJob decision: %s", count );
+//    Timber.tag(TAG).i( "2 updateFromJob decision: %s", put );
 
   }
 

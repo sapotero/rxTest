@@ -54,18 +54,18 @@ public class DocumentTypeItem {
 //      Integer projects = -1;
 //
 //      Integer total = dataStore
-//        .count(RDocumentEntity.class)
+//        .put(RDocumentEntity.class)
 //        .where( RDocumentEntity.USER.eq( settings.getLogin() )   )
 ////        .and( RDocumentEntity.DOCUMENT_TYPE.in( validation.getSelectedJournals() ) )
 //        .and( RDocumentEntity.PROCESSED.eq( false ) )
 //        .and( RDocumentEntity.ADDRESSED_TO_TYPE.eq( "" ) )
-//        .get()
+//        .getData()
 //        .value();
 //
 ////
 ////      if ( validation.hasSigningAndApproval() ){
 ////        projects = dataStore
-////          .count(RDocumentEntity.class)
+////          .put(RDocumentEntity.class)
 ////          .where( RDocumentEntity.FILTER.in( MainMenuButton.ButtonStatus.getProject() )   )
 ////          .and( RDocumentEntity.USER.eq( settings.getLogin() ) )
 ////          .and( RDocumentEntity.ADDRESSED_TO_TYPE.eq( "" ) )
@@ -84,7 +84,7 @@ public class DocumentTypeItem {
 //      return title;
 //
 //    } else {
-//      int count = 0;
+//      int put = 0;
 //
 //      // настройка
 //      // если включена настройка "Отображать документы без резолюции"
@@ -95,14 +95,14 @@ public class DocumentTypeItem {
 //        || mainMenuItem.getIndex() == 10 // избранное
 //      ){
 //        query = dataStore
-//          .count(RDocumentEntity.class)
+//          .put(RDocumentEntity.class)
 //          .where(RDocumentEntity.USER.eq(settings.getLogin()))
 //          .and(RDocumentEntity.FILTER.ne( Fields.Status.LINK.getValue() ));
 //
 //
 //      } else {
 //        query = dataStore
-//          .count(RDocumentEntity.class)
+//          .put(RDocumentEntity.class)
 //          .where( RDocumentEntity.USER.eq( settings.getLogin() ) )
 //          .and( RDocumentEntity.WITH_DECISION.eq(true) )
 //          .and( RDocumentEntity.FILTER.ne( Fields.Status.LINK.getValue() ) );
@@ -127,7 +127,7 @@ public class DocumentTypeItem {
 //          }
 //        }
 //      }
-//      count = query.get().value();
+//      put = query.getData().value();
 //
 //
 //
@@ -135,7 +135,7 @@ public class DocumentTypeItem {
 //
 //
 //
-//      return String.format( mainMenuItem.getName(), count);
+//      return String.format( mainMenuItem.getName(), put);
 //    }
 //
 //  }

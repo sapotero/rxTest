@@ -14,6 +14,7 @@ import sapotero.rxtest.views.custom.OrganizationSpinner;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import sapotero.rxtest.views.menu.factories.ItemsBuilder;
 import sapotero.rxtest.views.menu.fields.MainMenuItem;
+import timber.log.Timber;
 
 public class MenuBuilder implements ItemsBuilder.Callback{
   private final ItemsBuilder itemsBuilder;
@@ -46,14 +47,15 @@ public class MenuBuilder implements ItemsBuilder.Callback{
   }
 
 
-  public void updateCount() {
-    itemsBuilder.getSelectedItem().recalcuate();
-//    updateFromJob();
-  }
+//  public void updateCount() {
+//    itemsBuilder.getSelectedItem().recalcuate();
+////    updateFromJob();
+//  }
 
   public void invalidate() {
+    Timber.tag(TAG).i("invalidate");
     getItem().recalcuate();
-    itemsBuilder.invalidate();
+//    itemsBuilder.invalidate();
   }
 
 

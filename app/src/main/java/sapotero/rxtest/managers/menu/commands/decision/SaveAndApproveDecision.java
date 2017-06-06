@@ -122,7 +122,7 @@ public class SaveAndApproveDecision extends AbstractCommand {
         .get()
         .value();
 
-      Timber.tag(TAG).e("count %s", dec);
+      Timber.tag(TAG).e("put %s", dec);
       EventBus.getDefault().post( new ShowNextDocumentEvent());
     }
 

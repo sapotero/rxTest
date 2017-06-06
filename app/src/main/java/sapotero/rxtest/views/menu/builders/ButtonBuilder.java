@@ -11,16 +11,17 @@ import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
+import com.google.gson.Gson;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
 import io.requery.Persistable;
-import io.requery.query.Expression;
-import io.requery.query.LogicalCondition;
 import io.requery.query.WhereAndOr;
 import io.requery.rx.RxScalar;
 import io.requery.rx.SingleEntityStore;
@@ -33,6 +34,7 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.utils.memory.MemoryStore;
+import sapotero.rxtest.utils.memory.models.Counter;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.utils.memory.utils.Filter;
 import timber.log.Timber;
@@ -41,9 +43,8 @@ public class ButtonBuilder {
 
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject Settings settings;
-//  @Inject Validation validation;
-  @Inject
-MemoryStore store;
+  //  @Inject Validation validation;
+  @Inject MemoryStore store;
 
   private ConditionBuilder[] conditions;
   private ConditionBuilder[] item_conditions;
@@ -62,21 +63,8 @@ MemoryStore store;
   private final CompositeSubscription subscription = new CompositeSubscription();
 
   public void recalculate() {
+    Timber.i("recalculate");
     getCount();
-//    Observable
-//      .just("")
-//      .debounce(100, TimeUnit.MILLISECONDS)
-//      .subscribeOn(Schedulers.newThread())
-//      .observeOn(AndroidSchedulers.mainThread())
-//      .subscribe(
-//        data -> {
-//          Timber.tag(TAG).e("recalculate");
-//          if (view != null) {
-//            getCount();
-//          }
-//        },
-//        Timber::e
-//      );
   }
 
   public interface Callback {
@@ -105,14 +93,18 @@ MemoryStore store;
 
   private void getCount() {
 
+    Timber.i("getCount");
     // Отображать документы без резолюции
     if ( settings.isShowWithoutProject() ){
+      Timber.i("isShowWithoutProject");
       getCountWithoutDecisons();
     } else {
       // для некоторых журналов показываем всё независимо от настроек
       if (showDecisionForse){
+        Timber.i("showDecisionForse");
         getCountWithoutDecisons();
       } else {
+        Timber.i("getCountWithDecisons");
         getCountWithDecisons();
       }
     }
@@ -120,8 +112,6 @@ MemoryStore store;
   }
 
   private void getCountWithDecisons() {
-
-    LogicalCondition<? extends Expression<?>, ?> query_condition;
 
     unsubscribe();
 
@@ -180,30 +170,6 @@ MemoryStore store;
 
   private void getCountWithoutDecisons() {
 
-//    Boolean processed = false;
-//
-//    WhereAndOr<RxScalar<Integer>> query = dataStore
-//      .count(RDocumentEntity.class)
-//      .where( RDocumentEntity.USER.eq( settings.getLogin() ) );
-
-    // проекты, подпись, согласование
-//    if ( !Arrays.asList(1,5,6,4,7).contains(index) ){
-//      List<String> journals = validation.getSelectedJournals();
-//      if ( journals.size() > 0){
-//        query = query.and( RDocumentEntity.DOCUMENT_TYPE.in( validation.getSelectedJournals() ) );
-//      }
-//    }
-
-//    // обработанные и Рассмотренные
-//    if ( Arrays.asList(4,7).contains(index) ){
-//      query = query.and(RDocumentEntity.PROCESSED.eq(true));
-//
-//      processed = true;
-//    } else {
-//      query = query.and(RDocumentEntity.PROCESSED.eq(false));
-//    }
-
-
     ArrayList<ConditionBuilder> _conditions = new ArrayList<>();
 
     if ( item_conditions.length > 0 ){
@@ -216,14 +182,51 @@ MemoryStore store;
 
     Filter filter = new Filter(_conditions);
 
+    ArrayList<String> types    = filter.getTypes();
+    ArrayList<String> statuses = filter.getStatuses();
+
+    Timber.i( "type: %s, statuses: %s , processed: %s", new Gson().toJson(types),  new Gson().toJson(statuses), filter.getProcessed() );
+
+    Counter counter = store.getCounter();
+
+    Counter.Status status = null;
+    if (statuses.size() > 0){
+      status = Counter.Status.getStatus(filter.getStatuses().get(0));
+    }
+
+    Counter.Document type = null;
+
+    if (types.size() > 0){
+      type = Counter.Document.getType(types.get(0));
+    }
+    if ( filter.getProcessed() ){
+      type = Counter.Document.PROCESSED;
+    }
+
+
+    Timber.w("COUNTER: %s %s", status, type );
+
+    try {
+      if (type != null && status != null) {
+
+        Map<Counter.Document, Integer> docs = counter.getData().get(status);
+        if (docs != null && docs.containsKey(type)){
+          Timber.w("FROM COUNTER: %s", docs.get(type) );
+        }
+      }
+    } catch (Exception e) {
+      Timber.e(e);
+    }
+
+
     Observable
       .from( store.getDocuments().values() )
 
+      .filter( filter::byType)
+      .filter( filter::byStatus)
       .filter( filter::isProcessed )
       .filter( filter::isFavorites )
       .filter( filter::isControl )
-      .filter( filter::byType)
-      .filter( filter::byStatus)
 
       .map( InMemoryDocument::getUid )
       .toList()
@@ -231,10 +234,8 @@ MemoryStore store;
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         list -> {
-
           Timber.e( label, list.size() );
           view.setText( String.format( label, list.size() ) );
-
         },
         Timber::e
       );

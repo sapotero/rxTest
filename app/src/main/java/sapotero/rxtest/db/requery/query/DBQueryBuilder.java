@@ -115,11 +115,11 @@ MemoryStore store;
 
 //          .filter( this::byOrganization )
 
+          .filter( filter::byStatus)
+          .filter( filter::byType)
           .filter( filter::isProcessed )
           .filter( filter::isFavorites )
           .filter( filter::isControl )
-          .filter( filter::byType)
-          .filter( filter::byStatus)
 
           .toSortedList(Filter::bySortKey)
 

@@ -101,6 +101,7 @@ public class Processor {
 
     switch (source){
       case DB:
+        Timber.w("process as db");
         transaction
           .from(InMemoryDocumentMapper.fromDB(document_from_db))
           .setState(InMemoryState.READY);

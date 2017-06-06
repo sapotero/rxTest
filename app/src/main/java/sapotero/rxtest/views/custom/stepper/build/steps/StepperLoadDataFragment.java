@@ -177,7 +177,7 @@ public class StepperLoadDataFragment extends Fragment implements Step {
       // No documents to download, set download complete
       mRingProgressBar.setProgress( 100 );
     } else {
-      updateProgressBar("Document count ready");
+      updateProgressBar("Document put ready");
     }
   }
 

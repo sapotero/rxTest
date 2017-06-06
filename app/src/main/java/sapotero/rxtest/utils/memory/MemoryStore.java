@@ -1,5 +1,7 @@
 package sapotero.rxtest.utils.memory;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -14,16 +16,17 @@ import rx.subjects.PublishSubject;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.events.utils.RecalculateMenuEvent;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.memory.interfaces.Processable;
 import sapotero.rxtest.utils.memory.mappers.InMemoryDocumentMapper;
+import sapotero.rxtest.utils.memory.models.Counter;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.utils.memory.utils.Processor;
 import sapotero.rxtest.utils.memory.utils.Transaction;
 import timber.log.Timber;
 
 public class MemoryStore implements Processable{
-
   @Inject SingleEntityStore<Persistable> dataStore;
 
   private String TAG = this.getClass().getSimpleName();
@@ -33,10 +36,12 @@ public class MemoryStore implements Processable{
   private final CompositeSubscription subscription;
   private final PublishSubject<InMemoryDocument> pub;
   private final PublishSubject<InMemoryDocument> sub;
+  private final Counter counter;
 
   public MemoryStore() {
     this.pub = PublishSubject.create();
     this.sub = PublishSubject.create();
+    this.counter = new Counter();
 
     this.documents  = new HashMap<>();
 
@@ -63,13 +68,22 @@ public class MemoryStore implements Processable{
       .subscribe(
         docs -> {
           for (InMemoryDocument doc: docs ) {
-            Timber.w("SUB - %s", doc.getUid());
             documents.put( doc.getUid(), doc );
             pub.onNext( doc );
           }
+
         },
         Timber::e
       );
+  }
+
+  public Counter getCounter() {
+    return counter;
+  }
+
+  public void counterRecreate() {
+    counter.recreate(documents);
+    EventBus.getDefault().post( new RecalculateMenuEvent());
   }
 
   private void log() {
@@ -110,7 +124,9 @@ public class MemoryStore implements Processable{
       .subscribe(
         docs -> {
           for (RDocumentEntity doc : docs) {
-            documents.put(doc.getUid(), InMemoryDocumentMapper.fromDB(doc));
+            InMemoryDocument document = InMemoryDocumentMapper.fromDB(doc);
+            documents.put(doc.getUid(), document);
+            counter.put( document );
           }
         },
         Timber::e
@@ -137,6 +153,8 @@ public class MemoryStore implements Processable{
       .withFilter(filter)
       .withIndex(index)
       .execute();
+
+//    counterRecreate();
   }
 
   @Override
@@ -144,6 +162,8 @@ public class MemoryStore implements Processable{
     new Processor(sub)
       .withTransaction(transaction)
       .execute();
+
+//    counterRecreate();
   }
 
   @Override
@@ -155,5 +175,7 @@ public class MemoryStore implements Processable{
       .withFilter(index)
       .withDocument(doc)
       .execute();
+
+//    counterRecreate();
   }
 }
