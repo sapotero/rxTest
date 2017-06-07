@@ -189,7 +189,7 @@
                 android:paddingEnd="@dimen/date_offset"
                 android:paddingTop="@dimen/date_offset"
                 android:paddingBottom="@dimen/half_date_offset"
-                android:text="Резолюция"
+                android:text="Текст"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
