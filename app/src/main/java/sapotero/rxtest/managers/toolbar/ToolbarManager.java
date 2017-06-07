@@ -450,10 +450,12 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
           case R.id.menu_info_shared_to_favorites:
             item.setTitle(context.getString(
               isFromFavorites() ? R.string.remove_from_favorites : R.string.to_favorites));
+            item.setIcon( ContextCompat.getDrawable(context, isFromFavorites() ? R.drawable.to_favorites : R.drawable.star) );
             break;
           case R.id.menu_info_shared_to_control:
             item.setTitle(context.getString(
               isFromControl() ? R.string.remove_from_control : R.string.to_control));
+            item.setIcon( ContextCompat.getDrawable(context, isFromControl() ? R.drawable.to_controle_on : R.drawable.to_control_icon ) );
             break;
           default:
             break;
