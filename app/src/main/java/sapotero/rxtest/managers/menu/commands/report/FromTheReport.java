@@ -1,8 +1,11 @@
 package sapotero.rxtest.managers.menu.commands.report;
 
+import android.support.annotation.Nullable;
+
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Objects;
 
 import retrofit2.Retrofit;
@@ -18,6 +21,8 @@ import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
+import sapotero.rxtest.utils.memory.fields.FieldType;
+import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
 public class FromTheReport extends AbstractCommand {
@@ -41,8 +46,16 @@ public class FromTheReport extends AbstractCommand {
 
   @Override
   public void execute() {
+
+
     queueManager.add(this);
     update();
+
+    store.process(
+      store.startTransactionFor( getUid() )
+        .setLabel(LabelType.SYNC)
+        .setField(FieldType.PROCESSED, true)
+    );
   }
 
   @Override
@@ -51,6 +64,21 @@ public class FromTheReport extends AbstractCommand {
   }
 
   private void update(){
+    String uid = getUid();
+
+    int count = dataStore
+      .update(RDocumentEntity.class)
+      .set( RDocumentEntity.PROCESSED, true)
+      .set( RDocumentEntity.MD5, "" )
+      .set( RDocumentEntity.CHANGED, true)
+      .where(RDocumentEntity.UID.eq(uid))
+      .get()
+      .value();
+    EventBus.getDefault().post( new ShowNextDocumentEvent());
+  }
+
+  @Nullable
+  private String getUid() {
     String uid = null;
 
     if (params.getDocument() != null && !Objects.equals(params.getDocument(), "")){
@@ -60,21 +88,7 @@ public class FromTheReport extends AbstractCommand {
     if (document.getUid() != null && !Objects.equals(document.getUid(), "")){
       uid = document.getUid();
     }
-
-
-    Timber.tag(TAG).i( "3 updateLocal document uid:\n%s\n%s\n", params.getDocument(), document.getUid() );
-
-
-    int count = dataStore
-      .update(RDocumentEntity.class)
-//      .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue() )
-      .set( RDocumentEntity.PROCESSED, true)
-      .set( RDocumentEntity.MD5, "" )
-      .set( RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq(uid))
-      .get()
-      .value();
-    EventBus.getDefault().post( new ShowNextDocumentEvent());
+    return uid;
   }
 
   @Override
@@ -100,18 +114,7 @@ public class FromTheReport extends AbstractCommand {
     OperationService operationService = retrofit.create( OperationService.class );
 
     ArrayList<String> uids = new ArrayList<>();
-
-    String uid = null;
-
-    if (params.getDocument() != null && !Objects.equals(params.getDocument(), "")){
-      uid = params.getDocument();
-    }
-
-    if (document.getUid() != null && !Objects.equals(document.getUid(), "")){
-      uid = document.getUid();
-    }
-
-    uids.add( uid );
+    uids.add( getUid() );
 
     String comment = null;
 
@@ -137,10 +140,26 @@ public class FromTheReport extends AbstractCommand {
           Timber.tag(TAG).i("type: %s", data.getType());
 
           queueManager.setExecutedRemote(this);
+
+          store.process(
+            store.startTransactionFor( getUid() )
+              .removeLabel(LabelType.SYNC)
+              .setField(FieldType.MD5, "")
+          );
         },
         error -> {
           if (callback != null){
             callback.onCommandExecuteError(getType());
+          }
+
+          if ( settings.isOnline() ){
+            store.process(
+              store.startTransactionFor( getUid() )
+                .removeLabel(LabelType.SYNC)
+                .setField(FieldType.PROCESSED, false)
+            );
+            queueManager.setExecutedWithError(this, Collections.singletonList(error.getLocalizedMessage()));
+
           }
         }
       );

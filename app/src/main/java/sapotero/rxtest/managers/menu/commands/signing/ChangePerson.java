@@ -19,6 +19,7 @@ import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.memory.fields.FieldType;
+import sapotero.rxtest.utils.memory.fields.InMemoryState;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
@@ -53,6 +54,7 @@ public class ChangePerson extends AbstractCommand {
         .setLabel(LabelType.SYNC)
         .setField(FieldType.PROCESSED, true)
         .setField(FieldType.MD5, "")
+        .setState(InMemoryState.LOADING)
     );
 
   }

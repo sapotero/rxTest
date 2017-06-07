@@ -179,7 +179,6 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
             params.setDecisionId( current_decision.getUid() );
             params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(current_decision) );
-
             params.setDocument( settings.getUid() );
             params.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
 
@@ -230,7 +229,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
       CommandParams params = new CommandParams();
       params.setDecisionId( current_decision.getUid() );
-//      params.setDecision( current_decision );
+      params.setDocument( settings.getUid() );
       params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(current_decision) );
       params.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
 
@@ -252,7 +251,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
         CommandParams commandParams = new CommandParams();
         commandParams.setDecisionId( current_decision.getUid() );
-//          commandParams.setDecision( current_decision );
+        commandParams.setDocument( settings.getUid() );
         commandParams.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(current_decision) );
         commandParams.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
 

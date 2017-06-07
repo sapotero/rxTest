@@ -3,6 +3,7 @@ package sapotero.rxtest.managers.menu.commands.approval;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
@@ -19,6 +20,7 @@ import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.memory.fields.FieldType;
+import sapotero.rxtest.utils.memory.fields.InMemoryState;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
@@ -56,7 +58,7 @@ public class ChangePerson extends AbstractCommand {
       store.startTransactionFor( getUid() )
         .setLabel(LabelType.SYNC)
         .setField(FieldType.PROCESSED, true)
-        .setField(FieldType.MD5, "")
+        .setState(InMemoryState.LOADING)
     );
 
     EventBus.getDefault().post( new ShowNextDocumentEvent());
@@ -150,6 +152,7 @@ public class ChangePerson extends AbstractCommand {
             store.startTransactionFor( getUid() )
               .removeLabel(LabelType.SYNC)
               .setField(FieldType.MD5, "")
+              .setState(InMemoryState.READY)
           );
         },
         error -> {
@@ -157,11 +160,16 @@ public class ChangePerson extends AbstractCommand {
             callback.onCommandExecuteError(getType());
           }
 
-          store.process(
-            store.startTransactionFor( getUid() )
-              .removeLabel(LabelType.SYNC)
-              .setField(FieldType.PROCESSED, false)
-          );
+          if ( settings.isOnline() ){
+            store.process(
+              store.startTransactionFor( getUid() )
+                .removeLabel(LabelType.SYNC)
+                .setField(FieldType.PROCESSED, false)
+                .setState(InMemoryState.READY)
+            );
+            queueManager.setExecutedWithError(this, Collections.singletonList(error.getLocalizedMessage()));
+
+          }
         }
       );
   }

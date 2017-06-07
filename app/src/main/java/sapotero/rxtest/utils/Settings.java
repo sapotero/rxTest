@@ -14,6 +14,7 @@ public class Settings {
 
   private static final String CURRENT_ACTIVITY_KEY = "current_activity_key";
   private static final String SIGN_WITH_DC_KEY = "SIGN_WITH_DC";
+  private static final String IS_ONLINE = "is_online";
   private static final String DOCUMENTS_COUNT_KEY = "documents.put";
   private static final String LOGIN_KEY = "login";
   private static final String TOKEN_KEY = "token";
@@ -107,6 +108,7 @@ public class Settings {
   private Preference<Boolean> debugEnabled;
   private Preference<Boolean> startLoadData;
   private Preference<AuthType> authType;
+  private Preference<Boolean> online;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -183,6 +185,7 @@ public class Settings {
     startLoadData                  = settings.getBoolean(START_LOAD_DATA_KEY);
     authType                       = settings.getEnum(STEPPER_AUTH_TYPE_KEY, AuthType.class);
     current_activity               = settings.getString(CURRENT_ACTIVITY_KEY);
+    online                         = settings.getBoolean(START_LOAD_DATA_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -564,5 +567,13 @@ public class Settings {
 
   public Preference<AuthType> getAuthTypePreference() {
     return authType;
+  }
+
+  public boolean isOnline() {
+    return getBoolean(online);
+  }
+
+  public void setOnline(Boolean value) {
+    online.set(value);
   }
 }

@@ -751,7 +751,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     try {
       toolbar.getMenu().findItem(R.id.online).setTitle( isConnectedToInternet ? R.string.is_online : R.string.is_offline );
-      toolbar.getMenu().findItem(R.id.online).setIcon( isConnectedToInternet  ? R.drawable.icon_online : R.drawable.icon_offline );
+      toolbar.getMenu().findItem(R.id.online).setIcon(  isConnectedToInternet ? R.drawable.icon_online : R.drawable.icon_offline );
     } catch (Exception e) {
       e.printStackTrace();
     }

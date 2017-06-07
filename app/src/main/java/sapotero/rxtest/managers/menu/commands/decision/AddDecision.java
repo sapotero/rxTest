@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.Collections;
+
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Retrofit;
@@ -23,6 +25,7 @@ import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
+import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
 public class AddDecision extends AbstractCommand {
@@ -63,6 +66,11 @@ public class AddDecision extends AbstractCommand {
     Command command = operation.getCommand(null, document, _params);
     command.execute();
 
+    store.process(
+      store.startTransactionFor( params.getDecisionModel().getDocumentUid() )
+        .setLabel(LabelType.SYNC)
+    );
+
     Timber.tag(TAG).w("ASSIGNMENT: %s", params.isAssignment() );
 
     queueManager.add(this);
@@ -75,20 +83,6 @@ public class AddDecision extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    //      RDocumentEntity document = (RDocumentEntity) decision.getDocument();
-//      String decision_uid = decision.getUid();
-//      String document_uid = document.getUid();
-//
-//      dataStore
-//        .updateFromJob(RDocumentEntity.class)
-//        .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue())
-//        .where(RDocumentEntity.UID.eq( document_uid ))
-//        .startTransactionFor()
-//        .call();
-//
-//      dataStore
-//        .updateFromJob(decision).toObservable().subscribe();
-
     // resolved https://tasks.n-core.ru/browse/MVDESD-13366
     // ставим плашку всегда
     dataStore
@@ -118,8 +112,6 @@ public class AddDecision extends AbstractCommand {
 
 
     Decision decision = params.getDecisionModel();
-//    decision.setLetterheadFontSize("12");
-//    decision.setPerformersFontSize("12");
     decision.setLetterhead(null);
     decision.setShowPosition( false );
 
@@ -128,8 +120,6 @@ public class AddDecision extends AbstractCommand {
     }
 
     String json_m = new Gson().toJson( decision );
-
-//    Timber.w("decision_json_m: %s", json_m);
 
     RequestBody json = RequestBody.create(
       MediaType.parse("application/json"),
@@ -155,6 +145,7 @@ public class AddDecision extends AbstractCommand {
           if (data.getErrors() !=null && data.getErrors().size() > 0){
             queueManager.setExecutedWithError(this, data.getErrors());
             EventBus.getDefault().post( new ForceUpdateDocumentEvent( data.getDocumentUid() ));
+
           } else {
 
             if (callback != null ){
@@ -165,15 +156,29 @@ public class AddDecision extends AbstractCommand {
             queueManager.setExecutedRemote(this);
           }
 
+          removeSyncLabel();
+
         },
         error -> {
           Timber.tag(TAG).i("error: %s", error);
           if (callback != null){
-            callback.onCommandExecuteError(getType());
+            callback.onCommandExecuteError(error.getLocalizedMessage());
           }
-//          queueManager.setExecutedWithError(this, Collections.singletonList("http_error"));
+
+          if ( settings.isOnline() ){
+            removeSyncLabel();
+            queueManager.setExecutedWithError(this, Collections.singletonList(error.getLocalizedMessage()));
+
+          }
         }
       );
+  }
+
+  private void removeSyncLabel() {
+    store.process(
+      store.startTransactionFor( params.getDecisionModel().getDocumentUid() )
+        .removeLabel(LabelType.SYNC)
+    );
   }
 
   @Override

@@ -101,7 +101,7 @@ MemoryStore store;
 
     if ( conditions.size() > 0 ){
 
-//      findOrganizations(true);
+      findOrganizations(true);
       unsubscribe();
 
       Filter filter = new Filter(conditions);
@@ -113,7 +113,7 @@ MemoryStore store;
         Observable
           .from( store.getDocuments().values() )
 
-//          .filter( this::byOrganization )
+          .filter( this::byOrganization )
 
           .filter( filter::byType)
           .filter( filter::byStatus)
@@ -215,123 +215,6 @@ MemoryStore store;
   }
 
 
-  private void addByOneInAdapter(RDocumentEntity documentEntity) {
-    hideEmpty();
-//    adapter.addItem(documentEntity);
-  }
-
-
-//
-//  private void addMany(List<RDocumentEntity> results) {
-//
-//    Timber.tag(TAG).i( "results: %s", results.size() );
-//
-//    if ( results.size() > 0) {
-//      hideEmpty();
-//
-//      for (RDocumentEntity doc: results) {
-//        Timber.tag(TAG).i( "mass add doc: %s", doc );
-//
-//        if (doc != null) {
-//          RSignerEntity signer = (RSignerEntity) doc.getSigner();
-//
-//          boolean[] selected_index = organizationSelector.getSelected();
-//          ArrayList<String> ids = new ArrayList<>();
-//
-//          for (int i = 0; i < selected_index.length; i++) {
-//            if ( selected_index[i] ){
-//              ids.add( organizationAdapter.getItem(i).getName() );
-//            }          }
-//
-//          // resolved https://tasks.n-core.ru/browse/MVDESD-12625
-//          // *1) *Фильтр по организациям.
-//          String organization = signer.getOrganisation();
-//
-//          if (selected_index.length == 0){
-//            addDocument(doc);
-//          } else {
-//            if ( ids.contains(organization) || withFavorites && doc.isFavorites() ){
-//              addDocument(doc);
-//            }
-//          }
-//        }
-//      }
-//
-//    } else {
-//      showEmpty();
-//    }
-//  }
-
-  private void error(Throwable error) {
-    Timber.tag(TAG).e(error);
-  }
-//
-//  public void addByOne(Result<RDocumentEntity> docs){
-//
-//
-//
-//    docs()
-//      .subscribeOn(Schedulers.io())
-//      .observeOn( AndroidSchedulers.mainThread() )
-//      .compositeSubscription( doc -> {
-//
-//
-//        RSignerEntity signer = (RSignerEntity) doc.getSigner();
-//
-//        boolean[] selected_index = organizationSelector.getSelected();
-//        ArrayList<String> ids = new ArrayList<>();
-//
-//        for (int i = 0; i < selected_index.length; i++) {
-//          if ( selected_index[i] ){
-//            ids.add( organizationAdapter.getItem(i).getName() );
-//          }
-//        }
-//
-//        // resolved https://tasks.n-core.ru/browse/MVDESD-12625
-//        // *1) *Фильтр по организациям.
-//        String organization = signer.getOrganisation();
-//
-//        if (selected_index.length == 0){
-//          addDocument(doc);
-//        } else {
-//          if ( ids.contains(organization) || withFavorites && doc.isFavorites() ){
-//            addDocument(doc);
-//          }
-//        }
-//
-//      }, this::error);
-//
-//  }
-
-  private void addDocument(RDocumentEntity doc) {
-//    // настройка
-//    // если включена настройка "Отображать документы без резолюции"
-//    if ( settings.isShowWithoutProject() ){
-//      addOne(doc);
-//    } else {
-//      if ( menuBuilder.getItem().isShowAnyWay() ){
-//        addOne(doc);
-//      } else {
-//        if (doc.isWithDecision() != null && doc.isWithDecision()){
-//          addOne(doc);
-//        }
-//      }
-//    }
-  }
-
-//  public void addList(Result<RDocumentEntity> docs){
-//
-//    docs
-//      .toObservable()
-//      .subscribeOn(Schedulers.io())
-//      .observeOn( AndroidSchedulers.mainThread() )
-//      .toList()
-//      .compositeSubscription( list -> {
-//        addList(list);
-//      }, this::error);
-//
-//  }
-
   private void unsubscribe() {
     if (compositeSubscription == null) {
       compositeSubscription = new CompositeSubscription();
@@ -380,10 +263,17 @@ MemoryStore store;
         }
       }
 
+      Filter filter = new Filter(conditions);
+
       Observable
         .from( store.getDocuments().values() )
-        .filter( doc -> byStatus(filters, doc) )
-        .filter( doc -> byType(indexes, doc))
+
+        .filter( filter::byType)
+        .filter( filter::byStatus)
+        .filter( filter::isProcessed )
+        .filter( filter::isFavorites )
+        .filter( filter::isControl )
+
         .map(InMemoryDocument::getDocument)
         .filter(document -> document.getSigner() != null)
         .map(Document::getSigner)

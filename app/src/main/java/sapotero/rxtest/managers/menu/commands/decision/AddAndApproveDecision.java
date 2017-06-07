@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.Collections;
 import java.util.Objects;
 
 import io.requery.query.Tuple;
@@ -26,6 +27,8 @@ import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
 import sapotero.rxtest.services.MainService;
+import sapotero.rxtest.utils.memory.fields.FieldType;
+import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
 public class AddAndApproveDecision extends AbstractCommand {
@@ -55,6 +58,11 @@ public class AddAndApproveDecision extends AbstractCommand {
     updateLocal();
     queueManager.add(this);
     EventBus.getDefault().post( new ShowNextDocumentEvent() );
+
+    store.process(
+      store.startTransactionFor( params.getDecisionModel().getDocumentUid() )
+        .setLabel(LabelType.SYNC)
+    );
   }
 
   private void updateLocal() {
@@ -65,13 +73,13 @@ public class AddAndApproveDecision extends AbstractCommand {
     Integer count = dataStore
       .update(RDecisionEntity.class)
       .set(RDecisionEntity.TEMPORARY, true)
-      .where(RDecisionEntity.UID.eq(params.getDecisionModel().getId()))
+      .where(RDecisionEntity.UID.eq(getUid()))
       .get().value();
     Timber.tag(TAG).i( "updateLocal: %s", count );
 
     Tuple red = dataStore
       .select(RDecisionEntity.RED)
-      .where(RDecisionEntity.UID.eq(params.getDecisionModel().getId()))
+      .where(RDecisionEntity.UID.eq(getUid()))
       .get().firstOrNull();
 
     dataStore
@@ -106,9 +114,21 @@ public class AddAndApproveDecision extends AbstractCommand {
         .where(RDocumentEntity.UID.eq( params.getDecisionModel().getDocumentUid() ))
         .get()
         .value();
+
+
+      store.process(
+        store.startTransactionFor( params.getDecisionModel().getDocumentUid() )
+          .setField(FieldType.PROCESSED, true)
+      );
+
+
     }
 
-    EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( params.getDecisionModel().getId() ));
+    EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent(getUid()));
+  }
+
+  private String getUid() {
+    return params.getDecisionModel().getId();
   }
 
 
@@ -183,28 +203,38 @@ public class AddAndApproveDecision extends AbstractCommand {
       .subscribe(
         data -> {
 
-          queueManager.setExecutedRemote(this);
+          if (data.getErrors() !=null && data.getErrors().size() > 0){
+            queueManager.setExecutedWithError(this, data.getErrors());
 
-//          if (data.getErrors() !=null && data.getErrors().size() > 0){
-//            queueManager.setExecutedWithError(this, data.getErrors());
-//            EventBus.getDefault().post( new ForceUpdateDocumentEvent( data.getDocumentUid() ));
-//          } else {
-//
-//            if (callback != null ){
-//              callback.onCommandExecuteSuccess( getType() );
-//              EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
-//            }
-//
-//            queueManager.setExecutedRemote(this);
-//          }
+            store.process(
+              store.startTransactionFor( params.getDecisionModel().getDocumentUid() )
+                .removeLabel(LabelType.SYNC)
+                .setField(FieldType.PROCESSED, false)
+            );
+
+          } else {
+            store.process(
+              store.startTransactionFor( params.getDecisionModel().getDocumentUid() )
+                .removeLabel(LabelType.SYNC)
+            );
+            queueManager.setExecutedRemote(this);
+          }
 
         },
         error -> {
-          Timber.tag(TAG).i("error: %s", error);
           if (callback != null){
             callback.onCommandExecuteError(getType());
           }
-//          queueManager.setExecutedWithError(this, Collections.singletonList("http_error"));
+
+          if ( settings.isOnline() ){
+            store.process(
+              store.startTransactionFor( params.getDecisionModel().getDocumentUid() )
+                .removeLabel(LabelType.SYNC)
+                .setField(FieldType.PROCESSED, false)
+            );
+            queueManager.setExecutedWithError(this, Collections.singletonList(error.getLocalizedMessage()));
+
+          }
         }
       );
   }

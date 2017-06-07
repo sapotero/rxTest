@@ -19,6 +19,7 @@ import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.memory.fields.FieldType;
+import sapotero.rxtest.utils.memory.fields.InMemoryState;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
@@ -63,6 +64,7 @@ public class PrevPerson extends AbstractCommand {
       store.startTransactionFor( getUid() )
         .setLabel(LabelType.SYNC)
         .setField(FieldType.PROCESSED, true)
+        .setState(InMemoryState.LOADING)
     );
   }
 

@@ -1,7 +1,7 @@
 package sapotero.rxtest.services;
 
 import android.app.AlertDialog;
-import android.app.IntentService;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -93,7 +93,7 @@ import sapotero.rxtest.utils.cryptopro.wrapper.CMSSign;
 import sapotero.rxtest.utils.queue.QueueManager;
 import timber.log.Timber;
 
-public class MainService extends IntentService {
+public class MainService extends Service {
 
 
   final String TAG = MainService.class.getSimpleName();
@@ -119,7 +119,7 @@ public class MainService extends IntentService {
 
 
   public MainService() {
-    super("MainService");
+
   }
 
   public void onCreate() {
@@ -209,11 +209,6 @@ public class MainService extends IntentService {
   public IBinder onBind(Intent intent) {
     Timber.tag(TAG).d("onBind");
     return null;
-  }
-
-  @Override
-  protected void onHandleIntent(Intent intent) {
-
   }
 
   /* ----------------------------------------- */

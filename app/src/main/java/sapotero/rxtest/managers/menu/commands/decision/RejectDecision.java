@@ -1,9 +1,12 @@
 package sapotero.rxtest.managers.menu.commands.decision;
 
+import android.support.annotation.Nullable;
+
 import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.Collections;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -27,6 +30,8 @@ import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
 import sapotero.rxtest.retrofit.models.wrapper.DecisionWrapper;
+import sapotero.rxtest.utils.memory.fields.FieldType;
+import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
 public class RejectDecision extends AbstractCommand {
@@ -87,21 +92,10 @@ public class RejectDecision extends AbstractCommand {
       .get().value();
 
 
-    String uid = null;
 
     if (Objects.equals(params.getDecisionModel().getSignerId(), settings.getCurrentUserId())){
 
-      if (params.getDecisionModel().getDocumentUid() != null && !Objects.equals(params.getDecisionModel().getDocumentUid(), "")){
-        uid = params.getDecisionModel().getDocumentUid();
-      }
-
-      if (params.getDocument() != null && !Objects.equals(params.getDocument(), "")){
-        uid = params.getDocument();
-      }
-
-      if (document.getUid() != null && !Objects.equals(document.getUid(), "")){
-        uid = document.getUid();
-      }
+      String uid = getUid();
 
 
       Timber.tag(TAG).i( "3 updateLocal document uid:\n%s\n%s\n%s\n", params.getDecisionModel().getDocumentUid(), params.getDocument(), document.getUid() );
@@ -116,12 +110,20 @@ public class RejectDecision extends AbstractCommand {
 
       Timber.tag(TAG).e("3 updateLocal document %s | %s", uid, dec > 0);
 
-//      EventBus.getDefault().post( new ShowNextDocumentEvent());
+      store.process(
+        store.startTransactionFor( uid )
+          .setLabel(LabelType.SYNC)
+          .setField(FieldType.PROCESSED, true)
+      );
+
     }
 
     Observable.just("").timeout(100, TimeUnit.MILLISECONDS).subscribe(
       data -> {
-        Timber.tag("slow").e("exec");
+        store.process(
+          store.startTransactionFor( getUid() )
+            .setLabel(LabelType.SYNC)
+        );
 
         EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( params.getDecisionModel().getId() ));
       }, error -> {
@@ -130,6 +132,26 @@ public class RejectDecision extends AbstractCommand {
     );
   }
 
+  @Nullable
+  private String getUid() {
+    String uid = null;
+    if (params.getDecisionModel().getDocumentUid() != null && !Objects.equals(params.getDecisionModel().getDocumentUid(), "")){
+      uid = params.getDecisionModel().getDocumentUid();
+    }
+
+    if (params.getDocument() != null && !Objects.equals(params.getDocument(), "")){
+      uid = params.getDocument();
+    }
+
+    if (document.getUid() != null && !Objects.equals(document.getUid(), "")){
+      uid = document.getUid();
+    }
+
+    Timber.tag(TAG).e( "%s | %s | %s", params.getDecisionModel().getDocumentUid(), params.getDocument(), document.getUid() );
+
+
+    return uid;
+  }
 
 
   @Override
@@ -205,32 +227,38 @@ public class RejectDecision extends AbstractCommand {
           if (data.getErrors() !=null && data.getErrors().size() > 0){
             queueManager.setExecutedWithError(this, data.getErrors());
             EventBus.getDefault().post( new ForceUpdateDocumentEvent( data.getDocumentUid() ));
+
           } else {
 
             if (callback != null ){
               callback.onCommandExecuteSuccess( getType() );
-              EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
             }
+            EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
 
             queueManager.setExecutedRemote(this);
-
-            String uid = document.getUid();
-//            store.removeLabel(LabelType.SYNC, uid);
           }
+
+          store.process(
+            store.startTransactionFor( getUid() )
+              .removeLabel(LabelType.SYNC)
+          );
 
         },
         error -> {
           Timber.tag(TAG).i("error: %s", error);
           if (callback != null){
-            callback.onCommandExecuteError(getType());
+            callback.onCommandExecuteError(error.getLocalizedMessage());
           }
-//          queueManager.setExecutedWithError(this, Collections.singletonList("http_error"));
 
-          String uid = document.getUid();
-//          store.removeLabel(LabelType.SYNC, uid);
-//          store.setField(FieldType.PROCESSED, false, uid);
+          if ( settings.isOnline() ){
+            store.process(
+              store.startTransactionFor( getUid() )
+                .removeLabel(LabelType.SYNC)
+                .setField(FieldType.PROCESSED, false)
+            );
+            queueManager.setExecutedWithError(this, Collections.singletonList(error.getLocalizedMessage()));
 
-          EventBus.getDefault().post( new ForceUpdateDocumentEvent( params.getDecisionModel().getDocumentUid() ));
+          }
         }
       );
   }
