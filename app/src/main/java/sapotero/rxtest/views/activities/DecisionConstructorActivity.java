@@ -120,7 +120,11 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
     toolbar.setContentInsetStartWithNavigation(250);
 
-    toolbar.setTitle("Редактор резолюции ");
+
+    // https://tasks.n-core.ru/browse/MVDESD-13591
+//    toolbar.setTitle("Текст");
+
+     toolbar.setTitle("Редактор резолюции ");
     toolbar.inflateMenu(R.menu.info_decision_constructor);
 
 
