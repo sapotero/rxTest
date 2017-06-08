@@ -494,7 +494,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(interval -> {
           updateDocument();
-        })
+        }, Timber::e)
     );
 
     toolbarManager.invalidate();

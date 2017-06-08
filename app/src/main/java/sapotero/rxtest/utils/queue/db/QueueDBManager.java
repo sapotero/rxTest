@@ -70,7 +70,7 @@ public class QueueDBManager implements JobCountInterface {
           .subscribeOn(Schedulers.computation())
           .subscribe(data -> {
             Timber.tag(TAG).v("inserted %s [ %s ]", data.getCommand(), data.getId() );
-          });
+          }, Timber::e);
       } else {
         Timber.tag(TAG).v("UUID exist!");
       }

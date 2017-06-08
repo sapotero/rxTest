@@ -97,11 +97,14 @@ MemoryStore store;
   }
 
   //new realization
-  public void execute(){
+  public void execute(boolean refreshSpinner){
 
     if ( conditions.size() > 0 ){
 
-      findOrganizations(true);
+      if ( refreshSpinner ) {
+        findOrganizations(true);
+      }
+
       unsubscribe();
 
       Filter filter = new Filter(conditions);
@@ -228,8 +231,7 @@ MemoryStore store;
     this.item = item;
     this.conditions = conditions;
     this.withFavorites = withFavorites;
-//    execute(true);
-    execute();
+    execute(true);
   }
 
   private void showEmpty(){

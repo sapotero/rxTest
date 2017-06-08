@@ -135,7 +135,7 @@ public class StepperLoadDataFragment extends Fragment implements Step {
             if (value < 100) {
               mRingProgressBar.setProgress( value + 1 );
             }
-          })
+          }, Timber::e)
       );
     }
   }

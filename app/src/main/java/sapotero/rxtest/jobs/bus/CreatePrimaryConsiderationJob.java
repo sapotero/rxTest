@@ -52,7 +52,7 @@ public class CreatePrimaryConsiderationJob extends BaseJob {
       .observeOn(Schedulers.computation())
       .subscribe(u -> {
         Timber.tag(TAG).v("addByOne " + u.getName() );
-      });
+      }, Timber::e);
   }
 
 

@@ -11,15 +11,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import javax.inject.Inject;
+
+import io.requery.Persistable;
+import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.R;
+import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.models.RFolderEntity;
 import sapotero.rxtest.db.requery.models.decisions.RBlock;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
+import sapotero.rxtest.db.requery.models.decisions.RDisplayFirstDecisionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RPerformer;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.views.adapters.models.DecisionSpinnerItem;
 import timber.log.Timber;
 
 public class DecisionSpinnerAdapter extends BaseAdapter {
+
+  @Inject SingleEntityStore<Persistable> dataStore;
+
   private final String current_user;
   private List<DecisionSpinnerItem> decisions;
   private LayoutInflater inflter;
@@ -41,6 +51,8 @@ public class DecisionSpinnerAdapter extends BaseAdapter {
     this.context = context;
     this.decisions = decisions;
     this.inflter = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+    EsdApplication.getDataComponent().inject(this);
   }
 
   @Override
@@ -61,6 +73,7 @@ public class DecisionSpinnerAdapter extends BaseAdapter {
   public void addAll(List<DecisionSpinnerItem> items) {
     if (items.size() > 0){
 
+      List<DecisionSpinnerItem> createdAndSigner = new ArrayList<>();
       List<DecisionSpinnerItem> list = new ArrayList<>();
       List<DecisionSpinnerItem> signer = new ArrayList<>();
       List<DecisionSpinnerItem> performer = new ArrayList<>();
@@ -68,7 +81,17 @@ public class DecisionSpinnerAdapter extends BaseAdapter {
       decisions.clear();
 
       for (DecisionSpinnerItem item: items ) {
-        if ( getPerformerIds(item).contains( current_user ) ){
+
+        RDisplayFirstDecisionEntity rDisplayFirstDecisionEntity =
+        dataStore
+          .select(RDisplayFirstDecisionEntity.class)
+          .where(RDisplayFirstDecisionEntity.DECISION_UID.eq( item.getDecision().getUid() ))
+          .and(RDisplayFirstDecisionEntity.USER_ID.eq( current_user ))
+          .get().firstOrNull();
+
+        if ( rDisplayFirstDecisionEntity != null ) {
+          createdAndSigner.add(item);
+        } else if ( getPerformerIds(item).contains( current_user ) ){
           performer.add(item);
         } else if (Objects.equals(item.getDecision().getSignerId(), current_user)){
           signer.add(0, item);
@@ -76,7 +99,9 @@ public class DecisionSpinnerAdapter extends BaseAdapter {
           list.add(item);
         }
       }
+
       decisions = new ArrayList<>();
+      decisions.addAll(createdAndSigner);
       decisions.addAll(signer);
       decisions.addAll(performer);
       decisions.addAll(list);

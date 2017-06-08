@@ -18,6 +18,7 @@ import sapotero.rxtest.views.activities.FileSignActivity;
 import sapotero.rxtest.views.activities.InfoNoMenuActivity;
 import sapotero.rxtest.views.activities.LogActivity;
 import sapotero.rxtest.views.activities.LoginActivity;
+import sapotero.rxtest.views.adapters.DecisionSpinnerAdapter;
 import sapotero.rxtest.views.adapters.DocumentLinkAdapter;
 import sapotero.rxtest.views.adapters.DocumentTypeAdapter;
 import sapotero.rxtest.views.adapters.PrimaryConsiderationAdapter;
@@ -64,6 +65,7 @@ public interface DataComponent {
   void inject(SearchResultAdapter searchResultAdapter);
   void inject(DocumentLinkAdapter documentLinkAdapter);
   void inject(PrimaryUsersAdapter primaryUsersAdapter);
+  void inject(DecisionSpinnerAdapter decisionSpinnerAdapter);
 
   void inject(StepperLoadDataFragment fragment);
   void inject(DecisionFragment fragment);
