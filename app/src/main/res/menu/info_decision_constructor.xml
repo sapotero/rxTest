@@ -10,6 +10,16 @@
         android:icon="@drawable/add_decision"
         android:title="@string/constructor_add_block"/>
     <item
+        android:id="@+id/action_constructor_infocard"
+        app:showAsAction="ifRoom|withText"
+        android:icon="@drawable/infocard"
+        android:title="@string/tab_info"/>
+    <item
+        android:id="@+id/action_constructor_documents"
+        app:showAsAction="ifRoom|withText"
+        android:icon="@drawable/documents"
+        android:title="@string/tab_document"/>
+    <item
         android:id="@+id/action_constructor_create_and_sign"
         app:showAsAction="ifRoom|withText"
         android:icon="@drawable/sign"

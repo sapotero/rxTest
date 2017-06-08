@@ -225,6 +225,8 @@
     <string name="go">Перейти</string>
     <string name="info_card_disabled">Невозможно отобразить инфокарточку</string>
     <string name="info_card">Информационная карточка</string>
+    <string name="info_card_short">Инфокарта</string>
+
     <string name="files">Просмотр образов</string>
     <string name="decision_editor">Редактор</string>
 
