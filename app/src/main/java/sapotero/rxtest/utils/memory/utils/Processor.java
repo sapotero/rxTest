@@ -20,6 +20,7 @@ import sapotero.rxtest.jobs.bus.CreateDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateProjectsJob;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.retrofit.models.documents.Document;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.fields.InMemoryState;
 import sapotero.rxtest.utils.memory.mappers.InMemoryDocumentMapper;
@@ -30,6 +31,7 @@ import timber.log.Timber;
 public class Processor {
   @Inject MemoryStore store;
   @Inject JobManager jobManager;
+  @Inject Settings settings;
 
   enum Source {
     EMPTY,
@@ -228,6 +230,7 @@ public class Processor {
 
 
   private void createJob(String uid) {
+    settings.addJobCount(1);
     if (index != null) {
       jobManager.addJobInBackground( new CreateDocumentsJob(uid, index, filter, false) );
     } else {
@@ -236,10 +239,12 @@ public class Processor {
   }
 
   private void updateJob(String uid) {
+    settings.addJobCount(1);
     jobManager.addJobInBackground( new UpdateDocumentJob( uid, index, filter ) );
   }
 
   private void updateAndSetProcessed(String uid) {
+    settings.addJobCount(1);
     jobManager.addJobInBackground( new UpdateDocumentJob( uid, index, filter, true ) );
   }
 
