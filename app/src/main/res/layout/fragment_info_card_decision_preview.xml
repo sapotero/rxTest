@@ -163,16 +163,28 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1">
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/md_grey_300"
+                    android:padding="@dimen/half_date_offset"
+                    android:layout_gravity="bottom"
+                    />
+
                 <TextView
                     android:id="@+id/activity_info_decision_preview_acition_text"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:paddingStart="@dimen/half_date_offset"
                     android:paddingEnd="@dimen/half_date_offset"
-                    android:paddingTop="@dimen/date_offset"
-                    android:paddingBottom="@dimen/date_offset"
+                    android:paddingTop="@dimen/half_date_offset"
+                    android:paddingBottom="@dimen/half_date_offset"
                     android:gravity="center|start"
                     android:textSize="12sp"
+
+                    android:fontFamily="sans-serif-light"
+                    android:textStyle="italic"
+
                     android:layout_weight="1"
                     android:ellipsize="end"
                     android:singleLine="true"

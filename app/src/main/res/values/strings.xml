@@ -216,12 +216,12 @@
     <string name="field_urgency">Срочность:</string>
     <string name="field_comment">Комментарий:</string>
     <string name="field_external_number">Номер поступившего документа:</string>
-    <string name="to_favorites">Добавить в избранное</string>
+    <string name="to_favorites">В избранное</string>
     <string name="to_control">На контроль</string>
     <string name="dialog_template_title">Шаблоны резолюции</string>
     <string name="no_files">Нет электронных образов</string>
-    <string name="remove_from_favorites"> Удалить из избранного </string>
-    <string name="remove_from_control">Снять отметку о контроле</string>
+    <string name="remove_from_favorites"> Из избранного </string>
+    <string name="remove_from_control">С контроля</string>
     <string name="go">Перейти</string>
     <string name="info_card_disabled">Невозможно отобразить инфокарточку</string>
     <string name="info_card">Информационная карточка</string>

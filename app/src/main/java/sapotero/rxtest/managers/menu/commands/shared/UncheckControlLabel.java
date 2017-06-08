@@ -59,6 +59,8 @@ public class UncheckControlLabel extends AbstractCommand {
     );
 
     queueManager.setExecutedLocal(this);
+
+
   }
 
   @Override
@@ -68,7 +70,13 @@ public class UncheckControlLabel extends AbstractCommand {
 
   @Override
   public void executeLocal() {
+    queueManager.setExecutedLocal(this);
+
     setControl(false);
+
+    if ( callback != null ){
+      callback.onCommandExecuteSuccess( getType() );
+    }
   }
 
   @Override

@@ -648,7 +648,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
       if (m.find()) {
         action_wrapper.setVisibility(View.VISIBLE);
-        action_text.setText( String.format("%s %s", m.group(0), organization) );
+        action_text.setText( String.format("Передал: %s %s", m.group(0), organization) );
       } else {
         action_wrapper.setVisibility(View.GONE);
       }
