@@ -72,6 +72,10 @@ public class CheckControlLabel extends AbstractCommand {
   public void executeLocal() {
     setControl(true);
     queueManager.setExecutedLocal(this);
+
+    if ( callback != null ){
+      callback.onCommandExecuteSuccess( getType() );
+    }
   }
 
   @Override
