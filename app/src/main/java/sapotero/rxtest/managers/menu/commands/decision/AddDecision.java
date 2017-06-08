@@ -148,6 +148,8 @@ public class AddDecision extends AbstractCommand {
 
           } else {
 
+            checkCreatorAndSignerIsCurrentUser(data, TAG);
+
             if (callback != null ){
               callback.onCommandExecuteSuccess( getType() );
             }

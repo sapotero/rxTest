@@ -15,6 +15,14 @@ public class DecisionError {
   @Expose
   private String documentUid = "";
 
+  @SerializedName("id")
+  @Expose
+  private String decisionUid;
+
+  @SerializedName("signer_id")
+  @Expose
+  private String decisionSignerId;
+
   public List<String> getErrors() {
     return errors;
   }
@@ -29,5 +37,21 @@ public class DecisionError {
 
   public void setDocumentUid(String documentUid) {
     this.documentUid = documentUid;
+  }
+
+  public String getDecisionUid() {
+    return decisionUid;
+  }
+
+  public void setDecisionUid(String decisionUid) {
+    this.decisionUid = decisionUid;
+  }
+
+  public String getDecisionSignerId() {
+    return decisionSignerId;
+  }
+
+  public void setDecisionSignerId(String decisionSignerId) {
+    this.decisionSignerId = decisionSignerId;
   }
 }

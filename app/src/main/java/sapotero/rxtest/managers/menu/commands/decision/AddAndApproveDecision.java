@@ -202,7 +202,6 @@ public class AddAndApproveDecision extends AbstractCommand {
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         data -> {
-
           if (data.getErrors() !=null && data.getErrors().size() > 0){
             queueManager.setExecutedWithError(this, data.getErrors());
 
@@ -214,10 +213,12 @@ public class AddAndApproveDecision extends AbstractCommand {
 
           } else {
             store.process(
-              store.startTransactionFor( params.getDecisionModel().getDocumentUid() )
+              store.startTransactionFor(params.getDecisionModel().getDocumentUid())
                 .removeLabel(LabelType.SYNC)
             );
             queueManager.setExecutedRemote(this);
+
+            checkCreatorAndSignerIsCurrentUser(data, TAG);
           }
 
         },
