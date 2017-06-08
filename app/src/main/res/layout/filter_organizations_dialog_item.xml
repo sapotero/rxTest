@@ -4,6 +4,9 @@
     android:layout_height="40dp"
     android:paddingStart="16dp"
     android:paddingEnd="16dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:background="?android:attr/selectableItemBackground"
     android:descendantFocusability="blocksDescendants"
     android:orientation="horizontal">
 
@@ -11,6 +14,7 @@
         android:id="@+id/filter_organization_checkbox"
         android:layout_gravity="center"
         android:clickable="false"
+        android:background="@android:color/transparent"
         android:layout_width="56dp"
         android:layout_height="wrap_content"/>
 
