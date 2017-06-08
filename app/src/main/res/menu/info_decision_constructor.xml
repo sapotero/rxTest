@@ -5,11 +5,6 @@
     tools:context="net.taptools.android.sportshistory.PlayerProfileActivity">
 
     <item
-        android:id="@+id/action_constructor_add_block"
-        app:showAsAction="ifRoom|withText"
-        android:icon="@drawable/add_decision"
-        android:title="@string/constructor_add_block"/>
-    <item
         android:id="@+id/action_constructor_infocard"
         app:showAsAction="ifRoom|withText"
         android:icon="@drawable/infocard"
@@ -19,6 +14,11 @@
         app:showAsAction="ifRoom|withText"
         android:icon="@drawable/documents"
         android:title="@string/tab_document"/>
+    <item
+        android:id="@+id/action_constructor_add_block"
+        app:showAsAction="ifRoom|withText"
+        android:icon="@drawable/add_decision"
+        android:title="@string/constructor_add_block"/>
     <item
         android:id="@+id/action_constructor_create_and_sign"
         app:showAsAction="ifRoom|withText"

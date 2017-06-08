@@ -1,5 +1,8 @@
 package sapotero.rxtest.views.activities;
 
+import android.app.DialogFragment;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -282,6 +285,12 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
       switch (item.getItemId()){
 
+        case R.id.action_constructor_documents:
+          break;
+
+        case R.id.action_constructor_infocard:
+          showInfoCard();
+          break;
 
         case R.id.action_constructor_create_and_sign:
           boolean canCreateAndSign = checkDecision();
@@ -613,6 +622,19 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     invalidateSaveAndSignButton();
 
 
+  }
+
+  private void showInfoCard() {
+    FragmentTransaction ft = getFragmentManager().beginTransaction();
+    Fragment prev = getFragmentManager().findFragmentByTag("dialog_infocard");
+    if (prev != null) {
+      ft.remove(prev);
+    }
+    ft.addToBackStack(null);
+
+    // Create and show the dialog.
+    DialogFragment newFragment = new DialogFragment();
+    newFragment.show(ft, "dialog_infocard");
   }
 
   private void invalidateSaveAndSignButton(){
