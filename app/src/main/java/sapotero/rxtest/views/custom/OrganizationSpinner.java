@@ -88,6 +88,11 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
         choices.add(dialogListItem);
       }
 
+      for (int i = 0; i < 100; i++) {
+        DialogListItem dialogListItem = new DialogListItem(false, "" + i, "Menu item lskdfjdsf sdklfjdsfklj sdfkljdskflj sdklfjdsklfj sdfkdsfklj dlfjdsfkj");
+        choices.add(dialogListItem);
+      }
+
       dialogListAdapter = new DialogListAdapter(getContext(), choices);
 
       MaterialDialog dialog = new MaterialDialog.Builder(context)
@@ -401,8 +406,9 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
 
     @Override
     public void onClick(View v) {
+      checkBox.setChecked( !checkBox.isChecked() ); // this is for checkbox animation
       item.setChecked( !item.isChecked() );
-      dialogListAdapter.notifyDataSetChanged();
+//      dialogListAdapter.notifyDataSetChanged();
 //      updateNeutralButtonText();
     }
   }
