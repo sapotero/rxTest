@@ -301,7 +301,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     organization_adapter = new OrganizationAdapter(this, new ArrayList<>());
     ORGANIZATION_SELECTOR.setAdapter(organization_adapter, true, selected -> {
-      dbQueryBuilder.execute();
+      dbQueryBuilder.execute(false);
     });
   }
 

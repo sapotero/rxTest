@@ -1,12 +1,12 @@
 package sapotero.rxtest.views.custom;
 
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.DataSetObserver;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.support.v7.widget.RecyclerView;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
@@ -16,15 +16,12 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CheckedTextView;
-import android.widget.ListView;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
+
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +29,6 @@ import java.util.List;
 import sapotero.rxtest.R;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
 import sapotero.rxtest.views.adapters.models.OrganizationItem;
-import timber.log.Timber;
 
 public class OrganizationSpinner extends TextView implements DialogInterface.OnMultiChoiceClickListener {
 
@@ -46,9 +42,9 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
   private boolean mAllSelected;
   private MultiSpinnerListener mListener;
 
-  List<DialogListItem> choices;
-  DialogListAdapter dialogListAdapter;
-  Button neutralButton;
+  private List<DialogListItem> choices;
+  private DialogListAdapter dialogListAdapter;
+  private MaterialDialog dialog;
 
   public OrganizationSpinner(Context context) {
     super(context);
@@ -84,59 +80,52 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
         choices.add(dialogListItem);
       }
 
-      AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-
-      View dialogView = inflater.inflate(R.layout.filter_organizations_dialog, null);
-      builder.setView(dialogView);
-
-      final AlertDialog dialog = builder.create();
-
-      Button negativeButton = (Button) dialogView.findViewById(R.id.filter_organization_negative);
-      negativeButton.setText(android.R.string.cancel);
-      negativeButton.setOnClickListener(v1 -> {
-        System.arraycopy(mOldSelection, 0, mSelected, 0, mSelected.length);
-        dialog.dismiss();
-      });
-
-      Button positiveButton = (Button) dialogView.findViewById(R.id.filter_organization_positive);
-      positiveButton.setText(android.R.string.ok);
-      positiveButton.setOnClickListener(v1 -> {
-        for (int i = 0; i < choices.size(); i++) {
-          mSelected[i] = choices.get(i).isChecked();
-        }
-        refreshSpinner();
-        mListener.onItemsSelected(mSelected);
-        dialog.dismiss();
-      });
-
-      neutralButton = (Button) dialogView.findViewById(R.id.filter_organization_neutral);
-      updateNeutralButtonText();
-      neutralButton.setOnClickListener(v12 -> {
-        if ( isCheckedAll() ) {
-          // Deselect all
-          for (int i = 0; i < mOldSelection.length; i++) {
-            choices.get(i).setChecked(false);
-          }
-        } else {
-          // Select all
-          for (int i = 0; i < mOldSelection.length; i++) {
-            choices.get(i).setChecked(true);
-          }
-        }
-        dialogListAdapter.notifyDataSetChanged();
-        updateNeutralButtonText();
-      });
-
       dialogListAdapter = new DialogListAdapter(getContext(), choices);
 
-      ListView listView = (ListView) dialogView.findViewById(R.id.filter_organization_list);
-      listView.setAdapter(dialogListAdapter);
-      listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-      listView.setOnItemClickListener((parent, view, position, id) -> {
-        choices.get(position).setChecked(!choices.get(position).isChecked());
-        dialogListAdapter.notifyDataSetChanged();
-        updateNeutralButtonText();
-      });
+      dialog = new MaterialDialog.Builder(getContext())
+        .title("Фильтр организаций")
+        .autoDismiss(false)
+        .cancelable(true)
+        .adapter(dialogListAdapter, null)
+        .negativeText(android.R.string.cancel)
+        .negativeColor(Color.BLACK)
+        .onNegative((dialog1, which) -> {
+          System.arraycopy(mOldSelection, 0, mSelected, 0, mSelected.length);
+          dialog1.dismiss();
+        })
+        .positiveText(android.R.string.ok)
+        .positiveColor(Color.BLACK)
+        .onPositive((dialog2, which) -> {
+          for (int i = 0; i < choices.size(); i++) {
+            mSelected[i] = choices.get(i).isChecked();
+          }
+          refreshSpinner();
+          mListener.onItemsSelected(mSelected);
+          dialog2.dismiss();
+        })
+        .neutralColor(Color.BLACK)
+        .onNeutral((dialog3, which) -> {
+          boolean isCheckedAll = isCheckedAll();
+
+          for (int i = 0; i < choices.size(); i++) {
+            RecyclerView.ViewHolder viewHolder = dialog3.getRecyclerView().findViewHolderForAdapterPosition(i);
+
+            choices.get(i).setChecked( !isCheckedAll );
+
+            if ( viewHolder != null ) {
+              // If item is visible, check the checkbox (this is needed for checkbox animation)
+              ((DialogListHolder) viewHolder).getCheckBox().setChecked( !isCheckedAll );
+            } else {
+              // Otherwise notify adapter, that item has changed
+              dialogListAdapter.notifyItemChanged(i);
+            }
+          }
+
+          updateNeutralButtonText();
+        })
+        .build();
+
+      updateNeutralButtonText();
 
       dialog.show();
     }
@@ -154,11 +143,11 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
   }
 
   private void updateNeutralButtonText() {
-    if (neutralButton != null) {
+    if (dialog != null) {
       if ( isCheckedAll() ) {
-        neutralButton.setText("Снять выделение");
+        dialog.setActionButton(DialogAction.NEUTRAL, "Снять выделение");
       } else {
-        neutralButton.setText("Выделить все");
+        dialog.setActionButton(DialogAction.NEUTRAL, "Выделить все");
       }
     }
   }
@@ -357,48 +346,68 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
     }
   }
 
-  private class DialogListAdapter extends BaseAdapter {
 
-    Context context;
-    List<DialogListItem> itemList;
-    LayoutInflater inflater;
+  private class DialogListHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+
+    private DialogListItem item;
+
+    private CheckBox checkBox;
+    private TextView count;
+    private TextView title;
+
+    public DialogListHolder(View itemView) {
+      super(itemView);
+      itemView.setOnClickListener(this);
+      checkBox = (CheckBox) itemView.findViewById(R.id.filter_organization_checkbox);
+      count = (TextView) itemView.findViewById(R.id.filter_organization_count);
+      title = (TextView) itemView.findViewById(R.id.filter_organization_name);
+    }
+
+    public void bindItem(DialogListItem item) {
+      this.item = item;
+      checkBox.setChecked( item.isChecked() );
+      count.setText( item.getCount() );
+      title.setText( item.getTitle() );
+    }
+
+    @Override
+    public void onClick(View v) {
+      checkBox.setChecked( !checkBox.isChecked() ); // this is for checkbox animation
+      item.setChecked( !item.isChecked() );
+      updateNeutralButtonText();
+    }
+
+    public CheckBox getCheckBox() {
+      return checkBox;
+    }
+  }
+
+
+  private class DialogListAdapter extends RecyclerView.Adapter<DialogListHolder> {
+
+    private List<DialogListItem> itemList;
+    private Context context;
 
     public DialogListAdapter(Context context, List<DialogListItem> itemList) {
       this.context = context;
       this.itemList = itemList;
-      this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     @Override
-    public int getCount() {
-      return itemList.size();
+    public DialogListHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+      LayoutInflater layoutInflater = LayoutInflater.from(context);
+      View view = layoutInflater.inflate(R.layout.filter_organizations_dialog_item, parent, false);
+      return new DialogListHolder(view);
     }
 
     @Override
-    public DialogListItem getItem(int position) {
-      return itemList.get(position);
+    public void onBindViewHolder(DialogListHolder holder, int position) {
+      holder.bindItem( itemList.get( position ) );
     }
 
     @Override
-    public long getItemId(int position) {
-      return position;
-    }
-
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-
-      View view = convertView;
-      if (null == view) {
-        view = inflater.inflate(R.layout.filter_organizations_dialog_item, parent, false);
-      }
-
-      DialogListItem dialogListItem = itemList.get(position);
-
-      ( (CheckBox) view.findViewById(R.id.filter_organization_checkbox) ).setChecked( dialogListItem.isChecked() );
-      ( (TextView) view.findViewById(R.id.filter_organization_count) ).setText( dialogListItem.getCount() );
-      ( (TextView) view.findViewById(R.id.filter_organization_name) ).setText( dialogListItem.getTitle() );
-
-      return view;
+    public int getItemCount() {
+      return itemList == null ? 0 : itemList.size();
     }
   }
 }
