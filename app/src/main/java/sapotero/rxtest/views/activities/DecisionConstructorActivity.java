@@ -1,8 +1,5 @@
 package sapotero.rxtest.views.activities;
 
-import android.app.DialogFragment;
-import android.app.Fragment;
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -64,13 +61,20 @@ import sapotero.rxtest.views.adapters.models.FontItem;
 import sapotero.rxtest.views.adapters.models.UrgencyItem;
 import sapotero.rxtest.views.custom.SpinnerWithLabel;
 import sapotero.rxtest.views.dialogs.DecisionTextDialog;
+import sapotero.rxtest.views.dialogs.InfoCardDialogFragment;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
 import sapotero.rxtest.views.dialogs.SelectTemplateDialogFragment;
 import sapotero.rxtest.views.fragments.DecisionFragment;
 import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
+import sapotero.rxtest.views.fragments.InfoActivityDecisionPreviewFragment;
+import sapotero.rxtest.views.fragments.InfoCardDocumentsFragment;
+import sapotero.rxtest.views.fragments.InfoCardFieldsFragment;
+import sapotero.rxtest.views.fragments.InfoCardLinksFragment;
+import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
+import sapotero.rxtest.views.fragments.RoutePreviewFragment;
 import timber.log.Timber;
 
-public class DecisionConstructorActivity extends AppCompatActivity implements DecisionFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, OperationManager.Callback, SelectOshsDialogFragment.Callback, SelectTemplateDialogFragment.Callback {
+public class DecisionConstructorActivity extends AppCompatActivity implements DecisionFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, OperationManager.Callback, SelectOshsDialogFragment.Callback, SelectTemplateDialogFragment.Callback,  InfoActivityDecisionPreviewFragment.OnFragmentInteractionListener, RoutePreviewFragment.OnFragmentInteractionListener, InfoCardDocumentsFragment.OnFragmentInteractionListener, InfoCardWebViewFragment.OnFragmentInteractionListener, InfoCardLinksFragment.OnFragmentInteractionListener, InfoCardFieldsFragment.OnFragmentInteractionListener {
 
   @Inject Settings settings;
   @Inject Mappers mappers;
@@ -285,8 +289,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
       switch (item.getItemId()){
 
-        case R.id.action_constructor_documents:
-          break;
 
         case R.id.action_constructor_infocard:
           showInfoCard();
@@ -625,16 +627,9 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
   }
 
   private void showInfoCard() {
-    FragmentTransaction ft = getFragmentManager().beginTransaction();
-    Fragment prev = getFragmentManager().findFragmentByTag("dialog_infocard");
-    if (prev != null) {
-      ft.remove(prev);
-    }
-    ft.addToBackStack(null);
 
-    // Create and show the dialog.
-    DialogFragment newFragment = new DialogFragment();
-    newFragment.show(ft, "dialog_infocard");
+    InfoCardDialogFragment newFragment = new InfoCardDialogFragment();
+    newFragment.show( getSupportFragmentManager(), "dialog_infocard" );
   }
 
   private void invalidateSaveAndSignButton(){

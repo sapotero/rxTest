@@ -9,16 +9,19 @@ import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
 
 public class TabPagerAdapter extends FragmentPagerAdapter {
   private String uid;
+  private boolean zoom = false;
 
   public TabPagerAdapter(FragmentManager fragmentManager) {
     super(fragmentManager);
   }
 
+
+
   @Override
   public Fragment getItem(int position) {
     switch (position) {
       case 0:
-        return new InfoCardDocumentsFragment().withUid(uid);
+        return new InfoCardDocumentsFragment().withUid(uid).withOutZoom(zoom);
       case 1:
         return new InfoCardWebViewFragment().withUid(uid);
       default:
@@ -44,5 +47,9 @@ public class TabPagerAdapter extends FragmentPagerAdapter {
 
   public void withUid(String uid) {
     this.uid = uid;
+  }
+
+  public void withoutZoom(boolean bool) {
+    this.zoom = bool;
   }
 }
