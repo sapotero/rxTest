@@ -1,9 +1,11 @@
 package sapotero.rxtest.views.menu.builders;
 
+import java.io.Serializable;
+
 import io.requery.query.Expression;
 import io.requery.query.LogicalCondition;
 
-public class ConditionBuilder {
+public class ConditionBuilder implements Serializable {
 
   public enum Condition{
     WHERE,

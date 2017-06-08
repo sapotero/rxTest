@@ -1,8 +1,6 @@
 package sapotero.rxtest.views.menu;
 
-import android.annotation.TargetApi;
 import android.content.Context;
-import android.os.Build;
 import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -12,7 +10,6 @@ import android.widget.Spinner;
 import java.util.ArrayList;
 
 import sapotero.rxtest.R;
-import sapotero.rxtest.views.adapters.DocumentTypeAdapter;
 import sapotero.rxtest.views.custom.OrganizationSpinner;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import sapotero.rxtest.views.menu.factories.ItemsBuilder;
@@ -50,19 +47,15 @@ public class MenuBuilder implements ItemsBuilder.Callback{
   }
 
 
-  public void updateCount() {
-    itemsBuilder.getSelectedItem().recalcuate();
-    update();
-  }
+//  public void updateCount() {
+//    itemsBuilder.getSelectedItem().recalcuate();
+////    updateFromJob();
+//  }
 
-  @TargetApi(Build.VERSION_CODES.M)
-  public void recreate() {
-
-    itemsBuilder.update();
-    RadioGroup tmp_view = itemsBuilder.getView();
-    buttons.removeAllViews();
-    buttons.addView( tmp_view );
-
+  public void invalidate() {
+    Timber.tag(TAG).i("invalidate");
+    getItem().recalcuate();
+//    itemsBuilder.invalidate();
   }
 
 
@@ -138,9 +131,9 @@ public class MenuBuilder implements ItemsBuilder.Callback{
   }
 
   public void update() {
-    //test update adapter
-    int index = journalSpinner.getSelectedItemPosition();
-    DocumentTypeAdapter tmp_adapter = (DocumentTypeAdapter) journalSpinner.getAdapter();
+//    //test updateFromJob adapter
+//    int index = journalSpinner.getSelectedItemPosition();
+//    DocumentTypeAdapter tmp_adapter = (DocumentTypeAdapter) journalSpinner.getAdapter();
 
   }
 
@@ -164,20 +157,8 @@ public class MenuBuilder implements ItemsBuilder.Callback{
 
     this.result = result;
 
-//    Timber.tag(TAG).v( "onMenuUpdate: %s", result.size() );
-//    for (ConditionBuilder condition : result ) {
-//      Timber.tag(TAG).i("|| %s", condition.toString());
-//    }
-
-
-    Timber.tag(TAG).i( "onMenuUpdate" );
-
     view = new FrameLayout(context);
-
     RadioGroup tmp_view = itemsBuilder.getView();
-
-    int index_selected = tmp_view.indexOfChild(tmp_view.findViewById(tmp_view.getCheckedRadioButtonId()));
-    Timber.tag(TAG).i( "checked: %s", index_selected );
 
     buttons.removeAllViews();
     buttons.addView( tmp_view );

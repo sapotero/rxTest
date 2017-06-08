@@ -57,6 +57,10 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
     this.user = user;
   }
 
+  public void invalidate() {
+    journalSpinnerAdapter.invalidate();
+  }
+
 
   public interface Callback {
     void onMenuUpdate(ArrayList<ConditionBuilder> result);
@@ -80,8 +84,6 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
       @RequiresApi(api = Build.VERSION_CODES.M)
       @Override
       public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-        Timber.tag(TAG).w( journalSpinnerAdapter.getItem(position).getName() );
-
         updateView();
       }
 
@@ -90,6 +92,8 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
       }
     });
   }
+
+
 
   public void setOrganizationsLayout(LinearLayout organizationsLayout) {
     this.organizationsLayout = organizationsLayout;
@@ -108,7 +112,7 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
   }
 
   public void setSpinnerDefaults() {
-
+    Timber.i( "setSpinnerDefaults" );
     List<DocumentTypeItem> document_types = new ArrayList<>();
 
     for ( MainMenuItem mainMenuItem : MainMenuItem.values()) {
@@ -117,6 +121,11 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
 
     journalSpinnerAdapter = new DocumentTypeAdapter(context, document_types);
     journalSpinner.setAdapter(journalSpinnerAdapter);
+
+    // без привязки к доступным журналам
+    if (settings.getStartJournal() != null){
+      journalSpinner.setSelection( Integer.parseInt( settings.getStartJournal() ) );
+    }
   }
 
   public void prev() {
@@ -135,7 +144,6 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
   }
 
 
-  @RequiresApi(api = Build.VERSION_CODES.M)
   private void updateView() {
     if (view == null){
       view = new RadioGroup(context);
@@ -145,7 +153,6 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
 
 
     MainMenuItem mainMenuItem = getSelectedItem();
-    Timber.tag(TAG).i( "CURRENT BUTTONS: %s", mainMenuItem.getMainMenuButtons().size() );
 
     RadioGroup button_group = getButtonGroupLayout(context);
 
@@ -245,13 +252,6 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
     view.setLayoutParams(params);
     return view;
   }
-
-  @RequiresApi(api = Build.VERSION_CODES.M)
-  public void update() {
-    updateView();
-  }
-
-
 
   @Override
   public void onButtonBuilderUpdate(Integer index) {

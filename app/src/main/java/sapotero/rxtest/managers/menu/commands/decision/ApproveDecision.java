@@ -1,9 +1,12 @@
 package sapotero.rxtest.managers.menu.commands.decision;
 
+import android.support.annotation.Nullable;
+
 import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.Collections;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -29,6 +32,8 @@ import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
 import sapotero.rxtest.retrofit.models.wrapper.DecisionWrapper;
 import sapotero.rxtest.services.MainService;
+import sapotero.rxtest.utils.memory.fields.FieldType;
+import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
 public class ApproveDecision extends AbstractCommand {
@@ -66,6 +71,7 @@ public class ApproveDecision extends AbstractCommand {
   public void execute() {
     queueManager.add(this);
     updateLocal();
+
   }
 
 
@@ -102,19 +108,15 @@ public class ApproveDecision extends AbstractCommand {
         || ( red != null && red.get(0).equals(true) )
 
       ){
-      String uid = null;
 
-      if (params.getDecisionModel().getDocumentUid() != null && !Objects.equals(params.getDecisionModel().getDocumentUid(), "")){
-        uid = params.getDecisionModel().getDocumentUid();
-      }
 
-      if (params.getDocument() != null && !Objects.equals(params.getDocument(), "")){
-        uid = params.getDocument();
-      }
+      String uid = getUid();
 
-      if (document.getUid() != null && !Objects.equals(document.getUid(), "")){
-        uid = document.getUid();
-      }
+      store.process(
+        store.startTransactionFor( getUid() )
+          .setLabel(LabelType.SYNC)
+          .setField(FieldType.PROCESSED, true)
+      );
 
 
       Timber.tag(TAG).i( "3 updateLocal document uid:\n%s\n%s\n%s\n", params.getDecisionModel().getDocumentUid(), params.getDocument(), document.getUid() );
@@ -124,13 +126,18 @@ public class ApproveDecision extends AbstractCommand {
         .update(RDocumentEntity.class)
         .set(RDocumentEntity.PROCESSED, true)
         .set(RDocumentEntity.MD5, "")
-        .where(RDocumentEntity.UID.eq( uid ))
+        .where(RDocumentEntity.UID.eq( getUid() ))
         .get().value();
 
       Timber.tag(TAG).e("3 updateLocal document %s | %s", uid, dec > 0);
 
 //      EventBus.getDefault().post( new ShowNextDocumentEvent());
     }
+
+    store.process(
+      store.startTransactionFor( getUid() )
+        .setLabel(LabelType.SYNC)
+    );
 
     Observable.just("").timeout(100, TimeUnit.MILLISECONDS).subscribe(
       data -> {
@@ -141,6 +148,27 @@ public class ApproveDecision extends AbstractCommand {
       }
     );
 
+  }
+
+  @Nullable
+  private String getUid() {
+    String uid = null;
+    if (params.getDecisionModel().getDocumentUid() != null && !Objects.equals(params.getDecisionModel().getDocumentUid(), "")){
+      uid = params.getDecisionModel().getDocumentUid();
+    }
+
+    if (params.getDocument() != null && !Objects.equals(params.getDocument(), "")){
+      uid = params.getDocument();
+    }
+
+    if (document.getUid() != null && !Objects.equals(document.getUid(), "")){
+      uid = document.getUid();
+    }
+
+    Timber.tag(TAG).e( "%s | %s | %s", params.getDecisionModel().getDocumentUid(), params.getDocument(), document.getUid() );
+
+
+    return uid;
   }
 
 
@@ -177,7 +205,6 @@ public class ApproveDecision extends AbstractCommand {
     }
 
     Decision _decision = params.getDecisionModel();
-//    _decision.setDocumentUid( document.getUid() );
     _decision.setDocumentUid( null );
     _decision.setApproved(true);
     _decision.setSign( sign );
@@ -218,27 +245,42 @@ public class ApproveDecision extends AbstractCommand {
           if (data.getErrors() !=null && data.getErrors().size() > 0){
             queueManager.setExecutedWithError(this, data.getErrors());
             EventBus.getDefault().post( new ForceUpdateDocumentEvent( data.getDocumentUid() ));
+
           } else {
 
             if (callback != null ){
               callback.onCommandExecuteSuccess( getType() );
-              EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
             }
+            EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
 
             queueManager.setExecutedRemote(this);
           }
+
+          store.process(
+            store.startTransactionFor( getUid() )
+              .removeLabel(LabelType.SYNC)
+          );
 
         },
         error -> {
           Timber.tag(TAG).i("error: %s", error);
           if (callback != null){
-            callback.onCommandExecuteError(getType());
+            callback.onCommandExecuteError(error.getLocalizedMessage());
           }
-//          queueManager.setExecutedWithError(this, Collections.singletonList("http_error"));
-          EventBus.getDefault().post( new ForceUpdateDocumentEvent( params.getDecisionModel().getDocumentUid() ));
+
+          if ( settings.isOnline() ){
+            store.process(
+              store.startTransactionFor( getUid() )
+                .removeLabel(LabelType.SYNC)
+                .setField(FieldType.PROCESSED, false)
+            );
+            queueManager.setExecutedWithError(this, Collections.singletonList(error.getLocalizedMessage()));
+
+          }
         }
       );
   }
+
 
   @Override
   public void withParams(CommandParams params) {

@@ -18,6 +18,9 @@ import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.services.MainService;
+import sapotero.rxtest.utils.memory.fields.FieldType;
+import sapotero.rxtest.utils.memory.fields.InMemoryState;
+import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
 public class NextPerson extends AbstractCommand {
@@ -55,6 +58,17 @@ public class NextPerson extends AbstractCommand {
   public void execute() {
     queueManager.add(this);
     EventBus.getDefault().post( new ShowNextDocumentEvent());
+
+    store.process(
+      store.startTransactionFor( getUid() )
+        .setLabel(LabelType.SYNC)
+        .setField(FieldType.PROCESSED, true)
+        .setState(InMemoryState.LOADING)
+    );
+  }
+
+  private String getUid() {
+    return params.getDocument() != null ? params.getDocument() : document.getUid();
   }
 
   @Override
@@ -66,11 +80,10 @@ public class NextPerson extends AbstractCommand {
   public void executeLocal() {
     int count = dataStore
       .update(RDocumentEntity.class)
-//      .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue() )
       .set( RDocumentEntity.PROCESSED, true)
       .set( RDocumentEntity.MD5, "" )
       .set( RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq(params.getDocument() != null ? params.getDocument(): document.getUid()))
+      .where(RDocumentEntity.UID.eq(getUid()))
       .get()
       .value();
 
@@ -95,7 +108,8 @@ public class NextPerson extends AbstractCommand {
     OperationService operationService = retrofit.create( OperationService.class );
 
     ArrayList<String> uids = new ArrayList<>();
-    uids.add( params.getDocument() != null ? params.getDocument(): document.getUid() );
+    String uid = getUid();
+    uids.add(uid);
 
     String comment = null;
     if ( params.getComment() != null ){
@@ -129,11 +143,23 @@ public class NextPerson extends AbstractCommand {
 
           queueManager.setExecutedRemote(this);
 
+          store.process(
+            store.startTransactionFor( getUid() )
+              .removeLabel(LabelType.SYNC)
+              .setField(FieldType.MD5, "")
+          );
         },
         error -> {
           if (callback != null){
             callback.onCommandExecuteError(getType());
           }
+
+          store.process(
+            store.startTransactionFor( getUid() )
+              .removeLabel(LabelType.SYNC)
+              .setField(FieldType.PROCESSED, false)
+          );
+
         }
       );
 

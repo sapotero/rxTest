@@ -97,7 +97,7 @@ public class RoutePreviewFragment extends Fragment {
 
     initEvents();
 
-    showPreview();
+    showPreview(true);
     loadRoute();
 
     return view;
@@ -114,45 +114,49 @@ public class RoutePreviewFragment extends Fragment {
         break;
     }
 
-    showPreview();
+    showPreview(false);
     updateButtonView();
     loadRoute();
   }
 
-  private void showPreview() {
+  private void showPreview(Boolean force) {
 
-    frame.setVisibility(View.VISIBLE);
+    if (!force) {
+      frame.setVisibility(View.VISIBLE);
 
-    int durationMillis = 300;
+      int durationMillis = 300;
 
-    Animation fadeIn = new AlphaAnimation(0, 1);
-    fadeIn.setInterpolator(new DecelerateInterpolator());
-    fadeIn.setDuration(durationMillis);
+      Animation fadeIn = new AlphaAnimation(0, 1);
+      fadeIn.setInterpolator(new DecelerateInterpolator());
+      fadeIn.setDuration(durationMillis);
 
-    Animation fadeOut = new AlphaAnimation(1, 0);
-    fadeOut.setInterpolator(new AccelerateInterpolator());
-    fadeOut.setStartOffset(durationMillis);
-    fadeOut.setDuration(durationMillis);
+      Animation fadeOut = new AlphaAnimation(1, 0);
+      fadeOut.setInterpolator(new AccelerateInterpolator());
+      fadeOut.setStartOffset(durationMillis);
+      fadeOut.setDuration(durationMillis);
 
-    AnimationSet animation = new AnimationSet(false);
-    AnimationSet wrapperAnimation = new AnimationSet(false);
+      AnimationSet animation = new AnimationSet(false);
+      AnimationSet wrapperAnimation = new AnimationSet(false);
 
-    wrapperAnimation.addAnimation(fadeIn);
-    animation.addAnimation(fadeOut);
+      wrapperAnimation.addAnimation(fadeIn);
+      animation.addAnimation(fadeOut);
 
-    frame.setAnimation(animation);
-    wrapper.setAnimation(wrapperAnimation);
+      frame.setAnimation(animation);
+      wrapper.setAnimation(wrapperAnimation);
 
-    Observable.just("")
-      .delay(durationMillis, TimeUnit.MILLISECONDS)
-      .subscribeOn( Schedulers.computation() )
-      .observeOn( AndroidSchedulers.mainThread() )
-      .subscribe(
-        data  -> {
-          frame.setVisibility(View.GONE);
-        },
-        Timber::e
-      );
+      Observable.just("")
+        .delay(durationMillis, TimeUnit.MILLISECONDS)
+        .subscribeOn( Schedulers.computation() )
+        .observeOn( AndroidSchedulers.mainThread() )
+        .subscribe(
+          data  -> {
+            frame.setVisibility(View.GONE);
+          },
+          Timber::e
+        );
+    } else {
+      frame.setVisibility(View.GONE);
+    }
 
   }
 

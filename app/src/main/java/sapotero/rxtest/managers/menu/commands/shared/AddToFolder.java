@@ -9,11 +9,13 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.retrofit.OperationService;
-import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.retrofit.OperationService;
+import sapotero.rxtest.retrofit.models.OperationResult;
+import sapotero.rxtest.utils.memory.fields.LabelType;
+import sapotero.rxtest.utils.memory.utils.Transaction;
 import timber.log.Timber;
 
 public class AddToFolder extends AbstractCommand {
@@ -50,6 +52,14 @@ public class AddToFolder extends AbstractCommand {
 
   @Override
   public void execute() {
+
+    Transaction transaction = new Transaction();
+    transaction
+      .from( store.getDocuments().get(document_id) )
+      .setLabel(LabelType.SYNC)
+      .setLabel(LabelType.FAVORITES);
+    store.process( transaction );
+
     Timber.tag(TAG).i("execute for %s - %s",getType(),document_id);
     queueManager.add(this);
   }
@@ -109,11 +119,28 @@ public class AddToFolder extends AbstractCommand {
           Timber.tag(TAG).i("type: %s", data.getType());
 
           queueManager.setExecutedRemote(this);
+
+          Transaction transaction = new Transaction();
+          transaction
+            .from( store.getDocuments().get(document_id) )
+            .removeLabel(LabelType.SYNC)
+            .setLabel(LabelType.FAVORITES);
+          store.process( transaction );
+
         },
         error -> {
           if (callback != null){
             callback.onCommandExecuteError(getType());
           }
+
+          Transaction transaction = new Transaction();
+          transaction
+            .from( store.getDocuments().get(document_id) )
+            .removeLabel(LabelType.SYNC)
+            .removeLabel(LabelType.FAVORITES);
+          store.process( transaction );
+
+
         }
       );
   }

@@ -1,16 +1,13 @@
 package sapotero.rxtest.views.dialogs;
 
-import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.DialogInterface;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.RequiresApi;
-import android.util.Base64;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebView;
+import android.widget.Button;
 
 import javax.inject.Inject;
 
@@ -19,92 +16,70 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.views.adapters.TabPagerAdapter;
+import sapotero.rxtest.views.custom.ViewPagerFixed;
 import timber.log.Timber;
 
-public class InfoCardDialogFragment extends DialogFragment implements View.OnClickListener {
+public class InfoCardDialogFragment extends DialogFragment {
 
   private String TAG = this.getClass().getSimpleName();
 
   @Inject Settings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
-  @BindView(R.id.fragment_preview_main_infocard) WebView infocard;
-  private String uid;
+  @BindView(R.id.fragment_preview_main_infocard_close) Button close;
+  @BindView(R.id.fragment_preview_tab_main) ViewPagerFixed viewPager;
+  @BindView(R.id.fragment_preview_tab_tabs) TabLayout tabLayout;
 
-  @RequiresApi(api = Build.VERSION_CODES.M)
+  //  @BindView(R.id.fragment_preview_main_infocard) WebView infocard;
+
+
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    View view = inflater.inflate(R.layout.fragment_preview_main_infocard, null);
+    View view = inflater.inflate(R.layout.fragment_preview_main_infocard, container, false);
+    ButterKnife.bind(this, view);
+
     EsdApplication.getDataComponent().inject(this);
-    ButterKnife.bind(view);
+
+//    infocard  = (WebView) view.findViewById(R.id.fragment_preview_main_infocard);
+//    viewPager = (ViewPager) view.findViewById(R.id.fragment_preview_tab_main);
 
     loadSettings();
     return view;
   }
 
-  @RequiresApi(api = Build.VERSION_CODES.M)
+  @OnClick(R.id.fragment_preview_main_infocard_close)
+  public void close(){
+    dismiss();
+  }
+
   private void loadSettings() {
-    dataStore
-      .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq( uid == null? settings.getUid() : uid  ))
-      .get()
-      .toObservable()
-      .subscribeOn(Schedulers.io())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(document -> {
-        try {
-          String htmlData = "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />" + new String(Base64.decode( document.getInfoCard(), Base64.DEFAULT));
 
-          infocard = (WebView) getView().findViewById(R.id.fragment_preview_main_infocard);
-          infocard.loadDataWithBaseURL("file:///android_asset/", htmlData, "text/html", "UTF-8", null);
-          infocard.getSettings().setBuiltInZoomControls(true);
-          infocard.getSettings().setDisplayZoomControls(false);
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
+//    RDocumentEntity document = dataStore
+//      .select(RDocumentEntity.class)
+//      .where(RDocumentEntity.UID.eq(settings.getUid()))
+//      .get().firstOrNull();
+//
+//    String htmlData = "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />" + new String(Base64.decode( document.getInfoCard(), Base64.DEFAULT));
+//
+//    infocard.loadDataWithBaseURL("file:///android_asset/", htmlData, "text/html", "UTF-8", null);
+//    infocard.getSettings().setBuiltInZoomControls(true);
+//    infocard.getSettings().setDisplayZoomControls(false);
 
-      });
+    if (viewPager != null) {
 
-  }
+      TabPagerAdapter adapter = new TabPagerAdapter ( getChildFragmentManager() );
+      adapter.withUid( settings.getUid()  );
+      adapter.withoutZoom(true);
 
-  @OnClick(R.id.dialog_reject_decision_button_cancel)
-  public void _cancel(View view) {
-    Timber.tag(TAG).i( "_cancel");
-    dismiss();
-  }
-
-  @OnClick(R.id.dialog_reject_decision_button_yes)
-  public void _yes(View view) {
-    Timber.tag(TAG).i( "_yes");
-    dismiss();
-  }
-
-  public InfoCardDialogFragment withUid(String uid) {
-    this.uid = uid;
-    return this;
-  }
-
-  public void onClick(DialogInterface dialog, int which) {
-    int i = 0;
-
-    switch (which) {
-      case Dialog.BUTTON_POSITIVE:
-        i = R.string.dialog_oshs_add;
-        break;
-      case Dialog.BUTTON_NEGATIVE:
-        i = R.string.dialog_oshs_cancel;
-        break;
-      default:
-        i = R.string.dialog_oshs_cancel;
-        break;
+      viewPager.setAdapter(adapter);
+      tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
+      tabLayout.setupWithViewPager(viewPager);
     }
 
-    Timber.tag(TAG).i(String.valueOf(which));
+
   }
 
   public void onDismiss(DialogInterface dialog) {
@@ -117,8 +92,4 @@ public class InfoCardDialogFragment extends DialogFragment implements View.OnCli
     Timber.tag(TAG).i( "onCancel");
   }
 
-  @Override
-  public void onClick(View v) {
-
-  }
 }

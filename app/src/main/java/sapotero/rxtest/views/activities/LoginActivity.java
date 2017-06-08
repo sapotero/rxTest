@@ -66,9 +66,6 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
 
     if( cryptoProInstalled ) {
 
-      startService(new Intent(this, MainService.class));
-
-      // Check for permissions if the activity previously not existed
       if (null == savedInstanceState) {
         check_permissions();
       }
@@ -107,7 +104,7 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
         .items(keyStoreTypeList)
         .itemsCallbackSingleChoice(-1, (dialog, view, which, text) -> {
 
-//          KeyStoreType.saveCurrentType(keyStoreTypeList.get(which));
+//          KeyStoreType.saveCurrentType(keyStoreTypeList.startTransactionFor(which));
 
           EventBus.getDefault().post( new SelectKeyStoreEvent(keyStoreTypeList.get(which)));
 
@@ -259,6 +256,9 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
     }
     EventBus.getDefault().register(this);
 
+    Intent serviceIntent = new Intent(this, MainService.class);
+    startService(serviceIntent);
+
     // If not first run and CryptoPro installed, immediately move to main activity
     if ( !settings.isFirstRun() && cryptoProInstalled ) {
       onCompleted(null);
@@ -268,9 +268,6 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
   /* Stepper */
   @Override
   public void onCompleted(View completeButton) {
-//    Toast.makeText( getApplicationContext(), "onCompleted", Toast.LENGTH_SHORT ).show();
-
-
     Intent intent = new Intent(this, MainActivity.class);
 
     Bundle bundle = ActivityOptionsCompat.makeCustomAnimation(this, android.R.anim.fade_in, android.R.anim.fade_out).toBundle();

@@ -36,7 +36,7 @@ public class CreateFoldersJob extends BaseJob {
 
   @Override
   public void onRun() throws Throwable {
-    //    Timber.tag(TAG).i( "folders: %s | %s", templates.size(), templates.get(0).getTitle() );
+    //    Timber.tag(TAG).i( "folders: %s | %s", templates.size(), templates.startTransactionFor(0).getTitle() );
     for (Folder template : templates){
       if ( !exist( template.getId()) ){
         add(template);

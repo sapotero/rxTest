@@ -15,13 +15,12 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.RelativeLayout;
 
-import com.f2prateek.rx.preferences.Preference;
-
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.Objects;
+
 import javax.inject.Inject;
 
 import butterknife.BindView;
@@ -32,7 +31,6 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
-
 import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.activities.DocumentInfocardFullScreenActivity;
 import sapotero.rxtest.views.adapters.utils.OnSwipeTouchListener;
@@ -49,7 +47,6 @@ public class InfoCardWebViewFragment extends Fragment {
   private OnFragmentInteractionListener mListener;
   private String TAG = this.getClass().getSimpleName();
   private String uid;
-  private Preference<String> UID;
 
   public InfoCardWebViewFragment() {
   }
@@ -165,7 +162,7 @@ public class InfoCardWebViewFragment extends Fragment {
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(UpdateCurrentDocumentEvent event) throws Exception {
     Timber.tag(TAG).w("UpdateCurrentDocumentEvent %s", event.uid);
-    if (Objects.equals(event.uid, uid != null ? uid : UID.get())){
+    if (Objects.equals(event.uid, uid != null ? uid : settings.getUid())) {
       setWebView();
     }
   }

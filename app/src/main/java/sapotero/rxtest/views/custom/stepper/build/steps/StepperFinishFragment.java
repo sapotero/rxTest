@@ -14,12 +14,17 @@ import sapotero.rxtest.views.custom.stepper.VerificationError;
 
 public class StepperFinishFragment extends Fragment implements Step {
 
+//  @Inject
+//  MemoryStore store;
+
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-    View view = inflater.inflate(R.layout.stepper_final_view, container, false);
+    //    EsdApplication.getManagerComponent().inject(this);
+//    store.load();
 
-    return view;
+
+    return inflater.inflate(R.layout.stepper_final_view, container, false);
   }
 
   @Override

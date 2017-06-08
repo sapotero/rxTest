@@ -45,12 +45,8 @@ public class CreateTemplatesJob extends BaseJob {
   }
 
   private void add(Template template) {
-    RTemplateEntity data = new RTemplateEntity();
-    data.setUid( template.getId() );
-    data.setTitle( template.getText() );
+    RTemplateEntity data = mappers.getTemplateMapper().toEntity(template);
     data.setType( type != null && !Objects.equals(type, "") ? type : "decision");
-    data.setUser( settings.getLogin() );
-
 
     dataStore
       .insert(data)

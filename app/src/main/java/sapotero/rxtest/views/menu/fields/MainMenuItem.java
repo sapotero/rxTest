@@ -1,12 +1,10 @@
 package sapotero.rxtest.views.menu.fields;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.views.menu.builders.ButtonBuilder;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
-import timber.log.Timber;
 
 
 enum V2DocumentType{
@@ -175,26 +173,21 @@ public enum MainMenuItem {
     true,
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.CONTROL.eq( true ) ),
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_LINKS.eq( false ) )
     },
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.CONTROL.eq( true ) ),
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_LINKS.eq( false ) ),
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_PROCESSED_FOLDER.eq( false ) ),
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_FAVORITES_FOLDER.eq( false ) ),
     },
     true, true),
   PROCESSED ( 9, "Обработанное %s", new MainMenuButton[]{},
     true,
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq( true ) ),
-      new ConditionBuilder( ConditionBuilder.Condition.OR, RDocumentEntity.FROM_PROCESSED_FOLDER.eq( true ) ),
     },
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq( true ) ),
-      new ConditionBuilder( ConditionBuilder.Condition.OR, RDocumentEntity.FROM_PROCESSED_FOLDER.eq( true ) ),
     },
     true, true),
+
   FAVORITES ( 10, "Избранное %s", new MainMenuButton[]{},
     true,
     new ConditionBuilder[]{
@@ -279,16 +272,16 @@ public enum MainMenuItem {
   }
 
   public ArrayList<ButtonBuilder> getMainMenuButtons(){
-    Timber.tag(TAG).e("getMainMenuButtons %s", buttonsList);
+//    Timber.tag(TAG).e("getMainMenuButtons %s", buttonsList);
 
     if ( buttonsList.size() == 0 ){
 
-      Timber.tag(TAG).e("buttonsList.size() == 0");
+//      Timber.tag(TAG).e("buttonsList.size() == 0");
 
       if ( mainMenuButtons.length > 0 ){
         for (int i = 0, length = mainMenuButtons.length-1; i <= length; i++) {
 
-          Timber.tag("CMP").e( "length: %s", Arrays.toString(getQueryConditions()));
+//          Timber.tag("CMP").e( "length: %s", Arrays.toString(getQueryConditions()));
 
           ButtonBuilder button = new ButtonBuilder(
             mainMenuButtons[i].getFormat(),
@@ -298,21 +291,13 @@ public enum MainMenuItem {
             mainMenuButtons[i].getIndex()
           );
 
-          if (i == 0){
-            button.setLeftCorner();
-          } else if ( i == length ){
-            button.setRightCorner();
-          } else {
-            button.setNoneCorner();
-          }
-
           buttonsList.add( button );
         }
       }
     }
     else {
       for (ButtonBuilder button: buttonsList){
-        Timber.tag(TAG).e("getMainMenuButtons else recalcuate");
+//        Timber.tag(TAG).e("getMainMenuButtons else recalcuate");
 //        button.recalculate();
       }
     }
@@ -326,7 +311,7 @@ public enum MainMenuItem {
 
   public void recalcuate(){
 
-    Timber.tag(TAG).e("recalcuate");
+//    Timber.tag(TAG).e("recalcuate");
     for (ButtonBuilder button: buttonsList){
       button.recalculate();
     }

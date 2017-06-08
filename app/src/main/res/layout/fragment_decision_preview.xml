@@ -14,20 +14,20 @@
         android:layout_height="match_parent"
         >
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:orientation="horizontal">
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Резолюция"
-                android:textSize="16sp"
-                android:fontFamily="sans-serif-light"
-                android:gravity="center"
-                android:layout_gravity="center"
-                />
-        </LinearLayout>
+        <!--<LinearLayout-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="48dp"-->
+            <!--android:orientation="horizontal">-->
+            <!--<TextView-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:text="Текст"-->
+                <!--android:textSize="16sp"-->
+                <!--android:fontFamily="sans-serif-light"-->
+                <!--android:gravity="center"-->
+                <!--android:layout_gravity="center"-->
+                <!--/>-->
+        <!--</LinearLayout>-->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"

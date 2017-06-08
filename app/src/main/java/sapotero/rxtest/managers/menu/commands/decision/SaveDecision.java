@@ -14,10 +14,10 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.db.mapper.BlockMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
-import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
@@ -27,7 +27,6 @@ import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
-import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
 import timber.log.Timber;
 
@@ -100,11 +99,11 @@ public class SaveDecision extends AbstractCommand {
     Decision dec = params.getDecisionModel();
     Timber.tag(TAG).e("UPDATE %s", new Gson().toJson(dec));
 //
-//    int count = dataStore
+//    int put = dataStore
 //      .delete(RDecisionEntity.class)
 //      .where(RDecisionEntity.UID.eq(dec.getId()))
-//      .get().value();
-//    Timber.tag(TAG).e("DELETED %s", count);
+//      .startTransactionFor().value();
+//    Timber.tag(TAG).e("DELETED %s", put);
 
 
     // RDecisionEntity decision = new RDecisionEntity();
@@ -134,34 +133,10 @@ public class SaveDecision extends AbstractCommand {
       decision.getBlocks().clear();
     }
 
+    BlockMapper blockMapper = mappers.getBlockMapper();
+
     for (Block _block : dec.getBlocks()) {
-      RBlockEntity block = new RBlockEntity();
-
-      block.setTextBefore(_block.getTextBefore());
-      block.setText(_block.getText());
-      block.setAppealText(_block.getAppealText());
-      block.setNumber(_block.getNumber());
-      block.setToFamiliarization(_block.getAskToReport());
-      block.setToCopy(_block.getToCopy());
-      block.setHidePerformers(_block.getHidePerformers());
-      block.setToFamiliarization(_block.getToFamiliarization());
-
-
-      for (Performer _perf : _block.getPerformers()) {
-        RPerformerEntity perf = new RPerformerEntity();
-
-        perf.setPerformerId(_perf.getPerformerId());
-        perf.setNumber(_perf.getNumber());
-        perf.setPerformerText(_perf.getPerformerText());
-        perf.setPerformerGender(_perf.getPerformerGender());
-        perf.setOrganizationText(_perf.getOrganizationText());
-        perf.setIsOriginal(_perf.getIsOriginal());
-        perf.setIsResponsible(_perf.getIsResponsible());
-        perf.setIsOrganization(_perf.getOrganization());
-        perf.setBlock(block);
-        block.getPerformers().add(perf);
-      }
-
+      RBlockEntity block = blockMapper.toEntity(_block);
       block.setDecision(decision);
       decision.getBlocks().add(block);
     }
@@ -169,7 +144,7 @@ public class SaveDecision extends AbstractCommand {
 //    RDocumentEntity doc = dataStore
 //      .select(RDocumentEntity.class)
 //      .where(RDocumentEntity.UID.eq(dec.getDocumentUid()))
-//      .get()
+//      .startTransactionFor()
 //      .first();
 //
 //    decision.setDocument( doc );
@@ -191,16 +166,16 @@ public class SaveDecision extends AbstractCommand {
         }
       );
 
-    Timber.tag(TAG).e("1 update params%s", new Gson().toJson( params ));
+    Timber.tag(TAG).e("1 updateFromJob params%s", new Gson().toJson( params ));
 
 //
-//    Integer count = dataStore
-//      .update(RDecisionEntity.class)
+//    Integer put = dataStore
+//      .updateFromJob(RDecisionEntity.class)
 //      .set(RDecisionEntity.TEMPORARY, true)
 //      .where(RDecisionEntity.UID.eq(dec.getId()))
-//      .get().value();
+//      .startTransactionFor().value();
 
-//    Timber.tag(TAG).i( "2 update decision: %s", count );
+//    Timber.tag(TAG).i( "2 updateFromJob decision: %s", put );
 
   }
 

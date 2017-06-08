@@ -11,11 +11,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.View;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.DecelerateInterpolator;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.birbit.android.jobqueue.JobManager;
 
 import org.greenrobot.eventbus.EventBus;
@@ -32,6 +37,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import rx.Observable;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
@@ -55,7 +61,6 @@ import sapotero.rxtest.services.task.UpdateCurrentDocumentTask;
 import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.adapters.TabSigningPagerAdapter;
-import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
 import sapotero.rxtest.views.fragments.InfoActivityDecisionPreviewFragment;
 import sapotero.rxtest.views.fragments.InfoCardDocumentsFragment;
 import sapotero.rxtest.views.fragments.InfoCardFieldsFragment;
@@ -64,13 +69,15 @@ import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
 import sapotero.rxtest.views.fragments.RoutePreviewFragment;
 import timber.log.Timber;
 
-public class InfoActivity extends AppCompatActivity implements InfoActivityDecisionPreviewFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, RoutePreviewFragment.OnFragmentInteractionListener, InfoCardDocumentsFragment.OnFragmentInteractionListener, InfoCardWebViewFragment.OnFragmentInteractionListener, InfoCardLinksFragment.OnFragmentInteractionListener, InfoCardFieldsFragment.OnFragmentInteractionListener{
+public class InfoActivity extends AppCompatActivity implements InfoActivityDecisionPreviewFragment.OnFragmentInteractionListener, RoutePreviewFragment.OnFragmentInteractionListener, InfoCardDocumentsFragment.OnFragmentInteractionListener, InfoCardWebViewFragment.OnFragmentInteractionListener, InfoCardLinksFragment.OnFragmentInteractionListener, InfoCardFieldsFragment.OnFragmentInteractionListener{
 
   @BindView(R.id.activity_info_preview_container) LinearLayout preview_container;
+  @BindView(R.id.frame_preview_decision) FrameLayout frame;
 
   @BindView(R.id.tab_main) ViewPager viewPager;
-  @BindView(R.id.tabs) TabLayout tabLayout;
   @BindView(R.id.activity_info_wrapper) View wrapper;
+  @BindView(R.id.tabs) TabLayout tabLayout;
+
 
   @Inject JobManager jobManager;
   @Inject Settings settings;
@@ -83,8 +90,8 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   private ToolbarManager toolbarManager;
   private Fields.Journal journal;
   private Fields.Status  status;
-  private MaterialDialog.Builder loadingDialog;
   private ScheduledThreadPoolExecutor scheduller;
+  private Subscription loggerSubscription;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -105,6 +112,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     }
     EventBus.getDefault().register(this);
 
+
     toolbarManager = new ToolbarManager( this, toolbar);
     toolbarManager.init();
 
@@ -115,8 +123,22 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
     setTabContent();
     setPreview();
+
+//    initLogger();
   }
 
+//  private void initLogger() {
+//    loggerSubscription = store.getPublishSubject()
+//      .filter( inMemoryDocument -> inMemoryDocument.getStatus() == Fields.Status.SIGNING )
+//      .subscribeOn(Schedulers.computation())
+//      .observeOn(AndroidSchedulers.mainThread())
+//      .subscribe(
+//        doc -> {
+//          Timber.tag(TAG).d(doc.toString());
+//        },
+//        Timber::e
+//      );
+//  }
 
 
   private void setTabContent() {
@@ -129,9 +151,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     }
 
 
-//    Timber.tag(TAG).e("IS_PROCESSED.get() %s | %s -> %s", status, STATUS_CODE.get(), IS_PROCESSED.get() );
-
-
     if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL ){
       TabSigningPagerAdapter adapter = new TabSigningPagerAdapter( getSupportFragmentManager() );
       viewPager.setAdapter(adapter);
@@ -139,7 +158,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
       TabPagerAdapter adapter = new TabPagerAdapter ( getSupportFragmentManager() );
       viewPager.setAdapter(adapter);
     }
-    viewPager.setOffscreenPageLimit(10);
+    viewPager.setOffscreenPageLimit(4);
 
     tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
       @Override
@@ -161,26 +180,58 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     tabLayout.setupWithViewPager(viewPager);
   }
 
+
   private void setPreview() {
+    addLoader();
 
     FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-
-//    Timber.tag("INFO").v( "JOURNAL: %s | STATUS: %s", journal.getName(), status.getName() );
-
-    try {
-      LinearLayout layout = (LinearLayout) findViewById(R.id.activity_info_preview_container);
-      layout.removeAllViews();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    fragmentTransaction.addToBackStack("PREVIEW");
 
     if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL ){
-      fragmentTransaction.add( R.id.activity_info_preview_container, new RoutePreviewFragment() );
+      fragmentTransaction.replace( R.id.activity_info_preview_container, new RoutePreviewFragment(), "PREVIEW" );
     } else {
-      fragmentTransaction.add( R.id.activity_info_preview_container, new InfoActivityDecisionPreviewFragment(toolbarManager) );
+      fragmentTransaction.replace( R.id.activity_info_preview_container, new InfoActivityDecisionPreviewFragment(toolbarManager), "PREVIEW" );
     }
 
     fragmentTransaction.commit();
+  }
+
+  private void addLoader() {
+    preview_container.removeAllViews();
+
+    frame.setVisibility(View.VISIBLE);
+
+    int durationMillis = 300;
+
+    Animation fadeIn = new AlphaAnimation(0, 1);
+    fadeIn.setInterpolator(new DecelerateInterpolator());
+    fadeIn.setDuration(durationMillis);
+
+    Animation fadeOut = new AlphaAnimation(1, 0);
+    fadeOut.setInterpolator(new AccelerateInterpolator());
+    fadeOut.setStartOffset(durationMillis);
+    fadeOut.setDuration(durationMillis);
+
+    AnimationSet animation = new AnimationSet(true);
+    AnimationSet wrapperAnimation = new AnimationSet(true);
+
+    wrapperAnimation.addAnimation(fadeIn);
+    animation.addAnimation(fadeOut);
+
+    frame.setAnimation(animation);
+    preview_container.setAnimation(wrapperAnimation);
+
+    Observable.just("")
+      .delay(durationMillis, TimeUnit.MILLISECONDS)
+      .subscribeOn( Schedulers.newThread() )
+      .observeOn( AndroidSchedulers.mainThread() )
+      .subscribe(
+        data  -> {
+          frame.setVisibility(View.GONE);
+        },
+        Timber::e
+      );
+
   }
 
   @OnClick(R.id.activity_info_prev_document)
@@ -228,6 +279,10 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
     if (scheduller != null){
       scheduller.shutdown();
+    }
+
+    if (loggerSubscription != null) {
+      loggerSubscription.unsubscribe();
     }
 
     unsubscribe();
@@ -379,7 +434,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 //
 ////    MainActivity.invalidate();
 //
-//    MainActivity.RAdapter.getPrevFromPosition(settings.getInteger("activity_main_menu.position").get());
+//    MainActivity.RAdapter.getPrevFromPosition(settings.getInteger("activity_main_menu.position").startTransactionFor());
 //    activity.startActivity(intent);
 //      activity.overridePendingTransition(R.anim.slide_to_right, R.anim.slide_from_left);
 //      activity.overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
@@ -409,7 +464,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 //
 //    MainActivity.invalidate();
 //
-//    MainActivity.RAdapter.getNextFromPosition( settings.getInteger("activity_main_menu.position").get() );
+//    MainActivity.RAdapter.getNextFromPosition( settings.getInteger("activity_main_menu.position").startTransactionFor() );
 //    activity.startActivity(intent);
 //    activity.overridePendingTransition(R.anim.slide_to_left, R.anim.slide_from_right);
 //    activity.overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
@@ -429,7 +484,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   public void updateCurrent(){
 
-    jobManager.addJobInBackground(new UpdateDocumentJob( settings.getUid(), status ));
+    updateDocument();
 
     unsubscribe();
     subscription.add(
@@ -438,11 +493,15 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(interval -> {
-          jobManager.addJobInBackground(new UpdateDocumentJob( settings.getUid(), status ));
+          updateDocument();
         })
     );
 
     toolbarManager.invalidate();
+  }
+
+  private void updateDocument() {
+    jobManager.addJobInBackground( new UpdateDocumentJob( settings.getUid() ) );
   }
 
   private void unsubscribe(){

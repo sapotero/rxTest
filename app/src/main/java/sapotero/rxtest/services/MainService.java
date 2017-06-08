@@ -7,8 +7,6 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.os.IBinder;
 import android.util.Log;
-import android.view.View;
-import android.widget.AdapterView;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.greenrobot.eventbus.EventBus;
@@ -17,6 +15,7 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Provider;
@@ -66,10 +65,8 @@ import sapotero.rxtest.events.crypto.SignDataWrongPinEvent;
 import sapotero.rxtest.events.decision.SignAfterCreateEvent;
 import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
-import sapotero.rxtest.events.document.UpdateUnprocessedDocumentsEvent;
 import sapotero.rxtest.events.service.AuthServiceAuthEvent;
 import sapotero.rxtest.events.service.CheckNetworkEvent;
-import sapotero.rxtest.events.service.UpdateAllDocumentsEvent;
 import sapotero.rxtest.events.service.UpdateDocumentsByStatusEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckFailEvent;
@@ -120,48 +117,52 @@ public class MainService extends Service {
   public static String user;
   private int keyStoreTypeIndex = 0;
 
+
   public MainService() {
+
   }
 
   public void onCreate() {
     super.onCreate();
 
-    if ( EventBus.getDefault().isRegistered(this) ){
-      EventBus.getDefault().unregister(this);
-    }
-    EventBus.getDefault().register(this);
+    Observable.just(true)
+      .subscribeOn(Schedulers.io())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe( data -> {
 
-    EsdApplication.getManagerComponent().inject(this);
+        if ( EventBus.getDefault().isRegistered(this) ){
+          EventBus.getDefault().unregister(this);
+        }
+        EventBus.getDefault().register(this);
 
-    dataLoaderInterface = new DataLoaderManager(getApplicationContext());
+        EsdApplication.getManagerComponent().inject(this);
 
-    Provider[] providers = Security.getProviders();
+        dataLoaderInterface = new DataLoaderManager(getApplicationContext());
 
-
-
-    // 1. Инициализация RxSharedPreferences
+        // 1. Инициализация RxSharedPreferences
 //        initialize();
 
-    // 2. Инициализация провайдеров: CSP и java-провайдеров (Обязательная часть).
-    if (!initCSPProviders()) {
-      Log.i(Constants.APP_LOGGER_TAG, "Couldn't initialize CSP.");
-    }
-    initJavaProviders();
+        // 2. Инициализация провайдеров: CSP и java-провайдеров (Обязательная часть).
+        if (!initCSPProviders()) {
+          Log.i(Constants.APP_LOGGER_TAG, "Couldn't initialize CSP.");
+        }
+        initJavaProviders();
 
-    // 4. Инициируем объект для управления выбором типа контейнера (Настройки).
-    KeyStoreType.init(this);
+        // 4. Инициируем объект для управления выбором типа контейнера (Настройки).
+        KeyStoreType.init(this);
 
-    // 5. Инициируем объект для управления выбором типа провайдера (Настройки).
-    ProviderType.init(this);
+        // 5. Инициируем объект для управления выбором типа провайдера (Настройки).
+        ProviderType.init(this);
 
 
 
-    aliases( KeyStoreType.currentType(), ProviderType.currentProviderType() );
+        aliases( KeyStoreType.currentType(), ProviderType.currentProviderType() );
 
-    loadParams();
+        loadParams();
 
-    initScheduller();
+        initScheduller();
 
+      }, Timber::e);
   }
 
   private void loadParams() {
@@ -180,7 +181,7 @@ public class MainService extends Service {
     scheduller.setRemoveOnCancelPolicy(true);
 
 
-    scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 0 ,5*60, TimeUnit.SECONDS );
+    scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 5*60 ,5*60, TimeUnit.SECONDS );
     scheduller.scheduleWithFixedDelay( new UpdateQueueTask(queue), 0 ,5, TimeUnit.SECONDS );
   }
 
@@ -348,23 +349,6 @@ public class MainService extends Service {
     // Провайдер CAdES API по умолчанию.
     CAdESConfig.setDefaultProvider(JCSP.PROVIDER_NAME);
 
-    // Включаем возможность онлайновой проверки статуса сертификата.
-//    System.setProperty("com.sun.security.enableCRLDP", "true");
-
-    // Настройки TLS для генерации контейнера и выпуска сертификата
-    // в УЦ 2.0, т.к. обращение к УЦ 2.0 будет выполняться по протоколу
-    // HTTPS и потребуется авторизация по сертификату. Указываем тип
-    // хранилища с доверенным корневым сертификатом, путь к нему и пароль.
-
-//    final String trustStorePath = getApplicationInfo().dataDir + File.separator + BKSTrustStore.STORAGE_DIRECTORY + File.separator + BKSTrustStore.STORAGE_FILE_TRUST;
-//
-//    final String trustStorePassword = String.valueOf(BKSTrustStore.STORAGE_PASSWORD);
-//    Log.d(Constants.APP_LOGGER_TAG, "Default trust store: " + trustStorePath);
-//
-//    System.setProperty("javax.net.ssl.trustStoreType", BKSTrustStore.STORAGE_TYPE);
-//    System.setProperty("javax.net.ssl.trustStore", trustStorePath);
-//    System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
-
   }
 
   public static Provider getDefaultKeyStoreProvider() {
@@ -424,186 +408,6 @@ public class MainService extends Service {
 
   }
 
-  public void containerOnSelectListener(AdapterView<?> adapterView, View view, int i, long l) {
-
-    if (keyStoreTypeIndex != i) {
-      KeyStoreType.saveCurrentType((String) adapterView.getItemAtPosition(i));
-      keyStoreTypeIndex = i;
-    }
-  }
-
-  private void addKey() {
-
-
-//    List<String> keyStoreTypeList = KeyStoreType.getKeyStoreTypeList();
-//
-//    Timber.tag("KEYS").e("%s", keyStoreTypeList);
-//
-//    final String containerFolder = getString(R.string.defaultPath);
-//
-//    if ( keyStoreTypeList.size() > 0 ){
-//
-//      new MaterialDialog.Builder(this)
-//        .title(R.string.container_title)
-//        .items(keyStoreTypeList)
-//        .itemsCallbackSingleChoice(-1, (dialog, view, which, text) -> {
-//
-//          KeyStoreType.saveCurrentType(keyStoreTypeList.get(which));
-//          keyStoreTypeIndex = which;
-//
-//          add_new_key(containerFolder);
-//
-//          return true;
-//        })
-//        .positiveText(R.string.vertical_form_stepper_form_continue)
-//        .show();
-//
-//    }
-
-
-//----------------------------------------------------
-
-//    EditText etContainerFolder = (EditText) view.findViewById(R.id.etContainerFolder);
-
-//    // Получаем исходную папку с контейнерами.
-//    String containerFolder = "/storage/";
-//
-//    try {
-//
-//      // Executes the command.
-//
-//      Process process = Runtime.getRuntime().exec("ls -la /storage/");
-//
-//      BufferedReader reader = new BufferedReader( new InputStreamReader(process.getInputStream()) );
-//
-//      int read;
-//      char[] buffer = new char[1024];
-//
-//      StringBuilder output = new StringBuilder();
-//      while ((read = reader.read(buffer)) > 0) {
-//        output.append(buffer, 0, read);
-//      }
-//      reader.close();
-//      process.waitFor();
-//
-//      Pattern pattern = Pattern.compile("(\\w{4}-\\w{4})");
-//      Matcher matcher = pattern.matcher(output.toString());
-//
-//      if (matcher.find()){
-//        Timber.tag("LS: folder - ").e( "/storage/%s", matcher.group() );
-//        containerFolder += matcher.group() + "/";
-//      } else {
-//        containerFolder = "self/primary/keys";
-//      }
-//
-//
-//    } catch (IOException | InterruptedException e) {
-////      throw new RuntimeException(e);
-//      Timber.tag("LS fails: ").e( e.toString() );
-//    }
-//
-//    try {
-//      Process proc = Runtime.getRuntime().exec("ls -la " + containerFolder);
-//
-//      BufferedReader reader = new BufferedReader( new InputStreamReader(proc.getInputStream()) );
-//
-//      int read;
-//      char[] buffer = new char[1024];
-//
-//      StringBuilder output = new StringBuilder();
-//      while ((read = reader.read(buffer)) > 0) {
-//        output.append(buffer, 0, read);
-//      }
-//      reader.close();
-//      proc.waitFor();
-//
-//      Timber.tag("LS").e("%s", output.toString());
-//
-//    } catch (IOException | InterruptedException e) {
-//      e.printStackTrace();
-//    }
-//
-//
-//    try {
-//      // Проверяем наличие контейнеров.
-//      File fileCur = null;
-//
-//
-//
-//      File sourceDirectory = new File(containerFolder);
-//      if (!sourceDirectory.exists()) {
-//        Timber.i("Source directory is empty or doesn't exist.");
-//        return;
-//      } // if
-//
-//      File[] srcContainers = sourceDirectory.listFiles();
-//      if (srcContainers == null || srcContainers.length == 0) {
-//        Timber.i("Source directory is empty.");
-//        return;
-//      } // if
-//
-//      // Определяемся с папкой назначения в кататоге
-//      // приложения.
-//
-//      CSPTool cspTool = new CSPTool(this);
-//      final String dstPath = cspTool.getAppInfrastructure().getKeysDirectory() + File.separator + userName2Dir(this);
-//
-//      deleteDirectory( new File(cspTool.getAppInfrastructure().getKeysDirectory()) );
-//
-//      cspTool.getAppInfrastructure().create();
-//
-//      Timber.i("Destination directory: %s", dstPath);
-//
-//      // Копируем папки контейнеров.
-//
-//      for (File srcCurrentContainer : srcContainers) {
-//
-//        if (srcCurrentContainer.getName().equals(".") || srcCurrentContainer.getName().equals("..")) {
-//          continue;
-//        }
-//
-//
-//        // Создаем папку контейнера в каталоге приложения.
-//        Timber.i("Container: %s", dstPath);
-//
-//        File dstContainer = new File(dstPath, srcCurrentContainer.getName());
-//        dstContainer.mkdirs();
-//
-//        // Копируем файлы из контейнера.
-//
-//        File[] srcContainer = srcCurrentContainer.listFiles();
-//        if (srcContainer != null) {
-//
-//          for (File srcCurrentContainerFile : srcContainer) {
-//
-//            Timber.i("\tCurrent file: %s", srcCurrentContainerFile.getName());
-//
-//            if (  srcCurrentContainerFile.getName().endsWith(".key") ){
-//              if (!RawResource.writeStreamToFile(
-//                srcCurrentContainerFile,
-//                dstContainer.getPath(), srcCurrentContainerFile.getName())) {
-//                Timber.i("\tCouldn't is_responsible file: %s", srcCurrentContainerFile.getName());
-//              }
-//              else {
-//                Timber.i("\tFile %s was copied successfully", srcCurrentContainerFile.getName());
-//              }
-//            } else {
-//              continue;
-//            }
-//
-//
-//
-//          } // for
-//
-//        } // if
-//
-//      } // for
-//
-//    } catch (Exception e) {
-//      Log.e(Constants.APP_LOGGER_TAG, e.getMessage(), e);
-//    }
-
-  }
 
   public String userName2Dir() throws Exception {
     Context context = getApplicationContext();
@@ -707,60 +511,75 @@ public class MainService extends Service {
     }
   }
 
-  private void checkPin(String password) throws Exception {
-//    addKey();
+  private void checkPin(String password) {
     aliases( KeyStoreType.currentType(), ProviderType.currentProviderType() );
 
     Timber.tag(TAG).d( "aliasesList, %s", aliasesList );
 
-    if (aliasesList.size() > 0){
-      EventBus.getDefault().post( new AuthServiceAuthEvent( aliasesList.toString() ) );
+    Observable
+      .just(password)
+      .subscribeOn( Schedulers.io() )
+      .observeOn( Schedulers.computation() )
+      .subscribe(
+        data -> {
 
-//    ContainerAdapter adapter = new ContainerAdapter(aliasesList.get( aliasesList.size()-1 ), null, aliasesList.get( aliasesList.size()-1 ), null);
-      ContainerAdapter adapter = new ContainerAdapter(aliasesList.get( 0 ), null, aliasesList.get( 0 ), null);
+          if (aliasesList.size() > 0){
+            EventBus.getDefault().post( new AuthServiceAuthEvent( aliasesList.toString() ) );
+            ContainerAdapter adapter = new ContainerAdapter(aliasesList.get( 0 ), null, aliasesList.get( 0 ), null);
 
-      adapter.setProviderType(ProviderType.currentProviderType());
-      adapter.setClientPassword( password.toCharArray() );
-      adapter.setResources(getResources());
+            adapter.setProviderType(ProviderType.currentProviderType());
+            adapter.setClientPassword( password.toCharArray() );
+            adapter.setResources(getResources());
 
 
-      final String trustStorePath = this.getApplicationInfo().dataDir + File.separator + BKSTrustStore.STORAGE_DIRECTORY + File.separator + BKSTrustStore.STORAGE_FILE_TRUST;
+            final String trustStorePath = this.getApplicationInfo().dataDir + File.separator + BKSTrustStore.STORAGE_DIRECTORY + File.separator + BKSTrustStore.STORAGE_FILE_TRUST;
 
-      Timber.e("DecisionResponce trust store: " + trustStorePath);
+            Timber.e("DecisionResponce trust store: " + trustStorePath);
 
-      adapter.setTrustStoreProvider(BouncyCastleProvider.PROVIDER_NAME);
-      adapter.setTrustStoreType(BKSTrustStore.STORAGE_TYPE);
+            adapter.setTrustStoreProvider(BouncyCastleProvider.PROVIDER_NAME);
+            adapter.setTrustStoreType(BKSTrustStore.STORAGE_TYPE);
 
-      adapter.setTrustStoreStream(new FileInputStream(trustStorePath));
-      adapter.setTrustStorePassword(BKSTrustStore.STORAGE_PASSWORD);
+            try {
+              adapter.setTrustStoreStream(new FileInputStream(trustStorePath));
+            } catch (FileNotFoundException e) {
+              Timber.e(e);
+            }
+            adapter.setTrustStorePassword(BKSTrustStore.STORAGE_PASSWORD);
 
-      PinCheck pinCheck = new PinCheck(adapter);
-      Boolean pinValid = pinCheck.check();
+            PinCheck pinCheck = new PinCheck(adapter);
+            Boolean pinValid = pinCheck.check();
 
-      if (pinValid){
-        CMSSignExample sign = new CMSSignExample(true, adapter);
-        sign.getResult(null);
+            if (pinValid){
+              CMSSignExample sign = new CMSSignExample(true, adapter);
+              try {
+                sign.getResult(null);
+              } catch (Exception e) {
+                Timber.e(e);
+              }
 
-        byte[] signature = sign.getSignature();
-        Encoder enc = new Encoder();
-        Timber.tag( "CRT_BASE64" ).d( enc.encode(signature) );
+              byte[] signature = sign.getSignature();
+              Encoder enc = new Encoder();
+              Timber.tag( "CRT_BASE64" ).d( enc.encode(signature) );
 
-        SIGN = enc.encode(signature);
+              SIGN = enc.encode(signature);
 
-        settings.setSign( SIGN );
-        settings.setSignedWithDc( true );
-        settings.setPin( password );
+              settings.setSign( SIGN );
+              settings.setSignedWithDc( true );
+              settings.setPin( password );
 
-        dataLoaderInterface.tryToSignWithDc( SIGN );
+              dataLoaderInterface.tryToSignWithDc( SIGN );
 
 //
-      } else {
-        EventBus.getDefault().post( new StepperDcCheckFailEvent("Pin is invalid") );
-      }
-    } else {
-      settings.setPin("");
-      EventBus.getDefault().post( new StepperDcCheckFailEvent("Ошибка! Проверьте SD карту") );
-    }
+            } else {
+              EventBus.getDefault().post( new StepperDcCheckFailEvent("Pin is invalid") );
+            }
+          } else {
+            settings.setPin("");
+            EventBus.getDefault().post( new StepperDcCheckFailEvent("Ошибка! Проверьте SD карту") );
+          }
+
+        }, Timber::e
+      );
   }
 
   private void checkLogin(String login, String password, String host) throws Exception {
@@ -788,7 +607,7 @@ public class MainService extends Service {
     Boolean pinValid = pinCheck.check();
 
     if (pinValid){
-      CMSSign sign = new CMSSign(true, adapter, new File("/sdcard/Download/1.apk"));
+      CMSSign sign = new CMSSign(true, adapter, null);
       sign.getResult(null);
 
       byte[] signature = sign.getSignature();
@@ -913,56 +732,12 @@ public class MainService extends Service {
     getSign( event.data );
   }
 
-  @Subscribe(threadMode = ThreadMode.BACKGROUND)
-  public void onMessageEvent(UpdateUnprocessedDocumentsEvent event) throws Exception {
-
-    dataStore
-      .select(RDocumentEntity.UID)
-      .where( RDocumentEntity.CHANGED.eq(true) )
-      .get()
-      .toObservable()
-      .subscribeOn(Schedulers.io())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(
-        doc -> {
-          String uid = doc.get(0).toString();
-          Timber.tag("Service[unproc]").e("unprocessed - %s", uid );
-        dataLoaderInterface.updateDocument( uid );
-        }, error -> {
-          Timber.tag("Service[unproc]").e("error %s", error);
-        }
-      );
-  }
-
-  public static boolean deleteDirectory(File directory) {
-    if(directory.exists()){
-      File[] files = directory.listFiles();
-      if(null!=files){
-        for(int i=0; i<files.length; i++) {
-          if(files[i].isDirectory()) {
-            deleteDirectory(files[i]);
-          }
-          else {
-            files[i].delete();
-          }
-        }
-      }
-    }
-    return(directory.delete());
-  }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(UpdateDocumentEvent event) throws Exception {
     EventBus.getDefault().post( new UpdateCurrentInfoActivityEvent() );
     dataLoaderInterface.updateDocument(event.uid);
   }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(UpdateAllDocumentsEvent event) throws Exception {
-    Timber.tag(TAG).e("updateAll");
-    updateAll();
-  }
-
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(SignAfterCreateEvent event) throws Exception {
@@ -999,7 +774,7 @@ public class MainService extends Service {
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13017
   // При первом запуске выгружаем все избранные с ЭО
-  @Subscribe(threadMode = ThreadMode.BACKGROUND)
+  @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(FolderCreatedEvent event){
     String type = event.getType();
     if (type == null) {
@@ -1027,6 +802,8 @@ public class MainService extends Service {
   // Старт / стоп проверки наличия сети
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(CheckNetworkEvent event){
+
+    Timber.i("CheckNetworkEvent");
     // Stop previously started checking network connection task, if exists
     if ( futureNetwork != null && !futureNetwork.isCancelled() ) {
       futureNetwork.cancel(true);
@@ -1034,8 +811,7 @@ public class MainService extends Service {
 
     // Start new checking network connection task, if requested by the event
     if ( event.isStart() ) {
-      futureNetwork = scheduller.scheduleWithFixedDelay(
-              new CheckNetworkTask(),  0 , 10, TimeUnit.SECONDS );
+      futureNetwork = scheduller.scheduleWithFixedDelay( new CheckNetworkTask(),  0 , 10, TimeUnit.SECONDS );
     }
   }
 }

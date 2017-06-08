@@ -9,7 +9,7 @@ public class OperationResult {
   @Expose
   private String ok;
 
-  @SerializedName("uis")
+  @SerializedName("message")
   @Expose
   private String message;
 

@@ -194,7 +194,7 @@ public class InstallCAdESTestTrustCertExample implements ICAdESData {
     String trustCertAlias = trustCert.getSerialNumber().toString(16);
 
     // Вывод списка содержащищся в хранилище сертификатов.
-    callback.log("Current count of trusted certificates: " + keyStore.size());
+    callback.log("Current put of trusted certificates: " + keyStore.size());
 
     if (needPrintAliases) {
       printAliases(keyStore, callback);

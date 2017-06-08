@@ -49,7 +49,7 @@ public class OperationManager implements CommandFactory.Callback {
       .withParams( params )
       .build( operation );
 
-    Timber.tag(TAG).i("command get");
+    Timber.tag(TAG).i("command startTransactionFor");
 
     if (command != null) {
       operationExecutor

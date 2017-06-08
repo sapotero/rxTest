@@ -63,7 +63,7 @@
 
 
                         <LinearLayout
-                            android:id="@+id/activity_main_menu_builder_organization"
+                            android:id="@+id/activity_main_menu_organization"
                             android:orientation="horizontal"
                             android:layout_height="56dp"
                             android:layout_width="match_parent"
@@ -138,7 +138,7 @@
 
 
                             <FrameLayout
-                                android:id="@+id/activity_main_menu_builder_buttons"
+                                android:id="@+id/activity_main_menu_buttons"
                                 android:layout_width="0dp"
                                 android:layout_height="48dp"
                                 android:layout_weight="1"

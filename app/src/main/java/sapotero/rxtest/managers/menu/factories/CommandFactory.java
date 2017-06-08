@@ -18,9 +18,10 @@ import sapotero.rxtest.managers.menu.commands.primary_consideration.PrimaryConsi
 import sapotero.rxtest.managers.menu.commands.report.FromTheReport;
 import sapotero.rxtest.managers.menu.commands.report.ReturnToPrimaryConsideration;
 import sapotero.rxtest.managers.menu.commands.shared.AddToFolder;
-import sapotero.rxtest.managers.menu.commands.shared.CheckForControl;
+import sapotero.rxtest.managers.menu.commands.shared.CheckControlLabel;
 import sapotero.rxtest.managers.menu.commands.shared.DoNothing;
 import sapotero.rxtest.managers.menu.commands.shared.RemoveFromFolder;
+import sapotero.rxtest.managers.menu.commands.shared.UncheckControlLabel;
 import sapotero.rxtest.managers.menu.commands.signing.PrevPerson;
 import sapotero.rxtest.managers.menu.commands.templates.CreateTemplate;
 import sapotero.rxtest.managers.menu.commands.templates.RemoveTemplate;
@@ -274,10 +275,10 @@ public class CommandFactory implements AbstractCommand.Callback{
         return "Удаление из избранного";
       }
     },
-    CHECK_FOR_CONTROL {
+    CHECK_CONTROL_LABEL {
       @Override
       public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
-        CheckForControl command = new CheckForControl(document);
+        CheckControlLabel command = new CheckControlLabel(document);
         command.withParams(params);
         command
           .withDocumentId( params.getDocument() )
@@ -287,17 +288,23 @@ public class CommandFactory implements AbstractCommand.Callback{
       }
       @Override
       public String getRussinaName() {
-        return "Установка/удаление отметки о необходимости постановки на контроль";
+        return "Установка отметки о необходимости постановки на контроль";
       }
     },
-    SKIP_CONTROL_LABEL {
+    UNCHECK_CONTROL_LABEL {
       @Override
       public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
-        return null;
+        UncheckControlLabel command = new UncheckControlLabel(document);
+        command.withParams(params);
+        command
+          .withDocumentId( params.getDocument() )
+          .registerCallBack(instance);
+
+        return command;
       }
       @Override
       public String getRussinaName() {
-        return "Установка/удаление отметки о необходимости постановки на контроль";
+        return "Удаление отметки о необходимости постановки на контроль";
       }
     },
     INCORRECT {
@@ -605,8 +612,11 @@ public class CommandFactory implements AbstractCommand.Callback{
           operation = Operation.REMOVE_FROM_FOLDER;
           break;
 
-        case "sapotero.rxtest.managers.menu.commands.shared.CheckForControl":
-          operation = Operation.CHECK_FOR_CONTROL;
+        case "sapotero.rxtest.managers.menu.commands.shared.CheckControlLabel":
+          operation = Operation.CHECK_CONTROL_LABEL;
+          break;
+        case "sapotero.rxtest.managers.menu.commands.shared.UncheckControlLabel":
+          operation = Operation.UNCHECK_CONTROL_LABEL;
           break;
 
         case "sapotero.rxtest.managers.menu.commands.shared.DoNothing":

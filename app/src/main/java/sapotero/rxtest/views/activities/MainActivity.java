@@ -9,11 +9,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,11 +34,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -48,8 +44,9 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
-import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
+import rx.subjects.PublishSubject;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.BuildConfig;
 import sapotero.rxtest.R;
@@ -57,19 +54,15 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.query.DBQueryBuilder;
 import sapotero.rxtest.db.requery.utils.Fields;
-import sapotero.rxtest.events.adapter.UpdateDocumentAdapterEvent;
 import sapotero.rxtest.events.bus.GetDocumentInfoEvent;
-import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.events.service.CheckNetworkEvent;
 import sapotero.rxtest.events.service.CheckNetworkResultEvent;
-import sapotero.rxtest.events.service.SuperVisorUpdateEvent;
-import sapotero.rxtest.events.service.UpdateAllDocumentsEvent;
-import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
-import sapotero.rxtest.events.view.UpdateMainActivityEvent;
+import sapotero.rxtest.events.utils.RecalculateMenuEvent;
 import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
 import sapotero.rxtest.managers.DataLoaderManager;
 import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
@@ -88,48 +81,28 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @Inject JobManager jobManager;
   @Inject Settings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
-
   @Inject QueueManager queue;
+  @Inject MemoryStore store;
 
-  @BindView(R.id.toolbar) Toolbar toolbar;
-
-  @BindView(R.id.documentsRecycleView) RecyclerView rv;
-  @BindView(R.id.progressBar) ProgressBar progressBar;
-  @BindView(R.id.activity_main_update_progressbar) ProgressBar update_progressbar;
-
-  @BindView(R.id.activity_main_menu) LinearLayout activity_main_menu;
-
-  @BindView(R.id.activity_main_menu_builder_organization) LinearLayout menu_builder_organization;
-  @BindView(R.id.activity_main_menu_builder_buttons) FrameLayout menu_builder_buttons;
-
-
-
-
-  @BindView(R.id.DOCUMENT_TYPE) Spinner DOCUMENT_TYPE_SELECTOR;
-  @BindView(R.id.ORGANIZATION) OrganizationSpinner ORGANIZATION_SELECTOR;
-
-  @BindView(R.id.activity_main_right_button) CircleRightArrow rightArrow;
-
-  @BindView(R.id.activity_main_left_button) CircleLeftArrow leftArrow;
-  @BindView(R.id.favorites_button) CheckBox favorites_button;
-
-  @BindView(R.id.documents_empty_list) TextView documents_empty_list;
-
-  private DataLoaderManager dataLoaderInterface;
-
-
+  @BindView (R.id.toolbar)                          Toolbar             toolbar;
+  @BindView (R.id.documentsRecycleView)             RecyclerView        rv;
+  @BindView (R.id.progressBar)                      ProgressBar         progressBar;
+  @BindView (R.id.activity_main_update_progressbar) ProgressBar         update_progressbar;
+  @BindView (R.id.activity_main_menu)               LinearLayout        activity_main_menu;
+  @BindView (R.id.activity_main_wrapper)            RelativeLayout      wrapper;
+  @BindView (R.id.activity_main_menu_organization)  LinearLayout        menu_builder_organization;
+  @BindView (R.id.activity_main_menu_buttons)       FrameLayout         menu_builder_buttons;
+  @BindView (R.id.DOCUMENT_TYPE)                    Spinner             DOCUMENT_TYPE_SELECTOR;
+  @BindView (R.id.ORGANIZATION)                     OrganizationSpinner ORGANIZATION_SELECTOR;
+  @BindView (R.id.activity_main_right_button)       CircleRightArrow    rightArrow;
+  @BindView (R.id.activity_main_left_button)        CircleLeftArrow     leftArrow;
+  @BindView (R.id.favorites_button)                 CheckBox            favorites_button;
+  @BindView (R.id.documents_empty_list)             TextView            documents_empty_list;
 
   private String TAG = MainActivity.class.getSimpleName();
-
-  private int loaded = 0;
-
   private OrganizationAdapter organization_adapter;
-
-  private int total = 0;
   private DrawerBuilder drawer;
 
-  private CompositeSubscription subscriptions;
-  //  private String total;
   private final int ALL                = 0;
   private final int INCOMING_DOCUMENTS = 1;
   private final int CITIZEN_REQUESTS   = 2;
@@ -153,36 +126,16 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @SuppressLint("StaticFieldLeak")
   public static DocumentsAdapter RAdapter;
 
-  @SuppressLint("StaticFieldLeak")
-  public static DBQueryBuilder dbQueryBuilder;
-
+  public  DBQueryBuilder dbQueryBuilder;
   public  MenuBuilder menuBuilder;
   private DataLoaderManager dataLoader;
   private SearchView searchView;
-
   private MainActivity context;
   private CompositeSubscription subscription;
+  private PublishSubject<Integer> searchSubject = PublishSubject.create();
 
-  @Override
   protected void onCreate(Bundle savedInstanceState) {
     setTheme(R.style.AppTheme);
-
-
-
-    /*
-    *
-    *
-    * Сделать InvalidationManager
-    * назначение - инвалидация документов по мд5
-
-    * Суть его - хранилка в памяти, где лежат ид доков и их мд5
-    *
-    * Назначение
-    * - не делать 100 запросов на обновление - если мд5 в памяти совпадают
-    * - обновлять доки пачками
-    *
-    *
-    * */
 
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
@@ -190,6 +143,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     ButterKnife.bind(this);
     EsdApplication.getManagerComponent().inject(this);
     context = this;
+    searchSubject = PublishSubject.create();
 
     initAdapters();
 
@@ -215,11 +169,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     dataLoader = new DataLoaderManager(this);
 
-    progressBar.setVisibility(ProgressBar.GONE);
 
     initToolbar();
 
-    initEvents();
 
     rxSettings();
 
@@ -228,11 +180,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     setFirstRunFalse();
 
     updateToken();
+    initSearchSub();
 
-  }
-
-  private void recreateView() {
-    menuBuilder.recreate();
   }
 
   private void setFirstRunFalse() {
@@ -244,7 +193,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       settings.setFirstRun(false);
     }
 
-    EventBus.getDefault().post( new UpdateAllDocumentsEvent());
   }
 
   private void updateToken() {
@@ -318,7 +266,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
 
           for (List<RDocumentEntity> list: result) {
-            Timber.tag(TAG).v("count: %s", list.size());
+            Timber.tag(TAG).v("put: %s", list.size());
             for ( RDocumentEntity doc : list ){
               docs.add( doc );
             }
@@ -334,6 +282,10 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void initAdapters() {
+    if (settings.isFirstRun()){
+      store.clear();
+    }
+
     int columnCount = 2;
     int spacing = 32;
 
@@ -346,9 +298,10 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     rv.setAdapter(RAdapter);
 
 
+
     organization_adapter = new OrganizationAdapter(this, new ArrayList<>());
     ORGANIZATION_SELECTOR.setAdapter(organization_adapter, true, selected -> {
-      dbQueryBuilder.execute(false);
+      dbQueryBuilder.execute();
     });
   }
 
@@ -400,8 +353,11 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 //          }
           break;
         case R.id.action_search:
-          searchView.onOptionsItemSelected(getFragmentManager(), item);
-          setEmptyToolbarClickListener();
+
+          searchSubject.onNext( item.getItemId() );
+
+//          searchView.onOptionsItemSelected(getFragmentManager(), item);
+//          setEmptyToolbarClickListener();
           break;
         default:
           jobManager.addJobInBackground(new UpdateAuthTokenJob());
@@ -411,40 +367,20 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     });
   }
 
-  private void updateProgressBar() {
-    dropLoadProgress(true);
+  private void initSearchSub(){
 
-    subscription.add(
-    Observable
-      .interval( 1, TimeUnit.SECONDS)
-      .subscribeOn(AndroidSchedulers.mainThread())
+    searchSubject
+      .buffer( 500, TimeUnit.MILLISECONDS )
+      .subscribeOn(Schedulers.computation())
       .observeOn(AndroidSchedulers.mainThread())
-      .subscribe( data-> {
-        int value = update_progressbar.getProgress();
-        update_progressbar.setProgress( value + 1 );
-
-        Timber.tag(TAG).w("TICK %s > %s = %s", getLoadedDocumentsPercent() , value, getLoadedDocumentsPercent() > value);
-        if ( getLoadedDocumentsPercent() >= value  && getLoadedDocumentsPercent() > 0){
-          subscription.unsubscribe();
-        }
-
-
-      })
-    );
-
-  }
-
-  private void dropLoadProgress(Boolean visible) {
-    loaded = 0;
-
-    if (subscription != null) {
-      subscription.clear();
-    }
-
-    if ( update_progressbar != null){
-      update_progressbar.setProgress(0);
-      update_progressbar.setVisibility(visible ? View.VISIBLE : View.GONE);
-    }
+      .subscribe(
+        data -> {
+          if (data.size() > 0){
+            searchView.onOptionsItemSelected(getFragmentManager(), data.get(0));
+          }
+        },
+        Timber::e
+      );
   }
 
   private void initEvents() {
@@ -454,13 +390,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     }
     EventBus.getDefault().register(this);
 
-
     Intent serviceIntent = new Intent(this, MainService.class);
-    if(startService(serviceIntent) != null) {
-//      Toast.makeText(getBaseContext(), "Service is already running", Toast.LENGTH_SHORT).show();
-    } else {
-      EventBus.getDefault().post(new SuperVisorUpdateEvent());
-    }
+    startService(serviceIntent);
 
     if (subscription == null){
       subscription = new CompositeSubscription();
@@ -469,33 +400,17 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   private void updateByStatus() {
     dataLoader.updateByCurrentStatus( menuBuilder.getItem(), null, false);
-
     Toast.makeText(this, "Обновление данных...", Toast.LENGTH_SHORT).show();
-
-    menuBuilder.build();
-
   }
 
-  @Override
-  public void onStart() {
-    super.onStart();
-  }
 
   @Override
   public void onResume() {
     super.onResume();
-
     initEvents();
-
-    Timber.tag(TAG).v("onResume");
-    invalidate();
-
-    menuBuilder.getItem().recalcuate();
-    dropLoadProgress(false);
-
     startNetworkCheck();
 
-//    EventBus.getDefault().post( new UpdateAllDocumentsEvent());
+//    EventBus.getDefault().post( new RecalculateMenuEvent());
 
   }
 
@@ -507,18 +422,10 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     EventBus.getDefault().post(new CheckNetworkEvent( false ));
   }
 
-  public static void invalidate(){
-    RAdapter.clear();
-    dbQueryBuilder.execute(true);
-  }
 
   @Override
   protected void onPause() {
     super.onPause();
-    if (subscriptions != null) {
-      subscriptions.unsubscribe();
-    }
-
     stopNetworkCheck();
   }
 
@@ -703,18 +610,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   public void rxSettings() {
     drawer_build_head();
 
-    Map<Integer, String> map = new HashMap<>();
-    int index = 0;
-
-    for (String journal : settings.getJournals()) {
-      index = Arrays.asList((getResources().getStringArray(R.array.settings_view_start_page_values))).indexOf(journal);
-      map.put(index, journal);
-    }
-
-    Map<Integer, String> treeMap = new TreeMap<>(map);
-    String[] identifier = (getResources().getStringArray(R.array.settings_view_start_page_identifier));
-    String[] title = (getResources().getStringArray(R.array.settings_view_start_page));
-
     for(Fields.Menu menu: Fields.Menu.values() ){
       drawer_add_item( menu.getIndex() , menu.getTitle(), Long.valueOf( menu.getIndex()) );
     }
@@ -759,34 +654,38 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 //  }
 
 
-  @Subscribe( threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(UpdateCountEvent event) {
-    Timber.tag(TAG).v("UpdateCountEvent");
-    menuBuilder.getItem().recalcuate();
-  }
+//  @Subscribe( threadMode = ThreadMode.MAIN)
+//  public void onMessageEvent(UpdateCountEvent event) {
+//    Timber.tag(TAG).v("UpdateCountEvent");
+//    menuBuilder.getItem().recalcuate();
+//  }
 
-  @Subscribe( threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(UpdateDocumentAdapterEvent event) {
+
+//  @Subscribe( threadMode = ThreadMode.MAIN)
+//  public void onMessageEvent(UpdateDocumentAdapterEvent event) {
 //    Timber.tag(TAG).v("UpdateDocumentAdapterEvent");
-//    dbQueryBuilder.invalidateDocumentEvent(event);
-  }
+////    dbQueryBuilder.invalidateDocumentEvent(event);
+//  }
 
-  @Subscribe( threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(UpdateMainActivityEvent event) {
-    Timber.tag(TAG).v("UpdateMainActivityEvent");
-    updateActivity();
-  }
-
-  private void updateActivity() {
-    recreateView();
-  }
-
+//  @RequiresApi(api = Build.VERSION_CODES.M)
+//  @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+//  public void onMessageEvent(RemoveDocumentFromAdapterEvent event) {
+//    Timber.tag(TAG).v("RemoveDocumentFromAdapterEvent %s", event.uid );
+//
+////    if ( !IS_HIDDEN.containsKey(event.uid) ){
+////      IS_HIDDEN.put(event.uid, true);
+////    }
+////    RAdapter.removeItem(event.uid);
+//
+////    menuBuilder.updateFromJob();
+//
+//  }
 
 
   /* MenuBuilder.Callback */
   @Override
   public void onMenuBuilderUpdate(ArrayList<ConditionBuilder> conditions) {
-    menuBuilder.setFavorites( dbQueryBuilder.getFavoritesCount() );
+//    menuBuilder.setFavorites( dbQueryBuilder.getFavoritesCount() );
     dbQueryBuilder.executeWithConditions( conditions, menuBuilder.getItem().isVisible() && favorites_button.isChecked(), menuBuilder.getItem() );
   }
 
@@ -810,30 +709,38 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
 
   /* DOCUMENT COUNT UPDATE */
+//  @Subscribe(threadMode = ThreadMode.MAIN)
+//  public void onMessageEvent(StepperLoadDocumentEvent event) throws Exception {
+//    loaded++;
+//
+//    int perc = getLoadedDocumentsPercent();
+//
+//    if (update_progressbar != null) {
+//      if ( update_progressbar.getProgress() < perc ){
+//        update_progressbar.setProgress( perc );
+//      }
+//    }
+//
+//    if ( update_progressbar != null && perc == 100f ){
+//      update_progressbar.setVisibility(View.GONE);
+//    }
+//  }
+//
+//  private int getLoadedDocumentsPercent() {
+//    float result = 100f * loaded / settings.getJobCount();
+//    if (result > 100 ){
+//      result = 100f;
+//    }
+//
+//    return (int) Math.ceil(result);
+//  }
+
   @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(StepperLoadDocumentEvent event) throws Exception {
-    loaded++;
-
-    int perc = getLoadedDocumentsPercent();
-
-    if (update_progressbar != null) {
-      if ( update_progressbar.getProgress() < perc ){
-        update_progressbar.setProgress( perc );
-      }
+  public void onMessageEvent(RecalculateMenuEvent event) {
+    if (menuBuilder != null) {
+      Timber.tag(TAG).i("RecalculateMenuEvent");
+      menuBuilder.invalidate();
     }
-
-    if ( update_progressbar != null && perc == 100f ){
-      update_progressbar.setVisibility(View.GONE);
-    }
-  }
-
-  private int getLoadedDocumentsPercent() {
-    float result = 100f * loaded / settings.getJobCount();
-    if (result > 100 ){
-      result = 100f;
-    }
-
-    return (int) Math.ceil(result);
   }
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13314
@@ -844,7 +751,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     try {
       toolbar.getMenu().findItem(R.id.online).setTitle( isConnectedToInternet ? R.string.is_online : R.string.is_offline );
-      toolbar.getMenu().findItem(R.id.online).setIcon( isConnectedToInternet  ? R.drawable.icon_online : R.drawable.icon_offline );
+      toolbar.getMenu().findItem(R.id.online).setIcon(  isConnectedToInternet ? R.drawable.icon_online : R.drawable.icon_offline );
     } catch (Exception e) {
       e.printStackTrace();
     }

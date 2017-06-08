@@ -1,5 +1,7 @@
 package sapotero.rxtest.managers.menu.commands.shared;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.ArrayList;
 
 import retrofit2.Retrofit;
@@ -9,11 +11,14 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.events.utils.RecalculateMenuEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
+import sapotero.rxtest.utils.memory.fields.LabelType;
+import sapotero.rxtest.utils.memory.utils.Transaction;
 import timber.log.Timber;
 
 public class RemoveFromFolder extends AbstractCommand {
@@ -56,7 +61,14 @@ public class RemoveFromFolder extends AbstractCommand {
       .set( RDocumentEntity.FROM_FAVORITES_FOLDER, false)
       .where(RDocumentEntity.UID.eq(document_id))
       .get().value();
-    Timber.tag(TAG).w( "updated: %s", count );
+
+
+    Transaction transaction = new Transaction();
+    transaction
+      .from( store.getDocuments().get(document_id) )
+      .setLabel(LabelType.SYNC)
+      .removeLabel(LabelType.FAVORITES);
+    store.process( transaction );
 
     queueManager.add(this);
   }
@@ -112,11 +124,28 @@ public class RemoveFromFolder extends AbstractCommand {
 
           queueManager.setExecutedRemote(this);
 
+          Transaction transaction = new Transaction();
+          transaction
+            .from( store.getDocuments().get(document_id) )
+            .removeLabel(LabelType.SYNC)
+            .removeLabel(LabelType.FAVORITES);
+          store.process( transaction );
+
+          EventBus.getDefault().post( new RecalculateMenuEvent() );
         },
         error -> {
           if (callback != null) {
             callback.onCommandExecuteError(getType());
           }
+
+          Transaction transaction = new Transaction();
+          transaction
+            .from( store.getDocuments().get(document_id) )
+            .removeLabel(LabelType.SYNC)
+            .setLabel(LabelType.FAVORITES);
+          store.process( transaction );
+
+
         }
       );
   }

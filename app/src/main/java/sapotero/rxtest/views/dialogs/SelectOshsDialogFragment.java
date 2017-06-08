@@ -34,6 +34,8 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.mapper.PerformerMapper;
+import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RAssistantEntity;
 import sapotero.rxtest.db.requery.models.RFavoriteUserEntity;
 import sapotero.rxtest.db.requery.models.RPrimaryConsiderationEntity;
@@ -49,6 +51,7 @@ import timber.log.Timber;
 public class SelectOshsDialogFragment extends DialogFragment implements View.OnClickListener {
 
   @Inject Settings settings;
+  @Inject Mappers mappers;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   private String TAG = this.getClass().getSimpleName();
@@ -150,16 +153,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
 
     view.findViewById(R.id.dialog_oshs_add).setOnClickListener( v ->{
       if ( callback != null && user != null ) {
-
-        Oshs oshs = new Oshs();
-        oshs.setId( user.getId() );
-        oshs.setOrganization( user.getOrganization() );
-        oshs.setAssistantId( user.getAssistantId() );
-        oshs.setPosition( user.getPosition() );
-        oshs.setName( user.getName() );
-        oshs.setGender( user.getGender() );
-        oshs.setIsOrganization( user.isOrganization() );
-
+        Oshs oshs = (Oshs) mappers.getPerformerMapper().convert(user, PerformerMapper.DestinationType.OSHS);
         Timber.e("setOnItemClickListener OPERATION: %s", operation.toString());
         callback.onSearchSuccess(oshs, operation, documentUid);
         dismiss();
@@ -248,7 +242,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe( user -> {
-           adapter.add( new PrimaryConsiderationPeople( user.getHeadId(), user.getTitle(), "", "", user.getAssistantId(), "", false ) );
+           adapter.add( mappers.getAssistantMapper().toPrimaryConsiderationPeople(user) );
         });
     }
 
@@ -263,7 +257,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe( user -> {
-           adapter.add( new PrimaryConsiderationPeople( user.getUid(), user.getName(), user.getPosition(), user.getOrganization(), null, user.getGender(), user.isIsOrganization() ) );
+           adapter.add( mappers.getPrimaryConsiderationMapper().toPrimaryConsiderationPeople(user) );
         });
     } else {
 
@@ -283,7 +277,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe( user -> {
-           adapter.add( new PrimaryConsiderationPeople( user.getUid(), user.getName(), user.getPosition(), user.getOrganization(), null, user.getGender(), user.isIsOrganization() ) );
+           adapter.add( mappers.getFavoriteUserMapper().toPrimaryConsiderationPeople(user) );
         });
     }
 
@@ -351,7 +345,8 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
 //            callback.onSearchSuccess( user, operation);
           }
 
-          user = new PrimaryConsiderationPeople( _user.getId(), _user.getName(), _user.getPosition(), _user.getOrganization(), _user.getAssistantId(), _user.getGender(), _user.getIsOrganization());
+          user = (PrimaryConsiderationPeople) mappers.getPerformerMapper().convert(_user, PerformerMapper.DestinationType.PRIMARYCONSIDERATIONPEOPLE);
+
           title.setText( _user.getName() );
           title.cancelPendingInputEvents();
           title.hideIndicator();

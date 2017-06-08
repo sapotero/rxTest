@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -20,16 +19,14 @@ import com.github.barteksc.pdfviewer.PDFView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
-
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -43,8 +40,6 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
-import sapotero.rxtest.events.bus.FileDownloadedEvent;
-import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.activities.DocumentImageFullScreenActivity;
@@ -93,9 +88,9 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    if ( !EventBus.getDefault().isRegistered(this) ){
-      EventBus.getDefault().register(this);
-    }
+//    if ( !EventBus.getDefault().isRegistered(this) ){
+//      EventBus.getDefault().register(this);
+//    }
 
   }
 
@@ -132,6 +127,8 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
       urgency.setVisibility(View.VISIBLE);
     }
 
+    index = 0;
+
     if (document.getImages().size() > 0){
       adapter.clear();
 
@@ -161,44 +158,40 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
         adapter.add( image );
       }
 
-    }
-
-
-    index = 0;
-
-
-    if (adapter.getCount() > 0) {
-
       try {
         setPdfPreview();
-      } catch (Exception e) {
-        e.printStackTrace();
+      } catch (FileNotFoundException e) {
+        Timber.e(e);
       }
 
       no_files.setVisibility(View.GONE);
       pdf_wrapper.setVisibility(View.VISIBLE);
+
     } else {
       no_files.setVisibility(View.VISIBLE);
       pdf_wrapper.setVisibility(View.GONE);
     }
+
   }
 
-  private void setPdfPreview() {
+  private void setPdfPreview() throws FileNotFoundException {
+
     Image image = adapter.getItem(index);
 
     document_title.setText( image.getTitle() );
 
     File file = new File(getContext().getFilesDir(), String.format( "%s_%s", image.getMd5(), image.getTitle() ));
 
+    InputStream targetStream = new FileInputStream(file);
 
     if (file.exists()){
       pdfView
-        .fromFile( file )
+        .fromStream( targetStream )
+//        .fromFile( file )
         .enableSwipe(true)
         .enableDoubletap(true)
         .defaultPage(0)
         .swipeHorizontal(false)
-        .enableAntialiasing(true)
         .onRender((nbPages, pageWidth, pageHeight) -> pdfView.fitToWidth())
         .onLoad(nbPages -> {
           Timber.tag(TAG).i(" onLoad");
@@ -206,17 +199,26 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
         .onError(t -> {
           Timber.tag(TAG).i(" onError");
         })
+        .onDraw((canvas, pageWidth, pageHeight, displayedPage) -> {
+          Timber.tag(TAG).i(" onDraw");
+        })
         .onPageChange((page, pageCount) -> {
           Timber.tag(TAG).i(" onPageChange");
           updatePageCount();
         })
-        .enableAnnotationRendering(false)
-        .password(null)
+        .enableAnnotationRendering(true)
         .scrollHandle(null)
         .load();
+//        pdfView.useBestQuality(true);
+//        pdfView.
+
+//      pdfView.setDrawingCacheEnabled(true);
+//      pdfView.stopFling();
+
       updateDocumentCount();
       updatePageCount();
       updateZoomVisibility();
+
     }
   }
 
@@ -244,7 +246,11 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     }
     Timber.tag(TAG).i( "AFTER %s - %s", index, adapter.getCount() );
 
-    setPdfPreview();
+    try {
+      setPdfPreview();
+    } catch (FileNotFoundException e) {
+      Timber.e(e);
+    }
   }
 
   @OnClick(R.id.info_card_pdf_fullscreen_next_document)
@@ -257,7 +263,11 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     }
     Timber.tag(TAG).i( "AFTER %s - %s", index, adapter.getCount() );
 
-    setPdfPreview();
+    try {
+      setPdfPreview();
+    } catch (FileNotFoundException e) {
+      Timber.e(e);
+    }
   }
 
   @OnClick(R.id.info_card_pdf_fullscreen_button)
@@ -287,14 +297,10 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   public void onDetach() {
     super.onDetach();
 
-    if ( EventBus.getDefault().isRegistered(this) ){
-      EventBus.getDefault().unregister(this);
-    }
-  }
+//    if ( EventBus.getDefault().isRegistered(this) ){
+//      EventBus.getDefault().unregister(this);
+//    }
 
-  @Override
-  public void onDestroyView() {
-    super.onDestroyView();
     pdfView.recycle();
   }
 
@@ -334,19 +340,19 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   }
 
 
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(FileDownloadedEvent event) {
-    Log.d("FileDownloadedEvent", event.path);
-
-  }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(UpdateCurrentDocumentEvent event) throws Exception {
-    Timber.tag(TAG).w("UpdateCurrentDocumentEvent %s", event.uid);
-    if (Objects.equals(event.uid, settings.getUid())){
-      updateDocument();
-    }
-  }
+//  @Subscribe(threadMode = ThreadMode.MAIN)
+//  public void onMessageEvent(FileDownloadedEvent event) {
+//    Log.d("FileDownloadedEvent", event.path);
+//
+//  }
+//
+//  @Subscribe(threadMode = ThreadMode.MAIN)
+//  public void onMessageEvent(UpdateCurrentDocumentEvent event) throws Exception {
+//    Timber.tag(TAG).w("UpdateCurrentDocumentEvent %s", event.uid);
+//    if (Objects.equals(event.uid, settings.getUid())){
+//      updateDocument();
+//    }
+//  }
 
 
 }

@@ -35,6 +35,7 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -60,6 +61,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.actions.RAction;
 import sapotero.rxtest.db.requery.models.actions.RActionEntity;
@@ -69,7 +71,6 @@ import sapotero.rxtest.db.requery.models.decisions.RDecision;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RPerformer;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
-import sapotero.rxtest.db.requery.utils.DecisionConverter;
 import sapotero.rxtest.events.decision.ApproveDecisionEvent;
 import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
 import sapotero.rxtest.events.decision.RejectDecisionEvent;
@@ -80,7 +81,9 @@ import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.managers.toolbar.ToolbarManager;
+import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.padeg.Declension;
 import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.adapters.DecisionSpinnerAdapter;
@@ -94,6 +97,7 @@ import timber.log.Timber;
 public class InfoActivityDecisionPreviewFragment extends Fragment implements SelectTemplateDialogFragment.Callback{
 
   @Inject Settings settings;
+  @Inject Mappers mappers;
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject OperationManager operationManager;
   @Inject QueueManager queue;
@@ -174,8 +178,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
             CommandParams params = new CommandParams();
 
             params.setDecisionId( current_decision.getUid() );
-            params.setDecisionModel( DecisionConverter.formatDecision(current_decision) );
-
+            params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(current_decision) );
             params.setDocument( settings.getUid() );
             params.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
 
@@ -195,7 +198,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
       params.setDecisionId( current_decision.getUid() );
 //      params.setDecision( current_decision );
-      params.setDecisionModel( DecisionConverter.formatDecision(current_decision) );
+      params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(current_decision) );
       params.setDocument( settings.getUid() );
       params.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
 
@@ -226,8 +229,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
       CommandParams params = new CommandParams();
       params.setDecisionId( current_decision.getUid() );
-//      params.setDecision( current_decision );
-      params.setDecisionModel( DecisionConverter.formatDecision(current_decision) );
+      params.setDocument( settings.getUid() );
+      params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(current_decision) );
       params.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
 
       operationManager.execute(operation, params);
@@ -248,8 +251,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
         CommandParams commandParams = new CommandParams();
         commandParams.setDecisionId( current_decision.getUid() );
-//          commandParams.setDecision( current_decision );
-        commandParams.setDecisionModel( DecisionConverter.formatDecision(current_decision) );
+        commandParams.setDocument( settings.getUid() );
+        commandParams.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(current_decision) );
         commandParams.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
 
         if ( settings.isShowCommentPost() ) {
@@ -586,10 +589,10 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 //
 //
 //          if ( list.size() == 1 ){
-//            setActionText(list.get(0).getToS());
+//            setActionText(list.startTransactionFor(0).getToS());
 //          } else if ( list.size() >= 2 ){
 //            Collections.sort(list, (a1, a2) -> a1.getUpdatedAt().compareTo( a2.getUpdatedAt() ));
-//            setActionText( list.get( list.size()-1 ).getToS() );
+//            setActionText( list.startTransactionFor( list.size()-1 ).getToS() );
 //          }
 //        } catch (Exception e) {
 //          Timber.tag(TAG).e(e);
@@ -645,7 +648,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
       if (m.find()) {
         action_wrapper.setVisibility(View.VISIBLE);
-        action_text.setText( String.format("%s %s", m.group(0), organization) );
+        action_text.setText( String.format("Передал: %s %s", m.group(0), organization) );
       } else {
         action_wrapper.setVisibility(View.GONE);
       }
@@ -733,11 +736,49 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   public void comment(){
     Timber.tag(TAG).v("comment_button");
 
-    new MaterialDialog.Builder( getContext() )
+    MaterialDialog editDialog = new MaterialDialog.Builder(getContext())
+      .title("Комментарий резолюции")
+      .inputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE)
+      .input("Комментарий", current_decision.getComment(), (dialog, input) -> {})
+      .positiveText(R.string.constructor_save)
+      .onPositive((dialog, which) -> {
+
+        if ( dialog.getInputEditText().getText() != null && !Objects.equals(dialog.getInputEditText().getText().toString(), current_decision.getComment()) ) {
+
+          CommandFactory.Operation operation = CommandFactory.Operation.SAVE_DECISION;
+          CommandParams params = new CommandParams();
+
+          Decision decision = mappers.getDecisionMapper().toFormattedModel( current_decision );
+          decision.setComment( dialog.getInputEditText().getText().toString() );
+          params.setDecisionModel( decision );
+          params.setDecisionId( current_decision.getUid() );
+          params.setDocument( settings.getUid() );
+
+          Timber.e("DECISION %s", new Gson().toJson(decision));
+
+          operationManager.execute( operation, params );
+        }
+        dialog.dismiss();
+      })
+      .neutralText(R.string.constructor_close)
+      .onNeutral((dialog, which) -> dialog.dismiss())
+      .autoDismiss(false)
+      .build();
+
+    MaterialDialog materialDialog = new MaterialDialog.Builder(getContext())
       .title("Комментарий резолюции")
       .content( current_decision.getComment() )
       .positiveText(R.string.constructor_close)
-      .build().show();
+      .neutralText(R.string.decision_preview_edit)
+      .onPositive((dialog, which) -> { dialog.dismiss(); })
+      .onNeutral((dialog, which) -> {
+        dialog.dismiss();
+        editDialog.show();
+      })
+      .autoDismiss(false)
+      .build();
+
+    materialDialog.show();
   }
 
 
@@ -912,16 +953,16 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 //    Retrofit retrofit = new Retrofit.Builder()
 //      .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
 //      .addConverterFactory(GsonConverterFactory.create())
-//      .baseUrl(HOST.get() + "v3/documents/")
+//      .baseUrl(HOST.startTransactionFor() + "v3/documents/")
 //      .client(okHttpClient)
 //      .build();
 //
 //    DocumentService documentService = retrofit.create( DocumentService.class );
 //
 //    Observable<DocumentInfo> activity_main_menu = documentService.getInfo(
-//      UID.get(),
-//      LOGIN.get(),
-//      TOKEN.get()
+//      UID.startTransactionFor(),
+//      LOGIN.startTransactionFor(),
+//      TOKEN.startTransactionFor()
 //    );
 //
 //    activity_main_menu.subscribeOn( Schedulers.newThread() )
@@ -1127,7 +1168,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       }
 
       TextView signerBlankTextView = new TextView(context);
-      signerBlankTextView.setText( DecisionConverter.formatName( decision.getSignerBlankText() ) );
+      signerBlankTextView.setText( Declension.formatName( decision.getSignerBlankText() ) );
       signerBlankTextView.setTextColor( Color.BLACK );
       signerBlankTextView.setGravity( Gravity.END);
       signerBlankTextView.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
@@ -1288,7 +1329,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
           String performerName = "";
 
-          String tempPerformerName = DecisionConverter.getPerformerNameForDecisionPreview(
+          String tempPerformerName = Declension.getPerformerNameForDecisionPreview(
             user.getPerformerText(),
             user.getPerformerGender(),
             block.getAppealText()

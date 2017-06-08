@@ -43,10 +43,12 @@ public class CheckNetworkTask implements Runnable {
         v2 -> {
           Timber.tag(TAG).d("Internet connectivity: true");
           EventBus.getDefault().post(new CheckNetworkResultEvent( true ));
+          settings.setOnline(true);
         },
         error -> {
           Timber.tag(TAG).d("Internet connectivity: false");
           EventBus.getDefault().post(new CheckNetworkResultEvent( false ));
+          settings.setOnline(false);
         });
   }
 }

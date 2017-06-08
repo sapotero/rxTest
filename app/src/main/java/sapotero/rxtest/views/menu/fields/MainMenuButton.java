@@ -89,7 +89,6 @@ public enum MainMenuButton {
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(true) ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in(Arrays.asList( Fields.Status.APPROVAL.getValue(), Fields.Status.SIGNING.getValue() ) ) ),
-//      new ConditionBuilder( ConditionBuilder.Condition.OR, RDocumentEntity.FILTER.eq( Fields.Status.PROCESSED.getValue() )  ),
     }
   ),
   FAVORITES ( 8, "Избранное %s" ,

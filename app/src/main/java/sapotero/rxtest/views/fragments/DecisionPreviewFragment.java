@@ -34,7 +34,6 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.db.requery.utils.DecisionConverter;
 import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -44,6 +43,7 @@ import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.padeg.Declension;
 import timber.log.Timber;
 
 public class DecisionPreviewFragment extends Fragment implements DecisionInterface {
@@ -304,7 +304,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
         String performerName = "";
 
         String tempPerformerName =
-                DecisionConverter.getPerformerNameForDecisionPreview(user.getPerformerText(), user.getPerformerGender(), block.getAppealText());
+                Declension.getPerformerNameForDecisionPreview(user.getPerformerText(), user.getPerformerGender(), block.getAppealText());
 
         Timber.tag("TEST").w("null? - %s | %s", block.getAppealText() == null, block.getAppealText() );
         Timber.tag("TEST").w("user %s", new Gson().toJson( user ) );
@@ -460,7 +460,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
     }
 
     TextView signerBlankTextView = new TextView(getActivity());
-    signerBlankTextView.setText( DecisionConverter.formatName(decision.getSignerBlankText()) );
+    signerBlankTextView.setText( Declension.formatName(decision.getSignerBlankText()) );
     signerBlankTextView.setTextColor( Color.BLACK );
     signerBlankTextView.setGravity( Gravity.END);
     signerBlankTextView.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
@@ -530,7 +530,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
 
   public void update() {
     try{
-//      Timber.tag(TAG).w( "UPDATE: %s", decision.getBlocks().get(0).getText() );
+//      Timber.tag(TAG).w( "UPDATE: %s", decision.getBlocks().startTransactionFor(0).getText() );
       updateView();
     }
     catch (Error e){

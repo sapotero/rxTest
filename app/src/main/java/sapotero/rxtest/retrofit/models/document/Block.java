@@ -10,6 +10,10 @@ import java.util.List;
 
 public class Block implements Serializable{
 
+    @SerializedName("_id")
+    @Expose
+    private String id;
+
     @SerializedName("number")
     @Expose
     private Integer number;
@@ -51,6 +55,14 @@ public class Block implements Serializable{
     @SerializedName("font_size")
     @Expose
     private String fontSize;
+
+    public String getId() {
+      return id;
+    }
+
+    public void setId(String id) {
+      this.id = id;
+    }
 
     public Boolean getAskToReport() {
         return askToReport;
@@ -227,5 +239,4 @@ public class Block implements Serializable{
     public void setPerformers(List<Performer> performers) {
         this.performers = performers;
     }
-
 }

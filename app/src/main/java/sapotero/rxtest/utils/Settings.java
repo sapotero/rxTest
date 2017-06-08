@@ -12,8 +12,10 @@ import sapotero.rxtest.views.custom.stepper.util.AuthType;
 
 public class Settings {
 
+  private static final String CURRENT_ACTIVITY_KEY = "current_activity_key";
   private static final String SIGN_WITH_DC_KEY = "SIGN_WITH_DC";
-  private static final String DOCUMENTS_COUNT_KEY = "documents.count";
+  private static final String IS_ONLINE = "is_online";
+  private static final String DOCUMENTS_COUNT_KEY = "documents.put";
   private static final String LOGIN_KEY = "login";
   private static final String TOKEN_KEY = "token";
   private static final String PASSWORD_KEY = "password";
@@ -45,6 +47,7 @@ public class Settings {
   private static String ONLY_URGENT_KEY;
   private static String JOURNALS_KEY;
   private static String START_PAGE_KEY;
+  private static String START_JOURNAL_KEY;
   private static String SHOW_WITHOUT_PROJECT_KEY;
   private static String HIDE_PRIMARY_CONSIDERATION_KEY;
   private static String HIDE_BUTTONS_KEY;
@@ -65,6 +68,7 @@ public class Settings {
   private Preference<Integer> jobCount;
   private Preference<String> login;
   private Preference<String> token;
+  private Preference<String> current_activity;
   private Preference<String> host;
   private Preference<String> password;
   private Preference<String> pin;
@@ -90,6 +94,7 @@ public class Settings {
   private Preference<Set<String>> journals;
   private Preference<String> prevDialogComment;
   private Preference<String> startPage;
+  private Preference<String> startJournal;
   private Preference<Boolean> showWithoutProject;
   private Preference<Boolean> hidePrimaryConsideration;
   private Preference<Boolean> hideButtons;
@@ -103,6 +108,7 @@ public class Settings {
   private Preference<Boolean> debugEnabled;
   private Preference<Boolean> startLoadData;
   private Preference<AuthType> authType;
+  private Preference<Boolean> online;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -120,6 +126,7 @@ public class Settings {
     ONLY_URGENT_KEY                = context.getResources().getString(R.string.only_urgent_key);
     JOURNALS_KEY                   = context.getResources().getString(R.string.journals_key);
     START_PAGE_KEY                 = context.getResources().getString(R.string.start_page_key);
+    START_JOURNAL_KEY                 = context.getResources().getString(R.string.start_journal_key);
     SHOW_WITHOUT_PROJECT_KEY       = context.getResources().getString(R.string.show_without_project_key);
     HIDE_PRIMARY_CONSIDERATION_KEY = context.getResources().getString(R.string.hide_primary_consideration_key);
     HIDE_BUTTONS_KEY               = context.getResources().getString(R.string.hide_buttons_key);
@@ -135,6 +142,7 @@ public class Settings {
     firstRunFlag                   = settings.getBoolean(FIRST_RUN_KEY);
     signWithDc                     = settings.getBoolean(SIGN_WITH_DC_KEY);
     jobCount                       = settings.getInteger(DOCUMENTS_COUNT_KEY);
+    login                          = settings.getString(LOGIN_KEY);
     login                          = settings.getString(LOGIN_KEY);
     token                          = settings.getString(TOKEN_KEY);
     host                           = settings.getString(HOST_KEY);
@@ -162,6 +170,7 @@ public class Settings {
     journals                       = settings.getStringSet(JOURNALS_KEY);
     prevDialogComment              = settings.getString(PREV_DIALOG_COMMENT_KEY);
     startPage                      = settings.getString(START_PAGE_KEY);
+    startJournal                   = settings.getString(START_JOURNAL_KEY);
     showWithoutProject             = settings.getBoolean(SHOW_WITHOUT_PROJECT_KEY);
     hidePrimaryConsideration       = settings.getBoolean(HIDE_PRIMARY_CONSIDERATION_KEY);
     hideButtons                    = settings.getBoolean(HIDE_BUTTONS_KEY);
@@ -175,6 +184,8 @@ public class Settings {
     debugEnabled                   = settings.getBoolean(DEBUG_ENABLED_KEY);
     startLoadData                  = settings.getBoolean(START_LOAD_DATA_KEY);
     authType                       = settings.getEnum(STEPPER_AUTH_TYPE_KEY, AuthType.class);
+    current_activity               = settings.getString(CURRENT_ACTIVITY_KEY);
+    online                         = settings.getBoolean(START_LOAD_DATA_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -249,6 +260,7 @@ public class Settings {
     return getString(login);
   }
 
+
   public void setLogin(String value) {
     setString(login, value);
   }
@@ -271,6 +283,14 @@ public class Settings {
     if (stringPreference != null) {
       stringPreference.set(value);
     }
+  }
+
+  public Preference<String> getCurrentActivity() {
+    return current_activity;
+  }
+
+  public void setCurrentActivity(Preference<String> current_activity) {
+    this.current_activity = current_activity;
   }
 
   public String getToken() {
@@ -477,6 +497,10 @@ public class Settings {
     return getString(startPage);
   }
 
+  public String getStartJournal() {
+    return getString(startJournal);
+  }
+
   public boolean isShowWithoutProject() {
     return getBoolean(showWithoutProject);
   }
@@ -543,5 +567,13 @@ public class Settings {
 
   public Preference<AuthType> getAuthTypePreference() {
     return authType;
+  }
+
+  public boolean isOnline() {
+    return getBoolean(online);
+  }
+
+  public void setOnline(Boolean value) {
+    online.set(value);
   }
 }

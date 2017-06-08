@@ -3,6 +3,7 @@ package sapotero.rxtest.managers.menu.commands.approval;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
@@ -18,6 +19,9 @@ import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.services.MainService;
+import sapotero.rxtest.utils.memory.fields.FieldType;
+import sapotero.rxtest.utils.memory.fields.InMemoryState;
+import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
 public class ChangePerson extends AbstractCommand {
@@ -49,7 +53,19 @@ public class ChangePerson extends AbstractCommand {
   @Override
   public void execute() {
     queueManager.add(this);
+
+    store.process(
+      store.startTransactionFor( getUid() )
+        .setLabel(LabelType.SYNC)
+        .setField(FieldType.PROCESSED, true)
+        .setState(InMemoryState.LOADING)
+    );
+
     EventBus.getDefault().post( new ShowNextDocumentEvent());
+  }
+
+  private String getUid() {
+    return params.getDocument() != null ? params.getDocument() : settings.getUid();
   }
 
   @Override
@@ -59,17 +75,20 @@ public class ChangePerson extends AbstractCommand {
 
   @Override
   public void executeLocal() {
+    String uid = getUid();
+
     int count = dataStore
       .update(RDocumentEntity.class)
-//      .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue() )
       .set( RDocumentEntity.MD5, "" )
       .set( RDocumentEntity.PROCESSED, true)
-      .set( RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq( params.getDocument() != null ? params.getDocument(): settings.getUid()))
+      .where(RDocumentEntity.UID.eq(uid))
       .get()
       .value();
 
     queueManager.setExecutedLocal(this);
+
+//    store.setLabel(LabelType.SYNC ,uid);
+//    store.setField(FieldType.PROCESSED ,true ,uid);
 
     if (callback != null ){
       callback.onCommandExecuteSuccess( getType() );
@@ -91,7 +110,9 @@ public class ChangePerson extends AbstractCommand {
     OperationService operationService = retrofit.create( OperationService.class );
 
     ArrayList<String> uids = new ArrayList<>();
-    uids.add( params.getDocument() != null ? params.getDocument(): settings.getUid() );
+    String uid = getUid();
+
+    uids.add(uid);
 
     String comment = null;
     if ( params.getComment() != null ){
@@ -126,10 +147,28 @@ public class ChangePerson extends AbstractCommand {
           Timber.tag(TAG).i("type: %s", data.getType());
 
           queueManager.setExecutedRemote(this);
+
+          store.process(
+            store.startTransactionFor( getUid() )
+              .removeLabel(LabelType.SYNC)
+              .setField(FieldType.MD5, "")
+              .setState(InMemoryState.READY)
+          );
         },
         error -> {
           if (callback != null){
             callback.onCommandExecuteError(getType());
+          }
+
+          if ( settings.isOnline() ){
+            store.process(
+              store.startTransactionFor( getUid() )
+                .removeLabel(LabelType.SYNC)
+                .setField(FieldType.PROCESSED, false)
+                .setState(InMemoryState.READY)
+            );
+            queueManager.setExecutedWithError(this, Collections.singletonList(error.getLocalizedMessage()));
+
           }
         }
       );

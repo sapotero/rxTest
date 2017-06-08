@@ -8,7 +8,6 @@ import android.support.v4.app.FragmentManager;
 
 import com.google.gson.Gson;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -17,20 +16,16 @@ import javax.inject.Inject;
 
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
-import rx.Subscription;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
-import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
-import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
+import sapotero.rxtest.db.mapper.utils.Mappers;
+import sapotero.rxtest.managers.view.builders.DecisionBuilder;
+import sapotero.rxtest.managers.view.builders.PreviewBuilder;
+import sapotero.rxtest.managers.view.interfaces.DecisionInterface;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.Performer;
 import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
-import sapotero.rxtest.managers.view.builders.DecisionBuilder;
-import sapotero.rxtest.managers.view.builders.PreviewBuilder;
-import sapotero.rxtest.managers.view.interfaces.DecisionInterface;
 import sapotero.rxtest.views.adapters.models.UrgencyItem;
 import timber.log.Timber;
 
@@ -38,6 +33,7 @@ public class DecisionManager implements DecisionInterface, DecisionBuilder.Callb
 
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject Settings settings;
+  @Inject Mappers mappers;
 
   private Decision decision;
   private final String md5;
@@ -156,97 +152,6 @@ public class DecisionManager implements DecisionInterface, DecisionBuilder.Callb
   public void update(){
     preview_builder.setDecision(decision);
     preview_builder.update();
-  }
-
-  public void saveDecision(){
-
-    Decision d = decision;
-
-    Timber.tag(TAG).w("[%s] -  %s:%s ", settings.getUid(), d.getId(), d.getLetterhead() );
-
-    RDocumentEntity document = dataStore
-      .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq(settings.getUid()))
-      .get().first();
-
-    document.setChanged(true);
-
-    RDecisionEntity dec = dataStore
-      .select(RDecisionEntity.class)
-      .where(RDecisionEntity.UID.eq(d.getId()))
-      .get().first();
-
-    dec.setUid( d.getId() );
-    dec.setLetterhead(d.getLetterhead());
-    dec.setApproved(d.getApproved());
-    dec.setSigner(d.getSigner());
-    dec.setSignerId(d.getSignerId());
-    dec.setAssistantId(d.getAssistantId());
-    dec.setSignerBlankText(d.getSignerBlankText());
-    dec.setSignerIsManager(d.getSignerIsManager());
-    dec.setComment(d.getComment());
-    dec.setDate(d.getDate());
-    dec.setUrgencyText(d.getUrgencyText());
-    dec.setShowPosition(d.getShowPosition());
-    dec.setChanged(true);
-
-    if ( d.getBlocks() != null && d.getBlocks().size() >= 1 ){
-
-      ArrayList<RBlockEntity> list = new ArrayList<>();
-
-      for (Block b: d.getBlocks() ) {
-        RBlockEntity block = new RBlockEntity();
-        block.setNumber(b.getNumber());
-        block.setText(b.getText());
-        block.setAppealText(b.getAppealText());
-        block.setTextBefore(b.getTextBefore());
-        block.setHidePerformers(b.getHidePerformers());
-        block.setToCopy(b.getToCopy());
-        block.setToFamiliarization(b.getToFamiliarization());
-
-        if ( b.getPerformers() != null && b.getPerformers().size() >= 1 ) {
-
-          for (Performer p : b.getPerformers()) {
-            RPerformerEntity performer = new RPerformerEntity();
-
-            performer.setNumber(p.getNumber());
-            performer.setPerformerId(p.getPerformerId());
-            performer.setPerformerType(p.getPerformerType());
-            performer.setPerformerText(p.getPerformerText());
-            performer.setPerformerGender(p.getPerformerGender());
-            performer.setOrganizationText(p.getOrganizationText());
-            performer.setIsOriginal(p.getIsOriginal());
-            performer.setIsResponsible(p.getIsResponsible());
-            performer.setIsOrganization(p.getOrganization());
-
-            performer.setBlock(block);
-            block.getPerformers().add(performer);
-          }
-        }
-
-
-        block.setDecision(dec);
-        list.add(block);
-      }
-
-      dec.getBlocks().clear();
-      dec.getBlocks().addAll(list);
-    }
-
-      //FIX DECISION
-    dec.setDocument(document);
-
-//    RDecisionEntity temp = dataStore.addByOne(dec).toBlocking().value();
-    Subscription temp = dataStore
-      .update(dec)
-      .subscribe( data ->{
-        Timber.tag(TAG).w( "addByOne : %s", data.getBlocks().isEmpty() );
-      }, error -> {
-        Timber.e( String.valueOf(error.getStackTrace()) );
-      });
-
-
-
   }
 
   /* DecisionInterface */

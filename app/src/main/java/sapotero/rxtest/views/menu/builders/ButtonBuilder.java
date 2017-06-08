@@ -3,8 +3,6 @@ package sapotero.rxtest.views.menu.builders;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.graphics.drawable.StateListDrawable;
-import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.support.v4.content.ContextCompat;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -13,16 +11,14 @@ import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
 import io.requery.Persistable;
-import io.requery.query.Expression;
-import io.requery.query.LogicalCondition;
 import io.requery.query.WhereAndOr;
 import io.requery.rx.RxScalar;
 import io.requery.rx.SingleEntityStore;
@@ -33,15 +29,18 @@ import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.utils.validation.Validation;
 import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.memory.MemoryStore;
+import sapotero.rxtest.utils.memory.models.InMemoryDocument;
+import sapotero.rxtest.utils.memory.utils.Filter;
 import timber.log.Timber;
 
 public class ButtonBuilder {
 
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject Settings settings;
-  @Inject Validation validation;
+  //  @Inject Validation validation;
+  @Inject MemoryStore store;
 
   private ConditionBuilder[] conditions;
   private ConditionBuilder[] item_conditions;
@@ -49,30 +48,19 @@ public class ButtonBuilder {
   private Integer index;
   private String label;
   private boolean active;
-  private Corner corner;
 
   private Callback callback;
   private RadioButton view;
+
+  private final HashMap<String, String> mapper = new HashMap<>();
 
 
   private String TAG = this.getClass().getSimpleName();
   private final CompositeSubscription subscription = new CompositeSubscription();
 
   public void recalculate() {
-    Observable
-      .just("")
-      .debounce(100, TimeUnit.MILLISECONDS)
-      .subscribeOn(Schedulers.newThread())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(
-        data -> {
-          Timber.tag(TAG).e("recalculate");
-          if (view != null) {
-            getCount();
-          }
-        },
-        Timber::e
-      );
+    Timber.i("recalculate");
+    getCount();
   }
 
   public interface Callback {
@@ -82,12 +70,6 @@ public class ButtonBuilder {
     this.callback = callback;
   }
 
-
-  private enum Corner{
-    LEFT,
-    RIGHT,
-    NONE
-  }
 
   public Integer getIndex() {
     return index;
@@ -99,23 +81,26 @@ public class ButtonBuilder {
     this.item_conditions = item_conditions;
     this.showDecisionForse = showDecisionForse;
     this.index = index;
-    this.corner = Corner.NONE;
     this.active = false;
 
-    EsdApplication.getValidationComponent().inject(this);
+    EsdApplication.getManagerComponent().inject(this);
   }
 
 
   private void getCount() {
 
+    Timber.i("getCount");
     // Отображать документы без резолюции
     if ( settings.isShowWithoutProject() ){
+      Timber.i("isShowWithoutProject");
       getCountWithoutDecisons();
     } else {
       // для некоторых журналов показываем всё независимо от настроек
       if (showDecisionForse){
+        Timber.i("showDecisionForse");
         getCountWithoutDecisons();
       } else {
+        Timber.i("getCountWithDecisons");
         getCountWithDecisons();
       }
     }
@@ -124,15 +109,13 @@ public class ButtonBuilder {
 
   private void getCountWithDecisons() {
 
-    LogicalCondition<? extends Expression<?>, ?> query_condition;
-
     unsubscribe();
 
     WhereAndOr<RxScalar<Integer>> query = dataStore
       .count(RDocumentEntity.class)
       .where(RDocumentEntity.USER.eq(settings.getLogin()))
       .and(RDocumentEntity.WITH_DECISION.eq(true))
-      .and( RDocumentEntity.DOCUMENT_TYPE.in( validation.getSelectedJournals() ) )
+//      .and( RDocumentEntity.DOCUMENT_TYPE.in( validation.getSelectedJournals() ) )
       .and(RDocumentEntity.FROM_LINKS.eq(false));
 
 //    if (index == 4 || index == 7){
@@ -148,7 +131,7 @@ public class ButtonBuilder {
     if ( item_conditions.length > 0 ){
 
       for (ConditionBuilder condition : item_conditions ){
-        Timber.tag(TAG).i( "I %s", condition.toString() );
+//        Timber.tag(TAG).i( "I %s", condition.toString() );
         switch ( condition.getCondition() ){
           case AND:
             query = query.and( condition.getField() );
@@ -164,7 +147,7 @@ public class ButtonBuilder {
     if ( conditions.length > 0 ){
 
       for (ConditionBuilder condition : conditions ){
-        Timber.tag(TAG).i( "C %s", condition.toString() );
+//        Timber.tag(TAG).i( "C %s", condition.toString() );
         switch ( condition.getCondition() ){
           case AND:
             query = query.and( condition.getField() );
@@ -183,71 +166,77 @@ public class ButtonBuilder {
 
   private void getCountWithoutDecisons() {
 
-    WhereAndOr<RxScalar<Integer>> query = dataStore
-      .count(RDocumentEntity.class)
-      .where( RDocumentEntity.USER.eq( settings.getLogin() ) );
-
-    // проекты, подпись, согласование
-    if ( !Arrays.asList(1,5,6,4,7).contains(index) ){
-      List<String> journals = validation.getSelectedJournals();
-      if ( journals.size() > 0){
-        query = query.and( RDocumentEntity.DOCUMENT_TYPE.in( validation.getSelectedJournals() ) );
-      }
-    }
-
-    // обработанные и Рассмотренные
-    if ( Arrays.asList(4,7).contains(index) ){
-      query = query.and(RDocumentEntity.PROCESSED.eq(true));
-    } else {
-      query = query.and(RDocumentEntity.PROCESSED.eq(false));
-    }
+    ArrayList<ConditionBuilder> _conditions = new ArrayList<>();
 
     if ( item_conditions.length > 0 ){
-      for (ConditionBuilder condition : item_conditions ){
-        switch ( condition.getCondition() ){
-          case AND:
-            query = query.and( condition.getField() );
-            break;
-          case OR:
-            query = query.or( condition.getField() );
-            break;
-          default:
-            break;
-        }
-      }
+      Collections.addAll(_conditions, item_conditions);
     }
     if ( conditions.length > 0 ){
-      for (ConditionBuilder condition : conditions ){
-        switch ( condition.getCondition() ){
-          case AND:
-            query = query.and( condition.getField() );
-            break;
-          case OR:
-            query = query.or( condition.getField() );
-            break;
-          default:
-            break;
-        }
-      }
+      Collections.addAll(_conditions, conditions);
     }
 
-    Integer size = query.get().value();
 
-    for (ConditionBuilder condition : conditions ) {
-      Timber.tag(TAG).i("condition %s", condition.toString());
-    }
+    Filter filter = new Filter(_conditions);
+//
+//    ArrayList<String> types    = filter.getTypes();
+//    ArrayList<String> statuses = filter.getStatuses();
+//
+//    Timber.i( "type: %s, statuses: %s , processed: %s", new Gson().toJson(types),  new Gson().toJson(statuses), filter.getProcessed() );
+//
+//    Counter counter = store.getCounter();
+//
+//    Counter.Status status = null;
+//    if (statuses.size() > 0){
+//      status = Counter.Status.getStatus(filter.getStatuses().get(0));
+//    }
+//
+//    Counter.Document type = null;
+//
+//    if (types.size() > 0){
+//      type = Counter.Document.getType(types.get(0));
+//    }
+//    if ( filter.getProcessed() ){
+//      type = Counter.Document.PROCESSED;
+//    }
+//
+//
+//    Timber.w("COUNTER: %s %s", status, type );
+//
+//    try {
+//      if (type != null && status != null) {
+//
+//        Map<Counter.Document, Integer> docs = counter.getData().get(status);
+//        if (docs != null && docs.containsKey(type)){
+//          Timber.w("FROM COUNTER: %s", docs.get(type) );
+//        }
+//      }
+//    } catch (Exception e) {
+//      Timber.e(e);
+//    }
 
-    for (ConditionBuilder condition : item_conditions ) {
-      Timber.tag(TAG).i("condition %s", condition.toString());
-    }
 
-    Timber.tag(TAG).i("size %s",  conditions.length);
-    Timber.tag(TAG).i("total %s", size);
+    Observable
+      .from( store.getDocuments().values() )
 
-    view.setText( String.format( label, size ) );
+      .filter( filter::byType)
+      .filter( filter::byStatus)
+      .filter( filter::isProcessed )
+      .filter( filter::isFavorites )
+      .filter( filter::isControl )
+
+      .map( InMemoryDocument::getUid )
+      .toList()
+      .subscribeOn( Schedulers.computation() )
+      .observeOn( AndroidSchedulers.mainThread() )
+      .subscribe(
+        list -> {
+          Timber.e( label, list.size() );
+          view.setText( String.format( label, list.size() ) );
+        },
+        Timber::e
+      );
   }
 
-  @RequiresApi(api = Build.VERSION_CODES.M)
   public RadioButton getView(Context context){
 
     Timber.tag(TAG).e("create new");
@@ -271,7 +260,7 @@ public class ButtonBuilder {
     view.setButtonDrawable( ContextCompat.getDrawable(context, R.drawable.toggle_selector_button) );
 
     view.setBackground( ContextCompat.getDrawable(context, R.drawable.toggle_selector_button) );
-    view.setForeground( context.getDrawable(R.drawable.card_foreground) );
+//    view.setForeground( ContextCompat.getDrawable(context, R.drawable.card_foreground) );
 
     view.setText( String.format( label, 0) );
 
@@ -285,21 +274,21 @@ public class ButtonBuilder {
       }
     }
 
-    if (!validation.hasSigningAndApproval() && index == 1){
-      view.setVisibility(View.GONE);
-    }
+//    if (!validation.hasSigningAndApproval() && index == 1){
+//      view.setVisibility(View.GONE);
+//    }
 
 
     getCount();
 
     view.setOnCheckedChangeListener((buttonView, isChecked) -> {
-      Timber.tag("setOnCheckedChangeListener").i("change");
+//      Timber.tag("setOnCheckedChangeListener").i("change");
       setActive(isChecked);
 
 //      getCount();
 
       if (isChecked){
-        Timber.tag("setOnCheckedChangeListener").i("change");
+//        Timber.tag("setOnCheckedChangeListener").i("change");
         callback.onButtonBuilderUpdate(index);
       }
     });
@@ -315,16 +304,6 @@ public class ButtonBuilder {
 
   public RadioButton getButton(){
     return view;
-  }
-
-  public void setLeftCorner() {
-    corner = Corner.LEFT;
-  }
-  public void setRightCorner() {
-    corner = Corner.RIGHT;
-  }
-  public void setNoneCorner() {
-    corner = Corner.NONE;
   }
 
   public boolean isActive() {

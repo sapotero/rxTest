@@ -3,6 +3,7 @@ package sapotero.rxtest.managers.menu.commands.report;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Objects;
 
 import retrofit2.Retrofit;
@@ -18,6 +19,8 @@ import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.utils.memory.fields.FieldType;
+import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
 public class ReturnToPrimaryConsideration extends AbstractCommand {
@@ -43,6 +46,12 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
   public void execute() {
     queueManager.add(this);
     update();
+
+    store.process(
+      store.startTransactionFor( getUid() )
+        .setLabel(LabelType.SYNC)
+        .setField(FieldType.PROCESSED, true)
+    );
   }
 
   private void update() {
@@ -125,10 +134,26 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
           Timber.tag(TAG).i("type: %s", data.getType());
 
           queueManager.setExecutedRemote(this);
+
+          store.process(
+            store.startTransactionFor( getUid() )
+              .removeLabel(LabelType.SYNC)
+              .setField(FieldType.MD5, "")
+          );
         },
         error -> {
           if (callback != null){
             callback.onCommandExecuteError(getType());
+          }
+
+          if ( settings.isOnline() ){
+            store.process(
+              store.startTransactionFor( getUid() )
+                .removeLabel(LabelType.SYNC)
+                .setField(FieldType.PROCESSED, false)
+            );
+            queueManager.setExecutedWithError(this, Collections.singletonList(error.getLocalizedMessage()));
+
           }
         }
       );

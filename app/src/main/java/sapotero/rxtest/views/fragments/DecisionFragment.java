@@ -39,6 +39,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.mapper.PerformerMapper;
+import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.view.builders.BlockFactory;
 import sapotero.rxtest.retrofit.models.Oshs;
@@ -56,6 +58,7 @@ import timber.log.Timber;
 public class DecisionFragment extends Fragment implements PrimaryConsiderationAdapter.Callback, SelectOshsDialogFragment.Callback, SelectTemplateDialogFragment.Callback {
 
   @Inject Settings settings;
+  @Inject Mappers mappers;
 
   @BindView(R.id.card_toolbar)  Toolbar  card_toolbar;
   @BindView(R.id.decision_text) EditText decision_text;
@@ -329,7 +332,8 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
       for ( Performer u: block.getPerformers() ) {
         Timber.tag(TAG).w("USER: %s [ %s | %s ]", u.getPerformerText(), u.getIsOriginal(), u.getIsResponsible() );
         Timber.tag(TAG).w("USER: %s ", new Gson().toJson(u) );
-        PrimaryConsiderationPeople user = new PrimaryConsiderationPeople( u );
+        PrimaryConsiderationPeople user =
+                (PrimaryConsiderationPeople) mappers.getPerformerMapper().convert(u, PerformerMapper.DestinationType.PRIMARYCONSIDERATIONPEOPLE);
 
         people.add(user);
       }
@@ -413,6 +417,7 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     }
 
     Block block = new Block();
+    block.setId(this.block.getId());
     block.setNumber(number);
     block.setText( decision_text.getText().toString() );
     block.setAppealText( appealText );
@@ -433,19 +438,9 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
       ArrayList<Performer> performers = new ArrayList<>();
 
       for (int i = 0; i < adapter.getCount(); i++) {
-        Performer p = new Performer();
         PrimaryConsiderationPeople item = adapter.getItem(i);
-
-        p.setPerformerId( item.getId() );
-        p.setIsResponsible( item.isResponsible() );
-        p.setIsOriginal( item.isOriginal() );
-        p.setPerformerId( item.getId() );
-        p.setPerformerText( item.getName() );
-        p.setPerformerGender( item.getGender() );
-        p.setOrganizationText( item.getOrganization() );
-        p.setNumber( i );
-        p.setOrganization( item.isOrganization() );
-
+        Performer p = (Performer) mappers.getPerformerMapper().convert(item, PerformerMapper.DestinationType.PERFORMER);
+        p.setNumber(i);
         performers.add(p);
       }
 
@@ -580,7 +575,10 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   public void onSearchSuccess(Oshs user, CommandFactory.Operation operation, String uid) {
     Timber.tag("FROM DIALOG").i( "[%s] %s | %s", user.getId(), user.getName(), user.getOrganization());
 
-    adapter.add( new PrimaryConsiderationPeople( user.getId(), user.getName(), user.getPosition(), user.getOrganization(), null, user.getGender(), user.getIsOrganization() ) );
+    PrimaryConsiderationPeople item =
+            (PrimaryConsiderationPeople) mappers.getPerformerMapper().convert(user, PerformerMapper.DestinationType.PRIMARYCONSIDERATIONPEOPLE);
+
+    adapter.add( item );
     updateUsers();
 
     if (callback != null) {

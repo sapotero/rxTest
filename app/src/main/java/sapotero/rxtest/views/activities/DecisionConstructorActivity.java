@@ -37,6 +37,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RUrgencyEntity;
 import sapotero.rxtest.db.requery.models.decisions.RBlock;
@@ -44,7 +45,6 @@ import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RPerformer;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
-import sapotero.rxtest.db.requery.utils.DecisionConverter;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.decision.ApproveDecisionEvent;
 import sapotero.rxtest.events.decision.RejectDecisionEvent;
@@ -61,39 +61,37 @@ import sapotero.rxtest.views.adapters.models.FontItem;
 import sapotero.rxtest.views.adapters.models.UrgencyItem;
 import sapotero.rxtest.views.custom.SpinnerWithLabel;
 import sapotero.rxtest.views.dialogs.DecisionTextDialog;
+import sapotero.rxtest.views.dialogs.InfoCardDialogFragment;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
 import sapotero.rxtest.views.dialogs.SelectTemplateDialogFragment;
 import sapotero.rxtest.views.fragments.DecisionFragment;
 import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
+import sapotero.rxtest.views.fragments.InfoActivityDecisionPreviewFragment;
+import sapotero.rxtest.views.fragments.InfoCardDocumentsFragment;
+import sapotero.rxtest.views.fragments.InfoCardFieldsFragment;
+import sapotero.rxtest.views.fragments.InfoCardLinksFragment;
+import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
+import sapotero.rxtest.views.fragments.RoutePreviewFragment;
 import timber.log.Timber;
 
-public class DecisionConstructorActivity extends AppCompatActivity implements DecisionFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, OperationManager.Callback, SelectOshsDialogFragment.Callback, SelectTemplateDialogFragment.Callback {
+public class DecisionConstructorActivity extends AppCompatActivity implements DecisionFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, OperationManager.Callback, SelectOshsDialogFragment.Callback, SelectTemplateDialogFragment.Callback,  InfoActivityDecisionPreviewFragment.OnFragmentInteractionListener, RoutePreviewFragment.OnFragmentInteractionListener, InfoCardDocumentsFragment.OnFragmentInteractionListener, InfoCardWebViewFragment.OnFragmentInteractionListener, InfoCardLinksFragment.OnFragmentInteractionListener, InfoCardFieldsFragment.OnFragmentInteractionListener {
 
   @Inject Settings settings;
+  @Inject Mappers mappers;
   @Inject OperationManager operationManager;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   @BindView(R.id.toolbar) Toolbar toolbar;
-
   @BindView(R.id.activity_decision_constructor_wrapper) RelativeLayout wrapper;
   @BindView(R.id.decision_constructor_decision_preview) RelativeLayout testWrapper;
-
   @BindView(R.id.urgency_selector) SpinnerWithLabel<UrgencyItem> urgency_selector;
   @BindView(R.id.head_font_selector) SpinnerWithLabel<FontItem> font_selector;
   @BindView(R.id.signer_oshs_selector) EditText signer_oshs_selector;
-
-
   @BindView(R.id.sign_as_current_user) Button sign_as_current_user;
   @BindView(R.id.select_oshs_wrapper) LinearLayout select_oshs_wrapper;
-
   @BindView(R.id.activity_decision_constructor_scroll_wrapper) ScrollView scroll;
-
-
   @BindView(R.id.decision_constructor_decision_comment) EditText decision_comment;
   @BindView(R.id.decision_constructor_decision_date)    EditText decision_date;
-
-
-
 
   private String TAG = this.getClass().getSimpleName();
   private DecisionManager manager;
@@ -129,7 +127,11 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
     toolbar.setContentInsetStartWithNavigation(250);
 
-    toolbar.setTitle("Редактор резолюции ");
+
+    // https://tasks.n-core.ru/browse/MVDESD-13591
+//    toolbar.setTitle("Текст");
+
+     toolbar.setTitle("Редактор резолюции ");
     toolbar.inflateMenu(R.menu.info_decision_constructor);
 
 
@@ -186,7 +188,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
                 if (rDecisionEntity != null) {
 //                  params.setDecision( rDecisionEntity );
-                  params.setDecisionModel( DecisionConverter.formatDecision(rDecisionEntity) );
+                  params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
                   params.setDecisionId( rDecisionEntity.getUid() );
 
                   RDocumentEntity doc = (RDocumentEntity) rDecisionEntity.getDocument();
@@ -223,7 +225,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
                   decision.setDocumentUid( settings.getUid() );
 
                   if (rDecisionEntity != null) {
-                    params.setDecisionModel( DecisionConverter.formatDecision(rDecisionEntity) );
+                    params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
                     params.setDecisionId( rDecisionEntity.getUid() );
                   }
 
@@ -288,6 +290,10 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       switch (item.getItemId()){
 
 
+        case R.id.action_constructor_infocard:
+          showInfoCard();
+          break;
+
         case R.id.action_constructor_create_and_sign:
           boolean canCreateAndSign = checkDecision();
 
@@ -302,7 +308,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
             decision.setDocumentUid( settings.getUid() );
 
             if (rDecisionEntity != null) {
-              params.setDecisionModel( DecisionConverter.formatDecision(rDecisionEntity) );
+              params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
               params.setDecisionId( rDecisionEntity.getUid() );
             }
 
@@ -347,7 +353,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
             params = new CommandParams();
             params.setDecisionId( rDecisionEntity.getUid() );
 //            params.setDecision( rDecisionEntity );
-            params.setDecisionModel( DecisionConverter.formatDecision(rDecisionEntity) );
+            params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
 
             if ( settings.isDecisionWithAssignment() ){
               Timber.tag(TAG).w("ASSIGNMENT: %s", settings.isDecisionWithAssignment() );
@@ -371,7 +377,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
             params = new CommandParams();
             params.setDecisionId( rDecisionEntity.getUid() );
 //            params.setDecision( rDecisionEntity );
-            params.setDecisionModel( DecisionConverter.formatDecision(rDecisionEntity) );
+            params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
             operationManager.execute(operation, params);
           }
 
@@ -620,6 +626,12 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
   }
 
+  private void showInfoCard() {
+
+    InfoCardDialogFragment newFragment = new InfoCardDialogFragment();
+    newFragment.show( getSupportFragmentManager(), "dialog_infocard" );
+  }
+
   private void invalidateSaveAndSignButton(){
 
     Timber.tag(TAG).e("invalidateSaveAndSignButton" );
@@ -754,34 +766,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       return showSaveDialog;
     }
 
-
-//  @Override
-//  public boolean dispatchTouchEvent(MotionEvent ev) {
-//    View view = getCurrentFocus();
-//    if (view != null && (ev.getAction() == MotionEvent.ACTION_UP || ev.getAction() == MotionEvent.ACTION_MOVE) && view instanceof EditText && !view.getClass().getName().startsWith("android.webkit.")) {
-//      int scrcoords[] = new int[2];
-//      view.getLocationOnScreen(scrcoords);
-//      float x = ev.getRawX() + view.getLeft() - scrcoords[0];
-//      float y = ev.getRawY() + view.getTop() - scrcoords[1];
-//      if (x < view.getLeft() || x > view.getRight() || y < view.getTop() || y > view.getBottom())
-//        hideKeyboard(this);
-//    }
-//    return super.dispatchTouchEvent(ev);
-//  }
-
-//  private void hideKeyboard(DecisionConstructorActivity constructorActivity) {
-//    if( constructorActivity != null ){
-//      ((InputMethodManager) constructorActivity
-//        .getSystemService(Context.INPUT_METHOD_SERVICE))
-//        .hideSoftInputFromWindow(
-//          constructorActivity
-//            .getWindow()
-//            .getDecorView()
-//            .getApplicationWindowToken(),
-//          0);
-//    }
-//  }
-
     @Override
     protected void onResume () {
       super.onPostResume();
@@ -790,103 +774,85 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       operationManager.registerCallBack(this);
     }
 
-    private void loadDecision () {
-      Integer decision_id = settings.getDecisionActiveId();
-
-      rDecisionEntity = dataStore
-        .select(RDecisionEntity.class)
-        .where(RDecisionEntity.ID.eq(decision_id))
-        .get().firstOrNull();
-
-      if (rDecisionEntity != null) {
-        raw_decision = new Decision();
-
-        raw_decision.setId(rDecisionEntity.getUid());
-        raw_decision.setLetterhead(rDecisionEntity.getLetterhead());
-        raw_decision.setApproved(rDecisionEntity.isApproved());
-        raw_decision.setSigner(rDecisionEntity.getSigner());
-        raw_decision.setSignerId(rDecisionEntity.getSignerId());
-        raw_decision.setAssistantId(rDecisionEntity.getAssistantId());
-        raw_decision.setSignerBlankText(rDecisionEntity.getSignerBlankText());
-        raw_decision.setSignerIsManager(rDecisionEntity.isSignerIsManager());
-        raw_decision.setSignerPositionS(rDecisionEntity.getSignerPositionS());
-        raw_decision.setComment(rDecisionEntity.getComment());
-        raw_decision.setDate(rDecisionEntity.getDate());
-        raw_decision.setUrgencyText(rDecisionEntity.getUrgencyText());
-        raw_decision.setShowPosition(rDecisionEntity.isShowPosition());
-        raw_decision.setLetterheadFontSize(rDecisionEntity.getLetterheadFontSize());
-        raw_decision.setPerformersFontSize(rDecisionEntity.getPerformerFontSize());
-
-        if (rDecisionEntity.getBlocks() != null && rDecisionEntity.getBlocks().size() >= 1) {
-
-          ArrayList<Block> list = new ArrayList<>();
-
-          for (RBlock _block : rDecisionEntity.getBlocks()) {
-
-            RBlockEntity b = (RBlockEntity) _block;
-            Block block = new Block();
-            block.setNumber(b.getNumber());
-            block.setFontSize(b.getFontSize());
-            block.setText(b.getText());
-            block.setAppealText(b.getAppealText());
-            block.setTextBefore(b.isTextBefore());
-            block.setHidePerformers(b.isHidePerformers());
-            block.setToCopy(b.isToCopy());
-            block.setToFamiliarization(b.isToFamiliarization());
-
-            if (b.getPerformers() != null && b.getPerformers().size() >= 1) {
-
-              for (RPerformer _performer : b.getPerformers()) {
-
-                RPerformerEntity p = (RPerformerEntity) _performer;
-                Performer performer = new Performer();
-
-                performer.setNumber(p.getNumber());
-                performer.setPerformerId(p.getPerformerId());
-                performer.setPerformerType(p.getPerformerType());
-                performer.setPerformerText(p.getPerformerText());
-                performer.setPerformerGender(p.getPerformerGender());
-                performer.setOrganizationText(p.getOrganizationText());
-                performer.setIsOriginal(p.isIsOriginal());
-                performer.setIsResponsible(p.isIsResponsible());
-                performer.setOrganization(p.isIsOrganization());
-
-                block.getPerformers().add(performer);
-              }
+  private void loadDecision () {
+    Integer decision_id = settings.getDecisionActiveId();
+    rDecisionEntity = dataStore
+      .select(RDecisionEntity.class)
+      .where(RDecisionEntity.ID.eq(decision_id))
+      .get().firstOrNull();
+    if (rDecisionEntity != null) {
+      raw_decision = new Decision();
+      raw_decision.setId(rDecisionEntity.getUid());
+      raw_decision.setLetterhead(rDecisionEntity.getLetterhead());
+      raw_decision.setApproved(rDecisionEntity.isApproved());
+      raw_decision.setSigner(rDecisionEntity.getSigner());
+      raw_decision.setSignerId(rDecisionEntity.getSignerId());
+      raw_decision.setAssistantId(rDecisionEntity.getAssistantId());
+      raw_decision.setSignerBlankText(rDecisionEntity.getSignerBlankText());
+      raw_decision.setSignerIsManager(rDecisionEntity.isSignerIsManager());
+      raw_decision.setSignerPositionS(rDecisionEntity.getSignerPositionS());
+      raw_decision.setComment(rDecisionEntity.getComment());
+      raw_decision.setDate(rDecisionEntity.getDate());
+      raw_decision.setUrgencyText(rDecisionEntity.getUrgencyText());
+      raw_decision.setShowPosition(rDecisionEntity.isShowPosition());
+      raw_decision.setLetterheadFontSize(rDecisionEntity.getLetterheadFontSize());
+      raw_decision.setPerformersFontSize(rDecisionEntity.getPerformerFontSize());
+      if (rDecisionEntity.getBlocks() != null && rDecisionEntity.getBlocks().size() >= 1) {
+        ArrayList<Block> list = new ArrayList<>();
+        for (RBlock _block : rDecisionEntity.getBlocks()) {
+          RBlockEntity b = (RBlockEntity) _block;
+          Block block = new Block();
+          block.setNumber(b.getNumber());
+          block.setFontSize(b.getFontSize());
+          block.setText(b.getText());
+          block.setAppealText(b.getAppealText());
+          block.setTextBefore(b.isTextBefore());
+          block.setHidePerformers(b.isHidePerformers());
+          block.setToCopy(b.isToCopy());
+          block.setToFamiliarization(b.isToFamiliarization());
+          if (b.getPerformers() != null && b.getPerformers().size() >= 1) {
+            for (RPerformer _performer : b.getPerformers()) {
+              RPerformerEntity p = (RPerformerEntity) _performer;
+              Performer performer = new Performer();
+              performer.setNumber(p.getNumber());
+              performer.setPerformerId(p.getPerformerId());
+              performer.setPerformerType(p.getPerformerType());
+              performer.setPerformerText(p.getPerformerText());
+              performer.setPerformerGender(p.getPerformerGender());
+              performer.setOrganizationText(p.getOrganizationText());
+              performer.setIsOriginal(p.isIsOriginal());
+              performer.setIsResponsible(p.isIsResponsible());
+              performer.setOrganization(p.isIsOrganization());
+              block.getPerformers().add(performer);
             }
-
-            Collections.sort(block.getPerformers(), (o1, o2) -> o1.getNumber().compareTo(o2.getNumber()));
-            list.add(block);
           }
-
-          Collections.sort(list, (o1, o2) -> o1.getNumber().compareTo(o2.getNumber()));
-          raw_decision.setBlocks(list);
+          Collections.sort(block.getPerformers(), (o1, o2) -> o1.getNumber().compareTo(o2.getNumber()));
+          list.add(block);
         }
-      } else {
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-        Calendar cal = Calendar.getInstance();
-        String date = dateFormat.format(cal.getTime());
-
-        String signerName = getCurrentUserName();
-        String signerOrganization = getCurrentUserOrganization();
-        String signerPosition = getCurrentUserPosition();
-
-        raw_decision = new Decision();
-        raw_decision.setLetterhead("Бланк резолюции");
-        raw_decision.setShowPosition(true);
-        raw_decision.setSignerId(getCurrentUserId());
-        raw_decision.setSigner(makeSignerWithOrganizationText(signerName, signerOrganization, signerPosition));
-        raw_decision.setSignerBlankText(signerName);
-        raw_decision.setSignerPositionS(signerPosition);
-        raw_decision.setUrgencyText("");
-        raw_decision.setId(null);
-        raw_decision.setDate(date);
-        raw_decision.setBlocks(new ArrayList<>());
-
+        Collections.sort(list, (o1, o2) -> o1.getNumber().compareTo(o2.getNumber()));
+        raw_decision.setBlocks(list);
       }
-
+    } else {
+      SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+      Calendar cal = Calendar.getInstance();
+      String date = dateFormat.format(cal.getTime());
+      String signerName = getCurrentUserName();
+      String signerOrganization = getCurrentUserOrganization();
+      String signerPosition = getCurrentUserPosition();
+      raw_decision = new Decision();
+      raw_decision.setLetterhead("Бланк резолюции");
+      raw_decision.setShowPosition(true);
+      raw_decision.setSignerId(getCurrentUserId());
+      raw_decision.setSigner(makeSignerWithOrganizationText(signerName, signerOrganization, signerPosition));
+      raw_decision.setSignerBlankText(signerName);
+      raw_decision.setSignerPositionS(signerPosition);
+      raw_decision.setUrgencyText("");
+      raw_decision.setId(null);
+      raw_decision.setDate(date);
+      raw_decision.setBlocks(new ArrayList<>());
     }
+  }
+
 
     @Override
     public void onFragmentInteraction (Uri uri){
@@ -921,7 +887,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
           CommandParams params = new CommandParams();
           params.setDecisionId(rDecisionEntity.getUid());
 //        params.setDecision( rDecisionEntity );
-          params.setDecisionModel(DecisionConverter.formatDecision(rDecisionEntity));
+          params.setDecisionModel(mappers.getDecisionMapper().toFormattedModel(rDecisionEntity));
 
           operationManager.execute(operation, params);
         })
@@ -947,7 +913,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
           CommandParams params = new CommandParams();
           params.setDecisionId(rDecisionEntity.getUid());
 //        params.setDecision( rDecisionEntity );
-          params.setDecisionModel(DecisionConverter.formatDecision(rDecisionEntity));
+          params.setDecisionModel(mappers.getDecisionMapper().toFormattedModel(rDecisionEntity));
 
           if (settings.isDecisionWithAssignment()) {
             Timber.tag(TAG).w("ASSIGNMENT: %s", settings.isDecisionWithAssignment());

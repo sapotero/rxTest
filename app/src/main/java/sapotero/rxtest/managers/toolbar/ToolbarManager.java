@@ -280,7 +280,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
               showToControlDialog();
 
             } else {
-              operation = CommandFactory.Operation.CHECK_FOR_CONTROL;
+              operation = !isFromControl() ? CommandFactory.Operation.CHECK_CONTROL_LABEL : CommandFactory.Operation.UNCHECK_CONTROL_LABEL;
               params.setDocument( settings.getUid() );
             }
             break;
@@ -450,10 +450,12 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
           case R.id.menu_info_shared_to_favorites:
             item.setTitle(context.getString(
               isFromFavorites() ? R.string.remove_from_favorites : R.string.to_favorites));
+            item.setIcon( ContextCompat.getDrawable(context, isFromFavorites() ? R.drawable.to_favorites : R.drawable.star) );
             break;
           case R.id.menu_info_shared_to_control:
             item.setTitle(context.getString(
               isFromControl() ? R.string.remove_from_control : R.string.to_control));
+            item.setIcon( ContextCompat.getDrawable(context, isFromControl() ? R.drawable.to_controle_on : R.drawable.to_controle_off ) );
             break;
           default:
             break;
@@ -641,13 +643,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     toolbar.setNavigationOnClickListener(v ->{
       Activity activity = (Activity) context;
       activity.finish();
-//      activity.overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
-//      activity.overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
       }
     );
-
-//    status  = Fields.Status.findStatus(STATUS_CODE.get());
-//    journal = Fields.getJournalByUid( UID.get() );
 
 
     Timber.tag("MENU").e( "STATUS CODE: %s", settings.getStatusCode() );
@@ -678,6 +675,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     if (isFromControl()){
       isControl = true;
     }
+
+    Boolean finalIsControl = isControl;
     new MaterialDialog.Builder( context )
       .title(   isControl ? R.string.dialog_to_control_negative      : R.string.dialog_to_control_positive      )
       .content( isControl ? R.string.dialog_to_control_body_negative : R.string.dialog_to_control_body_positive )
@@ -685,7 +684,10 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       .positiveText(R.string.approve)
       .negativeText(R.string.cancel)
       .onPositive((dialog1, which) -> {
-        CommandFactory.Operation operation = CommandFactory.Operation.CHECK_FOR_CONTROL;
+
+        CommandFactory.Operation operation;
+
+        operation = !finalIsControl ? CommandFactory.Operation.CHECK_CONTROL_LABEL : CommandFactory.Operation.UNCHECK_CONTROL_LABEL;
 
         CommandParams params = new CommandParams();
         params.setUser( settings.getLogin() );
@@ -847,12 +849,16 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   /* OperationManager.Callback */
   @Override
   public void onExecuteSuccess(String command) {
-    Timber.tag(TAG).w("update %s", command );
+    Timber.tag(TAG).w("updateFromJob %s", command );
 
     switch (command){
       case "check_for_control":
         EventBus.getDefault().post( new ShowSnackEvent("Отметки для постановки на контроль успешно обновлены.") );
         break;
+      case "uncheck_control_label":
+        EventBus.getDefault().post( new ShowSnackEvent("Отметки для постановки на контроль успешно обновлены.") );
+        break;
+
       case "add_to_folder":
         EventBus.getDefault().post( new ShowSnackEvent("Добавление в избранное.") );
         break;
@@ -862,7 +868,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       default:
 
         toolbar.inflateMenu(R.menu.info_menu);
-//        EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.get() ) );
+//        EventBus.getDefault().postSticky( new RemoveDocumentFromAdapterEvent( UID.startTransactionFor() ) );
 //        EventBus.getDefault().post( new ShowNextDocumentEvent() );
         break;
     }
