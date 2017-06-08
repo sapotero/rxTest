@@ -385,8 +385,8 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
 
   private class DialogListAdapter extends RecyclerView.Adapter<DialogListHolder> {
 
-    List<DialogListItem> itemList;
-    Context context;
+    private List<DialogListItem> itemList;
+    private Context context;
 
     public DialogListAdapter(Context context, List<DialogListItem> itemList) {
       this.context = context;
