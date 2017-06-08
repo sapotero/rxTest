@@ -23,6 +23,7 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.adapters.utils.OnSwipeTouchListener;
+import timber.log.Timber;
 
 public class InfoCardFieldsFragment extends Fragment {
 
@@ -116,7 +117,7 @@ public class InfoCardFieldsFragment extends Fragment {
         } else {
           wrapper_field_external_number.setVisibility( View.GONE );
         }
-      });
+      }, Timber::e);
   }
  @Override
   public void onAttach(Context context) {

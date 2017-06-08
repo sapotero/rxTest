@@ -243,7 +243,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe( user -> {
            adapter.add( mappers.getAssistantMapper().toPrimaryConsiderationPeople(user) );
-        });
+        }, Timber::e);
     }
 
     if (withPrimaryConsideration){
@@ -258,7 +258,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe( user -> {
            adapter.add( mappers.getPrimaryConsiderationMapper().toPrimaryConsiderationPeople(user) );
-        });
+        }, Timber::e);
     } else {
 
       WhereAndOr<RxResult<RFavoriteUserEntity>> query =
@@ -278,7 +278,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe( user -> {
            adapter.add( mappers.getFavoriteUserMapper().toPrimaryConsiderationPeople(user) );
-        });
+        }, Timber::e);
     }
 
 

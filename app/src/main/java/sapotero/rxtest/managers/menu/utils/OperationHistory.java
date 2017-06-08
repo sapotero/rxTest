@@ -45,7 +45,7 @@ public class OperationHistory {
 
         }
 
-      });
+      }, Timber::e);
   }
 
   public Boolean getConnected() {
@@ -58,7 +58,7 @@ public class OperationHistory {
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(isConnectedToInternet -> {
         this.isConnectedToInternet = isConnectedToInternet;
-      });
+      }, Timber::e);
 
   }
 

@@ -63,7 +63,7 @@ public class CreateFoldersJob extends BaseJob {
       .subscribe(u -> {
         Timber.tag(TAG).v("addByOne " + u.getTitle() );
         EventBus.getDefault().post( new FolderCreatedEvent(u.getType()) );
-      });
+      }, Timber::e);
   }
 
 

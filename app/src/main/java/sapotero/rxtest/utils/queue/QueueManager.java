@@ -47,7 +47,7 @@ public class QueueManager {
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(isConnectedToInternet -> {
         this.isConnectedToInternet = isConnectedToInternet;
-      });
+      }, Timber::e);
   }
 
   public Boolean getConnected() {
