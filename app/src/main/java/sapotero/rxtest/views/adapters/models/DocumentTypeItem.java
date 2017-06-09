@@ -6,7 +6,6 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -134,7 +133,6 @@ public class DocumentTypeItem {
       .filter( filter::byStatus)
       .filter( filter::isProcessed )
       .map( InMemoryDocument::getUid )
-      .throttleLast(300, TimeUnit.MILLISECONDS)
       .toList()
       .subscribeOn( Schedulers.computation() )
       .observeOn( AndroidSchedulers.mainThread() )

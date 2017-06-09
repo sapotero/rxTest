@@ -29,6 +29,7 @@ import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
 import sapotero.rxtest.retrofit.models.wrapper.DecisionWrapper;
 import sapotero.rxtest.utils.memory.fields.FieldType;
+import sapotero.rxtest.utils.memory.fields.InMemoryState;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
@@ -78,6 +79,7 @@ public class RejectDecision extends AbstractCommand {
     store.process(
       store.startTransactionFor( params.getDocument() )
         .setLabel(LabelType.SYNC)
+        .setState(InMemoryState.LOADING)
     );
 
   }

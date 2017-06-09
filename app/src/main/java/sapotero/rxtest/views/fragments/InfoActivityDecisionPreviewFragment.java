@@ -127,9 +127,6 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   @BindView(R.id.activity_info_decision_preview_temporary) TextView temporary;
   @BindView(R.id.activity_info_decision_preview_count) TextView decision_count;
 
-
-  ;
-
   private DecisionSpinnerAdapter decision_spinner_adapter;
   private Preview preview;
 
