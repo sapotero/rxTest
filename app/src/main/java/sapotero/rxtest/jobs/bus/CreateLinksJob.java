@@ -83,11 +83,26 @@ public class CreateLinksJob extends DocumentJob {
   private void saveFirstLink(String firstLinkRegNum) {
     if ( saveFirstLink && exist( parentUid ) && exist( firstLinkRegNum ) ) {
       Timber.tag("FirstLink").d("Saving regNum %s of doc %s as first link of doc %s", firstLinkRegNum, linkUid, parentUid);
+
       dataStore
         .update(RDocumentEntity.class)
         .set(RDocumentEntity.FIRST_LINK, firstLinkRegNum)
         .where(RDecisionEntity.UID.eq(parentUid))
         .get().value();
+
+      updateParentDocInMemory();
+    }
+  }
+
+  private void updateParentDocInMemory() {
+    RDocumentEntity parentDoc =
+      dataStore
+        .select(RDocumentEntity.class)
+        .where(RDecisionEntity.UID.eq(parentUid))
+        .get().firstOrNull();
+
+    if (parentDoc != null) {
+      store.process( parentDoc, parentDoc.getDocumentType(), parentDoc.getFilter() );
     }
   }
 
