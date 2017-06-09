@@ -142,20 +142,6 @@ public class UpdateDocumentJob extends DocumentJob {
           documentExisting.setProcessed( true );
         }
 
-//        if ( !isFromProcessedFolder ) {
-//          if ( filter != null && index != null) {
-//            if ( !Objects.equals(documentExisting.getFilter(), filter) || !Objects.equals(documentExisting.getDocumentType(), index) ) {
-//              // если прилетело обновление и документ не из папки обработанных и изменился фильтр или индекс - уберем из обработанных
-//              documentExisting.setProcessed( false );
-//            }
-//          }
-//        }
-
-//        if (  (!isFromProcessedFolder && !(filter==null && index==null) ) || !Objects.equals(documentExisting.getFilter(), filter) || !Objects.equals(documentExisting.getDocumentType(), index)) {
-//          // если прилетело обновление и документ не из папки обработанных - уберем из обработанных
-//          documentExisting.setProcessed( false );
-//        }
-
         documentExisting.setFromLinks( false );
         documentExisting.setChanged( false );
 
