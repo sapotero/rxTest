@@ -9,11 +9,14 @@ import com.birbit.android.jobqueue.RetryConstraint;
 
 import org.greenrobot.eventbus.EventBus;
 
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.mapper.DocumentMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
+import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
 import timber.log.Timber;
 
@@ -44,39 +47,33 @@ public class CreateLinksJob extends DocumentJob {
 
   @Override
   public void onRun() throws Throwable {
-    if ( isExist() ) {
-      setFromLinks();
-      saveFirstLink( getRegNumFromExistingDoc() );
-      EventBus.getDefault().post( new StepperLoadDocumentEvent(linkUid) );
-    } else {
-      loadDocument(linkUid, TAG);
-    }
-  }
-
-  private boolean isExist() {
-    return dataStore
-      .count(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq(linkUid))
-      .get().value() > 0;
-  }
-
-  private void setFromLinks() {
-    dataStore
-      .update(RDocumentEntity.class)
-      .set(RDocumentEntity.FROM_LINKS, true)
-      .where(RDecisionEntity.UID.eq(linkUid))
-      .get().value();
-  }
-
-  // Get registration number from existing document with linkUid
-  private String getRegNumFromExistingDoc() {
-    RDocumentEntity existingDoc =
+    RDocumentEntity existingLink =
       dataStore
         .select(RDocumentEntity.class)
         .where(RDecisionEntity.UID.eq(linkUid))
         .get().firstOrNull();
 
-    return existingDoc == null ? null : existingDoc.getRegistrationNumber();
+    if ( exist( existingLink ) ) {
+      // Linked document exists, update it with fromLinks = true
+      existingLink.setFromLinks( true );
+      dataStore
+        .update( existingLink )
+        .subscribeOn( Schedulers.io() )
+        .observeOn( AndroidSchedulers.mainThread() )
+        .subscribe(
+          result -> Timber.tag(TAG).d("Set existing doc %s as link", result.getUid()),
+          error -> Timber.tag(TAG).e(error)
+        );
+
+      // Set link's reg number as first link in parent doc
+      saveFirstLink( existingLink.getRegistrationNumber() );
+
+      EventBus.getDefault().post( new StepperLoadDocumentEvent(linkUid) );
+
+    } else {
+      // Linked document not exists, load from API
+      loadDocument(linkUid, TAG);
+    }
   }
 
   // Save registration number as first link in the parent document
@@ -84,25 +81,28 @@ public class CreateLinksJob extends DocumentJob {
     if ( saveFirstLink && exist( parentUid ) && exist( firstLinkRegNum ) ) {
       Timber.tag("FirstLink").d("Saving regNum %s of doc %s as first link of doc %s", firstLinkRegNum, linkUid, parentUid);
 
-      dataStore
-        .update(RDocumentEntity.class)
-        .set(RDocumentEntity.FIRST_LINK, firstLinkRegNum)
-        .where(RDecisionEntity.UID.eq(parentUid))
-        .get().value();
+      RDocumentEntity parentDoc =
+        dataStore
+          .select(RDocumentEntity.class)
+          .where(RDecisionEntity.UID.eq(parentUid))
+          .get().firstOrNull();
 
-      updateParentDocInMemory();
-    }
-  }
+      if ( exist( parentDoc ) ) {
+        parentDoc.setFirstLink( firstLinkRegNum );
 
-  private void updateParentDocInMemory() {
-    RDocumentEntity parentDoc =
-      dataStore
-        .select(RDocumentEntity.class)
-        .where(RDecisionEntity.UID.eq(parentUid))
-        .get().firstOrNull();
-
-    if (parentDoc != null) {
-      store.process( parentDoc, parentDoc.getDocumentType(), parentDoc.getFilter() );
+        dataStore
+          .update( parentDoc )
+          .subscribeOn( Schedulers.io() )
+          .observeOn( AndroidSchedulers.mainThread() )
+          .subscribe(
+            result -> {
+              Timber.tag(TAG).d("Set first link %s in doc %s", firstLinkRegNum, result.getUid());
+              // Update parent doc in memory
+              store.process( result, result.getDocumentType(), result.getFilter() );
+            },
+            error -> Timber.tag(TAG).e(error)
+          );
+      }
     }
   }
 
