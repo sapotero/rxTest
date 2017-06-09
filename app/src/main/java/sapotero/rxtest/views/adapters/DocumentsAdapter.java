@@ -151,36 +151,9 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
       if( Arrays.asList( Fields.Status.SIGNING.getValue(), Fields.Status.APPROVAL.getValue() ).contains(doc.getFilter()) ){
 
-        if (!Objects.equals(item.getFirstLink(), "")){
+        if (item.getFirstLink() != null && !Objects.equals(item.getFirstLink(), "")){
           viewHolder.date.setText( item.getTitle() + " на " + item.getFirstLink() );
         }
-
-        // рефактор апи!
-//        Timber.tag("Status LINKS").e("size: %s", item.getLinks().size() );
-//
-//        if ( item.getLinks().size() >= 1){
-//
-//          try {
-//            Set<RLinks> links = item.getLinks();
-//
-//            ArrayList<RLinks> arrayList = new ArrayList<RLinks>();
-//            for (RLinks str : links) {
-//              arrayList.add(str);
-//            }
-//
-//            RLinksEntity _link = (RLinksEntity) arrayList.startTransactionFor(0);
-//            Timber.tag("Status LINKS").e("size > 0 | first: %s", _link.getUid() );
-//
-//            RDocumentEntity doc = dataStore
-//              .select(RDocumentEntity.class)
-//              .where(RDocumentEntity.UID.eq( _link.getUid() ))
-//              .startTransactionFor().first();
-//
-//            viewHolder.date.setText( item.getTitle() + " на " + doc.getRegistrationNumber() );
-//          } catch (NoSuchElementException e) {
-//            e.printStackTrace();
-//          }
-//        }
 
       }
 
