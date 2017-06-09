@@ -78,7 +78,7 @@ public class SaveDecision extends AbstractCommand {
 //    EventBus.getDefault().post( new ShowNextDocumentEvent());
     update();
 
-    queueManager.add(this);
+//    queueManager.add(this);
 
     store.process(
       store.startTransactionFor( params.getDocument() )
