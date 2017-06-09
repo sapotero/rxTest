@@ -139,7 +139,7 @@ abstract class DocumentJob extends BaseJob {
   private void loadLinkedData(DocumentInfo documentReceived, RDocumentEntity documentSaved, boolean isLink) {
     if ( !isLink ) {
       loadImages( documentSaved.getImages() );
-      loadLinks( documentReceived.getLinks() );
+      loadLinks( documentReceived.getLinks(), documentReceived.getUid() );
       loadCards( documentReceived.getRoute() );
     }
   }
@@ -158,10 +158,13 @@ abstract class DocumentJob extends BaseJob {
     }
   }
 
-  private void loadLinks(List<String> links) {
-    if ( notEmpty( links) ) {
+  private void loadLinks(List<String> links, String parentUid) {
+    if ( notEmpty( links ) ) {
+      int i = 0;
       for (String link : links) {
-        loadLinkedDoc( link );
+        // For the first link in the list save link's registration number in the first link field
+        loadLinkedDoc( link, parentUid, i == 0 );
+        i++;
       }
     }
   }
@@ -170,7 +173,7 @@ abstract class DocumentJob extends BaseJob {
     if ( exist( route ) ) {
       for (Step step : nullGuard( route.getSteps() )) {
         for (Card card : nullGuard( step.getCards() )) {
-          loadLinkedDoc( card.getUid() );
+          loadLinkedDoc( card.getUid(), null, false );
         }
       }
     }
@@ -181,10 +184,10 @@ abstract class DocumentJob extends BaseJob {
     return list != null ? list : Collections.EMPTY_LIST;
   }
 
-  private void loadLinkedDoc(String uid) {
-    if ( exist( uid ) ) {
+  private void loadLinkedDoc(String linkUid, String parentUid, boolean saveFirstLink) {
+    if ( exist( linkUid ) ) {
       addPrefJobCount(1);
-      jobManager.addJobInBackground( new CreateLinksJob( uid ) );
+      jobManager.addJobInBackground( new CreateLinksJob( linkUid, parentUid, saveFirstLink ) );
     }
   }
 }

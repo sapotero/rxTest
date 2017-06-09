@@ -104,6 +104,8 @@ public abstract class RDocument implements Persistable {
   @Column(value="false")
   Boolean red;
 
+  // Registration number of the first link in the list of links
+  String firstLink;
 
   @OneToMany(mappedBy = "document", cascade = {CascadeAction.DELETE, CascadeAction.SAVE})
   Set<RDecision> decisions;

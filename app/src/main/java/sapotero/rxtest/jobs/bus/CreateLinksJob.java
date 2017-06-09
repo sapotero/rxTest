@@ -15,6 +15,7 @@ import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
+import timber.log.Timber;
 
 // Creates links (no index, status: link)
 public class CreateLinksJob extends DocumentJob {
@@ -23,12 +24,17 @@ public class CreateLinksJob extends DocumentJob {
 
   private String TAG = this.getClass().getSimpleName();
 
-  private String uid;
+  private String linkUid;
+  private String parentUid;
+  private boolean saveFirstLink;
+
   private Fields.Status filter;
 
-  public CreateLinksJob(String uid) {
+  public CreateLinksJob(String linkUid, String parentUid, boolean saveFirstLink) {
     super( new Params(PRIORITY).requireNetwork().persist() );
-    this.uid = uid;
+    this.linkUid = linkUid;
+    this.parentUid = parentUid;
+    this.saveFirstLink = saveFirstLink;
     this.filter = Fields.Status.LINK;
   }
 
@@ -40,16 +46,17 @@ public class CreateLinksJob extends DocumentJob {
   public void onRun() throws Throwable {
     if ( isExist() ) {
       setFromLinks();
-      EventBus.getDefault().post( new StepperLoadDocumentEvent( uid ) );
+      saveFirstLink( getRegNumFromExistingDoc() );
+      EventBus.getDefault().post( new StepperLoadDocumentEvent(linkUid) );
     } else {
-      loadDocument(uid, TAG);
+      loadDocument(linkUid, TAG);
     }
   }
 
   private boolean isExist() {
     return dataStore
       .count(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq(uid))
+      .where(RDocumentEntity.UID.eq(linkUid))
       .get().value() > 0;
   }
 
@@ -57,8 +64,31 @@ public class CreateLinksJob extends DocumentJob {
     dataStore
       .update(RDocumentEntity.class)
       .set(RDocumentEntity.FROM_LINKS, true)
-      .where(RDecisionEntity.UID.eq(uid))
+      .where(RDecisionEntity.UID.eq(linkUid))
       .get().value();
+  }
+
+  // Get registration number from existing document with linkUid
+  private String getRegNumFromExistingDoc() {
+    RDocumentEntity existingDoc =
+      dataStore
+        .select(RDocumentEntity.class)
+        .where(RDecisionEntity.UID.eq(linkUid))
+        .get().firstOrNull();
+
+    return existingDoc == null ? null : existingDoc.getRegistrationNumber();
+  }
+
+  // Save registration number as first link in the parent document
+  private void saveFirstLink(String firstLinkRegNum) {
+    if ( saveFirstLink && exist( parentUid ) && exist( firstLinkRegNum ) ) {
+      Timber.tag("FirstLink").d("Saving regNum %s of doc %s as first link of doc %s", firstLinkRegNum, linkUid, parentUid);
+      dataStore
+        .update(RDocumentEntity.class)
+        .set(RDocumentEntity.FIRST_LINK, firstLinkRegNum)
+        .where(RDecisionEntity.UID.eq(parentUid))
+        .get().value();
+    }
   }
 
   @Override
@@ -74,6 +104,8 @@ public class CreateLinksJob extends DocumentJob {
     documentMapper.setShared(doc, false);
     doc.setFolder("");
     doc.setFromLinks(true);
+
+    saveFirstLink(document.getRegistrationNumber());
 
     saveDocument(document, doc, true, TAG);
   }
