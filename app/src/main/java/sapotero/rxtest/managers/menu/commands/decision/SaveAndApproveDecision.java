@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.Collections;
 import java.util.Objects;
 
 import io.requery.query.Tuple;
@@ -17,8 +18,6 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
-import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
-import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
@@ -28,6 +27,8 @@ import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
 import sapotero.rxtest.services.MainService;
+import sapotero.rxtest.utils.memory.fields.FieldType;
+import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
 public class SaveAndApproveDecision extends AbstractCommand {
@@ -67,6 +68,13 @@ public class SaveAndApproveDecision extends AbstractCommand {
 
     queueManager.add(this);
     updateLocal();
+
+
+    store.process(
+      store.startTransactionFor(  params.getDocument() )
+        .setLabel(LabelType.SYNC)
+    );
+
   }
 
   @Override
@@ -91,7 +99,7 @@ public class SaveAndApproveDecision extends AbstractCommand {
     Integer count = dataStore
       .update(RDecisionEntity.class)
       .set(RDecisionEntity.TEMPORARY, true)
-      .where(RDecisionEntity.UID.eq(params.getDecisionModel().getId()))
+      .where(RDecisionEntity.UID.eq( params.getDecisionModel().getId() ))
       .get().value();
     Timber.tag(TAG).i( "updateLocal: %s", count );
 
@@ -103,7 +111,7 @@ public class SaveAndApproveDecision extends AbstractCommand {
     dataStore
       .update(RDocumentEntity.class)
       .set(RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq( params.getDecisionModel().getDocumentUid() ))
+      .where(RDocumentEntity.UID.eq( params.getDocument() ))
       .get()
       .value();
 
@@ -118,11 +126,18 @@ public class SaveAndApproveDecision extends AbstractCommand {
         .update(RDocumentEntity.class)
         .set(RDocumentEntity.PROCESSED, true)
         .set(RDocumentEntity.MD5, "")
-        .where(RDocumentEntity.UID.eq( params.getDecisionModel().getDocumentUid() ))
+        .where(RDocumentEntity.UID.eq(  params.getDocument() ))
         .get()
         .value();
 
-      Timber.tag(TAG).e("put %s", dec);
+
+
+      store.process(
+        store.startTransactionFor(  params.getDocument() )
+          .setLabel(LabelType.SYNC)
+          .setField(FieldType.PROCESSED, true)
+      );
+
       EventBus.getDefault().post( new ShowNextDocumentEvent());
     }
 
@@ -192,30 +207,39 @@ public class SaveAndApproveDecision extends AbstractCommand {
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         data -> {
-
           if (data.getErrors() !=null && data.getErrors().size() > 0){
             queueManager.setExecutedWithError(this, data.getErrors());
-            EventBus.getDefault().post( new ForceUpdateDocumentEvent( data.getDocumentUid() ));
+
+            store.process(
+              store.startTransactionFor(  params.getDocument() )
+                .removeLabel(LabelType.SYNC)
+            );
+
           } else {
-
-            if (callback != null ){
-              callback.onCommandExecuteSuccess( getType() );
-            }
-            EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
-
+            store.process(
+              store.startTransactionFor(  params.getDocument() )
+                .removeLabel(LabelType.SYNC)
+            );
             queueManager.setExecutedRemote(this);
-          }
 
-//          EventBus.getDefault().post( new UpdateCurrentDocumentEvent( data.getDocumentUid() ));
+            checkCreatorAndSignerIsCurrentUser(data, TAG);
+          }
 
         },
         error -> {
-          Timber.tag(TAG).i("error: %s", error);
           if (callback != null){
             callback.onCommandExecuteError(getType());
           }
-//          queueManager.setExecutedWithError(this, Collections.singletonList("http_error"));
-          EventBus.getDefault().post( new ForceUpdateDocumentEvent( params.getDecisionModel().getDocumentUid() ));
+
+          if ( settings.isOnline() ){
+            store.process(
+              store.startTransactionFor(  params.getDocument() )
+                .removeLabel(LabelType.SYNC)
+                .setField(FieldType.PROCESSED, false)
+            );
+            queueManager.setExecutedWithError(this, Collections.singletonList(error.getLocalizedMessage()));
+
+          }
         }
       );
   }

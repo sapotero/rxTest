@@ -3,6 +3,7 @@ package sapotero.rxtest.managers.menu.commands.primary_consideration;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Objects;
 
 import retrofit2.Retrofit;
@@ -18,6 +19,7 @@ import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
+import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
 public class PrimaryConsideration extends AbstractCommand {
@@ -53,6 +55,11 @@ public class PrimaryConsideration extends AbstractCommand {
       .value();
 
     queueManager.add(this);
+
+    store.process(
+      store.startTransactionFor( params.getDocument() )
+        .setLabel(LabelType.SYNC)
+    );
 
   }
 
@@ -144,10 +151,25 @@ public class PrimaryConsideration extends AbstractCommand {
           Timber.tag(TAG).i("type: %s", data.getType());
 
          queueManager.setExecutedRemote(this);
+
+
+          store.process(
+            store.startTransactionFor( params.getDocument() )
+              .removeLabel(LabelType.SYNC)
+          );
         },
         error -> {
           if ( callback != null ){
             callback.onCommandExecuteError(getType());
+          }
+
+          if ( settings.isOnline() ){
+            store.process(
+              store.startTransactionFor( params.getDocument() )
+                .removeLabel(LabelType.SYNC)
+            );
+            queueManager.setExecutedWithError(this, Collections.singletonList(error.getLocalizedMessage()));
+
           }
         }
       );

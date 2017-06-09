@@ -72,6 +72,7 @@ import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RPerformer;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.events.decision.ApproveDecisionEvent;
+import sapotero.rxtest.events.decision.CheckActiveDecisionEvent;
 import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
 import sapotero.rxtest.events.decision.RejectDecisionEvent;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
@@ -126,9 +127,6 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   @BindView(R.id.activity_info_decision_preview_acition_text)  TextView action_text;
   @BindView(R.id.activity_info_decision_preview_temporary) TextView temporary;
   @BindView(R.id.activity_info_decision_preview_count) TextView decision_count;
-
-
-  ;
 
   private DecisionSpinnerAdapter decision_spinner_adapter;
   private Preview preview;
@@ -491,10 +489,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
     approved_text.setVisibility(!approved ? View.GONE : View.VISIBLE);
 
-    if ( !decision_spinner_adapter.hasActiveDecision() ){
-      Timber.tag(TAG).e("NO ACTIVE DECISION");
-      EventBus.getDefault().post( new HasNoActiveDecisionConstructor() );
-    }
+    checkActiveDecision();
 
 
     //FIX не даем выполнять операции для связанных документов
@@ -543,6 +538,13 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     //  Отображать информацию от кого поступила резолюция
     updateActionText(true);
 
+  }
+
+  private void checkActiveDecision() {
+    if ( !decision_spinner_adapter.hasActiveDecision() ){
+      Timber.tag(TAG).e("NO ACTIVE DECISION");
+      EventBus.getDefault().post( new HasNoActiveDecisionConstructor() );
+    }
   }
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13423
@@ -1402,6 +1404,11 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   public void onMessageEvent(InvalidateDecisionSpinnerEvent event) throws Exception {
     Timber.tag(TAG).w("InvalidateDecisionSpinnerEvent %s", event.uid);
     decision_spinner_adapter.invalidate(event.uid);
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(CheckActiveDecisionEvent event) throws Exception {
+    checkActiveDecision();
   }
 
 

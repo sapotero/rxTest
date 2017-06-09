@@ -19,7 +19,6 @@ import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
-import sapotero.rxtest.utils.memory.fields.FieldType;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
@@ -57,7 +56,6 @@ public class CheckControlLabel extends AbstractCommand {
       store.startTransactionFor(document_id)
       .setLabel(LabelType.SYNC)
       .setLabel(LabelType.CONTROL)
-      .setField(FieldType.PROCESSED, true)
     );
 
   }
@@ -146,7 +144,6 @@ public class CheckControlLabel extends AbstractCommand {
       store.startTransactionFor(document_id)
         .removeLabel(LabelType.SYNC)
         .removeLabel(LabelType.CONTROL)
-        .setField(FieldType.PROCESSED, false)
     );
 
   }

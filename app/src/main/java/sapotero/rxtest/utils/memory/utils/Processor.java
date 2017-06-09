@@ -19,9 +19,11 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.jobs.bus.CreateDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateProjectsJob;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
+import sapotero.rxtest.jobs.bus.UpsertDocumentJob;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.utils.memory.MemoryStore;
+import sapotero.rxtest.utils.memory.fields.FieldType;
 import sapotero.rxtest.utils.memory.fields.InMemoryState;
 import sapotero.rxtest.utils.memory.mappers.InMemoryDocumentMapper;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
@@ -38,7 +40,6 @@ public class Processor {
     DB,
     TRANSACTION,
     INTERSECT;
-
   }
 
   private final String TAG = this.getClass().getSimpleName();
@@ -139,23 +140,24 @@ public class Processor {
   private void validate(Document document){
     Timber.tag(TAG).e("->      : %s / %s@%5.10s  ", document.getUid(), filter, index );
 
-    HashMap<String, InMemoryDocument> documents = store.getDocuments();
+    upsert( document );
 
-    if ( documents.containsKey(document.getUid()) ){
-      InMemoryDocument doc = documents.get(document.getUid());
-
-      Timber.tag(TAG).e("filters : %s | %s", doc.getFilter(), filter);
-
-      // изменилось MD5
-      if ( Filter.isChanged( doc.getMd5(), document.getMd5() ) ){
-        Timber.tag(TAG).e("md5     : %s | %s", doc.getMd5(), document.getMd5());
-        updateJob( doc.getUid() );
-      }
-
-    } else {
-      Timber.tag(TAG).e("new: %s", document.getUid());
-      createJob(document.getUid());
-    }
+//    // new upsert job
+//    if ( store.getDocuments().keySet().contains( document.getUid() ) ){
+//      InMemoryDocument doc = store.getDocuments().get( document.getUid() );
+//
+//      Timber.tag(TAG).e("filters : %s | %s", doc.getFilter(), filter);
+//
+//      // изменилось MD5
+//      if ( Filter.isChanged( doc.getMd5(), document.getMd5() ) ){
+//        Timber.tag(TAG).e("md5     : %s | %s", doc.getMd5(), document.getMd5());
+//        updateJob( doc.getUid() );
+//      }
+//
+//    } else {
+//      Timber.tag(TAG).e("new: %s", document.getUid());
+//      createJob(document.getUid());
+//    }
 
   }
 
@@ -169,15 +171,16 @@ public class Processor {
 
     Observable<List<String>> imd = Observable
       .from( store.getDocuments().values() )
-      .filter(imdFilter::isProcessed)
       .filter(imdFilter::byType)
       .filter(imdFilter::byStatus)
       .map(InMemoryDocument::getUid)
       .toList();
 
-
     Observable
       .zip(imd, docs, (memory, api) -> {
+
+
+
         Timber.tag(TAG).e("memory: %s", memory.size());
         Timber.tag(TAG).e("api: %s", api.size());
 
@@ -193,6 +196,10 @@ public class Processor {
 
         for (String uid : remove) {
           updateAndSetProcessed( uid );
+        }
+
+        for ( String doc : api ) {
+          setAsUnprocessed( doc );
         }
 
         for ( Document doc : documents.values() ) {
@@ -215,13 +222,26 @@ public class Processor {
     return new ArrayList<>();
   }
 
+  private void setAsUnprocessed(String uid) {
+
+    if (store.getDocuments().containsKey(uid)){
+      store.process(
+        store.startTransactionFor(uid)
+          .setField(FieldType.PROCESSED, false)
+      );
+    }
+
+  }
+
   private ArrayList<ConditionBuilder> conditions() {
     ArrayList<ConditionBuilder> conditions = new ArrayList<>();
 
     if (filter != null) {
+      Timber.i("filter: %s", filter);
       conditions.add( new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq( filter )  ) );
     }
     if (index != null) {
+      Timber.i("index: %s", index);
       conditions.add( new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( index )  ) );
     }
 
@@ -246,6 +266,11 @@ public class Processor {
   private void updateAndSetProcessed(String uid) {
     settings.addJobCount(1);
     jobManager.addJobInBackground( new UpdateDocumentJob( uid, index, filter, true ) );
+  }
+
+  private void upsert(Document uid) {
+    settings.addJobCount(1);
+    jobManager.addJobInBackground( new UpsertDocumentJob( uid, index, filter) );
   }
 
 

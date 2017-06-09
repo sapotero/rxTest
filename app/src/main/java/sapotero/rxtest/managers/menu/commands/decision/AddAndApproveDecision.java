@@ -56,11 +56,11 @@ public class AddAndApproveDecision extends AbstractCommand {
   public void execute() {
 
     updateLocal();
-    queueManager.add(this);
     EventBus.getDefault().post( new ShowNextDocumentEvent() );
 
+    queueManager.add(this);
     store.process(
-      store.startTransactionFor( params.getDecisionModel().getDocumentUid() )
+      store.startTransactionFor( params.getDocument() )
         .setLabel(LabelType.SYNC)
     );
   }
@@ -73,19 +73,19 @@ public class AddAndApproveDecision extends AbstractCommand {
     Integer count = dataStore
       .update(RDecisionEntity.class)
       .set(RDecisionEntity.TEMPORARY, true)
-      .where(RDecisionEntity.UID.eq(getUid()))
+      .where(RDecisionEntity.UID.eq(getDecisionUid()))
       .get().value();
     Timber.tag(TAG).i( "updateLocal: %s", count );
 
     Tuple red = dataStore
       .select(RDecisionEntity.RED)
-      .where(RDecisionEntity.UID.eq(getUid()))
+      .where(RDecisionEntity.UID.eq(getDecisionUid()))
       .get().firstOrNull();
 
     dataStore
       .update(RDocumentEntity.class)
       .set(RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq( params.getDecisionModel().getDocumentUid() ))
+      .where(RDocumentEntity.UID.eq( params.getDocument() ))
       .get()
       .value();
 
@@ -95,7 +95,7 @@ public class AddAndApproveDecision extends AbstractCommand {
       .update(RDocumentEntity.class)
       .set(RDocumentEntity.CHANGED, true)
       .set(RDocumentEntity.MD5, "")
-      .where(RDocumentEntity.UID.eq( params.getDecisionModel().getDocumentUid() ))
+      .where(RDocumentEntity.UID.eq( params.getDocument() ))
       .get()
       .value();
 
@@ -111,23 +111,23 @@ public class AddAndApproveDecision extends AbstractCommand {
         .update(RDocumentEntity.class)
         .set(RDocumentEntity.PROCESSED, true)
         .set(RDocumentEntity.MD5, "")
-        .where(RDocumentEntity.UID.eq( params.getDecisionModel().getDocumentUid() ))
+        .where(RDocumentEntity.UID.eq( params.getDocument() ))
         .get()
         .value();
 
 
       store.process(
-        store.startTransactionFor( params.getDecisionModel().getDocumentUid() )
+        store.startTransactionFor( params.getDocument() )
           .setField(FieldType.PROCESSED, true)
       );
 
 
     }
 
-    EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent(getUid()));
+    EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent(getDecisionUid()));
   }
 
-  private String getUid() {
+  private String getDecisionUid() {
     return params.getDecisionModel().getId();
   }
 
@@ -206,13 +206,13 @@ public class AddAndApproveDecision extends AbstractCommand {
             queueManager.setExecutedWithError(this, data.getErrors());
 
             store.process(
-              store.startTransactionFor( params.getDecisionModel().getDocumentUid() )
+              store.startTransactionFor( params.getDocument() )
                 .removeLabel(LabelType.SYNC)
             );
 
           } else {
             store.process(
-              store.startTransactionFor(params.getDecisionModel().getDocumentUid())
+              store.startTransactionFor(params.getDocument())
                 .removeLabel(LabelType.SYNC)
             );
             queueManager.setExecutedRemote(this);
@@ -228,7 +228,7 @@ public class AddAndApproveDecision extends AbstractCommand {
 
           if ( settings.isOnline() ){
             store.process(
-              store.startTransactionFor( params.getDecisionModel().getDocumentUid() )
+              store.startTransactionFor( params.getDocument() )
                 .removeLabel(LabelType.SYNC)
                 .setField(FieldType.PROCESSED, false)
             );

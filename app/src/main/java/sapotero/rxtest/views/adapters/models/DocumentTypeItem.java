@@ -132,6 +132,8 @@ public class DocumentTypeItem {
       .filter( filter::byType)
       .filter( filter::byStatus)
       .filter( filter::isProcessed )
+      .filter( filter::isFavorites )
+      .filter( filter::isControl )
       .map( InMemoryDocument::getUid )
       .toList()
       .subscribeOn( Schedulers.computation() )

@@ -22,44 +22,50 @@ public class Transaction {
   }
 
   public Transaction setField(FieldType type, Boolean value) {
-    switch (type){
-      case PROCESSED:
-        document.getDocument().setProcessed(value);
-        document.setProcessed(value);
-        break;
+    if (document != null) {
+      switch (type){
+        case PROCESSED:
+          document.getDocument().setProcessed(value);
+          document.setProcessed(value);
+          break;
+      }
     }
 
     return this;
   }
 
   public Transaction setField(FieldType type, String value) {
-    switch (type){
-      case MD5:
-        document.getDocument().setMd5(value);
-        document.setMd5(value);
-        break;
-      case FILTER:
-        document.setFilter(value);
-        break;
+    if (document != null) {
+      switch (type){
+        case MD5:
+          document.getDocument().setMd5(value);
+          document.setMd5(value);
+          break;
+        case FILTER:
+          document.setFilter(value);
+          break;
 
+      }
     }
     return this;
   }
 
   private void changeLabel(LabelType type, Boolean value) {
-    switch (type){
-      case CONTROL:
-        document.getDocument().setControl(value);
-        break;
-      case LOCK:
-        document.getDocument().setFromProcessedFolder(value);
-        break;
-      case SYNC:
-        document.getDocument().setChanged(value);
-        break;
-      case FAVORITES:
-        document.getDocument().setFavorites(value);
-        break;
+    if (document != null) {
+      switch (type){
+        case CONTROL:
+          document.getDocument().setControl(value);
+          break;
+        case LOCK:
+          document.getDocument().setFromProcessedFolder(value);
+          break;
+        case SYNC:
+          document.getDocument().setChanged(value);
+          break;
+        case FAVORITES:
+          document.getDocument().setFavorites(value);
+          break;
+      }
     }
   }
 
@@ -74,27 +80,29 @@ public class Transaction {
   }
 
   public Transaction withFilter(String filter) {
-    if (filter != null) {
+    if (filter != null && document != null) {
       document.setFilter(filter);
     }
     return this;
   }
 
   public Transaction withIndex(String index) {
-    if (index != null) {
+    if (index != null && document != null) {
       document.setIndex(index);
     }
     return this;
   }
 
   public Transaction setState(InMemoryState state) {
-    switch ( state ){
-      case READY:
-        document.setAsReady();
-        break;
-      case LOADING:
-        document.setAsLoading();
-        break;
+    if (document != null) {
+      switch ( state ){
+        case READY:
+          document.setAsReady();
+          break;
+        case LOADING:
+          document.setAsLoading();
+          break;
+      }
     }
     return this;
   }

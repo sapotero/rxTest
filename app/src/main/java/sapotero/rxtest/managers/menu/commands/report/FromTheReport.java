@@ -144,7 +144,6 @@ public class FromTheReport extends AbstractCommand {
           store.process(
             store.startTransactionFor( getUid() )
               .removeLabel(LabelType.SYNC)
-              .setField(FieldType.MD5, "")
           );
         },
         error -> {

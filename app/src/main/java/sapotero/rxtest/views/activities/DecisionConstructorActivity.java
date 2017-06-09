@@ -183,7 +183,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
                 CommandParams params = new CommandParams();
                 params.setDecisionModel( decision );
-
+                params.setDocument( settings.getUid() );
                 decision.setDocumentUid( settings.getUid() );
 
                 if (rDecisionEntity != null) {
@@ -221,6 +221,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
                   params = new CommandParams();
                   params.setDecisionModel( decision );
+                  params.setDocument( settings.getUid() );
 
                   decision.setDocumentUid( settings.getUid() );
 
@@ -304,12 +305,14 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
             params = new CommandParams();
             params.setDecisionModel( decision );
+            params.setDocument( settings.getUid() );
 
             decision.setDocumentUid( settings.getUid() );
 
             if (rDecisionEntity != null) {
               params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
               params.setDecisionId( rDecisionEntity.getUid() );
+              params.setDocument( settings.getUid() );
             }
 
             operation = CommandFactory.Operation.CREATE_AND_APPROVE_DECISION;
@@ -318,11 +321,13 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
               operation = CommandFactory.Operation.SAVE_AND_APPROVE_DECISION;
               params.setDecisionId( rDecisionEntity.getUid() );
               params.setDecisionModel( manager.getDecision() );
+              params.setDocument( settings.getUid() );
             }
 
             if ( settings.isDecisionWithAssignment() ){
               Timber.tag(TAG).w("ASSIGNMENT: %s", settings.isDecisionWithAssignment() );
               params.setAssignment(true);
+              params.setDocument( settings.getUid() );
               decision.setAssignment(true);
             }
 
@@ -352,7 +357,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
             params = new CommandParams();
             params.setDecisionId( rDecisionEntity.getUid() );
-//            params.setDecision( rDecisionEntity );
+            params.setDocument( settings.getUid() );
             params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
 
             if ( settings.isDecisionWithAssignment() ){
@@ -376,7 +381,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
             params = new CommandParams();
             params.setDecisionId( rDecisionEntity.getUid() );
-//            params.setDecision( rDecisionEntity );
+            params.setDocument( settings.getUid() );
             params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
             operationManager.execute(operation, params);
           }
@@ -886,7 +891,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
           CommandParams params = new CommandParams();
           params.setDecisionId(rDecisionEntity.getUid());
-//        params.setDecision( rDecisionEntity );
+          params.setDocument( settings.getUid() );
           params.setDecisionModel(mappers.getDecisionMapper().toFormattedModel(rDecisionEntity));
 
           operationManager.execute(operation, params);
@@ -912,7 +917,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
           CommandParams params = new CommandParams();
           params.setDecisionId(rDecisionEntity.getUid());
-//        params.setDecision( rDecisionEntity );
+          params.setDocument( settings.getUid() );
           params.setDecisionModel(mappers.getDecisionMapper().toFormattedModel(rDecisionEntity));
 
           if (settings.isDecisionWithAssignment()) {

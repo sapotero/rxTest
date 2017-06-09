@@ -33,6 +33,7 @@ import sapotero.rxtest.retrofit.models.v2.DecisionError;
 import sapotero.rxtest.retrofit.models.wrapper.DecisionWrapper;
 import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.memory.fields.FieldType;
+import sapotero.rxtest.utils.memory.fields.InMemoryState;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
@@ -69,8 +70,15 @@ public class ApproveDecision extends AbstractCommand {
 
   @Override
   public void execute() {
-    queueManager.add(this);
     updateLocal();
+
+
+    queueManager.add(this);
+    store.process(
+      store.startTransactionFor( params.getDocument() )
+        .setLabel(LabelType.SYNC)
+        .setState(InMemoryState.LOADING)
+    );
 
   }
 
@@ -92,7 +100,7 @@ public class ApproveDecision extends AbstractCommand {
       .update(RDocumentEntity.class)
       .set(RDocumentEntity.CHANGED, true)
       .set(RDocumentEntity.MD5, "")
-      .where(RDocumentEntity.UID.eq( params.getDecisionModel().getDocumentUid() ))
+      .where(RDocumentEntity.UID.eq( params.getDocument() ))
       .get()
       .value();
     Tuple red = dataStore
@@ -113,7 +121,7 @@ public class ApproveDecision extends AbstractCommand {
       String uid = getUid();
 
       store.process(
-        store.startTransactionFor( getUid() )
+        store.startTransactionFor( params.getDocument() )
           .setLabel(LabelType.SYNC)
           .setField(FieldType.PROCESSED, true)
       );
@@ -126,7 +134,7 @@ public class ApproveDecision extends AbstractCommand {
         .update(RDocumentEntity.class)
         .set(RDocumentEntity.PROCESSED, true)
         .set(RDocumentEntity.MD5, "")
-        .where(RDocumentEntity.UID.eq( getUid() ))
+        .where(RDocumentEntity.UID.eq( params.getDocument() ))
         .get().value();
 
       Timber.tag(TAG).e("3 updateLocal document %s | %s", uid, dec > 0);
@@ -134,10 +142,6 @@ public class ApproveDecision extends AbstractCommand {
 //      EventBus.getDefault().post( new ShowNextDocumentEvent());
     }
 
-    store.process(
-      store.startTransactionFor( getUid() )
-        .setLabel(LabelType.SYNC)
-    );
 
     Observable.just("").timeout(100, TimeUnit.MILLISECONDS).subscribe(
       data -> {
@@ -244,14 +248,14 @@ public class ApproveDecision extends AbstractCommand {
 
           if (data.getErrors() !=null && data.getErrors().size() > 0){
             queueManager.setExecutedWithError(this, data.getErrors());
-            EventBus.getDefault().post( new ForceUpdateDocumentEvent( data.getDocumentUid() ));
+            EventBus.getDefault().post( new ForceUpdateDocumentEvent( params.getDocument() ));
 
           } else {
 
             if (callback != null ){
               callback.onCommandExecuteSuccess( getType() );
             }
-            EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
+            EventBus.getDefault().post( new UpdateDocumentEvent( params.getDocument() ));
 
             queueManager.setExecutedRemote(this);
           }
@@ -270,7 +274,7 @@ public class ApproveDecision extends AbstractCommand {
 
           if ( settings.isOnline() ){
             store.process(
-              store.startTransactionFor( getUid() )
+              store.startTransactionFor( params.getDocument() )
                 .removeLabel(LabelType.SYNC)
                 .setField(FieldType.PROCESSED, false)
             );
