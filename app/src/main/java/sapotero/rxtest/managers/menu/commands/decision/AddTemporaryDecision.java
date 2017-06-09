@@ -1,5 +1,7 @@
 package sapotero.rxtest.managers.menu.commands.decision;
 
+import android.support.annotation.Nullable;
+
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.Objects;
@@ -16,6 +18,7 @@ import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
+import sapotero.rxtest.utils.memory.fields.LabelType;
 import sapotero.rxtest.utils.padeg.Declension;
 import timber.log.Timber;
 
@@ -49,6 +52,11 @@ public class AddTemporaryDecision extends AbstractCommand {
   public void execute() {
     addDecision();
     queueManager.add(this);
+
+    store.process(
+      store.startTransactionFor( params.getDocument() )
+        .setLabel(LabelType.SYNC)
+    );
   }
 
   @Override
@@ -63,21 +71,13 @@ public class AddTemporaryDecision extends AbstractCommand {
 
   private void addDecision() {
 
-    String uid = null;
-
-    if (params.getDocument() != null && !Objects.equals(params.getDocument(), "")){
-      uid = params.getDocument();
-    }
-
-    if (document.getUid() != null && !Objects.equals(document.getUid(), "")){
-      uid = document.getUid();
-    }
+    String uid = getUid();
 
     Timber.tag(TAG).e("DOCUMENT_UID: %s", uid);
 
     RDocumentEntity doc = dataStore
       .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq(uid))
+      .where(RDocumentEntity.UID.eq( params.getDocument() ))
       .get().firstOrNull();
 
     Timber.tag(TAG).e("doc: %s", doc);
@@ -88,7 +88,7 @@ public class AddTemporaryDecision extends AbstractCommand {
       .update(RDocumentEntity.class)
       .set(RDocumentEntity.CHANGED, true)
       .set(RDocumentEntity.MD5, "")
-      .where(RDocumentEntity.UID.eq( uid ))
+      .where(RDocumentEntity.UID.eq( params.getDocument() ))
       .get()
       .value();
 
@@ -166,6 +166,20 @@ public class AddTemporaryDecision extends AbstractCommand {
             Timber.tag(TAG).e("Error: %s", error);
           });
     }
+  }
+
+  @Nullable
+  private String getUid() {
+    String uid = null;
+
+    if (params.getDocument() != null && !Objects.equals(params.getDocument(), "")){
+      uid = params.getDocument();
+    }
+
+    if (document.getUid() != null && !Objects.equals(document.getUid(), "")){
+      uid = document.getUid();
+    }
+    return uid;
   }
 
   @Override

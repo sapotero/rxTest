@@ -71,7 +71,7 @@ public class SaveDecision extends AbstractCommand {
       .update(RDocumentEntity.class)
       .set(RDocumentEntity.CHANGED, true)
 //      .set(RDocumentEntity.MD5, "")
-      .where(RDocumentEntity.UID.eq( params.getDecisionModel().getDocumentUid() ))
+      .where(RDocumentEntity.UID.eq( params.getDocument() ))
       .get()
       .value();
 
@@ -81,7 +81,7 @@ public class SaveDecision extends AbstractCommand {
     queueManager.add(this);
 
     store.process(
-      store.startTransactionFor( params.getDecisionModel().getDocumentUid() )
+      store.startTransactionFor( params.getDocument() )
         .setLabel(LabelType.SYNC)
     );
 
@@ -239,13 +239,13 @@ public class SaveDecision extends AbstractCommand {
             queueManager.setExecutedWithError(this, data.getErrors());
 
             store.process(
-              store.startTransactionFor( params.getDecisionModel().getDocumentUid() )
+              store.startTransactionFor( params.getDocument() )
                 .removeLabel(LabelType.SYNC)
             );
 
           } else {
             store.process(
-              store.startTransactionFor(document.getUid())
+              store.startTransactionFor( params.getDocument() )
                 .removeLabel(LabelType.SYNC)
             );
             queueManager.setExecutedRemote(this);
@@ -261,7 +261,7 @@ public class SaveDecision extends AbstractCommand {
 
           if ( settings.isOnline() ){
             store.process(
-              store.startTransactionFor( document.getUid() )
+              store.startTransactionFor( params.getDocument() )
                 .removeLabel(LabelType.SYNC)
             );
             queueManager.setExecutedWithError(this, Collections.singletonList(error.getLocalizedMessage()));

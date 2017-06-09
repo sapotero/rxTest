@@ -8,7 +8,6 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.util.Collections;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -22,7 +21,6 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
-import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -77,6 +75,11 @@ public class RejectDecision extends AbstractCommand {
 
     updateLocal();
 
+    store.process(
+      store.startTransactionFor( params.getDocument() )
+        .setLabel(LabelType.SYNC)
+    );
+
   }
 
 
@@ -88,7 +91,7 @@ public class RejectDecision extends AbstractCommand {
     Integer count = dataStore
       .update(RDecisionEntity.class)
       .set(RDecisionEntity.TEMPORARY, true)
-      .where(RDecisionEntity.UID.eq(params.getDecisionModel().getId()))
+      .where(RDecisionEntity.UID.eq( params.getDocument() ))
       .get().value();
 
 
@@ -105,7 +108,7 @@ public class RejectDecision extends AbstractCommand {
         .update(RDocumentEntity.class)
         .set(RDocumentEntity.PROCESSED, true)
         .set(RDocumentEntity.MD5, "")
-        .where(RDocumentEntity.UID.eq( uid ))
+        .where(RDocumentEntity.UID.eq( params.getDocument() ))
         .get().value();
 
       Timber.tag(TAG).e("3 updateLocal document %s | %s", uid, dec > 0);
@@ -118,18 +121,6 @@ public class RejectDecision extends AbstractCommand {
 
     }
 
-    Observable.just("").timeout(100, TimeUnit.MILLISECONDS).subscribe(
-      data -> {
-        store.process(
-          store.startTransactionFor( getUid() )
-            .setLabel(LabelType.SYNC)
-        );
-
-        EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( params.getDecisionModel().getId() ));
-      }, error -> {
-        Timber.tag(TAG).e(error);
-      }
-    );
   }
 
   @Nullable
@@ -226,20 +217,20 @@ public class RejectDecision extends AbstractCommand {
 
           if (data.getErrors() !=null && data.getErrors().size() > 0){
             queueManager.setExecutedWithError(this, data.getErrors());
-            EventBus.getDefault().post( new ForceUpdateDocumentEvent( data.getDocumentUid() ));
+            EventBus.getDefault().post( new ForceUpdateDocumentEvent( params.getDocument() ));
 
           } else {
 
             if (callback != null ){
               callback.onCommandExecuteSuccess( getType() );
             }
-            EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
+            EventBus.getDefault().post( new UpdateDocumentEvent( params.getDocument() ));
 
             queueManager.setExecutedRemote(this);
           }
 
           store.process(
-            store.startTransactionFor( getUid() )
+            store.startTransactionFor( params.getDocument() )
               .removeLabel(LabelType.SYNC)
           );
 
@@ -252,7 +243,7 @@ public class RejectDecision extends AbstractCommand {
 
           if ( settings.isOnline() ){
             store.process(
-              store.startTransactionFor( getUid() )
+              store.startTransactionFor( params.getDocument() )
                 .removeLabel(LabelType.SYNC)
                 .setField(FieldType.PROCESSED, false)
             );

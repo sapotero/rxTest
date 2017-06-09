@@ -67,7 +67,7 @@ public class AddDecision extends AbstractCommand {
     command.execute();
 
     store.process(
-      store.startTransactionFor( params.getDecisionModel().getDocumentUid() )
+      store.startTransactionFor( params.getDocument() )
         .setLabel(LabelType.SYNC)
     );
 
@@ -89,7 +89,7 @@ public class AddDecision extends AbstractCommand {
       .update(RDocumentEntity.class)
       .set(RDocumentEntity.CHANGED, true)
       .set(RDocumentEntity.MD5, "")
-      .where(RDocumentEntity.UID.eq( params.getDecisionModel().getDocumentUid() ))
+      .where(RDocumentEntity.UID.eq( params.getDocument() ))
       .get()
       .value();
 
@@ -178,7 +178,7 @@ public class AddDecision extends AbstractCommand {
 
   private void removeSyncLabel() {
     store.process(
-      store.startTransactionFor( params.getDecisionModel().getDocumentUid() )
+      store.startTransactionFor( params.getDocument() )
         .removeLabel(LabelType.SYNC)
     );
   }

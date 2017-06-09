@@ -71,7 +71,7 @@ public class SaveAndApproveDecision extends AbstractCommand {
 
 
     store.process(
-      store.startTransactionFor( params.getDecisionModel().getDocumentUid() )
+      store.startTransactionFor(  params.getDocument() )
         .setLabel(LabelType.SYNC)
     );
 
@@ -99,7 +99,7 @@ public class SaveAndApproveDecision extends AbstractCommand {
     Integer count = dataStore
       .update(RDecisionEntity.class)
       .set(RDecisionEntity.TEMPORARY, true)
-      .where(RDecisionEntity.UID.eq(params.getDecisionModel().getId()))
+      .where(RDecisionEntity.UID.eq( params.getDecisionModel().getId() ))
       .get().value();
     Timber.tag(TAG).i( "updateLocal: %s", count );
 
@@ -111,7 +111,7 @@ public class SaveAndApproveDecision extends AbstractCommand {
     dataStore
       .update(RDocumentEntity.class)
       .set(RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq( params.getDecisionModel().getDocumentUid() ))
+      .where(RDocumentEntity.UID.eq( params.getDocument() ))
       .get()
       .value();
 
@@ -126,14 +126,14 @@ public class SaveAndApproveDecision extends AbstractCommand {
         .update(RDocumentEntity.class)
         .set(RDocumentEntity.PROCESSED, true)
         .set(RDocumentEntity.MD5, "")
-        .where(RDocumentEntity.UID.eq( params.getDecisionModel().getDocumentUid() ))
+        .where(RDocumentEntity.UID.eq(  params.getDocument() ))
         .get()
         .value();
 
 
 
       store.process(
-        store.startTransactionFor( params.getDecisionModel().getDocumentUid() )
+        store.startTransactionFor(  params.getDocument() )
           .setLabel(LabelType.SYNC)
           .setField(FieldType.PROCESSED, true)
       );
@@ -211,13 +211,13 @@ public class SaveAndApproveDecision extends AbstractCommand {
             queueManager.setExecutedWithError(this, data.getErrors());
 
             store.process(
-              store.startTransactionFor( params.getDecisionModel().getDocumentUid() )
+              store.startTransactionFor(  params.getDocument() )
                 .removeLabel(LabelType.SYNC)
             );
 
           } else {
             store.process(
-              store.startTransactionFor(document.getUid())
+              store.startTransactionFor(  params.getDocument() )
                 .removeLabel(LabelType.SYNC)
             );
             queueManager.setExecutedRemote(this);
@@ -233,7 +233,7 @@ public class SaveAndApproveDecision extends AbstractCommand {
 
           if ( settings.isOnline() ){
             store.process(
-              store.startTransactionFor( document.getUid() )
+              store.startTransactionFor(  params.getDocument() )
                 .removeLabel(LabelType.SYNC)
                 .setField(FieldType.PROCESSED, false)
             );
