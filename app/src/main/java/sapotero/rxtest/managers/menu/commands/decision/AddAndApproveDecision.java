@@ -208,7 +208,6 @@ public class AddAndApproveDecision extends AbstractCommand {
             store.process(
               store.startTransactionFor( params.getDecisionModel().getDocumentUid() )
                 .removeLabel(LabelType.SYNC)
-                .setField(FieldType.PROCESSED, false)
             );
 
           } else {

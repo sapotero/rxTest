@@ -137,7 +137,6 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
   }
 
   public void setJournal(RDocumentEntity entity, String journal) {
-
     set( entity::setDocumentType, journal );
   }
 

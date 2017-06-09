@@ -110,8 +110,8 @@ abstract class DocumentJob extends BaseJob {
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         result -> {
-
           Timber.tag(TAG).d("Created " + result.getUid());
+          doAfterUpdate(result);
           loadLinkedData( documentReceived, result, isLink );
         },
         error -> Timber.tag(TAG).e(error)

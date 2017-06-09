@@ -55,7 +55,6 @@ public class CreateDocumentsJob extends DocumentJob {
 
   @Override
   public void doAfterUpdate(RDocumentEntity document) {
-
     if (document != null) {
       Timber.tag(TAG).e( "doAfterUpdate %s - %s / %s", uid, journal, status );
       store.process( document, journal, status );
