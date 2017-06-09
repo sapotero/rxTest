@@ -177,8 +177,10 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
   }
 
   private void setLinks(RDocumentEntity entity, List<String> links) {
+    entity.getLinks().clear();
+    entity.setFirstLink(null);
+
     if ( notEmpty( links ) ) {
-      entity.getLinks().clear();
       LinkMapper linkMapper = mappers.getLinkMapper();
 
       for (String linkModel : links) {
@@ -202,8 +204,9 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
   }
 
   private void setControlLabels(RDocumentEntity entity, List<ControlLabel> controlLabels) {
+    entity.getControlLabels().clear();
+
     if ( notEmpty( controlLabels ) ) {
-      entity.getControlLabels().clear();
       ControlLabelMapper controlLabelMapper = mappers.getControlLabelMapper();
 
       for (ControlLabel labelModel : controlLabels ) {
@@ -227,8 +230,9 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
   }
 
   private void setImages(RDocumentEntity entity, List<Image> images) {
+    entity.getImages().clear();
+
     if ( notEmpty( images ) ) {
-      entity.getImages().clear();
       ImageMapper imageMapper = mappers.getImageMapper();
 
       for (Image imageModel : images ) {
@@ -252,8 +256,9 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
   }
 
   private void setExemplars(RDocumentEntity entity, List<Exemplar> exemplars) {
+    entity.getExemplars().clear();
+
     if ( notEmpty( exemplars ) ) {
-      entity.getExemplars().clear();
       ExemplarMapper exemplarMapper = mappers.getExemplarMapper();
 
       for (Exemplar exemplarModel : exemplars ) {
@@ -277,8 +282,9 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
   }
 
   private void setActions(RDocumentEntity entity, List<DocumentInfoAction> actions) {
+    entity.getActions().clear();
+
     if ( notEmpty( actions ) ) {
-      entity.getActions().clear();
       ActionMapper actionMapper = mappers.getActionMapper();
 
       for (DocumentInfoAction actionModel : actions ) {
@@ -320,9 +326,10 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     Boolean red = false;
     Boolean with_decision = false;
 
+    entity.getDecisions().clear();
+
     if ( notEmpty( decisions ) ) {
       with_decision = true;
-      entity.getDecisions().clear();
       DecisionMapper decisionMapper = mappers.getDecisionMapper();
 
       for (Decision decisionModel : decisions ) {
