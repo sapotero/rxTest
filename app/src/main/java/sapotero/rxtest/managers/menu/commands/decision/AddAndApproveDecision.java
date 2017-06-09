@@ -56,9 +56,9 @@ public class AddAndApproveDecision extends AbstractCommand {
   public void execute() {
 
     updateLocal();
-    queueManager.add(this);
     EventBus.getDefault().post( new ShowNextDocumentEvent() );
 
+    queueManager.add(this);
     store.process(
       store.startTransactionFor( params.getDecisionModel().getDocumentUid() )
         .setLabel(LabelType.SYNC)

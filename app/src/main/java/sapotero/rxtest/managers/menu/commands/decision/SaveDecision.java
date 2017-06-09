@@ -18,8 +18,6 @@ import sapotero.rxtest.db.mapper.BlockMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
-import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
-import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
@@ -28,6 +26,7 @@ import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
+import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
 public class SaveDecision extends AbstractCommand {
@@ -78,6 +77,13 @@ public class SaveDecision extends AbstractCommand {
 
 //    EventBus.getDefault().post( new ShowNextDocumentEvent());
     update();
+
+    queueManager.add(this);
+
+    store.process(
+      store.startTransactionFor( params.getDecisionModel().getDocumentUid() )
+        .setLabel(LabelType.SYNC)
+    );
 
   }
 
@@ -229,33 +235,38 @@ public class SaveDecision extends AbstractCommand {
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         data -> {
-
           if (data.getErrors() !=null && data.getErrors().size() > 0){
             queueManager.setExecutedWithError(this, data.getErrors());
-            EventBus.getDefault().post( new ForceUpdateDocumentEvent( data.getDocumentUid() ));
+
+            store.process(
+              store.startTransactionFor( params.getDecisionModel().getDocumentUid() )
+                .removeLabel(LabelType.SYNC)
+            );
+
           } else {
-
-            if (callback != null ){
-              callback.onCommandExecuteSuccess( getType() );
-            }
-            EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
-
+            store.process(
+              store.startTransactionFor(document.getUid())
+                .removeLabel(LabelType.SYNC)
+            );
             queueManager.setExecutedRemote(this);
+
+            checkCreatorAndSignerIsCurrentUser(data, TAG);
           }
 
         },
         error -> {
-          Timber.tag(TAG).i("error: %s", error);
           if (callback != null){
             callback.onCommandExecuteError(getType());
           }
 
-          // Раскоментировать перед релизом
-          // if ( queueManager.getConnected() ){
-          //   queueManager.setExecutedWithError(this, Collections.singletonList("http_error"));
-          // }
+          if ( settings.isOnline() ){
+            store.process(
+              store.startTransactionFor( document.getUid() )
+                .removeLabel(LabelType.SYNC)
+            );
+            queueManager.setExecutedWithError(this, Collections.singletonList(error.getLocalizedMessage()));
 
-          EventBus.getDefault().post( new ForceUpdateDocumentEvent( params.getDecisionModel().getDocumentUid() ));
+          }
         }
       );
   }

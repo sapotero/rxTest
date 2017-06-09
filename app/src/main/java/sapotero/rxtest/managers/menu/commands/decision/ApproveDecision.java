@@ -69,8 +69,14 @@ public class ApproveDecision extends AbstractCommand {
 
   @Override
   public void execute() {
-    queueManager.add(this);
     updateLocal();
+
+
+    queueManager.add(this);
+    store.process(
+      store.startTransactionFor( params.getDecisionModel().getDocumentUid() )
+        .setLabel(LabelType.SYNC)
+    );
 
   }
 
