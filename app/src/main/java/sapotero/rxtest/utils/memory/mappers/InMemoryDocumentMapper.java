@@ -46,21 +46,7 @@ public class InMemoryDocumentMapper {
     document.setProcessed( doc.isProcessed() );
     document.setFromFavoritesFolder( doc.isFromFavoritesFolder() );
     document.setFromProcessedFolder( doc.isFromProcessedFolder() );
-
-
-    if ( doc.getLinks().size() > 0 ){
-      Observable
-        .from( doc.getLinks() )
-        .map( rLinks -> (RLinksEntity) rLinks )
-        .first()
-        .map( RLinksEntity::getUid )
-        .subscribeOn(Schedulers.computation())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(
-          document::setFirstLink,
-          Timber::e
-        );
-    }
+    document.setFirstLink( doc.getFirstLink() );
 
     RSignerEntity rSigner = (RSignerEntity) doc.getSigner();
     Signer signer = new Signer();
