@@ -34,6 +34,7 @@ import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.crypto.SignDataEvent;
+import sapotero.rxtest.events.decision.CheckActiveDecisionEvent;
 import sapotero.rxtest.events.decision.ShowDecisionConstructor;
 import sapotero.rxtest.events.view.ShowSnackEvent;
 import sapotero.rxtest.managers.menu.OperationManager;
@@ -430,11 +431,9 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
           break;
       }
 
-      // Если документ обработан - то изменяем резолюции на поручения
-      if ( isProcessed() ) {
-        safeSetVisibility(R.id.menu_info_decision_edit, false);
-        safeSetVisibility(R.id.menu_info_decision_create, true);
-      }
+//      if ( hasActiveDecision() ){
+//        safeSetVisibility(R.id.menu_info_decision_create, true);
+//      }
 
       if (isFromProject() || isFromFavoritesFolder() ) {
         // resolved https://tasks.n-core.ru/browse/MVDESD-12765
@@ -488,6 +487,12 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         }
       }
 
+      // Если документ обработан - то изменяем резолюции на поручения
+      if ( isProcessed() ) {
+        safeSetVisibility(R.id.menu_info_decision_edit, false);
+        safeSetVisibility(R.id.menu_info_decision_create, true);
+      }
+
     }
   }
 
@@ -529,6 +534,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   }
 
   private void showAsProcessed(Boolean showCreateButton) {
+    Timber.tag(TAG).e("showAsProcessed");
+
     toolbar.getMenu().clear();
     toolbar.inflateMenu(R.menu.info_menu);
 
@@ -580,6 +587,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
   //REFACTOR переделать это
   private void processEmptyDecisions() {
+    Timber.tag(TAG).e("processEmptyDecisions");
     safeSetVisibility( R.id.menu_info_decision_edit  , false);
     safeSetVisibility( R.id.menu_info_decision_create, true);
   }
@@ -874,6 +882,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     }
 
     invalidate();
+    EventBus.getDefault().post( new CheckActiveDecisionEvent() );
   }
 
   @Override
