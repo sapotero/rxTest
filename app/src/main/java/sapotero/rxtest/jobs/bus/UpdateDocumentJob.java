@@ -110,10 +110,51 @@ public class UpdateDocumentJob extends DocumentJob {
 
         boolean isFromProcessedFolder = Boolean.TRUE.equals( documentExisting.isFromProcessedFolder() );
         documentMapper.setNestedFields( documentExisting, documentReceived, isFromProcessedFolder );
-        if ( !isFromProcessedFolder ) {
-          // если прилетело обновление и документ не из папки обработанных - уберем из обработанных
+
+        boolean isSetProcessedFalse = true;
+
+        if ( isFromProcessedFolder ) {
+          // если документ из папки обработанных, то не убираем из обработанных
+          isSetProcessedFalse = false;
+        }
+
+        if ( filter == null && index == null) {
+          // если не указаны статус и журнал, то не убираем из обработанных
+          isSetProcessedFalse = false;
+        }
+
+        if ( filter != null && Objects.equals(documentExisting.getFilter(), filter) ) {
+          // если указан статус, и статус не изменился, то не убираем из обработанных
+          isSetProcessedFalse = false;
+        }
+
+        if ( index != null && Objects.equals(documentExisting.getDocumentType(), index) ) {
+          // если указан журнал, и журнал не изменился, то не убираем из обработанных
+          isSetProcessedFalse = false;
+        }
+
+        if ( isSetProcessedFalse ) {
+          // если прилетело обновление и документ не из папки обработанных и указаны статус или журнал и хотя бы один из них изменился - уберем из обработанных
           documentExisting.setProcessed( false );
         }
+
+        if ( forceProcessed ) {
+          documentExisting.setProcessed( true );
+        }
+
+//        if ( !isFromProcessedFolder ) {
+//          if ( filter != null && index != null) {
+//            if ( !Objects.equals(documentExisting.getFilter(), filter) || !Objects.equals(documentExisting.getDocumentType(), index) ) {
+//              // если прилетело обновление и документ не из папки обработанных и изменился фильтр или индекс - уберем из обработанных
+//              documentExisting.setProcessed( false );
+//            }
+//          }
+//        }
+
+//        if (  (!isFromProcessedFolder && !(filter==null && index==null) ) || !Objects.equals(documentExisting.getFilter(), filter) || !Objects.equals(documentExisting.getDocumentType(), index)) {
+//          // если прилетело обновление и документ не из папки обработанных - уберем из обработанных
+//          documentExisting.setProcessed( false );
+//        }
 
         documentExisting.setFromLinks( false );
         documentExisting.setChanged( false );
@@ -122,10 +163,6 @@ public class UpdateDocumentJob extends DocumentJob {
 
       } else {
         Timber.tag(TAG).d("MD5 equal");
-      }
-
-      if (forceProcessed){
-        documentExisting.setProcessed( true );
       }
     }
   }
@@ -138,7 +175,6 @@ public class UpdateDocumentJob extends DocumentJob {
       Timber.tag(TAG).e( "doAfterUpdate %s - %s / %s", uid, index, filter );
       store.process( document, index, filter );
     }
-
   }
 
   private void saveIdsToDelete(RDocumentEntity document) {

@@ -91,7 +91,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
         documents.set( index, doc);
         notifyItemChanged( index,  doc);
 
-        if ( doc.isProcessed() ){
+        if ( doc.isProcessed()  /*&& !processed*/ ){
           notifyItemRemoved(index);
           Holder.MAP.remove(doc.getUid());
           documents.remove(doc);

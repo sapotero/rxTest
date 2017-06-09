@@ -13,6 +13,7 @@ import sapotero.rxtest.db.mapper.DocumentMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
+import timber.log.Timber;
 
 // Creates documents from processed folder (no journal,
 public class CreateProcessedDocumentsJob extends DocumentJob {
@@ -59,6 +60,10 @@ public class CreateProcessedDocumentsJob extends DocumentJob {
 
   @Override
   public void doAfterUpdate(RDocumentEntity document) {
+    if (document != null) {
+      Timber.tag(TAG).e( "doAfterUpdate %s - %s / %s", uid, null, null );
+      store.process( document, null, null );
+    }
   }
 
   @Override
