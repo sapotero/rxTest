@@ -140,24 +140,24 @@ public class Processor {
   private void validate(Document document){
     Timber.tag(TAG).e("->      : %s / %s@%5.10s  ", document.getUid(), filter, index );
 
-    upsert( document );
+//    upsert( document );
 
-//    // new upsert job
-//    if ( store.getDocuments().keySet().contains( document.getUid() ) ){
-//      InMemoryDocument doc = store.getDocuments().get( document.getUid() );
-//
-//      Timber.tag(TAG).e("filters : %s | %s", doc.getFilter(), filter);
-//
-//      // изменилось MD5
-//      if ( Filter.isChanged( doc.getMd5(), document.getMd5() ) ){
-//        Timber.tag(TAG).e("md5     : %s | %s", doc.getMd5(), document.getMd5());
-//        updateJob( doc.getUid() );
-//      }
-//
-//    } else {
-//      Timber.tag(TAG).e("new: %s", document.getUid());
-//      createJob(document.getUid());
-//    }
+    // new upsert job
+    if ( store.getDocuments().keySet().contains( document.getUid() ) ){
+      InMemoryDocument doc = store.getDocuments().get( document.getUid() );
+
+      Timber.tag(TAG).e("filters : %s | %s", doc.getFilter(), filter);
+
+      // изменилось MD5
+      if ( Filter.isChanged( doc.getMd5(), document.getMd5() ) ){
+        Timber.tag(TAG).e("md5     : %s | %s", doc.getMd5(), document.getMd5());
+        updateJob( doc.getUid() );
+      }
+
+    } else {
+      Timber.tag(TAG).e("new: %s", document.getUid());
+      createJob(document.getUid());
+    }
 
   }
 
