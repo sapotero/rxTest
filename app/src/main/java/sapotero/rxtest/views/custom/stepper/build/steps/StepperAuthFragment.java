@@ -196,6 +196,7 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
       loadingDialog.show();
     }
     settings.setStartLoadData( true );
+    settings.setFavoritesLoaded( false );
     this.callback = callback;
   }
 
