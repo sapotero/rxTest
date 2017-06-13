@@ -17,12 +17,15 @@ import rx.subjects.PublishSubject;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.jobs.bus.CreateDocumentsJob;
+import sapotero.rxtest.jobs.bus.CreateFavoriteDocumentsJob;
+import sapotero.rxtest.jobs.bus.CreateProcessedDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateProjectsJob;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.jobs.bus.UpsertDocumentJob;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.utils.memory.MemoryStore;
+import sapotero.rxtest.utils.memory.fields.DocumentType;
 import sapotero.rxtest.utils.memory.fields.FieldType;
 import sapotero.rxtest.utils.memory.fields.InMemoryState;
 import sapotero.rxtest.utils.memory.mappers.InMemoryDocumentMapper;
@@ -39,7 +42,8 @@ public class Processor {
     EMPTY,
     DB,
     TRANSACTION,
-    INTERSECT;
+    INTERSECT,
+    FOLDER
   }
 
   private final String TAG = this.getClass().getSimpleName();
@@ -47,6 +51,8 @@ public class Processor {
 
   private String filter;
   private String index;
+  private String folder;
+  private DocumentType documentType = DocumentType.DOCUMENT;
 
   private RDocumentEntity document_from_db;
   private HashMap<String, Document> documents;
@@ -95,6 +101,22 @@ public class Processor {
   public Processor withDocuments(HashMap<String, Document> docs) {
     this.documents = docs;
     this.source = Source.INTERSECT;
+    this.documentType = DocumentType.DOCUMENT;
+    return this;
+  }
+
+  public Processor withFolder(String folder) {
+    if (folder != null) {
+      this.folder = folder;
+      this.source = Source.FOLDER;
+    }
+    return this;
+  }
+
+  public Processor withDocumentType(DocumentType documentType) {
+    if (documentType != null) {
+      this.documentType = documentType;
+    }
     return this;
   }
 
@@ -116,6 +138,9 @@ public class Processor {
         break;
       case INTERSECT:
         intersect();
+        break;
+      case FOLDER:
+        loadFromFolder();
         break;
       case EMPTY:
         break;
@@ -203,9 +228,7 @@ public class Processor {
 //          setAsUnprocessed( doc );
 //        }
 
-        for ( Document doc : documents.values() ) {
-          validate( doc );
-        }
+        validateDocuments();
 
         return Collections.singletonList("");
       })
@@ -221,6 +244,12 @@ public class Processor {
 
 
     return new ArrayList<>();
+  }
+
+  private void validateDocuments() {
+    for ( Document doc : documents.values() ) {
+      validate( doc );
+    }
   }
 
   private void setAsUnprocessed(String uid) {
@@ -249,13 +278,33 @@ public class Processor {
     return conditions;
   }
 
+  private void loadFromFolder() {
+    validateDocuments();
+  }
 
   private void createJob(String uid) {
     settings.addJobCount(1);
-    if (index != null) {
-      jobManager.addJobInBackground( new CreateDocumentsJob(uid, index, filter, false) );
-    } else {
-      jobManager.addJobInBackground( new CreateProjectsJob(uid, filter, false) );
+
+    switch (documentType) {
+      case DOCUMENT:
+        if (index != null) {
+          jobManager.addJobInBackground( new CreateDocumentsJob(uid, index, filter, false) );
+        } else {
+          jobManager.addJobInBackground( new CreateProjectsJob(uid, filter, false) );
+        }
+        break;
+
+      case FAVORITE:
+        if (folder != null) {
+          jobManager.addJobInBackground( new CreateFavoriteDocumentsJob(uid, folder) );
+        }
+        break;
+
+      case PROCESSED:
+        if (folder != null) {
+          jobManager.addJobInBackground( new CreateProcessedDocumentsJob(uid, folder) );
+        }
+        break;
     }
   }
 
@@ -273,6 +322,5 @@ public class Processor {
     settings.addJobCount(1);
     jobManager.addJobInBackground( new UpsertDocumentJob( uid, index, filter) );
   }
-
 
 }
