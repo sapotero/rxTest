@@ -28,6 +28,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.query.DBQueryBuilder;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.utils.NoDocumentsEvent;
 import sapotero.rxtest.retrofit.models.documents.Document;
@@ -49,6 +50,8 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
   private Context mContext;
   private final String TAG = this.getClass().getSimpleName();
 
+  private DBQueryBuilder dbQueryBuilder;
+
   public void removeAllWithRange() {
     Holder.MAP.clear();
     documents.clear();
@@ -63,6 +66,10 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
     EsdApplication.getManagerComponent().inject(this);
     initSubscription();
+  }
+
+  public void withDbQueryBuilder(DBQueryBuilder dbQueryBuilder) {
+    this.dbQueryBuilder = dbQueryBuilder;
   }
 
   private void initSubscription() {
@@ -95,6 +102,9 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
           notifyItemRemoved(index);
           Holder.MAP.remove(doc.getUid());
           documents.remove(doc);
+          if (documents.size() == 0 && dbQueryBuilder != null) {
+            dbQueryBuilder.showEmpty();
+          }
         }
 
       } else {
@@ -508,6 +518,9 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     if ( !Holder.MAP.containsKey( document.getUid()) ){
       documents.add(document);
       notifyItemInserted( documents.size() );
+      if (documents.size() > 0 && dbQueryBuilder != null) {
+        dbQueryBuilder.hideEmpty();
+      }
 //      Holder.MAP.put( document.getUid(), documents.s );
       recreateHash();
     }

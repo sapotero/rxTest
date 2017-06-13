@@ -726,7 +726,7 @@ public class DataLoaderManager {
     }
   }
 
-  private void updateProcessed() {
+  public void updateProcessed() {
 
     Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
     DocumentsService docService = retrofit.create(DocumentsService.class);

@@ -23,6 +23,7 @@ import java.security.Security;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -776,16 +777,19 @@ public class MainService extends Service {
   // При первом запуске выгружаем все избранные с ЭО
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(FolderCreatedEvent event){
-    String type = event.getType();
-    if (type == null) {
-      type = "";
-    }
-    if ( type.equals("favorites") ) {
+    if ( Objects.equals( event.getType(), "favorites" ) ) {
       if ( !settings.isFavoritesLoaded() ) {
         settings.setFavoritesLoaded(true);
         dataLoaderInterface.updateFavorites();
       }
     }
+
+//    if ( Objects.equals( event.getType(), "processed" ) ) {
+//      if ( !settings.isProcessedLoaded() ) {
+//        settings.setProcessedLoaded(true);
+//        dataLoaderInterface.updateProcessed();
+//      }
+//    }
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)

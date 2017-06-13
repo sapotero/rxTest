@@ -73,6 +73,7 @@ MemoryStore store;
 
   public DBQueryBuilder withAdapter(DocumentsAdapter rAdapter) {
     this.adapter = rAdapter;
+    this.adapter.withDbQueryBuilder(this);
     return this;
   }
 
@@ -234,12 +235,12 @@ MemoryStore store;
     execute(true);
   }
 
-  private void showEmpty(){
+  public void showEmpty(){
     progressBar.setVisibility(ProgressBar.GONE);
     documents_empty_list.setVisibility(View.VISIBLE);
   }
 
-  private void hideEmpty(){
+  public void hideEmpty(){
     documents_empty_list.setVisibility(View.GONE);
     progressBar.setVisibility(ProgressBar.GONE);
   }
