@@ -171,6 +171,7 @@ public class Processor {
 
     Observable<List<String>> imd = Observable
       .from( store.getDocuments().values() )
+      .filter(imdFilter::isProcessed)   // restored previously removed line
       .filter(imdFilter::byType)
       .filter(imdFilter::byStatus)
       .map(InMemoryDocument::getUid)
@@ -198,9 +199,9 @@ public class Processor {
           updateAndSetProcessed( uid );
         }
 
-        for ( String doc : api ) {
-          setAsUnprocessed( doc );
-        }
+//        for ( String doc : api ) {
+//          setAsUnprocessed( doc );
+//        }
 
         for ( Document doc : documents.values() ) {
           validate( doc );
