@@ -37,6 +37,7 @@ public class Settings {
   private static final String PREV_DIALOG_COMMENT_KEY = "prev_dialog_comment";
   private static final String START_LOAD_DATA_KEY = "start_load_data";
   private static final String STEPPER_AUTH_TYPE_KEY = "stepper.auth_type";
+  private static final String FAVORITES_LOADED_KEY = "favorites.loaded";
 
   public static String FIRST_RUN_KEY;
   private static String HOST_KEY;
@@ -109,6 +110,7 @@ public class Settings {
   private Preference<Boolean> startLoadData;
   private Preference<AuthType> authType;
   private Preference<Boolean> online;
+  private Preference<Boolean> favoritesLoaded;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -185,7 +187,8 @@ public class Settings {
     startLoadData                  = settings.getBoolean(START_LOAD_DATA_KEY);
     authType                       = settings.getEnum(STEPPER_AUTH_TYPE_KEY, AuthType.class);
     current_activity               = settings.getString(CURRENT_ACTIVITY_KEY);
-    online                         = settings.getBoolean(START_LOAD_DATA_KEY);
+    online                         = settings.getBoolean(IS_ONLINE);
+    favoritesLoaded                = settings.getBoolean(FAVORITES_LOADED_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -575,5 +578,13 @@ public class Settings {
 
   public void setOnline(Boolean value) {
     online.set(value);
+  }
+
+  public boolean isFavoritesLoaded() {
+    return getBoolean(favoritesLoaded);
+  }
+
+  public void setFavoritesLoaded(Boolean value) {
+    favoritesLoaded.set(value);
   }
 }

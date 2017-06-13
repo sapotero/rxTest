@@ -781,7 +781,8 @@ public class MainService extends Service {
       type = "";
     }
     if ( type.equals("favorites") ) {
-      if ( settings.isFirstRun() ) {
+      if ( !settings.isFavoritesLoaded() ) {
+        settings.setFavoritesLoaded(true);
         dataLoaderInterface.updateFavorites();
       }
     }
