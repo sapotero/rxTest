@@ -111,6 +111,9 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
         Timber.tag(TAG).w("NEW %s", doc.getUid() );
         if ( !doc.isProcessed() ){
           addItem(doc);
+          if (documents.size() > 0 && dbQueryBuilder != null) {
+            dbQueryBuilder.hideEmpty();
+          }
         }
       }
     }
@@ -518,9 +521,6 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     if ( !Holder.MAP.containsKey( document.getUid()) ){
       documents.add(document);
       notifyItemInserted( documents.size() );
-      if (documents.size() > 0 && dbQueryBuilder != null) {
-        dbQueryBuilder.hideEmpty();
-      }
 //      Holder.MAP.put( document.getUid(), documents.s );
       recreateHash();
     }
