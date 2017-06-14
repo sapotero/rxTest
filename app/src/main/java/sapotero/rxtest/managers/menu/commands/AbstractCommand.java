@@ -1,6 +1,7 @@
 package sapotero.rxtest.managers.menu.commands;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Objects;
 
 import javax.inject.Inject;
@@ -8,12 +9,19 @@ import javax.inject.Inject;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
 import okhttp3.OkHttpClient;
+import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
+import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.decisions.RDisplayFirstDecisionEntity;
+import sapotero.rxtest.retrofit.OperationService;
+import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
+import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.queue.QueueManager;
@@ -44,6 +52,57 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
   public interface Callback {
     void onCommandExecuteSuccess(String command);
     void onCommandExecuteError(String type);
+  }
+
+  protected Observable<OperationResult> getApprovalOperationResultObservable(String uid, String official_id) {
+    Retrofit retrofit = getOperationsRetrofit();
+
+    OperationService operationService = retrofit.create( OperationService.class );
+
+    ArrayList<String> uids = new ArrayList<>();
+    uids.add(uid);
+
+    String comment = null;
+    if ( params.getComment() != null ){
+      comment = params.getComment();
+    }
+
+    String sign = null;
+
+    try {
+      sign = MainService.getFakeSign( settings.getPin(), null );
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    return operationService.approval(
+      getType(),
+      settings.getLogin(),
+      settings.getToken(),
+      uids,
+      comment,
+      settings.getStatusCode(),
+      official_id,
+      sign
+    );
+  }
+
+  public Retrofit getOperationsRetrofit() {
+    return new Retrofit.Builder()
+      .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+      .addConverterFactory(GsonConverterFactory.create())
+      .baseUrl( settings.getHost() + "v3/operations/" )
+      .client( okHttpClient )
+      .build();
+  }
+
+  public Retrofit getRetrofit() {
+    return new Retrofit.Builder()
+      .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+      .addConverterFactory(GsonConverterFactory.create())
+      .baseUrl( settings.getHost() )
+      .client( okHttpClient )
+      .build();
   }
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13258

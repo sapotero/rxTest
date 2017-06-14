@@ -11,8 +11,6 @@ import io.requery.query.Tuple;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
-import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -151,13 +149,7 @@ public class AddAndApproveDecision extends AbstractCommand {
 
     Timber.tag(TAG).i( "type: %s", new Gson().toJson(params) );
 
-    Retrofit retrofit = new Retrofit.Builder()
-      .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-      .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( settings.getHost() )
-      .client( okHttpClient )
-      .build();
-
+    Retrofit retrofit = getRetrofit();
 
     Decision decision = params.getDecisionModel();
 //    decision.setLetterheadFontSize("12");

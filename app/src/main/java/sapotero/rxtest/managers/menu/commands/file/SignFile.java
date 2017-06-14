@@ -3,8 +3,6 @@ package sapotero.rxtest.managers.menu.commands.file;
 import java.io.File;
 
 import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
-import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -63,12 +61,7 @@ public class SignFile extends AbstractCommand {
   public void executeRemote() {
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
-    Retrofit retrofit = new Retrofit.Builder()
-      .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-      .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( settings.getHost() )
-      .client( okHttpClient )
-      .build();
+    Retrofit retrofit = getRetrofit();
 
     ImagesService imagesService = retrofit.create( ImagesService.class );
 
