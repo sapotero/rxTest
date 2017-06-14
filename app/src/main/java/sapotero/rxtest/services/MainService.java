@@ -784,12 +784,12 @@ public class MainService extends Service {
       }
     }
 
-//    if ( Objects.equals( event.getType(), "processed" ) ) {
-//      if ( !settings.isProcessedLoaded() ) {
-//        settings.setProcessedLoaded(true);
-//        dataLoaderInterface.updateProcessed();
-//      }
-//    }
+    if ( Objects.equals( event.getType(), "processed" ) ) {
+      if ( !settings.isProcessedLoaded() ) {
+        settings.setProcessedLoaded(true);
+        dataLoaderInterface.updateProcessed();
+      }
+    }
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
