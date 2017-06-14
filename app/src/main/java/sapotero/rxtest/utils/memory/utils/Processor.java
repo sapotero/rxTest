@@ -310,7 +310,11 @@ public class Processor {
 
   private void updateJob(String uid) {
     settings.addJobCount(1);
-    jobManager.addJobInBackground( new UpdateDocumentJob( uid, index, filter ) );
+    if (documentType == DocumentType.DOCUMENT) {
+      jobManager.addJobInBackground( new UpdateDocumentJob( uid, index, filter ) );
+    } else {
+      jobManager.addJobInBackground( new UpdateDocumentJob( uid, documentType ) );
+    }
   }
 
   private void updateAndSetProcessed(String uid) {

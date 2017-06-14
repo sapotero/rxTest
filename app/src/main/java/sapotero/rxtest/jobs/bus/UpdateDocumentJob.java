@@ -28,6 +28,7 @@ import sapotero.rxtest.db.requery.models.exemplars.RExemplarEntity;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
+import sapotero.rxtest.utils.memory.fields.DocumentType;
 import timber.log.Timber;
 
 // Updates ordinary documents, projects, documents from favorite folder and documents from processed folder
@@ -42,6 +43,7 @@ public class UpdateDocumentJob extends DocumentJob {
   private String filter = null;
   private Boolean forceUpdate    = false;
   private Boolean forceProcessed = false;
+  private DocumentType documentType = DocumentType.DOCUMENT;
 
   private int oldSignerId;
   private int oldRouteId;
@@ -76,6 +78,14 @@ public class UpdateDocumentJob extends DocumentJob {
     this.filter = filter;
 
     this.forceProcessed = forceProcessed;
+    this.forceUpdate = true;
+  }
+
+  public UpdateDocumentJob(String uid, DocumentType documentType) {
+    super( new Params(PRIORITY).requireNetwork().persist() );
+
+    this.uid = uid;
+    this.documentType = documentType;
   }
 
   @Override
@@ -96,6 +106,16 @@ public class UpdateDocumentJob extends DocumentJob {
       .get().firstOrNull();
 
     if ( exist( documentExisting ) ) {
+      // Force update, if document exists and it must be from favorites folder, but is not
+      if ( documentExisting.isFromFavoritesFolder() != null && !documentExisting.isFromFavoritesFolder() && documentType == DocumentType.FAVORITE ) {
+        forceUpdate = true;
+      }
+
+      // Force update, if document exists and it must be from processed folder, but is not
+      if ( documentExisting.isFromProcessedFolder() != null && !documentExisting.isFromProcessedFolder() && documentType == DocumentType.PROCESSED ) {
+        forceUpdate = true;
+      }
+
       if ( !Objects.equals( documentReceived.getMd5(), documentExisting.getMd5() ) || forceUpdate ) {
         Timber.tag(TAG).d( "MD5 not equal %s - %s", documentReceived.getMd5(), documentExisting.getMd5() );
 
@@ -140,6 +160,16 @@ public class UpdateDocumentJob extends DocumentJob {
 
         if ( forceProcessed ) {
           documentExisting.setProcessed( true );
+        }
+
+        if ( documentType == DocumentType.PROCESSED ) {
+          documentExisting.setProcessed( true );
+          documentExisting.setFromProcessedFolder( true );
+        }
+
+        if ( documentType == DocumentType.FAVORITE ) {
+          documentExisting.setFavorites( true );
+          documentExisting.setFromFavoritesFolder( true );
         }
 
         documentExisting.setFromLinks( false );

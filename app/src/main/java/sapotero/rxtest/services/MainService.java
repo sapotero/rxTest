@@ -775,6 +775,8 @@ public class MainService extends Service {
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13017
   // При первом запуске выгружаем все избранные с ЭО
+  // resolved https://tasks.n-core.ru/browse/MVDESD-13609
+  // При первом входе загружать документы из папки избранное и обработанное
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(FolderCreatedEvent event){
     if ( Objects.equals( event.getType(), "favorites" ) ) {
