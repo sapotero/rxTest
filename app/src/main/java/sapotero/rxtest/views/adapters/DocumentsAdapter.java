@@ -35,6 +35,7 @@ import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
+import sapotero.rxtest.utils.memory.utils.Filter;
 import sapotero.rxtest.views.activities.InfoActivity;
 import sapotero.rxtest.views.activities.MainActivity;
 import timber.log.Timber;
@@ -98,7 +99,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
         documents.set( index, doc);
         notifyItemChanged( index,  doc);
 
-        if ( doc.isProcessed()  /*&& !processed*/ ){
+        if ( doc.isProcessed() && !isDisplayProcessed() ) {
           notifyItemRemoved(index);
           Holder.MAP.remove(doc.getUid());
           documents.remove(doc);
@@ -109,15 +110,30 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
       } else {
         Timber.tag(TAG).w("NEW %s", doc.getUid() );
-        if ( !doc.isProcessed() ){
+        // Add new documents if user is still in the same tab,
+        // and add new processed documents only into processed tab or processed folder.
+        if ( doc.isProcessed() == isDisplayProcessed() && settings.isInTheSameTab() ) {
           addItem(doc);
           if (documents.size() > 0 && dbQueryBuilder != null) {
             dbQueryBuilder.hideEmpty();
           }
         }
       }
+
     }
 
+  }
+
+  // True if inside Processed tab or Processed Folder
+  private boolean isDisplayProcessed() {
+    boolean result = false;
+
+    if ( dbQueryBuilder != null && dbQueryBuilder.getConditions() != null ) {
+      Filter filter = new Filter(dbQueryBuilder.getConditions());
+      result = filter.getProcessed();
+    }
+
+    return result;
   }
 
   @Override

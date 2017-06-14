@@ -78,7 +78,6 @@ public class UpdateDocumentJob extends DocumentJob {
     this.filter = filter;
 
     this.forceProcessed = forceProcessed;
-    this.forceUpdate = true;
   }
 
   public UpdateDocumentJob(String uid, DocumentType documentType) {

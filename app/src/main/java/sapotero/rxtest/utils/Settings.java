@@ -39,6 +39,7 @@ public class Settings {
   private static final String STEPPER_AUTH_TYPE_KEY = "stepper.auth_type";
   private static final String FAVORITES_LOADED_KEY = "favorites.loaded";
   private static final String PROCESSED_LOADED_KEY = "processed.loaded";
+  private static final String IN_THE_SAME_TAB_KEY = "in.the.same.tab";
 
   public static String FIRST_RUN_KEY;
   private static String HOST_KEY;
@@ -113,6 +114,7 @@ public class Settings {
   private Preference<Boolean> online;
   private Preference<Boolean> favoritesLoaded;
   private Preference<Boolean> processedLoaded;
+  private Preference<Boolean> inTheSameTab;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -192,6 +194,7 @@ public class Settings {
     online                         = settings.getBoolean(IS_ONLINE);
     favoritesLoaded                = settings.getBoolean(FAVORITES_LOADED_KEY);
     processedLoaded                = settings.getBoolean(PROCESSED_LOADED_KEY);
+    inTheSameTab                   = settings.getBoolean(IN_THE_SAME_TAB_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -597,5 +600,13 @@ public class Settings {
 
   public void setProcessedLoaded(Boolean value) {
     processedLoaded.set(value);
+  }
+
+  public boolean isInTheSameTab() {
+    return getBoolean(inTheSameTab);
+  }
+
+  public void setInTheSameTab(Boolean value) {
+    inTheSameTab.set(value);
   }
 }

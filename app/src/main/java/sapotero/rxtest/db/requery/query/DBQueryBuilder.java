@@ -142,6 +142,7 @@ MemoryStore store;
                   adapter.addItem(doc);
                 }
 
+                settings.setInTheSameTab(true);
               } else {
                 showEmpty();
               }
@@ -406,4 +407,7 @@ MemoryStore store;
     return this;
   }
 
+  public ArrayList<ConditionBuilder> getConditions() {
+    return conditions;
+  }
 }
