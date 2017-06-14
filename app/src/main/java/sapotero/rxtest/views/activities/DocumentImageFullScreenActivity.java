@@ -50,6 +50,7 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity implement
     InfoCardDocumentsFragment fragment = new InfoCardDocumentsFragment();
     fragment.withOutZoom(true);
     fragment.withUid( settings.getUid() );
+    fragment.withIndex( getIntent().getIntExtra( "index", 0 ) );
 
     FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
     fragmentTransaction.add(R.id.activity_document_image_full_screen_wrapper, fragment);

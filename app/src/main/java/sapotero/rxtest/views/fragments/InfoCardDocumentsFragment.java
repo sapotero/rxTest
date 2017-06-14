@@ -74,7 +74,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   @BindView(R.id.fragment_info_card_urgency_title) TextView urgency;
 
 
-  private int index;
+  private int index = 0;
 
   private DocumentLinkAdapter adapter;
   private String uid;
@@ -126,8 +126,6 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     if ( document.getUrgency() != null ){
       urgency.setVisibility(View.VISIBLE);
     }
-
-    index = 0;
 
     if (document.getImages().size() > 0){
       adapter.clear();
@@ -332,6 +330,11 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
   public InfoCardDocumentsFragment withOutZoom(Boolean withOutZoom) {
     this.withOutZoom = withOutZoom;
+    return this;
+  }
+
+  public InfoCardDocumentsFragment withIndex(int index) {
+    this.index = index;
     return this;
   }
 
