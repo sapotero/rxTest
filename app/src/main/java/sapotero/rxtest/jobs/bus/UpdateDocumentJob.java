@@ -105,15 +105,15 @@ public class UpdateDocumentJob extends DocumentJob {
       .get().firstOrNull();
 
     if ( exist( documentExisting ) ) {
-      // Force update, if document exists and it must be from favorites folder, but is not
-      if ( documentExisting.isFromFavoritesFolder() != null && !documentExisting.isFromFavoritesFolder() && documentType == DocumentType.FAVORITE ) {
-        forceUpdate = true;
-      }
-
-      // Force update, if document exists and it must be from processed folder, but is not
-      if ( documentExisting.isFromProcessedFolder() != null && !documentExisting.isFromProcessedFolder() && documentType == DocumentType.PROCESSED ) {
-        forceUpdate = true;
-      }
+//      // Force update, if document exists and it must be from favorites folder, but is not
+//      if ( documentExisting.isFromFavoritesFolder() != null && !documentExisting.isFromFavoritesFolder() && documentType == DocumentType.FAVORITE ) {
+//        forceUpdate = true;
+//      }
+//
+//      // Force update, if document exists and it must be from processed folder, but is not
+//      if ( documentExisting.isFromProcessedFolder() != null && !documentExisting.isFromProcessedFolder() && documentType == DocumentType.PROCESSED ) {
+//        forceUpdate = true;
+//      }
 
       if ( !Objects.equals( documentReceived.getMd5(), documentExisting.getMd5() ) || forceUpdate ) {
         Timber.tag(TAG).d( "MD5 not equal %s - %s", documentReceived.getMd5(), documentExisting.getMd5() );
@@ -161,15 +161,15 @@ public class UpdateDocumentJob extends DocumentJob {
           documentExisting.setProcessed( true );
         }
 
-        if ( documentType == DocumentType.PROCESSED ) {
-          documentExisting.setProcessed( true );
-          documentExisting.setFromProcessedFolder( true );
-        }
-
-        if ( documentType == DocumentType.FAVORITE ) {
-          documentExisting.setFavorites( true );
-          documentExisting.setFromFavoritesFolder( true );
-        }
+//        if ( documentType == DocumentType.PROCESSED ) {
+//          documentExisting.setProcessed( true );
+//          documentExisting.setFromProcessedFolder( true );
+//        }
+//
+//        if ( documentType == DocumentType.FAVORITE ) {
+//          documentExisting.setFavorites( true );
+//          documentExisting.setFromFavoritesFolder( true );
+//        }
 
         documentExisting.setFromLinks( false );
         documentExisting.setChanged( false );
