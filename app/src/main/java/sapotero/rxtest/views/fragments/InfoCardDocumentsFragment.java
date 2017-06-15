@@ -1,5 +1,6 @@
 package sapotero.rxtest.views.fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -47,6 +48,7 @@ import timber.log.Timber;
 
 public class InfoCardDocumentsFragment extends Fragment implements AdapterView.OnItemClickListener, GestureDetector.OnDoubleTapListener {
 
+  public static final int REQUEST_CODE_INDEX = 1;
   @Inject Settings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
@@ -241,11 +243,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     }
     Timber.tag(TAG).i( "AFTER %s - %s", index, adapter.getCount() );
 
-    try {
-      setPdfPreview();
-    } catch (FileNotFoundException e) {
-      Timber.e(e);
-    }
+    showPdf();
   }
 
   @OnClick(R.id.info_card_pdf_fullscreen_next_document)
@@ -258,6 +256,10 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     }
     Timber.tag(TAG).i( "AFTER %s - %s", index, adapter.getCount() );
 
+    showPdf();
+  }
+
+  private void showPdf() {
     try {
       setPdfPreview();
     } catch (FileNotFoundException e) {
@@ -267,8 +269,20 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
   @OnClick(R.id.info_card_pdf_fullscreen_button)
   public void fullscreen() {
+    // Start DocumentImageFullScreenActivity, which uses another instance of this fragment for full screen PDF view.
+    // Index of the image to be shown in full screen is passed via intent.
     Intent intent = DocumentImageFullScreenActivity.newIntent( getContext(), adapter.getItems(), index );
-    startActivity(intent);
+    startActivityForResult(intent, REQUEST_CODE_INDEX);
+  }
+
+  // This is called, when DocumentImageFullScreenActivity returns index of the image shown in full screen
+  // (needed to switch to this image in this instance of the fragment in case the user switched to another image in full screen).
+  @Override
+  public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    if ( resultCode == Activity.RESULT_OK && requestCode == REQUEST_CODE_INDEX && data != null ) {
+      index = DocumentImageFullScreenActivity.getIndexFromIntent( data );
+      showPdf();
+    }
   }
 
   @Override
@@ -333,6 +347,9 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     void onFragmentInteraction(Uri uri);
   }
 
+  public int getIndex() {
+    return index;
+  }
 
 //  @Subscribe(threadMode = ThreadMode.MAIN)
 //  public void onMessageEvent(FileDownloadedEvent event) {

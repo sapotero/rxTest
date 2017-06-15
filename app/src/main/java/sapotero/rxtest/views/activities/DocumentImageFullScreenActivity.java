@@ -46,6 +46,8 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity implement
   private DocumentLinkAdapter adapter;
   private Integer index;
 
+  private InfoCardDocumentsFragment fragment;
+
   public static Intent newIntent(Context context, ArrayList<Image> images, int index) {
     Type listType = new TypeToken<ArrayList<Image>>() {}.getType();
 
@@ -54,6 +56,10 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity implement
     intent.putExtra( EXTRA_INDEX_KEY, index );
 
     return intent;
+  }
+
+  public static int getIndexFromIntent(Intent intent) {
+    return intent.getIntExtra( EXTRA_INDEX_KEY, 0 );
   }
 
   @Override
@@ -66,7 +72,7 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity implement
     ButterKnife.bind(this);
     EsdApplication.getDataComponent().inject(this);
 
-    InfoCardDocumentsFragment fragment = new InfoCardDocumentsFragment();
+    fragment = new InfoCardDocumentsFragment();
     fragment.withOutZoom(true);
     fragment.withUid( settings.getUid() );
     fragment.withIndex( getIntent().getIntExtra( EXTRA_INDEX_KEY, 0 ) );
@@ -78,11 +84,11 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity implement
 
     toolbar.setTitleTextColor(getResources().getColor(R.color.md_black_1000));
     toolbar.setNavigationOnClickListener(v ->{
-        finish();
+        closeActivity();
       }
     );
     toolbar.setOnClickListener(view -> {
-      finish();
+      closeActivity();
     });
 
     Drawable drawable = toolbar.getNavigationIcon();
@@ -93,6 +99,16 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity implement
 
   }
 
+  private void closeActivity() {
+    sendIndexResult();
+    finish();
+  }
+
+  private void sendIndexResult() {
+    Intent intent = new Intent();
+    intent.putExtra( EXTRA_INDEX_KEY, fragment.getIndex() );
+    setResult(RESULT_OK, intent);
+  }
 
   @Override
   public void onFragmentInteraction(Uri uri) {
