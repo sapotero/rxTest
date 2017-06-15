@@ -1,5 +1,7 @@
 package sapotero.rxtest.views.activities;
 
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -10,6 +12,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.widget.FrameLayout;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 import javax.inject.Inject;
@@ -31,11 +37,24 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity implement
 
   @Inject Settings settings;
 
+  public static final String EXTRA_FILES_KEY = "files";
+  public static final String EXTRA_INDEX_KEY = "index";
+
   private String TAG = this.getClass().getSimpleName();
 
   private ArrayList<Image> files = new ArrayList<Image>();
   private DocumentLinkAdapter adapter;
   private Integer index;
+
+  public static Intent newIntent(Context context, ArrayList<Image> images, int index) {
+    Type listType = new TypeToken<ArrayList<Image>>() {}.getType();
+
+    Intent intent = new Intent( context, DocumentImageFullScreenActivity.class);
+    intent.putExtra( EXTRA_FILES_KEY, new Gson().toJson( images, listType ) );
+    intent.putExtra( EXTRA_INDEX_KEY, index );
+
+    return intent;
+  }
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +69,7 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity implement
     InfoCardDocumentsFragment fragment = new InfoCardDocumentsFragment();
     fragment.withOutZoom(true);
     fragment.withUid( settings.getUid() );
-    fragment.withIndex( getIntent().getIntExtra( "index", 0 ) );
+    fragment.withIndex( getIntent().getIntExtra( EXTRA_INDEX_KEY, 0 ) );
 
     FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
     fragmentTransaction.add(R.id.activity_document_image_full_screen_wrapper, fragment);

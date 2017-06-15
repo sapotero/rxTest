@@ -16,14 +16,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.barteksc.pdfviewer.PDFView;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -270,14 +267,8 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
   @OnClick(R.id.info_card_pdf_fullscreen_button)
   public void fullscreen() {
-    Type listType = new TypeToken<ArrayList<Image>>() {}.getType();
-
-    Context context = getContext();
-
-    Intent intent = new Intent( context, DocumentImageFullScreenActivity.class);
-    intent.putExtra( "files", new Gson().toJson( adapter.getItems(), listType ) );
-    intent.putExtra( "index", index );
-    context.startActivity(intent);
+    Intent intent = DocumentImageFullScreenActivity.newIntent( getContext(), adapter.getItems(), index );
+    startActivity(intent);
   }
 
   @Override
