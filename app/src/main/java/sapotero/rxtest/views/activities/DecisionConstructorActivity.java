@@ -339,9 +339,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
           break;
         case R.id.action_constructor_add_block:
           manager.getDecisionBuilder().addBlock();
-
-//          scroll.fullScroll(ScrollView.FOCUS_DOWN);
-
           break;
 
         case R.id.action_constructor_next:

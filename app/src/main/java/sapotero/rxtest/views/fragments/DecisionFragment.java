@@ -111,6 +111,8 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   private int lastUpdate = -1;
   private String fontSize;
 
+  private boolean scrollTo = false;
+
   public void setBlockFactory(BlockFactory blockFactory) {
     this.blockFactory = blockFactory;
   }
@@ -350,6 +352,8 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     return view;
   }
 
+
+
   private void updateAppeal() {
     block.setAskToReport(forReport);
     block.setAskToAcquaint(forAcquaint);
@@ -512,6 +516,14 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
       mSpeechRecognized = false;
       new Handler().postDelayed(() -> setQuery(mQuery, true), SPEECH_RECOGNITION_DELAY);
     }
+
+    if ( scrollTo ) {
+      View view = getView();
+
+      if (view != null) {
+        view.getParent().requestChildFocus(view, view);
+      }
+    }
   }
   public void setQuery(@NonNull String query, boolean submit) {
     this.mQuery = query;
@@ -625,5 +637,9 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     Timber.tag("ADD template").e("onSelectTemplate %s", template);
     decision_text.setText( template );
 
+  }
+
+  public void withScrollTo(boolean scrollTo) {
+    this.scrollTo = scrollTo;
   }
 }

@@ -71,6 +71,7 @@ public class BlockFactory implements DecisionInterface, DecisionFragment.Callbac
     bundle.putString( "block", gson.toJson(block) );
 
     fragment.setArguments(bundle);
+    fragment.withScrollTo(true);
 
     transaction.add(R.id.decisions_container, fragment );
     transaction.commit();
