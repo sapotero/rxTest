@@ -58,10 +58,6 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity implement
     return intent;
   }
 
-  public static int getIndexFromIntent(Intent intent) {
-    return intent.getIntExtra( EXTRA_INDEX_KEY, 0 );
-  }
-
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     setTheme(R.style.AppTheme);
@@ -75,7 +71,6 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity implement
     fragment = new InfoCardDocumentsFragment();
     fragment.withOutZoom(true);
     fragment.withUid( settings.getUid() );
-    fragment.withIndex( getIntent().getIntExtra( EXTRA_INDEX_KEY, 0 ) );
 
     FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
     fragmentTransaction.add(R.id.activity_document_image_full_screen_wrapper, fragment);
@@ -100,14 +95,8 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity implement
   }
 
   private void closeActivity() {
-    sendIndexResult();
+    setResult(RESULT_OK);
     finish();
-  }
-
-  private void sendIndexResult() {
-    Intent intent = new Intent();
-    intent.putExtra( EXTRA_INDEX_KEY, fragment.getIndex() );
-    setResult(RESULT_OK, intent);
   }
 
   @Override

@@ -72,7 +72,6 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
   @BindView(R.id.fragment_info_card_urgency_title) TextView urgency;
 
-
   private int index = 0;
 
   private DocumentLinkAdapter adapter;
@@ -126,6 +125,8 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
       urgency.setVisibility(View.VISIBLE);
     }
 
+    index = settings.getImageIndex();
+
     if (document.getImages().size() > 0){
       adapter.clear();
 
@@ -155,11 +156,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
         adapter.add( image );
       }
 
-      try {
-        setPdfPreview();
-      } catch (FileNotFoundException e) {
-        Timber.e(e);
-      }
+      showPdf();
 
       no_files.setVisibility(View.GONE);
       pdf_wrapper.setVisibility(View.VISIBLE);
@@ -243,6 +240,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     }
     Timber.tag(TAG).i( "AFTER %s - %s", index, adapter.getCount() );
 
+    settings.setImageIndex( index );
     showPdf();
   }
 
@@ -256,6 +254,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     }
     Timber.tag(TAG).i( "AFTER %s - %s", index, adapter.getCount() );
 
+    settings.setImageIndex( index );
     showPdf();
   }
 
@@ -270,17 +269,16 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   @OnClick(R.id.info_card_pdf_fullscreen_button)
   public void fullscreen() {
     // Start DocumentImageFullScreenActivity, which uses another instance of this fragment for full screen PDF view.
-    // Index of the image to be shown in full screen is passed via intent.
     Intent intent = DocumentImageFullScreenActivity.newIntent( getContext(), adapter.getItems(), index );
     startActivityForResult(intent, REQUEST_CODE_INDEX);
   }
 
-  // This is called, when DocumentImageFullScreenActivity returns index of the image shown in full screen
-  // (needed to switch to this image in this instance of the fragment in case the user switched to another image in full screen).
+  // This is called, when DocumentImageFullScreenActivity returns
+  // (needed to switch to the image shown in full screen).
   @Override
   public void onActivityResult(int requestCode, int resultCode, Intent data) {
-    if ( resultCode == Activity.RESULT_OK && requestCode == REQUEST_CODE_INDEX && data != null ) {
-      index = DocumentImageFullScreenActivity.getIndexFromIntent( data );
+    if ( resultCode == Activity.RESULT_OK && requestCode == REQUEST_CODE_INDEX ) {
+      index = settings.getImageIndex();
       showPdf();
     }
   }
@@ -338,17 +336,8 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     return this;
   }
 
-  public InfoCardDocumentsFragment withIndex(int index) {
-    this.index = index;
-    return this;
-  }
-
   public interface OnFragmentInteractionListener {
     void onFragmentInteraction(Uri uri);
-  }
-
-  public int getIndex() {
-    return index;
   }
 
 //  @Subscribe(threadMode = ThreadMode.MAIN)

@@ -40,6 +40,7 @@ public class Settings {
   private static final String FAVORITES_LOADED_KEY = "favorites.loaded";
   private static final String PROCESSED_LOADED_KEY = "processed.loaded";
   private static final String IN_THE_SAME_TAB_KEY = "in.the.same.tab";
+  private static final String IMAGE_INDEX_KEY = "image.index";
 
   public static String FIRST_RUN_KEY;
   private static String HOST_KEY;
@@ -115,6 +116,7 @@ public class Settings {
   private Preference<Boolean> favoritesLoaded;
   private Preference<Boolean> processedLoaded;
   private Preference<Boolean> inTheSameTab;
+  private Preference<Integer> imageIndex;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -195,6 +197,7 @@ public class Settings {
     favoritesLoaded                = settings.getBoolean(FAVORITES_LOADED_KEY);
     processedLoaded                = settings.getBoolean(PROCESSED_LOADED_KEY);
     inTheSameTab                   = settings.getBoolean(IN_THE_SAME_TAB_KEY);
+    imageIndex                     = settings.getInteger(IMAGE_INDEX_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -608,5 +611,13 @@ public class Settings {
 
   public void setInTheSameTab(Boolean value) {
     inTheSameTab.set(value);
+  }
+
+  public int getImageIndex() {
+    return getInteger(imageIndex);
+  }
+
+  public void setImageIndex(int value) {
+    setInteger(imageIndex, value);
   }
 }
