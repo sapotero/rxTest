@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.FileProvider;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -82,8 +83,8 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   private String uid;
   private Boolean withOutZoom = false;
 
+  private File file;
   private String contentType;
-  private Uri filePath;
 
   public InfoCardDocumentsFragment() {
   }
@@ -181,8 +182,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     contentType = image.getContentType();
     document_title.setText( image.getTitle() );
 
-    File file = new File(getContext().getFilesDir(), String.format( "%s_%s", image.getMd5(), image.getTitle() ));
-    filePath = Uri.fromFile(file);
+    file = new File(getContext().getFilesDir(), String.format( "%s_%s", image.getMd5(), image.getTitle() ));
 
     if ( Objects.equals(contentType, "application/pdf") ) {
       InputStream targetStream = new FileInputStream(file);
@@ -371,9 +371,25 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 //    }
 //  }
 
+  // resolved https://tasks.n-core.ru/browse/MVDESD-13415
+  // Если ЭО имеет формат, отличный от PDF, предлагать открыть во внешнем приложении
   @OnClick(R.id.open_in_another_app)
   public void openInAnotherApp() {
+    if ( file != null && contentType != null) {
+      Uri contentUri = FileProvider.getUriForFile(getContext(), "sed.mobile.fileprovider", file);
+      Intent intent = new Intent();
+      intent.setAction(Intent.ACTION_VIEW);
+      intent.setDataAndType(contentUri, contentType);
+      intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
+      Intent chooser = Intent.createChooser(intent, "Открыть с помощью");
+
+      if (intent.resolveActivity(getContext().getPackageManager()) != null) {
+        startActivity(chooser);
+      } else {
+        Toast.makeText(getContext(), "Подходящие приложения не установлены", Toast.LENGTH_SHORT).show();
+      }
+    }
   }
 
 }
