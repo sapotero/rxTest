@@ -56,7 +56,6 @@ import sapotero.rxtest.db.requery.query.DBQueryBuilder;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.bus.GetDocumentInfoEvent;
 import sapotero.rxtest.events.service.CheckNetworkEvent;
-import sapotero.rxtest.events.service.CheckNetworkResultEvent;
 import sapotero.rxtest.events.utils.RecalculateMenuEvent;
 import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
 import sapotero.rxtest.managers.DataLoaderManager;
@@ -394,10 +393,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     Intent serviceIntent = new Intent(this, MainService.class);
     startService(serviceIntent);
-
-    if (subscription == null){
-      subscription = new CompositeSubscription();
-    }
   }
 
   private void updateByStatus() {
@@ -411,6 +406,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     super.onResume();
     initEvents();
     startNetworkCheck();
+    subscribeToNetworkCheckResults();
 
 //    EventBus.getDefault().post( new RecalculateMenuEvent());
 
@@ -424,11 +420,41 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     EventBus.getDefault().post(new CheckNetworkEvent( false ));
   }
 
+  // resolved https://tasks.n-core.ru/browse/MVDESD-13314
+  // Обновление иконки В сети / Не в сети
+  private void subscribeToNetworkCheckResults() {
+    unsubscribe();
+    subscription = new CompositeSubscription();
+
+    subscription.add(
+      settings.getOnlinePreference()
+        .asObservable()
+        .subscribe(
+          isOnline -> {
+            boolean isConnectedToInternet = isOnline != null ? isOnline : false;
+            try {
+              toolbar.getMenu().findItem(R.id.online).setTitle( isConnectedToInternet ? R.string.is_online : R.string.is_offline );
+              toolbar.getMenu().findItem(R.id.online).setIcon(  isConnectedToInternet ? R.drawable.icon_online : R.drawable.icon_offline );
+            } catch (Exception e) {
+              Timber.tag(TAG).e(e);
+            }
+          },
+          Timber::e
+        )
+    );
+  }
+
+  private void unsubscribe() {
+    if ( subscription != null && subscription.hasSubscriptions() ) {
+      subscription.unsubscribe();
+    }
+  }
 
   @Override
   protected void onPause() {
     super.onPause();
     stopNetworkCheck();
+    unsubscribe();
   }
 
   @Override
@@ -743,20 +769,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     if (menuBuilder != null) {
       Timber.tag(TAG).i("RecalculateMenuEvent");
       menuBuilder.invalidate();
-    }
-  }
-
-  // resolved https://tasks.n-core.ru/browse/MVDESD-13314
-  // Обновление иконки В сети / Не в сети
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(CheckNetworkResultEvent event) {
-    boolean isConnectedToInternet = event.isConnected();
-
-    try {
-      toolbar.getMenu().findItem(R.id.online).setTitle( isConnectedToInternet ? R.string.is_online : R.string.is_offline );
-      toolbar.getMenu().findItem(R.id.online).setIcon(  isConnectedToInternet ? R.drawable.icon_online : R.drawable.icon_offline );
-    } catch (Exception e) {
-      e.printStackTrace();
     }
   }
 }

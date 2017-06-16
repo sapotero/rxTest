@@ -586,7 +586,11 @@ public class Settings {
   }
 
   public void setOnline(Boolean value) {
-    online.set(value);
+    setBoolean(online, value);
+  }
+
+  public Preference<Boolean> getOnlinePreference() {
+    return online;
   }
 
   public boolean isFavoritesLoaded() {
@@ -594,7 +598,7 @@ public class Settings {
   }
 
   public void setFavoritesLoaded(Boolean value) {
-    favoritesLoaded.set(value);
+    setBoolean(favoritesLoaded, value);
   }
 
   public boolean isProcessedLoaded() {
@@ -602,7 +606,7 @@ public class Settings {
   }
 
   public void setProcessedLoaded(Boolean value) {
-    processedLoaded.set(value);
+    setBoolean(processedLoaded, value);
   }
 
   public boolean isInTheSameTab() {
@@ -610,7 +614,7 @@ public class Settings {
   }
 
   public void setInTheSameTab(Boolean value) {
-    inTheSameTab.set(value);
+    setBoolean(inTheSameTab, value);
   }
 
   public int getImageIndex() {
