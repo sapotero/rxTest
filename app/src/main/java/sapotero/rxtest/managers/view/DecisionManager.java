@@ -117,6 +117,7 @@ public class DecisionManager implements DecisionInterface, DecisionBuilder.Callb
       block.setNumber( null );
       block.setToCopy( null );
       block.setToFamiliarization( null );
+      block.setFontSize( null );
 
       for ( Performer performer : nullGuard( block.getPerformers() ) ) {
         if ( performer.getIsOriginal() == null ) {
