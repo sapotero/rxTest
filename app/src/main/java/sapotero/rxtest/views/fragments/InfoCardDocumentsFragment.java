@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,6 +26,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -72,12 +74,16 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
   @BindView(R.id.fragment_info_card_urgency_title) TextView urgency;
 
+  @BindView(R.id.open_in_another_app_wrapper) LinearLayout open_in_another_app_wrapper;
+
   private int index = 0;
 
   private DocumentLinkAdapter adapter;
   private String uid;
   private Boolean withOutZoom = false;
 
+  private String contentType;
+  private Uri filePath;
 
   public InfoCardDocumentsFragment() {
   }
@@ -164,6 +170,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     } else {
       no_files.setVisibility(View.VISIBLE);
       pdf_wrapper.setVisibility(View.GONE);
+      open_in_another_app_wrapper.setVisibility(View.GONE);
     }
 
   }
@@ -171,49 +178,59 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   private void setPdfPreview() throws FileNotFoundException {
 
     Image image = adapter.getItem(index);
-
+    contentType = image.getContentType();
     document_title.setText( image.getTitle() );
 
     File file = new File(getContext().getFilesDir(), String.format( "%s_%s", image.getMd5(), image.getTitle() ));
+    filePath = Uri.fromFile(file);
 
-    InputStream targetStream = new FileInputStream(file);
+    if ( Objects.equals(contentType, "application/pdf") ) {
+      InputStream targetStream = new FileInputStream(file);
 
-    if (file.exists()){
-      pdfView
-        .fromStream( targetStream )
-//        .fromFile( file )
-        .enableSwipe(true)
-        .enableDoubletap(true)
-        .defaultPage(0)
-        .swipeHorizontal(false)
-        .onRender((nbPages, pageWidth, pageHeight) -> pdfView.fitToWidth())
-        .onLoad(nbPages -> {
-          Timber.tag(TAG).i(" onLoad");
-        })
-        .onError(t -> {
-          Timber.tag(TAG).i(" onError");
-        })
-        .onDraw((canvas, pageWidth, pageHeight, displayedPage) -> {
-          Timber.tag(TAG).i(" onDraw");
-        })
-        .onPageChange((page, pageCount) -> {
-          Timber.tag(TAG).i(" onPageChange");
-          updatePageCount();
-        })
-        .enableAnnotationRendering(true)
-        .scrollHandle(null)
-        .load();
+      if (file.exists()) {
+        pdfView
+          .fromStream(targetStream)
+//         .fromFile( file )
+          .enableSwipe(true)
+          .enableDoubletap(true)
+          .defaultPage(0)
+          .swipeHorizontal(false)
+          .onRender((nbPages, pageWidth, pageHeight) -> pdfView.fitToWidth())
+          .onLoad(nbPages -> {
+            Timber.tag(TAG).i(" onLoad");
+          })
+          .onError(t -> {
+            Timber.tag(TAG).i(" onError");
+          })
+          .onDraw((canvas, pageWidth, pageHeight, displayedPage) -> {
+            Timber.tag(TAG).i(" onDraw");
+          })
+          .onPageChange((page, pageCount) -> {
+            Timber.tag(TAG).i(" onPageChange");
+            updatePageCount();
+          })
+          .enableAnnotationRendering(true)
+          .scrollHandle(null)
+          .load();
+
 //        pdfView.useBestQuality(true);
-//        pdfView.
+//        pdfView.setDrawingCacheEnabled(true);
+//        pdfView.stopFling();
+      }
 
-//      pdfView.setDrawingCacheEnabled(true);
-//      pdfView.stopFling();
+      pdfView.setVisibility(View.VISIBLE);
+      open_in_another_app_wrapper.setVisibility(View.GONE);
+      page_counter.setVisibility(View.VISIBLE);
 
-      updateDocumentCount();
-      updatePageCount();
-      updateZoomVisibility();
-
+    } else {
+      pdfView.setVisibility(View.GONE);
+      open_in_another_app_wrapper.setVisibility(View.VISIBLE);
+      page_counter.setVisibility(View.INVISIBLE);
     }
+
+    updateDocumentCount();
+    updatePageCount();
+    updateZoomVisibility();
   }
 
   private void updateZoomVisibility() {
@@ -354,5 +371,9 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 //    }
 //  }
 
+  @OnClick(R.id.open_in_another_app)
+  public void openInAnotherApp() {
+
+  }
 
 }

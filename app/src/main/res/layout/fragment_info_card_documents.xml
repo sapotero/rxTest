@@ -29,6 +29,33 @@
             android:layout_margin="@dimen/half_date_offset"
             />
 
+        <LinearLayout
+            android:id="@+id/open_in_another_app_wrapper"
+            android:visibility="gone"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <TextView
+                android:id="@+id/info_card_pdf_cannot_open"
+                android:text="@string/cannot_open_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
+
+            <Button
+                android:id="@+id/open_in_another_app"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:text="@string/open_in_another_app"
+                style="@style/Widget.AppCompat.Button.Borderless">
+            </Button>
+
+        </LinearLayout>
+
         <FrameLayout
             android:id="@+id/info_card_pdf_wrapper"
             android:layout_width="match_parent"
