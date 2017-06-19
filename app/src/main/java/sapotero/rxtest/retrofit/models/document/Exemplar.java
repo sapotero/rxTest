@@ -27,7 +27,7 @@ public class Exemplar {
     @SerializedName("date")
     @Expose
     private String date;
-    @SerializedName("byStatus")
+    @SerializedName("statuses")
     @Expose
     private List<Status> statuses = new ArrayList<Status>();
 

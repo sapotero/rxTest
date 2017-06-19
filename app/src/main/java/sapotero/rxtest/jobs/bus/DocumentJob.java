@@ -180,7 +180,7 @@ abstract class DocumentJob extends BaseJob {
   }
 
   // Return empty list if input list is null
-  private <T> List<T> nullGuard(List<T> list) {
+  public <T> List<T> nullGuard(List<T> list) {
     return list != null ? list : Collections.EMPTY_LIST;
   }
 

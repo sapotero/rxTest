@@ -9,6 +9,7 @@ import com.birbit.android.jobqueue.RetryConstraint;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.List;
 import java.util.Objects;
 
 import sapotero.rxtest.db.mapper.DocumentMapper;
@@ -28,6 +29,8 @@ import sapotero.rxtest.db.requery.models.exemplars.RExemplarEntity;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
+import sapotero.rxtest.retrofit.models.document.Exemplar;
+import sapotero.rxtest.retrofit.models.document.Status;
 import sapotero.rxtest.utils.memory.fields.DocumentType;
 import timber.log.Timber;
 
@@ -152,8 +155,22 @@ public class UpdateDocumentJob extends DocumentJob {
           isSetProcessedFalse = false;
         }
 
+        // Если текущий статус какого-либо экземпляра адресован текущему пользователю, то убрать из обработанных
+        // (например, документ возвращен текущему пользователю после отклонения)
+        for (Exemplar exemplar : nullGuard( documentReceived.getExemplars() ) ) {
+          List<Status> statuses = exemplar.getStatuses();
+          if ( notEmpty( statuses ) ) {
+            Status currentStatus = statuses.get( statuses.size() - 1 );
+            if ( Objects.equals( currentStatus.getAddressedToId(), settings.getCurrentUserId() ) ) {
+              isSetProcessedFalse = true;
+              break;
+            }
+          }
+        }
+
         if ( isSetProcessedFalse ) {
-          // если прилетело обновление и документ не из папки обработанных и указаны статус или журнал и хотя бы один из них изменился - уберем из обработанных
+          // если прилетело обновление и документ не из папки обработанных и указаны статус или журнал и хотя бы один из них изменился
+          // или документ после обновления адресован текущему пользователю - уберем из обработанных
           documentExisting.setProcessed( false );
         }
 
