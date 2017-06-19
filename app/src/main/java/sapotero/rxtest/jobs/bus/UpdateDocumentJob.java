@@ -155,16 +155,16 @@ public class UpdateDocumentJob extends DocumentJob {
           isSetProcessedFalse = false;
         }
 
-        // Если документ адресован текущему пользователю, то убрать из обработанных
-        // (например, документ возвращен текущему пользователю после отклонения)
-        if ( addressedToCurrentUser( documentReceived ) ) {
-          isSetProcessedFalse = true;
+        if ( isSetProcessedFalse ) {
+          // если прилетело обновление и документ не из папки обработанных и указаны статус или журнал и хотя бы один из них изменился - уберем из обработанных
+          documentExisting.setProcessed( false );
         }
 
-        if ( isSetProcessedFalse ) {
-          // если прилетело обновление и документ не из папки обработанных и указаны статус или журнал и хотя бы один из них изменился
-          // или документ после обновления адресован текущему пользователю - уберем из обработанных
+        // Если документ адресован текущему пользователю, то убрать из обработанных и из папки обработанных
+        // (например, документ возвращен текущему пользователю после отклонения)
+        if ( addressedToCurrentUser( documentReceived ) ) {
           documentExisting.setProcessed( false );
+          documentExisting.setFromProcessedFolder( false );
         }
 
         if ( forceProcessed ) {
