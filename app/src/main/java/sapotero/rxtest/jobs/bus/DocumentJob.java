@@ -42,7 +42,7 @@ abstract class DocumentJob extends BaseJob {
   }
 
   public String getJournalName(String journal) {
-    String journalName = "";
+    String journalName = null;
 
     if ( exist( journal ) ) {
       String[] index = journal.split("_production_db_");
