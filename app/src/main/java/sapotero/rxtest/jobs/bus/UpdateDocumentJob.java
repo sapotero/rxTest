@@ -155,17 +155,10 @@ public class UpdateDocumentJob extends DocumentJob {
           isSetProcessedFalse = false;
         }
 
-        // Если текущий статус какого-либо экземпляра адресован текущему пользователю, то убрать из обработанных
+        // Если документ адресован текущему пользователю, то убрать из обработанных
         // (например, документ возвращен текущему пользователю после отклонения)
-        for (Exemplar exemplar : nullGuard( documentReceived.getExemplars() ) ) {
-          List<Status> statuses = exemplar.getStatuses();
-          if ( notEmpty( statuses ) ) {
-            Status currentStatus = statuses.get( statuses.size() - 1 );
-            if ( Objects.equals( currentStatus.getAddressedToId(), settings.getCurrentUserId() ) ) {
-              isSetProcessedFalse = true;
-              break;
-            }
-          }
+        if ( addressedToCurrentUser( documentReceived ) ) {
+          isSetProcessedFalse = true;
         }
 
         if ( isSetProcessedFalse ) {

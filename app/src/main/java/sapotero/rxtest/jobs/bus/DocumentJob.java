@@ -7,6 +7,7 @@ import org.greenrobot.eventbus.EventBus;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import retrofit2.Retrofit;
@@ -24,7 +25,9 @@ import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Card;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
+import sapotero.rxtest.retrofit.models.document.Exemplar;
 import sapotero.rxtest.retrofit.models.document.Route;
+import sapotero.rxtest.retrofit.models.document.Status;
 import sapotero.rxtest.retrofit.models.document.Step;
 import timber.log.Timber;
 
@@ -180,7 +183,7 @@ abstract class DocumentJob extends BaseJob {
   }
 
   // Return empty list if input list is null
-  public <T> List<T> nullGuard(List<T> list) {
+  private <T> List<T> nullGuard(List<T> list) {
     return list != null ? list : Collections.EMPTY_LIST;
   }
 
@@ -189,5 +192,23 @@ abstract class DocumentJob extends BaseJob {
       addPrefJobCount(1);
       jobManager.addJobInBackground( new CreateLinksJob( linkUid, parentUid, saveFirstLink ) );
     }
+  }
+
+  // True, если текущий статус какого-либо экземпляра адресован текущему пользователю
+  boolean addressedToCurrentUser(DocumentInfo document) {
+    boolean result = false;
+
+    for (Exemplar exemplar : nullGuard( document.getExemplars() ) ) {
+      List<Status> statuses = exemplar.getStatuses();
+      if ( notEmpty( statuses ) ) {
+        Status currentStatus = statuses.get( statuses.size() - 1 );
+        if ( Objects.equals( currentStatus.getAddressedToId(), settings.getCurrentUserId() ) ) {
+          result = true;
+          break;
+        }
+      }
+    }
+
+    return result;
   }
 }
