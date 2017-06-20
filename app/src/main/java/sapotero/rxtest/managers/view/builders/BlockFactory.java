@@ -152,7 +152,6 @@ public class BlockFactory implements DecisionInterface, DecisionFragment.Callbac
   @Override
   public void onUpdateSuccess(int lastUpdated) {
 
-    Decision _temp_dec = getDecision();
     int originCount = 0;
 
     for (DecisionFragment block: blocks) {
@@ -175,6 +174,8 @@ public class BlockFactory implements DecisionInterface, DecisionFragment.Callbac
 
     }
 
+    // Save block changes into decision
+    getDecision();
 
     Timber.tag(TAG).i("onUpdateSuccess");
     if (callback != null){
