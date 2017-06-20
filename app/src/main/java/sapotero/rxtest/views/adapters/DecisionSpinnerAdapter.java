@@ -62,7 +62,7 @@ public class DecisionSpinnerAdapter extends BaseAdapter {
 
   @Override
   public DecisionSpinnerItem getItem(int position) {
-    return decisions.get(position);
+    return position >= 0 && position <= decisions.size() - 1 ? decisions.get(position) : decisions.get(0);
   }
 
   public void add(DecisionSpinnerItem item) {
