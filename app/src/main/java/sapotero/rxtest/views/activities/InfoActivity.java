@@ -518,4 +518,9 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
       subscription.clear();
     }
   }
+
+  @Override
+  public void onBackPressed() {
+    finish();
+  }
 }
