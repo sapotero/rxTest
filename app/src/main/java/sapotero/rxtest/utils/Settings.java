@@ -41,6 +41,7 @@ public class Settings {
   private static final String PROCESSED_LOADED_KEY = "processed.loaded";
   private static final String IN_THE_SAME_TAB_KEY = "in.the.same.tab";
   private static final String IMAGE_INDEX_KEY = "image.index";
+  private static final String UNAUTHORIZED_KEY = "user.unauthorized";
 
   public static String FIRST_RUN_KEY;
   private static String HOST_KEY;
@@ -117,6 +118,7 @@ public class Settings {
   private Preference<Boolean> processedLoaded;
   private Preference<Boolean> inTheSameTab;
   private Preference<Integer> imageIndex;
+  private Preference<Boolean> unauthorized;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -198,6 +200,7 @@ public class Settings {
     processedLoaded                = settings.getBoolean(PROCESSED_LOADED_KEY);
     inTheSameTab                   = settings.getBoolean(IN_THE_SAME_TAB_KEY);
     imageIndex                     = settings.getInteger(IMAGE_INDEX_KEY);
+    unauthorized                   = settings.getBoolean(UNAUTHORIZED_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -623,5 +626,17 @@ public class Settings {
 
   public void setImageIndex(int value) {
     setInteger(imageIndex, value);
+  }
+
+  public boolean isUnauthorized() {
+    return getBoolean(unauthorized);
+  }
+
+  public void setUnauthorized(Boolean value) {
+    setBoolean(unauthorized, value);
+  }
+
+  public Preference<Boolean> getUnauthorizedPreference() {
+    return unauthorized;
   }
 }

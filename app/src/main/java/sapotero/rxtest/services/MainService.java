@@ -163,6 +163,8 @@ public class MainService extends Service {
 
         initScheduller();
 
+        startObserveUnauthorized();
+
       }, Timber::e);
   }
 
@@ -184,6 +186,23 @@ public class MainService extends Service {
 
     scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 5*60 ,5*60, TimeUnit.SECONDS );
     scheduller.scheduleWithFixedDelay( new UpdateQueueTask(queue), 0 ,5, TimeUnit.SECONDS );
+  }
+
+  // resolved https://tasks.n-core.ru/browse/MVDESD-13625
+  // Если не авторизовано, то заново логиниться
+  private void startObserveUnauthorized() {
+    // Preference value is set inside OkHttp interceptor
+    settings.getUnauthorizedPreference()
+      .asObservable()
+      .subscribe(value -> {
+        boolean isUnauthorized = value != null ? value : false;
+        if ( isUnauthorized ) {
+          Timber.tag(TAG).d("Unauthorized, logging in");
+          dataLoaderInterface.updateAuth(SIGN);
+        }
+      },
+        Timber::e
+      );
   }
 
   public int onStartCommand(Intent intent, int flags, int startId) {

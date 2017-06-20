@@ -54,6 +54,12 @@ public class OkHttpModule {
             settings.setOnline(false);
           }
 
+          if ( response.code() == HttpURLConnection.HTTP_UNAUTHORIZED ) {
+            settings.setUnauthorized(true);
+          } else {
+            settings.setUnauthorized(false);
+          }
+
           return response;
         })
       .build();
