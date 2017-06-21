@@ -2,11 +2,13 @@ package sapotero.rxtest.managers.menu.commands;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import retrofit2.Retrofit;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.services.MainService;
@@ -63,7 +65,13 @@ public abstract class ApprovalSigningCommand extends AbstractCommand {
 
           onRemoteSuccess();
 
-          queueManager.setExecutedRemote(this);
+          if (data.getMessage() != null && !data.getMessage().toLowerCase().contains("успешно") ) {
+            List<String> errorList = new ArrayList<>();
+            errorList.add(data.getMessage());
+            queueManager.setExecutedWithError(this, errorList );
+          } else {
+            queueManager.setExecutedRemote(this);
+          }
 
           store.process(
             store.startTransactionFor( uid )
@@ -71,6 +79,13 @@ public abstract class ApprovalSigningCommand extends AbstractCommand {
               .setField(FieldType.MD5, "")
               .setState(InMemoryState.READY)
           );
+
+          dataStore
+            .update(RDocumentEntity.class)
+            .set( RDocumentEntity.CHANGED, false)
+            .where(RDocumentEntity.UID.eq(uid))
+            .get()
+            .value();
         },
         error -> {
           if (callback != null) {
@@ -84,6 +99,14 @@ public abstract class ApprovalSigningCommand extends AbstractCommand {
                 .setField(FieldType.PROCESSED, false)
                 .setState(InMemoryState.READY)
             );
+
+            dataStore
+              .update(RDocumentEntity.class)
+              .set( RDocumentEntity.PROCESSED, false)
+              .set( RDocumentEntity.CHANGED, false)
+              .where(RDocumentEntity.UID.eq(uid))
+              .get()
+              .value();
 
             queueManager.setExecutedWithError(this, Collections.singletonList(error.getLocalizedMessage()));
           }

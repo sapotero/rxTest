@@ -68,6 +68,7 @@ public class ChangePerson extends ApprovalSigningCommand {
       .update(RDocumentEntity.class)
       .set( RDocumentEntity.MD5, "" )
       .set( RDocumentEntity.PROCESSED, true)
+      .set( RDocumentEntity.CHANGED, true)
       .where(RDocumentEntity.UID.eq(uid))
       .get()
       .value();
