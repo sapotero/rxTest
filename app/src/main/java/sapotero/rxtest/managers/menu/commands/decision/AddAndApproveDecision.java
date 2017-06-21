@@ -26,6 +26,7 @@ import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
 import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.memory.fields.FieldType;
+import sapotero.rxtest.utils.memory.fields.InMemoryState;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
@@ -60,6 +61,7 @@ public class AddAndApproveDecision extends AbstractCommand {
     store.process(
       store.startTransactionFor( params.getDocument() )
         .setLabel(LabelType.SYNC)
+        .setState(InMemoryState.LOADING)
     );
   }
 
@@ -194,21 +196,16 @@ public class AddAndApproveDecision extends AbstractCommand {
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         data -> {
+          store.process(
+            store.startTransactionFor( params.getDocument() )
+              .removeLabel(LabelType.SYNC)
+              .setState(InMemoryState.READY)
+          );
+
           if (data.getErrors() !=null && data.getErrors().size() > 0){
             queueManager.setExecutedWithError(this, data.getErrors());
-
-            store.process(
-              store.startTransactionFor( params.getDocument() )
-                .removeLabel(LabelType.SYNC)
-            );
-
           } else {
-            store.process(
-              store.startTransactionFor(params.getDocument())
-                .removeLabel(LabelType.SYNC)
-            );
             queueManager.setExecutedRemote(this);
-
             checkCreatorAndSignerIsCurrentUser(data, TAG);
           }
 
@@ -223,6 +220,7 @@ public class AddAndApproveDecision extends AbstractCommand {
               store.startTransactionFor( params.getDocument() )
                 .removeLabel(LabelType.SYNC)
                 .setField(FieldType.PROCESSED, false)
+                .setState(InMemoryState.READY)
             );
             queueManager.setExecutedWithError(this, Collections.singletonList(error.getLocalizedMessage()));
 
