@@ -169,6 +169,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         sapotero.rxtest.managers.menu.commands.approval.NextPerson command = new sapotero.rxtest.managers.menu.commands.approval.NextPerson(document);
         command.withParams(params);
         command
+          .withPerson( "" )
           .registerCallBack(instance);
         command.withParams(params);
         return command;
@@ -216,6 +217,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         sapotero.rxtest.managers.menu.commands.signing.NextPerson command = new sapotero.rxtest.managers.menu.commands.signing.NextPerson(document);
         command.withParams(params);
         command
+          .withPerson( "" )
           .registerCallBack(instance);
         command.withParams(params);
         return command;

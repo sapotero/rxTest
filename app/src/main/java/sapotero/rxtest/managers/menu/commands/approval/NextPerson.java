@@ -2,15 +2,10 @@ package sapotero.rxtest.managers.menu.commands.approval;
 
 import org.greenrobot.eventbus.EventBus;
 
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.ApprovalSigningCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
-import sapotero.rxtest.managers.menu.utils.CommandParams;
-import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.utils.memory.fields.FieldType;
 import sapotero.rxtest.utils.memory.fields.InMemoryState;
 import sapotero.rxtest.utils.memory.fields.LabelType;
@@ -95,9 +90,5 @@ public class NextPerson extends ApprovalSigningCommand {
 
   @Override
   protected void onRemoteSuccess() {
-  }
-
-  private RDocumentEntity getDocument(String uid){
-    return dataStore.select(RDocumentEntity.class).where(RDocumentEntity.UID.eq(uid)).get().firstOrNull();
   }
 }

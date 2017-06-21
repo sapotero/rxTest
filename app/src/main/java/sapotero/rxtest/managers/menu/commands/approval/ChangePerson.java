@@ -2,17 +2,10 @@ package sapotero.rxtest.managers.menu.commands.approval;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.util.Collections;
-
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.ApprovalSigningCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
-import sapotero.rxtest.managers.menu.utils.CommandParams;
-import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.utils.memory.fields.FieldType;
 import sapotero.rxtest.utils.memory.fields.InMemoryState;
 import sapotero.rxtest.utils.memory.fields.LabelType;
@@ -80,9 +73,6 @@ public class ChangePerson extends ApprovalSigningCommand {
       .value();
 
     queueManager.setExecutedLocal(this);
-
-//    store.setLabel(LabelType.SYNC ,uid);
-//    store.setField(FieldType.PROCESSED ,true ,uid);
 
     if (callback != null ){
       callback.onCommandExecuteSuccess( getType() );
