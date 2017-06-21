@@ -109,8 +109,6 @@ public class ButtonBuilder {
 
   private void getCountWithDecisons() {
 
-    settings.setShowOnlyWithDecision(true);
-
     unsubscribe();
 
     WhereAndOr<RxScalar<Integer>> query = dataStore
@@ -167,8 +165,6 @@ public class ButtonBuilder {
   }
 
   private void getCountWithoutDecisons() {
-
-    settings.setShowOnlyWithDecision(false);
 
     ArrayList<ConditionBuilder> _conditions = new ArrayList<>();
 
