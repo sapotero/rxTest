@@ -54,7 +54,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     void onCommandExecuteError(String type);
   }
 
-  protected Observable<OperationResult> getApprovalOperationResultObservable(String uid, String official_id) {
+  protected Observable<OperationResult> getApprovalSignOperationResultObservable(String uid, String official_id) {
     Retrofit retrofit = getOperationsRetrofit();
 
     OperationService operationService = retrofit.create( OperationService.class );
@@ -75,7 +75,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       e.printStackTrace();
     }
 
-    return operationService.approval(
+    return operationService.approvalSign(
       getType(),
       settings.getLogin(),
       settings.getToken(),

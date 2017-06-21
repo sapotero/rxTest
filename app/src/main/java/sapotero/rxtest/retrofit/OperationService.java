@@ -52,18 +52,7 @@ public interface OperationService{
   );
 
   @PUT("{operation_name}.json")
-  Observable<OperationResult> approval(
-    @Path("operation_name") String operation_name,
-    @Query("login") String login,
-    @Query("auth_token") String auth_token,
-    @Query("uids[]") ArrayList<String> uids,
-    @Query("operation_data[comment]") String operation_data,
-    @Query("status_code") String status_code,
-    @Query("operation_data[official_id]") String official_id,
-    @Query("sign") String sign
-  );
-  @PUT("{operation_name}.json")
-  Observable<OperationResult> sign(
+  Observable<OperationResult> approvalSign(
     @Path("operation_name") String operation_name,
     @Query("login") String login,
     @Query("auth_token") String auth_token,

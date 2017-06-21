@@ -94,7 +94,7 @@ public class ChangePerson extends AbstractCommand {
   public void executeRemote() {
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
-    Observable<OperationResult> info = getApprovalOperationResultObservable(getUid(), official_id);
+    Observable<OperationResult> info = getApprovalSignOperationResultObservable(getUid(), official_id);
 
     info.subscribeOn( Schedulers.computation() )
       .observeOn( AndroidSchedulers.mainThread() )

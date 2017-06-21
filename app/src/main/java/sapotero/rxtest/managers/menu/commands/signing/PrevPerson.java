@@ -95,34 +95,7 @@ public class PrevPerson extends AbstractCommand {
   public void executeRemote() {
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
-    Retrofit retrofit = getOperationsRetrofit();
-
-    OperationService operationService = retrofit.create( OperationService.class );
-
-    ArrayList<String> uids = new ArrayList<>();
-    uids.add(getUid());
-
-    String comment = null;
-    if ( params.getComment() != null ){
-      comment = params.getComment();
-    }
-
-    try {
-      sign = MainService.getFakeSign( settings.getPin(), null );
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
-    Observable<OperationResult> info = operationService.sign(
-      getType(),
-      settings.getLogin(),
-      settings.getToken(),
-      uids,
-      comment,
-      settings.getStatusCode(),
-      official_id,
-      sign
-    );
+    Observable<OperationResult> info = getApprovalSignOperationResultObservable(getUid(), official_id);
 
     info.subscribeOn( Schedulers.computation() )
       .observeOn( AndroidSchedulers.mainThread() )
@@ -131,7 +104,6 @@ public class PrevPerson extends AbstractCommand {
           Timber.tag(TAG).i("ok: %s", data.getOk());
           Timber.tag(TAG).i("error: %s", data.getMessage());
           Timber.tag(TAG).i("type: %s", data.getType());
-
           queueManager.setExecutedRemote(this);
 
           store.process(
