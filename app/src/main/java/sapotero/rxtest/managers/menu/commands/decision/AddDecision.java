@@ -174,14 +174,4 @@ public class AddDecision extends AbstractCommand {
         .removeLabel(LabelType.SYNC)
     );
   }
-
-  @Override
-  public void withParams(CommandParams params) {
-    this.params = params;
-  }
-
-  @Override
-  public CommandParams getParams() {
-    return params;
-  }
 }

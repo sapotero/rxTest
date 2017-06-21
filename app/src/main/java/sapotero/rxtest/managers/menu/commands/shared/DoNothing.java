@@ -45,15 +45,4 @@ public class DoNothing extends AbstractCommand {
     queueManager.setExecutedLocal(this);
     queueManager.setExecutedRemote(this);
   }
-
-
-  @Override
-  public void withParams(CommandParams params) {
-    this.params = params;
-  }
-
-  @Override
-  public CommandParams getParams() {
-    return params;
-  }
 }

@@ -119,13 +119,4 @@ public class SignFile extends AbstractCommand {
       },
         Timber::e);
   }
-
-  @Override
-  public void withParams(CommandParams params) {
-    this.params = params;
-  }
-  @Override
-  public CommandParams getParams() {
-    return params;
-  }
 }

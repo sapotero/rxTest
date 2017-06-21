@@ -75,14 +75,4 @@ public class UpdateTemplate extends AbstractCommand {
         }
       );
   }
-
-  @Override
-  public void withParams(CommandParams params) {
-    this.params = params;
-  }
-
-  @Override
-  public CommandParams getParams() {
-    return params;
-  }
 }

@@ -80,15 +80,4 @@ public class RemoveTemplate extends AbstractCommand {
   private void remove(Template data) {
     dataStore.delete(RTemplateEntity.class).where(RTemplateEntity.UID.eq(data.getId())).get().value();
   }
-
-
-  @Override
-  public void withParams(CommandParams params) {
-    this.params = params;
-  }
-
-  @Override
-  public CommandParams getParams() {
-    return params;
-  }
 }

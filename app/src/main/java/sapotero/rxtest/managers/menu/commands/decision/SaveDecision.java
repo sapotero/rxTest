@@ -264,16 +264,6 @@ public class SaveDecision extends AbstractCommand {
       );
   }
 
-  @Override
-  public void withParams(CommandParams params) {
-    this.params = params;
-  }
-
-  @Override
-  public CommandParams getParams() {
-    return params;
-  }
-
   public SaveDecision withSign(boolean withSign) {
     this.withSign = withSign;
     return this;

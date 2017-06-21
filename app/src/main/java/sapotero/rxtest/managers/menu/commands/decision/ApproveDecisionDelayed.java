@@ -173,14 +173,4 @@ public class ApproveDecisionDelayed extends AbstractCommand {
   private RDecisionEntity getDecision(String uid){
     return dataStore.select(RDecisionEntity.class).where(RDecisionEntity.UID.eq(uid)).get().firstOrNull();
   }
-
-  @Override
-  public void withParams(CommandParams params) {
-    this.params = params;
-  }
-
-  @Override
-  public CommandParams getParams() {
-    return params;
-  }
 }

@@ -154,14 +154,4 @@ public class UncheckControlLabel extends AbstractCommand {
       .get()
       .value();
   }
-
-  @Override
-  public void withParams(CommandParams params) {
-    this.params = params;
-  }
-
-  @Override
-  public CommandParams getParams() {
-    return params;
-  }
 }

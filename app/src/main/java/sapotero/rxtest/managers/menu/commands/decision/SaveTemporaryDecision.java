@@ -118,14 +118,4 @@ public class SaveTemporaryDecision extends AbstractCommand {
   public void executeRemote() {
 //    queueManager.setExecutedRemote(this);
   }
-
-  @Override
-  public void withParams(CommandParams params) {
-    this.params = params;
-  }
-
-  @Override
-  public CommandParams getParams() {
-    return params;
-  }
 }

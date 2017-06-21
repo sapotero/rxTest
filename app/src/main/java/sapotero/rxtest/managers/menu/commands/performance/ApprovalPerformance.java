@@ -112,13 +112,4 @@ public class ApprovalPerformance extends AbstractCommand {
   public String getType() {
     return "to_the_approval_performance";
   }
-
-  @Override
-  public void withParams(CommandParams params) {
-    this.params = params;
-  }
-  @Override
-  public CommandParams getParams() {
-    return params;
-  }
 }
