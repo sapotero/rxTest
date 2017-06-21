@@ -48,11 +48,15 @@ public class OkHttpModule {
 
           Response response = chain.proceed(request);
 
-          if ( response.code() == HttpURLConnection.HTTP_OK ) {
-            settings.setOnline(true);
-          } else {
-            settings.setOnline(false);
-          }
+          // resolved https://tasks.n-core.ru/browse/MVDESD-13625
+          // Если не авторизовано, то заново логиниться
+
+          // Закомментировано, т.к. если сервер возвращает код 500, у нас ставится Не в сети
+//          if ( response.code() == HttpURLConnection.HTTP_OK ) {
+//            settings.setOnline(true);
+//          } else {
+//            settings.setOnline(false);
+//          }
 
           if ( response.code() == HttpURLConnection.HTTP_UNAUTHORIZED ) {
             settings.setUnauthorized(true);

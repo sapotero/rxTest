@@ -343,8 +343,9 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
       }
     }
 
+    entity.setWithDecision( with_decision );
+
     if ( !processed ) {
-      entity.setWithDecision( with_decision );
       entity.setRed( red );
     }
   }

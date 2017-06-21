@@ -42,6 +42,7 @@ public class Settings {
   private static final String IN_THE_SAME_TAB_KEY = "in.the.same.tab";
   private static final String IMAGE_INDEX_KEY = "image.index";
   private static final String UNAUTHORIZED_KEY = "user.unauthorized";
+  private static final String SHOW_ONLY_WITH_DECISION_KEY = "show.only.with.decision";
 
   public static String FIRST_RUN_KEY;
   private static String HOST_KEY;
@@ -119,6 +120,7 @@ public class Settings {
   private Preference<Boolean> inTheSameTab;
   private Preference<Integer> imageIndex;
   private Preference<Boolean> unauthorized;
+  private Preference<Boolean> showOnlyWithDecision;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -136,7 +138,7 @@ public class Settings {
     ONLY_URGENT_KEY                = context.getResources().getString(R.string.only_urgent_key);
     JOURNALS_KEY                   = context.getResources().getString(R.string.journals_key);
     START_PAGE_KEY                 = context.getResources().getString(R.string.start_page_key);
-    START_JOURNAL_KEY                 = context.getResources().getString(R.string.start_journal_key);
+    START_JOURNAL_KEY              = context.getResources().getString(R.string.start_journal_key);
     SHOW_WITHOUT_PROJECT_KEY       = context.getResources().getString(R.string.show_without_project_key);
     HIDE_PRIMARY_CONSIDERATION_KEY = context.getResources().getString(R.string.hide_primary_consideration_key);
     HIDE_BUTTONS_KEY               = context.getResources().getString(R.string.hide_buttons_key);
@@ -201,6 +203,7 @@ public class Settings {
     inTheSameTab                   = settings.getBoolean(IN_THE_SAME_TAB_KEY);
     imageIndex                     = settings.getInteger(IMAGE_INDEX_KEY);
     unauthorized                   = settings.getBoolean(UNAUTHORIZED_KEY);
+    showOnlyWithDecision           = settings.getBoolean(SHOW_ONLY_WITH_DECISION_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -638,5 +641,13 @@ public class Settings {
 
   public Preference<Boolean> getUnauthorizedPreference() {
     return unauthorized;
+  }
+
+  public boolean isShowOnlyWithDecision() {
+    return getBoolean(showOnlyWithDecision);
+  }
+
+  public void setShowOnlyWithDecision(Boolean value) {
+    setBoolean(showOnlyWithDecision, value);
   }
 }

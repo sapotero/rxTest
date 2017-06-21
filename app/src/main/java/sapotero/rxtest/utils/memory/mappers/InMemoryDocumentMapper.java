@@ -70,6 +70,7 @@ public class InMemoryDocumentMapper {
     imd.setIndex(document.getDocumentType());
     imd.setDocument( convert(document) );
     imd.setProcessed( imd.getDocument().isProcessed() );
+    imd.setHasDecision( document.isWithDecision() != null ? document.isWithDecision() : false );
 
     imd.setAsReady();
 

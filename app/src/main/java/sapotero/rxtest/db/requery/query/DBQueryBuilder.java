@@ -116,9 +116,8 @@ MemoryStore store;
       compositeSubscription.add(
         Observable
           .from( store.getDocuments().values() )
-
           .filter( this::byOrganization )
-
+          .filter( this::byDecision )
           .filter( filter::byType)
           .filter( filter::byStatus)
           .filter( filter::isProcessed )
@@ -219,6 +218,17 @@ MemoryStore store;
     return result;
   }
 
+  // resolved https://tasks.n-core.ru/browse/MVDESD-13400
+  // Не отображать документы без резолюции, если включена соответствующая опция
+  private Boolean byDecision(InMemoryDocument doc) {
+    boolean result = true;
+
+    if ( settings.isShowOnlyWithDecision() && !doc.hasDecision() ) {
+      result = false;
+    }
+
+    return result;
+  }
 
   private void unsubscribe() {
     if (compositeSubscription == null) {
@@ -271,7 +281,7 @@ MemoryStore store;
 
       Observable
         .from( store.getDocuments().values() )
-
+        .filter( this::byDecision )
         .filter( filter::byType)
         .filter( filter::byStatus)
         .filter( filter::isProcessed )
