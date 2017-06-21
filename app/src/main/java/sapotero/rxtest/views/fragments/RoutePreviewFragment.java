@@ -245,29 +245,29 @@ public class RoutePreviewFragment extends Fragment {
         wrapper.removeAllViews();
       }
 
-      Observable
-        .from( ((RRouteEntity) doc.getRoute()).getSteps() )
-        .map( rStep -> (RStepEntity) rStep )
-        .filter(rStepEntity -> rStepEntity != null)
-        .sorted( (e1, e2) -> e1.getNumber().compareTo(e2.getNumber()) )
-        .map(PanelBuilder::new)
-        .subscribeOn( Schedulers.computation() )
-        .observeOn( AndroidSchedulers.mainThread() )
-        .subscribe(
-          panel -> {
-            LinearLayout build = panel.build();
+      if ( doc.getRoute() != null && ((RRouteEntity) doc.getRoute()).getSteps() != null ) {
+        Observable
+          .from( ((RRouteEntity) doc.getRoute()).getSteps() )
+          .map( rStep -> (RStepEntity) rStep )
+          .filter(rStepEntity -> rStepEntity != null)
+          .sorted( (e1, e2) -> e1.getNumber().compareTo(e2.getNumber()) )
+          .map(PanelBuilder::new)
+          .subscribeOn( Schedulers.computation() )
+          .observeOn( AndroidSchedulers.mainThread() )
+          .subscribe(
+            panel -> {
+              LinearLayout build = panel.build();
 
-            if (build != null) {
-              wrapper.addView(build);
+              if (build != null) {
+                wrapper.addView(build);
+              }
+            },
+            error -> {
+              Timber.tag(TAG).e(error);
             }
-          },
-          error -> {
-            Timber.tag(TAG).e(error);
-          }
-        );
-
+          );
+      }
     }
-
   }
 
   private enum PanelType {
