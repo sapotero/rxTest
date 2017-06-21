@@ -1,7 +1,6 @@
 package sapotero.rxtest.managers.menu.factories;
 
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
-import sapotero.rxtest.managers.menu.commands.approval.ChangePerson;
 import sapotero.rxtest.managers.menu.commands.decision.AddAndApproveDecision;
 import sapotero.rxtest.managers.menu.commands.decision.AddDecision;
 import sapotero.rxtest.managers.menu.commands.decision.AddTemporaryDecision;
@@ -22,7 +21,6 @@ import sapotero.rxtest.managers.menu.commands.shared.CheckControlLabel;
 import sapotero.rxtest.managers.menu.commands.shared.DoNothing;
 import sapotero.rxtest.managers.menu.commands.shared.RemoveFromFolder;
 import sapotero.rxtest.managers.menu.commands.shared.UncheckControlLabel;
-import sapotero.rxtest.managers.menu.commands.signing.PrevPerson;
 import sapotero.rxtest.managers.menu.commands.templates.CreateTemplate;
 import sapotero.rxtest.managers.menu.commands.templates.RemoveTemplate;
 import sapotero.rxtest.managers.menu.commands.templates.UpdateTemplate;
@@ -152,7 +150,7 @@ public class CommandFactory implements AbstractCommand.Callback{
     APPROVAL_CHANGE_PERSON {
       @Override
       public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
-        sapotero.rxtest.managers.menu.commands.signing.ChangePerson command = new sapotero.rxtest.managers.menu.commands.signing.ChangePerson(document);
+        sapotero.rxtest.managers.menu.commands.approval.ChangePerson command = new sapotero.rxtest.managers.menu.commands.approval.ChangePerson(document);
         command.withParams(params);
         command
           .withPerson( params.getPerson() )
@@ -183,7 +181,7 @@ public class CommandFactory implements AbstractCommand.Callback{
     APPROVAL_PREV_PERSON {
       @Override
       public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
-        PrevPerson command = new PrevPerson(document);
+        sapotero.rxtest.managers.menu.commands.approval.PrevPerson command = new sapotero.rxtest.managers.menu.commands.approval.PrevPerson(document);
         command.withParams(params);
         command
           .withPerson( "" )
@@ -199,7 +197,7 @@ public class CommandFactory implements AbstractCommand.Callback{
     SIGNING_CHANGE_PERSON {
       @Override
       public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
-        ChangePerson command = new ChangePerson(document);
+        sapotero.rxtest.managers.menu.commands.signing.ChangePerson command = new sapotero.rxtest.managers.menu.commands.signing.ChangePerson(document);
         command.withParams(params);
         command
           .withPerson( params.getPerson() )
@@ -230,7 +228,7 @@ public class CommandFactory implements AbstractCommand.Callback{
     SIGNING_PREV_PERSON {
       @Override
       public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
-        PrevPerson command = new PrevPerson(document);
+        sapotero.rxtest.managers.menu.commands.signing.PrevPerson command = new sapotero.rxtest.managers.menu.commands.signing.PrevPerson(document);
         command.withParams(params);
         command
           .withPerson( "" )
