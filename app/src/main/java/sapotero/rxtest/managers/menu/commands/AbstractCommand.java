@@ -46,45 +46,18 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     EsdApplication.getManagerComponent().inject(this);
   }
 
-  public abstract void withParams(CommandParams params);
+  public void withParams(CommandParams params) {
+    this.params = params;
+  }
+
+  public CommandParams getParams() {
+    return params;
+  }
 
   public Callback callback;
   public interface Callback {
     void onCommandExecuteSuccess(String command);
     void onCommandExecuteError(String type);
-  }
-
-  protected Observable<OperationResult> getApprovalSignOperationResultObservable(String uid, String official_id) {
-    Retrofit retrofit = getOperationsRetrofit();
-
-    OperationService operationService = retrofit.create( OperationService.class );
-
-    ArrayList<String> uids = new ArrayList<>();
-    uids.add(uid);
-
-    String comment = null;
-    if ( params.getComment() != null ){
-      comment = params.getComment();
-    }
-
-    String sign = null;
-
-    try {
-      sign = MainService.getFakeSign( settings.getPin(), null );
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
-    return operationService.approvalSign(
-      getType(),
-      settings.getLogin(),
-      settings.getToken(),
-      uids,
-      comment,
-      settings.getStatusCode(),
-      official_id,
-      sign
-    );
   }
 
   public Retrofit getOperationsRetrofit() {

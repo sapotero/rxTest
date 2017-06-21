@@ -9,7 +9,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
-import sapotero.rxtest.managers.menu.commands.AbstractCommand;
+import sapotero.rxtest.managers.menu.commands.ApprovalSigningCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.OperationResult;
@@ -18,7 +18,7 @@ import sapotero.rxtest.utils.memory.fields.InMemoryState;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
-public class ChangePerson extends AbstractCommand {
+public class ChangePerson extends ApprovalSigningCommand {
 
   private final DocumentReceiver document;
 
@@ -93,51 +93,10 @@ public class ChangePerson extends AbstractCommand {
   @Override
   public void executeRemote() {
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
-
-    Observable<OperationResult> info = getApprovalSignOperationResultObservable(getUid(), official_id);
-
-    info.subscribeOn( Schedulers.computation() )
-      .observeOn( AndroidSchedulers.mainThread() )
-      .subscribe(
-        data -> {
-          Timber.tag(TAG).i("ok: %s", data.getOk());
-          Timber.tag(TAG).i("error: %s", data.getMessage());
-          Timber.tag(TAG).i("type: %s", data.getType());
-
-          queueManager.setExecutedRemote(this);
-
-          store.process(
-            store.startTransactionFor( getUid() )
-              .removeLabel(LabelType.SYNC)
-              .setField(FieldType.MD5, "")
-              .setState(InMemoryState.READY)
-          );
-        },
-        error -> {
-          if (callback != null){
-            callback.onCommandExecuteError(getType());
-          }
-
-          if ( settings.isOnline() ){
-            store.process(
-              store.startTransactionFor( getUid() )
-                .removeLabel(LabelType.SYNC)
-                .setField(FieldType.PROCESSED, false)
-                .setState(InMemoryState.READY)
-            );
-            queueManager.setExecutedWithError(this, Collections.singletonList(error.getLocalizedMessage()));
-
-          }
-        }
-      );
+    remoteOperation(getUid(), official_id, TAG);
   }
 
   @Override
-  public void withParams(CommandParams params) {
-    this.params = params;
-  }
-  @Override
-  public CommandParams getParams() {
-    return params;
+  protected void onRemoteSuccess() {
   }
 }
