@@ -42,7 +42,6 @@ public class Settings {
   private static final String IN_THE_SAME_TAB_KEY = "in.the.same.tab";
   private static final String IMAGE_INDEX_KEY = "image.index";
   private static final String UNAUTHORIZED_KEY = "user.unauthorized";
-  private static final String SHOW_ONLY_WITH_DECISION_KEY = "show.only.with.decision";
 
   public static String FIRST_RUN_KEY;
   private static String HOST_KEY;
@@ -120,7 +119,6 @@ public class Settings {
   private Preference<Boolean> inTheSameTab;
   private Preference<Integer> imageIndex;
   private Preference<Boolean> unauthorized;
-  private Preference<Boolean> showOnlyWithDecision;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -203,7 +201,6 @@ public class Settings {
     inTheSameTab                   = settings.getBoolean(IN_THE_SAME_TAB_KEY);
     imageIndex                     = settings.getInteger(IMAGE_INDEX_KEY);
     unauthorized                   = settings.getBoolean(UNAUTHORIZED_KEY);
-    showOnlyWithDecision           = settings.getBoolean(SHOW_ONLY_WITH_DECISION_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -641,13 +638,5 @@ public class Settings {
 
   public Preference<Boolean> getUnauthorizedPreference() {
     return unauthorized;
-  }
-
-  public boolean isShowOnlyWithDecision() {
-    return getBoolean(showOnlyWithDecision);
-  }
-
-  public void setShowOnlyWithDecision(Boolean value) {
-    setBoolean(showOnlyWithDecision, value);
   }
 }

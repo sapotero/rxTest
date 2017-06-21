@@ -223,7 +223,7 @@ MemoryStore store;
   private Boolean byDecision(InMemoryDocument doc) {
     boolean result = true;
 
-    if ( settings.isShowOnlyWithDecision() && !doc.hasDecision() ) {
+    if ( !settings.isShowWithoutProject() && item != null && !item.isShowAnyWay() && !doc.hasDecision() ) {
       result = false;
     }
 

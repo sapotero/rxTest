@@ -156,18 +156,6 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
 
     RadioGroup button_group = getButtonGroupLayout(context);
 
-    // resolved https://tasks.n-core.ru/browse/MVDESD-13400
-    // Не отображать документы без резолюции, если включена соответствующая опция
-    if ( mainMenuItem.isShowAnyWay() ) {
-      settings.setShowOnlyWithDecision(false);
-    } else {
-      if ( settings.isShowWithoutProject() ) {
-        settings.setShowOnlyWithDecision(false);
-      } else {
-        settings.setShowOnlyWithDecision(true);
-      }
-    }
-
     if ( mainMenuItem.getMainMenuButtons().size() > 0 ){
 //      for ( ButtonBuilder button: mainMenuItem.getMainMenuButtons() ){
       Boolean isSet = false;
