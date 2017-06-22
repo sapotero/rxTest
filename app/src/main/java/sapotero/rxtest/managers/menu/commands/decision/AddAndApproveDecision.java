@@ -20,7 +20,6 @@ import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
-import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
@@ -202,6 +201,8 @@ public class AddAndApproveDecision extends AbstractCommand {
               .setState(InMemoryState.READY)
           );
 
+          setChangedFalseInDb( params.getDocument() );
+
           if (data.getErrors() !=null && data.getErrors().size() > 0){
             queueManager.setExecutedWithError(this, data.getErrors());
           } else {
@@ -222,8 +223,10 @@ public class AddAndApproveDecision extends AbstractCommand {
                 .setField(FieldType.PROCESSED, false)
                 .setState(InMemoryState.READY)
             );
-            queueManager.setExecutedWithError(this, Collections.singletonList(error.getLocalizedMessage()));
 
+            setChangedFalseInDb( params.getDocument() );
+
+            queueManager.setExecutedWithError(this, Collections.singletonList(error.getLocalizedMessage()));
           }
         }
       );

@@ -40,15 +40,9 @@ public class ChangePerson extends ApprovalSigningCommand {
   @Override
   public void execute() {
     queueManager.add(this);
-
-    store.process(
-      store.startTransactionFor( getUid() )
-        .setLabel(LabelType.SYNC)
-        .setField(FieldType.PROCESSED, true)
-        .setState(InMemoryState.LOADING)
-    );
-
     EventBus.getDefault().post( new ShowNextDocumentEvent());
+
+    setDocOperationStartedInMemory( getUid() );
   }
 
   private String getUid() {

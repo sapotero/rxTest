@@ -80,12 +80,7 @@ public abstract class ApprovalSigningCommand extends AbstractCommand {
               .setState(InMemoryState.READY)
           );
 
-          dataStore
-            .update(RDocumentEntity.class)
-            .set( RDocumentEntity.CHANGED, false)
-            .where(RDocumentEntity.UID.eq(uid))
-            .get()
-            .value();
+          setChangedFalseInDb(uid);
         },
         error -> {
           if (callback != null) {

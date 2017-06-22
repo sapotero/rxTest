@@ -17,6 +17,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.mapper.utils.Mappers;
+import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDisplayFirstDecisionEntity;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
@@ -24,6 +25,9 @@ import sapotero.rxtest.retrofit.models.v2.DecisionError;
 import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.utils.memory.MemoryStore;
+import sapotero.rxtest.utils.memory.fields.FieldType;
+import sapotero.rxtest.utils.memory.fields.InMemoryState;
+import sapotero.rxtest.utils.memory.fields.LabelType;
 import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.interfaces.Operation;
@@ -101,5 +105,23 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
           );
       }
     }
+  }
+
+  protected void setDocOperationStartedInMemory(String uid) {
+    store.process(
+      store.startTransactionFor( uid )
+        .setLabel(LabelType.SYNC)
+        .setField(FieldType.PROCESSED, true)
+        .setState(InMemoryState.LOADING)
+    );
+  }
+
+  protected void setChangedFalseInDb(String uid) {
+    dataStore
+      .update(RDocumentEntity.class)
+      .set( RDocumentEntity.CHANGED, false)
+      .where(RDocumentEntity.UID.eq(uid))
+      .get()
+      .value();
   }
 }

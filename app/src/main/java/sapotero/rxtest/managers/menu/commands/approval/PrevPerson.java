@@ -44,16 +44,10 @@ public class PrevPerson extends ApprovalSigningCommand {
 
   @Override
   public void execute() {
+    queueManager.add(this);
     EventBus.getDefault().post( new ShowNextDocumentEvent());
 
-    queueManager.add(this);
-
-    store.process(
-      store.startTransactionFor( getUid() )
-        .setLabel(LabelType.SYNC)
-        .setField(FieldType.PROCESSED, true)
-        .setState(InMemoryState.LOADING)
-    );
+    setDocOperationStartedInMemory( getUid() );
   }
 
   private String getUid() {
