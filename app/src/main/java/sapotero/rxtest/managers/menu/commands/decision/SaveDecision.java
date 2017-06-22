@@ -78,11 +78,7 @@ public class SaveDecision extends AbstractCommand {
 
 //    queueManager.add(this);
 
-    store.process(
-      store.startTransactionFor( params.getDocument() )
-        .setLabel(LabelType.SYNC)
-    );
-
+    setDocOperationStartedInMemory( params.getDocument() );
   }
 
   @Override
@@ -231,20 +227,12 @@ public class SaveDecision extends AbstractCommand {
           if (data.getErrors() !=null && data.getErrors().size() > 0){
             queueManager.setExecutedWithError(this, data.getErrors());
 
-            store.process(
-              store.startTransactionFor( params.getDocument() )
-                .removeLabel(LabelType.SYNC)
-            );
-
           } else {
-            store.process(
-              store.startTransactionFor( params.getDocument() )
-                .removeLabel(LabelType.SYNC)
-            );
             queueManager.setExecutedRemote(this);
-
             checkCreatorAndSignerIsCurrentUser(data, TAG);
           }
+
+          finishOperationOnSuccess( params.getDocument() );
 
         },
         error -> {
@@ -253,12 +241,7 @@ public class SaveDecision extends AbstractCommand {
           }
 
           if ( settings.isOnline() ){
-            store.process(
-              store.startTransactionFor( params.getDocument() )
-                .removeLabel(LabelType.SYNC)
-            );
-            queueManager.setExecutedWithError(this, Collections.singletonList(error.getLocalizedMessage()));
-
+            finishOperationProcessedOnError( this, params.getDocument(), Collections.singletonList(error.getLocalizedMessage() ) );
           }
         }
       );

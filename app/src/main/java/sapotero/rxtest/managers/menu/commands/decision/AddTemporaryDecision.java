@@ -53,10 +53,7 @@ public class AddTemporaryDecision extends AbstractCommand {
     addDecision();
     queueManager.add(this);
 
-    store.process(
-      store.startTransactionFor( params.getDocument() )
-        .setLabel(LabelType.SYNC)
-    );
+    setDocOperationStartedInMemory( params.getDocument() );
   }
 
   @Override

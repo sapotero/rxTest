@@ -69,15 +69,8 @@ public class ApproveDecision extends AbstractCommand {
   @Override
   public void execute() {
     updateLocal();
-
-
     queueManager.add(this);
-    store.process(
-      store.startTransactionFor( params.getDocument() )
-        .setLabel(LabelType.SYNC)
-        .setState(InMemoryState.LOADING)
-    );
-
+    setDocOperationStartedInMemory( params.getDocument() );
   }
 
 
@@ -253,10 +246,7 @@ public class ApproveDecision extends AbstractCommand {
             queueManager.setExecutedRemote(this);
           }
 
-          store.process(
-            store.startTransactionFor( getUid() )
-              .removeLabel(LabelType.SYNC)
-          );
+          finishOperationOnSuccess( params.getDocument() );
 
         },
         error -> {
@@ -266,13 +256,7 @@ public class ApproveDecision extends AbstractCommand {
           }
 
           if ( settings.isOnline() ){
-            store.process(
-              store.startTransactionFor( params.getDocument() )
-                .removeLabel(LabelType.SYNC)
-                .setField(FieldType.PROCESSED, false)
-            );
-            queueManager.setExecutedWithError(this, Collections.singletonList(error.getLocalizedMessage()));
-
+            finishOperationProcessedOnError( this, params.getDocument(), Collections.singletonList(error.getLocalizedMessage() ) );
           }
         }
       );

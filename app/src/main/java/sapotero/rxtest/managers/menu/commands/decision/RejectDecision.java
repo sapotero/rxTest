@@ -74,12 +74,7 @@ public class RejectDecision extends AbstractCommand {
 
     updateLocal();
 
-    store.process(
-      store.startTransactionFor( params.getDocument() )
-        .setLabel(LabelType.SYNC)
-        .setState(InMemoryState.LOADING)
-    );
-
+    setDocOperationStartedInMemory( params.getDocument() );
   }
 
 
@@ -224,10 +219,7 @@ public class RejectDecision extends AbstractCommand {
             queueManager.setExecutedRemote(this);
           }
 
-          store.process(
-            store.startTransactionFor( params.getDocument() )
-              .removeLabel(LabelType.SYNC)
-          );
+          finishOperationOnSuccess( params.getDocument() );
 
         },
         error -> {
@@ -237,13 +229,7 @@ public class RejectDecision extends AbstractCommand {
           }
 
           if ( settings.isOnline() ){
-            store.process(
-              store.startTransactionFor( params.getDocument() )
-                .removeLabel(LabelType.SYNC)
-                .setField(FieldType.PROCESSED, false)
-            );
-            queueManager.setExecutedWithError(this, Collections.singletonList(error.getLocalizedMessage()));
-
+            finishOperationProcessedOnError( this, params.getDocument(), Collections.singletonList(error.getLocalizedMessage() ) );
           }
         }
       );
