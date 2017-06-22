@@ -64,10 +64,7 @@ public class AddDecision extends AbstractCommand {
     Command command = operation.getCommand(null, document, _params);
     command.execute();
 
-    store.process(
-      store.startTransactionFor( params.getDocument() )
-        .setLabel(LabelType.SYNC)
-    );
+    setDocOperationStartedInMemory( params.getDocument() );
 
     Timber.tag(TAG).w("ASSIGNMENT: %s", params.isAssignment() );
 
@@ -150,7 +147,7 @@ public class AddDecision extends AbstractCommand {
             queueManager.setExecutedRemote(this);
           }
 
-          removeSyncLabel();
+          finishOperationOnSuccess( params.getDocument() );
 
         },
         error -> {
@@ -160,18 +157,9 @@ public class AddDecision extends AbstractCommand {
           }
 
           if ( settings.isOnline() ){
-            removeSyncLabel();
-            queueManager.setExecutedWithError(this, Collections.singletonList(error.getLocalizedMessage()));
-
+            finishOperationOnError( this, params.getDocument(), Collections.singletonList( error.getLocalizedMessage() ) );
           }
         }
       );
-  }
-
-  private void removeSyncLabel() {
-    store.process(
-      store.startTransactionFor( params.getDocument() )
-        .removeLabel(LabelType.SYNC)
-    );
   }
 }

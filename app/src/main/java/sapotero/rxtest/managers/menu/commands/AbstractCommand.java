@@ -3,6 +3,7 @@ package sapotero.rxtest.managers.menu.commands;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 import javax.inject.Inject;
@@ -112,6 +113,14 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     store.process(
       store.startTransactionFor( uid )
         .setLabel(LabelType.SYNC)
+        .setState(InMemoryState.LOADING)
+    );
+  }
+
+  protected void setDocOperationProcessedStartedInMemory(String uid) {
+    store.process(
+      store.startTransactionFor( uid )
+        .setLabel(LabelType.SYNC)
         .setField(FieldType.PROCESSED, true)
         .setState(InMemoryState.LOADING)
     );
@@ -133,10 +142,16 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       .value();
   }
 
-  protected void finishOperationOnError(Command command, String uid, String errorMessage) {
+  protected void finishOperationOnError(Command command, String uid, List<String> errors) {
+    finishOperationOnSuccess( uid );
+    queueManager.setExecutedWithError( command, errors );
+  }
+
+  protected void finishOperationProcessedOnError(Command command, String uid, List<String> errors) {
     store.process(
       store.startTransactionFor( uid )
         .removeLabel(LabelType.SYNC)
+        .setField(FieldType.MD5, "")
         .setField(FieldType.PROCESSED, false)
         .setState(InMemoryState.READY)
     );
@@ -149,6 +164,6 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       .get()
       .value();
 
-    queueManager.setExecutedWithError( command, Collections.singletonList( errorMessage ) );
+    queueManager.setExecutedWithError( command, errors );
   }
 }

@@ -8,13 +8,9 @@ import retrofit2.Retrofit;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.services.MainService;
-import sapotero.rxtest.utils.memory.fields.FieldType;
-import sapotero.rxtest.utils.memory.fields.InMemoryState;
-import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
 public abstract class ApprovalSigningCommand extends AbstractCommand {
@@ -66,9 +62,7 @@ public abstract class ApprovalSigningCommand extends AbstractCommand {
           onRemoteSuccess();
 
           if (data.getMessage() != null && !data.getMessage().toLowerCase().contains("успешно") ) {
-            List<String> errorList = new ArrayList<>();
-            errorList.add(data.getMessage());
-            queueManager.setExecutedWithError(this, errorList );
+            queueManager.setExecutedWithError(this, Collections.singletonList( data.getMessage() ) );
           } else {
             queueManager.setExecutedRemote(this);
           }
@@ -81,7 +75,7 @@ public abstract class ApprovalSigningCommand extends AbstractCommand {
           }
 
           if ( settings.isOnline() ){
-            finishOperationOnError( this, uid, error.getLocalizedMessage());
+            finishOperationProcessedOnError( this, uid, Collections.singletonList( error.getLocalizedMessage() ) );
           }
         }
       );

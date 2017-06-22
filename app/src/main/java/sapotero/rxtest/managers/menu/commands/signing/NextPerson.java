@@ -13,9 +13,6 @@ import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
-import sapotero.rxtest.utils.memory.fields.FieldType;
-import sapotero.rxtest.utils.memory.fields.InMemoryState;
-import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
 public class NextPerson extends ApprovalSigningCommand {
@@ -55,7 +52,7 @@ public class NextPerson extends ApprovalSigningCommand {
     queueManager.add(this);
     EventBus.getDefault().post( new ShowNextDocumentEvent());
 
-    setDocOperationStartedInMemory( getUid() );
+    setDocOperationProcessedStartedInMemory( getUid() );
   }
 
 

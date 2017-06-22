@@ -6,9 +6,6 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.ApprovalSigningCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
-import sapotero.rxtest.utils.memory.fields.FieldType;
-import sapotero.rxtest.utils.memory.fields.InMemoryState;
-import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
 public class ChangePerson extends ApprovalSigningCommand {
@@ -38,7 +35,7 @@ public class ChangePerson extends ApprovalSigningCommand {
     queueManager.add(this);
     EventBus.getDefault().post( new ShowNextDocumentEvent());
 
-    setDocOperationStartedInMemory( getUid() );
+    setDocOperationProcessedStartedInMemory( getUid() );
   }
 
   @Override

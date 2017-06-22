@@ -210,7 +210,7 @@ public class AddAndApproveDecision extends AbstractCommand {
           }
 
           if ( settings.isOnline() ) {
-            finishOperationOnError( this, params.getDocument(), error.getLocalizedMessage() );
+            finishOperationProcessedOnError( this, params.getDocument(), Collections.singletonList( error.getLocalizedMessage() ) );
           }
         }
       );
