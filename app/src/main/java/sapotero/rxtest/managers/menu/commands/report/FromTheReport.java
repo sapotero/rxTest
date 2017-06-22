@@ -44,16 +44,9 @@ public class FromTheReport extends AbstractCommand {
 
   @Override
   public void execute() {
-
-
     queueManager.add(this);
     update();
-
-    store.process(
-      store.startTransactionFor( getUid() )
-        .setLabel(LabelType.SYNC)
-        .setField(FieldType.PROCESSED, true)
-    );
+    setDocOperationProcessedStartedInMemory( getUid() );
   }
 
   @Override
@@ -134,24 +127,16 @@ public class FromTheReport extends AbstractCommand {
 
           queueManager.setExecutedRemote(this);
 
-          store.process(
-            store.startTransactionFor( getUid() )
-              .removeLabel(LabelType.SYNC)
-          );
+          finishOperationOnSuccess( getUid() );
+
         },
         error -> {
           if (callback != null){
             callback.onCommandExecuteError(getType());
           }
 
-          if ( settings.isOnline() ){
-            store.process(
-              store.startTransactionFor( getUid() )
-                .removeLabel(LabelType.SYNC)
-                .setField(FieldType.PROCESSED, false)
-            );
-            queueManager.setExecutedWithError(this, Collections.singletonList(error.getLocalizedMessage()));
-
+          if ( settings.isOnline() ) {
+            finishOperationProcessedOnError( this, params.getDocument(), Collections.singletonList(error.getLocalizedMessage() ) );
           }
         }
       );

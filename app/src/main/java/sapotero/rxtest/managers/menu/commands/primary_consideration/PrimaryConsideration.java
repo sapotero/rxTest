@@ -54,11 +54,7 @@ public class PrimaryConsideration extends AbstractCommand {
 
     queueManager.add(this);
 
-    store.process(
-      store.startTransactionFor( params.getDocument() )
-        .setLabel(LabelType.SYNC)
-    );
-
+    setDocOperationProcessedStartedInMemory( params.getDocument() );
   }
 
   private void update(){
@@ -143,13 +139,10 @@ public class PrimaryConsideration extends AbstractCommand {
           Timber.tag(TAG).i("error: %s", data.getMessage());
           Timber.tag(TAG).i("type: %s", data.getType());
 
-         queueManager.setExecutedRemote(this);
+          queueManager.setExecutedRemote(this);
 
+          finishOperationOnSuccess( params.getDocument() );
 
-          store.process(
-            store.startTransactionFor( params.getDocument() )
-              .removeLabel(LabelType.SYNC)
-          );
         },
         error -> {
           if ( callback != null ){
@@ -157,12 +150,7 @@ public class PrimaryConsideration extends AbstractCommand {
           }
 
           if ( settings.isOnline() ){
-            store.process(
-              store.startTransactionFor( params.getDocument() )
-                .removeLabel(LabelType.SYNC)
-            );
-            queueManager.setExecutedWithError(this, Collections.singletonList(error.getLocalizedMessage()));
-
+            finishOperationProcessedOnError( this, params.getDocument(), Collections.singletonList(error.getLocalizedMessage() ) );
           }
         }
       );
