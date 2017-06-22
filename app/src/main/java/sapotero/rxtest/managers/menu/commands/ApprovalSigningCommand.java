@@ -73,14 +73,7 @@ public abstract class ApprovalSigningCommand extends AbstractCommand {
             queueManager.setExecutedRemote(this);
           }
 
-          store.process(
-            store.startTransactionFor( uid )
-              .removeLabel(LabelType.SYNC)
-              .setField(FieldType.MD5, "")
-              .setState(InMemoryState.READY)
-          );
-
-          setChangedFalseInDb(uid);
+          finishOperationOnSuccess( uid );
         },
         error -> {
           if (callback != null) {
@@ -88,22 +81,7 @@ public abstract class ApprovalSigningCommand extends AbstractCommand {
           }
 
           if ( settings.isOnline() ){
-            store.process(
-              store.startTransactionFor( uid )
-                .removeLabel(LabelType.SYNC)
-                .setField(FieldType.PROCESSED, false)
-                .setState(InMemoryState.READY)
-            );
-
-            dataStore
-              .update(RDocumentEntity.class)
-              .set( RDocumentEntity.PROCESSED, false)
-              .set( RDocumentEntity.CHANGED, false)
-              .where(RDocumentEntity.UID.eq(uid))
-              .get()
-              .value();
-
-            queueManager.setExecutedWithError(this, Collections.singletonList(error.getLocalizedMessage()));
+            finishOperationOnError( this, uid, error.getLocalizedMessage());
           }
         }
       );

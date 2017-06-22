@@ -2,6 +2,7 @@ package sapotero.rxtest.managers.menu.commands;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Objects;
 
 import javax.inject.Inject;
@@ -116,12 +117,38 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     );
   }
 
-  protected void setChangedFalseInDb(String uid) {
+  protected void finishOperationOnSuccess(String uid) {
+    store.process(
+      store.startTransactionFor( uid )
+        .removeLabel(LabelType.SYNC)
+        .setField(FieldType.MD5, "")
+        .setState(InMemoryState.READY)
+    );
+
     dataStore
       .update(RDocumentEntity.class)
       .set( RDocumentEntity.CHANGED, false)
       .where(RDocumentEntity.UID.eq(uid))
       .get()
       .value();
+  }
+
+  protected void finishOperationOnError(Command command, String uid, String errorMessage) {
+    store.process(
+      store.startTransactionFor( uid )
+        .removeLabel(LabelType.SYNC)
+        .setField(FieldType.PROCESSED, false)
+        .setState(InMemoryState.READY)
+    );
+
+    dataStore
+      .update(RDocumentEntity.class)
+      .set( RDocumentEntity.PROCESSED, false)
+      .set( RDocumentEntity.CHANGED, false)
+      .where(RDocumentEntity.UID.eq( uid ) )
+      .get()
+      .value();
+
+    queueManager.setExecutedWithError( command, Collections.singletonList( errorMessage ) );
   }
 }

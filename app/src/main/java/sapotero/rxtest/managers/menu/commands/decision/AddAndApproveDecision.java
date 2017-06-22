@@ -195,38 +195,22 @@ public class AddAndApproveDecision extends AbstractCommand {
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         data -> {
-          store.process(
-            store.startTransactionFor( params.getDocument() )
-              .removeLabel(LabelType.SYNC)
-              .setState(InMemoryState.READY)
-          );
-
-          setChangedFalseInDb( params.getDocument() );
-
-          if (data.getErrors() !=null && data.getErrors().size() > 0){
+          if (data.getErrors() != null && data.getErrors().size() > 0){
             queueManager.setExecutedWithError(this, data.getErrors());
           } else {
             queueManager.setExecutedRemote(this);
             checkCreatorAndSignerIsCurrentUser(data, TAG);
           }
 
+          finishOperationOnSuccess( params.getDocument() );
         },
         error -> {
           if (callback != null){
             callback.onCommandExecuteError(getType());
           }
 
-          if ( settings.isOnline() ){
-            store.process(
-              store.startTransactionFor( params.getDocument() )
-                .removeLabel(LabelType.SYNC)
-                .setField(FieldType.PROCESSED, false)
-                .setState(InMemoryState.READY)
-            );
-
-            setChangedFalseInDb( params.getDocument() );
-
-            queueManager.setExecutedWithError(this, Collections.singletonList(error.getLocalizedMessage()));
+          if ( settings.isOnline() ) {
+            finishOperationOnError( this, params.getDocument(), error.getLocalizedMessage() );
           }
         }
       );
