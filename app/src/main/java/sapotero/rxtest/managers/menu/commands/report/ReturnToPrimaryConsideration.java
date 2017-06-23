@@ -3,7 +3,6 @@ package sapotero.rxtest.managers.menu.commands.report;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Objects;
 
 import retrofit2.Retrofit;
@@ -16,9 +15,6 @@ import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
-import sapotero.rxtest.managers.menu.utils.CommandParams;
-import sapotero.rxtest.utils.memory.fields.FieldType;
-import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
 public class ReturnToPrimaryConsideration extends AbstractCommand {
@@ -126,15 +122,7 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
           finishOperationOnSuccess( getUid() );
 
         },
-        error -> {
-          if (callback != null){
-            callback.onCommandExecuteError(getType());
-          }
-
-          if ( settings.isOnline() ) {
-            finishOperationProcessedOnError( this, params.getDocument(), Collections.singletonList(error.getLocalizedMessage() ) );
-          }
-        }
+        error -> onError( this, params.getDocument(), error.getLocalizedMessage(), true, TAG )
       );
   }
 }

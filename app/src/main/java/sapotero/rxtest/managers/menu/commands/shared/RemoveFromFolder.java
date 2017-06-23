@@ -12,7 +12,6 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.utils.RecalculateMenuEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
-import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.utils.memory.fields.LabelType;

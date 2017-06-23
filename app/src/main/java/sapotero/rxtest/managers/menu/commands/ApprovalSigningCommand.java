@@ -2,7 +2,6 @@ package sapotero.rxtest.managers.menu.commands;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 import retrofit2.Retrofit;
 import rx.Observable;
@@ -10,12 +9,11 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
-import sapotero.rxtest.services.MainService;
 import timber.log.Timber;
 
 public abstract class ApprovalSigningCommand extends AbstractCommand {
 
-  protected Observable<OperationResult> getOperationResultObservable(String uid, String official_id) {
+  private Observable<OperationResult> getOperationResultObservable(String uid, String official_id) {
     Retrofit retrofit = getOperationsRetrofit();
 
     OperationService operationService = retrofit.create( OperationService.class );
@@ -28,13 +26,7 @@ public abstract class ApprovalSigningCommand extends AbstractCommand {
       comment = params.getComment();
     }
 
-    String sign = null;
-
-    try {
-      sign = MainService.getFakeSign( settings.getPin(), null );
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    String sign = getSign();
 
     return operationService.approvalSign(
       getType(),
@@ -48,7 +40,7 @@ public abstract class ApprovalSigningCommand extends AbstractCommand {
     );
   }
 
-  public void remoteOperation(String uid, String official_id, String TAG) {
+  protected void remoteOperation(String uid, String official_id, String TAG) {
     Observable<OperationResult> info = getOperationResultObservable(uid, official_id);
 
     info.subscribeOn( Schedulers.computation() )
@@ -69,15 +61,7 @@ public abstract class ApprovalSigningCommand extends AbstractCommand {
 
           finishOperationOnSuccess( uid );
         },
-        error -> {
-          if (callback != null) {
-            callback.onCommandExecuteError(getType());
-          }
-
-          if ( settings.isOnline() ){
-            finishOperationProcessedOnError( this, uid, Collections.singletonList( error.getLocalizedMessage() ) );
-          }
-        }
+        error -> onError( this, uid, error.getLocalizedMessage(), true, TAG )
       );
   }
 

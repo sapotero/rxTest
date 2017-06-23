@@ -6,9 +6,6 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.util.Collections;
 
-import okhttp3.MediaType;
-import okhttp3.RequestBody;
-import retrofit2.Retrofit;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -17,17 +14,14 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
-import sapotero.rxtest.managers.menu.commands.AbstractCommand;
+import sapotero.rxtest.managers.menu.commands.DecisionCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
-import sapotero.rxtest.managers.menu.utils.CommandParams;
-import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
-import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
-public class SaveDecision extends AbstractCommand {
+public class SaveDecision extends DecisionCommand {
 
   private final DocumentReceiver document;
 
@@ -183,8 +177,6 @@ public class SaveDecision extends AbstractCommand {
   public void executeRemote() {
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
-    Retrofit retrofit = getRetrofit();
-
 //    Decision formated_decision = DecisionConverter.formatDecision( decision );
 //
 //    DecisionWrapper wrapper = new DecisionWrapper();
@@ -199,51 +191,16 @@ public class SaveDecision extends AbstractCommand {
       _decision.setApproved(true);
     }
 
-    String json_m = new Gson().toJson( _decision );
-
-    Timber.w("decision_json_m: %s", json_m);
-
-    RequestBody json = RequestBody.create(
-      MediaType.parse("application/json"),
-      json_m
-    );
-
-    Timber.tag(TAG).e("DECISION");
-    Timber.tag(TAG).e("%s", json);
-
-    DocumentService operationService = retrofit.create( DocumentService.class );
-
-    Observable<DecisionError> info = operationService.update(
-      decisionId,
-      settings.getLogin(),
-      settings.getToken(),
-      json
-    );
+    Observable<DecisionError> info = getDecisionUpdateOperationObservable(_decision, decisionId, TAG);
 
     info.subscribeOn( Schedulers.computation() )
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         data -> {
-          if (data.getErrors() !=null && data.getErrors().size() > 0){
-            queueManager.setExecutedWithError(this, data.getErrors());
-
-          } else {
-            queueManager.setExecutedRemote(this);
-            checkCreatorAndSignerIsCurrentUser(data, TAG);
-          }
-
+          onSuccess( this, data, false, true, TAG );
           finishOperationOnSuccess( params.getDocument() );
-
         },
-        error -> {
-          if (callback != null){
-            callback.onCommandExecuteError(getType());
-          }
-
-          if ( settings.isOnline() ){
-            finishOperationProcessedOnError( this, params.getDocument(), Collections.singletonList(error.getLocalizedMessage() ) );
-          }
-        }
+        error -> onError( this, params.getDocument(), error.getLocalizedMessage(), true, TAG )
       );
   }
 

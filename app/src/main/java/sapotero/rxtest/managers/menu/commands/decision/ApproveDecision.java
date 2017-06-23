@@ -6,36 +6,25 @@ import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.util.Collections;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import io.requery.query.Tuple;
-import okhttp3.MediaType;
-import okhttp3.RequestBody;
-import retrofit2.Retrofit;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
-import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
-import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
-import sapotero.rxtest.managers.menu.commands.AbstractCommand;
+import sapotero.rxtest.managers.menu.commands.DecisionCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
-import sapotero.rxtest.managers.menu.utils.CommandParams;
-import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
-import sapotero.rxtest.retrofit.models.wrapper.DecisionWrapper;
-import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.memory.fields.FieldType;
-import sapotero.rxtest.utils.memory.fields.InMemoryState;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
-public class ApproveDecision extends AbstractCommand {
+public class ApproveDecision extends DecisionCommand {
 
   private final DocumentReceiver document;
 
@@ -184,15 +173,7 @@ public class ApproveDecision extends AbstractCommand {
   public void executeRemote() {
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
-    Retrofit retrofit = getRetrofit();
-
-    String sign = null;
-
-    try {
-      sign = MainService.getFakeSign( settings.getPin(), null );
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    String sign = getSign();
 
     Decision _decision = params.getDecisionModel();
     _decision.setDocumentUid( null );
@@ -203,62 +184,16 @@ public class ApproveDecision extends AbstractCommand {
       _decision.setAssignment(true);
     }
 
-    DecisionWrapper wrapper = new DecisionWrapper();
-    wrapper.setDecision(_decision);
-
-    String json_d = new Gson().toJson( wrapper );
-    Timber.w("decision_json: %s", json_d);
-
-
-    RequestBody json = RequestBody.create(
-      MediaType.parse("application/json"),
-      json_d
-    );
-
-    Timber.tag(TAG).e("DECISION");
-    Timber.tag(TAG).e("%s", json);
-
-    DocumentService operationService = retrofit.create( DocumentService.class );
-
-    Observable<DecisionError> info = operationService.update(
-      decisionId,
-      settings.getLogin(),
-      settings.getToken(),
-      json
-    );
+    Observable<DecisionError> info = getDecisionUpdateOperationObservable(_decision, decisionId, TAG);
 
     info.subscribeOn( Schedulers.computation() )
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         data -> {
-
-          if (data.getErrors() !=null && data.getErrors().size() > 0){
-            queueManager.setExecutedWithError(this, data.getErrors());
-            EventBus.getDefault().post( new ForceUpdateDocumentEvent( params.getDocument() ));
-
-          } else {
-
-            if (callback != null ){
-              callback.onCommandExecuteSuccess( getType() );
-            }
-            EventBus.getDefault().post( new UpdateDocumentEvent( params.getDocument() ));
-
-            queueManager.setExecutedRemote(this);
-          }
-
+          onSuccess( this, data, true, false, TAG );
           finishOperationOnSuccess( params.getDocument() );
-
         },
-        error -> {
-          Timber.tag(TAG).i("error: %s", error);
-          if (callback != null){
-            callback.onCommandExecuteError(error.getLocalizedMessage());
-          }
-
-          if ( settings.isOnline() ){
-            finishOperationProcessedOnError( this, params.getDocument(), Collections.singletonList(error.getLocalizedMessage() ) );
-          }
-        }
+        error -> onError( this, params.getDocument(), error.getLocalizedMessage(), true, TAG )
       );
   }
 }

@@ -1,7 +1,7 @@
 package sapotero.rxtest.managers.menu.commands;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -14,15 +14,12 @@ import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
-import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDisplayFirstDecisionEntity;
-import sapotero.rxtest.retrofit.OperationService;
-import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
 import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.Settings;
@@ -84,6 +81,18 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       .build();
   }
 
+  public String getSign() {
+    String sign = null;
+
+    try {
+      sign = MainService.getFakeSign( settings.getPin(), null );
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    return sign;
+  }
+
   // resolved https://tasks.n-core.ru/browse/MVDESD-13258
   // 1. Созданные мной и подписант я
   protected void checkCreatorAndSignerIsCurrentUser(DecisionError data, String TAG) {
@@ -142,12 +151,12 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       .value();
   }
 
-  protected void finishOperationOnError(Command command, String uid, List<String> errors) {
+  private void finishOperationOnError(Command command, String uid, List<String> errors) {
     finishOperationOnSuccess( uid );
     queueManager.setExecutedWithError( command, errors );
   }
 
-  protected void finishOperationProcessedOnError(Command command, String uid, List<String> errors) {
+  private void finishOperationProcessedOnError(Command command, String uid, List<String> errors) {
     store.process(
       store.startTransactionFor( uid )
         .removeLabel(LabelType.SYNC)
@@ -165,5 +174,25 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       .value();
 
     queueManager.setExecutedWithError( command, errors );
+  }
+
+  public <T> boolean notEmpty(Collection<T> collection) {
+    return collection != null && collection.size() > 0;
+  }
+
+  public void onError(Command command, String uid, String errorMessage, boolean setProcessedFalse, String TAG) {
+    Timber.tag(TAG).i("error: %s", errorMessage);
+
+    if (callback != null){
+      callback.onCommandExecuteError( errorMessage );
+    }
+
+    if ( settings.isOnline() ) {
+      if ( setProcessedFalse ) {
+        finishOperationProcessedOnError( command, uid, Collections.singletonList( errorMessage ) );
+      } else {
+        finishOperationOnError( command, uid, Collections.singletonList( errorMessage ) );
+      }
+    }
   }
 }

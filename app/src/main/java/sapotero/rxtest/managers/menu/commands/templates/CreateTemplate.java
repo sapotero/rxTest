@@ -14,7 +14,6 @@ import sapotero.rxtest.db.requery.models.RTemplateEntity;
 import sapotero.rxtest.events.decision.AddDecisionTemplateEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
-import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.TemplatesService;
 import sapotero.rxtest.retrofit.models.Template;
 import timber.log.Timber;

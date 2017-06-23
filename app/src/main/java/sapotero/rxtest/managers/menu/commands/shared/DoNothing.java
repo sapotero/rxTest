@@ -2,7 +2,6 @@ package sapotero.rxtest.managers.menu.commands.shared;
 
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
-import sapotero.rxtest.managers.menu.utils.CommandParams;
 
 public class DoNothing extends AbstractCommand {
 

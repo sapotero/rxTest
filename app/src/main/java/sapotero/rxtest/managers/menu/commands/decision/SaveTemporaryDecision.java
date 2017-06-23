@@ -9,14 +9,13 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
-import sapotero.rxtest.managers.menu.commands.AbstractCommand;
+import sapotero.rxtest.managers.menu.commands.DecisionCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
-import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import timber.log.Timber;
 
-public class SaveTemporaryDecision extends AbstractCommand {
+public class SaveTemporaryDecision extends DecisionCommand {
 
   private final DocumentReceiver document;
 

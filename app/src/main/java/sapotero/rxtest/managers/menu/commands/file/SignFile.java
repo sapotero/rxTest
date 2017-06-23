@@ -10,9 +10,7 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.queue.FileSignEntity;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
-import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.ImagesService;
-import sapotero.rxtest.services.MainService;
 import timber.log.Timber;
 
 public class SignFile extends AbstractCommand {
@@ -67,12 +65,7 @@ public class SignFile extends AbstractCommand {
 
     File file = new File( EsdApplication.getApplication().getApplicationContext().getFilesDir(), params.getFilePath() );
 
-    String file_sign = null;
-    try {
-      file_sign = MainService.getFakeSign( settings.getPin(), file );
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    String file_sign = getSign();
 
     if (file_sign != null) {
       Observable<Object> info = imagesService.update(
