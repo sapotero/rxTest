@@ -162,7 +162,7 @@ public class UpdateDocumentJob extends DocumentJob {
 
         // Если документ адресован текущему пользователю, то убрать из обработанных и из папки обработанных
         // (например, документ возвращен текущему пользователю после отклонения)
-        if ( addressedToCurrentUser( documentReceived ) ) {
+        if ( addressedToCurrentUser( documentReceived, documentExisting, documentMapper ) ) {
           documentExisting.setProcessed( false );
           documentExisting.setFromProcessedFolder( false );
         }

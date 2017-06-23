@@ -199,7 +199,7 @@ abstract class DocumentJob extends BaseJob {
 
   // True, если текущий статус какого-либо экземпляра адресован текущему пользователю
   // или согласно маршруту документ должен поступить текущему пользователю.
-  boolean addressedToCurrentUser(DocumentInfo document) {
+  boolean addressedToCurrentUser(DocumentInfo document, RDocumentEntity documentEntity, DocumentMapper documentMapper) {
     boolean result = false;
 
     for (Exemplar exemplar : nullGuard( document.getExemplars() ) ) {
@@ -231,6 +231,11 @@ abstract class DocumentJob extends BaseJob {
               if ( !lastActionStatus.toLowerCase().contains("отклонено")
                 && !lastActionStatus.toLowerCase().contains("согласовано")
                 && !lastActionStatus.toLowerCase().contains("подписано") ) {
+                if ( title.equals( "Подписывающие" ) ) {
+                  documentMapper.setFilter( documentEntity, "signing" );
+                } else {
+                  documentMapper.setFilter( documentEntity, "approval" );
+                }
                 result = true;
                 return result;
               }

@@ -42,11 +42,11 @@ public class CreateProcessedDocumentsJob extends DocumentJob {
 
   @Override
   public void doAfterLoad(DocumentInfo document) {
-    // Положить документ в папку Обработанные, если не адресован текущему пользователю
-    if ( !addressedToCurrentUser( document ) ) {
-      DocumentMapper documentMapper = mappers.getDocumentMapper();
-      RDocumentEntity doc = new RDocumentEntity();
+    DocumentMapper documentMapper = mappers.getDocumentMapper();
+    RDocumentEntity doc = new RDocumentEntity();
 
+    // Положить документ в папку Обработанные, если не адресован текущему пользователю
+    if ( !addressedToCurrentUser( document, doc, documentMapper ) ) {
       documentMapper.setSimpleFields(doc, document);
       documentMapper.setNestedFields(doc, document, true);
 
