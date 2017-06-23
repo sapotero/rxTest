@@ -10,7 +10,7 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.events.view.ShowPrevDocumentEvent;
+import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
@@ -55,7 +55,7 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
       .get()
       .value();
 
-    EventBus.getDefault().post( new ShowPrevDocumentEvent());
+    EventBus.getDefault().post( new ShowNextDocumentEvent());
   }
 
   private String getUid() {
