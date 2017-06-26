@@ -7,6 +7,8 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.models.images.RSignImageEntity;
+import sapotero.rxtest.db.requery.models.queue.FileSignEntity;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.retrofit.ImagesService;
@@ -74,22 +76,63 @@ public class SignFile extends AbstractCommand {
         file_sign
       );
 
-      String finalFile_sign = file_sign;
       info.subscribeOn( Schedulers.computation() )
         .observeOn( AndroidSchedulers.mainThread() )
         .subscribe(
           data -> {
             Timber.tag(TAG).i("signed: %s", data);
             queueManager.setExecutedRemote(this);
-
-            saveImageSign(params.getLabel(), params.getImageId(), params.getDocument(), finalFile_sign, TAG);
+            setSignSuccess( getParams().getImageId() );
+            saveImageSign( file_sign );
           },
           error -> {
             if (callback != null) {
               callback.onCommandExecuteError(getType());
             }
+
+            if ( settings.isOnline() ) {
+              setSignError( getParams().getImageId() );
+            }
           }
         );
     }
+  }
+
+  private void saveImageSign(String sign){
+    FileSignEntity task = new FileSignEntity();
+    task.setFilename( params.getLabel() );
+    task.setImageId( params.getImageId() );
+    task.setDocumentId( params.getDocument() );
+    task.setSign( sign );
+
+    dataStore
+      .insert(task)
+      .toObservable()
+      .subscribeOn(Schedulers.computation())
+      .subscribeOn(Schedulers.computation())
+      .subscribe(
+        data -> Timber.tag(TAG).v("inserted %s [ %s ]", data.getImageId(), data.getDocumentId() ),
+        Timber::e
+      );
+  }
+
+  private void setSignSuccess(String imageId) {
+    dataStore
+      .update(RSignImageEntity.class)
+      .set( RSignImageEntity.SIGNED, true )
+      .set( RSignImageEntity.SIGNING, false )
+      .where( RSignImageEntity.IMAGE_ID.eq( imageId ) )
+      .get()
+      .value();
+  }
+
+  private void setSignError(String imageId) {
+    dataStore
+      .update(RSignImageEntity.class)
+      .set( RSignImageEntity.ERROR, true )
+      .set( RSignImageEntity.SIGNING, false )
+      .where( RSignImageEntity.IMAGE_ID.eq( imageId ) )
+      .get()
+      .value();
   }
 }

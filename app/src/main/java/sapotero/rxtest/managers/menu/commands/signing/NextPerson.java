@@ -2,23 +2,27 @@ package sapotero.rxtest.managers.menu.commands.signing;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Set;
 
-import retrofit2.Call;
-import retrofit2.Response;
-import retrofit2.Retrofit;
+import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
+import sapotero.rxtest.db.requery.models.images.RSignImageEntity;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.ApprovalSigningCommand;
+import sapotero.rxtest.managers.menu.factories.CommandFactory;
+import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
-import sapotero.rxtest.retrofit.ImagesService;
+import sapotero.rxtest.managers.menu.utils.CommandParams;
 import timber.log.Timber;
 
 public class NextPerson extends ApprovalSigningCommand {
+
+  private static final int ALL_IMAGES_SIGNED = 0;
+  private static final int IMAGE_SIGN_ERROR = 1;
+  private static final int NOT_ALL_IMAGES_SIGNED = 2;
 
   private final DocumentReceiver document;
 
@@ -87,12 +91,13 @@ public class NextPerson extends ApprovalSigningCommand {
   public void executeRemote() {
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
-    boolean isImagesSigned = signImages();
+    int result = signImages();
 
-    if ( isImagesSigned ) {
+    if ( result == ALL_IMAGES_SIGNED ) {
       remoteOperation(getUid(), official_id, TAG);
+    }
 
-    } else {
+    if ( result == IMAGE_SIGN_ERROR ) {
       String errorMessage = "Электронные образы не были подписаны";
       Timber.tag(TAG).i("error: %s", errorMessage);
 
@@ -108,58 +113,110 @@ public class NextPerson extends ApprovalSigningCommand {
     return params.getDocument() != null ? params.getDocument(): document.getUid();
   }
 
-  // True if images signed successfully
-  private boolean signImages() {
+  private int signImages() {
+    int result = ALL_IMAGES_SIGNED;
+
     Timber.tag(TAG).e("Signing images");
     RDocumentEntity doc = getDocument(document.getUid());
 
     Timber.tag(TAG).e("doc: %s", doc);
 
-    if (doc != null) {
+    if ( doc == null ) {
+      return result;
+    }
 
-      Set<RImage> images = doc.getImages();
-      Timber.tag(TAG).e("images: %s", images);
+    Set<RImage> images = doc.getImages();
+    Timber.tag(TAG).e("images: %s", images);
 
-      if (notEmpty(images)) {
-        Retrofit retrofit = getRetrofit();
+    if ( !notEmpty( images ) ) {
+      return result;
+    }
 
-        for (RImage img : images) {
-          RImageEntity image = (RImageEntity) img;
+    for (RImage img : images) {
+      RImageEntity image = (RImageEntity) img;
+      Timber.tag(TAG).e("image: %s", document.getUid());
+      boolean isSigned = image.isSigned() != null ? image.isSigned() : false;
 
-          Timber.tag(TAG).e("image: %s", document.getUid());
+      if ( !isSigned ) {
+        RSignImageEntity signImage = getSignImage( image.getImageId() );
 
-          String file_sign = getSign();
+        if ( signImage == null ) {
+          signImage = createNewSignImage( image.getImageId() );
+        }
 
-          ImagesService imagesService = retrofit.create(ImagesService.class);
-          Call<Object> call = imagesService.updateNonRx(
-            image.getImageId(),
-            settings.getLogin(),
-            settings.getToken(),
-            file_sign
-          );
+        if ( signImage.isError() ) {
+          return IMAGE_SIGN_ERROR;
+        }
 
-          try {
-            Response<Object> response = call.execute();
-
-            if ( !response.isSuccessful() ) {
-              return false;
-            }
-
-            Timber.tag(TAG).i("Signed image %s", image.getImageId() );
-
-            saveImageSign( image.getTitle(), image.getImageId(), document.getUid(), file_sign, TAG );
-
-          } catch (IOException e) {
-            return false;
+        if ( !signImage.isSigned() ) {
+          result = NOT_ALL_IMAGES_SIGNED;
+          if ( !signImage.isSigning() ) {
+            addImageSignTask( image );
+            setSigning( image.getImageId() );
           }
         }
+
       }
     }
 
-    return true;
+    return result;
+  }
+
+  private RSignImageEntity createNewSignImage(String imageId) {
+    RSignImageEntity signImage = new RSignImageEntity();
+    signImage.setImageId( imageId );
+    signImage.setSigned( false );
+    signImage.setSigning( false );
+    signImage.setError( false );
+
+    dataStore
+      .insert(signImage)
+      .toObservable()
+      .subscribeOn(Schedulers.computation())
+      .subscribeOn(Schedulers.computation())
+      .subscribe(
+        data -> Timber.tag(TAG).v( "inserted RSignImage %s", data.getImageId() ),
+        Timber::e
+      );
+
+    return signImage;
+  }
+
+  private void setSigning(String imageId) {
+    dataStore
+      .update(RSignImageEntity.class)
+      .set( RSignImageEntity.SIGNING, true)
+      .where( RSignImageEntity.IMAGE_ID.eq( imageId ) )
+      .get()
+      .value();
+  }
+
+  private void addImageSignTask(RImageEntity image) {
+    Timber.tag(TAG).e("addImageSignTask");
+
+    CommandFactory.Operation operation = CommandFactory.Operation.FILE_SIGN;
+    CommandParams params = new CommandParams();
+    params.setUser( settings.getLogin() );
+    params.setDocument( document.getUid() );
+    params.setLabel( image.getTitle() );
+    params.setFilePath( String.format( "%s_%s", image.getMd5(), image.getTitle()) );
+    params.setImageId( image.getImageId() );
+    Command command = operation.getCommand(null, document, params);
+    Timber.tag(TAG).e("image: %s", document.getUid());
+    queueManager.add(command);
+  }
+
+  private RSignImageEntity getSignImage(String imageId) {
+    return dataStore
+      .select(RSignImageEntity.class)
+      .where(RSignImageEntity.IMAGE_ID.eq(imageId))
+      .get().firstOrNull();
   }
 
   private RDocumentEntity getDocument(String uid){
-    return dataStore.select(RDocumentEntity.class).where(RDocumentEntity.UID.eq(uid)).get().firstOrNull();
+    return dataStore
+      .select(RDocumentEntity.class)
+      .where(RDocumentEntity.UID.eq(uid))
+      .get().firstOrNull();
   }
 }
