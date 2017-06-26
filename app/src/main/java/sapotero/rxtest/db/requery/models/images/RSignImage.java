@@ -15,5 +15,6 @@ public class RSignImage {
   String imageId;
   Boolean signed;
   Boolean signing;
+  Boolean signTaskStarted;
   Boolean error;
 }

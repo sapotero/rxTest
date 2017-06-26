@@ -1,6 +1,7 @@
 package sapotero.rxtest.managers.menu.commands.file;
 
 import java.io.File;
+import java.util.Collections;
 
 import retrofit2.Retrofit;
 import rx.Observable;
@@ -60,21 +61,39 @@ public class SignFile extends AbstractCommand {
   public void executeRemote() {
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
+    RSignImageEntity signImage = getSignImage( getParams().getImageId() );
+
+    if ( signImage == null ) {
+      return;
+    }
+
+    if ( signImage.isSignTaskStarted() != null && signImage.isSignTaskStarted() ) {
+      return;
+    }
+
+    setSignTaskStarted( getParams().getImageId(), true );
+
     Retrofit retrofit = getRetrofit();
 
     ImagesService imagesService = retrofit.create( ImagesService.class );
 
     File file = new File( EsdApplication.getApplication().getApplicationContext().getFilesDir(), params.getFilePath() );
 
+    Timber.tag(TAG).d("Generating sign");
+
     String file_sign = getSign();
 
     if (file_sign != null) {
+      Timber.tag(TAG).d("Sign generated");
+
       Observable<Object> info = imagesService.update(
         getParams().getImageId(),
         settings.getLogin(),
         settings.getToken(),
         file_sign
       );
+
+      Timber.tag(TAG).d("Sending image sign request");
 
       info.subscribeOn( Schedulers.computation() )
         .observeOn( AndroidSchedulers.mainThread() )
@@ -84,15 +103,22 @@ public class SignFile extends AbstractCommand {
             queueManager.setExecutedRemote(this);
             setSignSuccess( getParams().getImageId() );
             saveImageSign( file_sign );
+            setSignTaskStarted( getParams().getImageId(), false );
           },
           error -> {
+            Timber.tag(TAG).i("Sign error");
+
             if (callback != null) {
               callback.onCommandExecuteError(getType());
             }
 
             if ( settings.isOnline() ) {
+              String errorMessage = "Ошибка подписания электронного образа";
+              queueManager.setExecutedWithError( this,  Collections.singletonList( errorMessage ) );
               setSignError( getParams().getImageId() );
             }
+
+            setSignTaskStarted( getParams().getImageId(), false );
           }
         );
     }
@@ -121,6 +147,7 @@ public class SignFile extends AbstractCommand {
       .update(RSignImageEntity.class)
       .set( RSignImageEntity.SIGNED, true )
       .set( RSignImageEntity.SIGNING, false )
+      .set( RSignImageEntity.ERROR, false )
       .where( RSignImageEntity.IMAGE_ID.eq( imageId ) )
       .get()
       .value();
@@ -131,6 +158,15 @@ public class SignFile extends AbstractCommand {
       .update(RSignImageEntity.class)
       .set( RSignImageEntity.ERROR, true )
       .set( RSignImageEntity.SIGNING, false )
+      .where( RSignImageEntity.IMAGE_ID.eq( imageId ) )
+      .get()
+      .value();
+  }
+
+  private void setSignTaskStarted(String imageId, boolean value) {
+    dataStore
+      .update(RSignImageEntity.class)
+      .set( RSignImageEntity.SIGN_TASK_STARTED, value )
       .where( RSignImageEntity.IMAGE_ID.eq( imageId ) )
       .get()
       .value();

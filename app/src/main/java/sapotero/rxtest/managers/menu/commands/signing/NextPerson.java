@@ -151,6 +151,7 @@ public class NextPerson extends ApprovalSigningCommand {
         if ( !signImage.isSigned() ) {
           result = NOT_ALL_IMAGES_SIGNED;
           if ( !signImage.isSigning() ) {
+            Timber.tag(TAG).e("Creating image sign task");
             addImageSignTask( image );
             setSigning( image.getImageId() );
           }
@@ -167,6 +168,7 @@ public class NextPerson extends ApprovalSigningCommand {
     signImage.setImageId( imageId );
     signImage.setSigned( false );
     signImage.setSigning( false );
+    signImage.setSignTaskStarted( false );
     signImage.setError( false );
 
     dataStore
@@ -204,13 +206,6 @@ public class NextPerson extends ApprovalSigningCommand {
     Command command = operation.getCommand(null, document, params);
     Timber.tag(TAG).e("image: %s", document.getUid());
     queueManager.add(command);
-  }
-
-  private RSignImageEntity getSignImage(String imageId) {
-    return dataStore
-      .select(RSignImageEntity.class)
-      .where(RSignImageEntity.IMAGE_ID.eq(imageId))
-      .get().firstOrNull();
   }
 
   private RDocumentEntity getDocument(String uid){
