@@ -20,6 +20,7 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDisplayFirstDecisionEntity;
+import sapotero.rxtest.db.requery.models.queue.FileSignEntity;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
 import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.Settings;
@@ -194,5 +195,23 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
         finishOperationOnError( command, uid, Collections.singletonList( errorMessage ) );
       }
     }
+  }
+
+  protected void addSigned(String label, String imageId, String documentId, String sign, String TAG){
+    FileSignEntity task = new FileSignEntity();
+    task.setFilename( label );
+    task.setImageId( imageId );
+    task.setDocumentId( documentId );
+    task.setSign( sign );
+
+    dataStore
+      .insert(task)
+      .toObservable()
+      .subscribeOn(Schedulers.computation())
+      .subscribeOn(Schedulers.computation())
+      .subscribe(
+        data -> Timber.tag(TAG).v( "inserted %s [ %s ]", data.getImageId(), data.getDocumentId() ),
+        Timber::e
+      );
   }
 }

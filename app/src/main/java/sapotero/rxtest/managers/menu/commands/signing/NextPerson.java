@@ -2,8 +2,18 @@ package sapotero.rxtest.managers.menu.commands.signing;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Collections;
 import java.util.Set;
 
+import retrofit2.Call;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
+import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
@@ -13,6 +23,7 @@ import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.retrofit.ImagesService;
 import timber.log.Timber;
 
 public class NextPerson extends ApprovalSigningCommand {
@@ -83,20 +94,24 @@ public class NextPerson extends ApprovalSigningCommand {
   @Override
   public void executeRemote() {
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
-    remoteOperation(getUid(), official_id, TAG);
-  }
 
-  @Override
-  protected void onRemoteSuccess() {
-    addImageSignTask();
+    boolean isImagesSigned = signImages();
+
+    if ( isImagesSigned ) {
+      remoteOperation(getUid(), official_id, TAG);
+    } else {
+      String errorMessage = "Электронные образы не были подписаны";
+      onError( this, getUid(), errorMessage, true, TAG );
+    }
   }
 
   private String getUid() {
     return params.getDocument() != null ? params.getDocument(): document.getUid();
   }
 
-  private void addImageSignTask(){
-    Timber.tag(TAG).e("addImageSignTask");
+  // True if images signed successfully
+  private boolean signImages() {
+    Timber.tag(TAG).e("Signing images");
     RDocumentEntity doc = getDocument(document.getUid());
 
     Timber.tag(TAG).e("doc: %s", doc);
@@ -106,29 +121,43 @@ public class NextPerson extends ApprovalSigningCommand {
       Set<RImage> images = doc.getImages();
       Timber.tag(TAG).e("images: %s", images);
 
+      if (notEmpty(images)) {
+        Retrofit retrofit = getRetrofit();
 
-      if (images != null && images.size() > 0) {
-        for (RImage img: images) {
+        for (RImage img : images) {
           RImageEntity image = (RImageEntity) img;
 
-          CommandFactory.Operation operation = CommandFactory.Operation.FILE_SIGN;
-          CommandParams params = new CommandParams();
-          params.setUser( settings.getLogin() );
-          params.setDocument( document.getUid() );
-          params.setLabel( image.getTitle() );
-          params.setFilePath( String.format( "%s_%s", image.getMd5(), image.getTitle()) );
-          params.setImageId( image.getImageId() );
-
-
-          Command command = operation.getCommand(null, document, params);
-
           Timber.tag(TAG).e("image: %s", document.getUid());
-          queueManager.add(command);
+
+          String file_sign = getSign();
+
+          ImagesService imagesService = retrofit.create(ImagesService.class);
+          Call<Object> call = imagesService.updateNonRx(
+            image.getImageId(),
+            settings.getLogin(),
+            settings.getToken(),
+            file_sign
+          );
+
+          try {
+            Response<Object> response = call.execute();
+
+            if ( !response.isSuccessful() ) {
+              return false;
+            }
+
+            Timber.tag(TAG).i("Signed image %s", image.getImageId() );
+
+            addSigned( image.getTitle(), image.getImageId(), document.getUid(), file_sign, TAG );
+
+          } catch (IOException e) {
+            return false;
+          }
         }
       }
-      queueManager.setExecutedRemote(this);
-
     }
+
+    return true;
   }
 
   private RDocumentEntity getDocument(String uid){

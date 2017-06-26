@@ -83,7 +83,7 @@ public class SignFile extends AbstractCommand {
             Timber.tag(TAG).i("signed: %s", data);
             queueManager.setExecutedRemote(this);
 
-            addSigned(finalFile_sign);
+            addSigned(params.getLabel(), params.getImageId(), params.getDocument(), finalFile_sign, TAG);
           },
           error -> {
             if (callback != null) {
@@ -94,22 +94,5 @@ public class SignFile extends AbstractCommand {
         );
     }
 
-  }
-  private void addSigned(String sign){
-    FileSignEntity task = new FileSignEntity();
-    task.setFilename( params.getLabel() );
-    task.setImageId(  params.getImageId() );
-    task.setDocumentId( params.getDocument() );
-    task.setSign( sign );
-
-    dataStore
-      .insert(task)
-      .toObservable()
-      .subscribeOn(Schedulers.computation())
-      .subscribeOn(Schedulers.computation())
-      .subscribe(data -> {
-        Timber.tag(TAG).v("inserted %s [ %s ]", data.getImageId(), data.getDocumentId() );
-      },
-        Timber::e);
   }
 }

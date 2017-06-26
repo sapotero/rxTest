@@ -79,8 +79,4 @@ public class NextPerson extends ApprovalSigningCommand {
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
     remoteOperation(getUid(), official_id, TAG);
   }
-
-  @Override
-  protected void onRemoteSuccess() {
-  }
 }

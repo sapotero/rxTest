@@ -51,8 +51,6 @@ public abstract class ApprovalSigningCommand extends AbstractCommand {
           Timber.tag(TAG).i("error: %s", data.getMessage());
           Timber.tag(TAG).i("type: %s", data.getType());
 
-          onRemoteSuccess();
-
           if (data.getMessage() != null && !data.getMessage().toLowerCase().contains("успешно") ) {
             queueManager.setExecutedWithError(this, Collections.singletonList( data.getMessage() ) );
           } else {
@@ -64,6 +62,4 @@ public abstract class ApprovalSigningCommand extends AbstractCommand {
         error -> onError( this, uid, error.getLocalizedMessage(), true, TAG )
       );
   }
-
-  protected abstract void onRemoteSuccess();
 }

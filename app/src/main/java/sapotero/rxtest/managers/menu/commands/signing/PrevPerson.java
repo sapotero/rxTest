@@ -77,10 +77,6 @@ public class PrevPerson extends ApprovalSigningCommand {
     remoteOperation(getUid(), official_id, TAG);
   }
 
-  @Override
-  protected void onRemoteSuccess() {
-  }
-
   private String getUid() {
     return params.getDocument() != null ? params.getDocument(): document.getUid();
   }
