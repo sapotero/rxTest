@@ -96,7 +96,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13258
   // 1. Созданные мной и подписант я
-  protected void checkCreatorAndSignerIsCurrentUser(DecisionError data, String TAG) {
+  void checkCreatorAndSignerIsCurrentUser(DecisionError data, String TAG) {
     String decisionUid = data.getDecisionUid();
 
     // Если создал резолюцию я и подписант я, то сохранить UID этой резолюции в отдельную таблицу
@@ -157,7 +157,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     queueManager.setExecutedWithError( command, errors );
   }
 
-  private void finishOperationProcessedOnError(Command command, String uid, List<String> errors) {
+  protected void finishOperationProcessedOnError(Command command, String uid, List<String> errors) {
     store.process(
       store.startTransactionFor( uid )
         .removeLabel(LabelType.SYNC)
@@ -197,7 +197,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     }
   }
 
-  protected void addSigned(String label, String imageId, String documentId, String sign, String TAG){
+  protected void saveImageSign(String label, String imageId, String documentId, String sign, String TAG){
     FileSignEntity task = new FileSignEntity();
     task.setFilename( label );
     task.setImageId( imageId );

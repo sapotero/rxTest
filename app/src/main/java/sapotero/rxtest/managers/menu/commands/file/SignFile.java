@@ -7,7 +7,6 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.db.requery.models.queue.FileSignEntity;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.retrofit.ImagesService;
@@ -83,16 +82,14 @@ public class SignFile extends AbstractCommand {
             Timber.tag(TAG).i("signed: %s", data);
             queueManager.setExecutedRemote(this);
 
-            addSigned(params.getLabel(), params.getImageId(), params.getDocument(), finalFile_sign, TAG);
+            saveImageSign(params.getLabel(), params.getImageId(), params.getDocument(), finalFile_sign, TAG);
           },
           error -> {
             if (callback != null) {
               callback.onCommandExecuteError(getType());
             }
-
           }
         );
     }
-
   }
 }

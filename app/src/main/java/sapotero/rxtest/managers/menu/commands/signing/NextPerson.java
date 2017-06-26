@@ -2,7 +2,6 @@ package sapotero.rxtest.managers.menu.commands.signing;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Set;
@@ -10,19 +9,12 @@ import java.util.Set;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
-import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.ApprovalSigningCommand;
-import sapotero.rxtest.managers.menu.factories.CommandFactory;
-import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
-import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.ImagesService;
 import timber.log.Timber;
 
@@ -99,9 +91,16 @@ public class NextPerson extends ApprovalSigningCommand {
 
     if ( isImagesSigned ) {
       remoteOperation(getUid(), official_id, TAG);
+
     } else {
       String errorMessage = "Электронные образы не были подписаны";
-      onError( this, getUid(), errorMessage, true, TAG );
+      Timber.tag(TAG).i("error: %s", errorMessage);
+
+      if (callback != null){
+        callback.onCommandExecuteError( errorMessage );
+      }
+
+      finishOperationProcessedOnError( this, getUid(), Collections.singletonList( errorMessage ) );
     }
   }
 
@@ -148,7 +147,7 @@ public class NextPerson extends ApprovalSigningCommand {
 
             Timber.tag(TAG).i("Signed image %s", image.getImageId() );
 
-            addSigned( image.getTitle(), image.getImageId(), document.getUid(), file_sign, TAG );
+            saveImageSign( image.getTitle(), image.getImageId(), document.getUid(), file_sign, TAG );
 
           } catch (IOException e) {
             return false;

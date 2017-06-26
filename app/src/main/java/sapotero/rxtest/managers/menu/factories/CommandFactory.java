@@ -224,7 +224,7 @@ public class CommandFactory implements AbstractCommand.Callback{
       }
       @Override
       public String getRussinaName() {
-        return "Передача подписания документа предыдущему в маршруте ДЛ";
+        return "Передача подписания документа следующему в маршруте ДЛ";
       }
     },
     SIGNING_PREV_PERSON {
