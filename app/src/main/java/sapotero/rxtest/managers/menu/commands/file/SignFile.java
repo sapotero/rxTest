@@ -69,6 +69,12 @@ public class SignFile extends AbstractCommand {
       return;
     }
 
+    if ( signImage.isSigned() != null && signImage.isSigned() ) {
+      Timber.tag(TAG).d("Image already signed, quit and remove from queue");
+      queueManager.setExecutedRemote(this);
+      return;
+    }
+
     if ( signImage.isSignTaskStarted() != null && signImage.isSignTaskStarted() ) {
       Timber.tag(TAG).d("Sign task already started, quit");
       return;
@@ -106,7 +112,6 @@ public class SignFile extends AbstractCommand {
             queueManager.setExecutedRemote(this);
             setSignSuccess( getParams().getImageId() );
             saveImageSign( file_sign );
-            setSignTaskStarted( getParams().getImageId(), false );
           },
           error -> {
             Timber.tag(TAG).i("Sign error");
