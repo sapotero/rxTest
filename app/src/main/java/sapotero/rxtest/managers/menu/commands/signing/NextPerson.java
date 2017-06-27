@@ -56,10 +56,27 @@ public class NextPerson extends ApprovalSigningCommand {
 
   @Override
   public void execute() {
+    resetSignImageError();
+
     queueManager.add(this);
     EventBus.getDefault().post( new ShowNextDocumentEvent());
 
     setDocOperationProcessedStartedInMemory( getUid() );
+  }
+
+  private void resetSignImageError() {
+    Timber.tag(TAG).e("Resetting sign image errors");
+    RDocumentEntity doc = getDocument( document.getUid() );
+
+    if ( doc != null ) {
+      Set<RImage> images = doc.getImages();
+      if ( notEmpty( images ) ) {
+        for (RImage img : images) {
+          RImageEntity image = (RImageEntity) img;
+          setSignErrorFalse( image.getImageId() );
+        }
+      }
+    }
   }
 
 
@@ -213,5 +230,16 @@ public class NextPerson extends ApprovalSigningCommand {
       .select(RDocumentEntity.class)
       .where(RDocumentEntity.UID.eq(uid))
       .get().firstOrNull();
+  }
+
+  private void setSignErrorFalse(String imageId) {
+    int count = dataStore
+      .update(RSignImageEntity.class)
+      .set( RSignImageEntity.ERROR, false )
+      .where( RSignImageEntity.IMAGE_ID.eq( imageId ) )
+      .get()
+      .value();
+
+    Timber.tag(TAG).i("Set sign error false count = %s", count);
   }
 }

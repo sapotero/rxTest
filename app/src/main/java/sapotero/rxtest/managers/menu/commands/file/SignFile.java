@@ -59,15 +59,24 @@ public class SignFile extends AbstractCommand {
 
   @Override
   public void executeRemote() {
+    Timber.tag(TAG).d("Starting executeRemote");
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
     RSignImageEntity signImage = getSignImage( getParams().getImageId() );
 
     if ( signImage == null ) {
+      Timber.tag(TAG).d("signImage == null, quit");
+      return;
+    }
+
+    if ( signImage.isSigned() != null && signImage.isSigned() ) {
+      Timber.tag(TAG).d("Image already signed, quit and remove from queue");
+      queueManager.setExecutedRemote(this);
       return;
     }
 
     if ( signImage.isSignTaskStarted() != null && signImage.isSignTaskStarted() ) {
+      Timber.tag(TAG).d("Sign task already started, quit");
       return;
     }
 
@@ -103,7 +112,6 @@ public class SignFile extends AbstractCommand {
             queueManager.setExecutedRemote(this);
             setSignSuccess( getParams().getImageId() );
             saveImageSign( file_sign );
-            setSignTaskStarted( getParams().getImageId(), false );
           },
           error -> {
             Timber.tag(TAG).i("Sign error");
@@ -125,6 +133,8 @@ public class SignFile extends AbstractCommand {
   }
 
   private void saveImageSign(String sign){
+    Timber.tag(TAG).i("Saving image sign");
+
     FileSignEntity task = new FileSignEntity();
     task.setFilename( params.getLabel() );
     task.setImageId( params.getImageId() );
@@ -137,7 +147,7 @@ public class SignFile extends AbstractCommand {
       .subscribeOn(Schedulers.computation())
       .subscribeOn(Schedulers.computation())
       .subscribe(
-        data -> Timber.tag(TAG).v("inserted %s [ %s ]", data.getImageId(), data.getDocumentId() ),
+        data -> Timber.tag(TAG).v("Saved image sign %s [ %s ]", data.getImageId(), data.getDocumentId() ),
         Timber::e
       );
   }
@@ -151,6 +161,8 @@ public class SignFile extends AbstractCommand {
       .where( RSignImageEntity.IMAGE_ID.eq( imageId ) )
       .get()
       .value();
+
+    Timber.tag(TAG).i("Set sign success");
   }
 
   private void setSignError(String imageId) {
@@ -161,6 +173,8 @@ public class SignFile extends AbstractCommand {
       .where( RSignImageEntity.IMAGE_ID.eq( imageId ) )
       .get()
       .value();
+
+    Timber.tag(TAG).i("Set sign error");
   }
 
   private void setSignTaskStarted(String imageId, boolean value) {
@@ -170,5 +184,7 @@ public class SignFile extends AbstractCommand {
       .where( RSignImageEntity.IMAGE_ID.eq( imageId ) )
       .get()
       .value();
+
+    Timber.tag(TAG).i("Set sign task started = %s", value);
   }
 }

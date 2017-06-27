@@ -156,7 +156,7 @@ public class BlockFactory implements DecisionInterface, DecisionFragment.Callbac
 
     for (DecisionFragment block: blocks) {
       PrimaryConsiderationAdapter adapter = block.getPerformerAdapter();
-      if ( adapter.hasOriginal() ) {
+      if ( adapter != null && adapter.hasOriginal() ) {
         originCount++;
       }
     }
