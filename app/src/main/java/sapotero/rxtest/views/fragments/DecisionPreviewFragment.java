@@ -259,7 +259,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
     if( decision.getBlocks() != null && decision.getBlocks().size() > 0 ){
       List<Block> blocks = decision.getBlocks();
 
-      Collections.sort(blocks, (o1, o2) -> o1.getNumber().compareTo( o2.getNumber() ));
+      Collections.sort(blocks, (o1, o2) -> o1.getNumber() != null && o2.getNumber() != null ? o1.getNumber().compareTo( o2.getNumber() ) : 0 );
 
       for (Block block: blocks){
         Timber.tag("block").v( block.getText() );
@@ -277,11 +277,11 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
         if ( block.getTextBefore() != null && block.getTextBefore() ){
           setBlockText( block, isOnlyOneBlock );
 
-          if (!block.getHidePerformers()){
+          if ( block.getHidePerformers() != null && !block.getHidePerformers() ) {
             setBlockPerformers( block, isOnlyOneBlock );
           }
         } else {
-          if (!block.getHidePerformers()) {
+          if ( block.getHidePerformers() != null && !block.getHidePerformers() ) {
             setBlockPerformers( block, isOnlyOneBlock );
           }
           setBlockText( block, isOnlyOneBlock );
