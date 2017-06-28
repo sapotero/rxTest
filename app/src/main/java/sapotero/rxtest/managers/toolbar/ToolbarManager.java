@@ -128,7 +128,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
             // настройка
             // Показывать подтверждения о действиях с документом
-            if ( settings.isActionsConfirm() ){
+            if ( settings.isShowCommentPost() ){
               operation = CommandFactory.Operation.INCORRECT;
               showFromTheReportDialog();
             } else {
@@ -153,7 +153,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
           case R.id.menu_info_approval_prev_person:
             // настройка
             // Показывать подтверждения о действиях с документом
-            if ( settings.isActionsConfirm() ){
+            if ( settings.isShowCommentPost() ){
               operation = CommandFactory.Operation.INCORRECT;
               showPrevDialog(true);
             } else {
@@ -231,7 +231,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
             // настройка
             // Показывать подтверждения о действиях с документом
-            if ( settings.isActionsConfirm() ){
+            if ( settings.isShowCommentPost() ){
               operation = CommandFactory.Operation.INCORRECT;
               showPrevDialog(false);
             } else {
