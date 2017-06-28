@@ -110,7 +110,9 @@ public class UpdateDocumentJob extends DocumentJob {
       .where(RDocumentEntity.UID.eq(uid))
       .get().firstOrNull();
 
-    if ( exist( documentExisting ) ) {
+    if (  documentExisting != null && documentExisting.isChanged() != null && !documentExisting.isChanged() ) {
+      Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Starting update");
+
 //      // Force update, if document exists and it must be from favorites folder, but is not
 //      if ( documentExisting.isFromFavoritesFolder() != null && !documentExisting.isFromFavoritesFolder() && documentType == DocumentType.FAVORITE ) {
 //        forceUpdate = true;
@@ -197,6 +199,8 @@ public class UpdateDocumentJob extends DocumentJob {
         Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: MD5 equal");
         Timber.tag(TAG).d("MD5 equal");
       }
+    } else {
+      Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Document has Sync label, quit");
     }
   }
 
