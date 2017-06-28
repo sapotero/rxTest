@@ -32,8 +32,6 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
 
     Timber.tag("SETTINGS").d("settings_view_journals %s", settings.getJournals() );
 
-    findPreference( context.getResources().getString(R.string.show_comment_post_key) )
-            .setDependency( context.getResources().getString(R.string.actions_confirm_key) );
 
     subscriptions = new CompositeSubscription();
     subscriptions.add(
@@ -43,24 +41,27 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
       },Timber::e)
     );
 
-    // resolved https://tasks.n-core.ru/browse/MVDESD-13341
-    // При отклонении проекта не отображается окно ввода комментария
-    subscriptions.add(
-      settings.getActionsConfirmPreference()
-        .asObservable()
-        .subscribe(
-          active -> {
-            if (active){
-              settings.setShowCommentPost(true);
-              findPreference( context.getResources().getString(R.string.show_comment_post_key) ).setEnabled(true);
-            } else {
-              settings.setShowCommentPost(false);
-              findPreference( context.getResources().getString(R.string.show_comment_post_key) ).setEnabled(false);
-            }
-          },
-          Timber::e
-        )
-    );
+//    *** НЕ АКТУАЛЬНО ***
+//    findPreference( context.getResources().getString(R.string.show_comment_post_key) )
+//            .setDependency( context.getResources().getString(R.string.actions_confirm_key) );
+//    // resolved https://tasks.n-core.ru/browse/MVDESD-13341
+//    // При отклонении проекта не отображается окно ввода комментария
+//    subscriptions.add(
+//      settings.getActionsConfirmPreference()
+//        .asObservable()
+//        .subscribe(
+//          active -> {
+//            if (active){
+//              settings.setShowCommentPost(true);
+//              findPreference( context.getResources().getString(R.string.show_comment_post_key) ).setEnabled(true);
+//            } else {
+//              settings.setShowCommentPost(false);
+//              findPreference( context.getResources().getString(R.string.show_comment_post_key) ).setEnabled(false);
+//            }
+//          },
+//          Timber::e
+//        )
+//    );
   }
 
   @Override
