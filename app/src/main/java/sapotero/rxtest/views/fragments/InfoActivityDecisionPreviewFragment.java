@@ -742,7 +742,11 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       .title("Комментарий резолюции")
       .inputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE)
       .input("Комментарий", current_decision.getComment(), (dialog, input) -> {})
+
       .positiveText(R.string.constructor_save)
+      .negativeText(R.string.constructor_close)
+      .neutralText(R.string.constructor_clear)
+      
       .onPositive((dialog, which) -> {
 
         if ( dialog.getInputEditText().getText() != null && !Objects.equals(dialog.getInputEditText().getText().toString(), current_decision.getComment()) ) {
@@ -762,8 +766,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
         }
         dialog.dismiss();
       })
-      .neutralText(R.string.constructor_close)
-      .onNeutral((dialog, which) -> dialog.dismiss())
+      .onNegative((dialog, which) -> dialog.dismiss())
+      .onNeutral((dialog, which) -> dialog.getInputEditText().setText(""))
       .autoDismiss(false)
       .build();
 

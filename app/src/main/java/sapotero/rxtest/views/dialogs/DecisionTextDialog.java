@@ -1,7 +1,6 @@
 package sapotero.rxtest.views.dialogs;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.util.DisplayMetrics;
 import android.widget.EditText;
 
@@ -20,7 +19,9 @@ public class DecisionTextDialog {
       dialogBuilder = new MaterialDialog.Builder(context)
         .title(title)
         .customView(R.layout.dialog_decision_text, false)
-        .positiveText("OK")
+        .positiveText(R.string.constructor_save)
+        .negativeText(R.string.constructor_close)
+        .neutralText(R.string.constructor_clear)
         .showListener(dialog -> {
           DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
           float screenWidth = displayMetrics.widthPixels;
@@ -29,14 +30,27 @@ public class DecisionTextDialog {
           ((MaterialDialog) dialog).getWindow().setLayout(width, 500);
 
           textInput = (EditText) ((MaterialDialog) dialog)
-                  .getCustomView().findViewById(R.id.dialog_decision_text_input);
+            .getCustomView().findViewById(R.id.dialog_decision_text_input);
           textInput.setHint(hint);
           textInput.setText(parentEditText.getText());
         })
-        .dismissListener(dialog1 -> {
+        .onPositive((dialog1, which) -> {
           parentEditText.setText(textInput.getText());
           clearReferences();
-        });
+          dialog1.dismiss();
+        })
+        .onNeutral((dialog12, which) -> {
+          textInput = (EditText) dialog.getCustomView().findViewById(R.id.dialog_decision_text_input);
+          textInput.setText("");
+        })
+        .onNegative((dialog1, which) -> {
+          dialog1.dismiss();
+        })
+      .autoDismiss(false);
+//        .dismissListener(dialog1 -> {
+//          parentEditText.setText(textInput.getText());
+//          clearReferences();
+//        });
     }
   }
 
