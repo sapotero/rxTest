@@ -60,6 +60,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
   }
 
   public DocumentsAdapter(Context context, List<InMemoryDocument> documents) {
+    Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: new DocumentsAdapter");
     Timber.tag(TAG).e("INIT");
 
     this.mContext  = context;
@@ -74,9 +75,11 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
   }
 
   private void initSubscription() {
+    Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: initSubscription");
+
     store
       .getPublishSubject()
-      .buffer(1, TimeUnit.MILLISECONDS)
+      .buffer(500, TimeUnit.MILLISECONDS)
       .onBackpressureBuffer(256)
       .onBackpressureDrop()
       .subscribeOn(Schedulers.computation())
@@ -88,32 +91,39 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
   }
 
   private void updateDocumentCard(List<InMemoryDocument> docs) {
+//    Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: updateDocumentCard");
 
     for (InMemoryDocument doc : docs ) {
 
 //      Timber.tag(TAG).e("!!!!!!! %s - %s \n", doc.getUid(), doc.isProcessed() );
 
       if ( Holder.MAP.containsKey( doc.getUid() ) ){
+        Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Document exists");
 
         Integer index = Holder.MAP.get(doc.getUid());
-        documents.set( index, doc);
-        notifyItemChanged( index,  doc);
 
         Timber.tag(TAG).w("+++%s %s", doc.isProcessed(), !isDisplayProcessed());
         if ( doc.isProcessed() && !isDisplayProcessed() ) {
+          Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Remove document from adapter");
           notifyItemRemoved(index);
           Holder.MAP.remove(doc.getUid());
           documents.remove(doc);
           if (documents.size() == 0 && dbQueryBuilder != null) {
             dbQueryBuilder.showEmpty();
           }
+        } else {
+          Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Change document in adapter");
+          documents.set( index, doc);
+          notifyItemChanged( index,  doc);
         }
 
       } else {
+        Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: New document");
         Timber.tag(TAG).w("NEW %s", doc.getUid() );
         // Add new documents if user is still in the same tab,
         // and add new processed documents only into processed tab or processed folder.
         if ( doc.isProcessed() == isDisplayProcessed() && settings.isInTheSameTab() ) {
+          Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Add document into adapter");
           addItem(doc);
           if (documents.size() > 0 && dbQueryBuilder != null) {
             dbQueryBuilder.hideEmpty();

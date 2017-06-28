@@ -120,6 +120,8 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
   }
 
   protected void setDocOperationStartedInMemory(String uid) {
+    Timber.tag("RecyclerViewRefresh").d("Command: Set sync label");
+
     store.process(
       store.startTransactionFor( uid )
         .setLabel(LabelType.SYNC)

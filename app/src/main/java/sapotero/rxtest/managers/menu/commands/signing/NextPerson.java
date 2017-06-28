@@ -55,12 +55,12 @@ public class NextPerson extends ApprovalSigningCommand {
 
   @Override
   public void execute() {
+    queueManager.add(this);
+    EventBus.getDefault().post( new ShowNextDocumentEvent());
+
     setDocOperationProcessedStartedInMemory( getUid() );
 
     resetSignImageError();
-
-    queueManager.add(this);
-    EventBus.getDefault().post( new ShowNextDocumentEvent());
   }
 
   private void resetSignImageError() {

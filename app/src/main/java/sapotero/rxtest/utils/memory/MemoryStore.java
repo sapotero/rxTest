@@ -72,6 +72,7 @@ public class MemoryStore implements Processable{
         docs -> {
           for (InMemoryDocument doc: docs ) {
             documents.put( doc.getUid(), doc );
+            Timber.tag("RecyclerViewRefresh").d("MemoryStore: pub.onNext()");
             pub.onNext( doc );
           }
 
