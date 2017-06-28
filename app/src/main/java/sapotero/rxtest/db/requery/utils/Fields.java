@@ -200,6 +200,18 @@ public class Fields {
       return value;
     }
 
+    public static Menu getMenu( String string){
+      Menu menu = null;
+
+      for ( Menu item: Menu.values()  ){
+        if ( Objects.equals( item.getIndex() , Integer.valueOf(string)) ){
+          menu = item;
+          break;
+        }
+      }
+
+      return menu;
+    }
   }
 
   public static Status  getStatus(String type ){

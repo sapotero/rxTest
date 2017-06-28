@@ -638,9 +638,19 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   public void rxSettings() {
     drawer_build_head();
 
-    for(Fields.Menu menu: Fields.Menu.values() ){
-      drawer_add_item( menu.getIndex() , menu.getTitle(), Long.valueOf( menu.getIndex()) );
+    Fields.Menu menu = Fields.Menu.ALL;
+    drawer_add_item( menu.getIndex() , menu.getTitle(), Long.valueOf( menu.getIndex()) );
+
+    for(String uid: settings.getJournals() ){
+      Fields.Menu m = Fields.Menu.getMenu(uid);
+      if (m != null) {
+        drawer_add_item( m.getIndex() , m.getTitle(), Long.valueOf( m.getIndex()) );
+      }
     }
+
+//    for(Fields.Menu menu: Fields.Menu.values() ){
+//      drawer_add_item( menu.getIndex() , menu.getTitle(), Long.valueOf( menu.getIndex()) );
+//    }
 
     drawer_build_bottom();
   }
