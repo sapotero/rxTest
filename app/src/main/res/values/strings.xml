@@ -191,6 +191,7 @@
     <string name="constructor_add_block">Добавить блок</string>
     <string name="constructor_save">Сохранить</string>
     <string name="constructor_close">Закрыть</string>
+    <string name="constructor_clear">Очистить</string>
     <string name="constructor_delete">Удалить</string>
     <string name="wait_for_sync">Ожидает синхронизации</string>
 
