@@ -123,8 +123,19 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
     journalSpinner.setAdapter(journalSpinnerAdapter);
 
     // без привязки к доступным журналам
+    // resolved https://tasks.n-core.ru/browse/MVDESD-13318
+    // открывать "Все документы" если выбран журнал по умолчанию,
+    // которого нет в активных журналах
+
     if (settings.getStartJournal() != null){
-      journalSpinner.setSelection( Integer.parseInt( settings.getStartJournal() ) );
+
+      int journal = 0;
+      if ( settings.getJournals().contains( settings.getStartJournal() ) ){
+        journal = Integer.parseInt( settings.getStartJournal() );
+      }
+
+      journalSpinner.setSelection( journal );
+
     }
   }
 
