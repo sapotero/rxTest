@@ -76,8 +76,8 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
   private void initSubscription() {
     store
       .getPublishSubject()
-      .buffer(500, TimeUnit.MILLISECONDS)
-      .onBackpressureBuffer(64)
+      .buffer(1, TimeUnit.MILLISECONDS)
+      .onBackpressureBuffer(256)
       .onBackpressureDrop()
       .subscribeOn(Schedulers.computation())
       .observeOn(AndroidSchedulers.mainThread())
@@ -99,6 +99,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
         documents.set( index, doc);
         notifyItemChanged( index,  doc);
 
+        Timber.tag(TAG).w("+++%s %s", doc.isProcessed(), !isDisplayProcessed());
         if ( doc.isProcessed() && !isDisplayProcessed() ) {
           notifyItemRemoved(index);
           Holder.MAP.remove(doc.getUid());

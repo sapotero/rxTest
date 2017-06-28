@@ -53,15 +53,14 @@ public class NextPerson extends ApprovalSigningCommand {
     return this;
   }
 
-
   @Override
   public void execute() {
+    setDocOperationProcessedStartedInMemory( getUid() );
+
     resetSignImageError();
 
     queueManager.add(this);
     EventBus.getDefault().post( new ShowNextDocumentEvent());
-
-    setDocOperationProcessedStartedInMemory( getUid() );
   }
 
   private void resetSignImageError() {
@@ -78,7 +77,6 @@ public class NextPerson extends ApprovalSigningCommand {
       }
     }
   }
-
 
   @Override
   public String getType() {

@@ -96,11 +96,14 @@ public class UpdateDocumentJob extends DocumentJob {
 
   @Override
   public void onRun() throws Throwable {
+    Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Load document");
+
     loadDocument(uid, TAG);
   }
 
   @Override
   public void doAfterLoad(DocumentInfo documentReceived) {
+    Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: doAfterLoad");
 
     RDocumentEntity documentExisting = dataStore
       .select(RDocumentEntity.class)
@@ -119,6 +122,7 @@ public class UpdateDocumentJob extends DocumentJob {
 //      }
 
       if ( !Objects.equals( documentReceived.getMd5(), documentExisting.getMd5() ) || forceUpdate ) {
+        Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: MD5 not equal, updating document");
         Timber.tag(TAG).d( "MD5 not equal %s - %s", documentReceived.getMd5(), documentExisting.getMd5() );
 
         saveIdsToDelete( documentExisting );
@@ -163,11 +167,13 @@ public class UpdateDocumentJob extends DocumentJob {
         // Если документ адресован текущему пользователю, то убрать из обработанных и из папки обработанных
         // (например, документ возвращен текущему пользователю после отклонения)
         if ( addressedToCurrentUser( documentReceived, documentExisting, documentMapper ) ) {
+          Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Set processed = false");
           documentExisting.setProcessed( false );
           documentExisting.setFromProcessedFolder( false );
         }
 
         if ( forceProcessed ) {
+          Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Set processed = true");
           documentExisting.setProcessed( true );
         }
 
@@ -184,9 +190,11 @@ public class UpdateDocumentJob extends DocumentJob {
         documentExisting.setFromLinks( false );
         documentExisting.setChanged( false );
 
+        Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: writing update to data store");
         updateDocument( documentReceived, documentExisting, TAG );
 
       } else {
+        Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: MD5 equal");
         Timber.tag(TAG).d("MD5 equal");
       }
     }
@@ -197,6 +205,7 @@ public class UpdateDocumentJob extends DocumentJob {
     deleteLinkedDataPartTwo();
 
     if (document != null) {
+      Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: doAfterUpdate");
       Timber.tag(TAG).e( "doAfterUpdate %s - %s / %s", uid, index, filter );
       store.process( document, index, filter );
     }

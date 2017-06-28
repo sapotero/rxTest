@@ -64,7 +64,7 @@ public class MemoryStore implements Processable{
 
     sub
       .buffer( 200, TimeUnit.MILLISECONDS )
-      .onBackpressureBuffer(64)
+      .onBackpressureBuffer(256)
       .onBackpressureDrop()
       .subscribeOn(Schedulers.computation())
       .observeOn(AndroidSchedulers.mainThread())
@@ -156,6 +156,8 @@ public class MemoryStore implements Processable{
 
   @Override
   public void process(HashMap<String, Document> docs, String filter, String index) {
+    Timber.tag("RecyclerViewRefresh").d("MemoryStore: Process documents from HashMap");
+
     new Processor(sub)
       .withDocuments(docs)
       .withFilter(filter)
@@ -167,6 +169,8 @@ public class MemoryStore implements Processable{
 
   @Override
   public void process(HashMap<String, Document> docs, String folderUid, DocumentType documentType ) {
+    Timber.tag("RecyclerViewRefresh").d("MemoryStore: Process documents from HashMap");
+
     new Processor(sub)
       .withDocuments(docs)
       .withFolder(folderUid)
@@ -176,6 +180,8 @@ public class MemoryStore implements Processable{
 
   @Override
   public void process(Transaction transaction) {
+    Timber.tag("RecyclerViewRefresh").d("MemoryStore: Process transaction");
+
     new Processor(sub)
       .withTransaction(transaction)
       .execute();
@@ -185,6 +191,8 @@ public class MemoryStore implements Processable{
 
   @Override
   public void process(RDocumentEntity doc, String filter, String index) {
+    Timber.tag("RecyclerViewRefresh").d("MemoryStore: Process document from RDocumentEntity");
+
     Timber.tag(TAG).e("process: %s %s %s", doc.getUid(), filter, index);
 
     new Processor(sub)

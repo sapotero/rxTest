@@ -128,6 +128,8 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
   }
 
   protected void setDocOperationProcessedStartedInMemory(String uid) {
+    Timber.tag("RecyclerViewRefresh").d("Command: Set sync label");
+
     store.process(
       store.startTransactionFor( uid )
         .setLabel(LabelType.SYNC)
@@ -137,6 +139,8 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
   }
 
   protected void finishOperationOnSuccess(String uid) {
+    Timber.tag("RecyclerViewRefresh").d("Command: Remove sync label");
+
     store.process(
       store.startTransactionFor( uid )
         .removeLabel(LabelType.SYNC)
@@ -158,6 +162,8 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
   }
 
   protected void finishOperationProcessedOnError(Command command, String uid, List<String> errors) {
+    Timber.tag("RecyclerViewRefresh").d("Command: Remove sync label");
+
     store.process(
       store.startTransactionFor( uid )
         .removeLabel(LabelType.SYNC)
