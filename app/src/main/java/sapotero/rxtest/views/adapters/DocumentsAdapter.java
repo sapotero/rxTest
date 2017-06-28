@@ -105,9 +105,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
         Timber.tag(TAG).w("+++%s %s", doc.isProcessed(), !isDisplayProcessed());
         if ( doc.isProcessed() && !isDisplayProcessed() ) {
           Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Remove document from adapter");
-          notifyItemRemoved(index);
-          Holder.MAP.remove(doc.getUid());
-          documents.remove(doc);
+          removeItem( index, doc );
           if (documents.size() == 0 && dbQueryBuilder != null) {
             dbQueryBuilder.showEmpty();
           }
@@ -133,6 +131,12 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
     }
 
+  }
+
+  private void removeItem(int index, InMemoryDocument doc) {
+    notifyItemRemoved(index);
+    documents.remove(doc);
+    recreateHash();
   }
 
   // True if inside Processed tab or Processed Folder
