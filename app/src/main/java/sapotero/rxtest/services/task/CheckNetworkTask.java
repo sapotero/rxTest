@@ -2,15 +2,12 @@ package sapotero.rxtest.services.task;
 
 import android.content.Context;
 
-import org.greenrobot.eventbus.EventBus;
-
 import javax.inject.Inject;
 
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.events.service.CheckNetworkResultEvent;
 import sapotero.rxtest.retrofit.Api.AuthService;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.utils.Settings;
@@ -42,12 +39,10 @@ public class CheckNetworkTask implements Runnable {
       .subscribe(
         v2 -> {
           Timber.tag(TAG).d("Internet connectivity: true");
-          EventBus.getDefault().post(new CheckNetworkResultEvent( true ));
           settings.setOnline(true);
         },
         error -> {
           Timber.tag(TAG).d("Internet connectivity: false");
-          EventBus.getDefault().post(new CheckNetworkResultEvent( false ));
           settings.setOnline(false);
         });
   }

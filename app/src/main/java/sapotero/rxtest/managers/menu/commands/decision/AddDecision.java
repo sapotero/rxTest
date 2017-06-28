@@ -1,34 +1,19 @@
 package sapotero.rxtest.managers.menu.commands.decision;
 
-import com.google.gson.Gson;
-
-import org.greenrobot.eventbus.EventBus;
-
-import java.util.Collections;
-
-import okhttp3.MediaType;
-import okhttp3.RequestBody;
-import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
-import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
-import sapotero.rxtest.events.document.UpdateDocumentEvent;
-import sapotero.rxtest.managers.menu.commands.AbstractCommand;
+import sapotero.rxtest.managers.menu.commands.DecisionCommand;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
-import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
-import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
-public class AddDecision extends AbstractCommand {
+public class AddDecision extends DecisionCommand {
 
   private final DocumentReceiver document;
 
@@ -66,10 +51,7 @@ public class AddDecision extends AbstractCommand {
     Command command = operation.getCommand(null, document, _params);
     command.execute();
 
-    store.process(
-      store.startTransactionFor( params.getDocument() )
-        .setLabel(LabelType.SYNC)
-    );
+    setDocOperationStartedInMemory( params.getDocument() );
 
     Timber.tag(TAG).w("ASSIGNMENT: %s", params.isAssignment() );
 
@@ -103,14 +85,6 @@ public class AddDecision extends AbstractCommand {
   public void executeRemote() {
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
-    Retrofit retrofit = new Retrofit.Builder()
-      .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-      .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( settings.getHost() )
-      .client( okHttpClient )
-      .build();
-
-
     Decision decision = params.getDecisionModel();
     decision.setLetterhead(null);
     decision.setShowPosition( false );
@@ -119,77 +93,16 @@ public class AddDecision extends AbstractCommand {
       decision.setAssignment(true);
     }
 
-    String json_m = new Gson().toJson( decision );
-
-    RequestBody json = RequestBody.create(
-      MediaType.parse("application/json"),
-      json_m
-    );
-
-    Timber.tag(TAG).e("DECISION");
-    Timber.tag(TAG).e("%s", json_m);
-
-    DocumentService operationService = retrofit.create( DocumentService.class );
-
-    Observable<DecisionError> info = operationService.create(
-      settings.getLogin(),
-      settings.getToken(),
-      json
-    );
+    Observable<DecisionError> info = getDecisionCreateOperationObservable(decision, TAG);
 
     info.subscribeOn( Schedulers.computation() )
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         data -> {
-
-          if (data.getErrors() !=null && data.getErrors().size() > 0){
-            queueManager.setExecutedWithError(this, data.getErrors());
-            EventBus.getDefault().post( new ForceUpdateDocumentEvent( data.getDocumentUid() ));
-
-          } else {
-
-            checkCreatorAndSignerIsCurrentUser(data, TAG);
-
-            if (callback != null ){
-              callback.onCommandExecuteSuccess( getType() );
-            }
-            EventBus.getDefault().post( new UpdateDocumentEvent( document.getUid() ));
-
-            queueManager.setExecutedRemote(this);
-          }
-
-          removeSyncLabel();
-
+          onSuccess( this, data, true, true, TAG );
+          finishOperationOnSuccess( params.getDocument() );
         },
-        error -> {
-          Timber.tag(TAG).i("error: %s", error);
-          if (callback != null){
-            callback.onCommandExecuteError(error.getLocalizedMessage());
-          }
-
-          if ( settings.isOnline() ){
-            removeSyncLabel();
-            queueManager.setExecutedWithError(this, Collections.singletonList(error.getLocalizedMessage()));
-
-          }
-        }
+        error -> onError( this, params.getDocument(), error.getLocalizedMessage(), false, TAG )
       );
-  }
-
-  private void removeSyncLabel() {
-    store.process(
-      store.startTransactionFor( params.getDocument() )
-        .removeLabel(LabelType.SYNC)
-    );
-  }
-
-  @Override
-  public void withParams(CommandParams params) {
-    this.params = params;
-  }
-
-  @Override
-  public CommandParams getParams() {
-    return params;
   }
 }

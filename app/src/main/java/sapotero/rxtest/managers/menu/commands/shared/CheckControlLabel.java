@@ -7,8 +7,6 @@ import java.util.Collections;
 import java.util.Objects;
 
 import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
-import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -16,7 +14,6 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.view.ShowSnackEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
-import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.utils.memory.fields.LabelType;
@@ -80,12 +77,7 @@ public class CheckControlLabel extends AbstractCommand {
   public void executeRemote() {
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
-    Retrofit retrofit = new Retrofit.Builder()
-      .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-      .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( settings.getHost() + "v3/operations/" )
-      .client( okHttpClient )
-      .build();
+    Retrofit retrofit = getOperationsRetrofit();
 
     OperationService operationService = retrofit.create( OperationService.class );
 
@@ -155,15 +147,5 @@ public class CheckControlLabel extends AbstractCommand {
       .where(RDocumentEntity.UID.eq(document_id))
       .get()
       .value();
-  }
-
-  @Override
-  public void withParams(CommandParams params) {
-    this.params = params;
-  }
-
-  @Override
-  public CommandParams getParams() {
-    return params;
   }
 }

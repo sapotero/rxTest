@@ -73,6 +73,7 @@ MemoryStore store;
 
   public DBQueryBuilder withAdapter(DocumentsAdapter rAdapter) {
     this.adapter = rAdapter;
+    this.adapter.withDbQueryBuilder(this);
     return this;
   }
 
@@ -115,9 +116,8 @@ MemoryStore store;
       compositeSubscription.add(
         Observable
           .from( store.getDocuments().values() )
-
           .filter( this::byOrganization )
-
+          .filter( this::byDecision )
           .filter( filter::byType)
           .filter( filter::byStatus)
           .filter( filter::isProcessed )
@@ -141,6 +141,7 @@ MemoryStore store;
                   adapter.addItem(doc);
                 }
 
+                settings.setInTheSameTab(true);
               } else {
                 showEmpty();
               }
@@ -217,6 +218,17 @@ MemoryStore store;
     return result;
   }
 
+  // resolved https://tasks.n-core.ru/browse/MVDESD-13400
+  // Не отображать документы без резолюции, если включена соответствующая опция
+  private Boolean byDecision(InMemoryDocument doc) {
+    boolean result = true;
+
+    if ( !settings.isShowWithoutProject() && item != null && !item.isShowAnyWay() && !doc.hasDecision() ) {
+      result = false;
+    }
+
+    return result;
+  }
 
   private void unsubscribe() {
     if (compositeSubscription == null) {
@@ -234,12 +246,12 @@ MemoryStore store;
     execute(true);
   }
 
-  private void showEmpty(){
+  public void showEmpty(){
     progressBar.setVisibility(ProgressBar.GONE);
     documents_empty_list.setVisibility(View.VISIBLE);
   }
 
-  private void hideEmpty(){
+  public void hideEmpty(){
     documents_empty_list.setVisibility(View.GONE);
     progressBar.setVisibility(ProgressBar.GONE);
   }
@@ -269,7 +281,7 @@ MemoryStore store;
 
       Observable
         .from( store.getDocuments().values() )
-
+        .filter( this::byDecision )
         .filter( filter::byType)
         .filter( filter::byStatus)
         .filter( filter::isProcessed )
@@ -405,4 +417,7 @@ MemoryStore store;
     return this;
   }
 
+  public ArrayList<ConditionBuilder> getConditions() {
+    return conditions;
+  }
 }

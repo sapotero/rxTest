@@ -37,6 +37,11 @@ public class Settings {
   private static final String PREV_DIALOG_COMMENT_KEY = "prev_dialog_comment";
   private static final String START_LOAD_DATA_KEY = "start_load_data";
   private static final String STEPPER_AUTH_TYPE_KEY = "stepper.auth_type";
+  private static final String FAVORITES_LOADED_KEY = "favorites.loaded";
+  private static final String PROCESSED_LOADED_KEY = "processed.loaded";
+  private static final String IN_THE_SAME_TAB_KEY = "in.the.same.tab";
+  private static final String IMAGE_INDEX_KEY = "image.index";
+  private static final String UNAUTHORIZED_KEY = "user.unauthorized";
 
   public static String FIRST_RUN_KEY;
   private static String HOST_KEY;
@@ -109,6 +114,11 @@ public class Settings {
   private Preference<Boolean> startLoadData;
   private Preference<AuthType> authType;
   private Preference<Boolean> online;
+  private Preference<Boolean> favoritesLoaded;
+  private Preference<Boolean> processedLoaded;
+  private Preference<Boolean> inTheSameTab;
+  private Preference<Integer> imageIndex;
+  private Preference<Boolean> unauthorized;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -126,7 +136,7 @@ public class Settings {
     ONLY_URGENT_KEY                = context.getResources().getString(R.string.only_urgent_key);
     JOURNALS_KEY                   = context.getResources().getString(R.string.journals_key);
     START_PAGE_KEY                 = context.getResources().getString(R.string.start_page_key);
-    START_JOURNAL_KEY                 = context.getResources().getString(R.string.start_journal_key);
+    START_JOURNAL_KEY              = context.getResources().getString(R.string.start_journal_key);
     SHOW_WITHOUT_PROJECT_KEY       = context.getResources().getString(R.string.show_without_project_key);
     HIDE_PRIMARY_CONSIDERATION_KEY = context.getResources().getString(R.string.hide_primary_consideration_key);
     HIDE_BUTTONS_KEY               = context.getResources().getString(R.string.hide_buttons_key);
@@ -185,7 +195,12 @@ public class Settings {
     startLoadData                  = settings.getBoolean(START_LOAD_DATA_KEY);
     authType                       = settings.getEnum(STEPPER_AUTH_TYPE_KEY, AuthType.class);
     current_activity               = settings.getString(CURRENT_ACTIVITY_KEY);
-    online                         = settings.getBoolean(START_LOAD_DATA_KEY);
+    online                         = settings.getBoolean(IS_ONLINE);
+    favoritesLoaded                = settings.getBoolean(FAVORITES_LOADED_KEY);
+    processedLoaded                = settings.getBoolean(PROCESSED_LOADED_KEY);
+    inTheSameTab                   = settings.getBoolean(IN_THE_SAME_TAB_KEY);
+    imageIndex                     = settings.getInteger(IMAGE_INDEX_KEY);
+    unauthorized                   = settings.getBoolean(UNAUTHORIZED_KEY);
   }
 
   public boolean isFirstRun( ) {
@@ -574,6 +589,54 @@ public class Settings {
   }
 
   public void setOnline(Boolean value) {
-    online.set(value);
+    setBoolean(online, value);
+  }
+
+  public Preference<Boolean> getOnlinePreference() {
+    return online;
+  }
+
+  public boolean isFavoritesLoaded() {
+    return getBoolean(favoritesLoaded);
+  }
+
+  public void setFavoritesLoaded(Boolean value) {
+    setBoolean(favoritesLoaded, value);
+  }
+
+  public boolean isProcessedLoaded() {
+    return getBoolean(processedLoaded);
+  }
+
+  public void setProcessedLoaded(Boolean value) {
+    setBoolean(processedLoaded, value);
+  }
+
+  public boolean isInTheSameTab() {
+    return getBoolean(inTheSameTab);
+  }
+
+  public void setInTheSameTab(Boolean value) {
+    setBoolean(inTheSameTab, value);
+  }
+
+  public int getImageIndex() {
+    return getInteger(imageIndex);
+  }
+
+  public void setImageIndex(int value) {
+    setInteger(imageIndex, value);
+  }
+
+  public boolean isUnauthorized() {
+    return getBoolean(unauthorized);
+  }
+
+  public void setUnauthorized(Boolean value) {
+    setBoolean(unauthorized, value);
+  }
+
+  public Preference<Boolean> getUnauthorizedPreference() {
+    return unauthorized;
   }
 }

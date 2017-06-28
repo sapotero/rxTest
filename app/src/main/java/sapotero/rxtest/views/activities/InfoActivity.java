@@ -103,7 +103,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     ButterKnife.bind(this);
     EsdApplication.getManagerComponent().inject(this);
 
-
+    clearImageIndex();
   }
 
   private void initInfoActivity() {
@@ -425,6 +425,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
     exitIfAlreadySeenThisFuckingDocument();
 
+    clearImageIndex();
     initInfoActivity();
     updateCurrent();
 //    finish();
@@ -454,6 +455,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
     exitIfAlreadySeenThisFuckingDocument();
 
+    clearImageIndex();
     initInfoActivity();
     updateCurrent();
 
@@ -473,6 +475,9 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   }
 
+  private void clearImageIndex() {
+    settings.setImageIndex(0);
+  }
 
   private void restart() {
     Intent intent = getIntent();
@@ -512,5 +517,10 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     if (subscription.hasSubscriptions()){
       subscription.clear();
     }
+  }
+
+  @Override
+  public void onBackPressed() {
+    finish();
   }
 }

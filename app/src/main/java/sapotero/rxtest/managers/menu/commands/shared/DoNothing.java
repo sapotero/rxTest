@@ -2,7 +2,6 @@ package sapotero.rxtest.managers.menu.commands.shared;
 
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
-import sapotero.rxtest.managers.menu.utils.CommandParams;
 
 public class DoNothing extends AbstractCommand {
 
@@ -44,16 +43,5 @@ public class DoNothing extends AbstractCommand {
   private void update() {
     queueManager.setExecutedLocal(this);
     queueManager.setExecutedRemote(this);
-  }
-
-
-  @Override
-  public void withParams(CommandParams params) {
-    this.params = params;
-  }
-
-  @Override
-  public CommandParams getParams() {
-    return params;
   }
 }

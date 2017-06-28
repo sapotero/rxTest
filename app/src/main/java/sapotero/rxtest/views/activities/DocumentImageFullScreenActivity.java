@@ -1,5 +1,7 @@
 package sapotero.rxtest.views.activities;
 
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -10,6 +12,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.widget.FrameLayout;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 import javax.inject.Inject;
@@ -31,11 +37,26 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity implement
 
   @Inject Settings settings;
 
+  public static final String EXTRA_FILES_KEY = "files";
+  public static final String EXTRA_INDEX_KEY = "index";
+
   private String TAG = this.getClass().getSimpleName();
 
   private ArrayList<Image> files = new ArrayList<Image>();
   private DocumentLinkAdapter adapter;
   private Integer index;
+
+  private InfoCardDocumentsFragment fragment;
+
+  public static Intent newIntent(Context context, ArrayList<Image> images, int index) {
+    Type listType = new TypeToken<ArrayList<Image>>() {}.getType();
+
+    Intent intent = new Intent( context, DocumentImageFullScreenActivity.class);
+    intent.putExtra( EXTRA_FILES_KEY, new Gson().toJson( images, listType ) );
+    intent.putExtra( EXTRA_INDEX_KEY, index );
+
+    return intent;
+  }
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +68,7 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity implement
     ButterKnife.bind(this);
     EsdApplication.getDataComponent().inject(this);
 
-    InfoCardDocumentsFragment fragment = new InfoCardDocumentsFragment();
+    fragment = new InfoCardDocumentsFragment();
     fragment.withOutZoom(true);
     fragment.withUid( settings.getUid() );
 
@@ -58,11 +79,11 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity implement
 
     toolbar.setTitleTextColor(getResources().getColor(R.color.md_black_1000));
     toolbar.setNavigationOnClickListener(v ->{
-        finish();
+        closeActivity();
       }
     );
     toolbar.setOnClickListener(view -> {
-      finish();
+      closeActivity();
     });
 
     Drawable drawable = toolbar.getNavigationIcon();
@@ -73,6 +94,10 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity implement
 
   }
 
+  private void closeActivity() {
+    setResult(RESULT_OK);
+    finish();
+  }
 
   @Override
   public void onFragmentInteraction(Uri uri) {

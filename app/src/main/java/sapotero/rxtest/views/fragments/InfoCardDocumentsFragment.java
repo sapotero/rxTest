@@ -1,10 +1,12 @@
 package sapotero.rxtest.views.fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.FileProvider;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -12,21 +14,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.barteksc.pdfviewer.PDFView;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -50,6 +51,7 @@ import timber.log.Timber;
 
 public class InfoCardDocumentsFragment extends Fragment implements AdapterView.OnItemClickListener, GestureDetector.OnDoubleTapListener {
 
+  public static final int REQUEST_CODE_INDEX = 1;
   @Inject Settings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
@@ -73,13 +75,16 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
   @BindView(R.id.fragment_info_card_urgency_title) TextView urgency;
 
+  @BindView(R.id.open_in_another_app_wrapper) LinearLayout open_in_another_app_wrapper;
 
-  private int index;
+  private int index = 0;
 
   private DocumentLinkAdapter adapter;
   private String uid;
   private Boolean withOutZoom = false;
 
+  private File file;
+  private String contentType;
 
   public InfoCardDocumentsFragment() {
   }
@@ -127,7 +132,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
       urgency.setVisibility(View.VISIBLE);
     }
 
-    index = 0;
+    index = settings.getImageIndex();
 
     if (document.getImages().size() > 0){
       adapter.clear();
@@ -158,11 +163,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
         adapter.add( image );
       }
 
-      try {
-        setPdfPreview();
-      } catch (FileNotFoundException e) {
-        Timber.e(e);
-      }
+      showPdf();
 
       no_files.setVisibility(View.GONE);
       pdf_wrapper.setVisibility(View.VISIBLE);
@@ -170,6 +171,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     } else {
       no_files.setVisibility(View.VISIBLE);
       pdf_wrapper.setVisibility(View.GONE);
+      open_in_another_app_wrapper.setVisibility(View.GONE);
     }
 
   }
@@ -177,49 +179,58 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   private void setPdfPreview() throws FileNotFoundException {
 
     Image image = adapter.getItem(index);
-
+    contentType = image.getContentType();
     document_title.setText( image.getTitle() );
 
-    File file = new File(getContext().getFilesDir(), String.format( "%s_%s", image.getMd5(), image.getTitle() ));
+    file = new File(getContext().getFilesDir(), String.format( "%s_%s", image.getMd5(), image.getTitle() ));
 
-    InputStream targetStream = new FileInputStream(file);
+    if ( Objects.equals(contentType, "application/pdf") ) {
+      InputStream targetStream = new FileInputStream(file);
 
-    if (file.exists()){
-      pdfView
-        .fromStream( targetStream )
-//        .fromFile( file )
-        .enableSwipe(true)
-        .enableDoubletap(true)
-        .defaultPage(0)
-        .swipeHorizontal(false)
-        .onRender((nbPages, pageWidth, pageHeight) -> pdfView.fitToWidth())
-        .onLoad(nbPages -> {
-          Timber.tag(TAG).i(" onLoad");
-        })
-        .onError(t -> {
-          Timber.tag(TAG).i(" onError");
-        })
-        .onDraw((canvas, pageWidth, pageHeight, displayedPage) -> {
-          Timber.tag(TAG).i(" onDraw");
-        })
-        .onPageChange((page, pageCount) -> {
-          Timber.tag(TAG).i(" onPageChange");
-          updatePageCount();
-        })
-        .enableAnnotationRendering(true)
-        .scrollHandle(null)
-        .load();
+      if (file.exists()) {
+        pdfView
+          .fromStream(targetStream)
+//         .fromFile( file )
+          .enableSwipe(true)
+          .enableDoubletap(true)
+          .defaultPage(0)
+          .swipeHorizontal(false)
+          .onRender((nbPages, pageWidth, pageHeight) -> pdfView.fitToWidth())
+          .onLoad(nbPages -> {
+            Timber.tag(TAG).i(" onLoad");
+          })
+          .onError(t -> {
+            Timber.tag(TAG).i(" onError");
+          })
+          .onDraw((canvas, pageWidth, pageHeight, displayedPage) -> {
+            Timber.tag(TAG).i(" onDraw");
+          })
+          .onPageChange((page, pageCount) -> {
+            Timber.tag(TAG).i(" onPageChange");
+            updatePageCount();
+          })
+          .enableAnnotationRendering(true)
+          .scrollHandle(null)
+          .load();
+
 //        pdfView.useBestQuality(true);
-//        pdfView.
+//        pdfView.setDrawingCacheEnabled(true);
+//        pdfView.stopFling();
+      }
 
-//      pdfView.setDrawingCacheEnabled(true);
-//      pdfView.stopFling();
+      pdfView.setVisibility(View.VISIBLE);
+      open_in_another_app_wrapper.setVisibility(View.GONE);
+      page_counter.setVisibility(View.VISIBLE);
 
-      updateDocumentCount();
-      updatePageCount();
-      updateZoomVisibility();
-
+    } else {
+      pdfView.setVisibility(View.GONE);
+      open_in_another_app_wrapper.setVisibility(View.VISIBLE);
+      page_counter.setVisibility(View.INVISIBLE);
     }
+
+    updateDocumentCount();
+    updatePageCount();
+    updateZoomVisibility();
   }
 
   private void updateZoomVisibility() {
@@ -246,11 +257,8 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     }
     Timber.tag(TAG).i( "AFTER %s - %s", index, adapter.getCount() );
 
-    try {
-      setPdfPreview();
-    } catch (FileNotFoundException e) {
-      Timber.e(e);
-    }
+    settings.setImageIndex( index );
+    showPdf();
   }
 
   @OnClick(R.id.info_card_pdf_fullscreen_next_document)
@@ -263,6 +271,11 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     }
     Timber.tag(TAG).i( "AFTER %s - %s", index, adapter.getCount() );
 
+    settings.setImageIndex( index );
+    showPdf();
+  }
+
+  private void showPdf() {
     try {
       setPdfPreview();
     } catch (FileNotFoundException e) {
@@ -272,14 +285,19 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
   @OnClick(R.id.info_card_pdf_fullscreen_button)
   public void fullscreen() {
-    Type listType = new TypeToken<ArrayList<Image>>() {}.getType();
+    // Start DocumentImageFullScreenActivity, which uses another instance of this fragment for full screen PDF view.
+    Intent intent = DocumentImageFullScreenActivity.newIntent( getContext(), adapter.getItems(), index );
+    startActivityForResult(intent, REQUEST_CODE_INDEX);
+  }
 
-    Context context = getContext();
-
-    Intent intent = new Intent( context, DocumentImageFullScreenActivity.class);
-    intent.putExtra( "files", new Gson().toJson( adapter.getItems(), listType ) );
-    intent.putExtra( "index", index );
-    context.startActivity(intent);
+  // This is called, when DocumentImageFullScreenActivity returns
+  // (needed to switch to the image shown in full screen).
+  @Override
+  public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    if ( resultCode == Activity.RESULT_OK && requestCode == REQUEST_CODE_INDEX ) {
+      index = settings.getImageIndex();
+      showPdf();
+    }
   }
 
   @Override
@@ -339,7 +357,6 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     void onFragmentInteraction(Uri uri);
   }
 
-
 //  @Subscribe(threadMode = ThreadMode.MAIN)
 //  public void onMessageEvent(FileDownloadedEvent event) {
 //    Log.d("FileDownloadedEvent", event.path);
@@ -354,5 +371,25 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 //    }
 //  }
 
+  // resolved https://tasks.n-core.ru/browse/MVDESD-13415
+  // Если ЭО имеет формат, отличный от PDF, предлагать открыть во внешнем приложении
+  @OnClick(R.id.open_in_another_app)
+  public void openInAnotherApp() {
+    if ( file != null && contentType != null) {
+      Uri contentUri = FileProvider.getUriForFile(getContext(), "sed.mobile.fileprovider", file);
+      Intent intent = new Intent();
+      intent.setAction(Intent.ACTION_VIEW);
+      intent.setDataAndType(contentUri, contentType);
+      intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+      Intent chooser = Intent.createChooser(intent, "Открыть с помощью");
+
+      if (intent.resolveActivity(getContext().getPackageManager()) != null) {
+        startActivity(chooser);
+      } else {
+        Toast.makeText(getContext(), "Подходящие приложения не установлены", Toast.LENGTH_SHORT).show();
+      }
+    }
+  }
 
 }

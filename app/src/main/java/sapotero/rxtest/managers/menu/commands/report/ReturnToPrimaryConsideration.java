@@ -3,24 +3,18 @@ package sapotero.rxtest.managers.menu.commands.report;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Objects;
 
 import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
-import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.events.view.ShowPrevDocumentEvent;
+import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
-import sapotero.rxtest.managers.menu.utils.CommandParams;
-import sapotero.rxtest.utils.memory.fields.FieldType;
-import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
 public class ReturnToPrimaryConsideration extends AbstractCommand {
@@ -46,12 +40,7 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
   public void execute() {
     queueManager.add(this);
     update();
-
-    store.process(
-      store.startTransactionFor( getUid() )
-        .setLabel(LabelType.SYNC)
-        .setField(FieldType.PROCESSED, true)
-    );
+    setDocOperationProcessedStartedInMemory( getUid() );
   }
 
   private void update() {
@@ -66,7 +55,7 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
       .get()
       .value();
 
-    EventBus.getDefault().post( new ShowPrevDocumentEvent());
+    EventBus.getDefault().post( new ShowNextDocumentEvent());
   }
 
   private String getUid() {
@@ -101,12 +90,7 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
   public void executeRemote() {
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
-    Retrofit retrofit = new Retrofit.Builder()
-      .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-      .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( settings.getHost() + "v3/operations/" )
-      .client( okHttpClient )
-      .build();
+    Retrofit retrofit = getOperationsRetrofit();
 
     OperationService operationService = retrofit.create( OperationService.class );
 
@@ -135,37 +119,10 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
 
           queueManager.setExecutedRemote(this);
 
-          store.process(
-            store.startTransactionFor( getUid() )
-              .removeLabel(LabelType.SYNC)
-          );
+          finishOperationOnSuccess( getUid() );
+
         },
-        error -> {
-          if (callback != null){
-            callback.onCommandExecuteError(getType());
-          }
-
-          if ( settings.isOnline() ){
-            store.process(
-              store.startTransactionFor( getUid() )
-                .removeLabel(LabelType.SYNC)
-                .setField(FieldType.PROCESSED, false)
-            );
-            queueManager.setExecutedWithError(this, Collections.singletonList(error.getLocalizedMessage()));
-
-          }
-        }
+        error -> onError( this, params.getDocument(), error.getLocalizedMessage(), true, TAG )
       );
   }
-
-  @Override
-  public void withParams(CommandParams params) {
-    this.params = params;
-  }
-
-  @Override
-  public CommandParams getParams() {
-    return params;
-  }
-
 }

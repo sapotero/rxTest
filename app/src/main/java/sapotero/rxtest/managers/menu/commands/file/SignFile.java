@@ -1,20 +1,18 @@
 package sapotero.rxtest.managers.menu.commands.file;
 
 import java.io.File;
+import java.util.Collections;
 
 import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
-import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.models.images.RSignImageEntity;
 import sapotero.rxtest.db.requery.models.queue.FileSignEntity;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
-import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.ImagesService;
-import sapotero.rxtest.services.MainService;
 import timber.log.Timber;
 
 public class SignFile extends AbstractCommand {
@@ -61,27 +59,42 @@ public class SignFile extends AbstractCommand {
 
   @Override
   public void executeRemote() {
+    Timber.tag(TAG).d("Starting executeRemote");
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
-    Retrofit retrofit = new Retrofit.Builder()
-      .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-      .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( settings.getHost() )
-      .client( okHttpClient )
-      .build();
+    RSignImageEntity signImage = getSignImage( getParams().getImageId() );
+
+    if ( signImage == null ) {
+      Timber.tag(TAG).d("signImage == null, quit");
+      return;
+    }
+
+    if ( signImage.isSigned() != null && signImage.isSigned() ) {
+      Timber.tag(TAG).d("Image already signed, quit and remove from queue");
+      queueManager.setExecutedRemote(this);
+      return;
+    }
+
+    if ( signImage.isSignTaskStarted() != null && signImage.isSignTaskStarted() ) {
+      Timber.tag(TAG).d("Sign task already started, quit");
+      return;
+    }
+
+    setSignTaskStarted( getParams().getImageId(), true );
+
+    Retrofit retrofit = getRetrofit();
 
     ImagesService imagesService = retrofit.create( ImagesService.class );
 
     File file = new File( EsdApplication.getApplication().getApplicationContext().getFilesDir(), params.getFilePath() );
 
-    String file_sign = null;
-    try {
-      file_sign = MainService.getFakeSign( settings.getPin(), file );
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    Timber.tag(TAG).d("Generating sign");
+
+    String file_sign = getSign();
 
     if (file_sign != null) {
+      Timber.tag(TAG).d("Sign generated");
+
       Observable<Object> info = imagesService.update(
         getParams().getImageId(),
         settings.getLogin(),
@@ -89,30 +102,42 @@ public class SignFile extends AbstractCommand {
         file_sign
       );
 
-      String finalFile_sign = file_sign;
+      Timber.tag(TAG).d("Sending image sign request");
+
       info.subscribeOn( Schedulers.computation() )
         .observeOn( AndroidSchedulers.mainThread() )
         .subscribe(
           data -> {
             Timber.tag(TAG).i("signed: %s", data);
             queueManager.setExecutedRemote(this);
-
-            addSigned(finalFile_sign);
+            setSignSuccess( getParams().getImageId() );
+            saveImageSign( file_sign );
           },
           error -> {
+            Timber.tag(TAG).i("Sign error");
+
             if (callback != null) {
               callback.onCommandExecuteError(getType());
             }
 
+            if ( settings.isOnline() ) {
+              String errorMessage = "Ошибка подписания электронного образа";
+              queueManager.setExecutedWithError( this,  Collections.singletonList( errorMessage ) );
+              setSignError( getParams().getImageId() );
+            }
+
+            setSignTaskStarted( getParams().getImageId(), false );
           }
         );
     }
-
   }
-  private void addSigned(String sign){
+
+  private void saveImageSign(String sign){
+    Timber.tag(TAG).i("Saving image sign");
+
     FileSignEntity task = new FileSignEntity();
     task.setFilename( params.getLabel() );
-    task.setImageId(  params.getImageId() );
+    task.setImageId( params.getImageId() );
     task.setDocumentId( params.getDocument() );
     task.setSign( sign );
 
@@ -121,18 +146,45 @@ public class SignFile extends AbstractCommand {
       .toObservable()
       .subscribeOn(Schedulers.computation())
       .subscribeOn(Schedulers.computation())
-      .subscribe(data -> {
-        Timber.tag(TAG).v("inserted %s [ %s ]", data.getImageId(), data.getDocumentId() );
-      },
-        Timber::e);
+      .subscribe(
+        data -> Timber.tag(TAG).v("Saved image sign %s [ %s ]", data.getImageId(), data.getDocumentId() ),
+        Timber::e
+      );
   }
 
-  @Override
-  public void withParams(CommandParams params) {
-    this.params = params;
+  private void setSignSuccess(String imageId) {
+    dataStore
+      .update(RSignImageEntity.class)
+      .set( RSignImageEntity.SIGNED, true )
+      .set( RSignImageEntity.SIGNING, false )
+      .set( RSignImageEntity.ERROR, false )
+      .where( RSignImageEntity.IMAGE_ID.eq( imageId ) )
+      .get()
+      .value();
+
+    Timber.tag(TAG).i("Set sign success");
   }
-  @Override
-  public CommandParams getParams() {
-    return params;
+
+  private void setSignError(String imageId) {
+    dataStore
+      .update(RSignImageEntity.class)
+      .set( RSignImageEntity.ERROR, true )
+      .set( RSignImageEntity.SIGNING, false )
+      .where( RSignImageEntity.IMAGE_ID.eq( imageId ) )
+      .get()
+      .value();
+
+    Timber.tag(TAG).i("Set sign error");
+  }
+
+  private void setSignTaskStarted(String imageId, boolean value) {
+    dataStore
+      .update(RSignImageEntity.class)
+      .set( RSignImageEntity.SIGN_TASK_STARTED, value )
+      .where( RSignImageEntity.IMAGE_ID.eq( imageId ) )
+      .get()
+      .value();
+
+    Timber.tag(TAG).i("Set sign task started = %s", value);
   }
 }

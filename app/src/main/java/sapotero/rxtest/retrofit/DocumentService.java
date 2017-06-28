@@ -33,12 +33,4 @@ public interface DocumentService {
     @Query("auth_token") String auth_token,
     @Body RequestBody body
   );
-
-  @POST("/v2/decisions.json")
-  Observable<DecisionError> createAndSign(
-    @Query("login") String login,
-    @Query("auth_token") String auth_token,
-    @Body RequestBody body
-  );
-
 }

@@ -18,6 +18,8 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.utils.RecalculateMenuEvent;
 import sapotero.rxtest.retrofit.models.documents.Document;
+import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.memory.fields.DocumentType;
 import sapotero.rxtest.utils.memory.interfaces.Processable;
 import sapotero.rxtest.utils.memory.mappers.InMemoryDocumentMapper;
 import sapotero.rxtest.utils.memory.models.Counter;
@@ -28,6 +30,7 @@ import timber.log.Timber;
 
 public class MemoryStore implements Processable{
   @Inject SingleEntityStore<Persistable> dataStore;
+  @Inject Settings settings;
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -119,8 +122,9 @@ public class MemoryStore implements Processable{
     dataStore
       .select(RDocumentEntity.class)
       .where(RDocumentEntity.FROM_LINKS.eq(false))
-      .and(RDocumentEntity.FROM_PROCESSED_FOLDER.eq(false))
-      .and(RDocumentEntity.FROM_FAVORITES_FOLDER.eq(false))
+      .and(RDocumentEntity.USER.eq(settings.getLogin()))
+//      .and(RDocumentEntity.FROM_PROCESSED_FOLDER.eq(false))
+//      .and(RDocumentEntity.FROM_FAVORITES_FOLDER.eq(false))
       .get().toObservable()
       .toList()
       .subscribeOn(Schedulers.immediate())
@@ -159,6 +163,15 @@ public class MemoryStore implements Processable{
       .execute();
 
 //    counterRecreate();
+  }
+
+  @Override
+  public void process(HashMap<String, Document> docs, String folderUid, DocumentType documentType ) {
+    new Processor(sub)
+      .withDocuments(docs)
+      .withFolder(folderUid)
+      .withDocumentType(documentType)
+      .execute();
   }
 
   @Override

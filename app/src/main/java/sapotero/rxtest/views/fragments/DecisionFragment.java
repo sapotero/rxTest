@@ -111,6 +111,8 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   private int lastUpdate = -1;
   private String fontSize;
 
+  private boolean scrollTo = false;
+
   public void setBlockFactory(BlockFactory blockFactory) {
     this.blockFactory = blockFactory;
   }
@@ -350,6 +352,8 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     return view;
   }
 
+
+
   private void updateAppeal() {
     block.setAskToReport(forReport);
     block.setAskToAcquaint(forAcquaint);
@@ -408,43 +412,45 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   }
 
   public Block getBlock(){
-
-    String appealText = "";
-    if (  button_ask_to_report.isChecked()) {
-      appealText = button_ask_to_report.getTextOn().toString();
-    } else if (button_ask_to_acquaint.isChecked()) {
-      appealText = button_ask_to_acquaint.getTextOn().toString();
-    }
-
     Block block = new Block();
-    block.setId(this.block.getId());
-    block.setNumber(number);
-    block.setText( decision_text.getText().toString() );
-    block.setAppealText( appealText );
-    block.setTextBefore( fragment_decision_text_before.isChecked() );
-    block.setHidePerformers( hide_performers.isChecked() );
-    block.setToCopy(false);
-    block.setToFamiliarization(false);
-    block.setAskToAcquaint(forAcquaint);
-    block.setAskToReport(forReport);
 
-    if (fontSize == null ){
-      block.setFontSize("13");
-    } else {
-      block.setFontSize(fontSize);
-    }
-
-    if ( adapter.getCount() > 0 ){
-      ArrayList<Performer> performers = new ArrayList<>();
-
-      for (int i = 0; i < adapter.getCount(); i++) {
-        PrimaryConsiderationPeople item = adapter.getItem(i);
-        Performer p = (Performer) mappers.getPerformerMapper().convert(item, PerformerMapper.DestinationType.PERFORMER);
-        p.setNumber(i);
-        performers.add(p);
+    if ( this.block != null ) {
+      String appealText = "";
+      if ( button_ask_to_report.isChecked()) {
+        appealText = button_ask_to_report.getTextOn().toString();
+      } else if ( button_ask_to_acquaint.isChecked()) {
+        appealText = button_ask_to_acquaint.getTextOn().toString();
       }
 
-      block.setPerformers( performers );
+      block.setId(this.block.getId());
+      block.setNumber(number);
+      block.setText( decision_text.getText().toString() );
+      block.setAppealText( appealText );
+      block.setTextBefore( fragment_decision_text_before.isChecked() );
+      block.setHidePerformers( hide_performers.isChecked() );
+      block.setToCopy(false);
+      block.setToFamiliarization(false);
+      block.setAskToAcquaint(forAcquaint);
+      block.setAskToReport(forReport);
+
+      if (fontSize == null ){
+        block.setFontSize("13");
+      } else {
+        block.setFontSize(fontSize);
+      }
+
+      if ( adapter.getCount() > 0 ){
+        ArrayList<Performer> performers = new ArrayList<>();
+
+        for (int i = 0; i < adapter.getCount(); i++) {
+          PrimaryConsiderationPeople item = adapter.getItem(i);
+          Performer p = (Performer) mappers.getPerformerMapper().convert(item, PerformerMapper.DestinationType.PERFORMER);
+          p.setNumber(i);
+          performers.add(p);
+        }
+
+        block.setPerformers( performers );
+      }
     }
 
     return block;
@@ -511,6 +517,14 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     if (mSpeechRecognized) {
       mSpeechRecognized = false;
       new Handler().postDelayed(() -> setQuery(mQuery, true), SPEECH_RECOGNITION_DELAY);
+    }
+
+    if ( scrollTo ) {
+      View view = getView();
+
+      if (view != null) {
+        view.getParent().requestChildFocus(view, view);
+      }
     }
   }
   public void setQuery(@NonNull String query, boolean submit) {
@@ -625,5 +639,9 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     Timber.tag("ADD template").e("onSelectTemplate %s", template);
     decision_text.setText( template );
 
+  }
+
+  public void withScrollTo(boolean scrollTo) {
+    this.scrollTo = scrollTo;
   }
 }

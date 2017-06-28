@@ -23,6 +23,7 @@ import java.security.Security;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -162,6 +163,8 @@ public class MainService extends Service {
 
         initScheduller();
 
+        startObserveUnauthorized();
+
       }, Timber::e);
   }
 
@@ -183,6 +186,23 @@ public class MainService extends Service {
 
     scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 5*60 ,5*60, TimeUnit.SECONDS );
     scheduller.scheduleWithFixedDelay( new UpdateQueueTask(queue), 0 ,5, TimeUnit.SECONDS );
+  }
+
+  // resolved https://tasks.n-core.ru/browse/MVDESD-13625
+  // Если не авторизовано, то заново логиниться
+  private void startObserveUnauthorized() {
+    // Preference value is set inside OkHttp interceptor
+    settings.getUnauthorizedPreference()
+      .asObservable()
+      .subscribe(value -> {
+        boolean isUnauthorized = value != null ? value : false;
+        if ( isUnauthorized ) {
+          Timber.tag(TAG).d("Unauthorized, logging in");
+          dataLoaderInterface.updateAuth(SIGN);
+        }
+      },
+        Timber::e
+      );
   }
 
   public int onStartCommand(Intent intent, int flags, int startId) {
@@ -774,15 +794,21 @@ public class MainService extends Service {
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13017
   // При первом запуске выгружаем все избранные с ЭО
+  // resolved https://tasks.n-core.ru/browse/MVDESD-13609
+  // При первом входе загружать документы из папки избранное и обработанное
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(FolderCreatedEvent event){
-    String type = event.getType();
-    if (type == null) {
-      type = "";
-    }
-    if ( type.equals("favorites") ) {
-      if ( settings.isFirstRun() ) {
+    if ( Objects.equals( event.getType(), "favorites" ) ) {
+      if ( !settings.isFavoritesLoaded() ) {
+        settings.setFavoritesLoaded(true);
         dataLoaderInterface.updateFavorites();
+      }
+    }
+
+    if ( Objects.equals( event.getType(), "processed" ) ) {
+      if ( !settings.isProcessedLoaded() ) {
+        settings.setProcessedLoaded(true);
+        dataLoaderInterface.updateProcessed();
       }
     }
   }

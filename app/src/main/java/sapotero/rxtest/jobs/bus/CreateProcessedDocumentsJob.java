@@ -45,17 +45,20 @@ public class CreateProcessedDocumentsJob extends DocumentJob {
     DocumentMapper documentMapper = mappers.getDocumentMapper();
     RDocumentEntity doc = new RDocumentEntity();
 
-    documentMapper.setSimpleFields(doc, document);
-    documentMapper.setNestedFields(doc, document, true);
+    // Положить документ в папку Обработанные, если не адресован текущему пользователю
+    if ( !addressedToCurrentUser( document, doc, documentMapper ) ) {
+      documentMapper.setSimpleFields(doc, document);
+      documentMapper.setNestedFields(doc, document, true);
 
-    documentMapper.setJournal(doc, "");
-    documentMapper.setFilter(doc, "");
-    documentMapper.setShared(doc, false);
-    doc.setFolder(folder);
-    doc.setFromProcessedFolder(true);
-    doc.setProcessed(true);
+      documentMapper.setJournal(doc, "");
+      documentMapper.setFilter(doc, "");
+      documentMapper.setShared(doc, false);
+      doc.setFolder(folder);
+      doc.setFromProcessedFolder(true);
+      doc.setProcessed(true);
 
-    saveDocument(document, doc, false, TAG);
+      saveDocument(document, doc, false, TAG);
+    }
   }
 
   @Override

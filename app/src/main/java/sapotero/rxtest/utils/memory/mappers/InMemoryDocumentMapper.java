@@ -39,13 +39,13 @@ public class InMemoryDocumentMapper {
     document.setComment( doc.getComment() );
     document.setExternalDocumentNumber( doc.getExternalDocumentNumber() );
     document.setReceiptDate( doc.getReceiptDate() );
-    document.setRed( doc.isRed() );
+    document.setRed( doc.isRed() != null ? doc.isRed() : false );
     document.setChanged( doc.isChanged() );
     document.setControl( doc.isControl() );
     document.setFavorites( doc.isFavorites() );
-    document.setProcessed( doc.isProcessed() );
-    document.setFromFavoritesFolder( doc.isFromFavoritesFolder() );
-    document.setFromProcessedFolder( doc.isFromProcessedFolder() );
+    document.setProcessed( doc.isProcessed() != null ? doc.isProcessed() : false );
+    document.setFromFavoritesFolder( doc.isFromFavoritesFolder() != null ? doc.isFromFavoritesFolder() : false );
+    document.setFromProcessedFolder( doc.isFromProcessedFolder() != null ? doc.isFromProcessedFolder() : false );
     document.setFirstLink( doc.getFirstLink() );
 
     RSignerEntity rSigner = (RSignerEntity) doc.getSigner();
@@ -70,6 +70,7 @@ public class InMemoryDocumentMapper {
     imd.setIndex(document.getDocumentType());
     imd.setDocument( convert(document) );
     imd.setProcessed( imd.getDocument().isProcessed() );
+    imd.setHasDecision( document.isWithDecision() != null ? document.isWithDecision() : false );
 
     imd.setAsReady();
 

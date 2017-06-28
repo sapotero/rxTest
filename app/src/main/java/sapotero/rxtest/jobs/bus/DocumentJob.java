@@ -4,9 +4,11 @@ import com.birbit.android.jobqueue.Params;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import retrofit2.Retrofit;
@@ -22,9 +24,13 @@ import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.retrofit.DocumentService;
+import sapotero.rxtest.retrofit.models.document.Action;
 import sapotero.rxtest.retrofit.models.document.Card;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
+import sapotero.rxtest.retrofit.models.document.Exemplar;
+import sapotero.rxtest.retrofit.models.document.Person;
 import sapotero.rxtest.retrofit.models.document.Route;
+import sapotero.rxtest.retrofit.models.document.Status;
 import sapotero.rxtest.retrofit.models.document.Step;
 import timber.log.Timber;
 
@@ -39,7 +45,7 @@ abstract class DocumentJob extends BaseJob {
   }
 
   public String getJournalName(String journal) {
-    String journalName = "";
+    String journalName = null;
 
     if ( exist( journal ) ) {
       String[] index = journal.split("_production_db_");
@@ -189,5 +195,70 @@ abstract class DocumentJob extends BaseJob {
       addPrefJobCount(1);
       jobManager.addJobInBackground( new CreateLinksJob( linkUid, parentUid, saveFirstLink ) );
     }
+  }
+
+  // True, если текущий статус какого-либо экземпляра адресован текущему пользователю
+  // или согласно маршруту документ должен поступить текущему пользователю.
+  boolean addressedToCurrentUser(DocumentInfo document, RDocumentEntity documentEntity, DocumentMapper documentMapper) {
+    boolean result = false;
+
+    for (Exemplar exemplar : nullGuard( document.getExemplars() ) ) {
+      List<Status> statuses = exemplar.getStatuses();
+      if ( notEmpty( statuses ) ) {
+        Status currentStatus = statuses.get( statuses.size() - 1 );
+        if ( Objects.equals( currentStatus.getAddressedToId(), settings.getCurrentUserId() ) ) {
+          result = true;
+          break;
+        }
+      }
+    }
+
+    if ( document.getRoute() != null && document.getRoute().getSteps() != null  ) {
+      List<Step> steps = document.getRoute().getSteps();
+
+      // Сначала смотрим шаг Подписывающие, потом Согласующие
+      List<String> titles = new ArrayList<>();
+      titles.add("Подписывающие");
+      titles.add("Согласующие");
+
+      for (String title : titles) {
+        Step step = getStep(steps, title);
+        for ( Person person : nullGuard( step.getPeople() ) ) {
+          if ( Objects.equals( person.getOfficialId(), settings.getCurrentUserId() ) ) {
+            List<Action> actions = person.getActions();
+            if ( notEmpty( actions ) ) {
+              String lastActionStatus = actions.get( actions.size() - 1 ).getStatus();
+              if ( !lastActionStatus.toLowerCase().contains("отклонено")
+                && !lastActionStatus.toLowerCase().contains("согласовано")
+                && !lastActionStatus.toLowerCase().contains("подписано") ) {
+                if ( title.equals( "Подписывающие" ) ) {
+                  documentMapper.setFilter( documentEntity, "signing" );
+                } else {
+                  documentMapper.setFilter( documentEntity, "approval" );
+                }
+                result = true;
+                return result;
+              }
+            }
+          }
+        }
+      }
+
+    }
+
+    return result;
+  }
+
+  private Step getStep(List<Step> steps, String title) {
+    Step result = new Step();
+
+    for ( Step step : nullGuard( steps) ) {
+      if ( Objects.equals( step.getTitle(), title) ) {
+        result = step;
+        break;
+      }
+    }
+
+    return result;
   }
 }

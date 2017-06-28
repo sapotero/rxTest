@@ -1325,7 +1325,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
           _users.add(user);
         }
 
-        Collections.sort(_users, (o1, o2) -> o1.getNumber().compareTo( o2.getNumber() ));
+        Collections.sort(_users, (o1, o2) -> o1.getNumber() != null && o2.getNumber() != null ? o1.getNumber().compareTo( o2.getNumber() ) : 0 );
 
         for (RPerformerEntity user: _users){
 

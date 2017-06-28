@@ -39,11 +39,13 @@ import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckSuccessEvent;
 import sapotero.rxtest.events.stepper.load.StepperDocumentCountReadyEvent;
 import sapotero.rxtest.jobs.bus.CreateAssistantJob;
+import sapotero.rxtest.jobs.bus.CreateDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateFavoriteDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateFavoriteUsersJob;
 import sapotero.rxtest.jobs.bus.CreateFoldersJob;
 import sapotero.rxtest.jobs.bus.CreatePrimaryConsiderationJob;
 import sapotero.rxtest.jobs.bus.CreateProcessedDocumentsJob;
+import sapotero.rxtest.jobs.bus.CreateProjectsJob;
 import sapotero.rxtest.jobs.bus.CreateTemplatesJob;
 import sapotero.rxtest.jobs.bus.CreateUrgencyJob;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
@@ -51,11 +53,13 @@ import sapotero.rxtest.retrofit.Api.AuthService;
 import sapotero.rxtest.retrofit.DocumentsService;
 import sapotero.rxtest.retrofit.models.AuthSignToken;
 import sapotero.rxtest.retrofit.models.documents.Document;
+import sapotero.rxtest.retrofit.models.documents.Documents;
 import sapotero.rxtest.retrofit.models.v2.v2UserOshs;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.utils.memory.MemoryStore;
+import sapotero.rxtest.utils.memory.fields.DocumentType;
 import sapotero.rxtest.views.menu.fields.MainMenuButton;
 import sapotero.rxtest.views.menu.fields.MainMenuItem;
 import timber.log.Timber;
@@ -82,7 +86,6 @@ public class DataLoaderManager {
   private int requestCount;
 
   private int jobCount;
-  private int jobCountFavorites;
 
   private boolean isDocumentCountSent;
 
@@ -544,7 +547,6 @@ public class DataLoaderManager {
 
       requestCount = indexes.size() * statuses.size() + sp.size();
       isDocumentCountSent = false;
-      jobCount = 0;
       settings.setJobCount(0);
 
 
@@ -565,16 +567,7 @@ public class DataLoaderManager {
                 data -> {
                   Timber.tag("LoadSequence").d("Received list of documents");
                   requestCount--;
-                  if (data.getDocuments().size() > 0){
-
-                    HashMap<String, Document> doc_hash = new HashMap<String, Document>();
-                    for (Document doc: data.getDocuments() ) {
-                      doc_hash.put( doc.getUid(), doc );
-                    }
-                    store.process( doc_hash, status, index );
-                  }
-
-
+                  processDocuments( data, status, index, null, DocumentType.DOCUMENT );
                   updatePrefJobCount();
                 },
                 error -> {
@@ -597,16 +590,7 @@ public class DataLoaderManager {
               data -> {
                 Timber.tag("LoadSequence").d("Received list of projects");
                 requestCount--;
-
-                if (data.getDocuments().size() > 0){
-
-                  HashMap<String, Document> doc_hash = new HashMap<String, Document>();
-                  for (Document doc: data.getDocuments() ) {
-                    doc_hash.put( doc.getUid(), doc );
-                  }
-                  store.process( doc_hash, code, null );
-                }
-
+                processDocuments( data, code, null, null, DocumentType.DOCUMENT );
                 updatePrefJobCount();
               },
               error -> {
@@ -619,14 +603,29 @@ public class DataLoaderManager {
     }
   }
 
+  private void processDocuments(Documents data, String status, String index, String folder, DocumentType documentType) {
+    if (data.getDocuments().size() > 0){
+      HashMap<String, Document> doc_hash = new HashMap<>();
+
+      for (Document doc: data.getDocuments() ) {
+        doc_hash.put( doc.getUid(), doc );
+      }
+
+      if (documentType == DocumentType.DOCUMENT) {
+        store.process( doc_hash, status, index );
+      } else {
+        store.process( doc_hash, folder, documentType );
+      }
+    }
+  }
+
   // resolved https://tasks.n-core.ru/browse/MVDESD-13145
   // Передача количества документов в экран загрузки
   private void updatePrefJobCount() {
     if (0 == requestCount && !isDocumentCountSent) {
-      // Received responses on all requests, now jobCount contains total initial job put value.
-      // Update counter in preferences with this value.
+      // Received responses on all requests, now jobCount contains total initial job count value.
+      // Send event to update progress bar in login activity.
       isDocumentCountSent = true;
-      settings.addJobCount(jobCount);
       EventBus.getDefault().post( new StepperDocumentCountReadyEvent() );
     }
   }
@@ -710,8 +709,6 @@ public class DataLoaderManager {
     if ( favorites_folder != null ) {
       Timber.tag(TAG).e("FAVORITES EXIST!");
 
-      jobCountFavorites = 0;
-
       subscription.add(
         docService.getByFolders(settings.getLogin(), settings.getToken(), null, 500, 0, favorites_folder.getUid(), null)
           .subscribeOn( Schedulers.io() )
@@ -719,21 +716,8 @@ public class DataLoaderManager {
           .subscribe(
             data -> {
               Timber.tag("LoadSequence").d("Received list of favorites");
-              if ( data.getDocuments().size() > 0 ) {
-                Timber.tag("FAVORITES").e("DOCUMENTS COUNT: %s", data.getDocuments().size() );
-                for (Document doc : data.getDocuments()) {
-                  if ( isExist(doc) ) {
-                    if ( !isDocumentMd5Changed( doc.getUid(), doc.getMd5() ) ) {
-                      jobCountFavorites++;
-                      jobManager.addJobInBackground(new UpdateDocumentJob( doc.getUid() ) );
-                    }
-                  } else {
-                    jobCountFavorites++;
-                    jobManager.addJobInBackground( new CreateFavoriteDocumentsJob( doc.getUid(), favorites_folder.getUid() ) );
-                  }
-                }
-              }
-              settings.addJobCount(jobCountFavorites);
+              Timber.tag("FAVORITES").e("DOCUMENTS COUNT: %s", data.getDocuments().size() );
+              processDocuments( data, null, null, favorites_folder.getUid(), DocumentType.FAVORITE );
             }, error -> {
               Timber.tag(TAG).e(error);
             }
@@ -742,38 +726,32 @@ public class DataLoaderManager {
     }
   }
 
-  private void updateProcessed() {
+  public void updateProcessed() {
+
     Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
     DocumentsService docService = retrofit.create(DocumentsService.class);
+
     RFolderEntity processed_folder = dataStore
       .select(RFolderEntity.class)
       .where(RFolderEntity.TYPE.eq("processed"))
       .and(RFolderEntity.USER.eq( settings.getLogin() ))
       .get().firstOrNull();
+
     if ( processed_folder != null ) {
       dateFormat = new SimpleDateFormat("dd.MM.yyyy", new Locale("RU"));
       Calendar cal = Calendar.getInstance();
       cal.add(Calendar.HOUR, -20*24);
       String date = dateFormat.format(cal.getTime());
       Timber.tag(TAG).e("PROCESSED EXIST! %s", date);
+
       subscription.add(
         docService.getByFolders(settings.getLogin(), settings.getToken(), null, 500, 0, processed_folder.getUid(), date)
           .subscribeOn( Schedulers.io() )
           .observeOn( AndroidSchedulers.mainThread() )
           .subscribe(
             data -> {
-              if ( data.getDocuments().size() > 0 ) {
-                Timber.tag("PROCESSED").e("DOCUMENTS COUNT: %s", data.getDocuments().size() );
-                for (Document doc : data.getDocuments()) {
-                  if ( isExist(doc) ) {
-                    if ( !isDocumentMd5Changed( doc.getUid(), doc.getMd5() ) ) {
-                      jobManager.addJobInBackground( new UpdateDocumentJob( doc.getUid() ) );
-                    }
-                  } else {
-                    jobManager.addJobInBackground( new CreateProcessedDocumentsJob( doc.getUid(), processed_folder.getUid() ) );
-                  }
-                }
-              }
+              Timber.tag("PROCESSED").e("DOCUMENTS COUNT: %s", data.getDocuments().size() );
+              processDocuments( data, null, null, processed_folder.getUid(), DocumentType.PROCESSED );
             }, error -> {
               Timber.tag(TAG).e(error);
             }

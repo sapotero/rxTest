@@ -220,6 +220,8 @@
     <string name="to_control">На контроль</string>
     <string name="dialog_template_title">Шаблоны резолюции</string>
     <string name="no_files">Нет электронных образов</string>
+    <string name="cannot_open_image">Невозможно открыть электронный образ</string>
+    <string name="open_in_another_app">Открыть в другом приложении</string>
     <string name="remove_from_favorites"> Из избранного </string>
     <string name="remove_from_control">С контроля</string>
     <string name="go">Перейти</string>

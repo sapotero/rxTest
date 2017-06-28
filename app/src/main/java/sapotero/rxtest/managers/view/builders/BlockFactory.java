@@ -71,6 +71,7 @@ public class BlockFactory implements DecisionInterface, DecisionFragment.Callbac
     bundle.putString( "block", gson.toJson(block) );
 
     fragment.setArguments(bundle);
+    fragment.withScrollTo(true);
 
     transaction.add(R.id.decisions_container, fragment );
     transaction.commit();
@@ -151,12 +152,11 @@ public class BlockFactory implements DecisionInterface, DecisionFragment.Callbac
   @Override
   public void onUpdateSuccess(int lastUpdated) {
 
-    Decision _temp_dec = getDecision();
     int originCount = 0;
 
     for (DecisionFragment block: blocks) {
       PrimaryConsiderationAdapter adapter = block.getPerformerAdapter();
-      if ( adapter.hasOriginal() ) {
+      if ( adapter != null && adapter.hasOriginal() ) {
         originCount++;
       }
     }
@@ -174,6 +174,8 @@ public class BlockFactory implements DecisionInterface, DecisionFragment.Callbac
 
     }
 
+    // Save block changes into decision
+    getDecision();
 
     Timber.tag(TAG).i("onUpdateSuccess");
     if (callback != null){

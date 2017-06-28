@@ -3,12 +3,9 @@ package sapotero.rxtest.managers.menu.commands.primary_consideration;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Objects;
 
 import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
-import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -16,10 +13,8 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
-import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
-import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
 public class PrimaryConsideration extends AbstractCommand {
@@ -56,11 +51,7 @@ public class PrimaryConsideration extends AbstractCommand {
 
     queueManager.add(this);
 
-    store.process(
-      store.startTransactionFor( params.getDocument() )
-        .setLabel(LabelType.SYNC)
-    );
-
+    setDocOperationProcessedStartedInMemory( params.getDocument() );
   }
 
   private void update(){
@@ -120,12 +111,7 @@ public class PrimaryConsideration extends AbstractCommand {
   public void executeRemote() {
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
-    Retrofit retrofit = new Retrofit.Builder()
-      .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-      .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( settings.getHost() + "v3/operations/" )
-      .client( okHttpClient )
-      .build();
+    Retrofit retrofit = getOperationsRetrofit();
 
     OperationService operationService = retrofit.create( OperationService.class );
 
@@ -150,38 +136,12 @@ public class PrimaryConsideration extends AbstractCommand {
           Timber.tag(TAG).i("error: %s", data.getMessage());
           Timber.tag(TAG).i("type: %s", data.getType());
 
-         queueManager.setExecutedRemote(this);
+          queueManager.setExecutedRemote(this);
 
+          finishOperationOnSuccess( params.getDocument() );
 
-          store.process(
-            store.startTransactionFor( params.getDocument() )
-              .removeLabel(LabelType.SYNC)
-          );
         },
-        error -> {
-          if ( callback != null ){
-            callback.onCommandExecuteError(getType());
-          }
-
-          if ( settings.isOnline() ){
-            store.process(
-              store.startTransactionFor( params.getDocument() )
-                .removeLabel(LabelType.SYNC)
-            );
-            queueManager.setExecutedWithError(this, Collections.singletonList(error.getLocalizedMessage()));
-
-          }
-        }
+        error -> onError( this, params.getDocument(), error.getLocalizedMessage(), true, TAG )
       );
-  }
-
-  @Override
-  public void withParams(CommandParams params) {
-    this.params = params;
-  }
-
-  @Override
-  public CommandParams getParams() {
-    return params;
   }
 }

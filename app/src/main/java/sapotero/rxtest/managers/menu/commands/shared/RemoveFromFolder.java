@@ -5,8 +5,6 @@ import org.greenrobot.eventbus.EventBus;
 import java.util.ArrayList;
 
 import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
-import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -14,7 +12,6 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.utils.RecalculateMenuEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
-import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.utils.memory.fields.LabelType;
@@ -91,12 +88,7 @@ public class RemoveFromFolder extends AbstractCommand {
 
   @Override
   public void executeRemote() {
-    Retrofit retrofit = new Retrofit.Builder()
-      .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-      .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl(settings.getHost() + "v3/operations/")
-      .client(okHttpClient)
-      .build();
+    Retrofit retrofit = getOperationsRetrofit();
 
     OperationService operationService = retrofit.create(OperationService.class);
 
@@ -148,15 +140,5 @@ public class RemoveFromFolder extends AbstractCommand {
 
         }
       );
-  }
-
-  @Override
-  public void withParams(CommandParams params) {
-    this.params = params;
-  }
-
-  @Override
-  public CommandParams getParams() {
-    return params;
   }
 }
