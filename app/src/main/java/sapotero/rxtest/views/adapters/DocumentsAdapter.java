@@ -84,7 +84,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     store
       .getPublishSubject()
       .buffer(500, TimeUnit.MILLISECONDS)
-      .onBackpressureBuffer(256)
+      .onBackpressureBuffer(512)
       .onBackpressureDrop()
       .subscribeOn(Schedulers.computation())
       .observeOn(AndroidSchedulers.mainThread())
@@ -102,29 +102,30 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 //      Timber.tag(TAG).e("!!!!!!! %s - %s \n", doc.getUid(), doc.isProcessed() );
 
       if ( Holder.MAP.containsKey( doc.getUid() ) ){
-        Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Document exists");
+        Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Document exists %s", doc.getUid() );
 
         Integer index = Holder.MAP.get(doc.getUid());
 
         Timber.tag(TAG).w("+++%s %s", doc.isProcessed(), !isDisplayProcessed());
         if ( doc.isProcessed() && !isDisplayProcessed() ) {
-          Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Remove document from adapter");
+          Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Remove document from adapter %s", doc.getUid() );
           removeItem( index, doc );
           if (documents.size() == 0 && dbQueryBuilder != null) {
             dbQueryBuilder.showEmpty();
           }
         } else {
-          Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Change document in adapter");
+          Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Change document in adapter %s", doc.getUid() );
           documents.set( index, doc);
           notifyItemChanged( index,  doc);
         }
 
       } else {
-        Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: New document");
+        Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: New document %s", doc.getUid() );
         Timber.tag(TAG).w("NEW %s", doc.getUid() );
         checkConditionsAndAddItem( doc );
       }
     }
+
   }
 
   private void checkConditionsAndAddItem(InMemoryDocument doc) {
@@ -145,7 +146,6 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
           .filter( filter::isControl )
           .subscribe(
             doc1 -> {
-              Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Add document into adapter");
               addItem(doc1);
               if (documents.size() > 0 && dbQueryBuilder != null) {
                 dbQueryBuilder.hideEmpty();
@@ -172,6 +172,10 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     int mainMenuPosition = settings.getMainMenuPosition();
     if ( index < mainMenuPosition ) {
       settings.setMainMenuPosition( mainMenuPosition - 1 );
+    }
+
+    if ( documents.size() == 0 ) {
+      EventBus.getDefault().post( new NoDocumentsEvent() );
     }
   }
 
@@ -330,191 +334,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
         viewHolder.cv.setFocusable(true);
         break;
     }
-
-
-
-
   }
-
-//  @Override
-//  public void onBindViewHolder(final DocumentViewHolder viewHolder, final int position) {
-//    final RDocumentEntity item = documents.startTransactionFor(position);
-//
-//    viewHolder.title.setText( item.getShortDescription() );
-//    viewHolder.subtitle.setText( item.getComment() );
-//
-//    //resolved https://tasks.n-core.ru/browse/MVDESD-12625
-//    //  На плитке Обращения и НПА не показывать строку "Без организации", если её действительно нет(
-//    //    Timber.d("star with: %s %s", item.getUid().startsWith( Fields.Journal.INCOMING_ORDERS.getValue() ), item.getUid().startsWith( Fields.Journal.CITIZEN_REQUESTS.getValue() ));
-//    if(
-//          item.getUid().startsWith( Fields.Journal.INCOMING_ORDERS.getValue() )
-//      ||  item.getUid().startsWith( Fields.Journal.CITIZEN_REQUESTS.getValue() )
-//
-//      ){
-//
-//      if ( item.getOrganization().toLowerCase().contains("без организации") ){
-//        Timber.d("empty organization" );
-//        viewHolder.from.setText("");
-//      } else {
-//        Timber.e( "SIGNER %s", item.getSigner() );
-//        if ( item.getSigner() != null ){
-//          RSignerEntity signer = (RSignerEntity) item.getSigner();
-//          viewHolder.from.setText( signer.getOrganisation() );
-//        }
-//      }
-//
-//    } else {
-//      viewHolder.from.setText( item.getOrganization() );
-//    }
-//
-//    String number = item.getExternalDocumentNumber();
-//
-//    if (number == null){
-//      number = item.getRegistrationNumber();
-//    }
-//
-//    viewHolder.date.setText( item.getTitle() );
-//
-//    if( Objects.equals(item.getFilter(), Fields.Status.SIGNING.getValue()) ||  Objects.equals(item.getFilter(), Fields.Status.APPROVAL.getValue()) ){
-//
-//      Timber.tag("Status LINKS").e("size: %s", item.getLinks().size() );
-//
-//      if ( item.getLinks().size() >= 1){
-//
-//        try {
-//          Set<RLinks> links = item.getLinks();
-//
-//          ArrayList<RLinks> arrayList = new ArrayList<RLinks>();
-//          for (RLinks str : links) {
-//            arrayList.add(str);
-//          }
-//
-//          RLinksEntity _link = (RLinksEntity) arrayList.startTransactionFor(0);
-//          Timber.tag("Status LINKS").e("size > 0 | first: %s", _link.getUid() );
-//
-//          RDocumentEntity doc = dataStore
-//            .select(RDocumentEntity.class)
-//            .where(RDocumentEntity.UID.eq( _link.getUid() ))
-//            .startTransactionFor().first();
-//
-//          viewHolder.date.setText( item.getTitle() + " на " + doc.getRegistrationNumber() );
-//        } catch (NoSuchElementException e) {
-//          e.printStackTrace();
-//        }
-//      }
-//
-//    }
-//
-//    if ( item.isChanged() != null && item.isChanged() ){
-//      viewHolder.sync_label.setVisibility(View.VISIBLE);
-//    } else {
-//      viewHolder.sync_label.setVisibility(View.GONE);
-//    }
-//
-//
-//
-//    if ( item.isControl() != null && item.isControl() ){
-//      viewHolder.control_label.setVisibility(View.VISIBLE);
-//    } else {
-//      viewHolder.control_label.setVisibility(View.GONE);
-//    }
-//
-//    if ( item.isFavorites() != null && item.isFavorites() ){;
-//      viewHolder.favorite_label.setVisibility(View.VISIBLE);
-//    } else {
-//      viewHolder.favorite_label.setVisibility(View.GONE);
-//    }
-//
-//
-//    // если обработаное - то ничего нельзя делать
-//    if (
-//      item.isFromFavoritesFolder() != null && item.isFromFavoritesFolder() ||
-//      item.isFromProcessedFolder() != null && item.isFromProcessedFolder()
-//      ){
-//      viewHolder.lock_label.setVisibility(View.VISIBLE);
-//    } else {
-//      viewHolder.lock_label.setVisibility(View.GONE);
-//    }
-//
-//
-//    viewHolder.cv.setOnClickListener(view -> {
-//
-//      settings.setUid( item.getUid() );
-//      settings.setMainMenuPosition( viewHolder.getAdapterPosition() );
-//      settings.setRegNumber( item.getRegistrationNumber() );
-//      settings.setStatusCode( item.getFilter() );
-//      settings.setLoadFromSearch( false );
-//      settings.setRegDate( item.getRegistrationDate() );
-//
-//      Intent intent = new Intent(mContext, InfoActivity.class);
-//
-//      MainActivity activity = (MainActivity) mContext;
-//      activity.startActivity(intent);
-////      activity.overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
-//
-////      Toast.makeText(mContext, " onClick : " + item.getMd5() + " \n" + item.getTitle(), Toast.LENGTH_SHORT).show();
-////      viewHolder.swipeLayout.close(true);
-//    });
-//
-//    viewHolder.cv.setOnLongClickListener(view -> {
-//
-//
-////      documentManager.startTransactionFor( item.getUid() ).toJson();
-//
-//
-////      String _title = documentManager.getDocument(item.getUid()).getTitle();
-////      String _title = manager.startTransactionFor(item.getUid()).getTitle();
-////      Timber.e("title : %s", _title);
-////
-////      Notification builder =
-////        new NotificationCompat.Builder(mContext)
-////          .setSmallIcon( R.drawable.gerb )
-////          .setContentTitle("Уведомление")
-////          .setContentText("Добавлена резолюция к документу " + item.getUid() )
-////          .setDefaults(Notification.DEFAULT_ALL)
-////          .setCategory(Notification.CATEGORY_MESSAGE)
-////          .setPriority(NotificationCompat.PRIORITY_HIGH)
-////          .addAction( 1 , "Утвердить", null)
-////          .addAction( 0 ,  "Отклонить", null)
-////          .build();
-////
-////      NotificationManager notificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
-////      notificationManager.notify(0, builder);
-////
-//      return true;
-//    });
-//
-//    if ( item.getUrgency() != null ){
-//      viewHolder.badge.setVisibility(View.VISIBLE);
-//      viewHolder.badge.setText( item.getUrgency() );
-//    } else {
-//      viewHolder.badge.setVisibility(View.GONE);
-//    }
-//
-//    // resolved https://tasks.n-core.ru/browse/MVDESD-12625
-//    //  Номер документа на плитке выделять красным.
-//    //  Красным документ должен подсвечиваться, только тогда,
-//    //  когда создаём проект резолюции.
-//    //  В подписавших резолюцию должен быть Министр.
-//
-//    if (item.isRed() != null && item.isRed()){
-//      viewHolder.cv.setBackground( ContextCompat.getDrawable(mContext, R.drawable.top_border) );
-//
-//
-//      // resolved https://tasks.n-core.ru/browse/MVDESD-13426
-//      // Выделять номер документа красным на плитке
-//      viewHolder.date.setTextColor( ContextCompat.getColor(mContext, R.color.md_red_A700 ) );
-//
-//    } else {
-//      viewHolder.cv.setBackground( ContextCompat.getDrawable(mContext, R.color.md_white_1000 ) );
-//      viewHolder.date.setTextColor( ContextCompat.getColor(mContext, R.color.md_grey_800 ) );
-//    }
-//
-//
-//
-////    setAnimation(viewHolder.itemView, position);
-//
-//  }
 
   @Override
   public int getItemCount() {
@@ -586,6 +406,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
   public void addItem(InMemoryDocument document) {
     if ( !Holder.MAP.containsKey( document.getUid()) ){
+      Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Add document into adapter %s", document.getUid() );
       documents.add(document);
       notifyItemInserted( documents.size() );
 //      Holder.MAP.put( document.getUid(), documents.s );

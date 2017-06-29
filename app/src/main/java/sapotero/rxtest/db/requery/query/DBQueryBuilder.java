@@ -126,8 +126,8 @@ MemoryStore store;
 
           .toSortedList(Filter::bySortKey)
 
-          .subscribeOn(Schedulers.computation())
-          .observeOn(AndroidSchedulers.mainThread())
+//          .subscribeOn(Schedulers.computation())
+//          .observeOn(AndroidSchedulers.mainThread())
           .subscribe(
             docs -> {
 
