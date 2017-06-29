@@ -90,7 +90,7 @@ public class RoutePreviewFragment extends Fragment {
     card      = (FrameLayout)  view.findViewById(R.id.route_preview_fragment_card_view);
     button.setOnClickListener(this::changeState);
 
-    state  = State.ALL;
+    state  = State.LAST;
 
     EsdApplication.getDataComponent().inject(this);
     ButterKnife.bind(view);
@@ -99,6 +99,7 @@ public class RoutePreviewFragment extends Fragment {
 
     showPreview(true);
     loadRoute();
+    updateButtonView();
 
     return view;
   }
