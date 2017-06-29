@@ -3,6 +3,7 @@ package sapotero.rxtest.db.requery.models.images;
 import io.requery.Column;
 import io.requery.Entity;
 import io.requery.Generated;
+import io.requery.Index;
 import io.requery.Key;
 import io.requery.ManyToOne;
 import sapotero.rxtest.db.requery.models.RDocument;
@@ -11,6 +12,7 @@ import sapotero.rxtest.db.requery.models.RDocument;
 public abstract class RImage {
   @Key
   @Generated
+  @Index("image_id_index")
   int id;
 
   String imageId;

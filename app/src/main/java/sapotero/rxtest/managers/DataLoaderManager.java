@@ -39,16 +39,11 @@ import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckSuccessEvent;
 import sapotero.rxtest.events.stepper.load.StepperDocumentCountReadyEvent;
 import sapotero.rxtest.jobs.bus.CreateAssistantJob;
-import sapotero.rxtest.jobs.bus.CreateDocumentsJob;
-import sapotero.rxtest.jobs.bus.CreateFavoriteDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateFavoriteUsersJob;
 import sapotero.rxtest.jobs.bus.CreateFoldersJob;
 import sapotero.rxtest.jobs.bus.CreatePrimaryConsiderationJob;
-import sapotero.rxtest.jobs.bus.CreateProcessedDocumentsJob;
-import sapotero.rxtest.jobs.bus.CreateProjectsJob;
 import sapotero.rxtest.jobs.bus.CreateTemplatesJob;
 import sapotero.rxtest.jobs.bus.CreateUrgencyJob;
-import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.retrofit.Api.AuthService;
 import sapotero.rxtest.retrofit.DocumentsService;
 import sapotero.rxtest.retrofit.models.AuthSignToken;
@@ -193,22 +188,31 @@ public class DataLoaderManager {
                   })
               );
 
-              // Доработка api для возврата ВРИО/по поручению
-              // https://tasks.n-core.ru/browse/MVDESD-11453
-              subscriptionInitV2.add(
-                auth.getAssistant(settings.getLogin(), settings.getToken(), settings.getCurrentUserId())
-                  .subscribeOn(Schedulers.computation())
-                  .observeOn(AndroidSchedulers.mainThread())
-                  .subscribe( data -> {
-                    jobManager.addJobInBackground(new CreateAssistantJob(data));
-                  }, error -> {
-                    Timber.tag(TAG).e(error);
-                  })
-              );
+            // Доработка api для возврата ВРИО/по поручению
+            // resolved https://tasks.n-core.ru/browse/MVDESD-11453
+            subscriptionInitV2.add(
+              auth.getAssistantByHeadId(settings.getLogin(), settings.getToken(), settings.getCurrentUserId())
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe( data -> {
+                  jobManager.addJobInBackground(new CreateAssistantJob(data));
+                }, error -> {
+                  Timber.tag(TAG).e(error);
+                })
+            );
 
-//            } catch (Exception e) {
-//              e.printStackTrace();
-//            }
+            // resolved https://tasks.n-core.ru/browse/MVDESD-13711
+            subscriptionInitV2.add(
+              auth.getAssistantByAssistantId(settings.getLogin(), settings.getToken(), settings.getCurrentUserId())
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe( data -> {
+                  jobManager.addJobInBackground(new CreateAssistantJob(data));
+                }, error -> {
+                  Timber.tag(TAG).e(error);
+                })
+            );
+
           },
           error -> {
             Timber.tag("USER_INFO").e( "ERROR: %s", error);

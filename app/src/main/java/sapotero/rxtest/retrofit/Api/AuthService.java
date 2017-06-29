@@ -23,10 +23,17 @@ import sapotero.rxtest.retrofit.models.v2.v2UserOshs;
 public interface AuthService {
 
   @GET("classifiers/assistants.json")
-  Observable<ArrayList<Assistant>> getAssistant(
+  Observable<ArrayList<Assistant>> getAssistantByHeadId(
     @Query("login") String username,
     @Query("auth_token") String token,
     @Query("head_id") String head
+  );
+
+  @GET("classifiers/assistants.json")
+  Observable<ArrayList<Assistant>> getAssistantByAssistantId(
+    @Query("login") String username,
+    @Query("auth_token") String token,
+    @Query("assistant_id") String head
   );
 
   @GET("/v2/classifiers.json")

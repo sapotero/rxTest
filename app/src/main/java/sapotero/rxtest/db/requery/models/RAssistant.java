@@ -22,6 +22,7 @@ public abstract class RAssistant {
   Boolean forDecision;
   String  title;
 
+  @Index("assistant_user_index")
   String  user;
 
 }

@@ -29,15 +29,15 @@ public abstract class RDocument implements Persistable {
   @Column(unique = true)
   String uid;
 
-  @Index("md5_index")
+//  @Index("md5_index")
   String md5;
 
-  @Index("user_index")
+//  @Index("user_index")
   String user;
 
   //  Запрос на получение документов по api v3
   //  /v3/documents.json?status_code=primary_consideration&addressed_to_type=group
-  @Index("addressedToType_index")
+//  @Index("addressedToType_index")
   String addressedToType;
 
   Integer sortKey;
@@ -52,50 +52,50 @@ public abstract class RDocument implements Persistable {
 
   Boolean viewed;
 
-  @Index("changed_index")
+//  @Index("changed_index")
   Boolean changed;
 
   @ForeignKey
   @OneToOne
   RSigner signer;
 
-  @Index("organization_index")
+//  @Index("organization_index")
   String organization;
 
-  @Index("filter_index")
+//  @Index("filter_index")
   String filter;
 
-  @Index("documentType_index")
+//  @Index("documentType_index")
   String documentType;
 
   String infoCard;
 
-  @Index("folder_index")
+//  @Index("folder_index")
   String folder;
 
-  @Index("control_index")
+//  @Index("control_index")
   Boolean control;
 
-  @Index("favorites_index")
+//  @Index("favorites_index")
   Boolean favorites;
 
-  @Index("processed_index")
+//  @Index("processed_index")
   Boolean processed;
 
 
   // из папки обработанное
-  @Index("fromProcessedFolder_index")
+//  @Index("fromProcessedFolder_index")
   Boolean fromProcessedFolder;
 
   // из папки избранное
-  @Index("fromFavoritesFolder_index")
+//  @Index("fromFavoritesFolder_index")
   Boolean fromFavoritesFolder;
 
   // из папки обработанное
-  @Index("fromLinks_index")
+//  @Index("fromLinks_index")
   Boolean fromLinks;
 
-  @Index("expired_index")
+//  @Index("expired_index")
   Boolean expired;
 
   @Column(value="false")

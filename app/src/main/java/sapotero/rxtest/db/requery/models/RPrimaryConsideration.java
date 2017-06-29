@@ -2,6 +2,7 @@ package sapotero.rxtest.db.requery.models;
 
 import io.requery.Entity;
 import io.requery.Generated;
+import io.requery.Index;
 import io.requery.Key;
 
 
@@ -23,5 +24,6 @@ public abstract class RPrimaryConsideration {
   Boolean isOrganization;
   Boolean isGroup;
 
+  @Index("pc_user_index")
   String  user;
 }
