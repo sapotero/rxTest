@@ -3,13 +3,10 @@ package sapotero.rxtest.db.requery.utils;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
-import java.util.concurrent.Executors;
-
 import dagger.Module;
 import dagger.Provides;
 import io.requery.Persistable;
 import io.requery.android.sqlite.DatabaseSource;
-import io.requery.cache.EntityCacheBuilder;
 import io.requery.meta.EntityModel;
 import io.requery.rx.RxSupport;
 import io.requery.rx.SingleEntityStore;
@@ -34,15 +31,8 @@ public final class RequeryDbModule {
     EntityModel model = Models.DEFAULT;
 
     Configuration configuration = new ConfigurationBuilder(source, model)
-      .setStatementCacheSize(128)
-      .setBatchUpdateSize(16)
-      .setEntityCache(new EntityCacheBuilder(model)
-        .useReferenceCache(true)
-        .useSerializableCache(true)
-        .build())
-      .setWriteExecutor(
-        Executors.newScheduledThreadPool(4)
-      )
+      .setStatementCacheSize(16)
+      .setBatchUpdateSize(8)
       .build();
 
     SchemaModifier schemaModifier = new SchemaModifier(configuration);
