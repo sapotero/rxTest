@@ -128,7 +128,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
             // настройка
             // Показывать подтверждения о действиях с документом
-            if ( settings.isShowCommentPost() ){
+            if ( settings.isShowCommentPost() || !settings.isShowCommentPost() && settings.isActionsConfirm() ){
               operation = CommandFactory.Operation.INCORRECT;
               showFromTheReportDialog();
             } else {
@@ -153,7 +153,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
           case R.id.menu_info_approval_prev_person:
             // настройка
             // Показывать подтверждения о действиях с документом
-            if ( settings.isShowCommentPost() ){
+            if ( settings.isShowCommentPost() || !settings.isShowCommentPost() && settings.isActionsConfirm() ){
               operation = CommandFactory.Operation.INCORRECT;
               showPrevDialog(true);
             } else {
@@ -231,7 +231,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
             // настройка
             // Показывать подтверждения о действиях с документом
-            if ( settings.isShowCommentPost() ){
+            if ( settings.isShowCommentPost() || !settings.isShowCommentPost() && settings.isActionsConfirm() ){
               operation = CommandFactory.Operation.INCORRECT;
               showPrevDialog(false);
             } else {
@@ -804,7 +804,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
     // настройка
     // Показывать комментарий при отклонении
-    if ( settings.isShowCommentPost() ){
+    if ( settings.isShowCommentPost() || !settings.isShowCommentPost() && settings.isActionsConfirm() ){
       fromTheReportDialog.inputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES )
         .input(R.string.comment_hint, R.string.dialog_empty_value, (dialog12, input) -> {
           settings.setPrevDialogComment( input.toString() );
