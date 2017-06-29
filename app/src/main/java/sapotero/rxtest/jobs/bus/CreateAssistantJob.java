@@ -9,6 +9,7 @@ import com.birbit.android.jobqueue.RetryConstraint;
 
 import java.util.ArrayList;
 
+import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RAssistantEntity;
 import sapotero.rxtest.retrofit.models.Assistant;
@@ -48,7 +49,7 @@ public class CreateAssistantJob extends BaseJob {
       .insert(data)
       .toObservable()
       .subscribeOn(Schedulers.computation())
-      .observeOn(Schedulers.computation())
+      .observeOn(AndroidSchedulers.mainThread())
       .subscribe(u -> {
         Timber.tag(TAG).v("addByOne " + u.getTitle() );
       }, Timber::e);

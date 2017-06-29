@@ -2,6 +2,7 @@ package sapotero.rxtest.db.requery.models;
 
 import io.requery.Entity;
 import io.requery.Generated;
+import io.requery.Index;
 import io.requery.Key;
 
 
@@ -23,6 +24,7 @@ public abstract class RFavoriteUser {
   Boolean isOrganization;
   Boolean isGroup;
 
+  @Index("fu_user_index")
   String  user;
 
 }

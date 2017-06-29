@@ -33,7 +33,7 @@ public interface AuthService {
   Observable<ArrayList<Assistant>> getAssistantByAssistantId(
     @Query("login") String username,
     @Query("auth_token") String token,
-    @Query("head_id") String head
+    @Query("assistant_id") String head
   );
 
   @GET("/v2/classifiers.json")
