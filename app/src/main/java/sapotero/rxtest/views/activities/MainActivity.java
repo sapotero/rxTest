@@ -285,8 +285,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       store.clear();
     }
 
-    settings.setInTheSameTab(false);
-
     int columnCount = 2;
     int spacing = 32;
 
@@ -714,7 +712,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @Override
   public void onMenuBuilderUpdate(ArrayList<ConditionBuilder> conditions) {
 //    menuBuilder.setFavorites( dbQueryBuilder.getFavoritesCount() );
-    settings.setInTheSameTab(false);  // user switched to another tab
     dbQueryBuilder.executeWithConditions( conditions, menuBuilder.getItem().isVisible() && favorites_button.isChecked(), menuBuilder.getItem() );
   }
 

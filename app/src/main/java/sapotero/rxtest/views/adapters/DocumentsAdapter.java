@@ -24,8 +24,10 @@ import javax.inject.Inject;
 
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
+import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.query.DBQueryBuilder;
@@ -52,6 +54,8 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
   private final String TAG = this.getClass().getSimpleName();
 
   private DBQueryBuilder dbQueryBuilder;
+
+  private CompositeSubscription compositeSubscription;
 
   public void removeAllWithRange() {
     Holder.MAP.clear();
@@ -118,19 +122,46 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       } else {
         Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: New document");
         Timber.tag(TAG).w("NEW %s", doc.getUid() );
-        // Add new documents if user is still in the same tab,
-        // and add new processed documents only into processed tab or processed folder.
-        if ( doc.isProcessed() == isDisplayProcessed() && settings.isInTheSameTab() ) {
-          Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Add document into adapter");
-          addItem(doc);
-          if (documents.size() > 0 && dbQueryBuilder != null) {
-            dbQueryBuilder.hideEmpty();
-          }
-        }
+        checkConditionsAndAddItem( doc );
       }
-
     }
+  }
 
+  private void checkConditionsAndAddItem(InMemoryDocument doc) {
+    if ( dbQueryBuilder != null && dbQueryBuilder.getConditions() != null ) {
+      Filter filter = new Filter(dbQueryBuilder.getConditions());
+
+      unsubscribe();
+
+      compositeSubscription.add(
+        Observable
+          .just( doc )
+          .filter( dbQueryBuilder::byOrganization )
+          .filter( dbQueryBuilder::byDecision )
+          .filter( filter::byType)
+          .filter( filter::byStatus)
+          .filter( filter::isProcessed )
+          .filter( filter::isFavorites )
+          .filter( filter::isControl )
+          .subscribe(
+            doc1 -> {
+              Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Add document into adapter");
+              addItem(doc1);
+              if (documents.size() > 0 && dbQueryBuilder != null) {
+                dbQueryBuilder.hideEmpty();
+              }
+            },
+            Timber::e
+          )
+      );
+    }
+  }
+
+  private void unsubscribe() {
+    if ( compositeSubscription != null && compositeSubscription.hasSubscriptions() ) {
+      compositeSubscription.unsubscribe();
+    }
+    compositeSubscription = new CompositeSubscription();
   }
 
   private void removeItem(int index, InMemoryDocument doc) {

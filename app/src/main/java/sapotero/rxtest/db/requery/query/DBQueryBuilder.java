@@ -141,7 +141,6 @@ MemoryStore store;
                   adapter.addItem(doc);
                 }
 
-                settings.setInTheSameTab(true);
               } else {
                 showEmpty();
               }
@@ -195,7 +194,7 @@ MemoryStore store;
   }
 
   @NonNull
-  private Boolean byOrganization(InMemoryDocument doc) {
+  public Boolean byOrganization(InMemoryDocument doc) {
     boolean   result = true;
     boolean[] selected_index = organizationSelector.getSelected();
 
@@ -220,7 +219,7 @@ MemoryStore store;
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13400
   // Не отображать документы без резолюции, если включена соответствующая опция
-  private Boolean byDecision(InMemoryDocument doc) {
+  public Boolean byDecision(InMemoryDocument doc) {
     boolean result = true;
 
     if ( !settings.isShowWithoutProject() && item != null && !item.isShowAnyWay() && !doc.hasDecision() ) {
