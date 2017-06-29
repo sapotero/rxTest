@@ -137,6 +137,11 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     notifyItemRemoved(index);
     documents.remove(doc);
     recreateHash();
+
+    int mainMenuPosition = settings.getMainMenuPosition();
+    if ( index < mainMenuPosition ) {
+      settings.setMainMenuPosition( mainMenuPosition - 1 );
+    }
   }
 
   // True if inside Processed tab or Processed Folder
