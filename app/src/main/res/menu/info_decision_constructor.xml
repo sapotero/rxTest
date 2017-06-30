@@ -20,6 +20,14 @@
         app:showAsAction="ifRoom|withText"
         android:icon="@drawable/add_decision"
         android:title="@string/constructor_add_block"/>
+
+    <item
+        android:id="@+id/action_constructor_to_the_primary_consideration"
+        app:showAsAction="ifRoom|withText"
+        android:icon="@drawable/change"
+        android:visible="false"
+        android:title="@string/menu_info_change_person"/>
+
     <item
         android:id="@+id/action_constructor_create_and_sign"
         app:showAsAction="ifRoom|withText"

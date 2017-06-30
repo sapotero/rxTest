@@ -104,17 +104,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
             Timber.v("primary_consideration");
 
-            SelectOshsDialogFragment dialogFragment = new SelectOshsDialogFragment();
-            Bundle bundle1 = new Bundle();
-            bundle1.putString("operation", "primary_consideration");
-            dialogFragment.setArguments(bundle1);
-            dialogFragment.withPrimaryConsideration(true);
-            dialogFragment.withSearch(false);
-            dialogFragment.withConfirm(true);
-            dialogFragment.withChangePerson(true);
-            dialogFragment.registerCallBack( this );
-            dialogFragment.withDocumentUid( settings.getUid() );
-            dialogFragment.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
+            showPrimaryConsiderationDialog(activity);
 
             operation = CommandFactory.Operation.INCORRECT;
             break;
@@ -319,6 +309,20 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         return false;
       }
     );
+  }
+
+  public void showPrimaryConsiderationDialog(Activity activity) {
+    SelectOshsDialogFragment dialogFragment = new SelectOshsDialogFragment();
+    Bundle bundle1 = new Bundle();
+    bundle1.putString("operation", "primary_consideration");
+    dialogFragment.setArguments(bundle1);
+    dialogFragment.withPrimaryConsideration(true);
+    dialogFragment.withSearch(false);
+    dialogFragment.withConfirm(true);
+    dialogFragment.withChangePerson(true);
+    dialogFragment.registerCallBack( this );
+    dialogFragment.withDocumentUid( settings.getUid() );
+    dialogFragment.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
   }
 
   public static int parseIntOrDefault(String value, int defaultValue) {

@@ -317,9 +317,18 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
     invalidateArrows();
 
+    chechPrimaryConsiderationDialog();
+
 //    startThreadedUpdate();
 //    Keyboard.hide(this);
 
+  }
+
+  private void chechPrimaryConsiderationDialog() {
+    if (settings.isShowPrimaryConsideration()){
+      settings.setShowPrimaryConsideration(false);
+      toolbarManager.showPrimaryConsiderationDialog(this);
+    }
   }
 
   private void invalidateArrows() {

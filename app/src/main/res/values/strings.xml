@@ -508,6 +508,7 @@
     <string name="show_approve_on_primary_key">settings_view_show_approve_on_primary</string>
     <string name="max_image_size_key">settings_view_show_max_image_size</string>
     <string name="debug_enabled_key">debug_enabled</string>
+    <string name="SHOW_PRIMARY_CONSIDERATION_KEY">SHOW_PRIMARY_CONSIDERATION</string>
 
     <!--CRYPTO PRO-->
 
