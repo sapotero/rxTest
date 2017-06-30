@@ -138,7 +138,10 @@ MemoryStore store;
                 hideEmpty();
                 for (InMemoryDocument doc: docs ) {
                   Timber.tag(TAG).w("add %s", doc.getUid() );
-                  adapter.addItem(doc);
+                  InMemoryDocument docFromMem = store.getDocuments().get( doc.getUid() );
+                  if ( docFromMem != null ) {
+                    adapter.addItem( docFromMem );
+                  }
                 }
 
               } else {

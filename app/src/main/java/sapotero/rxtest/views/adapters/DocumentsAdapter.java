@@ -92,6 +92,28 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
         this::updateDocumentCard,
         Timber::e
       );
+
+//    Observable
+//      .interval( 5, TimeUnit.SECONDS )
+//      .subscribeOn(Schedulers.computation())
+//      .observeOn(AndroidSchedulers.mainThread())
+//      .subscribe(interval -> {
+//        Timber.tag("RecyclerViewRefreshSubscription").d("Start refresh");
+//        if ( documents != null ) {
+//          Timber.tag("RecyclerViewRefreshSubscription").d("Adapter exists, checking changes");
+//          int index = 0;
+//          for ( InMemoryDocument doc : documents) {
+//            InMemoryDocument docInMemory = store.getDocuments().get( doc.getUid() );
+//            if ( docInMemory != null && doc.getDocument().getChanged() != docInMemory.getDocument().getChanged() ) {
+//              Timber.tag("RecyclerViewRefreshSubscription").d("Changing item %s", docInMemory.getUid() );
+//              documents.set( index, docInMemory );
+//              notifyItemChanged( index, docInMemory );
+//            }
+//          }
+//        }
+//      },
+//        Timber::e
+//      );
   }
 
   private void updateDocumentCard(List<InMemoryDocument> docs) {
