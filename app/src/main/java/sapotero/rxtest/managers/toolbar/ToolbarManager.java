@@ -491,6 +491,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       if ( isProcessed() ) {
         safeSetVisibility(R.id.menu_info_decision_edit, false);
         safeSetVisibility(R.id.menu_info_decision_create, true);
+      } else {
+        safeSetVisibility(R.id.menu_info_decision_edit, true);
       }
 
     }
@@ -593,7 +595,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   }
 
   public void setEditDecisionMenuItemVisible(boolean visible){
-    safeSetVisibility( R.id.menu_info_decision_edit, false);
+    safeSetVisibility( R.id.menu_info_decision_edit, visible);
     // if (visible){
     //   safeSetVisibility( R.id.menu_info_decision_edit, false);
     // } else {

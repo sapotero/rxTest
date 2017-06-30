@@ -43,7 +43,6 @@
         android:background="@drawable/toolbar_background"
         app:navigationIcon="?attr/homeAsUpIndicator"
         app:theme="@style/ToolbarColoredBackArrow"
-        android:theme="@style/AlertDialog.AppCompat.Light"
         android:elevation="8dp"/>
 
     <!--android:layout_marginStart="64dp"-->

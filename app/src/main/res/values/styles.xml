@@ -30,11 +30,19 @@
 
         <item name="preferenceTheme"> @style/PreferenceThemeOverlay.v14.Material </item>
         <item name="android:windowFullscreen">true</item>
+
     </style>
+
 
     <style name="ToolbarColoredBackArrow" parent="AppTheme">
         <item name="android:textColorPrimary">@color/md_grey_100</item>
         <item name="android:textColorSecondary">@color/md_grey_300</item>
+        <item name="popupTheme">@style/PopupMenuStyle</item>
+    </style>
+
+    <style name="PopupMenuStyle" parent="ThemeOverlay.AppCompat.Light">
+        <item name="android:colorBackground">@color/md_white_1000</item>
+        <item name="android:textColor">@color/md_light_blue_900</item>
     </style>
 
     <style name="ButtonBorderless" parent="Widget.AppCompat.Button.Borderless.Colored"/>
