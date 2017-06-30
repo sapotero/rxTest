@@ -286,7 +286,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
     toolbar.setOnMenuItemClickListener(item -> {
 
-      CommandParams params;
+      CommandParams commandParams;
       CommandFactory.Operation operation;
 
       switch (item.getItemId()){
@@ -298,38 +298,25 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
         case R.id.action_constructor_to_the_primary_consideration:
 
-          settings.setShowPrimaryConsideration(true);
-
-          Decision primary_decision = manager.getDecision();
-
-          CommandFactory.Operation primary_operation = CommandFactory.Operation.SAVE_DECISION;
-
-          CommandParams primary_params = new CommandParams();
-          primary_params.setDecisionModel( primary_decision );
-          primary_params.setDocument( settings.getUid() );
-          primary_decision.setDocumentUid( settings.getUid() );
-
           if (rDecisionEntity != null) {
-            primary_params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
-            primary_params.setDecisionId( rDecisionEntity.getUid() );
+            settings.setShowPrimaryConsideration(true);
 
-            RDocumentEntity doc = (RDocumentEntity) rDecisionEntity.getDocument();
-            primary_params.setDocument( settings.getUid() );
+            Decision primary_decision = manager.getDecision();
 
-            if (doc != null) {
-              primary_params.setDocument(doc.getUid());
-            }
-            rDecisionEntity.setTemporary(true);
-          } else {
-            primary_params.setDocument( settings.getUid() );
-            primary_params.setDecisionModel(primary_decision);
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            String json = gson.toJson( primary_decision );
+            Timber.tag(TAG).w("action_constructor_to_the_primary_consideration: %s", json );
+
+            operation = CommandFactory.Operation.SAVE_DECISION;
+
+            commandParams = new CommandParams();
+            commandParams.setDecisionId( rDecisionEntity.getUid() );
+            commandParams.setDecisionModel( manager.getDecision() );
+            commandParams.setDocument( settings.getUid() );
+            operationManager.execute( operation, commandParams );
+
+            finish();
           }
-
-
-
-          operationManager.execute( primary_operation, primary_params );
-
-          finish();
           break;
 
         case R.id.action_constructor_create_and_sign:
@@ -340,35 +327,35 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
             Decision decision = manager.getDecision();
 
-            primary_params = new CommandParams();
-            primary_params.setDecisionModel( decision );
-            primary_params.setDocument( settings.getUid() );
+            commandParams = new CommandParams();
+            commandParams.setDecisionModel( decision );
+            commandParams.setDocument( settings.getUid() );
 
             decision.setDocumentUid( settings.getUid() );
 
             if (rDecisionEntity != null) {
-              primary_params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
-              primary_params.setDecisionId( rDecisionEntity.getUid() );
-              primary_params.setDocument( settings.getUid() );
+              commandParams.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
+              commandParams.setDecisionId( rDecisionEntity.getUid() );
+              commandParams.setDocument( settings.getUid() );
             }
 
             operation = CommandFactory.Operation.CREATE_AND_APPROVE_DECISION;
 
             if (rDecisionEntity != null){
               operation = CommandFactory.Operation.SAVE_AND_APPROVE_DECISION;
-              primary_params.setDecisionId( rDecisionEntity.getUid() );
-              primary_params.setDecisionModel( manager.getDecision() );
-              primary_params.setDocument( settings.getUid() );
+              commandParams.setDecisionId( rDecisionEntity.getUid() );
+              commandParams.setDecisionModel( manager.getDecision() );
+              commandParams.setDocument( settings.getUid() );
             }
 
             if ( settings.isDecisionWithAssignment() ){
               Timber.tag(TAG).w("ASSIGNMENT: %s", settings.isDecisionWithAssignment() );
-              primary_params.setAssignment(true);
-              primary_params.setDocument( settings.getUid() );
+              commandParams.setAssignment(true);
+              commandParams.setDocument( settings.getUid() );
               decision.setAssignment(true);
             }
 
-            operationManager.execute( operation, primary_params );
+            operationManager.execute( operation, commandParams );
 
             finish();
           }
@@ -389,16 +376,16 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
             operation =CommandFactory.Operation.APPROVE_DECISION;
 
-            primary_params = new CommandParams();
-            primary_params.setDecisionId( rDecisionEntity.getUid() );
-            primary_params.setDocument( settings.getUid() );
-            primary_params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
+            commandParams = new CommandParams();
+            commandParams.setDecisionId( rDecisionEntity.getUid() );
+            commandParams.setDocument( settings.getUid() );
+            commandParams.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
 
             if ( settings.isDecisionWithAssignment() ){
               Timber.tag(TAG).w("ASSIGNMENT: %s", settings.isDecisionWithAssignment() );
-              primary_params.setAssignment(true);
+              commandParams.setAssignment(true);
             }
-            operationManager.execute(operation, primary_params);
+            operationManager.execute(operation, commandParams);
           }
 
           break;
@@ -413,11 +400,11 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
             operation =CommandFactory.Operation.REJECT_DECISION;
 
-            primary_params = new CommandParams();
-            primary_params.setDecisionId( rDecisionEntity.getUid() );
-            primary_params.setDocument( settings.getUid() );
-            primary_params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
-            operationManager.execute(operation, primary_params);
+            commandParams = new CommandParams();
+            commandParams.setDecisionId( rDecisionEntity.getUid() );
+            commandParams.setDocument( settings.getUid() );
+            commandParams.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
+            operationManager.execute(operation, commandParams);
           }
 
           break;
@@ -699,7 +686,9 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
 
       if ( doc.getFilter() != null && Objects.equals(doc.getFilter(), "primary_consideration") && doc.isProcessed() != null && !doc.isProcessed()){
-        toolbar.getMenu().findItem(R.id.action_constructor_to_the_primary_consideration).setVisible(true);
+        if (rDecisionEntity != null){
+          toolbar.getMenu().findItem(R.id.action_constructor_to_the_primary_consideration).setVisible(true);
+        }
       } else {
         toolbar.getMenu().findItem(R.id.action_constructor_to_the_primary_consideration).setVisible(false);
       }
