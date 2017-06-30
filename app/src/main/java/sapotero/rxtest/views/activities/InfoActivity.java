@@ -49,6 +49,7 @@ import sapotero.rxtest.events.crypto.SignDataResultEvent;
 import sapotero.rxtest.events.crypto.SignDataWrongPinEvent;
 import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
 import sapotero.rxtest.events.decision.ShowDecisionConstructor;
+import sapotero.rxtest.events.document.DropControlEvent;
 import sapotero.rxtest.events.utils.NoDocumentsEvent;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.events.view.ShowPrevDocumentEvent;
@@ -386,6 +387,12 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     Snackbar.make( wrapper, event.message, Snackbar.LENGTH_LONG ).show();
   }
 
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(DropControlEvent event) throws Exception {
+    Timber.tag(TAG).w("event: %s", event.control);
+    toolbarManager.dropControlLabel( event.control );
+  }
+
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(ShowDecisionConstructor event) throws Exception {
@@ -437,17 +444,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     clearImageIndex();
     initInfoActivity();
     updateCurrent();
-//    finish();
-//
-//    InfoActivity activity = this;
-//    Intent intent = new Intent(this, InfoActivity.class);
-//
-////    MainActivity.invalidate();
-//
-//    MainActivity.RAdapter.getPrevFromPosition(settings.getInteger("activity_main_menu.position").startTransactionFor());
-//    activity.startActivity(intent);
-//      activity.overridePendingTransition(R.anim.slide_to_right, R.anim.slide_from_left);
-//      activity.overridePendingTransition(R.anim.slide_from_left, R.anim.slide_to_right);
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
@@ -468,32 +464,10 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     initInfoActivity();
     updateCurrent();
 
-//    finish();
-//
-//    InfoActivity activity = this;
-//    Intent intent = new Intent( this, InfoActivity.class);
-//
-//    MainActivity.invalidate();
-//
-//    MainActivity.RAdapter.getNextFromPosition( settings.getInteger("activity_main_menu.position").startTransactionFor() );
-//    activity.startActivity(intent);
-//    activity.overridePendingTransition(R.anim.slide_to_left, R.anim.slide_from_right);
-//    activity.overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
-
-
-
   }
 
   private void clearImageIndex() {
     settings.setImageIndex(0);
-  }
-
-  private void restart() {
-    Intent intent = getIntent();
-    intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-    overridePendingTransition(0, 0);
-    finish();
-    startActivity(intent);
   }
 
   public void updateCurrent(){
