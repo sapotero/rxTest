@@ -516,9 +516,7 @@ public class CommandFactory implements AbstractCommand.Callback{
       public String getRussinaName() {
         return "Удаление шаблона резолюции";
       }
-    },
-
-    ;
+    };
 
     public static Operation getOperation(String operation_type){
       Operation operation = Operation.INCORRECT;

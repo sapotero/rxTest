@@ -7,6 +7,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.ForegroundColorSpan;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -399,12 +402,21 @@ public class RoutePreviewFragment extends Fragment {
             switch ( state ){
               case ALL:
                 for (Action action : user.getActions()) {
-                  item.withAction(String.format("%s - %s", action.getDate(), action.getStatus()));
+                  if (action.getComment() != null) {
+                    item.withAction( String.format("%s - %s\n%s", action.getDate(), action.getStatus(), action.getComment()) );
+                  } else {
+                    item.withAction(String.format("%s - %s", action.getDate(), action.getStatus()));
+                  }
                 }
                 break;
               case LAST:
                 Action action = user.getActions().get( user.getActions().size()-1 );
-                item.withAction(String.format("%s - %s", action.getDate(), action.getStatus()));
+
+                if (action.getComment() != null) {
+                  item.withAction(String.format("%s - %s\n%s", action.getDate(), action.getStatus(), action.getComment()));
+                } else {
+                  item.withAction(String.format("%s - %s", action.getDate(), action.getStatus()));
+                }
                 break;
               default:
                 break;
@@ -428,6 +440,8 @@ public class RoutePreviewFragment extends Fragment {
       text.setTypeface( Typeface.create("sans-serif", Typeface.NORMAL) );
       text.setText(title);
       text.setPadding(16,0,0,0);
+
+
 
       titleView.addView( text );
 
@@ -527,34 +541,48 @@ public class RoutePreviewFragment extends Fragment {
     //refactor
     ItemBuilder withAction(String action) {
       this.action = action;
+      int color = 0x000000;
 
       TextView text = new TextView(context);
 
       text.setTextColor( ContextCompat.getColor(context, R.color.md_grey_600) );
 
       if (action.contains("На ") || action.contains("К ")){
-        text.setTextColor( ContextCompat.getColor(context, R.color.md_blue_600) );
+        color = ContextCompat.getColor(context, R.color.md_blue_600);
       }
 
       if (action.contains("Отклонено")  || action.contains("Возвращен")){
-        text.setTextColor( ContextCompat.getColor(context, R.color.md_red_600) );
+        color = ContextCompat.getColor(context, R.color.md_red_600);
       }
 
       if (action.contains("Отправлен") || action.contains("Согласовано")|| action.contains("Подписано")  ){
-        text.setTextColor( ContextCompat.getColor(context, R.color.md_green_600) );
+        color = ContextCompat.getColor(context, R.color.md_green_600);
       }
 
       if (action.contains("передано")){
-        text.setTextColor( ContextCompat.getColor(context, R.color.md_yellow_800) );
+        color = ContextCompat.getColor(context, R.color.md_yellow_800);
       }
 
       text.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
       text.setTypeface( Typeface.create("sans-serif", Typeface.NORMAL) );
-      text.setText(action);
+
+      if (action.contains("\n")){
+        final SpannableStringBuilder sb = new SpannableStringBuilder(action);
+
+        final ForegroundColorSpan comment = new ForegroundColorSpan( ContextCompat.getColor(context, R.color.md_grey_600) );
+        final ForegroundColorSpan status = new ForegroundColorSpan( color );
+        sb.setSpan(status, 0, action.indexOf("\n"), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+        sb.setSpan(comment, action.indexOf("\n"), action.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+        text.setPadding(0,8,0,8);
+        text.setText(sb);
+
+      } else {
+        text.setTextColor( color );
+        text.setText(action);
+      }
+
 
       actionView.addView( text );
-
-
       return this;
     }
 

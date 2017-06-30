@@ -131,7 +131,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     // https://tasks.n-core.ru/browse/MVDESD-13591
 //    toolbar.setTitle("Текст");
 
-     toolbar.setTitle("Редактор резолюции ");
+    toolbar.setTitle("Редактор резолюции ");
     toolbar.inflateMenu(R.menu.info_decision_constructor);
 
 
@@ -283,6 +283,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     } );
 
 
+
     toolbar.setOnMenuItemClickListener(item -> {
 
       CommandParams params;
@@ -295,6 +296,42 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
           showInfoCard();
           break;
 
+        case R.id.action_constructor_to_the_primary_consideration:
+
+          settings.setShowPrimaryConsideration(true);
+
+          Decision primary_decision = manager.getDecision();
+
+          CommandFactory.Operation primary_operation = CommandFactory.Operation.SAVE_DECISION;
+
+          CommandParams primary_params = new CommandParams();
+          primary_params.setDecisionModel( primary_decision );
+          primary_params.setDocument( settings.getUid() );
+          primary_decision.setDocumentUid( settings.getUid() );
+
+          if (rDecisionEntity != null) {
+            primary_params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
+            primary_params.setDecisionId( rDecisionEntity.getUid() );
+
+            RDocumentEntity doc = (RDocumentEntity) rDecisionEntity.getDocument();
+            primary_params.setDocument( settings.getUid() );
+
+            if (doc != null) {
+              primary_params.setDocument(doc.getUid());
+            }
+            rDecisionEntity.setTemporary(true);
+          } else {
+            primary_params.setDocument( settings.getUid() );
+            primary_params.setDecisionModel(primary_decision);
+          }
+
+
+
+          operationManager.execute( primary_operation, primary_params );
+
+          finish();
+          break;
+
         case R.id.action_constructor_create_and_sign:
           boolean canCreateAndSign = checkDecision();
 
@@ -303,35 +340,35 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
             Decision decision = manager.getDecision();
 
-            params = new CommandParams();
-            params.setDecisionModel( decision );
-            params.setDocument( settings.getUid() );
+            primary_params = new CommandParams();
+            primary_params.setDecisionModel( decision );
+            primary_params.setDocument( settings.getUid() );
 
             decision.setDocumentUid( settings.getUid() );
 
             if (rDecisionEntity != null) {
-              params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
-              params.setDecisionId( rDecisionEntity.getUid() );
-              params.setDocument( settings.getUid() );
+              primary_params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
+              primary_params.setDecisionId( rDecisionEntity.getUid() );
+              primary_params.setDocument( settings.getUid() );
             }
 
             operation = CommandFactory.Operation.CREATE_AND_APPROVE_DECISION;
 
             if (rDecisionEntity != null){
               operation = CommandFactory.Operation.SAVE_AND_APPROVE_DECISION;
-              params.setDecisionId( rDecisionEntity.getUid() );
-              params.setDecisionModel( manager.getDecision() );
-              params.setDocument( settings.getUid() );
+              primary_params.setDecisionId( rDecisionEntity.getUid() );
+              primary_params.setDecisionModel( manager.getDecision() );
+              primary_params.setDocument( settings.getUid() );
             }
 
             if ( settings.isDecisionWithAssignment() ){
               Timber.tag(TAG).w("ASSIGNMENT: %s", settings.isDecisionWithAssignment() );
-              params.setAssignment(true);
-              params.setDocument( settings.getUid() );
+              primary_params.setAssignment(true);
+              primary_params.setDocument( settings.getUid() );
               decision.setAssignment(true);
             }
 
-            operationManager.execute( operation, params );
+            operationManager.execute( operation, primary_params );
 
             finish();
           }
@@ -352,16 +389,16 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
             operation =CommandFactory.Operation.APPROVE_DECISION;
 
-            params = new CommandParams();
-            params.setDecisionId( rDecisionEntity.getUid() );
-            params.setDocument( settings.getUid() );
-            params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
+            primary_params = new CommandParams();
+            primary_params.setDecisionId( rDecisionEntity.getUid() );
+            primary_params.setDocument( settings.getUid() );
+            primary_params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
 
             if ( settings.isDecisionWithAssignment() ){
               Timber.tag(TAG).w("ASSIGNMENT: %s", settings.isDecisionWithAssignment() );
-              params.setAssignment(true);
+              primary_params.setAssignment(true);
             }
-            operationManager.execute(operation, params);
+            operationManager.execute(operation, primary_params);
           }
 
           break;
@@ -376,11 +413,11 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
             operation =CommandFactory.Operation.REJECT_DECISION;
 
-            params = new CommandParams();
-            params.setDecisionId( rDecisionEntity.getUid() );
-            params.setDocument( settings.getUid() );
-            params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
-            operationManager.execute(operation, params);
+            primary_params = new CommandParams();
+            primary_params.setDecisionId( rDecisionEntity.getUid() );
+            primary_params.setDocument( settings.getUid() );
+            primary_params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
+            operationManager.execute(operation, primary_params);
           }
 
           break;
@@ -628,6 +665,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
   }
 
+
   private void showInfoCard() {
 
     InfoCardDialogFragment newFragment = new InfoCardDialogFragment();
@@ -657,6 +695,16 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
           toolbar.getMenu().findItem(R.id.action_constructor_create_and_sign).setVisible(false);
         }
       }
+
+
+
+      if ( doc.getFilter() != null && Objects.equals(doc.getFilter(), "primary_consideration") && doc.isProcessed() != null && !doc.isProcessed()){
+        toolbar.getMenu().findItem(R.id.action_constructor_to_the_primary_consideration).setVisible(true);
+      } else {
+        toolbar.getMenu().findItem(R.id.action_constructor_to_the_primary_consideration).setVisible(false);
+      }
+
+
     } else {
       // если новая резолюция
       if (!settings.isShowApproveOnPrimary() && Objects.equals(settings.getStatusCode(), "primary_consideration")) {
@@ -670,6 +718,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
         }
       }
     }
+
   }
 
     private boolean checkDecision () {
@@ -843,7 +892,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       String signerPosition = getCurrentUserPosition();
       raw_decision = new Decision();
       raw_decision.setLetterhead("Бланк резолюции");
-      raw_decision.setShowPosition(true);
+      raw_decision.setShowPosition(false);
       raw_decision.setSignerId(getCurrentUserId());
       raw_decision.setSigner(makeSignerWithOrganizationText(signerName, signerOrganization, signerPosition));
       raw_decision.setSignerBlankText(signerName);

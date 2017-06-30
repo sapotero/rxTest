@@ -11,6 +11,7 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.events.document.DropControlEvent;
 import sapotero.rxtest.events.view.ShowSnackEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
@@ -95,6 +96,12 @@ public class CheckControlLabel extends AbstractCommand {
       null
     );
 
+
+    RDocumentEntity doc = dataStore
+      .select(RDocumentEntity.class)
+      .where(RDocumentEntity.UID.eq(document_id))
+      .get().firstOrNull();
+
     info.subscribeOn( Schedulers.computation() )
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
@@ -105,6 +112,11 @@ public class CheckControlLabel extends AbstractCommand {
 
           if ( Objects.equals(result.getType(), "danger") && result.getMessage() != null){
             EventBus.getDefault().post( new ShowSnackEvent( result.getMessage() ));
+
+            if (doc != null) {
+              EventBus.getDefault().post( new DropControlEvent( doc.isControl() ));
+            }
+
             setAsError();
             setControl(false);
             queueManager.setExecutedWithError(this, Collections.singletonList( result.getMessage() ));

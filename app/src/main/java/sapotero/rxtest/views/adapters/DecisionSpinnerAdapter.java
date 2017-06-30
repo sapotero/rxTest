@@ -17,7 +17,6 @@ import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.db.requery.models.RFolderEntity;
 import sapotero.rxtest.db.requery.models.decisions.RBlock;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDisplayFirstDecisionEntity;
@@ -163,14 +162,11 @@ public class DecisionSpinnerAdapter extends BaseAdapter {
   public boolean hasActiveDecision() {
     Boolean result = false;
 
-    try {
-      for ( DecisionSpinnerItem decision: decisions ) {
-        if (!decision.getDecision().isApproved() && Objects.equals(decision.getDecision().getSignerId(), current_user)){
-          result = true;
-        }
+    for ( DecisionSpinnerItem decision: decisions ) {
+      if (!decision.getDecision().isApproved() && Objects.equals(decision.getDecision().getSignerId(), current_user)){
+        result = true;
+        break;
       }
-    } catch (Exception e) {
-      e.printStackTrace();
     }
 
     return result;

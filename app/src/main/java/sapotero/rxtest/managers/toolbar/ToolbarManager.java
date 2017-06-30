@@ -34,7 +34,6 @@ import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.crypto.SignDataEvent;
-import sapotero.rxtest.events.decision.CheckActiveDecisionEvent;
 import sapotero.rxtest.events.decision.ShowDecisionConstructor;
 import sapotero.rxtest.events.view.ShowSnackEvent;
 import sapotero.rxtest.managers.menu.OperationManager;
@@ -104,17 +103,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
             Timber.v("primary_consideration");
 
-            SelectOshsDialogFragment dialogFragment = new SelectOshsDialogFragment();
-            Bundle bundle1 = new Bundle();
-            bundle1.putString("operation", "primary_consideration");
-            dialogFragment.setArguments(bundle1);
-            dialogFragment.withPrimaryConsideration(true);
-            dialogFragment.withSearch(false);
-            dialogFragment.withConfirm(true);
-            dialogFragment.withChangePerson(true);
-            dialogFragment.registerCallBack( this );
-            dialogFragment.withDocumentUid( settings.getUid() );
-            dialogFragment.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
+            showPrimaryConsiderationDialog(activity);
 
             operation = CommandFactory.Operation.INCORRECT;
             break;
@@ -321,6 +310,20 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     );
   }
 
+  public void showPrimaryConsiderationDialog(Activity activity) {
+    SelectOshsDialogFragment dialogFragment = new SelectOshsDialogFragment();
+    Bundle bundle1 = new Bundle();
+    bundle1.putString("operation", "primary_consideration");
+    dialogFragment.setArguments(bundle1);
+    dialogFragment.withPrimaryConsideration(true);
+    dialogFragment.withSearch(false);
+    dialogFragment.withConfirm(true);
+    dialogFragment.withChangePerson(true);
+    dialogFragment.registerCallBack( this );
+    dialogFragment.withDocumentUid( settings.getUid() );
+    dialogFragment.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
+  }
+
   public static int parseIntOrDefault(String value, int defaultValue) {
     int result = defaultValue;
     try {
@@ -452,8 +455,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             item.setIcon( ContextCompat.getDrawable(context, isFromFavorites() ? R.drawable.to_favorites : R.drawable.star) );
             break;
           case R.id.menu_info_shared_to_control:
-            item.setTitle(context.getString(
-              isFromControl() ? R.string.remove_from_control : R.string.to_control));
+            item.setTitle(context.getString( isFromControl() ? R.string.remove_from_control : R.string.to_control));
             item.setIcon( ContextCompat.getDrawable(context, isFromControl() ? R.drawable.to_controle_on : R.drawable.to_controle_off ) );
             break;
           default:
@@ -478,6 +480,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       }
 
 
+      // Если документ обработан - то изменяем резолюции на поручения
       if ( isProcessed() ){
         safeSetVisibility(R.id.menu_info_decision_create_with_assignment, settings.isShowCreateDecisionPost());
         safeSetVisibility(R.id.menu_info_decision_create, settings.isShowCreateDecisionPost());
@@ -485,12 +488,10 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         if (isFromProject()){
           safeSetVisibility(R.id.menu_info_decision_create_with_assignment, false);
         }
-      }
-
-      // Если документ обработан - то изменяем резолюции на поручения
-      if ( isProcessed() ) {
         safeSetVisibility(R.id.menu_info_decision_edit, false);
         safeSetVisibility(R.id.menu_info_decision_create, true);
+      } else {
+        safeSetVisibility(R.id.menu_info_decision_edit, true);
       }
 
     }
@@ -593,7 +594,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   }
 
   public void setEditDecisionMenuItemVisible(boolean visible){
-    safeSetVisibility( R.id.menu_info_decision_edit, false);
+    safeSetVisibility( R.id.menu_info_decision_edit, visible);
     // if (visible){
     //   safeSetVisibility( R.id.menu_info_decision_edit, false);
     // } else {
@@ -882,7 +883,17 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     }
 
     invalidate();
-    EventBus.getDefault().post( new CheckActiveDecisionEvent() );
+//    EventBus.getDefault().post( new CheckActiveDecisionEvent() );
+  }
+
+  public void dropControlLabel(Boolean control){
+    try {
+      MenuItem item = toolbar.getMenu().findItem(R.id.menu_info_shared_to_control);
+      item.setTitle(context.getString( !control ? R.string.remove_from_control : R.string.to_control));
+      item.setIcon( ContextCompat.getDrawable(context, !control ? R.drawable.to_controle_on : R.drawable.to_controle_off ) );
+    } catch (Exception e) {
+      Timber.e(e);
+    }
   }
 
   @Override

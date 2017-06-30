@@ -1,18 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item
-        android:id="@+id/menu_info_decision_create"
-        app:showAsAction="always|withText"
-        android:icon="@drawable/add_decision"
-        android:title="@string/info_create_decision"/>
+
     <item
         android:id="@+id/menu_info_decision_edit"
         app:showAsAction="always|withText"
         android:icon="@drawable/edit_pencil"
         android:visible="false"
         android:title="@string/info_edit_decision"/>
-
     <item
         android:id="@+id/menu_info_shared_to_control"
         app:showAsAction="always|withText"
@@ -20,7 +15,7 @@
         android:title="@string/to_control"/>
     <item
         android:id="@+id/menu_info_to_the_approval_performance"
-        app:showAsAction="ifRoom|withText"
+        app:showAsAction="always|withText"
         android:icon="@drawable/sign"
         android:title="@string/menu_info_to_the_approval_performance"/>
     <item
@@ -33,4 +28,9 @@
         app:showAsAction="always|withText"
         android:icon="@drawable/dismiss"
         android:title="@string/menu_info_prev_person"/>
+    <item
+        android:id="@+id/menu_info_decision_create"
+        app:showAsAction="ifRoom|withText"
+        android:icon="@drawable/add_decision"
+        android:title="@string/info_create_decision"/>
 </menu>

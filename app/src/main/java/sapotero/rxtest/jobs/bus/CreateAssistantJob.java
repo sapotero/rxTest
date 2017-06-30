@@ -35,7 +35,7 @@ public class CreateAssistantJob extends BaseJob {
   @Override
   public void onRun() throws Throwable {
     for (Assistant user : users){
-      if ( !exist( user.getAssistantId()) ){
+      if ( !exist( user.getToS()) ){
         add(user);
       }
     }
@@ -57,13 +57,13 @@ public class CreateAssistantJob extends BaseJob {
 
 
   @NonNull
-  private Boolean exist(String id){
+  private Boolean exist(String user){
 
     boolean result = false;
 
     Integer count = dataStore
-      .count(RAssistantEntity.ASSISTANT_ID)
-      .where(RAssistantEntity.ASSISTANT_ID.eq(id))
+      .count(RAssistantEntity.TITLE)
+      .where(RAssistantEntity.TITLE.eq(user))
       .and(RAssistantEntity.USER.eq(settings.getLogin()))
       .get().value();
 
