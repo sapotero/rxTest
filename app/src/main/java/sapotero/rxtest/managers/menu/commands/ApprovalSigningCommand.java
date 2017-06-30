@@ -59,7 +59,12 @@ public abstract class ApprovalSigningCommand extends AbstractCommand {
 
           finishOperationOnSuccess( uid );
         },
-        error -> onError( this, uid, error.getLocalizedMessage(), true, TAG )
+        error -> {
+          onError( this, uid, error.getLocalizedMessage(), true, TAG );
+          onRemoteError();
+        }
       );
   }
+
+  public abstract void onRemoteError();
 }

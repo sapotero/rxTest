@@ -85,9 +85,8 @@ public class NextPerson extends ApprovalSigningCommand {
 
   @Override
   public void executeLocal() {
-    int count = dataStore
+    dataStore
       .update(RDocumentEntity.class)
-//      .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue() )
       .set( RDocumentEntity.PROCESSED, true)
       .set( RDocumentEntity.MD5, "" )
       .set( RDocumentEntity.CHANGED, true)
@@ -239,5 +238,9 @@ public class NextPerson extends ApprovalSigningCommand {
       .value();
 
     Timber.tag(TAG).i("Set sign error false count = %s", count);
+  }
+
+  @Override
+  public void onRemoteError() {
   }
 }

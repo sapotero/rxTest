@@ -80,4 +80,8 @@ public class PrevPerson extends ApprovalSigningCommand {
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
     remoteOperation(getUid(), official_id, TAG);
   }
+
+  @Override
+  public void onRemoteError() {
+  }
 }
