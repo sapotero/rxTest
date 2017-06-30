@@ -33,6 +33,7 @@ public class DecisionTextDialog {
             .getCustomView().findViewById(R.id.dialog_decision_text_input);
           textInput.setHint(hint);
           textInput.setText(parentEditText.getText());
+          textInput.setSelection(parentEditText.getText().length());
         })
         .onPositive((dialog1, which) -> {
           parentEditText.setText(textInput.getText());
