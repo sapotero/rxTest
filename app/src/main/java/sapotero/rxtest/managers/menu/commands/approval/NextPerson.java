@@ -91,6 +91,8 @@ public class NextPerson extends ApprovalSigningCommand {
 
     if ( rApprovalNextPersonEntity == null ) {
       createNewRApprovalNextPersonEntity( getUid() );
+    } else {
+      setTaskStarted( getUid(), true );
     }
 
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
