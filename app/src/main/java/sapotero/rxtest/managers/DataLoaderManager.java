@@ -44,6 +44,7 @@ import sapotero.rxtest.jobs.bus.CreateFoldersJob;
 import sapotero.rxtest.jobs.bus.CreatePrimaryConsiderationJob;
 import sapotero.rxtest.jobs.bus.CreateTemplatesJob;
 import sapotero.rxtest.jobs.bus.CreateUrgencyJob;
+import sapotero.rxtest.jobs.bus.DeleteAssistantJob;
 import sapotero.rxtest.retrofit.Api.AuthService;
 import sapotero.rxtest.retrofit.DocumentsService;
 import sapotero.rxtest.retrofit.models.AuthSignToken;
@@ -74,8 +75,6 @@ public class DataLoaderManager {
   private CompositeSubscription subscriptionInitV2;
   private CompositeSubscription subscriptionUpdateAuth;
   private final Context context;
-  private ArrayList<String> v2Journals;
-  private ArrayList<String> v2Statuses;
 
   // Network request counter. Incremented when request created, decremented when response received.
   private int requestCount;
@@ -112,6 +111,8 @@ public class DataLoaderManager {
               setCurrentUserId(user.getId());
               setCurrentUserOrganization(user.getOrganization());
               setCurrentUserPosition(user.getPosition());
+
+              jobManager.addJobInBackground( new DeleteAssistantJob() );
 
               // получаем папки
               subscriptionInitV2.add(
