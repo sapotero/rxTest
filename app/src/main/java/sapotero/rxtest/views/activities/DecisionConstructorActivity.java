@@ -843,7 +843,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
       String signerPosition = getCurrentUserPosition();
       raw_decision = new Decision();
       raw_decision.setLetterhead("Бланк резолюции");
-      raw_decision.setShowPosition(true);
+      raw_decision.setShowPosition(false);
       raw_decision.setSignerId(getCurrentUserId());
       raw_decision.setSigner(makeSignerWithOrganizationText(signerName, signerOrganization, signerPosition));
       raw_decision.setSignerBlankText(signerName);
