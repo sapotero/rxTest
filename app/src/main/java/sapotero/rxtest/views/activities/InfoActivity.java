@@ -293,6 +293,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   public void exitIfAlreadySeenThisFuckingDocument(){
     if (Objects.equals(settings.getLastSeenUid(), settings.getUid())){
+      Timber.tag(TAG).e("exitIfAlreadySeenThisDocument");
       finish();
     }
   }
@@ -424,11 +425,13 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(NoDocumentsEvent event) throws Exception {
+    Timber.tag(TAG).e("NoDocumentsEvent");
     finish();
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(ShowPrevDocumentEvent event) throws Exception {
+    Timber.tag(TAG).e("ShowPrevDocumentEvent");
     showPrevDocument();
   }
 
@@ -448,6 +451,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(ShowNextDocumentEvent event){
+    Timber.tag(TAG).e("ShowNextDocumentEvent");
     showNextDocument();
   }
 

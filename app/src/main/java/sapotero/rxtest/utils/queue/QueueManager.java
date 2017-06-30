@@ -59,7 +59,7 @@ public class QueueManager {
     if (supervisor.getRunningJobsCount() < THREAD_POOL_SIZE){
 
 
-      List<QueueEntity> uncompleteSignTasks  = dBManager.getUncompleteSignTasks(2);
+      List<QueueEntity> uncompleteSignTasks  = dBManager.getUncompleteSignTasks(8);
       if ( uncompleteSignTasks.size() > 0 ){
         for ( QueueEntity command : uncompleteSignTasks ) {
           dBManager.setAsRunning(command.getUuid());

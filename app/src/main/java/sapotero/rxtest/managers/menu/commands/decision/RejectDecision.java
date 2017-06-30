@@ -73,6 +73,7 @@ public class RejectDecision extends DecisionCommand {
 
     Integer count = dataStore
       .update(RDecisionEntity.class)
+      .set(RDecisionEntity.CHANGED, true)
       .set(RDecisionEntity.TEMPORARY, true)
       .where(RDecisionEntity.UID.eq( params.getDocument() ))
       .get().value();

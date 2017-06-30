@@ -80,4 +80,8 @@ public class PrevPerson extends ApprovalSigningCommand {
   private String getUid() {
     return params.getDocument() != null ? params.getDocument(): document.getUid();
   }
+
+  @Override
+  public void onRemoteError() {
+  }
 }

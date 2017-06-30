@@ -39,7 +39,6 @@ public class Settings {
   private static final String STEPPER_AUTH_TYPE_KEY = "stepper.auth_type";
   private static final String FAVORITES_LOADED_KEY = "favorites.loaded";
   private static final String PROCESSED_LOADED_KEY = "processed.loaded";
-  private static final String IN_THE_SAME_TAB_KEY = "in.the.same.tab";
   private static final String IMAGE_INDEX_KEY = "image.index";
   private static final String UNAUTHORIZED_KEY = "user.unauthorized";
   private static final String SHOW_PRIMARY_CONSIDERATION = "show_promary_consideration";
@@ -117,7 +116,6 @@ public class Settings {
   private Preference<Boolean> online;
   private Preference<Boolean> favoritesLoaded;
   private Preference<Boolean> processedLoaded;
-  private Preference<Boolean> inTheSameTab;
   private Preference<Integer> imageIndex;
   private Preference<Boolean> unauthorized;
   private Preference<Boolean> showPrimaryConsideration;
@@ -200,7 +198,6 @@ public class Settings {
     online                         = settings.getBoolean(IS_ONLINE);
     favoritesLoaded                = settings.getBoolean(FAVORITES_LOADED_KEY);
     processedLoaded                = settings.getBoolean(PROCESSED_LOADED_KEY);
-    inTheSameTab                   = settings.getBoolean(IN_THE_SAME_TAB_KEY);
     imageIndex                     = settings.getInteger(IMAGE_INDEX_KEY);
     unauthorized                   = settings.getBoolean(UNAUTHORIZED_KEY);
     showPrimaryConsideration       = settings.getBoolean(SHOW_PRIMARY_CONSIDERATION);
@@ -621,14 +618,6 @@ public class Settings {
 
   public void setProcessedLoaded(Boolean value) {
     setBoolean(processedLoaded, value);
-  }
-
-  public boolean isInTheSameTab() {
-    return getBoolean(inTheSameTab);
-  }
-
-  public void setInTheSameTab(Boolean value) {
-    setBoolean(inTheSameTab, value);
   }
 
   public int getImageIndex() {
