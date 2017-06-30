@@ -31,7 +31,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -85,7 +84,6 @@ import sapotero.rxtest.managers.toolbar.ToolbarManager;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.utils.padeg.Declension;
-import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.adapters.DecisionSpinnerAdapter;
 import sapotero.rxtest.views.adapters.models.DecisionSpinnerItem;
@@ -101,7 +99,6 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   @Inject Mappers mappers;
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject OperationManager operationManager;
-  @Inject QueueManager queue;
 
   private ToolbarManager toolbarManager;
   private OnFragmentInteractionListener mListener;
@@ -358,17 +355,11 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
         if ( doc.isFromLinks() != null && !doc.isFromLinks() && current_decision != null ){
 
-          if ( !queue.getConnected() &&
+          if ( !settings.isOnline() &&
             current_decision.isTemporary() != null &&
             current_decision.isTemporary() && !doc.isProcessed() ){
 
             edit();
-          }
-
-          if ( queue.getConnected() &&
-            current_decision.isTemporary() != null &&
-            current_decision.isTemporary() ){
-            Toast.makeText( getContext(), "Запрещено редактировать резолюции в онлайне!\nДождитесь синхронизации.", Toast.LENGTH_SHORT ).show();
           }
 
           if ( current_decision.isApproved() != null &&
