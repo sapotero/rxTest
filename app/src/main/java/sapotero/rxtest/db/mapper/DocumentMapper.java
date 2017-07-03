@@ -1,5 +1,8 @@
 package sapotero.rxtest.db.mapper;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -31,6 +34,7 @@ import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.retrofit.models.document.Route;
 import sapotero.rxtest.retrofit.models.document.Signer;
 import sapotero.rxtest.utils.Settings;
+import timber.log.Timber;
 
 // Maps between DocumentInfo and RDocumentEntity
 public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity> {
@@ -79,6 +83,20 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     entity.setTitle( model.getTitle() );
     entity.setRegistrationNumber( model.getRegistrationNumber() );
     entity.setRegistrationDate( model.getRegistrationDate() );
+
+    entity.setRegistrationDate( model.getRegistrationDate() );
+
+
+    try {
+      SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
+      Date date = format.parse( model.getRegistrationDate() );
+
+      SimpleDateFormat fmtOut = new SimpleDateFormat("yyyy");
+      entity.setYear( Integer.parseInt(fmtOut.format(date)) );
+    } catch (ParseException e) {
+      Timber.e(e);
+    }
+
     entity.setUrgency( model.getUrgency() );
     entity.setShortDescription( model.getShortDescription() );
     entity.setComment( model.getComment() );

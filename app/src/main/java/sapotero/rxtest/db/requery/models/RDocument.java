@@ -29,8 +29,8 @@ public abstract class RDocument implements Persistable {
   @Column(unique = true)
   String uid;
 
-  @Index("year_index")
-  String year;
+  @Index("doc_year_index")
+  int year;
 
 //  @Index("md5_index")
   String md5;
