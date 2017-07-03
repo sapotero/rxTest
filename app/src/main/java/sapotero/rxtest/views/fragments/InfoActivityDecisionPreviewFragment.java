@@ -31,6 +31,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -130,7 +131,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
   private Unbinder binder;
   private String uid;
-  private RDecisionEntity current_decision;
+  public static RDecisionEntity current_decision;
   private String TAG = this.getClass().getSimpleName();
   private GestureDetector gestureDetector;
   private RDocumentEntity doc;
@@ -338,8 +339,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     templates.dismiss();
   }
 
-  public class GestureListener extends
-    GestureDetector.SimpleOnGestureListener {
+  public class GestureListener extends GestureDetector.SimpleOnGestureListener {
 
     @Override
     public boolean onDown(MotionEvent e) {
@@ -355,24 +355,38 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
         if ( doc.isFromLinks() != null && !doc.isFromLinks() && current_decision != null ){
 
-          if ( !settings.isOnline() &&
-            current_decision.isTemporary() != null &&
-            current_decision.isTemporary() && !doc.isProcessed() ){
-            Timber.tag("GestureListener").w("1");
-            edit();
+          if ( settings.isOnline() ){
+
+            if ( current_decision.isChanged() ){
+              // resolved https://tasks.n-core.ru/browse/MVDESD-13727
+              // В онлайне не давать редактировать резолюцию, если она в статусе "ожидает синхронизации"
+              // как по кнопке, так и по двойному тапу
+              Toast.makeText(getContext(), "3апрещено редактировать резолюции в онлайне", Toast.LENGTH_SHORT).show();
+            }
+
+            if ( current_decision.isApproved() != null &&
+              !current_decision.isApproved() &&
+              current_decision.isTemporary() != null &&
+              !current_decision.isTemporary() && !doc.isProcessed()){
+              Timber.tag("GestureListener").w("2");
+              edit();
+            } else {
+              Timber.tag("GestureListener").w("-2");
+            }
+
           } else {
-            Timber.tag("GestureListener").w("-1");
+            if (
+              current_decision.isTemporary() != null &&
+              current_decision.isTemporary() && !doc.isProcessed() ){
+              Timber.tag("GestureListener").w("1");
+              edit();
+            } else {
+              Timber.tag("GestureListener").w("-1");
+            }
           }
 
-          if ( current_decision.isApproved() != null &&
-            !current_decision.isApproved() &&
-            current_decision.isTemporary() != null &&
-            !current_decision.isTemporary() && !doc.isProcessed()){
-            Timber.tag("GestureListener").w("2");
-            edit();
-          } else {
-            Timber.tag("GestureListener").w("-2");
-          }
+
+
         }
 
         if ( doc.isFromLinks() != null && !doc.isFromLinks() &&
@@ -759,6 +773,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
           Timber.e("DECISION %s", new Gson().toJson(decision));
 
           operationManager.execute( operation, params );
+
+          updateAfteButtonPressed();
         }
         dialog.dismiss();
       })
