@@ -11,6 +11,7 @@ import sapotero.rxtest.managers.menu.utils.OperationManagerModule;
 import sapotero.rxtest.managers.toolbar.ToolbarManager;
 import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.memory.MemoryStore;
+import sapotero.rxtest.utils.memory.utils.Filter;
 import sapotero.rxtest.utils.memory.utils.MemoryStoreModule;
 import sapotero.rxtest.utils.memory.utils.Processor;
 import sapotero.rxtest.utils.queue.utils.QueueManagerModule;
@@ -66,4 +67,5 @@ public interface ManagerComponent {
   void inject(DocumentTypeItem buttonBuilder);
 
   void inject(Processor context);
+  void inject(Filter context);
 }

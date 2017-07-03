@@ -44,9 +44,7 @@ public class DBQueryBuilder {
 
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject Settings settings;
-//  @Inject Validation validation;
-  @Inject
-MemoryStore store;
+  @Inject MemoryStore store;
 
   private final String TAG = this.getClass().getSimpleName();
 
@@ -116,6 +114,7 @@ MemoryStore store;
       compositeSubscription.add(
         Observable
           .from( store.getDocuments().values() )
+          .filter( filter::byYear )
           .filter( this::byOrganization )
           .filter( this::byDecision )
           .filter( filter::byType)
@@ -283,6 +282,7 @@ MemoryStore store;
 
       Observable
         .from( store.getDocuments().values() )
+        .filter( filter::byYear)
         .filter( this::byDecision )
         .filter( filter::byType)
         .filter( filter::byStatus)

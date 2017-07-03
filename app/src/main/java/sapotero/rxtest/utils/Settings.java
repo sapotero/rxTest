@@ -51,6 +51,7 @@ public class Settings {
   private static String SHOW_URGENCY_KEY;
   private static String ONLY_URGENT_KEY;
   private static String JOURNALS_KEY;
+  private static String YEARS_KEY;
   private static String START_PAGE_KEY;
   private static String START_JOURNAL_KEY;
   private static String SHOW_WITHOUT_PROJECT_KEY;
@@ -97,6 +98,7 @@ public class Settings {
   private Preference<Boolean> showUrgency;
   private Preference<Boolean> onlyUrgent;
   private Preference<Set<String>> journals;
+  private Preference<Set<String>> years;
   private Preference<String> prevDialogComment;
   private Preference<String> startPage;
   private Preference<String> startJournal;
@@ -135,6 +137,7 @@ public class Settings {
     SHOW_URGENCY_KEY               = context.getResources().getString(R.string.show_urgency_key);
     ONLY_URGENT_KEY                = context.getResources().getString(R.string.only_urgent_key);
     JOURNALS_KEY                   = context.getResources().getString(R.string.journals_key);
+    YEARS_KEY                      = context.getResources().getString(R.string.years_key);
     START_PAGE_KEY                 = context.getResources().getString(R.string.start_page_key);
     START_JOURNAL_KEY              = context.getResources().getString(R.string.start_journal_key);
     SHOW_WITHOUT_PROJECT_KEY       = context.getResources().getString(R.string.show_without_project_key);
@@ -178,6 +181,7 @@ public class Settings {
     showUrgency                    = settings.getBoolean(SHOW_URGENCY_KEY);
     onlyUrgent                     = settings.getBoolean(ONLY_URGENT_KEY);
     journals                       = settings.getStringSet(JOURNALS_KEY);
+    years                          = settings.getStringSet(YEARS_KEY);
     prevDialogComment              = settings.getString(PREV_DIALOG_COMMENT_KEY);
     startPage                      = settings.getString(START_PAGE_KEY);
     startJournal                   = settings.getString(START_JOURNAL_KEY);
@@ -506,6 +510,14 @@ public class Settings {
 
   public Preference<Set<String>> getJournalsPreference() {
     return journals;
+  }
+
+  public Set<String> getYears() {
+    return getStringSet(years);
+  }
+
+  public Preference<Set<String>> getYearsPreference() {
+    return years;
   }
 
   public String getPrevDialogComment() {

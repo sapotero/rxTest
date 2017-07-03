@@ -13,7 +13,6 @@ import android.widget.RadioGroup;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.regex.Pattern;
 
 import javax.inject.Inject;
@@ -51,8 +50,6 @@ public class ButtonBuilder {
 
   private Callback callback;
   private RadioButton view;
-
-  private final HashMap<String, String> mapper = new HashMap<>();
 
 
   private String TAG = this.getClass().getSimpleName();
@@ -218,6 +215,7 @@ public class ButtonBuilder {
     Observable
       .from( store.getDocuments().values() )
 
+      .filter( filter::byYear)
       .filter( filter::byType)
       .filter( filter::byStatus)
       .filter( filter::isProcessed )

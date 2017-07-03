@@ -21,6 +21,7 @@ import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.utils.memory.utils.Filter;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
+import sapotero.rxtest.views.menu.fields.MainMenuButton;
 import sapotero.rxtest.views.menu.fields.MainMenuItem;
 import timber.log.Timber;
 
@@ -65,39 +66,46 @@ public class DocumentTypeItem {
 
   private void setTextForAllDocument(TextView view) {
 
-    ArrayList<ConditionBuilder> _conditions = new ArrayList<ConditionBuilder>();
     ArrayList<ConditionBuilder> _projects  = new ArrayList<ConditionBuilder>();
 
-    Collections.addAll( _conditions, mainMenuItem.getCountConditions() );
-
-    for (ConditionBuilder condition: _conditions) {
-      _projects.add(condition);
-    }
+    ArrayList<ConditionBuilder> _primary = new ArrayList<ConditionBuilder>();
+    ArrayList<ConditionBuilder> _report  = new ArrayList<ConditionBuilder>();
 
     Collections.addAll( _projects, MainMenuItem.APPROVE_ASSIGN.getCountConditions() );
+    Collections.addAll( _primary, MainMenuButton.PRIMARY_CONSIDERATION.getConditions() );
+    Collections.addAll( _report,  MainMenuButton.PERFORMANCE.getConditions() );
 
 
     Filter project_filter  = new Filter(_projects);
-    Filter document_filter = new Filter(_conditions);
+    Filter p_filter = new Filter(_primary);
+    Filter r_filter = new Filter(_report);
 
 
-
-
-
-    Observable<Integer> all = Observable
+    Observable<Integer> primary = Observable
       .from(store.getDocuments().values())
-      .filter(document_filter::byType)
-      .filter(document_filter::byStatus)
-      .filter( project_filter::isProcessed )
+      .filter(p_filter::byYear)
+      .filter(p_filter::byType)
+      .filter(p_filter::byStatus)
+      .map(InMemoryDocument::getUid)
+      .toList()
+      .map(List::size);
+
+    Observable<Integer> report = Observable
+      .from(store.getDocuments().values())
+      .filter(r_filter::byYear)
+      .filter(r_filter::byType)
+      .filter(r_filter::byStatus)
+      .filter(r_filter::isProcessed )
       .map(InMemoryDocument::getUid)
       .toList()
       .map(List::size);
 
     Observable<Integer> proj = Observable
       .from( store.getDocuments().values() )
-      .filter( project_filter::byType)
-      .filter( project_filter::byStatus)
-      .filter( project_filter::isProcessed )
+      .filter(project_filter::byYear)
+      .filter(project_filter::byType)
+      .filter(project_filter::byStatus)
+      .filter(project_filter::isProcessed )
       .map( InMemoryDocument::getUid )
       .toList()
       .map(List::size);
@@ -105,8 +113,12 @@ public class DocumentTypeItem {
 //    subscription.add(
     Observable
       .zip(
-        all, proj,
-        (total, projects) -> String.format( mainMenuItem.getName(), total-projects, projects )
+        Observable
+          .zip(
+            report, primary,
+            (sum_report, sum_primary) -> sum_report + sum_primary
+          ), proj,
+        (total, projects) -> String.format( mainMenuItem.getName(), total, projects )
       )
       .subscribeOn( Schedulers.computation() )
       .observeOn( AndroidSchedulers.mainThread() )
@@ -129,6 +141,7 @@ public class DocumentTypeItem {
     Observable
       .from( store.getDocuments().values() )
 
+      .filter( filter::byYear)
       .filter( filter::byType)
       .filter( filter::byStatus)
       .filter( filter::isProcessed )

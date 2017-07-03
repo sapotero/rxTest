@@ -16,6 +16,7 @@ public class InMemoryDocument implements Serializable {
   public String md5;
   public String index;
   public String filter;
+  public Integer year;
   public Boolean hasDecision = false;
   public Boolean processed   = false;
 
@@ -23,6 +24,14 @@ public class InMemoryDocument implements Serializable {
   private InMemoryState state = InMemoryState.LOADING;
 
   public InMemoryDocument() {
+  }
+
+  public Integer getYear() {
+    return year;
+  }
+
+  public void setYear(Integer year) {
+    this.year = year;
   }
 
   public void setProcessed(Boolean processed) {

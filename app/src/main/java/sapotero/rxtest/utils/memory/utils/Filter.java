@@ -8,12 +8,18 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import timber.log.Timber;
 
 public class Filter {
+
+  @Inject Settings settings;
 
   private final String TAG = this.getClass().getSimpleName();
   private final ArrayList<ConditionBuilder> conditions;
@@ -28,6 +34,7 @@ public class Filter {
   public Filter(ArrayList<ConditionBuilder> conditions) {
     this.conditions = conditions;
     processConditions();
+    EsdApplication.getManagerComponent().inject(this);
   }
 
   private void processConditions() {
@@ -104,6 +111,14 @@ public class Filter {
 
   public Boolean isProcessed(InMemoryDocument doc) {
     return isProcessed == doc.isProcessed();
+  }
+
+  public Boolean isNotProcessed(InMemoryDocument doc) {
+    return isProcessed != doc.isProcessed();
+  }
+
+  public Boolean byYear(InMemoryDocument doc) {
+    return settings.getYears().contains( String.valueOf(doc.getYear()) );
   }
 
   public Boolean isFavorites(InMemoryDocument doc) {
