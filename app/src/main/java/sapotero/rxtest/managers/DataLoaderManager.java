@@ -463,8 +463,6 @@ public class DataLoaderManager {
       updateProcessed();
     } else if (items == MainMenuItem.FAVORITES) {
       updateFavorites();
-    } else if (items == MainMenuItem.ON_CONTROL) {
-      updateControl();
     } else {
 
       ArrayList<String> indexes = new ArrayList<>();
@@ -513,7 +511,7 @@ public class DataLoaderManager {
 
 
       // обновляем всё
-      if (items == MainMenuItem.ALL || items.getIndex() == 11) {
+      if (items == MainMenuItem.ALL || items.getIndex() == 11 || items == MainMenuItem.ON_CONTROL) {
         statuses.add("primary_consideration");
         statuses.add("sent_to_the_report");
         sp.add("approval");
@@ -770,55 +768,4 @@ public class DataLoaderManager {
 //  public void onMessageEvent(StepperDcCheckEvent event) throws Exception {
 //    String token = event.pin;
 //  }
-
-  private void updateControl() {
-    Timber.tag(TAG).e("Updating CONTROL");
-
-    ArrayList<String> indexes = new ArrayList<>();
-    ArrayList<String> sp = new ArrayList<>();
-    ArrayList<String> statuses = new ArrayList<>();
-
-    statuses.add("primary_consideration");
-    statuses.add("sent_to_the_report");
-    sp.add("approval");
-    sp.add("signing");
-
-    indexes.add("citizen_requests_production_db_core_cards_citizen_requests_cards");
-    indexes.add("incoming_documents_production_db_core_cards_incoming_documents_cards");
-    indexes.add("orders_ddo_production_db_core_cards_orders_ddo_cards");
-    indexes.add("orders_production_db_core_cards_orders_cards");
-    indexes.add("outgoing_documents_production_db_core_cards_outgoing_documents_cards");
-    indexes.add("incoming_orders_production_db_core_cards_incoming_orders_cards");
-
-    Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
-    DocumentsService docService = retrofit.create(DocumentsService.class);
-
-    for (String index: indexes ) {
-      for (String status: statuses ) {
-        subscription.add(
-          docService
-            .getDocumentsByIndexesWithControl(settings.getLogin(), settings.getToken(), index, status, null , 500, "checked")
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(
-              data -> processDocuments( data, status, index, null, DocumentType.DOCUMENT ),
-              error -> Timber.tag(TAG).e(error)
-            )
-        );
-      }
-    }
-
-    for (String code : sp) {
-      subscription.add(
-        docService
-          .getDocumentsWithControl(settings.getLogin(), settings.getToken(), code, null , 500, 0, "checked")
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(
-            data -> processDocuments( data, code, null, null, DocumentType.DOCUMENT ),
-            error -> Timber.tag(TAG).e(error)
-          )
-      );
-    }
-  }
 }

@@ -19,17 +19,6 @@ public interface DocumentsService {
   );
 
   @GET("/v3/documents.json")
-  Observable<Documents> getDocumentsWithControl(
-    @Query("login") String login,
-    @Query("auth_token") String auth_token,
-    @Query("status_code") String status_code,
-    @Query("addressed_to_type") String addressed_to_type,
-    @Query("limit")  Integer limit,
-    @Query("offset") Integer offset,
-    @Query("control_labels[]") String control // checked
-  );
-
-  @GET("/v3/documents.json")
   Observable<Documents> getDocumentsByIndexes(
     @Query("login") String login,
     @Query("auth_token") String auth_token,
@@ -37,17 +26,6 @@ public interface DocumentsService {
     @Query("status_code") String status_code,
     @Query("addressed_to_type") String addressed_to_type,
     @Query("limit") int limit
-  );
-
-  @GET("/v3/documents.json")
-  Observable<Documents> getDocumentsByIndexesWithControl(
-    @Query("login") String login,
-    @Query("auth_token") String auth_token,
-    @Query("indexes") String indexes,
-    @Query("status_code") String status_code,
-    @Query("addressed_to_type") String addressed_to_type,
-    @Query("limit") int limit,
-    @Query("control_labels[]") String control // checked
   );
 
   @GET("/v3/documents/{UID}.json")
