@@ -405,7 +405,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(HasNoActiveDecisionConstructor event) throws Exception {
-    toolbarManager.showCreateDecisionButton();
+//    toolbarManager.showCreateDecisionButton();
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)

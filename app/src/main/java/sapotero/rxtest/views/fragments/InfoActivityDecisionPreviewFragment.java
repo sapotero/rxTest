@@ -358,15 +358,20 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
           if ( !settings.isOnline() &&
             current_decision.isTemporary() != null &&
             current_decision.isTemporary() && !doc.isProcessed() ){
-
+            Timber.tag("GestureListener").w("1");
             edit();
+          } else {
+            Timber.tag("GestureListener").w("-1");
           }
 
           if ( current_decision.isApproved() != null &&
             !current_decision.isApproved() &&
             current_decision.isTemporary() != null &&
             !current_decision.isTemporary() && !doc.isProcessed()){
+            Timber.tag("GestureListener").w("2");
             edit();
+          } else {
+            Timber.tag("GestureListener").w("-2");
           }
         }
 
