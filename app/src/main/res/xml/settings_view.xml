@@ -37,6 +37,14 @@
             android:entries="@array/settings_view_journals"
             android:entryValues="@array/settings_view_journals_values" />
 
+        <MultiSelectListPreference
+            android:key="@string/years_key"
+            android:title="Года отображения документов"
+            android:defaultValue="@array/settings_years_values"
+            android:entryValues="@array/settings_years_values"
+            android:entries="@array/settings_years"
+            />
+
         <SwitchPreference
             android:key="@string/show_without_project_key"
             android:title="Отображать документы без резолюции"
