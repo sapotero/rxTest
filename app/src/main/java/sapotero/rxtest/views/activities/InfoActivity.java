@@ -36,6 +36,8 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.requery.Persistable;
+import io.requery.rx.SingleEntityStore;
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -43,6 +45,7 @@ import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.bus.MassInsertDoneEvent;
 import sapotero.rxtest.events.crypto.SignDataResultEvent;
@@ -79,15 +82,15 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   @BindView(R.id.activity_info_wrapper) View wrapper;
   @BindView(R.id.tabs) TabLayout tabLayout;
 
-
   @Inject JobManager jobManager;
   @Inject Settings settings;
 
-  private String TAG = this.getClass().getSimpleName();
-  private CompositeSubscription subscription;
+  @Inject SingleEntityStore<Persistable> dataStore;
 
   @BindView(R.id.toolbar) Toolbar toolbar;
 
+  private String TAG = this.getClass().getSimpleName();
+  private CompositeSubscription subscription;
   private ToolbarManager toolbarManager;
   private Fields.Journal journal;
   private Fields.Status  status;
@@ -398,20 +401,26 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(ShowDecisionConstructor event) throws Exception {
 
-    try {
-      if ( settings.isOnline() ){
-        if ( InfoActivityDecisionPreviewFragment.current_decision != null && !InfoActivityDecisionPreviewFragment.current_decision.isChanged() ){
-          showDecisionEditor();
-        } else {
-          Toast.makeText( this, "Дождитесь выполнения операции", Toast.LENGTH_SHORT).show();
-        }
-      } else {
-        showDecisionEditor();
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
 
+    RDecisionEntity decision = dataStore
+      .select(RDecisionEntity.class)
+      .where(RDecisionEntity.ID.eq( settings.getDecisionActiveId() ) )
+      .get().firstOrNull();
+
+    if (decision != null) {
+
+      Timber.tag(TAG).i("[%s] %s : %s|%s", decision.getId(), decision.getUid(), decision.isChanged(), decision.isTemporary() );
+
+        if ( settings.isOnline() ){
+          if ( decision.isChanged() != null && decision.isChanged() ){
+            Toast.makeText( this, "3апрещено редактировать резолюцию. Дождитесь выполнения операции.", Toast.LENGTH_SHORT).show();
+          } else {
+            showDecisionEditor();
+          }
+        } else {
+          showDecisionEditor();
+        }
+    }
 //    activity.overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
   }
 
