@@ -1,5 +1,7 @@
 package sapotero.rxtest.retrofit;
 
+import java.util.List;
+
 import retrofit2.http.GET;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
@@ -15,9 +17,8 @@ public interface DocumentsService {
     @Query("status_code") String status_code,
     @Query("addressed_to_type") String addressed_to_type,
     @Query("limit")  Integer limit,
-    @Query("offset") Integer offset
-    // грузим всегда всё, потомсортиируем по годам
-    // @Query("year") List<String> years
+    @Query("offset") Integer offset,
+    @Query("year") List<String> years
   );
 
   @GET("/v3/documents.json")
@@ -27,9 +28,8 @@ public interface DocumentsService {
     @Query("indexes") String indexes,
     @Query("status_code") String status_code,
     @Query("addressed_to_type") String addressed_to_type,
-    @Query("limit") int limit
-    // грузим всегда всё, потомсортиируем по годам
-    // @Query("year") List<String> years
+    @Query("limit") int limit,
+    @Query("year") List<String> years
     );
 
   @GET("/v3/documents/{UID}.json")

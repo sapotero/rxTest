@@ -1,15 +1,10 @@
 package sapotero.rxtest.utils.memory.mappers;
 
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.models.RLinksEntity;
 import sapotero.rxtest.db.requery.models.RSignerEntity;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.retrofit.models.documents.Signer;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
-import timber.log.Timber;
 
 public class InMemoryDocumentMapper {
 
@@ -69,6 +64,7 @@ public class InMemoryDocumentMapper {
     imd.setFilter(document.getFilter());
     imd.setIndex(document.getDocumentType());
     imd.setDocument( convert(document) );
+    imd.setYear( document.getYear() );
     imd.setProcessed( imd.getDocument().isProcessed() );
     imd.setHasDecision( document.isWithDecision() != null ? document.isWithDecision() : false );
 

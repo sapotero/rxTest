@@ -196,6 +196,7 @@ public class Processor {
 
     Observable<List<String>> imd = Observable
       .from( store.getDocuments().values() )
+      .filter(imdFilter::byYear)
       .filter(imdFilter::isProcessed)   // restored previously removed line
       .filter(imdFilter::byType)
       .filter(imdFilter::byStatus)
