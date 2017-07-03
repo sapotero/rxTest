@@ -126,7 +126,7 @@ public class AddToFolder extends AbstractCommand {
           }
 
           if ( settings.isOnline() ) {
-            queueManager.setExecutedRemote(this);
+            queueManager.setExecutedWithError( this, Collections.singletonList( error.getLocalizedMessage() ) );
             setError();
           }
         }

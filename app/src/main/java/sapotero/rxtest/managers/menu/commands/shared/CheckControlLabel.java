@@ -66,7 +66,14 @@ public class CheckControlLabel extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    setControl(true);
+    dataStore
+      .update(RDocumentEntity.class)
+      .set( RDocumentEntity.CONTROL, true)
+      .set( RDocumentEntity.CHANGED, true )
+      .where(RDocumentEntity.UID.eq(document_id))
+      .get()
+      .value();
+
     queueManager.setExecutedLocal(this);
 
     if ( callback != null ){
@@ -117,45 +124,57 @@ public class CheckControlLabel extends AbstractCommand {
               EventBus.getDefault().post( new DropControlEvent( doc.isControl() ));
             }
 
-            setAsError();
-            setControl(false);
-            queueManager.setExecutedWithError(this, Collections.singletonList( result.getMessage() ));
+            queueManager.setExecutedWithError( this, Collections.singletonList( result.getMessage() ) );
+            setError();
+
           } else {
             if (callback != null){
               callback.onCommandExecuteSuccess(getType());
             }
-            store.process(
-              store.startTransactionFor(document_id)
-                .removeLabel(LabelType.SYNC)
-            );
-            queueManager.setExecutedRemote(this);
+
+            if (result.getMessage() != null && !result.getMessage().toLowerCase().contains("успешно") ) {
+              queueManager.setExecutedWithError(this, Collections.singletonList( result.getMessage() ) );
+              setError();
+            } else {
+              queueManager.setExecutedRemote(this);
+              setSuccess();
+            }
           }
         },
         error -> {
           if (callback != null){
             callback.onCommandExecuteError(getType());
           }
-          setAsError();
-          queueManager.setExecutedWithError(this, Collections.singletonList(error.getLocalizedMessage()));
-          setControl(false);
+
+          if ( settings.isOnline() ) {
+            queueManager.setExecutedWithError( this, Collections.singletonList( error.getLocalizedMessage() ) );
+            setError();
+          }
         }
       );
 
   }
 
-  private void setAsError() {
+  private void setSuccess() {
+    store.process(
+      store.startTransactionFor(document_id)
+        .removeLabel(LabelType.SYNC)
+    );
+
+    setChangedFalse(document_id);
+  }
+
+  private void setError() {
     store.process(
       store.startTransactionFor(document_id)
         .removeLabel(LabelType.SYNC)
         .removeLabel(LabelType.CONTROL)
     );
 
-  }
-
-  private void setControl(Boolean control) {
     dataStore
       .update(RDocumentEntity.class)
-      .set( RDocumentEntity.CONTROL, control)
+      .set( RDocumentEntity.CONTROL, false )
+      .set( RDocumentEntity.CHANGED, false )
       .where(RDocumentEntity.UID.eq(document_id))
       .get()
       .value();
