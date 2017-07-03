@@ -21,7 +21,7 @@
             android:defaultValue="true" />
         <SwitchPreference
             android:key="@string/control_confirm_key"
-            android:title="Показывать подтверждения о постановке на контроль документов для раздела «Обращение граждан»"
+            android:title="Показывать подтверждения о постановке на контроль документов для раздела «Обращения граждан»"
             android:defaultValue="true" />
 
     </android.support.v7.preference.PreferenceCategory>
