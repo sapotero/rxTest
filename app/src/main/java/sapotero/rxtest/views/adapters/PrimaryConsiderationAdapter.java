@@ -110,7 +110,12 @@ public class PrimaryConsiderationAdapter extends BaseAdapter {
       checked.add( checked_view );
     }
 
-    viewHolder.name.setText( user.getName().replaceAll( "\\(.+\\)", "" ) );
+    if (user.getName() != null) {
+      viewHolder.name.setText( user.getName().replaceAll( "\\(.+\\)", "" ) );
+    } else {
+      viewHolder.name.setText( user.getName() );
+    }
+
     viewHolder.is_responsible.setChecked( user.isResponsible() );
     viewHolder.is_original.setChecked( user.isOriginal() );
 
