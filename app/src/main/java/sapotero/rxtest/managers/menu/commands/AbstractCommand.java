@@ -21,6 +21,7 @@ import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDisplayFirstDecisionEntity;
 import sapotero.rxtest.db.requery.models.images.RSignImageEntity;
+import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
 import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.Settings;
@@ -214,5 +215,15 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       .select(RSignImageEntity.class)
       .where(RSignImageEntity.IMAGE_ID.eq(imageId))
       .get().firstOrNull();
+  }
+
+  void printLog(OperationResult data, String TAG) {
+    Timber.tag(TAG).i("ok: %s", data.getOk());
+    Timber.tag(TAG).i("error: %s", data.getMessage());
+    Timber.tag(TAG).i("type: %s", data.getType());
+  }
+
+  public void printCommandType(Command command, String TAG) {
+    Timber.tag(TAG).i( "type: %s", command.getClass().getName() );
   }
 }

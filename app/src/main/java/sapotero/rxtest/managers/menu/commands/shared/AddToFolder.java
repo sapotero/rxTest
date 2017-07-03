@@ -1,22 +1,13 @@
 package sapotero.rxtest.managers.menu.commands.shared;
 
-import java.util.ArrayList;
-import java.util.Collections;
-
-import retrofit2.Retrofit;
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.managers.menu.commands.AbstractCommand;
+import sapotero.rxtest.managers.menu.commands.SharedCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
-import sapotero.rxtest.retrofit.OperationService;
-import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import sapotero.rxtest.utils.memory.utils.Transaction;
 import timber.log.Timber;
 
-public class AddToFolder extends AbstractCommand {
+public class AddToFolder extends SharedCommand {
 
   private final DocumentReceiver document;
 
@@ -86,54 +77,10 @@ public class AddToFolder extends AbstractCommand {
 
   @Override
   public void executeRemote() {
-    Retrofit retrofit = getOperationsRetrofit();
-
-    OperationService operationService = retrofit.create( OperationService.class );
-
-    ArrayList<String> uids = new ArrayList<>();
-    uids.add( settings.getUid() );
-
-    Observable<OperationResult> info = operationService.shared(
-      getType(),
-      settings.getLogin(),
-      settings.getToken(),
-      uids,
-      document_id == null ? settings.getUid() : document_id,
-      settings.getStatusCode(),
-      folder_id,
-      null
-    );
-
-    info.subscribeOn( Schedulers.computation() )
-      .observeOn( AndroidSchedulers.mainThread() )
-      .subscribe(
-        data -> {
-          Timber.tag(TAG).i("ok: %s", data.getOk());
-          Timber.tag(TAG).i("error: %s", data.getMessage());
-          Timber.tag(TAG).i("type: %s", data.getType());
-
-          if (data.getMessage() != null && !data.getMessage().toLowerCase().contains("успешно") ) {
-            queueManager.setExecutedWithError(this, Collections.singletonList( data.getMessage() ) );
-            setError();
-          } else {
-            queueManager.setExecutedRemote(this);
-            setSuccess();
-          }
-        },
-        error -> {
-          if (callback != null){
-            callback.onCommandExecuteError(getType());
-          }
-
-          if ( settings.isOnline() ) {
-            queueManager.setExecutedWithError( this, Collections.singletonList( error.getLocalizedMessage() ) );
-            setError();
-          }
-        }
-      );
+    remoteFolderOperation( this, document_id, folder_id, false, TAG );
   }
 
-  private void setSuccess() {
+  protected void setSuccess() {
     Transaction transaction = new Transaction();
     transaction
       .from( store.getDocuments().get(document_id) )
@@ -144,7 +91,7 @@ public class AddToFolder extends AbstractCommand {
     setChangedFalse(document_id);
   }
 
-  private void setError() {
+  protected void setError() {
     Transaction transaction = new Transaction();
     transaction
       .from( store.getDocuments().get(document_id) )

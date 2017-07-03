@@ -103,7 +103,7 @@ public class NextPerson extends ApprovalSigningCommand {
 
   @Override
   public void executeRemote() {
-    Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
+    printCommandType( this, TAG );
 
     int result = signImages();
 

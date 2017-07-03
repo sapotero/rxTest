@@ -66,7 +66,7 @@ public class ChangePerson extends ApprovalSigningCommand {
 
   @Override
   public void executeRemote() {
-    Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
+    printCommandType( this, TAG );
     remoteOperation(getUid(), official_id, TAG);
   }
 

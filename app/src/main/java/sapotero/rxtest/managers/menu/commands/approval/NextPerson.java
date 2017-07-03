@@ -95,7 +95,7 @@ public class NextPerson extends ApprovalSigningCommand {
       setTaskStarted( getUid(), true );
     }
 
-    Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
+    printCommandType( this, TAG );
     remoteOperation(getUid(), official_id, TAG);
   }
 
