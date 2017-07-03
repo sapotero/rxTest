@@ -1,6 +1,7 @@
 package sapotero.rxtest.managers.menu.commands.shared;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import retrofit2.Retrofit;
 import rx.Observable;
@@ -70,7 +71,8 @@ public class AddToFolder extends AbstractCommand {
   public void executeLocal() {
     Integer count = dataStore
       .update(RDocumentEntity.class)
-      .set( RDocumentEntity.FAVORITES, true)
+      .set( RDocumentEntity.FAVORITES, true )
+      .set( RDocumentEntity.CHANGED, true )
       .where(RDocumentEntity.UID.eq(document_id))
       .get().value();
     Timber.tag(TAG).w( "updated: %s", count );
@@ -110,30 +112,57 @@ public class AddToFolder extends AbstractCommand {
           Timber.tag(TAG).i("error: %s", data.getMessage());
           Timber.tag(TAG).i("type: %s", data.getType());
 
-          queueManager.setExecutedRemote(this);
-
-          Transaction transaction = new Transaction();
-          transaction
-            .from( store.getDocuments().get(document_id) )
-            .removeLabel(LabelType.SYNC)
-            .setLabel(LabelType.FAVORITES);
-          store.process( transaction );
-
+          if (data.getMessage() != null && !data.getMessage().toLowerCase().contains("успешно") ) {
+            queueManager.setExecutedWithError(this, Collections.singletonList( data.getMessage() ) );
+            setError();
+          } else {
+            queueManager.setExecutedRemote(this);
+            setSuccess();
+          }
         },
         error -> {
           if (callback != null){
             callback.onCommandExecuteError(getType());
           }
 
-          Transaction transaction = new Transaction();
-          transaction
-            .from( store.getDocuments().get(document_id) )
-            .removeLabel(LabelType.SYNC)
-            .removeLabel(LabelType.FAVORITES);
-          store.process( transaction );
-
-
+          if ( settings.isOnline() ) {
+            queueManager.setExecutedRemote(this);
+            setError();
+          }
         }
       );
+  }
+
+  private void setSuccess() {
+    Transaction transaction = new Transaction();
+    transaction
+      .from( store.getDocuments().get(document_id) )
+      .removeLabel(LabelType.SYNC)
+      .setLabel(LabelType.FAVORITES);
+    store.process( transaction );
+
+    dataStore
+      .update( RDocumentEntity.class )
+      .set( RDocumentEntity.CHANGED, false )
+      .where( RDocumentEntity.UID.eq( document_id ) )
+      .get()
+      .value();
+  }
+
+  private void setError() {
+    Transaction transaction = new Transaction();
+    transaction
+      .from( store.getDocuments().get(document_id) )
+      .removeLabel(LabelType.SYNC)
+      .removeLabel(LabelType.FAVORITES);
+    store.process( transaction );
+
+    dataStore
+      .update( RDocumentEntity.class )
+      .set( RDocumentEntity.CHANGED, false )
+      .set( RDocumentEntity.FAVORITES, false )
+      .where( RDocumentEntity.UID.eq( document_id ) )
+      .get()
+      .value();
   }
 }
