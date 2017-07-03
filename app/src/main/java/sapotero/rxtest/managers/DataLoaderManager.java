@@ -3,6 +3,7 @@ package sapotero.rxtest.managers;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.support.annotation.Nullable;
 
 import com.birbit.android.jobqueue.JobManager;
 import com.birbit.android.jobqueue.TagConstraint;
@@ -14,6 +15,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -565,7 +567,7 @@ public class DataLoaderManager {
 
           subscription.add(
             docService
-              .getDocumentsByIndexes(settings.getLogin(), settings.getToken(), index, status, null , 500)
+              .getDocumentsByIndexes(settings.getLogin(), settings.getToken(), index, status, null , 500, getYears())
               .subscribeOn(Schedulers.io())
               .observeOn(AndroidSchedulers.mainThread())
               .subscribe(
@@ -588,7 +590,7 @@ public class DataLoaderManager {
       for (String code : sp) {
         subscription.add(
           docService
-            .getDocuments(settings.getLogin(), settings.getToken(), code, null , 500, 0)
+            .getDocuments(settings.getLogin(), settings.getToken(), code, null , 500, 0, getYears())
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
@@ -606,6 +608,11 @@ public class DataLoaderManager {
         );
       }
     }
+  }
+
+  @Nullable
+  private List<String> getYears() {
+    return settings.getYears().size() == 4 ? null : new ArrayList<>(settings.getYears());
   }
 
   private void processDocuments(Documents data, String status, String index, String folder, DocumentType documentType) {
