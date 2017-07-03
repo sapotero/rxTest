@@ -65,7 +65,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     void onCommandExecuteError(String type);
   }
 
-  public Retrofit getOperationsRetrofit() {
+  protected Retrofit getOperationsRetrofit() {
     return new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
@@ -223,7 +223,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     Timber.tag(TAG).i("type: %s", data.getType());
   }
 
-  public void printCommandType(Command command, String TAG) {
+  protected void printCommandType(Command command, String TAG) {
     Timber.tag(TAG).i( "type: %s", command.getClass().getName() );
   }
 }
