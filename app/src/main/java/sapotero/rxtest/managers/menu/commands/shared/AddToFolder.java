@@ -141,12 +141,7 @@ public class AddToFolder extends AbstractCommand {
       .setLabel(LabelType.FAVORITES);
     store.process( transaction );
 
-    dataStore
-      .update( RDocumentEntity.class )
-      .set( RDocumentEntity.CHANGED, false )
-      .where( RDocumentEntity.UID.eq( document_id ) )
-      .get()
-      .value();
+    setChangedFalse(document_id);
   }
 
   private void setError() {

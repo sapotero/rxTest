@@ -3,6 +3,7 @@ package sapotero.rxtest.managers.menu.commands.shared;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import retrofit2.Retrofit;
 import rx.Observable;
@@ -54,8 +55,9 @@ public class RemoveFromFolder extends AbstractCommand {
   public void execute() {
     Integer count = dataStore
       .update(RDocumentEntity.class)
-      .set( RDocumentEntity.FAVORITES, false)
-      .set( RDocumentEntity.FROM_FAVORITES_FOLDER, false)
+      .set( RDocumentEntity.FAVORITES, false )
+      .set( RDocumentEntity.FROM_FAVORITES_FOLDER, false )
+      .set( RDocumentEntity.CHANGED, true )
       .where(RDocumentEntity.UID.eq(document_id))
       .get().value();
 
@@ -114,31 +116,53 @@ public class RemoveFromFolder extends AbstractCommand {
           Timber.tag(TAG).i("error: %s", data.getMessage());
           Timber.tag(TAG).i("type: %s", data.getType());
 
-          queueManager.setExecutedRemote(this);
-
-          Transaction transaction = new Transaction();
-          transaction
-            .from( store.getDocuments().get(document_id) )
-            .removeLabel(LabelType.SYNC)
-            .removeLabel(LabelType.FAVORITES);
-          store.process( transaction );
-
-          EventBus.getDefault().post( new RecalculateMenuEvent() );
+          if (data.getMessage() != null && !data.getMessage().toLowerCase().contains("успешно") ) {
+            queueManager.setExecutedWithError(this, Collections.singletonList( data.getMessage() ) );
+            setError();
+          } else {
+            queueManager.setExecutedRemote(this);
+            setSuccess();
+            EventBus.getDefault().post( new RecalculateMenuEvent() );
+          }
         },
         error -> {
           if (callback != null) {
             callback.onCommandExecuteError(getType());
           }
 
-          Transaction transaction = new Transaction();
-          transaction
-            .from( store.getDocuments().get(document_id) )
-            .removeLabel(LabelType.SYNC)
-            .setLabel(LabelType.FAVORITES);
-          store.process( transaction );
-
-
+          if ( settings.isOnline() ) {
+            queueManager.setExecutedRemote(this);
+            setError();
+          }
         }
       );
+  }
+
+  private void setSuccess() {
+    Transaction transaction = new Transaction();
+    transaction
+      .from( store.getDocuments().get(document_id) )
+      .removeLabel(LabelType.SYNC)
+      .removeLabel(LabelType.FAVORITES);
+    store.process( transaction );
+
+    setChangedFalse(document_id);
+  }
+
+  private void setError() {
+    Transaction transaction = new Transaction();
+    transaction
+      .from( store.getDocuments().get(document_id) )
+      .removeLabel(LabelType.SYNC)
+      .setLabel(LabelType.FAVORITES);
+    store.process( transaction );
+
+    dataStore
+      .update( RDocumentEntity.class )
+      .set( RDocumentEntity.CHANGED, false )
+      .set( RDocumentEntity.FAVORITES, true )
+      .where( RDocumentEntity.UID.eq( document_id ) )
+      .get()
+      .value();
   }
 }

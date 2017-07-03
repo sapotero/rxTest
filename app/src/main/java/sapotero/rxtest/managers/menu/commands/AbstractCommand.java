@@ -150,6 +150,10 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
         .setState(InMemoryState.READY)
     );
 
+    setChangedFalse(uid);
+  }
+
+  protected void setChangedFalse(String uid) {
     dataStore
       .update(RDocumentEntity.class)
       .set( RDocumentEntity.CHANGED, false)
