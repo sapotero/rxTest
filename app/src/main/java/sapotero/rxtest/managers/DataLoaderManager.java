@@ -461,8 +461,10 @@ public class DataLoaderManager {
 
     if (items == MainMenuItem.PROCESSED){
       updateProcessed();
-    } else if (items == MainMenuItem.FAVORITES){
+    } else if (items == MainMenuItem.FAVORITES) {
       updateFavorites();
+    } else if (items == MainMenuItem.ON_CONTROL) {
+      updateControl();
     } else {
 
       ArrayList<String> indexes = new ArrayList<>();
@@ -603,6 +605,10 @@ public class DataLoaderManager {
                 Timber.tag(TAG).e(error);
               })
         );
+      }
+
+      if ( settings.isFirstRun() ) {
+        updateControl();
       }
     }
   }
@@ -768,4 +774,8 @@ public class DataLoaderManager {
 //  public void onMessageEvent(StepperDcCheckEvent event) throws Exception {
 //    String token = event.pin;
 //  }
+
+  private void updateControl() {
+
+  }
 }
