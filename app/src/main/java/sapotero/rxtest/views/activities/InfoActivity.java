@@ -397,10 +397,28 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(ShowDecisionConstructor event) throws Exception {
+
+    try {
+      if ( settings.isOnline() ){
+        if ( InfoActivityDecisionPreviewFragment.current_decision != null && !InfoActivityDecisionPreviewFragment.current_decision.isChanged() ){
+          showDecisionEditor();
+        } else {
+          Toast.makeText( this, "Дождитесь выполнения операции", Toast.LENGTH_SHORT).show();
+        }
+      } else {
+        showDecisionEditor();
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+//    activity.overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
+  }
+
+  private void showDecisionEditor() {
     Intent intent = new Intent( this, DecisionConstructorActivity.class);
     InfoActivity activity = (InfoActivity) this;
     activity.startActivity(intent);
-//    activity.overridePendingTransition(R.anim.slide_from_right, R.anim.slide_to_left);
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
