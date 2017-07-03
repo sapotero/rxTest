@@ -103,10 +103,8 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
       if ( Holder.MAP.containsKey( doc.getUid() ) ){
         Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Document exists %s", doc.getUid() );
-
         Integer index = Holder.MAP.get(doc.getUid());
 
-        Timber.tag(TAG).w("+++%s %s", doc.isProcessed(), !isDisplayProcessed());
         if ( isItemRemove( doc.isProcessed(), doc.getDocument().getControl(), doc.getDocument().getFavorites() ) ) {
           Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Remove document from adapter %s", doc.getUid() );
           removeItem( index, doc );
