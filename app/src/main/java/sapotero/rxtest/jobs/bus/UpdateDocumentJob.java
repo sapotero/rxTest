@@ -44,8 +44,9 @@ public class UpdateDocumentJob extends DocumentJob {
   private String uid;
   private String index  = null;
   private String filter = null;
-  private Boolean forceUpdate    = false;
-  private Boolean forceProcessed = false;
+  private Boolean forceUpdate       = false;
+  private Boolean forceProcessed    = false;
+  private Boolean forceDropFavorite = false;
   private DocumentType documentType = DocumentType.DOCUMENT;
 
   private int oldSignerId;
@@ -88,6 +89,15 @@ public class UpdateDocumentJob extends DocumentJob {
 
     this.uid = uid;
     this.documentType = documentType;
+  }
+
+  public UpdateDocumentJob(String uid, DocumentType documentType, boolean forceDropFavorite) {
+    super( new Params(PRIORITY).requireNetwork().persist() );
+
+    this.uid = uid;
+    this.documentType = documentType;
+    this.forceDropFavorite = forceDropFavorite;
+    this.forceUpdate = true;
   }
 
   @Override
@@ -186,6 +196,11 @@ public class UpdateDocumentJob extends DocumentJob {
 
         if ( documentType == DocumentType.FAVORITE ) {
           documentExisting.setFavorites( true );
+        }
+
+        if ( forceDropFavorite ) {
+          documentExisting.setFavorites( false );
+          documentExisting.setFromFavoritesFolder( false );
         }
 
         documentExisting.setFromLinks( false );

@@ -69,10 +69,12 @@ public class CheckControlLabel extends SharedCommand {
     remoteControlLabelOperation( this, document_id, TAG );
   }
 
+  @Override
   protected void setSuccess() {
     setControlLabelSuccess(document_id);
   }
 
+  @Override
   protected void setError() {
     store.process(
       store.startTransactionFor(document_id)

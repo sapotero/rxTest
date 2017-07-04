@@ -81,6 +81,7 @@ public class RemoveFromFolder extends SharedCommand {
     remoteFolderOperation( this, document_id, folder_id, true, TAG );
   }
 
+  @Override
   protected void setSuccess() {
     Transaction transaction = new Transaction();
     transaction
@@ -92,6 +93,7 @@ public class RemoveFromFolder extends SharedCommand {
     setChangedFalse(document_id);
   }
 
+  @Override
   protected void setError() {
     Transaction transaction = new Transaction();
     transaction

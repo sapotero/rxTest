@@ -80,6 +80,7 @@ public class AddToFolder extends SharedCommand {
     remoteFolderOperation( this, document_id, folder_id, false, TAG );
   }
 
+  @Override
   protected void setSuccess() {
     Transaction transaction = new Transaction();
     transaction
@@ -91,6 +92,7 @@ public class AddToFolder extends SharedCommand {
     setChangedFalse(document_id);
   }
 
+  @Override
   protected void setError() {
     Transaction transaction = new Transaction();
     transaction
