@@ -25,6 +25,12 @@ public class DeleteProcessedImageJob extends BaseJob {
     RDocumentEntity doc = dataStore
       .select(RDocumentEntity.class)
       .get().firstOrNull();
+
+    /*
+    * 0 - добавить поле грохнутое в RImage
+    * 1 - найти все образы, грохнуть файлы, отметить образ как грохнутый
+    * 2 - на предпросмотре образа - показать кнопку загрузить заново
+    * */
   }
 
   @Override
