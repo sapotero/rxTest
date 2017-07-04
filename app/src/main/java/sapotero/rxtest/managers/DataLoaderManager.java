@@ -752,7 +752,16 @@ public class DataLoaderManager {
     if ( processed_folder != null ) {
       dateFormat = new SimpleDateFormat("dd.MM.yyyy", new Locale("RU"));
       Calendar cal = Calendar.getInstance();
-      cal.add(Calendar.HOUR, -20*24);
+
+      int period = 1;
+
+      try {
+        period = Integer.parseInt( settings.getImageLoadPeriod() );
+      } catch (NumberFormatException e) {
+        Timber.e(e);
+      }
+
+      cal.add(Calendar.HOUR, -24*7*period);
       String date = dateFormat.format(cal.getTime());
       Timber.tag(TAG).e("PROCESSED EXIST! %s", date);
 
