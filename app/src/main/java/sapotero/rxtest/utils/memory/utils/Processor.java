@@ -196,12 +196,20 @@ public class Processor {
 
     Observable<List<String>> imd = Observable
       .from( store.getDocuments().values() )
-      .filter(imdFilter::byYear)
       .filter(imdFilter::isProcessed)   // restored previously removed line
       .filter(imdFilter::byType)
       .filter(imdFilter::byStatus)
       .map(InMemoryDocument::getUid)
       .toList();
+
+
+
+//    for (InMemoryDocument doc: store.getDocuments().values() ) {
+//      Timber.i(doc.toString());
+//    }
+
+    Timber.tag(TAG).e("conditions: %s", imdFilter.hasStatuses());
+    Timber.tag(TAG).e("store values: %s", imd.toBlocking().first().size() );
 
     Observable
       .zip(imd, docs, (memory, api) -> {

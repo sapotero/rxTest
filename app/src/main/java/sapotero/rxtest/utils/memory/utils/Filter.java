@@ -65,8 +65,13 @@ public class Filter {
         }
 
         if (condition.getField().getLeftOperand() == RDocumentEntity.DOCUMENT_TYPE){
-          types.add( String.valueOf(condition.getField().getRightOperand()) );
-          Timber.tag(TAG).w("new index: %s", String.valueOf(condition.getField().getRightOperand()));
+
+          String indexName = getIndexName( String.valueOf(condition.getField().getRightOperand()));
+          if (indexName != null) {
+            Timber.tag(TAG).w("new index: %s", String.valueOf(condition.getField().getRightOperand()));
+            types.add( indexName );
+//            types.add( String.valueOf(condition.getField().getRightOperand()) );
+          }
         }
 
         if (condition.getField().getLeftOperand() == RDocumentEntity.CONTROL){
@@ -161,5 +166,17 @@ public class Filter {
     }
 
     return result;
+  }
+
+
+  public static String getIndexName(String raw_index) {
+    String indexName = null;
+
+    if ( raw_index != null ) {
+      String[] index = raw_index.split("_production_db_");
+      indexName = index[0];
+    }
+
+    return indexName;
   }
 }

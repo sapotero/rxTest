@@ -108,7 +108,13 @@ public class InMemoryDocument implements Serializable {
     return "InMemoryDocument { " +
       "uid='" + uid + '\'' +
       ", md5='" + md5 + '\'' +
-      ", action=" + state +
-      " }";
+      ", index='" + index + '\'' +
+      ", filter='" + filter + '\'' +
+      ", year=" + year +
+      ", hasDecision=" + hasDecision +
+      ", processed=" + processed +
+      ", document=" + document +
+      ", state=" + state +
+      "}";
   }
 }
