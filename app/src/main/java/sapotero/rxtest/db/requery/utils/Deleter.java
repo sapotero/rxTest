@@ -35,6 +35,17 @@ public class Deleter {
     return collection != null && collection.size() > 0;
   }
 
+  public void deleteDocument(String uid, String TAG) {
+    RDocumentEntity documentEntity = dataStore
+      .select( RDocumentEntity.class )
+      .where( RDocumentEntity.UID.eq( uid ) )
+      .get().firstOrNull();
+
+    if ( documentEntity != null ) {
+      deleteDocument( documentEntity, TAG );
+    }
+  }
+
   public void deleteDocument(RDocumentEntity document, String TAG) {
     deleteDecisions( document, TAG );
     deleteExemplars( document, TAG );

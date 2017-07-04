@@ -16,6 +16,7 @@ import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.db.requery.utils.Deleter;
 import sapotero.rxtest.jobs.bus.CreateDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateFavoriteDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateProcessedDocumentsJob;
@@ -378,14 +379,26 @@ public class Processor {
   }
 
   private void updateAndDropFavorite(String uid) {
-    settings.addJobCount(1);
+    InMemoryDocument doc = store.getDocuments().get( uid );
 
-    store.process(
-      store.startTransactionFor( uid )
-        .removeLabel(LabelType.FAVORITES)
-    );
+    if ( doc != null && doc.getDocument() != null && doc.getDocument().isFromFavoritesFolder() ) {
+      doc.getDocument().setFavorites( false );
+      doc.getDocument().setFromFavoritesFolder( false );
+      store.getPublishSubject().onNext( doc );
 
-    jobManager.addJobInBackground( new UpdateDocumentJob( uid, documentType, true ) );
+      store.getDocuments().remove( uid );
+      new Deleter().deleteDocument( uid, TAG );
+
+    } else {
+      settings.addJobCount(1);
+
+      store.process(
+        store.startTransactionFor( uid )
+          .removeLabel(LabelType.FAVORITES)
+      );
+
+      jobManager.addJobInBackground( new UpdateDocumentJob( uid, documentType, true ) );
+    }
   }
 
   private void upsert(Document uid) {
