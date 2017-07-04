@@ -1,6 +1,10 @@
 package sapotero.rxtest.managers.menu.commands.shared;
 
+import org.greenrobot.eventbus.EventBus;
+
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.db.requery.utils.Deleter;
+import sapotero.rxtest.events.utils.NoDocumentsEvent;
 import sapotero.rxtest.managers.menu.commands.SharedCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.utils.memory.fields.LabelType;
@@ -44,7 +48,6 @@ public class RemoveFromFolder extends SharedCommand {
     Integer count = dataStore
       .update(RDocumentEntity.class)
       .set( RDocumentEntity.FAVORITES, false )
-      .set( RDocumentEntity.FROM_FAVORITES_FOLDER, false )
       .set( RDocumentEntity.CHANGED, true )
       .where(RDocumentEntity.UID.eq(document_id))
       .get().value();
@@ -83,14 +86,27 @@ public class RemoveFromFolder extends SharedCommand {
 
   @Override
   protected void setSuccess() {
-    Transaction transaction = new Transaction();
-    transaction
-      .from( store.getDocuments().get(document_id) )
-      .removeLabel(LabelType.SYNC)
-      .removeLabel(LabelType.FAVORITES);
-    store.process( transaction );
+    RDocumentEntity documentEntity = dataStore
+      .select( RDocumentEntity.class )
+      .where( RDocumentEntity.UID.eq( document_id ) )
+      .get().firstOrNull();
 
-    setChangedFalse(document_id);
+    if ( documentEntity != null && documentEntity.isFromFavoritesFolder() != null && documentEntity.isFromFavoritesFolder() ) {
+      EventBus.getDefault().post( new NoDocumentsEvent() );
+
+      store.getDocuments().remove( document_id );
+      new Deleter().deleteDocument( documentEntity, TAG );
+
+    } else {
+      Transaction transaction = new Transaction();
+      transaction
+        .from( store.getDocuments().get(document_id) )
+        .removeLabel(LabelType.SYNC)
+        .removeLabel(LabelType.FAVORITES);
+      store.process( transaction );
+
+      setChangedFalse(document_id);
+    }
   }
 
   @Override
