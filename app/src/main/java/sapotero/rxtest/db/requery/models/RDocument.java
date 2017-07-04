@@ -87,7 +87,7 @@ public abstract class RDocument implements Persistable {
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13232
   // удалять обработанные за период текущая дата - Срок хранения ЭО в обработанных документах
-  String processedDate;
+  Integer processedDate;
 
 
   // из папки обработанное
