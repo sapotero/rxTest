@@ -135,7 +135,6 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       compositeSubscription.add(
         Observable
           .just( doc )
-          .filter( dbQueryBuilder::byOrganization )
           .filter( dbQueryBuilder::byDecision )
           .filter( filter::byType)
           .filter( filter::byStatus)
