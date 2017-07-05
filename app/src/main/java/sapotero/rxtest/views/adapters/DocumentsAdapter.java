@@ -178,33 +178,26 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     }
   }
 
-  // True if inside Processed tab or Processed Folder
-  private boolean isDisplayProcessed() {
-    boolean result = false;
-
-    if ( dbQueryBuilder != null && dbQueryBuilder.getConditions() != null ) {
-      Filter filter = new Filter(dbQueryBuilder.getConditions());
-      result = filter.getProcessed();
-    }
-
-    return result;
-  }
-
   private boolean isItemRemove(boolean processed, boolean control, boolean favorite) {
     boolean result = false;
 
     if ( dbQueryBuilder != null && dbQueryBuilder.getConditions() != null ) {
       Filter filter = new Filter(dbQueryBuilder.getConditions());
 
-      if ( processed && !filter.getProcessed() ) {
-        result = true;
+      if ( !filter.getControl() && !filter.getFavorites() ) {
+        if ( processed && !filter.getProcessed() ) {
+          Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Remove due to processed");
+          result = true;
+        }
       }
 
       if ( !control && filter.getControl() ) {
+        Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Remove due to control");
         result = true;
       }
 
       if ( !favorite && filter.getFavorites() ) {
+        Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Remove due to favorite");
         result = true;
       }
     }
