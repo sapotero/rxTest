@@ -103,11 +103,9 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
       if ( Holder.MAP.containsKey( doc.getUid() ) ){
         Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Document exists %s", doc.getUid() );
-
         Integer index = Holder.MAP.get(doc.getUid());
 
-        Timber.tag(TAG).w("+++%s %s", doc.isProcessed(), !isDisplayProcessed());
-        if ( doc.isProcessed() && !isDisplayProcessed() ) {
+        if ( isItemRemove( doc.isProcessed(), doc.getDocument().getControl(), doc.getDocument().getFavorites() ) ) {
           Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Remove document from adapter %s", doc.getUid() );
           removeItem( index, doc );
           if (documents.size() == 0 && dbQueryBuilder != null) {
@@ -187,6 +185,28 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     if ( dbQueryBuilder != null && dbQueryBuilder.getConditions() != null ) {
       Filter filter = new Filter(dbQueryBuilder.getConditions());
       result = filter.getProcessed();
+    }
+
+    return result;
+  }
+
+  private boolean isItemRemove(boolean processed, boolean control, boolean favorite) {
+    boolean result = false;
+
+    if ( dbQueryBuilder != null && dbQueryBuilder.getConditions() != null ) {
+      Filter filter = new Filter(dbQueryBuilder.getConditions());
+
+      if ( processed && !filter.getProcessed() ) {
+        result = true;
+      }
+
+      if ( !control && filter.getControl() ) {
+        result = true;
+      }
+
+      if ( !favorite && filter.getFavorites() ) {
+        result = true;
+      }
     }
 
     return result;

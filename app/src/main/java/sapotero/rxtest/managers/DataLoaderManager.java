@@ -464,7 +464,7 @@ public class DataLoaderManager {
 
     if (items == MainMenuItem.PROCESSED){
       updateProcessed();
-    } else if (items == MainMenuItem.FAVORITES){
+    } else if (items == MainMenuItem.FAVORITES) {
       updateFavorites();
     } else {
 
@@ -514,7 +514,7 @@ public class DataLoaderManager {
 
 
       // обновляем всё
-      if (items == MainMenuItem.ALL || items.getIndex() == 11) {
+      if (items == MainMenuItem.ALL || items.getIndex() == 11 || items == MainMenuItem.ON_CONTROL) {
         statuses.add("primary_consideration");
         statuses.add("sent_to_the_report");
         sp.add("approval");

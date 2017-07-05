@@ -21,6 +21,7 @@ import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDisplayFirstDecisionEntity;
 import sapotero.rxtest.db.requery.models.images.RSignImageEntity;
+import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
 import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.Settings;
@@ -64,7 +65,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     void onCommandExecuteError(String type);
   }
 
-  public Retrofit getOperationsRetrofit() {
+  protected Retrofit getOperationsRetrofit() {
     return new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
@@ -150,6 +151,10 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
         .setState(InMemoryState.READY)
     );
 
+    setChangedFalse(uid);
+  }
+
+  protected void setChangedFalse(String uid) {
     dataStore
       .update(RDocumentEntity.class)
       .set( RDocumentEntity.CHANGED, false)
@@ -210,5 +215,15 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       .select(RSignImageEntity.class)
       .where(RSignImageEntity.IMAGE_ID.eq(imageId))
       .get().firstOrNull();
+  }
+
+  void printLog(OperationResult data, String TAG) {
+    Timber.tag(TAG).i("ok: %s", data.getOk());
+    Timber.tag(TAG).i("error: %s", data.getMessage());
+    Timber.tag(TAG).i("type: %s", data.getType());
+  }
+
+  protected void printCommandType(Command command, String TAG) {
+    Timber.tag(TAG).i( "type: %s", command.getClass().getName() );
   }
 }

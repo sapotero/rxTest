@@ -28,6 +28,7 @@ import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.fields.DocumentType;
 import sapotero.rxtest.utils.memory.fields.FieldType;
 import sapotero.rxtest.utils.memory.fields.InMemoryState;
+import sapotero.rxtest.utils.memory.fields.LabelType;
 import sapotero.rxtest.utils.memory.mappers.InMemoryDocumentMapper;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
@@ -280,7 +281,60 @@ public class Processor {
   }
 
   private void loadFromFolder() {
+    if ( documentType == DocumentType.FAVORITE ) {
+      intersectFavorites();
+    }
+
     validateDocuments();
+  }
+
+  private void intersectFavorites() {
+    Timber.tag(TAG).d("Intersecting favorites");
+
+    Observable<List<String>> imd = Observable
+      .from( store.getDocuments().values() )
+      .filter( this::byFavorites )
+      .map( InMemoryDocument::getUid )
+      .toList();
+
+    Observable<List<String>> docs = Observable
+      .from( documents.keySet() )
+      .toList();
+
+    Observable
+      .zip(imd, docs, (memory, api) -> {
+
+        List<String> remove = new ArrayList<>(memory);
+        remove.removeAll(api);
+
+        Timber.tag(TAG).d("memory favorites: %s", memory.size());
+        Timber.tag(TAG).d("api favorites: %s", api.size());
+        Timber.tag(TAG).d("remove favorites: %s", remove.size());
+
+        for (String uid : remove) {
+          Timber.tag(TAG).d("Removing from favorites: %s", uid);
+          updateAndDropFavorite( uid );
+        }
+
+        return Collections.singletonList("");
+      })
+      .buffer(200, TimeUnit.MILLISECONDS)
+      .subscribeOn(Schedulers.immediate())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(
+        data -> Timber.tag(TAG).d("Intersected favorites successfully"),
+        Timber::e
+      );
+  }
+
+  private boolean byFavorites(InMemoryDocument doc) {
+    boolean result = false;
+
+    if ( doc != null && doc.getDocument() != null && doc.getDocument().getFavorites() != null ) {
+      result = doc.getDocument().getFavorites() || doc.getDocument().isFromFavoritesFolder();
+    }
+
+    return result;
   }
 
   private void createJob(String uid) {
@@ -311,18 +365,28 @@ public class Processor {
 
   private void updateJob(String uid) {
     settings.addJobCount(1);
-    jobManager.addJobInBackground( new UpdateDocumentJob( uid, index, filter ) );
 
-//    if (documentType == DocumentType.DOCUMENT) {
-//      jobManager.addJobInBackground( new UpdateDocumentJob( uid, index, filter ) );
-//    } else {
-//      jobManager.addJobInBackground( new UpdateDocumentJob( uid, documentType ) );
-//    }
+    if (documentType == DocumentType.DOCUMENT) {
+      jobManager.addJobInBackground( new UpdateDocumentJob( uid, index, filter ) );
+    } else {
+      jobManager.addJobInBackground( new UpdateDocumentJob( uid, documentType ) );
+    }
   }
 
   private void updateAndSetProcessed(String uid) {
     settings.addJobCount(1);
     jobManager.addJobInBackground( new UpdateDocumentJob( uid, index, filter, true ) );
+  }
+
+  private void updateAndDropFavorite(String uid) {
+    settings.addJobCount(1);
+
+    store.process(
+      store.startTransactionFor( uid )
+        .removeLabel(LabelType.FAVORITES)
+    );
+
+    jobManager.addJobInBackground( new UpdateDocumentJob( uid, documentType, true ) );
   }
 
   private void upsert(Document uid) {

@@ -162,4 +162,12 @@ public class Filter {
 
     return result;
   }
+
+  public Boolean getControl() {
+    return isControl;
+  }
+
+  public Boolean getFavorites() {
+    return isFavorites;
+  }
 }

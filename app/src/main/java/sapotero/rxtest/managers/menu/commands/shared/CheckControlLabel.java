@@ -1,26 +1,12 @@
 package sapotero.rxtest.managers.menu.commands.shared;
 
-import org.greenrobot.eventbus.EventBus;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Objects;
-
-import retrofit2.Retrofit;
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.events.document.DropControlEvent;
-import sapotero.rxtest.events.view.ShowSnackEvent;
-import sapotero.rxtest.managers.menu.commands.AbstractCommand;
+import sapotero.rxtest.managers.menu.commands.SharedCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
-import sapotero.rxtest.retrofit.OperationService;
-import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
-public class CheckControlLabel extends AbstractCommand {
+public class CheckControlLabel extends SharedCommand {
 
   private final DocumentReceiver document;
   private String TAG = this.getClass().getSimpleName();
@@ -46,7 +32,6 @@ public class CheckControlLabel extends AbstractCommand {
 
   @Override
   public void execute() {
-
     Timber.tag(TAG).i("execute for %s - %s",getType(),document_id);
     queueManager.add(this);
 
@@ -55,7 +40,6 @@ public class CheckControlLabel extends AbstractCommand {
       .setLabel(LabelType.SYNC)
       .setLabel(LabelType.CONTROL)
     );
-
   }
 
   @Override
@@ -63,10 +47,16 @@ public class CheckControlLabel extends AbstractCommand {
     return "check_for_control";
   }
 
-
   @Override
   public void executeLocal() {
-    setControl(true);
+    dataStore
+      .update(RDocumentEntity.class)
+      .set( RDocumentEntity.CONTROL, true)
+      .set( RDocumentEntity.CHANGED, true )
+      .where(RDocumentEntity.UID.eq(document_id))
+      .get()
+      .value();
+
     queueManager.setExecutedLocal(this);
 
     if ( callback != null ){
@@ -76,86 +66,26 @@ public class CheckControlLabel extends AbstractCommand {
 
   @Override
   public void executeRemote() {
-    Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
-
-    Retrofit retrofit = getOperationsRetrofit();
-
-    OperationService operationService = retrofit.create( OperationService.class );
-
-    ArrayList<String> uids = new ArrayList<>();
-    uids.add( settings.getUid() );
-
-    Observable<OperationResult> info = operationService.shared(
-      getType(),
-      settings.getLogin(),
-      settings.getToken(),
-      uids,
-      document_id == null ? settings.getUid() : document_id,
-      settings.getStatusCode(),
-      null,
-      null
-    );
-
-
-    RDocumentEntity doc = dataStore
-      .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq(document_id))
-      .get().firstOrNull();
-
-    info.subscribeOn( Schedulers.computation() )
-      .observeOn( AndroidSchedulers.mainThread() )
-      .subscribe(
-        result -> {
-          Timber.tag(TAG).i("ok: %s", result.getOk());
-          Timber.tag(TAG).i("error: %s", result.getMessage());
-          Timber.tag(TAG).i("type: %s", result.getType());
-
-          if ( Objects.equals(result.getType(), "danger") && result.getMessage() != null){
-            EventBus.getDefault().post( new ShowSnackEvent( result.getMessage() ));
-
-            if (doc != null) {
-              EventBus.getDefault().post( new DropControlEvent( doc.isControl() ));
-            }
-
-            setAsError();
-            setControl(false);
-            queueManager.setExecutedWithError(this, Collections.singletonList( result.getMessage() ));
-          } else {
-            if (callback != null){
-              callback.onCommandExecuteSuccess(getType());
-            }
-            store.process(
-              store.startTransactionFor(document_id)
-                .removeLabel(LabelType.SYNC)
-            );
-            queueManager.setExecutedRemote(this);
-          }
-        },
-        error -> {
-          if (callback != null){
-            callback.onCommandExecuteError(getType());
-          }
-          setAsError();
-          queueManager.setExecutedWithError(this, Collections.singletonList(error.getLocalizedMessage()));
-          setControl(false);
-        }
-      );
-
+    remoteControlLabelOperation( this, document_id, TAG );
   }
 
-  private void setAsError() {
+  @Override
+  protected void setSuccess() {
+    setControlLabelSuccess(document_id);
+  }
+
+  @Override
+  protected void setError() {
     store.process(
       store.startTransactionFor(document_id)
         .removeLabel(LabelType.SYNC)
         .removeLabel(LabelType.CONTROL)
     );
 
-  }
-
-  private void setControl(Boolean control) {
     dataStore
       .update(RDocumentEntity.class)
-      .set( RDocumentEntity.CONTROL, control)
+      .set( RDocumentEntity.CONTROL, false )
+      .set( RDocumentEntity.CHANGED, false )
       .where(RDocumentEntity.UID.eq(document_id))
       .get()
       .value();

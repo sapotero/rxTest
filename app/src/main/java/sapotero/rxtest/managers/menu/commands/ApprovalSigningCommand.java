@@ -47,9 +47,7 @@ public abstract class ApprovalSigningCommand extends AbstractCommand {
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         data -> {
-          Timber.tag(TAG).i("ok: %s", data.getOk());
-          Timber.tag(TAG).i("error: %s", data.getMessage());
-          Timber.tag(TAG).i("type: %s", data.getType());
+          printLog( data, TAG );
 
           if (data.getMessage() != null && !data.getMessage().toLowerCase().contains("успешно") ) {
             queueManager.setExecutedWithError(this, Collections.singletonList( data.getMessage() ) );

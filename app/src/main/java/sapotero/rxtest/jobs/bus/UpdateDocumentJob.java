@@ -44,8 +44,9 @@ public class UpdateDocumentJob extends DocumentJob {
   private String uid;
   private String index  = null;
   private String filter = null;
-  private Boolean forceUpdate    = false;
-  private Boolean forceProcessed = false;
+  private Boolean forceUpdate       = false;
+  private Boolean forceProcessed    = false;
+  private Boolean forceDropFavorite = false;
   private DocumentType documentType = DocumentType.DOCUMENT;
 
   private int oldSignerId;
@@ -90,6 +91,15 @@ public class UpdateDocumentJob extends DocumentJob {
     this.documentType = documentType;
   }
 
+  public UpdateDocumentJob(String uid, DocumentType documentType, boolean forceDropFavorite) {
+    super( new Params(PRIORITY).requireNetwork().persist() );
+
+    this.uid = uid;
+    this.documentType = documentType;
+    this.forceDropFavorite = forceDropFavorite;
+    this.forceUpdate = true;
+  }
+
   @Override
   public void onAdded() {
   }
@@ -113,11 +123,11 @@ public class UpdateDocumentJob extends DocumentJob {
     if (  documentExisting != null && documentExisting.isChanged() != null && !documentExisting.isChanged() ) {
       Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Starting update");
 
-//      // Force update, if document exists and it must be from favorites folder, but is not
-//      if ( documentExisting.isFromFavoritesFolder() != null && !documentExisting.isFromFavoritesFolder() && documentType == DocumentType.FAVORITE ) {
-//        forceUpdate = true;
-//      }
-//
+      // Force update, if document exists and it must be favorite, because it is from favorites folder
+      if ( documentExisting.isFavorites() != null && !documentExisting.isFavorites() && documentType == DocumentType.FAVORITE ) {
+        forceUpdate = true;
+      }
+
 //      // Force update, if document exists and it must be from processed folder, but is not
 //      if ( documentExisting.isFromProcessedFolder() != null && !documentExisting.isFromProcessedFolder() && documentType == DocumentType.PROCESSED ) {
 //        forceUpdate = true;
@@ -183,11 +193,15 @@ public class UpdateDocumentJob extends DocumentJob {
 //          documentExisting.setProcessed( true );
 //          documentExisting.setFromProcessedFolder( true );
 //        }
-//
-//        if ( documentType == DocumentType.FAVORITE ) {
-//          documentExisting.setFavorites( true );
-//          documentExisting.setFromFavoritesFolder( true );
-//        }
+
+        if ( documentType == DocumentType.FAVORITE ) {
+          documentExisting.setFavorites( true );
+        }
+
+        if ( forceDropFavorite ) {
+          documentExisting.setFavorites( false );
+          documentExisting.setFromFavoritesFolder( false );
+        }
 
         documentExisting.setFromLinks( false );
         documentExisting.setChanged( false );

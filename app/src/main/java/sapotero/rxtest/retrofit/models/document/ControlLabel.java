@@ -9,7 +9,7 @@ public class ControlLabel {
     @SerializedName("created_at")
     @Expose
     private String createdAt;
-    @SerializedName("person")
+    @SerializedName("official_id")
     @Expose
     private String officialId;
     @SerializedName("official_name")

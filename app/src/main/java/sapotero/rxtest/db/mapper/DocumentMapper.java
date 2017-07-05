@@ -223,6 +223,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
 
   private void setControlLabels(RDocumentEntity entity, List<ControlLabel> controlLabels) {
     entity.getControlLabels().clear();
+    boolean isControl = false;
 
     if ( notEmpty( controlLabels ) ) {
       ControlLabelMapper controlLabelMapper = mappers.getControlLabelMapper();
@@ -231,8 +232,15 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
         RControlLabelsEntity labelEntity = controlLabelMapper.toEntity( labelModel );
         labelEntity.setDocument( entity );
         entity.getControlLabels().add( labelEntity );
+
+        if ( Objects.equals( labelModel.getOfficialId(), settings.getCurrentUserId() )
+          && Objects.equals( labelModel.getState(), "Отмечен для постановки на контроль") ) {
+          isControl = true;
+        }
       }
     }
+
+    entity.setControl( isControl );
   }
 
   private void setControlLabels(DocumentInfo model, Set<RControlLabels> controlLabels) {

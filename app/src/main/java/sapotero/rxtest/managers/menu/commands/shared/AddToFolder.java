@@ -1,21 +1,13 @@
 package sapotero.rxtest.managers.menu.commands.shared;
 
-import java.util.ArrayList;
-
-import retrofit2.Retrofit;
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.managers.menu.commands.AbstractCommand;
+import sapotero.rxtest.managers.menu.commands.SharedCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
-import sapotero.rxtest.retrofit.OperationService;
-import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import sapotero.rxtest.utils.memory.utils.Transaction;
 import timber.log.Timber;
 
-public class AddToFolder extends AbstractCommand {
+public class AddToFolder extends SharedCommand {
 
   private final DocumentReceiver document;
 
@@ -70,7 +62,8 @@ public class AddToFolder extends AbstractCommand {
   public void executeLocal() {
     Integer count = dataStore
       .update(RDocumentEntity.class)
-      .set( RDocumentEntity.FAVORITES, true)
+      .set( RDocumentEntity.FAVORITES, true )
+      .set( RDocumentEntity.CHANGED, true )
       .where(RDocumentEntity.UID.eq(document_id))
       .get().value();
     Timber.tag(TAG).w( "updated: %s", count );
@@ -84,56 +77,36 @@ public class AddToFolder extends AbstractCommand {
 
   @Override
   public void executeRemote() {
-    Retrofit retrofit = getOperationsRetrofit();
+    remoteFolderOperation( this, document_id, folder_id, false, TAG );
+  }
 
-    OperationService operationService = retrofit.create( OperationService.class );
+  @Override
+  protected void setSuccess() {
+    Transaction transaction = new Transaction();
+    transaction
+      .from( store.getDocuments().get(document_id) )
+      .removeLabel(LabelType.SYNC)
+      .setLabel(LabelType.FAVORITES);
+    store.process( transaction );
 
-    ArrayList<String> uids = new ArrayList<>();
-    uids.add( settings.getUid() );
+    setChangedFalse(document_id);
+  }
 
-    Observable<OperationResult> info = operationService.shared(
-      getType(),
-      settings.getLogin(),
-      settings.getToken(),
-      uids,
-      document_id == null ? settings.getUid() : document_id,
-      settings.getStatusCode(),
-      folder_id,
-      null
-    );
+  @Override
+  protected void setError() {
+    Transaction transaction = new Transaction();
+    transaction
+      .from( store.getDocuments().get(document_id) )
+      .removeLabel(LabelType.SYNC)
+      .removeLabel(LabelType.FAVORITES);
+    store.process( transaction );
 
-    info.subscribeOn( Schedulers.computation() )
-      .observeOn( AndroidSchedulers.mainThread() )
-      .subscribe(
-        data -> {
-          Timber.tag(TAG).i("ok: %s", data.getOk());
-          Timber.tag(TAG).i("error: %s", data.getMessage());
-          Timber.tag(TAG).i("type: %s", data.getType());
-
-          queueManager.setExecutedRemote(this);
-
-          Transaction transaction = new Transaction();
-          transaction
-            .from( store.getDocuments().get(document_id) )
-            .removeLabel(LabelType.SYNC)
-            .setLabel(LabelType.FAVORITES);
-          store.process( transaction );
-
-        },
-        error -> {
-          if (callback != null){
-            callback.onCommandExecuteError(getType());
-          }
-
-          Transaction transaction = new Transaction();
-          transaction
-            .from( store.getDocuments().get(document_id) )
-            .removeLabel(LabelType.SYNC)
-            .removeLabel(LabelType.FAVORITES);
-          store.process( transaction );
-
-
-        }
-      );
+    dataStore
+      .update( RDocumentEntity.class )
+      .set( RDocumentEntity.CHANGED, false )
+      .set( RDocumentEntity.FAVORITES, false )
+      .where( RDocumentEntity.UID.eq( document_id ) )
+      .get()
+      .value();
   }
 }
