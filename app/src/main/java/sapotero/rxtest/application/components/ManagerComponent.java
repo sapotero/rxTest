@@ -26,6 +26,7 @@ import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
 import sapotero.rxtest.views.fragments.DecisionRejectionTemplateFragment;
 import sapotero.rxtest.views.fragments.DecisionTemplateFragment;
 import sapotero.rxtest.views.fragments.InfoActivityDecisionPreviewFragment;
+import sapotero.rxtest.views.fragments.InfoCardDocumentsFragment;
 import sapotero.rxtest.views.menu.builders.ButtonBuilder;
 
 @ManagerScope
@@ -68,4 +69,5 @@ public interface ManagerComponent {
 
   void inject(Processor context);
   void inject(Filter context);
+  void inject(InfoCardDocumentsFragment fragment);
 }

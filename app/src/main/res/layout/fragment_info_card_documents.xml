@@ -194,7 +194,7 @@
             />
 
         <Button
-            android:id="@+id/delete_load_button"
+            android:id="@+id/info_card_pdf_reload"
             android:text="@string/deleted_image_load"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

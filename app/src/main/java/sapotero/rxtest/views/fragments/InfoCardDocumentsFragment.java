@@ -19,6 +19,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.birbit.android.jobqueue.JobManager;
 import com.github.barteksc.pdfviewer.PDFView;
 
 import java.io.File;
@@ -42,8 +43,12 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
+import sapotero.rxtest.jobs.bus.ReloadProcessedImageJob;
 import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.memory.MemoryStore;
+import sapotero.rxtest.utils.memory.fields.LabelType;
+import sapotero.rxtest.utils.memory.utils.Transaction;
 import sapotero.rxtest.views.activities.DocumentImageFullScreenActivity;
 import sapotero.rxtest.views.adapters.DocumentLinkAdapter;
 import sapotero.rxtest.views.custom.CircleLeftArrow;
@@ -55,6 +60,8 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   public static final int REQUEST_CODE_INDEX = 1;
   @Inject Settings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
+  @Inject MemoryStore store;
+  @Inject JobManager jobManager;
 
   private OnFragmentInteractionListener mListener;
   private Context mContext;
@@ -71,7 +78,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   @BindView(R.id.info_card_pdf_fullscreen_page_counter)     TextView page_counter;
   @BindView(R.id.info_card_pdf_fullscreen_button) FrameLayout fullscreen;
   @BindView(R.id.deleted_image) FrameLayout deletedImage;
-  @BindView(R.id.delete_load_button) Button reloadImageButton;
+  @BindView(R.id.info_card_pdf_reload) Button reloadImageButton;
 
   @BindView(R.id.info_card_pdf_no_files) TextView no_files;
   @BindView(R.id.info_card_pdf_wrapper)  FrameLayout pdf_wrapper;
@@ -97,15 +104,12 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     super.onCreate(savedInstanceState);
   }
 
-  @OnClick(R.id.delete_load_button) public void reloadImage(){
-    
-  }
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.fragment_info_card_documents, container, false);
     ButterKnife.bind(this, view);
-    EsdApplication.getDataComponent().inject( this );
+    EsdApplication.getManagerComponent().inject( this );
 
     if (null != savedInstanceState) {
       index = savedInstanceState.getInt(STATE_CURRENT_PAGE_INDEX, 0);
@@ -276,6 +280,20 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
     settings.setImageIndex( index );
     showPdf();
+  }
+
+  @OnClick(R.id.info_card_pdf_reload)
+  public void reloadImage(){
+
+    Transaction transaction = new Transaction();
+    transaction
+      .from( store.getDocuments().get( settings.getUid() ) )
+      .setLabel(LabelType.SYNC);
+    store.process( transaction );
+
+    jobManager.addJobInBackground( new ReloadProcessedImageJob( settings.getUid() ) );
+
+    getActivity().finish();
   }
 
   @OnClick(R.id.info_card_pdf_fullscreen_next_document)
