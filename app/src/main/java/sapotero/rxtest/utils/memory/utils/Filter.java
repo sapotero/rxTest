@@ -110,7 +110,14 @@ public class Filter {
   }
 
   public Boolean isProcessed(InMemoryDocument doc) {
-    return isProcessed == doc.isProcessed();
+    Boolean result = true;
+
+    // Фильтруем обработанные для всех журналов, кроме Избранное и На контроле
+    if ( !isFavorites && !isControl ) {
+      result = isProcessed == doc.isProcessed();
+    }
+
+    return result;
   }
 
   public Boolean isNotProcessed(InMemoryDocument doc) {

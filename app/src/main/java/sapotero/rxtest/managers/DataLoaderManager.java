@@ -431,7 +431,6 @@ public class DataLoaderManager {
         .getAuth(login, password)
         .subscribeOn(Schedulers.computation())
         .observeOn(AndroidSchedulers.mainThread())
-        .unsubscribeOn(Schedulers.io())
         .subscribe(
           data -> {
             Timber.tag(TAG).i("tryToSignWithLogin: token %s", data.getAuthToken());

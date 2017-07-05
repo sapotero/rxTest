@@ -5,6 +5,7 @@ import sapotero.rxtest.application.modules.EsdModule;
 import sapotero.rxtest.application.modules.SettingsModule;
 import sapotero.rxtest.application.scopes.DataScope;
 import sapotero.rxtest.db.mapper.utils.MappersModule;
+import sapotero.rxtest.db.requery.utils.Deleter;
 import sapotero.rxtest.db.requery.utils.RequeryDbModule;
 import sapotero.rxtest.db.requery.utils.validation.ValidationModule;
 import sapotero.rxtest.managers.CurrentDocumentManager;
@@ -85,4 +86,6 @@ public interface DataComponent {
   void inject(CurrentDocumentManager currentDocumentManager);
 
   void inject(DecisionManager decisionManager);
+
+  void inject(Deleter deleter);
 }

@@ -207,8 +207,11 @@ abstract class DocumentJob extends BaseJob {
       if ( notEmpty( statuses ) ) {
         Status currentStatus = statuses.get( statuses.size() - 1 );
         if ( Objects.equals( currentStatus.getAddressedToId(), settings.getCurrentUserId() ) ) {
-          result = true;
-          break;
+          if ( Objects.equals( currentStatus.getStatusCode(), "primary_consideration")
+            || Objects.equals( currentStatus.getStatusCode(), "sent_to_the_report") ) {
+            result = true;
+            break;
+          }
         }
       }
     }
