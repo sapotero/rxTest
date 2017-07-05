@@ -179,58 +179,69 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   private void setPdfPreview() throws FileNotFoundException {
 
     Image image = adapter.getItem(index);
-    contentType = image.getContentType();
-    document_title.setText( image.getTitle() );
 
-    file = new File(getContext().getFilesDir(), String.format( "%s_%s", image.getMd5(), image.getTitle() ));
+    if ( image.isDeleted() ){
+      showDownloadButton();
+    } else {
 
-    if ( Objects.equals(contentType, "application/pdf") ) {
-      InputStream targetStream = new FileInputStream(file);
+      contentType = image.getContentType();
+      document_title.setText( image.getTitle() );
 
-      if (file.exists()) {
-        pdfView
-          .fromStream(targetStream)
+      file = new File(getContext().getFilesDir(), String.format( "%s_%s", image.getMd5(), image.getTitle() ));
+
+      if ( Objects.equals(contentType, "application/pdf") ) {
+        InputStream targetStream = new FileInputStream(file);
+
+        if (file.exists()) {
+          pdfView
+            .fromStream(targetStream)
 //         .fromFile( file )
-          .enableSwipe(true)
-          .enableDoubletap(true)
-          .defaultPage(0)
-          .swipeHorizontal(false)
-          .onRender((nbPages, pageWidth, pageHeight) -> pdfView.fitToWidth())
-          .onLoad(nbPages -> {
-            Timber.tag(TAG).i(" onLoad");
-          })
-          .onError(t -> {
-            Timber.tag(TAG).i(" onError");
-          })
-          .onDraw((canvas, pageWidth, pageHeight, displayedPage) -> {
-            Timber.tag(TAG).i(" onDraw");
-          })
-          .onPageChange((page, pageCount) -> {
-            Timber.tag(TAG).i(" onPageChange");
-            updatePageCount();
-          })
-          .enableAnnotationRendering(true)
-          .scrollHandle(null)
-          .load();
+            .enableSwipe(true)
+            .enableDoubletap(true)
+            .defaultPage(0)
+            .swipeHorizontal(false)
+            .onRender((nbPages, pageWidth, pageHeight) -> pdfView.fitToWidth())
+            .onLoad(nbPages -> {
+              Timber.tag(TAG).i(" onLoad");
+            })
+            .onError(t -> {
+              Timber.tag(TAG).i(" onError");
+            })
+            .onDraw((canvas, pageWidth, pageHeight, displayedPage) -> {
+              Timber.tag(TAG).i(" onDraw");
+            })
+            .onPageChange((page, pageCount) -> {
+              Timber.tag(TAG).i(" onPageChange");
+              updatePageCount();
+            })
+            .enableAnnotationRendering(true)
+            .scrollHandle(null)
+            .load();
 
 //        pdfView.useBestQuality(true);
 //        pdfView.setDrawingCacheEnabled(true);
 //        pdfView.stopFling();
+        }
+
+        pdfView.setVisibility(View.VISIBLE);
+        open_in_another_app_wrapper.setVisibility(View.GONE);
+        page_counter.setVisibility(View.VISIBLE);
+
+      } else {
+        pdfView.setVisibility(View.GONE);
+        open_in_another_app_wrapper.setVisibility(View.VISIBLE);
+        page_counter.setVisibility(View.INVISIBLE);
       }
-
-      pdfView.setVisibility(View.VISIBLE);
-      open_in_another_app_wrapper.setVisibility(View.GONE);
-      page_counter.setVisibility(View.VISIBLE);
-
-    } else {
-      pdfView.setVisibility(View.GONE);
-      open_in_another_app_wrapper.setVisibility(View.VISIBLE);
-      page_counter.setVisibility(View.INVISIBLE);
     }
+
 
     updateDocumentCount();
     updatePageCount();
     updateZoomVisibility();
+  }
+
+  private void showDownloadButton() {
+    Timber.tag(TAG).e("SHOW DOWNLOAD BUTTON");
   }
 
   private void updateZoomVisibility() {

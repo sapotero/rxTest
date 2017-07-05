@@ -31,6 +31,16 @@ public class Image {
     @Expose
     private Boolean signed;
 
+    private transient boolean deleted = false;
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
+
     /**
      * 
      * @return
