@@ -2,7 +2,9 @@ package sapotero.rxtest.retrofit.utils;
 
 import com.facebook.stetho.okhttp3.StethoInterceptor;
 
+import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.UnknownHostException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -46,25 +48,28 @@ public class OkHttpModule {
           Request.Builder requestBuilder = original.newBuilder().url(url);
           Request request = requestBuilder.build();
 
-          Response response = chain.proceed(request);
+          try {
+            Response response = chain.proceed(request);
 
-          // resolved https://tasks.n-core.ru/browse/MVDESD-13625
-          // Если не авторизовано, то заново логиниться
+            // resolved https://tasks.n-core.ru/browse/MVDESD-13625
+            // Если не авторизовано, то заново логиниться
 
-          // Закомментировано, т.к. если сервер возвращает код 500, у нас ставится Не в сети
-//          if ( response.code() == HttpURLConnection.HTTP_OK ) {
-//            settings.setOnline(true);
-//          } else {
-//            settings.setOnline(false);
-//          }
+            if ( response.code() == HttpURLConnection.HTTP_UNAUTHORIZED ) {
+              settings.setOnline(false);
+              settings.setUnauthorized(true);
+            } else {
+              settings.setOnline(true);
+              settings.setUnauthorized(false);
+            }
 
-          if ( response.code() == HttpURLConnection.HTTP_UNAUTHORIZED ) {
-            settings.setUnauthorized(true);
-          } else {
-            settings.setUnauthorized(false);
+            return response;
+
+          } catch (IOException e) {
+            if (e instanceof UnknownHostException) {
+              settings.setOnline(false);
+            }
+            throw e;
           }
-
-          return response;
         })
       .build();
   }
