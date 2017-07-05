@@ -13,6 +13,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -69,6 +70,8 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   @BindView(R.id.info_card_pdf_fullscreen_page_title)       TextView document_title;
   @BindView(R.id.info_card_pdf_fullscreen_page_counter)     TextView page_counter;
   @BindView(R.id.info_card_pdf_fullscreen_button) FrameLayout fullscreen;
+  @BindView(R.id.deleted_image) FrameLayout deletedImage;
+  @BindView(R.id.delete_load_button) Button reloadImageButton;
 
   @BindView(R.id.info_card_pdf_no_files) TextView no_files;
   @BindView(R.id.info_card_pdf_wrapper)  FrameLayout pdf_wrapper;
@@ -92,11 +95,10 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+  }
 
-//    if ( !EventBus.getDefault().isRegistered(this) ){
-//      EventBus.getDefault().register(this);
-//    }
-
+  @OnClick(R.id.delete_load_button) public void reloadImage(){
+    
   }
 
   @Override
@@ -182,11 +184,6 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
     if ( image.isDeleted() ){
       showDownloadButton();
-
-      updateDocumentCount();
-      setEmptyDocumentCount();
-      setEmptyPageCount();
-      setEmptyZoom();
     } else {
 
       contentType = image.getContentType();
@@ -249,21 +246,14 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   }
 
   private void showDownloadButton() {
-    Timber.tag(TAG).e("SHOW DOWNLOAD BUTTON");
+    deletedImage.setVisibility(View.VISIBLE);
   }
 
   private void updateZoomVisibility() {
     if (withOutZoom){
       fullscreen.setVisibility(View.GONE);
     }
-  }
-
-  private void setEmptyZoom() {
-    fullscreen.setVisibility(View.GONE);
-  }
-
-  public void setEmptyDocumentCount(){
-    document_counter.setText("");
+    deletedImage.setVisibility(View.GONE);
   }
 
   public void updateDocumentCount(){
@@ -272,10 +262,6 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
   public void updatePageCount(){
     page_counter.setText( String.format("%s из %s страниц", pdfView.getCurrentPage() + 1, pdfView.getPageCount()) );
-  }
-
-  public void setEmptyPageCount(){
-    page_counter.setText( "" );
   }
 
   @OnClick(R.id.info_card_pdf_fullscreen_prev_document)
