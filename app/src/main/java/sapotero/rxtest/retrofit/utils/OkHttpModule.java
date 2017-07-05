@@ -31,6 +31,9 @@ public class OkHttpModule {
           HttpLoggingInterceptor.Level.BASIC
         )
       )
+      .addNetworkInterceptor(
+        new HttpLoggingInterceptor()
+      )
       // refactor
       // for test only!!!
 //      .addInterceptor( new NetworkSlowdown() )

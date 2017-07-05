@@ -85,6 +85,11 @@ public abstract class RDocument implements Persistable {
 //  @Index("processed_index")
   Boolean processed;
 
+  // resolved https://tasks.n-core.ru/browse/MVDESD-13232
+  // удалять обработанные за период текущая дата - Срок хранения ЭО в обработанных документах
+  @Column(value="0")
+  Integer processedDate;
+
 
   // из папки обработанное
 //  @Index("fromProcessedFolder_index")

@@ -32,7 +32,6 @@ import sapotero.rxtest.views.dialogs.InfoCardDialogFragment;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
 import sapotero.rxtest.views.dialogs.SelectTemplateDialogFragment;
 import sapotero.rxtest.views.fragments.DecisionFragment;
-import sapotero.rxtest.views.fragments.InfoCardDocumentsFragment;
 import sapotero.rxtest.views.fragments.InfoCardFieldsFragment;
 import sapotero.rxtest.views.fragments.InfoCardLinksFragment;
 import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
@@ -71,7 +70,7 @@ public interface DataComponent {
   void inject(StepperLoadDataFragment fragment);
   void inject(DecisionFragment fragment);
   void inject(InfoCardWebViewFragment fragment);
-  void inject(InfoCardDocumentsFragment fragment);
+
   void inject(SelectOshsDialogFragment fragment);
   void inject(InfoCardFieldsFragment fragment);
   void inject(InfoCardLinksFragment fragment);

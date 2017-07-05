@@ -24,6 +24,8 @@ import sapotero.rxtest.retrofit.utils.OkHttpModule;
 import sapotero.rxtest.utils.queue.utils.QueueManagerModule;
 import timber.log.Timber;
 
+// на проде отправлем ошибки сюда
+// rgiliazov6@mvd.ru
 
 @ReportsCrashes(
   mailTo = "esapozhnikov@n-core.ru",

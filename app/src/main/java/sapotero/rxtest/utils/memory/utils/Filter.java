@@ -65,8 +65,13 @@ public class Filter {
         }
 
         if (condition.getField().getLeftOperand() == RDocumentEntity.DOCUMENT_TYPE){
-          types.add( String.valueOf(condition.getField().getRightOperand()) );
-          Timber.tag(TAG).w("new index: %s", String.valueOf(condition.getField().getRightOperand()));
+
+          String indexName = getIndexName( String.valueOf(condition.getField().getRightOperand()));
+          if (indexName != null) {
+            Timber.tag(TAG).w("new index: %s", String.valueOf(condition.getField().getRightOperand()));
+            types.add( indexName );
+//            types.add( String.valueOf(condition.getField().getRightOperand()) );
+          }
         }
 
         if (condition.getField().getLeftOperand() == RDocumentEntity.CONTROL){
@@ -94,6 +99,7 @@ public class Filter {
   public Boolean hasStatuses() {
     return statuses.size() > 0;
   }
+
   public Boolean hasTypes() {
     return types.size() > 0;
   }
@@ -101,6 +107,7 @@ public class Filter {
   public ArrayList<String> getTypes() {
     return types;
   }
+
   public ArrayList<String> getStatuses() {
     return statuses;
   }
@@ -177,4 +184,16 @@ public class Filter {
   public Boolean getFavorites() {
     return isFavorites;
   }
+
+  public static String getIndexName(String raw_index) {
+    String indexName = null;
+
+    if ( raw_index != null ) {
+      String[] index = raw_index.split("_production_db_");
+      indexName = index[0];
+    }
+
+    return indexName;
+    }
+
 }

@@ -122,11 +122,12 @@ public class DBQueryBuilder {
           .filter( filter::isProcessed )
           .filter( filter::isFavorites )
           .filter( filter::isControl )
+          .toList()
 
-          .toSortedList(Filter::bySortKey)
+//          .toSortedList(Filter::bySortKey)
 
-//          .subscribeOn(Schedulers.computation())
-//          .observeOn(AndroidSchedulers.mainThread())
+          .subscribeOn(Schedulers.computation())
+          .observeOn(AndroidSchedulers.mainThread())
           .subscribe(
             docs -> {
 
@@ -136,7 +137,7 @@ public class DBQueryBuilder {
               if (docs.size() > 0){
                 hideEmpty();
                 for (InMemoryDocument doc: docs ) {
-                  Timber.tag(TAG).w("add %s", doc.getUid() );
+//                  Timber.tag(TAG).w("add %s", doc.getUid() );
                   InMemoryDocument docFromMem = store.getDocuments().get( doc.getUid() );
                   if ( docFromMem != null ) {
                     adapter.addItem( docFromMem );

@@ -9,7 +9,6 @@ import com.birbit.android.jobqueue.RetryConstraint;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.util.List;
 import java.util.Objects;
 
 import sapotero.rxtest.db.mapper.DocumentMapper;
@@ -30,8 +29,6 @@ import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.db.requery.utils.Deleter;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
-import sapotero.rxtest.retrofit.models.document.Exemplar;
-import sapotero.rxtest.retrofit.models.document.Status;
 import sapotero.rxtest.utils.memory.fields.DocumentType;
 import timber.log.Timber;
 

@@ -47,6 +47,7 @@ import sapotero.rxtest.jobs.bus.CreatePrimaryConsiderationJob;
 import sapotero.rxtest.jobs.bus.CreateTemplatesJob;
 import sapotero.rxtest.jobs.bus.CreateUrgencyJob;
 import sapotero.rxtest.jobs.bus.DeleteAssistantJob;
+import sapotero.rxtest.jobs.bus.DeleteProcessedImageJob;
 import sapotero.rxtest.retrofit.Api.AuthService;
 import sapotero.rxtest.retrofit.DocumentsService;
 import sapotero.rxtest.retrofit.models.AuthSignToken;
@@ -525,6 +526,8 @@ public class DataLoaderManager {
         indexes.add("orders_production_db_core_cards_orders_cards");
         indexes.add("outgoing_documents_production_db_core_cards_outgoing_documents_cards");
         indexes.add("incoming_orders_production_db_core_cards_incoming_orders_cards");
+
+        checkImagesToDelete();
       }
 
       if (button == null) {
@@ -607,6 +610,29 @@ public class DataLoaderManager {
         );
       }
     }
+  }
+
+  private void checkImagesToDelete() {
+    Timber.tag(TAG).e( "checkImagesToDelete" );
+
+    dataStore
+      .select(RDocumentEntity.class)
+      .where(RDocumentEntity.PROCESSED_DATE.ne( 0 ) )
+      .and(RDocumentEntity.CONTROL.eq(false))
+      .get().toObservable()
+      .map(RDocumentEntity::getUid)
+      .toList()
+      .observeOn(Schedulers.computation())
+      .subscribeOn(AndroidSchedulers.mainThread())
+      .subscribe(
+        data -> {
+          Timber.tag(TAG).e("DELETE UID: %s", data.size() );
+          for (String uid : data) {
+            jobManager.addJobInBackground( new DeleteProcessedImageJob(uid) );
+          }
+        },
+        Timber::e
+      );
   }
 
   @Nullable
@@ -751,7 +777,16 @@ public class DataLoaderManager {
     if ( processed_folder != null ) {
       dateFormat = new SimpleDateFormat("dd.MM.yyyy", new Locale("RU"));
       Calendar cal = Calendar.getInstance();
-      cal.add(Calendar.HOUR, -20*24);
+
+      int period = 1;
+
+      try {
+        period = Integer.parseInt( settings.getImageLoadPeriod() );
+      } catch (NumberFormatException e) {
+        Timber.e(e);
+      }
+
+      cal.add(Calendar.HOUR, -24*7*period);
       String date = dateFormat.format(cal.getTime());
       Timber.tag(TAG).e("PROCESSED EXIST! %s", date);
 

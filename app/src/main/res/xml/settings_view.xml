@@ -58,6 +58,28 @@
     </android.support.v7.preference.PreferenceCategory>
 
     <android.support.v7.preference.PreferenceCategory
+        android:title="Настройки ЭО">
+
+        <ListPreference
+            android:key="@string/processed_load_period_key"
+            android:title="Загрузка"
+            android:summary="За какой период загружать ЭО из папки «Обработанные»"
+            android:defaultValue="1"
+            android:entries="@array/settings_view_processed_load_period"
+            android:entryValues="@array/settings_view_processed_load_period_values" />
+
+        <ListPreference
+            android:key="@string/processed_delete_period_key"
+            android:title="Хранение"
+            android:summary="Срок хранения ЭО в обработанных документах"
+            android:defaultValue="1"
+            android:entries="@array/settings_view_processed_delete_period"
+            android:entryValues="@array/settings_view_processed_delete_period_values" />
+
+
+    </android.support.v7.preference.PreferenceCategory>
+
+    <android.support.v7.preference.PreferenceCategory
     android:title="Настройки резолюции">
         <SwitchPreference
             android:key="@string/hide_buttons_key"

@@ -13,11 +13,13 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.birbit.android.jobqueue.JobManager;
 import com.github.barteksc.pdfviewer.PDFView;
 
 import java.io.File;
@@ -41,8 +43,12 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
+import sapotero.rxtest.jobs.bus.ReloadProcessedImageJob;
 import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.memory.MemoryStore;
+import sapotero.rxtest.utils.memory.fields.LabelType;
+import sapotero.rxtest.utils.memory.utils.Transaction;
 import sapotero.rxtest.views.activities.DocumentImageFullScreenActivity;
 import sapotero.rxtest.views.adapters.DocumentLinkAdapter;
 import sapotero.rxtest.views.custom.CircleLeftArrow;
@@ -54,6 +60,8 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   public static final int REQUEST_CODE_INDEX = 1;
   @Inject Settings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
+  @Inject MemoryStore store;
+  @Inject JobManager jobManager;
 
   private OnFragmentInteractionListener mListener;
   private Context mContext;
@@ -69,6 +77,8 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   @BindView(R.id.info_card_pdf_fullscreen_page_title)       TextView document_title;
   @BindView(R.id.info_card_pdf_fullscreen_page_counter)     TextView page_counter;
   @BindView(R.id.info_card_pdf_fullscreen_button) FrameLayout fullscreen;
+  @BindView(R.id.deleted_image) FrameLayout deletedImage;
+  @BindView(R.id.info_card_pdf_reload) Button reloadImageButton;
 
   @BindView(R.id.info_card_pdf_no_files) TextView no_files;
   @BindView(R.id.info_card_pdf_wrapper)  FrameLayout pdf_wrapper;
@@ -92,18 +102,14 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-
-//    if ( !EventBus.getDefault().isRegistered(this) ){
-//      EventBus.getDefault().register(this);
-//    }
-
   }
+
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.fragment_info_card_documents, container, false);
     ButterKnife.bind(this, view);
-    EsdApplication.getDataComponent().inject( this );
+    EsdApplication.getManagerComponent().inject( this );
 
     if (null != savedInstanceState) {
       index = savedInstanceState.getInt(STATE_CURRENT_PAGE_INDEX, 0);
@@ -179,64 +185,79 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   private void setPdfPreview() throws FileNotFoundException {
 
     Image image = adapter.getItem(index);
-    contentType = image.getContentType();
-    document_title.setText( image.getTitle() );
 
-    file = new File(getContext().getFilesDir(), String.format( "%s_%s", image.getMd5(), image.getTitle() ));
+    if ( image.isDeleted() ){
+      showDownloadButton();
+    } else {
 
-    if ( Objects.equals(contentType, "application/pdf") ) {
-      InputStream targetStream = new FileInputStream(file);
+      contentType = image.getContentType();
+      document_title.setText( image.getTitle() );
 
-      if (file.exists()) {
-        pdfView
-          .fromStream(targetStream)
+      file = new File(getContext().getFilesDir(), String.format( "%s_%s", image.getMd5(), image.getTitle() ));
+
+      if ( Objects.equals(contentType, "application/pdf") ) {
+        InputStream targetStream = new FileInputStream(file);
+
+        if (file.exists()) {
+          pdfView
+            .fromStream(targetStream)
 //         .fromFile( file )
-          .enableSwipe(true)
-          .enableDoubletap(true)
-          .defaultPage(0)
-          .swipeHorizontal(false)
-          .onRender((nbPages, pageWidth, pageHeight) -> pdfView.fitToWidth())
-          .onLoad(nbPages -> {
-            Timber.tag(TAG).i(" onLoad");
-          })
-          .onError(t -> {
-            Timber.tag(TAG).i(" onError");
-          })
-          .onDraw((canvas, pageWidth, pageHeight, displayedPage) -> {
-            Timber.tag(TAG).i(" onDraw");
-          })
-          .onPageChange((page, pageCount) -> {
-            Timber.tag(TAG).i(" onPageChange");
-            updatePageCount();
-          })
-          .enableAnnotationRendering(true)
-          .scrollHandle(null)
-          .load();
+            .enableSwipe(true)
+            .enableDoubletap(true)
+            .defaultPage(0)
+            .swipeHorizontal(false)
+            .onRender((nbPages, pageWidth, pageHeight) -> pdfView.fitToWidth())
+            .onLoad(nbPages -> {
+              Timber.tag(TAG).i(" onLoad");
+            })
+            .onError(t -> {
+              Timber.tag(TAG).i(" onError");
+            })
+            .onDraw((canvas, pageWidth, pageHeight, displayedPage) -> {
+              Timber.tag(TAG).i(" onDraw");
+            })
+            .onPageChange((page, pageCount) -> {
+              Timber.tag(TAG).i(" onPageChange");
+              updatePageCount();
+            })
+            .enableAnnotationRendering(true)
+            .scrollHandle(null)
+            .load();
 
 //        pdfView.useBestQuality(true);
 //        pdfView.setDrawingCacheEnabled(true);
 //        pdfView.stopFling();
+        }
+
+        pdfView.setVisibility(View.VISIBLE);
+        open_in_another_app_wrapper.setVisibility(View.GONE);
+        page_counter.setVisibility(View.VISIBLE);
+
+      } else {
+        pdfView.setVisibility(View.GONE);
+        open_in_another_app_wrapper.setVisibility(View.VISIBLE);
+        page_counter.setVisibility(View.INVISIBLE);
       }
 
-      pdfView.setVisibility(View.VISIBLE);
-      open_in_another_app_wrapper.setVisibility(View.GONE);
-      page_counter.setVisibility(View.VISIBLE);
+      updateDocumentCount();
+      updatePageCount();
+      updateZoomVisibility();
 
-    } else {
-      pdfView.setVisibility(View.GONE);
-      open_in_another_app_wrapper.setVisibility(View.VISIBLE);
-      page_counter.setVisibility(View.INVISIBLE);
     }
 
-    updateDocumentCount();
-    updatePageCount();
-    updateZoomVisibility();
+
+
+  }
+
+  private void showDownloadButton() {
+    deletedImage.setVisibility(View.VISIBLE);
   }
 
   private void updateZoomVisibility() {
     if (withOutZoom){
       fullscreen.setVisibility(View.GONE);
     }
+    deletedImage.setVisibility(View.GONE);
   }
 
   public void updateDocumentCount(){
@@ -259,6 +280,20 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
     settings.setImageIndex( index );
     showPdf();
+  }
+
+  @OnClick(R.id.info_card_pdf_reload)
+  public void reloadImage(){
+
+    Transaction transaction = new Transaction();
+    transaction
+      .from( store.getDocuments().get( settings.getUid() ) )
+      .setLabel(LabelType.SYNC);
+    store.process( transaction );
+
+    jobManager.addJobInBackground( new ReloadProcessedImageJob( settings.getUid() ) );
+
+    getActivity().finish();
   }
 
   @OnClick(R.id.info_card_pdf_fullscreen_next_document)

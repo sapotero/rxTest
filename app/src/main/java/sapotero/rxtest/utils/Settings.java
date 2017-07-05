@@ -54,6 +54,8 @@ public class Settings {
   private static String YEARS_KEY;
   private static String START_PAGE_KEY;
   private static String START_JOURNAL_KEY;
+  private static String IMAGE_LOADED_KEY;
+  private static String IMAGE_DELETE_KEY;
   private static String SHOW_WITHOUT_PROJECT_KEY;
   private static String HIDE_PRIMARY_CONSIDERATION_KEY;
   private static String HIDE_BUTTONS_KEY;
@@ -101,6 +103,8 @@ public class Settings {
   private Preference<Set<String>> years;
   private Preference<String> prevDialogComment;
   private Preference<String> startPage;
+  private Preference<String> image_load_period;
+  private Preference<String> image_delete_period;
   private Preference<String> startJournal;
   private Preference<Boolean> showWithoutProject;
   private Preference<Boolean> hidePrimaryConsideration;
@@ -140,6 +144,8 @@ public class Settings {
     YEARS_KEY                      = context.getResources().getString(R.string.years_key);
     START_PAGE_KEY                 = context.getResources().getString(R.string.start_page_key);
     START_JOURNAL_KEY              = context.getResources().getString(R.string.start_journal_key);
+    IMAGE_LOADED_KEY               = context.getResources().getString(R.string.processed_load_period_key);
+    IMAGE_DELETE_KEY               = context.getResources().getString(R.string.processed_delete_period_key);
     SHOW_WITHOUT_PROJECT_KEY       = context.getResources().getString(R.string.show_without_project_key);
     HIDE_PRIMARY_CONSIDERATION_KEY = context.getResources().getString(R.string.hide_primary_consideration_key);
     HIDE_BUTTONS_KEY               = context.getResources().getString(R.string.hide_buttons_key);
@@ -184,6 +190,8 @@ public class Settings {
     years                          = settings.getStringSet(YEARS_KEY);
     prevDialogComment              = settings.getString(PREV_DIALOG_COMMENT_KEY);
     startPage                      = settings.getString(START_PAGE_KEY);
+    image_load_period              = settings.getString(IMAGE_LOADED_KEY);
+    image_delete_period            = settings.getString(IMAGE_DELETE_KEY);
     startJournal                   = settings.getString(START_JOURNAL_KEY);
     showWithoutProject             = settings.getBoolean(SHOW_WITHOUT_PROJECT_KEY);
     hidePrimaryConsideration       = settings.getBoolean(HIDE_PRIMARY_CONSIDERATION_KEY);
@@ -530,6 +538,14 @@ public class Settings {
 
   public String getStartPage() {
     return getString(startPage);
+  }
+
+  public String getImageLoadPeriod() {
+    return getString(image_load_period);
+  }
+
+  public String getImageDeletePeriod() {
+    return getString(image_delete_period);
   }
 
   public String getStartJournal() {

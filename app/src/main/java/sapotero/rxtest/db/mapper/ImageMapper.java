@@ -28,6 +28,7 @@ public class ImageMapper extends AbstractMapper<Image, RImageEntity> {
     entity.setLoading(false);
     entity.setComplete(false);
     entity.setError(false);
+    entity.setDeleted(false);
 
     return entity;
   }
@@ -44,6 +45,8 @@ public class ImageMapper extends AbstractMapper<Image, RImageEntity> {
     model.setContentType(entity.getContentType());
     model.setSigned(entity.isSigned());
     model.setCreatedAt(entity.getCreatedAt());
+    model.setCreatedAt(entity.getCreatedAt());
+    model.setDeleted(entity.isDeleted());
 
     return model;
   }

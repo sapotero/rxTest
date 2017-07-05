@@ -427,7 +427,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
   public void addItem(InMemoryDocument document) {
     if ( !Holder.MAP.containsKey( document.getUid()) ){
-      Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Add document into adapter %s", document.getUid() );
+//      Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Add document into adapter %s", document.getUid() );
       documents.add(document);
       notifyItemInserted( documents.size() );
 //      Holder.MAP.put( document.getUid(), documents.s );

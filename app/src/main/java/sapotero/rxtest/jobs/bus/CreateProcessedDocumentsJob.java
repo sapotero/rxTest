@@ -9,6 +9,9 @@ import com.birbit.android.jobqueue.RetryConstraint;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.math.BigDecimal;
+import java.util.Date;
+
 import sapotero.rxtest.db.mapper.DocumentMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
@@ -40,10 +43,23 @@ public class CreateProcessedDocumentsJob extends DocumentJob {
     loadDocument(uid, TAG);
   }
 
+
   @Override
   public void doAfterLoad(DocumentInfo document) {
     DocumentMapper documentMapper = mappers.getDocumentMapper();
     RDocumentEntity doc = new RDocumentEntity();
+
+    int period = 1;
+
+    try {
+      period = Integer.valueOf( settings.getImageDeletePeriod() );
+    } catch (NumberFormatException e) {
+      Timber.e(e);
+    }
+
+    long current = new Date().getTime()/1000 + period * 7 * 24 * 60 * 60;
+
+    doc.setProcessedDate( new BigDecimal( current ).intValueExact() );
 
     // Положить документ в папку Обработанные, если не адресован текущему пользователю
     if ( !addressedToCurrentUser( document, doc, documentMapper ) ) {
@@ -56,6 +72,7 @@ public class CreateProcessedDocumentsJob extends DocumentJob {
       doc.setFolder(folder);
       doc.setFromProcessedFolder(true);
       doc.setProcessed(true);
+      doc.setProcessedDate( new BigDecimal( current ).intValueExact() );
 
       saveDocument(document, doc, false, TAG);
     }
