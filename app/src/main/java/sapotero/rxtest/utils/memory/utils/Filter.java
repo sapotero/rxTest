@@ -99,6 +99,7 @@ public class Filter {
   public Boolean hasStatuses() {
     return statuses.size() > 0;
   }
+
   public Boolean hasTypes() {
     return types.size() > 0;
   }
@@ -106,6 +107,7 @@ public class Filter {
   public ArrayList<String> getTypes() {
     return types;
   }
+
   public ArrayList<String> getStatuses() {
     return statuses;
   }

@@ -629,11 +629,11 @@ public class DataLoaderManager {
     long current = new Date().getTime()/1000 - period * 7 * 24 * 60 * 60;
 
     dataStore
-      .select(RDocumentEntity.UID)
+      .select(RDocumentEntity.class)
       .where(RDocumentEntity.PROCESSED_DATE.ne( new BigDecimal(current).intValueExact()) )
       .and(RDocumentEntity.CONTROL.eq(false))
       .get().toObservable()
-      .map(tuple -> String.valueOf( tuple.get(1) ))
+      .map(RDocumentEntity::getUid)
       .toList()
       .observeOn(Schedulers.computation())
       .subscribeOn(AndroidSchedulers.mainThread())

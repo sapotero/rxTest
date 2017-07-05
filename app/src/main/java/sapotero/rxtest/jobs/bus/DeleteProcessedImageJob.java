@@ -6,7 +6,13 @@ import com.birbit.android.jobqueue.CancelReason;
 import com.birbit.android.jobqueue.Params;
 import com.birbit.android.jobqueue.RetryConstraint;
 
+import java.util.Set;
+
+import io.requery.rx.RxScalar;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.db.requery.models.images.RImage;
+import sapotero.rxtest.db.requery.models.images.RImageEntity;
+import timber.log.Timber;
 
 
 public class DeleteProcessedImageJob extends BaseJob {
@@ -22,9 +28,36 @@ public class DeleteProcessedImageJob extends BaseJob {
 
   @Override
   public void onAdded() {
-    RDocumentEntity doc = dataStore
-      .select(RDocumentEntity.class)
-      .get().firstOrNull();
+    if (uid != null) {
+      Timber.e("DOCUMENT UID: %s", uid);
+      RDocumentEntity doc = dataStore
+        .select(RDocumentEntity.class)
+        .where(RDocumentEntity.UID.eq(uid))
+        .get().firstOrNull();
+
+      if (doc != null) {
+
+        Set<RImage> images = doc.getImages();
+        if (images.size() > 0){
+          for (RImage img: images) {
+            RImageEntity image = (RImageEntity) img;
+
+            if ( image.isDeleted() != null && !image.isDeleted() ){
+              RxScalar<Integer> img_db = dataStore
+                .update(RImageEntity.class)
+                .set(RImageEntity.DELETED, true)
+                .where(RImageEntity.ID.eq(image.getId()))
+                .get();
+              Timber.e("DELETED IMAGE: %s", image.getId());
+            } else {
+              Timber.e("ALREADY DELETED IMAGE: %s", image.getId());
+            }
+
+          }
+        }
+
+      }
+    }
 
     /*
     * 0 - добавить поле грохнутое в RImage

@@ -25,6 +25,8 @@ public abstract class RImage {
   String createdAt;
   Boolean signed;
 
+  Boolean deleted;
+
 
   @Column(value="false")
   Boolean loading;
