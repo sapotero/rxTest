@@ -11,11 +11,9 @@ import com.birbit.android.jobqueue.TagConstraint;
 import org.greenrobot.eventbus.EventBus;
 import org.json.JSONObject;
 
-import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -618,19 +616,9 @@ public class DataLoaderManager {
   private void checkImagesToDelete() {
     Timber.tag(TAG).e( "checkImagesToDelete" );
 
-    int period = 1;
-
-    try {
-      period = Integer.valueOf( settings.getImageDeletePeriod() );
-    } catch (NumberFormatException e) {
-      Timber.e(e);
-    }
-
-    long current = new Date().getTime()/1000 - period * 7 * 24 * 60 * 60;
-
     dataStore
       .select(RDocumentEntity.class)
-      .where(RDocumentEntity.PROCESSED_DATE.ne( new BigDecimal(current).intValueExact()) )
+      .where(RDocumentEntity.PROCESSED_DATE.ne( 0 ) )
       .and(RDocumentEntity.CONTROL.eq(false))
       .get().toObservable()
       .map(RDocumentEntity::getUid)

@@ -182,6 +182,11 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
     if ( image.isDeleted() ){
       showDownloadButton();
+
+      updateDocumentCount();
+      setEmptyDocumentCount();
+      setEmptyPageCount();
+      setEmptyZoom();
     } else {
 
       contentType = image.getContentType();
@@ -232,12 +237,15 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
         open_in_another_app_wrapper.setVisibility(View.VISIBLE);
         page_counter.setVisibility(View.INVISIBLE);
       }
+
+      updateDocumentCount();
+      updatePageCount();
+      updateZoomVisibility();
+
     }
 
 
-    updateDocumentCount();
-    updatePageCount();
-    updateZoomVisibility();
+
   }
 
   private void showDownloadButton() {
@@ -250,12 +258,24 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     }
   }
 
+  private void setEmptyZoom() {
+    fullscreen.setVisibility(View.GONE);
+  }
+
+  public void setEmptyDocumentCount(){
+    document_counter.setText("");
+  }
+
   public void updateDocumentCount(){
     document_counter.setText( String.format("%s из %s", index + 1, adapter.getCount()) );
   }
 
   public void updatePageCount(){
     page_counter.setText( String.format("%s из %s страниц", pdfView.getCurrentPage() + 1, pdfView.getPageCount()) );
+  }
+
+  public void setEmptyPageCount(){
+    page_counter.setText( "" );
   }
 
   @OnClick(R.id.info_card_pdf_fullscreen_prev_document)

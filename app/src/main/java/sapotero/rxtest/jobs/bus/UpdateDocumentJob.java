@@ -9,7 +9,6 @@ import com.birbit.android.jobqueue.RetryConstraint;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.util.List;
 import java.util.Objects;
 
 import sapotero.rxtest.db.mapper.DocumentMapper;
@@ -29,8 +28,6 @@ import sapotero.rxtest.db.requery.models.exemplars.RExemplarEntity;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
-import sapotero.rxtest.retrofit.models.document.Exemplar;
-import sapotero.rxtest.retrofit.models.document.Status;
 import sapotero.rxtest.utils.memory.fields.DocumentType;
 import timber.log.Timber;
 
@@ -307,6 +304,9 @@ public class UpdateDocumentJob extends DocumentJob {
       int count = dataStore
         .delete( RImageEntity.class )
         .where( RImageEntity.DOCUMENT_ID.eq( document.getId() ) )
+        // переделать
+        // удаление образов из обработынных
+        .and( RImageEntity.DELETED.ne( true ) )
         .get().value();
 
       Timber.tag(TAG).d("Deleted " + count + " images from document with ID " + document.getId());

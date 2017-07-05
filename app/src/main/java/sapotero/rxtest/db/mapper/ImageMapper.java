@@ -28,6 +28,7 @@ public class ImageMapper extends AbstractMapper<Image, RImageEntity> {
     entity.setLoading(false);
     entity.setComplete(false);
     entity.setError(false);
+    entity.setDeleted(false);
 
     return entity;
   }
