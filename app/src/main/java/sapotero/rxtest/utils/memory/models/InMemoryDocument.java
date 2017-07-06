@@ -19,6 +19,7 @@ public class InMemoryDocument implements Serializable {
   public Integer year;
   public Boolean hasDecision = false;
   public Boolean processed   = false;
+  public Boolean allowUpdate = true;
 
   public Document document;
   private InMemoryState state = InMemoryState.LOADING;
@@ -110,5 +111,13 @@ public class InMemoryDocument implements Serializable {
       ", md5='" + md5 + '\'' +
       ", action=" + state +
       " }";
+  }
+
+  public Boolean isAllowUpdate() {
+    return allowUpdate;
+  }
+
+  public void setAllowUpdate(Boolean allowUpdate) {
+    this.allowUpdate = allowUpdate;
   }
 }

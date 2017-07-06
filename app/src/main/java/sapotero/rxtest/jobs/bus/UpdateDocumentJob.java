@@ -33,6 +33,7 @@ import sapotero.rxtest.retrofit.models.document.DocumentInfo;
 import sapotero.rxtest.retrofit.models.document.Exemplar;
 import sapotero.rxtest.retrofit.models.document.Status;
 import sapotero.rxtest.utils.memory.fields.DocumentType;
+import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import timber.log.Timber;
 
 // Updates ordinary documents, projects, documents from favorite folder and documents from processed folder
@@ -107,9 +108,28 @@ public class UpdateDocumentJob extends DocumentJob {
 
   @Override
   public void onRun() throws Throwable {
-    Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Load document");
+    Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Starting job");
 
-    loadDocument(uid, TAG);
+    RDocumentEntity documentExisting = dataStore
+      .select(RDocumentEntity.class)
+      .where(RDocumentEntity.UID.eq(uid))
+      .get().firstOrNull();
+
+    if ( documentExisting != null && documentExisting.isChanged() != null && !documentExisting.isChanged() ) {
+      Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Loading document");
+      InMemoryDocument docInMemory = store.getDocuments().get(uid);
+
+      if ( docInMemory != null ) {
+        Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: setAllowUpdate( true )");
+        docInMemory.setAllowUpdate( true );
+        store.getDocuments().put(uid, docInMemory);
+      }
+
+      loadDocument(uid, TAG);
+
+    } else {
+      Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Document has Sync label, quit loading");
+    }
   }
 
   @Override
@@ -121,7 +141,7 @@ public class UpdateDocumentJob extends DocumentJob {
       .where(RDocumentEntity.UID.eq(uid))
       .get().firstOrNull();
 
-    if (  documentExisting != null && documentExisting.isChanged() != null && !documentExisting.isChanged() ) {
+    if ( documentExisting != null && documentExisting.isChanged() != null && !documentExisting.isChanged() ) {
       Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Starting update");
 
       // Force update, if document exists and it must be favorite, because it is from favorites folder
@@ -207,15 +227,27 @@ public class UpdateDocumentJob extends DocumentJob {
         documentExisting.setFromLinks( false );
         documentExisting.setChanged( false );
 
-        Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: writing update to data store");
-        updateDocument( documentReceived, documentExisting, TAG );
+        boolean update = true;
+
+        InMemoryDocument docInMemory = store.getDocuments().get(uid);
+
+        if ( docInMemory != null && !docInMemory.isAllowUpdate() ) {
+          update = false;
+        }
+
+        if ( update ) {
+          Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: writing update to data store");
+          updateDocument( documentReceived, documentExisting, TAG );
+        } else {
+          Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Update not allowed, quit");
+        }
 
       } else {
         Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: MD5 equal");
         Timber.tag(TAG).d("MD5 equal");
       }
     } else {
-      Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Document has Sync label, quit");
+      Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Document has Sync label, quit updating in DB");
     }
   }
 

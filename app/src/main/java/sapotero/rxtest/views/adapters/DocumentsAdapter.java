@@ -164,7 +164,9 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
   }
 
   private void removeItem(int index, InMemoryDocument doc) {
+    Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: NotifyItemRemoved");
     notifyItemRemoved(index);
+    Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Remove from list");
     documents.remove(doc);
     recreateHash();
 
@@ -429,12 +431,15 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
   }
 
   private void recreateHash() {
+    Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Recreating hash");
 
     Holder.MAP = new HashMap<>();
 
     for (int i = 0; i < documents.size(); i++) {
       Holder.MAP.put( documents.get(i).getUid(), i );
     }
+
+    Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Hash recreated");
   }
 
   class DocumentViewHolder extends RecyclerView.ViewHolder {
