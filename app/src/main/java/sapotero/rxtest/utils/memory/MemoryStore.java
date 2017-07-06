@@ -46,6 +46,10 @@ public class MemoryStore implements Processable{
     this.sub = PublishSubject.create();
     this.counter = new Counter();
 
+    // FIXME: 06.07.17
+    // https://totallylazy.com/
+    // коллекции - totallylazy
+
     this.documents  = new HashMap<>();
 
     this.subscription = new CompositeSubscription();

@@ -11,8 +11,11 @@ import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
+import com.googlecode.totallylazy.Sequence;
+
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import javax.inject.Inject;
@@ -33,6 +36,8 @@ import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.utils.memory.utils.Filter;
 import timber.log.Timber;
+
+import static com.googlecode.totallylazy.Sequences.sequence;
 
 public class ButtonBuilder {
 
@@ -211,18 +216,33 @@ public class ButtonBuilder {
 //      Timber.e(e);
 //    }
 
+    Sequence<InMemoryDocument> _docs = sequence(store.getDocuments().values());
 
-    Observable
-      .from( store.getDocuments().values() )
-
+    List<InMemoryDocument> lazy_docs = _docs
       .filter( filter::byYear)
       .filter( filter::byType)
       .filter( filter::byStatus)
       .filter( filter::isProcessed )
       .filter( filter::isFavorites )
       .filter( filter::isControl )
+      .toList();
 
-      .map( InMemoryDocument::getUid )
+//    compositeSubscription.add(
+      Observable
+//          .from( store.getDocuments().values() )
+        .from( lazy_docs )
+
+//    Observable
+//      .from( store.getDocuments().values() )
+//
+//      .filter( filter::byYear)
+//      .filter( filter::byType)
+//      .filter( filter::byStatus)
+//      .filter( filter::isProcessed )
+//      .filter( filter::isFavorites )
+//      .filter( filter::isControl )
+//
+//      .map( InMemoryDocument::getUid )
       .toList()
       .subscribeOn( Schedulers.computation() )
       .observeOn( AndroidSchedulers.mainThread() )

@@ -200,6 +200,8 @@ dependencies {
     compile 'com.facebook.stetho:stetho-okhttp3:1.4.1'
     /*debug*/
 
+    compile group:'com.googlecode.totallylazy', name:'totallylazy', version:'1.86'
+
 
 
     compile 'ch.acra:acra:4.9.0'
@@ -227,6 +229,9 @@ allprojects {
     repositories {
         maven {
             url "https://jitpack.io"
+        }
+        maven {
+            url "http://repo.bodar.com/"
         }
     }
 }

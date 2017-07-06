@@ -3,6 +3,8 @@ package sapotero.rxtest.views.adapters.models;
 import android.content.Context;
 import android.widget.TextView;
 
+import com.googlecode.totallylazy.Sequence;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -24,6 +26,8 @@ import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import sapotero.rxtest.views.menu.fields.MainMenuButton;
 import sapotero.rxtest.views.menu.fields.MainMenuItem;
 import timber.log.Timber;
+
+import static com.googlecode.totallylazy.Sequences.sequence;
 
 public class DocumentTypeItem {
   @Inject SingleEntityStore<Persistable> dataStore;
@@ -80,33 +84,56 @@ public class DocumentTypeItem {
     Filter p_filter = new Filter(_primary);
     Filter r_filter = new Filter(_report);
 
+    Sequence<InMemoryDocument> _docs = sequence(store.getDocuments().values());
 
-    Observable<Integer> primary = Observable
-      .from(store.getDocuments().values())
+    List<InMemoryDocument> lazy_docs_p = _docs
       .filter(p_filter::byYear)
       .filter(p_filter::byType)
       .filter(p_filter::byStatus)
-      .map(InMemoryDocument::getUid)
-      .toList()
-      .map(List::size);
+      .toList();
 
-    Observable<Integer> report = Observable
-      .from(store.getDocuments().values())
+    List<InMemoryDocument> lazy_docs_r = _docs
       .filter(r_filter::byYear)
       .filter(r_filter::byType)
       .filter(r_filter::byStatus)
       .filter(r_filter::isProcessed )
-      .map(InMemoryDocument::getUid)
-      .toList()
-      .map(List::size);
+      .toList();
 
-    Observable<Integer> proj = Observable
-      .from( store.getDocuments().values() )
+    List<InMemoryDocument> lazy_docs_sign = _docs
       .filter(project_filter::byYear)
       .filter(project_filter::byType)
       .filter(project_filter::byStatus)
       .filter(project_filter::isProcessed )
-      .map( InMemoryDocument::getUid )
+      .toList();
+
+
+    Observable<Integer> primary = Observable
+      .from( lazy_docs_p )
+//      .filter(p_filter::byYear)
+//      .filter(p_filter::byType)
+//      .filter(p_filter::byStatus)
+//      .map(InMemoryDocument::getUid)
+      .toList()
+      .map(List::size);
+
+    Observable<Integer> report = Observable
+      .from(lazy_docs_r)
+//      .filter(r_filter::byYear)
+//      .filter(r_filter::byType)
+//      .filter(r_filter::byStatus)
+//      .filter(r_filter::isProcessed )
+//      .map(InMemoryDocument::getUid)
+      .toList()
+      .map(List::size);
+
+    Observable<Integer> proj = Observable
+      .from(lazy_docs_sign)
+//      .from( store.getDocuments().values() )
+//      .filter(project_filter::byYear)
+//      .filter(project_filter::byType)
+//      .filter(project_filter::byStatus)
+//      .filter(project_filter::isProcessed )
+//      .map( InMemoryDocument::getUid )
       .toList()
       .map(List::size);
 
@@ -137,17 +164,28 @@ public class DocumentTypeItem {
     Filter filter = new Filter(_conditions);
 
 
-//    subscription.add(
-    Observable
-      .from( store.getDocuments().values() )
+    Sequence<InMemoryDocument> _docs = sequence(store.getDocuments().values());
 
+    List<InMemoryDocument> lazy_docs = _docs
       .filter( filter::byYear)
       .filter( filter::byType)
       .filter( filter::byStatus)
       .filter( filter::isProcessed )
       .filter( filter::isFavorites )
       .filter( filter::isControl )
-      .map( InMemoryDocument::getUid )
+      .toList();
+
+    Observable
+      .from( lazy_docs )
+//      .from( store.getDocuments().values() )
+//
+//      .filter( filter::byYear)
+//      .filter( filter::byType)
+//      .filter( filter::byStatus)
+//      .filter( filter::isProcessed )
+//      .filter( filter::isFavorites )
+//      .filter( filter::isControl )
+//      .map( InMemoryDocument::getUid )
       .toList()
       .subscribeOn( Schedulers.computation() )
       .observeOn( AndroidSchedulers.mainThread() )

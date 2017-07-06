@@ -6,9 +6,11 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+import com.googlecode.totallylazy.Sequence;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -32,6 +34,8 @@ import sapotero.rxtest.views.custom.OrganizationSpinner;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import sapotero.rxtest.views.menu.fields.MainMenuItem;
 import timber.log.Timber;
+
+import static com.googlecode.totallylazy.Sequences.sequence;
 
 public class DBQueryBuilder {
 
@@ -99,19 +103,42 @@ public class DBQueryBuilder {
       Timber.tag(TAG).w("!!!!! byStatus : %s", new Gson().toJson( filter.getStatuses() ) );
       Timber.tag(TAG).w("!!!!! indexes  : %s", new Gson().toJson(  filter.getTypes() ) );
 
+      long startTime = System.nanoTime();
+      Sequence<InMemoryDocument> _docs = sequence(store.getDocuments().values());
+
+      List<InMemoryDocument> lazy_docs = _docs
+        .filter(filter::byYear)
+        .filter(this::byOrganization)
+        .filter(this::byDecision)
+        .filter(filter::byType)
+        .filter(filter::byStatus)
+        .filter(filter::isProcessed)
+        .filter(filter::isFavorites)
+        .filter(filter::isControl)
+        .toList();
+      long endTime = System.nanoTime();
+
+      long duration = (endTime - startTime)/1000000;
+
+      Timber.e("SIZE: %s | %sms", lazy_docs.size(), duration);
+
+
+
+
+      long startTimeSub = System.nanoTime();
       compositeSubscription.add(
         Observable
-          .from( store.getDocuments().values() )
-          .filter( filter::byYear )
-          .filter( this::byOrganization )
-          .filter( this::byDecision )
-          .filter( filter::byType)
-          .filter( filter::byStatus)
-          .filter( filter::isProcessed )
-          .filter( filter::isFavorites )
-          .filter( filter::isControl )
+//          .from( store.getDocuments().values() )
+          .from( lazy_docs )
+//          .filter( filter::byYear )
+//          .filter( this::byOrganization )
+//          .filter( this::byDecision )
+//          .filter( filter::byType)
+//          .filter( filter::byStatus)
+//          .filter( filter::isProcessed )
+//          .filter( filter::isFavorites )
+//          .filter( filter::isControl )
           .toList()
-
 //          .toSortedList(Filter::bySortKey)
 
           .subscribeOn(Schedulers.computation())
@@ -119,7 +146,11 @@ public class DBQueryBuilder {
           .subscribe(
             docs -> {
 
-              Timber.tag(TAG).w("size %s", docs.size() );
+              long endTimeSub = System.nanoTime();
+
+              long durationSub = (endTimeSub - startTimeSub)/1000000;
+
+              Timber.tag(TAG).w("size %s | %sms", docs.size(), durationSub );
               adapter.removeAllWithRange();
 
               if (docs.size() > 0){
@@ -144,9 +175,6 @@ public class DBQueryBuilder {
 
 
   }
-
-  // FIXME: 06.07.17
-  // перенести в фильтр
 
   @NonNull
   private Boolean byOrganization(InMemoryDocument doc) {
@@ -175,7 +203,6 @@ public class DBQueryBuilder {
 
   // FIXME: 06.07.17
   // перенести в фильтр
-
   // resolved https://tasks.n-core.ru/browse/MVDESD-13400
   // Не отображать документы без резолюции, если включена соответствующая опция
   public Boolean byDecision(InMemoryDocument doc) {

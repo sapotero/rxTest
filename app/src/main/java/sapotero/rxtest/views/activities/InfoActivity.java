@@ -63,6 +63,7 @@ import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.managers.toolbar.ToolbarManager;
 import sapotero.rxtest.services.task.UpdateCurrentDocumentTask;
 import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.adapters.TabSigningPagerAdapter;
 import sapotero.rxtest.views.fragments.InfoActivityDecisionPreviewFragment;
@@ -84,6 +85,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   @Inject JobManager jobManager;
   @Inject Settings settings;
+  @Inject MemoryStore store;
 
   @Inject SingleEntityStore<Persistable> dataStore;
 
@@ -108,7 +110,14 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     EsdApplication.getManagerComponent().inject(this);
 
     clearImageIndex();
+
   }
+
+
+
+
+
+
 
   private void initInfoActivity() {
     if (EventBus.getDefault().isRegistered(this)) {
@@ -128,22 +137,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     setTabContent();
     setPreview();
 
-//    initLogger();
   }
-
-//  private void initLogger() {
-//    loggerSubscription = store.getPublishSubject()
-//      .filter( inMemoryDocument -> inMemoryDocument.getStatus() == Fields.Status.SIGNING )
-//      .subscribeOn(Schedulers.computation())
-//      .observeOn(AndroidSchedulers.mainThread())
-//      .subscribe(
-//        doc -> {
-//          Timber.tag(TAG).d(doc.toString());
-//        },
-//        Timber::e
-//      );
-//  }
-
 
   private void setTabContent() {
 
@@ -324,9 +318,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
     chechPrimaryConsiderationDialog();
 
-//    startThreadedUpdate();
-//    Keyboard.hide(this);
-
   }
 
   private void chechPrimaryConsiderationDialog() {
@@ -447,7 +438,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   public void onMessageEvent(UpdateCurrentDocumentEvent event) throws Exception {
     Timber.d("UpdateCurrentDocumentEvent");
     updateCurrent();
-
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
