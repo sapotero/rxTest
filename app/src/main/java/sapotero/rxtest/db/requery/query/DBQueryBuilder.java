@@ -249,8 +249,10 @@ public class DBQueryBuilder {
 
       Filter filter = new Filter(conditions);
 
-      Observable
-        .from( store.getDocuments().values() )
+
+      Sequence<InMemoryDocument> _docs = sequence(store.getDocuments().values());
+
+      List<Signer> lazy_docs = _docs
         .filter( filter::byYear)
         .filter( this::byDecision )
         .filter( filter::byType)
@@ -258,10 +260,13 @@ public class DBQueryBuilder {
         .filter( filter::isProcessed )
         .filter( filter::isFavorites )
         .filter( filter::isControl )
-
         .map(InMemoryDocument::getDocument)
         .filter(document -> document.getSigner() != null)
         .map(Document::getSigner)
+        .toList();
+
+      Observable
+        .from( lazy_docs )
         .toList()
         .subscribeOn(Schedulers.computation())
         .observeOn(AndroidSchedulers.mainThread())
