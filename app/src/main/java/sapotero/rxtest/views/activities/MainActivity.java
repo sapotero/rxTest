@@ -157,13 +157,11 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       .registerCallBack(this);
     menuBuilder.build();
 
-    dbQueryBuilder = new DBQueryBuilder(this)
+    dbQueryBuilder = new DBQueryBuilder()
       .withAdapter( RAdapter )
-      .withItem(menuBuilder)
       .withOrganizationsAdapter( organization_adapter )
       .withOrganizationSelector( ORGANIZATION_SELECTOR )
       .withEmptyView( documents_empty_list )
-      .withRecycleView(rv)
       .withProgressBar( progressBar );
 
     dataLoader = new DataLoaderManager(this);

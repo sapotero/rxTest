@@ -33,6 +33,7 @@ public final class RequeryDbModule {
     Configuration configuration = new ConfigurationBuilder(source, model)
       .setStatementCacheSize(16)
       .setBatchUpdateSize(8)
+      .setQuoteColumnNames(true)
       .build();
 
     SchemaModifier schemaModifier = new SchemaModifier(configuration);

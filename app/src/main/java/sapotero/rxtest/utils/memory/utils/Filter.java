@@ -37,6 +37,10 @@ public class Filter {
     EsdApplication.getManagerComponent().inject(this);
   }
 
+  // FIXME: 06.07.17
+  // убрать чейнинг .filter().filter()...
+  // из всех мест, заменить везде на 1 метод
+
   private void processConditions() {
     if (conditions != null) {
       for (ConditionBuilder condition : conditions ){
@@ -195,5 +199,7 @@ public class Filter {
 
     return indexName;
     }
+
+
 
 }
