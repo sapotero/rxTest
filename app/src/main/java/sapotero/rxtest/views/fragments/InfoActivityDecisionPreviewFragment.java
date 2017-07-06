@@ -355,36 +355,37 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
         if ( doc.isFromLinks() != null && !doc.isFromLinks() && current_decision != null ){
 
-          EventBus.getDefault().post( new ShowDecisionConstructor() );
-//          if ( settings.isOnline() ){
-//
-//            if ( current_decision.isChanged() != null &&  current_decision.isChanged() ){
-//              // resolved https://tasks.n-core.ru/browse/MVDESD-13727
-//              // В онлайне не давать редактировать резолюцию, если она в статусе "ожидает синхронизации"
-//              // как по кнопке, так и по двойному тапу
-//              EventBus.getDefault().post( new ShowDecisionConstructor() );
-//            }
-//
-//            if ( current_decision.isApproved() != null &&
-//              !current_decision.isApproved() &&
-//              current_decision.isTemporary() != null &&
-//              !current_decision.isTemporary() && !doc.isProcessed()){
-//              Timber.tag("GestureListener").w("2");
-//              edit();
-//            } else {
-//              Timber.tag("GestureListener").w("-2");
-//            }
-//
-//          } else {
-//            if (
-//              current_decision.isTemporary() != null &&
-//              current_decision.isTemporary() && !doc.isProcessed() ){
-//              Timber.tag("GestureListener").w("1");
-//              edit();
-//            } else {
-//              Timber.tag("GestureListener").w("-1");
-//            }
-//          }
+          // зачем то это тут было
+          // EventBus.getDefault().post( new ShowDecisionConstructor() );
+          if ( settings.isOnline() ){
+
+            if ( current_decision.isChanged() != null &&  current_decision.isChanged() ){
+              // resolved https://tasks.n-core.ru/browse/MVDESD-13727
+              // В онлайне не давать редактировать резолюцию, если она в статусе "ожидает синхронизации"
+              // как по кнопке, так и по двойному тапу
+              EventBus.getDefault().post( new ShowDecisionConstructor() );
+            }
+
+            if ( current_decision.isApproved() != null &&
+              !current_decision.isApproved() &&
+              current_decision.isTemporary() != null &&
+              !current_decision.isTemporary() && !doc.isProcessed()){
+              Timber.tag("GestureListener").w("2");
+              edit();
+            } else {
+              Timber.tag("GestureListener").w("-2");
+            }
+
+          } else {
+            if (
+              current_decision.isTemporary() != null &&
+              current_decision.isTemporary() && !doc.isProcessed() ){
+              Timber.tag("GestureListener").w("1");
+              edit();
+            } else {
+              Timber.tag("GestureListener").w("-1");
+            }
+          }
 
 
 
