@@ -71,7 +71,19 @@ public class UncheckControlLabel extends SharedCommand {
 
   @Override
   protected void setSuccess() {
-    setControlLabelSuccess(document_id);
+    store.process(
+      store.startTransactionFor(document_id)
+        .removeLabel(LabelType.SYNC)
+        .removeLabel(LabelType.CONTROL)
+    );
+
+    dataStore
+      .update(RDocumentEntity.class)
+      .set( RDocumentEntity.CONTROL, false )
+      .set( RDocumentEntity.CHANGED, false )
+      .where(RDocumentEntity.UID.eq(document_id))
+      .get()
+      .value();
   }
 
   @Override
@@ -84,7 +96,7 @@ public class UncheckControlLabel extends SharedCommand {
 
     dataStore
       .update(RDocumentEntity.class)
-      .set( RDocumentEntity.CONTROL, true)
+      .set( RDocumentEntity.CONTROL, true )
       .set( RDocumentEntity.CHANGED, false )
       .where(RDocumentEntity.UID.eq(document_id))
       .get()

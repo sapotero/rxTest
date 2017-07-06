@@ -71,7 +71,19 @@ public class CheckControlLabel extends SharedCommand {
 
   @Override
   protected void setSuccess() {
-    setControlLabelSuccess(document_id);
+    store.process(
+      store.startTransactionFor(document_id)
+        .removeLabel(LabelType.SYNC)
+        .setLabel(LabelType.CONTROL)
+    );
+
+    dataStore
+      .update(RDocumentEntity.class)
+      .set( RDocumentEntity.CONTROL, true )
+      .set( RDocumentEntity.CHANGED, false )
+      .where(RDocumentEntity.UID.eq(document_id))
+      .get()
+      .value();
   }
 
   @Override
