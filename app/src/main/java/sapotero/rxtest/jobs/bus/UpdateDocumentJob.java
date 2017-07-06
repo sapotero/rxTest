@@ -136,6 +136,13 @@ public class UpdateDocumentJob extends DocumentJob {
   public void doAfterLoad(DocumentInfo documentReceived) {
     Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: doAfterLoad");
 
+    InMemoryDocument docInMemory = store.getDocuments().get(uid);
+
+    if ( docInMemory != null && !docInMemory.isAllowUpdate() ) {
+      Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Update not allowed, quit");
+      return;
+    }
+
     RDocumentEntity documentExisting = dataStore
       .select(RDocumentEntity.class)
       .where(RDocumentEntity.UID.eq(uid))
@@ -227,20 +234,8 @@ public class UpdateDocumentJob extends DocumentJob {
         documentExisting.setFromLinks( false );
         documentExisting.setChanged( false );
 
-        boolean update = true;
-
-        InMemoryDocument docInMemory = store.getDocuments().get(uid);
-
-        if ( docInMemory != null && !docInMemory.isAllowUpdate() ) {
-          update = false;
-        }
-
-        if ( update ) {
-          Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: writing update to data store");
-          updateDocument( documentReceived, documentExisting, TAG );
-        } else {
-          Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Update not allowed, quit");
-        }
+        Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: writing update to data store");
+        updateDocument( documentReceived, documentExisting, TAG );
 
       } else {
         Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: MD5 equal");

@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -57,9 +58,13 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
   private CompositeSubscription compositeSubscription;
 
+  // Keeps UIDs of previously removed docs
+  List<String> removedUids;
+
   public void removeAllWithRange() {
     Holder.MAP.clear();
     documents.clear();
+    removedUids.clear();
     notifyDataSetChanged();
   }
 
@@ -72,6 +77,8 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
     EsdApplication.getManagerComponent().inject(this);
     initSubscription();
+
+    removedUids = new ArrayList<>();
   }
 
   public void withDbQueryBuilder(DBQueryBuilder dbQueryBuilder) {
@@ -127,6 +134,11 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
   }
 
   private void checkConditionsAndAddItem(InMemoryDocument doc) {
+    if ( removedUids != null && removedUids.contains( doc.getUid() ) ) {
+      Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Do not add previously removed doc %s", doc.getUid() );
+      return;
+    }
+
     if ( dbQueryBuilder != null && dbQueryBuilder.getConditions() != null ) {
       Filter filter = new Filter(dbQueryBuilder.getConditions());
 
@@ -164,10 +176,16 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
   }
 
   private void removeItem(int index, InMemoryDocument doc) {
+    if ( removedUids != null && removedUids.contains( doc.getUid() ) ) {
+      Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Do not remove already removed doc %s", doc.getUid() );
+      return;
+    }
+
     Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: NotifyItemRemoved");
     notifyItemRemoved(index);
     Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Remove from list");
     documents.remove(doc);
+    removedUids.add(doc.getUid());
     recreateHash();
 
     int mainMenuPosition = settings.getMainMenuPosition();
