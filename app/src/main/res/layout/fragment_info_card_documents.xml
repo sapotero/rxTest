@@ -205,6 +205,35 @@
 
     </FrameLayout>
 
+    <FrameLayout
+        android:id="@+id/broken_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/md_grey_50"
+        android:visibility="gone"
+        android:layout_alignParentTop="true">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="24dp"
+            android:paddingBottom="8sp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:textColor="@color/md_grey_800"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:fontFamily="sans-serif"
+            android:textStyle="normal"
+            android:textSize="24sp"
+            android:padding="@dimen/date_offset"
+            android:layout_gravity="center"
+            android:layout_marginBottom="48sp"
+            android:text="@string/broken_image"
+            />
+
+    </FrameLayout>
+
     <TextView
         android:id="@+id/fragment_info_card_urgency_title"
         android:visibility="gone"

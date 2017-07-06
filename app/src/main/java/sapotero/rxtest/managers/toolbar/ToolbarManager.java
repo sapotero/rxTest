@@ -384,7 +384,11 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
           break;
         default:
           safeSetVisibility(R.id.menu_info_decision_create, false);
-          safeSetVisibility(R.id.menu_info_decision_edit,   true);
+          safeSetVisibility(R.id.menu_info_decision_edit,   false);
+
+//          if ( doc.isProcessed() != null && doc.isProcessed() ){
+//            safeSetVisibility(R.id.menu_info_decision_edit, false);
+//          }
           break;
       }
 

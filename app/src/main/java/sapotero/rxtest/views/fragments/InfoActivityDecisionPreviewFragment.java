@@ -550,6 +550,15 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     //  Отображать информацию от кого поступила резолюция
     updateActionText(true);
 
+    if (
+        current_decision.isApproved() != null && current_decision.isApproved()
+        || doc.isProcessed() != null && doc.isProcessed()
+      ){
+      toolbarManager.setEditDecisionMenuItemVisible(false);
+    } else {
+      toolbarManager.setEditDecisionMenuItemVisible(true);
+    }
+
   }
 
   private void checkActiveDecision() {
@@ -898,7 +907,11 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
           Timber.e("no decisions");
 
           if (toolbarManager != null) {
-            toolbarManager.setEditDecisionMenuItemVisible(false);
+
+            if (doc.isProcessed() != null && !doc.isProcessed()){
+              toolbarManager.setEditDecisionMenuItemVisible(false);
+            }
+
           }
           decision_spinner_adapter.clear();
 
@@ -952,9 +965,16 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
       settings.setDecisionActiveId( current_decision.getId() );
 
-      if (toolbarManager != null) {
-        toolbarManager.setEditDecisionMenuItemVisible( !current_decision.isApproved() );
-      }
+//      if (toolbarManager != null) {
+////        toolbarManager.setEditDecisionMenuItemVisible( !current_decision.isApproved() );
+//
+//        if (doc.isProcessed() != null && doc.isProcessed()){
+//          toolbarManager.setEditDecisionMenuItemVisible(false);
+//        } else {
+//          toolbarManager.setEditDecisionMenuItemVisible(true);
+//        }
+//
+//      }
       updateVisibility( current_decision.isApproved() );
 
 

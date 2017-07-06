@@ -78,6 +78,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   @BindView(R.id.info_card_pdf_fullscreen_page_counter)     TextView page_counter;
   @BindView(R.id.info_card_pdf_fullscreen_button) FrameLayout fullscreen;
   @BindView(R.id.deleted_image) FrameLayout deletedImage;
+  @BindView(R.id.broken_image) FrameLayout broken_image;
   @BindView(R.id.info_card_pdf_reload) Button reloadImageButton;
 
   @BindView(R.id.info_card_pdf_no_files) TextView no_files;
@@ -224,6 +225,11 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
             .scrollHandle(null)
             .load();
 
+          pdfView.useBestQuality(false);
+          pdfView.setDrawingCacheEnabled(true);
+          pdfView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_LOW);
+          pdfView.stopFling();
+
 //        pdfView.useBestQuality(true);
 //        pdfView.setDrawingCacheEnabled(true);
 //        pdfView.stopFling();
@@ -312,10 +318,22 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
   private void showPdf() {
     try {
+      hideBrokenImage();
       setPdfPreview();
     } catch (FileNotFoundException e) {
       Timber.e(e);
+      showBrokenImage();
     }
+  }
+
+  private void showBrokenImage() {
+    pdfView.setOnDragListener(null);
+    pdfView.setOnTouchListener(null);
+    pdfView.recycle();
+    broken_image.setVisibility(View.VISIBLE);
+  }
+  private void hideBrokenImage() {
+    broken_image.setVisibility(View.GONE);
   }
 
   @OnClick(R.id.info_card_pdf_fullscreen_button)
