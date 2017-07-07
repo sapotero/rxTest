@@ -1,30 +1,26 @@
 package sapotero.rxtest.db.requery.query;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+import com.googlecode.totallylazy.Sequence;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.inject.Inject;
 
 import io.requery.Persistable;
-import io.requery.query.WhereAndOr;
-import io.requery.rx.RxResult;
 import io.requery.rx.SingleEntityStore;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.models.RSignerEntity;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.retrofit.models.documents.Signer;
 import sapotero.rxtest.utils.Settings;
@@ -35,10 +31,11 @@ import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
 import sapotero.rxtest.views.adapters.models.OrganizationItem;
 import sapotero.rxtest.views.custom.OrganizationSpinner;
-import sapotero.rxtest.views.menu.MenuBuilder;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import sapotero.rxtest.views.menu.fields.MainMenuItem;
 import timber.log.Timber;
+
+import static com.googlecode.totallylazy.Sequences.sequence;
 
 public class DBQueryBuilder {
 
@@ -48,7 +45,6 @@ public class DBQueryBuilder {
 
   private final String TAG = this.getClass().getSimpleName();
 
-  private final Context    context;
   private DocumentsAdapter adapter;
   private ArrayList<ConditionBuilder> conditions;
   private ProgressBar progressBar;
@@ -56,16 +52,10 @@ public class DBQueryBuilder {
   private CompositeSubscription compositeSubscription;
   private OrganizationAdapter organizationAdapter;
   private OrganizationSpinner organizationSelector;
-  private Boolean withFavorites;
-  private MenuBuilder menuBuilder;
-  private RecyclerView recyclerView;
   private MainMenuItem item;
 
-  private String query_status = null;
-  private String query_type = null;
+  public DBQueryBuilder() {
 
-  public DBQueryBuilder(Context context) {
-    this.context = context;
     EsdApplication.getManagerComponent().inject(this);
   }
 
@@ -75,7 +65,8 @@ public class DBQueryBuilder {
     return this;
   }
 
-
+  // FIXME: 06.07.17
+  // убрать в адаптер
   public DBQueryBuilder withEmptyView(TextView documents_empty_list) {
     this.documents_empty_list = documents_empty_list;
     return this;
@@ -90,18 +81,19 @@ public class DBQueryBuilder {
     return this;
   }
 
+  // FIXME: 06.07.17
+  // убрать в адаптер
   public DBQueryBuilder withProgressBar(ProgressBar progress) {
     this.progressBar = progress;
     return this;
   }
 
-  //new realization
   public void execute(boolean refreshSpinner){
 
     if ( conditions.size() > 0 ){
 
       if ( refreshSpinner ) {
-        findOrganizations(true);
+        findOrganizations();
       }
 
       unsubscribe();
@@ -111,27 +103,43 @@ public class DBQueryBuilder {
       Timber.tag(TAG).w("!!!!! byStatus : %s", new Gson().toJson( filter.getStatuses() ) );
       Timber.tag(TAG).w("!!!!! indexes  : %s", new Gson().toJson(  filter.getTypes() ) );
 
+      long startTime = System.nanoTime();
+      Sequence<InMemoryDocument> _docs = sequence(store.getDocuments().values());
+
+      List<InMemoryDocument> lazy_docs = _docs
+        .filter(filter::byYear)
+        .filter(this::byOrganization)
+        .filter(this::byDecision)
+        .filter(filter::byType)
+        .filter(filter::byStatus)
+        .filter(filter::isProcessed)
+        .filter(filter::isFavorites)
+        .filter(filter::isControl)
+        .toList();
+      long endTime = System.nanoTime();
+
+      long duration = (endTime - startTime)/1000000;
+
+      Timber.e("SIZE: %s | %sms", lazy_docs.size(), duration);
+
+
+
+
+      long startTimeSub = System.nanoTime();
       compositeSubscription.add(
         Observable
-          .from( store.getDocuments().values() )
-          .filter( filter::byYear )
-          .filter( this::byOrganization )
-          .filter( this::byDecision )
-          .filter( filter::byType)
-          .filter( filter::byStatus)
-          .filter( filter::isProcessed )
-          .filter( filter::isFavorites )
-          .filter( filter::isControl )
+          .from( lazy_docs )
           .toList()
-
-//          .toSortedList(Filter::bySortKey)
-
           .subscribeOn(Schedulers.computation())
           .observeOn(AndroidSchedulers.mainThread())
           .subscribe(
             docs -> {
 
-              Timber.tag(TAG).w("size %s", docs.size() );
+              long endTimeSub = System.nanoTime();
+
+              long durationSub = (endTimeSub - startTimeSub)/1000000;
+
+              Timber.tag(TAG).w("size %s | %sms", docs.size(), durationSub );
               adapter.removeAllWithRange();
 
               if (docs.size() > 0){
@@ -157,47 +165,8 @@ public class DBQueryBuilder {
 
   }
 
-  private boolean byType(ArrayList<String> indexes, InMemoryDocument doc) {
-    Timber.tag(TAG).e("byType?   %s | %s", doc.getUid(), indexes.size() );
-    return indexes.size() == 0 || indexes.contains(doc.getIndex());
-  }
-
-  private boolean byStatus(ArrayList<String> filters, InMemoryDocument doc) {
-    Timber.tag(TAG).e("byStatus? %s | %s", doc.getUid(), filters.size());
-    return filters.size() == 0 || filters.contains(doc.getFilter());
-  }
-
-  private boolean byProcessed(Boolean withProcessed, InMemoryDocument doc) {
-    Timber.tag(TAG).e("processed? %s", doc.getDocument().isProcessed() );
-    return !withProcessed || doc.getDocument().isProcessed();
-  }
-
-  private boolean byControl(Boolean withControl, InMemoryDocument doc) {
-//    Timber.tag(TAG).e("control? %s", doc.getDocument().getControl() );
-
-    Boolean result = true;
-
-    if ( withControl ){
-      result = doc.getDocument().getControl();
-    }
-
-    return result;
-  }
-
-  private boolean byFavorites(Boolean withFavorites, InMemoryDocument doc) {
-//    Timber.tag(TAG).e("favorites? %s", doc.getDocument().getFavorites() );
-
-    Boolean result = true;
-
-    if ( withFavorites ){
-      result = doc.getDocument().getFavorites() || doc.getDocument().isFromFavoritesFolder();
-    }
-
-    return result;
-  }
-
   @NonNull
-  public Boolean byOrganization(InMemoryDocument doc) {
+  private Boolean byOrganization(InMemoryDocument doc) {
     boolean   result = true;
     boolean[] selected_index = organizationSelector.getSelected();
 
@@ -220,6 +189,9 @@ public class DBQueryBuilder {
     return result;
   }
 
+
+  // FIXME: 06.07.17
+  // перенести в фильтр
   // resolved https://tasks.n-core.ru/browse/MVDESD-13400
   // Не отображать документы без резолюции, если включена соответствующая опция
   public Boolean byDecision(InMemoryDocument doc) {
@@ -244,7 +216,6 @@ public class DBQueryBuilder {
   public void executeWithConditions(ArrayList<ConditionBuilder> conditions, boolean withFavorites, MainMenuItem item) {
     this.item = item;
     this.conditions = conditions;
-    this.withFavorites = withFavorites;
     execute(true);
   }
 
@@ -252,37 +223,25 @@ public class DBQueryBuilder {
     progressBar.setVisibility(ProgressBar.GONE);
     documents_empty_list.setVisibility(View.VISIBLE);
   }
-
   public void hideEmpty(){
     documents_empty_list.setVisibility(View.GONE);
     progressBar.setVisibility(ProgressBar.GONE);
   }
 
 
-  private void findOrganizations(boolean b) {
+  private void findOrganizations() {
     Timber.i( "findOrganizations" );
     organizationAdapter.clear();
     organizationSelector.clear();
 
     if ( conditions.size() > 0 ) {
 
-      ArrayList<String> filters = new ArrayList<>();
-      ArrayList<String> indexes = new ArrayList<>();
-
-      for (ConditionBuilder condition : conditions) {
-        if (condition.getField().getLeftOperand() == RDocumentEntity.FILTER) {
-          filters.add(String.valueOf(condition.getField().getRightOperand()));
-        }
-
-        if (condition.getField().getLeftOperand() == RDocumentEntity.DOCUMENT_TYPE) {
-          indexes.add(String.valueOf(condition.getField().getRightOperand()));
-        }
-      }
-
       Filter filter = new Filter(conditions);
 
-      Observable
-        .from( store.getDocuments().values() )
+
+      Sequence<InMemoryDocument> _docs = sequence(store.getDocuments().values());
+
+      List<Signer> lazy_docs = _docs
         .filter( filter::byYear)
         .filter( this::byDecision )
         .filter( filter::byType)
@@ -290,10 +249,13 @@ public class DBQueryBuilder {
         .filter( filter::isProcessed )
         .filter( filter::isFavorites )
         .filter( filter::isControl )
-
         .map(InMemoryDocument::getDocument)
         .filter(document -> document.getSigner() != null)
         .map(Document::getSigner)
+        .toList();
+
+      Observable
+        .from( lazy_docs )
         .toList()
         .subscribeOn(Schedulers.computation())
         .observeOn(AndroidSchedulers.mainThread())
@@ -332,92 +294,6 @@ public class DBQueryBuilder {
 
     }
 
-  }
-
-
-
-  private void findOrganizations() {
-    Timber.i( "findOrganizations" );
-    organizationAdapter.clear();
-    organizationSelector.clear();
-
-    WhereAndOr<RxResult<RSignerEntity>> query = dataStore
-      .select(RSignerEntity.class)
-      .distinct()
-      .join(RDocumentEntity.class)
-      .on( RDocumentEntity.SIGNER_ID.eq(RSignerEntity.ID) )
-      .where(RDocumentEntity.USER.eq( settings.getLogin() ));
-
-    if ( conditions.size() > 0 ){
-
-      for (ConditionBuilder condition : conditions ){
-        switch ( condition.getCondition() ){
-          case AND:
-            query = query.and( condition.getField() );
-            break;
-          case OR:
-            query = query.or( condition.getField() );
-            break;
-          default:
-            break;
-        }
-      }
-    }
-
-    query
-      .get()
-      .toObservable()
-      .subscribeOn(Schedulers.io())
-      .observeOn(AndroidSchedulers.mainThread())
-      .toList()
-      .subscribe(
-
-        signers -> {
-
-
-          // resolved https://tasks.n-core.ru/browse/MVDESD-12625
-          // Фильтр по организациям.
-
-          HashMap< String, Integer> organizations = new HashMap< String, Integer>();
-
-
-          for (RSignerEntity signer: signers){
-            String key = signer.getOrganisation();
-
-            if ( !organizations.containsKey( key ) ){
-              organizations.put(key, 0);
-            }
-
-            Integer value = organizations.get(key);
-            value += 1;
-
-            organizations.put( key, value  );
-          }
-
-          for ( String organization: organizations.keySet()) {
-            Timber.d( "org:  %s | %s", organization, organizations.get(organization) );
-            organizationAdapter.add( new OrganizationItem( organization, organizations.get(organization) ) );
-          }
-
-          organizationSelector.refreshSpinner();
-
-        },
-        error -> {
-          Timber.tag("ERROR").e(error);
-        }
-
-      );
-
-  }
-
-  public DBQueryBuilder withItem(MenuBuilder menuBuilder) {
-    this.menuBuilder = menuBuilder;
-    return this;
-  }
-
-  public DBQueryBuilder withRecycleView(RecyclerView recyclerView) {
-    this.recyclerView = recyclerView;
-    return this;
   }
 
   public ArrayList<ConditionBuilder> getConditions() {

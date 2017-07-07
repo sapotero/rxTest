@@ -106,6 +106,7 @@
     <string name="tab_document">документ</string>
     <string name="tab_info">инфокарта</string>
     <string name="control">K</string>
+    <string name="broken_image">Невозможно отобразить ЭО</string>
     <string name="favorites">★</string>
     <!--<string name="favorites_template">★ Избранное</string>-->
     <string name="favorites_template">Избранное</string>

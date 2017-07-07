@@ -3,8 +3,6 @@ package sapotero.rxtest.application;
 import android.app.Application;
 import android.content.Context;
 
-import com.facebook.stetho.Stetho;
-
 import org.acra.ACRA;
 import org.acra.ReportingInteractionMode;
 import org.acra.annotation.ReportsCrashes;
@@ -22,7 +20,6 @@ import sapotero.rxtest.jobs.utils.JobModule;
 import sapotero.rxtest.managers.menu.utils.OperationManagerModule;
 import sapotero.rxtest.retrofit.utils.OkHttpModule;
 import sapotero.rxtest.utils.queue.utils.QueueManagerModule;
-import timber.log.Timber;
 
 // на проде отправлем ошибки сюда
 // rgiliazov6@mvd.ru
@@ -50,7 +47,7 @@ public final class EsdApplication extends Application {
   @Override public void onCreate() {
     super.onCreate();
 
-    Timber.plant(new Timber.DebugTree());
+//    Timber.plant(new Timber.DebugTree());
 
     if (Constant.DEBUG) {
 
@@ -61,11 +58,11 @@ public final class EsdApplication extends Application {
 
     }
 
-    Stetho.Initializer initializer = Stetho.newInitializerBuilder(this)
-        .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this))
-        .enableDumpapp(Stetho.defaultDumperPluginsProvider(getApplicationContext()))
-        .build();
-    Stetho.initialize(initializer);
+//    Stetho.Initializer initializer = Stetho.newInitializerBuilder(this)
+//        .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this))
+//        .enableDumpapp(Stetho.defaultDumperPluginsProvider(getApplicationContext()))
+//        .build();
+//    Stetho.initialize(initializer);
 
     application = this;
 

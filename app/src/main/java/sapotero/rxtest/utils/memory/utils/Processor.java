@@ -1,6 +1,7 @@
 package sapotero.rxtest.utils.memory.utils;
 
 import com.birbit.android.jobqueue.JobManager;
+import com.googlecode.totallylazy.Sequence;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,6 +35,8 @@ import sapotero.rxtest.utils.memory.mappers.InMemoryDocumentMapper;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import timber.log.Timber;
+
+import static com.googlecode.totallylazy.Sequences.sequence;
 
 public class Processor {
   @Inject MemoryStore store;
@@ -192,23 +195,22 @@ public class Processor {
 
     Filter imdFilter = new Filter( conditions() );
 
-    Observable<List<String>> docs = Observable
-      .from(documents.keySet())
-      .toList();
+    Sequence<InMemoryDocument> _docs = sequence(store.getDocuments().values());
 
-    Observable<List<String>> imd = Observable
-      .from( store.getDocuments().values() )
+    List<String> lazy_docs = _docs
       .filter(imdFilter::isProcessed)   // restored previously removed line
       .filter(imdFilter::byType)
       .filter(imdFilter::byStatus)
       .map(InMemoryDocument::getUid)
       .toList();
 
+    Observable<List<String>> docs = Observable
+      .from(documents.keySet())
+      .toList();
 
-
-//    for (InMemoryDocument doc: store.getDocuments().values() ) {
-//      Timber.i(doc.toString());
-//    }
+    Observable<List<String>> imd = Observable
+      .from( lazy_docs )
+      .toList();
 
     Timber.tag(TAG).e("conditions: %s", imdFilter.hasStatuses());
     Timber.tag(TAG).e("store values: %s", imd.toBlocking().first().size() );

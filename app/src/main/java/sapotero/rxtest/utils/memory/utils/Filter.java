@@ -37,16 +37,17 @@ public class Filter {
     EsdApplication.getManagerComponent().inject(this);
   }
 
+  // FIXME: 06.07.17
+  // убрать чейнинг .filter().filter()...
+  // из всех мест, заменить везде на 1 метод
+
+  // totallylazy
+  // https://totallylazy.com/
+
   private void processConditions() {
     if (conditions != null) {
       for (ConditionBuilder condition : conditions ){
         if (condition.getField().getLeftOperand() == RDocumentEntity.FILTER){
-
-//          try {
-//            statuses.addAll(((ArrayList<String>) condition.getField().getRightOperand()));
-//          } catch (Exception e) {
-//            statuses.add( String.valueOf(condition.getField().getRightOperand()) );
-//          }
 
           try {
             Type listType = new TypeToken<List<String>>() {}.getType();
@@ -195,5 +196,7 @@ public class Filter {
 
     return indexName;
     }
+
+
 
 }
