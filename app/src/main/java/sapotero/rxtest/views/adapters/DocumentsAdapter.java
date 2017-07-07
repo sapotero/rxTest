@@ -13,12 +13,13 @@ import android.widget.TextView;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -59,10 +60,10 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
   private CompositeSubscription compositeSubscription;
 
   // Keeps UIDs of previously removed docs
-  List<String> removedUids;
+  Set<String> removedUids;
 
   // Keeps UIDs of previously added docs
-  List<String> addedUids;
+  Set<String> addedUids;
 
   public void removeAllWithRange() {
     Holder.MAP.clear();
@@ -82,8 +83,8 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     EsdApplication.getManagerComponent().inject(this);
     initSubscription();
 
-    removedUids = new ArrayList<>();
-    addedUids = new ArrayList<>();
+    removedUids = new HashSet<>();
+    addedUids = new HashSet<>();
   }
 
   public void withDbQueryBuilder(DBQueryBuilder dbQueryBuilder) {
