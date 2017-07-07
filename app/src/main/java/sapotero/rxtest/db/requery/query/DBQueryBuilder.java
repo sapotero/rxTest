@@ -128,19 +128,8 @@ public class DBQueryBuilder {
       long startTimeSub = System.nanoTime();
       compositeSubscription.add(
         Observable
-//          .from( store.getDocuments().values() )
           .from( lazy_docs )
-//          .filter( filter::byYear )
-//          .filter( this::byOrganization )
-//          .filter( this::byDecision )
-//          .filter( filter::byType)
-//          .filter( filter::byStatus)
-//          .filter( filter::isProcessed )
-//          .filter( filter::isFavorites )
-//          .filter( filter::isControl )
           .toList()
-//          .toSortedList(Filter::bySortKey)
-
           .subscribeOn(Schedulers.computation())
           .observeOn(AndroidSchedulers.mainThread())
           .subscribe(

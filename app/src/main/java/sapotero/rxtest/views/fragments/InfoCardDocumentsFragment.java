@@ -176,6 +176,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
       pdf_wrapper.setVisibility(View.VISIBLE);
 
     } else {
+      disablePdfView();
       no_files.setVisibility(View.VISIBLE);
       pdf_wrapper.setVisibility(View.GONE);
       open_in_another_app_wrapper.setVisibility(View.GONE);
@@ -228,7 +229,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
           pdfView.useBestQuality(false);
           pdfView.setDrawingCacheEnabled(true);
           pdfView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_LOW);
-          pdfView.stopFling();
+//          pdfView.stopFling();
 
 //        pdfView.useBestQuality(true);
 //        pdfView.setDrawingCacheEnabled(true);
@@ -322,16 +323,21 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
       setPdfPreview();
     } catch (FileNotFoundException e) {
       Timber.e(e);
+      disablePdfView();
       showBrokenImage();
     }
   }
 
   private void showBrokenImage() {
+    broken_image.setVisibility(View.VISIBLE);
+  }
+
+  private void disablePdfView() {
     pdfView.setOnDragListener(null);
     pdfView.setOnTouchListener(null);
     pdfView.recycle();
-    broken_image.setVisibility(View.VISIBLE);
   }
+
   private void hideBrokenImage() {
     broken_image.setVisibility(View.GONE);
   }
