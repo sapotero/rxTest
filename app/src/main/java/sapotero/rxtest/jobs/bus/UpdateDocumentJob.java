@@ -30,6 +30,7 @@ import sapotero.rxtest.db.requery.utils.Deleter;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
 import sapotero.rxtest.utils.memory.fields.DocumentType;
+import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import timber.log.Timber;
 
 // Updates ordinary documents, projects, documents from favorite folder and documents from processed folder
@@ -104,21 +105,47 @@ public class UpdateDocumentJob extends DocumentJob {
 
   @Override
   public void onRun() throws Throwable {
-    Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Load document");
-
-    loadDocument(uid, TAG);
-  }
-
-  @Override
-  public void doAfterLoad(DocumentInfo documentReceived) {
-    Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: doAfterLoad");
+    Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Starting job");
 
     RDocumentEntity documentExisting = dataStore
       .select(RDocumentEntity.class)
       .where(RDocumentEntity.UID.eq(uid))
       .get().firstOrNull();
 
-    if (  documentExisting != null && documentExisting.isChanged() != null && !documentExisting.isChanged() ) {
+    if ( documentExisting != null && documentExisting.isChanged() != null && !documentExisting.isChanged() ) {
+      Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Loading document");
+      InMemoryDocument docInMemory = store.getDocuments().get(uid);
+
+      if ( docInMemory != null ) {
+        Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: setAllowUpdate( true )");
+        docInMemory.setAllowUpdate( true );
+        store.getDocuments().put(uid, docInMemory);
+      }
+
+      loadDocument(uid, TAG);
+
+    } else {
+      Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Document has Sync label, quit loading");
+    }
+  }
+
+  @Override
+  public void doAfterLoad(DocumentInfo documentReceived) {
+    Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: doAfterLoad");
+
+    InMemoryDocument docInMemory = store.getDocuments().get(uid);
+
+    if ( docInMemory != null && !docInMemory.isAllowUpdate() ) {
+      Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Update not allowed, quit");
+      return;
+    }
+
+    RDocumentEntity documentExisting = dataStore
+      .select(RDocumentEntity.class)
+      .where(RDocumentEntity.UID.eq(uid))
+      .get().firstOrNull();
+
+    if ( documentExisting != null && documentExisting.isChanged() != null && !documentExisting.isChanged() ) {
       Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Starting update");
 
       // Force update, if document exists and it must be favorite, because it is from favorites folder
@@ -212,7 +239,7 @@ public class UpdateDocumentJob extends DocumentJob {
         Timber.tag(TAG).d("MD5 equal");
       }
     } else {
-      Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Document has Sync label, quit");
+      Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Document has Sync label, quit updating in DB");
     }
   }
 

@@ -15,9 +15,11 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -57,9 +59,17 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
   private CompositeSubscription compositeSubscription;
 
+  // Keeps UIDs of previously removed docs
+  Set<String> removedUids;
+
+  // Keeps UIDs of previously added docs
+  Set<String> addedUids;
+
   public void removeAllWithRange() {
     Holder.MAP.clear();
     documents.clear();
+    removedUids.clear();
+    addedUids.clear();
     notifyDataSetChanged();
   }
 
@@ -72,6 +82,9 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
     EsdApplication.getManagerComponent().inject(this);
     initSubscription();
+
+    removedUids = new HashSet<>();
+    addedUids = new HashSet<>();
   }
 
   public void withDbQueryBuilder(DBQueryBuilder dbQueryBuilder) {
@@ -127,6 +140,16 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
   }
 
   private void checkConditionsAndAddItem(InMemoryDocument doc) {
+    if ( removedUids != null && removedUids.contains( doc.getUid() ) ) {
+      Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Do not add previously removed doc %s", doc.getUid() );
+      return;
+    }
+
+    if ( addedUids != null && addedUids.contains( doc.getUid() ) ) {
+      Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Do not add previously added doc %s", doc.getUid() );
+      return;
+    }
+
     if ( dbQueryBuilder != null && dbQueryBuilder.getConditions() != null ) {
       Filter filter = new Filter(dbQueryBuilder.getConditions());
 
@@ -164,8 +187,16 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
   }
 
   private void removeItem(int index, InMemoryDocument doc) {
+    if ( removedUids != null && removedUids.contains( doc.getUid() ) ) {
+      Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Do not remove already removed doc %s", doc.getUid() );
+      return;
+    }
+
+    Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: NotifyItemRemoved");
     notifyItemRemoved(index);
+    Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Remove from list");
     documents.remove(doc);
+    removedUids.add(doc.getUid());
     recreateHash();
 
     int mainMenuPosition = settings.getMainMenuPosition();
@@ -178,33 +209,26 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     }
   }
 
-  // True if inside Processed tab or Processed Folder
-  private boolean isDisplayProcessed() {
-    boolean result = false;
-
-    if ( dbQueryBuilder != null && dbQueryBuilder.getConditions() != null ) {
-      Filter filter = new Filter(dbQueryBuilder.getConditions());
-      result = filter.getProcessed();
-    }
-
-    return result;
-  }
-
   private boolean isItemRemove(boolean processed, boolean control, boolean favorite) {
     boolean result = false;
 
     if ( dbQueryBuilder != null && dbQueryBuilder.getConditions() != null ) {
       Filter filter = new Filter(dbQueryBuilder.getConditions());
 
-      if ( processed && !filter.getProcessed() ) {
-        result = true;
+      if ( !filter.getControl() && !filter.getFavorites() ) {
+        if ( processed && !filter.getProcessed() ) {
+          Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Remove due to processed");
+          result = true;
+        }
       }
 
       if ( !control && filter.getControl() ) {
+        Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Remove due to control");
         result = true;
       }
 
       if ( !favorite && filter.getFavorites() ) {
+        Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Remove due to favorite");
         result = true;
       }
     }
@@ -429,6 +453,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     if ( !Holder.MAP.containsKey( document.getUid()) ){
 //      Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Add document into adapter %s", document.getUid() );
       documents.add(document);
+      addedUids.add(document.getUid());
       notifyItemInserted( documents.size() );
 //      Holder.MAP.put( document.getUid(), documents.s );
       recreateHash();
@@ -436,12 +461,15 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
   }
 
   private void recreateHash() {
+    Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Recreating hash");
 
     Holder.MAP = new HashMap<>();
 
     for (int i = 0; i < documents.size(); i++) {
       Holder.MAP.put( documents.get(i).getUid(), i );
     }
+
+    Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Hash recreated");
   }
 
   class DocumentViewHolder extends RecyclerView.ViewHolder {

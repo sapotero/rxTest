@@ -122,13 +122,4 @@ public abstract class SharedCommand extends AbstractCommand {
         error -> onError( command, error.getLocalizedMessage() )
       );
   }
-
-  protected void setControlLabelSuccess(String document_id) {
-    store.process(
-      store.startTransactionFor(document_id)
-        .removeLabel(LabelType.SYNC)
-    );
-
-    setChangedFalse(document_id);
-  }
 }

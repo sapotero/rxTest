@@ -4,6 +4,7 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.managers.menu.commands.SharedCommand;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.utils.memory.fields.LabelType;
+import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import timber.log.Timber;
 
 public class CheckControlLabel extends SharedCommand {
@@ -35,6 +36,8 @@ public class CheckControlLabel extends SharedCommand {
     Timber.tag(TAG).i("execute for %s - %s",getType(),document_id);
     queueManager.add(this);
 
+    Timber.tag("RecyclerViewRefresh").d("CheckControlLabel: execute - update in MemoryStore");
+
     store.process(
       store.startTransactionFor(document_id)
       .setLabel(LabelType.SYNC)
@@ -49,6 +52,8 @@ public class CheckControlLabel extends SharedCommand {
 
   @Override
   public void executeLocal() {
+    Timber.tag("RecyclerViewRefresh").d("CheckControlLabel: executeLocal - update in DB");
+
     dataStore
       .update(RDocumentEntity.class)
       .set( RDocumentEntity.CONTROL, true)
@@ -71,7 +76,33 @@ public class CheckControlLabel extends SharedCommand {
 
   @Override
   protected void setSuccess() {
-    setControlLabelSuccess(document_id);
+    Timber.tag("RecyclerViewRefresh").d("CheckControlLabel: executeRemote success - update in DB and MemoryStore");
+
+//    store.process(
+//      store.startTransactionFor(document_id)
+//        .removeLabel(LabelType.SYNC)
+//        .setLabel(LabelType.CONTROL)
+//    );
+
+    InMemoryDocument docInMemory = store.getDocuments().get(document_id);
+
+    if ( docInMemory != null ) {
+      Timber.tag("RecyclerViewRefresh").d("CheckControlLabel: setAllowUpdate( false )");
+      docInMemory.getDocument().setControl( true );
+      docInMemory.getDocument().setChanged( false );
+      docInMemory.setAllowUpdate( false );
+      store.getDocuments().put(document_id, docInMemory);
+      Timber.tag("RecyclerViewRefresh").d("MemoryStore: pub.onNext()");
+      store.getPublishSubject().onNext( docInMemory );
+    }
+
+    dataStore
+      .update(RDocumentEntity.class)
+      .set( RDocumentEntity.CONTROL, true )
+      .set( RDocumentEntity.CHANGED, false )
+      .where(RDocumentEntity.UID.eq(document_id))
+      .get()
+      .value();
   }
 
   @Override
