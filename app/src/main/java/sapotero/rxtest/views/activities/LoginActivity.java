@@ -51,6 +51,7 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
   private StepperAdapter adapter;
 
   private boolean cryptoProInstalled = false;
+  private boolean selectContainerDialogShown = false;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -94,25 +95,41 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
 
   private void showSelectDialog(List<String> keyStoreTypeList) {
 
+    if ( selectContainerDialogShown ) {
+      Timber.tag("SelectContainerDialog").d("LoginActivity: Dialog already shown, quit showing dialog");
+      return;
+    }
 
     Timber.tag("KEYS").e("%s", keyStoreTypeList);
 
     if ( keyStoreTypeList.size() > 0 ){
+      Timber.tag("SelectContainerDialog").d("LoginActivity: Showing dialog");
+
+      selectContainerDialogShown = true;
 
       new MaterialDialog.Builder(this)
         .title(R.string.container_title)
+        .autoDismiss(false)
+        .cancelable(false)
         .items(keyStoreTypeList)
         .itemsCallbackSingleChoice(-1, (dialog, view, which, text) -> {
 
 //          KeyStoreType.saveCurrentType(keyStoreTypeList.startTransactionFor(which));
 
-          EventBus.getDefault().post( new SelectKeyStoreEvent(keyStoreTypeList.get(which)));
+          if ( which >= 0 && which < keyStoreTypeList.size() ) {
+            EventBus.getDefault().post( new SelectKeyStoreEvent(keyStoreTypeList.get(which)));
+          }
 
           return true;
         })
         .positiveText(R.string.vertical_form_stepper_form_continue)
         .onPositive((dialog, which) -> {
-          EventBus.getDefault().post( new AddKeyEvent());
+          int selectedIndex = dialog.getSelectedIndex();
+
+          if ( selectedIndex >= 0 && selectedIndex < keyStoreTypeList.size() ) {
+            EventBus.getDefault().post( new AddKeyEvent());
+            dialog.dismiss();
+          }
         })
         .show();
 
@@ -256,7 +273,7 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
     }
     EventBus.getDefault().register(this);
 
-    Intent serviceIntent = new Intent(this, MainService.class);
+    Intent serviceIntent = MainService.newIntent(this, true);
     startService(serviceIntent);
 
     // If not first run and CryptoPro installed, immediately move to main activity
