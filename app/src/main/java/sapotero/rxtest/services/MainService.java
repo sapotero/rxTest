@@ -161,7 +161,12 @@ public class MainService extends Service {
 
         aliases( KeyStoreType.currentType(), ProviderType.currentProviderType() );
 
-        loadParams();
+        if ( settings.isFirstRun() ) {
+          Timber.tag("SelectContainerDialog").d("MainService: onCreate: Send event to LoginActivity to show select container dialog");
+          loadParams();
+        } else {
+          Timber.tag("SelectContainerDialog").d("MainService: onCreate: isFirstRun = false, quit showing dialog");
+        }
 
         initScheduller();
 
@@ -175,8 +180,6 @@ public class MainService extends Service {
   }
 
   private void loadParams() {
-    Timber.tag("SelectContainerDialog").d("MainService: Send event to LoginActivity to show select container dialog");
-
     KeyStoreType.init(this);
     List<String> keyStoreTypeList = KeyStoreType.getKeyStoreTypeList();
 
@@ -220,9 +223,15 @@ public class MainService extends Service {
     if ( intent != null ) {
       boolean isFromLogin = intent.getBooleanExtra(EXTRA_IS_FROM_LOGIN, false);
 
+      Timber.tag("SelectContainerDialog").d("MainService: onStartCommand: isFirstRun = %s, isFromLogin = %s, isOnCreateComplete = %s", settings.isFirstRun(), isFromLogin, isOnCreateComplete);
       if ( settings.isFirstRun() && isFromLogin && isOnCreateComplete ) {
+        Timber.tag("SelectContainerDialog").d("MainService: onStartCommand: Send event to LoginActivity to show select container dialog");
         loadParams();
+      } else {
+        Timber.tag("SelectContainerDialog").d("MainService: onStartCommand: quit showing dialog");
       }
+    } else {
+      Timber.tag("SelectContainerDialog").d("MainService: onStartCommand: intent is null, quit showing dialog");
     }
 
     return super.onStartCommand(intent, flags, startId);

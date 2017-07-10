@@ -95,6 +95,16 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
 
   private void showSelectDialog(List<String> keyStoreTypeList) {
 
+    if ( !cryptoProInstalled ) {
+      Timber.tag("SelectContainerDialog").d("LoginActivity: CryptoPro not installed, quit showing dialog");
+      return;
+    }
+
+    if ( !settings.isFirstRun() ) {
+      Timber.tag("SelectContainerDialog").d("LoginActivity: isFirstRun = false, quit showing dialog");
+      return;
+    }
+
     if ( selectContainerDialogShown ) {
       Timber.tag("SelectContainerDialog").d("LoginActivity: Dialog already shown, quit showing dialog");
       return;
