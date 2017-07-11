@@ -74,6 +74,7 @@ android {
 }
 
 
+
 buildscript {
     repositories {
         mavenCentral()
@@ -98,8 +99,10 @@ dependencies {
     provided fileTree(include: ['*.jar'], dir: '../xml_libs')
     provided 'xalan:xalan:2.7.0'
 
+    testCompile 'org.mockito:mockito-core:1.10.19'
 
     testCompile 'junit:junit:4.12'
+    //noinspection GradleCompatible
     compile 'com.android.support:multidex:1.0.1'
 
     compile 'com.android.support:appcompat-v7:25.2.0'

@@ -20,6 +20,7 @@ import sapotero.rxtest.jobs.utils.JobModule;
 import sapotero.rxtest.managers.menu.utils.OperationManagerModule;
 import sapotero.rxtest.retrofit.utils.OkHttpModule;
 import sapotero.rxtest.utils.queue.utils.QueueManagerModule;
+import timber.log.Timber;
 
 // на проде отправлем ошибки сюда
 // rgiliazov6@mvd.ru
@@ -47,7 +48,7 @@ public final class EsdApplication extends Application {
   @Override public void onCreate() {
     super.onCreate();
 
-//    Timber.plant(new Timber.DebugTree());
+    Timber.plant(new Timber.DebugTree());
 
     if (Constant.DEBUG) {
 

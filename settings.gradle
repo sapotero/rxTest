@@ -1,1 +1,1 @@
-include ':app', ':org.eclipse.paho.android.service-release', ':cryptopro'
+include ':app'

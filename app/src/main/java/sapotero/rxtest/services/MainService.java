@@ -185,7 +185,7 @@ public class MainService extends Service {
 
 
     scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 5*60 ,5*60, TimeUnit.SECONDS );
-    scheduller.scheduleWithFixedDelay( new UpdateQueueTask(queue), 0 ,2, TimeUnit.SECONDS );
+    scheduller.scheduleWithFixedDelay( new UpdateQueueTask(queue), 0 ,10, TimeUnit.SECONDS );
   }
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13625
