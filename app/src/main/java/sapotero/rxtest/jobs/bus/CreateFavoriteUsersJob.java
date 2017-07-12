@@ -35,10 +35,12 @@ public class CreateFavoriteUsersJob extends BaseJob {
   public void onRun() throws Throwable {
     try {
       Timber.tag(TAG).i( "users: %s | %s", users.size(), users.get(0).getName() );
+      int index = 0;
       for (Oshs user : users){
         if ( !exist( user.getId()) ){
-          add(user);
+          add(user, index);
         }
+        index++;
       }
     } catch (Exception e) {
       e.printStackTrace();
@@ -46,8 +48,9 @@ public class CreateFavoriteUsersJob extends BaseJob {
 
   }
 
-  private void add(Oshs user) {
+  private void add(Oshs user, int index) {
     RFavoriteUserEntity data = mappers.getFavoriteUserMapper().toEntity(user);
+    data.setSortIndex(index);
 
     dataStore
       .insert(data)
