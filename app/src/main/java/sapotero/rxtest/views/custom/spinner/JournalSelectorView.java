@@ -7,16 +7,11 @@ import android.view.View;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 
-import java.util.List;
-
 import sapotero.rxtest.R;
-import sapotero.rxtest.views.menu.fields.MainMenuItem;
+import sapotero.rxtest.views.adapters.spinner.JournalSelectorAdapter;
 import timber.log.Timber;
 
-import static com.googlecode.totallylazy.Sequences.sequence;
-
 public class JournalSelectorView extends AppCompatTextView implements View.OnClickListener {
-
   private String TAG = this.getClass().getSimpleName();
 
   public JournalSelectorView(Context context) {
@@ -38,32 +33,23 @@ public class JournalSelectorView extends AppCompatTextView implements View.OnCli
   public void onClick(View v) {
     Timber.tag(TAG).w("clicked!");
 
-//    JournalSelectorAdapter adapter = new JournalSelectorAdapter(getContext(), Arrays.asList(MainMenuItem.values()));
-//
-//    new MaterialDialog.Builder( getContext() )
-//      .title(R.string.container_title)
-//      .adapter(adapter, null)
-//      .itemsCallbackSingleChoice(-1, (dialog, view, which, text) -> {
-//        updateView( String.valueOf(text) );
-//        return true;
-//      })
-//      .alwaysCallSingleChoiceCallback()
-//      .show();
+    JournalSelectorAdapter adapter = new JournalSelectorAdapter();
 
-    List<String> plain_list = sequence( MainMenuItem.values() ).map(MainMenuItem::getName).toList();
     new MaterialDialog.Builder( getContext() )
       .title(R.string.container_title)
-      .items(plain_list)
+      .adapter(adapter, null)
       .itemsCallbackSingleChoice(-1, (dialog, view, which, text) -> {
         updateView( String.valueOf(text) );
         return true;
       })
+      .alwaysCallSingleChoiceCallback()
       .show();
-
 
   }
 
   private void updateView(String text){
     setText(text);
   }
+
+
 }

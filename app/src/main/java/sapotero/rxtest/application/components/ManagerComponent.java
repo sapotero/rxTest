@@ -22,6 +22,7 @@ import sapotero.rxtest.views.activities.SettingsTemplatesActivity;
 import sapotero.rxtest.views.adapters.DecisionAdapter;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.models.DocumentTypeItem;
+import sapotero.rxtest.views.adapters.spinner.JournalSelectorAdapter;
 import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
 import sapotero.rxtest.views.fragments.DecisionRejectionTemplateFragment;
 import sapotero.rxtest.views.fragments.DecisionTemplateFragment;
@@ -70,4 +71,6 @@ public interface ManagerComponent {
   void inject(Processor context);
   void inject(Filter context);
   void inject(InfoCardDocumentsFragment fragment);
+
+  void inject(JournalSelectorAdapter context);
 }
