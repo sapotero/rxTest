@@ -32,6 +32,8 @@ public class JournalSelectorAdapter extends RecyclerView.Adapter<JournalSelector
   @Inject MemoryStore store;
   private List<String> items;
 
+  private ItemCallback itemCallback;
+
   public JournalSelectorAdapter() {
     EsdApplication.getManagerComponent().inject(this);
     process();
@@ -70,10 +72,12 @@ public class JournalSelectorAdapter extends RecyclerView.Adapter<JournalSelector
 
   private int getCount(Sequence<InMemoryDocument> imd, Filter filter) {
     return imd
-      .filter(filter::byYear)
-      .filter(filter::byType)
-      .filter(filter::byStatus)
-      .filter(filter::isProcessed )
+      .filter( filter::byYear)
+      .filter( filter::byType)
+      .filter( filter::byStatus)
+      .filter( filter::isProcessed )
+      .filter( filter::isFavorites )
+      .filter( filter::isControl )
       .toList().size();
   }
 
@@ -122,15 +126,30 @@ public class JournalSelectorAdapter extends RecyclerView.Adapter<JournalSelector
     return items.size();
   }
 
-  class ViewHolder extends RecyclerView.ViewHolder {
+  public String getItem(int position) {
+    return items.get(position);
+  }
+
+  public interface ItemCallback {
+    void onItemClicked(int itemIndex);
+  }
+  public void setCallback(ItemCallback itemCallback) {
+    this.itemCallback = itemCallback;
+  }
+
+  class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
     private final TextView title;
 
     public ViewHolder(View itemView) {
       super(itemView);
       title = (TextView) itemView.findViewById(R.id.journal_selector_adapter_item_title);
-
+      title.setOnClickListener(this);
     }
 
+    @Override
+    public void onClick(View view) {
+      itemCallback.onItemClicked(getAdapterPosition());
+    }
   }
 }

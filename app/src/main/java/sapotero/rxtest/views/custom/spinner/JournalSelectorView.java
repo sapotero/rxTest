@@ -14,6 +14,9 @@ import timber.log.Timber;
 public class JournalSelectorView extends AppCompatTextView implements View.OnClickListener {
   private String TAG = this.getClass().getSimpleName();
 
+  private JournalSelectorAdapter adapter;
+  private MaterialDialog dialog;
+
   public JournalSelectorView(Context context) {
     super(context);
     setOnClickListener(this);
@@ -24,31 +27,33 @@ public class JournalSelectorView extends AppCompatTextView implements View.OnCli
     setOnClickListener(this);
   }
 
-  public JournalSelectorView(Context context, AttributeSet attrs, int defStyle) {
-    super(context, attrs, defStyle);
+  public JournalSelectorView(Context context, AttributeSet attrs, int defStyleAttr) {
+    super(context, attrs, defStyleAttr);
     setOnClickListener(this);
   }
+
 
   @Override
   public void onClick(View v) {
     Timber.tag(TAG).w("clicked!");
 
-    JournalSelectorAdapter adapter = new JournalSelectorAdapter();
+    adapter = new JournalSelectorAdapter();
+    adapter.setCallback(this::updateView);
 
-    new MaterialDialog.Builder( getContext() )
+    dialog = new MaterialDialog.Builder( getContext() )
       .title(R.string.container_title)
       .adapter(adapter, null)
-      .itemsCallbackSingleChoice(-1, (dialog, view, which, text) -> {
-        updateView( String.valueOf(text) );
-        return true;
-      })
       .alwaysCallSingleChoiceCallback()
-      .show();
+      .autoDismiss(true)
+      .build();
+    dialog.show();
+
 
   }
 
-  private void updateView(String text){
-    setText(text);
+  private void updateView(int position){
+    dialog.dismiss();
+    setText( adapter.getItem(position) );
   }
 
 
