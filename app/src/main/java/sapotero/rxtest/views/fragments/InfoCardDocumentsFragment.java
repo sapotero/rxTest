@@ -201,6 +201,9 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
         InputStream targetStream = new FileInputStream(file);
 
         if (file.exists()) {
+          com.github.barteksc.pdfviewer.util.Constants.THUMBNAIL_RATIO = 1f;
+          com.github.barteksc.pdfviewer.util.Constants.PART_SIZE = 512;
+
           pdfView
             .fromStream(targetStream)
 //         .fromFile( file )
@@ -222,13 +225,21 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
               Timber.tag(TAG).i(" onPageChange");
               updatePageCount();
             })
+//            .onPageScroll((page, positionOffset) -> pdfView.stopFling())
             .enableAnnotationRendering(true)
             .scrollHandle(null)
             .load();
 
           pdfView.useBestQuality(false);
-          pdfView.setDrawingCacheEnabled(true);
           pdfView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_LOW);
+          pdfView.setWillNotCacheDrawing(false);
+          pdfView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+          pdfView.setDrawingCacheEnabled(true);
+          pdfView.enableRenderDuringScale(false);
+
+//          pdfView.useBestQuality(false);
+//          pdfView.setDrawingCacheEnabled(true);
+//          pdfView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_LOW);
 //          pdfView.stopFling();
 
 //        pdfView.useBestQuality(true);
