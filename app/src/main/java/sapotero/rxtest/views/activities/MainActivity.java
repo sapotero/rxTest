@@ -34,6 +34,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -637,7 +638,22 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     Fields.Menu menu = Fields.Menu.ALL;
     drawer_add_item( menu.getIndex() , menu.getTitle(), Long.valueOf( menu.getIndex()) );
 
-    for(String uid: settings.getJournals() ){
+    // resolved https://tasks.n-core.ru/browse/MVDESD-13752
+    // Добавить в боковую панель разделы: Контроль, Обраб, Избр.
+    List<String> menuItems = new ArrayList<>();
+    menuItems.addAll( settings.getJournals() );
+    menuItems.add( String.valueOf( ON_CONTROL ) );
+    menuItems.add( String.valueOf( PROCESSED ) );
+    menuItems.add( String.valueOf( FAVORITES ) );
+    Collections.sort(menuItems, (o1, o2) -> {
+      try {
+        return Integer.valueOf(o1).compareTo( Integer.valueOf(o2) );
+      } catch (NumberFormatException e) {
+        return 0;
+      }
+    } );
+
+    for(String uid : menuItems ){
       Fields.Menu m = Fields.Menu.getMenu(uid);
       if (m != null) {
         drawer_add_item( m.getIndex() , m.getTitle(), Long.valueOf( m.getIndex()) );
