@@ -171,7 +171,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     initToolbar();
 
 
-    rxSettings();
+//    rxSettings();
 
     initSearch();
 
@@ -405,6 +405,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     startNetworkCheck();
     subscribeToNetworkCheckResults();
 
+    rxSettings();
+
 //    EventBus.getDefault().post( new RecalculateMenuEvent());
 
   }
@@ -607,15 +609,13 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       )
       .build();
 
-    if (drawer == null) {
-      drawer = new DrawerBuilder()
-        .withActivity(this)
-        .withToolbar(toolbar)
-        .withActionBarDrawerToggle(true)
-        .withHeader(R.layout.drawer_header)
+    drawer = new DrawerBuilder()
+      .withActivity(this)
+      .withToolbar(toolbar)
+      .withActionBarDrawerToggle(true)
+      .withHeader(R.layout.drawer_header)
 //        .withShowDrawerOnFirstLaunch(true)
-        .withAccountHeader(headerResult);
-    }
+      .withAccountHeader(headerResult);
 
     drawer.addDrawerItems(
       new SectionDrawerItem().withName(R.string.drawer_item_journals)
