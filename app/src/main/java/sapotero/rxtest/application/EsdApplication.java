@@ -61,11 +61,11 @@ public final class EsdApplication extends Application {
 
     }
 
-    Stetho.Initializer initializer = Stetho.newInitializerBuilder(this)
-        .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this))
-        .enableDumpapp(Stetho.defaultDumperPluginsProvider(getApplicationContext()))
-        .build();
-    Stetho.initialize(initializer);
+//    Stetho.Initializer initializer = Stetho.newInitializerBuilder(this)
+//        .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this))
+//        .enableDumpapp(Stetho.defaultDumperPluginsProvider(getApplicationContext()))
+//        .build();
+//    Stetho.initialize(initializer);
 
     application = this;
 
