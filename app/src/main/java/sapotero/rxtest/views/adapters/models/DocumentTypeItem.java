@@ -57,15 +57,6 @@ public class DocumentTypeItem {
 
   public void setText(TextView view) {
 
-//    subscription.clear();
-    switch ( mainMenuItem.getIndex() ){
-      case 0:
-        setTextForAllDocument(view);
-        break;
-      default:
-        setTextForNormalText(view);
-    }
-
   }
 
   private void setTextForAllDocument(TextView view) {

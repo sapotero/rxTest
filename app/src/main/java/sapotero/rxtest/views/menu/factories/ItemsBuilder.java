@@ -149,16 +149,12 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
     return view;
   }
 
-
-  private void updateView() {
+  public void updateView(MainMenuItem mainMenuItem) {
     if (view == null){
       view = new RadioGroup(context);
     }
 
     view.removeAllViews();
-
-
-    MainMenuItem mainMenuItem = getSelectedItem();
 
     RadioGroup button_group = getButtonGroupLayout(context);
 
@@ -216,6 +212,10 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
     }
 
     view.addView( button_group );
+  }
+
+  public void updateView() {
+    updateView(getSelectedItem());
   }
 
   public MainMenuItem getSelectedItem(){

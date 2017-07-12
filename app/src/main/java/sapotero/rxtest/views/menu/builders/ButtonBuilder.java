@@ -117,14 +117,7 @@ public class ButtonBuilder {
       .count(RDocumentEntity.class)
       .where(RDocumentEntity.USER.eq(settings.getLogin()))
       .and(RDocumentEntity.WITH_DECISION.eq(true))
-//      .and( RDocumentEntity.DOCUMENT_TYPE.in( validation.getSelectedJournals() ) )
       .and(RDocumentEntity.FROM_LINKS.eq(false));
-
-//    if (index == 4 || index == 7){
-//      query = query.and(RDocumentEntity.PROCESSED.eq(true));
-//    } else {
-//      query = query.and(RDocumentEntity.PROCESSED.eq(false));
-//    }
 
     if (index == 0){
       query = query.or(RDocumentEntity.FROM_PROCESSED_FOLDER.eq(true));
@@ -179,42 +172,6 @@ public class ButtonBuilder {
 
 
     Filter filter = new Filter(_conditions);
-//
-//    ArrayList<String> types    = filter.getTypes();
-//    ArrayList<String> statuses = filter.getStatuses();
-//
-//    Timber.i( "type: %s, statuses: %s , processed: %s", new Gson().toJson(types),  new Gson().toJson(statuses), filter.getProcessed() );
-//
-//    Counter counter = store.getCounter();
-//
-//    Counter.Status status = null;
-//    if (statuses.size() > 0){
-//      status = Counter.Status.getStatus(filter.getStatuses().get(0));
-//    }
-//
-//    Counter.Document type = null;
-//
-//    if (types.size() > 0){
-//      type = Counter.Document.getType(types.get(0));
-//    }
-//    if ( filter.getProcessed() ){
-//      type = Counter.Document.PROCESSED;
-//    }
-//
-//
-//    Timber.w("COUNTER: %s %s", status, type );
-//
-//    try {
-//      if (type != null && status != null) {
-//
-//        Map<Counter.Document, Integer> docs = counter.getData().get(status);
-//        if (docs != null && docs.containsKey(type)){
-//          Timber.w("FROM COUNTER: %s", docs.get(type) );
-//        }
-//      }
-//    } catch (Exception e) {
-//      Timber.e(e);
-//    }
 
     Sequence<InMemoryDocument> _docs = sequence(store.getDocuments().values());
 
@@ -227,22 +184,8 @@ public class ButtonBuilder {
       .filter( filter::isControl )
       .toList();
 
-//    compositeSubscription.add(
-      Observable
-//          .from( store.getDocuments().values() )
-        .from( lazy_docs )
-
-//    Observable
-//      .from( store.getDocuments().values() )
-//
-//      .filter( filter::byYear)
-//      .filter( filter::byType)
-//      .filter( filter::byStatus)
-//      .filter( filter::isProcessed )
-//      .filter( filter::isFavorites )
-//      .filter( filter::isControl )
-//
-//      .map( InMemoryDocument::getUid )
+    Observable
+      .from( lazy_docs )
       .toList()
       .subscribeOn( Schedulers.computation() )
       .observeOn( AndroidSchedulers.mainThread() )
@@ -278,7 +221,6 @@ public class ButtonBuilder {
     view.setButtonDrawable( ContextCompat.getDrawable(context, R.drawable.toggle_selector_button) );
 
     view.setBackground( ContextCompat.getDrawable(context, R.drawable.toggle_selector_button) );
-//    view.setForeground( ContextCompat.getDrawable(context, R.drawable.card_foreground) );
 
     view.setText( String.format( label, 0) );
 
@@ -292,26 +234,14 @@ public class ButtonBuilder {
       }
     }
 
-//    if (!validation.hasSigningAndApproval() && index == 1){
-//      view.setVisibility(View.GONE);
-//    }
-
-
     getCount();
 
     view.setOnCheckedChangeListener((buttonView, isChecked) -> {
-//      Timber.tag("setOnCheckedChangeListener").i("change");
       setActive(isChecked);
-
-//      getCount();
-
       if (isChecked){
-//        Timber.tag("setOnCheckedChangeListener").i("change");
         callback.onButtonBuilderUpdate(index);
       }
     });
-
-//    view.setForeground(context.getDrawable(R.drawable.ripple));
 
     return view;
   }

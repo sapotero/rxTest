@@ -7,7 +7,10 @@ import android.view.View;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 
+import org.greenrobot.eventbus.EventBus;
+
 import sapotero.rxtest.R;
+import sapotero.rxtest.events.adapter.JournalSelectorIndexEvent;
 import sapotero.rxtest.views.adapters.spinner.JournalSelectorAdapter;
 import timber.log.Timber;
 
@@ -54,6 +57,7 @@ public class JournalSelectorView extends AppCompatTextView implements View.OnCli
   private void updateView(int position){
     dialog.dismiss();
     setText( adapter.getItem(position) );
+    EventBus.getDefault().post( new JournalSelectorIndexEvent(position) );
   }
 
 

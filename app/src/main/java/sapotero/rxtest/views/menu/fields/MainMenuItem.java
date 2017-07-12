@@ -1,6 +1,9 @@
 package sapotero.rxtest.views.menu.fields;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
 
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.views.menu.builders.ButtonBuilder;
@@ -309,19 +312,22 @@ public enum MainMenuItem {
     return showOrganization;
   }
 
-  public void recalcuate(){
-
-//    Timber.tag(TAG).e("recalcuate");
-    for (ButtonBuilder button: buttonsList){
-      button.recalculate();
-    }
-
-
-  }
-
   @Override
   public String toString() {
     return name;
+  }
+
+
+  private static final Map<Integer,MainMenuItem> lookup = new HashMap<Integer,MainMenuItem>();
+
+  static {
+    for(MainMenuItem w : EnumSet.allOf(MainMenuItem.class)){
+      lookup.put(w.getIndex(), w);
+    }
+  }
+
+  public static MainMenuItem get(int index) {
+    return lookup.get(index);
   }
 
 }
