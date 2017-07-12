@@ -34,16 +34,19 @@ public class CreatePrimaryConsiderationJob extends BaseJob {
   @Override
   public void onRun() throws Throwable {
     Timber.tag(TAG).i( "users: %s | %s", users.size(), users.get(0).getName() );
+    int index = 0;
     for (Oshs user : users){
       if ( !exist( user.getId()) ){
-        add(user);
+        add(user, index);
       }
+      index++;
     }
 
   }
 
-  private void add(Oshs user) {
+  private void add(Oshs user, int index) {
     RPrimaryConsiderationEntity data = mappers.getPrimaryConsiderationMapper().toEntity(user);
+    data.setSortIndex(index);
 
     dataStore
       .insert(data)
