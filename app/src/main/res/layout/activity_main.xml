@@ -82,14 +82,31 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="match_parent"
                                 android:id="@+id/DOCUMENT_TYPE"
-                                android:minWidth="400dp"
+                                android:minWidth="200dp"
                                 android:background="@null"
                                 android:drawableEnd="@drawable/drop_down_vector"
                                 android:drawablePadding="@dimen/date_offset"
                                 />
-                            <Space
-                                android:layout_width="240dp"
-                                android:layout_height="match_parent"/>
+                            <!--<Space-->
+                                <!--android:layout_width="160dp"-->
+                                <!--android:layout_height="match_parent"/>-->
+
+                            <sapotero.rxtest.views.custom.spinner.JournalSelectorView
+                                android:layout_width="400dp"
+                                android:layout_height="match_parent"
+                                android:text="JournalSelectorView"
+                                android:background="?attr/selectableItemBackgroundBorderless"
+                                android:clickable="true"
+
+                                android:textSize="24sp"
+                                android:fontFamily="sans-serif-light"
+                                android:textStyle="normal"
+                                android:textColor="@color/md_grey_800"
+                                android:ellipsize="middle"
+                                android:maxLines="1"
+                                android:gravity="center"
+
+                                />
 
                             <sapotero.rxtest.views.custom.OrganizationSpinner
                                 android:layout_gravity="center|end"
