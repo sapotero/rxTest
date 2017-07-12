@@ -387,7 +387,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     }
     EventBus.getDefault().register(this);
 
-    Intent serviceIntent = new Intent(this, MainService.class);
+    Intent serviceIntent = MainService.newIntent(this, false);
     startService(serviceIntent);
   }
 

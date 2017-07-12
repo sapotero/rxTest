@@ -97,6 +97,7 @@ import timber.log.Timber;
 public class MainService extends Service {
 
 
+  public static final String EXTRA_IS_FROM_LOGIN = "IsFromLogin";
   final String TAG = MainService.class.getSimpleName();
   private ScheduledThreadPoolExecutor scheduller;
   private ScheduledFuture futureNetwork;
@@ -118,6 +119,7 @@ public class MainService extends Service {
   public static String user;
   private int keyStoreTypeIndex = 0;
 
+  boolean isOnCreateComplete = false;
 
   public MainService() {
 
@@ -125,6 +127,8 @@ public class MainService extends Service {
 
   public void onCreate() {
     super.onCreate();
+
+    EsdApplication.getManagerComponent().inject(this);
 
     Observable.just(true)
       .subscribeOn(Schedulers.io())
@@ -135,8 +139,6 @@ public class MainService extends Service {
           EventBus.getDefault().unregister(this);
         }
         EventBus.getDefault().register(this);
-
-        EsdApplication.getManagerComponent().inject(this);
 
         dataLoaderInterface = new DataLoaderManager(getApplicationContext());
 
@@ -159,11 +161,20 @@ public class MainService extends Service {
 
         aliases( KeyStoreType.currentType(), ProviderType.currentProviderType() );
 
-        loadParams();
+        if ( settings.isFirstRun() ) {
+          Timber.tag("SelectContainerDialog").d("MainService: onCreate: Send event to LoginActivity to show select container dialog");
+          loadParams();
+        } else {
+          Timber.tag("SelectContainerDialog").d("MainService: onCreate: isFirstRun = false, quit showing dialog");
+        }
 
         initScheduller();
 
         startObserveUnauthorized();
+
+        Timber.tag("SelectContainerDialog").d("MainService: onCreate complete");
+
+        isOnCreateComplete = true;
 
       }, Timber::e);
   }
@@ -207,6 +218,22 @@ public class MainService extends Service {
 
   public int onStartCommand(Intent intent, int flags, int startId) {
     Timber.tag(TAG).d("onStartCommand");
+    Timber.tag("SelectContainerDialog").d("MainService: onStartCommand");
+
+    if ( intent != null ) {
+      boolean isFromLogin = intent.getBooleanExtra(EXTRA_IS_FROM_LOGIN, false);
+
+      Timber.tag("SelectContainerDialog").d("MainService: onStartCommand: isFirstRun = %s, isFromLogin = %s, isOnCreateComplete = %s", settings.isFirstRun(), isFromLogin, isOnCreateComplete);
+      if ( settings.isFirstRun() && isFromLogin && isOnCreateComplete ) {
+        Timber.tag("SelectContainerDialog").d("MainService: onStartCommand: Send event to LoginActivity to show select container dialog");
+        loadParams();
+      } else {
+        Timber.tag("SelectContainerDialog").d("MainService: onStartCommand: quit showing dialog");
+      }
+    } else {
+      Timber.tag("SelectContainerDialog").d("MainService: onStartCommand: intent is null, quit showing dialog");
+    }
+
     return super.onStartCommand(intent, flags, startId);
   }
 
@@ -839,5 +866,11 @@ public class MainService extends Service {
     if ( event.isStart() ) {
       futureNetwork = scheduller.scheduleWithFixedDelay( new CheckNetworkTask(),  0 , 10, TimeUnit.SECONDS );
     }
+  }
+
+  public static Intent newIntent(Context context, boolean isFromLogin) {
+    Intent intent = new Intent(context, MainService.class);
+    intent.putExtra(EXTRA_IS_FROM_LOGIN, isFromLogin);
+    return intent;
   }
 }
