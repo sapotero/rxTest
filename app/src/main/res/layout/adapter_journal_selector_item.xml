@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clickable="false"
+    android:focusable="false"
+    android:paddingStart="@dimen/date_offset"
+    android:paddingEnd="@dimen/date_offset"
+    android:orientation="horizontal">
+
+
+        <TextView
+            android:id="@+id/journal_selector_adapter_item_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/half_date_offset"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground"
+            android:textSize="20sp">
+        </TextView>
+
+</LinearLayout>

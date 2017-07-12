@@ -57,11 +57,6 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
     this.user = user;
   }
 
-  public void invalidate() {
-    journalSpinnerAdapter.invalidate();
-  }
-
-
   public interface Callback {
     void onMenuUpdate(ArrayList<ConditionBuilder> result);
   }
