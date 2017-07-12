@@ -18,6 +18,10 @@ import timber.log.Timber;
 public class CreateFavoriteUsersJob extends BaseJob {
 
   public static final int PRIORITY = 1;
+
+  // Needed to show favorite users after assistants in SelectOshsDialogFragment
+  public static final int INDEX_INIT_VALUE = 10000;
+
   private final ArrayList<Oshs> users;
 
   private String TAG = this.getClass().getSimpleName();
@@ -35,7 +39,7 @@ public class CreateFavoriteUsersJob extends BaseJob {
   public void onRun() throws Throwable {
     try {
       Timber.tag(TAG).i( "users: %s | %s", users.size(), users.get(0).getName() );
-      int index = 0;
+      int index = INDEX_INIT_VALUE;
       for (Oshs user : users){
         if ( !exist( user.getId()) ){
           add(user, index);
