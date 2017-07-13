@@ -19,7 +19,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.birbit.android.jobqueue.JobManager;
-import com.mikepenz.material_design_iconic_typeface_library.MaterialDesignIconic;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.DrawerBuilder;
@@ -35,7 +34,6 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -54,7 +52,6 @@ import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.BuildConfig;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.db.requery.models.RAssistantEntity;
 import sapotero.rxtest.db.requery.models.RColleagueEntity;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.query.DBQueryBuilder;
@@ -479,30 +476,24 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     drawer
       .addDrawerItems(
-
-        new SectionDrawerItem().withName(R.string.drawer_item_settings),
-
+        new DividerDrawerItem(),
         new SecondaryDrawerItem()
           .withName(R.string.drawer_item_settings_account)
-          .withIcon(MaterialDesignIconic.Icon.gmi_accounts)
           .withIdentifier(SETTINGS_VIEW),
         new SecondaryDrawerItem()
           .withName(R.string.drawer_item_settings_templates)
-          .withIcon(MaterialDesignIconic.Icon.gmi_comment_edit)
           .withIdentifier(SETTINGS_DECISION_TEMPLATES)
       );
 
     if (settings.isDebugEnabled()){
       drawer
         .addDrawerItems(
-          new SectionDrawerItem().withName(R.string.drawer_item_debug),
+          new DividerDrawerItem(),
           new SecondaryDrawerItem()
             .withIdentifier(SETTINGS_LOG)
-            .withIcon(MaterialDesignIconic.Icon.gmi_assignment)
-            .withName("Лог"),
+            .withName("Очередь задач"),
           new SecondaryDrawerItem()
             .withIdentifier(SETTINGS_SIGN)
-            .withIcon(MaterialDesignIconic.Icon.gmi_dns)
             .withName("Подписи ЭО"),
           new DividerDrawerItem()
         );
