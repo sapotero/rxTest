@@ -192,12 +192,13 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       return;
     }
 
-    Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: NotifyItemRemoved");
-    notifyItemRemoved(index);
     Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Remove from list");
-    documents.remove(doc);
+    documents.remove(index);
     removedUids.add(doc.getUid());
     recreateHash();
+
+    Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: NotifyItemRemoved");
+    notifyItemRemoved(index);
 
     int mainMenuPosition = settings.getMainMenuPosition();
     if ( index < mainMenuPosition ) {

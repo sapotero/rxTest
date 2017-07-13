@@ -32,6 +32,7 @@ import sapotero.rxtest.events.crypto.SelectKeyStoreEvent;
 import sapotero.rxtest.events.crypto.SelectKeysEvent;
 import sapotero.rxtest.events.stepper.shared.StepperNextStepEvent;
 import sapotero.rxtest.services.MainService;
+import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.views.custom.stepper.StepperLayout;
 import sapotero.rxtest.views.custom.stepper.VerificationError;
 import sapotero.rxtest.views.custom.stepper.build.StepperAdapter;
@@ -44,6 +45,7 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
   private static final int PERM_SYSTEM_SETTINGS_REQUEST_CODE = 1;
 
   @Inject sapotero.rxtest.utils.Settings settings;
+  @Inject MemoryStore store;
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -59,7 +61,7 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_login);
 
-    EsdApplication.getDataComponent().inject(this);
+    EsdApplication.getManagerComponent().inject(this);
 
     initialize();
 

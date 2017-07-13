@@ -57,21 +57,11 @@ public class DocumentTypeItem {
 
   public void setText(TextView view) {
 
-//    subscription.clear();
-    switch ( mainMenuItem.getIndex() ){
-      case 0:
-        setTextForAllDocument(view);
-        break;
-      default:
-        setTextForNormalText(view);
-    }
-
   }
 
   private void setTextForAllDocument(TextView view) {
 
     ArrayList<ConditionBuilder> _projects  = new ArrayList<ConditionBuilder>();
-
     ArrayList<ConditionBuilder> _primary = new ArrayList<ConditionBuilder>();
     ArrayList<ConditionBuilder> _report  = new ArrayList<ConditionBuilder>();
 

@@ -54,7 +54,7 @@ public class MenuBuilder implements ItemsBuilder.Callback{
 
   public void invalidate() {
     Timber.tag(TAG).i("invalidate");
-    getItem().recalcuate();
+//    getItem().recalcuate();
 //    itemsBuilder.invalidate();
   }
 
@@ -78,6 +78,10 @@ public class MenuBuilder implements ItemsBuilder.Callback{
     this.context = context;
     this.itemsBuilder = new ItemsBuilder( context );
     this.itemsBuilder.registerCallBack(this);
+  }
+
+  public ItemsBuilder getItemsBuilder() {
+    return itemsBuilder;
   }
 
   public MenuBuilder withJournalSelector(Spinner selector) {

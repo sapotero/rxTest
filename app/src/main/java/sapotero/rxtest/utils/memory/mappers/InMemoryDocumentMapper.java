@@ -45,10 +45,13 @@ public class InMemoryDocumentMapper {
 
     RSignerEntity rSigner = (RSignerEntity) doc.getSigner();
     Signer signer = new Signer();
-    signer.setId( rSigner.getUid() );
-    signer.setType( rSigner.getType() );
-    signer.setName( rSigner.getName() );
-    signer.setOrganisation( rSigner.getOrganisation() );
+
+    if ( rSigner != null ) {
+      signer.setId( rSigner.getUid() );
+      signer.setType( rSigner.getType() );
+      signer.setName( rSigner.getName() );
+      signer.setOrganisation( rSigner.getOrganisation() );
+    }
 
     document.setSigner( signer );
     document.setViewed( doc.isViewed() );

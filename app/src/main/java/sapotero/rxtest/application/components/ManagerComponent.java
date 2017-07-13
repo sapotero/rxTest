@@ -17,11 +17,13 @@ import sapotero.rxtest.utils.memory.utils.Processor;
 import sapotero.rxtest.utils.queue.utils.QueueManagerModule;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.activities.InfoActivity;
+import sapotero.rxtest.views.activities.LoginActivity;
 import sapotero.rxtest.views.activities.MainActivity;
 import sapotero.rxtest.views.activities.SettingsTemplatesActivity;
 import sapotero.rxtest.views.adapters.DecisionAdapter;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.models.DocumentTypeItem;
+import sapotero.rxtest.views.adapters.spinner.JournalSelectorAdapter;
 import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
 import sapotero.rxtest.views.fragments.DecisionRejectionTemplateFragment;
 import sapotero.rxtest.views.fragments.DecisionTemplateFragment;
@@ -38,6 +40,7 @@ import sapotero.rxtest.views.menu.builders.ButtonBuilder;
 })
 
 public interface ManagerComponent {
+  void inject(LoginActivity activity);
   void inject(MainActivity activity);
   void inject(InfoActivity activity);
   void inject(DecisionConstructorActivity activity);
@@ -70,4 +73,6 @@ public interface ManagerComponent {
   void inject(Processor context);
   void inject(Filter context);
   void inject(InfoCardDocumentsFragment fragment);
+
+  void inject(JournalSelectorAdapter context);
 }
