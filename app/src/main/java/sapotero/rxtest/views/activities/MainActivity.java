@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
 import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -28,6 +29,7 @@ import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
 import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.SectionDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -52,6 +54,7 @@ import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.BuildConfig;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.models.RAssistantEntity;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.query.DBQueryBuilder;
 import sapotero.rxtest.db.requery.utils.Fields;
@@ -593,17 +596,46 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   private void drawer_build_head() {
 
+    List<RAssistantEntity> assistantsFromDB = dataStore
+      .select(RAssistantEntity.class)
+      .where(RAssistantEntity.USER.eq( settings.getLogin() ))
+      .get().toList();
+
+    List<RAssistantEntity> assistants = new ArrayList<>();
+    assistants.addAll( assistantsFromDB );
+
+//    for (RAssistantEntity assistant : assistantsFromDB) {
+//      if ( assistant.getTitle() != null && assistant.getTitle().toLowerCase().contains("заместитель") ) {
+//        assistants.add( assistant );
+//      }
+//    }
+
+    Collections.sort(assistants, (o1, o2) -> o1.getSortIndex() != null && o2.getSortIndex() != null ? o1.getSortIndex().compareTo( o2.getSortIndex() ) : 0 );
+
+    IProfile[] profiles = new ProfileDrawerItem[ assistants.size() + 1 ];
+
+    profiles[0] = new ProfileDrawerItem()
+      .withName( settings.getCurrentUserOrganization() )
+      .withEmail( settings.getCurrentUser() )
+      .withSetSelected( true )
+      .withIcon( R.drawable.gerb );
+
+    int i = 1;
+
+    for (RAssistantEntity assistant : assistants) {
+      profiles[i] = new ProfileDrawerItem()
+        .withName( assistant.getTitle() )
+        .withIsExpanded( true )
+        .withSelectable( false )
+        .withSetSelected( false )
+        .withIcon( R.drawable.gerb );
+      i++;
+    }
 
     AccountHeader headerResult = new AccountHeaderBuilder()
       .withActivity(this)
       .withHeaderBackground(R.drawable.header)
-      .addProfiles(
-        new ProfileDrawerItem()
-          .withName( settings.getCurrentUserOrganization() )
-          .withEmail( settings.getCurrentUser() )
-          .withSetSelected(true)
-          .withIcon(R.drawable.gerb)
-      )
+      .addProfiles( profiles )
       .withOnAccountHeaderListener(
         (view, profile, currentProfile) -> false
       )
