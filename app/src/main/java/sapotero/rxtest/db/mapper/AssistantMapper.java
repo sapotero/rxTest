@@ -52,6 +52,7 @@ public class AssistantMapper extends AbstractMapper<Assistant, RAssistantEntity>
     people.setAssistantId( entity.getAssistantId() );
     people.setGender("");
     people.setIsOrganization( false );
+    people.setSortIndex( entity.getSortIndex() );
 
     return people;
   }
