@@ -17,9 +17,12 @@ import javax.inject.Inject;
 
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.utils.validators.Integer;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.utils.memory.utils.Filter;
+import sapotero.rxtest.views.adapters.spinner.interfaces.ItemCallback;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import sapotero.rxtest.views.menu.fields.MainMenuButton;
 import sapotero.rxtest.views.menu.fields.MainMenuItem;
@@ -30,26 +33,16 @@ import static com.googlecode.totallylazy.Sequences.sequence;
 
 public class JournalSelectorAdapter extends RecyclerView.Adapter<JournalSelectorAdapter.ViewHolder> {
   @Inject MemoryStore store;
-  private List<String> items;
+  @Inject Settings settings;
 
+  private List<String> items;
   private ItemCallback itemCallback;
+
 
   public JournalSelectorAdapter() {
     EsdApplication.getManagerComponent().inject(this);
-    process();
-  }
-
-  private void process() {
-    Sequence<InMemoryDocument> imd = sequence( store.getDocuments().values() );
-    this.items = sequence( MainMenuItem.values() )
-      .mapConcurrently( item-> {
-
-        String result = "noop";
-
-        result = item.getIndex() == 0 ? getAllJournalCount(imd, item) : getJournalCount(item, imd);
-
-        return result;
-      }).toList();
+    build();
+    setDefault();
   }
 
   private String getJournalCount(MainMenuItem item, Sequence<InMemoryDocument> imd) {
@@ -81,7 +74,7 @@ public class JournalSelectorAdapter extends RecyclerView.Adapter<JournalSelector
       .toList().size();
   }
 
-  private String getAllJournalCount(Sequence<InMemoryDocument> _docs, MainMenuItem item) {
+  private String getAllCount(Sequence<InMemoryDocument> _docs, MainMenuItem item) {
 
     ArrayList<ConditionBuilder> _projects  = new ArrayList<ConditionBuilder>();
     ArrayList<ConditionBuilder> _primary = new ArrayList<ConditionBuilder>();
@@ -93,7 +86,7 @@ public class JournalSelectorAdapter extends RecyclerView.Adapter<JournalSelector
 
     List<ArrayList<ConditionBuilder>> conditions = Arrays.asList(_projects, _primary, _report);
 
-    List<Integer> total_count_list = sequence(conditions)
+    List<java.lang.Integer> total_count_list = sequence(conditions)
       .mapConcurrently(conds -> {
         Filter filter = new Filter(conds);
         return getCount(_docs, filter);
@@ -110,6 +103,40 @@ public class JournalSelectorAdapter extends RecyclerView.Adapter<JournalSelector
     return result;
   }
 
+  public String getItem(int position) {
+    return items.get(position);
+  }
+
+  public void setCallback(ItemCallback itemCallback) {
+    this.itemCallback = itemCallback;
+  }
+
+  public String setDefault() {
+    int defaultPosition = 0;
+
+    if ( settings.getJournals().contains( settings.getStartJournal() ) ){
+      if ( Integer.isInt( settings.getStartJournal() ) ){
+        defaultPosition = java.lang.Integer.parseInt( settings.getStartJournal() );
+      }
+    }
+
+    return getItem( defaultPosition );
+  }
+
+  private void build() {
+    Sequence<InMemoryDocument> imd = sequence( store.getDocuments().values() );
+
+    this.items = sequence( MainMenuItem.values() )
+      .mapConcurrently( item-> {
+
+        String result = "noop";
+
+        result = item.getIndex() == 0 ? getAllCount(imd, item) : getJournalCount(item, imd);
+
+        return result;
+      }).toList();
+  }
+
   @Override
   public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
     View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_journal_selector_item, parent, false);
@@ -124,17 +151,6 @@ public class JournalSelectorAdapter extends RecyclerView.Adapter<JournalSelector
   @Override
   public int getItemCount() {
     return items.size();
-  }
-
-  public String getItem(int position) {
-    return items.get(position);
-  }
-
-  public interface ItemCallback {
-    void onItemClicked(int itemIndex);
-  }
-  public void setCallback(ItemCallback itemCallback) {
-    this.itemCallback = itemCallback;
   }
 
   class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

@@ -9,6 +9,9 @@ import com.afollestad.materialdialogs.MaterialDialog;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.concurrent.TimeUnit;
+
+import rx.Observable;
 import sapotero.rxtest.R;
 import sapotero.rxtest.events.adapter.JournalSelectorIndexEvent;
 import sapotero.rxtest.views.adapters.spinner.JournalSelectorAdapter;
@@ -22,17 +25,33 @@ public class JournalSelectorView extends AppCompatTextView implements View.OnCli
 
   public JournalSelectorView(Context context) {
     super(context);
-    setOnClickListener(this);
+    build();
   }
 
   public JournalSelectorView(Context context, AttributeSet attrs) {
     super(context, attrs);
-    setOnClickListener(this);
+    build();
   }
 
   public JournalSelectorView(Context context, AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
+    build();
+  }
+
+  private void build(){
     setOnClickListener(this);
+
+
+    Observable
+      .just(true)
+      .delay(1500, TimeUnit.MILLISECONDS)
+      .subscribe(
+        data -> {
+          Timber.e("+++!!");
+          JournalSelectorAdapter adapter = new JournalSelectorAdapter();
+          setText( adapter.setDefault() );
+        }, Timber::e
+      );
   }
 
 
@@ -59,6 +78,5 @@ public class JournalSelectorView extends AppCompatTextView implements View.OnCli
     setText( adapter.getItem(position) );
     EventBus.getDefault().post( new JournalSelectorIndexEvent(position) );
   }
-
 
 }
