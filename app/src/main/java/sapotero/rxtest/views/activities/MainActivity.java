@@ -9,7 +9,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -603,12 +602,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     List<RAssistantEntity> assistants = new ArrayList<>();
     assistants.addAll( assistantsFromDB );
-
-//    for (RAssistantEntity assistant : assistantsFromDB) {
-//      if ( assistant.getTitle() != null && assistant.getTitle().toLowerCase().contains("заместитель") ) {
-//        assistants.add( assistant );
-//      }
-//    }
 
     Collections.sort(assistants, (o1, o2) -> o1.getSortIndex() != null && o2.getSortIndex() != null ? o1.getSortIndex().compareTo( o2.getSortIndex() ) : 0 );
 
