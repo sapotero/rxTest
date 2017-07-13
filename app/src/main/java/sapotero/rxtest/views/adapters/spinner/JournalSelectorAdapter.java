@@ -6,22 +6,24 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.googlecode.totallylazy.Sequence;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.utils.validators.Integer;
 import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.utils.memory.utils.Filter;
+import sapotero.rxtest.utils.validators.IntegerValidator;
 import sapotero.rxtest.views.adapters.spinner.interfaces.ItemCallback;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import sapotero.rxtest.views.menu.fields.MainMenuButton;
@@ -36,11 +38,14 @@ public class JournalSelectorAdapter extends RecyclerView.Adapter<JournalSelector
   @Inject Settings settings;
 
   private List<String> items;
+  private HashMap<Integer, Integer> positions;
   private ItemCallback itemCallback;
 
 
   public JournalSelectorAdapter() {
     EsdApplication.getManagerComponent().inject(this);
+    positions = new HashMap<>();
+
     build();
     setDefault();
   }
@@ -124,7 +129,7 @@ public class JournalSelectorAdapter extends RecyclerView.Adapter<JournalSelector
     int defaultPosition = 0;
 
     if ( settings.getJournals().contains( settings.getStartJournal() ) ){
-      if ( Integer.isInt( settings.getStartJournal() ) ){
+      if ( IntegerValidator.isInt( settings.getStartJournal() ) ){
         defaultPosition = java.lang.Integer.parseInt( settings.getStartJournal() );
       }
     }
@@ -135,9 +140,22 @@ public class JournalSelectorAdapter extends RecyclerView.Adapter<JournalSelector
   private void build() {
     final Sequence<InMemoryDocument> imd = sequence( store.getDocuments().values() );
 
-    this.items = sequence( MainMenuItem.values() )
+    ArrayList<MainMenuItem> journal = new ArrayList<>();
+
+    journal.add( MainMenuItem.ALL );
+    journal.addAll(
+      sequence( settings.getJournals() )
+        .filter(IntegerValidator::isInt)
+        .map(id -> MainMenuItem.get(Integer.parseInt(id)))
+        .toList()
+    );
+    journal.addAll( Arrays.asList(MainMenuItem.ON_CONTROL, MainMenuItem.PROCESSED, MainMenuItem.FAVORITES) );
+
+
+    this.items = sequence( journal )
       .mapConcurrently( item-> {
 
+        positions.put(journal.indexOf(item), item.getIndex());
         String result = "noop";
 
         result = item.getIndex() == 0 ? getAllCount(imd, item) : getJournalCount(item, imd);
@@ -162,19 +180,26 @@ public class JournalSelectorAdapter extends RecyclerView.Adapter<JournalSelector
     return items.size();
   }
 
+  public int getItemPosition(int position) {
+    Timber.e( new Gson().toJson(positions) );
+
+    return positions.get(position);
+  }
+
   class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
     private final TextView title;
 
     public ViewHolder(View itemView) {
       super(itemView);
-      title = (TextView) itemView.findViewById(R.id.journal_selector_adapter_item_title);
-      title.setOnClickListener(this);
+      this.title = (TextView) itemView.findViewById(R.id.journal_selector_adapter_item_title);
+      this.title.setOnClickListener(this);
     }
+
 
     @Override
     public void onClick(View view) {
-      itemCallback.onItemClicked(getAdapterPosition());
+      itemCallback.onItemClicked( getAdapterPosition() );
     }
   }
 }
