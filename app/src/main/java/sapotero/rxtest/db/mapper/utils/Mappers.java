@@ -3,6 +3,7 @@ package sapotero.rxtest.db.mapper.utils;
 import sapotero.rxtest.db.mapper.ActionMapper;
 import sapotero.rxtest.db.mapper.AssistantMapper;
 import sapotero.rxtest.db.mapper.BlockMapper;
+import sapotero.rxtest.db.mapper.ColleagueMapper;
 import sapotero.rxtest.db.mapper.ControlLabelMapper;
 import sapotero.rxtest.db.mapper.DecisionMapper;
 import sapotero.rxtest.db.mapper.DocumentMapper;
@@ -37,6 +38,7 @@ public class Mappers {
   private SignerMapper signerMapper;
   private StepMapper stepMapper;
   private TemplateMapper templateMapper;
+  private ColleagueMapper colleagueMapper;
 
   public Mappers(Settings settings) {
     actionMapper = new ActionMapper(settings, this);
@@ -55,6 +57,7 @@ public class Mappers {
     signerMapper = new SignerMapper(settings, this);
     stepMapper = new StepMapper(settings, this);
     templateMapper = new TemplateMapper(settings, this);
+    colleagueMapper = new ColleagueMapper(settings, this);
   }
 
   public ActionMapper getActionMapper() {
@@ -119,5 +122,9 @@ public class Mappers {
 
   public TemplateMapper getTemplateMapper() {
     return templateMapper;
+  }
+
+  public ColleagueMapper getColleagueMapper() {
+    return colleagueMapper;
   }
 }

@@ -35,6 +35,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -54,6 +55,7 @@ import sapotero.rxtest.BuildConfig;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RAssistantEntity;
+import sapotero.rxtest.db.requery.models.RColleagueEntity;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.query.DBQueryBuilder;
 import sapotero.rxtest.db.requery.utils.Fields;
@@ -597,17 +599,18 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   private void drawer_build_head() {
 
-    List<RAssistantEntity> assistantsFromDB = dataStore
-      .select(RAssistantEntity.class)
-      .where(RAssistantEntity.USER.eq( settings.getLogin() ))
+    List<RColleagueEntity> colleaguesFromDB = dataStore
+      .select(RColleagueEntity.class)
+      .where(RColleagueEntity.USER.eq( settings.getLogin() ))
+      .and(RColleagueEntity.ACTIVED.eq(true))
       .get().toList();
 
-    List<RAssistantEntity> assistants = new ArrayList<>();
-    assistants.addAll( assistantsFromDB );
+    List<RColleagueEntity> colleagues = new ArrayList<>();
+    colleagues.addAll( colleaguesFromDB );
 
-    Collections.sort(assistants, (o1, o2) -> o1.getSortIndex() != null && o2.getSortIndex() != null ? o1.getSortIndex().compareTo( o2.getSortIndex() ) : 0 );
+    Collections.sort(colleagues, (o1, o2) -> o1.getSortIndex() != null && o2.getSortIndex() != null ? o1.getSortIndex().compareTo( o2.getSortIndex() ) : 0 );
 
-    IProfile[] profiles = new ProfileDrawerItem[ assistants.size() + 1 ];
+    IProfile[] profiles = new ProfileDrawerItem[ colleagues.size() + 1 ];
 
     profiles[0] = new ProfileDrawerItem()
       .withName( settings.getCurrentUserOrganization() )
@@ -617,9 +620,11 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     int i = 1;
 
-    for (RAssistantEntity assistant : assistants) {
+    for (RColleagueEntity colleague : colleagues) {
+      String colleagueName = splitName( colleague.getOfficialName() );
+
       profiles[i] = new ProfileDrawerItem()
-        .withName( assistant.getTitle() )
+        .withName( colleagueName )
         .withIsExpanded( true )
         .withSelectable( false )
         .withSetSelected( false )
@@ -647,6 +652,26 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     drawer.addDrawerItems(
       new SectionDrawerItem().withName(R.string.drawer_item_journals)
     );
+  }
+
+  private String splitName(String nameToSplit) {
+    String name = nameToSplit;
+
+    try {
+      String[] split = name.split(" ");
+
+      if ( split.length >= 2 ){
+        String part1 = split[0];
+        String part2 = split[1];
+
+        if (part2 != null && part2.contains(".")) {
+          name = String.format("%s %s", part1, part2);
+        }
+      }
+    } catch (Exception error) {
+    }
+
+    return name;
   }
 
   private void drawer_add_item(int index, String title, Long identifier) {

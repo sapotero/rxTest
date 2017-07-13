@@ -41,6 +41,7 @@ import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckSuccessEvent;
 import sapotero.rxtest.events.stepper.load.StepperDocumentCountReadyEvent;
 import sapotero.rxtest.jobs.bus.CreateAssistantJob;
+import sapotero.rxtest.jobs.bus.CreateColleagueJob;
 import sapotero.rxtest.jobs.bus.CreateFavoriteUsersJob;
 import sapotero.rxtest.jobs.bus.CreateFoldersJob;
 import sapotero.rxtest.jobs.bus.CreatePrimaryConsiderationJob;
@@ -212,6 +213,17 @@ public class DataLoaderManager {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe( data -> {
                   jobManager.addJobInBackground(new CreateAssistantJob(data));
+                }, error -> {
+                  Timber.tag(TAG).e(error);
+                })
+            );
+
+            subscriptionInitV2.add(
+              auth.getColleagues(settings.getLogin(), settings.getToken())
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe( data -> {
+                  jobManager.addJobInBackground(new CreateColleagueJob(data));
                 }, error -> {
                   Timber.tag(TAG).e(error);
                 })
