@@ -18,6 +18,7 @@ import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.utils.memory.fields.LabelType;
+import timber.log.Timber;
 
 public abstract class SharedCommand extends AbstractCommand {
 
@@ -35,6 +36,8 @@ public abstract class SharedCommand extends AbstractCommand {
   protected abstract void setError();
 
   private void checkMessage(Command command, String message, boolean recalculateMenu) {
+    Timber.tag("RecyclerViewRefresh").d("SharedCommand: response message: %s", message);
+
     if (message != null && !message.toLowerCase().contains("успешно") ) {
       queueManager.setExecutedWithError( command, Collections.singletonList( message ) );
       setError();
@@ -77,15 +80,17 @@ public abstract class SharedCommand extends AbstractCommand {
 
     OperationService operationService = retrofit.create( OperationService.class );
 
+    String uid = document_id == null ? settings.getUid() : document_id;
+
     ArrayList<String> uids = new ArrayList<>();
-    uids.add( settings.getUid() );
+    uids.add( uid );
 
     return operationService.shared(
       getType(),
       settings.getLogin(),
       settings.getToken(),
       uids,
-      document_id == null ? settings.getUid() : document_id,
+      uid,
       settings.getStatusCode(),
       folder_id,
       null
