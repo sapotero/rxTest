@@ -33,8 +33,12 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.models.RAssistantEntity;
+import sapotero.rxtest.db.requery.models.RColleagueEntity;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.db.requery.models.RFavoriteUserEntity;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
+import sapotero.rxtest.db.requery.models.RPrimaryConsiderationEntity;
 import sapotero.rxtest.events.auth.AuthDcCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthDcCheckSuccessEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
@@ -47,7 +51,6 @@ import sapotero.rxtest.jobs.bus.CreateFoldersJob;
 import sapotero.rxtest.jobs.bus.CreatePrimaryConsiderationJob;
 import sapotero.rxtest.jobs.bus.CreateTemplatesJob;
 import sapotero.rxtest.jobs.bus.CreateUrgencyJob;
-import sapotero.rxtest.jobs.bus.DeleteAssistantJob;
 import sapotero.rxtest.jobs.bus.DeleteProcessedImageJob;
 import sapotero.rxtest.retrofit.Api.AuthService;
 import sapotero.rxtest.retrofit.DocumentsService;
@@ -116,9 +119,9 @@ public class DataLoaderManager {
               setCurrentUserOrganization(user.getOrganization());
               setCurrentUserPosition(user.getPosition());
 
-              jobManager.addJobInBackground( new DeleteAssistantJob() );
+              deleteUsers();
 
-              // получаем папки
+            // получаем папки
               subscriptionInitV2.add(
                 auth.getFolders(settings.getLogin(), settings.getToken())
                   .subscribeOn(Schedulers.computation())
@@ -236,6 +239,28 @@ public class DataLoaderManager {
           })
     );
 
+  }
+
+  private void deleteUsers() {
+    dataStore
+      .delete(RAssistantEntity.class)
+      .where(RAssistantEntity.USER.eq(settings.getLogin()))
+      .get().value();
+
+    dataStore
+      .delete(RFavoriteUserEntity.class)
+      .where(RFavoriteUserEntity.USER.eq(settings.getLogin()))
+      .get().value();
+
+    dataStore
+      .delete(RPrimaryConsiderationEntity.class)
+      .where(RPrimaryConsiderationEntity.USER.eq(settings.getLogin()))
+      .get().value();
+
+    dataStore
+      .delete(RColleagueEntity.class)
+      .where(RColleagueEntity.USER.eq(settings.getLogin()))
+      .get().value();
   }
 
   private void loadAllDocs(boolean load) {
