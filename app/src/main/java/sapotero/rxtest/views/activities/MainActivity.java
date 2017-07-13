@@ -54,7 +54,7 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.query.DBQueryBuilder;
 import sapotero.rxtest.db.requery.utils.Fields;
-import sapotero.rxtest.events.bus.GetDocumentInfoEvent;
+import sapotero.rxtest.events.adapter.JournalSelectorIndexEvent;
 import sapotero.rxtest.events.service.CheckNetworkEvent;
 import sapotero.rxtest.events.utils.RecalculateMenuEvent;
 import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
@@ -132,6 +132,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private MainActivity context;
   private CompositeSubscription subscription;
   private PublishSubject<Integer> searchSubject = PublishSubject.create();
+  private int menuIndex;
+  private int buttonIndex;
 
   protected void onCreate(Bundle savedInstanceState) {
     setTheme(R.style.AppTheme);
@@ -664,58 +666,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
 
-
-  @Subscribe(threadMode = ThreadMode.BACKGROUND)
-  public void onMessageEvent(GetDocumentInfoEvent event) {
-//    Toast.makeText(getApplicationContext(), event.message, Toast.LENGTH_SHORT).show();
-  }
-
-//  @Subscribe(threadMode = ThreadMode.MAIN)
-//  public void onMessageEvent(InsertRxDocumentsEvent event) {
-////    Toast.makeText(getApplicationContext(), event.uis, Toast.LENGTH_SHORT).show();
-//  }
-
-//  @Subscribe(threadMode = ThreadMode.MAIN)
-//  public void onMessageEvent(UpdateDocumentJobEvent event) {
-//    int position = RAdapter.getPositionByUid(event.uid);
-//    RecyclerView.ViewHolder a = rv.findViewHolderForAdapterPosition(position);
-//
-//    int visibility = event.value ? View.VISIBLE : View.GONE;
-//    int field = Objects.equals(event.field, "control") ? R.id.control_label : R.id.favorite_label;
-//
-//    View view = a.itemView.findViewById(field);
-//    view.setVisibility(visibility);
-//  }
-
-
-//  @Subscribe( threadMode = ThreadMode.MAIN)
-//  public void onMessageEvent(UpdateCountEvent event) {
-//    Timber.tag(TAG).v("UpdateCountEvent");
-//    menuBuilder.getItem().recalcuate();
-//  }
-
-
-//  @Subscribe( threadMode = ThreadMode.MAIN)
-//  public void onMessageEvent(UpdateDocumentAdapterEvent event) {
-//    Timber.tag(TAG).v("UpdateDocumentAdapterEvent");
-////    dbQueryBuilder.invalidateDocumentEvent(event);
-//  }
-
-//  @RequiresApi(api = Build.VERSION_CODES.M)
-//  @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
-//  public void onMessageEvent(RemoveDocumentFromAdapterEvent event) {
-//    Timber.tag(TAG).v("RemoveDocumentFromAdapterEvent %s", event.uid );
-//
-////    if ( !IS_HIDDEN.containsKey(event.uid) ){
-////      IS_HIDDEN.put(event.uid, true);
-////    }
-////    RAdapter.removeItem(event.uid);
-//
-////    menuBuilder.updateFromJob();
-//
-//  }
-
-
   /* MenuBuilder.Callback */
   @Override
   public void onMenuBuilderUpdate(ArrayList<ConditionBuilder> conditions) {
@@ -726,10 +676,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   @Override
   public void onUpdateError(Throwable error) {
-
   }
-
-
 
   @Override
   public void onShow() {
@@ -742,38 +689,19 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
 
-  /* DOCUMENT COUNT UPDATE */
-//  @Subscribe(threadMode = ThreadMode.MAIN)
-//  public void onMessageEvent(StepperLoadDocumentEvent event) throws Exception {
-//    loaded++;
-//
-//    int perc = getLoadedDocumentsPercent();
-//
-//    if (update_progressbar != null) {
-//      if ( update_progressbar.getProgress() < perc ){
-//        update_progressbar.setProgress( perc );
-//      }
-//    }
-//
-//    if ( update_progressbar != null && perc == 100f ){
-//      update_progressbar.setVisibility(View.GONE);
-//    }
-//  }
-//
-//  private int getLoadedDocumentsPercent() {
-//    float result = 100f * loaded / settings.getJobCount();
-//    if (result > 100 ){
-//      result = 100f;
-//    }
-//
-//    return (int) Math.ceil(result);
-//  }
-
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(RecalculateMenuEvent event) {
     if (menuBuilder != null) {
       Timber.tag(TAG).i("RecalculateMenuEvent");
-      menuBuilder.invalidate();
+      menuBuilder.getItemsBuilder().updateView();
     }
   }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(JournalSelectorIndexEvent event) {
+    menuIndex = event.index;
+    DOCUMENT_TYPE_SELECTOR.setSelection(event.index);
+  }
+
+
 }

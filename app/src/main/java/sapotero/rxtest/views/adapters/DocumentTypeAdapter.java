@@ -71,7 +71,9 @@ public class DocumentTypeAdapter extends BaseAdapter {
 
 
     text = ( (TextView) view.findViewById(R.id.document_type_name)  );
-    item.setText(text);
+    text.setText( item.getMainMenuItem().getName() );
+
+//    item.setText(text);
 
     return view;
   }

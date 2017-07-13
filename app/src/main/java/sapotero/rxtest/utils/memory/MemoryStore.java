@@ -81,7 +81,7 @@ public class MemoryStore implements Processable{
           }
 
           if (docs.size() > 0){
-            counterRecreate();
+//            counterRecreate();
           }
 
         },
@@ -139,7 +139,7 @@ public class MemoryStore implements Processable{
           for (RDocumentEntity doc : docs) {
             InMemoryDocument document = InMemoryDocumentMapper.fromDB(doc);
             documents.put(doc.getUid(), document);
-            counter.put( document );
+//            counter.put( document );
           }
         },
         Timber::e

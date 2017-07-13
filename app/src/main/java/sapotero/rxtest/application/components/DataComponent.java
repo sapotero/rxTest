@@ -18,7 +18,6 @@ import sapotero.rxtest.views.activities.DocumentInfocardFullScreenActivity;
 import sapotero.rxtest.views.activities.FileSignActivity;
 import sapotero.rxtest.views.activities.InfoNoMenuActivity;
 import sapotero.rxtest.views.activities.LogActivity;
-import sapotero.rxtest.views.activities.LoginActivity;
 import sapotero.rxtest.views.adapters.DecisionSpinnerAdapter;
 import sapotero.rxtest.views.adapters.DocumentLinkAdapter;
 import sapotero.rxtest.views.adapters.DocumentTypeAdapter;
@@ -54,7 +53,6 @@ public interface DataComponent {
 
   void inject(LogActivity activity);
   void inject(SettingsViewFragment activity);
-  void inject(LoginActivity activity);
   void inject(FileSignActivity activity);
   void inject(DocumentImageFullScreenActivity activity);
   void inject(DocumentInfocardFullScreenActivity activity);
