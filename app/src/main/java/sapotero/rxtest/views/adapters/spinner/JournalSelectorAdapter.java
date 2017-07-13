@@ -64,21 +64,30 @@ public class JournalSelectorAdapter extends RecyclerView.Adapter<JournalSelector
   }
 
   private int getCount(Sequence<InMemoryDocument> imd, Filter filter) {
-    return imd
-      .filter( filter::byYear)
-      .filter( filter::byType)
-      .filter( filter::byStatus)
-      .filter( filter::isProcessed )
-      .filter( filter::isFavorites )
-      .filter( filter::isControl )
-      .toList().size();
+    int result = -1;
+
+    try {
+      result = imd
+        .filter( filter::byYear)
+        .filter( filter::byType)
+        .filter( filter::byStatus)
+        .filter( filter::isProcessed )
+        .filter( filter::isFavorites )
+        .filter( filter::isControl )
+        .toList().size();
+    } catch (Exception e) {
+      Timber.e(e);
+    }
+
+
+    return result;
   }
 
-  private String getAllCount(Sequence<InMemoryDocument> _docs, MainMenuItem item) {
+  private String getAllCount(Sequence<InMemoryDocument> docs, MainMenuItem item) {
 
-    ArrayList<ConditionBuilder> _projects  = new ArrayList<ConditionBuilder>();
-    ArrayList<ConditionBuilder> _primary = new ArrayList<ConditionBuilder>();
-    ArrayList<ConditionBuilder> _report  = new ArrayList<ConditionBuilder>();
+    ArrayList<ConditionBuilder> _projects = new ArrayList<>();
+    ArrayList<ConditionBuilder> _primary  = new ArrayList<>();
+    ArrayList<ConditionBuilder> _report   = new ArrayList<>();
 
     Collections.addAll( _projects, MainMenuItem.APPROVE_ASSIGN.getCountConditions() );
     Collections.addAll( _primary,  MainMenuButton.PRIMARY_CONSIDERATION.getConditions());
@@ -89,7 +98,7 @@ public class JournalSelectorAdapter extends RecyclerView.Adapter<JournalSelector
     List<java.lang.Integer> total_count_list = sequence(conditions)
       .mapConcurrently(conds -> {
         Filter filter = new Filter(conds);
-        return getCount(_docs, filter);
+        return getCount(docs, filter);
       }).toList();
 
     String result = "";
@@ -124,7 +133,7 @@ public class JournalSelectorAdapter extends RecyclerView.Adapter<JournalSelector
   }
 
   private void build() {
-    Sequence<InMemoryDocument> imd = sequence( store.getDocuments().values() );
+    final Sequence<InMemoryDocument> imd = sequence( store.getDocuments().values() );
 
     this.items = sequence( MainMenuItem.values() )
       .mapConcurrently( item-> {

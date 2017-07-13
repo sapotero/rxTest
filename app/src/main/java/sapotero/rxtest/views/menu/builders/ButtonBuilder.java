@@ -24,9 +24,6 @@ import io.requery.Persistable;
 import io.requery.query.WhereAndOr;
 import io.requery.rx.RxScalar;
 import io.requery.rx.SingleEntityStore;
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
@@ -181,21 +178,32 @@ public class ButtonBuilder {
       .filter( filter::byStatus)
       .filter( filter::isProcessed )
       .filter( filter::isFavorites )
-      .filter( filter::isControl )
-      .toList();
+      .filter( filter::isControl ).toList();
 
-    Observable
-      .from( lazy_docs )
-      .toList()
-      .subscribeOn( Schedulers.computation() )
-      .observeOn( AndroidSchedulers.mainThread() )
-      .subscribe(
-        list -> {
-          Timber.e( label, list.size() );
-          view.setText( String.format( label, list.size() ) );
-        },
-        Timber::e
-      );
+    Timber.e( label, lazy_docs.size() );
+    view.setText( String.format( label, lazy_docs.size() ) );
+//      .mapConcurrently( inMemoryDocument -> {
+//
+//        Timber.e( label, list.size() );
+//        view.setText( String.format( label, list.size() ) );
+//
+//        return false;
+//      });
+////      .toList();
+//
+//
+//    Observable
+//      .from( lazy_docs )
+//      .toList()
+//      .subscribeOn( Schedulers.computation() )
+//      .observeOn( AndroidSchedulers.mainThread() )
+//      .subscribe(
+//        list -> {
+//          Timber.e( label, list.size() );
+//          view.setText( String.format( label, list.size() ) );
+//        },
+//        Timber::e
+//      );
   }
 
   public RadioButton getView(Context context){

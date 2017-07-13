@@ -3,19 +3,17 @@ package sapotero.rxtest.views.custom.spinner;
 import android.content.Context;
 import android.support.v7.widget.AppCompatTextView;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.util.concurrent.TimeUnit;
-
-import rx.Observable;
-import sapotero.rxtest.R;
 import sapotero.rxtest.events.adapter.JournalSelectorIndexEvent;
 import sapotero.rxtest.views.adapters.spinner.JournalSelectorAdapter;
-import timber.log.Timber;
 
 public class JournalSelectorView extends AppCompatTextView implements View.OnClickListener {
   private String TAG = this.getClass().getSimpleName();
@@ -41,36 +39,27 @@ public class JournalSelectorView extends AppCompatTextView implements View.OnCli
   private void build(){
     setOnClickListener(this);
 
+    adapter = new JournalSelectorAdapter();
+    adapter.setCallback(this::updateView);
 
-    Observable
-      .just(true)
-      .delay(1500, TimeUnit.MILLISECONDS)
-      .subscribe(
-        data -> {
-          Timber.e("+++!!");
-          JournalSelectorAdapter adapter = new JournalSelectorAdapter();
-          setText( adapter.setDefault() );
-        }, Timber::e
-      );
+    setText( adapter.setDefault() );
   }
 
 
   @Override
   public void onClick(View v) {
-    Timber.tag(TAG).w("clicked!");
-
-    adapter = new JournalSelectorAdapter();
-    adapter.setCallback(this::updateView);
-
     dialog = new MaterialDialog.Builder( getContext() )
-      .title(R.string.container_title)
       .adapter(adapter, null)
       .alwaysCallSingleChoiceCallback()
       .autoDismiss(true)
       .build();
     dialog.show();
 
-
+    Window window = dialog.getWindow();
+    WindowManager.LayoutParams layoutParams = window.getAttributes();
+    layoutParams.gravity = Gravity.START | Gravity.CENTER_HORIZONTAL;
+    layoutParams.flags &= ~WindowManager.LayoutParams.FLAG_DIM_BEHIND;
+    window.setAttributes(layoutParams);
   }
 
   private void updateView(int position){
