@@ -13,6 +13,11 @@ public abstract class RFavoriteUser {
   @Generated
   int id;
 
+  // resolved https://tasks.n-core.ru/browse/MVDESD-13414
+  // Отображать порядок ДЛ в МП, также как в группах СЭД
+  // Номер элемента в списке из входящего JSON
+  Integer sortIndex;
+
   String uid;
   String name;
   String organization;

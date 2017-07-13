@@ -34,16 +34,19 @@ public class CreateAssistantJob extends BaseJob {
 
   @Override
   public void onRun() throws Throwable {
+    int index = 0;
     for (Assistant user : users){
       if ( !exist( user.getToS()) ){
-        add(user);
+        add(user, index);
       }
+      index++;
     }
 
   }
 
-  private void add(Assistant user) {
+  private void add(Assistant user, int index) {
     RAssistantEntity data = mappers.getAssistantMapper().toEntity(user);
+    data.setSortIndex(index);
 
     dataStore
       .insert(data)

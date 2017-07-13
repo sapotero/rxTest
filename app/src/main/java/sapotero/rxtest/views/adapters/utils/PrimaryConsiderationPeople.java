@@ -17,6 +17,11 @@ public class PrimaryConsiderationPeople implements IPerformer {
   private boolean isResponsible = false;
   private boolean isOrganization = false;
 
+  // resolved https://tasks.n-core.ru/browse/MVDESD-13414
+  // Отображать порядок ДЛ в МП, также как в группах СЭД
+  // Номер элемента в списке из входящего JSON
+  private Integer sortIndex;
+
   public PrimaryConsiderationPeople() {
   }
 
@@ -106,6 +111,14 @@ public class PrimaryConsiderationPeople implements IPerformer {
 
   public void setIsOrganization(boolean organization) {
     isOrganization = organization;
+  }
+
+  public Integer getSortIndex() {
+    return sortIndex;
+  }
+
+  public void setSortIndex(Integer sortIndex) {
+    this.sortIndex = sortIndex;
   }
 
   @Override

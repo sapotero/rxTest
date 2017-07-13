@@ -140,14 +140,9 @@ public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
 
   @Override
   public void notifyDataSetChanged() {
-    Collections.sort(resultItems, new Comparator<PrimaryConsiderationPeople>() {
-      @Override
-      public int compare(PrimaryConsiderationPeople a, PrimaryConsiderationPeople b)
-      {
-
-        return  a.getName().compareTo( b.getName() );
-      }
-    });
+    // resolved https://tasks.n-core.ru/browse/MVDESD-13414
+    // Отображать порядок ДЛ в МП, также как в группах СЭД
+    Collections.sort(sourceItems, (o1, o2) -> o1.getSortIndex() != null && o2.getSortIndex() != null ? o1.getSortIndex().compareTo( o2.getSortIndex() ) : 0 );
 
     super.notifyDataSetChanged();
   }
