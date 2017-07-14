@@ -221,6 +221,8 @@ public class DataLoaderManager {
                 })
             );
 
+            // resolved https://tasks.n-core.ru/browse/MVDESD-13752
+            // Добавить в боковую панель список коллег
             subscriptionInitV2.add(
               auth.getColleagues(settings.getLogin(), settings.getToken())
                 .subscribeOn(Schedulers.computation())

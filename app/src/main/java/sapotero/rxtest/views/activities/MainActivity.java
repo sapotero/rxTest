@@ -478,7 +478,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       .addDrawerItems(
         new DividerDrawerItem(),
         new SecondaryDrawerItem()
-          .withName(R.string.drawer_item_settings_account)
+          .withName(R.string.drawer_item_settings)
           .withIdentifier(SETTINGS_VIEW),
         new SecondaryDrawerItem()
           .withName(R.string.drawer_item_settings_templates)
@@ -491,10 +491,10 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
           new DividerDrawerItem(),
           new SecondaryDrawerItem()
             .withIdentifier(SETTINGS_LOG)
-            .withName("Очередь задач"),
+            .withName(R.string.drawer_item_settings_log),
           new SecondaryDrawerItem()
             .withIdentifier(SETTINGS_SIGN)
-            .withName("Подписи ЭО"),
+            .withName(R.string.drawer_item_settings_signatures),
           new DividerDrawerItem()
         );
     }
@@ -590,6 +590,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   private void drawer_build_head() {
 
+    // resolved https://tasks.n-core.ru/browse/MVDESD-13752
+    // Добавить в боковую панель список коллег
     List<RColleagueEntity> colleaguesFromDB = dataStore
       .select(RColleagueEntity.class)
       .where(RColleagueEntity.USER.eq( settings.getLogin() ))
@@ -616,7 +618,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
       profiles[i] = new ProfileDrawerItem()
         .withName( colleagueName )
-        .withIsExpanded( true )
         .withSelectable( false )
         .withSetSelected( false )
         .withIcon( R.drawable.gerb );
@@ -660,6 +661,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
         }
       }
     } catch (Exception error) {
+      Timber.tag(TAG).d("Error splitting colleague name: %s", nameToSplit);
     }
 
     return name;

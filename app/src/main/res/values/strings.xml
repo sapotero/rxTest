@@ -134,12 +134,13 @@
     <string name="action_settings">Выполняется проверка пин кода…</string>
     <string name="drawer_item_journals">Журналы</string>
     <string name="drawer_item_settings">Настройки</string>
-    <string name="drawer_item_settings_account">Настройка</string>
+    <string name="drawer_item_settings_account">Учетная запись/Отображение</string>
     <string name="drawer_item_settings_config">Отображение</string>
     <string name="drawer_item_settings_templates">Шаблоны резолюций</string>
     <string name="drawer_item_settings_templates_off">Шаблоны отклонения</string>
     <string name="drawer_item_debug">Отладка</string>
-
+    <string name="drawer_item_settings_log">Очередь задач</string>
+    <string name="drawer_item_settings_signatures">Подписи ЭО</string>
 
     <string name="hint_urgency">Срочность</string>
     <string name="hint_head_font_size">Шрифт исполнителя</string>
