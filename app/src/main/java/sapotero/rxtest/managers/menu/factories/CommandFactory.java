@@ -92,7 +92,7 @@ public class CommandFactory implements AbstractCommand.Callback{
 
       @Override
       public String getRussianName() {
-        return "Отклонения документа с возвратом на первичное рассмотрение";
+        return "Отклонение документа с возвратом на первичное рассмотрение";
       }
     },
     DELEGATE_PERFORMANCE {

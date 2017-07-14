@@ -111,6 +111,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
           case R.id.menu_info_delegate_performance:
             operation = CommandFactory.Operation.DELEGATE_PERFORMANCE;
             params.setPerson( settings.getCurrentUserId() );
+            params.setStatusCode( settings.getStatusCode() );
             break;
           case R.id.menu_info_to_the_approval_performance:
 
@@ -122,6 +123,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             } else {
               operation = CommandFactory.Operation.FROM_THE_REPORT;
               params.setPerson( settings.getCurrentUserId() );
+              params.setStatusCode( settings.getStatusCode() );
             }
             break;
 
@@ -293,6 +295,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             } else {
               operation = CommandFactory.Operation.RETURN_TO_THE_PRIMARY_CONSIDERATION;
               params.setDocument( settings.getUid() );
+              params.setStatusCode( settings.getStatusCode() );
             }
 
             break;
@@ -769,6 +772,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         operation = CommandFactory.Operation.FROM_THE_REPORT;
         params.setPerson( settings.getCurrentUserId() );
         params.setDocument( settings.getUid() );
+        params.setStatusCode( settings.getStatusCode() );
         if ( settings.isShowCommentPost() ) {
           params.setComment(dialog1.getInputEditText().getText().toString());
         }
@@ -805,6 +809,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         CommandFactory.Operation operation;
         operation = CommandFactory.Operation.RETURN_TO_THE_PRIMARY_CONSIDERATION;
         params.setDocument( settings.getUid() );
+        params.setStatusCode( settings.getStatusCode() );
         operationManager.execute(operation, params);
       })
       .autoDismiss(true)

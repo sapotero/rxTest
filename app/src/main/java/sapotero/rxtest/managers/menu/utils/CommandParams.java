@@ -26,6 +26,7 @@ public class CommandParams implements Serializable {
   private String linkedTaskUuid = "";
   private boolean assignment = false;
 
+  private String statusCode;
 
   public String getFilePath() {
     return filePath;
@@ -160,5 +161,13 @@ public class CommandParams implements Serializable {
 
   public void setLinkedTaskUuid(String linkedTaskUuid) {
     this.linkedTaskUuid = linkedTaskUuid;
+  }
+
+  public String getStatusCode() {
+    return statusCode;
+  }
+
+  public void setStatusCode(String statusCode) {
+    this.statusCode = statusCode;
   }
 }

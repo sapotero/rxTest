@@ -87,7 +87,7 @@ public class FromTheReport extends AbstractCommand {
       settings.getToken(),
       uids,
       comment,
-      settings.getStatusCode()
+      getParams().getStatusCode()
     );
 
     info.subscribeOn( Schedulers.computation() )

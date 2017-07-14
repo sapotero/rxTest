@@ -88,7 +88,7 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
       settings.getToken(),
       uids,
       uid,
-      settings.getStatusCode()
+      getParams().getStatusCode()
     );
 
     info.subscribeOn( Schedulers.computation() )
