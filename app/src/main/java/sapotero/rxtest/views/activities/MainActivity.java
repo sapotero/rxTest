@@ -477,10 +477,10 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     drawer
       .addDrawerItems(
         new DividerDrawerItem(),
-        new SecondaryDrawerItem()
+        new PrimaryDrawerItem()
           .withName(R.string.drawer_item_settings)
           .withIdentifier(SETTINGS_VIEW),
-        new SecondaryDrawerItem()
+        new PrimaryDrawerItem()
           .withName(R.string.drawer_item_settings_templates)
           .withIdentifier(SETTINGS_DECISION_TEMPLATES)
       );
@@ -489,10 +489,10 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       drawer
         .addDrawerItems(
           new DividerDrawerItem(),
-          new SecondaryDrawerItem()
+          new PrimaryDrawerItem()
             .withIdentifier(SETTINGS_LOG)
             .withName(R.string.drawer_item_settings_log),
-          new SecondaryDrawerItem()
+          new PrimaryDrawerItem()
             .withIdentifier(SETTINGS_SIGN)
             .withName(R.string.drawer_item_settings_signatures),
           new DividerDrawerItem()
