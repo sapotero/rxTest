@@ -58,60 +58,53 @@ public class CommandFactory implements AbstractCommand.Callback{
   public enum Operation {
     FILE_SIGN {
       @Override
-      public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
-        SignFile command = new SignFile(document);
+      public Command getCommand(CommandFactory instance, CommandParams params) {
+        SignFile command = new SignFile(params);
         command.registerCallBack(instance);
-        command.withParams(params);
         return command;
       }
 
       @Override
-      public String getRussinaName() {
+      public String getRussianName() {
         return "Подписание электронного образа";
       }
     },
     FROM_THE_REPORT {
       @Override
-      public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
-        FromTheReport command = new FromTheReport(document);
-//        doc.withHistory(histrory);
+      public Command getCommand(CommandFactory instance, CommandParams params) {
+        FromTheReport command = new FromTheReport(params);
         command.registerCallBack(instance);
-        command.withParams(params);
         return command;
       }
 
       @Override
-      public String getRussinaName() {
+      public String getRussianName() {
         return "Возврат с доклада";
       }
     },
     RETURN_TO_THE_PRIMARY_CONSIDERATION {
       @Override
-      public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
-        ReturnToPrimaryConsideration command = new ReturnToPrimaryConsideration(document);
-//        doc.withHistory(histrory);
+      public Command getCommand(CommandFactory instance, CommandParams params) {
+        ReturnToPrimaryConsideration command = new ReturnToPrimaryConsideration(params);
         command.registerCallBack(instance);
-        command.withParams(params);
         return command;
       }
+
       @Override
-      public String getRussinaName() {
+      public String getRussianName() {
         return "Отклонения документа с возвратом на первичное рассмотрение";
       }
     },
     DELEGATE_PERFORMANCE {
       @Override
-      public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
+      public Command getCommand(CommandFactory instance, CommandParams params) {
         DelegatePerformance command = new DelegatePerformance(document);
-        command.withParams(params);
-        command
-          .withPerson( params.getPerson() )
-          .registerCallBack(instance);
-        command.withParams(params);
+        command.registerCallBack(instance);
         return command;
       }
+
       @Override
-      public String getRussinaName() {
+      public String getRussianName() {
         return "Передача исполнения";
       }
     },
@@ -127,7 +120,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         return command;
       }
       @Override
-      public String getRussinaName() {
+      public String getRussianName() {
         return "Исполнение без ответа";
       }
     },
@@ -143,7 +136,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         return command;
       }
       @Override
-      public String getRussinaName() {
+      public String getRussianName() {
         return "Передачи первичного рассмотрения";
       }
     },
@@ -159,7 +152,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         return command;
       }
       @Override
-      public String getRussinaName() {
+      public String getRussianName() {
         return "Передача согласования";
       }
     },
@@ -175,7 +168,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         return command;
       }
       @Override
-      public String getRussinaName() {
+      public String getRussianName() {
         return "Передача согласования документа следующему в маршруте ДЛ";
       }
     },
@@ -191,7 +184,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         return command;
       }
       @Override
-      public String getRussinaName() {
+      public String getRussianName() {
         return "Передача согласования документа предыдущему в маршруте ДЛ";
       }
     },
@@ -207,7 +200,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         return command;
       }
       @Override
-      public String getRussinaName() {
+      public String getRussianName() {
         return "Передача подписания";
       }
     },
@@ -223,7 +216,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         return command;
       }
       @Override
-      public String getRussinaName() {
+      public String getRussianName() {
         return "Передача подписания документа следующему в маршруте ДЛ";
       }
     },
@@ -239,7 +232,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         return command;
       }
       @Override
-      public String getRussinaName() {
+      public String getRussianName() {
         return "Передача подписания документа предыдущему в маршруте ДЛ";
       }
     },
@@ -255,7 +248,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         return command;
       }
       @Override
-      public String getRussinaName() {
+      public String getRussianName() {
         return "Добавление в избранное";
       }
     },
@@ -271,7 +264,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         return command;
       }
       @Override
-      public String getRussinaName() {
+      public String getRussianName() {
         return "Удаление из избранного";
       }
     },
@@ -287,7 +280,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         return command;
       }
       @Override
-      public String getRussinaName() {
+      public String getRussianName() {
         return "Установка отметки о необходимости постановки на контроль";
       }
     },
@@ -303,7 +296,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         return command;
       }
       @Override
-      public String getRussinaName() {
+      public String getRussianName() {
         return "Удаление отметки о необходимости постановки на контроль";
       }
     },
@@ -316,7 +309,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         return command;
       }
       @Override
-      public String getRussinaName() {
+      public String getRussianName() {
         return "Операция заглушка для тестов";
       }
     },
@@ -334,7 +327,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         return command;
       }
       @Override
-      public String getRussinaName() {
+      public String getRussianName() {
         return "Сохранение резолюции";
       }
     },
@@ -351,7 +344,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         return command;
       }
       @Override
-      public String getRussinaName() {
+      public String getRussianName() {
         return "Создание резолюции";
       }
     },
@@ -369,7 +362,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         return command;
       }
       @Override
-      public String getRussinaName() {
+      public String getRussianName() {
         return "*Создание резолюции";
       }
     },
@@ -384,7 +377,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         return command;
       }
       @Override
-      public String getRussinaName() {
+      public String getRussianName() {
         return "*Сохранение резолюции";
       }
     },
@@ -403,7 +396,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         return command;
       }
       @Override
-      public String getRussinaName() {
+      public String getRussianName() {
         return "Сохранение и подписание резолюции";
       }
     },
@@ -419,7 +412,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         return command;
       }
       @Override
-      public String getRussinaName() {
+      public String getRussianName() {
         return "Создание и подписание резолюции";
       }
     },
@@ -437,7 +430,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         return command;
       }
       @Override
-      public String getRussinaName() {
+      public String getRussianName() {
         return "Подписание резолюции";
       }
     },
@@ -450,7 +443,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         return command;
       }
       @Override
-      public String getRussinaName() {
+      public String getRussianName() {
         return "Подписание резолюции";
       }
     },
@@ -476,7 +469,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         return command;
       }
       @Override
-      public String getRussinaName() {
+      public String getRussianName() {
         return "Отклонение резолюции";
       }
     },
@@ -489,7 +482,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         return command;
       }
       @Override
-      public String getRussinaName() {
+      public String getRussianName() {
         return "Создание шаблона резолюции";
       }
     },
@@ -501,7 +494,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         return command;
       }
       @Override
-      public String getRussinaName() {
+      public String getRussianName() {
         return "Изменение шаблона резолюции";
       }
     },
@@ -513,7 +506,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         return command;
       }
       @Override
-      public String getRussinaName() {
+      public String getRussianName() {
         return "Удаление шаблона резолюции";
       }
     };
@@ -635,8 +628,8 @@ public class CommandFactory implements AbstractCommand.Callback{
       return operation;
     }
 
-    public abstract Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params);
-    public abstract String getRussinaName();
+    public abstract Command getCommand(CommandFactory instance, CommandParams params);
+    public abstract String getRussianName();
   };
 
   public CommandFactory() {

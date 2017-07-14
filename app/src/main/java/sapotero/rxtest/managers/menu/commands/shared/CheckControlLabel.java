@@ -78,12 +78,6 @@ public class CheckControlLabel extends SharedCommand {
   protected void setSuccess() {
     Timber.tag("RecyclerViewRefresh").d("CheckControlLabel: executeRemote success - update in DB and MemoryStore");
 
-//    store.process(
-//      store.startTransactionFor(document_id)
-//        .removeLabel(LabelType.SYNC)
-//        .setLabel(LabelType.CONTROL)
-//    );
-
     InMemoryDocument docInMemory = store.getDocuments().get(document_id);
 
     if ( docInMemory != null ) {

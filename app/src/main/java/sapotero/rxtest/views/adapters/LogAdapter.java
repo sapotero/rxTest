@@ -44,7 +44,7 @@ public class LogAdapter extends RecyclerView.Adapter<LogAdapter.QueueViewHolder>
 
     if (operation != null) {
       viewHolder.date.setText( item.getCreatedAt() );
-      viewHolder.title.setText( operation.getRussinaName() );
+      viewHolder.title.setText( operation.getRussianName() );
 
       String status = "";
 

@@ -19,7 +19,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.birbit.android.jobqueue.JobManager;
-import com.mikepenz.material_design_iconic_typeface_library.MaterialDesignIconic;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.DrawerBuilder;
@@ -477,11 +476,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
         new SecondaryDrawerItem()
           .withName(R.string.drawer_item_settings_account)
-          .withIcon(MaterialDesignIconic.Icon.gmi_accounts)
           .withIdentifier(SETTINGS_VIEW),
         new SecondaryDrawerItem()
           .withName(R.string.drawer_item_settings_templates)
-          .withIcon(MaterialDesignIconic.Icon.gmi_comment_edit)
           .withIdentifier(SETTINGS_DECISION_TEMPLATES)
       );
 
@@ -491,11 +488,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
           new SectionDrawerItem().withName(R.string.drawer_item_debug),
           new SecondaryDrawerItem()
             .withIdentifier(SETTINGS_LOG)
-            .withIcon(MaterialDesignIconic.Icon.gmi_assignment)
             .withName("Лог"),
           new SecondaryDrawerItem()
             .withIdentifier(SETTINGS_SIGN)
-            .withIcon(MaterialDesignIconic.Icon.gmi_dns)
             .withName("Подписи ЭО"),
           new DividerDrawerItem()
         );

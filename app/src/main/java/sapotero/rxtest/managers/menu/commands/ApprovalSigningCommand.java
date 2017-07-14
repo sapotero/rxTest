@@ -7,11 +7,16 @@ import retrofit2.Retrofit;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import timber.log.Timber;
 
 public abstract class ApprovalSigningCommand extends AbstractCommand {
+
+  public ApprovalSigningCommand(CommandParams params) {
+    super(params);
+  }
 
   private Observable<OperationResult> getOperationResultObservable(String uid, String official_id) {
     Retrofit retrofit = getOperationsRetrofit();

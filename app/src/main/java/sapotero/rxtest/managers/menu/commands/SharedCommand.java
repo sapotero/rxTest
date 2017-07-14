@@ -15,12 +15,17 @@ import sapotero.rxtest.events.document.DropControlEvent;
 import sapotero.rxtest.events.utils.RecalculateMenuEvent;
 import sapotero.rxtest.events.view.ShowSnackEvent;
 import sapotero.rxtest.managers.menu.interfaces.Command;
+import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
 public abstract class SharedCommand extends AbstractCommand {
+
+  public SharedCommand(CommandParams params) {
+    super(params);
+  }
 
   public void onError(Command command, String message) {
     if (callback != null){

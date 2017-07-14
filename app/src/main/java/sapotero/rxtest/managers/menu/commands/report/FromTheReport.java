@@ -1,11 +1,8 @@
 package sapotero.rxtest.managers.menu.commands.report;
 
-import android.support.annotation.Nullable;
-
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 import retrofit2.Retrofit;
 import rx.Observable;
@@ -14,24 +11,17 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
-import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
+import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import timber.log.Timber;
 
 public class FromTheReport extends AbstractCommand {
 
-  private final DocumentReceiver document;
-
   private String TAG = this.getClass().getSimpleName();
 
-  public FromTheReport(DocumentReceiver document){
-    super();
-    this.document = document;
-  }
-
-  public String getInfo(){
-    return null;
+  public FromTheReport(CommandParams params) {
+    super(params);
   }
 
   public void registerCallBack(Callback callback){
@@ -42,7 +32,7 @@ public class FromTheReport extends AbstractCommand {
   public void execute() {
     queueManager.add(this);
     update();
-    setDocOperationProcessedStartedInMemory( getUid() );
+    setDocOperationProcessedStartedInMemory( getParams().getDocument() );
   }
 
   @Override
@@ -51,9 +41,9 @@ public class FromTheReport extends AbstractCommand {
   }
 
   private void update(){
-    String uid = getUid();
+    String uid = getParams().getDocument();
 
-    int count = dataStore
+    dataStore
       .update(RDocumentEntity.class)
       .set( RDocumentEntity.PROCESSED, true)
       .set( RDocumentEntity.MD5, "" )
@@ -61,21 +51,8 @@ public class FromTheReport extends AbstractCommand {
       .where(RDocumentEntity.UID.eq(uid))
       .get()
       .value();
+
     EventBus.getDefault().post( new ShowNextDocumentEvent());
-  }
-
-  @Nullable
-  private String getUid() {
-    String uid = null;
-
-    if (params.getDocument() != null && !Objects.equals(params.getDocument(), "")){
-      uid = params.getDocument();
-    }
-
-    if (document.getUid() != null && !Objects.equals(document.getUid(), "")){
-      uid = document.getUid();
-    }
-    return uid;
   }
 
   @Override
@@ -96,12 +73,12 @@ public class FromTheReport extends AbstractCommand {
     OperationService operationService = retrofit.create( OperationService.class );
 
     ArrayList<String> uids = new ArrayList<>();
-    uids.add( getUid() );
+    uids.add( getParams().getDocument() );
 
     String comment = null;
 
-    if (params.getComment() != null){
-      comment = params.getComment();
+    if (getParams().getComment() != null){
+      comment = getParams().getComment();
     }
 
     Observable<OperationResult> info = operationService.report(
@@ -123,10 +100,10 @@ public class FromTheReport extends AbstractCommand {
 
           queueManager.setExecutedRemote(this);
 
-          finishOperationOnSuccess( getUid() );
+          finishOperationOnSuccess( getParams().getDocument() );
 
         },
-        error -> onError( this, params.getDocument(), error.getLocalizedMessage(), true, TAG )
+        error -> onError( this, getParams().getDocument(), error.getLocalizedMessage(), true, TAG )
       );
   }
 }

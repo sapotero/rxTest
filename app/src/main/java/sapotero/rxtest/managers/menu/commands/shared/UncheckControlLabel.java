@@ -78,12 +78,6 @@ public class UncheckControlLabel extends SharedCommand {
   protected void setSuccess() {
     Timber.tag("RecyclerViewRefresh").d("UncheckControlLabel: executeRemote success - update in DB and MemoryStore");
 
-//    store.process(
-//      store.startTransactionFor(document_id)
-//        .removeLabel(LabelType.SYNC)
-//        .removeLabel(LabelType.CONTROL)
-//    );
-
     InMemoryDocument docInMemory = store.getDocuments().get(document_id);
 
     if ( docInMemory != null ) {
