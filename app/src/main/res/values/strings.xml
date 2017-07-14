@@ -139,7 +139,8 @@
     <string name="drawer_item_settings_templates">Шаблоны резолюций</string>
     <string name="drawer_item_settings_templates_off">Шаблоны отклонения</string>
     <string name="drawer_item_debug">Отладка</string>
-
+    <string name="drawer_item_settings_log">Очередь задач</string>
+    <string name="drawer_item_settings_signatures">Подписи ЭО</string>
 
     <string name="hint_urgency">Срочность</string>
     <string name="hint_head_font_size">Шрифт исполнителя</string>

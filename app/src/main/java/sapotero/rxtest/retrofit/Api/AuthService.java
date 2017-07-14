@@ -13,6 +13,7 @@ import retrofit2.http.Query;
 import rx.Observable;
 import sapotero.rxtest.retrofit.models.Assistant;
 import sapotero.rxtest.retrofit.models.AuthSignToken;
+import sapotero.rxtest.retrofit.models.Colleague;
 import sapotero.rxtest.retrofit.models.Folder;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.models.Template;
@@ -98,5 +99,9 @@ public interface AuthService {
     @Query("auth_token") String token
   );
 
-
+  @GET("v3/colleagues.json")
+  Observable<ArrayList<Colleague>> getColleagues(
+    @Query("login") String username,
+    @Query("auth_token") String token
+  );
 }
