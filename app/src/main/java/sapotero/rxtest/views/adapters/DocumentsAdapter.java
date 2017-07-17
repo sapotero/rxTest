@@ -48,8 +48,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
   @Inject Settings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
-  @Inject
-  MemoryStore store;
+  @Inject MemoryStore store;
 
   private List<InMemoryDocument> documents;
   private Context mContext;
@@ -85,6 +84,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
     removedUids = new HashSet<>();
     addedUids = new HashSet<>();
+
   }
 
   public void withDbQueryBuilder(DBQueryBuilder dbQueryBuilder) {
@@ -136,6 +136,8 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
         checkConditionsAndAddItem( doc );
       }
     }
+
+//    EventBus.getDefault().postSticky( new JournalSelectorUpdateCountEvent() );
 
   }
 
@@ -462,7 +464,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
   }
 
   private void recreateHash() {
-    Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Recreating hash");
+//    Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Recreating hash");
 
     Holder.MAP = new HashMap<>();
 
@@ -470,7 +472,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       Holder.MAP.put( documents.get(i).getUid(), i );
     }
 
-    Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Hash recreated");
+//    Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Hash recreated");
   }
 
   class DocumentViewHolder extends RecyclerView.ViewHolder {

@@ -73,6 +73,7 @@ import sapotero.rxtest.views.custom.CircleLeftArrow;
 import sapotero.rxtest.views.custom.CircleRightArrow;
 import sapotero.rxtest.views.custom.OrganizationSpinner;
 import sapotero.rxtest.views.custom.SearchView.SearchView;
+import sapotero.rxtest.views.custom.spinner.JournalSelectorView;
 import sapotero.rxtest.views.menu.MenuBuilder;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import timber.log.Timber;
@@ -100,6 +101,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @BindView (R.id.favorites_button)                 CheckBox            favorites_button;
   @BindView (R.id.documents_empty_list)             TextView            documents_empty_list;
 
+  @BindView (R.id.activity_main_journal_selector)   JournalSelectorView journalSelector;
+
   private String TAG = MainActivity.class.getSimpleName();
   private OrganizationAdapter organization_adapter;
   private DrawerBuilder drawer;
@@ -114,8 +117,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private final int IN_DOCUMENTS       = 7;
   private final int ON_CONTROL         = 8;
   private final int PROCESSED          = 9;
-
   private final int FAVORITES          = 10;
+
   private final int SETTINGS_VIEW_TYPE_APPROVE = 18;
   private final int SETTINGS_VIEW = 20;
   private final int SETTINGS_DECISION_TEMPLATES = 21;
@@ -293,6 +296,13 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     GridLayoutManager gridLayoutManager = new GridLayoutManager(this, columnCount, GridLayoutManager.VERTICAL, false);
 
     RAdapter = new DocumentsAdapter(this, new ArrayList<>());
+    RAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+      @Override
+      public void onChanged() {
+        super.onChanged();
+//        updateCount();
+      }
+    });
 
     rv.addItemDecoration(new GridSpacingItemDecoration(columnCount, spacing, true));
     rv.setLayoutManager(gridLayoutManager);
@@ -304,6 +314,11 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     ORGANIZATION_SELECTOR.setAdapter(organization_adapter, true, selected -> {
       dbQueryBuilder.execute(false);
     });
+  }
+
+  private void updateCount(){
+    journalSelector.updateCounter();
+    menuBuilder.getItemsBuilder().updateView();
   }
 
   private void initToolbar() {
@@ -407,6 +422,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     initEvents();
     startNetworkCheck();
     subscribeToNetworkCheckResults();
+    updateCount();
 
     rxSettings();
 
@@ -469,6 +485,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   private void setJournalType(int type) {
     menuBuilder.selectJournal( type );
+    journalSelector.selectJournal(type);
+
   }
 
   private void drawer_build_bottom() {
@@ -712,8 +730,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     drawer_build_bottom();
   }
 
-
-
   @OnClick(R.id.activity_main_left_button)
   public void setLeftArrowArrow() {
     menuBuilder.showPrev();
@@ -724,14 +740,12 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     menuBuilder.showNext();
   }
 
-
   /* MenuBuilder.Callback */
   @Override
   public void onMenuBuilderUpdate(ArrayList<ConditionBuilder> conditions) {
 //    menuBuilder.setFavorites( dbQueryBuilder.getFavoritesCount() );
     dbQueryBuilder.executeWithConditions( conditions, menuBuilder.getItem().isVisible() && favorites_button.isChecked(), menuBuilder.getItem() );
   }
-
 
   @Override
   public void onUpdateError(Throwable error) {
@@ -752,7 +766,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   public void onMessageEvent(RecalculateMenuEvent event) {
     if (menuBuilder != null) {
       Timber.tag(TAG).i("RecalculateMenuEvent");
-      menuBuilder.getItemsBuilder().updateView();
+//      menuBuilder.getItemsBuilder().updateView();
     }
   }
 
@@ -762,5 +776,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     DOCUMENT_TYPE_SELECTOR.setSelection(event.index);
   }
 
+//  @Subscribe(threadMode = ThreadMode.MAIN)
+//  public void onMessageEvent(JournalSelectorUpdateCountEvent event) {
+//    Timber.tag(TAG).d("JournalSelectorUpdateCountEvent");
+//  }
 
 }

@@ -244,6 +244,8 @@ public class ButtonBuilder {
 
     getCount();
 
+    //положить в сеттинги
+
     view.setOnCheckedChangeListener((buttonView, isChecked) -> {
       setActive(isChecked);
       if (isChecked){
