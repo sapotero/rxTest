@@ -90,6 +90,7 @@
 
 
                             <sapotero.rxtest.views.custom.spinner.JournalSelectorView
+                                android:id="@+id/activity_main_journal_selector"
                                 android:layout_width="400dp"
                                 android:layout_height="match_parent"
                                 android:text="JournalSelectorView"

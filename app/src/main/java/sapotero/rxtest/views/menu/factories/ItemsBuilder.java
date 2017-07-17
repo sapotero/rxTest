@@ -1,8 +1,6 @@
 package sapotero.rxtest.views.menu.factories;
 
 import android.content.Context;
-import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -17,6 +15,7 @@ import org.greenrobot.eventbus.EventBus;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -46,7 +45,8 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
   private OrganizationSpinner organizationSelector;
   private CheckBox favoritesButton;
   private String user;
-  private Integer index;
+  private Integer index = -1;
+  private Integer view_index = -1;
 
 
   public boolean isVisible() {
@@ -76,9 +76,9 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
     journalSpinner = selector;
 
     journalSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-      @RequiresApi(api = Build.VERSION_CODES.M)
       @Override
       public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+        view_index = -1;
         updateView();
       }
 
@@ -154,6 +154,8 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
       view = new RadioGroup(context);
     }
 
+    Timber.e("++ index: %s | %s", index, view_index);
+
     view.removeAllViews();
 
     RadioGroup button_group = getButtonGroupLayout(context);
@@ -165,42 +167,60 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
       for (int i = 0; i < mainMenuItem.getMainMenuButtons().size(); i++) {
         ButtonBuilder button = mainMenuItem.getMainMenuButtons().get(i);
 
-        button_group.addView( button.getView(context) );
+        RadioButton button_view = button.getView(context);
+        button_group.addView( button_view );
         button.registerCallBack(this);
 
         // resolved https://tasks.n-core.ru/browse/MVDESD-12879
         // Стартовая страница: Должен быть выбор отображаемого раздела документов при запуске
         // На рассмотрение, Первичное рассмотрение, Рассмотренные
 
-        switch (settings.getStartPage()){
-          case "report":
-            if ( button.getIndex() == 2 ) {
-              ((RadioButton) button_group.getChildAt(i)).setChecked(true);
-              isSet = true;
-            }
-            break;
-          case "primary_consideration":
-            if ( button.getIndex() == 3 ) {
-              ((RadioButton) button_group.getChildAt(i)).setChecked(true);
-              isSet = true;
-            }
-            break;
-          case "processed":
-            if ( button.getIndex() == 4 || button.getIndex() == 7 ) {
-              ((RadioButton) button_group.getChildAt(i)).setChecked(true);
-              isSet = true;
-            }
-            break;
+        if (view_index == -1){
+          switch ( settings.getStartPage() ){
+            case "report":
+              if ( button.getIndex() == 2 ) {
+                ((RadioButton) button_group.getChildAt(i)).setChecked(true);
+                isSet = true;
+              }
+              break;
+            case "primary_consideration":
+              if ( button.getIndex() == 3 ) {
+                ((RadioButton) button_group.getChildAt(i)).setChecked(true);
+                isSet = true;
+              }
+              break;
+            case "processed":
+              if ( button.getIndex() == 4 || button.getIndex() == 7 ) {
+                ((RadioButton) button_group.getChildAt(i)).setChecked(true);
+                isSet = true;
+              }
+              break;
+          }
         }
-      }
 
+        if (Objects.equals(index, button.getIndex())){
+          view_index = button_view.getId();
+          Timber.e("button: %s | %s", index, view_index);
+        }
+
+      }
+//
       if (!isSet){
         ((RadioButton) button_group.getChildAt(0)).setChecked(true);
       }
-
-      // если отключена первичка, но она есть в кнопках
+//
+//      // если отключена первичка, но она есть в кнопках
       if (settings.isHidePrimaryConsideration()){
         ((RadioButton) button_group.getChildAt(0)).setChecked(true);
+      }
+
+      if (view_index != -1){
+        Timber.e("last_checked_index %s", view_index);
+        try {
+          button_group.check(view_index);
+        } catch (Exception e) {
+          Timber.e(e);
+        }
       }
 
     } else {
@@ -216,6 +236,10 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
 
   public void updateView() {
     updateView(getSelectedItem());
+  }
+
+  public void updateCount() {
+
   }
 
   public MainMenuItem getSelectedItem(){
@@ -236,14 +260,6 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
       Collections.addAll(result, MainMenuButton.getByIndex(index).getConditions() );
     }
 
-//    Timber.tag(TAG).v( "onMenuUpdate: %s", result.size() );
-//    for (ConditionBuilder condition : result ) {
-//      Timber.tag(TAG).i("** %s", condition.toString());
-//    }
-
-
-//    Timber.tag(TAG).v( MainMenuButton.getByIndex(index).getFormat() );
-
     return result;
   }
 
@@ -261,9 +277,10 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
 
   @Override
   public void onButtonBuilderUpdate(Integer index) {
+
     try {
       this.index = index;
-      Timber.tag(TAG).i( "onButtonBuilderUpdate" );
+      Timber.tag(TAG).i( "+ set last_checked_index %s | %s" ,index, view_index);
       EventBus.getDefault().post( new UpdateDocumentsByStatusEvent( getSelectedItem(), MainMenuButton.getByIndex(index) ) );
       callback.onMenuUpdate( getConditions() );
     } catch (Exception e) {

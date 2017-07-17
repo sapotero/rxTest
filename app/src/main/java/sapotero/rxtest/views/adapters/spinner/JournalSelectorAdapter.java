@@ -147,6 +147,7 @@ public class JournalSelectorAdapter extends RecyclerView.Adapter<JournalSelector
       sequence( settings.getJournals() )
         .filter(IntegerValidator::isInt)
         .map(id -> MainMenuItem.get(Integer.parseInt(id)))
+        .sort((i1, i2) -> i1.getIndex().compareTo(i2.getIndex()))
         .toList()
     );
     journal.addAll( Arrays.asList(MainMenuItem.ON_CONTROL, MainMenuItem.PROCESSED, MainMenuItem.FAVORITES) );

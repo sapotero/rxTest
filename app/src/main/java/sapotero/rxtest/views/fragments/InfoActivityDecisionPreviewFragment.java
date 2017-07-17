@@ -713,7 +713,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   @Override public void onDestroyView() {
     super.onDestroyView();
     binder.unbind();
-    initEvents();
+    unregisterEventBus();
   }
 
   @Override
@@ -966,108 +966,15 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
       settings.setDecisionActiveId( current_decision.getId() );
 
-//      if (toolbarManager != null) {
-////        toolbarManager.setEditDecisionMenuItemVisible( !current_decision.isApproved() );
-//
-//        if (doc.isProcessed() != null && doc.isProcessed()){
-//          toolbarManager.setEditDecisionMenuItemVisible(false);
-//        } else {
-//          toolbarManager.setEditDecisionMenuItemVisible(true);
-//        }
-//
-//      }
       updateVisibility( current_decision.isApproved() );
-
-
 
     }
 
-//    if ( !decision_spinner_adapter.hasActiveDecision() ){
-//      toolbarManager.showAsProcessed();
-//    }
   }
 
   private void loadFromJson(){
     Timber.e("loadFromJson");
-//    HOST = settings.getString("settings_username_host");
-//
-//    Retrofit retrofit = new Retrofit.Builder()
-//      .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-//      .addConverterFactory(GsonConverterFactory.create())
-//      .baseUrl(HOST.startTransactionFor() + "v3/documents/")
-//      .client(okHttpClient)
-//      .build();
-//
-//    DocumentService documentService = retrofit.create( DocumentService.class );
-//
-//    Observable<DocumentInfo> activity_main_menu = documentService.getInfo(
-//      UID.startTransactionFor(),
-//      LOGIN.startTransactionFor(),
-//      TOKEN.startTransactionFor()
-//    );
-//
-//    activity_main_menu.subscribeOn( Schedulers.newThread() )
-//      .observeOn( AndroidSchedulers.mainThread() )
-//      .subscribe(
-//        data -> {
-//          DOCUMENT = data;
-//
-//          Gson gson = new Gson();
-//
-//          Preference<String> documentNumber = settings.getString("document.number");
-//          documentNumber.set( DOCUMENT.getRegistrationNumber() );
-//
-//          Preference<String> documentJson = settings.getString("document.json");
-//          documentJson.set( gson.toJson(DOCUMENT) );
-//
-//          Preference<String> documentImages = settings.getString("document.images");
-//          documentImages.set( gson.toJson( DOCUMENT.getImages() ) );
-//
-//          toolbar.setTitle( data.getTitle() );
-//
-//          if ( data.getDecisions().size() >= 1 ){
-//
-//            desigions_recycler_view.setLayoutManager(new LinearLayoutManager(this));
-//
-//            List<Decision> decisions_list = new ArrayList<>();
-//            for (Decision decision: data.getDecisions()) {
-//              decisions_list.addByOne(decision);
-//            }
-//
-//            decision_adapter = new DecisionAdapter(decisions_list, this, desigions_recycler_view);
-//            desigions_recycler_view.setAdapter(decision_adapter);
-//
-//            // если есть резолюции, то отобразить первую
-//            if ( decisions_list.size() > 0 ) {
-//              try {
-//                jobManager.addJobInBackground( new SetActiveDecisionJob(0) );
-//              } catch ( Exception e){
-//                Timber.tag(TAG + " massInsert error").v( e );
-//              }
-//            }
-//
-//            desigions_recycler_view.setLayoutManager(new LinearLayoutManager(this));
-//
-//            RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
-//            itemAnimator.setAddDuration(10);
-//            itemAnimator.setRemoveDuration(10);
-//            desigions_recycler_view.setItemAnimator(itemAnimator);
-//
-//          }
-//
-//          if ( data.getInfoCard() != null ){
-//            CARD = Base64.decode( data.getInfoCard().getBytes(), Base64.DEFAULT );
-//          } else {
-//            CARD = Base64.decode( "".getBytes(), Base64.DEFAULT );
-//          }
-//          Preference<String> infocard = settings.getString("document.infoCard");
-//          infocard.set( new String(CARD , StandardCharsets.UTF_8) );
-//
-//        },
-//        error -> {
-//          Log.d( "++_ERROR", error.getMessage() );
-//          Toast.makeText( this, error.getMessage(), Toast.LENGTH_SHORT).show();
-//        });
+
   }
 
   public class Preview{
@@ -1409,10 +1316,14 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
   private void initEvents() {
     Timber.tag(TAG).v("initEvents");
+    unregisterEventBus();
+    EventBus.getDefault().register(this);
+  }
+
+  private void unregisterEventBus() {
     if (EventBus.getDefault().isRegistered(this)) {
       EventBus.getDefault().unregister(this);
     }
-    EventBus.getDefault().register(this);
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)

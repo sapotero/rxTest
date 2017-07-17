@@ -16,6 +16,7 @@ import rx.subjects.PublishSubject;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.events.adapter.JournalSelectorUpdateCountEvent;
 import sapotero.rxtest.events.utils.RecalculateMenuEvent;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.Settings;
@@ -81,6 +82,7 @@ public class MemoryStore implements Processable{
           }
 
           if (docs.size() > 0){
+            EventBus.getDefault().post( new JournalSelectorUpdateCountEvent() );
 //            counterRecreate();
           }
 
