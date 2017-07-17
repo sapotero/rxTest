@@ -653,18 +653,6 @@ public class DataLoaderManager {
     }
   }
 
-  private void updateCount(Documents data) {
-    int total;
-
-    try {
-      total = Integer.valueOf( data.getMeta() != null ? data.getMeta().getTotal() : "0" );
-    } catch (NumberFormatException e) {
-      total = 0;
-    }
-
-    settings.addJobCount( total );
-  }
-
   private void checkImagesToDelete() {
     Timber.tag(TAG).e( "checkImagesToDelete" );
 
@@ -707,6 +695,18 @@ public class DataLoaderManager {
         store.process( doc_hash, folder, documentType );
       }
     }
+  }
+
+  private void updateCount(Documents data) {
+    int total;
+
+    try {
+      total = Integer.valueOf( data.getMeta() != null ? data.getMeta().getTotal() : "0" );
+    } catch (NumberFormatException e) {
+      total = 0;
+    }
+
+    settings.addJobCount( total );
   }
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13145
@@ -807,6 +807,7 @@ public class DataLoaderManager {
             data -> {
               Timber.tag("LoadSequence").d("Received list of favorites");
               Timber.tag("FAVORITES").e("DOCUMENTS COUNT: %s", data.getDocuments().size() );
+              updateCount( data );
               processDocuments( data, null, null, favorites_folder.getUid(), DocumentType.FAVORITE );
             }, error -> {
               Timber.tag(TAG).e(error);
@@ -850,6 +851,7 @@ public class DataLoaderManager {
           .subscribe(
             data -> {
               Timber.tag("PROCESSED").e("DOCUMENTS COUNT: %s", data.getDocuments().size() );
+              updateCount( data );
               processDocuments( data, null, null, processed_folder.getUid(), DocumentType.PROCESSED );
             }, error -> {
               Timber.tag(TAG).e(error);

@@ -365,14 +365,12 @@ public class Processor {
 
       case FAVORITE:
         if (folder != null) {
-          settings.addJobCount(1);
           jobManager.addJobInBackground( new CreateFavoriteDocumentsJob(uid, folder) );
         }
         break;
 
       case PROCESSED:
         if (folder != null) {
-          settings.addJobCount(1);
           jobManager.addJobInBackground( new CreateProcessedDocumentsJob(uid, folder) );
         }
         break;
