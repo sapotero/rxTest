@@ -3,6 +3,7 @@ package sapotero.rxtest.views.custom.stepper.build.steps;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
+import android.support.annotation.UiThread;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,6 +31,7 @@ import sapotero.rxtest.events.stepper.load.StepperDocumentCountReadyEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.custom.stepper.Step;
+import sapotero.rxtest.views.custom.stepper.StepperLayout;
 import sapotero.rxtest.views.custom.stepper.VerificationError;
 import timber.log.Timber;
 
@@ -179,11 +181,12 @@ public class StepperLoadDataFragment extends Fragment implements Step {
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(StepperDocumentCountReadyEvent event) {
     isReceivedTotalCount = true;
+    unsubscribe();
     if (settings.getTotalDocCount() == 0) {
       // No documents to download, set download complete
       mRingProgressBar.setProgress( 100 );
     } else {
-      updateProgressBar("Document put ready");
+      updateProgressBar("Document count ready");
     }
   }
 
@@ -217,11 +220,11 @@ public class StepperLoadDataFragment extends Fragment implements Step {
     if (total != 0) {
       result = 100f * loaded / total;
 
-      if (result > 95){
+      if (result > 100) {
         result = 100f;
       }
     }
 
-    return (int) Math.ceil(result);
+    return (int) Math.floor(result);
   }
 }

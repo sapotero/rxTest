@@ -13,6 +13,8 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.birbit.android.jobqueue.JobManager;
+import com.birbit.android.jobqueue.TagConstraint;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -39,6 +41,7 @@ import timber.log.Timber;
 public class StepperAuthFragment extends Fragment implements BlockingStep {
 
   @Inject Settings settings;
+  @Inject JobManager jobManager;
 
   final String TAG = this.getClass().getSimpleName();
 
@@ -58,7 +61,7 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    EsdApplication.getDataComponent().inject(this);
+    EsdApplication.getManagerComponent().inject(this);
 
     View view = inflater.inflate(R.layout.stepper_auth, container, false);
 
@@ -172,6 +175,7 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
   @Override
   public void onSelected() {
     passwordEditText.setText("");
+    jobManager.cancelJobsInBackground(null, TagConstraint.ANY, "DocJob");
   }
 
   @Override

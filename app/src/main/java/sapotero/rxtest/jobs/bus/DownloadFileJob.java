@@ -40,7 +40,7 @@ public class DownloadFileJob  extends BaseJob {
   private RImageEntity image;
 
   DownloadFileJob(String host, String strUrl, String fileName, int id) {
-    super( new Params(PRIORITY).requireNetwork().persist() );
+    super( new Params(PRIORITY).requireNetwork().persist().addTags("DocJob") );
     this.host = host;
     this.strUrl = strUrl;
     this.fileName = fileName;
@@ -76,6 +76,8 @@ public class DownloadFileJob  extends BaseJob {
 
       if ( !image.isComplete() && !isError ){
         loadFile();
+      } else {
+        EventBus.getDefault().post(new FileDownloadedEvent("File is uncomplete with error: " + fileName));
       }
 
     }
