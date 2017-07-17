@@ -47,8 +47,7 @@ public class JournalSelectorView extends AppCompatTextView implements View.OnCli
 
   @Override
   public void onClick(View v) {
-    adapter = new JournalSelectorAdapter();
-    adapter.setCallback(this::updateView);
+    createAdapter();
 
     dialog = new MaterialDialog.Builder( getContext() )
       .adapter(adapter, null)
@@ -65,6 +64,11 @@ public class JournalSelectorView extends AppCompatTextView implements View.OnCli
     layoutParams.y = 172;
     layoutParams.flags &= ~WindowManager.LayoutParams.FLAG_DIM_BEHIND;
     window.setAttributes(layoutParams);
+  }
+
+  private void createAdapter() {
+    adapter = new JournalSelectorAdapter();
+    adapter.setCallback(this::updateView);
   }
 
   private void updateView(int position){
@@ -94,6 +98,7 @@ public class JournalSelectorView extends AppCompatTextView implements View.OnCli
   public void updateCounter() {
     Timber.e("updateCounter %s", position);
     if (position != -1) {
+      createAdapter();
       selectJournal(position);
     }
   }

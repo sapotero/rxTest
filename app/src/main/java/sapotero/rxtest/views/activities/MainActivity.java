@@ -298,7 +298,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       @Override
       public void onChanged() {
         super.onChanged();
-        updateCount();
+//        updateCount();
       }
     });
 
@@ -316,6 +316,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   private void updateCount(){
     journalSelector.updateCounter();
+    menuBuilder.getItemsBuilder().updateView();
   }
 
   private void initToolbar() {
@@ -670,8 +671,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     drawer_build_bottom();
   }
 
-
-
   @OnClick(R.id.activity_main_left_button)
   public void setLeftArrowArrow() {
     menuBuilder.showPrev();
@@ -682,14 +681,12 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     menuBuilder.showNext();
   }
 
-
   /* MenuBuilder.Callback */
   @Override
   public void onMenuBuilderUpdate(ArrayList<ConditionBuilder> conditions) {
 //    menuBuilder.setFavorites( dbQueryBuilder.getFavoritesCount() );
     dbQueryBuilder.executeWithConditions( conditions, menuBuilder.getItem().isVisible() && favorites_button.isChecked(), menuBuilder.getItem() );
   }
-
 
   @Override
   public void onUpdateError(Throwable error) {
@@ -710,7 +707,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   public void onMessageEvent(RecalculateMenuEvent event) {
     if (menuBuilder != null) {
       Timber.tag(TAG).i("RecalculateMenuEvent");
-      menuBuilder.getItemsBuilder().updateView();
+//      menuBuilder.getItemsBuilder().updateView();
     }
   }
 
@@ -719,5 +716,10 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     menuIndex = event.index;
     DOCUMENT_TYPE_SELECTOR.setSelection(event.index);
   }
+
+//  @Subscribe(threadMode = ThreadMode.MAIN)
+//  public void onMessageEvent(JournalSelectorUpdateCountEvent event) {
+//    Timber.tag(TAG).d("JournalSelectorUpdateCountEvent");
+//  }
 
 }

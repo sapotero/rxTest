@@ -218,8 +218,6 @@ public class Processor {
     Observable
       .zip(imd, docs, (memory, api) -> {
 
-
-
         Timber.tag(TAG).e("memory: %s", memory.size());
         Timber.tag(TAG).e("api: %s", api.size());
 
@@ -237,10 +235,6 @@ public class Processor {
           updateAndSetProcessed( uid );
         }
 
-//        for ( String doc : api ) {
-//          setAsUnprocessed( doc );
-//        }
-
         validateDocuments();
 
         return Collections.singletonList("");
@@ -250,6 +244,7 @@ public class Processor {
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(
         data -> {
+//          EventBus.getDefault().post( new JournalSelectorUpdateCountEvent() );
           Timber.tag(TAG).e("processed");
         },
         Timber::e
