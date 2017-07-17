@@ -324,12 +324,6 @@ public class DataLoaderManager {
     return error;
   }
 
-  private boolean isOnline() {
-    ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-    NetworkInfo netInfo = cm.getActiveNetworkInfo();
-    return netInfo != null && netInfo.isConnectedOrConnecting();
-  }
-
   private void unsubscribe(){
     if ( !isSubscriptionExist() ){
       subscription = new CompositeSubscription();
@@ -443,13 +437,7 @@ public class DataLoaderManager {
           },
           error -> {
             Timber.tag(TAG).i("tryToSignWithDc error: %s" , error );
-
             EventBus.getDefault().post( new AuthDcCheckFailEvent( error.getMessage() ) );
-
-            // если в офлайне то всё равно идём дальше
-            if ( !isOnline() ){
-              EventBus.getDefault().post( new AuthDcCheckSuccessEvent() );
-            }
           }
         )
     );

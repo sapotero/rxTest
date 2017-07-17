@@ -104,10 +104,20 @@ public class InfoCardWebViewFragment extends Fragment {
 
   private void initEvents() {
     Timber.tag(TAG).v("initEvents");
+    unregisterEventBus();
+    EventBus.getDefault().register(this);
+  }
+
+  private void unregisterEventBus() {
     if (EventBus.getDefault().isRegistered(this)) {
       EventBus.getDefault().unregister(this);
     }
-    EventBus.getDefault().register(this);
+  }
+
+  @Override
+  public void onDestroy(){
+    super.onDestroy();
+    unregisterEventBus();
   }
 
   public void onButtonPressed(Uri uri) {

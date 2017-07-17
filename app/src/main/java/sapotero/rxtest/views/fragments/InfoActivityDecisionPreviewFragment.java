@@ -713,7 +713,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   @Override public void onDestroyView() {
     super.onDestroyView();
     binder.unbind();
-    initEvents();
+    unregisterEventBus();
   }
 
   @Override
@@ -1316,10 +1316,14 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
   private void initEvents() {
     Timber.tag(TAG).v("initEvents");
+    unregisterEventBus();
+    EventBus.getDefault().register(this);
+  }
+
+  private void unregisterEventBus() {
     if (EventBus.getDefault().isRegistered(this)) {
       EventBus.getDefault().unregister(this);
     }
-    EventBus.getDefault().register(this);
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)

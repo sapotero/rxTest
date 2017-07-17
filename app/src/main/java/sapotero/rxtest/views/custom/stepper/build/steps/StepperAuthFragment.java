@@ -90,7 +90,6 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
         .cancelable(false)
         .progress(true, 0).build();
     }
-
   }
 
   private void attachSettings() {
@@ -231,7 +230,7 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
   public void onMessageEvent(StepperDcCheckSuccesEvent event) throws Exception {
     Timber.tag(TAG).d("SignFileCommand success");
     if (callback != null) {
-      loadingDialog.hide();
+      loadingDialog.dismiss();
       callback.goToNextStep();
     }
   }
@@ -244,14 +243,14 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
       Toast.makeText( getContext(), event.error, Toast.LENGTH_SHORT ).show();
     }
 
-    loadingDialog.hide();
+    loadingDialog.dismiss();
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(StepperLoginCheckSuccessEvent event) throws Exception {
     Timber.tag(TAG).d("login success");
     if (callback != null) {
-      loadingDialog.hide();
+      loadingDialog.dismiss();
       callback.goToNextStep();
     }
   }
@@ -264,7 +263,6 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
       Toast.makeText( getContext(), event.error, Toast.LENGTH_SHORT ).show();
     }
 
-    loadingDialog.hide();
+    loadingDialog.dismiss();
   }
-
 }
