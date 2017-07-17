@@ -3,6 +3,8 @@ package sapotero.rxtest.utils.memory.utils;
 import com.birbit.android.jobqueue.JobManager;
 import com.googlecode.totallylazy.Sequence;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -18,6 +20,7 @@ import rx.subjects.PublishSubject;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Deleter;
+import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.jobs.bus.CreateDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateFavoriteDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateProcessedDocumentsJob;
@@ -182,6 +185,8 @@ public class Processor {
       if ( Filter.isChanged( doc.getMd5(), document.getMd5() ) ){
         Timber.tag(TAG).e("md5     : %s | %s", doc.getMd5(), document.getMd5());
         updateJob( doc.getUid() );
+      } else {
+        EventBus.getDefault().post( new StepperLoadDocumentEvent( doc.getUid() ) );
       }
 
     } else {
@@ -349,8 +354,6 @@ public class Processor {
   }
 
   private void createJob(String uid) {
-    settings.addJobCount(1);
-
     switch (documentType) {
       case DOCUMENT:
         if (index != null) {
@@ -362,12 +365,14 @@ public class Processor {
 
       case FAVORITE:
         if (folder != null) {
+          settings.addJobCount(1);
           jobManager.addJobInBackground( new CreateFavoriteDocumentsJob(uid, folder) );
         }
         break;
 
       case PROCESSED:
         if (folder != null) {
+          settings.addJobCount(1);
           jobManager.addJobInBackground( new CreateProcessedDocumentsJob(uid, folder) );
         }
         break;
@@ -375,8 +380,6 @@ public class Processor {
   }
 
   private void updateJob(String uid) {
-    settings.addJobCount(1);
-
     if (documentType == DocumentType.DOCUMENT) {
       jobManager.addJobInBackground( new UpdateDocumentJob( uid, index, filter ) );
     } else {

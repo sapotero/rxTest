@@ -615,12 +615,13 @@ public class DataLoaderManager {
                 data -> {
                   Timber.tag("LoadSequence").d("Received list of documents");
                   requestCount--;
+                  updateCount( data );
+                  checkAndSendCountReady();
                   processDocuments( data, status, index, null, DocumentType.DOCUMENT );
-                  updatePrefJobCount();
                 },
                 error -> {
                   requestCount--;
-                  updatePrefJobCount();
+                  checkAndSendCountReady();
                   Timber.tag(TAG).e(error);
                 })
           );
@@ -638,17 +639,30 @@ public class DataLoaderManager {
               data -> {
                 Timber.tag("LoadSequence").d("Received list of projects");
                 requestCount--;
+                updateCount( data );
+                checkAndSendCountReady();
                 processDocuments( data, code, null, null, DocumentType.DOCUMENT );
-                updatePrefJobCount();
               },
               error -> {
                 requestCount--;
-                updatePrefJobCount();
+                checkAndSendCountReady();
                 Timber.tag(TAG).e(error);
               })
         );
       }
     }
+  }
+
+  private void updateCount(Documents data) {
+    int total;
+
+    try {
+      total = Integer.valueOf( data.getMeta() != null ? data.getMeta().getTotal() : "0" );
+    } catch (NumberFormatException e) {
+      total = 0;
+    }
+
+    settings.addJobCount( total );
   }
 
   private void checkImagesToDelete() {
@@ -697,7 +711,7 @@ public class DataLoaderManager {
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13145
   // Передача количества документов в экран загрузки
-  private void updatePrefJobCount() {
+  private void checkAndSendCountReady() {
     if (0 == requestCount && !isDocumentCountSent) {
       // Received responses on all requests, now jobCount contains total initial job count value.
       // Send event to update progress bar in login activity.
