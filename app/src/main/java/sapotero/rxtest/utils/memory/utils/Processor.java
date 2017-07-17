@@ -386,7 +386,7 @@ public class Processor {
   }
 
   private void updateAndSetProcessed(String uid) {
-    settings.addJobCount(1);
+    settings.addTotalDocCount(1);
     jobManager.addJobInBackground( new UpdateDocumentJob( uid, index, filter, true ) );
   }
 
@@ -402,7 +402,7 @@ public class Processor {
       new Deleter().deleteDocument( uid, TAG );
 
     } else {
-      settings.addJobCount(1);
+      settings.addTotalDocCount(1);
 
       store.process(
         store.startTransactionFor( uid )
@@ -414,7 +414,7 @@ public class Processor {
   }
 
   private void upsert(Document uid) {
-    settings.addJobCount(1);
+    settings.addTotalDocCount(1);
     jobManager.addJobInBackground( new UpsertDocumentJob( uid, index, filter) );
   }
 
