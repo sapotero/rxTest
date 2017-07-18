@@ -26,7 +26,7 @@ public class CreateFavoriteDocumentsJob extends DocumentJob {
   private String folder;
 
   public CreateFavoriteDocumentsJob(String uid, String folder) {
-    super( new Params(PRIORITY).requireNetwork().persist() );
+    super( new Params(PRIORITY).requireNetwork().persist().addTags("DocJob") );
     this.uid     = uid;
     this.folder = folder;
   }

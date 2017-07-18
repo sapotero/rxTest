@@ -27,7 +27,7 @@ public class CreateDocumentsJob extends DocumentJob {
   private boolean shared = false;
 
   public CreateDocumentsJob(String uid, String journal, String status, boolean shared) {
-    super( new Params(PRIORITY).requireNetwork().persist() );
+    super( new Params(PRIORITY).requireNetwork().persist().addTags("DocJob") );
     this.uid = uid;
     this.journal = getJournalName(journal);
     this.status = status;

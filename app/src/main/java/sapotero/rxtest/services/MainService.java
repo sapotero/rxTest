@@ -56,7 +56,9 @@ import sapotero.rxtest.events.auth.AuthDcCheckSuccessEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckSuccessEvent;
 import sapotero.rxtest.events.bus.FolderCreatedEvent;
+import sapotero.rxtest.events.bus.StartRegularRefreshEvent;
 import sapotero.rxtest.events.bus.UpdateAuthTokenEvent;
+import sapotero.rxtest.events.bus.UpdateFavoritesAndProcessedEvent;
 import sapotero.rxtest.events.crypto.AddKeyEvent;
 import sapotero.rxtest.events.crypto.SelectKeyStoreEvent;
 import sapotero.rxtest.events.crypto.SelectKeysEvent;
@@ -194,8 +196,6 @@ public class MainService extends Service {
     // Tasks will be removed on cancellation
     scheduller.setRemoveOnCancelPolicy(true);
 
-
-    scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 5*60 ,5*60, TimeUnit.SECONDS );
     scheduller.scheduleWithFixedDelay( new UpdateQueueTask(queue), 0 ,10, TimeUnit.SECONDS );
   }
 
@@ -827,17 +827,26 @@ public class MainService extends Service {
   public void onMessageEvent(FolderCreatedEvent event){
     if ( Objects.equals( event.getType(), "favorites" ) ) {
       if ( !settings.isFavoritesLoaded() ) {
+        Timber.tag("LoadSequence").d("Favorites folder created, starting update");
         settings.setFavoritesLoaded(true);
-        dataLoaderInterface.updateFavorites();
+        dataLoaderInterface.updateFavorites(false);
       }
     }
 
     if ( Objects.equals( event.getType(), "processed" ) ) {
       if ( !settings.isProcessedLoaded() ) {
+        Timber.tag("LoadSequence").d("Processed folder created, starting update");
         settings.setProcessedLoaded(true);
-        dataLoaderInterface.updateProcessed();
+        dataLoaderInterface.updateProcessed(false);
       }
     }
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(UpdateFavoritesAndProcessedEvent event) {
+    Timber.tag("LoadSequence").d("Documents and projects loaded, loading favorites and processed");
+    dataLoaderInterface.updateFavorites(true);
+    dataLoaderInterface.updateProcessed(true);
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
@@ -872,5 +881,10 @@ public class MainService extends Service {
     Intent intent = new Intent(context, MainService.class);
     intent.putExtra(EXTRA_IS_FROM_LOGIN, isFromLogin);
     return intent;
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(StartRegularRefreshEvent event){
+    scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 5*60, 5*60, TimeUnit.SECONDS );
   }
 }

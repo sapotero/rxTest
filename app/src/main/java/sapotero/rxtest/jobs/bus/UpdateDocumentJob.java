@@ -58,7 +58,7 @@ public class UpdateDocumentJob extends DocumentJob {
   }
 
   public UpdateDocumentJob(String uid, String index, String filter) {
-    super( new Params(PRIORITY).requireNetwork().persist() );
+    super( new Params(PRIORITY).requireNetwork().persist().addTags("DocJob") );
 
     Timber.tag(TAG).e( "create %s - %s / %s", uid, index, filter );
 
@@ -72,7 +72,7 @@ public class UpdateDocumentJob extends DocumentJob {
   }
 
   public UpdateDocumentJob(String uid, String index, String filter, boolean forceProcessed) {
-    super( new Params(PRIORITY).requireNetwork().persist() );
+    super( new Params(PRIORITY).requireNetwork().persist().addTags("DocJob") );
 
     Timber.tag(TAG).e( "create %s - %s / %s", uid, index, filter );
 
@@ -84,14 +84,14 @@ public class UpdateDocumentJob extends DocumentJob {
   }
 
   public UpdateDocumentJob(String uid, DocumentType documentType) {
-    super( new Params(PRIORITY).requireNetwork().persist() );
+    super( new Params(PRIORITY).requireNetwork().persist().addTags("DocJob") );
 
     this.uid = uid;
     this.documentType = documentType;
   }
 
   public UpdateDocumentJob(String uid, DocumentType documentType, boolean forceDropFavorite) {
-    super( new Params(PRIORITY).requireNetwork().persist() );
+    super( new Params(PRIORITY).requireNetwork().persist().addTags("DocJob") );
 
     this.uid = uid;
     this.documentType = documentType;
@@ -126,6 +126,7 @@ public class UpdateDocumentJob extends DocumentJob {
 
     } else {
       Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Document has Sync label, quit loading");
+      EventBus.getDefault().post( new StepperLoadDocumentEvent( uid ) );
     }
   }
 

@@ -67,8 +67,8 @@ abstract class DocumentJob extends BaseJob {
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         doc -> {
-          doAfterLoad( doc );
           EventBus.getDefault().post( new StepperLoadDocumentEvent( doc.getUid()) );
+          doAfterLoad( doc );
         },
         error -> {
           Timber.tag(TAG).e(error);
@@ -167,14 +167,10 @@ abstract class DocumentJob extends BaseJob {
     }
   }
 
-  private void addPrefJobCount(int value) {
-    settings.addJobCount(value);
-  }
-
   private void loadImages(Set<RImage> images) {
     if ( notEmpty( images ) ) {
       for (RImage _image : images) {
-        addPrefJobCount(1);
+        settings.addTotalDocCount(1);
         RImageEntity image = (RImageEntity) _image;
         jobManager.addJobInBackground( new DownloadFileJob( settings.getHost(), image.getPath(), image.getMd5() + "_" + image.getTitle(), image.getId() ) );
       }
@@ -209,7 +205,7 @@ abstract class DocumentJob extends BaseJob {
 
   private void loadLinkedDoc(String linkUid, String parentUid, boolean saveFirstLink) {
     if ( exist( linkUid ) ) {
-      addPrefJobCount(1);
+      settings.addTotalDocCount(1);
       jobManager.addJobInBackground( new CreateLinksJob( linkUid, parentUid, saveFirstLink ) );
     }
   }

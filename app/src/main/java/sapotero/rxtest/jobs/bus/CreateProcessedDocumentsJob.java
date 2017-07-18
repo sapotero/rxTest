@@ -29,7 +29,7 @@ public class CreateProcessedDocumentsJob extends DocumentJob {
   private String folder;
 
   public CreateProcessedDocumentsJob(String uid, String folder) {
-    super( new Params(PRIORITY).requireNetwork().persist() );
+    super( new Params(PRIORITY).requireNetwork().persist().addTags("DocJob") );
     this.uid = uid;
     this.folder = folder;
   }

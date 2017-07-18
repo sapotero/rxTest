@@ -15,7 +15,8 @@ public class Settings {
   private static final String CURRENT_ACTIVITY_KEY = "current_activity_key";
   private static final String SIGN_WITH_DC_KEY = "SIGN_WITH_DC";
   private static final String IS_ONLINE = "is_online";
-  private static final String DOCUMENTS_COUNT_KEY = "documents.put";
+  private static final String DOCUMENTS_TOTAL_COUNT_KEY = "documents.total.count";
+  private static final String DOCPROJ_COUNT_KEY = "docproj.count";
   private static final String LOGIN_KEY = "login";
   private static final String TOKEN_KEY = "token";
   private static final String PASSWORD_KEY = "password";
@@ -73,7 +74,8 @@ public class Settings {
 
   private Preference<Boolean> firstRunFlag;
   private Preference<Boolean> signWithDc;
-  private Preference<Integer> jobCount;
+  private Preference<Integer> totalDocCount;
+  private Preference<Integer> docProjCount;
   private Preference<String> login;
   private Preference<String> token;
   private Preference<String> current_activity;
@@ -160,7 +162,8 @@ public class Settings {
 
     firstRunFlag                   = settings.getBoolean(FIRST_RUN_KEY);
     signWithDc                     = settings.getBoolean(SIGN_WITH_DC_KEY);
-    jobCount                       = settings.getInteger(DOCUMENTS_COUNT_KEY);
+    totalDocCount                  = settings.getInteger(DOCUMENTS_TOTAL_COUNT_KEY);
+    docProjCount                   = settings.getInteger(DOCPROJ_COUNT_KEY);
     login                          = settings.getString(LOGIN_KEY);
     login                          = settings.getString(LOGIN_KEY);
     token                          = settings.getString(TOKEN_KEY);
@@ -263,16 +266,28 @@ public class Settings {
     }
   }
 
-  public int getJobCount() {
-    return getInteger(jobCount);
+  public int getTotalDocCount() {
+    return getInteger(totalDocCount);
   }
 
-  public void setJobCount(int value) {
-    setInteger(jobCount, value);
+  public void setTotalDocCount(int value) {
+    setInteger(totalDocCount, value);
   }
 
-  public void addJobCount(int value) {
-    setJobCount(getJobCount() + value);
+  public void addTotalDocCount(int value) {
+    setTotalDocCount(getTotalDocCount() + value);
+  }
+
+  public int getDocProjCount() {
+    return getInteger(docProjCount);
+  }
+
+  public void setDocProjCount(int value) {
+    setInteger(docProjCount, value);
+  }
+
+  public void addDocProjCount(int value) {
+    setDocProjCount(getDocProjCount() + value);
   }
 
   private int getInteger(Preference<Integer> integerPreference) {

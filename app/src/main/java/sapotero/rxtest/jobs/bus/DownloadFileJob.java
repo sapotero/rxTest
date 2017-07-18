@@ -40,7 +40,7 @@ public class DownloadFileJob  extends BaseJob {
   private RImageEntity image;
 
   DownloadFileJob(String host, String strUrl, String fileName, int id) {
-    super( new Params(PRIORITY).requireNetwork().persist() );
+    super( new Params(PRIORITY).requireNetwork().persist().addTags("DocJob") );
     this.host = host;
     this.strUrl = strUrl;
     this.fileName = fileName;
@@ -57,15 +57,19 @@ public class DownloadFileJob  extends BaseJob {
   public void onRun() throws Throwable {
     getImage();
 
+    boolean sendEvent = true;
+
     if (image != null) {
 
       if ( !image.isLoading() && image.isComplete() ){
         Timber.tag(TAG).e("File exists!");
+        sendEvent = false;
         EventBus.getDefault().post(new FileDownloadedEvent("File exists: " + fileName));
       }
 
       if ( image.isLoading() ){
         Timber.tag(TAG).e("File already downloading!");
+        sendEvent = false;
         EventBus.getDefault().post(new FileDownloadedEvent("File already downloading: " + fileName));
       }
 
@@ -75,9 +79,13 @@ public class DownloadFileJob  extends BaseJob {
       }
 
       if ( !image.isComplete() && !isError ){
+        sendEvent = false;
         loadFile();
       }
+    }
 
+    if ( sendEvent ) {
+      EventBus.getDefault().post(new FileDownloadedEvent(fileName));
     }
 
   }

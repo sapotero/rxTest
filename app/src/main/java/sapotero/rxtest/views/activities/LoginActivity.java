@@ -26,6 +26,7 @@ import javax.inject.Inject;
 
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.events.bus.StartRegularRefreshEvent;
 import sapotero.rxtest.events.crypto.AddKeyEvent;
 import sapotero.rxtest.events.crypto.SelectKeyStoreEvent;
 import sapotero.rxtest.events.crypto.SelectKeysEvent;
@@ -296,6 +297,8 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
 
     Bundle bundle = ActivityOptionsCompat.makeCustomAnimation(this, android.R.anim.fade_in, android.R.anim.fade_out).toBundle();
     startActivity(intent, bundle);
+
+    EventBus.getDefault().post( new StartRegularRefreshEvent() );
 
     finish();
   }

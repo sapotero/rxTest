@@ -24,7 +24,6 @@ import sapotero.rxtest.views.adapters.DocumentTypeAdapter;
 import sapotero.rxtest.views.adapters.PrimaryConsiderationAdapter;
 import sapotero.rxtest.views.adapters.PrimaryUsersAdapter;
 import sapotero.rxtest.views.adapters.SearchResultAdapter;
-import sapotero.rxtest.views.custom.stepper.build.steps.StepperAuthFragment;
 import sapotero.rxtest.views.custom.stepper.build.steps.StepperChooseAuthTypeFragment;
 import sapotero.rxtest.views.custom.stepper.build.steps.StepperLoadDataFragment;
 import sapotero.rxtest.views.dialogs.InfoCardDialogFragment;
@@ -75,7 +74,6 @@ public interface DataComponent {
   void inject(RoutePreviewFragment fragment);
   void inject(SelectTemplateDialogFragment fragment);
   void inject(InfoCardDialogFragment fragment);
-  void inject(StepperAuthFragment fragment);
   void inject(StepperChooseAuthTypeFragment fragment);
 
   void inject(ItemsBuilder itemsBuilder);
