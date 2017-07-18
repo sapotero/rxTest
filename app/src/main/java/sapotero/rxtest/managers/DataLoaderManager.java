@@ -1,8 +1,6 @@
 package sapotero.rxtest.managers;
 
 import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.support.annotation.Nullable;
 
 import com.birbit.android.jobqueue.JobManager;

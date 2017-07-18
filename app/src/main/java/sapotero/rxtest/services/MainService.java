@@ -56,6 +56,7 @@ import sapotero.rxtest.events.auth.AuthDcCheckSuccessEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckSuccessEvent;
 import sapotero.rxtest.events.bus.FolderCreatedEvent;
+import sapotero.rxtest.events.bus.StartRegularRefreshEvent;
 import sapotero.rxtest.events.bus.UpdateAuthTokenEvent;
 import sapotero.rxtest.events.bus.UpdateFavoritesAndProcessedEvent;
 import sapotero.rxtest.events.crypto.AddKeyEvent;
@@ -195,8 +196,6 @@ public class MainService extends Service {
     // Tasks will be removed on cancellation
     scheduller.setRemoveOnCancelPolicy(true);
 
-
-    scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 5*60 ,5*60, TimeUnit.SECONDS );
     scheduller.scheduleWithFixedDelay( new UpdateQueueTask(queue), 0 ,10, TimeUnit.SECONDS );
   }
 
@@ -882,5 +881,10 @@ public class MainService extends Service {
     Intent intent = new Intent(context, MainService.class);
     intent.putExtra(EXTRA_IS_FROM_LOGIN, isFromLogin);
     return intent;
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(StartRegularRefreshEvent event){
+    scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 5*60, 5*60, TimeUnit.SECONDS );
   }
 }
