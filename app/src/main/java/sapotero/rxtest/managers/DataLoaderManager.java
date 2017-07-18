@@ -92,6 +92,10 @@ public class DataLoaderManager {
   private Documents processedData;
   private boolean favoritesDataLoaded = false;
   private boolean processedDataLoaded = false;
+  private boolean favoritesDataLoading = false;
+  private boolean processedDataLoading = false;
+  private boolean processFavoritesData = false;
+  private boolean processProcessedData = false;
 
   public DataLoaderManager(Context context) {
 
@@ -494,6 +498,8 @@ public class DataLoaderManager {
 
     favoritesDataLoaded = false;
     processedDataLoaded = false;
+    favoritesDataLoading = false;
+    processedDataLoading = false;
 
     if (items == MainMenuItem.PROCESSED){
       updateProcessed( true );
@@ -788,6 +794,8 @@ public class DataLoaderManager {
 
   public void updateFavorites(boolean processLoadedData) {
 
+    processFavoritesData = processLoadedData;
+
     Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
     DocumentsService docService = retrofit.create(DocumentsService.class);
 
@@ -800,13 +808,22 @@ public class DataLoaderManager {
     if ( favorites_folder != null ) {
       Timber.tag(TAG).e("FAVORITES EXIST!");
 
-      if ( favoritesDataLoaded && processLoadedData ) {
-        Timber.tag("LoadSequence").d("Processing previously loaded list of favorites");
-        processFavorites(favorites_folder);
+      if ( favoritesDataLoaded ) {
+        Timber.tag("LoadSequence").d("List of favorites already loaded, quit loading");
+        if ( processFavoritesData ) {
+          Timber.tag("LoadSequence").d("Processing previously loaded list of favorites");
+          processFavorites(favorites_folder);
+        }
+        return;
+      }
+
+      if ( favoritesDataLoading ) {
+        Timber.tag("LoadSequence").d("List of favorites loading already started, quit loading");
         return;
       }
 
       Timber.tag("LoadSequence").d("Loading list of favorites");
+      favoritesDataLoading = true;
       subscription.add(
         docService.getByFolders(settings.getLogin(), settings.getToken(), null, 500, 0, favorites_folder.getUid(), null)
           .subscribeOn( Schedulers.io() )
@@ -818,7 +835,7 @@ public class DataLoaderManager {
               favoritesData = data;
               favoritesDataLoaded = true;
               updateDocCount( favoritesData, false );
-              if ( processLoadedData ) {
+              if ( processFavoritesData ) {
                 Timber.tag("LoadSequence").d("Processing list of favorites");
                 processFavorites(favorites_folder);
               } else {
@@ -826,6 +843,7 @@ public class DataLoaderManager {
               }
             }, error -> {
               Timber.tag(TAG).e(error);
+              favoritesDataLoading = false;
             }
           )
       );
@@ -838,6 +856,8 @@ public class DataLoaderManager {
 
   public void updateProcessed(boolean processLoadedData) {
 
+    processProcessedData = processLoadedData;
+
     Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
     DocumentsService docService = retrofit.create(DocumentsService.class);
 
@@ -849,9 +869,17 @@ public class DataLoaderManager {
 
     if ( processed_folder != null ) {
 
-      if ( processedDataLoaded && processLoadedData ) {
-        Timber.tag("LoadSequence").d("Processing previously loaded list of processed");
-        processProcessed( processed_folder );
+      if ( processedDataLoaded ) {
+        Timber.tag("LoadSequence").d("List of processed already loaded, quit loading");
+        if ( processProcessedData ) {
+          Timber.tag("LoadSequence").d("Processing previously loaded list of processed");
+          processProcessed( processed_folder );
+        }
+        return;
+      }
+
+      if ( processedDataLoading ) {
+        Timber.tag("LoadSequence").d("List of processed loading already started, quit loading");
         return;
       }
 
@@ -871,6 +899,7 @@ public class DataLoaderManager {
       Timber.tag(TAG).e("PROCESSED EXIST! %s", date);
 
       Timber.tag("LoadSequence").d("Loading list of processed");
+      processedDataLoading = true;
       subscription.add(
         docService.getByFolders(settings.getLogin(), settings.getToken(), null, 500, 0, processed_folder.getUid(), date)
           .subscribeOn( Schedulers.io() )
@@ -882,7 +911,7 @@ public class DataLoaderManager {
               processedData = data;
               processedDataLoaded = true;
               updateDocCount( processedData, false );
-              if ( processLoadedData ) {
+              if ( processProcessedData ) {
                 Timber.tag("LoadSequence").d("Processing list of processed");
                 processProcessed( processed_folder );
               } else {
@@ -890,6 +919,7 @@ public class DataLoaderManager {
               }
             }, error -> {
               Timber.tag(TAG).e(error);
+              processedDataLoading = false;
             }
           )
       );
