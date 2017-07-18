@@ -21,7 +21,6 @@ before_script:
   - export ANDROID_HOME=/home/sapotero/android-sdk/
   - export PATH=${PATH}:/home/sapotero/android-sdk/platform-tools:/home/sapotero/android-sdk/tools
   - export ANDROID_EMULATOR_FORCE_32BIT=true  
-  
   - chmod +x ./gradlew
 
 stages:
