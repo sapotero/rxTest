@@ -105,6 +105,7 @@ dependencies {
     testCompile group: 'com.squareup.okhttp', name: 'mockwebserver', version: '2.7.5'
 
     testCompile 'junit:junit:4.12'
+    compile 'com.github.thiagokimo:faker:1.4.3'
     //noinspection GradleCompatible
     compile 'com.android.support:multidex:1.0.1'
 

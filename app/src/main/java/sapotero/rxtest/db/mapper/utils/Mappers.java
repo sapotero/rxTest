@@ -1,5 +1,7 @@
 package sapotero.rxtest.db.mapper.utils;
 
+import javax.inject.Inject;
+
 import sapotero.rxtest.db.mapper.ActionMapper;
 import sapotero.rxtest.db.mapper.AssistantMapper;
 import sapotero.rxtest.db.mapper.BlockMapper;
@@ -21,6 +23,8 @@ import sapotero.rxtest.utils.Settings;
 
 // Keeps all mappers in one place
 public class Mappers {
+
+  @Inject Settings settings;
 
   private ActionMapper actionMapper;
   private AssistantMapper assistantMapper;
