@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava.HttpException;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import rx.Observable;
@@ -107,8 +108,8 @@ public class ExampleUnitTest {
     apiInteractor.getUser().subscribe(subscriber);
 
 
-    subscriber.assertNoErrors();
-    subscriber.assertCompleted();
+    subscriber.assertError( HttpException.class );
+//    subscriber.assertCompleted();
   }
 
   @Test
