@@ -218,6 +218,7 @@ public class StepperLoadDataFragment extends Fragment implements Step {
     if (total != 0) {
       result = 100f * loaded / total;
 
+      // TODO: fix this
       if (result > 99.5f) {
         result = 100f;
       }
