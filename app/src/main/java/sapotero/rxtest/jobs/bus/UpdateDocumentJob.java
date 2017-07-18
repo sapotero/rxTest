@@ -126,6 +126,7 @@ public class UpdateDocumentJob extends DocumentJob {
 
     } else {
       Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Document has Sync label, quit loading");
+      EventBus.getDefault().post( new StepperLoadDocumentEvent( uid ) );
     }
   }
 
