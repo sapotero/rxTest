@@ -107,7 +107,7 @@ public class StepperLoadDataFragment extends Fragment implements Step {
     } else {
       error = new VerificationError("Дождитесь окончания загрузки");
 
-      if ( mRingProgressBar.getProgress() >= 90 ){
+      if ( mRingProgressBar.getProgress() >= 100 ){
         error = null;
       } else {
         Toast.makeText( getContext(), error.getErrorMessage(), Toast.LENGTH_SHORT ).show();

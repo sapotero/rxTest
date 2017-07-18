@@ -67,8 +67,8 @@ abstract class DocumentJob extends BaseJob {
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         doc -> {
-          doAfterLoad( doc );
           EventBus.getDefault().post( new StepperLoadDocumentEvent( doc.getUid()) );
+          doAfterLoad( doc );
         },
         error -> {
           Timber.tag(TAG).e(error);

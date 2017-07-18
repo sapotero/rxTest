@@ -86,15 +86,16 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
 
     entity.setRegistrationDate( model.getRegistrationDate() );
 
+    if ( model.getRegistrationDate() != null ) {
+      try {
+        SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
+        Date date = format.parse( model.getRegistrationDate() );
 
-    try {
-      SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
-      Date date = format.parse( model.getRegistrationDate() );
-
-      SimpleDateFormat fmtOut = new SimpleDateFormat("yyyy");
-      entity.setYear( Integer.parseInt(fmtOut.format(date)) );
-    } catch (ParseException e) {
-      Timber.e(e);
+        SimpleDateFormat fmtOut = new SimpleDateFormat("yyyy");
+        entity.setYear( Integer.parseInt(fmtOut.format(date)) );
+      } catch (ParseException e) {
+        Timber.e(e);
+      }
     }
 
     entity.setUrgency( model.getUrgency() );

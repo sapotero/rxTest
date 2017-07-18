@@ -54,6 +54,8 @@ public class CreateLinksJob extends DocumentJob {
         .get().firstOrNull();
 
     if ( exist( existingLink ) ) {
+      EventBus.getDefault().post( new StepperLoadDocumentEvent(linkUid) );
+
       // Linked document exists, update it with fromLinks = true
       existingLink.setFromLinks( true );
       dataStore
@@ -67,8 +69,6 @@ public class CreateLinksJob extends DocumentJob {
 
       // Set link's reg number as first link in parent doc
       saveFirstLink( existingLink.getRegistrationNumber() );
-
-      EventBus.getDefault().post( new StepperLoadDocumentEvent(linkUid) );
 
     } else {
       // Linked document not exists, load from API
