@@ -496,6 +496,14 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     super.onStop();
   }
 
+  @Override
+  protected void onDestroy() {
+    // Reset previous state of organization filter on application quit
+    settings.setOrganizationFilterHash(0);
+
+    super.onDestroy();
+  }
+
   private void setJournalType(int type) {
     menuBuilder.selectJournal( type );
     journalSelector.selectJournal(type);
@@ -785,6 +793,10 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(JournalSelectorIndexEvent event) {
+    if ( menuIndex != event.index ) {
+      // Reset previous state of organization filter on journal change
+      settings.setOrganizationFilterHash(0);
+    }
     menuIndex = event.index;
     DOCUMENT_TYPE_SELECTOR.setSelection(event.index);
   }
