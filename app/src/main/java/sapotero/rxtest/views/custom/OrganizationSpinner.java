@@ -22,10 +22,11 @@ import android.widget.TextView;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -34,7 +35,6 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
 import sapotero.rxtest.views.adapters.models.OrganizationItem;
-import timber.log.Timber;
 
 public class OrganizationSpinner extends TextView implements DialogInterface.OnMultiChoiceClickListener {
 
@@ -106,9 +106,6 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
         .positiveText(android.R.string.ok)
         .positiveColor(Color.BLACK)
         .onPositive((dialog2, which) -> {
-          for (int i = 0; i < choices.size(); i++) {
-            mSelected[i] = choices.get(i).isChecked();
-          }
           saveSelection();
           select();
           dialog2.dismiss();
@@ -147,12 +144,18 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
   }
 
   private void saveSelection() {
-    String selectionJson = new Gson().toJson(mSelected);
+    Set<String> selectedOrganizations = new HashSet<>();
 
-    Timber.tag("OrganizationFilter").d("selectionJson = %s", selectionJson);
+    for (int i = 0; i < choices.size(); i++) {
+      mSelected[i] = choices.get(i).isChecked();
+
+      if ( mSelected[i] ) {
+        selectedOrganizations.add( (String) choices.get(i).getTitle() );
+      }
+    }
 
     settings.setOrganizationFilterActive( true );
-    settings.setOrganizationFilterSelection( selectionJson );
+    settings.setOrganizationFilterSelection( selectedOrganizations );
   }
 
   private boolean isCheckedAll() {
@@ -246,12 +249,22 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
     return this.mSelected;
   }
 
-  public void setSelected(boolean[] selected) {
-    if (this.mSelected.length != selected.length) {
-      return;
+  public void setSelected(Set<String> selection) {
+    boolean resetSelection = true;
+
+    for (int i = 0; i < mAdapter.getCount(); i++) {
+      mSelected[i] = false;
+      if ( selection.contains( mAdapter.getItem(i).getTitle() ) ) {
+        resetSelection = false;
+        mSelected[i] = true;
+      }
     }
 
-    this.mSelected = selected;
+    if ( resetSelection ) {
+      for (int i = 0; i < mAdapter.getCount(); i++) {
+        mSelected[i] = true;
+      }
+    }
 
     select();
   }

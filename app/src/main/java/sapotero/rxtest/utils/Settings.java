@@ -5,6 +5,7 @@ import android.content.Context;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import sapotero.rxtest.R;
@@ -130,7 +131,7 @@ public class Settings {
   private Preference<Boolean> unauthorized;
   private Preference<Boolean> showPrimaryConsideration;
   private Preference<Boolean> organizationFilterActive;
-  private Preference<String> organizationFilterSelection;
+  private Preference<Set<String>> organizationFilterSelection;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -221,7 +222,7 @@ public class Settings {
     unauthorized                   = settings.getBoolean(UNAUTHORIZED_KEY);
     showPrimaryConsideration       = settings.getBoolean(SHOW_PRIMARY_CONSIDERATION);
     organizationFilterActive       = settings.getBoolean(ORGANIZATION_FILTER_ACTIVE_KEY);
-    organizationFilterSelection    = settings.getString(ORGANIZATION_FILTER_SELECTION_KEY);
+    organizationFilterSelection    = settings.getStringSet(ORGANIZATION_FILTER_SELECTION_KEY);
   }
 
   public boolean isShowPrimaryConsideration( ) {
@@ -530,7 +531,19 @@ public class Settings {
   }
 
   private Set<String> getStringSet(Preference<Set<String>> stringSetPreference) {
-    return stringSetPreference.get();
+    Set<String> value = stringSetPreference.get();
+
+    if (value != null) {
+      return value;
+    } else {
+      return new HashSet<>();
+    }
+  }
+
+  private void setStringSet(Preference<Set<String>> stringSetPreference, Set<String> value) {
+    if (stringSetPreference != null) {
+      stringSetPreference.set(value);
+    }
   }
 
   public Set<String> getJournals() {
@@ -697,11 +710,11 @@ public class Settings {
     setBoolean(organizationFilterActive, value);
   }
 
-  public String getOrganizationFilterSelection() {
-    return getString(organizationFilterSelection);
+  public Set<String> getOrganizationFilterSelection() {
+    return getStringSet(organizationFilterSelection);
   }
 
-  public void setOrganizationFilterSelection(String value) {
-    setString(organizationFilterSelection, value);
+  public void setOrganizationFilterSelection(Set<String> value) {
+    setStringSet(organizationFilterSelection, value);
   }
 }

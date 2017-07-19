@@ -19,7 +19,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.birbit.android.jobqueue.JobManager;
-import com.google.gson.Gson;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.DrawerBuilder;
@@ -37,6 +36,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -466,8 +466,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   private void updateOrganizationFilter() {
     if ( settings.isOrganizationFilterActive() ) {
-      String oldFilterSelectionJson = settings.getOrganizationFilterSelection();
-      boolean[] oldFilterSelection = new Gson().fromJson(oldFilterSelectionJson, boolean[].class);
+      Set<String> oldFilterSelection = settings.getOrganizationFilterSelection();
       ORGANIZATION_SELECTOR.setSelected(oldFilterSelection);
     }
   }
