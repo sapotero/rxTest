@@ -150,8 +150,7 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
     String sum = "";
 
     for (int i = 0; i < mAdapter.getCount(); i++) {
-      String item = String.format("%s%s", mAdapter.getItem(i).getCountForDialog(), mAdapter.getItem(i).getTitleForDialog());
-      sum = sum + item;
+      sum = sum + mAdapter.getItem(i).getTitleForDialog();
     }
 
     return sum.hashCode();
