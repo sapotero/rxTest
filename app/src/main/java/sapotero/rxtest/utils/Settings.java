@@ -5,6 +5,7 @@ import android.content.Context;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
+import java.util.List;
 import java.util.Set;
 
 import sapotero.rxtest.R;
@@ -43,6 +44,8 @@ public class Settings {
   private static final String IMAGE_INDEX_KEY = "image.index";
   private static final String UNAUTHORIZED_KEY = "user.unauthorized";
   private static final String SHOW_PRIMARY_CONSIDERATION = "show_promary_consideration";
+  private static final String ORGANIZATION_FILTER_HASH_KEY = "organization.filter.hash";
+  private static final String ORGANIZATION_FILTER_SELECTION_KEY = "organization.filter.selection";
 
   public static String FIRST_RUN_KEY;
   private static String HOST_KEY;
@@ -127,6 +130,8 @@ public class Settings {
   private Preference<Integer> imageIndex;
   private Preference<Boolean> unauthorized;
   private Preference<Boolean> showPrimaryConsideration;
+  private Preference<Integer> organizationFilterHash;
+  private Preference<String> organizationFilterSelection;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -216,6 +221,8 @@ public class Settings {
     imageIndex                     = settings.getInteger(IMAGE_INDEX_KEY);
     unauthorized                   = settings.getBoolean(UNAUTHORIZED_KEY);
     showPrimaryConsideration       = settings.getBoolean(SHOW_PRIMARY_CONSIDERATION);
+    organizationFilterHash         = settings.getInteger(ORGANIZATION_FILTER_HASH_KEY);
+    organizationFilterSelection    = settings.getString(ORGANIZATION_FILTER_SELECTION_KEY);
   }
 
   public boolean isShowPrimaryConsideration( ) {
@@ -681,5 +688,21 @@ public class Settings {
 
   public Preference<Boolean> getUnauthorizedPreference() {
     return unauthorized;
+  }
+
+  public int getOrganizationFilterHash() {
+    return getInteger(organizationFilterHash);
+  }
+
+  public void setOrganizationFilterHash(int value) {
+    setInteger(organizationFilterHash, value);
+  }
+
+  public String getOrganizationFilterSelection() {
+    return getString(organizationFilterSelection);
+  }
+
+  public void setOrganizationFilterSelection(String value) {
+    setString(organizationFilterSelection, value);
   }
 }

@@ -6,6 +6,7 @@ import android.graphics.drawable.StateListDrawable;
 import android.support.v4.content.ContextCompat;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
@@ -56,6 +57,8 @@ public class ButtonBuilder {
 
   private String TAG = this.getClass().getSimpleName();
   private final CompositeSubscription subscription = new CompositeSubscription();
+
+  private boolean previousState;
 
   public void recalculate() {
     Timber.i("recalculate");
@@ -246,10 +249,28 @@ public class ButtonBuilder {
 
     //положить в сеттинги
 
+    // Called every time button is checked (even if programmatically)
     view.setOnCheckedChangeListener((buttonView, isChecked) -> {
       setActive(isChecked);
       if (isChecked){
         callback.onButtonBuilderUpdate(index);
+      }
+    });
+
+    // Save button state before click
+    // (call sequence: 1. onTouch, 2. onCheckedChange, 3. onClick)
+    view.setOnTouchListener((v, event) -> {
+      if ( event.getAction() == MotionEvent.ACTION_DOWN ) {
+        previousState = view.isChecked();
+      }
+      return false;
+    });
+
+    view.setOnClickListener(v -> {
+      // If previous state was false and after click state changed to true, then user switched between tabs
+      if ( !previousState && view.isChecked() ) {
+        // Reset previous state of organization filter
+        settings.setOrganizationFilterHash(0);
       }
     });
 

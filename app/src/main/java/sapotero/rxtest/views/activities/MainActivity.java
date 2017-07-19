@@ -19,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.birbit.android.jobqueue.JobManager;
+import com.google.gson.Gson;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.DrawerBuilder;
@@ -423,6 +424,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     startNetworkCheck();
     subscribeToNetworkCheckResults();
     updateCount();
+    updateOrganizationFilter();
 
     rxSettings();
 
@@ -460,6 +462,17 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
           Timber::e
         )
     );
+  }
+
+  private void updateOrganizationFilter() {
+    int newFilterHash = ORGANIZATION_SELECTOR.getFilterHash();
+    int oldFilterHash = settings.getOrganizationFilterHash();
+
+    if ( newFilterHash == oldFilterHash ) {
+      String oldFilterSelectionJson = settings.getOrganizationFilterSelection();
+      boolean[] oldFilterSelection = new Gson().fromJson(oldFilterSelectionJson, boolean[].class);
+      ORGANIZATION_SELECTOR.setSelected(oldFilterSelection);
+    }
   }
 
   private void unsubscribe() {
