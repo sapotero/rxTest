@@ -265,6 +265,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     if ( !EventBus.getDefault().isRegistered(this) ){
       EventBus.getDefault().register(this);
     }
+
   }
 
   @Override
