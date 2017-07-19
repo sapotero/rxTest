@@ -5,7 +5,6 @@ import android.content.Context;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
-import java.util.List;
 import java.util.Set;
 
 import sapotero.rxtest.R;
@@ -44,7 +43,7 @@ public class Settings {
   private static final String IMAGE_INDEX_KEY = "image.index";
   private static final String UNAUTHORIZED_KEY = "user.unauthorized";
   private static final String SHOW_PRIMARY_CONSIDERATION = "show_promary_consideration";
-  private static final String ORGANIZATION_FILTER_HASH_KEY = "organization.filter.hash";
+  private static final String ORGANIZATION_FILTER_ACTIVE_KEY = "organization.filter.active";
   private static final String ORGANIZATION_FILTER_SELECTION_KEY = "organization.filter.selection";
 
   public static String FIRST_RUN_KEY;
@@ -130,7 +129,7 @@ public class Settings {
   private Preference<Integer> imageIndex;
   private Preference<Boolean> unauthorized;
   private Preference<Boolean> showPrimaryConsideration;
-  private Preference<Integer> organizationFilterHash;
+  private Preference<Boolean> organizationFilterActive;
   private Preference<String> organizationFilterSelection;
 
   public Settings(Context context, RxSharedPreferences settings) {
@@ -221,7 +220,7 @@ public class Settings {
     imageIndex                     = settings.getInteger(IMAGE_INDEX_KEY);
     unauthorized                   = settings.getBoolean(UNAUTHORIZED_KEY);
     showPrimaryConsideration       = settings.getBoolean(SHOW_PRIMARY_CONSIDERATION);
-    organizationFilterHash         = settings.getInteger(ORGANIZATION_FILTER_HASH_KEY);
+    organizationFilterActive       = settings.getBoolean(ORGANIZATION_FILTER_ACTIVE_KEY);
     organizationFilterSelection    = settings.getString(ORGANIZATION_FILTER_SELECTION_KEY);
   }
 
@@ -690,12 +689,12 @@ public class Settings {
     return unauthorized;
   }
 
-  public int getOrganizationFilterHash() {
-    return getInteger(organizationFilterHash);
+  public boolean isOrganizationFilterActive( ) {
+    return getBoolean(organizationFilterActive);
   }
 
-  public void setOrganizationFilterHash(int value) {
-    setInteger(organizationFilterHash, value);
+  public void setOrganizationFilterActive(boolean value) {
+    setBoolean(organizationFilterActive, value);
   }
 
   public String getOrganizationFilterSelection() {

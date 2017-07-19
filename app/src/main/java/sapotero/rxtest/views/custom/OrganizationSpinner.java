@@ -146,24 +146,12 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
     mListener.onItemsSelected(mSelected);
   }
 
-  public int getFilterHash() {
-    String sum = "";
-
-    for (int i = 0; i < mAdapter.getCount(); i++) {
-      sum = sum + mAdapter.getItem(i).getTitleForDialog();
-    }
-
-    return sum.hashCode();
-  }
-
   private void saveSelection() {
-    int filterHash = getFilterHash();
     String selectionJson = new Gson().toJson(mSelected);
 
-    Timber.tag("OrganizationFilter").d("hash = %s", filterHash);
     Timber.tag("OrganizationFilter").d("selectionJson = %s", selectionJson);
 
-    settings.setOrganizationFilterHash( filterHash );
+    settings.setOrganizationFilterActive( true );
     settings.setOrganizationFilterSelection( selectionJson );
   }
 

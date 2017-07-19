@@ -270,7 +270,7 @@ public class ButtonBuilder {
       // If previous state was false and after click state changed to true, then user switched between tabs
       if ( !previousState && view.isChecked() ) {
         // Reset previous state of organization filter
-        settings.setOrganizationFilterHash(0);
+        settings.setOrganizationFilterActive( false );
       }
     });
 

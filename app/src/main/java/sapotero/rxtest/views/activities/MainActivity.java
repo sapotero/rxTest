@@ -465,10 +465,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void updateOrganizationFilter() {
-    int newFilterHash = ORGANIZATION_SELECTOR.getFilterHash();
-    int oldFilterHash = settings.getOrganizationFilterHash();
-
-    if ( newFilterHash == oldFilterHash ) {
+    if ( settings.isOrganizationFilterActive() ) {
       String oldFilterSelectionJson = settings.getOrganizationFilterSelection();
       boolean[] oldFilterSelection = new Gson().fromJson(oldFilterSelectionJson, boolean[].class);
       ORGANIZATION_SELECTOR.setSelected(oldFilterSelection);
@@ -499,7 +496,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @Override
   protected void onDestroy() {
     // Reset previous state of organization filter on application quit
-    settings.setOrganizationFilterHash(0);
+    settings.setOrganizationFilterActive( false );
 
     super.onDestroy();
   }
@@ -795,7 +792,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   public void onMessageEvent(JournalSelectorIndexEvent event) {
     if ( menuIndex != event.index ) {
       // Reset previous state of organization filter on journal change
-      settings.setOrganizationFilterHash(0);
+      settings.setOrganizationFilterActive( false );
     }
     menuIndex = event.index;
     DOCUMENT_TYPE_SELECTOR.setSelection(event.index);
