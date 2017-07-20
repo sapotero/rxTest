@@ -24,6 +24,7 @@ import sapotero.rxtest.views.adapters.DocumentTypeAdapter;
 import sapotero.rxtest.views.adapters.PrimaryConsiderationAdapter;
 import sapotero.rxtest.views.adapters.PrimaryUsersAdapter;
 import sapotero.rxtest.views.adapters.SearchResultAdapter;
+import sapotero.rxtest.views.custom.OrganizationSpinner;
 import sapotero.rxtest.views.custom.stepper.build.steps.StepperChooseAuthTypeFragment;
 import sapotero.rxtest.views.custom.stepper.build.steps.StepperLoadDataFragment;
 import sapotero.rxtest.views.dialogs.InfoCardDialogFragment;
@@ -83,4 +84,6 @@ public interface DataComponent {
   void inject(DecisionManager decisionManager);
 
   void inject(Deleter deleter);
+
+  void inject(OrganizationSpinner organizationSpinner);
 }

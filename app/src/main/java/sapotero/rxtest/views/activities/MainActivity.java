@@ -36,6 +36,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -139,6 +140,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private PublishSubject<Integer> searchSubject = PublishSubject.create();
   private int menuIndex;
   private int buttonIndex;
+
+  private static boolean active = false;
 
   protected void onCreate(Bundle savedInstanceState) {
     setTheme(R.style.AppTheme);
@@ -422,9 +425,11 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     initEvents();
     startNetworkCheck();
     subscribeToNetworkCheckResults();
-    updateCount();
+    update();
 
     rxSettings();
+
+    active = true;
 
 //    EventBus.getDefault().post( new RecalculateMenuEvent());
 
@@ -462,6 +467,22 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     );
   }
 
+  private void updateOrganizationFilter() {
+    if ( settings.isOrganizationFilterActive() ) {
+      try {
+        Set<String> oldFilterSelection = settings.getOrganizationFilterSelection();
+        ORGANIZATION_SELECTOR.setSelected(oldFilterSelection);
+      } catch (Exception e) {
+        Timber.tag(TAG).e(e);
+      }
+    }
+  }
+
+  public void update() {
+    updateCount();
+    updateOrganizationFilter();
+  }
+
   private void unsubscribe() {
     if ( subscription != null && subscription.hasSubscriptions() ) {
       subscription.unsubscribe();
@@ -473,6 +494,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     super.onPause();
     stopNetworkCheck();
     unsubscribe();
+
+    active = false;
   }
 
   @Override
@@ -481,6 +504,14 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       EventBus.getDefault().unregister(this);
     }
     super.onStop();
+  }
+
+  @Override
+  protected void onDestroy() {
+    // Reset previous state of organization filter on application quit
+    settings.setOrganizationFilterActive( false );
+
+    super.onDestroy();
   }
 
   private void setJournalType(int type) {
@@ -772,8 +803,16 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(JournalSelectorIndexEvent event) {
+    if ( menuIndex != event.index ) {
+      // Reset previous state of organization filter on journal change
+      settings.setOrganizationFilterActive( false );
+    }
     menuIndex = event.index;
     DOCUMENT_TYPE_SELECTOR.setSelection(event.index);
+  }
+
+  public static boolean isActive() {
+    return active;
   }
 
 //  @Subscribe(threadMode = ThreadMode.MAIN)

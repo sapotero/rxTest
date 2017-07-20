@@ -5,6 +5,7 @@ import android.content.Context;
 import com.f2prateek.rx.preferences.Preference;
 import com.f2prateek.rx.preferences.RxSharedPreferences;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import sapotero.rxtest.R;
@@ -43,6 +44,8 @@ public class Settings {
   private static final String IMAGE_INDEX_KEY = "image.index";
   private static final String UNAUTHORIZED_KEY = "user.unauthorized";
   private static final String SHOW_PRIMARY_CONSIDERATION = "show_promary_consideration";
+  private static final String ORGANIZATION_FILTER_ACTIVE_KEY = "organization.filter.active";
+  private static final String ORGANIZATION_FILTER_SELECTION_KEY = "organization.filter.savedselection";
 
   public static String FIRST_RUN_KEY;
   private static String HOST_KEY;
@@ -127,6 +130,8 @@ public class Settings {
   private Preference<Integer> imageIndex;
   private Preference<Boolean> unauthorized;
   private Preference<Boolean> showPrimaryConsideration;
+  private Preference<Boolean> organizationFilterActive;
+  private Preference<Set<String>> organizationFilterSelection;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -216,6 +221,8 @@ public class Settings {
     imageIndex                     = settings.getInteger(IMAGE_INDEX_KEY);
     unauthorized                   = settings.getBoolean(UNAUTHORIZED_KEY);
     showPrimaryConsideration       = settings.getBoolean(SHOW_PRIMARY_CONSIDERATION);
+    organizationFilterActive       = settings.getBoolean(ORGANIZATION_FILTER_ACTIVE_KEY);
+    organizationFilterSelection    = settings.getStringSet(ORGANIZATION_FILTER_SELECTION_KEY);
   }
 
   public boolean isShowPrimaryConsideration( ) {
@@ -524,7 +531,19 @@ public class Settings {
   }
 
   private Set<String> getStringSet(Preference<Set<String>> stringSetPreference) {
-    return stringSetPreference.get();
+    Set<String> value = stringSetPreference.get();
+
+    if (value != null) {
+      return value;
+    } else {
+      return new HashSet<>();
+    }
+  }
+
+  private void setStringSet(Preference<Set<String>> stringSetPreference, Set<String> value) {
+    if (stringSetPreference != null) {
+      stringSetPreference.set(value);
+    }
   }
 
   public Set<String> getJournals() {
@@ -681,5 +700,21 @@ public class Settings {
 
   public Preference<Boolean> getUnauthorizedPreference() {
     return unauthorized;
+  }
+
+  public boolean isOrganizationFilterActive( ) {
+    return getBoolean(organizationFilterActive);
+  }
+
+  public void setOrganizationFilterActive(boolean value) {
+    setBoolean(organizationFilterActive, value);
+  }
+
+  public Set<String> getOrganizationFilterSelection() {
+    return getStringSet(organizationFilterSelection);
+  }
+
+  public void setOrganizationFilterSelection(Set<String> value) {
+    setStringSet(organizationFilterSelection, value);
   }
 }

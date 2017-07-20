@@ -24,13 +24,21 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import javax.inject.Inject;
 
 import sapotero.rxtest.R;
+import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.adapters.OrganizationAdapter;
 import sapotero.rxtest.views.adapters.models.OrganizationItem;
 
 public class OrganizationSpinner extends TextView implements DialogInterface.OnMultiChoiceClickListener {
+
+  @Inject Settings settings;
 
   private final LayoutInflater inflater;
   //  private SpinnerAdapter mAdapter;
@@ -48,11 +56,13 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
 
   public OrganizationSpinner(Context context) {
     super(context);
+    EsdApplication.getDataComponent().inject(this);
     inflater = (LayoutInflater) context.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
   }
 
   public OrganizationSpinner(Context context, AttributeSet attr, int defStyle) {
     super(context, attr, defStyle);
+    EsdApplication.getDataComponent().inject(this);
     inflater = (LayoutInflater) context.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
   }
 
@@ -96,11 +106,8 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
         .positiveText(android.R.string.ok)
         .positiveColor(Color.BLACK)
         .onPositive((dialog2, which) -> {
-          for (int i = 0; i < choices.size(); i++) {
-            mSelected[i] = choices.get(i).isChecked();
-          }
-          refreshSpinner();
-          mListener.onItemsSelected(mSelected);
+          saveSelection();
+          select();
           dialog2.dismiss();
         })
         .neutralColor(Color.BLACK)
@@ -130,6 +137,26 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
       dialog.show();
     }
   };
+
+  public void select() {
+    refreshSpinner();
+    mListener.onItemsSelected(mSelected);
+  }
+
+  private void saveSelection() {
+    Set<String> selectedOrganizations = new HashSet<>();
+
+    for (int i = 0; i < choices.size(); i++) {
+      mSelected[i] = choices.get(i).isChecked();
+
+      if ( mSelected[i] ) {
+        selectedOrganizations.add( (String) choices.get(i).getTitle() );
+      }
+    }
+
+    settings.setOrganizationFilterActive( true );
+    settings.setOrganizationFilterSelection( selectedOrganizations );
+  }
 
   private boolean isCheckedAll() {
     boolean isCheckedAll = true;
@@ -222,13 +249,24 @@ public class OrganizationSpinner extends TextView implements DialogInterface.OnM
     return this.mSelected;
   }
 
-  public void setSelected(boolean[] selected) {
-    if (this.mSelected.length != selected.length)
-      return;
+  public void setSelected(Set<String> selection) {
+    boolean resetSelection = true;
 
-    this.mSelected = selected;
+    for (int i = 0; i < mAdapter.getCount(); i++) {
+      mSelected[i] = false;
+      if ( selection.contains( mAdapter.getItem(i).getTitle() ) ) {
+        resetSelection = false;
+        mSelected[i] = true;
+      }
+    }
 
-    refreshSpinner();
+    if ( resetSelection ) {
+      for (int i = 0; i < mAdapter.getCount(); i++) {
+        mSelected[i] = true;
+      }
+    }
+
+    select();
   }
 
   public void add(){

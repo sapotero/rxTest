@@ -11,25 +11,24 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.Sequences;
+
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
-import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.query.DBQueryBuilder;
@@ -56,19 +55,9 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
   private DBQueryBuilder dbQueryBuilder;
 
-  private CompositeSubscription compositeSubscription;
-
-  // Keeps UIDs of previously removed docs
-  Set<String> removedUids;
-
-  // Keeps UIDs of previously added docs
-  Set<String> addedUids;
-
   public void removeAllWithRange() {
     Holder.MAP.clear();
     documents.clear();
-    removedUids.clear();
-    addedUids.clear();
     notifyDataSetChanged();
   }
 
@@ -81,10 +70,6 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
     EsdApplication.getManagerComponent().inject(this);
     initSubscription();
-
-    removedUids = new HashSet<>();
-    addedUids = new HashSet<>();
-
   }
 
   public void withDbQueryBuilder(DBQueryBuilder dbQueryBuilder) {
@@ -121,9 +106,6 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
         if ( isItemRemove( doc.isProcessed(), doc.getDocument().getControl(), doc.getDocument().getFavorites() ) ) {
           Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Remove document from adapter %s", doc.getUid() );
           removeItem( index, doc );
-          if (documents.size() == 0 && dbQueryBuilder != null) {
-            dbQueryBuilder.showEmpty();
-          }
         } else {
           Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Change document in adapter %s", doc.getUid() );
           documents.set( index, doc);
@@ -142,74 +124,64 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
   }
 
   private void checkConditionsAndAddItem(InMemoryDocument doc) {
-    if ( removedUids != null && removedUids.contains( doc.getUid() ) ) {
-      Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Do not add previously removed doc %s", doc.getUid() );
-      return;
-    }
-
-    if ( addedUids != null && addedUids.contains( doc.getUid() ) ) {
-      Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Do not add previously added doc %s", doc.getUid() );
-      return;
-    }
-
     if ( dbQueryBuilder != null && dbQueryBuilder.getConditions() != null ) {
       Filter filter = new Filter(dbQueryBuilder.getConditions());
 
-      unsubscribe();
+      Sequence<InMemoryDocument> docSequence = Sequences.sequence(doc);
 
-      compositeSubscription.add(
-        Observable
-          .just( doc )
-          .filter( filter::byYear)
-//          .filter( dbQueryBuilder::byOrganization )
-          .filter( dbQueryBuilder::byDecision )
-          .filter( filter::byType)
-          .filter( filter::byStatus)
-          .filter( filter::isProcessed )
-          .filter( filter::isFavorites )
-          .filter( filter::isControl )
-          .subscribe(
-            doc1 -> {
-              addItem(doc1);
-              if (documents.size() > 0 && dbQueryBuilder != null) {
-                dbQueryBuilder.hideEmpty();
-              }
-            },
-            Timber::e
-          )
-      );
-    }
-  }
+      List<InMemoryDocument> docs = docSequence
+        .filter( filter::byYear )
+        .filter( dbQueryBuilder::byDecision )
+        .filter( filter::byType )
+        .filter( filter::byStatus)
+        .filter( filter::isProcessed )
+        .filter( filter::isFavorites )
+        .filter( filter::isControl )
+        .toList();
 
-  private void unsubscribe() {
-    if ( compositeSubscription != null && compositeSubscription.hasSubscriptions() ) {
-      compositeSubscription.unsubscribe();
+      for (InMemoryDocument _doc : docs) {
+        Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Updating MainActivity for: %s", _doc.getUid() );
+        ((MainActivity) mContext).update();
+      }
     }
-    compositeSubscription = new CompositeSubscription();
   }
 
   private void removeItem(int index, InMemoryDocument doc) {
-    if ( removedUids != null && removedUids.contains( doc.getUid() ) ) {
-      Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Do not remove already removed doc %s", doc.getUid() );
-      return;
-    }
-
-    Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Remove from list");
     documents.remove(index);
-    removedUids.add(doc.getUid());
     recreateHash();
-
-    Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: NotifyItemRemoved");
-    notifyItemRemoved(index);
 
     int mainMenuPosition = settings.getMainMenuPosition();
     if ( index < mainMenuPosition ) {
       settings.setMainMenuPosition( mainMenuPosition - 1 );
     }
 
-    if ( documents.size() == 0 ) {
+    updateMainActivity(doc);
+
+    if ( documents.size() == 0 || ( isFavoriteOrControl() && Objects.equals( doc.getUid(), settings.getUid() ) ) ) {
       EventBus.getDefault().post( new NoDocumentsEvent() );
     }
+  }
+
+  private void updateMainActivity(InMemoryDocument doc) {
+    if ( MainActivity.isActive() ) {
+      Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Updating MainActivity for: %s", doc.getUid() );
+      ((MainActivity) mContext).update();
+    } else {
+      Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: MainActivity is not active, quit updating MainActivity");
+    }
+  }
+
+  private boolean isFavoriteOrControl() {
+    boolean isFavoriteOrControl = false;
+
+    if ( dbQueryBuilder != null && dbQueryBuilder.getConditions() != null ) {
+      Filter filter = new Filter(dbQueryBuilder.getConditions());
+      if ( filter.getFavorites() || filter.getControl() ) {
+        isFavoriteOrControl = true;
+      }
+    }
+
+    return isFavoriteOrControl;
   }
 
   private boolean isItemRemove(boolean processed, boolean control, boolean favorite) {
@@ -456,7 +428,6 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     if ( !Holder.MAP.containsKey( document.getUid()) ){
 //      Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Add document into adapter %s", document.getUid() );
       documents.add(document);
-      addedUids.add(document.getUid());
       notifyItemInserted( documents.size() );
 //      Holder.MAP.put( document.getUid(), documents.s );
       recreateHash();

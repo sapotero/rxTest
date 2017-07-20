@@ -317,7 +317,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     invalidateArrows();
 
     chechPrimaryConsiderationDialog();
-
   }
 
   private void chechPrimaryConsiderationDialog() {
