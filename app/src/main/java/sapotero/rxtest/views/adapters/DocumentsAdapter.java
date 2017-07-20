@@ -154,12 +154,25 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       settings.setMainMenuPosition( mainMenuPosition - 1 );
     }
 
-    if ( documents.size() == 0 ) {
-      EventBus.getDefault().post( new NoDocumentsEvent() );
+    if ( !InfoActivity.isActive() ) {
+      Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Updating MainActivity for: %s", doc.getUid() );
+      ((MainActivity) mContext).update();
+    } else {
+      Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: InfoActivity is active, quit updating MainActivity");
     }
 
-    Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Updating MainActivity for: %s", doc.getUid() );
-    ((MainActivity) mContext).update();
+    boolean isFavoriteOrControl = false;
+
+    if ( dbQueryBuilder != null && dbQueryBuilder.getConditions() != null ) {
+      Filter filter = new Filter(dbQueryBuilder.getConditions());
+      if ( filter.getFavorites() || filter.getControl() ) {
+        isFavoriteOrControl = true;
+      }
+    }
+
+    if ( documents.size() == 0 || ( isFavoriteOrControl && Objects.equals( doc.getUid(), settings.getUid() ) ) ) {
+      EventBus.getDefault().post( new NoDocumentsEvent() );
+    }
   }
 
   private boolean isItemRemove(boolean processed, boolean control, boolean favorite) {
