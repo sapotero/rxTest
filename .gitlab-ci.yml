@@ -22,6 +22,7 @@ before_script:
   - export ANDROID_HOME=/home/sapotero/android-sdk/
   - export PATH=${PATH}:/home/sapotero/android-sdk/platform-tools:/home/sapotero/android-sdk/tools
   - chmod +x ./gradlew
+  - chmod +x ./upload_file
 
 stages:
   - build
@@ -66,4 +67,4 @@ copy:
     - build
   script:
     #- curl -k -H "Authorization: Token 36b75fa39f3c0aac17080f2f05c8721f4a5c2d30" -F file=@test.txt -F filename=test.txt -F parent_dir=/ http://files.n-core.ru:8082/upload-api/024b6d67-3100-4c0e-b934-5b374673d23f
-    - echo 'copy complited'
+    - ./upload_file
