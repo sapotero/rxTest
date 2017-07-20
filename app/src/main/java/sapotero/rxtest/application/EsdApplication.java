@@ -3,11 +3,10 @@ package sapotero.rxtest.application;
 import android.app.Application;
 import android.content.Context;
 
-import com.facebook.stetho.Stetho;
-
 import org.acra.ACRA;
 import org.acra.ReportingInteractionMode;
 import org.acra.annotation.ReportsCrashes;
+import org.acra.sender.HttpSender;
 
 import sapotero.rxtest.R;
 import sapotero.rxtest.annotations.AnnotationTest;
@@ -74,8 +73,8 @@ import static org.acra.ReportField.USER_IP;
 //  mode = ReportingInteractionMode.TOAST,
 //  resToastText = R.string.crashed)
 
-@ReportsCrashes(formUri = "http://192.168.155.72/send",
-  mailTo = "esapozhnikov@n-core.ru",
+@ReportsCrashes(formUri = "http://10.0.32.77/send",
+//  mailTo = "esapozhnikov@n-core.ru",
   customReportContent = {
     REPORT_ID,
     APP_VERSION_CODE,
@@ -119,8 +118,8 @@ import static org.acra.ReportField.USER_IP;
     THREAD_DETAILS,
     USER_IP
   },
-
-  reportType = org.acra.sender.HttpSender.Type.JSON, // recommended
+  reportType = HttpSender.Type.JSON,
+  httpMethod = HttpSender.Method.POST,
   mode = ReportingInteractionMode.TOAST,
   resToastText = R.string.crash_toast_text
 )
@@ -154,11 +153,11 @@ public final class EsdApplication extends Application {
 
     }
 
-    Stetho.Initializer initializer = Stetho.newInitializerBuilder(this)
-        .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this))
-        .enableDumpapp(Stetho.defaultDumperPluginsProvider(getApplicationContext()))
-        .build();
-    Stetho.initialize(initializer);
+//    Stetho.Initializer initializer = Stetho.newInitializerBuilder(this)
+//        .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this))
+//        .enableDumpapp(Stetho.defaultDumperPluginsProvider(getApplicationContext()))
+//        .build();
+//    Stetho.initialize(initializer);
 
     application = this;
 
