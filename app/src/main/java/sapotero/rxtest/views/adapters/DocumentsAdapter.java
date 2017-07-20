@@ -18,11 +18,9 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -57,17 +55,9 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
   private DBQueryBuilder dbQueryBuilder;
 
-  // Keeps UIDs of previously removed docs
-  Set<String> removedUids;
-
-  // Keeps UIDs of previously added docs
-  Set<String> addedUids;
-
   public void removeAllWithRange() {
     Holder.MAP.clear();
     documents.clear();
-    removedUids.clear();
-    addedUids.clear();
     notifyDataSetChanged();
   }
 
@@ -80,10 +70,6 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
     EsdApplication.getManagerComponent().inject(this);
     initSubscription();
-
-    removedUids = new HashSet<>();
-    addedUids = new HashSet<>();
-
   }
 
   public void withDbQueryBuilder(DBQueryBuilder dbQueryBuilder) {
@@ -138,16 +124,6 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
   }
 
   private void checkConditionsAndAddItem(InMemoryDocument doc) {
-    if ( removedUids != null && removedUids.contains( doc.getUid() ) ) {
-      Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Do not add previously removed doc %s", doc.getUid() );
-      return;
-    }
-
-    if ( addedUids != null && addedUids.contains( doc.getUid() ) ) {
-      Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Do not add previously added doc %s", doc.getUid() );
-      return;
-    }
-
     if ( dbQueryBuilder != null && dbQueryBuilder.getConditions() != null ) {
       Filter filter = new Filter(dbQueryBuilder.getConditions());
 
@@ -171,13 +147,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
   }
 
   private void removeItem(int index, InMemoryDocument doc) {
-    if ( removedUids != null && removedUids.contains( doc.getUid() ) ) {
-      Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Do not remove already removed doc %s", doc.getUid() );
-      return;
-    }
-
     documents.remove(index);
-    removedUids.add(doc.getUid());
 
     int mainMenuPosition = settings.getMainMenuPosition();
     if ( index < mainMenuPosition ) {
@@ -436,7 +406,6 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     if ( !Holder.MAP.containsKey( document.getUid()) ){
 //      Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Add document into adapter %s", document.getUid() );
       documents.add(document);
-      addedUids.add(document.getUid());
       notifyItemInserted( documents.size() );
 //      Holder.MAP.put( document.getUid(), documents.s );
       recreateHash();
