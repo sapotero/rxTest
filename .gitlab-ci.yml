@@ -38,6 +38,7 @@ build:
   artifacts:
     paths:
     - app/build/outputs/
+    expire_in: 1 week
 
 unitTests:
   stage: test
@@ -48,8 +49,8 @@ unitTests:
 
 functionalTests:
   stage: test
-  dependencies:
-    - build
+#  dependencies:
+#    - build
   script:
 #    - wget --quiet --output-document=android-wait-for-emulator https://raw.githubusercontent.com/travis-ci/travis-cookbooks/0f497eb71291b52a703143c5cd63a217c8766dc9/community-cookbooks/android-sdk/files/default/android-wait-for-emulator
 #    - chmod +x android-wait-for-emulator
@@ -63,9 +64,9 @@ functionalTests:
 
 copy:
   stage: copy
-  dependencies:
-    - build
+#  dependencies:
+#    - build
   script:
     #- curl -k -H "Authorization: Token 36b75fa39f3c0aac17080f2f05c8721f4a5c2d30" -F file=@test.txt -F filename=test.txt -F parent_dir=/ http://files.n-core.ru:8082/upload-api/024b6d67-3100-4c0e-b934-5b374673d23f
-    - ./upload_file
+    #- ./upload_file
     - echo 'copy complete'

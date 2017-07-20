@@ -55,14 +55,9 @@ android {
 ////            def newApkName = project + SEP + flavor + SEP + buildType + SEP + version + SEP + formattedDate + ".apk"
 //            def newApkName = project + SEP + buildType + SEP + version + SEP + formattedDate + ".apk"
 
-            def CI_RUNNER_ID = System.getenv("CI_RUNNER_ID")
-            if (CI_RUNNER_ID == null) {
-                CI_RUNNER_ID = "local"
-            }
-
-            def CI_COMMIT_REF_NAME = System.getenv("CI_COMMIT_REF_NAME")
-            if (CI_COMMIT_REF_NAME == null) {
-                CI_COMMIT_REF_NAME = "build"
+            def CI_COMMIT_SHA = System.getenv("CI_COMMIT_SHA")
+            if (CI_COMMIT_SHA == null) {
+                CI_COMMIT_SHA = "local"
             }
 
             def CI_COMMIT_TAG = System.getenv("CI_COMMIT_TAG")
@@ -70,7 +65,12 @@ android {
                 CI_COMMIT_TAG = "develop"
             }
 
-            def newApkName = CI_COMMIT_TAG + "_" + CI_RUNNER_ID + "_" + CI_COMMIT_REF_NAME + ".apk"
+            def CI_REGISTRY_USER = System.getenv("CI_REGISTRY_USER")
+            if (CI_REGISTRY_USER == null) {
+                CI_REGISTRY_USER = "build"
+            }
+
+            def newApkName = CI_COMMIT_TAG + "_" + CI_COMMIT_SHA + "_" + CI_REGISTRY_USER + ".apk"
 
             output.outputFile = new File(output.outputFile.parent, newApkName)
 
