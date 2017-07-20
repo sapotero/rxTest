@@ -120,9 +120,6 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
         if ( isItemRemove( doc.isProcessed(), doc.getDocument().getControl(), doc.getDocument().getFavorites() ) ) {
           Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Remove document from adapter %s", doc.getUid() );
           removeItem( index, doc );
-          if (documents.size() == 0 && dbQueryBuilder != null) {
-            dbQueryBuilder.showEmpty();
-          }
         } else {
           Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Change document in adapter %s", doc.getUid() );
           documents.set( index, doc);
@@ -179,13 +176,8 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       return;
     }
 
-    Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Remove from list");
     documents.remove(index);
     removedUids.add(doc.getUid());
-    recreateHash();
-
-    Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: NotifyItemRemoved");
-    notifyItemRemoved(index);
 
     int mainMenuPosition = settings.getMainMenuPosition();
     if ( index < mainMenuPosition ) {
@@ -195,6 +187,9 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     if ( documents.size() == 0 ) {
       EventBus.getDefault().post( new NoDocumentsEvent() );
     }
+
+    Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Updating MainActivity for: %s", doc.getUid() );
+    ((MainActivity) mContext).update();
   }
 
   private boolean isItemRemove(boolean processed, boolean control, boolean favorite) {
