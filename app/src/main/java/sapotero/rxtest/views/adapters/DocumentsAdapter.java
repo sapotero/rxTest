@@ -148,19 +148,30 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
   private void removeItem(int index, InMemoryDocument doc) {
     documents.remove(index);
+    recreateHash();
 
     int mainMenuPosition = settings.getMainMenuPosition();
     if ( index < mainMenuPosition ) {
       settings.setMainMenuPosition( mainMenuPosition - 1 );
     }
 
-    if ( !InfoActivity.isActive() ) {
+    updateMainActivity(doc);
+
+    if ( documents.size() == 0 || ( isFavoriteOrControl() && Objects.equals( doc.getUid(), settings.getUid() ) ) ) {
+      EventBus.getDefault().post( new NoDocumentsEvent() );
+    }
+  }
+
+  private void updateMainActivity(InMemoryDocument doc) {
+    if ( MainActivity.isActive() ) {
       Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Updating MainActivity for: %s", doc.getUid() );
       ((MainActivity) mContext).update();
     } else {
-      Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: InfoActivity is active, quit updating MainActivity");
+      Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: MainActivity is not active, quit updating MainActivity");
     }
+  }
 
+  private boolean isFavoriteOrControl() {
     boolean isFavoriteOrControl = false;
 
     if ( dbQueryBuilder != null && dbQueryBuilder.getConditions() != null ) {
@@ -170,9 +181,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       }
     }
 
-    if ( documents.size() == 0 || ( isFavoriteOrControl && Objects.equals( doc.getUid(), settings.getUid() ) ) ) {
-      EventBus.getDefault().post( new NoDocumentsEvent() );
-    }
+    return isFavoriteOrControl;
   }
 
   private boolean isItemRemove(boolean processed, boolean control, boolean favorite) {

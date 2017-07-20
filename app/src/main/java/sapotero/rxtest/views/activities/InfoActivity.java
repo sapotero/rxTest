@@ -99,8 +99,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   private ScheduledThreadPoolExecutor scheduller;
   private Subscription loggerSubscription;
 
-  private static boolean active = false;
-
   @Override
   protected void onCreate(Bundle savedInstanceState) {
 
@@ -319,14 +317,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     invalidateArrows();
 
     chechPrimaryConsiderationDialog();
-
-    active = true;
-  }
-
-  @Override
-  protected void onPause() {
-    super.onPause();
-    active = false;
   }
 
   private void chechPrimaryConsiderationDialog() {
@@ -535,9 +525,5 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   @Override
   public void onBackPressed() {
     finish();
-  }
-
-  public static boolean isActive() {
-    return active;
   }
 }

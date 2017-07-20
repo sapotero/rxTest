@@ -45,7 +45,7 @@ public class Settings {
   private static final String UNAUTHORIZED_KEY = "user.unauthorized";
   private static final String SHOW_PRIMARY_CONSIDERATION = "show_promary_consideration";
   private static final String ORGANIZATION_FILTER_ACTIVE_KEY = "organization.filter.active";
-  private static final String ORGANIZATION_FILTER_SELECTION_KEY = "organization.filter.selection";
+  private static final String ORGANIZATION_FILTER_SELECTION_KEY = "organization.filter.savedselection";
 
   public static String FIRST_RUN_KEY;
   private static String HOST_KEY;

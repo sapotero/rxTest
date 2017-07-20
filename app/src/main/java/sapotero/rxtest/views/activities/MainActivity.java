@@ -141,6 +141,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private int menuIndex;
   private int buttonIndex;
 
+  private static boolean active = false;
+
   protected void onCreate(Bundle savedInstanceState) {
     setTheme(R.style.AppTheme);
 
@@ -427,6 +429,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     rxSettings();
 
+    active = true;
+
 //    EventBus.getDefault().post( new RecalculateMenuEvent());
 
   }
@@ -465,8 +469,12 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   private void updateOrganizationFilter() {
     if ( settings.isOrganizationFilterActive() ) {
-      Set<String> oldFilterSelection = settings.getOrganizationFilterSelection();
-      ORGANIZATION_SELECTOR.setSelected(oldFilterSelection);
+      try {
+        Set<String> oldFilterSelection = settings.getOrganizationFilterSelection();
+        ORGANIZATION_SELECTOR.setSelected(oldFilterSelection);
+      } catch (Exception e) {
+        Timber.tag(TAG).e(e);
+      }
     }
   }
 
@@ -486,6 +494,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     super.onPause();
     stopNetworkCheck();
     unsubscribe();
+
+    active = false;
   }
 
   @Override
@@ -799,6 +809,10 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     }
     menuIndex = event.index;
     DOCUMENT_TYPE_SELECTOR.setSelection(event.index);
+  }
+
+  public static boolean isActive() {
+    return active;
   }
 
 //  @Subscribe(threadMode = ThreadMode.MAIN)
