@@ -11,6 +11,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.googlecode.totallylazy.Sequence;
+import com.googlecode.totallylazy.Sequences;
+
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.Arrays;
@@ -26,10 +29,8 @@ import javax.inject.Inject;
 
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
-import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.query.DBQueryBuilder;
@@ -55,8 +56,6 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
   private final String TAG = this.getClass().getSimpleName();
 
   private DBQueryBuilder dbQueryBuilder;
-
-  private CompositeSubscription compositeSubscription;
 
   // Keeps UIDs of previously removed docs
   Set<String> removedUids;
@@ -155,37 +154,23 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     if ( dbQueryBuilder != null && dbQueryBuilder.getConditions() != null ) {
       Filter filter = new Filter(dbQueryBuilder.getConditions());
 
-      unsubscribe();
+      Sequence<InMemoryDocument> docSequence = Sequences.sequence(doc);
 
-      compositeSubscription.add(
-        Observable
-          .just( doc )
-          .filter( filter::byYear)
-//          .filter( dbQueryBuilder::byOrganization )
-          .filter( dbQueryBuilder::byDecision )
-          .filter( filter::byType)
-          .filter( filter::byStatus)
-          .filter( filter::isProcessed )
-          .filter( filter::isFavorites )
-          .filter( filter::isControl )
-          .subscribe(
-            doc1 -> {
-              addItem(doc1);
-              if (documents.size() > 0 && dbQueryBuilder != null) {
-                dbQueryBuilder.hideEmpty();
-              }
-            },
-            Timber::e
-          )
-      );
-    }
-  }
+      List<InMemoryDocument> docs = docSequence
+        .filter( filter::byYear )
+        .filter( dbQueryBuilder::byDecision )
+        .filter( filter::byType )
+        .filter( filter::byStatus)
+        .filter( filter::isProcessed )
+        .filter( filter::isFavorites )
+        .filter( filter::isControl )
+        .toList();
 
-  private void unsubscribe() {
-    if ( compositeSubscription != null && compositeSubscription.hasSubscriptions() ) {
-      compositeSubscription.unsubscribe();
+      for (InMemoryDocument _doc : docs) {
+        Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Updating MainActivity for: %s", _doc.getUid() );
+        ((MainActivity) mContext).update();
+      }
     }
-    compositeSubscription = new CompositeSubscription();
   }
 
   private void removeItem(int index, InMemoryDocument doc) {

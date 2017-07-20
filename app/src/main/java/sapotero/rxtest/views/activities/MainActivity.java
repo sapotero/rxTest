@@ -423,8 +423,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     initEvents();
     startNetworkCheck();
     subscribeToNetworkCheckResults();
-    updateCount();
-    updateOrganizationFilter();
+    update();
 
     rxSettings();
 
@@ -469,6 +468,11 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       Set<String> oldFilterSelection = settings.getOrganizationFilterSelection();
       ORGANIZATION_SELECTOR.setSelected(oldFilterSelection);
     }
+  }
+
+  public void update() {
+    updateCount();
+    updateOrganizationFilter();
   }
 
   private void unsubscribe() {
