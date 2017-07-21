@@ -338,6 +338,22 @@ public class PerformerMapperText {
 
     assertNotNull( destination );
     assertTrue( destination instanceof Oshs );
+    assertEquals( null, destination.getIPerformerUid() );
+    assertEquals( null, destination.getIPerformerNumber() );
+    assertEquals( dummyOshs.getId(), destination.getIPerformerId() );
+    assertEquals( null, destination.getIPerformerType() );
+    assertEquals( dummyOshs.getName(), destination.getIPerformerName() );
+    assertEquals( dummyOshs.getGender(), destination.getIPerformerGender() );
+    assertEquals( dummyOshs.getOrganization(), destination.getIPerformerOrganizationName() );
+    assertEquals( dummyOshs.getAssistantId(), destination.getIPerformerAssistantId() );
+    assertEquals( dummyOshs.getPosition(), destination.getIPerformerPosition() );
+    assertEquals( dummyOshs.getLastName(), destination.getIPerformerLastName() );
+    assertEquals( dummyOshs.getFirstName(), destination.getIPerformerFirstName() );
+    assertEquals( dummyOshs.getMiddleName(), destination.getIPerformerMiddleName() );
+    assertEquals( dummyOshs.getImage(), destination.getIPerformerImage() );
+    assertEquals( null, destination.isIPerformerOriginal() );
+    assertEquals( null, destination.isIPerformerResponsible() );
+    assertEquals( dummyOshs.getIsGroup(), destination.isIPerformerGroup() );
+    assertEquals( dummyOshs.getIsOrganization(), destination.isIPerformerOrganization() );
   }
-
 }
