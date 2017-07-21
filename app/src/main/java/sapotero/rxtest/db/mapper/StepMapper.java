@@ -8,18 +8,15 @@ import java.util.List;
 
 import java.lang.reflect.Type;
 
-import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RStepEntity;
 import sapotero.rxtest.retrofit.models.document.Step;
-import sapotero.rxtest.utils.Settings;
 
 // Maps between Step and RStepEntity
 public class StepMapper extends AbstractMapper<Step, RStepEntity> {
 
   private Gson gson;
 
-  public StepMapper(Settings settings, Mappers mappers) {
-    super(settings, mappers);
+  public StepMapper() {
     gson = new Gson();
   }
 

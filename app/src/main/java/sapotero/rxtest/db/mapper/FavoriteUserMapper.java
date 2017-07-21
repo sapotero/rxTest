@@ -1,5 +1,8 @@
 package sapotero.rxtest.db.mapper;
 
+import javax.inject.Inject;
+
+import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RFavoriteUserEntity;
 import sapotero.rxtest.retrofit.models.Oshs;
@@ -10,8 +13,13 @@ import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 // (model for RFavoriteUserEntity is Oshs)
 public class FavoriteUserMapper extends AbstractMapper<Oshs, RFavoriteUserEntity> {
 
-  public FavoriteUserMapper(Settings settings, Mappers mappers) {
-    super(settings, mappers);
+  @Inject Settings settings;
+
+  private Mappers mappers;
+
+  public FavoriteUserMapper(Mappers mappers) {
+    this.mappers = mappers;
+    EsdApplication.getDataComponent().inject(this);
   }
 
   @Override

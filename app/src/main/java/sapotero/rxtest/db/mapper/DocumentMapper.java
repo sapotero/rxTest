@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import javax.inject.Inject;
+
+import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RLinks;
@@ -39,8 +42,13 @@ import timber.log.Timber;
 // Maps between DocumentInfo and RDocumentEntity
 public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity> {
 
-  public DocumentMapper(Settings settings, Mappers mappers) {
-    super(settings, mappers);
+  @Inject Settings settings;
+
+  private Mappers mappers;
+
+  public DocumentMapper(Mappers mappers) {
+    this.mappers = mappers;
+    EsdApplication.getDataComponent().inject(this);
   }
 
   @Override

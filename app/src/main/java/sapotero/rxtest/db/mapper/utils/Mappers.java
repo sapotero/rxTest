@@ -1,7 +1,5 @@
 package sapotero.rxtest.db.mapper.utils;
 
-import javax.inject.Inject;
-
 import sapotero.rxtest.db.mapper.ActionMapper;
 import sapotero.rxtest.db.mapper.AssistantMapper;
 import sapotero.rxtest.db.mapper.BlockMapper;
@@ -19,12 +17,9 @@ import sapotero.rxtest.db.mapper.RouteMapper;
 import sapotero.rxtest.db.mapper.SignerMapper;
 import sapotero.rxtest.db.mapper.StepMapper;
 import sapotero.rxtest.db.mapper.TemplateMapper;
-import sapotero.rxtest.utils.Settings;
 
 // Keeps all mappers in one place
 public class Mappers {
-
-  @Inject Settings settings;
 
   private ActionMapper actionMapper;
   private AssistantMapper assistantMapper;
@@ -44,24 +39,24 @@ public class Mappers {
   private TemplateMapper templateMapper;
   private ColleagueMapper colleagueMapper;
 
-  public Mappers(Settings settings) {
-    actionMapper = new ActionMapper(settings, this);
-    assistantMapper = new AssistantMapper(settings, this);
-    blockMapper = new BlockMapper(settings, this);
-    controlLabelMapper = new ControlLabelMapper(settings, this);
-    decisionMapper = new DecisionMapper(settings, this);
-    documentMapper = new DocumentMapper(settings, this);
-    exemplarMapper = new ExemplarMapper(settings, this);
-    favoriteUserMapper = new FavoriteUserMapper(settings, this);
-    imageMapper = new ImageMapper(settings, this);
-    linkMapper = new LinkMapper(settings, this);
-    performerMapper = new PerformerMapper(settings, this);
-    primaryConsiderationMapper = new PrimaryConsiderationMapper(settings, this);
-    routeMapper = new RouteMapper(settings, this);
-    signerMapper = new SignerMapper(settings, this);
-    stepMapper = new StepMapper(settings, this);
-    templateMapper = new TemplateMapper(settings, this);
-    colleagueMapper = new ColleagueMapper(settings, this);
+  public Mappers() {
+    actionMapper = new ActionMapper();
+    assistantMapper = new AssistantMapper();
+    blockMapper = new BlockMapper(this);
+    controlLabelMapper = new ControlLabelMapper();
+    decisionMapper = new DecisionMapper(this);
+    documentMapper = new DocumentMapper(this);
+    exemplarMapper = new ExemplarMapper();
+    favoriteUserMapper = new FavoriteUserMapper(this);
+    imageMapper = new ImageMapper();
+    linkMapper = new LinkMapper();
+    performerMapper = new PerformerMapper();
+    primaryConsiderationMapper = new PrimaryConsiderationMapper(this);
+    routeMapper = new RouteMapper(this);
+    signerMapper = new SignerMapper();
+    stepMapper = new StepMapper();
+    templateMapper = new TemplateMapper();
+    colleagueMapper = new ColleagueMapper();
   }
 
   public ActionMapper getActionMapper() {

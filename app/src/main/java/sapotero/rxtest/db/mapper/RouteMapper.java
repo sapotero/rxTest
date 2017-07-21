@@ -6,13 +6,14 @@ import sapotero.rxtest.db.requery.models.RStep;
 import sapotero.rxtest.db.requery.models.RStepEntity;
 import sapotero.rxtest.retrofit.models.document.Route;
 import sapotero.rxtest.retrofit.models.document.Step;
-import sapotero.rxtest.utils.Settings;
 
 // Maps between Route and RRouteEntity
 public class RouteMapper extends AbstractMapper<Route, RRouteEntity> {
 
-  public RouteMapper(Settings settings, Mappers mappers) {
-    super(settings, mappers);
+  private Mappers mappers;
+
+  public RouteMapper(Mappers mappers) {
+    this.mappers = mappers;
   }
 
   @Override

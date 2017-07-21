@@ -26,7 +26,7 @@ public class ImageMapperTest {
   @Before
   public void init() {
     MockitoAnnotations.initMocks(this);
-    mapper = new ImageMapper(settings, mappers);
+    mapper = new ImageMapper();
     generateImage();
   }
 
