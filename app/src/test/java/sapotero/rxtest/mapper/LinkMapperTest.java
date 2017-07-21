@@ -7,7 +7,9 @@ import sapotero.rxtest.db.mapper.LinkMapper;
 import sapotero.rxtest.db.requery.models.RLinksEntity;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -41,8 +43,8 @@ public class LinkMapperTest {
     entity = mapper.toEntity(model);
 
     assertNotNull( entity );
-    assertEquals( entity.getId(), 0 );
-    assertEquals( entity.getUid(), model );
+    assertEquals( 0, entity.getId() );
+    assertEquals( model, entity.getUid() );
   }
 
   @Test
@@ -54,10 +56,28 @@ public class LinkMapperTest {
     model = mapper.toModel(entity);
 
     assertNotNull( model );
-    assertEquals( model, link );
+    assertEquals( link, model );
 
     verify(entity, atLeastOnce()).getUid();
     verify(entity, never()).setUid(anyString());
     verifyNoMoreInteractions(entity);
+  }
+
+  @Test
+  public void hasDiff() {
+    RLinksEntity entity1 = new RLinksEntity();
+    RLinksEntity entity2 = new RLinksEntity();
+    boolean hasDiff;
+
+    entity1.setUid(link);
+    entity2.setUid(link);
+    hasDiff = mapper.hasDiff(entity1, entity2);
+
+    assertFalse( hasDiff );
+
+    entity2.setUid("");
+    hasDiff = mapper.hasDiff(entity1, entity2);
+
+    assertTrue( hasDiff );
   }
 }
