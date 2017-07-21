@@ -144,6 +144,7 @@ public final class EsdApplication extends Application {
 
     Timber.plant(new Timber.DebugTree());
 
+    
     if (Constant.DEBUG) {
 
 //      if (LeakCanary.isInAnalyzerProcess(this)) {
