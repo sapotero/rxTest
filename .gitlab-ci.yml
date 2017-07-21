@@ -38,7 +38,7 @@ build:
   artifacts:
     paths:
     - app/build/outputs/
-    expire_in: 1 week
+    expire_in: 1 hour
 
 unitTests:
   stage: test
