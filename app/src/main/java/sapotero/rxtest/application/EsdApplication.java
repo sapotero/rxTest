@@ -143,7 +143,6 @@ public final class EsdApplication extends Application {
     super.onCreate();
 
     Timber.plant(new Timber.DebugTree());
-
     
     if (Constant.DEBUG) {
 
