@@ -8,6 +8,7 @@ PWD=$(echo "app/build/outputs/apk")
 FILENAME=$(ls $PWD | head -n 1)
 FILEPATH=$(echo "${PWD}/${FILENAME}")
 DATETIME=$(date +"%D %T ")
+DATE_WITH_FILENAME=$(echo "${DATETIME}${FILENAME}")
 
-curl -k -L --silent --header "Authorization: Token ${TOKEN}" -F "file=@${FILEPATH}" -F "filename=${DATETIME}${FILENAME}" -F parent_dir=/  "${UPLOAD_LINK}"
+curl -k -L --silent --header "Authorization: Token ${TOKEN}" -F "file=@${FILEPATH}" -F "filename=${DATE_WITH_FILENAME}" -F parent_dir=/  "${UPLOAD_LINK}"
 
