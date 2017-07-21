@@ -64,9 +64,7 @@ functionalTests:
 
 copy:
   stage: copy
-#  dependencies:
-#    - build
+  when: manual
+  allow_failure: true
   script:
-    #- curl -k -H "Authorization: Token 36b75fa39f3c0aac17080f2f05c8721f4a5c2d30" -F file=@test.txt -F filename=test.txt -F parent_dir=/ http://files.n-core.ru:8082/upload-api/024b6d67-3100-4c0e-b934-5b374673d23f
     - ./upload_file.sh
-    - echo 'copy complete'

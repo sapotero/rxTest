@@ -139,6 +139,7 @@ public final class EsdApplication extends Application {
     ACRA.init(this);
   }
 
+  
   @Override public void onCreate() {
     super.onCreate();
 
