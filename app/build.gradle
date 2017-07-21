@@ -12,6 +12,7 @@ android {
         versionCode 1
         versionName "1.0"
         multiDexEnabled true
+        testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
     }
 
     dexOptions {
@@ -193,12 +194,26 @@ dependencies {
     compile 'com.android.support:design:25.2.0'
     compile 'com.android.support:appcompat-v7:25.2.0'
     compile 'com.android.support:support-v4:25.2.0'
+
+    compile 'com.android.support.test:testing-support-lib:0.1'
+    compile 'com.android.support.test.uiautomator:uiautomator-v18:2.1.2'
+
+    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    }
+    androidTestCompile 'com.android.support.test.espresso:espresso-contrib:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+        exclude group: 'com.android.support', module: 'support-v4'
+        exclude group: 'com.android.support', module: 'design'
+        exclude group: 'com.android.support', module: 'recyclerview-v7'
+    }
 }
 
 
 configurations.all {
     resolutionStrategy {
         force 'com.squareup.okio:okio:1.9.0'
+        force 'org.hamcrest:hamcrest-core:1.3'
     }
 }
 

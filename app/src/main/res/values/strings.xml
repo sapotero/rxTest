@@ -504,6 +504,11 @@
         <item>1.5</item>
     </string-array>
 
+
+    <string name="host_key_title">Домен</string>
+    <string name="settings_journal_title">Журналы</string>
+
+
     <!--SharedPreferences keys-->
     <string name="first_run_key">is_first_run</string>
     <string name="host_key">settings_username_host</string>
