@@ -45,32 +45,23 @@ android {
     applicationVariants.all { variant ->
         variant.outputs.each { output ->
 //            def project = "sed"
-//            def SEP = "_"
 //            def flavor = variant.productFlavors[0].name
 //            def buildType = variant.variantData.variantConfiguration.buildType.name
-//            def version = variant.versionName
-//            def date = new Date();
-//            def formattedDate = date.format('dd.MM.YYYY_HH-mm')
-//
-////            def newApkName = project + SEP + flavor + SEP + buildType + SEP + version + SEP + formattedDate + ".apk"
+//            def newApkName = project + SEP + flavor + SEP + buildType + SEP + version + SEP + formattedDate + ".apk"
 //            def newApkName = project + SEP + buildType + SEP + version + SEP + formattedDate + ".apk"
 
-            def CI_COMMIT_SHA = System.getenv("CI_COMMIT_SHA")
-            if (CI_COMMIT_SHA == null) {
-                CI_COMMIT_SHA = "local"
-            }
+            def SEP = "_"
 
-            def CI_COMMIT_TAG = System.getenv("CI_COMMIT_TAG")
+            def CI_COMMIT_TAG = System.getenv("CI_COMMIT_SHA")
             if (CI_COMMIT_TAG == null) {
-                CI_COMMIT_TAG = "develop"
+                CI_COMMIT_TAG = ""
             }
 
-            def CI_REGISTRY_USER = System.getenv("CI_REGISTRY_USER")
-            if (CI_REGISTRY_USER == null) {
-                CI_REGISTRY_USER = "build"
-            }
+            def date = new Date();
+            def formattedDate = date.format('dd.MM.YYYY_HH-mm')
+            def version = variant.versionName
 
-            def newApkName = CI_COMMIT_TAG + "_" + CI_COMMIT_SHA + "_" + CI_REGISTRY_USER + ".apk"
+            def newApkName = version + SEP + formattedDate + SEP + CI_COMMIT_TAG + ".apk"
 
             output.outputFile = new File(output.outputFile.parent, newApkName)
 
