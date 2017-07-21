@@ -5,7 +5,7 @@
         android:title="Настройки доступа">
         <EditTextPreference
             android:key="@string/host_key"
-            android:title="@string/host_key_title"
+            android:title="Домен"
             android:defaultValue="http://mobile.sed.mvd.ru/"/>
         <!--android:defaultValue="http://mobile.sed.a-soft.org/"/>-->
     </android.support.v7.preference.PreferenceCategory>
