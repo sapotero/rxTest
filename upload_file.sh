@@ -5,5 +5,15 @@ REPO_ID=$( curl -k -L --silent --header "Authorization: Token ${TOKEN}" https://
 UPLOAD_HOST=$( echo "https://files.n-core.ru/api2/repos/${REPO_ID}/upload-link/" )
 UPLOAD_LINK=$( curl -k -L --silent --header "Authorization: Token ${TOKEN}" "${UPLOAD_HOST}" | jq --raw-output '.')
 FILENAME=$( echo "${CI_COMMIT_TAG}_${CI_RUNNER_ID}_${CI_COMMIT_REF_NAME}.apk" )
-curl -k -L --silent --header "Authorization: Token ${TOKEN}" -F "file=@app/build/outputs/${FILENAME}" -F "filename=${FILENAME}" -F parent_dir=/  "${UPLOAD_LINK}"
+PWD=$(pwd)
+
+echo "TOKEN: " + $TOKEN
+echo "REPO_ID: " + $REPO_ID
+echo "UPLOAD_HOST: " + $UPLOAD_HOST
+echo "UPLOAD_LINK: " + $UPLOAD_LINK
+echo "FILENAME: " + $FILENAME
+echo "PWD: " + $PWD
+
+
+curl -k -L --silent --header "Authorization: Token ${TOKEN}" -F "file=@/home/sapotero/AndroidStudioProjects/RxTest/${FILENAME}" -F "filename=${FILENAME}" -F parent_dir=/  "${UPLOAD_LINK}"
 
