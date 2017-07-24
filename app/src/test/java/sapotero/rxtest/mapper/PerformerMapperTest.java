@@ -15,7 +15,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-public class PerformerMapperText {
+public class PerformerMapperTest {
 
   private PerformerMapper mapper;
   private Performer dummyPerformer;
@@ -29,7 +29,7 @@ public class PerformerMapperText {
     mapper = new PerformerMapper();
     generatePerformer();
     generatePrimaryConsiderationPeople();
-    generateOshs();
+    dummyOshs = PrimaryConsiderationMapperTest.generateOshs();
   }
 
   private void generatePerformer() {
@@ -54,21 +54,6 @@ public class PerformerMapperText {
     dummyPrimaryConsiderationPeople.setOrganization( "ОДиР ГУ МВД России по Самарской области" );
     dummyPrimaryConsiderationPeople.setGender( "Мужской" );
     dummyPrimaryConsiderationPeople.setIsOrganization( false );
-  }
-
-  private void generateOshs() {
-    dummyOshs = new Oshs();
-    dummyOshs.setId( "58f88dfc776b000026000001" );
-    dummyOshs.setIsOrganization( false );
-    dummyOshs.setIsGroup( false );
-    dummyOshs.setName( "Сотрудник_а2 A.T." );
-    dummyOshs.setOrganization( "ОДиР ГУ МВД России по Самарской области" );
-    dummyOshs.setPosition( "Сотрудник ОДИР" );
-    dummyOshs.setLastName( "Сотрудник_а2" );
-    dummyOshs.setFirstName( "Android" );
-    dummyOshs.setMiddleName( "Test" );
-    dummyOshs.setGender( "Мужской" );
-    dummyOshs.setImage( null );
   }
 
   @Test
