@@ -101,6 +101,21 @@ public class PerformerMapperTest {
     assertEquals( expected.getOrganizationText(), actual.getOrganizationText() );
   }
 
+  public static void verifyFormattedPerformer(Performer expected, Performer actual) {
+    assertNotNull( actual );
+    assertEquals( expected.getId(), actual.getId() );
+    assertEquals( expected.getPerformerId(), actual.getPerformerId() );
+    assertEquals( expected.getIsOriginal(), actual.getIsOriginal() );
+    assertEquals( expected.getIsResponsible(), actual.getIsResponsible() );
+    assertEquals( expected.getOrganization(), actual.getOrganization() );
+    assertEquals( null, actual.getNumber() );
+    assertEquals( null, actual.getPerformerType() );
+    assertEquals( null, actual.getPerformerText() );
+    assertEquals( null, actual.getPerformerGender() );
+    assertEquals( null, actual.getOrganizationText() );
+    assertEquals( false, actual.getGroup() );
+  }
+
   @Test
   public void isOrganization() {
     Performer performer = new Performer();

@@ -27,7 +27,6 @@ public class BlockMapperTest {
   private BlockMapper mapper;
   private PerformerMapper performerMapper;
   private Block dummyBlock;
-  private Performer dummyPerformer;
   private RBlockEntity entity;
   private Block model;
 
@@ -38,13 +37,13 @@ public class BlockMapperTest {
     MockitoAnnotations.initMocks(this);
     performerMapper = new PerformerMapper();
 
-    generateBlock();
+    dummyBlock = generateBlock();
 
     Mockito.when(mappers.getPerformerMapper()).thenReturn(performerMapper);
   }
 
-  private void generateBlock() {
-    dummyBlock = new Block();
+  public static Block generateBlock() {
+    Block dummyBlock = new Block();
     dummyBlock.setId( "Ij3hf834y7f4iEhfweihfeRfhjw9823ryu98" );
     dummyBlock.setNumber( 5 );
     dummyBlock.setText( "Уылдаовы влдыоа выд олдвыао ва" );
@@ -55,8 +54,9 @@ public class BlockMapperTest {
     dummyBlock.setToCopy( false );
     dummyBlock.setToFamiliarization( false );
 
-    dummyPerformer = PerformerMapperTest.generatePerformer();
-    this.dummyBlock.getPerformers().add( dummyPerformer );
+    Performer dummyPerformer = PerformerMapperTest.generatePerformer();
+    dummyBlock.getPerformers().add( dummyPerformer );
+    return dummyBlock;
   }
 
   @Test
@@ -66,21 +66,25 @@ public class BlockMapperTest {
 
     Mockito.verify(mappers, times(1)).getPerformerMapper();
 
-    assertNotNull( entity );
-    assertEquals( 0, entity.getId() );
-    assertEquals( dummyBlock.getId(), entity.getUid() );
-    assertEquals( dummyBlock.getNumber(), entity.getNumber() );
-    assertEquals( dummyBlock.getText(), entity.getText() );
-    assertEquals( dummyBlock.getAppealText(), entity.getAppealText() );
-    assertEquals( dummyBlock.getTextBefore(), entity.isTextBefore() );
-    assertEquals( dummyBlock.getHidePerformers(), entity.isHidePerformers() );
-    assertEquals( dummyBlock.getFontSize(), entity.getFontSize() );
-    assertEquals( dummyBlock.getToCopy(), entity.isToCopy() );
-    assertEquals( dummyBlock.getToFamiliarization(), entity.isToFamiliarization() );
+    verifyBlock( dummyBlock, entity );
+  }
 
-    for (RPerformer _performer : entity.getPerformers() ) {
+  public static void verifyBlock(Block expected, RBlockEntity actual) {
+    assertNotNull( actual );
+    assertEquals( 0, actual.getId() );
+    assertEquals( expected.getId(), actual.getUid() );
+    assertEquals( expected.getNumber(), actual.getNumber() );
+    assertEquals( expected.getText(), actual.getText() );
+    assertEquals( expected.getAppealText(), actual.getAppealText() );
+    assertEquals( expected.getTextBefore(), actual.isTextBefore() );
+    assertEquals( expected.getHidePerformers(), actual.isHidePerformers() );
+    assertEquals( expected.getFontSize(), actual.getFontSize() );
+    assertEquals( expected.getToCopy(), actual.isToCopy() );
+    assertEquals( expected.getToFamiliarization(), actual.isToFamiliarization() );
+
+    for (RPerformer _performer : actual.getPerformers() ) {
       RPerformerEntity performerEntity = (RPerformerEntity) _performer;
-      PerformerMapperTest.verifyPerformer( dummyPerformer, performerEntity );
+      PerformerMapperTest.verifyPerformer( expected.getPerformers().get(0), performerEntity );
     }
   }
 
@@ -92,19 +96,41 @@ public class BlockMapperTest {
 
     Mockito.verify(mappers, times(2)).getPerformerMapper();
 
-    assertNotNull( model );
-    assertEquals( dummyBlock.getId(), model.getId() );
-    assertEquals( dummyBlock.getNumber(), model.getNumber() );
-    assertEquals( dummyBlock.getText(), model.getText() );
-    assertEquals( dummyBlock.getAppealText(), model.getAppealText() );
-    assertEquals( dummyBlock.getTextBefore(), model.getTextBefore() );
-    assertEquals( dummyBlock.getHidePerformers(), model.getHidePerformers() );
-    assertEquals( dummyBlock.getFontSize(), model.getFontSize() );
-    assertEquals( dummyBlock.getToCopy(), model.getToCopy() );
-    assertEquals( dummyBlock.getToFamiliarization(), model.getToFamiliarization() );
+    verifyBlock( dummyBlock, model );
+  }
 
-    for (Performer performer : this.model.getPerformers() ) {
-      PerformerMapperTest.verifyPerformer( dummyPerformer, performer );
+  public static void verifyBlock(Block expected, Block actual) {
+    assertNotNull( actual );
+    assertEquals( expected.getId(), actual.getId() );
+    assertEquals( expected.getNumber(), actual.getNumber() );
+    assertEquals( expected.getText(), actual.getText() );
+    assertEquals( expected.getAppealText(), actual.getAppealText() );
+    assertEquals( expected.getTextBefore(), actual.getTextBefore() );
+    assertEquals( expected.getHidePerformers(), actual.getHidePerformers() );
+    assertEquals( expected.getFontSize(), actual.getFontSize() );
+    assertEquals( expected.getToCopy(), actual.getToCopy() );
+    assertEquals( expected.getToFamiliarization(), actual.getToFamiliarization() );
+
+    for (Performer performer : actual.getPerformers() ) {
+      PerformerMapperTest.verifyPerformer( expected.getPerformers().get(0), performer );
+    }
+  }
+
+  public static void verifyFormattedBlock(Block expected, Block actual) {
+    assertNotNull( actual );
+    assertEquals( expected.getId(), actual.getId() );
+    assertEquals( expected.getNumber(), actual.getNumber() );
+    assertEquals( expected.getText(), actual.getText() );
+    assertEquals( expected.getAppealText(), actual.getAppealText() );
+    assertEquals( expected.getTextBefore(), actual.getTextBefore() );
+    assertEquals( expected.getHidePerformers(), actual.getHidePerformers() );
+    assertEquals( "14", actual.getFontSize() );
+    assertEquals( "1", actual.getIndentation() );
+    assertEquals( null, actual.getToCopy() );
+    assertEquals( null, actual.getToFamiliarization() );
+
+    for (Performer performer : actual.getPerformers() ) {
+      PerformerMapperTest.verifyFormattedPerformer( expected.getPerformers().get(0), performer );
     }
   }
 
