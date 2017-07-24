@@ -42,7 +42,6 @@ public class ActionMapperTest {
 
     assertNotNull( entity );
     assertEquals( 0, entity.getId() );
-
     assertEquals( dummyAction.getOfficialId(), entity.getOfficialId() );
     assertEquals( dummyAction.getAddressedToId(), entity.getAddressedToId() );
     assertEquals( dummyAction.getAction(), entity.getAction() );
