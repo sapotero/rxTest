@@ -1,32 +1,26 @@
 package sapotero.rxtest.mapper;
 
-import android.content.Context;
-
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import sapotero.rxtest.db.mapper.ImageMapper;
-import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.retrofit.models.document.Image;
-import sapotero.rxtest.utils.Settings;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class ImageMapperTest {
 
-  @Mock private Context context;
-  @Mock private ImageMapper mapper;
-  @Mock private Mappers mappers;
-  @Mock private Settings settings;
-  @Mock private Image image;
-  @Mock private RImageEntity imageModel;
+  private ImageMapper mapper;
+  private Image dummyImage;
+  private RImageEntity entity;
+  private Image model;
 
   @Before
   public void init() {
-    MockitoAnnotations.initMocks(this);
-    mapper = new ImageMapper();
     generateImage();
   }
 
@@ -40,48 +34,69 @@ public class ImageMapperTest {
     Integer size       = 654658;
     Boolean signed     = Math.random() > 0.5;
 
-    image = new Image();
-    image.setTitle(title);
-    image.setNumber(number);
-    image.setMd5(md5);
-    image.setSize(size);
-    image.setPath(path);
-    image.setContentType(contentType);
-    image.setSigned(signed);
-    image.setCreatedAt(createdAt);
-    image.setPath(path);
+    dummyImage = new Image();
+    dummyImage.setTitle(title);
+    dummyImage.setNumber(number);
+    dummyImage.setMd5(md5);
+    dummyImage.setSize(size);
+    dummyImage.setPath(path);
+    dummyImage.setContentType(contentType);
+    dummyImage.setSigned(signed);
+    dummyImage.setCreatedAt(createdAt);
   }
 
   @Test
-  public void ToEntity() {
-    imageModel = mapper.toEntity(image);
+  public void toEntity() {
+    mapper = new ImageMapper();
+    entity = mapper.toEntity(dummyImage);
 
-    Assert.assertEquals( imageModel.getNumber()      , image.getNumber() );
-    Assert.assertEquals( imageModel.getTitle()       , image.getTitle() );
-    Assert.assertEquals( imageModel.getMd5()         , image.getMd5() );
-    Assert.assertEquals( imageModel.getSize()        , image.getSize() );
-    Assert.assertEquals( imageModel.getPath()        , image.getPath() );
-    Assert.assertEquals( imageModel.getContentType() , image.getContentType() );
-    Assert.assertEquals( imageModel.isSigned()       , image.getSigned() );
-    Assert.assertEquals( imageModel.getCreatedAt()   , image.getCreatedAt() );
-    Assert.assertEquals( imageModel.isLoading()      , false );
-    Assert.assertEquals( imageModel.isComplete()     , false );
-    Assert.assertEquals( imageModel.isError()        , false );
-    Assert.assertEquals( imageModel.isDeleted()      , false );
+    assertNotNull( entity );
+    assertEquals( 0                       , entity.getId() );
+    assertEquals( entity.getNumber()      , dummyImage.getNumber() );
+    assertEquals( entity.getTitle()       , dummyImage.getTitle() );
+    assertEquals( entity.getMd5()         , dummyImage.getMd5() );
+    assertEquals( entity.getSize()        , dummyImage.getSize() );
+    assertEquals( entity.getPath()        , dummyImage.getPath() );
+    assertEquals( entity.getContentType() , dummyImage.getContentType() );
+    assertEquals( entity.isSigned()       , dummyImage.getSigned() );
+    assertEquals( entity.getCreatedAt()   , dummyImage.getCreatedAt() );
+    assertEquals( entity.isLoading()      , false );
+    assertEquals( entity.isComplete()     , false );
+    assertEquals( entity.isError()        , false );
+    assertEquals( entity.isDeleted()      , false );
   }
 
   @Test
-  public void ToModel(){
-    Image temp_model = mapper.toModel(imageModel);
+  public void toModel(){
+    mapper = new ImageMapper();
+    entity = mapper.toEntity(dummyImage);
+    model = mapper.toModel(entity);
 
-    Assert.assertEquals( imageModel.getNumber()      , temp_model.getNumber() );
-    Assert.assertEquals( imageModel.getTitle()       , temp_model.getTitle() );
-    Assert.assertEquals( imageModel.getMd5()         , temp_model.getMd5() );
-    Assert.assertEquals( imageModel.getSize()        , temp_model.getSize() );
-    Assert.assertEquals( imageModel.getPath()        , temp_model.getPath() );
-    Assert.assertEquals( imageModel.getContentType() , temp_model.getContentType() );
-    Assert.assertEquals( imageModel.isSigned()       , temp_model.getSigned() );
-    Assert.assertEquals( imageModel.getCreatedAt()   , temp_model.getCreatedAt() );
+    assertNotNull( model );
+    assertEquals( entity.getNumber()      , model.getNumber() );
+    assertEquals( entity.getTitle()       , model.getTitle() );
+    assertEquals( entity.getMd5()         , model.getMd5() );
+    assertEquals( entity.getSize()        , model.getSize() );
+    assertEquals( entity.getPath()        , model.getPath() );
+    assertEquals( entity.getContentType() , model.getContentType() );
+    assertEquals( entity.isSigned()       , model.getSigned() );
+    assertEquals( entity.getCreatedAt()   , model.getCreatedAt() );
   }
 
+  @Test
+  public void hasDiff() {
+    mapper = new ImageMapper();
+
+    RImageEntity entity1 = mapper.toEntity(dummyImage);
+    RImageEntity entity2 = mapper.toEntity(dummyImage);
+
+    boolean hasDiff = mapper.hasDiff(entity1, entity2);
+
+    assertFalse( hasDiff );
+
+    entity2.setNumber( 7 );
+    hasDiff = mapper.hasDiff(entity1, entity2);
+
+    assertTrue( hasDiff );
+  }
 }
