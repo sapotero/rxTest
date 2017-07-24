@@ -4,9 +4,7 @@ package sapotero.rxtest.mapper;
 import org.junit.Before;
 import org.junit.Test;
 
-import sapotero.rxtest.db.mapper.ActionMapper;
 import sapotero.rxtest.db.mapper.ControlLabelMapper;
-import sapotero.rxtest.db.requery.models.actions.RActionEntity;
 import sapotero.rxtest.db.requery.models.control_labels.RControlLabelsEntity;
 import sapotero.rxtest.retrofit.models.document.ControlLabel;
 
