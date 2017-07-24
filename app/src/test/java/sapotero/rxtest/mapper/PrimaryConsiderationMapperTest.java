@@ -19,12 +19,15 @@ import sapotero.rxtest.db.mapper.PerformerMapper;
 import sapotero.rxtest.db.mapper.PrimaryConsiderationMapper;
 import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RPrimaryConsiderationEntity;
+import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.utils.Settings;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.times;
 
 @RunWith(PowerMockRunner.class)
@@ -160,5 +163,22 @@ public class PrimaryConsiderationMapperTest {
     assertEquals( dummyOshs.getName(), people.getName() );
     assertEquals( dummyOshs.getIsOrganization(), people.isOrganization() );
     assertEquals( dummySortIndex, people.getSortIndex() );
+  }
+
+  @Test
+  public void hasDiff() {
+    mapper = new PrimaryConsiderationMapper(mappers);
+
+    RPrimaryConsiderationEntity entity1 = mapper.toEntity(dummyOshs);
+    RPrimaryConsiderationEntity entity2 = mapper.toEntity(dummyOshs);
+
+    boolean hasDiff = mapper.hasDiff(entity1, entity2);
+
+    assertFalse( hasDiff );
+
+    entity2.setUid("");
+    hasDiff = mapper.hasDiff(entity1, entity2);
+
+    assertTrue( hasDiff );
   }
 }

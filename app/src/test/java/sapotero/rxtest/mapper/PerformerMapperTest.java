@@ -27,13 +27,13 @@ public class PerformerMapperTest {
   @Before
   public void init() {
     mapper = new PerformerMapper();
-    generatePerformer();
+    dummyPerformer = generatePerformer();
     generatePrimaryConsiderationPeople();
     dummyOshs = PrimaryConsiderationMapperTest.generateOshs();
   }
 
-  private void generatePerformer() {
-    dummyPerformer = new Performer();
+  public static Performer generatePerformer() {
+    Performer dummyPerformer = new Performer();
     dummyPerformer.setId( "5936884c029a000222000001" );
     dummyPerformer.setPerformerId( "58f88dfc776b000026000001" );
     dummyPerformer.setIsOriginal( true );
@@ -44,6 +44,7 @@ public class PerformerMapperTest {
     dummyPerformer.setPerformerText( "Сотрудник_а2 A.T. (Сотрудник ОДИР)" );
     dummyPerformer.setPerformerGender( "Мужской" );
     dummyPerformer.setOrganizationText( "ОДиР ГУ МВД России по Самарской области" );
+    return dummyPerformer;
   }
 
   private void generatePrimaryConsiderationPeople() {
@@ -60,18 +61,22 @@ public class PerformerMapperTest {
   public void toEntity() {
     entity = mapper.toEntity(dummyPerformer);
 
-    assertNotNull( entity );
-    assertEquals( 0, entity.getId() );
-    assertEquals( dummyPerformer.getId(), entity.getUid() );
-    assertEquals( dummyPerformer.getPerformerId(), entity.getPerformerId() );
-    assertEquals( dummyPerformer.getIsOriginal(), entity.isIsOriginal() );
-    assertEquals( dummyPerformer.getIsResponsible(), entity.isIsResponsible() );
-    assertEquals( dummyPerformer.getOrganization(), entity.isIsOrganization() );
-    assertEquals( dummyPerformer.getNumber(), entity.getNumber() );
-    assertEquals( dummyPerformer.getPerformerType(), entity.getPerformerType() );
-    assertEquals( dummyPerformer.getPerformerText(), entity.getPerformerText() );
-    assertEquals( dummyPerformer.getPerformerGender(), entity.getPerformerGender() );
-    assertEquals( dummyPerformer.getOrganizationText(), entity.getOrganizationText() );
+    verifyPerformer( dummyPerformer, entity );
+  }
+
+  public static void verifyPerformer(Performer expected, RPerformerEntity actual) {
+    assertNotNull( actual );
+    assertEquals( 0, actual.getId() );
+    assertEquals( expected.getId(), actual.getUid() );
+    assertEquals( expected.getPerformerId(), actual.getPerformerId() );
+    assertEquals( expected.getIsOriginal(), actual.isIsOriginal() );
+    assertEquals( expected.getIsResponsible(), actual.isIsResponsible() );
+    assertEquals( expected.getOrganization(), actual.isIsOrganization() );
+    assertEquals( expected.getNumber(), actual.getNumber() );
+    assertEquals( expected.getPerformerType(), actual.getPerformerType() );
+    assertEquals( expected.getPerformerText(), actual.getPerformerText() );
+    assertEquals( expected.getPerformerGender(), actual.getPerformerGender() );
+    assertEquals( expected.getOrganizationText(), actual.getOrganizationText() );
   }
 
   @Test
@@ -79,17 +84,21 @@ public class PerformerMapperTest {
     entity = mapper.toEntity(dummyPerformer);
     model = mapper.toModel(entity);
 
-    assertNotNull( model );
-    assertEquals( dummyPerformer.getId(), model.getId() );
-    assertEquals( dummyPerformer.getPerformerId(), model.getPerformerId() );
-    assertEquals( dummyPerformer.getIsOriginal(), model.getIsOriginal() );
-    assertEquals( dummyPerformer.getIsResponsible(), model.getIsResponsible() );
-    assertEquals( dummyPerformer.getOrganization(), model.getOrganization() );
-    assertEquals( dummyPerformer.getNumber(), model.getNumber() );
-    assertEquals( dummyPerformer.getPerformerType(), model.getPerformerType() );
-    assertEquals( dummyPerformer.getPerformerText(), model.getPerformerText() );
-    assertEquals( dummyPerformer.getPerformerGender(), model.getPerformerGender() );
-    assertEquals( dummyPerformer.getOrganizationText(), model.getOrganizationText() );
+    verifyPerformer( dummyPerformer, model );
+  }
+
+  public static void verifyPerformer(Performer expected, Performer actual) {
+    assertNotNull( actual );
+    assertEquals( expected.getId(), actual.getId() );
+    assertEquals( expected.getPerformerId(), actual.getPerformerId() );
+    assertEquals( expected.getIsOriginal(), actual.getIsOriginal() );
+    assertEquals( expected.getIsResponsible(), actual.getIsResponsible() );
+    assertEquals( expected.getOrganization(), actual.getOrganization() );
+    assertEquals( expected.getNumber(), actual.getNumber() );
+    assertEquals( expected.getPerformerType(), actual.getPerformerType() );
+    assertEquals( expected.getPerformerText(), actual.getPerformerText() );
+    assertEquals( expected.getPerformerGender(), actual.getPerformerGender() );
+    assertEquals( expected.getOrganizationText(), actual.getOrganizationText() );
   }
 
   @Test
