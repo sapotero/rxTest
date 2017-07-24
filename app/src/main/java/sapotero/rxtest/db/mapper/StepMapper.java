@@ -50,7 +50,7 @@ public class StepMapper extends AbstractMapper<Step, RStepEntity> {
     return gson.toJson( list );
   }
 
-  private <T> ArrayList<T> jsonToList(String jsonString) {
+  public <T> ArrayList<T> jsonToList(String jsonString) {
     Type listType = new TypeToken<ArrayList<T>>(){}.getType();
     return gson.fromJson(jsonString, listType);
   }
