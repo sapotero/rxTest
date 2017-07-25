@@ -10,12 +10,12 @@ import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import timber.log.Timber;
 
 public class CurrentDocumentManager {
 
-  @Inject Settings settings;
+  @Inject ISettings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   private CompositeSubscription subscription;

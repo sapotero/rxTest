@@ -10,18 +10,17 @@ import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
 import okhttp3.OkHttpClient;
 import sapotero.rxtest.db.mapper.utils.Mappers;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 
 public abstract class BaseJob extends Job {
 
   @Inject JobManager jobManager;
   @Inject OkHttpClient okHttpClient;
-  @Inject Settings settings;
+  @Inject ISettings settings;
   @Inject Mappers mappers;
   @Inject SingleEntityStore<Persistable> dataStore;
-  @Inject
-  MemoryStore store;
+  @Inject MemoryStore store;
 
   protected BaseJob(Params params) {
     super(params);

@@ -85,7 +85,7 @@ import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.services.task.CheckNetworkTask;
 import sapotero.rxtest.services.task.UpdateAllDocumentsTask;
 import sapotero.rxtest.services.task.UpdateQueueTask;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.cryptopro.AlgorithmSelector;
 import sapotero.rxtest.utils.cryptopro.CMSSignExample;
 import sapotero.rxtest.utils.cryptopro.ContainerAdapter;
@@ -105,7 +105,7 @@ public class MainService extends Service {
   private ScheduledFuture futureNetwork;
 
   @Inject OkHttpClient okHttpClient;
-  @Inject Settings settings;
+  @Inject ISettings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   @Inject QueueManager queue;

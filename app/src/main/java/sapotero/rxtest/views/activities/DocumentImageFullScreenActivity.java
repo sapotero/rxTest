@@ -25,7 +25,7 @@ import butterknife.ButterKnife;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.retrofit.models.document.Image;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.adapters.DocumentLinkAdapter;
 import sapotero.rxtest.views.fragments.InfoCardDocumentsFragment;
 import timber.log.Timber;
@@ -35,7 +35,7 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity implement
   @BindView(R.id.document_image_toolbar) Toolbar toolbar;
   @BindView(R.id.activity_document_image_full_screen_wrapper) FrameLayout wrapper;
 
-  @Inject Settings settings;
+  @Inject ISettings settings;
 
   public static final String EXTRA_FILES_KEY = "files";
   public static final String EXTRA_INDEX_KEY = "index";

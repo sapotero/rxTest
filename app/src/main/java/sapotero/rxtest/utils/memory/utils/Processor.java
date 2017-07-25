@@ -28,7 +28,7 @@ import sapotero.rxtest.jobs.bus.CreateProjectsJob;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.jobs.bus.UpsertDocumentJob;
 import sapotero.rxtest.retrofit.models.documents.Document;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.fields.DocumentType;
 import sapotero.rxtest.utils.memory.fields.FieldType;
@@ -44,7 +44,7 @@ import static com.googlecode.totallylazy.Sequences.sequence;
 public class Processor {
   @Inject MemoryStore store;
   @Inject JobManager jobManager;
-  @Inject Settings settings;
+  @Inject ISettings settings;
 
   enum Source {
     EMPTY,

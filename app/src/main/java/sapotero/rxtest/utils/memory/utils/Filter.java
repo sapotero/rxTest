@@ -12,14 +12,14 @@ import javax.inject.Inject;
 
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import timber.log.Timber;
 
 public class Filter {
 
-  @Inject Settings settings;
+  @Inject ISettings settings;
 
   private final String TAG = this.getClass().getSimpleName();
   private final ArrayList<ConditionBuilder> conditions;

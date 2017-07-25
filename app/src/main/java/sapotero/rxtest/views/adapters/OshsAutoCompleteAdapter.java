@@ -25,7 +25,7 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.utils.OshsAdapterService;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 
 public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable {
 
@@ -36,7 +36,7 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
   private String TAG = this.getClass().getSimpleName();
 
   @Inject OkHttpClient okHttpClient;
-  @Inject Settings settings;
+  @Inject ISettings settings;
 
   private ArrayList<String> ignore_user_ids;
 

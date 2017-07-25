@@ -28,14 +28,14 @@ import sapotero.rxtest.events.bus.UpdateFavoritesAndProcessedEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckFailEvent;
 import sapotero.rxtest.events.stepper.load.StepperDocumentCountReadyEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.custom.stepper.Step;
 import sapotero.rxtest.views.custom.stepper.VerificationError;
 import timber.log.Timber;
 
 public class StepperLoadDataFragment extends Fragment implements Step {
 
-  @Inject Settings settings;
+  @Inject ISettings settings;
 
   private String TAG = this.getClass().getSimpleName();
   private int loadedTotal = 0;

@@ -58,7 +58,7 @@ import sapotero.rxtest.retrofit.models.documents.Documents;
 import sapotero.rxtest.retrofit.models.v2.v2UserOshs;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.services.MainService;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.fields.DocumentType;
 import sapotero.rxtest.views.menu.fields.MainMenuButton;
@@ -70,7 +70,7 @@ public class DataLoaderManager {
   private final String TAG = this.getClass().getSimpleName();
 
   @Inject OkHttpClient okHttpClient;
-  @Inject Settings settings;
+  @Inject ISettings settings;
   @Inject JobManager jobManager;
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject MemoryStore store;

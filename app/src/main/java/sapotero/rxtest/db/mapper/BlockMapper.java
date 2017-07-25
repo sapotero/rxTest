@@ -8,13 +8,14 @@ import sapotero.rxtest.db.requery.models.decisions.RPerformer;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Performer;
-import sapotero.rxtest.utils.Settings;
 
 // Maps between Block and RBlockEntity
 public class BlockMapper extends AbstractMapper<Block, RBlockEntity> {
 
-  public BlockMapper(Settings settings, Mappers mappers) {
-    super(settings, mappers);
+  private Mappers mappers;
+
+  public BlockMapper(Mappers mappers) {
+    this.mappers = mappers;
   }
 
   @Override

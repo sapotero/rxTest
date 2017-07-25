@@ -7,16 +7,16 @@ import java.util.Set;
 
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import timber.log.Timber;
 
 public class Validation{
-  private Settings settings;
+  private ISettings settings;
 
   private Set<String> selected_journals;
   private String TAG = this.getClass().getSimpleName();
 
-  Validation(Settings settings) {
+  Validation(ISettings settings) {
     this.settings = settings;
 
     this.settings

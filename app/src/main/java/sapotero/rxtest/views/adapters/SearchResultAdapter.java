@@ -16,14 +16,14 @@ import javax.inject.Inject;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.activities.InfoActivity;
 
 public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapter.ViewHolder> {
   private final Context context;
   private final List<RDocumentEntity> mDataset;
 
-  @Inject Settings settings;
+  @Inject ISettings settings;
 
   public SearchResultAdapter(Context context, List<RDocumentEntity> mDataset) {
     this.context = context;

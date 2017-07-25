@@ -83,7 +83,7 @@ import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.managers.toolbar.ToolbarManager;
 import sapotero.rxtest.retrofit.models.document.Decision;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.padeg.Declension;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.adapters.DecisionSpinnerAdapter;
@@ -96,7 +96,7 @@ import timber.log.Timber;
 @SuppressLint("ValidFragment")
 public class InfoActivityDecisionPreviewFragment extends Fragment implements SelectTemplateDialogFragment.Callback{
 
-  @Inject Settings settings;
+  @Inject ISettings settings;
   @Inject Mappers mappers;
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject OperationManager operationManager;

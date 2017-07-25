@@ -1,15 +1,19 @@
 package sapotero.rxtest.db.mapper;
 
-import sapotero.rxtest.db.mapper.utils.Mappers;
+import javax.inject.Inject;
+
+import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RColleagueEntity;
 import sapotero.rxtest.retrofit.models.Colleague;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 
 // Maps between Colleague and RColleagueEntity
  public class ColleagueMapper extends AbstractMapper<Colleague, RColleagueEntity> {
 
-  public ColleagueMapper(Settings settings, Mappers mappers) {
-    super(settings, mappers);
+  @Inject ISettings settings;
+
+  public ColleagueMapper() {
+    EsdApplication.getDataComponent().inject(this);
   }
 
   @Override

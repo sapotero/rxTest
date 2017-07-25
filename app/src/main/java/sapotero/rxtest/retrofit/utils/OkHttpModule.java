@@ -16,13 +16,13 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 import sapotero.rxtest.application.scopes.NetworkScope;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 
 @Module
 public class OkHttpModule {
   @Provides
   @NetworkScope
-  OkHttpClient provideOkHttpModule(Settings settings) {
+  OkHttpClient provideOkHttpModule(ISettings settings) {
     return  new OkHttpClient.Builder()
       .readTimeout(60,    TimeUnit.SECONDS)
       .connectTimeout(60, TimeUnit.SECONDS)

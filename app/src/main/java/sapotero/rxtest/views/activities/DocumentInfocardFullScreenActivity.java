@@ -23,7 +23,7 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import timber.log.Timber;
 
 public class DocumentInfocardFullScreenActivity extends AppCompatActivity {
@@ -32,7 +32,7 @@ public class DocumentInfocardFullScreenActivity extends AppCompatActivity {
   @BindView(R.id.fullscreen_web_infocard) WebView webview;
   @BindView(R.id.fullscreen_web_infocard_zoomer) SeekBar zoom;
 
-  @Inject Settings settings;
+  @Inject ISettings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   private String TAG = this.getClass().getSimpleName();

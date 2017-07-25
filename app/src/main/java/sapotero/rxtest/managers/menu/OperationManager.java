@@ -6,12 +6,12 @@ import sapotero.rxtest.managers.menu.invokers.OperationExecutor;
 import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.managers.menu.utils.OperationHistory;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import timber.log.Timber;
 
 public class OperationManager implements CommandFactory.Callback {
 
-  private Settings settings;
+  private ISettings settings;
 
   private final String TAG = this.getClass().getSimpleName();
 
@@ -30,7 +30,7 @@ public class OperationManager implements CommandFactory.Callback {
     this.callback = callback;
   }
 
-  public OperationManager(Settings settings) {
+  public OperationManager(ISettings settings) {
     this.settings = settings;
 
     histrory          = new OperationHistory();

@@ -31,7 +31,7 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.activities.DocumentInfocardFullScreenActivity;
 import sapotero.rxtest.views.adapters.utils.OnSwipeTouchListener;
 import timber.log.Timber;
@@ -41,7 +41,7 @@ public class InfoCardWebViewFragment extends Fragment {
   @BindView(R.id.web_infocard) WebView infocard;
   @BindView(R.id.fragment_info_card_web_wrapper) RelativeLayout wrapper;
 
-  @Inject Settings settings;
+  @Inject ISettings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   private OnFragmentInteractionListener mListener;
