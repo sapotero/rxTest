@@ -28,11 +28,11 @@ public class StepMapperTest {
 
   @Before
   public void init() {
-    generateStep();
+    dummyStep = generateStep();
   }
 
-  private void generateStep() {
-    dummyStep = new Step();
+  public static Step generateStep() {
+    Step dummyStep = new Step();
 
     dummyStep.setTitle( "kjsdhfkds823kjsd" );
     dummyStep.setNumber( "56" );
@@ -68,6 +68,8 @@ public class StepMapperTest {
     anotherApproval.setComment( "SD23iuyi hfjew8y23rkjhf ewfkjhewf78hfdks fdfgfd" );
     anotherApprovals.add(anotherApproval);
     dummyStep.setAnotherApprovals(anotherApprovals);
+
+    return dummyStep;
   }
 
   @Test
@@ -75,28 +77,30 @@ public class StepMapperTest {
     mapper = new StepMapper();
     entity = mapper.toEntity(dummyStep);
 
-    assertNotNull( entity );
-    assertEquals( 0, entity.getId() );
-    assertEquals( dummyStep.getTitle(), entity.getTitle() );
-    assertEquals( dummyStep.getNumber(), entity.getNumber() );
+    verifyStep( dummyStep, entity, mapper );
+  }
 
-    List<Person> expectedPeople = dummyStep.getPeople();
-    List<Person> actualPeople = mapper.jsonToList( entity.getPeople(), StepMapper.FieldType.PEOPLE );
+  public static void verifyStep( Step expected, RStepEntity actual, StepMapper mapper ) {
+    assertNotNull( actual );
+    assertEquals( 0, actual.getId() );
+    assertEquals( expected.getTitle(), actual.getTitle() );
+    assertEquals( expected.getNumber(), actual.getNumber() );
+
+    List<Person> expectedPeople = expected.getPeople();
+    List<Person> actualPeople = mapper.jsonToList( actual.getPeople(), StepMapper.FieldType.PEOPLE );
     verifyPeople( expectedPeople, actualPeople );
 
-    List<Card> expectedCards = dummyStep.getCards();
-    List<Card> actualCards = mapper.jsonToList( entity.getCards(), StepMapper.FieldType.CARDS );
+    List<Card> expectedCards = expected.getCards();
+    List<Card> actualCards = mapper.jsonToList( actual.getCards(), StepMapper.FieldType.CARDS );
     verifyCards( expectedCards, actualCards );
 
-    List<AnotherApproval> expectedAnotherApprovals = dummyStep.getAnotherApprovals();
-    List<AnotherApproval> actualAnotherApprovals = mapper.jsonToList( entity.getAnother_approvals(), StepMapper.FieldType.ANOTHER_APPROVALS );
+    List<AnotherApproval> expectedAnotherApprovals = expected.getAnotherApprovals();
+    List<AnotherApproval> actualAnotherApprovals = mapper.jsonToList( actual.getAnother_approvals(), StepMapper.FieldType.ANOTHER_APPROVALS );
     verifyAnotherApprovals( expectedAnotherApprovals, actualAnotherApprovals );
   }
 
-  private void verifyPeople(List<Person> expectedPeople, List<Person> actualPeople) {
-    if ( actualPeople == null ) {
-      return;
-    }
+  private static void verifyPeople(List<Person> expectedPeople, List<Person> actualPeople) {
+    assertNotNull( actualPeople );
 
     for ( int i = 0; i < actualPeople.size(); i++ ) {
       assertEquals( expectedPeople.get(i).getOfficialId(), actualPeople.get(i).getOfficialId() );
@@ -105,9 +109,9 @@ public class StepMapperTest {
 
       List<Action> expectedActions = expectedPeople.get(i).getActions();
       List<Action> actualActions = actualPeople.get(i).getActions();
-      if ( actualActions == null ) {
-        continue;
-      }
+
+      assertNotNull( actualActions );
+
       for ( int j = 0; j < actualActions.size(); j++ ) {
         assertEquals( expectedActions.get(j).getDate(), actualActions.get(j).getDate() );
         assertEquals( expectedActions.get(j).getStatus(), actualActions.get(j).getStatus() );
@@ -116,22 +120,22 @@ public class StepMapperTest {
     }
   }
 
-  private void verifyCards(List<Card> expectedCards, List<Card> actualCards) {
-    if ( actualCards != null ) {
-      for ( int i = 0; i < actualCards.size(); i++ ) {
-        assertEquals( expectedCards.get(i).getUid(), actualCards.get(i).getUid() );
-        assertEquals( expectedCards.get(i).getOriginalApproval(), actualCards.get(i).getOriginalApproval() );
-        assertEquals( expectedCards.get(i).getFullTextApproval(), actualCards.get(i).getFullTextApproval() );
-      }
+  private static void verifyCards(List<Card> expectedCards, List<Card> actualCards) {
+    assertNotNull( actualCards );
+
+    for ( int i = 0; i < actualCards.size(); i++ ) {
+      assertEquals( expectedCards.get(i).getUid(), actualCards.get(i).getUid() );
+      assertEquals( expectedCards.get(i).getOriginalApproval(), actualCards.get(i).getOriginalApproval() );
+      assertEquals( expectedCards.get(i).getFullTextApproval(), actualCards.get(i).getFullTextApproval() );
     }
   }
 
-  private void verifyAnotherApprovals(List<AnotherApproval> expectedAnotherApprovals, List<AnotherApproval> actualAnotherApprovals) {
-    if ( actualAnotherApprovals != null ) {
-      for ( int i = 0; i < actualAnotherApprovals.size(); i++ ) {
-        assertEquals( expectedAnotherApprovals.get(i).getOfficialName(), actualAnotherApprovals.get(i).getOfficialName() );
-        assertEquals( expectedAnotherApprovals.get(i).getComment(), actualAnotherApprovals.get(i).getComment() );
-      }
+  private static void verifyAnotherApprovals(List<AnotherApproval> expectedAnotherApprovals, List<AnotherApproval> actualAnotherApprovals) {
+    assertNotNull( actualAnotherApprovals );
+
+    for ( int i = 0; i < actualAnotherApprovals.size(); i++ ) {
+      assertEquals( expectedAnotherApprovals.get(i).getOfficialName(), actualAnotherApprovals.get(i).getOfficialName() );
+      assertEquals( expectedAnotherApprovals.get(i).getComment(), actualAnotherApprovals.get(i).getComment() );
     }
   }
 
@@ -141,20 +145,24 @@ public class StepMapperTest {
     entity = mapper.toEntity(dummyStep);
     model = mapper.toModel(entity);
 
-    assertNotNull( model );
-    assertEquals( dummyStep.getTitle(), model.getTitle() );
-    assertEquals( dummyStep.getNumber(), model.getNumber() );
+    verifyStep( dummyStep, model );
+  }
 
-    List<Person> expectedPeople = dummyStep.getPeople();
-    List<Person> actualPeople = model.getPeople();
+  public static void verifyStep(Step expected, Step actual) {
+    assertNotNull( actual );
+    assertEquals( expected.getTitle(), actual.getTitle() );
+    assertEquals( expected.getNumber(), actual.getNumber() );
+
+    List<Person> expectedPeople = expected.getPeople();
+    List<Person> actualPeople = actual.getPeople();
     verifyPeople( expectedPeople, actualPeople );
 
-    List<Card> expectedCards = dummyStep.getCards();
-    List<Card> actualCards = model.getCards();
+    List<Card> expectedCards = expected.getCards();
+    List<Card> actualCards = actual.getCards();
     verifyCards( expectedCards, actualCards );
 
-    List<AnotherApproval> expectedAnotherApprovals = dummyStep.getAnotherApprovals();
-    List<AnotherApproval> actualAnotherApprovals = model.getAnotherApprovals();
+    List<AnotherApproval> expectedAnotherApprovals = expected.getAnotherApprovals();
+    List<AnotherApproval> actualAnotherApprovals = actual.getAnotherApprovals();
     verifyAnotherApprovals( expectedAnotherApprovals, actualAnotherApprovals );
   }
 

@@ -99,9 +99,11 @@ public class DecisionMapperTest {
     assertEquals( dummyDecision.getLetterheadFontSize(), entity.getLetterheadFontSize() );
     assertEquals( dummyDecision.getPerformersFontSize(), entity.getPerformerFontSize() );
 
+    int index = 0;
     for (RBlock _block : entity.getBlocks() ) {
       RBlockEntity blockEntity = (RBlockEntity) _block;
-      BlockMapperTest.verifyBlock( dummyDecision.getBlocks().get(0), blockEntity );
+      BlockMapperTest.verifyBlock( dummyDecision.getBlocks().get(index), blockEntity );
+      index++;
     }
   }
 
@@ -133,8 +135,10 @@ public class DecisionMapperTest {
     assertEquals( dummyDecision.getLetterheadFontSize(), model.getLetterheadFontSize() );
     assertEquals( dummyDecision.getPerformersFontSize(), model.getPerformersFontSize() );
 
+    int index = 0;
     for (Block block : model.getBlocks() ) {
-      BlockMapperTest.verifyBlock( dummyDecision.getBlocks().get(0), block );
+      BlockMapperTest.verifyBlock( dummyDecision.getBlocks().get(index), block );
+      index++;
     }
   }
 
@@ -183,8 +187,10 @@ public class DecisionMapperTest {
     assertEquals( "12", formattedModel.getLetterheadFontSize() );
     assertEquals( null, formattedModel.getPerformersFontSize() );
 
+    int index = 0;
     for (Block block : formattedModel.getBlocks() ) {
-      BlockMapperTest.verifyFormattedBlock( dummyDecision.getBlocks().get(0), block );
+      BlockMapperTest.verifyFormattedBlock( dummyDecision.getBlocks().get(index), block );
+      index++;
     }
   }
 }

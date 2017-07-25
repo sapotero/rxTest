@@ -82,9 +82,11 @@ public class BlockMapperTest {
     assertEquals( expected.getToCopy(), actual.isToCopy() );
     assertEquals( expected.getToFamiliarization(), actual.isToFamiliarization() );
 
+    int index = 0;
     for (RPerformer _performer : actual.getPerformers() ) {
       RPerformerEntity performerEntity = (RPerformerEntity) _performer;
-      PerformerMapperTest.verifyPerformer( expected.getPerformers().get(0), performerEntity );
+      PerformerMapperTest.verifyPerformer( expected.getPerformers().get(index), performerEntity );
+      index++;
     }
   }
 
@@ -111,8 +113,10 @@ public class BlockMapperTest {
     assertEquals( expected.getToCopy(), actual.getToCopy() );
     assertEquals( expected.getToFamiliarization(), actual.getToFamiliarization() );
 
+    int index = 0;
     for (Performer performer : actual.getPerformers() ) {
-      PerformerMapperTest.verifyPerformer( expected.getPerformers().get(0), performer );
+      PerformerMapperTest.verifyPerformer( expected.getPerformers().get(index), performer );
+      index++;
     }
   }
 
@@ -129,8 +133,10 @@ public class BlockMapperTest {
     assertEquals( null, actual.getToCopy() );
     assertEquals( null, actual.getToFamiliarization() );
 
+    int index = 0;
     for (Performer performer : actual.getPerformers() ) {
-      PerformerMapperTest.verifyFormattedPerformer( expected.getPerformers().get(0), performer );
+      PerformerMapperTest.verifyFormattedPerformer( expected.getPerformers().get(index), performer );
+      index++;
     }
   }
 

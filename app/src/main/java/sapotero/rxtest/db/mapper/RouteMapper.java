@@ -1,5 +1,8 @@
 package sapotero.rxtest.db.mapper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RRouteEntity;
 import sapotero.rxtest.db.requery.models.RStep;
@@ -39,11 +42,15 @@ public class RouteMapper extends AbstractMapper<Route, RRouteEntity> {
     model.setTitle( entity.getText() );
     StepMapper stepMapper = mappers.getStepMapper();
 
+    List<Step> steps = new ArrayList<>();
+
     for (RStep step : entity.getSteps() ) {
       RStepEntity stepEntity = (RStepEntity) step;
       Step stepModel = stepMapper.toModel( stepEntity );
-      model.getSteps().add( stepModel );
+      steps.add( stepModel );
     }
+
+    model.setSteps(steps);
 
     return model;
   }
