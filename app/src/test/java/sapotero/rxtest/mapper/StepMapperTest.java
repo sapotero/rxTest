@@ -69,58 +69,37 @@ public class StepMapperTest {
   }
 
   @Test
-  public void toEntityToModel() {
+  public void toEntity() {
     mapper = new StepMapper();
     entity = mapper.toEntity(dummyStep);
-    model = mapper.toModel(entity);
 
     assertNotNull( entity );
     assertEquals( 0, entity.getId() );
-    assertEquals( dummyStep.getTitle(), model.getTitle() );
-    assertEquals( dummyStep.getNumber(), model.getNumber() );
+    assertEquals( dummyStep.getTitle(), entity.getTitle() );
+    assertEquals( dummyStep.getNumber(), entity.getNumber() );
 
-//    List<Person> expectedPeople = dummyStep.getPeople();
-//    List<Person> actualPeople = model.getPeople();
-//    if ( actualPeople != null ) {
-//      for ( int i = 0; i < actualPeople.size(); i++ ) {
-//        assertEquals( expectedPeople.get(i).getOfficialId(), actualPeople.get(i).getOfficialId() );
-//        assertEquals( expectedPeople.get(i).getOfficialName(), actualPeople.get(i).getOfficialName() );
-//        assertEquals( expectedPeople.get(i).getSignPng(), actualPeople.get(i).getSignPng() );
-//
-//        List<Action> expectedActions = expectedPeople.get(i).getActions();
-//        List<Action> actualActions = actualPeople.get(i).getActions();
-//        if ( actualActions != null) {
-//          for ( int j = 0; j < actualActions.size(); j++ ) {
-//            assertEquals( expectedActions.get(j).getDate(), actualActions.get(j).getDate() );
-//            assertEquals( expectedActions.get(j).getStatus(), actualActions.get(j).getStatus() );
-//            assertEquals( expectedActions.get(j).getComment(), actualActions.get(j).getComment() );
-//          }
-//        }
-//      }
-//    }
+    List<Person> expectedPeople = dummyStep.getPeople();
+    List<Person> actualPeople = mapper.jsonToList( entity.getPeople(), StepMapper.FieldType.PEOPLE );
+    if ( actualPeople != null ) {
+      for ( int i = 0; i < actualPeople.size(); i++ ) {
+        assertEquals( expectedPeople.get(i).getOfficialId(), actualPeople.get(i).getOfficialId() );
+        assertEquals( expectedPeople.get(i).getOfficialName(), actualPeople.get(i).getOfficialName() );
+        assertEquals( expectedPeople.get(i).getSignPng(), actualPeople.get(i).getSignPng() );
 
+        List<Action> expectedActions = expectedPeople.get(i).getActions();
+        List<Action> actualActions = actualPeople.get(i).getActions();
+        if ( actualActions != null) {
+          for ( int j = 0; j < actualActions.size(); j++ ) {
+            assertEquals( expectedActions.get(j).getDate(), actualActions.get(j).getDate() );
+            assertEquals( expectedActions.get(j).getStatus(), actualActions.get(j).getStatus() );
+            assertEquals( expectedActions.get(j).getComment(), actualActions.get(j).getComment() );
+          }
+        }
+      }
+    }
 
-//    List<Person> expectedPeople = dummyStep.getPeople();
-//    List<Person> actualPeople = mapper.jsonToList( entity.getPeople() );
-//    if ( actualPeople != null ) {
-//      for ( int i = 0; i < actualPeople.size(); i++ ) {
-//        assertEquals( expectedPeople.get(i).getOfficialId(), actualPeople.get(i).getOfficialId() );
-//        assertEquals( expectedPeople.get(i).getOfficialName(), actualPeople.get(i).getOfficialName() );
-//        assertEquals( expectedPeople.get(i).getSignPng(), actualPeople.get(i).getSignPng() );
-//
-//        List<Action> expectedActions = expectedPeople.get(i).getActions();
-//        List<Action> actualActions = actualPeople.get(i).getActions();
-//        if ( actualActions != null) {
-//          for ( int j = 0; j < actualActions.size(); j++ ) {
-//            assertEquals( expectedActions.get(j).getDate(), actualActions.get(j).getDate() );
-//            assertEquals( expectedActions.get(j).getStatus(), actualActions.get(j).getStatus() );
-//            assertEquals( expectedActions.get(j).getComment(), actualActions.get(j).getComment() );
-//          }
-//        }
-//      }
-//    }
+    // TODO: verify cards
 
+    // TODO: verify another approvals
   }
-
-
 }

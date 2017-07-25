@@ -9,6 +9,9 @@ import java.util.List;
 import java.lang.reflect.Type;
 
 import sapotero.rxtest.db.requery.models.RStepEntity;
+import sapotero.rxtest.retrofit.models.document.AnotherApproval;
+import sapotero.rxtest.retrofit.models.document.Card;
+import sapotero.rxtest.retrofit.models.document.Person;
 import sapotero.rxtest.retrofit.models.document.Step;
 
 // Maps between Step and RStepEntity
@@ -39,9 +42,9 @@ public class StepMapper extends AbstractMapper<Step, RStepEntity> {
 
     model.setTitle( entity.getTitle() );
     model.setNumber( entity.getNumber() );
-    set( model::setPeople, entity.getPeople() );
-    set( model::setCards, entity.getCards() );
-    set( model::setAnotherApprovals, entity.getAnother_approvals() );
+    set( model::setPeople, entity.getPeople(), FieldType.PEOPLE );
+    set( model::setCards, entity.getCards(), FieldType.CARDS );
+    set( model::setAnotherApprovals, entity.getAnother_approvals(), FieldType.ANOTHER_APPROVALS );
 
     return model;
   }
@@ -50,8 +53,22 @@ public class StepMapper extends AbstractMapper<Step, RStepEntity> {
     return gson.toJson( list );
   }
 
-  public <T> ArrayList<T> jsonToList(String jsonString) {
-    Type listType = new TypeToken<ArrayList<T>>(){}.getType();
+  public <T> ArrayList<T> jsonToList(String jsonString, FieldType fieldType) {
+    Type listType;
+    switch ( fieldType ) {
+      case PEOPLE:
+        listType = new TypeToken<ArrayList<Person>>(){}.getType();
+        break;
+      case CARDS:
+        listType = new TypeToken<ArrayList<Card>>(){}.getType();
+        break;
+      case ANOTHER_APPROVALS:
+        listType = new TypeToken<ArrayList<AnotherApproval>>(){}.getType();
+        break;
+      default:
+        listType = new TypeToken<ArrayList<Person>>(){}.getType();
+        break;
+    }
     return gson.fromJson(jsonString, listType);
   }
 
@@ -61,9 +78,15 @@ public class StepMapper extends AbstractMapper<Step, RStepEntity> {
     }
   }
 
-  private <T> void set(ListFieldSetter<T> listFieldSetter, String jsonString) {
+  private <T> void set(ListFieldSetter<T> listFieldSetter, String jsonString, FieldType fieldType) {
     if ( notEmpty( jsonString ) ) {
-      listFieldSetter.setField( jsonToList( jsonString ) );
+      listFieldSetter.setField( jsonToList( jsonString, fieldType ) );
     }
+  }
+
+  public enum FieldType {
+    PEOPLE,
+    CARDS,
+    ANOTHER_APPROVALS
   }
 }
