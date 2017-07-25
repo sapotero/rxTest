@@ -21,6 +21,7 @@ import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RPrimaryConsiderationEntity;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.utils.ISettings;
+import sapotero.rxtest.utils.TestSettings;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 
 import static org.junit.Assert.assertEquals;
@@ -37,7 +38,6 @@ public class PrimaryConsiderationMapperTest {
   private PrimaryConsiderationMapper mapper;
   private PerformerMapper performerMapper;
   private Oshs dummyOshs;
-  private String dummyLogin;
   private Integer dummySortIndex;
   private RPrimaryConsiderationEntity entity;
   private Oshs model;
@@ -57,22 +57,16 @@ public class PrimaryConsiderationMapperTest {
     performerMapper = new PerformerMapper();
 
     dummyOshs = generateOshs();
-    generateDummyLogin();
     generateDummySortIndex();
 
     PowerMockito.mockStatic(EsdApplication.class);
     PowerMockito.when(EsdApplication.getDataComponent()).thenReturn(testDataComponent);
 
-    Mockito.when(settings.getLogin()).thenReturn(dummyLogin);
     Mockito.when(mappers.getPerformerMapper()).thenReturn(performerMapper);
   }
 
   private void generateDummySortIndex() {
     dummySortIndex = 123;
-  }
-
-  private void generateDummyLogin() {
-    dummyLogin = "dummyLogin";
   }
 
   public static Oshs generateOshs() {
@@ -114,7 +108,7 @@ public class PrimaryConsiderationMapperTest {
     assertEquals( dummyOshs.getName(), entity.getName() );
     assertEquals( dummyOshs.getIsGroup(), entity.isIsGroup() );
     assertEquals( dummyOshs.getIsOrganization(), entity.isIsOrganization() );
-    assertEquals( dummyLogin, entity.getUser() );
+    assertEquals( ((TestSettings) settings).login, entity.getUser() );
   }
 
   @Test
