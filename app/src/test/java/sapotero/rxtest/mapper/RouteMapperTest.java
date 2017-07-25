@@ -39,19 +39,21 @@ public class RouteMapperTest {
     MockitoAnnotations.initMocks(this);
     stepMapper = new StepMapper();
 
-    generateRoute();
+    dummyRoute = generateRoute();
 
     Mockito.when(mappers.getStepMapper()).thenReturn(stepMapper);
   }
 
-  private void generateRoute() {
-    dummyRoute = new Route();
+  public static Route generateRoute() {
+    Route dummyRoute = new Route();
     dummyRoute.setTitle( "kjdshf8923yjhef2ewhfkihf sdkjfhds fkdsh" );
 
     List<Step> steps = new ArrayList<>();
     Step dummyStep = StepMapperTest.generateStep();
     steps.add(dummyStep);
     dummyRoute.setSteps(steps);
+
+    return dummyRoute;
   }
 
   @Test

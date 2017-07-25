@@ -40,14 +40,14 @@ public class DecisionMapperTest {
     performerMapper = new PerformerMapper();
     blockMapper = new BlockMapper(mappers);
 
-    generateDecision();
+    dummyDecision = generateDecision();
 
     Mockito.when(mappers.getPerformerMapper()).thenReturn(performerMapper);
     Mockito.when(mappers.getBlockMapper()).thenReturn(blockMapper);
   }
 
-  private void generateDecision() {
-    dummyDecision = new Decision();
+  public static Decision generateDecision() {
+    Decision dummyDecision = new Decision();
     dummyDecision.setId( "G546olierufih8EDE4erD34fdg" );
     dummyDecision.setLetterhead( "Бланк резолюции" );
     dummyDecision.setApproved( false );
@@ -67,7 +67,9 @@ public class DecisionMapperTest {
     dummyDecision.setPerformersFontSize( "10" );
 
     Block dummyBlock = BlockMapperTest.generateBlock();
-    this.dummyDecision.getBlocks().add(dummyBlock);
+    dummyDecision.getBlocks().add(dummyBlock);
+
+    return dummyDecision;
   }
 
   @Test

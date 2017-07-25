@@ -125,7 +125,7 @@ public class MemoryStore implements Processable{
     loadFromDB();
   };
 
-  private void loadFromDB() {
+  public void loadFromDB() {
     dataStore
       .select(RDocumentEntity.class)
       .where(RDocumentEntity.FROM_LINKS.eq(false))

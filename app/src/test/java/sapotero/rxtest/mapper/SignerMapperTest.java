@@ -3,10 +3,8 @@ package sapotero.rxtest.mapper;
 import org.junit.Before;
 import org.junit.Test;
 
-import sapotero.rxtest.db.mapper.ActionMapper;
 import sapotero.rxtest.db.mapper.SignerMapper;
 import sapotero.rxtest.db.requery.models.RSignerEntity;
-import sapotero.rxtest.db.requery.models.actions.RActionEntity;
 import sapotero.rxtest.retrofit.models.document.Signer;
 
 import static org.junit.Assert.assertEquals;
@@ -23,15 +21,16 @@ public class SignerMapperTest {
 
   @Before
   public void init() {
-    generateSigner();
+    dummySigner = generateSigner();
   }
 
-  private void generateSigner() {
-    dummySigner = new Signer();
+  public static Signer generateSigner() {
+    Signer dummySigner = new Signer();
     dummySigner.setId( "RF34frkfjV9sjhd34rgfd" );
     dummySigner.setName( "Иванов И.И." );
     dummySigner.setOrganisation( "ОДиР ГУ МВД России по Самарской области" );
     dummySigner.setType( "mvd_person" );
+    return dummySigner;
   }
 
   @Test

@@ -21,10 +21,10 @@ public class ImageMapperTest {
 
   @Before
   public void init() {
-    generateImage();
+    dummyImage = generateImage();
   }
 
-  private void generateImage(){
+  public static Image generateImage() {
     String title       = "1538 от 21.04.2017";
     String md5         = "0288415775b0295cf5e475221a04989c6088ece4eb1b13010f27fff31ca0c56a64";
     String path        = "/documents/0288415775b0295cf5e475221a04989c6088ece4eb1b13010f27fff31ca0c56a64?show_operations=true";
@@ -34,7 +34,7 @@ public class ImageMapperTest {
     Integer size       = 654658;
     Boolean signed     = Math.random() > 0.5;
 
-    dummyImage = new Image();
+    Image dummyImage = new Image();
     dummyImage.setTitle(title);
     dummyImage.setNumber(number);
     dummyImage.setMd5(md5);
@@ -43,6 +43,8 @@ public class ImageMapperTest {
     dummyImage.setContentType(contentType);
     dummyImage.setSigned(signed);
     dummyImage.setCreatedAt(createdAt);
+
+    return dummyImage;
   }
 
   @Test

@@ -22,17 +22,18 @@ public class ActionMapperTest {
 
   @Before
   public void init() {
-    generateAction();
+    dummyAction = generateAction();
   }
 
-  private void generateAction() {
-    dummyAction = new DocumentInfoAction();
+  public static DocumentInfoAction generateAction() {
+    DocumentInfoAction dummyAction = new DocumentInfoAction();
     dummyAction.setOfficialId( "J78hsdkjfh8WE23ewfs" );
     dummyAction.setAddressedToId( "kjds7jhWEKLdf34DFSGFDGdf" );
     dummyAction.setAction( "primary_consideration" );
     dummyAction.setActionDescription( "Отправлен на первичное рассмотрение" );
     dummyAction.setUpdatedAt( "2017-07-24" );
     dummyAction.setToS( "kjshfdkjshf" );
+    return dummyAction;
   }
 
   @Test

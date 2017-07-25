@@ -22,17 +22,18 @@ public class ExemplarMapperTest {
 
   @Before
   public void init() {
-    generateExemplar();
+    dummyExemplar = generateExemplar();
   }
 
-  private void generateExemplar() {
-    dummyExemplar = new Exemplar();
+  public static Exemplar generateExemplar() {
+    Exemplar dummyExemplar = new Exemplar();
     dummyExemplar.setNumber( 3 );
     dummyExemplar.setIsOriginal( true );
     dummyExemplar.setStatusCode( "sent_to_the_report" );
     dummyExemplar.setAddressedToId( "58f88dfc776b000026000001" );
     dummyExemplar.setAddressedToName( "Сотрудник_а2 A.T." );
     dummyExemplar.setDate( "2017-07-24" );
+    return dummyExemplar;
   }
 
   @Test

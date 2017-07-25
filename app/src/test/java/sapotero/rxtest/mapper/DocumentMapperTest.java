@@ -10,6 +10,9 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.inject.Inject;
 
 import sapotero.rxtest.application.EsdApplication;
@@ -27,7 +30,14 @@ import sapotero.rxtest.db.mapper.RouteMapper;
 import sapotero.rxtest.db.mapper.StepMapper;
 import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.retrofit.models.document.ControlLabel;
+import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
+import sapotero.rxtest.retrofit.models.document.DocumentInfoAction;
+import sapotero.rxtest.retrofit.models.document.Exemplar;
+import sapotero.rxtest.retrofit.models.document.Image;
+import sapotero.rxtest.retrofit.models.document.Route;
+import sapotero.rxtest.retrofit.models.document.Signer;
 import sapotero.rxtest.utils.ISettings;
 
 
@@ -88,7 +98,44 @@ public class DocumentMapperTest {
   }
 
   private void generateDocument() {
+    dummyDoc = new DocumentInfo();
+    dummyDoc.setUid( "02153f437109fe79ad68cdc63f1ed0e57cca7bcbf88d2c1c53a08ac27b67c68871" );
+    dummyDoc.setMd5( "692fe5abec8bec4cbc29f5475d126a67" );
+    dummyDoc.setSortKey( null );
+    dummyDoc.setTitle( "Входящий документ от 30.06.2017" );
+    dummyDoc.setRegistrationNumber( "1323" );
+    dummyDoc.setRegistrationDate( "30.06.2017" );
+    dummyDoc.setUrgency( "Весьма срочно" );
+    dummyDoc.setShortDescription( "sdlkfoi rkji lkjewr 2" );
+    dummyDoc.setComment( "S8 sdkjhf8 sjdk |Sd k3jhrkjhf sdkjfh" );
+    dummyDoc.setExternalDocumentNumber( "1155" );
+    dummyDoc.setReceiptDate( "30.06.2017" );
+    dummyDoc.setViewed( true );
 
+    Signer dummySigner = SignerMapperTest.generateSigner();
+    dummyDoc.setSigner(dummySigner);
+
+    Decision dummyDecision = DecisionMapperTest.generateDecision();
+    dummyDoc.getDecisions().add(dummyDecision);
+
+    Route dummyRoute = RouteMapperTest.generateRoute();
+    dummyDoc.setRoute(dummyRoute);
+
+    Exemplar dummyExemplar = ExemplarMapperTest.generateExemplar();
+    dummyDoc.getExemplars().add(dummyExemplar);
+
+    Image dummyImage = ImageMapperTest.generateImage();
+    dummyDoc.getImages().add(dummyImage);
+
+    ControlLabel dummyControlLabel = ControlLabelMapperTest.generateControlLabel();
+    dummyDoc.getControlLabels().add(dummyControlLabel);
+
+    DocumentInfoAction dummyAction = ActionMapperTest.generateAction();
+    dummyDoc.getActions().add(dummyAction);
+
+    // TODO: add links
+
+    // TODO: add infocard
   }
 
   @Test

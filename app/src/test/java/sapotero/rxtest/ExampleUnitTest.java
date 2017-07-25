@@ -24,8 +24,8 @@ import sapotero.rxtest.retrofit.models.AuthSignToken;
 import sapotero.rxtest.retrofit.models.v2.v2UserOshs;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.matchers.JUnitMatchers.hasItems;
 import static org.mockito.Mockito.verify;
 
@@ -51,7 +51,7 @@ public class ExampleUnitTest {
 
   @Test
   public void addition_isNotCorrect() throws Exception {
-    assertNotEquals(5, 2 + 2);
+    assertTrue( 5 != 2 + 2 );
   }
 
   @Test
@@ -139,7 +139,7 @@ public class ExampleUnitTest {
     // получили 1 токен
     assertEquals(1, tokens.size());
     assertEquals(tokens.get(0).getLogin(), null);
-    assertNotEquals(tokens.get(0).getAuthToken(), null);
+    assertTrue(tokens.get(0).getAuthToken() != null);
 
     real_token = tokens.get(0).getAuthToken();
 
