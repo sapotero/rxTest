@@ -10,6 +10,7 @@ import javax.inject.Inject;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.Settings;
 import timber.log.Timber;
 
@@ -17,7 +18,7 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
   private CompositeSubscription subscriptions;
 
   @Inject Context context;
-  @Inject Settings settings;
+  @Inject ISettings settings;
 
   @Override
   public void onCreatePreferences(Bundle bundle, String s) {

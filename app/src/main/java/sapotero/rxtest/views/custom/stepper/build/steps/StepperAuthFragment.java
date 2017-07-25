@@ -31,7 +31,7 @@ import sapotero.rxtest.events.stepper.auth.StepperDcCheckSuccesEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckFailEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckSuccessEvent;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.custom.stepper.BlockingStep;
 import sapotero.rxtest.views.custom.stepper.StepperLayout;
 import sapotero.rxtest.views.custom.stepper.VerificationError;
@@ -40,7 +40,7 @@ import timber.log.Timber;
 
 public class StepperAuthFragment extends Fragment implements BlockingStep {
 
-  @Inject Settings settings;
+  @Inject ISettings settings;
   @Inject JobManager jobManager;
 
   final String TAG = this.getClass().getSimpleName();

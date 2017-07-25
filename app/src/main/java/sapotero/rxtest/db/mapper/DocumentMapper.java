@@ -36,13 +36,13 @@ import sapotero.rxtest.retrofit.models.document.Exemplar;
 import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.retrofit.models.document.Route;
 import sapotero.rxtest.retrofit.models.document.Signer;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import timber.log.Timber;
 
 // Maps between DocumentInfo and RDocumentEntity
 public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity> {
 
-  @Inject Settings settings;
+  @Inject ISettings settings;
 
   private Mappers mappers;
 

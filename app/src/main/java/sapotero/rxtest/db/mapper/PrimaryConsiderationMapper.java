@@ -6,14 +6,14 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RPrimaryConsiderationEntity;
 import sapotero.rxtest.retrofit.models.Oshs;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 
 // Maps between RPrimaryConsideration, Oshs and PrimaryConsiderationPeople
 // (model for RPrimaryConsideration is Oshs)
 public class PrimaryConsiderationMapper extends AbstractMapper<Oshs, RPrimaryConsiderationEntity> {
 
-  @Inject Settings settings;
+  @Inject ISettings settings;
 
   private Mappers mappers;
 

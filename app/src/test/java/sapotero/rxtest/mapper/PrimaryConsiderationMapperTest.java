@@ -19,9 +19,8 @@ import sapotero.rxtest.db.mapper.PerformerMapper;
 import sapotero.rxtest.db.mapper.PrimaryConsiderationMapper;
 import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RPrimaryConsiderationEntity;
-import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.retrofit.models.Oshs;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 
 import static org.junit.Assert.assertEquals;
@@ -46,7 +45,7 @@ public class PrimaryConsiderationMapperTest {
 
   @Mock Mappers mappers;
 
-  @Inject Settings settings;
+  @Inject ISettings settings;
 
   @Before
   public void init() {

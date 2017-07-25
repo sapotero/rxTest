@@ -10,7 +10,7 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.retrofit.Api.AuthService;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import timber.log.Timber;
 
 // Checks network connection by getting current user info
@@ -19,7 +19,7 @@ public class CheckNetworkTask implements Runnable {
   final String TAG = CheckNetworkTask.class.getSimpleName();
 
   @Inject Context context;
-  @Inject Settings settings;
+  @Inject ISettings settings;
   @Inject OkHttpClient okHttpClient;
 
   public CheckNetworkTask() {

@@ -63,7 +63,7 @@ import sapotero.rxtest.events.utils.RecalculateMenuEvent;
 import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
 import sapotero.rxtest.managers.DataLoaderManager;
 import sapotero.rxtest.services.MainService;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
@@ -82,7 +82,7 @@ import timber.log.Timber;
 public class MainActivity extends AppCompatActivity implements MenuBuilder.Callback, SearchView.OnVisibilityChangeListener {
 
   @Inject JobManager jobManager;
-  @Inject Settings settings;
+  @Inject ISettings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject QueueManager queue;
   @Inject MemoryStore store;

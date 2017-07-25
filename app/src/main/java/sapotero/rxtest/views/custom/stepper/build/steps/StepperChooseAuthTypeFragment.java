@@ -20,7 +20,7 @@ import javax.inject.Inject;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.events.stepper.shared.StepperNextStepEvent;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.activities.SettingsActivity;
 import sapotero.rxtest.views.custom.stepper.Step;
 import sapotero.rxtest.views.custom.stepper.VerificationError;
@@ -28,7 +28,7 @@ import sapotero.rxtest.views.custom.stepper.util.AuthType;
 import timber.log.Timber;
 
 public class StepperChooseAuthTypeFragment extends Fragment implements Step, View.OnClickListener {
-  @Inject Settings settings;
+  @Inject ISettings settings;
 
   private MaterialDialog dialog;
 

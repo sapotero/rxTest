@@ -42,13 +42,13 @@ import sapotero.rxtest.managers.view.interfaces.DecisionInterface;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.Performer;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.padeg.Declension;
 import timber.log.Timber;
 
 public class DecisionPreviewFragment extends Fragment implements DecisionInterface {
 
-  @Inject Settings settings;
+  @Inject ISettings settings;
   @Inject OperationManager operationManager;
 
   private OnFragmentInteractionListener mListener;

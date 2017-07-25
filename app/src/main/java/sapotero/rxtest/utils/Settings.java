@@ -11,7 +11,7 @@ import java.util.Set;
 import sapotero.rxtest.R;
 import sapotero.rxtest.views.custom.stepper.util.AuthType;
 
-public class Settings {
+public class Settings implements ISettings {
 
   private static final String CURRENT_ACTIVITY_KEY = "current_activity_key";
   private static final String SIGN_WITH_DC_KEY = "SIGN_WITH_DC";
@@ -43,7 +43,7 @@ public class Settings {
   private static final String PROCESSED_LOADED_KEY = "processed.loaded";
   private static final String IMAGE_INDEX_KEY = "image.index";
   private static final String UNAUTHORIZED_KEY = "user.unauthorized";
-  private static final String SHOW_PRIMARY_CONSIDERATION = "show_promary_consideration";
+  private static final String SHOW_PRIMARY_CONSIDERATION = "show_primary_consideration";
   private static final String ORGANIZATION_FILTER_ACTIVE_KEY = "organization.filter.active";
   private static final String ORGANIZATION_FILTER_SELECTION_KEY = "organization.filter.savedselection";
 
@@ -225,26 +225,32 @@ public class Settings {
     organizationFilterSelection    = settings.getStringSet(ORGANIZATION_FILTER_SELECTION_KEY);
   }
 
-  public boolean isShowPrimaryConsideration( ) {
+  @Override
+  public boolean isShowPrimaryConsideration() {
     return getBoolean(showPrimaryConsideration);
   }
 
+  @Override
   public void setShowPrimaryConsideration(boolean value) {
     setBoolean(showPrimaryConsideration, value);
   }
 
-  public boolean isFirstRun( ) {
+  @Override
+  public boolean isFirstRun() {
     return getBoolean(firstRunFlag);
   }
 
+  @Override
   public void setFirstRun(boolean value) {
     setBoolean(firstRunFlag, value);
   }
 
-  public boolean isSignedWithDc( ) {
+  @Override
+  public boolean isSignedWithDc() {
     return getBoolean(signWithDc);
   }
 
+  @Override
   public void setSignedWithDc(boolean value) {
     setBoolean(signWithDc, value);
   }
@@ -273,26 +279,32 @@ public class Settings {
     }
   }
 
+  @Override
   public int getTotalDocCount() {
     return getInteger(totalDocCount);
   }
 
+  @Override
   public void setTotalDocCount(int value) {
     setInteger(totalDocCount, value);
   }
 
+  @Override
   public void addTotalDocCount(int value) {
     setTotalDocCount(getTotalDocCount() + value);
   }
 
+  @Override
   public int getDocProjCount() {
     return getInteger(docProjCount);
   }
 
+  @Override
   public void setDocProjCount(int value) {
     setInteger(docProjCount, value);
   }
 
+  @Override
   public void addDocProjCount(int value) {
     setDocProjCount(getDocProjCount() + value);
   }
@@ -313,15 +325,18 @@ public class Settings {
     }
   }
 
+  @Override
   public String getLogin() {
     return getString(login);
   }
 
 
+  @Override
   public void setLogin(String value) {
     setString(login, value);
   }
 
+  @Override
   public Preference<String> getLoginPreference() {
     return login;
   }
@@ -342,190 +357,237 @@ public class Settings {
     }
   }
 
+  @Override
   public Preference<String> getCurrentActivity() {
     return current_activity;
   }
 
+  @Override
   public void setCurrentActivity(Preference<String> current_activity) {
     this.current_activity = current_activity;
   }
 
+  @Override
   public String getToken() {
     return getString(token);
   }
 
+  @Override
   public void setToken(String value) {
     setString(token, value);
   }
 
+  @Override
   public String getHost() {
     return getString(host);
   }
 
+  @Override
   public void setHost(String value) {
     setString(host, value);
   }
 
+  @Override
   public String getPassword() {
     return getString(password);
   }
 
+  @Override
   public void setPassword(String value) {
     setString(password, value);
   }
 
+  @Override
   public String getPin() {
     return getString(pin);
   }
 
+  @Override
   public void setPin(String value) {
     setString(pin, value);
   }
 
+  @Override
   public String getSign() {
     return getString(sign);
   }
 
+  @Override
   public void setSign(String value) {
     setString(sign, value);
   }
 
+  @Override
   public String getUid() {
     return getString(uid);
   }
 
+  @Override
   public void setUid(String value) {
     setString(uid, value);
   }
 
+  @Override
   public String getStatusCode() {
     return getString(statusCode);
   }
 
+  @Override
   public void setStatusCode(String value) {
     setString(statusCode, value);
   }
 
+  @Override
   public String getCurrentUserId() {
     return getString(currentUserId);
   }
 
+  @Override
   public void setCurrentUserId(String value) {
     setString(currentUserId, value);
   }
 
+  @Override
   public String getCurrentUser() {
     return getString(currentUser);
   }
 
+  @Override
   public void setCurrentUser(String value) {
     setString(currentUser, value);
   }
 
+  @Override
   public String getCurrentUserOrganization() {
     return getString(currentUserOrganization);
   }
 
+  @Override
   public void setCurrentUserOrganization(String value) {
     setString(currentUserOrganization, value);
   }
 
+  @Override
   public String getCurrentUserPosition() {
     return getString(currentUserPosition);
   }
 
+  @Override
   public void setCurrentUserPosition(String value) {
     setString(currentUserPosition, value);
   }
 
+  @Override
   public int getMainMenuPosition() {
     return getInteger(mainMenuPosition);
   }
 
+  @Override
   public void setMainMenuPosition(int value) {
     setInteger(mainMenuPosition, value);
   }
 
+  @Override
   public String getRegNumber() {
     return getString(regNumber);
   }
 
+  @Override
   public void setRegNumber(String value) {
     setString(regNumber, value);
   }
 
+  @Override
   public String getRegDate() {
     return getString(regDate);
   }
 
+  @Override
   public void setRegDate(String value) {
     setString(regDate, value);
   }
 
+  @Override
   public boolean isLoadFromSearch() {
     return getBoolean(loadFromSearch);
   }
 
+  @Override
   public void setLoadFromSearch(boolean value) {
     setBoolean(loadFromSearch, value);
   }
 
+  @Override
   public String getLastSeenUid() {
     return getString(lastSeenUid);
   }
 
+  @Override
   public void setLastSeenUid(String value) {
     setString(lastSeenUid, value);
   }
 
+  @Override
   public boolean isDecisionWithAssignment() {
     return getBoolean(decisionWithAssignment);
   }
 
+  @Override
   public void setDecisionWithAssignment(boolean value) {
     setBoolean(decisionWithAssignment, value);
   }
 
+  @Override
   public int getDecisionActiveId() {
     return getInteger(decisionActiveId);
   }
 
+  @Override
   public void setDecisionActiveId(int value) {
     setInteger(decisionActiveId, value);
   }
 
+  @Override
   public boolean isActionsConfirm() {
     return getBoolean(actionsConfirm);
   }
 
+  @Override
   public Preference<Boolean> getActionsConfirmPreference() {
     return actionsConfirm;
   }
 
+  @Override
   public boolean isControlConfirm() {
     return getBoolean(controlConfirm);
   }
 
+  @Override
   public boolean isShowCommentPost() {
     return getBoolean(showCommentPost);
   }
 
+  @Override
   public void setShowCommentPost(boolean value) {
     setBoolean(showCommentPost, value);
   }
 
+  @Override
   public boolean isShowUrgency() {
     return getBoolean(showUrgency);
   }
 
+  @Override
   public Preference<Boolean> getShowUrgencyPreference() {
     return showUrgency;
   }
 
+  @Override
   public boolean isOnlyUrgent() {
     return getBoolean(onlyUrgent);
   }
 
+  @Override
   public void setOnlyUrgent(boolean value) {
     setBoolean(onlyUrgent, value);
   }
@@ -546,174 +608,217 @@ public class Settings {
     }
   }
 
+  @Override
   public Set<String> getJournals() {
     return getStringSet(journals);
   }
 
+  @Override
   public Preference<Set<String>> getJournalsPreference() {
     return journals;
   }
 
+  @Override
   public Set<String> getYears() {
     return getStringSet(years);
   }
 
+  @Override
   public Preference<Set<String>> getYearsPreference() {
     return years;
   }
 
+  @Override
   public String getPrevDialogComment() {
     return getString(prevDialogComment);
   }
 
+  @Override
   public void setPrevDialogComment(String value) {
     setString(prevDialogComment, value);
   }
 
+  @Override
   public String getStartPage() {
     return getString(startPage);
   }
 
+  @Override
   public String getImageLoadPeriod() {
     return getString(image_load_period);
   }
 
+  @Override
   public String getImageDeletePeriod() {
     return getString(image_delete_period);
   }
 
+  @Override
   public String getStartJournal() {
     return getString(startJournal);
   }
 
+  @Override
   public boolean isShowWithoutProject() {
     return getBoolean(showWithoutProject);
   }
 
+  @Override
   public boolean isHidePrimaryConsideration() {
     return getBoolean(hidePrimaryConsideration);
   }
 
+  @Override
   public boolean isHideButtons() {
     return getBoolean(hideButtons);
   }
 
+  @Override
   public boolean isShowDecisionDateUpdate() {
     return getBoolean(showDecisionDateUpdate);
   }
 
+  @Override
   public boolean isShowDecisionChangeFont() {
     return getBoolean(showDecisionChangeFont);
   }
 
+  @Override
   public boolean isShowOrigin() {
     return getBoolean(showOrigin);
   }
 
+  @Override
   public boolean isShowChangeSigner() {
     return getBoolean(showChangeSigner);
   }
 
+  @Override
   public boolean isShowCreateDecisionPost() {
     return getBoolean(showCreateDecisionPost);
   }
 
+  @Override
   public boolean isShowApproveOnPrimary() {
     return getBoolean(showApproveOnPrimary);
   }
 
+  @Override
   public String getMaxImageSize() {
     return getString(maxImageSize);
   }
 
+  @Override
   public void setMaxImageSize(String value) {
     setString(maxImageSize, value);
   }
 
+  @Override
   public boolean isDebugEnabled() {
     return getBoolean(debugEnabled);
   }
 
+  @Override
   public boolean isStartLoadData() {
     return getBoolean(startLoadData);
   }
 
+  @Override
   public void setStartLoadData(boolean value) {
     setBoolean(startLoadData, value);
   }
 
+  @Override
   public AuthType getAuthType() {
     return authType.get();
   }
 
+  @Override
   public void setAuthType(AuthType value) {
     authType.set(value);
   }
 
+  @Override
   public Preference<AuthType> getAuthTypePreference() {
     return authType;
   }
 
+  @Override
   public boolean isOnline() {
     return getBoolean(online);
   }
 
+  @Override
   public void setOnline(Boolean value) {
     setBoolean(online, value);
   }
 
+  @Override
   public Preference<Boolean> getOnlinePreference() {
     return online;
   }
 
+  @Override
   public boolean isFavoritesLoaded() {
     return getBoolean(favoritesLoaded);
   }
 
+  @Override
   public void setFavoritesLoaded(Boolean value) {
     setBoolean(favoritesLoaded, value);
   }
 
+  @Override
   public boolean isProcessedLoaded() {
     return getBoolean(processedLoaded);
   }
 
+  @Override
   public void setProcessedLoaded(Boolean value) {
     setBoolean(processedLoaded, value);
   }
 
+  @Override
   public int getImageIndex() {
     return getInteger(imageIndex);
   }
 
+  @Override
   public void setImageIndex(int value) {
     setInteger(imageIndex, value);
   }
 
+  @Override
   public boolean isUnauthorized() {
     return getBoolean(unauthorized);
   }
 
+  @Override
   public void setUnauthorized(Boolean value) {
     setBoolean(unauthorized, value);
   }
 
+  @Override
   public Preference<Boolean> getUnauthorizedPreference() {
     return unauthorized;
   }
 
-  public boolean isOrganizationFilterActive( ) {
+  @Override
+  public boolean isOrganizationFilterActive() {
     return getBoolean(organizationFilterActive);
   }
 
+  @Override
   public void setOrganizationFilterActive(boolean value) {
     setBoolean(organizationFilterActive, value);
   }
 
+  @Override
   public Set<String> getOrganizationFilterSelection() {
     return getStringSet(organizationFilterSelection);
   }
 
+  @Override
   public void setOrganizationFilterSelection(Set<String> value) {
     setStringSet(organizationFilterSelection, value);
   }

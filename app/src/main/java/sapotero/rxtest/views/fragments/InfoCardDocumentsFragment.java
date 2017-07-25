@@ -49,7 +49,7 @@ import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.jobs.bus.ReloadProcessedImageJob;
 import sapotero.rxtest.retrofit.models.document.Image;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import sapotero.rxtest.utils.memory.utils.Transaction;
@@ -62,7 +62,7 @@ import timber.log.Timber;
 public class InfoCardDocumentsFragment extends Fragment implements AdapterView.OnItemClickListener, GestureDetector.OnDoubleTapListener {
 
   public static final int REQUEST_CODE_INDEX = 1;
-  @Inject Settings settings;
+  @Inject ISettings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject MemoryStore store;
   @Inject JobManager jobManager;

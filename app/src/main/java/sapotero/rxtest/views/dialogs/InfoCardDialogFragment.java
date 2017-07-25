@@ -18,7 +18,7 @@ import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.custom.ViewPagerFixed;
 import timber.log.Timber;
@@ -27,7 +27,7 @@ public class InfoCardDialogFragment extends DialogFragment {
 
   private String TAG = this.getClass().getSimpleName();
 
-  @Inject Settings settings;
+  @Inject ISettings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   @BindView(R.id.fragment_preview_main_infocard_close) Button close;

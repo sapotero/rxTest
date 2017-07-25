@@ -6,14 +6,14 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RFavoriteUserEntity;
 import sapotero.rxtest.retrofit.models.Oshs;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 
 // Maps between RFavoriteUserEntity, Oshs and PrimaryConsiderationPeople
 // (model for RFavoriteUserEntity is Oshs)
 public class FavoriteUserMapper extends AbstractMapper<Oshs, RFavoriteUserEntity> {
 
-  @Inject Settings settings;
+  @Inject ISettings settings;
 
   private Mappers mappers;
 

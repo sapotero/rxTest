@@ -21,7 +21,7 @@ import javax.inject.Inject;
 
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.events.service.UpdateDocumentsByStatusEvent;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.adapters.DocumentTypeAdapter;
 import sapotero.rxtest.views.adapters.models.DocumentTypeItem;
 import sapotero.rxtest.views.custom.OrganizationSpinner;
@@ -33,7 +33,7 @@ import timber.log.Timber;
 
 public class ItemsBuilder implements ButtonBuilder.Callback {
 
-  @Inject Settings settings;
+  @Inject ISettings settings;
 
   private String TAG = this.getClass().getSimpleName();
   private final Context context;

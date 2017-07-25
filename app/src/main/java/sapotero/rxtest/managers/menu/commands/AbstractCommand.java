@@ -24,7 +24,7 @@ import sapotero.rxtest.db.requery.models.images.RSignImageEntity;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
 import sapotero.rxtest.services.MainService;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.fields.FieldType;
 import sapotero.rxtest.utils.memory.fields.InMemoryState;
@@ -39,7 +39,7 @@ import timber.log.Timber;
 public abstract class AbstractCommand implements Serializable, Command, Operation {
 
   @Inject public OkHttpClient okHttpClient;
-  @Inject public Settings settings;
+  @Inject public ISettings settings;
   @Inject public Mappers mappers;
   @Inject public SingleEntityStore<Persistable> dataStore;
   @Inject public QueueManager queueManager;

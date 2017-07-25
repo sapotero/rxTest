@@ -18,12 +18,12 @@ import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RTemplateEntity;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 
 public class SelectTemplateDialogFragment extends DialogFragment implements View.OnClickListener {
 
   @Inject SingleEntityStore<Persistable> dataStore;
-  @Inject Settings settings;
+  @Inject ISettings settings;
 
   private String TAG = this.getClass().getSimpleName();
   Callback callback;

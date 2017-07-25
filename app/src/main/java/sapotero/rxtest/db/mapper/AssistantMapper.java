@@ -5,13 +5,13 @@ import javax.inject.Inject;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RAssistantEntity;
 import sapotero.rxtest.retrofit.models.Assistant;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 
 // Maps between Assistant, RAssistantEntity and PrimaryConsiderationPeople
 public class AssistantMapper extends AbstractMapper<Assistant, RAssistantEntity> {
 
-  @Inject Settings settings;
+  @Inject ISettings settings;
 
   public AssistantMapper() {
     EsdApplication.getDataComponent().inject(this);
