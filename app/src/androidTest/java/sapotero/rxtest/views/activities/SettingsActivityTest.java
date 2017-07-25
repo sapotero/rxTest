@@ -116,6 +116,8 @@ public class SettingsActivityTest {
     assertThat( preferences.getString( "settings_username_host" , ""), is( "http://mobile.sed.a-soft.org/" ));
 
     waitUI();
+
+
   }
 
   private void waitUI() {
