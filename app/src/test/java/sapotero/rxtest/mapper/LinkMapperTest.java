@@ -22,45 +22,51 @@ import static org.mockito.Mockito.when;
 public class LinkMapperTest {
 
   private LinkMapper mapper;
-  private String link;
+  private String dummyLink;
   private String model;
   private RLinksEntity entity;
 
   @Before
   public void init() {
     mapper = new LinkMapper();
-    generateLink();
+    dummyLink = generateLink();
   }
 
-  private void generateLink() {
-    link = "025e937f2dffce50fee6fcd69cfe7daf48b333ddf29fe634d89cae907d7c42c409";
+  public static String generateLink() {
+    return "025e937f2dffce50fee6fcd69cfe7daf48b333ddf29fe634d89cae907d7c42c409";
   }
 
   @Test
   public void toEntity() {
-    model = link;
+    entity = mapper.toEntity(dummyLink);
 
-    entity = mapper.toEntity(model);
+    verifyLink( dummyLink, entity );
+  }
 
-    assertNotNull( entity );
-    assertEquals( 0, entity.getId() );
-    assertEquals( model, entity.getUid() );
+  public static void verifyLink(String expected, RLinksEntity actual) {
+    assertNotNull( actual );
+    assertEquals( 0, actual.getId() );
+    assertEquals( expected, actual.getUid() );
   }
 
   @Test
   public void toModel() {
     entity = mock(RLinksEntity.class);
-    when(entity.getUid()).thenReturn(link);
+    when(entity.getUid()).thenReturn(dummyLink);
 
     model = null;
     model = mapper.toModel(entity);
 
-    assertNotNull( model );
-    assertEquals( link, model );
-
     verify(entity, atLeastOnce()).getUid();
     verify(entity, never()).setUid(anyString());
     verifyNoMoreInteractions(entity);
+
+    verifyLink( dummyLink, model );
+  }
+
+  public static void verifyLink(String dummyLink, String model) {
+    assertNotNull( model );
+    assertEquals( dummyLink, model );
   }
 
   @Test
@@ -69,8 +75,8 @@ public class LinkMapperTest {
     RLinksEntity entity2 = new RLinksEntity();
     boolean hasDiff;
 
-    entity1.setUid(link);
-    entity2.setUid(link);
+    entity1.setUid(dummyLink);
+    entity2.setUid(dummyLink);
     hasDiff = mapper.hasDiff(entity1, entity2);
 
     assertFalse( hasDiff );

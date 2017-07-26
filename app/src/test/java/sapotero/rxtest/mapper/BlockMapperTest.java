@@ -44,13 +44,13 @@ public class BlockMapperTest {
 
   public static Block generateBlock() {
     Block dummyBlock = new Block();
-    dummyBlock.setId( "Ij3hf834y7f4iEhfweihfeRfhjw9823ryu98" );
+    dummyBlock.setId( "5968dce312dd000028000001" );
     dummyBlock.setNumber( 5 );
     dummyBlock.setText( "Уылдаовы влдыоа выд олдвыао ва" );
     dummyBlock.setAppealText( "Прошу доложить" );
     dummyBlock.setTextBefore( false );
     dummyBlock.setHidePerformers( false );
-    dummyBlock.setFontSize( "10" );
+    dummyBlock.setFontSize( "8" );
     dummyBlock.setToCopy( false );
     dummyBlock.setToFamiliarization( false );
 

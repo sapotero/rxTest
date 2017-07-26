@@ -40,34 +40,36 @@ public class DecisionMapperTest {
     performerMapper = new PerformerMapper();
     blockMapper = new BlockMapper(mappers);
 
-    generateDecision();
+    dummyDecision = generateDecision();
 
     Mockito.when(mappers.getPerformerMapper()).thenReturn(performerMapper);
     Mockito.when(mappers.getBlockMapper()).thenReturn(blockMapper);
   }
 
-  private void generateDecision() {
-    dummyDecision = new Decision();
-    dummyDecision.setId( "G546olierufih8EDE4erD34fdg" );
+  public static Decision generateDecision() {
+    Decision dummyDecision = new Decision();
+    dummyDecision.setId( "59662a4f5284000003000001" );
     dummyDecision.setLetterhead( "Бланк резолюции" );
     dummyDecision.setApproved( false );
-    dummyDecision.setSigner( "Сотрудник_а1 A.T. (ОДиР ГУ МВД России по Самарской области)" );
-    dummyDecision.setSignerId( "58f88dfc776b000026000402" );
-    dummyDecision.setSignerBlankText( "Сотрудник_а1 A.T." );
+    dummyDecision.setSigner( "Сотрудник_а2 A.T. (ОДиР ГУ МВД России по Самарской области, Сотрудник ОДИР)" );
+    dummyDecision.setSignerId( "58f88dfc776b000026000001" );
+    dummyDecision.setSignerBlankText( "A.T. Сотрудник_а2" );
     dummyDecision.setSignerIsManager( false );
     dummyDecision.setSignerPositionS( "Сотрудник ОДИР" );
-    dummyDecision.setAssistantId( "kjhwf78&HJJ3eg43f" );
+    dummyDecision.setAssistantId( null );
     dummyDecision.setComment( "kjh89 23sdjf23n 2389dskjf slsdkjfsdj" );
-    dummyDecision.setDate( "2017-07-24" );
+    dummyDecision.setDate( "15.07.2017" );
     dummyDecision.setUrgencyText( "Весьма срочно" );
-    dummyDecision.setShowPosition( true );
+    dummyDecision.setShowPosition( false );
     dummyDecision.setSignBase64( null );
     dummyDecision.setRed( false );
-    dummyDecision.setLetterheadFontSize( "14" );
-    dummyDecision.setPerformersFontSize( "10" );
+    dummyDecision.setLetterheadFontSize( "12" );
+    dummyDecision.setPerformersFontSize( "15" );
 
     Block dummyBlock = BlockMapperTest.generateBlock();
-    this.dummyDecision.getBlocks().add(dummyBlock);
+    dummyDecision.getBlocks().add(dummyBlock);
+
+    return dummyDecision;
   }
 
   @Test
@@ -78,31 +80,35 @@ public class DecisionMapperTest {
     Mockito.verify(mappers, times(1)).getPerformerMapper();
     Mockito.verify(mappers, times(1)).getBlockMapper();
 
-    assertNotNull( entity );
-    assertEquals( 0, entity.getId() );
-    assertEquals( false, entity.isTemporary() );
-    assertEquals( dummyDecision.getId(), entity.getUid() );
-    assertEquals( dummyDecision.getLetterhead(), entity.getLetterhead() );
-    assertEquals( dummyDecision.getApproved(), entity.isApproved() );
-    assertEquals( dummyDecision.getSigner(), entity.getSigner() );
-    assertEquals( dummyDecision.getSignerId(), entity.getSignerId() );
-    assertEquals( dummyDecision.getSignerBlankText(), entity.getSignerBlankText() );
-    assertEquals( dummyDecision.getSignerIsManager(), entity.isSignerIsManager() );
-    assertEquals( dummyDecision.getSignerPositionS(), entity.getSignerPositionS() );
-    assertEquals( dummyDecision.getAssistantId(), entity.getAssistantId() );
-    assertEquals( dummyDecision.getComment(), entity.getComment() );
-    assertEquals( dummyDecision.getDate(), entity.getDate() );
-    assertEquals( dummyDecision.getUrgencyText(), entity.getUrgencyText() );
-    assertEquals( dummyDecision.getShowPosition(), entity.isShowPosition() );
-    assertEquals( dummyDecision.getSignBase64(), entity.getSignBase64() );
-    assertEquals( dummyDecision.getRed(), entity.isRed() );
-    assertEquals( dummyDecision.getLetterheadFontSize(), entity.getLetterheadFontSize() );
-    assertEquals( dummyDecision.getPerformersFontSize(), entity.getPerformerFontSize() );
+    verifyDecision( dummyDecision, entity );
+  }
+
+  public static void verifyDecision(Decision expected, RDecisionEntity actual) {
+    assertNotNull( actual );
+    assertEquals( 0, actual.getId() );
+    assertEquals( false, actual.isTemporary() );
+    assertEquals( expected.getId(), actual.getUid() );
+    assertEquals( expected.getLetterhead(), actual.getLetterhead() );
+    assertEquals( expected.getApproved(), actual.isApproved() );
+    assertEquals( expected.getSigner(), actual.getSigner() );
+    assertEquals( expected.getSignerId(), actual.getSignerId() );
+    assertEquals( expected.getSignerBlankText(), actual.getSignerBlankText() );
+    assertEquals( expected.getSignerIsManager(), actual.isSignerIsManager() );
+    assertEquals( expected.getSignerPositionS(), actual.getSignerPositionS() );
+    assertEquals( expected.getAssistantId(), actual.getAssistantId() );
+    assertEquals( expected.getComment(), actual.getComment() );
+    assertEquals( expected.getDate(), actual.getDate() );
+    assertEquals( expected.getUrgencyText(), actual.getUrgencyText() );
+    assertEquals( expected.getShowPosition(), actual.isShowPosition() );
+    assertEquals( expected.getSignBase64(), actual.getSignBase64() );
+    assertEquals( expected.getRed(), actual.isRed() );
+    assertEquals( expected.getLetterheadFontSize(), actual.getLetterheadFontSize() );
+    assertEquals( expected.getPerformersFontSize(), actual.getPerformerFontSize() );
 
     int index = 0;
-    for (RBlock _block : entity.getBlocks() ) {
+    for (RBlock _block : actual.getBlocks() ) {
       RBlockEntity blockEntity = (RBlockEntity) _block;
-      BlockMapperTest.verifyBlock( dummyDecision.getBlocks().get(index), blockEntity );
+      BlockMapperTest.verifyBlock( expected.getBlocks().get(index), blockEntity );
       index++;
     }
   }
@@ -116,28 +122,32 @@ public class DecisionMapperTest {
     Mockito.verify(mappers, times(2)).getPerformerMapper();
     Mockito.verify(mappers, times(2)).getBlockMapper();
 
-    assertNotNull( model );
-    assertEquals( dummyDecision.getId(), model.getId() );
-    assertEquals( dummyDecision.getLetterhead(), model.getLetterhead() );
-    assertEquals( dummyDecision.getApproved(), model.getApproved() );
-    assertEquals( dummyDecision.getSigner(), model.getSigner() );
-    assertEquals( dummyDecision.getSignerId(), model.getSignerId() );
-    assertEquals( dummyDecision.getSignerBlankText(), model.getSignerBlankText() );
-    assertEquals( dummyDecision.getSignerIsManager(), model.getSignerIsManager() );
-    assertEquals( dummyDecision.getSignerPositionS(), model.getSignerPositionS() );
-    assertEquals( dummyDecision.getAssistantId(), model.getAssistantId() );
-    assertEquals( dummyDecision.getComment(), model.getComment() );
-    assertEquals( dummyDecision.getDate(), model.getDate() );
-    assertEquals( dummyDecision.getUrgencyText(), model.getUrgencyText() );
-    assertEquals( dummyDecision.getShowPosition(), model.getShowPosition() );
-    assertEquals( dummyDecision.getSignBase64(), model.getSignBase64() );
-    assertEquals( dummyDecision.getRed(), model.getRed() );
-    assertEquals( dummyDecision.getLetterheadFontSize(), model.getLetterheadFontSize() );
-    assertEquals( dummyDecision.getPerformersFontSize(), model.getPerformersFontSize() );
+    verifyDecision( dummyDecision, model );
+  }
+
+  public static void verifyDecision(Decision expected, Decision actual) {
+    assertNotNull( actual );
+    assertEquals( expected.getId(), actual.getId() );
+    assertEquals( expected.getLetterhead(), actual.getLetterhead() );
+    assertEquals( expected.getApproved(), actual.getApproved() );
+    assertEquals( expected.getSigner(), actual.getSigner() );
+    assertEquals( expected.getSignerId(), actual.getSignerId() );
+    assertEquals( expected.getSignerBlankText(), actual.getSignerBlankText() );
+    assertEquals( expected.getSignerIsManager(), actual.getSignerIsManager() );
+    assertEquals( expected.getSignerPositionS(), actual.getSignerPositionS() );
+    assertEquals( expected.getAssistantId(), actual.getAssistantId() );
+    assertEquals( expected.getComment(), actual.getComment() );
+    assertEquals( expected.getDate(), actual.getDate() );
+    assertEquals( expected.getUrgencyText(), actual.getUrgencyText() );
+    assertEquals( expected.getShowPosition(), actual.getShowPosition() );
+    assertEquals( expected.getSignBase64(), actual.getSignBase64() );
+    assertEquals( expected.getRed(), actual.getRed() );
+    assertEquals( expected.getLetterheadFontSize(), actual.getLetterheadFontSize() );
+    assertEquals( expected.getPerformersFontSize(), actual.getPerformersFontSize() );
 
     int index = 0;
-    for (Block block : model.getBlocks() ) {
-      BlockMapperTest.verifyBlock( dummyDecision.getBlocks().get(index), block );
+    for (Block block : actual.getBlocks() ) {
+      BlockMapperTest.verifyBlock( expected.getBlocks().get(index), block );
       index++;
     }
   }

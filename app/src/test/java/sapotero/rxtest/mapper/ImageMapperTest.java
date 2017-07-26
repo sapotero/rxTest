@@ -21,10 +21,10 @@ public class ImageMapperTest {
 
   @Before
   public void init() {
-    generateImage();
+    dummyImage = generateImage();
   }
 
-  private void generateImage(){
+  public static Image generateImage() {
     String title       = "1538 от 21.04.2017";
     String md5         = "0288415775b0295cf5e475221a04989c6088ece4eb1b13010f27fff31ca0c56a64";
     String path        = "/documents/0288415775b0295cf5e475221a04989c6088ece4eb1b13010f27fff31ca0c56a64?show_operations=true";
@@ -34,7 +34,7 @@ public class ImageMapperTest {
     Integer size       = 654658;
     Boolean signed     = Math.random() > 0.5;
 
-    dummyImage = new Image();
+    Image dummyImage = new Image();
     dummyImage.setTitle(title);
     dummyImage.setNumber(number);
     dummyImage.setMd5(md5);
@@ -43,6 +43,8 @@ public class ImageMapperTest {
     dummyImage.setContentType(contentType);
     dummyImage.setSigned(signed);
     dummyImage.setCreatedAt(createdAt);
+
+    return dummyImage;
   }
 
   @Test
@@ -50,20 +52,24 @@ public class ImageMapperTest {
     mapper = new ImageMapper();
     entity = mapper.toEntity(dummyImage);
 
-    assertNotNull( entity );
-    assertEquals( 0                       , entity.getId() );
-    assertEquals( entity.getNumber()      , dummyImage.getNumber() );
-    assertEquals( entity.getTitle()       , dummyImage.getTitle() );
-    assertEquals( entity.getMd5()         , dummyImage.getMd5() );
-    assertEquals( entity.getSize()        , dummyImage.getSize() );
-    assertEquals( entity.getPath()        , dummyImage.getPath() );
-    assertEquals( entity.getContentType() , dummyImage.getContentType() );
-    assertEquals( entity.isSigned()       , dummyImage.getSigned() );
-    assertEquals( entity.getCreatedAt()   , dummyImage.getCreatedAt() );
-    assertEquals( entity.isLoading()      , false );
-    assertEquals( entity.isComplete()     , false );
-    assertEquals( entity.isError()        , false );
-    assertEquals( entity.isDeleted()      , false );
+    verifyImage( dummyImage, entity );
+  }
+
+  public static void verifyImage(Image expected, RImageEntity actual) {
+    assertNotNull( actual );
+    assertEquals( 0                          , actual.getId() );
+    assertEquals( expected.getNumber()       , actual.getNumber() );
+    assertEquals( expected.getTitle()        , actual.getTitle() );
+    assertEquals( expected.getMd5()          , actual.getMd5() );
+    assertEquals( expected.getSize()         , actual.getSize() );
+    assertEquals( expected.getPath()         , actual.getPath() );
+    assertEquals( expected.getContentType()  , actual.getContentType() );
+    assertEquals( expected.getSigned()       , actual.isSigned() );
+    assertEquals( expected.getCreatedAt()    , actual.getCreatedAt() );
+    assertEquals( false                      , actual.isLoading() );
+    assertEquals( false                      , actual.isComplete() );
+    assertEquals( false                      , actual.isError() );
+    assertEquals( false                      , actual.isDeleted() );
   }
 
   @Test
@@ -72,15 +78,19 @@ public class ImageMapperTest {
     entity = mapper.toEntity(dummyImage);
     model = mapper.toModel(entity);
 
-    assertNotNull( model );
-    assertEquals( entity.getNumber()      , model.getNumber() );
-    assertEquals( entity.getTitle()       , model.getTitle() );
-    assertEquals( entity.getMd5()         , model.getMd5() );
-    assertEquals( entity.getSize()        , model.getSize() );
-    assertEquals( entity.getPath()        , model.getPath() );
-    assertEquals( entity.getContentType() , model.getContentType() );
-    assertEquals( entity.isSigned()       , model.getSigned() );
-    assertEquals( entity.getCreatedAt()   , model.getCreatedAt() );
+    verifyImage( dummyImage, model );
+  }
+
+  public static void verifyImage(Image expected, Image actual) {
+    assertNotNull( actual );
+    assertEquals( expected.getNumber()      , actual.getNumber() );
+    assertEquals( expected.getTitle()       , actual.getTitle() );
+    assertEquals( expected.getMd5()         , actual.getMd5() );
+    assertEquals( expected.getSize()        , actual.getSize() );
+    assertEquals( expected.getPath()        , actual.getPath() );
+    assertEquals( expected.getContentType() , actual.getContentType() );
+    assertEquals( expected.getSigned()      , actual.getSigned() );
+    assertEquals( expected.getCreatedAt()   , actual.getCreatedAt() );
   }
 
   @Test

@@ -22,17 +22,18 @@ public class ControlLabelMapperTest {
 
   @Before
   public void init() {
-    generateControlLabel();
+    dummyControlLabel = generateControlLabel();
   }
 
-  private void generateControlLabel() {
-    dummyControlLabel = new ControlLabel();
-    dummyControlLabel.setCreatedAt( "2017-07-24" );
+  public static ControlLabel generateControlLabel() {
+    ControlLabel dummyControlLabel = new ControlLabel();
+    dummyControlLabel.setCreatedAt( "20.07.2017 15:33" );
     dummyControlLabel.setOfficialId( "58f88dfc776b000026000001" );
     dummyControlLabel.setOfficialName( "Сотрудник_а2 A.T." );
-    dummyControlLabel.setSkippedOfficialId( "dkjsbfdskjhfdkj" );
-    dummyControlLabel.setSkippedOfficialName( "Сотрудник_а3 A.T." );
+    dummyControlLabel.setSkippedOfficialId( null );
+    dummyControlLabel.setSkippedOfficialName( null );
     dummyControlLabel.setState( "Отмечен для постановки на контроль" );
+    return dummyControlLabel;
   }
 
   @Test
@@ -40,14 +41,18 @@ public class ControlLabelMapperTest {
     mapper = new ControlLabelMapper();
     entity = mapper.toEntity(dummyControlLabel);
 
-    assertNotNull( entity );
-    assertEquals( 0, entity.getId() );
-    assertEquals( dummyControlLabel.getCreatedAt(), entity.getCreatedAt() );
-    assertEquals( dummyControlLabel.getOfficialId(), entity.getOfficialId() );
-    assertEquals( dummyControlLabel.getOfficialName(), entity.getOfficialName() );
-    assertEquals( dummyControlLabel.getSkippedOfficialId(), entity.getSkippedOfficialId() );
-    assertEquals( dummyControlLabel.getSkippedOfficialName(), entity.getSkippedOfficialName() );
-    assertEquals( dummyControlLabel.getState(), entity.getState() );
+    verifyControlLabel( dummyControlLabel, entity );
+  }
+
+  public static void verifyControlLabel(ControlLabel expected, RControlLabelsEntity actual) {
+    assertNotNull( actual );
+    assertEquals( 0, actual.getId() );
+    assertEquals( expected.getCreatedAt(), actual.getCreatedAt() );
+    assertEquals( expected.getOfficialId(), actual.getOfficialId() );
+    assertEquals( expected.getOfficialName(), actual.getOfficialName() );
+    assertEquals( expected.getSkippedOfficialId(), actual.getSkippedOfficialId() );
+    assertEquals( expected.getSkippedOfficialName(), actual.getSkippedOfficialName() );
+    assertEquals( expected.getState(), actual.getState() );
   }
 
   @Test
@@ -56,6 +61,10 @@ public class ControlLabelMapperTest {
     entity = mapper.toEntity(dummyControlLabel);
     model = mapper.toModel(entity);
 
+    verifyControlLabel( dummyControlLabel, model );
+  }
+
+  public static void verifyControlLabel(ControlLabel dummyControlLabel, ControlLabel model) {
     assertNotNull( model );
     assertEquals( dummyControlLabel.getCreatedAt(), model.getCreatedAt() );
     assertEquals( dummyControlLabel.getOfficialId(), model.getOfficialId() );

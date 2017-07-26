@@ -21,6 +21,9 @@ public class TestSettingsModule {
     doCallRealMethod().when(testSettings).setLogin(anyString());
     when(testSettings.getLogin()).thenCallRealMethod();
 
+    doCallRealMethod().when(testSettings).setCurrentUserId(anyString());
+    when(testSettings.getCurrentUserId()).thenCallRealMethod();
+
     return testSettings;
   }
 }

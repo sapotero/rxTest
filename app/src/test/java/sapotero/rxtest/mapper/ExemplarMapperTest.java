@@ -22,17 +22,18 @@ public class ExemplarMapperTest {
 
   @Before
   public void init() {
-    generateExemplar();
+    dummyExemplar = generateExemplar();
   }
 
-  private void generateExemplar() {
-    dummyExemplar = new Exemplar();
+  public static Exemplar generateExemplar() {
+    Exemplar dummyExemplar = new Exemplar();
     dummyExemplar.setNumber( 3 );
     dummyExemplar.setIsOriginal( true );
     dummyExemplar.setStatusCode( "sent_to_the_report" );
     dummyExemplar.setAddressedToId( "58f88dfc776b000026000001" );
-    dummyExemplar.setAddressedToName( "Сотрудник_а2 A.T." );
-    dummyExemplar.setDate( "2017-07-24" );
+    dummyExemplar.setAddressedToName( "Сотрудник_а2 A.T. (ОДиР ГУ МВД России по Самарской области)" );
+    dummyExemplar.setDate( "05.06.2017" );
+    return dummyExemplar;
   }
 
   @Test
@@ -40,14 +41,18 @@ public class ExemplarMapperTest {
     mapper = new ExemplarMapper();
     entity = mapper.toEntity(dummyExemplar);
 
-    assertNotNull( entity );
-    assertEquals( 0, entity.getId() );
-    assertEquals( String.valueOf(dummyExemplar.getNumber()), entity.getNumber() );
-    assertEquals( dummyExemplar.getIsOriginal(), entity.isIsOriginal() );
-    assertEquals( dummyExemplar.getStatusCode(), entity.getStatusCode() );
-    assertEquals( dummyExemplar.getAddressedToId(), entity.getAddressedToId() );
-    assertEquals( dummyExemplar.getAddressedToName(), entity.getAddressedToName() );
-    assertEquals( dummyExemplar.getDate(), entity.getDate() );
+    verifyExemplar( dummyExemplar, entity );
+  }
+
+  public static void verifyExemplar(Exemplar expected, RExemplarEntity actual) {
+    assertNotNull( actual );
+    assertEquals( 0, actual.getId() );
+    assertEquals( String.valueOf(expected.getNumber()), actual.getNumber() );
+    assertEquals( expected.getIsOriginal(), actual.isIsOriginal() );
+    assertEquals( expected.getStatusCode(), actual.getStatusCode() );
+    assertEquals( expected.getAddressedToId(), actual.getAddressedToId() );
+    assertEquals( expected.getAddressedToName(), actual.getAddressedToName() );
+    assertEquals( expected.getDate(), actual.getDate() );
   }
 
   @Test
@@ -56,13 +61,17 @@ public class ExemplarMapperTest {
     entity = mapper.toEntity(dummyExemplar);
     model = mapper.toModel(entity);
 
-    assertNotNull( model );
-    assertEquals( dummyExemplar.getNumber(), model.getNumber() );
-    assertEquals( dummyExemplar.getIsOriginal(), model.getIsOriginal() );
-    assertEquals( dummyExemplar.getStatusCode(), model.getStatusCode() );
-    assertEquals( dummyExemplar.getAddressedToId(), model.getAddressedToId() );
-    assertEquals( dummyExemplar.getAddressedToName(), model.getAddressedToName() );
-    assertEquals( dummyExemplar.getDate(), model.getDate() );
+    verifyExemplar( dummyExemplar, model );
+  }
+
+  public static void verifyExemplar(Exemplar expected, Exemplar actual) {
+    assertNotNull( actual );
+    assertEquals( expected.getNumber(), actual.getNumber() );
+    assertEquals( expected.getIsOriginal(), actual.getIsOriginal() );
+    assertEquals( expected.getStatusCode(), actual.getStatusCode() );
+    assertEquals( expected.getAddressedToId(), actual.getAddressedToId() );
+    assertEquals( expected.getAddressedToName(), actual.getAddressedToName() );
+    assertEquals( expected.getDate(), actual.getDate() );
   }
 
   @Test
