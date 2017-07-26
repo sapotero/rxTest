@@ -57,7 +57,7 @@ public class PrimaryConsiderationMapperTest {
     performerMapper = new PerformerMapper();
 
     dummyOshs = generateOshs();
-    generateDummySortIndex();
+    dummySortIndex = generateDummySortIndex();
 
     PowerMockito.mockStatic(EsdApplication.class);
     PowerMockito.when(EsdApplication.getDataComponent()).thenReturn(testDataComponent);
@@ -65,8 +65,8 @@ public class PrimaryConsiderationMapperTest {
     Mockito.when(mappers.getPerformerMapper()).thenReturn(performerMapper);
   }
 
-  private void generateDummySortIndex() {
-    dummySortIndex = 123;
+  public static Integer generateDummySortIndex() {
+    return 123;
   }
 
   public static Oshs generateOshs() {
