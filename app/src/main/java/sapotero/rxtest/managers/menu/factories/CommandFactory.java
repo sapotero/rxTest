@@ -69,6 +69,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         return "Подписание электронного образа";
       }
     },
+
     FROM_THE_REPORT {
       @Override
       public Command getCommand(CommandFactory instance, CommandParams params) {
@@ -82,6 +83,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         return "Возврат с доклада";
       }
     },
+
     RETURN_TO_THE_PRIMARY_CONSIDERATION {
       @Override
       public Command getCommand(CommandFactory instance, CommandParams params) {
@@ -95,10 +97,11 @@ public class CommandFactory implements AbstractCommand.Callback{
         return "Отклонение документа с возвратом на первичное рассмотрение";
       }
     },
+
     DELEGATE_PERFORMANCE {
       @Override
       public Command getCommand(CommandFactory instance, CommandParams params) {
-        DelegatePerformance command = new DelegatePerformance(document);
+        DelegatePerformance command = new DelegatePerformance(params);
         command.registerCallBack(instance);
         return command;
       }
@@ -108,241 +111,211 @@ public class CommandFactory implements AbstractCommand.Callback{
         return "Передача исполнения";
       }
     },
+
     TO_THE_APPROVAL_PERFORMANCE {
       @Override
-      public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
-        ApprovalPerformance command = new ApprovalPerformance(document);
-        command.withParams(params);
-        command
-          .withPerson( params.getPerson() )
-          .registerCallBack(instance);
-        command.withParams(params);
+      public Command getCommand(CommandFactory instance, CommandParams params) {
+        ApprovalPerformance command = new ApprovalPerformance(params);
+        command.registerCallBack(instance);
         return command;
       }
+
       @Override
       public String getRussianName() {
         return "Исполнение без ответа";
       }
     },
+
     TO_THE_PRIMARY_CONSIDERATION {
       @Override
-      public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
-        PrimaryConsideration command = new PrimaryConsideration(document);
-        command.withParams(params);
-        command
-          .withPerson( params.getPerson() )
-          .registerCallBack(instance);
-        command.withParams(params);
+      public Command getCommand(CommandFactory instance, CommandParams params) {
+        PrimaryConsideration command = new PrimaryConsideration(params);
+        command.registerCallBack(instance);
         return command;
       }
+
       @Override
       public String getRussianName() {
         return "Передачи первичного рассмотрения";
       }
     },
+
     APPROVAL_CHANGE_PERSON {
       @Override
-      public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
-        sapotero.rxtest.managers.menu.commands.approval.ChangePerson command = new sapotero.rxtest.managers.menu.commands.approval.ChangePerson(document);
-        command.withParams(params);
-        command
-          .withPerson( params.getPerson() )
-          .registerCallBack(instance);
-        command.withParams(params);
+      public Command getCommand(CommandFactory instance, CommandParams params) {
+        sapotero.rxtest.managers.menu.commands.approval.ChangePerson command = new sapotero.rxtest.managers.menu.commands.approval.ChangePerson(params);
+        command.registerCallBack(instance);
         return command;
       }
+
       @Override
       public String getRussianName() {
         return "Передача согласования";
       }
     },
+
     APPROVAL_NEXT_PERSON {
       @Override
-      public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
-        sapotero.rxtest.managers.menu.commands.approval.NextPerson command = new sapotero.rxtest.managers.menu.commands.approval.NextPerson(document);
-        command.withParams(params);
-        command
-          .withPerson( "" )
-          .registerCallBack(instance);
-        command.withParams(params);
+      public Command getCommand(CommandFactory instance, CommandParams params) {
+        sapotero.rxtest.managers.menu.commands.approval.NextPerson command = new sapotero.rxtest.managers.menu.commands.approval.NextPerson(params);
+        command.registerCallBack(instance);
         return command;
       }
+
       @Override
       public String getRussianName() {
         return "Передача согласования документа следующему в маршруте ДЛ";
       }
     },
+
     APPROVAL_PREV_PERSON {
       @Override
-      public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
-        sapotero.rxtest.managers.menu.commands.approval.PrevPerson command = new sapotero.rxtest.managers.menu.commands.approval.PrevPerson(document);
-        command.withParams(params);
-        command
-          .withPerson( "" )
-          .registerCallBack(instance);
-        command.withParams(params);
+      public Command getCommand(CommandFactory instance, CommandParams params) {
+        sapotero.rxtest.managers.menu.commands.approval.PrevPerson command = new sapotero.rxtest.managers.menu.commands.approval.PrevPerson(params);
+        command.registerCallBack(instance);
         return command;
       }
+
       @Override
       public String getRussianName() {
         return "Передача согласования документа предыдущему в маршруте ДЛ";
       }
     },
+
     SIGNING_CHANGE_PERSON {
       @Override
-      public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
-        sapotero.rxtest.managers.menu.commands.signing.ChangePerson command = new sapotero.rxtest.managers.menu.commands.signing.ChangePerson(document);
-        command.withParams(params);
-        command
-          .withPerson( params.getPerson() )
-          .registerCallBack(instance);
-        command.withParams(params);
+      public Command getCommand(CommandFactory instance, CommandParams params) {
+        sapotero.rxtest.managers.menu.commands.signing.ChangePerson command = new sapotero.rxtest.managers.menu.commands.signing.ChangePerson(params);
+        command.registerCallBack(instance);
         return command;
       }
+
       @Override
       public String getRussianName() {
         return "Передача подписания";
       }
     },
+
     SIGNING_NEXT_PERSON {
       @Override
-      public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
-        sapotero.rxtest.managers.menu.commands.signing.NextPerson command = new sapotero.rxtest.managers.menu.commands.signing.NextPerson(document);
-        command.withParams(params);
-        command
-          .withPerson( "" )
-          .registerCallBack(instance);
-        command.withParams(params);
+      public Command getCommand(CommandFactory instance, CommandParams params) {
+        sapotero.rxtest.managers.menu.commands.signing.NextPerson command = new sapotero.rxtest.managers.menu.commands.signing.NextPerson(params);
+        command.registerCallBack(instance);
         return command;
       }
+
       @Override
       public String getRussianName() {
         return "Передача подписания документа следующему в маршруте ДЛ";
       }
     },
+
     SIGNING_PREV_PERSON {
       @Override
-      public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
-        sapotero.rxtest.managers.menu.commands.signing.PrevPerson command = new sapotero.rxtest.managers.menu.commands.signing.PrevPerson(document);
-        command.withParams(params);
-        command
-          .withPerson( "" )
-          .registerCallBack(instance);
-        command.withParams(params);
+      public Command getCommand(CommandFactory instance, CommandParams params) {
+        sapotero.rxtest.managers.menu.commands.signing.PrevPerson command = new sapotero.rxtest.managers.menu.commands.signing.PrevPerson(params);
+        command.registerCallBack(instance);
         return command;
       }
+
       @Override
       public String getRussianName() {
         return "Передача подписания документа предыдущему в маршруте ДЛ";
       }
     },
+
     ADD_TO_FOLDER {
       @Override
-      public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
-        AddToFolder command = new AddToFolder(document);
-        command.withParams(params);
-        command
-          .withFolder( params.getFolder() )
-          .withDocumentId( params.getDocument() )
-          .registerCallBack(instance);
+      public Command getCommand(CommandFactory instance, CommandParams params) {
+        AddToFolder command = new AddToFolder(params);
+        command.registerCallBack(instance);
         return command;
       }
+
       @Override
       public String getRussianName() {
         return "Добавление в избранное";
       }
     },
+
     REMOVE_FROM_FOLDER {
       @Override
-      public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
-        RemoveFromFolder command = new RemoveFromFolder(document);
-        command.withParams(params);
-        command
-          .withFolder( params.getFolder() )
-          .withDocumentId( params.getDocument() )
-          .registerCallBack(instance);
+      public Command getCommand(CommandFactory instance, CommandParams params) {
+        RemoveFromFolder command = new RemoveFromFolder(params);
+        command.registerCallBack(instance);
         return command;
       }
+
       @Override
       public String getRussianName() {
         return "Удаление из избранного";
       }
     },
+
     CHECK_CONTROL_LABEL {
       @Override
-      public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
-        CheckControlLabel command = new CheckControlLabel(document);
-        command.withParams(params);
-        command
-          .withDocumentId( params.getDocument() )
-          .registerCallBack(instance);
-        
+      public Command getCommand(CommandFactory instance, CommandParams params) {
+        CheckControlLabel command = new CheckControlLabel(params);
+        command.registerCallBack(instance);
         return command;
       }
+
       @Override
       public String getRussianName() {
         return "Установка отметки о необходимости постановки на контроль";
       }
     },
+
     UNCHECK_CONTROL_LABEL {
       @Override
-      public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
-        UncheckControlLabel command = new UncheckControlLabel(document);
-        command.withParams(params);
-        command
-          .withDocumentId( params.getDocument() )
-          .registerCallBack(instance);
-
+      public Command getCommand(CommandFactory instance, CommandParams params) {
+        UncheckControlLabel command = new UncheckControlLabel(params);
+        command.registerCallBack(instance);
         return command;
       }
+
       @Override
       public String getRussianName() {
         return "Удаление отметки о необходимости постановки на контроль";
       }
     },
+
     INCORRECT {
       @Override
-      public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
-        DoNothing command = new DoNothing(document);
-        command.withParams(params);
-
+      public Command getCommand(CommandFactory instance, CommandParams params) {
+        DoNothing command = new DoNothing(params);
+        command.registerCallBack(instance);
         return command;
       }
+
       @Override
       public String getRussianName() {
         return "Операция заглушка для тестов";
       }
     },
+
     SAVE_DECISION {
       @Override
-      public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
-        SaveDecision command = new SaveDecision(document);
-        command.withParams(params);
-        command
-//          .withDecision( params.getDecision() )
-          .withDecisionId( params.getDecisionId() )
-          .registerCallBack(instance);
-
-        command.withParams(params);
+      public Command getCommand(CommandFactory instance, CommandParams params) {
+        SaveDecision command = new SaveDecision(params);
+        command.registerCallBack(instance);
         return command;
       }
+
       @Override
       public String getRussianName() {
         return "Сохранение резолюции";
       }
     },
+
     CREATE_DECISION {
       @Override
-      public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
-        AddDecision command = new AddDecision(document);
-        command.withParams(params);
-        command
-          .withDecisionId( params.getDecisionId() )
-          .registerCallBack(instance);
-
-        command.withParams(params);
+      public Command getCommand(CommandFactory instance, CommandParams params) {
+        AddDecision command = new AddDecision(params);
+        command.registerCallBack(instance);
         return command;
       }
+
       @Override
       public String getRussianName() {
         return "Создание резолюции";
@@ -361,11 +334,13 @@ public class CommandFactory implements AbstractCommand.Callback{
         command.withParams(params);
         return command;
       }
+
       @Override
       public String getRussianName() {
         return "*Создание резолюции";
       }
     },
+
     SAVE_TEMPORARY_DECISION {
       @Override
       public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
@@ -376,11 +351,13 @@ public class CommandFactory implements AbstractCommand.Callback{
         command.withParams(params);
         return command;
       }
+
       @Override
       public String getRussianName() {
         return "*Сохранение резолюции";
       }
     },
+
     SAVE_AND_APPROVE_DECISION {
       @Override
       public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
@@ -395,6 +372,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         command.withParams(params);
         return command;
       }
+
       @Override
       public String getRussianName() {
         return "Сохранение и подписание резолюции";
@@ -411,11 +389,13 @@ public class CommandFactory implements AbstractCommand.Callback{
         command.withParams(params);
         return command;
       }
+
       @Override
       public String getRussianName() {
         return "Создание и подписание резолюции";
       }
     },
+
     APPROVE_DECISION {
       @Override
       public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
@@ -429,11 +409,13 @@ public class CommandFactory implements AbstractCommand.Callback{
         command.withParams(params);
         return command;
       }
+
       @Override
       public String getRussianName() {
         return "Подписание резолюции";
       }
     },
+
     APPROVE_DECISION_DELAYED {
       @Override
       public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
@@ -442,6 +424,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         command.registerCallBack(instance);
         return command;
       }
+
       @Override
       public String getRussianName() {
         return "Подписание резолюции";
@@ -468,6 +451,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         Timber.tag("CommandFactory").w("REJECT_DECISION after params" );
         return command;
       }
+
       @Override
       public String getRussianName() {
         return "Отклонение резолюции";
@@ -481,11 +465,13 @@ public class CommandFactory implements AbstractCommand.Callback{
         command.withParams(params);
         return command;
       }
+
       @Override
       public String getRussianName() {
         return "Создание шаблона резолюции";
       }
     },
+
     UPDATE_DECISION_TEMPLATE {
       @Override
       public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
@@ -493,11 +479,13 @@ public class CommandFactory implements AbstractCommand.Callback{
         command.withParams(params);
         return command;
       }
+
       @Override
       public String getRussianName() {
         return "Изменение шаблона резолюции";
       }
     },
+
     DELETE_DECISION_TEMPLATE {
       @Override
       public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
@@ -505,6 +493,7 @@ public class CommandFactory implements AbstractCommand.Callback{
         command.withParams(params);
         return command;
       }
+
       @Override
       public String getRussianName() {
         return "Удаление шаблона резолюции";

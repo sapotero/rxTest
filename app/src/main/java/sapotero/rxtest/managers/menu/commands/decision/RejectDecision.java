@@ -62,7 +62,7 @@ public class RejectDecision extends DecisionCommand {
 
     updateLocal();
 
-    setDocOperationStartedInMemory( params.getDocument() );
+    setDocOperationStartedInMemory();
   }
 
 
@@ -163,16 +163,16 @@ public class RejectDecision extends DecisionCommand {
       formated_decision.setComment( String.format( "Причина отклонения: %s", params.getComment() ) );
     }
 
-    Observable<DecisionError> info = getDecisionUpdateOperationObservable(formated_decision, decisionId, TAG);
+    Observable<DecisionError> info = getDecisionUpdateOperationObservable(formated_decision, TAG);
 
     info.subscribeOn( Schedulers.computation() )
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         data -> {
           onSuccess( this, data, true, false, TAG );
-          finishOperationOnSuccess( params.getDocument() );
+          finishOperationOnSuccess();
         },
-        error -> onError( this, params.getDocument(), error.getLocalizedMessage(), false, TAG )
+        error -> onError( this, error.getLocalizedMessage(), false, TAG )
       );
   }
 }

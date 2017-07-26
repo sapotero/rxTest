@@ -7,7 +7,6 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.managers.menu.commands.DecisionCommand;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.interfaces.Command;
-import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
@@ -15,45 +14,32 @@ import timber.log.Timber;
 
 public class AddDecision extends DecisionCommand {
 
-  private final DocumentReceiver document;
-
   private String TAG = this.getClass().getSimpleName();
 
-  private String decisionId;
-
-  public AddDecision(DocumentReceiver document){
-    super();
-    this.document = document;
-  }
-
-  public String getInfo(){
-    return null;
+  public AddDecision(CommandParams params) {
+    super(params);
   }
 
   public void registerCallBack(Callback callback){
     this.callback = callback;
   }
 
-  public AddDecision withDecisionId(String decisionId){
-    this.decisionId = decisionId;
-    return this;
-  }
-
   @Override
   public void execute() {
-
     CommandFactory.Operation operation = CommandFactory.Operation.CREATE_TEMPORARY_DECISION;
     CommandParams _params = new CommandParams();
-    _params.setDecisionId( params.getDecisionModel().getId() );
-    _params.setDecisionModel( params.getDecisionModel() );
-    _params.setDocument(params.getDocument());
-    _params.setAssignment(params.isAssignment());
-    Command command = operation.getCommand(null, document, _params);
+    _params.setUser( getParams().getUser() );
+    _params.setToken( getParams().getToken() );
+    _params.setDecisionId( getParams().getDecisionModel().getId() );
+    _params.setDecisionModel( getParams().getDecisionModel() );
+    _params.setDocument( getParams().getDocument() );
+    _params.setAssignment( getParams().isAssignment() );
+    Command command = operation.getCommand(null, _params);
     command.execute();
 
-    setDocOperationStartedInMemory( params.getDocument() );
+    setDocOperationStartedInMemory();
 
-    Timber.tag(TAG).w("ASSIGNMENT: %s", params.isAssignment() );
+    Timber.tag(TAG).w("ASSIGNMENT: %s", getParams().isAssignment() );
 
     queueManager.add(this);
   }
@@ -71,13 +57,14 @@ public class AddDecision extends DecisionCommand {
       .update(RDocumentEntity.class)
       .set(RDocumentEntity.CHANGED, true)
       .set(RDocumentEntity.MD5, "")
-      .where(RDocumentEntity.UID.eq( params.getDocument() ))
+      .where(RDocumentEntity.UID.eq( getParams().getDocument() ))
       .get()
       .value();
 
     if (callback != null ){
       callback.onCommandExecuteSuccess( getType() );
     }
+
     queueManager.setExecutedLocal(this);
   }
 
@@ -85,11 +72,11 @@ public class AddDecision extends DecisionCommand {
   public void executeRemote() {
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
-    Decision decision = params.getDecisionModel();
+    Decision decision = getParams().getDecisionModel();
     decision.setLetterhead(null);
     decision.setShowPosition( false );
 
-    if (params.isAssignment()){
+    if ( getParams().isAssignment() ) {
       decision.setAssignment(true);
     }
 
@@ -100,9 +87,9 @@ public class AddDecision extends DecisionCommand {
       .subscribe(
         data -> {
           onSuccess( this, data, true, true, TAG );
-          finishOperationOnSuccess( params.getDocument() );
+          finishOperationOnSuccess();
         },
-        error -> onError( this, params.getDocument(), error.getLocalizedMessage(), false, TAG )
+        error -> onError( this, error.getLocalizedMessage(), false, TAG )
       );
   }
 }

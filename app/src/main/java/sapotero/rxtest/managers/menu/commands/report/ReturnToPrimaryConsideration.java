@@ -36,7 +36,7 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
   public void execute() {
     queueManager.add(this);
     update();
-    setDocOperationProcessedStartedInMemory( getParams().getDocument() );
+    setDocOperationProcessedStartedInMemory();
   }
 
   private void update() {
@@ -84,8 +84,8 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
 
     Observable<OperationResult> info = operationService.report(
       getType(),
-      settings.getLogin(),
-      settings.getToken(),
+      getParams().getUser(),
+      getParams().getToken(),
       uids,
       uid,
       getParams().getStatusCode()
@@ -101,10 +101,10 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
 
           queueManager.setExecutedRemote(this);
 
-          finishOperationOnSuccess( getParams().getDocument() );
+          finishOperationOnSuccess();
 
         },
-        error -> onError( this, getParams().getDocument(), error.getLocalizedMessage(), true, TAG )
+        error -> onError( this, error.getLocalizedMessage(), true, TAG )
       );
   }
 }

@@ -60,7 +60,7 @@ public class SaveAndApproveDecision extends DecisionCommand {
     queueManager.add(this);
     updateLocal();
 
-    setDocOperationStartedInMemory( params.getDocument() );
+    setDocOperationStartedInMemory();
   }
 
   @Override
@@ -148,16 +148,16 @@ public class SaveAndApproveDecision extends DecisionCommand {
 
     _decision.setSign( sign );
 
-    Observable<DecisionError> info = getDecisionUpdateOperationObservable(_decision, decisionId, TAG);
+    Observable<DecisionError> info = getDecisionUpdateOperationObservable(_decision, TAG);
 
     info.subscribeOn( Schedulers.computation() )
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         data -> {
           onSuccess( this, data, false, true, TAG );
-          finishOperationOnSuccess( params.getDocument() );
+          finishOperationOnSuccess();
         },
-        error -> onError( this, params.getDocument(), error.getLocalizedMessage(), true, TAG )
+        error -> onError( this, error.getLocalizedMessage(), true, TAG )
       );
   }
 

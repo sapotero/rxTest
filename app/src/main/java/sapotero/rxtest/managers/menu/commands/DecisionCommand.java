@@ -39,13 +39,13 @@ public abstract class DecisionCommand extends AbstractCommand {
     DocumentService operationService = retrofit.create( DocumentService.class );
 
     return operationService.create(
-      settings.getLogin(),
-      settings.getToken(),
+      getParams().getUser(),
+      getParams().getToken(),
       json
     );
   }
 
-  protected Observable<DecisionError> getDecisionUpdateOperationObservable(Decision decision, String decisionId, String TAG) {
+  protected Observable<DecisionError> getDecisionUpdateOperationObservable(Decision decision, String TAG) {
     DecisionWrapper wrapper = new DecisionWrapper();
     wrapper.setDecision(decision);
 
@@ -64,9 +64,9 @@ public abstract class DecisionCommand extends AbstractCommand {
     DocumentService operationService = retrofit.create( DocumentService.class );
 
     return operationService.update(
-      decisionId,
-      settings.getLogin(),
-      settings.getToken(),
+      getParams().getDecisionId(),
+      getParams().getUser(),
+      getParams().getToken(),
       json
     );
   }

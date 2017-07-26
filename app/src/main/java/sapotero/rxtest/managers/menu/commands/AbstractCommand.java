@@ -117,59 +117,59 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     }
   }
 
-  protected void setDocOperationStartedInMemory(String uid) {
+  protected void setDocOperationStartedInMemory() {
     Timber.tag("RecyclerViewRefresh").d("Command: Set sync label");
 
     store.process(
-      store.startTransactionFor( uid )
+      store.startTransactionFor( getParams().getDocument() )
         .setLabel(LabelType.SYNC)
         .setState(InMemoryState.LOADING)
     );
   }
 
-  protected void setDocOperationProcessedStartedInMemory(String uid) {
+  protected void setDocOperationProcessedStartedInMemory() {
     Timber.tag("RecyclerViewRefresh").d("Command: Set sync label");
 
     store.process(
-      store.startTransactionFor( uid )
+      store.startTransactionFor( getParams().getDocument() )
         .setLabel(LabelType.SYNC)
         .setField(FieldType.PROCESSED, true)
         .setState(InMemoryState.LOADING)
     );
   }
 
-  protected void finishOperationOnSuccess(String uid) {
+  protected void finishOperationOnSuccess() {
     Timber.tag("RecyclerViewRefresh").d("Command: Remove sync label");
 
     store.process(
-      store.startTransactionFor( uid )
+      store.startTransactionFor( getParams().getDocument() )
         .removeLabel(LabelType.SYNC)
         .setField(FieldType.MD5, "")
         .setState(InMemoryState.READY)
     );
 
-    setChangedFalse(uid);
+    setChangedFalse();
   }
 
-  protected void setChangedFalse(String uid) {
+  protected void setChangedFalse() {
     dataStore
       .update(RDocumentEntity.class)
       .set( RDocumentEntity.CHANGED, false)
-      .where(RDocumentEntity.UID.eq(uid))
+      .where(RDocumentEntity.UID.eq(getParams().getDocument()))
       .get()
       .value();
   }
 
-  private void finishOperationOnError(Command command, String uid, List<String> errors) {
-    finishOperationOnSuccess( uid );
+  private void finishOperationOnError(Command command, List<String> errors) {
+    finishOperationOnSuccess();
     queueManager.setExecutedWithError( command, errors );
   }
 
-  protected void finishOperationProcessedOnError(Command command, String uid, List<String> errors) {
+  protected void finishOperationProcessedOnError(Command command, List<String> errors) {
     Timber.tag("RecyclerViewRefresh").d("Command: Remove sync label");
 
     store.process(
-      store.startTransactionFor( uid )
+      store.startTransactionFor( getParams().getDocument() )
         .removeLabel(LabelType.SYNC)
         .setField(FieldType.MD5, "")
         .setField(FieldType.PROCESSED, false)
@@ -180,7 +180,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       .update(RDocumentEntity.class)
       .set( RDocumentEntity.PROCESSED, false)
       .set( RDocumentEntity.CHANGED, false)
-      .where(RDocumentEntity.UID.eq( uid ) )
+      .where(RDocumentEntity.UID.eq( getParams().getDocument() ) )
       .get()
       .value();
 
@@ -191,7 +191,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     return collection != null && collection.size() > 0;
   }
 
-  public void onError(Command command, String uid, String errorMessage, boolean setProcessedFalse, String TAG) {
+  public void onError(Command command, String errorMessage, boolean setProcessedFalse, String TAG) {
     Timber.tag(TAG).i("error: %s", errorMessage);
 
     if (callback != null){
@@ -200,9 +200,9 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
 
     if ( settings.isOnline() ) {
       if ( setProcessedFalse ) {
-        finishOperationProcessedOnError( command, uid, Collections.singletonList( errorMessage ) );
+        finishOperationProcessedOnError( command, Collections.singletonList( errorMessage ) );
       } else {
-        finishOperationOnError( command, uid, Collections.singletonList( errorMessage ) );
+        finishOperationOnError( command, Collections.singletonList( errorMessage ) );
       }
     }
   }

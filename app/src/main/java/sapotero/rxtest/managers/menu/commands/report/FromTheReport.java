@@ -32,7 +32,7 @@ public class FromTheReport extends AbstractCommand {
   public void execute() {
     queueManager.add(this);
     update();
-    setDocOperationProcessedStartedInMemory( getParams().getDocument() );
+    setDocOperationProcessedStartedInMemory();
   }
 
   @Override
@@ -83,8 +83,8 @@ public class FromTheReport extends AbstractCommand {
 
     Observable<OperationResult> info = operationService.report(
       getType(),
-      settings.getLogin(),
-      settings.getToken(),
+      getParams().getUser(),
+      getParams().getToken(),
       uids,
       comment,
       getParams().getStatusCode()
@@ -100,10 +100,10 @@ public class FromTheReport extends AbstractCommand {
 
           queueManager.setExecutedRemote(this);
 
-          finishOperationOnSuccess( getParams().getDocument() );
+          finishOperationOnSuccess();
 
         },
-        error -> onError( this, getParams().getDocument(), error.getLocalizedMessage(), true, TAG )
+        error -> onError( this, error.getLocalizedMessage(), true, TAG )
       );
   }
 }

@@ -182,6 +182,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
                 Decision decision = manager.getDecision();
 
                 CommandParams params = new CommandParams();
+                params.setUser( settings.getLogin() );
+                params.setToken( settings.getToken() );
                 params.setDecisionModel( decision );
                 params.setDocument( settings.getUid() );
                 decision.setDocumentUid( settings.getUid() );
@@ -220,6 +222,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
                   decision = manager.getDecision();
 
                   params = new CommandParams();
+                  params.setUser( settings.getLogin() );
+                  params.setToken( settings.getToken() );
                   params.setDecisionModel( decision );
                   params.setDocument( settings.getUid() );
 
@@ -310,6 +314,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
             operation = CommandFactory.Operation.SAVE_DECISION;
 
             commandParams = new CommandParams();
+            commandParams.setUser( settings.getLogin() );
+            commandParams.setToken( settings.getToken() );
             commandParams.setDecisionId( rDecisionEntity.getUid() );
             commandParams.setDecisionModel( manager.getDecision() );
             commandParams.setDocument( settings.getUid() );
@@ -328,6 +334,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
             Decision decision = manager.getDecision();
 
             commandParams = new CommandParams();
+            commandParams.setUser( settings.getLogin() );
+            commandParams.setToken( settings.getToken() );
             commandParams.setDecisionModel( decision );
             commandParams.setDocument( settings.getUid() );
 
@@ -377,6 +385,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
             operation =CommandFactory.Operation.APPROVE_DECISION;
 
             commandParams = new CommandParams();
+            commandParams.setUser( settings.getLogin() );
+            commandParams.setToken( settings.getToken() );
             commandParams.setDecisionId( rDecisionEntity.getUid() );
             commandParams.setDocument( settings.getUid() );
             commandParams.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
@@ -401,6 +411,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
             operation =CommandFactory.Operation.REJECT_DECISION;
 
             commandParams = new CommandParams();
+            commandParams.setUser( settings.getLogin() );
+            commandParams.setToken( settings.getToken() );
             commandParams.setDecisionId( rDecisionEntity.getUid() );
             commandParams.setDocument( settings.getUid() );
             commandParams.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
@@ -925,6 +937,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
           operation = CommandFactory.Operation.REJECT_DECISION;
 
           CommandParams params = new CommandParams();
+          params.setUser( settings.getLogin() );
+          params.setToken( settings.getToken() );
           params.setDecisionId(rDecisionEntity.getUid());
           params.setDocument( settings.getUid() );
           params.setDecisionModel(mappers.getDecisionMapper().toFormattedModel(rDecisionEntity));
@@ -951,6 +965,8 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
           operation = CommandFactory.Operation.APPROVE_DECISION;
 
           CommandParams params = new CommandParams();
+          params.setUser( settings.getLogin() );
+          params.setToken( settings.getToken() );
           params.setDecisionId(rDecisionEntity.getUid());
           params.setDocument( settings.getUid() );
           params.setDecisionModel(mappers.getDecisionMapper().toFormattedModel(rDecisionEntity));

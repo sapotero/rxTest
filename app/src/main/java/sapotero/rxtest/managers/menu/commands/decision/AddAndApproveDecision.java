@@ -166,9 +166,9 @@ public class AddAndApproveDecision extends DecisionCommand {
       .subscribe(
         data -> {
           onSuccess( this, data, false, true, TAG );
-          finishOperationOnSuccess( params.getDocument() );
+          finishOperationOnSuccess();
         },
-        error -> onError( this, params.getDocument(), error.getLocalizedMessage(), true, TAG )
+        error -> onError( this, error.getLocalizedMessage(), true, TAG )
       );
   }
 }
