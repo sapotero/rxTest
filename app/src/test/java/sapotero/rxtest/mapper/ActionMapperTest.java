@@ -41,14 +41,18 @@ public class ActionMapperTest {
     mapper = new ActionMapper();
     entity = mapper.toEntity(dummyAction);
 
-    assertNotNull( entity );
-    assertEquals( 0, entity.getId() );
-    assertEquals( dummyAction.getOfficialId(), entity.getOfficialId() );
-    assertEquals( dummyAction.getAddressedToId(), entity.getAddressedToId() );
-    assertEquals( dummyAction.getAction(), entity.getAction() );
-    assertEquals( dummyAction.getActionDescription(), entity.getActionDescription() );
-    assertEquals( dummyAction.getUpdatedAt(), entity.getUpdatedAt() );
-    assertEquals( dummyAction.getToS(), entity.getToS() );
+    verifyAction( dummyAction, entity );
+  }
+
+  public static void verifyAction(DocumentInfoAction expected, RActionEntity actual) {
+    assertNotNull( actual );
+    assertEquals( 0, actual.getId() );
+    assertEquals( expected.getOfficialId(), actual.getOfficialId() );
+    assertEquals( expected.getAddressedToId(), actual.getAddressedToId() );
+    assertEquals( expected.getAction(), actual.getAction() );
+    assertEquals( expected.getActionDescription(), actual.getActionDescription() );
+    assertEquals( expected.getUpdatedAt(), actual.getUpdatedAt() );
+    assertEquals( expected.getToS(), actual.getToS() );
   }
 
   @Test
@@ -57,13 +61,17 @@ public class ActionMapperTest {
     entity = mapper.toEntity(dummyAction);
     model = mapper.toModel(entity);
 
-    assertNotNull( model );
-    assertEquals( dummyAction.getOfficialId(), model.getOfficialId() );
-    assertEquals( dummyAction.getAddressedToId(), model.getAddressedToId() );
-    assertEquals( dummyAction.getAction(), model.getAction() );
-    assertEquals( dummyAction.getActionDescription(), model.getActionDescription() );
-    assertEquals( dummyAction.getUpdatedAt(), model.getUpdatedAt() );
-    assertEquals( dummyAction.getToS(), model.getToS() );
+    verifyAction( dummyAction, model );
+  }
+
+  public static void verifyAction(DocumentInfoAction expected, DocumentInfoAction actual) {
+    assertNotNull( actual );
+    assertEquals( expected.getOfficialId(), actual.getOfficialId() );
+    assertEquals( expected.getAddressedToId(), actual.getAddressedToId() );
+    assertEquals( expected.getAction(), actual.getAction() );
+    assertEquals( expected.getActionDescription(), actual.getActionDescription() );
+    assertEquals( expected.getUpdatedAt(), actual.getUpdatedAt() );
+    assertEquals( expected.getToS(), actual.getToS() );
   }
 
   @Test

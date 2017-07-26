@@ -41,14 +41,18 @@ public class ControlLabelMapperTest {
     mapper = new ControlLabelMapper();
     entity = mapper.toEntity(dummyControlLabel);
 
-    assertNotNull( entity );
-    assertEquals( 0, entity.getId() );
-    assertEquals( dummyControlLabel.getCreatedAt(), entity.getCreatedAt() );
-    assertEquals( dummyControlLabel.getOfficialId(), entity.getOfficialId() );
-    assertEquals( dummyControlLabel.getOfficialName(), entity.getOfficialName() );
-    assertEquals( dummyControlLabel.getSkippedOfficialId(), entity.getSkippedOfficialId() );
-    assertEquals( dummyControlLabel.getSkippedOfficialName(), entity.getSkippedOfficialName() );
-    assertEquals( dummyControlLabel.getState(), entity.getState() );
+    verifyControlLabel( dummyControlLabel, entity );
+  }
+
+  public static void verifyControlLabel(ControlLabel expected, RControlLabelsEntity actual) {
+    assertNotNull( actual );
+    assertEquals( 0, actual.getId() );
+    assertEquals( expected.getCreatedAt(), actual.getCreatedAt() );
+    assertEquals( expected.getOfficialId(), actual.getOfficialId() );
+    assertEquals( expected.getOfficialName(), actual.getOfficialName() );
+    assertEquals( expected.getSkippedOfficialId(), actual.getSkippedOfficialId() );
+    assertEquals( expected.getSkippedOfficialName(), actual.getSkippedOfficialName() );
+    assertEquals( expected.getState(), actual.getState() );
   }
 
   @Test
@@ -57,6 +61,10 @@ public class ControlLabelMapperTest {
     entity = mapper.toEntity(dummyControlLabel);
     model = mapper.toModel(entity);
 
+    verifyControlLabel( dummyControlLabel, model );
+  }
+
+  public static void verifyControlLabel(ControlLabel dummyControlLabel, ControlLabel model) {
     assertNotNull( model );
     assertEquals( dummyControlLabel.getCreatedAt(), model.getCreatedAt() );
     assertEquals( dummyControlLabel.getOfficialId(), model.getOfficialId() );

@@ -38,12 +38,16 @@ public class SignerMapperTest {
     mapper = new SignerMapper();
     entity = mapper.toEntity(dummySigner);
 
-    assertNotNull( entity );
-    assertEquals( 0, entity.getId() );
-    assertEquals( dummySigner.getId(), entity.getUid() );
-    assertEquals( dummySigner.getName(), entity.getName() );
-    assertEquals( dummySigner.getOrganisation(), entity.getOrganisation() );
-    assertEquals( dummySigner.getType(), entity.getType() );
+    verifySigner( dummySigner, entity );
+  }
+
+  public static void verifySigner(Signer expected, RSignerEntity actual) {
+    assertNotNull( actual );
+    assertEquals( 0, actual.getId() );
+    assertEquals( expected.getId(), actual.getUid() );
+    assertEquals( expected.getName(), actual.getName() );
+    assertEquals( expected.getOrganisation(), actual.getOrganisation() );
+    assertEquals( expected.getType(), actual.getType() );
   }
 
   @Test
@@ -52,11 +56,15 @@ public class SignerMapperTest {
     entity = mapper.toEntity(dummySigner);
     model = mapper.toModel(entity);
 
-    assertNotNull( model );
-    assertEquals( dummySigner.getId(), model.getId() );
-    assertEquals( dummySigner.getName(), model.getName() );
-    assertEquals( dummySigner.getOrganisation(), model.getOrganisation() );
-    assertEquals( dummySigner.getType(), model.getType() );
+    verifySigner( dummySigner, model );
+  }
+
+  public static void verifySigner(Signer expected, Signer actual) {
+    assertNotNull( actual );
+    assertEquals( expected.getId(), actual.getId() );
+    assertEquals( expected.getName(), actual.getName() );
+    assertEquals( expected.getOrganisation(), actual.getOrganisation() );
+    assertEquals( expected.getType(), actual.getType() );
   }
 
   @Test

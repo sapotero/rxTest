@@ -41,14 +41,18 @@ public class ExemplarMapperTest {
     mapper = new ExemplarMapper();
     entity = mapper.toEntity(dummyExemplar);
 
-    assertNotNull( entity );
-    assertEquals( 0, entity.getId() );
-    assertEquals( String.valueOf(dummyExemplar.getNumber()), entity.getNumber() );
-    assertEquals( dummyExemplar.getIsOriginal(), entity.isIsOriginal() );
-    assertEquals( dummyExemplar.getStatusCode(), entity.getStatusCode() );
-    assertEquals( dummyExemplar.getAddressedToId(), entity.getAddressedToId() );
-    assertEquals( dummyExemplar.getAddressedToName(), entity.getAddressedToName() );
-    assertEquals( dummyExemplar.getDate(), entity.getDate() );
+    verifyExemplar( dummyExemplar, entity );
+  }
+
+  public static void verifyExemplar(Exemplar expected, RExemplarEntity actual) {
+    assertNotNull( actual );
+    assertEquals( 0, actual.getId() );
+    assertEquals( String.valueOf(expected.getNumber()), actual.getNumber() );
+    assertEquals( expected.getIsOriginal(), actual.isIsOriginal() );
+    assertEquals( expected.getStatusCode(), actual.getStatusCode() );
+    assertEquals( expected.getAddressedToId(), actual.getAddressedToId() );
+    assertEquals( expected.getAddressedToName(), actual.getAddressedToName() );
+    assertEquals( expected.getDate(), actual.getDate() );
   }
 
   @Test
@@ -57,13 +61,17 @@ public class ExemplarMapperTest {
     entity = mapper.toEntity(dummyExemplar);
     model = mapper.toModel(entity);
 
-    assertNotNull( model );
-    assertEquals( dummyExemplar.getNumber(), model.getNumber() );
-    assertEquals( dummyExemplar.getIsOriginal(), model.getIsOriginal() );
-    assertEquals( dummyExemplar.getStatusCode(), model.getStatusCode() );
-    assertEquals( dummyExemplar.getAddressedToId(), model.getAddressedToId() );
-    assertEquals( dummyExemplar.getAddressedToName(), model.getAddressedToName() );
-    assertEquals( dummyExemplar.getDate(), model.getDate() );
+    verifyExemplar( dummyExemplar, model );
+  }
+
+  public static void verifyExemplar(Exemplar expected, Exemplar actual) {
+    assertNotNull( actual );
+    assertEquals( expected.getNumber(), actual.getNumber() );
+    assertEquals( expected.getIsOriginal(), actual.getIsOriginal() );
+    assertEquals( expected.getStatusCode(), actual.getStatusCode() );
+    assertEquals( expected.getAddressedToId(), actual.getAddressedToId() );
+    assertEquals( expected.getAddressedToName(), actual.getAddressedToName() );
+    assertEquals( expected.getDate(), actual.getDate() );
   }
 
   @Test

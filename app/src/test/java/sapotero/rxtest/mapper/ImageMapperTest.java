@@ -52,20 +52,24 @@ public class ImageMapperTest {
     mapper = new ImageMapper();
     entity = mapper.toEntity(dummyImage);
 
-    assertNotNull( entity );
-    assertEquals( 0                       , entity.getId() );
-    assertEquals( entity.getNumber()      , dummyImage.getNumber() );
-    assertEquals( entity.getTitle()       , dummyImage.getTitle() );
-    assertEquals( entity.getMd5()         , dummyImage.getMd5() );
-    assertEquals( entity.getSize()        , dummyImage.getSize() );
-    assertEquals( entity.getPath()        , dummyImage.getPath() );
-    assertEquals( entity.getContentType() , dummyImage.getContentType() );
-    assertEquals( entity.isSigned()       , dummyImage.getSigned() );
-    assertEquals( entity.getCreatedAt()   , dummyImage.getCreatedAt() );
-    assertEquals( entity.isLoading()      , false );
-    assertEquals( entity.isComplete()     , false );
-    assertEquals( entity.isError()        , false );
-    assertEquals( entity.isDeleted()      , false );
+    verifyImage( dummyImage, entity );
+  }
+
+  public static void verifyImage(Image expected, RImageEntity actual) {
+    assertNotNull( actual );
+    assertEquals( 0                          , actual.getId() );
+    assertEquals( expected.getNumber()       , actual.getNumber() );
+    assertEquals( expected.getTitle()        , actual.getTitle() );
+    assertEquals( expected.getMd5()          , actual.getMd5() );
+    assertEquals( expected.getSize()         , actual.getSize() );
+    assertEquals( expected.getPath()         , actual.getPath() );
+    assertEquals( expected.getContentType()  , actual.getContentType() );
+    assertEquals( expected.getSigned()       , actual.isSigned() );
+    assertEquals( expected.getCreatedAt()    , actual.getCreatedAt() );
+    assertEquals( false                      , actual.isLoading() );
+    assertEquals( false                      , actual.isComplete() );
+    assertEquals( false                      , actual.isError() );
+    assertEquals( false                      , actual.isDeleted() );
   }
 
   @Test
@@ -74,15 +78,19 @@ public class ImageMapperTest {
     entity = mapper.toEntity(dummyImage);
     model = mapper.toModel(entity);
 
-    assertNotNull( model );
-    assertEquals( entity.getNumber()      , model.getNumber() );
-    assertEquals( entity.getTitle()       , model.getTitle() );
-    assertEquals( entity.getMd5()         , model.getMd5() );
-    assertEquals( entity.getSize()        , model.getSize() );
-    assertEquals( entity.getPath()        , model.getPath() );
-    assertEquals( entity.getContentType() , model.getContentType() );
-    assertEquals( entity.isSigned()       , model.getSigned() );
-    assertEquals( entity.getCreatedAt()   , model.getCreatedAt() );
+    verifyImage( dummyImage, model );
+  }
+
+  public static void verifyImage(Image expected, Image actual) {
+    assertNotNull( actual );
+    assertEquals( expected.getNumber()      , actual.getNumber() );
+    assertEquals( expected.getTitle()       , actual.getTitle() );
+    assertEquals( expected.getMd5()         , actual.getMd5() );
+    assertEquals( expected.getSize()        , actual.getSize() );
+    assertEquals( expected.getPath()        , actual.getPath() );
+    assertEquals( expected.getContentType() , actual.getContentType() );
+    assertEquals( expected.getSigned()      , actual.getSigned() );
+    assertEquals( expected.getCreatedAt()   , actual.getCreatedAt() );
   }
 
   @Test

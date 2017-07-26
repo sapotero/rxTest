@@ -63,14 +63,18 @@ public class RouteMapperTest {
 
     Mockito.verify(mappers, times(1)).getStepMapper();
 
-    assertNotNull( entity );
-    assertEquals( 0, entity.getId() );
-    assertEquals( dummyRoute.getTitle(), entity.getText() );
+    verifyRoute( dummyRoute, entity, stepMapper );
+  }
+
+  public static void verifyRoute(Route expected, RRouteEntity actual, StepMapper stepMapper) {
+    assertNotNull( actual );
+    assertEquals( 0, actual.getId() );
+    assertEquals( expected.getTitle(), actual.getText() );
 
     int index = 0;
-    for ( RStep _step : entity.getSteps() ) {
+    for ( RStep _step : actual.getSteps() ) {
       RStepEntity stepEntity = (RStepEntity) _step;
-      StepMapperTest.verifyStep( dummyRoute.getSteps().get(index), stepEntity, stepMapper );
+      StepMapperTest.verifyStep( expected.getSteps().get(index), stepEntity, stepMapper );
       index++;
     }
   }
@@ -83,12 +87,16 @@ public class RouteMapperTest {
 
     Mockito.verify(mappers, times(2)).getStepMapper();
 
-    assertNotNull( entity );
-    assertEquals( dummyRoute.getTitle(), model.getTitle() );
+    verifyRoute( dummyRoute, model );
+  }
+
+  public static void verifyRoute(Route expected, Route actual) {
+    assertNotNull( actual );
+    assertEquals( expected.getTitle(), actual.getTitle() );
 
     int index = 0;
-    for ( Step step : model.getSteps() ) {
-      StepMapperTest.verifyStep( dummyRoute.getSteps().get(index), step );
+    for ( Step step : actual.getSteps() ) {
+      StepMapperTest.verifyStep( expected.getSteps().get(index), step );
       index++;
     }
   }
