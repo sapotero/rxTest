@@ -22,17 +22,18 @@ public class ActionMapperTest {
 
   @Before
   public void init() {
-    generateAction();
+    dummyAction = generateAction();
   }
 
-  private void generateAction() {
-    dummyAction = new DocumentInfoAction();
-    dummyAction.setOfficialId( "J78hsdkjfh8WE23ewfs" );
-    dummyAction.setAddressedToId( "kjds7jhWEKLdf34DFSGFDGdf" );
+  public static DocumentInfoAction generateAction() {
+    DocumentInfoAction dummyAction = new DocumentInfoAction();
+    dummyAction.setOfficialId( "56eaad2735c7000002000001" );
+    dummyAction.setAddressedToId( "58f88dfc776b000026000001" );
     dummyAction.setAction( "primary_consideration" );
-    dummyAction.setActionDescription( "Отправлен на первичное рассмотрение" );
-    dummyAction.setUpdatedAt( "2017-07-24" );
-    dummyAction.setToS( "kjshfdkjshf" );
+    dummyAction.setActionDescription( "Отправлен экземпляр в статусе \\\"Первичное рассмотрение \\\"" );
+    dummyAction.setUpdatedAt( "09.06.2017 09:07:11" );
+    dummyAction.setToS( "Отправлен экземпляр в статусе \\\"Первичное рассмотрение \\\" пользователем Руководитель Г. (ГУ МВД России по Самарской области)" );
+    return dummyAction;
   }
 
   @Test
@@ -40,14 +41,18 @@ public class ActionMapperTest {
     mapper = new ActionMapper();
     entity = mapper.toEntity(dummyAction);
 
-    assertNotNull( entity );
-    assertEquals( 0, entity.getId() );
-    assertEquals( dummyAction.getOfficialId(), entity.getOfficialId() );
-    assertEquals( dummyAction.getAddressedToId(), entity.getAddressedToId() );
-    assertEquals( dummyAction.getAction(), entity.getAction() );
-    assertEquals( dummyAction.getActionDescription(), entity.getActionDescription() );
-    assertEquals( dummyAction.getUpdatedAt(), entity.getUpdatedAt() );
-    assertEquals( dummyAction.getToS(), entity.getToS() );
+    verifyAction( dummyAction, entity );
+  }
+
+  public static void verifyAction(DocumentInfoAction expected, RActionEntity actual) {
+    assertNotNull( actual );
+    assertEquals( 0, actual.getId() );
+    assertEquals( expected.getOfficialId(), actual.getOfficialId() );
+    assertEquals( expected.getAddressedToId(), actual.getAddressedToId() );
+    assertEquals( expected.getAction(), actual.getAction() );
+    assertEquals( expected.getActionDescription(), actual.getActionDescription() );
+    assertEquals( expected.getUpdatedAt(), actual.getUpdatedAt() );
+    assertEquals( expected.getToS(), actual.getToS() );
   }
 
   @Test
@@ -56,13 +61,17 @@ public class ActionMapperTest {
     entity = mapper.toEntity(dummyAction);
     model = mapper.toModel(entity);
 
-    assertNotNull( model );
-    assertEquals( dummyAction.getOfficialId(), model.getOfficialId() );
-    assertEquals( dummyAction.getAddressedToId(), model.getAddressedToId() );
-    assertEquals( dummyAction.getAction(), model.getAction() );
-    assertEquals( dummyAction.getActionDescription(), model.getActionDescription() );
-    assertEquals( dummyAction.getUpdatedAt(), model.getUpdatedAt() );
-    assertEquals( dummyAction.getToS(), model.getToS() );
+    verifyAction( dummyAction, model );
+  }
+
+  public static void verifyAction(DocumentInfoAction expected, DocumentInfoAction actual) {
+    assertNotNull( actual );
+    assertEquals( expected.getOfficialId(), actual.getOfficialId() );
+    assertEquals( expected.getAddressedToId(), actual.getAddressedToId() );
+    assertEquals( expected.getAction(), actual.getAction() );
+    assertEquals( expected.getActionDescription(), actual.getActionDescription() );
+    assertEquals( expected.getUpdatedAt(), actual.getUpdatedAt() );
+    assertEquals( expected.getToS(), actual.getToS() );
   }
 
   @Test

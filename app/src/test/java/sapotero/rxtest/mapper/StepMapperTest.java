@@ -34,7 +34,7 @@ public class StepMapperTest {
   public static Step generateStep() {
     Step dummyStep = new Step();
 
-    dummyStep.setTitle( "kjsdhfkds823kjsd" );
+    dummyStep.setTitle( "Согласующие" );
     dummyStep.setNumber( "56" );
 
     List<Person> people = new ArrayList<>();
@@ -45,9 +45,9 @@ public class StepMapperTest {
 
     List<Action> actions = new ArrayList<>();
     Action action = new Action();
-    action.setDate( "2017-07-24" );
-    action.setStatus( "primary_consideration" );
-    action.setComment( "Отправлен на первичное рассмотрение" );
+    action.setDate( "30.06.2017 10:01" );
+    action.setStatus( "Согласовано" );
+    action.setComment( "SDFrkjf f ds78 fjhkdskjfh" );
 
     actions.add(action);
     person.setActions(actions);

@@ -15,10 +15,10 @@ import javax.inject.Inject;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.dagger.components.DaggerTestDataComponent;
 import sapotero.rxtest.dagger.components.TestDataComponent;
+import sapotero.rxtest.db.mapper.FavoriteUserMapper;
 import sapotero.rxtest.db.mapper.PerformerMapper;
-import sapotero.rxtest.db.mapper.PrimaryConsiderationMapper;
 import sapotero.rxtest.db.mapper.utils.Mappers;
-import sapotero.rxtest.db.requery.models.RPrimaryConsiderationEntity;
+import sapotero.rxtest.db.requery.models.RFavoriteUserEntity;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.TestSettings;
@@ -32,14 +32,14 @@ import static org.mockito.Mockito.times;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ EsdApplication.class })
-public class PrimaryConsiderationMapperTest {
+public class FavoriteUserMapperTest {
 
   private TestDataComponent testDataComponent;
-  private PrimaryConsiderationMapper mapper;
+  private FavoriteUserMapper mapper;
   private PerformerMapper performerMapper;
   private Oshs dummyOshs;
   private Integer dummySortIndex;
-  private RPrimaryConsiderationEntity entity;
+  private RFavoriteUserEntity entity;
   private Oshs model;
   private PrimaryConsiderationPeople people;
 
@@ -56,8 +56,8 @@ public class PrimaryConsiderationMapperTest {
 
     performerMapper = new PerformerMapper();
 
-    dummyOshs = generateOshs();
-    dummySortIndex = generateDummySortIndex();
+    dummyOshs = PrimaryConsiderationMapperTest.generateOshs();
+    dummySortIndex = PrimaryConsiderationMapperTest.generateDummySortIndex();
 
     PowerMockito.mockStatic(EsdApplication.class);
     PowerMockito.when(EsdApplication.getDataComponent()).thenReturn(testDataComponent);
@@ -65,32 +65,11 @@ public class PrimaryConsiderationMapperTest {
     Mockito.when(mappers.getPerformerMapper()).thenReturn(performerMapper);
   }
 
-  public static Integer generateDummySortIndex() {
-    return 123;
-  }
-
-  public static Oshs generateOshs() {
-    Oshs dummyOshs = new Oshs();
-    dummyOshs.setId( "58f88dfc776b000026000001" );
-    dummyOshs.setIsOrganization( false );
-    dummyOshs.setIsGroup( false );
-    dummyOshs.setName( "Сотрудник_а2 A.T." );
-    dummyOshs.setOrganization( "ОДиР ГУ МВД России по Самарской области" );
-    dummyOshs.setPosition( "Сотрудник ОДИР" );
-    dummyOshs.setLastName( "Сотрудник_а2" );
-    dummyOshs.setFirstName( "Android" );
-    dummyOshs.setMiddleName( "Test" );
-    dummyOshs.setGender( "Мужской" );
-    dummyOshs.setImage( null );
-    return dummyOshs;
-  }
-
   @Test
   public void toEntity() {
-    mapper = new PrimaryConsiderationMapper(mappers);
+    mapper = new FavoriteUserMapper(mappers);
     entity = mapper.toEntity(dummyOshs);
 
-    // These two lines verify, that EsdApplication.getDataComponent() was called 1 time
     PowerMockito.verifyStatic(times(1));
     EsdApplication.getDataComponent();
 
@@ -113,7 +92,7 @@ public class PrimaryConsiderationMapperTest {
 
   @Test
   public void toModel() {
-    mapper = new PrimaryConsiderationMapper(mappers);
+    mapper = new FavoriteUserMapper(mappers);
     entity = mapper.toEntity(dummyOshs);
     model = mapper.toModel(entity);
 
@@ -137,7 +116,7 @@ public class PrimaryConsiderationMapperTest {
 
   @Test
   public void toPrimaryConsiderationPeople() {
-    mapper = new PrimaryConsiderationMapper(mappers);
+    mapper = new FavoriteUserMapper(mappers);
     entity = mapper.toEntity(dummyOshs);
     entity.setSortIndex(dummySortIndex);
     people = mapper.toPrimaryConsiderationPeople(entity);
@@ -160,10 +139,10 @@ public class PrimaryConsiderationMapperTest {
 
   @Test
   public void hasDiff() {
-    mapper = new PrimaryConsiderationMapper(mappers);
+    mapper = new FavoriteUserMapper(mappers);
 
-    RPrimaryConsiderationEntity entity1 = mapper.toEntity(dummyOshs);
-    RPrimaryConsiderationEntity entity2 = mapper.toEntity(dummyOshs);
+    RFavoriteUserEntity entity1 = mapper.toEntity(dummyOshs);
+    RFavoriteUserEntity entity2 = mapper.toEntity(dummyOshs);
 
     boolean hasDiff = mapper.hasDiff(entity1, entity2);
 
