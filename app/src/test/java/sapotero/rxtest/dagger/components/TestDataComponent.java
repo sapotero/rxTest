@@ -6,10 +6,12 @@ import sapotero.rxtest.application.scopes.DataScope;
 import sapotero.rxtest.dagger.modules.TestEsdModule;
 import sapotero.rxtest.dagger.modules.TestSettingsModule;
 import sapotero.rxtest.db.mapper.AssistantMapper;
+import sapotero.rxtest.db.mapper.ColleagueMapper;
 import sapotero.rxtest.db.mapper.PrimaryConsiderationMapper;
 import sapotero.rxtest.db.mapper.utils.MappersModule;
 import sapotero.rxtest.db.requery.utils.RequeryDbModule;
 import sapotero.rxtest.mapper.AssistantMapperTest;
+import sapotero.rxtest.mapper.ColleagueMapperTest;
 import sapotero.rxtest.mapper.DocumentMapperTest;
 import sapotero.rxtest.mapper.PrimaryConsiderationMapperTest;
 import sapotero.rxtest.utils.memory.utils.MemoryStoreModule;
@@ -31,4 +33,7 @@ public interface TestDataComponent extends DataComponent {
 
   void inject(AssistantMapper assistantMapper);
   void inject(AssistantMapperTest assistantMapperTest);
+
+  void inject(ColleagueMapper colleagueMapper);
+  void inject(ColleagueMapperTest colleagueMapperTest);
 }

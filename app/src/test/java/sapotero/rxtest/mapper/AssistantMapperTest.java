@@ -4,7 +4,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -15,9 +14,7 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.dagger.components.DaggerTestDataComponent;
 import sapotero.rxtest.dagger.components.TestDataComponent;
 import sapotero.rxtest.db.mapper.AssistantMapper;
-import sapotero.rxtest.db.mapper.PrimaryConsiderationMapper;
 import sapotero.rxtest.db.requery.models.RAssistantEntity;
-import sapotero.rxtest.db.requery.models.RPrimaryConsiderationEntity;
 import sapotero.rxtest.retrofit.models.Assistant;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.TestSettings;
@@ -45,8 +42,6 @@ public class AssistantMapperTest {
 
   @Before
   public void init() {
-    MockitoAnnotations.initMocks(this);
-
     testDataComponent = DaggerTestDataComponent.builder().build();
     testDataComponent.inject(this);
 
