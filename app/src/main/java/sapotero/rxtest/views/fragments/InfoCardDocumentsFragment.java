@@ -5,8 +5,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.FileProvider;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -84,6 +86,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   @BindView(R.id.deleted_image) FrameLayout deletedImage;
   @BindView(R.id.broken_image) FrameLayout broken_image;
   @BindView(R.id.info_card_pdf_reload) Button reloadImageButton;
+  @BindView(R.id.swiperefresh) SwipeRefreshLayout swipe;
 
   @BindView(R.id.info_card_pdf_no_files) TextView no_files;
   @BindView(R.id.info_card_pdf_wrapper)  FrameLayout pdf_wrapper;
@@ -128,6 +131,10 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     return view;
   }
 
+  private void refresh() {
+    swipe.setRefreshing(false);
+  }
+
   private void initSubscription() {
     directionSub
       .buffer( 500, TimeUnit.MILLISECONDS )
@@ -159,6 +166,9 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
               if ( positions.get(0) == 1.0f ){
                 getNextImage();
               }
+
+              swipe.setRefreshing(true);
+              ( new Handler()).postDelayed(this::refresh, 1000);
             }
 
 

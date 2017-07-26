@@ -19,15 +19,23 @@
         android:layout_alignParentBottom="true">
 
 
-        <!--<sapotero.rxtest.views.custom.pdf.PDFView-->
-        <com.github.barteksc.pdfviewer.PDFView
-            android:id="@+id/pdfView"
+
+        <android.support.v4.widget.SwipeRefreshLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/swiperefresh"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:padding="32dp"
-            android:layout_margin="@dimen/half_date_offset"
-            />
+            android:layout_height="match_parent">
+
+            <com.github.barteksc.pdfviewer.PDFView
+                android:id="@+id/pdfView"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:padding="32dp"
+                android:layout_margin="@dimen/half_date_offset"
+                />
+
+        </android.support.v4.widget.SwipeRefreshLayout>
 
         <LinearLayout
             android:id="@+id/open_in_another_app_wrapper"
