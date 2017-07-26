@@ -52,9 +52,9 @@ public class ColleagueMapperTest {
 
   private void generateColleague() {
     dummyColleague = new Colleague();
-    dummyColleague.setColleagueId( "sdlkfhjdskfhi23uhfj23fk" );
-    dummyColleague.setOfficialId( "58f88dfc776b000026000001" );
-    dummyColleague.setOfficialName( "Сотрудник_а2 A.T." );
+    dummyColleague.setColleagueId( "58b845ed24b40001b3000001" );
+    dummyColleague.setOfficialId( "56eaaddb1372000002000001" );
+    dummyColleague.setOfficialName( "Руководитель О. (ОДиР ГУ МВД России по Самарской области, Начальник)" );
     dummyColleague.setActived( true );
   }
 

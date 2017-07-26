@@ -128,7 +128,7 @@ public class DocumentMapperTest {
     dummyDoc = new DocumentInfo();
     dummyDoc.setUid( "02153f437109fe79ad68cdc63f1ed0e57cca7bcbf88d2c1c53a08ac27b67c68871" );
     dummyDoc.setMd5( "692fe5abec8bec4cbc29f5475d126a67" );
-    dummyDoc.setSortKey( 8 );
+    dummyDoc.setSortKey( 1496673841 );
     dummyDoc.setTitle( "Входящий документ от 30.06.2017" );
     dummyDoc.setRegistrationNumber( "1323" );
     dummyDoc.setRegistrationDate( "30.06.2017" );

@@ -26,9 +26,9 @@ public class SignerMapperTest {
 
   public static Signer generateSigner() {
     Signer dummySigner = new Signer();
-    dummySigner.setId( "RF34frkfjV9sjhd34rgfd" );
-    dummySigner.setName( "Иванов И.И." );
-    dummySigner.setOrganisation( "ОДиР ГУ МВД России по Самарской области" );
+    dummySigner.setId( "58f88dfc776b000026370001" );
+    dummySigner.setName( "Иванов И.И. (Старший эксперт)" );
+    dummySigner.setOrganisation( "ЦВСНП МВД по Республике Башкортостан" );
     dummySigner.setType( "mvd_person" );
     return dummySigner;
   }

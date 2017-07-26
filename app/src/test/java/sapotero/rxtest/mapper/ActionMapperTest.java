@@ -27,12 +27,12 @@ public class ActionMapperTest {
 
   public static DocumentInfoAction generateAction() {
     DocumentInfoAction dummyAction = new DocumentInfoAction();
-    dummyAction.setOfficialId( "J78hsdkjfh8WE23ewfs" );
-    dummyAction.setAddressedToId( "kjds7jhWEKLdf34DFSGFDGdf" );
+    dummyAction.setOfficialId( "56eaad2735c7000002000001" );
+    dummyAction.setAddressedToId( "58f88dfc776b000026000001" );
     dummyAction.setAction( "primary_consideration" );
-    dummyAction.setActionDescription( "Отправлен на первичное рассмотрение" );
-    dummyAction.setUpdatedAt( "2017-07-24" );
-    dummyAction.setToS( "kjshfdkjshf" );
+    dummyAction.setActionDescription( "Отправлен экземпляр в статусе \\\"Первичное рассмотрение \\\"" );
+    dummyAction.setUpdatedAt( "09.06.2017 09:07:11" );
+    dummyAction.setToS( "Отправлен экземпляр в статусе \\\"Первичное рассмотрение \\\" пользователем Руководитель Г. (ГУ МВД России по Самарской области)" );
     return dummyAction;
   }
 

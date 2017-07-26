@@ -54,11 +54,11 @@ public class AssistantMapperTest {
 
   private void generateAssistant() {
     dummyAssistant = new Assistant();
-    dummyAssistant.setToS( "sdfkldsfk uihf wef" );
-    dummyAssistant.setAssistantId( "58f88dfc776b000026000001" );
-    dummyAssistant.setAssistantName( "Сотрудник_а2 A.T." );
+    dummyAssistant.setToS( "Сотрудник О. (ОДиР ГУ МВД России по Самарской области, Врио  Руководителя О.)" );
+    dummyAssistant.setAssistantId( "57347f4673f700005b000001" );
+    dummyAssistant.setAssistantName( "Сотрудник О." );
     dummyAssistant.setForDecision( false );
-    dummyAssistant.setHeadId( "kjsdhfk21DFsdklj89jSDsdf4" );
+    dummyAssistant.setHeadId( "56eaaddb1372000002000001" );
     dummyAssistant.setHeadName( "Иванов И.И." );
   }
 

@@ -27,11 +27,11 @@ public class ControlLabelMapperTest {
 
   public static ControlLabel generateControlLabel() {
     ControlLabel dummyControlLabel = new ControlLabel();
-    dummyControlLabel.setCreatedAt( "2017-07-24" );
+    dummyControlLabel.setCreatedAt( "20.07.2017 15:33" );
     dummyControlLabel.setOfficialId( "58f88dfc776b000026000001" );
     dummyControlLabel.setOfficialName( "Сотрудник_а2 A.T." );
-    dummyControlLabel.setSkippedOfficialId( "dkjsbfdskjhfdkj" );
-    dummyControlLabel.setSkippedOfficialName( "Сотрудник_а3 A.T." );
+    dummyControlLabel.setSkippedOfficialId( null );
+    dummyControlLabel.setSkippedOfficialName( null );
     dummyControlLabel.setState( "Отмечен для постановки на контроль" );
     return dummyControlLabel;
   }

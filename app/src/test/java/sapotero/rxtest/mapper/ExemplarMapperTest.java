@@ -31,8 +31,8 @@ public class ExemplarMapperTest {
     dummyExemplar.setIsOriginal( true );
     dummyExemplar.setStatusCode( "sent_to_the_report" );
     dummyExemplar.setAddressedToId( "58f88dfc776b000026000001" );
-    dummyExemplar.setAddressedToName( "Сотрудник_а2 A.T." );
-    dummyExemplar.setDate( "2017-07-24" );
+    dummyExemplar.setAddressedToName( "Сотрудник_а2 A.T. (ОДиР ГУ МВД России по Самарской области)" );
+    dummyExemplar.setDate( "05.06.2017" );
     return dummyExemplar;
   }
 

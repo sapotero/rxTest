@@ -48,23 +48,23 @@ public class DecisionMapperTest {
 
   public static Decision generateDecision() {
     Decision dummyDecision = new Decision();
-    dummyDecision.setId( "G546olierufih8EDE4erD34fdg" );
+    dummyDecision.setId( "59662a4f5284000003000001" );
     dummyDecision.setLetterhead( "Бланк резолюции" );
     dummyDecision.setApproved( false );
-    dummyDecision.setSigner( "Сотрудник_а1 A.T. (ОДиР ГУ МВД России по Самарской области)" );
-    dummyDecision.setSignerId( "58f88dfc776b000026000402" );
-    dummyDecision.setSignerBlankText( "Сотрудник_а1 A.T." );
+    dummyDecision.setSigner( "Сотрудник_а2 A.T. (ОДиР ГУ МВД России по Самарской области, Сотрудник ОДИР)" );
+    dummyDecision.setSignerId( "58f88dfc776b000026000001" );
+    dummyDecision.setSignerBlankText( "A.T. Сотрудник_а2" );
     dummyDecision.setSignerIsManager( false );
     dummyDecision.setSignerPositionS( "Сотрудник ОДИР" );
-    dummyDecision.setAssistantId( "kjhwf78&HJJ3eg43f" );
+    dummyDecision.setAssistantId( null );
     dummyDecision.setComment( "kjh89 23sdjf23n 2389dskjf slsdkjfsdj" );
-    dummyDecision.setDate( "2017-07-24" );
+    dummyDecision.setDate( "15.07.2017" );
     dummyDecision.setUrgencyText( "Весьма срочно" );
-    dummyDecision.setShowPosition( true );
+    dummyDecision.setShowPosition( false );
     dummyDecision.setSignBase64( null );
     dummyDecision.setRed( false );
-    dummyDecision.setLetterheadFontSize( "14" );
-    dummyDecision.setPerformersFontSize( "10" );
+    dummyDecision.setLetterheadFontSize( "12" );
+    dummyDecision.setPerformersFontSize( "15" );
 
     Block dummyBlock = BlockMapperTest.generateBlock();
     dummyDecision.getBlocks().add(dummyBlock);
