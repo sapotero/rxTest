@@ -16,6 +16,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,6 +40,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
@@ -67,15 +69,10 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   @Inject MemoryStore store;
   @Inject JobManager jobManager;
 
-  private OnFragmentInteractionListener mListener;
-  private Context mContext;
-  private String TAG = this.getClass().getSimpleName();
-
-  private static final String STATE_CURRENT_PAGE_INDEX = "current_page_index";
-
   @BindView(R.id.pdfView) PDFView pdfView;
 
   @BindView(R.id.info_card_pdf_fullscreen_prev_document) CircleLeftArrow prev_document;
+
   @BindView(R.id.info_card_pdf_fullscreen_next_document) CircleRightArrow next_document;
   @BindView(R.id.info_card_pdf_fullscreen_document_counter) TextView document_counter;
   @BindView(R.id.info_card_pdf_fullscreen_page_title)       TextView document_title;
@@ -84,13 +81,19 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   @BindView(R.id.deleted_image) FrameLayout deletedImage;
   @BindView(R.id.broken_image) FrameLayout broken_image;
   @BindView(R.id.info_card_pdf_reload) Button reloadImageButton;
-
   @BindView(R.id.info_card_pdf_no_files) TextView no_files;
-  @BindView(R.id.info_card_pdf_wrapper)  FrameLayout pdf_wrapper;
 
+  @BindView(R.id.info_card_pdf_wrapper)  FrameLayout pdf_wrapper;
   @BindView(R.id.fragment_info_card_urgency_title) TextView urgency;
 
   @BindView(R.id.open_in_another_app_wrapper) LinearLayout open_in_another_app_wrapper;
+  @BindView(R.id.pdf_linear_wrapper) RelativeLayout pdf_linear_wrapper;
+
+  private OnFragmentInteractionListener mListener;
+  private Context mContext;
+  private String TAG = this.getClass().getSimpleName();
+
+  private static final String STATE_CURRENT_PAGE_INDEX = "current_page_index";
 
   private int index = 0;
 
@@ -100,10 +103,16 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
   private File file;
   private String contentType;
-
   private PublishSubject<Float> directionSub = PublishSubject.create();
 
+
+  private final SwipeUtil swipeUtil;
+  private Toast toast;
+  private boolean toastShown = false;
+  private Subscription sub;
+
   public InfoCardDocumentsFragment() {
+    swipeUtil = new SwipeUtil();
   }
 
   @Override
@@ -129,15 +138,17 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   }
 
   private void initSubscription() {
-    directionSub
-      .buffer( 500, TimeUnit.MILLISECONDS )
-      .onBackpressureBuffer(512)
+    sub = directionSub
+      .buffer( 1000, TimeUnit.MILLISECONDS )
+      .onBackpressureBuffer(32)
       .onBackpressureDrop()
       .subscribeOn(Schedulers.computation())
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(
         positions -> {
-          if ( positions.size() > 16 ){
+          Timber.i("SIZE: %s", positions.size());
+
+          if ( positions.size() >= 16 ){
             Boolean changed = false;
 
             for (int i = 0; i < positions.size(); i++) {
@@ -260,13 +271,9 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
             .swipeHorizontal(false)
             .onRender((nbPages, pageWidth, pageHeight) -> pdfView.fitToWidth())
             .onPageChange((page, pageCount) -> {
-              Timber.tag(TAG).i(" onPageChange");
               updatePageCount();
             })
-            .onPageScroll((page, positionOffset) -> {
-              directionSub.onNext(positionOffset);
-            })
-//            .onPageScroll((page, positionOffset) -> pdfView.stopFling())
+            .onPageScroll(this::setDirection)
             .enableAnnotationRendering(true)
             .scrollHandle(null)
             .load();
@@ -278,14 +285,6 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
           pdfView.setDrawingCacheEnabled(true);
           pdfView.enableRenderDuringScale(false);
 
-//          pdfView.useBestQuality(false);
-//          pdfView.setDrawingCacheEnabled(true);
-//          pdfView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_LOW);
-//          pdfView.stopFling();
-
-//        pdfView.useBestQuality(true);
-//        pdfView.setDrawingCacheEnabled(true);
-//        pdfView.stopFling();
         }
 
         pdfView.setVisibility(View.VISIBLE);
@@ -305,6 +304,41 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     }
 
 
+
+  }
+
+  private void setDirection(int page, float positionOffset) {
+
+    if ( adapter.getItems().size() > 1 ){
+
+      SwipeUtil.DIRECTION direction = SwipeUtil.DIRECTION.OTHER;
+
+      if (positionOffset == 0.0f){
+        direction = SwipeUtil.DIRECTION.UP;
+      }
+
+      if (positionOffset == 1.0f){
+        direction = SwipeUtil.DIRECTION.DOWN;
+      }
+
+      if ( swipeUtil.isSameDirection(direction) ) {
+        if (direction != SwipeUtil.DIRECTION.OTHER) {
+
+          if ( !toastShown ) {
+            toast = Toast.makeText(getContext(), direction.getMessage(), Toast.LENGTH_SHORT);
+            toast.show();
+            toastShown = true;
+          }
+
+        }
+      } else {
+        toastShown = false;
+      }
+
+      swipeUtil.setDirection( direction );
+      directionSub.onNext(positionOffset);
+
+    }
 
   }
 
@@ -429,8 +463,12 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 //    if ( EventBus.getDefault().isRegistered(this) ){
 //      EventBus.getDefault().unregister(this);
 //    }
+//    directionSub
+    if (sub != null) {
+      sub.unsubscribe();
+      directionSub = null;
+    }
 
-    pdfView.recycle();
   }
 
   @Override
@@ -468,20 +506,6 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     void onFragmentInteraction(Uri uri);
   }
 
-//  @Subscribe(threadMode = ThreadMode.MAIN)
-//  public void onMessageEvent(FileDownloadedEvent event) {
-//    Log.d("FileDownloadedEvent", event.path);
-//
-//  }
-//
-//  @Subscribe(threadMode = ThreadMode.MAIN)
-//  public void onMessageEvent(UpdateCurrentDocumentEvent event) throws Exception {
-//    Timber.tag(TAG).w("UpdateCurrentDocumentEvent %s", event.uid);
-//    if (Objects.equals(event.uid, settings.getUid())){
-//      updateDocument();
-//    }
-//  }
-
   // resolved https://tasks.n-core.ru/browse/MVDESD-13415
   // Если ЭО имеет формат, отличный от PDF, предлагать открыть во внешнем приложении
   @OnClick(R.id.open_in_another_app)
@@ -503,4 +527,39 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     }
   }
 
+
+  private static class SwipeUtil{
+
+    enum DIRECTION{
+      UP("Для перехода к предыдущему электронному образу потяните ↓"), DOWN("Для перехода к следующему электронному образу потяните ↑"), OTHER("");
+
+      private final String message;
+      DIRECTION(String message) {
+        this.message = message;
+      }
+
+      public String getMessage() {
+        return message;
+      }
+    };
+
+    DIRECTION direction;
+
+
+    SwipeUtil() {
+      this.direction = DIRECTION.OTHER;
+    }
+
+    Boolean isSameDirection(DIRECTION direction){
+      return direction == this.direction;
+    }
+
+    void setDirection(DIRECTION direction) {
+      this.direction = direction;
+    }
+
+    public String getMessage(){
+      return direction.getMessage();
+    }
+  }
 }
