@@ -33,7 +33,7 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RLinks;
 import sapotero.rxtest.db.requery.models.RLinksEntity;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.activities.InfoNoMenuActivity;
 import sapotero.rxtest.views.adapters.LinkAdapter;
 import sapotero.rxtest.views.adapters.models.Link;
@@ -42,7 +42,7 @@ import timber.log.Timber;
 
 public class InfoCardLinksFragment extends Fragment {
 
-  @Inject Settings settings;
+  @Inject ISettings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   @BindView(R.id.fragment_info_card_link_wrapper) Spinner wrapper;

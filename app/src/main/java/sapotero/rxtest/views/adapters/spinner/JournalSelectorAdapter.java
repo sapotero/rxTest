@@ -19,7 +19,7 @@ import javax.inject.Inject;
 
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.utils.memory.utils.Filter;
@@ -35,7 +35,7 @@ import static com.googlecode.totallylazy.Sequences.sequence;
 
 public class JournalSelectorAdapter extends RecyclerView.Adapter<JournalSelectorAdapter.ViewHolder> {
   @Inject MemoryStore store;
-  @Inject Settings settings;
+  @Inject ISettings settings;
 
   private List<String> items;
   private HashMap<Integer, Integer> positions;
@@ -147,6 +147,7 @@ public class JournalSelectorAdapter extends RecyclerView.Adapter<JournalSelector
       sequence( settings.getJournals() )
         .filter(IntegerValidator::isInt)
         .map(id -> MainMenuItem.get(Integer.parseInt(id)))
+        .sort((i1, i2) -> i1.getIndex().compareTo(i2.getIndex()))
         .toList()
     );
     journal.addAll( Arrays.asList(MainMenuItem.ON_CONTROL, MainMenuItem.PROCESSED, MainMenuItem.FAVORITES) );

@@ -18,7 +18,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.utils.memory.utils.Filter;
@@ -31,7 +31,7 @@ import static com.googlecode.totallylazy.Sequences.sequence;
 
 public class DocumentTypeItem {
   @Inject SingleEntityStore<Persistable> dataStore;
-  @Inject Settings settings;
+  @Inject ISettings settings;
   @Inject MemoryStore store;
 
   private final CompositeSubscription subscription;

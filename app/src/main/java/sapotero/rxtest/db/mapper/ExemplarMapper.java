@@ -1,16 +1,10 @@
 package sapotero.rxtest.db.mapper;
 
-import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.exemplars.RExemplarEntity;
 import sapotero.rxtest.retrofit.models.document.Exemplar;
-import sapotero.rxtest.utils.Settings;
 
 // Maps between Exemplar and ExemplarEntity
 public class ExemplarMapper extends AbstractMapper<Exemplar, RExemplarEntity> {
-
-  public ExemplarMapper(Settings settings, Mappers mappers) {
-    super(settings, mappers);
-  }
 
   @Override
   public RExemplarEntity toEntity(Exemplar model) {

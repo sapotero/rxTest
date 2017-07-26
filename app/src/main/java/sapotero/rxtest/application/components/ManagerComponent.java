@@ -24,6 +24,7 @@ import sapotero.rxtest.views.adapters.DecisionAdapter;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.models.DocumentTypeItem;
 import sapotero.rxtest.views.adapters.spinner.JournalSelectorAdapter;
+import sapotero.rxtest.views.custom.stepper.build.steps.StepperAuthFragment;
 import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
 import sapotero.rxtest.views.fragments.DecisionRejectionTemplateFragment;
 import sapotero.rxtest.views.fragments.DecisionTemplateFragment;
@@ -52,6 +53,7 @@ public interface ManagerComponent {
   void inject(DecisionTemplateFragment fragment);
   void inject(DecisionRejectionTemplateFragment fragment);
   void inject(DecisionPreviewFragment fragment);
+  void inject(StepperAuthFragment fragment);
 
   void inject(DecisionAdapter adapter);
 

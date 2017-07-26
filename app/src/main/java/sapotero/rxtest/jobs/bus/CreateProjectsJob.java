@@ -26,7 +26,7 @@ public class CreateProjectsJob extends DocumentJob {
   private boolean shared = false;
 
   public CreateProjectsJob(String uid, String status, boolean shared) {
-    super( new Params(PRIORITY).requireNetwork().persist() );
+    super( new Params(PRIORITY).requireNetwork().persist().addTags("DocJob") );
     this.uid = uid;
     this.status = status;
     this.shared = shared;

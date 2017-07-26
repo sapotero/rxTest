@@ -39,7 +39,7 @@ import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.Oshs;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
 import timber.log.Timber;
@@ -47,7 +47,7 @@ import timber.log.Timber;
 public class ToolbarManager  implements SelectOshsDialogFragment.Callback, OperationManager.Callback {
 
   @Inject SingleEntityStore<Persistable> dataStore;
-  @Inject Settings settings;
+  @Inject ISettings settings;
   @Inject OperationManager operationManager;
 
   private final String TAG = this.getClass().getSimpleName();

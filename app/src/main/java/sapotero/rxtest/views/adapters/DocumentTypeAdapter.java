@@ -16,12 +16,12 @@ import javax.inject.Inject;
 
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.adapters.models.DocumentTypeItem;
 
 public class DocumentTypeAdapter extends BaseAdapter {
 
-  @Inject Settings settings;
+  @Inject ISettings settings;
 
   private List<DocumentTypeItem> documents;
   private Context context;

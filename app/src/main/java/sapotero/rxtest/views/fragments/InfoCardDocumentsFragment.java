@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -38,6 +39,9 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
+import rx.subjects.PublishSubject;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
@@ -45,7 +49,7 @@ import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.jobs.bus.ReloadProcessedImageJob;
 import sapotero.rxtest.retrofit.models.document.Image;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import sapotero.rxtest.utils.memory.utils.Transaction;
@@ -58,7 +62,7 @@ import timber.log.Timber;
 public class InfoCardDocumentsFragment extends Fragment implements AdapterView.OnItemClickListener, GestureDetector.OnDoubleTapListener {
 
   public static final int REQUEST_CODE_INDEX = 1;
-  @Inject Settings settings;
+  @Inject ISettings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject MemoryStore store;
   @Inject JobManager jobManager;
@@ -97,6 +101,8 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   private File file;
   private String contentType;
 
+  private PublishSubject<Float> directionSub = PublishSubject.create();
+
   public InfoCardDocumentsFragment() {
   }
 
@@ -117,8 +123,49 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     }
 
     updateDocument();
+    initSubscription();
 
     return view;
+  }
+
+  private void initSubscription() {
+    directionSub
+      .buffer( 500, TimeUnit.MILLISECONDS )
+      .onBackpressureBuffer(512)
+      .onBackpressureDrop()
+      .subscribeOn(Schedulers.computation())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(
+        positions -> {
+          if ( positions.size() > 16 ){
+            Boolean changed = false;
+
+            for (int i = 0; i < positions.size(); i++) {
+              if (i > 1){
+                 if (!Objects.equals(positions.get(i - 1), positions.get(i))){
+                   changed = true;
+                   break;
+                 }
+              }
+            }
+
+            if (!changed){
+              Timber.d("NOT CHANGED: %s", positions.get(0) );
+
+              if ( positions.get(0) == 0.0f ){
+                getPrevImage();
+              }
+
+              if ( positions.get(0) == 1.0f ){
+                getNextImage();
+              }
+            }
+
+
+          }
+        },
+        Timber::e
+      );
   }
 
   public void updateDocument(){
@@ -212,18 +259,12 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
             .defaultPage(0)
             .swipeHorizontal(false)
             .onRender((nbPages, pageWidth, pageHeight) -> pdfView.fitToWidth())
-            .onLoad(nbPages -> {
-              Timber.tag(TAG).i(" onLoad");
-            })
-            .onError(t -> {
-              Timber.tag(TAG).i(" onError");
-            })
-            .onDraw((canvas, pageWidth, pageHeight, displayedPage) -> {
-              Timber.tag(TAG).i(" onDraw");
-            })
             .onPageChange((page, pageCount) -> {
               Timber.tag(TAG).i(" onPageChange");
               updatePageCount();
+            })
+            .onPageScroll((page, positionOffset) -> {
+              directionSub.onNext(positionOffset);
             })
 //            .onPageScroll((page, positionOffset) -> pdfView.stopFling())
             .enableAnnotationRendering(true)
@@ -287,7 +328,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   }
 
   @OnClick(R.id.info_card_pdf_fullscreen_prev_document)
-  public void setLeftArrowArrow() {
+  public void getPrevImage() {
     Timber.tag(TAG).i( "BEFORE %s - %s", index, adapter.getCount() );
     if ( index <= 0 ){
       index = adapter.getCount()-1;
@@ -315,7 +356,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   }
 
   @OnClick(R.id.info_card_pdf_fullscreen_next_document)
-  public void setRightArrow() {
+  public void getNextImage() {
     Timber.tag(TAG).i( "BEFORE %s - %s", index, adapter.getCount() );
     if ( index >= adapter.getCount()-1 ){
       index = 0;

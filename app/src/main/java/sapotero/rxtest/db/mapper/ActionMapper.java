@@ -1,16 +1,10 @@
 package sapotero.rxtest.db.mapper;
 
-import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.actions.RActionEntity;
 import sapotero.rxtest.retrofit.models.document.DocumentInfoAction;
-import sapotero.rxtest.utils.Settings;
 
 // Maps between DocumentInfoAction and RActionEntity
 public class ActionMapper extends AbstractMapper<DocumentInfoAction, RActionEntity> {
-
-  public ActionMapper(Settings settings, Mappers mappers) {
-    super(settings, mappers);
-  }
 
   @Override
   public RActionEntity toEntity(DocumentInfoAction model) {

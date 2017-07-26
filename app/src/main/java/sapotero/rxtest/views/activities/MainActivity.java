@@ -27,13 +27,16 @@ import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
 import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
 import com.mikepenz.materialdrawer.model.SectionDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -50,6 +53,7 @@ import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.BuildConfig;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.models.RColleagueEntity;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.query.DBQueryBuilder;
 import sapotero.rxtest.db.requery.utils.Fields;
@@ -59,7 +63,7 @@ import sapotero.rxtest.events.utils.RecalculateMenuEvent;
 import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
 import sapotero.rxtest.managers.DataLoaderManager;
 import sapotero.rxtest.services.MainService;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
@@ -70,6 +74,7 @@ import sapotero.rxtest.views.custom.CircleLeftArrow;
 import sapotero.rxtest.views.custom.CircleRightArrow;
 import sapotero.rxtest.views.custom.OrganizationSpinner;
 import sapotero.rxtest.views.custom.SearchView.SearchView;
+import sapotero.rxtest.views.custom.spinner.JournalSelectorView;
 import sapotero.rxtest.views.menu.MenuBuilder;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import timber.log.Timber;
@@ -77,7 +82,7 @@ import timber.log.Timber;
 public class MainActivity extends AppCompatActivity implements MenuBuilder.Callback, SearchView.OnVisibilityChangeListener {
 
   @Inject JobManager jobManager;
-  @Inject Settings settings;
+  @Inject ISettings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject QueueManager queue;
   @Inject MemoryStore store;
@@ -97,6 +102,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @BindView (R.id.favorites_button)                 CheckBox            favorites_button;
   @BindView (R.id.documents_empty_list)             TextView            documents_empty_list;
 
+  @BindView (R.id.activity_main_journal_selector)   JournalSelectorView journalSelector;
+
   private String TAG = MainActivity.class.getSimpleName();
   private OrganizationAdapter organization_adapter;
   private DrawerBuilder drawer;
@@ -111,8 +118,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private final int IN_DOCUMENTS       = 7;
   private final int ON_CONTROL         = 8;
   private final int PROCESSED          = 9;
-
   private final int FAVORITES          = 10;
+
   private final int SETTINGS_VIEW_TYPE_APPROVE = 18;
   private final int SETTINGS_VIEW = 20;
   private final int SETTINGS_DECISION_TEMPLATES = 21;
@@ -133,6 +140,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private PublishSubject<Integer> searchSubject = PublishSubject.create();
   private int menuIndex;
   private int buttonIndex;
+
+  private static boolean active = false;
 
   protected void onCreate(Bundle savedInstanceState) {
     setTheme(R.style.AppTheme);
@@ -171,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     initToolbar();
 
 
-    rxSettings();
+//    rxSettings();
 
     initSearch();
 
@@ -290,6 +299,13 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     GridLayoutManager gridLayoutManager = new GridLayoutManager(this, columnCount, GridLayoutManager.VERTICAL, false);
 
     RAdapter = new DocumentsAdapter(this, new ArrayList<>());
+    RAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+      @Override
+      public void onChanged() {
+        super.onChanged();
+//        updateCount();
+      }
+    });
 
     rv.addItemDecoration(new GridSpacingItemDecoration(columnCount, spacing, true));
     rv.setLayoutManager(gridLayoutManager);
@@ -301,6 +317,11 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     ORGANIZATION_SELECTOR.setAdapter(organization_adapter, true, selected -> {
       dbQueryBuilder.execute(false);
     });
+  }
+
+  private void updateCount(){
+    journalSelector.updateCounter();
+    menuBuilder.getItemsBuilder().updateView();
   }
 
   private void initToolbar() {
@@ -404,6 +425,11 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     initEvents();
     startNetworkCheck();
     subscribeToNetworkCheckResults();
+    update();
+
+    rxSettings();
+
+    active = true;
 
 //    EventBus.getDefault().post( new RecalculateMenuEvent());
 
@@ -441,6 +467,22 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     );
   }
 
+  private void updateOrganizationFilter() {
+    if ( settings.isOrganizationFilterActive() ) {
+      try {
+        Set<String> oldFilterSelection = settings.getOrganizationFilterSelection();
+        ORGANIZATION_SELECTOR.setSelected(oldFilterSelection);
+      } catch (Exception e) {
+        Timber.tag(TAG).e(e);
+      }
+    }
+  }
+
+  public void update() {
+    updateCount();
+    updateOrganizationFilter();
+  }
+
   private void unsubscribe() {
     if ( subscription != null && subscription.hasSubscriptions() ) {
       subscription.unsubscribe();
@@ -452,6 +494,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     super.onPause();
     stopNetworkCheck();
     unsubscribe();
+
+    active = false;
   }
 
   @Override
@@ -462,8 +506,18 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     super.onStop();
   }
 
+  @Override
+  protected void onDestroy() {
+    // Reset previous state of organization filter on application quit
+    settings.setOrganizationFilterActive( false );
+
+    super.onDestroy();
+  }
+
   private void setJournalType(int type) {
     menuBuilder.selectJournal( type );
+    journalSelector.selectJournal(type);
+
   }
 
   private void drawer_build_bottom() {
@@ -471,13 +525,11 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     drawer
       .addDrawerItems(
-
-        new SectionDrawerItem().withName(R.string.drawer_item_settings),
-
-        new SecondaryDrawerItem()
-          .withName(R.string.drawer_item_settings_account)
+        new DividerDrawerItem(),
+        new PrimaryDrawerItem()
+          .withName(R.string.drawer_item_settings)
           .withIdentifier(SETTINGS_VIEW),
-        new SecondaryDrawerItem()
+        new PrimaryDrawerItem()
           .withName(R.string.drawer_item_settings_templates)
           .withIdentifier(SETTINGS_DECISION_TEMPLATES)
       );
@@ -485,13 +537,13 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     if (settings.isDebugEnabled()){
       drawer
         .addDrawerItems(
-          new SectionDrawerItem().withName(R.string.drawer_item_debug),
-          new SecondaryDrawerItem()
+          new DividerDrawerItem(),
+          new PrimaryDrawerItem()
             .withIdentifier(SETTINGS_LOG)
-            .withName("Лог"),
-          new SecondaryDrawerItem()
+            .withName(R.string.drawer_item_settings_log),
+          new PrimaryDrawerItem()
             .withIdentifier(SETTINGS_SIGN)
-            .withName("Подписи ЭО"),
+            .withName(R.string.drawer_item_settings_signatures),
           new DividerDrawerItem()
         );
     }
@@ -587,35 +639,81 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   private void drawer_build_head() {
 
+    // resolved https://tasks.n-core.ru/browse/MVDESD-13752
+    // Добавить в боковую панель список коллег
+    List<RColleagueEntity> colleaguesFromDB = dataStore
+      .select(RColleagueEntity.class)
+      .where(RColleagueEntity.USER.eq( settings.getLogin() ))
+      .and(RColleagueEntity.ACTIVED.eq(true))
+      .get().toList();
+
+    List<RColleagueEntity> colleagues = new ArrayList<>();
+    colleagues.addAll( colleaguesFromDB );
+
+    Collections.sort(colleagues, (o1, o2) -> o1.getSortIndex() != null && o2.getSortIndex() != null ? o1.getSortIndex().compareTo( o2.getSortIndex() ) : 0 );
+
+    IProfile[] profiles = new ProfileDrawerItem[ colleagues.size() + 1 ];
+
+    profiles[0] = new ProfileDrawerItem()
+      .withName( settings.getCurrentUserOrganization() )
+      .withEmail( settings.getCurrentUser() )
+      .withSetSelected( true )
+      .withIcon( R.drawable.gerb );
+
+    int i = 1;
+
+    for (RColleagueEntity colleague : colleagues) {
+      String colleagueName = splitName( colleague.getOfficialName() );
+
+      profiles[i] = new ProfileDrawerItem()
+        .withName( colleagueName )
+        .withSelectable( false )
+        .withSetSelected( false )
+        .withIcon( R.drawable.gerb );
+      i++;
+    }
 
     AccountHeader headerResult = new AccountHeaderBuilder()
       .withActivity(this)
       .withHeaderBackground(R.drawable.header)
-      .addProfiles(
-        new ProfileDrawerItem()
-          .withName( settings.getCurrentUserOrganization() )
-          .withEmail( settings.getCurrentUser() )
-          .withSetSelected(true)
-          .withIcon(R.drawable.gerb)
-      )
+      .addProfiles( profiles )
       .withOnAccountHeaderListener(
         (view, profile, currentProfile) -> false
       )
       .build();
 
-    if (drawer == null) {
-      drawer = new DrawerBuilder()
-        .withActivity(this)
-        .withToolbar(toolbar)
-        .withActionBarDrawerToggle(true)
-        .withHeader(R.layout.drawer_header)
+    drawer = new DrawerBuilder()
+      .withActivity(this)
+      .withToolbar(toolbar)
+      .withActionBarDrawerToggle(true)
+      .withHeader(R.layout.drawer_header)
 //        .withShowDrawerOnFirstLaunch(true)
-        .withAccountHeader(headerResult);
-    }
+      .withAccountHeader(headerResult);
 
     drawer.addDrawerItems(
       new SectionDrawerItem().withName(R.string.drawer_item_journals)
     );
+  }
+
+  private String splitName(String nameToSplit) {
+    String name = nameToSplit;
+
+    try {
+      String[] split = name.split(" ");
+
+      if ( split.length >= 2 ){
+        String part1 = split[0];
+        String part2 = split[1];
+
+        if (part2 != null && part2.contains(".")) {
+          name = String.format("%s %s", part1, part2);
+        }
+      }
+    } catch (Exception error) {
+      Timber.tag(TAG).d("Error splitting colleague name: %s", nameToSplit);
+    }
+
+    return name;
   }
 
   private void drawer_add_item(int index, String title, Long identifier) {
@@ -634,7 +732,22 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     Fields.Menu menu = Fields.Menu.ALL;
     drawer_add_item( menu.getIndex() , menu.getTitle(), Long.valueOf( menu.getIndex()) );
 
-    for(String uid: settings.getJournals() ){
+    // resolved https://tasks.n-core.ru/browse/MVDESD-13752
+    // Добавить в боковую панель разделы: Контроль, Обраб, Избр.
+    List<String> menuItems = new ArrayList<>();
+    menuItems.addAll( settings.getJournals() );
+    menuItems.add( String.valueOf( ON_CONTROL ) );
+    menuItems.add( String.valueOf( PROCESSED ) );
+    menuItems.add( String.valueOf( FAVORITES ) );
+    Collections.sort(menuItems, (o1, o2) -> {
+      try {
+        return Integer.valueOf(o1).compareTo( Integer.valueOf(o2) );
+      } catch (NumberFormatException e) {
+        return 0;
+      }
+    } );
+
+    for(String uid : menuItems ){
       Fields.Menu m = Fields.Menu.getMenu(uid);
       if (m != null) {
         drawer_add_item( m.getIndex() , m.getTitle(), Long.valueOf( m.getIndex()) );
@@ -648,8 +761,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     drawer_build_bottom();
   }
 
-
-
   @OnClick(R.id.activity_main_left_button)
   public void setLeftArrowArrow() {
     menuBuilder.showPrev();
@@ -660,14 +771,12 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     menuBuilder.showNext();
   }
 
-
   /* MenuBuilder.Callback */
   @Override
   public void onMenuBuilderUpdate(ArrayList<ConditionBuilder> conditions) {
 //    menuBuilder.setFavorites( dbQueryBuilder.getFavoritesCount() );
     dbQueryBuilder.executeWithConditions( conditions, menuBuilder.getItem().isVisible() && favorites_button.isChecked(), menuBuilder.getItem() );
   }
-
 
   @Override
   public void onUpdateError(Throwable error) {
@@ -688,15 +797,27 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   public void onMessageEvent(RecalculateMenuEvent event) {
     if (menuBuilder != null) {
       Timber.tag(TAG).i("RecalculateMenuEvent");
-      menuBuilder.getItemsBuilder().updateView();
+//      menuBuilder.getItemsBuilder().updateView();
     }
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(JournalSelectorIndexEvent event) {
+    if ( menuIndex != event.index ) {
+      // Reset previous state of organization filter on journal change
+      settings.setOrganizationFilterActive( false );
+    }
     menuIndex = event.index;
     DOCUMENT_TYPE_SELECTOR.setSelection(event.index);
   }
 
+  public static boolean isActive() {
+    return active;
+  }
+
+//  @Subscribe(threadMode = ThreadMode.MAIN)
+//  public void onMessageEvent(JournalSelectorUpdateCountEvent event) {
+//    Timber.tag(TAG).d("JournalSelectorUpdateCountEvent");
+//  }
 
 }

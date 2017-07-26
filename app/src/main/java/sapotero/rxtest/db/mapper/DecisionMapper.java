@@ -8,13 +8,14 @@ import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
-import sapotero.rxtest.utils.Settings;
 
 // Maps between Decision and RDecisionEntity
 public class DecisionMapper extends AbstractMapper<Decision, RDecisionEntity> {
 
-  public DecisionMapper(Settings settings, Mappers mappers) {
-    super(settings, mappers);
+  private Mappers mappers;
+
+  public DecisionMapper(Mappers mappers) {
+    this.mappers = mappers;
   }
 
   @Override

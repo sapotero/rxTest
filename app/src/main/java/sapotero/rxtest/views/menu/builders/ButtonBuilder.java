@@ -6,6 +6,7 @@ import android.graphics.drawable.StateListDrawable;
 import android.support.v4.content.ContextCompat;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
@@ -28,7 +29,7 @@ import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.utils.memory.utils.Filter;
@@ -39,7 +40,7 @@ import static com.googlecode.totallylazy.Sequences.sequence;
 public class ButtonBuilder {
 
   @Inject SingleEntityStore<Persistable> dataStore;
-  @Inject Settings settings;
+  @Inject ISettings settings;
   //  @Inject Validation validation;
   @Inject MemoryStore store;
 
@@ -56,6 +57,8 @@ public class ButtonBuilder {
 
   private String TAG = this.getClass().getSimpleName();
   private final CompositeSubscription subscription = new CompositeSubscription();
+
+  private boolean previousState;
 
   public void recalculate() {
     Timber.i("recalculate");
@@ -244,10 +247,30 @@ public class ButtonBuilder {
 
     getCount();
 
+    //положить в сеттинги
+
+    // Called every time button is checked (even if programmatically)
     view.setOnCheckedChangeListener((buttonView, isChecked) -> {
       setActive(isChecked);
       if (isChecked){
         callback.onButtonBuilderUpdate(index);
+      }
+    });
+
+    // Save button state before click
+    // (call sequence: 1. onTouch, 2. onCheckedChange, 3. onClick)
+    view.setOnTouchListener((v, event) -> {
+      if ( event.getAction() == MotionEvent.ACTION_DOWN ) {
+        previousState = view.isChecked();
+      }
+      return false;
+    });
+
+    view.setOnClickListener(v -> {
+      // If previous state was false and after click state changed to true, then user switched between tabs
+      if ( !previousState && view.isChecked() ) {
+        // Reset previous state of organization filter
+        settings.setOrganizationFilterActive( false );
       }
     });
 

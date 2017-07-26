@@ -67,8 +67,8 @@ abstract class DocumentJob extends BaseJob {
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         doc -> {
-          doAfterLoad( doc );
           EventBus.getDefault().post( new StepperLoadDocumentEvent( doc.getUid()) );
+          doAfterLoad( doc );
         },
         error -> {
           Timber.tag(TAG).e(error);
@@ -109,19 +109,36 @@ abstract class DocumentJob extends BaseJob {
   }
 
   void saveDocument(DocumentInfo documentReceived, RDocumentEntity documentToSave, boolean isLink, String TAG) {
-    dataStore
-      .insert( documentToSave )
-      .toObservable()
-      .subscribeOn( Schedulers.io() )
-      .observeOn( AndroidSchedulers.mainThread() )
-      .subscribe(
-        result -> {
-          Timber.tag(TAG).d("Created " + result.getUid());
-          doAfterUpdate(result);
-          loadLinkedData( documentReceived, result, isLink );
-        },
-        error -> Timber.tag(TAG).e(error)
-      );
+    if ( !existInDb( documentToSave ) ) {
+      dataStore
+        .insert( documentToSave )
+        .toObservable()
+        .subscribeOn( Schedulers.io() )
+        .observeOn( AndroidSchedulers.mainThread() )
+        .subscribe(
+          result -> {
+            Timber.tag(TAG).d("Created " + result.getUid());
+            doAfterUpdate(result);
+            loadLinkedData( documentReceived, result, isLink );
+          },
+          error -> Timber.tag(TAG).e(error)
+        );
+    }
+  }
+
+  private boolean existInDb(RDocumentEntity documentToSave) {
+    boolean result = false;
+
+    Integer count = dataStore
+      .count(RDocumentEntity.class)
+      .where(RDocumentEntity.UID.eq(documentToSave.getUid()))
+      .get().value();
+
+    if( count != 0 ){
+      result = true;
+    }
+
+    return result;
   }
 
   void updateDocument(DocumentInfo documentReceived, RDocumentEntity documentToUpdate, String TAG) {
@@ -150,14 +167,10 @@ abstract class DocumentJob extends BaseJob {
     }
   }
 
-  private void addPrefJobCount(int value) {
-    settings.addJobCount(value);
-  }
-
   private void loadImages(Set<RImage> images) {
     if ( notEmpty( images ) ) {
       for (RImage _image : images) {
-        addPrefJobCount(1);
+        settings.addTotalDocCount(1);
         RImageEntity image = (RImageEntity) _image;
         jobManager.addJobInBackground( new DownloadFileJob( settings.getHost(), image.getPath(), image.getMd5() + "_" + image.getTitle(), image.getId() ) );
       }
@@ -192,7 +205,7 @@ abstract class DocumentJob extends BaseJob {
 
   private void loadLinkedDoc(String linkUid, String parentUid, boolean saveFirstLink) {
     if ( exist( linkUid ) ) {
-      addPrefJobCount(1);
+      settings.addTotalDocCount(1);
       jobManager.addJobInBackground( new CreateLinksJob( linkUid, parentUid, saveFirstLink ) );
     }
   }

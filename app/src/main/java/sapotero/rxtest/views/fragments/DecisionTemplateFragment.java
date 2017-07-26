@@ -34,14 +34,14 @@ import sapotero.rxtest.events.decision.AddDecisionTemplateEvent;
 import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.adapters.DecisionTemplateRecyclerAdapter;
 import sapotero.rxtest.views.adapters.decorators.DividerItemDecoration;
 import timber.log.Timber;
 
 public class DecisionTemplateFragment extends Fragment {
 
-  @Inject Settings settings;
+  @Inject ISettings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject OperationManager operationManager;
 

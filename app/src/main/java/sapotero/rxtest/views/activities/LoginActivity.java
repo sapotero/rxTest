@@ -26,12 +26,13 @@ import javax.inject.Inject;
 
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.events.bus.FileDownloadedEvent;
+import sapotero.rxtest.events.bus.StartRegularRefreshEvent;
 import sapotero.rxtest.events.crypto.AddKeyEvent;
 import sapotero.rxtest.events.crypto.SelectKeyStoreEvent;
 import sapotero.rxtest.events.crypto.SelectKeysEvent;
 import sapotero.rxtest.events.stepper.shared.StepperNextStepEvent;
 import sapotero.rxtest.services.MainService;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.views.custom.stepper.StepperLayout;
 import sapotero.rxtest.views.custom.stepper.VerificationError;
@@ -44,7 +45,7 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
   private static final int PERM_REQUEST_CODE = 0;
   private static final int PERM_SYSTEM_SETTINGS_REQUEST_CODE = 1;
 
-  @Inject sapotero.rxtest.utils.Settings settings;
+  @Inject ISettings settings;
   @Inject MemoryStore store;
 
   private String TAG = this.getClass().getSimpleName();
@@ -54,6 +55,9 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
 
   private boolean cryptoProInstalled = false;
   private boolean selectContainerDialogShown = false;
+
+  // True, if the activity is in the foreground
+  private boolean isActive = false;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -68,16 +72,12 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
     cryptoProInstalled = appInstalled("ru.cprocsp.ACSP");
 
     if( cryptoProInstalled ) {
-
       if (null == savedInstanceState) {
         check_permissions();
       }
-
       initView();
 
-
     } else {
-
       new MaterialDialog.Builder(this)
         .title(R.string.error_csp_not_installed)
         .content(R.string.error_csp_not_installed_body)
@@ -88,11 +88,6 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
         })
         .show();
     }
-
-
-
-//    queue.clean();
-
   }
 
   private void showSelectDialog(List<String> keyStoreTypeList) {
@@ -144,7 +139,6 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
           }
         })
         .show();
-
     }
   }
 
@@ -267,22 +261,19 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
   }
 
   @Override
-  public void onStop() {
-    super.onStop();
-
-    if (EventBus.getDefault().isRegistered(this)) {
-      EventBus.getDefault().unregister(this);
-    }
-
+  public void onPause() {
+    super.onPause();
+    isActive = false;
+    unregisterEventBus();
   }
 
   @Override
   public void onResume() {
     super.onResume();
 
-    if (EventBus.getDefault().isRegistered(this)) {
-      EventBus.getDefault().unregister(this);
-    }
+    isActive = true;
+
+    unregisterEventBus();
     EventBus.getDefault().register(this);
 
     Intent serviceIntent = MainService.newIntent(this, true);
@@ -294,6 +285,12 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
     }
   }
 
+  private void unregisterEventBus() {
+    if (EventBus.getDefault().isRegistered(this)) {
+      EventBus.getDefault().unregister(this);
+    }
+  }
+
   /* Stepper */
   @Override
   public void onCompleted(View completeButton) {
@@ -302,8 +299,9 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
     Bundle bundle = ActivityOptionsCompat.makeCustomAnimation(this, android.R.anim.fade_in, android.R.anim.fade_out).toBundle();
     startActivity(intent, bundle);
 
-    finish();
+    EventBus.getDefault().post( new StartRegularRefreshEvent() );
 
+    finish();
   }
 
   @Override
@@ -321,11 +319,6 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
 //    Toast.makeText( getApplicationContext(), "onReturn", Toast.LENGTH_SHORT ).show();
   }
 
-  @Subscribe(threadMode = ThreadMode.BACKGROUND)
-  public void onMessageEvent(FileDownloadedEvent event) {
-//    printJobStat();
-  }
-
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(StepperNextStepEvent event) {
     stepperLayout.getmNextNavigationButton().performClick();
@@ -333,8 +326,8 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(SelectKeysEvent event) {
-    showSelectDialog(event.list);
+    if ( isActive ) {
+      showSelectDialog(event.list);
+    }
   }
-
-
 }

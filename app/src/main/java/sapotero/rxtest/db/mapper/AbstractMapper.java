@@ -4,18 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-import sapotero.rxtest.db.mapper.utils.Mappers;
-import sapotero.rxtest.utils.Settings;
-
 public abstract class AbstractMapper<M, E> implements Mapper<M, E> {
-
-  public Settings settings;
-  public Mappers mappers;
-
-  public AbstractMapper(Settings settings, Mappers mappers) {
-    this.settings = settings;
-    this.mappers = mappers;
-  }
 
   @Override
   public boolean hasDiff(E entity, E entity2) {

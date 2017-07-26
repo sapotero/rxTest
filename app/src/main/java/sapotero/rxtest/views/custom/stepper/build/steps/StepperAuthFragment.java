@@ -13,6 +13,8 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.birbit.android.jobqueue.JobManager;
+import com.birbit.android.jobqueue.TagConstraint;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -29,7 +31,7 @@ import sapotero.rxtest.events.stepper.auth.StepperDcCheckSuccesEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckFailEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckSuccessEvent;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.custom.stepper.BlockingStep;
 import sapotero.rxtest.views.custom.stepper.StepperLayout;
 import sapotero.rxtest.views.custom.stepper.VerificationError;
@@ -38,7 +40,8 @@ import timber.log.Timber;
 
 public class StepperAuthFragment extends Fragment implements BlockingStep {
 
-  @Inject Settings settings;
+  @Inject ISettings settings;
+  @Inject JobManager jobManager;
 
   final String TAG = this.getClass().getSimpleName();
 
@@ -58,7 +61,7 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    EsdApplication.getDataComponent().inject(this);
+    EsdApplication.getManagerComponent().inject(this);
 
     View view = inflater.inflate(R.layout.stepper_auth, container, false);
 
@@ -90,7 +93,6 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
         .cancelable(false)
         .progress(true, 0).build();
     }
-
   }
 
   private void attachSettings() {
@@ -172,6 +174,7 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
   @Override
   public void onSelected() {
     passwordEditText.setText("");
+    jobManager.cancelJobsInBackground(null, TagConstraint.ANY, "DocJob");
   }
 
   @Override
@@ -231,7 +234,7 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
   public void onMessageEvent(StepperDcCheckSuccesEvent event) throws Exception {
     Timber.tag(TAG).d("SignFileCommand success");
     if (callback != null) {
-      loadingDialog.hide();
+      loadingDialog.dismiss();
       callback.goToNextStep();
     }
   }
@@ -244,14 +247,14 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
       Toast.makeText( getContext(), event.error, Toast.LENGTH_SHORT ).show();
     }
 
-    loadingDialog.hide();
+    loadingDialog.dismiss();
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(StepperLoginCheckSuccessEvent event) throws Exception {
     Timber.tag(TAG).d("login success");
     if (callback != null) {
-      loadingDialog.hide();
+      loadingDialog.dismiss();
       callback.goToNextStep();
     }
   }
@@ -264,7 +267,6 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
       Toast.makeText( getContext(), event.error, Toast.LENGTH_SHORT ).show();
     }
 
-    loadingDialog.hide();
+    loadingDialog.dismiss();
   }
-
 }

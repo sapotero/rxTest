@@ -50,7 +50,7 @@ public class Block implements Serializable{
 
     @SerializedName("indentation")
     @Expose
-    private String indentation = "1";
+    private String indentation;
 
     @SerializedName("font_size")
     @Expose

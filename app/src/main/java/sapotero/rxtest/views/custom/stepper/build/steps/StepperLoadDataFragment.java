@@ -24,27 +24,31 @@ import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.events.bus.FileDownloadedEvent;
+import sapotero.rxtest.events.bus.UpdateFavoritesAndProcessedEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckFailEvent;
 import sapotero.rxtest.events.stepper.load.StepperDocumentCountReadyEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.custom.stepper.Step;
 import sapotero.rxtest.views.custom.stepper.VerificationError;
 import timber.log.Timber;
 
 public class StepperLoadDataFragment extends Fragment implements Step {
 
-  @Inject Settings settings;
+  @Inject ISettings settings;
 
   private String TAG = this.getClass().getSimpleName();
-  private int loaded = 0;
+  private int loadedTotal = 0;
+  private int loadedDocProj = 0;
 
   private RingProgressBar mRingProgressBar;
 
   private VerificationError error;
   private CompositeSubscription subscription;
 
-  private boolean isReceivedJobCount = false;
+  private boolean isReceivedTotalCount = false;
+
+  private boolean isUpdateFavoritesAndProcessedEventSent = false;
 
   private PublishSubject publish = PublishSubject.create();
 
@@ -103,7 +107,7 @@ public class StepperLoadDataFragment extends Fragment implements Step {
     } else {
       error = new VerificationError("Дождитесь окончания загрузки");
 
-      if ( mRingProgressBar.getProgress() >= 90 ){
+      if ( mRingProgressBar.getProgress() >= 100 ){
         error = null;
       } else {
         Toast.makeText( getContext(), error.getErrorMessage(), Toast.LENGTH_SHORT ).show();
@@ -118,8 +122,10 @@ public class StepperLoadDataFragment extends Fragment implements Step {
     Timber.tag(TAG).d("mRingProgressBar init");
 
     if ( settings.isStartLoadData() ) {
-      isReceivedJobCount = false;
-      loaded = 0;
+      isReceivedTotalCount = false;
+      isUpdateFavoritesAndProcessedEventSent = false;
+      loadedTotal = 0;
+      loadedDocProj = 0;
       mRingProgressBar.setProgress( 0 );
       settings.setStartLoadData( false );
 
@@ -172,42 +178,52 @@ public class StepperLoadDataFragment extends Fragment implements Step {
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(StepperDocumentCountReadyEvent event) {
-    isReceivedJobCount = true;
-    if (settings.getJobCount() == 0) {
+    isReceivedTotalCount = true;
+    unsubscribe();
+    if (settings.getTotalDocCount() == 0) {
       // No documents to download, set download complete
       mRingProgressBar.setProgress( 100 );
     } else {
-      updateProgressBar("Document put ready");
+      updateProgressBar("Document count ready");
     }
   }
 
   private void updateProgressBar(String message) {
-    loaded++;
+    loadedTotal++;
+    loadedDocProj++;
 
-    int jobCount = settings.getJobCount();
+    int totalDocCount = settings.getTotalDocCount();
 
-    Timber.tag(TAG).d("TOTAL: %s/%s | %s", jobCount, loaded, message );
+    Timber.tag(TAG).d("TOTAL: %s/%s | %s", totalDocCount, loadedTotal, message );
 
-    if ( isReceivedJobCount && jobCount != 0) {
-      int perc = calculatePercent(jobCount);
+    if ( isReceivedTotalCount && totalDocCount != 0) {
+      int perc = calculatePercent(loadedTotal, totalDocCount);
 
       if (mRingProgressBar != null && mRingProgressBar.getProgress() < perc) {
         mRingProgressBar.setProgress( perc );
       }
+
+      if ( calculatePercent( loadedDocProj, settings.getDocProjCount() ) > 98 ) {
+        if ( !isUpdateFavoritesAndProcessedEventSent ) {
+          isUpdateFavoritesAndProcessedEventSent = true;
+          EventBus.getDefault().post( new UpdateFavoritesAndProcessedEvent() );
+        }
+      }
     }
   }
 
-  private int calculatePercent(int jobCount) {
+  private int calculatePercent(int loaded, int total) {
     float result = 0;
 
-    if (jobCount != 0) {
-      result = 100f * loaded / jobCount;
+    if (total != 0) {
+      result = 100f * loaded / total;
 
-      if (result > 95){
+      // TODO: fix this
+      if (result > 99.5f) {
         result = 100f;
       }
     }
 
-    return (int) Math.ceil(result);
+    return (int) Math.floor(result);
   }
 }

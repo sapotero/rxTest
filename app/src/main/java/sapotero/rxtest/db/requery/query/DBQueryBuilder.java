@@ -16,14 +16,11 @@ import javax.inject.Inject;
 
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.retrofit.models.documents.Signer;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.utils.memory.utils.Filter;
@@ -40,7 +37,7 @@ import static com.googlecode.totallylazy.Sequences.sequence;
 public class DBQueryBuilder {
 
   @Inject SingleEntityStore<Persistable> dataStore;
-  @Inject Settings settings;
+  @Inject ISettings settings;
   @Inject MemoryStore store;
 
   private final String TAG = this.getClass().getSimpleName();
@@ -106,7 +103,7 @@ public class DBQueryBuilder {
       long startTime = System.nanoTime();
       Sequence<InMemoryDocument> _docs = sequence(store.getDocuments().values());
 
-      List<InMemoryDocument> lazy_docs = _docs
+      List<InMemoryDocument> docs = _docs
         .filter(filter::byYear)
         .filter(this::byOrganization)
         .filter(this::byDecision)
@@ -120,49 +117,24 @@ public class DBQueryBuilder {
 
       long duration = (endTime - startTime)/1000000;
 
-      Timber.e("SIZE: %s | %sms", lazy_docs.size(), duration);
+      Timber.e("SIZE: %s | %sms", docs.size(), duration);
 
+      adapter.removeAllWithRange();
 
-
-
-      long startTimeSub = System.nanoTime();
-      compositeSubscription.add(
-        Observable
-          .from( lazy_docs )
-          .toList()
-          .subscribeOn(Schedulers.computation())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(
-            docs -> {
-
-              long endTimeSub = System.nanoTime();
-
-              long durationSub = (endTimeSub - startTimeSub)/1000000;
-
-              Timber.tag(TAG).w("size %s | %sms", docs.size(), durationSub );
-              adapter.removeAllWithRange();
-
-              if (docs.size() > 0){
-                hideEmpty();
-                for (InMemoryDocument doc: docs ) {
+      if (docs.size() > 0){
+        hideEmpty();
+        for (InMemoryDocument doc: docs ) {
 //                  Timber.tag(TAG).w("add %s", doc.getUid() );
-                  InMemoryDocument docFromMem = store.getDocuments().get( doc.getUid() );
-                  if ( docFromMem != null ) {
-                    adapter.addItem( docFromMem );
-                  }
-                }
+          InMemoryDocument docFromMem = store.getDocuments().get( doc.getUid() );
+          if ( docFromMem != null ) {
+            adapter.addItem( docFromMem );
+          }
+        }
 
-              } else {
-                showEmpty();
-              }
-            },
-            Timber::e
-          )
-      );
-
+      } else {
+        showEmpty();
+      }
     }
-
-
   }
 
   @NonNull
@@ -241,7 +213,7 @@ public class DBQueryBuilder {
 
       Sequence<InMemoryDocument> _docs = sequence(store.getDocuments().values());
 
-      List<Signer> lazy_docs = _docs
+      List<Signer> signers = _docs
         .filter( filter::byYear)
         .filter( this::byDecision )
         .filter( filter::byType)
@@ -254,44 +226,29 @@ public class DBQueryBuilder {
         .map(Document::getSigner)
         .toList();
 
-      Observable
-        .from( lazy_docs )
-        .toList()
-        .subscribeOn(Schedulers.computation())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(
-          signers -> {
+      // resolved https://tasks.n-core.ru/browse/MVDESD-12625
+      // Фильтр по организациям.
 
-            // resolved https://tasks.n-core.ru/browse/MVDESD-12625
-            // Фильтр по организациям.
+      HashMap<String, Integer> organizations = new HashMap<>();
 
-            HashMap< String, Integer> organizations = new HashMap< String, Integer>();
+      for (Signer signer: signers){
+        String key = signer.getOrganisation();
 
+        if ( !organizations.containsKey( key ) ){
+          organizations.put(key, 0);
+        }
 
-            for (Signer signer: signers){
-              String key = signer.getOrganisation();
+        Integer value = organizations.get(key);
+        value += 1;
 
-              if ( !organizations.containsKey( key ) ){
-                organizations.put(key, 0);
-              }
+        organizations.put( key, value  );
+      }
 
-              Integer value = organizations.get(key);
-              value += 1;
+      for ( String organization: organizations.keySet()) {
+        organizationAdapter.add( new OrganizationItem( organization, organizations.get(organization) ) );
+      }
 
-              organizations.put( key, value  );
-            }
-
-            for ( String organization: organizations.keySet()) {
-              organizationAdapter.add( new OrganizationItem( organization, organizations.get(organization) ) );
-            }
-
-            organizationSelector.refreshSpinner();
-
-          },
-          Timber::e
-
-        );
-
+      organizationSelector.refreshSpinner();
     }
 
   }

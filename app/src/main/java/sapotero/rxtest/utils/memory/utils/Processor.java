@@ -3,6 +3,8 @@ package sapotero.rxtest.utils.memory.utils;
 import com.birbit.android.jobqueue.JobManager;
 import com.googlecode.totallylazy.Sequence;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -18,6 +20,7 @@ import rx.subjects.PublishSubject;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Deleter;
+import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.jobs.bus.CreateDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateFavoriteDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateProcessedDocumentsJob;
@@ -25,7 +28,7 @@ import sapotero.rxtest.jobs.bus.CreateProjectsJob;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.jobs.bus.UpsertDocumentJob;
 import sapotero.rxtest.retrofit.models.documents.Document;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.fields.DocumentType;
 import sapotero.rxtest.utils.memory.fields.FieldType;
@@ -41,7 +44,7 @@ import static com.googlecode.totallylazy.Sequences.sequence;
 public class Processor {
   @Inject MemoryStore store;
   @Inject JobManager jobManager;
-  @Inject Settings settings;
+  @Inject ISettings settings;
 
   enum Source {
     EMPTY,
@@ -182,6 +185,8 @@ public class Processor {
       if ( Filter.isChanged( doc.getMd5(), document.getMd5() ) ){
         Timber.tag(TAG).e("md5     : %s | %s", doc.getMd5(), document.getMd5());
         updateJob( doc.getUid() );
+      } else {
+        EventBus.getDefault().post( new StepperLoadDocumentEvent( doc.getUid() ) );
       }
 
     } else {
@@ -218,8 +223,6 @@ public class Processor {
     Observable
       .zip(imd, docs, (memory, api) -> {
 
-
-
         Timber.tag(TAG).e("memory: %s", memory.size());
         Timber.tag(TAG).e("api: %s", api.size());
 
@@ -237,10 +240,6 @@ public class Processor {
           updateAndSetProcessed( uid );
         }
 
-//        for ( String doc : api ) {
-//          setAsUnprocessed( doc );
-//        }
-
         validateDocuments();
 
         return Collections.singletonList("");
@@ -250,6 +249,7 @@ public class Processor {
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(
         data -> {
+//          EventBus.getDefault().post( new JournalSelectorUpdateCountEvent() );
           Timber.tag(TAG).e("processed");
         },
         Timber::e
@@ -349,8 +349,6 @@ public class Processor {
   }
 
   private void createJob(String uid) {
-    settings.addJobCount(1);
-
     switch (documentType) {
       case DOCUMENT:
         if (index != null) {
@@ -375,8 +373,6 @@ public class Processor {
   }
 
   private void updateJob(String uid) {
-    settings.addJobCount(1);
-
     if (documentType == DocumentType.DOCUMENT) {
       jobManager.addJobInBackground( new UpdateDocumentJob( uid, index, filter ) );
     } else {
@@ -385,7 +381,7 @@ public class Processor {
   }
 
   private void updateAndSetProcessed(String uid) {
-    settings.addJobCount(1);
+    settings.addTotalDocCount(1);
     jobManager.addJobInBackground( new UpdateDocumentJob( uid, index, filter, true ) );
   }
 
@@ -401,7 +397,7 @@ public class Processor {
       new Deleter().deleteDocument( uid, TAG );
 
     } else {
-      settings.addJobCount(1);
+      settings.addTotalDocCount(1);
 
       store.process(
         store.startTransactionFor( uid )
@@ -413,7 +409,7 @@ public class Processor {
   }
 
   private void upsert(Document uid) {
-    settings.addJobCount(1);
+    settings.addTotalDocCount(1);
     jobManager.addJobInBackground( new UpsertDocumentJob( uid, index, filter) );
   }
 

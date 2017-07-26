@@ -41,7 +41,7 @@ import sapotero.rxtest.db.requery.models.RFavoriteUserEntity;
 import sapotero.rxtest.db.requery.models.RPrimaryConsiderationEntity;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.retrofit.models.Oshs;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.adapters.OshsAutoCompleteAdapter;
 import sapotero.rxtest.views.adapters.PrimaryUsersAdapter;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
@@ -50,7 +50,7 @@ import timber.log.Timber;
 
 public class SelectOshsDialogFragment extends DialogFragment implements View.OnClickListener {
 
-  @Inject Settings settings;
+  @Inject ISettings settings;
   @Inject Mappers mappers;
   @Inject SingleEntityStore<Persistable> dataStore;
 

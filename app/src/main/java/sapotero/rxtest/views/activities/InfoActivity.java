@@ -62,7 +62,7 @@ import sapotero.rxtest.events.view.UpdateCurrentInfoActivityEvent;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.managers.toolbar.ToolbarManager;
 import sapotero.rxtest.services.task.UpdateCurrentDocumentTask;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.adapters.TabSigningPagerAdapter;
@@ -84,7 +84,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   @BindView(R.id.tabs) TabLayout tabLayout;
 
   @Inject JobManager jobManager;
-  @Inject Settings settings;
+  @Inject ISettings settings;
   @Inject MemoryStore store;
 
   @Inject SingleEntityStore<Persistable> dataStore;
@@ -317,7 +317,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     invalidateArrows();
 
     chechPrimaryConsiderationDialog();
-
   }
 
   private void chechPrimaryConsiderationDialog() {

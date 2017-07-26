@@ -16,9 +16,10 @@ import rx.subjects.PublishSubject;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.events.adapter.JournalSelectorUpdateCountEvent;
 import sapotero.rxtest.events.utils.RecalculateMenuEvent;
 import sapotero.rxtest.retrofit.models.documents.Document;
-import sapotero.rxtest.utils.Settings;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.fields.DocumentType;
 import sapotero.rxtest.utils.memory.interfaces.Processable;
 import sapotero.rxtest.utils.memory.mappers.InMemoryDocumentMapper;
@@ -30,7 +31,7 @@ import timber.log.Timber;
 
 public class MemoryStore implements Processable{
   @Inject SingleEntityStore<Persistable> dataStore;
-  @Inject Settings settings;
+  @Inject ISettings settings;
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -81,6 +82,7 @@ public class MemoryStore implements Processable{
           }
 
           if (docs.size() > 0){
+            EventBus.getDefault().post( new JournalSelectorUpdateCountEvent() );
 //            counterRecreate();
           }
 
@@ -123,7 +125,7 @@ public class MemoryStore implements Processable{
     loadFromDB();
   };
 
-  private void loadFromDB() {
+  public void loadFromDB() {
     dataStore
       .select(RDocumentEntity.class)
       .where(RDocumentEntity.FROM_LINKS.eq(false))

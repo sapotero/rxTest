@@ -139,7 +139,8 @@
     <string name="drawer_item_settings_templates">Шаблоны резолюций</string>
     <string name="drawer_item_settings_templates_off">Шаблоны отклонения</string>
     <string name="drawer_item_debug">Отладка</string>
-
+    <string name="drawer_item_settings_log">Очередь задач</string>
+    <string name="drawer_item_settings_signatures">Подписи ЭО</string>
 
     <string name="hint_urgency">Срочность</string>
     <string name="hint_head_font_size">Шрифт исполнителя</string>
@@ -503,6 +504,11 @@
         <item>1.5</item>
     </string-array>
 
+
+    <string name="host_key_title">Домен</string>
+    <string name="settings_journal_title">Журналы</string>
+
+
     <!--SharedPreferences keys-->
     <string name="first_run_key">is_first_run</string>
     <string name="host_key">settings_username_host</string>
@@ -557,5 +563,7 @@
         <item>3</item>
         <item>4</item>
     </string-array>
+
+    <string name="crash_toast_text">Приложение остановлено. Обратитесь к администратору устройства.</string>
 
 </resources>

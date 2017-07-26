@@ -46,8 +46,8 @@
                     android:layout_width="@dimen/stepper_content_width"
                     android:layout_height="wrap_content"
                     android:hint="@string/username_hinf"
-                    android:text="rukodir"
-                    style="@android:style/Widget.Material.EditText"/>
+                    android:inputType="textVisiblePassword"
+                    android:text="rukodir"/>
             </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout
