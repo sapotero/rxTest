@@ -5,12 +5,6 @@ import java.io.Serializable;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.memory.fields.InMemoryState;
 
-/**
- * In Memory Document Storage
- */
-
-
-
 public class InMemoryDocument implements Serializable {
   public String uid;
   public String md5;
@@ -22,7 +16,7 @@ public class InMemoryDocument implements Serializable {
   public Boolean allowUpdate = true;
 
   public Document document;
-  private InMemoryState state = InMemoryState.LOADING;
+  public InMemoryState state = InMemoryState.LOADING;
 
   public InMemoryDocument() {
   }
@@ -86,6 +80,7 @@ public class InMemoryDocument implements Serializable {
   public void setAsReady(){
     state = InMemoryState.READY;
   }
+
 
 
   public String getMd5() {

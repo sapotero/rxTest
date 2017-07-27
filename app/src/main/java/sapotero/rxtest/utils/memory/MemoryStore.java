@@ -17,7 +17,6 @@ import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.adapter.JournalSelectorUpdateCountEvent;
-import sapotero.rxtest.events.utils.RecalculateMenuEvent;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.fields.DocumentType;
@@ -91,15 +90,6 @@ public class MemoryStore implements Processable{
         },
         Timber::e
       );
-  }
-
-  public Counter getCounter() {
-    return counter;
-  }
-
-  public void counterRecreate() {
-//    counter.recreate(documents);
-    EventBus.getDefault().post( new RecalculateMenuEvent());
   }
 
   private void log() {

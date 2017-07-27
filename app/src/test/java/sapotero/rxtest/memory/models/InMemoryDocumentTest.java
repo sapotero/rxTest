@@ -1,5 +1,6 @@
-package sapotero.rxtest.utils.memory.models;
+package sapotero.rxtest.memory.models;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -7,9 +8,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import rx.android.plugins.RxAndroidPlugins;
 import sapotero.rxtest.retrofit.models.documents.Document;
+import sapotero.rxtest.utils.memory.fields.InMemoryState;
+import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 
 public class InMemoryDocumentTest {
+
+  //Field year of type Integer - was not mocked since Mockito doesn't mock a Final class
+  //Field hasDecision of type Boolean - was not mocked since Mockito doesn't mock a Final class
+  //Field processed of type Boolean - was not mocked since Mockito doesn't mock a Final class
+  //Field allowUpdate of type Boolean - was not mocked since Mockito doesn't mock a Final class
 
   @Mock Document document;
   @InjectMocks InMemoryDocument inMemoryDocument;
@@ -19,6 +28,10 @@ public class InMemoryDocumentTest {
     MockitoAnnotations.initMocks(this);
   }
 
+  @After
+  public void tearDown() throws Exception {
+    RxAndroidPlugins.getInstance().reset();
+  }
   @Test
   public void testIsProcessed() throws Exception {
     Boolean result = inMemoryDocument.isProcessed();
@@ -34,11 +47,13 @@ public class InMemoryDocumentTest {
   @Test
   public void testSetAsLoading() throws Exception {
     inMemoryDocument.setAsLoading();
+    Assert.assertEquals(inMemoryDocument.getState(), InMemoryState.LOADING);
   }
 
   @Test
   public void testSetAsReady() throws Exception {
     inMemoryDocument.setAsReady();
+    Assert.assertEquals(inMemoryDocument.getState(), InMemoryState.READY);
   }
 
   @Test
@@ -47,5 +62,3 @@ public class InMemoryDocumentTest {
     Assert.assertEquals(Boolean.TRUE, result);
   }
 }
-
-//Generated with love by TestMe :) Please report issues and submit feature requests at: http://weirddev.com/forum#!/testme
