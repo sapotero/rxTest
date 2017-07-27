@@ -99,10 +99,10 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
 
     // Если создал резолюцию я и подписант я, то сохранить UID этой резолюции в отдельную таблицу
     if ( decisionUid != null && !decisionUid.equals("") ) {
-      if ( Objects.equals( data.getDecisionSignerId(), settings.getCurrentUserId() ) ) {
+      if ( Objects.equals( data.getDecisionSignerId(), getParams().getCurrentUserId() ) ) {
         RDisplayFirstDecisionEntity rDisplayFirstDecisionEntity = new RDisplayFirstDecisionEntity();
         rDisplayFirstDecisionEntity.setDecisionUid( decisionUid );
-        rDisplayFirstDecisionEntity.setUserId( settings.getCurrentUserId() );
+        rDisplayFirstDecisionEntity.setUserId( getParams().getCurrentUserId() );
 
         dataStore
           .insert( rDisplayFirstDecisionEntity )

@@ -13,24 +13,17 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RTemplateEntity;
 import sapotero.rxtest.events.decision.AddDecisionTemplateEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
-import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
+import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.TemplatesService;
 import sapotero.rxtest.retrofit.models.Template;
 import timber.log.Timber;
 
 public class CreateTemplate extends AbstractCommand {
 
-  private final DocumentReceiver document;
-
   private String TAG = this.getClass().getSimpleName();
 
-  public CreateTemplate(DocumentReceiver document){
-    super();
-    this.document = document;
-  }
-
-  public String getInfo(){
-    return null;
+  public CreateTemplate(CommandParams params) {
+    super(params);
   }
 
   public void registerCallBack(Callback callback){
@@ -50,7 +43,6 @@ public class CreateTemplate extends AbstractCommand {
   @Override
   public void executeLocal() {
     queueManager.setExecutedLocal(this);
-
   }
 
   @Override
@@ -60,14 +52,14 @@ public class CreateTemplate extends AbstractCommand {
     TemplatesService templatesService = retrofit.create( TemplatesService.class );
 
     String type = null;
-    if ( params.getLabel() != null && !Objects.equals(params.getLabel(), "decision")){
-      type = params.getLabel();
+    if ( getParams().getLabel() != null && !Objects.equals(getParams().getLabel(), "decision")){
+      type = getParams().getLabel();
     }
 
     Observable<Template> info = templatesService.create(
-      settings.getLogin(),
-      settings.getToken(),
-      params.getComment(),
+      getParams().getUser(),
+      getParams().getToken(),
+      getParams().getComment(),
       type
     );
 
@@ -90,7 +82,7 @@ public class CreateTemplate extends AbstractCommand {
 
   private void insertTemplate(Template data) {
     RTemplateEntity template = mappers.getTemplateMapper().toEntity(data);
-    template.setType(params.getLabel());
+    template.setType(getParams().getLabel());
 
     dataStore
       .insert(template)

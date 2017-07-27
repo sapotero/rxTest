@@ -8,24 +8,17 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.DecisionCommand;
-import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
+import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
 import timber.log.Timber;
 
 public class ApproveDecisionDelayed extends DecisionCommand {
 
-  private final DocumentReceiver document;
-
   private String TAG = this.getClass().getSimpleName();
 
-  public ApproveDecisionDelayed(DocumentReceiver document){
-    super();
-    this.document = document;
-  }
-
-  public String getInfo(){
-    return null;
+  public ApproveDecisionDelayed(CommandParams params) {
+    super(params);
   }
 
   public void registerCallBack(Callback callback){
@@ -37,9 +30,7 @@ public class ApproveDecisionDelayed extends DecisionCommand {
     queueManager.add(this);
   }
 
-
   public void update() {
-
     if (callback != null ){
       callback.onCommandExecuteSuccess( getType() );
     }
@@ -48,12 +39,11 @@ public class ApproveDecisionDelayed extends DecisionCommand {
       dataStore
         .update(RDecisionEntity.class)
         .set( RDecisionEntity.APPROVED, true)
-        .where(RDecisionEntity.UID.eq( params.getDecisionId() )).get().call();
+        .where(RDecisionEntity.UID.eq( getParams().getDecisionId() )).get().call();
     } catch (Exception e) {
       e.printStackTrace();
     }
   }
-
 
   @Override
   public String getType() {
@@ -77,7 +67,7 @@ public class ApproveDecisionDelayed extends DecisionCommand {
 
     String sign = getSign();
 
-    RDecisionEntity decision= getDecision(params.getDecisionId());
+    RDecisionEntity decision= getDecision(getParams().getDecisionId());
     if ( decision != null) {
 
       Decision _decision = mappers.getDecisionMapper().toFormattedModel(decision);
@@ -86,7 +76,7 @@ public class ApproveDecisionDelayed extends DecisionCommand {
       _decision.setApproved(true);
       _decision.setSign( sign );
 
-      if (params.isAssignment()){
+      if (getParams().isAssignment()){
         _decision.setAssignment(true);
       }
 
@@ -104,7 +94,7 @@ public class ApproveDecisionDelayed extends DecisionCommand {
               callback.onCommandExecuteError(getType());
             }
 //            queueManager.setExecutedWithError(this, Collections.singletonList("http_error"));
-            EventBus.getDefault().post( new ForceUpdateDocumentEvent( params.getDecisionModel().getDocumentUid() ));
+            EventBus.getDefault().post( new ForceUpdateDocumentEvent( getParams().getDocument() ));
           }
         );
     } else {
@@ -113,7 +103,6 @@ public class ApproveDecisionDelayed extends DecisionCommand {
         callback.onCommandExecuteError(getType());
       }
     }
-
   }
 
   private RDecisionEntity getDecision(String uid){

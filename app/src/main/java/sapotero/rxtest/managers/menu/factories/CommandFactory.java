@@ -25,7 +25,6 @@ import sapotero.rxtest.managers.menu.commands.templates.CreateTemplate;
 import sapotero.rxtest.managers.menu.commands.templates.RemoveTemplate;
 import sapotero.rxtest.managers.menu.commands.templates.UpdateTemplate;
 import sapotero.rxtest.managers.menu.interfaces.Command;
-import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import timber.log.Timber;
 
@@ -34,7 +33,6 @@ public class CommandFactory implements AbstractCommand.Callback{
   private final String TAG = this.getClass().getSimpleName();
 
   private CommandParams params;
-  private DocumentReceiver document;
 
   Callback callback;
 
@@ -49,11 +47,11 @@ public class CommandFactory implements AbstractCommand.Callback{
     void onCommandSuccess(String command);
     void onCommandError();
   }
+
   public CommandFactory registerCallBack(Callback callback){
     this.callback = callback;
     return this;
   }
-
 
   public enum Operation {
     FILE_SIGN {
@@ -324,14 +322,9 @@ public class CommandFactory implements AbstractCommand.Callback{
 
     CREATE_TEMPORARY_DECISION {
       @Override
-      public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
-        AddTemporaryDecision command = new AddTemporaryDecision(document);
-        command.withParams(params);
-        command
-          .withDecisionId( params.getDecisionId() )
-          .registerCallBack(instance);
-
-        command.withParams(params);
+      public Command getCommand(CommandFactory instance, CommandParams params) {
+        AddTemporaryDecision command = new AddTemporaryDecision(params);
+        command.registerCallBack(instance);
         return command;
       }
 
@@ -343,12 +336,9 @@ public class CommandFactory implements AbstractCommand.Callback{
 
     SAVE_TEMPORARY_DECISION {
       @Override
-      public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
-        SaveTemporaryDecision command = new SaveTemporaryDecision(document);
-        command.withParams(params);
+      public Command getCommand(CommandFactory instance, CommandParams params) {
+        SaveTemporaryDecision command = new SaveTemporaryDecision(params);
         command.registerCallBack(instance);
-
-        command.withParams(params);
         return command;
       }
 
@@ -360,16 +350,9 @@ public class CommandFactory implements AbstractCommand.Callback{
 
     SAVE_AND_APPROVE_DECISION {
       @Override
-      public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
-        SaveAndApproveDecision command = new SaveAndApproveDecision(document);
-        command.withParams(params);
-        command
-//          .withDecision( params.getDecision() )
-          .withDecisionId( params.getDecisionId() )
-          .withSign(true)
-          .registerCallBack(instance);
-
-        command.withParams(params);
+      public Command getCommand(CommandFactory instance, CommandParams params) {
+        SaveAndApproveDecision command = new SaveAndApproveDecision(params);
+        command.registerCallBack(instance);
         return command;
       }
 
@@ -381,12 +364,9 @@ public class CommandFactory implements AbstractCommand.Callback{
 
     CREATE_AND_APPROVE_DECISION {
       @Override
-      public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
-        AddAndApproveDecision command = new AddAndApproveDecision(document);
-        command.withParams(params);
+      public Command getCommand(CommandFactory instance, CommandParams params) {
+        AddAndApproveDecision command = new AddAndApproveDecision(params);
         command.registerCallBack(instance);
-
-        command.withParams(params);
         return command;
       }
 
@@ -398,15 +378,9 @@ public class CommandFactory implements AbstractCommand.Callback{
 
     APPROVE_DECISION {
       @Override
-      public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
-        ApproveDecision command = new ApproveDecision(document);
-        command.withParams(params);
-        command
-//          .withDecision( params.getDecision() )
-          .withDecisionId( params.getDecisionId() )
-          .registerCallBack(instance);
-
-        command.withParams(params);
+      public Command getCommand(CommandFactory instance, CommandParams params) {
+        ApproveDecision command = new ApproveDecision(params);
+        command.registerCallBack(instance);
         return command;
       }
 
@@ -418,9 +392,8 @@ public class CommandFactory implements AbstractCommand.Callback{
 
     APPROVE_DECISION_DELAYED {
       @Override
-      public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
-        ApproveDecisionDelayed command = new ApproveDecisionDelayed(document);
-        command.withParams(params);
+      public Command getCommand(CommandFactory instance, CommandParams params) {
+        ApproveDecisionDelayed command = new ApproveDecisionDelayed(params);
         command.registerCallBack(instance);
         return command;
       }
@@ -433,22 +406,9 @@ public class CommandFactory implements AbstractCommand.Callback{
 
     REJECT_DECISION {
       @Override
-      public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
-        Timber.tag("CommandFactory").w("REJECT_DECISION star" );
-
-        RejectDecision command = new RejectDecision(document);
-        Timber.tag("CommandFactory").w("REJECT_DECISION create" );
-        command.withParams(params);
-        Timber.tag("CommandFactory").w("REJECT_DECISION params" );
-        command
-//          .withDecision( params.getDecision() )
-          .withDecisionId( params.getDecisionId() )
-          .registerCallBack(instance);
-
-        Timber.tag("CommandFactory").w("REJECT_DECISION after register callback" );
-
-        command.withParams(params);
-        Timber.tag("CommandFactory").w("REJECT_DECISION after params" );
+      public Command getCommand(CommandFactory instance, CommandParams params) {
+        RejectDecision command = new RejectDecision(params);
+        command.registerCallBack(instance);
         return command;
       }
 
@@ -460,9 +420,9 @@ public class CommandFactory implements AbstractCommand.Callback{
 
     CREATE_DECISION_TEMPLATE {
       @Override
-      public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
-        CreateTemplate command = new CreateTemplate(document);
-        command.withParams(params);
+      public Command getCommand(CommandFactory instance, CommandParams params) {
+        CreateTemplate command = new CreateTemplate(params);
+        command.registerCallBack(instance);
         return command;
       }
 
@@ -474,9 +434,9 @@ public class CommandFactory implements AbstractCommand.Callback{
 
     UPDATE_DECISION_TEMPLATE {
       @Override
-      public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
-        UpdateTemplate command = new UpdateTemplate(document);
-        command.withParams(params);
+      public Command getCommand(CommandFactory instance, CommandParams params) {
+        UpdateTemplate command = new UpdateTemplate(params);
+        command.registerCallBack(instance);
         return command;
       }
 
@@ -488,9 +448,9 @@ public class CommandFactory implements AbstractCommand.Callback{
 
     DELETE_DECISION_TEMPLATE {
       @Override
-      public Command getCommand(CommandFactory instance, DocumentReceiver document, CommandParams params) {
-        RemoveTemplate command = new RemoveTemplate(document);
-        command.withParams(params);
+      public Command getCommand(CommandFactory instance, CommandParams params) {
+        RemoveTemplate command = new RemoveTemplate(params);
+        command.registerCallBack(instance);
         return command;
       }
 
@@ -520,7 +480,6 @@ public class CommandFactory implements AbstractCommand.Callback{
 
         case "sapotero.rxtest.managers.menu.commands.decision.SaveDecision":
           operation = Operation.SAVE_DECISION;
-
           break;
         case "sapotero.rxtest.managers.menu.commands.decision.SaveAndApproveDecision":
           operation = Operation.SAVE_AND_APPROVE_DECISION;
@@ -528,7 +487,6 @@ public class CommandFactory implements AbstractCommand.Callback{
         case "sapotero.rxtest.managers.menu.commands.decision.SaveTemporaryDecision":
           operation = Operation.SAVE_TEMPORARY_DECISION;
           break;
-
 
         case "sapotero.rxtest.managers.menu.commands.decision.ApproveDecision":
           operation = Operation.APPROVE_DECISION;
@@ -584,7 +542,6 @@ public class CommandFactory implements AbstractCommand.Callback{
           operation = Operation.SIGNING_PREV_PERSON;
           break;
 
-
         case "sapotero.rxtest.managers.menu.commands.shared.AddToFolder":
           operation = Operation.ADD_TO_FOLDER;
           break;
@@ -612,22 +569,16 @@ public class CommandFactory implements AbstractCommand.Callback{
         case "sapotero.rxtest.managers.menu.commands.templates.RemoveTemplate":
           operation = Operation.DELETE_DECISION_TEMPLATE;
           break;
-
       }
+
       return operation;
     }
 
     public abstract Command getCommand(CommandFactory instance, CommandParams params);
     public abstract String getRussianName();
-  };
-
-  public CommandFactory() {
   }
 
-  public CommandFactory withDocument(DocumentReceiver doc) {
-    Timber.tag(TAG).w("withDocument" );
-    document = doc;
-    return this;
+  public CommandFactory() {
   }
 
   public CommandFactory withParams(CommandParams params) {
@@ -639,7 +590,7 @@ public class CommandFactory implements AbstractCommand.Callback{
   public Command build(CommandFactory.Operation operation) {
     Timber.tag(TAG).w("build" );
 
-    Command command = operation.getCommand(this, document, params);
+    Command command = operation.getCommand(this, params);
 
     Timber.tag("CommandFactory").w("after build" );
     return command;

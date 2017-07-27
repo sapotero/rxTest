@@ -15,7 +15,7 @@ import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.DecisionCommand;
-import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
+import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
 import sapotero.rxtest.utils.memory.fields.FieldType;
@@ -24,39 +24,18 @@ import timber.log.Timber;
 
 public class SaveAndApproveDecision extends DecisionCommand {
 
-  private final DocumentReceiver document;
-
   private String TAG = this.getClass().getSimpleName();
 
-  private RDecisionEntity decision;
-  private String decisionId;
-  private boolean withSign = false;
-
-  public SaveAndApproveDecision(DocumentReceiver document){
-    super();
-    this.document = document;
-  }
-
-  public String getInfo(){
-    return null;
+  public SaveAndApproveDecision(CommandParams params) {
+    super(params);
   }
 
   public void registerCallBack(Callback callback){
     this.callback = callback;
   }
 
-  public SaveAndApproveDecision withDecision(RDecisionEntity decision){
-    this.decision = decision;
-    return this;
-  }
-  public SaveAndApproveDecision withDecisionId(String decisionId){
-    this.decisionId = decisionId;
-    return this;
-  }
-
   @Override
   public void execute() {
-
     queueManager.add(this);
     updateLocal();
 
@@ -78,48 +57,45 @@ public class SaveAndApproveDecision extends DecisionCommand {
   }
 
   private void updateLocal() {
-
-    Timber.tag(TAG).e("updateLocal %s", new Gson().toJson( params ));
-
+    Timber.tag(TAG).e("updateLocal %s", new Gson().toJson( getParams() ));
 
     Integer count = dataStore
       .update(RDecisionEntity.class)
       .set(RDecisionEntity.TEMPORARY, true)
-      .where(RDecisionEntity.UID.eq( params.getDecisionModel().getId() ))
+      .where(RDecisionEntity.UID.eq( getParams().getDecisionModel().getId() ))
       .get().value();
+
     Timber.tag(TAG).i( "updateLocal: %s", count );
 
     Tuple red = dataStore
       .select(RDecisionEntity.RED)
-      .where(RDecisionEntity.UID.eq(params.getDecisionModel().getId()))
+      .where(RDecisionEntity.UID.eq(getParams().getDecisionModel().getId()))
       .get().firstOrNull();
 
     dataStore
       .update(RDocumentEntity.class)
       .set(RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq( params.getDocument() ))
+      .where(RDocumentEntity.UID.eq( getParams().getDocument() ))
       .get()
       .value();
 
+    Timber.tag(TAG).e("-------- %s %s", getParams().getDecisionModel().getSignerId(), getParams().getCurrentUserId());
 
-    Timber.tag(TAG).e("-------- %s %s", params.getDecisionModel().getSignerId(), settings.getCurrentUserId());
     if (
-      Objects.equals(params.getDecisionModel().getSignerId(), settings.getCurrentUserId())
+      Objects.equals(getParams().getDecisionModel().getSignerId(), getParams().getCurrentUserId())
       // или если подписывающий министр
 //      || ( red != null && red.startTransactionFor(0).equals(true) )
-      ){
-      Integer dec = dataStore
+      ) {
+      dataStore
         .update(RDocumentEntity.class)
         .set(RDocumentEntity.PROCESSED, true)
         .set(RDocumentEntity.MD5, "")
-        .where(RDocumentEntity.UID.eq(  params.getDocument() ))
+        .where(RDocumentEntity.UID.eq(  getParams().getDocument() ))
         .get()
         .value();
 
-
-
       store.process(
-        store.startTransactionFor(  params.getDocument() )
+        store.startTransactionFor(  getParams().getDocument() )
           .setLabel(LabelType.SYNC)
           .setField(FieldType.PROCESSED, true)
       );
@@ -127,20 +103,14 @@ public class SaveAndApproveDecision extends DecisionCommand {
       EventBus.getDefault().post( new ShowNextDocumentEvent());
     }
 
-    EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( params.getDecisionModel().getId() ));
+    EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( getParams().getDecisionModel().getId() ));
   }
 
   @Override
   public void executeRemote() {
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 
-//    Decision formated_decision = DecisionConverter.formatDecision( decision );
-//
-//    DecisionWrapper wrapper = new DecisionWrapper();
-//    wrapper.setDecision(formated_decision);
-
-    Decision _decision = params.getDecisionModel();
-//    _decision.setDocumentUid( document.getUid() );
+    Decision _decision = getParams().getDecisionModel();
     _decision.setDocumentUid( null );
     _decision.setApproved(true);
 
@@ -159,10 +129,5 @@ public class SaveAndApproveDecision extends DecisionCommand {
         },
         error -> onError( this, error.getLocalizedMessage(), true, TAG )
       );
-  }
-
-  public SaveAndApproveDecision withSign(boolean withSign) {
-    this.withSign = withSign;
-    return this;
   }
 }

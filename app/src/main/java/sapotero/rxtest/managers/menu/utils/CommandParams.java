@@ -20,6 +20,7 @@ public class CommandParams implements Serializable {
   public String uuid;
   public String user;
   public String token;
+  public String currentUserId;
   public String comment;
   public Decision decisionModel;
   public Boolean activeDecision;
@@ -178,5 +179,13 @@ public class CommandParams implements Serializable {
 
   public void setToken(String token) {
     this.token = token;
+  }
+
+  public String getCurrentUserId() {
+    return currentUserId;
+  }
+
+  public void setCurrentUserId(String currentUserId) {
+    this.currentUserId = currentUserId;
   }
 }

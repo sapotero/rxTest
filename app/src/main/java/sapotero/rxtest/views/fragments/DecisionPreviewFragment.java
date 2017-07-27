@@ -150,6 +150,9 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
 
           CommandParams params = new CommandParams();
 
+          params.setUser( settings.getLogin() );
+          params.setToken( settings.getToken() );
+          params.setCurrentUserId( settings.getCurrentUserId() );
           params.setDecisionId( decision.getId() );
           params.setDecisionModel( decision );
           params.setDocument( settings.getUid() );
@@ -168,6 +171,9 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
 
       CommandParams params = new CommandParams();
 
+      params.setUser( settings.getLogin() );
+      params.setToken( settings.getToken() );
+      params.setCurrentUserId( settings.getCurrentUserId() );
       params.setDecisionId( decision.getId() );
       params.setDecisionModel( decision );
       params.setDocument( settings.getUid() );
@@ -199,8 +205,12 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
           CommandFactory.Operation operation =CommandFactory.Operation.REJECT_DECISION;
 
           CommandParams commandParams = new CommandParams();
+          commandParams.setUser( settings.getLogin() );
+          commandParams.setToken( settings.getToken() );
+          commandParams.setCurrentUserId( settings.getCurrentUserId() );
           commandParams.setDecisionId( decision.getId() );
           commandParams.setDecisionModel( decision );
+          commandParams.setDocument( settings.getUid() );
           commandParams.setComment( dialog1.getInputEditText().getText().toString() );
 
           operationManager.execute(operation, commandParams);
@@ -223,6 +233,9 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
       operation =CommandFactory.Operation.REJECT_DECISION;
 
       CommandParams params = new CommandParams();
+      params.setUser( settings.getLogin() );
+      params.setToken( settings.getToken() );
+      params.setCurrentUserId( settings.getCurrentUserId() );
       params.setDecisionId( decision.getId() );
       params.setDecisionModel( decision );
       params.setDocument( settings.getUid() );

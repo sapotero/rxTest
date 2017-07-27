@@ -21,6 +21,7 @@ import sapotero.rxtest.db.requery.models.RTemplateEntity;
 import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.fragments.DecisionRejectionTemplateFragment;
 import sapotero.rxtest.views.fragments.DecisionTemplateFragment;
 import timber.log.Timber;
@@ -28,6 +29,7 @@ import timber.log.Timber;
 public class SettingsTemplatesActivity extends AppCompatActivity implements DecisionTemplateFragment.OnListFragmentInteractionListener, DecisionRejectionTemplateFragment.OnListFragmentInteractionListener {
 
   @Inject OperationManager operationManager;
+  @Inject ISettings settings;
 
   @BindView(R.id.activity_settings_content_wrapper) LinearLayout wrapper;
   @BindView(R.id.toolbar) Toolbar toolbar;
@@ -108,6 +110,8 @@ public class SettingsTemplatesActivity extends AppCompatActivity implements Deci
 
           CommandFactory.Operation operation = CommandFactory.Operation.DELETE_DECISION_TEMPLATE;
           CommandParams params = new CommandParams();
+          params.setUser( settings.getLogin() );
+          params.setToken( settings.getToken() );
           params.setUuid( item.getUid() );
           operationManager.execute(operation, params);
 
@@ -117,6 +121,8 @@ public class SettingsTemplatesActivity extends AppCompatActivity implements Deci
 
           CommandFactory.Operation operation = CommandFactory.Operation.UPDATE_DECISION_TEMPLATE;
           CommandParams params = new CommandParams();
+          params.setUser( settings.getLogin() );
+          params.setToken( settings.getToken() );
           params.setComment( dialog.getInputEditText().getText().toString() );
           params.setUuid( item.getUid() );
           operationManager.execute(operation, params);

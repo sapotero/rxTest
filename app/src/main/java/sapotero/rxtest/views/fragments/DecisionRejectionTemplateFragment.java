@@ -126,6 +126,8 @@ public class DecisionRejectionTemplateFragment extends Fragment {
 
         CommandFactory.Operation operation = CommandFactory.Operation.CREATE_DECISION_TEMPLATE;
         CommandParams params = new CommandParams();
+        params.setUser( settings.getLogin() );
+        params.setToken( settings.getToken() );
         params.setComment( dialog.getInputEditText().getText().toString() );
         params.setLabel( REJECTION );
         operationManager.execute(operation, params);

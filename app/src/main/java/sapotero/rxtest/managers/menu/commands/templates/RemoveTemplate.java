@@ -6,23 +6,14 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RTemplateEntity;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
-import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
+import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.TemplatesService;
 import sapotero.rxtest.retrofit.models.Template;
 
 public class RemoveTemplate extends AbstractCommand {
 
-  private final DocumentReceiver document;
-
-  private String TAG = this.getClass().getSimpleName();
-
-  public RemoveTemplate(DocumentReceiver document){
-    super();
-    this.document = document;
-  }
-
-  public String getInfo(){
-    return null;
+  public RemoveTemplate(CommandParams params) {
+    super(params);
   }
 
   public void registerCallBack(Callback callback){
@@ -55,9 +46,9 @@ public class RemoveTemplate extends AbstractCommand {
     TemplatesService templatesService = retrofit.create( TemplatesService.class );
 
     Observable<Template> info = templatesService.remove(
-      params.getUuid(),
-      settings.getLogin(),
-      settings.getToken()
+      getParams().getUuid(),
+      getParams().getUser(),
+      getParams().getToken()
     );
 
     info

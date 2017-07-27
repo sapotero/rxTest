@@ -5,23 +5,14 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
-import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
+import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.TemplatesService;
 import sapotero.rxtest.retrofit.models.Template;
 
 public class UpdateTemplate extends AbstractCommand {
 
-  private final DocumentReceiver document;
-
-  private String TAG = this.getClass().getSimpleName();
-
-  public UpdateTemplate(DocumentReceiver document){
-    super();
-    this.document = document;
-  }
-
-  public String getInfo(){
-    return null;
+  public UpdateTemplate(CommandParams params) {
+    super(params);
   }
 
   public void registerCallBack(Callback callback){
@@ -54,10 +45,10 @@ public class UpdateTemplate extends AbstractCommand {
     TemplatesService templatesService = retrofit.create( TemplatesService.class );
 
     Observable<Template> info = templatesService.update(
-      params.getUuid(),
-      settings.getLogin(),
-      settings.getToken(),
-      params.getComment()
+      getParams().getUuid(),
+      getParams().getUser(),
+      getParams().getToken(),
+      getParams().getComment()
     );
 
     info
