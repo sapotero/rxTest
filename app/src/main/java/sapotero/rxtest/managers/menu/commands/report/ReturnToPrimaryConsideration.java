@@ -84,7 +84,7 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
 
     Observable<OperationResult> info = operationService.report(
       getType(),
-      getParams().getUser(),
+      getParams().getLogin(),
       getParams().getToken(),
       uids,
       uid,

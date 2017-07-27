@@ -792,12 +792,8 @@ public class MainService extends Service {
 
     CommandFactory.Operation operation = CommandFactory.Operation.APPROVE_DECISION_DELAYED;
     CommandParams params = new CommandParams();
-    params.setUser( settings.getLogin() );
-    params.setToken( settings.getToken() );
-    params.setCurrentUserId( settings.getCurrentUserId() );
     params.setDecisionId( event.uid );
     params.setAssignment( event.assignment );
-    params.setDocument( settings.getUid() );
 
     Command command = operation.getCommand(null, params);
     queue.add(command);

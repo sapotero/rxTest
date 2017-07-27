@@ -28,8 +28,6 @@ public class AddDecision extends DecisionCommand {
   public void execute() {
     CommandFactory.Operation operation = CommandFactory.Operation.CREATE_TEMPORARY_DECISION;
     CommandParams _params = new CommandParams();
-    _params.setUser( getParams().getUser() );
-    _params.setToken( getParams().getToken() );
     _params.setDecisionId( getParams().getDecisionModel().getId() );
     _params.setDecisionModel( getParams().getDecisionModel() );
     _params.setDocument( getParams().getDocument() );

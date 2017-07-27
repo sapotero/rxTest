@@ -18,7 +18,6 @@ import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
-import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
 public abstract class SharedCommand extends AbstractCommand {
@@ -92,7 +91,7 @@ public abstract class SharedCommand extends AbstractCommand {
 
     return operationService.shared(
       getType(),
-      getParams().getUser(),
+      getParams().getLogin(),
       getParams().getToken(),
       uids,
       uid,

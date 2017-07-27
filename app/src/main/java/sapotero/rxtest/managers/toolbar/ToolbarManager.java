@@ -90,9 +90,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
         CommandFactory.Operation operation;
         CommandParams params = new CommandParams();
-        params.setUser( settings.getLogin() );
-        params.setToken( settings.getToken() );
-        params.setDocument( settings.getUid() );
 
         switch ( item.getItemId() ){
           // sent_to_the_report (отправлен на доклад)
@@ -112,7 +109,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
           case R.id.menu_info_delegate_performance:
             operation = CommandFactory.Operation.DELEGATE_PERFORMANCE;
             params.setPerson( settings.getCurrentUserId() );
-            params.setStatusCode( settings.getStatusCode() );
             break;
           case R.id.menu_info_to_the_approval_performance:
 
@@ -124,7 +120,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             } else {
               operation = CommandFactory.Operation.FROM_THE_REPORT;
               params.setPerson( settings.getCurrentUserId() );
-              params.setStatusCode( settings.getStatusCode() );
             }
             break;
 
@@ -138,7 +133,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
               showNextDialog(false);
             } else {
               operation = CommandFactory.Operation.APPROVAL_NEXT_PERSON;
-              params.setStatusCode( settings.getStatusCode() );
               params.setPerson( "" );
             }
 //
@@ -151,9 +145,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
               showPrevDialog(true);
             } else {
               operation = CommandFactory.Operation.APPROVAL_PREV_PERSON;
-              params.setStatusCode( settings.getStatusCode() );
               params.setPerson( "" );
-              params.setSign( "SIGN" );
             }
             break;
 
@@ -205,7 +197,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
                 showNextDialog(true);
               } else {
                 operation = CommandFactory.Operation.SIGNING_NEXT_PERSON;
-                params.setStatusCode( settings.getStatusCode() );
                 params.setPerson( "" );
               }
 
@@ -233,7 +224,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
               showPrevDialog(false);
             } else {
               operation = CommandFactory.Operation.SIGNING_PREV_PERSON;
-              params.setStatusCode( settings.getStatusCode() );
               params.setPerson( "" );
             }
 
@@ -266,8 +256,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
               .get().first().getUid();
 
             params.setFolder( favorites );
-            params.setDocument( settings.getUid() );
-            params.setStatusCode( settings.getStatusCode() );
 
             break;
           case R.id.menu_info_shared_to_control:
@@ -281,8 +269,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
             } else {
               operation = !isFromControl() ? CommandFactory.Operation.CHECK_CONTROL_LABEL : CommandFactory.Operation.UNCHECK_CONTROL_LABEL;
-              params.setDocument( settings.getUid() );
-              params.setStatusCode( settings.getStatusCode() );
             }
             break;
 
@@ -304,8 +290,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
               showDismissDialog();
             } else {
               operation = CommandFactory.Operation.RETURN_TO_THE_PRIMARY_CONSIDERATION;
-              params.setDocument( settings.getUid() );
-              params.setStatusCode( settings.getStatusCode() );
             }
 
             break;
@@ -687,10 +671,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         operation = !finalIsControl ? CommandFactory.Operation.CHECK_CONTROL_LABEL : CommandFactory.Operation.UNCHECK_CONTROL_LABEL;
 
         CommandParams params = new CommandParams();
-        params.setUser( settings.getLogin() );
-        params.setToken( settings.getToken() );
-        params.setDocument( settings.getUid() );
-        params.setStatusCode( settings.getStatusCode() );
 
         operationManager.execute( operation, params );
       })
@@ -712,12 +692,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         operation = !isApproval ? CommandFactory.Operation.APPROVAL_NEXT_PERSON: CommandFactory.Operation.SIGNING_NEXT_PERSON;
 
         CommandParams params = new CommandParams();
-        params.setUser( settings.getLogin() );
-        params.setToken( settings.getToken() );
-        params.setDocument( settings.getUid() );
-        params.setStatusCode( settings.getStatusCode() );
         params.setPerson( "" );
-        params.setSign( "SignFileCommand" );
 
         operationManager.execute( operation, params );
       })
@@ -739,12 +714,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         CommandFactory.Operation operation;
         operation = isApproval ? CommandFactory.Operation.APPROVAL_PREV_PERSON : CommandFactory.Operation.SIGNING_PREV_PERSON;
 
-        params.setUser( settings.getLogin() );
-        params.setToken( settings.getToken() );
-        params.setDocument( settings.getUid() );
-        params.setStatusCode( settings.getStatusCode() );
         params.setPerson( "" );
-        params.setSign("SignFileCommand");
 
         // если есть комментарий
         if (settings.getPrevDialogComment() != null && settings.isShowCommentPost() ) {
@@ -787,8 +757,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
         operation = CommandFactory.Operation.FROM_THE_REPORT;
         params.setPerson( settings.getCurrentUserId() );
-        params.setDocument( settings.getUid() );
-        params.setStatusCode( settings.getStatusCode() );
         if ( settings.isShowCommentPost() ) {
           params.setComment(dialog1.getInputEditText().getText().toString());
         }
@@ -824,8 +792,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       .onPositive((dialog1, which) -> {
         CommandFactory.Operation operation;
         operation = CommandFactory.Operation.RETURN_TO_THE_PRIMARY_CONSIDERATION;
-        params.setDocument( settings.getUid() );
-        params.setStatusCode( settings.getStatusCode() );
         operationManager.execute(operation, params);
       })
       .autoDismiss(true)
@@ -838,11 +804,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   public void onSearchSuccess(Oshs user, CommandFactory.Operation operation, String uid) {
     Timber.tag("onSearchSuccess").i("user: %s", user.getName());
     CommandParams params = new CommandParams();
-    params.setUser( settings.getLogin() );
-    params.setToken( settings.getToken() );
     params.setPerson( user.getId() );
     params.setDocument( uid );
-    params.setStatusCode( settings.getStatusCode() );
     operationManager.execute( operation, params );
   }
 

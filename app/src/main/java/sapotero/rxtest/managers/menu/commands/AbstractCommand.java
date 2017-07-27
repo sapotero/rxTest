@@ -66,7 +66,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     return new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( settings.getHost() + "v3/operations/" )
+      .baseUrl( getParams().getHost() + "v3/operations/" )
       .client( okHttpClient )
       .build();
   }
@@ -75,7 +75,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     return new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( settings.getHost() )
+      .baseUrl( getParams().getHost() )
       .client( okHttpClient )
       .build();
   }
@@ -84,7 +84,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     String sign = null;
 
     try {
-      sign = MainService.getFakeSign( settings.getPin(), null );
+      sign = MainService.getFakeSign( getParams().getPin(), null );
     } catch (Exception e) {
       e.printStackTrace();
     }

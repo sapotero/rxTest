@@ -173,13 +173,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
             CommandParams params = new CommandParams();
 
-            params.setUser( settings.getLogin() );
-            params.setToken( settings.getToken() );
-            params.setCurrentUserId( settings.getCurrentUserId() );
             params.setDecisionId( current_decision.getUid() );
             params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(current_decision) );
-            params.setDocument( settings.getUid() );
-            params.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
 
             operationManager.execute(operation, params);
             updateAfteButtonPressed();
@@ -195,14 +190,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
       CommandParams params = new CommandParams();
 
-      params.setUser( settings.getLogin() );
-      params.setToken( settings.getToken() );
-      params.setCurrentUserId( settings.getCurrentUserId() );
       params.setDecisionId( current_decision.getUid() );
-//      params.setDecision( current_decision );
       params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(current_decision) );
-      params.setDocument( settings.getUid() );
-      params.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
 
       operationManager.execute(operation, params);
       updateAfteButtonPressed();
@@ -230,13 +219,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       operation =CommandFactory.Operation.REJECT_DECISION;
 
       CommandParams params = new CommandParams();
-      params.setUser( settings.getLogin() );
-      params.setToken( settings.getToken() );
-      params.setCurrentUserId( settings.getCurrentUserId() );
       params.setDecisionId( current_decision.getUid() );
-      params.setDocument( settings.getUid() );
       params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(current_decision) );
-      params.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
 
       operationManager.execute(operation, params);
       updateAfteButtonPressed();
@@ -255,13 +239,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
         CommandFactory.Operation operation =CommandFactory.Operation.REJECT_DECISION;
 
         CommandParams commandParams = new CommandParams();
-        commandParams.setUser( settings.getLogin() );
-        commandParams.setToken( settings.getToken() );
-        commandParams.setCurrentUserId( settings.getCurrentUserId() );
         commandParams.setDecisionId( current_decision.getUid() );
-        commandParams.setDocument( settings.getUid() );
         commandParams.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(current_decision) );
-        commandParams.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
 
         if ( settings.isShowCommentPost() ) {
           commandParams.setComment(dialog1.getInputEditText().getText().toString());
@@ -790,12 +769,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
           Decision decision = mappers.getDecisionMapper().toFormattedModel( current_decision );
           decision.setComment( dialog.getInputEditText().getText().toString() );
-          params.setUser( settings.getLogin() );
-          params.setToken( settings.getToken() );
-          params.setCurrentUserId( settings.getCurrentUserId() );
           params.setDecisionModel( decision );
           params.setDecisionId( current_decision.getUid() );
-          params.setDocument( settings.getUid() );
 
           Timber.e("DECISION %s", new Gson().toJson(decision));
 

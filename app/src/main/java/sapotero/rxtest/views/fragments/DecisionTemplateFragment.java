@@ -126,8 +126,6 @@ public class DecisionTemplateFragment extends Fragment {
 
         CommandFactory.Operation operation = CommandFactory.Operation.CREATE_DECISION_TEMPLATE;
         CommandParams params = new CommandParams();
-        params.setUser( settings.getLogin() );
-        params.setToken( settings.getToken() );
         params.setComment( dialog.getInputEditText().getText().toString() );
         params.setLabel( DECISION );
         operationManager.execute(operation, params);

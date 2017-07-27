@@ -39,7 +39,7 @@ public abstract class DecisionCommand extends AbstractCommand {
     DocumentService operationService = retrofit.create( DocumentService.class );
 
     return operationService.create(
-      getParams().getUser(),
+      getParams().getLogin(),
       getParams().getToken(),
       json
     );
@@ -65,7 +65,7 @@ public abstract class DecisionCommand extends AbstractCommand {
 
     return operationService.update(
       getParams().getDecisionId(),
-      getParams().getUser(),
+      getParams().getLogin(),
       getParams().getToken(),
       json
     );

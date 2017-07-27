@@ -47,7 +47,7 @@ public class RemoveTemplate extends AbstractCommand {
 
     Observable<Template> info = templatesService.remove(
       getParams().getUuid(),
-      getParams().getUser(),
+      getParams().getLogin(),
       getParams().getToken()
     );
 

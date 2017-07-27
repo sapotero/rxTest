@@ -46,7 +46,7 @@ public class DelegatePerformance extends AbstractCommand {
 
     Observable<OperationResult> info = operationService.performance(
       getType(),
-      getParams().getUser(),
+      getParams().getLogin(),
       getParams().getToken(),
       uids,
       getParams().getDocument(),

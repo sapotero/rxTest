@@ -188,11 +188,7 @@ public class NextPerson extends ApprovalSigningCommand {
 
     CommandFactory.Operation operation = CommandFactory.Operation.FILE_SIGN;
     CommandParams params = new CommandParams();
-    params.setUser( getParams().getUser() );
-    params.setToken( getParams().getToken() );
-    params.setDocument( getParams().getDocument() );
     params.setLabel( image.getTitle() );
-    params.setFilePath( String.format( "%s_%s", image.getMd5(), image.getTitle()) );
     params.setImageId( image.getImageId() );
     Command command = operation.getCommand(null, params);
     Timber.tag(TAG).e("image: %s", getParams().getDocument());

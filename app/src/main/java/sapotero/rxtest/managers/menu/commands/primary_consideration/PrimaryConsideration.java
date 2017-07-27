@@ -3,7 +3,6 @@ package sapotero.rxtest.managers.menu.commands.primary_consideration;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 import retrofit2.Retrofit;
 import rx.Observable;
@@ -95,7 +94,7 @@ public class PrimaryConsideration extends AbstractCommand {
 
     Observable<OperationResult> info = operationService.consideration(
       getType(),
-      getParams().getUser(),
+      getParams().getLogin(),
       getParams().getToken(),
       uids,
       getParams().getDocument(),

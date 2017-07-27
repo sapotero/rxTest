@@ -34,7 +34,7 @@ public abstract class ApprovalSigningCommand extends AbstractCommand {
 
     return operationService.approvalSign(
       getType(),
-      getParams().getUser(),
+      getParams().getLogin(),
       getParams().getToken(),
       uids,
       comment,

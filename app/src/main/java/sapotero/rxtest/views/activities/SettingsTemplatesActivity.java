@@ -29,7 +29,6 @@ import timber.log.Timber;
 public class SettingsTemplatesActivity extends AppCompatActivity implements DecisionTemplateFragment.OnListFragmentInteractionListener, DecisionRejectionTemplateFragment.OnListFragmentInteractionListener {
 
   @Inject OperationManager operationManager;
-  @Inject ISettings settings;
 
   @BindView(R.id.activity_settings_content_wrapper) LinearLayout wrapper;
   @BindView(R.id.toolbar) Toolbar toolbar;
@@ -110,8 +109,6 @@ public class SettingsTemplatesActivity extends AppCompatActivity implements Deci
 
           CommandFactory.Operation operation = CommandFactory.Operation.DELETE_DECISION_TEMPLATE;
           CommandParams params = new CommandParams();
-          params.setUser( settings.getLogin() );
-          params.setToken( settings.getToken() );
           params.setUuid( item.getUid() );
           operationManager.execute(operation, params);
 
@@ -121,8 +118,6 @@ public class SettingsTemplatesActivity extends AppCompatActivity implements Deci
 
           CommandFactory.Operation operation = CommandFactory.Operation.UPDATE_DECISION_TEMPLATE;
           CommandParams params = new CommandParams();
-          params.setUser( settings.getLogin() );
-          params.setToken( settings.getToken() );
           params.setComment( dialog.getInputEditText().getText().toString() );
           params.setUuid( item.getUid() );
           operationManager.execute(operation, params);

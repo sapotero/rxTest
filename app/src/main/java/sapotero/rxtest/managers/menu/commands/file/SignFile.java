@@ -1,13 +1,11 @@
 package sapotero.rxtest.managers.menu.commands.file;
 
-import java.io.File;
 import java.util.Collections;
 
 import retrofit2.Retrofit;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.images.RSignImageEntity;
 import sapotero.rxtest.db.requery.models.queue.FileSignEntity;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
@@ -80,8 +78,6 @@ public class SignFile extends AbstractCommand {
 
     ImagesService imagesService = retrofit.create( ImagesService.class );
 
-    File file = new File( EsdApplication.getApplication().getApplicationContext().getFilesDir(), getParams().getFilePath() );
-
     Timber.tag(TAG).d("Generating sign");
 
     String file_sign = getSign();
@@ -91,7 +87,7 @@ public class SignFile extends AbstractCommand {
 
       Observable<Object> info = imagesService.update(
         getParams().getImageId(),
-        getParams().getUser(),
+        getParams().getLogin(),
         getParams().getToken(),
         file_sign
       );

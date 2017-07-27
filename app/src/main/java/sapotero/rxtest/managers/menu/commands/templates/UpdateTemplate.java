@@ -46,7 +46,7 @@ public class UpdateTemplate extends AbstractCommand {
 
     Observable<Template> info = templatesService.update(
       getParams().getUuid(),
-      getParams().getUser(),
+      getParams().getLogin(),
       getParams().getToken(),
       getParams().getComment()
     );
