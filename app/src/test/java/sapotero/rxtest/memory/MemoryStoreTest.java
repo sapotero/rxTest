@@ -1,5 +1,7 @@
 package sapotero.rxtest.memory;
 
+import android.support.annotation.NonNull;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -9,6 +11,8 @@ import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -95,7 +99,7 @@ public class MemoryStoreTest {
     assertSubscriberValid(subscriber);
 
 
-    InMemoryDocument document = new InMemoryDocument();
+    InMemoryDocument document = getRandomDocument();
     pub.onNext( document );
 
     subscriber.assertValue( document );
@@ -110,6 +114,15 @@ public class MemoryStoreTest {
     subscriber.assertValueCount(4);
     assertSubscriberValid(subscriber);
 
+//    Assert.assertEquals( 4, memoryStore.getDocuments() );
+
+  }
+
+  @NonNull
+  private InMemoryDocument getRandomDocument() {
+    InMemoryDocument doc = new InMemoryDocument();
+    doc.setUid(UUID.randomUUID().toString() );
+    return doc;
   }
 
   public MemoryStore buildStore() {
