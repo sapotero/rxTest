@@ -63,7 +63,7 @@ public class BlockMapper extends AbstractMapper<Block, RBlockEntity> {
 
     setBaseFields( formattedModel, entity );
     formattedModel.setFontSize( "14" );
-    formattedModel.setIndentation( "0" );
+    formattedModel.setIndentation( "5" ); // Не трогать!
     setPerformers( formattedModel, entity, true );
 
     return formattedModel;
