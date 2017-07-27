@@ -134,7 +134,7 @@ public class CommandFactory implements AbstractCommand.Callback{
 
       @Override
       public String getRussianName() {
-        return "Передачи первичного рассмотрения";
+        return "Передача первичного рассмотрения";
       }
     },
 

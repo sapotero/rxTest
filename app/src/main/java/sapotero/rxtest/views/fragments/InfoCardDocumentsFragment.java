@@ -132,12 +132,14 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     }
 
     updateDocument();
-    initSubscription();
+//    initSubscription();
 
     return view;
   }
 
   private void initSubscription() {
+    directionSub = PublishSubject.create();
+
     sub = directionSub
       .buffer( 1000, TimeUnit.MILLISECONDS )
       .onBackpressureBuffer(32)
@@ -457,18 +459,20 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   }
 
   @Override
-  public void onDetach() {
-    super.onDetach();
+  public void onResume() {
+    super.onResume();
 
-//    if ( EventBus.getDefault().isRegistered(this) ){
-//      EventBus.getDefault().unregister(this);
-//    }
-//    directionSub
+    initSubscription();
+  }
+
+  @Override
+  public void onPause() {
+    super.onPause();
+
     if (sub != null) {
       sub.unsubscribe();
       directionSub = null;
     }
-
   }
 
   @Override
