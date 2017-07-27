@@ -3,10 +3,14 @@
                 xmlns:tools="http://schemas.android.com/tools"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
+
+                android:id="@+id/pdf_linear_wrapper"
+
              tools:context="sapotero.rxtest.views.fragments.InfoCardDocumentsFragment">
 
 
     <LinearLayout
+
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -18,8 +22,6 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentBottom="true">
 
-
-        <!--<sapotero.rxtest.views.custom.pdf.PDFView-->
         <com.github.barteksc.pdfviewer.PDFView
             android:id="@+id/pdfView"
             android:layout_width="match_parent"
