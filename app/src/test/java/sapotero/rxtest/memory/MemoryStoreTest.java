@@ -1,11 +1,10 @@
 package sapotero.rxtest.memory;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -32,17 +31,11 @@ import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.utils.queue.utils.QueueManagerModule;
 
-import static org.powermock.api.mockito.PowerMockito.doNothing;
-
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ EsdApplication.class })
 public class MemoryStoreTest {
 
   @Inject ISettings settings;
-  @Mock MemoryStore store;
-
-  private TestSubscriber<InMemoryDocument> subscriber;
-  private PublishSubject<InMemoryDocument> pub;
 
   @Before
   public void init() {
@@ -71,55 +64,62 @@ public class MemoryStoreTest {
     RxAndroidPlugins.getInstance().reset();
   }
 
-
-  @Test
-  public void buildStore() {
-    store = new MemoryStore();
-    MemoryStore spyStore = Mockito.spy(store);
-
-    doNothing().when(spyStore).loadFromDB();
-
-    spyStore.build();
-  }
-
   @Test
   public void createSubscription(){
-    subscriber = new TestSubscriber<>();
-    pub = store.getPublishSubject();
-
-//    store
-//      .getPublishSubject()
-//      .subscribe(subscriber);
+    MemoryStore memoryStore = buildStore();
+    Assert.assertNotNull( memoryStore.getPublishSubject() );
   }
 
   @Test
-  public  void validateEmptySubscription(){
-//    subscriber.assertNoErrors();
-//    subscriber.assertNoTerminalEvent();
+  public void validateEmptySubscription(){
+    MemoryStore memoryStore = buildStore();
+    TestSubscriber<InMemoryDocument> subscriber = new TestSubscriber<>();
+
+    memoryStore
+      .getPublishSubject()
+      .subscribe(subscriber);
+
+    assertSubscriberValid(subscriber);
+    subscriber.assertNoValues();
+  }
+
+  @Test
+  public void validateAddDocumentToStore(){
+    MemoryStore memoryStore = buildStore();
+    TestSubscriber<InMemoryDocument> subscriber = new TestSubscriber<>();
+
+    PublishSubject<InMemoryDocument> pub = memoryStore.getPublishSubject();
+
+    pub.subscribe(subscriber);
+
+    assertSubscriberValid(subscriber);
+
+
+    InMemoryDocument document = new InMemoryDocument();
+    pub.onNext( document );
+
+    subscriber.assertValue( document );
+    subscriber.assertValueCount(1);
+    assertSubscriberValid(subscriber);
+
+
+    pub.onNext( document );
+    pub.onNext( document );
+    pub.onNext( document );
+
+    subscriber.assertValueCount(4);
+    assertSubscriberValid(subscriber);
+
+  }
+
+  public MemoryStore buildStore() {
+    return new MemoryStore().withDB(false).build();
+  }
+
+  private void assertSubscriberValid(TestSubscriber<InMemoryDocument> subscriber) {
+    subscriber.assertNoErrors();
+    subscriber.assertNoTerminalEvent();
+    subscriber.assertNotCompleted();
   }
 
 }
-
-//
-//    sub
-//      .buffer( 200, TimeUnit.MILLISECONDS )
-//      .onBackpressureBuffer(512)
-//      .onBackpressureDrop()
-//      .subscribeOn(Schedulers.computation())
-//      .observeOn(AndroidSchedulers.mainThread())
-//      .subscribe(
-//      docs -> {
-//      for (InMemoryDocument doc: docs ) {
-//      documents.put( doc.getUid(), doc );
-//      Timber.tag("RecyclerViewRefresh").d("MemoryStore: pub.onNext()");
-//      pub.onNext( doc );
-//      }
-//
-//      if (docs.size() > 0){
-//      EventBus.getDefault().post( new JournalSelectorUpdateCountEvent() );
-////            counterRecreate();
-//      }
-//
-//      },
-//      Timber::e
-//      );

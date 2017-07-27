@@ -41,8 +41,14 @@ public class MemoryStore implements Processable{
   private PublishSubject<InMemoryDocument> pub;
   private PublishSubject<InMemoryDocument> sub;
   private Counter counter;
+  private boolean withDB = true;
 
   public MemoryStore() {
+  }
+
+  public MemoryStore withDB(Boolean withDB){
+    this.withDB = withDB;
+    return this;
   }
 
   private void init() {
@@ -59,7 +65,9 @@ public class MemoryStore implements Processable{
   public MemoryStore build(){
     init();
 
-    loadFromDB();
+    if (withDB){
+      loadFromDB();
+    }
     startSub();
 
     return this;
