@@ -103,10 +103,6 @@ public class AddAndApproveDecision extends DecisionCommand {
     EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( getParams().getDecisionModel().getId() ));
   }
 
-  private String getDecisionUid() {
-    return getParams().getDecisionModel().getId();
-  }
-
   @Override
   public String getType() {
     return "add_and_approve_decision";

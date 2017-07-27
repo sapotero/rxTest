@@ -11,7 +11,7 @@ import sapotero.rxtest.utils.ISettings;
 
 public class CommandParams implements Serializable {
 
-  @Inject ISettings settings;
+  @Inject transient ISettings settings;
 
   private String host;
   private String login;
