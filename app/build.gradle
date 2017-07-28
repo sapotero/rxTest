@@ -133,7 +133,6 @@ dependencies {
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
     compile 'com.squareup.okhttp3:logging-interceptor:3.4.1'
 
-
     //RxAndroid
     compile 'io.reactivex:rxandroid:1.2.1'
     compile 'io.reactivex:rxjava:1.2.4'
@@ -188,7 +187,7 @@ dependencies {
     compile 'com.facebook.stetho:stetho-okhttp3:1.4.1'
     /*debug*/
 
-    compile group:'com.googlecode.totallylazy', name:'totallylazy', version:'1.86'
+    compile group: 'com.googlecode.totallylazy', name: 'totallylazy', version: '1.86'
 
 
 
@@ -224,6 +223,9 @@ configurations.all {
     }
 }
 
+dependencies {
+    compile 'com.android.support.constraint:constraint-layout:+'
+}
 allprojects {
     repositories {
         maven {

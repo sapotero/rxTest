@@ -20,6 +20,7 @@ import sapotero.rxtest.views.activities.InfoActivity;
 import sapotero.rxtest.views.activities.LoginActivity;
 import sapotero.rxtest.views.activities.MainActivity;
 import sapotero.rxtest.views.activities.SettingsTemplatesActivity;
+import sapotero.rxtest.views.activities.TestActivity;
 import sapotero.rxtest.views.adapters.DecisionAdapter;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.models.DocumentTypeItem;
@@ -77,4 +78,6 @@ public interface ManagerComponent {
   void inject(InfoCardDocumentsFragment fragment);
 
   void inject(JournalSelectorAdapter context);
+
+  void inject(TestActivity context);
 }
