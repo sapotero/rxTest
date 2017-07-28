@@ -90,8 +90,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
         CommandFactory.Operation operation;
         CommandParams params = new CommandParams();
-        params.setUser( settings.getLogin() );
-        params.setDocument( settings.getUid() );
 
         switch ( item.getItemId() ){
           // sent_to_the_report (отправлен на доклад)
@@ -135,6 +133,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
               showNextDialog(false);
             } else {
               operation = CommandFactory.Operation.APPROVAL_NEXT_PERSON;
+              params.setPerson( "" );
             }
 //
             break;
@@ -146,7 +145,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
               showPrevDialog(true);
             } else {
               operation = CommandFactory.Operation.APPROVAL_PREV_PERSON;
-              params.setSign( "SIGN" );
+              params.setPerson( "" );
             }
             break;
 
@@ -198,6 +197,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
                 showNextDialog(true);
               } else {
                 operation = CommandFactory.Operation.SIGNING_NEXT_PERSON;
+                params.setPerson( "" );
               }
 
             } else {
@@ -224,6 +224,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
               showPrevDialog(false);
             } else {
               operation = CommandFactory.Operation.SIGNING_PREV_PERSON;
+              params.setPerson( "" );
             }
 
             break;
@@ -254,9 +255,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
               .where(RFolderEntity.TYPE.eq("favorites"))
               .get().first().getUid();
 
-            params.setFolder(favorites);
-            params.setDocument( settings.getUid() );
-
+            params.setFolder( favorites );
 
             break;
           case R.id.menu_info_shared_to_control:
@@ -270,7 +269,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
             } else {
               operation = !isFromControl() ? CommandFactory.Operation.CHECK_CONTROL_LABEL : CommandFactory.Operation.UNCHECK_CONTROL_LABEL;
-              params.setDocument( settings.getUid() );
             }
             break;
 
@@ -292,7 +290,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
               showDismissDialog();
             } else {
               operation = CommandFactory.Operation.RETURN_TO_THE_PRIMARY_CONSIDERATION;
-              params.setDocument( settings.getUid() );
             }
 
             break;
@@ -674,8 +671,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         operation = !finalIsControl ? CommandFactory.Operation.CHECK_CONTROL_LABEL : CommandFactory.Operation.UNCHECK_CONTROL_LABEL;
 
         CommandParams params = new CommandParams();
-        params.setUser( settings.getLogin() );
-        params.setDocument( settings.getUid() );
 
         operationManager.execute( operation, params );
       })
@@ -697,9 +692,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         operation = !isApproval ? CommandFactory.Operation.APPROVAL_NEXT_PERSON: CommandFactory.Operation.SIGNING_NEXT_PERSON;
 
         CommandParams params = new CommandParams();
-        params.setUser( settings.getLogin() );
-        params.setDocument( settings.getUid() );
-        params.setSign( "SignFileCommand" );
+        params.setPerson( "" );
 
         operationManager.execute( operation, params );
       })
@@ -721,9 +714,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         CommandFactory.Operation operation;
         operation = isApproval ? CommandFactory.Operation.APPROVAL_PREV_PERSON : CommandFactory.Operation.SIGNING_PREV_PERSON;
 
-
-        params.setUser(settings.getLogin());
-        params.setSign("SignFileCommand");
+        params.setPerson( "" );
 
         // если есть комментарий
         if (settings.getPrevDialogComment() != null && settings.isShowCommentPost() ) {
@@ -732,8 +723,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             params.setComment(dialog1.getInputEditText().getText().toString());
           }
         }
-        params.setDocument( settings.getUid() );
-
 
         operationManager.execute(operation, params);
       })
@@ -768,7 +757,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
         operation = CommandFactory.Operation.FROM_THE_REPORT;
         params.setPerson( settings.getCurrentUserId() );
-        params.setDocument( settings.getUid() );
         if ( settings.isShowCommentPost() ) {
           params.setComment(dialog1.getInputEditText().getText().toString());
         }
@@ -804,7 +792,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       .onPositive((dialog1, which) -> {
         CommandFactory.Operation operation;
         operation = CommandFactory.Operation.RETURN_TO_THE_PRIMARY_CONSIDERATION;
-        params.setDocument( settings.getUid() );
         operationManager.execute(operation, params);
       })
       .autoDismiss(true)

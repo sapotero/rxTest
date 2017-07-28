@@ -11,44 +11,28 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
-import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
+import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import timber.log.Timber;
 
 public class ApprovalPerformance extends AbstractCommand {
 
-  private final DocumentReceiver document;
-
   private String TAG = this.getClass().getSimpleName();
 
-  private String official_id;
-
-  public ApprovalPerformance(DocumentReceiver document){
-    super();
-    this.document = document;
-  }
-
-  public String getInfo(){
-    return null;
+  public ApprovalPerformance(CommandParams params) {
+    super(params);
   }
 
   public void registerCallBack(Callback callback){
     this.callback = callback;
   }
 
-  public ApprovalPerformance withPerson(String uid){
-    official_id = uid;
-    return this;
-  }
-
-
   @Override
   public void execute() {
     queueManager.add(this);
     EventBus.getDefault().post( new ShowNextDocumentEvent());
   }
-
 
   @Override
   public void executeRemote() {
@@ -59,16 +43,16 @@ public class ApprovalPerformance extends AbstractCommand {
     OperationService operationService = retrofit.create( OperationService.class );
 
     ArrayList<String> uids = new ArrayList<>();
-    uids.add( settings.getUid() );
+    uids.add( getParams().getDocument() );
 
     Observable<OperationResult> info = operationService.performance(
       getType(),
-      settings.getLogin(),
-      settings.getToken(),
+      getParams().getLogin(),
+      getParams().getToken(),
       uids,
-      settings.getUid(),
-      settings.getStatusCode(),
-      official_id
+      getParams().getDocument(),
+      getParams().getStatusCode(),
+      getParams().getPerson()
     );
 
     info.subscribeOn( Schedulers.computation() )
@@ -90,13 +74,12 @@ public class ApprovalPerformance extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    int count = dataStore
+    dataStore
       .update(RDocumentEntity.class)
-//      .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue() )
       .set( RDocumentEntity.PROCESSED, true)
       .set( RDocumentEntity.MD5, "" )
       .set( RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq(settings.getUid()))
+      .where(RDocumentEntity.UID.eq(getParams().getDocument()))
       .get()
       .value();
 

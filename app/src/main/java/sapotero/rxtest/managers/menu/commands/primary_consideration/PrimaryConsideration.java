@@ -3,7 +3,6 @@ package sapotero.rxtest.managers.menu.commands.primary_consideration;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 import retrofit2.Retrofit;
 import rx.Observable;
@@ -12,36 +11,25 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
-import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
+import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import timber.log.Timber;
 
 public class PrimaryConsideration extends AbstractCommand {
 
-  private final DocumentReceiver document;
-
   private String TAG = this.getClass().getSimpleName();
 
-  private String official_id;
-
-  public PrimaryConsideration(DocumentReceiver document){
-    super();
-    this.document = document;
+  public PrimaryConsideration(CommandParams params) {
+    super(params);
   }
 
   public void registerCallBack(Callback callback){
     this.callback = callback;
   }
 
-  public PrimaryConsideration withPerson(String uid){
-    official_id = uid;
-    return this;
-  }
-
   @Override
   public void execute() {
-
     dataStore
       .update(RDocumentEntity.class)
       .set(RDocumentEntity.CHANGED, true)
@@ -51,27 +39,14 @@ public class PrimaryConsideration extends AbstractCommand {
 
     queueManager.add(this);
 
-    setDocOperationProcessedStartedInMemory( params.getDocument() );
+    setDocOperationProcessedStartedInMemory();
   }
 
   private void update(){
-    String uid = null;
+    String uid = getParams().getDocument();
 
-    if (params.getDocument() != null && !Objects.equals(params.getDocument(), "")){
-      uid = params.getDocument();
-    }
-
-    if (document.getUid() != null && !Objects.equals(document.getUid(), "")){
-      uid = document.getUid();
-    }
-
-
-    Timber.tag(TAG).i( "3 updateLocal document uid:\n%s\n%s\n", params.getDocument(), document.getUid() );
-
-
-    int count = dataStore
+    dataStore
       .update(RDocumentEntity.class)
-//      .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue() )
       .set( RDocumentEntity.PROCESSED, true)
       .set( RDocumentEntity.MD5, "" )
       .set( RDocumentEntity.CHANGED, true)
@@ -81,7 +56,6 @@ public class PrimaryConsideration extends AbstractCommand {
     EventBus.getDefault().post( new ShowNextDocumentEvent());
   }
 
-
   @Override
   public String getType() {
     return "to_the_primary_consideration";
@@ -89,15 +63,15 @@ public class PrimaryConsideration extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    int count = dataStore
+    dataStore
       .update(RDocumentEntity.class)
-//      .set( RDocumentEntity.FILTER, Fields.Status.PROCESSED.getValue() )
       .set( RDocumentEntity.PROCESSED, true)
       .set( RDocumentEntity.MD5, "" )
       .set( RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq(params.getDocument() != null ? params.getDocument(): settings.getUid()))
+      .where(RDocumentEntity.UID.eq(getParams().getDocument()))
       .get()
       .value();
+
     if ( callback != null ){
       callback.onCommandExecuteSuccess( getType() );
     }
@@ -116,16 +90,16 @@ public class PrimaryConsideration extends AbstractCommand {
     OperationService operationService = retrofit.create( OperationService.class );
 
     ArrayList<String> uids = new ArrayList<>();
-    uids.add( params.getDocument() != null ? params.getDocument(): settings.getUid() );
+    uids.add( getParams().getDocument() );
 
     Observable<OperationResult> info = operationService.consideration(
       getType(),
-      settings.getLogin(),
-      settings.getToken(),
+      getParams().getLogin(),
+      getParams().getToken(),
       uids,
-      settings.getUid(),
-      settings.getStatusCode(),
-      official_id
+      getParams().getDocument(),
+      getParams().getStatusCode(),
+      getParams().getPerson()
     );
 
     info.subscribeOn( Schedulers.computation() )
@@ -138,10 +112,10 @@ public class PrimaryConsideration extends AbstractCommand {
 
           queueManager.setExecutedRemote(this);
 
-          finishOperationOnSuccess( params.getDocument() );
+          finishOperationOnSuccess();
 
         },
-        error -> onError( this, params.getDocument(), error.getLocalizedMessage(), true, TAG )
+        error -> onError( this, error.getLocalizedMessage(), true, TAG )
       );
   }
 }

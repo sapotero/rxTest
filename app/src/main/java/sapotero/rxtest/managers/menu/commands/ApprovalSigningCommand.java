@@ -7,41 +7,45 @@ import retrofit2.Retrofit;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
-import timber.log.Timber;
 
 public abstract class ApprovalSigningCommand extends AbstractCommand {
 
-  private Observable<OperationResult> getOperationResultObservable(String uid, String official_id) {
+  public ApprovalSigningCommand(CommandParams params) {
+    super(params);
+  }
+
+  private Observable<OperationResult> getOperationResultObservable() {
     Retrofit retrofit = getOperationsRetrofit();
 
     OperationService operationService = retrofit.create( OperationService.class );
 
     ArrayList<String> uids = new ArrayList<>();
-    uids.add(uid);
+    uids.add(getParams().getDocument());
 
     String comment = null;
-    if ( params.getComment() != null ){
-      comment = params.getComment();
+    if ( getParams().getComment() != null ){
+      comment = getParams().getComment();
     }
 
     String sign = getSign();
 
     return operationService.approvalSign(
       getType(),
-      settings.getLogin(),
-      settings.getToken(),
+      getParams().getLogin(),
+      getParams().getToken(),
       uids,
       comment,
-      settings.getStatusCode(),
-      official_id,
+      getParams().getStatusCode(),
+      getParams().getPerson(),
       sign
     );
   }
 
-  protected void remoteOperation(String uid, String official_id, String TAG) {
-    Observable<OperationResult> info = getOperationResultObservable(uid, official_id);
+  protected void remoteOperation(String TAG) {
+    Observable<OperationResult> info = getOperationResultObservable();
 
     info.subscribeOn( Schedulers.computation() )
       .observeOn( AndroidSchedulers.mainThread() )
@@ -55,10 +59,10 @@ public abstract class ApprovalSigningCommand extends AbstractCommand {
             queueManager.setExecutedRemote(this);
           }
 
-          finishOperationOnSuccess( uid );
+          finishOperationOnSuccess();
         },
         error -> {
-          onError( this, uid, error.getLocalizedMessage(), true, TAG );
+          onError( this, error.getLocalizedMessage(), true, TAG );
           onRemoteError();
         }
       );

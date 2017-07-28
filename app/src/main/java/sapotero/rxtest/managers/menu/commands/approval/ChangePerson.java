@@ -5,33 +5,18 @@ import org.greenrobot.eventbus.EventBus;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.ApprovalSigningCommand;
-import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
-import timber.log.Timber;
+import sapotero.rxtest.managers.menu.utils.CommandParams;
 
 public class ChangePerson extends ApprovalSigningCommand {
 
-  private final DocumentReceiver document;
-
   private String TAG = this.getClass().getSimpleName();
 
-  private String official_id;
-
-  public ChangePerson(DocumentReceiver document){
-    super();
-    this.document = document;
-  }
-
-  public String getInfo(){
-    return null;
+  public ChangePerson(CommandParams params) {
+    super(params);
   }
 
   public void registerCallBack(Callback callback){
     this.callback = callback;
-  }
-
-  public ChangePerson withPerson(String uid){
-    official_id = uid;
-    return this;
   }
 
   @Override
@@ -39,11 +24,7 @@ public class ChangePerson extends ApprovalSigningCommand {
     queueManager.add(this);
     EventBus.getDefault().post( new ShowNextDocumentEvent());
 
-    setDocOperationProcessedStartedInMemory( getUid() );
-  }
-
-  private String getUid() {
-    return params.getDocument() != null ? params.getDocument() : settings.getUid();
+    setDocOperationProcessedStartedInMemory();
   }
 
   @Override
@@ -53,9 +34,9 @@ public class ChangePerson extends ApprovalSigningCommand {
 
   @Override
   public void executeLocal() {
-    String uid = getUid();
+    String uid = getParams().getDocument();
 
-    int count = dataStore
+    dataStore
       .update(RDocumentEntity.class)
       .set( RDocumentEntity.MD5, "" )
       .set( RDocumentEntity.PROCESSED, true)
@@ -69,13 +50,12 @@ public class ChangePerson extends ApprovalSigningCommand {
     if (callback != null ){
       callback.onCommandExecuteSuccess( getType() );
     }
-
   }
 
   @Override
   public void executeRemote() {
     printCommandType( this, TAG );
-    remoteOperation(getUid(), official_id, TAG);
+    remoteOperation(TAG);
   }
 
   @Override

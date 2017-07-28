@@ -3,131 +3,84 @@ package sapotero.rxtest.managers.menu.utils;
 import java.io.Serializable;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
+import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.retrofit.models.document.Decision;
+import sapotero.rxtest.utils.ISettings;
 
 public class CommandParams implements Serializable {
-  public String person;
-  public String folder;
-  public String label;
-  public String sign;
 
-  public String imageId;
-  public String filePath;
+  @Inject transient ISettings settings;
 
-  public String document;
-
-  public String decisionId;
-  public String uuid;
-  public String user;
-  public String comment;
-  public Decision decisionModel;
-  public Boolean activeDecision;
-
-  private String linkedTaskUuid = "";
+  private String host;
+  private String login;
+  private String token;
+  private String currentUserId;
+  private String pin;
+  private String document;
+  private String statusCode;
+  private String person;
+  private String decisionId;
+  private Decision decisionModel;
+  private String comment;
   private boolean assignment = false;
-
-
-  public String getFilePath() {
-    return filePath;
-  }
-
-  public void setFilePath(String filePath) {
-    this.filePath = filePath;
-  }
-
-  public String getImageId() {
-    return imageId;
-  }
-
-  public void setImageId(String imageId) {
-    this.imageId = imageId;
-  }
-  public Boolean getActiveDecision() {
-    return activeDecision;
-  }
-
-  public void setActiveDecision(Boolean activeDecision) {
-    this.activeDecision = activeDecision;
-  }
+  private String folder;
+  private String imageId;
+  private String uuid;
+  private String label;
 
   public CommandParams() {
+    EsdApplication.getDataComponent().inject(this);
+
+    setHost( settings.getHost() );
+    setLogin( settings.getLogin() );
+    setToken( settings.getToken() );
+    setCurrentUserId( settings.getCurrentUserId() );
+    setPin( settings.getPin() );
+    setDocument( settings.getUid() );
+    setStatusCode( settings.getStatusCode() );
     setUuid( UUID.randomUUID().toString() );
   }
 
-  public String getDecisionId() {
-    return decisionId;
+  public String getHost() {
+    return host;
   }
 
-  public void setDecisionId(String decisionId) {
-    this.decisionId = decisionId;
+  public void setHost(String host) {
+    this.host = host;
   }
 
-  public String getComment() {
-    return comment;
+  public String getLogin() {
+    return login;
   }
 
-  public void setComment(String comment) {
-    this.comment = comment;
+  public void setLogin(String login) {
+    this.login = login;
   }
 
-  public String getUser() {
-    return user;
+  public String getToken() {
+    return token;
   }
 
-  public void setUser(String user) {
-    this.user = user;
+  public void setToken(String token) {
+    this.token = token;
   }
 
-  public void setUuid(String uuid) {
-    this.uuid = uuid;
+  public String getCurrentUserId() {
+    return currentUserId;
   }
 
-  public String getUuid() {
-    return uuid;
+  public void setCurrentUserId(String currentUserId) {
+    this.currentUserId = currentUserId;
   }
 
-//  public RDecisionEntity getDecision() {
-//    return decision;
-//  }
-//
-//  public void setDecision(RDecisionEntity decision) {
-//    this.decision = decision;
-//  }
-
-  public String getPerson() {
-    return person;
+  public String getPin() {
+    return pin;
   }
 
-  public CommandParams setPerson(String person) {
-    this.person = person;
-    return this;
-  }
-
-  public String getFolder() {
-    return folder;
-  }
-
-  public CommandParams setFolder(String folder) {
-    this.folder = folder;
-    return this;
-  }
-
-  public String getLabel() {
-    return label;
-  }
-
-  public CommandParams setLabel(String label) {
-    this.label = label;
-    return this;
-  }
-
-  public String getSign() {
-    return sign;
-  }
-
-  public CommandParams setSign(String sign) {
-    this.sign = sign;
-    return this;
+  public void setPin(String pin) {
+    this.pin = pin;
   }
 
   public String getDocument() {
@@ -138,12 +91,44 @@ public class CommandParams implements Serializable {
     this.document = document;
   }
 
+  public String getStatusCode() {
+    return statusCode;
+  }
+
+  public void setStatusCode(String statusCode) {
+    this.statusCode = statusCode;
+  }
+
+  public String getPerson() {
+    return person;
+  }
+
+  public void setPerson(String person) {
+    this.person = person;
+  }
+
+  public String getDecisionId() {
+    return decisionId;
+  }
+
+  public void setDecisionId(String decisionId) {
+    this.decisionId = decisionId;
+  }
+
   public void setDecisionModel(Decision decisionModel) {
     this.decisionModel = decisionModel;
   }
 
   public Decision getDecisionModel() {
     return decisionModel;
+  }
+
+  public String getComment() {
+    return comment;
+  }
+
+  public void setComment(String comment) {
+    this.comment = comment;
   }
 
   public void setAssignment(boolean assignment) {
@@ -154,11 +139,35 @@ public class CommandParams implements Serializable {
     return assignment;
   }
 
-  public String getLinkedTaskUuid() {
-    return linkedTaskUuid;
+  public String getFolder() {
+    return folder;
   }
 
-  public void setLinkedTaskUuid(String linkedTaskUuid) {
-    this.linkedTaskUuid = linkedTaskUuid;
+  public void setFolder(String folder) {
+    this.folder = folder;
+  }
+
+  public String getImageId() {
+    return imageId;
+  }
+
+  public void setImageId(String imageId) {
+    this.imageId = imageId;
+  }
+
+  public void setUuid(String uuid) {
+    this.uuid = uuid;
+  }
+
+  public String getUuid() {
+    return uuid;
+  }
+
+  public String getLabel() {
+    return label;
+  }
+
+  public void setLabel(String label) {
+    this.label = label;
   }
 }

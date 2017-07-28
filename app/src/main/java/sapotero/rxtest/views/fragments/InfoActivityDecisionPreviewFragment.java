@@ -175,8 +175,6 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
             params.setDecisionId( current_decision.getUid() );
             params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(current_decision) );
-            params.setDocument( settings.getUid() );
-            params.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
 
             operationManager.execute(operation, params);
             updateAfteButtonPressed();
@@ -193,10 +191,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       CommandParams params = new CommandParams();
 
       params.setDecisionId( current_decision.getUid() );
-//      params.setDecision( current_decision );
       params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(current_decision) );
-      params.setDocument( settings.getUid() );
-      params.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
 
       operationManager.execute(operation, params);
       updateAfteButtonPressed();
@@ -225,9 +220,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
       CommandParams params = new CommandParams();
       params.setDecisionId( current_decision.getUid() );
-      params.setDocument( settings.getUid() );
       params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(current_decision) );
-      params.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
 
       operationManager.execute(operation, params);
       updateAfteButtonPressed();
@@ -247,9 +240,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
         CommandParams commandParams = new CommandParams();
         commandParams.setDecisionId( current_decision.getUid() );
-        commandParams.setDocument( settings.getUid() );
         commandParams.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(current_decision) );
-        commandParams.setActiveDecision( decision_spinner_adapter.hasActiveDecision() );
 
         if ( settings.isShowCommentPost() ) {
           commandParams.setComment(dialog1.getInputEditText().getText().toString());
@@ -780,7 +771,6 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
           decision.setComment( dialog.getInputEditText().getText().toString() );
           params.setDecisionModel( decision );
           params.setDecisionId( current_decision.getUid() );
-          params.setDocument( settings.getUid() );
 
           Timber.e("DECISION %s", new Gson().toJson(decision));
 

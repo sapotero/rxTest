@@ -1,32 +1,24 @@
 package sapotero.rxtest.managers.menu.commands.file;
 
-import java.io.File;
 import java.util.Collections;
 
 import retrofit2.Retrofit;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.images.RSignImageEntity;
 import sapotero.rxtest.db.requery.models.queue.FileSignEntity;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
-import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
+import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.ImagesService;
 import timber.log.Timber;
 
 public class SignFile extends AbstractCommand {
 
-  private final DocumentReceiver document;
-
   private String TAG = this.getClass().getSimpleName();
 
-  private String official_id;
-  private String sign;
-
-  public SignFile(DocumentReceiver document){
-    super();
-    this.document = document;
+  public SignFile(CommandParams params) {
+    super(params);
   }
 
   public String getInfo(){
@@ -86,8 +78,6 @@ public class SignFile extends AbstractCommand {
 
     ImagesService imagesService = retrofit.create( ImagesService.class );
 
-    File file = new File( EsdApplication.getApplication().getApplicationContext().getFilesDir(), params.getFilePath() );
-
     Timber.tag(TAG).d("Generating sign");
 
     String file_sign = getSign();
@@ -97,8 +87,8 @@ public class SignFile extends AbstractCommand {
 
       Observable<Object> info = imagesService.update(
         getParams().getImageId(),
-        settings.getLogin(),
-        settings.getToken(),
+        getParams().getLogin(),
+        getParams().getToken(),
         file_sign
       );
 
@@ -136,9 +126,9 @@ public class SignFile extends AbstractCommand {
     Timber.tag(TAG).i("Saving image sign");
 
     FileSignEntity task = new FileSignEntity();
-    task.setFilename( params.getLabel() );
-    task.setImageId( params.getImageId() );
-    task.setDocumentId( params.getDocument() );
+    task.setFilename( getParams().getLabel() );
+    task.setImageId( getParams().getImageId() );
+    task.setDocumentId( getParams().getDocument() );
     task.setSign( sign );
 
     dataStore

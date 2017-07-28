@@ -3,15 +3,11 @@ package sapotero.rxtest.managers.menu;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.invokers.OperationExecutor;
-import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.managers.menu.utils.OperationHistory;
-import sapotero.rxtest.utils.ISettings;
 import timber.log.Timber;
 
 public class OperationManager implements CommandFactory.Callback {
-
-  private ISettings settings;
 
   private final String TAG = this.getClass().getSimpleName();
 
@@ -30,9 +26,7 @@ public class OperationManager implements CommandFactory.Callback {
     this.callback = callback;
   }
 
-  public OperationManager(ISettings settings) {
-    this.settings = settings;
-
+  public OperationManager() {
     histrory          = new OperationHistory();
     operationExecutor = new OperationExecutor();
 
@@ -45,7 +39,6 @@ public class OperationManager implements CommandFactory.Callback {
     Timber.tag(TAG).i("execute start");
 
     Command command = commandBuilder
-      .withDocument( new DocumentReceiver( settings.getUid() ) )
       .withParams( params )
       .build( operation );
 

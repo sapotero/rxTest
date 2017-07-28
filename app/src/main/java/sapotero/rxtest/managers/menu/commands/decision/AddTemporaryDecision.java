@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.decision;
 
-import android.support.annotation.Nullable;
-
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.Objects;
@@ -14,7 +12,7 @@ import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.managers.menu.commands.DecisionCommand;
-import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
+import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.utils.padeg.Declension;
@@ -22,28 +20,14 @@ import timber.log.Timber;
 
 public class AddTemporaryDecision extends DecisionCommand {
 
-  private final DocumentReceiver document;
-
   private String TAG = this.getClass().getSimpleName();
 
-  private String decisionId;
-
-  public AddTemporaryDecision(DocumentReceiver document){
-    super();
-    this.document = document;
-  }
-
-  public String getInfo(){
-    return null;
+  public AddTemporaryDecision(CommandParams params) {
+    super(params);
   }
 
   public void registerCallBack(Callback callback){
     this.callback = callback;
-  }
-
-  public AddTemporaryDecision withDecisionId(String decisionId){
-    this.decisionId = decisionId;
-    return this;
   }
 
   @Override
@@ -51,7 +35,7 @@ public class AddTemporaryDecision extends DecisionCommand {
     addDecision();
     queueManager.add(this);
 
-    setDocOperationStartedInMemory( params.getDocument() );
+    setDocOperationStartedInMemory();
   }
 
   @Override
@@ -66,13 +50,13 @@ public class AddTemporaryDecision extends DecisionCommand {
 
   private void addDecision() {
 
-    String uid = getUid();
+    String uid = getParams().getDocument();
 
     Timber.tag(TAG).e("DOCUMENT_UID: %s", uid);
 
     RDocumentEntity doc = dataStore
       .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq( params.getDocument() ))
+      .where(RDocumentEntity.UID.eq( getParams().getDocument() ))
       .get().firstOrNull();
 
     Timber.tag(TAG).e("doc: %s", doc);
@@ -83,13 +67,13 @@ public class AddTemporaryDecision extends DecisionCommand {
       .update(RDocumentEntity.class)
       .set(RDocumentEntity.CHANGED, true)
       .set(RDocumentEntity.MD5, "")
-      .where(RDocumentEntity.UID.eq( params.getDocument() ))
+      .where(RDocumentEntity.UID.eq( getParams().getDocument() ))
       .get()
       .value();
 
 
 
-    Decision dec = params.getDecisionModel();
+    Decision dec = getParams().getDecisionModel();
 
     Timber.tag(TAG).e("dec: %s", dec);
 
@@ -154,27 +138,12 @@ public class AddTemporaryDecision extends DecisionCommand {
         .subscribe(
           data -> {
             Timber.tag(TAG).e("Updated: %s", data.getId());
-//            EventBus.getDefault().post( new UpdateCurrentDocumentEvent( params.getDocument() ));
-            EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( params.getDecisionModel().getId() ));
+            EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( getParams().getDecisionModel().getId() ));
           },
           error -> {
             Timber.tag(TAG).e("Error: %s", error);
           });
     }
-  }
-
-  @Nullable
-  private String getUid() {
-    String uid = null;
-
-    if (params.getDocument() != null && !Objects.equals(params.getDocument(), "")){
-      uid = params.getDocument();
-    }
-
-    if (document.getUid() != null && !Objects.equals(document.getUid(), "")){
-      uid = document.getUid();
-    }
-    return uid;
   }
 
   @Override

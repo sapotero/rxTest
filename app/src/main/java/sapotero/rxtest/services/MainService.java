@@ -795,8 +795,7 @@ public class MainService extends Service {
     params.setDecisionId( event.uid );
     params.setAssignment( event.assignment );
 
-
-    Command command = operation.getCommand(null, null, params);
+    Command command = operation.getCommand(null, params);
     queue.add(command);
   }
 

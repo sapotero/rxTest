@@ -5,39 +5,18 @@ import org.greenrobot.eventbus.EventBus;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.ApprovalSigningCommand;
-import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
-import timber.log.Timber;
+import sapotero.rxtest.managers.menu.utils.CommandParams;
 
 public class PrevPerson extends ApprovalSigningCommand {
 
-  private final DocumentReceiver document;
-
   private String TAG = this.getClass().getSimpleName();
 
-  private String official_id;
-  private String sign;
-
-  public PrevPerson(DocumentReceiver document){
-    super();
-    this.document = document;
-  }
-
-  public String getInfo(){
-    return null;
+  public PrevPerson(CommandParams params) {
+    super(params);
   }
 
   public void registerCallBack(Callback callback){
     this.callback = callback;
-  }
-
-  public PrevPerson withPerson(String uid){
-    this.official_id = uid;
-    return this;
-  }
-
-  public PrevPerson withSign(String sign){
-    this.sign = sign;
-    return this;
   }
 
   @Override
@@ -45,7 +24,7 @@ public class PrevPerson extends ApprovalSigningCommand {
     queueManager.add(this);
     EventBus.getDefault().post( new ShowNextDocumentEvent());
 
-    setDocOperationProcessedStartedInMemory( getUid() );
+    setDocOperationProcessedStartedInMemory();
   }
 
   @Override
@@ -55,12 +34,12 @@ public class PrevPerson extends ApprovalSigningCommand {
 
   @Override
   public void executeLocal() {
-    int count = dataStore
+    dataStore
       .update(RDocumentEntity.class)
       .set( RDocumentEntity.PROCESSED, true)
       .set( RDocumentEntity.MD5, "" )
       .set( RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq(getUid()))
+      .where(RDocumentEntity.UID.eq(getParams().getDocument()))
       .get()
       .value();
 
@@ -74,11 +53,7 @@ public class PrevPerson extends ApprovalSigningCommand {
   @Override
   public void executeRemote() {
     printCommandType( this, TAG );
-    remoteOperation(getUid(), official_id, TAG);
-  }
-
-  private String getUid() {
-    return params.getDocument() != null ? params.getDocument(): document.getUid();
+    remoteOperation(TAG);
   }
 
   @Override

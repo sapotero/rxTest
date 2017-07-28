@@ -3,7 +3,6 @@ package sapotero.rxtest.managers.menu.commands.report;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 import retrofit2.Retrofit;
 import rx.Observable;
@@ -11,21 +10,18 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
+import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
-import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import timber.log.Timber;
 
 public class ReturnToPrimaryConsideration extends AbstractCommand {
 
-  private final DocumentReceiver document;
-
   private String TAG = this.getClass().getSimpleName();
 
-  public ReturnToPrimaryConsideration(DocumentReceiver document){
-    super();
-    this.document = document;
+  public ReturnToPrimaryConsideration(CommandParams params) {
+    super(params);
   }
 
   public String getInfo(){
@@ -40,11 +36,11 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
   public void execute() {
     queueManager.add(this);
     update();
-    setDocOperationProcessedStartedInMemory( getUid() );
+    setDocOperationProcessedStartedInMemory();
   }
 
   private void update() {
-    String uid = getUid();
+    String uid = getParams().getDocument();
 
     dataStore
       .update(RDocumentEntity.class)
@@ -56,20 +52,6 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
       .value();
 
     EventBus.getDefault().post( new ShowNextDocumentEvent());
-  }
-
-  private String getUid() {
-    String uid = null;
-
-    if (params.getDocument() != null && !Objects.equals(params.getDocument(), "")) {
-      uid = params.getDocument();
-    }
-
-    if (document.getUid() != null && !Objects.equals(document.getUid(), "")) {
-      uid = document.getUid();
-    }
-
-    return uid;
   }
 
   @Override
@@ -96,17 +78,17 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
 
     ArrayList<String> uids = new ArrayList<>();
 
-    String uid = getUid();
+    String uid = getParams().getDocument();
 
     uids.add( uid );
 
     Observable<OperationResult> info = operationService.report(
       getType(),
-      settings.getLogin(),
-      settings.getToken(),
+      getParams().getLogin(),
+      getParams().getToken(),
       uids,
       uid,
-      settings.getStatusCode()
+      getParams().getStatusCode()
     );
 
     info.subscribeOn( Schedulers.computation() )
@@ -119,10 +101,10 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
 
           queueManager.setExecutedRemote(this);
 
-          finishOperationOnSuccess( getUid() );
+          finishOperationOnSuccess();
 
         },
-        error -> onError( this, params.getDocument(), error.getLocalizedMessage(), true, TAG )
+        error -> onError( this, error.getLocalizedMessage(), true, TAG )
       );
   }
 }

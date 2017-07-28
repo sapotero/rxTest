@@ -14,7 +14,6 @@ import java.util.concurrent.TimeUnit;
 import sapotero.rxtest.db.requery.models.queue.QueueEntity;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.interfaces.Command;
-import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.utils.queue.interfaces.JobCountInterface;
 import sapotero.rxtest.utils.queue.threads.handlers.ThreadRejectedExecutionHandler;
@@ -56,7 +55,6 @@ public class QueueSupervisor implements JobCountInterface {
       CommandParams params = new Gson().fromJson( task.getParams(), CommandParams.class );
 
       command = commandFactory
-        .withDocument( new DocumentReceiver( params.getDocument() ) )
         .withParams( params )
         .build( CommandFactory.Operation.getOperation( task.getCommand() ) );
 
