@@ -65,6 +65,10 @@ public class ButtonBuilder {
     getCount();
   }
 
+  public String getLabel() {
+    return label;
+  }
+
   public interface Callback {
     void onButtonBuilderUpdate(Integer index);
   }
