@@ -23,6 +23,7 @@ import sapotero.rxtest.views.activities.SettingsTemplatesActivity;
 import sapotero.rxtest.views.activities.TestActivity;
 import sapotero.rxtest.views.adapters.DecisionAdapter;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
+import sapotero.rxtest.views.adapters.main.FragmentBuilder;
 import sapotero.rxtest.views.adapters.models.DocumentTypeItem;
 import sapotero.rxtest.views.adapters.spinner.JournalSelectorAdapter;
 import sapotero.rxtest.views.custom.stepper.build.steps.StepperAuthFragment;
@@ -76,6 +77,7 @@ public interface ManagerComponent {
   void inject(Processor context);
   void inject(Filter context);
   void inject(InfoCardDocumentsFragment fragment);
+  void inject(FragmentBuilder fragment);
 
   void inject(JournalSelectorAdapter context);
 
