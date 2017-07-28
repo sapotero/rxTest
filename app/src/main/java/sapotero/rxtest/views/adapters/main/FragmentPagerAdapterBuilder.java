@@ -30,6 +30,18 @@ public class FragmentPagerAdapterBuilder extends FragmentPagerAdapter {
   }
 
   @Override
+  public CharSequence getPageTitle(int position) {
+
+    CharSequence result = null;
+
+    if ( item.getMainMenuButtons().size() >= position ){
+      result = item.getMainMenuButtons().get(position).getLabel();
+    }
+
+    return result;
+  }
+
+  @Override
   public int getCount() {
     return item.getMainMenuButtons().size();
   }
