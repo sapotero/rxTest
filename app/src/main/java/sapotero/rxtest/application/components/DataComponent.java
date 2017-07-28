@@ -15,6 +15,7 @@ import sapotero.rxtest.db.requery.utils.Deleter;
 import sapotero.rxtest.db.requery.utils.RequeryDbModule;
 import sapotero.rxtest.db.requery.utils.validation.ValidationModule;
 import sapotero.rxtest.managers.CurrentDocumentManager;
+import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.managers.view.DecisionManager;
 import sapotero.rxtest.retrofit.utils.OkHttpModule;
 import sapotero.rxtest.utils.memory.utils.MemoryStoreModule;
@@ -99,4 +100,6 @@ public interface DataComponent {
   void inject(FavoriteUserMapper favoriteUserMapper);
   void inject(PrimaryConsiderationMapper primaryConsiderationMapper);
   void inject(TemplateMapper templateMapper);
+
+  void inject(CommandParams commandParams);
 }

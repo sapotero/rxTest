@@ -1,19 +1,12 @@
 package sapotero.rxtest.managers.menu.commands.shared;
 
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
-import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
+import sapotero.rxtest.managers.menu.utils.CommandParams;
 
 public class DoNothing extends AbstractCommand {
 
-  private final DocumentReceiver document;
-
-  public DoNothing(DocumentReceiver document){
-    super();
-    this.document = document;
-  }
-
-  public String getInfo(){
-    return null;
+  public DoNothing(CommandParams params) {
+    super(params);
   }
 
   public void registerCallBack(Callback callback){

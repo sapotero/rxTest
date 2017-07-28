@@ -14,7 +14,6 @@ import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.ApprovalSigningCommand;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.interfaces.Command;
-import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import timber.log.Timber;
 
@@ -24,33 +23,14 @@ public class NextPerson extends ApprovalSigningCommand {
   private static final int IMAGE_SIGN_ERROR = 1;
   private static final int NOT_ALL_IMAGES_SIGNED = 2;
 
-  private final DocumentReceiver document;
-
   private String TAG = this.getClass().getSimpleName();
 
-  private String official_id;
-  private String sign;
-
-  public NextPerson(DocumentReceiver document){
-    super();
-    this.document = document;
-  }
-
-  public String getInfo(){
-    return null;
+  public NextPerson(CommandParams params) {
+    super(params);
   }
 
   public void registerCallBack(Callback callback){
     this.callback = callback;
-  }
-
-  public NextPerson withPerson(String uid){
-    this.official_id = uid;
-    return this;
-  }
-  public NextPerson withSign(String sign){
-    this.sign = sign;
-    return this;
   }
 
   @Override
@@ -58,14 +38,14 @@ public class NextPerson extends ApprovalSigningCommand {
     queueManager.add(this);
     EventBus.getDefault().post( new ShowNextDocumentEvent());
 
-    setDocOperationProcessedStartedInMemory( getUid() );
+    setDocOperationProcessedStartedInMemory();
 
     resetSignImageError();
   }
 
   private void resetSignImageError() {
     Timber.tag(TAG).e("Resetting sign image errors");
-    RDocumentEntity doc = getDocument( document.getUid() );
+    RDocumentEntity doc = getDocument( getParams().getDocument() );
 
     if ( doc != null ) {
       Set<RImage> images = doc.getImages();
@@ -90,7 +70,7 @@ public class NextPerson extends ApprovalSigningCommand {
       .set( RDocumentEntity.PROCESSED, true)
       .set( RDocumentEntity.MD5, "" )
       .set( RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq(getUid()))
+      .where(RDocumentEntity.UID.eq(getParams().getDocument()))
       .get()
       .value();
 
@@ -108,7 +88,7 @@ public class NextPerson extends ApprovalSigningCommand {
     int result = signImages();
 
     if ( result == ALL_IMAGES_SIGNED ) {
-      remoteOperation(getUid(), official_id, TAG);
+      remoteOperation(TAG);
     }
 
     if ( result == IMAGE_SIGN_ERROR ) {
@@ -119,19 +99,15 @@ public class NextPerson extends ApprovalSigningCommand {
         callback.onCommandExecuteError( errorMessage );
       }
 
-      finishOperationProcessedOnError( this, getUid(), Collections.singletonList( errorMessage ) );
+      finishOperationProcessedOnError( this, Collections.singletonList( errorMessage ) );
     }
-  }
-
-  private String getUid() {
-    return params.getDocument() != null ? params.getDocument(): document.getUid();
   }
 
   private int signImages() {
     int result = ALL_IMAGES_SIGNED;
 
     Timber.tag(TAG).e("Signing images");
-    RDocumentEntity doc = getDocument(document.getUid());
+    RDocumentEntity doc = getDocument(getParams().getDocument());
 
     Timber.tag(TAG).e("doc: %s", doc);
 
@@ -148,7 +124,7 @@ public class NextPerson extends ApprovalSigningCommand {
 
     for (RImage img : images) {
       RImageEntity image = (RImageEntity) img;
-      Timber.tag(TAG).e("image: %s", document.getUid());
+      Timber.tag(TAG).e("image: %s", getParams().getDocument());
       boolean isSigned = image.isSigned() != null ? image.isSigned() : false;
 
       if ( !isSigned ) {
@@ -212,13 +188,10 @@ public class NextPerson extends ApprovalSigningCommand {
 
     CommandFactory.Operation operation = CommandFactory.Operation.FILE_SIGN;
     CommandParams params = new CommandParams();
-    params.setUser( settings.getLogin() );
-    params.setDocument( document.getUid() );
     params.setLabel( image.getTitle() );
-    params.setFilePath( String.format( "%s_%s", image.getMd5(), image.getTitle()) );
     params.setImageId( image.getImageId() );
-    Command command = operation.getCommand(null, document, params);
-    Timber.tag(TAG).e("image: %s", document.getUid());
+    Command command = operation.getCommand(null, params);
+    Timber.tag(TAG).e("image: %s", getParams().getDocument());
     queueManager.add(command);
   }
 

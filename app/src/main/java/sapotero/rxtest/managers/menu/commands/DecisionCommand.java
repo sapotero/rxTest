@@ -11,6 +11,7 @@ import rx.Observable;
 import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.managers.menu.interfaces.Command;
+import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
@@ -18,6 +19,10 @@ import sapotero.rxtest.retrofit.models.wrapper.DecisionWrapper;
 import timber.log.Timber;
 
 public abstract class DecisionCommand extends AbstractCommand {
+
+  public DecisionCommand(CommandParams params) {
+    super(params);
+  }
 
   protected Observable<DecisionError> getDecisionCreateOperationObservable(Decision decision, String TAG) {
     String json_m = new Gson().toJson( decision );
@@ -34,13 +39,13 @@ public abstract class DecisionCommand extends AbstractCommand {
     DocumentService operationService = retrofit.create( DocumentService.class );
 
     return operationService.create(
-      settings.getLogin(),
-      settings.getToken(),
+      getParams().getLogin(),
+      getParams().getToken(),
       json
     );
   }
 
-  protected Observable<DecisionError> getDecisionUpdateOperationObservable(Decision decision, String decisionId, String TAG) {
+  protected Observable<DecisionError> getDecisionUpdateOperationObservable(Decision decision, String TAG) {
     DecisionWrapper wrapper = new DecisionWrapper();
     wrapper.setDecision(decision);
 
@@ -59,9 +64,9 @@ public abstract class DecisionCommand extends AbstractCommand {
     DocumentService operationService = retrofit.create( DocumentService.class );
 
     return operationService.update(
-      decisionId,
-      settings.getLogin(),
-      settings.getToken(),
+      getParams().getDecisionId(),
+      getParams().getLogin(),
+      getParams().getToken(),
       json
     );
   }

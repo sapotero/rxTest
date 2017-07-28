@@ -15,7 +15,7 @@ import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.DecisionCommand;
-import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
+import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
 import sapotero.rxtest.utils.memory.fields.FieldType;
@@ -25,19 +25,10 @@ import timber.log.Timber;
 
 public class AddAndApproveDecision extends DecisionCommand {
 
-  private final DocumentReceiver document;
-
   private String TAG = this.getClass().getSimpleName();
 
-  private String decisionId;
-
-  public AddAndApproveDecision(DocumentReceiver document){
-    super();
-    this.document = document;
-  }
-
-  public String getInfo(){
-    return null;
+  public AddAndApproveDecision(CommandParams params) {
+    super(params);
   }
 
   public void registerCallBack(Callback callback){
@@ -46,13 +37,12 @@ public class AddAndApproveDecision extends DecisionCommand {
 
   @Override
   public void execute() {
-
     updateLocal();
     EventBus.getDefault().post( new ShowNextDocumentEvent() );
 
     queueManager.add(this);
     store.process(
-      store.startTransactionFor( params.getDocument() )
+      store.startTransactionFor( getParams().getDocument() )
         .setLabel(LabelType.SYNC)
         .setState(InMemoryState.LOADING)
     );
@@ -60,25 +50,24 @@ public class AddAndApproveDecision extends DecisionCommand {
 
   private void updateLocal() {
 
-    Timber.tag(TAG).e("updateLocal %s", new Gson().toJson( params ));
-
+    Timber.tag(TAG).e("updateLocal %s", new Gson().toJson( getParams() ));
 
     Integer count = dataStore
       .update(RDecisionEntity.class)
       .set(RDecisionEntity.TEMPORARY, true)
-      .where(RDecisionEntity.UID.eq(getDecisionUid()))
+      .where(RDecisionEntity.UID.eq( getParams().getDecisionModel().getId() ))
       .get().value();
     Timber.tag(TAG).i( "updateLocal: %s", count );
 
     Tuple red = dataStore
       .select(RDecisionEntity.RED)
-      .where(RDecisionEntity.UID.eq(getDecisionUid()))
+      .where(RDecisionEntity.UID.eq( getParams().getDecisionModel().getId() ))
       .get().firstOrNull();
 
     dataStore
       .update(RDocumentEntity.class)
       .set(RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq( params.getDocument() ))
+      .where(RDocumentEntity.UID.eq( getParams().getDocument() ))
       .get()
       .value();
 
@@ -88,15 +77,12 @@ public class AddAndApproveDecision extends DecisionCommand {
       .update(RDocumentEntity.class)
       .set(RDocumentEntity.CHANGED, true)
       .set(RDocumentEntity.MD5, "")
-      .where(RDocumentEntity.UID.eq( params.getDocument() ))
+      .where(RDocumentEntity.UID.eq( getParams().getDocument() ))
       .get()
       .value();
 
-
-
-
     if (
-      Objects.equals(params.getDecisionModel().getSignerId(), settings.getCurrentUserId())
+      Objects.equals(getParams().getDecisionModel().getSignerId(), getParams().getCurrentUserId())
       // или если подписывающий министр
       || ( red != null && red.get(0).equals(true) )
       ){
@@ -104,26 +90,18 @@ public class AddAndApproveDecision extends DecisionCommand {
         .update(RDocumentEntity.class)
         .set(RDocumentEntity.PROCESSED, true)
         .set(RDocumentEntity.MD5, "")
-        .where(RDocumentEntity.UID.eq( params.getDocument() ))
+        .where(RDocumentEntity.UID.eq( getParams().getDocument() ))
         .get()
         .value();
 
-
       store.process(
-        store.startTransactionFor( params.getDocument() )
+        store.startTransactionFor( getParams().getDocument() )
           .setField(FieldType.PROCESSED, true)
       );
-
-
     }
 
-    EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent(getDecisionUid()));
+    EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( getParams().getDecisionModel().getId() ));
   }
-
-  private String getDecisionUid() {
-    return params.getDecisionModel().getId();
-  }
-
 
   @Override
   public String getType() {
@@ -142,14 +120,12 @@ public class AddAndApproveDecision extends DecisionCommand {
   public void executeRemote() {
     queueManager.setAsRunning(this);
 
-    Timber.tag(TAG).i( "type: %s", new Gson().toJson(params) );
+    Timber.tag(TAG).i( "type: %s", new Gson().toJson(getParams()) );
 
-    Decision decision = params.getDecisionModel();
-//    decision.setLetterheadFontSize("12");
-//    decision.setPerformersFontSize("12");
+    Decision decision = getParams().getDecisionModel();
     decision.setLetterhead(null);
 
-    if (params.isAssignment()){
+    if (getParams().isAssignment()){
       decision.setAssignment(true);
     }
 
@@ -166,9 +142,9 @@ public class AddAndApproveDecision extends DecisionCommand {
       .subscribe(
         data -> {
           onSuccess( this, data, false, true, TAG );
-          finishOperationOnSuccess( params.getDocument() );
+          finishOperationOnSuccess();
         },
-        error -> onError( this, params.getDocument(), error.getLocalizedMessage(), true, TAG )
+        error -> onError( this, error.getLocalizedMessage(), true, TAG )
       );
   }
 }

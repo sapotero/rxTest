@@ -10,24 +10,17 @@ import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.managers.menu.commands.DecisionCommand;
-import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
+import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import timber.log.Timber;
 
 public class SaveTemporaryDecision extends DecisionCommand {
 
-  private final DocumentReceiver document;
-
   private String TAG = this.getClass().getSimpleName();
 
-  public SaveTemporaryDecision(DocumentReceiver document){
-    super();
-    this.document = document;
-  }
-
-  public String getInfo(){
-    return null;
+  public SaveTemporaryDecision(CommandParams params) {
+    super(params);
   }
 
   public void registerCallBack(Callback callback){
@@ -36,7 +29,7 @@ public class SaveTemporaryDecision extends DecisionCommand {
 
   @Override
   public void execute() {
-    Timber.tag(TAG).e("execute %s", params);
+    Timber.tag(TAG).e("execute %s", getParams());
 //    updateFromJob();
     queueManager.add(this);
   }
@@ -48,12 +41,12 @@ public class SaveTemporaryDecision extends DecisionCommand {
 
   @Override
   public void executeLocal() {
-    Timber.tag(TAG).e("executeLocal %s", params);
+    Timber.tag(TAG).e("executeLocal %s", getParams());
     queueManager.setExecutedLocal(this);
   }
 
   private void update() {
-    Decision dec = params.getDecisionModel();
+    Decision dec = getParams().getDecisionModel();
 
     Timber.tag(TAG).e("UPDATE %s", new Gson().toJson(dec));
 
@@ -103,7 +96,7 @@ public class SaveTemporaryDecision extends DecisionCommand {
         .subscribe(
           data -> {
             Timber.tag(TAG).e("UPDATED %s", dec.getBlocks().get(0).getText() );
-            EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( params.getDecisionModel().getId() ));
+            EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( getParams().getDecisionModel().getId() ));
             queueManager.setExecutedRemote(this);
           },
           error -> {

@@ -15,12 +15,16 @@ import sapotero.rxtest.events.document.DropControlEvent;
 import sapotero.rxtest.events.utils.RecalculateMenuEvent;
 import sapotero.rxtest.events.view.ShowSnackEvent;
 import sapotero.rxtest.managers.menu.interfaces.Command;
+import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
-import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
 public abstract class SharedCommand extends AbstractCommand {
+
+  public SharedCommand(CommandParams params) {
+    super(params);
+  }
 
   public void onError(Command command, String message) {
     if (callback != null){
@@ -75,32 +79,32 @@ public abstract class SharedCommand extends AbstractCommand {
     checkMessage( command, data.getMessage(), recalculateMenu );
   }
 
-  private Observable<OperationResult> getOperationResultObservable(String document_id, String folder_id) {
+  private Observable<OperationResult> getOperationResultObservable() {
     Retrofit retrofit = getOperationsRetrofit();
 
     OperationService operationService = retrofit.create( OperationService.class );
 
-    String uid = document_id == null ? settings.getUid() : document_id;
+    String uid = getParams().getDocument();
 
     ArrayList<String> uids = new ArrayList<>();
     uids.add( uid );
 
     return operationService.shared(
       getType(),
-      settings.getLogin(),
-      settings.getToken(),
+      getParams().getLogin(),
+      getParams().getToken(),
       uids,
       uid,
-      settings.getStatusCode(),
-      folder_id,
+      getParams().getStatusCode(),
+      getParams().getFolder(),
       null
     );
   }
 
-  protected void remoteFolderOperation(Command command, String document_id, String folder_id, boolean recalculateMenu, String TAG) {
+  protected void remoteFolderOperation(Command command, boolean recalculateMenu, String TAG) {
     printCommandType( command, TAG );
 
-    Observable<OperationResult> info = getOperationResultObservable(document_id, folder_id);
+    Observable<OperationResult> info = getOperationResultObservable();
 
     info.subscribeOn( Schedulers.computation() )
       .observeOn( AndroidSchedulers.mainThread() )
@@ -110,14 +114,14 @@ public abstract class SharedCommand extends AbstractCommand {
       );
   }
 
-  protected void remoteControlLabelOperation(Command command, String document_id, String TAG) {
+  protected void remoteControlLabelOperation(Command command, String TAG) {
     printCommandType( command, TAG );
 
-    Observable<OperationResult> info = getOperationResultObservable(document_id, null);
+    Observable<OperationResult> info = getOperationResultObservable();
 
     RDocumentEntity doc = dataStore
       .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq(document_id))
+      .where(RDocumentEntity.UID.eq(getParams().getDocument()))
       .get().firstOrNull();
 
     info.subscribeOn( Schedulers.computation() )

@@ -10,22 +10,17 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
-import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
+import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import timber.log.Timber;
 
 public class DelegatePerformance extends AbstractCommand {
 
-  private final DocumentReceiver document;
-
   private String TAG = this.getClass().getSimpleName();
 
-  private String official_id;
-
-  public DelegatePerformance(DocumentReceiver document){
-    super();
-    this.document = document;
+  public DelegatePerformance(CommandParams params) {
+    super(params);
   }
 
   public String getInfo(){
@@ -34,11 +29,6 @@ public class DelegatePerformance extends AbstractCommand {
 
   public void registerCallBack(Callback callback){
     this.callback = callback;
-  }
-
-  public DelegatePerformance withPerson(String uid){
-    official_id = uid;
-    return this;
   }
 
   @Override
@@ -52,16 +42,16 @@ public class DelegatePerformance extends AbstractCommand {
     OperationService operationService = retrofit.create( OperationService.class );
 
     ArrayList<String> uids = new ArrayList<>();
-    uids.add( settings.getUid() );
+    uids.add( getParams().getDocument() );
 
     Observable<OperationResult> info = operationService.performance(
       getType(),
-      settings.getLogin(),
-      settings.getToken(),
+      getParams().getLogin(),
+      getParams().getToken(),
       uids,
-      settings.getUid(),
-      settings.getStatusCode(),
-      official_id
+      getParams().getDocument(),
+      getParams().getStatusCode(),
+      getParams().getPerson()
     );
 
     info.subscribeOn( Schedulers.computation() )

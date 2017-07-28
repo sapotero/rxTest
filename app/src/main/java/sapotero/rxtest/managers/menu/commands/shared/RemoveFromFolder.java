@@ -6,56 +6,34 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Deleter;
 import sapotero.rxtest.events.utils.NoDocumentsEvent;
 import sapotero.rxtest.managers.menu.commands.SharedCommand;
-import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
+import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import sapotero.rxtest.utils.memory.utils.Transaction;
-import timber.log.Timber;
 
 public class RemoveFromFolder extends SharedCommand {
 
-  private final DocumentReceiver document;
-
   private String TAG = this.getClass().getSimpleName();
 
-  private String folder_id;
-  private String document_id;
-
-  public RemoveFromFolder(DocumentReceiver document){
-    super();
-    this.document = document;
-  }
-
-  public String getInfo(){
-    return null;
+  public RemoveFromFolder(CommandParams params) {
+    super(params);
   }
 
   public void registerCallBack(Callback callback){
     this.callback = callback;
   }
 
-  public RemoveFromFolder withFolder(String uid){
-    folder_id = uid;
-    return this;
-  }
-
-  public RemoveFromFolder withDocumentId(String uid) {
-    this.document_id = uid;
-    return this;
-  }
-
   @Override
   public void execute() {
-    Integer count = dataStore
+    dataStore
       .update(RDocumentEntity.class)
       .set( RDocumentEntity.FAVORITES, false )
       .set( RDocumentEntity.CHANGED, true )
-      .where(RDocumentEntity.UID.eq(document_id))
+      .where(RDocumentEntity.UID.eq(getParams().getDocument()))
       .get().value();
-
 
     Transaction transaction = new Transaction();
     transaction
-      .from( store.getDocuments().get(document_id) )
+      .from( store.getDocuments().get(getParams().getDocument()) )
       .setLabel(LabelType.SYNC)
       .removeLabel(LabelType.FAVORITES);
     store.process( transaction );
@@ -70,9 +48,7 @@ public class RemoveFromFolder extends SharedCommand {
 
   @Override
   public void executeLocal() {
-
     queueManager.setExecutedLocal(this);
-
 
     if ( callback != null ){
       callback.onCommandExecuteSuccess( getType() );
@@ -81,31 +57,31 @@ public class RemoveFromFolder extends SharedCommand {
 
   @Override
   public void executeRemote() {
-    remoteFolderOperation( this, document_id, folder_id, true, TAG );
+    remoteFolderOperation( this, true, TAG );
   }
 
   @Override
   protected void setSuccess() {
     RDocumentEntity documentEntity = dataStore
       .select( RDocumentEntity.class )
-      .where( RDocumentEntity.UID.eq( document_id ) )
+      .where( RDocumentEntity.UID.eq( getParams().getDocument() ) )
       .get().firstOrNull();
 
     if ( documentEntity != null && documentEntity.isFromFavoritesFolder() != null && documentEntity.isFromFavoritesFolder() ) {
       EventBus.getDefault().post( new NoDocumentsEvent() );
 
-      store.getDocuments().remove( document_id );
+      store.getDocuments().remove( getParams().getDocument() );
       new Deleter().deleteDocument( documentEntity, TAG );
 
     } else {
       Transaction transaction = new Transaction();
       transaction
-        .from( store.getDocuments().get(document_id) )
+        .from( store.getDocuments().get(getParams().getDocument()) )
         .removeLabel(LabelType.SYNC)
         .removeLabel(LabelType.FAVORITES);
       store.process( transaction );
 
-      setChangedFalse(document_id);
+      setChangedFalse();
     }
   }
 
@@ -113,7 +89,7 @@ public class RemoveFromFolder extends SharedCommand {
   protected void setError() {
     Transaction transaction = new Transaction();
     transaction
-      .from( store.getDocuments().get(document_id) )
+      .from( store.getDocuments().get(getParams().getDocument()) )
       .removeLabel(LabelType.SYNC)
       .setLabel(LabelType.FAVORITES);
     store.process( transaction );
@@ -122,7 +98,7 @@ public class RemoveFromFolder extends SharedCommand {
       .update( RDocumentEntity.class )
       .set( RDocumentEntity.CHANGED, false )
       .set( RDocumentEntity.FAVORITES, true )
-      .where( RDocumentEntity.UID.eq( document_id ) )
+      .where( RDocumentEntity.UID.eq( getParams().getDocument() ) )
       .get()
       .value();
   }

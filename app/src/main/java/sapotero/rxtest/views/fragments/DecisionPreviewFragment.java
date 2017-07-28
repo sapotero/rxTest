@@ -152,7 +152,6 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
 
           params.setDecisionId( decision.getId() );
           params.setDecisionModel( decision );
-          params.setDocument( settings.getUid() );
 
           operationManager.execute(operation, params);
 
@@ -170,7 +169,6 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
 
       params.setDecisionId( decision.getId() );
       params.setDecisionModel( decision );
-      params.setDocument( settings.getUid() );
 
       operationManager.execute(operation, params);
     }
@@ -225,7 +223,6 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
       CommandParams params = new CommandParams();
       params.setDecisionId( decision.getId() );
       params.setDecisionModel( decision );
-      params.setDocument( settings.getUid() );
 
       operationManager.execute(operation, params);
     }

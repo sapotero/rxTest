@@ -4,43 +4,22 @@ import org.greenrobot.eventbus.EventBus;
 
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.models.images.RSignImageEntity;
-import sapotero.rxtest.db.requery.models.utils.RApprovalNextPerson;
 import sapotero.rxtest.db.requery.models.utils.RApprovalNextPersonEntity;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.ApprovalSigningCommand;
-import sapotero.rxtest.managers.menu.receivers.DocumentReceiver;
+import sapotero.rxtest.managers.menu.utils.CommandParams;
 import timber.log.Timber;
 
 public class NextPerson extends ApprovalSigningCommand {
 
-  private final DocumentReceiver document;
-
   private String TAG = this.getClass().getSimpleName();
 
-  private String official_id;
-  private String sign;
-
-  public NextPerson(DocumentReceiver document){
-    super();
-    this.document = document;
-  }
-
-  public String getInfo(){
-    return null;
+  public NextPerson(CommandParams params) {
+    super(params);
   }
 
   public void registerCallBack(Callback callback){
     this.callback = callback;
-  }
-
-  public NextPerson withPerson(String uid){
-    this.official_id = uid;
-    return this;
-  }
-  public NextPerson withSign(String sign){
-    this.sign = sign;
-    return this;
   }
 
   @Override
@@ -48,13 +27,9 @@ public class NextPerson extends ApprovalSigningCommand {
     queueManager.add(this);
     EventBus.getDefault().post( new ShowNextDocumentEvent());
 
-    setDocOperationProcessedStartedInMemory( getUid() );
+    setDocOperationProcessedStartedInMemory();
 
-    setTaskStarted( getUid(), false );
-  }
-
-  private String getUid() {
-    return params.getDocument() != null ? params.getDocument() : document.getUid();
+    setTaskStarted( getParams().getDocument(), false );
   }
 
   @Override
@@ -69,7 +44,7 @@ public class NextPerson extends ApprovalSigningCommand {
       .set( RDocumentEntity.PROCESSED, true)
       .set( RDocumentEntity.MD5, "" )
       .set( RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq(getUid()))
+      .where(RDocumentEntity.UID.eq(getParams().getDocument()))
       .get()
       .value();
 
@@ -82,7 +57,7 @@ public class NextPerson extends ApprovalSigningCommand {
 
   @Override
   public void executeRemote() {
-    RApprovalNextPersonEntity rApprovalNextPersonEntity = getApprovalNextPersonEntity( getUid() );
+    RApprovalNextPersonEntity rApprovalNextPersonEntity = getApprovalNextPersonEntity( getParams().getDocument() );
 
     if ( rApprovalNextPersonEntity != null && rApprovalNextPersonEntity.isTaskStarted() ) {
       Timber.tag(TAG).i( "Task already started, quit" );
@@ -90,13 +65,13 @@ public class NextPerson extends ApprovalSigningCommand {
     }
 
     if ( rApprovalNextPersonEntity == null ) {
-      createNewRApprovalNextPersonEntity( getUid() );
+      createNewRApprovalNextPersonEntity( getParams().getDocument() );
     } else {
-      setTaskStarted( getUid(), true );
+      setTaskStarted( getParams().getDocument(), true );
     }
 
     printCommandType( this, TAG );
-    remoteOperation(getUid(), official_id, TAG);
+    remoteOperation(TAG);
   }
 
   private RApprovalNextPersonEntity createNewRApprovalNextPersonEntity(String uid) {
@@ -137,6 +112,6 @@ public class NextPerson extends ApprovalSigningCommand {
 
   @Override
   public void onRemoteError() {
-    setTaskStarted( getUid(), false );
+    setTaskStarted( getParams().getDocument(), false );
   }
 }

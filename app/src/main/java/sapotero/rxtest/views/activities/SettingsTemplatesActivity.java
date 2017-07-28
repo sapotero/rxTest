@@ -21,6 +21,7 @@ import sapotero.rxtest.db.requery.models.RTemplateEntity;
 import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.fragments.DecisionRejectionTemplateFragment;
 import sapotero.rxtest.views.fragments.DecisionTemplateFragment;
 import timber.log.Timber;
