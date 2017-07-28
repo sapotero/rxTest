@@ -8,7 +8,6 @@ import android.support.test.runner.AndroidJUnit4;
 import android.support.v7.widget.CardView;
 import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.SeekBar;
 import android.widget.TextView;
 
 import org.junit.Before;
@@ -17,7 +16,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import sapotero.rxtest.R;
-import sapotero.rxtest.views.dialogs.DecisionMagniferFragment;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
@@ -105,17 +103,5 @@ public class CardViewTest {
     onView( withText( dummySync )).check(matches(isDisplayed()));
     onView( withText( dummyControl )).check(matches(isDisplayed()));
     onView( withText( dummyLock )).check(matches(withEffectiveVisibility(ViewMatchers.Visibility.GONE)));
-  }
-
-  @Test
-  public void addFragment() {
-    DecisionMagniferFragment fragment = new DecisionMagniferFragment();
-
-    activity.runOnUiThread(() -> activity.addFragment(fragment));
-    instrumentation.waitForIdleSync();
-
-    View viewById = activity.findViewById(R.id.dialog_magnifer_decision_seekbar_font_size);
-    assertThat(viewById, notNullValue());
-    assertThat(viewById, instanceOf(SeekBar.class));
   }
 }
