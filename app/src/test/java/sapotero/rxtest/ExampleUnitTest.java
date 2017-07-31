@@ -43,7 +43,6 @@ public class ExampleUnitTest {
 //    when(mCache.get(anyString())).thenReturn(null);
 
   }
-
   @Test
   public void addition_isCorrect() throws Exception {
     assertEquals(4, 2 + 2);
@@ -140,6 +139,7 @@ public class ExampleUnitTest {
     assertEquals(1, tokens.size());
     assertEquals(tokens.get(0).getLogin(), null);
     assertTrue(tokens.get(0).getAuthToken() != null);
+
 
     real_token = tokens.get(0).getAuthToken();
 

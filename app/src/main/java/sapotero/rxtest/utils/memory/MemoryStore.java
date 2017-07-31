@@ -17,7 +17,6 @@ import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.adapter.JournalSelectorUpdateCountEvent;
-import sapotero.rxtest.events.utils.RecalculateMenuEvent;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.fields.DocumentType;
@@ -30,41 +29,51 @@ import sapotero.rxtest.utils.memory.utils.Transaction;
 import timber.log.Timber;
 
 public class MemoryStore implements Processable{
+
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject ISettings settings;
-
   private String TAG = this.getClass().getSimpleName();
 
-  private final HashMap<String, InMemoryDocument> documents;
+  private HashMap<String, InMemoryDocument> documents;
 
-  private final CompositeSubscription subscription;
-  private final PublishSubject<InMemoryDocument> pub;
-  private final PublishSubject<InMemoryDocument> sub;
-  private final Counter counter;
+  private CompositeSubscription subscription;
+
+  private PublishSubject<InMemoryDocument> pub;
+  private PublishSubject<InMemoryDocument> sub;
+  private Counter counter;
+  private boolean withDB = true;
 
   public MemoryStore() {
+  }
+
+  public MemoryStore withDB(Boolean withDB){
+    this.withDB = withDB;
+    return this;
+  }
+
+  private void init() {
     this.pub = PublishSubject.create();
     this.sub = PublishSubject.create();
     this.counter = new Counter();
-
-    // FIXME: 06.07.17
-    // https://totallylazy.com/
-    // коллекции - totallylazy
-
     this.documents  = new HashMap<>();
 
     this.subscription = new CompositeSubscription();
 
     EsdApplication.getManagerComponent().inject(this);
-    loadFromDB();
-
-//    log();
-
-    startSub();
-
   }
 
-  private void startSub() {
+  public MemoryStore build(){
+    init();
+
+    if (withDB){
+      loadFromDB();
+    }
+    startSub();
+
+    return this;
+  }
+
+  public void startSub() {
     Timber.w("startSub");
 
     sub
@@ -89,15 +98,6 @@ public class MemoryStore implements Processable{
         },
         Timber::e
       );
-  }
-
-  public Counter getCounter() {
-    return counter;
-  }
-
-  public void counterRecreate() {
-//    counter.recreate(documents);
-    EventBus.getDefault().post( new RecalculateMenuEvent());
   }
 
   private void log() {
@@ -130,8 +130,6 @@ public class MemoryStore implements Processable{
       .select(RDocumentEntity.class)
       .where(RDocumentEntity.FROM_LINKS.eq(false))
       .and(RDocumentEntity.USER.eq(settings.getLogin()))
-//      .and(RDocumentEntity.FROM_PROCESSED_FOLDER.eq(false))
-//      .and(RDocumentEntity.FROM_FAVORITES_FOLDER.eq(false))
       .get().toObservable()
       .toList()
       .subscribeOn(Schedulers.immediate())
@@ -141,7 +139,6 @@ public class MemoryStore implements Processable{
           for (RDocumentEntity doc : docs) {
             InMemoryDocument document = InMemoryDocumentMapper.fromDB(doc);
             documents.put(doc.getUid(), document);
-//            counter.put( document );
           }
         },
         Timber::e

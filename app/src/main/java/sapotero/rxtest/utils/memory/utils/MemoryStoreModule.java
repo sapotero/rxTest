@@ -14,8 +14,8 @@ public final class MemoryStoreModule {
   @Provides
   @Inject
   @ManagerScope
-  MemoryStore provideJobModule() {
-    return new MemoryStore();
+  MemoryStore provideMemoryStoreModule() {
+    return new MemoryStore().build();
   }
 
 }
