@@ -1,7 +1,6 @@
 package sapotero.rxtest.views;
 
 import android.app.Instrumentation;
-import android.graphics.drawable.ColorDrawable;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
@@ -16,44 +15,41 @@ import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 import sapotero.rxtest.R;
 import sapotero.rxtest.retrofit.models.documents.Signer;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
-import sapotero.rxtest.views.activities.TestActivity;
+import sapotero.rxtest.views.activities.ActivityForTest;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.utils.TestRecyclerViewFragment;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
-import static android.support.test.espresso.matcher.ViewMatchers.hasDescendant;
+import static android.support.test.espresso.matcher.ViewMatchers.isClickable;
+import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static android.support.test.espresso.matcher.ViewMatchers.isFocusable;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static sapotero.rxtest.views.utils.TestUtils.withTextColor;
 
 @RunWith(AndroidJUnit4.class)
 public class RecyclerViewTest {
 
-  private TestActivity activity;
+  private ActivityForTest activity;
   private Instrumentation instrumentation;
 
   private TestRecyclerViewFragment fragment;
-  private RecyclerView recyclerView;
   private DocumentsAdapter adapter;
-  private DocumentsAdapter.DocumentViewHolder viewHolder;
 
   private InMemoryDocument dummyDoc;
 
   @Rule
-  public ActivityTestRule<TestActivity> activityTestRule = new ActivityTestRule<>(TestActivity.class);
+  public ActivityTestRule<ActivityForTest> activityTestRule = new ActivityTestRule<>(ActivityForTest.class);
 
   @Before
   public void init() {
@@ -65,7 +61,6 @@ public class RecyclerViewTest {
     activity.runOnUiThread(() -> activity.addFragment(fragment));
     instrumentation.waitForIdleSync();
 
-    recyclerView = fragment.getRecyclerView();
     adapter = fragment.getAdapter();
   }
 
@@ -112,15 +107,6 @@ public class RecyclerViewTest {
     instrumentation.waitForIdleSync();
   }
 
-  private void getViewHolder(int position) {
-    AtomicReference<DocumentsAdapter.DocumentViewHolder> reference = new AtomicReference<>();
-
-    activity.runOnUiThread(() -> reference.set( (DocumentsAdapter.DocumentViewHolder) recyclerView.findViewHolderForAdapterPosition(position) ));
-    instrumentation.waitForIdleSync();
-
-    viewHolder = reference.get();
-  }
-
   private void updateRecyclerView() {
     activity.runOnUiThread(() -> {
       List<InMemoryDocument> docs = new ArrayList<InMemoryDocument>();
@@ -143,20 +129,16 @@ public class RecyclerViewTest {
 
     addDoc();
 
-    onView(withId(R.id.testactivity_recycler_view)).check(matches(hasDescendant(withText( dummyDoc.getDocument().getShortDescription() ))));
-    onView(withId(R.id.testactivity_recycler_view)).check(matches(hasDescendant(withText( dummyDoc.getDocument().getComment() ))));
-    onView(withId(R.id.testactivity_recycler_view)).check(matches(hasDescendant(withText( dummyDoc.getDocument().getTitle() ))));
-    onView(withId(R.id.testactivity_recycler_view)).check(matches(hasDescendant(withText( dummyDoc.getDocument().getOrganization() ))));
-
-    getViewHolder(0);
-
-    assertEquals( View.GONE, viewHolder.badge.getVisibility() );
-    assertEquals( View.GONE, viewHolder.sync_label.getVisibility() );
-    assertEquals( View.GONE, viewHolder.favorite_label.getVisibility() );
-    assertEquals( View.GONE, viewHolder.control_label.getVisibility() );
-    assertEquals( View.GONE, viewHolder.lock_label.getVisibility() );
-    assertEquals( ContextCompat.getColor( activity, R.color.md_grey_800 ), viewHolder.date.getCurrentTextColor() );
-    assertEquals( ContextCompat.getColor( activity, R.color.md_white_1000 ), ((ColorDrawable) viewHolder.cv.getBackground()).getColor() );
+    onView(withId(R.id.swipe_layout_title)).check(matches(withText( dummyDoc.getDocument().getShortDescription() )));
+    onView(withId(R.id.swipe_layout_subtitle)).check(matches(withText( dummyDoc.getDocument().getComment() )));
+    onView(withId(R.id.swipe_layout_date)).check(matches(withText( dummyDoc.getDocument().getTitle() )));
+    onView(withId(R.id.swipe_layout_from)).check(matches(withText( dummyDoc.getDocument().getOrganization() )));
+    onView(withId(R.id.swipe_layout_urgency_badge)).check(matches(not(isDisplayed())));
+    onView(withId(R.id.sync_label)).check(matches(not(isDisplayed())));
+    onView(withId(R.id.favorite_label)).check(matches(not(isDisplayed())));
+    onView(withId(R.id.control_label)).check(matches(not(isDisplayed())));
+    onView(withId(R.id.lock_label)).check(matches(not(isDisplayed())));
+    onView(withId(R.id.swipe_layout_date)).check(matches(withTextColor(ContextCompat.getColor( activity, R.color.md_grey_800 ))));
   }
 
   @Test
@@ -167,15 +149,15 @@ public class RecyclerViewTest {
 
     addDoc();
 
-    onView(withId(R.id.testactivity_recycler_view)).check(matches(hasDescendant(withText( dummyDoc.getDocument().getOrganization() ))));
+    onView(withId(R.id.swipe_layout_from)).check(matches(withText( dummyDoc.getDocument().getOrganization() )));
 
     dummyDoc.setIndex( "incoming_orders" );
     addDoc();
-    onView(withId(R.id.testactivity_recycler_view)).check(matches(not(hasDescendant(withText( dummyDoc.getDocument().getOrganization() )))));
+    onView(withId(R.id.swipe_layout_from)).check(matches(withText( "" )));
 
     dummyDoc.setIndex( "citizen_requests" );
     addDoc();
-    onView(withId(R.id.testactivity_recycler_view)).check(matches(not(hasDescendant(withText( dummyDoc.getDocument().getOrganization() )))));
+    onView(withId(R.id.swipe_layout_from)).check(matches(withText( "" )));
   }
 
   @Test
@@ -184,13 +166,11 @@ public class RecyclerViewTest {
     dummyDoc.setAsReady();
 
     addDoc();
-    getViewHolder(0);
 
     // Check if document is in READY state
-    assertEquals( View.GONE, viewHolder.sync_label.getVisibility() );
-    assertEquals( 4f, viewHolder.cv.getCardElevation(), .1 );
-    assertTrue( viewHolder.cv.isClickable() );
-    assertTrue( viewHolder.cv.isFocusable() );
+    onView(withId(R.id.sync_label)).check(matches(not(isDisplayed())));
+    onView(withId(R.id.swipe_layout_cv)).check(matches(isClickable()));
+    onView(withId(R.id.swipe_layout_cv)).check(matches(isFocusable()));
   }
 
   @Test
@@ -199,13 +179,11 @@ public class RecyclerViewTest {
     dummyDoc.setAsLoading();
 
     addDoc();
-    getViewHolder(0);
 
     // Check if document is in LOADING state
-    assertEquals( View.VISIBLE, viewHolder.sync_label.getVisibility() );
-    assertEquals( 0f, viewHolder.cv.getCardElevation(), .1 );
-    assertFalse( viewHolder.cv.isClickable() );
-    assertFalse( viewHolder.cv.isFocusable() );
+    onView(withId(R.id.sync_label)).check(matches(isDisplayed()));
+    onView(withId(R.id.swipe_layout_cv)).check(matches(not(isClickable())));
+    onView(withId(R.id.swipe_layout_cv)).check(matches(not(isFocusable())));
   }
 
   @Test
@@ -215,7 +193,7 @@ public class RecyclerViewTest {
 
     addDoc();
 
-    onView(withId(R.id.testactivity_recycler_view)).check(matches(hasDescendant(withText( dummyDoc.getDocument().getUrgency() ))));
+    onView(withText(dummyDoc.getDocument().getUrgency())).check(matches(isDisplayed()));
   }
 
   @Test
@@ -224,9 +202,8 @@ public class RecyclerViewTest {
     dummyDoc.getDocument().setChanged(true);
 
     addDoc();
-    getViewHolder(0);
 
-    assertEquals( View.VISIBLE, viewHolder.sync_label.getVisibility() );
+    onView(withId(R.id.sync_label)).check(matches(isDisplayed()));
   }
 
   @Test
@@ -235,9 +212,8 @@ public class RecyclerViewTest {
     dummyDoc.getDocument().setFavorites(true);
 
     addDoc();
-    getViewHolder(0);
 
-    assertEquals( View.VISIBLE, viewHolder.favorite_label.getVisibility() );
+    onView(withId(R.id.favorite_label)).check(matches(isDisplayed()));
   }
 
   @Test
@@ -246,9 +222,8 @@ public class RecyclerViewTest {
     dummyDoc.getDocument().setControl(true);
 
     addDoc();
-    getViewHolder(0);
 
-    assertEquals( View.VISIBLE, viewHolder.control_label.getVisibility() );
+    onView(withId(R.id.control_label)).check(matches(isDisplayed()));
   }
 
   @Test
@@ -257,17 +232,15 @@ public class RecyclerViewTest {
     dummyDoc.getDocument().setFromFavoritesFolder(true);
 
     addDoc();
-    getViewHolder(0);
 
-    assertEquals( View.VISIBLE, viewHolder.lock_label.getVisibility() );
+    onView(withId(R.id.lock_label)).check(matches(isDisplayed()));
 
     dummyDoc.getDocument().setFromFavoritesFolder(false);
     dummyDoc.getDocument().setFromProcessedFolder(true);
 
     addDoc();
-    getViewHolder(0);
 
-    assertEquals( View.VISIBLE, viewHolder.lock_label.getVisibility() );
+    onView(withId(R.id.lock_label)).check(matches(isDisplayed()));
   }
 
   @Test
@@ -276,9 +249,8 @@ public class RecyclerViewTest {
     dummyDoc.getDocument().setRed(true);
 
     addDoc();
-    getViewHolder(0);
 
-    assertEquals( ContextCompat.getColor( activity, R.color.md_red_A700 ), viewHolder.date.getCurrentTextColor() );
+    onView(withId(R.id.swipe_layout_date)).check(matches(withTextColor(ContextCompat.getColor( activity, R.color.md_red_A700 ))));
   }
 
 //  @Test
@@ -307,4 +279,5 @@ public class RecyclerViewTest {
       e.printStackTrace();
     }
   }
+
 }

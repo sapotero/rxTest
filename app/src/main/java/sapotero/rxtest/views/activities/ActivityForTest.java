@@ -12,7 +12,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import sapotero.rxtest.R;
 
-public class TestActivity extends AppCompatActivity {
+public class ActivityForTest extends AppCompatActivity {
 
   @BindView(R.id.testactivity_view_container) FrameLayout viewContainer;
 

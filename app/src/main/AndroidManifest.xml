@@ -89,7 +89,7 @@
         <activity android:name=".views.activities.FileSignActivity">
         </activity>
         <activity
-            android:name=".views.activities.TestActivity"
+            android:name=".views.activities.ActivityForTest"
             android:screenOrientation="landscape">
         </activity>
 

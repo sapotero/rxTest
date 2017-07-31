@@ -16,7 +16,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import sapotero.rxtest.R;
-import sapotero.rxtest.views.activities.TestActivity;
+import sapotero.rxtest.views.activities.ActivityForTest;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
@@ -30,11 +30,11 @@ import static org.junit.Assert.assertThat;
 @RunWith(AndroidJUnit4.class)
 public class CardViewTest {
 
-  private TestActivity activity;
+  private ActivityForTest activity;
   private Instrumentation instrumentation;
 
   @Rule
-  public ActivityTestRule<TestActivity> activityTestRule = new ActivityTestRule<>(TestActivity.class);
+  public ActivityTestRule<ActivityForTest> activityTestRule = new ActivityTestRule<>(ActivityForTest.class);
 
   @Before
   public void init() {
