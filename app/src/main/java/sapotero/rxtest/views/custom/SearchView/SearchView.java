@@ -184,7 +184,11 @@ public class SearchView extends BaseRestoreInstanceFragment implements DialogInt
                 mOnVisibilityChangeListener.onShow();
             }
         }
+      try {
         animateShow(mSearchOverlay, mSearchRegion, mMenuItemId);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
     }
 
     @Override
