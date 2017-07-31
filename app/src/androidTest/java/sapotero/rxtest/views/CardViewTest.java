@@ -1,4 +1,4 @@
-package sapotero.rxtest.views.activities;
+package sapotero.rxtest.views;
 
 import android.app.Instrumentation;
 import android.support.test.InstrumentationRegistry;
@@ -16,6 +16,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import sapotero.rxtest.R;
+import sapotero.rxtest.views.activities.TestActivity;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;

@@ -92,7 +92,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       );
   }
 
-  private void updateDocumentCard(List<InMemoryDocument> docs) {
+  public void updateDocumentCard(List<InMemoryDocument> docs) {
 //    Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: updateDocumentCard");
 
     for (InMemoryDocument doc : docs ) {
@@ -446,18 +446,18 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 //    Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Hash recreated");
   }
 
-  class DocumentViewHolder extends RecyclerView.ViewHolder {
-    private TextView sync_label;
-    private TextView lock_label;
-    private TextView subtitle;
-    private TextView badge;
-    private TextView control_label;
-    private TextView favorite_label;
+  public class DocumentViewHolder extends RecyclerView.ViewHolder {
+    public TextView sync_label;
+    public TextView lock_label;
+    public TextView subtitle;
+    public TextView badge;
+    public TextView control_label;
+    public TextView favorite_label;
 
-    private CardView cv;
-    private TextView title;
-    private TextView date;
-    private TextView from;
+    public CardView cv;
+    public TextView title;
+    public TextView date;
+    public TextView from;
 
     public DocumentViewHolder(View itemView) {
       super(itemView);
