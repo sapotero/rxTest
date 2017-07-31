@@ -36,10 +36,19 @@ public class FragmentBuilder extends Fragment {
   @BindView(R.id.fragment_builder_recycle_view) RecyclerView recyclerView;
 
   private ButtonBuilder button;
+  private int count = 0;
+
+  public ButtonBuilder getButton() {
+    return button;
+  }
 
   public FragmentBuilder setButton(ButtonBuilder button) {
     this.button = button;
     return this;
+  }
+
+  public int getCount() {
+    return count;
   }
 
   @Override
@@ -87,6 +96,8 @@ public class FragmentBuilder extends Fragment {
       .filter( filter::isControl )
       .toList();
 
+    count = lazy_docs.size();
+
     for (InMemoryDocument doc :lazy_docs) {
       Timber.e("++imd %s", doc.getUid());
       adapter.addItem(doc);
@@ -94,7 +105,9 @@ public class FragmentBuilder extends Fragment {
 
   }
 
-  public Fragment build (){
+
+
+  public FragmentBuilder build (){
     return this;
   }
 }
