@@ -182,13 +182,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
 //    rxSettings();
 
-    initSearch();
-
     setFirstRunFalse();
 
     updateToken();
-    initSearchSub();
-
   }
 
   private void setFirstRunFalse() {
@@ -223,13 +219,11 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
       @Override
       public void onQueryTextChanged(@NonNull String newText) {
-        if (newText != null && newText.length() >= 1){
+        if (newText.length() >= 1){
           Timber.v("onQueryTextChanged %s | %s", newText, searchView.getSelected() );
 
           ArrayList<List<RDocumentEntity>> result = new ArrayList<>();
 
-          // TEST
-          //requery не умеет делать OR( u=1 and a=2 ) OR ( u=1 and a=3 )
           if ( searchView.getSelected() != null ){
 
             boolean[] selected = searchView.getSelected();
@@ -373,7 +367,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
           break;
         case R.id.action_search:
 
-          searchSubject.onNext( item.getItemId() );
+//          searchSubject.onNext( item.getItemId() );
+            searchView.onOptionsItemSelected(getFragmentManager(), item);
 
 //          searchView.onOptionsItemSelected(getFragmentManager(), item);
 //          setEmptyToolbarClickListener();
@@ -428,6 +423,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     update();
 
     rxSettings();
+
+    initSearch();
+//    initSearchSub();
 
     active = true;
 
