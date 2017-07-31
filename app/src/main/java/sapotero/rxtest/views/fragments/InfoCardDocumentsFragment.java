@@ -138,6 +138,8 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   }
 
   private void initSubscription() {
+    // TODO: создавать подписку только если образов больше 1
+
     directionSub = PublishSubject.create();
 
     sub = directionSub
@@ -337,8 +339,12 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
         toastShown = false;
       }
 
+
       swipeUtil.setDirection( direction );
-      directionSub.onNext(positionOffset);
+
+      if (directionSub != null) {
+        directionSub.onNext(positionOffset);
+      }
 
     }
 
