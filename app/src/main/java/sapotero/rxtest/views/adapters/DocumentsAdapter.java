@@ -319,7 +319,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
       if ( item.isRed() ){
         viewHolder.cv.setBackground( ContextCompat.getDrawable(mContext, R.drawable.top_border) );
-
+        viewHolder.setBackgroundResourceId( R.drawable.top_border );
 
         // resolved https://tasks.n-core.ru/browse/MVDESD-13426
         // Выделять номер документа красным на плитке
@@ -445,7 +445,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 //    Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Hash recreated");
   }
 
-  class DocumentViewHolder extends RecyclerView.ViewHolder {
+  public class DocumentViewHolder extends RecyclerView.ViewHolder {
     private TextView sync_label;
     private TextView lock_label;
     private TextView subtitle;
@@ -457,6 +457,8 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     private TextView title;
     private TextView date;
     private TextView from;
+
+    private int backgroundResourceId = 0;
 
     DocumentViewHolder(View itemView) {
       super(itemView);
@@ -477,6 +479,13 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       control_label.setVisibility(View.GONE);
     }
 
+    public int getBackgroundResourceId() {
+      return backgroundResourceId;
+    }
+
+    public void setBackgroundResourceId(int backgroundResourceId) {
+      this.backgroundResourceId = backgroundResourceId;
+    }
   }
 
   private static class Holder {

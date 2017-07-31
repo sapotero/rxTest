@@ -13,8 +13,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import sapotero.rxtest.R;
 import sapotero.rxtest.retrofit.models.documents.Signer;
@@ -34,6 +33,7 @@ import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static sapotero.rxtest.views.utils.TestUtils.withTextColor;
 
@@ -45,6 +45,8 @@ public class RecyclerViewTest {
 
   private TestRecyclerViewFragment fragment;
   private DocumentsAdapter adapter;
+  private RecyclerView recyclerView;
+  private DocumentsAdapter.DocumentViewHolder viewHolder;
 
   private InMemoryDocument dummyDoc;
 
@@ -61,6 +63,7 @@ public class RecyclerViewTest {
     activity.runOnUiThread(() -> activity.addFragment(fragment));
     instrumentation.waitForIdleSync();
 
+    recyclerView = fragment.getRecyclerView();
     adapter = fragment.getAdapter();
   }
 
@@ -107,13 +110,13 @@ public class RecyclerViewTest {
     instrumentation.waitForIdleSync();
   }
 
-  private void updateRecyclerView() {
-    activity.runOnUiThread(() -> {
-      List<InMemoryDocument> docs = new ArrayList<InMemoryDocument>();
-      docs.add(dummyDoc);
-      adapter.updateDocumentCard(docs);
-    });
+  private void getViewHolder(int position) {
+    AtomicReference<DocumentsAdapter.DocumentViewHolder> reference = new AtomicReference<>();
+
+    activity.runOnUiThread(() -> reference.set( (DocumentsAdapter.DocumentViewHolder) recyclerView.findViewHolderForAdapterPosition(position) ));
     instrumentation.waitForIdleSync();
+
+    viewHolder = reference.get();
   }
 
   @Test
@@ -249,35 +252,9 @@ public class RecyclerViewTest {
     dummyDoc.getDocument().setRed(true);
 
     addDoc();
+    getViewHolder(0);
 
     onView(withId(R.id.swipe_layout_date)).check(matches(withTextColor(ContextCompat.getColor( activity, R.color.md_red_A700 ))));
+    assertEquals( R.drawable.top_border, viewHolder.getBackgroundResourceId() );
   }
-
-//  @Test
-//  public void update() {
-//    dummyDoc = generateDocument();
-//    addDoc();
-//
-//    assertEquals( 1, adapter.getItemCount() );
-//    onView(withId(R.id.testactivity_recycler_view)).check(matches(hasDescendant(withText( dummyDoc.getDocument().getShortDescription() ))));
-//
-//    waitUI();
-//
-//    dummyDoc.getDocument().setShortDescription( "New short description" );
-//    updateRecyclerView();
-//
-//    assertEquals( 1, adapter.getItemCount() );
-//    onView(withId(R.id.testactivity_recycler_view)).check(matches(hasDescendant(withText( dummyDoc.getDocument().getShortDescription() ))));
-//
-//    waitUI();
-//  }
-
-  private void waitUI() {
-    try {
-      Thread.sleep(5000);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
-  }
-
 }
