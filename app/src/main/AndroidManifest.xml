@@ -12,20 +12,15 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
 
     <application
-
         android:name=".application.EsdApplication"
         android:allowBackup="true"
-
-
-        android:largeHeap="true"
         android:hardwareAccelerated="true"
-
         android:icon="@drawable/gerb"
         android:label="@string/app_name"
+        android:largeHeap="true"
         android:screenOrientation="landscape"
         android:supportsRtl="true"
         android:theme="@style/AppTheme.Launcher">
-
         <activity
             android:name=".views.activities.LoginActivity"
             android:screenOrientation="landscape"
@@ -89,7 +84,7 @@
         <activity android:name=".views.activities.FileSignActivity">
         </activity>
 
-        <!--FileProvider to open not PDF images in external apps-->
+        <!-- FileProvider to open not PDF images in external apps -->
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="sed.mobile.fileprovider"
@@ -97,9 +92,13 @@
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/filepaths" />
+                android:resource="@xml/filepaths"/>
         </provider>
 
+        <activity android:name=".views.activities.TestActivity"
+            android:exported="true"
+            android:screenOrientation="landscape">
+        </activity>
     </application>
 
 </manifest>

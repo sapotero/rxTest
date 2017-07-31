@@ -1,5 +1,6 @@
 package sapotero.rxtest.views.adapters;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.TransitionDrawable;
@@ -141,7 +142,11 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
       for (InMemoryDocument _doc : docs) {
         Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Updating MainActivity for: %s", _doc.getUid() );
-        ((MainActivity) mContext).update();
+        try {
+          ((MainActivity) mContext).update();
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
       }
     }
   }
@@ -163,11 +168,15 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
   }
 
   private void updateMainActivity(InMemoryDocument doc) {
-    if ( MainActivity.isActive() ) {
-      Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Updating MainActivity for: %s", doc.getUid() );
-      ((MainActivity) mContext).update();
-    } else {
-      Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: MainActivity is not active, quit updating MainActivity");
+    try {
+      if ( MainActivity.isActive() ) {
+        Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Updating MainActivity for: %s", doc.getUid() );
+        ((MainActivity) mContext).update();
+      } else {
+        Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: MainActivity is not active, quit updating MainActivity");
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
     }
   }
 
@@ -301,7 +310,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
         Intent intent = new Intent(mContext, InfoActivity.class);
 
-        MainActivity activity = (MainActivity) mContext;
+        Activity activity = (Activity) mContext;
         activity.startActivity(intent);
       });
 
