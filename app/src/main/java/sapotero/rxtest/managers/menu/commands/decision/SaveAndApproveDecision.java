@@ -116,18 +116,23 @@ public class SaveAndApproveDecision extends DecisionCommand {
 
     String sign = getSign();
 
-    _decision.setSign( sign );
+    if ( sign != null ) {
+      _decision.setSign( sign );
 
-    Observable<DecisionError> info = getDecisionUpdateOperationObservable(_decision, TAG);
+      Observable<DecisionError> info = getDecisionUpdateOperationObservable(_decision, TAG);
 
-    info.subscribeOn( Schedulers.computation() )
-      .observeOn( AndroidSchedulers.mainThread() )
-      .subscribe(
-        data -> {
-          onSuccess( this, data, false, true, TAG );
-          finishOperationOnSuccess();
-        },
-        error -> onError( this, error.getLocalizedMessage(), true, TAG )
-      );
+      info.subscribeOn( Schedulers.computation() )
+        .observeOn( AndroidSchedulers.mainThread() )
+        .subscribe(
+          data -> {
+            onSuccess( this, data, false, true, TAG );
+            finishOperationOnSuccess();
+          },
+          error -> onError( this, error.getLocalizedMessage(), true, TAG )
+        );
+
+    } else {
+      onError( this, SIGN_ERROR_MESSAGE, true, TAG );
+    }
   }
 }
