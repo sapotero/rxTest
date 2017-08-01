@@ -4,11 +4,12 @@ import org.greenrobot.eventbus.EventBus;
 
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Deleter;
-import sapotero.rxtest.events.utils.NoDocumentsEvent;
+import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.managers.menu.commands.SharedCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import sapotero.rxtest.utils.memory.utils.Transaction;
+import timber.log.Timber;
 
 public class RemoveFromFolder extends SharedCommand {
 
@@ -68,9 +69,9 @@ public class RemoveFromFolder extends SharedCommand {
       .get().firstOrNull();
 
     if ( documentEntity != null && documentEntity.isFromFavoritesFolder() != null && documentEntity.isFromFavoritesFolder() ) {
-      EventBus.getDefault().post( new NoDocumentsEvent() );
-
       store.getDocuments().remove( getParams().getDocument() );
+      Timber.tag("RecyclerViewRefresh").d("RemoveFromFolder: sending event to update MainActivity");
+      EventBus.getDefault().post( new UpdateCountEvent() );
       new Deleter().deleteDocument( documentEntity, TAG );
 
     } else {
