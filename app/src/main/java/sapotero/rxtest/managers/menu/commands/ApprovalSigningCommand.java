@@ -32,40 +32,57 @@ public abstract class ApprovalSigningCommand extends AbstractCommand {
 
     String sign = getSign();
 
-    return operationService.approvalSign(
-      getType(),
-      getParams().getLogin(),
-      getParams().getToken(),
-      uids,
-      comment,
-      getParams().getStatusCode(),
-      getParams().getPerson(),
-      sign
-    );
+    Observable<OperationResult> info;
+
+    if (sign != null) {
+      info = operationService.approvalSign(
+        getType(),
+        getParams().getLogin(),
+        getParams().getToken(),
+        uids,
+        comment,
+        getParams().getStatusCode(),
+        getParams().getPerson(),
+        sign
+      );
+    } else {
+      info = null;
+    }
+
+    return info;
   }
 
   protected void remoteOperation(String TAG) {
     Observable<OperationResult> info = getOperationResultObservable();
 
-    info.subscribeOn( Schedulers.computation() )
-      .observeOn( AndroidSchedulers.mainThread() )
-      .subscribe(
-        data -> {
-          printLog( data, TAG );
+    if (info != null) {
+      info.subscribeOn( Schedulers.computation() )
+        .observeOn( AndroidSchedulers.mainThread() )
+        .subscribe(
+          data -> {
+            printLog( data, TAG );
 
-          if (data.getMessage() != null && !data.getMessage().toLowerCase().contains("успешно") ) {
-            queueManager.setExecutedWithError(this, Collections.singletonList( data.getMessage() ) );
-          } else {
-            queueManager.setExecutedRemote(this);
+            if (data.getMessage() != null && !data.getMessage().toLowerCase().contains("успешно") ) {
+              queueManager.setExecutedWithError(this, Collections.singletonList( data.getMessage() ) );
+            } else {
+              queueManager.setExecutedRemote(this);
+            }
+
+            finishOperationOnSuccess();
+          },
+          error -> {
+            onError(error.getLocalizedMessage(), TAG);
           }
+        );
 
-          finishOperationOnSuccess();
-        },
-        error -> {
-          onError( this, error.getLocalizedMessage(), true, TAG );
-          onRemoteError();
-        }
-      );
+    } else {
+      onError(SIGN_ERROR_MESSAGE, TAG);
+    }
+  }
+
+  private void onError(String errorMessage, String TAG) {
+    onError( this, errorMessage, true, TAG );
+    onRemoteError();
   }
 
   public abstract void onRemoteError();

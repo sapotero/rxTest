@@ -1,5 +1,7 @@
 package sapotero.rxtest.managers.menu.commands;
 
+import org.acra.ACRA;
+
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
@@ -45,6 +47,8 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
   @Inject public QueueManager queueManager;
   @Inject public MemoryStore store;
 
+  public static final String SIGN_ERROR_MESSAGE = "Произошла ошибка электронной подписи";
+
   public CommandParams params;
 
   public AbstractCommand(CommandParams params) {
@@ -87,6 +91,11 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       sign = MainService.getFakeSign( getParams().getPin(), null );
     } catch (Exception e) {
       e.printStackTrace();
+      ACRA.getErrorReporter().handleSilentException(e);
+    }
+
+    if (Objects.equals(sign, "")) {
+      sign = null;
     }
 
     return sign;

@@ -68,7 +68,7 @@ public class ApproveDecisionDelayed extends DecisionCommand {
     String sign = getSign();
 
     RDecisionEntity decision= getDecision(getParams().getDecisionId());
-    if ( decision != null) {
+    if ( sign != null && decision != null) {
 
       Decision _decision = mappers.getDecisionMapper().toFormattedModel(decision);
       _decision.setDocumentUid( null );
