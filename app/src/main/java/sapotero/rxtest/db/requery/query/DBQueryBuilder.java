@@ -58,7 +58,6 @@ public class DBQueryBuilder {
 
   public DBQueryBuilder withAdapter(DocumentsAdapter rAdapter) {
     this.adapter = rAdapter;
-    this.adapter.withDbQueryBuilder(this);
     return this;
   }
 

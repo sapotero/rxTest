@@ -1,6 +1,9 @@
 package sapotero.rxtest.managers.menu.commands.shared;
 
+import org.greenrobot.eventbus.EventBus;
+
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.managers.menu.commands.SharedCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.utils.memory.fields.LabelType;
@@ -74,8 +77,9 @@ public class CheckControlLabel extends SharedCommand {
       docInMemory.getDocument().setChanged( false );
       docInMemory.setAllowUpdate( false );
       store.getDocuments().put(getParams().getDocument(), docInMemory);
-      Timber.tag("RecyclerViewRefresh").d("MemoryStore: pub.onNext()");
-      store.getPublishSubject().onNext( docInMemory );
+
+      Timber.tag("RecyclerViewRefresh").d("CheckControlLabel: sending event to update MainActivity");
+      EventBus.getDefault().post( new UpdateCountEvent() );
     }
 
     dataStore
