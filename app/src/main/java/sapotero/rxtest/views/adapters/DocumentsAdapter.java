@@ -47,7 +47,6 @@ import timber.log.Timber;
 public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.DocumentViewHolder> {
 
   @Inject ISettings settings;
-  @Inject SingleEntityStore<Persistable> dataStore;
   @Inject MemoryStore store;
 
   private List<InMemoryDocument> documents;
@@ -93,7 +92,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       );
   }
 
-  private void updateDocumentCard(List<InMemoryDocument> docs) {
+  public void updateDocumentCard(List<InMemoryDocument> docs) {
 //    Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: updateDocumentCard");
 
     for (InMemoryDocument doc : docs ) {
@@ -329,7 +328,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
       if ( item.isRed() ){
         viewHolder.cv.setBackground( ContextCompat.getDrawable(mContext, R.drawable.top_border) );
-
+        viewHolder.setBackgroundResourceId( R.drawable.top_border );
 
         // resolved https://tasks.n-core.ru/browse/MVDESD-13426
         // Выделять номер документа красным на плитке
@@ -455,7 +454,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 //    Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Hash recreated");
   }
 
-  class DocumentViewHolder extends RecyclerView.ViewHolder {
+  public class DocumentViewHolder extends RecyclerView.ViewHolder {
     private TextView sync_label;
     private TextView lock_label;
     private TextView subtitle;
@@ -468,7 +467,9 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     private TextView date;
     private TextView from;
 
-    public DocumentViewHolder(View itemView) {
+    private int backgroundResourceId = 0;
+
+    DocumentViewHolder(View itemView) {
       super(itemView);
 
 
@@ -487,6 +488,13 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       control_label.setVisibility(View.GONE);
     }
 
+    public int getBackgroundResourceId() {
+      return backgroundResourceId;
+    }
+
+    public void setBackgroundResourceId(int backgroundResourceId) {
+      this.backgroundResourceId = backgroundResourceId;
+    }
   }
 
   private static class Holder {
