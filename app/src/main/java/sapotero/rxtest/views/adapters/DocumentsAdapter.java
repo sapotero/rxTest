@@ -34,6 +34,7 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.query.DBQueryBuilder;
 import sapotero.rxtest.db.requery.utils.Fields;
+import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.events.utils.NoDocumentsEvent;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.ISettings;
@@ -141,12 +142,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
         .toList();
 
       for (InMemoryDocument _doc : docs) {
-        Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Updating MainActivity for: %s", _doc.getUid() );
-        try {
-          ((MainActivity) mContext).update();
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
+        updateMainActivity();
       }
     }
   }
@@ -160,24 +156,15 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       settings.setMainMenuPosition( mainMenuPosition - 1 );
     }
 
-    updateMainActivity(doc);
+    updateMainActivity();
 
     if ( documents.size() == 0 || ( isFavoriteOrControl() && Objects.equals( doc.getUid(), settings.getUid() ) ) ) {
       EventBus.getDefault().post( new NoDocumentsEvent() );
     }
   }
 
-  private void updateMainActivity(InMemoryDocument doc) {
-    try {
-      if ( MainActivity.isActive() ) {
-        Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: Updating MainActivity for: %s", doc.getUid() );
-        ((MainActivity) mContext).update();
-      } else {
-        Timber.tag("RecyclerViewRefresh").d("DocumentsAdapter: MainActivity is not active, quit updating MainActivity");
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+  private void updateMainActivity() {
+    EventBus.getDefault().post( new UpdateCountEvent() );
   }
 
   private boolean isFavoriteOrControl() {
