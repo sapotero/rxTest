@@ -46,6 +46,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
@@ -138,8 +139,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private MainActivity context;
   private CompositeSubscription subscription;
   private PublishSubject<Integer> searchSubject = PublishSubject.create();
+  private Subscription searchSubjectSubscription;
+
   private int menuIndex;
-  private int buttonIndex;
 
   private static boolean active = false;
 
@@ -178,7 +180,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
 
     initToolbar();
-
+    
+    initSearchSub();
+    initSearch();
 
 //    rxSettings();
 
@@ -366,9 +370,13 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 //          }
           break;
         case R.id.action_search:
+          if (searchView == null || searchSubjectSubscription == null || searchSubject == null) {
+            initSearchSub();
+            initSearch();
+          }
 
-//          searchSubject.onNext( item.getItemId() );
-            searchView.onOptionsItemSelected(getFragmentManager(), item);
+          searchSubject.onNext( item.getItemId() );
+//            searchView.onOptionsItemSelected(getFragmentManager(), item);
 
 //          searchView.onOptionsItemSelected(getFragmentManager(), item);
 //          setEmptyToolbarClickListener();
@@ -383,7 +391,11 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   private void initSearchSub(){
 
-    searchSubject
+    if (searchSubjectSubscription != null){
+      searchSubjectSubscription.unsubscribe();
+    }
+
+    searchSubjectSubscription = searchSubject
       .buffer( 500, TimeUnit.MILLISECONDS )
       .subscribeOn(Schedulers.computation())
       .observeOn(AndroidSchedulers.mainThread())
@@ -417,6 +429,10 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @Override
   public void onResume() {
     super.onResume();
+    initSearchSub();
+    initSearch();
+
+
     initEvents();
     startNetworkCheck();
     subscribeToNetworkCheckResults();
@@ -424,8 +440,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     rxSettings();
 
-    initSearch();
-//    initSearchSub();
 
     active = true;
 

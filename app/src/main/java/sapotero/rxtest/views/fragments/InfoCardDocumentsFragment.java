@@ -339,8 +339,12 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
         toastShown = false;
       }
 
+
       swipeUtil.setDirection( direction );
-      directionSub.onNext(positionOffset);
+
+      if (directionSub != null) {
+        directionSub.onNext(positionOffset);
+      }
 
     }
 
