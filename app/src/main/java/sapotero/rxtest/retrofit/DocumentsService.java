@@ -49,4 +49,11 @@ public interface DocumentsService {
     @Query("folder_id") String folder,
     @Query("created_at") String created_at
   );
+
+  @GET("/v3/documents/{UID}/view.json")
+  Observable<Document> processDocument(
+    @Path("UID") String uid,
+    @Query("login") String login,
+    @Query("auth_token") String auth_token
+  );
 }

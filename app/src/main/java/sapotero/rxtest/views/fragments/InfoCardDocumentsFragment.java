@@ -194,7 +194,6 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
       .get()
       .firstOrNull();
 
-    Timber.tag("IMAGESSS").e("%s", document.getUid() );
 
     //resolved https://tasks.n-core.ru/browse/MVDESD-12626 - срочность
     if ( document.getUrgency() != null ){
@@ -210,7 +209,6 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
       for (RImage image : document.getImages()) {
         RImageEntity img = (RImageEntity) image;
-        Timber.tag(TAG).i("image " + img.getTitle() );
         tmp.add(img);
       }
 
@@ -228,7 +226,6 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
 
       for (RImageEntity image : tmp) {
-        Timber.tag(TAG).e("image: %s %s", image.getNumber(), image.getCreatedAt());
         adapter.add( image );
       }
 
@@ -250,6 +247,9 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
     Image image = adapter.getItem(index);
 
+    // Проверяем, существует ли ЭО
+    // ЭО автоматически удаляются через период времени
+    // заданный в настройках
     if ( image.isDeleted() ){
       showDownloadButton();
     } else {
@@ -259,55 +259,64 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
       file = new File(getContext().getFilesDir(), String.format( "%s_%s", image.getMd5(), image.getTitle() ));
 
-      if ( Objects.equals(contentType, "application/pdf") ) {
-        InputStream targetStream = new FileInputStream(file);
+      // Проверяем что файл загружен полность,
+      // иначе рисуем крутилку с окошком
+      if (file.length() != image.getSize()){
+        Timber.tag(TAG).e("image size: %s | %s", file.length(), image.getSize());
+        showFileLoading(true);
+      } else {
+        showFileLoading(false);
+        if ( Objects.equals(contentType, "application/pdf") ) {
+          InputStream targetStream = new FileInputStream(file);
 
-        if (file.exists()) {
-          com.github.barteksc.pdfviewer.util.Constants.THUMBNAIL_RATIO = 1f;
-          com.github.barteksc.pdfviewer.util.Constants.PART_SIZE = 512;
+          if (file.exists()) {
+            com.github.barteksc.pdfviewer.util.Constants.THUMBNAIL_RATIO = 1.0f;
+            com.github.barteksc.pdfviewer.util.Constants.PART_SIZE = 512;
 
-          pdfView
-            .fromStream(targetStream)
+            pdfView
+              .fromStream(targetStream)
 //         .fromFile( file )
-            .enableSwipe(true)
-            .enableDoubletap(true)
-            .defaultPage(0)
-            .swipeHorizontal(false)
-            .onRender((nbPages, pageWidth, pageHeight) -> pdfView.fitToWidth())
-            .onPageChange((page, pageCount) -> {
-              updatePageCount();
-            })
-            .onPageScroll(this::setDirection)
-            .enableAnnotationRendering(true)
-            .scrollHandle(null)
-            .load();
+              .enableSwipe(true)
+              .enableDoubletap(true)
+              .defaultPage(0)
+              .swipeHorizontal(false)
+              .onRender((nbPages, pageWidth, pageHeight) -> pdfView.fitToWidth())
+              .onPageChange((page, pageCount) -> {
+                updatePageCount();
+              })
+              .onPageScroll(this::setDirection)
+              .enableAnnotationRendering(true)
+              .scrollHandle(null)
+              .load();
 
-          pdfView.useBestQuality(false);
-          pdfView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_LOW);
-          pdfView.setWillNotCacheDrawing(false);
-          pdfView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-          pdfView.setDrawingCacheEnabled(true);
-          pdfView.enableRenderDuringScale(false);
+            pdfView.useBestQuality(false);
+            pdfView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_LOW);
+            pdfView.setWillNotCacheDrawing(false);
+            pdfView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+            pdfView.setDrawingCacheEnabled(true);
+            pdfView.enableRenderDuringScale(false);
 
+          }
+
+          pdfView.setVisibility(View.VISIBLE);
+          open_in_another_app_wrapper.setVisibility(View.GONE);
+          page_counter.setVisibility(View.VISIBLE);
+
+        } else {
+          pdfView.setVisibility(View.GONE);
+          open_in_another_app_wrapper.setVisibility(View.VISIBLE);
+          page_counter.setVisibility(View.INVISIBLE);
         }
 
-        pdfView.setVisibility(View.VISIBLE);
-        open_in_another_app_wrapper.setVisibility(View.GONE);
-        page_counter.setVisibility(View.VISIBLE);
+        updateDocumentCount();
+        updatePageCount();
+        updateZoomVisibility();
 
-      } else {
-        pdfView.setVisibility(View.GONE);
-        open_in_another_app_wrapper.setVisibility(View.VISIBLE);
-        page_counter.setVisibility(View.INVISIBLE);
       }
-
-      updateDocumentCount();
-      updatePageCount();
-      updateZoomVisibility();
-
     }
+  }
 
-
+  private void showFileLoading(boolean b) {
 
   }
 
