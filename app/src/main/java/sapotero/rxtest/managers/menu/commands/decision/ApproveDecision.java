@@ -122,25 +122,30 @@ public class ApproveDecision extends DecisionCommand {
 
     String sign = getSign();
 
-    Decision _decision = getParams().getDecisionModel();
-    _decision.setDocumentUid( null );
-    _decision.setApproved(true);
-    _decision.setSign( sign );
+    if ( sign != null ) {
+      Decision _decision = getParams().getDecisionModel();
+      _decision.setDocumentUid( null );
+      _decision.setApproved(true);
+      _decision.setSign( sign );
 
-    if ( getParams().isAssignment() ) {
-      _decision.setAssignment(true);
+      if ( getParams().isAssignment() ) {
+        _decision.setAssignment(true);
+      }
+
+      Observable<DecisionError> info = getDecisionUpdateOperationObservable(_decision, TAG);
+
+      info.subscribeOn( Schedulers.computation() )
+        .observeOn( AndroidSchedulers.mainThread() )
+        .subscribe(
+          data -> {
+            onSuccess( this, data, true, false, TAG );
+            finishOperationOnSuccess();
+          },
+          error -> onError( this, error.getLocalizedMessage(), true, TAG )
+        );
+
+    } else {
+      onError( this, SIGN_ERROR_MESSAGE, true, TAG );
     }
-
-    Observable<DecisionError> info = getDecisionUpdateOperationObservable(_decision, TAG);
-
-    info.subscribeOn( Schedulers.computation() )
-      .observeOn( AndroidSchedulers.mainThread() )
-      .subscribe(
-        data -> {
-          onSuccess( this, data, true, false, TAG );
-          finishOperationOnSuccess();
-        },
-        error -> onError( this, error.getLocalizedMessage(), true, TAG )
-      );
   }
 }

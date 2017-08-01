@@ -103,23 +103,28 @@ public class SignFile extends AbstractCommand {
             setSignSuccess( getParams().getImageId() );
             saveImageSign( file_sign );
           },
-          error -> {
-            Timber.tag(TAG).i("Sign error");
-
-            if (callback != null) {
-              callback.onCommandExecuteError(getType());
-            }
-
-            if ( settings.isOnline() ) {
-              String errorMessage = "Ошибка подписания электронного образа";
-              queueManager.setExecutedWithError( this,  Collections.singletonList( errorMessage ) );
-              setSignError( getParams().getImageId() );
-            }
-
-            setSignTaskStarted( getParams().getImageId(), false );
-          }
+          error -> onError()
         );
+
+    } else {
+      onError();
     }
+  }
+
+  private void onError() {
+    Timber.tag(TAG).i("Sign error");
+
+    if (callback != null) {
+      callback.onCommandExecuteError(getType());
+    }
+
+    if ( settings.isOnline() ) {
+      String errorMessage = "Ошибка подписания электронного образа";
+      queueManager.setExecutedWithError( this,  Collections.singletonList( errorMessage ) );
+      setSignError( getParams().getImageId() );
+    }
+
+    setSignTaskStarted( getParams().getImageId(), false );
   }
 
   private void saveImageSign(String sign){
