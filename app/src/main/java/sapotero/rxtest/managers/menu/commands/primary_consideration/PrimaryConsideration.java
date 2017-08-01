@@ -95,7 +95,7 @@ public class PrimaryConsideration extends AbstractCommand {
     Observable<OperationResult> info = operationService.consideration(
       getType(),
       getParams().getLogin(),
-      getParams().getToken(),
+      settings.getToken(),
       uids,
       getParams().getDocument(),
       getParams().getStatusCode(),

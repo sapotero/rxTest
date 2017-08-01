@@ -70,7 +70,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     return new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( getParams().getHost() + "v3/operations/" )
+      .baseUrl( settings.getHost() + "v3/operations/" )
       .client( okHttpClient )
       .build();
   }
@@ -79,7 +79,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     return new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( getParams().getHost() )
+      .baseUrl( settings.getHost() )
       .client( okHttpClient )
       .build();
   }

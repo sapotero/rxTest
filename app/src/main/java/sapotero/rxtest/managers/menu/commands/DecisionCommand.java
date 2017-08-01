@@ -40,7 +40,7 @@ public abstract class DecisionCommand extends AbstractCommand {
 
     return operationService.create(
       getParams().getLogin(),
-      getParams().getToken(),
+      settings.getToken(),
       json
     );
   }
@@ -66,7 +66,7 @@ public abstract class DecisionCommand extends AbstractCommand {
     return operationService.update(
       getParams().getDecisionId(),
       getParams().getLogin(),
-      getParams().getToken(),
+      settings.getToken(),
       json
     );
   }

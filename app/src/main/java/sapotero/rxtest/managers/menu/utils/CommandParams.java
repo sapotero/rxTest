@@ -13,9 +13,7 @@ public class CommandParams implements Serializable {
 
   @Inject transient ISettings settings;
 
-  private String host;
   private String login;
-  private String token;
   private String currentUserId;
   private String pin;
   private String document;
@@ -33,22 +31,12 @@ public class CommandParams implements Serializable {
   public CommandParams() {
     EsdApplication.getDataComponent().inject(this);
 
-    setHost( settings.getHost() );
     setLogin( settings.getLogin() );
-    setToken( settings.getToken() );
     setCurrentUserId( settings.getCurrentUserId() );
     setPin( settings.getPin() );
     setDocument( settings.getUid() );
     setStatusCode( settings.getStatusCode() );
     setUuid( UUID.randomUUID().toString() );
-  }
-
-  public String getHost() {
-    return host;
-  }
-
-  public void setHost(String host) {
-    this.host = host;
   }
 
   public String getLogin() {
@@ -57,14 +45,6 @@ public class CommandParams implements Serializable {
 
   public void setLogin(String login) {
     this.login = login;
-  }
-
-  public String getToken() {
-    return token;
-  }
-
-  public void setToken(String token) {
-    this.token = token;
   }
 
   public String getCurrentUserId() {

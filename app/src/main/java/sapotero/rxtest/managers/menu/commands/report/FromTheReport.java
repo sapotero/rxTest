@@ -84,7 +84,7 @@ public class FromTheReport extends AbstractCommand {
     Observable<OperationResult> info = operationService.report(
       getType(),
       getParams().getLogin(),
-      getParams().getToken(),
+      settings.getToken(),
       uids,
       comment,
       getParams().getStatusCode()
