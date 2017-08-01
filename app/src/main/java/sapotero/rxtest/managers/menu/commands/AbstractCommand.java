@@ -2,6 +2,7 @@ package sapotero.rxtest.managers.menu.commands;
 
 import org.acra.ACRA;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
@@ -13,9 +14,11 @@ import javax.inject.Inject;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
 import okhttp3.OkHttpClient;
+import okhttp3.ResponseBody;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
+import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.application.EsdApplication;
@@ -23,6 +26,10 @@ import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDisplayFirstDecisionEntity;
 import sapotero.rxtest.db.requery.models.images.RSignImageEntity;
+import sapotero.rxtest.managers.menu.interfaces.Command;
+import sapotero.rxtest.managers.menu.interfaces.Operation;
+import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.retrofit.DocumentsService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
 import sapotero.rxtest.services.MainService;
@@ -32,9 +39,6 @@ import sapotero.rxtest.utils.memory.fields.FieldType;
 import sapotero.rxtest.utils.memory.fields.InMemoryState;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import sapotero.rxtest.utils.queue.QueueManager;
-import sapotero.rxtest.managers.menu.interfaces.Command;
-import sapotero.rxtest.managers.menu.interfaces.Operation;
-import sapotero.rxtest.managers.menu.utils.CommandParams;
 import timber.log.Timber;
 
 
@@ -99,6 +103,35 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     }
 
     return sign;
+  }
+
+  public void setAsProcessed(){
+
+    Retrofit retrofit =  new Retrofit.Builder()
+      .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+      .baseUrl( getParams().getHost() + "v3/operations/" )
+      .client( okHttpClient )
+      .build();
+
+    DocumentsService operationService = retrofit.create( DocumentsService.class );
+
+//     добавить проверку на то, что документ уже был обработан/просмотрен
+     Observable<ResponseBody> view = operationService.processDocument(
+      getParams().getDocument(),
+      getParams().getLogin(),
+      getParams().getToken()
+    );
+
+    view
+      .subscribeOn( Schedulers.computation() )
+      .observeOn( AndroidSchedulers.mainThread() )
+      .subscribe( body -> {
+        try {
+          Timber.d( "setAsProcessed : %s | %s", getParams().getDocument(), body.string() );
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }, Timber::e);
   }
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13258

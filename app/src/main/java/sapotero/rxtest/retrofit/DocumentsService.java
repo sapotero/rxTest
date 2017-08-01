@@ -2,7 +2,9 @@ package sapotero.rxtest.retrofit;
 
 import java.util.List;
 
+import okhttp3.ResponseBody;
 import retrofit2.http.GET;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 import rx.Observable;
@@ -50,8 +52,8 @@ public interface DocumentsService {
     @Query("created_at") String created_at
   );
 
-  @GET("/v3/documents/{UID}/view.json")
-  Observable<Document> processDocument(
+  @PUT("/v3/documents/{UID}/view.json")
+  Observable<ResponseBody> processDocument(
     @Path("UID") String uid,
     @Query("login") String login,
     @Query("auth_token") String auth_token
