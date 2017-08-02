@@ -30,6 +30,7 @@ public class NextPerson extends ApprovalSigningCommand {
     setDocOperationProcessedStartedInMemory();
 
     setTaskStarted( getParams().getDocument(), false );
+    setAsProcessed();
   }
 
   @Override

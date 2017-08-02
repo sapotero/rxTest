@@ -28,6 +28,7 @@ public class ApproveDecisionDelayed extends DecisionCommand {
   @Override
   public void execute() {
     queueManager.add(this);
+    setAsProcessed();
   }
 
   public void update() {

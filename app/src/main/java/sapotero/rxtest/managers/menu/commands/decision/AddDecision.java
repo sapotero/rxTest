@@ -40,6 +40,7 @@ public class AddDecision extends DecisionCommand {
     Timber.tag(TAG).w("ASSIGNMENT: %s", getParams().isAssignment() );
 
     queueManager.add(this);
+    setAsProcessed();
   }
 
   @Override

@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.birbit.android.jobqueue.JobManager;
 import com.github.barteksc.pdfviewer.PDFView;
+import com.google.gson.Gson;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -80,6 +81,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   @BindView(R.id.info_card_pdf_fullscreen_button) FrameLayout fullscreen;
   @BindView(R.id.deleted_image) FrameLayout deletedImage;
   @BindView(R.id.broken_image) FrameLayout broken_image;
+  @BindView(R.id.loading_image) FrameLayout loading_image;
   @BindView(R.id.info_card_pdf_reload) Button reloadImageButton;
   @BindView(R.id.info_card_pdf_no_files) TextView no_files;
 
@@ -110,6 +112,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   private Toast toast;
   private boolean toastShown = false;
   private Subscription sub;
+  private Subscription reload;
 
   public InfoCardDocumentsFragment() {
     swipeUtil = new SwipeUtil();
@@ -194,7 +197,6 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
       .get()
       .firstOrNull();
 
-    Timber.tag("IMAGESSS").e("%s", document.getUid() );
 
     //resolved https://tasks.n-core.ru/browse/MVDESD-12626 - срочность
     if ( document.getUrgency() != null ){
@@ -210,7 +212,6 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
       for (RImage image : document.getImages()) {
         RImageEntity img = (RImageEntity) image;
-        Timber.tag(TAG).i("image " + img.getTitle() );
         tmp.add(img);
       }
 
@@ -228,7 +229,6 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
 
       for (RImageEntity image : tmp) {
-        Timber.tag(TAG).e("image: %s %s", image.getNumber(), image.getCreatedAt());
         adapter.add( image );
       }
 
@@ -249,66 +249,112 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   private void setPdfPreview() throws FileNotFoundException {
 
     Image image = adapter.getItem(index);
+    file = new File(getContext().getFilesDir(), String.format( "%s_%s", image.getMd5(), image.getTitle() ));
 
-    if ( image.isDeleted() ){
-      showDownloadButton();
-    } else {
 
-      contentType = image.getContentType();
-      document_title.setText( image.getTitle() );
+    Timber.tag(TAG).e("image: %s", new Gson().toJson(image) );
+    Timber.tag(TAG).e("file: %s", file.toString() );
 
-      file = new File(getContext().getFilesDir(), String.format( "%s_%s", image.getMd5(), image.getTitle() ));
+    // Проверяем что файл загружен полность,
+    // иначе рисуем крутилку с окошком
+    if (image.getSize() != null && file.length() == image.getSize()){
+      Timber.tag(TAG).e("image size: %s | %s", file.length(), image.getSize());
+      showFileLoading(false);
 
-      if ( Objects.equals(contentType, "application/pdf") ) {
-        InputStream targetStream = new FileInputStream(file);
+      // Проверяем, существует ли ЭО
+      // ЭО автоматически удаляются через период времени
+      // заданный в настройках
+      if ( image.isDeleted() ){
+        showDownloadButton();
+      } else {
 
-        if (file.exists()) {
-          com.github.barteksc.pdfviewer.util.Constants.THUMBNAIL_RATIO = 1f;
-          com.github.barteksc.pdfviewer.util.Constants.PART_SIZE = 512;
+        contentType = image.getContentType();
+        document_title.setText( image.getTitle() );
 
-          pdfView
-            .fromStream(targetStream)
-//         .fromFile( file )
-            .enableSwipe(true)
-            .enableDoubletap(true)
-            .defaultPage(0)
-            .swipeHorizontal(false)
-            .onRender((nbPages, pageWidth, pageHeight) -> pdfView.fitToWidth())
-            .onPageChange((page, pageCount) -> {
-              updatePageCount();
-            })
-            .onPageScroll(this::setDirection)
-            .enableAnnotationRendering(true)
-            .scrollHandle(null)
-            .load();
+        if ( Objects.equals(contentType, "application/pdf") ) {
+          InputStream targetStream = new FileInputStream(file);
 
-          pdfView.useBestQuality(false);
-          pdfView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_LOW);
-          pdfView.setWillNotCacheDrawing(false);
-          pdfView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-          pdfView.setDrawingCacheEnabled(true);
-          pdfView.enableRenderDuringScale(false);
+          if (file.exists()) {
+            com.github.barteksc.pdfviewer.util.Constants.THUMBNAIL_RATIO = 1.0f;
+            com.github.barteksc.pdfviewer.util.Constants.PART_SIZE = 512;
 
+            pdfView
+              .fromStream(targetStream)
+  //         .fromFile( file )
+              .enableSwipe(true)
+              .enableDoubletap(true)
+              .defaultPage(0)
+              .swipeHorizontal(false)
+              .onRender((nbPages, pageWidth, pageHeight) -> pdfView.fitToWidth())
+              .onPageChange((page, pageCount) -> {
+                updatePageCount();
+              })
+              .onPageScroll(this::setDirection)
+              .enableAnnotationRendering(true)
+              .scrollHandle(null)
+              .load();
+
+            pdfView.useBestQuality(false);
+            pdfView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_LOW);
+            pdfView.setWillNotCacheDrawing(false);
+            pdfView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+            pdfView.setDrawingCacheEnabled(true);
+            pdfView.enableRenderDuringScale(false);
+
+          }
+
+          pdfView.setVisibility(View.VISIBLE);
+          open_in_another_app_wrapper.setVisibility(View.GONE);
+          page_counter.setVisibility(View.VISIBLE);
+
+        } else {
+          pdfView.setVisibility(View.GONE);
+          open_in_another_app_wrapper.setVisibility(View.VISIBLE);
+          page_counter.setVisibility(View.INVISIBLE);
         }
 
-        pdfView.setVisibility(View.VISIBLE);
-        open_in_another_app_wrapper.setVisibility(View.GONE);
-        page_counter.setVisibility(View.VISIBLE);
+        updateDocumentCount();
+        updatePageCount();
+        updateZoomVisibility();
 
-      } else {
-        pdfView.setVisibility(View.GONE);
-        open_in_another_app_wrapper.setVisibility(View.VISIBLE);
-        page_counter.setVisibility(View.INVISIBLE);
       }
-
-      updateDocumentCount();
-      updatePageCount();
-      updateZoomVisibility();
-
+    } else {
+      showFileLoading(true);
     }
+  }
 
+  private void showFileLoading(boolean show) {
+    loading_image.setVisibility( show ? View.VISIBLE : View.GONE );
+    pdfView.setEnabled(!show);
 
+    if (show){
+      startReloadSubscription();
+    } else {
+      stopReloadSubscription();
+    }
+  }
 
+  private void startReloadSubscription() {
+    stopReloadSubscription();
+
+    reload = PublishSubject.create().buffer( 5000, TimeUnit.MILLISECONDS )
+      .onBackpressureBuffer(1)
+      .onBackpressureDrop()
+      .subscribeOn(Schedulers.computation())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe( data->{
+        try {
+          Timber.d("startReloadSubscription");
+          setPdfPreview();
+        } catch (FileNotFoundException e) {
+          Timber.e(e);
+        }
+      }, Timber::e );
+  }
+  private void stopReloadSubscription() {
+    if (reload != null) {
+      reload.unsubscribe();
+    }
   }
 
   private void setDirection(int page, float positionOffset) {

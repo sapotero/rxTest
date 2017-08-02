@@ -30,6 +30,8 @@ public class UncheckControlLabel extends SharedCommand {
         .setLabel(LabelType.SYNC)
         .removeLabel(LabelType.CONTROL)
     );
+
+    setAsProcessed();
   }
 
   @Override

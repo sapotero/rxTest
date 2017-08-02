@@ -47,6 +47,7 @@ public class SaveDecision extends DecisionCommand {
     update();
 
     setDocOperationStartedInMemory();
+    setAsProcessed();
   }
 
   @Override

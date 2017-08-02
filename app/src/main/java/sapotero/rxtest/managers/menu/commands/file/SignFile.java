@@ -47,6 +47,7 @@ public class SignFile extends AbstractCommand {
     }
 
     queueManager.setExecutedLocal(this);
+    setAsProcessed();
   }
 
   @Override

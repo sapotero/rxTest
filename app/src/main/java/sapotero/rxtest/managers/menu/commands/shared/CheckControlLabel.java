@@ -30,6 +30,8 @@ public class CheckControlLabel extends SharedCommand {
       .setLabel(LabelType.SYNC)
       .setLabel(LabelType.CONTROL)
     );
+
+    setAsProcessed();
   }
 
   @Override

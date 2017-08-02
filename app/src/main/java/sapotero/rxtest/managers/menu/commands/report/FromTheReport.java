@@ -33,6 +33,7 @@ public class FromTheReport extends AbstractCommand {
     queueManager.add(this);
     update();
     setDocOperationProcessedStartedInMemory();
+    setAsProcessed();
   }
 
   @Override

@@ -73,6 +73,8 @@ public class DelegatePerformance extends AbstractCommand {
         }
       );
 
+    setAsProcessed();
+
   }
 
   @Override

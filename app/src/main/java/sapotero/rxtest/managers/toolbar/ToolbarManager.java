@@ -15,6 +15,8 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -33,6 +35,8 @@ import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.crypto.SignDataEvent;
+import sapotero.rxtest.events.decision.CheckDecisionVisibilityEvent;
+import sapotero.rxtest.events.decision.DecisionVisibilityEvent;
 import sapotero.rxtest.events.decision.ShowDecisionConstructor;
 import sapotero.rxtest.events.view.ShowSnackEvent;
 import sapotero.rxtest.managers.menu.OperationManager;
@@ -59,6 +63,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
   private RDocumentEntity doc;
   private MaterialDialog dialog;
+  private String command;
 
   public ToolbarManager (Context context, Toolbar toolbar) {
     this.context = context;
@@ -74,12 +79,18 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     // FIX починить и убрать из релиза
     getFirstForLenovo();
 
+    registerEvents();
+  }
+
+  private void registerEvents() {
+    EventBus.getDefault().unregister(this);
+    EventBus.getDefault().register(this);
   }
 
   private void getFirstForLenovo() {
     doc = dataStore
       .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq(settings.getUid())).get().first();
+      .where(RDocumentEntity.UID.eq(settings.getUid())).get().firstOrNull();
   }
 
   private void setListener() {
@@ -187,32 +198,49 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
           case R.id.menu_info_sign_next_person:
 
-            //проверим что все образы меньше 25Мб
-            if ( checkImagesSize() ){
+            //resolved https://tasks.n-core.ru/browse/MVDESD-13952
+            // при подписании проекта без ЭО не подписывать
+            // и не перемещать в обработанные
+            if ( hasImages() ){
 
-              // настройка
-              // Показывать подтверждения о действиях с документом
-              if ( settings.isActionsConfirm() ){
-                operation = CommandFactory.Operation.INCORRECT;
-                showNextDialog(true);
+              //проверим что все образы меньше 25Мб
+              if ( checkImagesSize() ){
+
+                // настройка
+                // Показывать подтверждения о действиях с документом
+                if ( settings.isActionsConfirm() ){
+                  operation = CommandFactory.Operation.INCORRECT;
+                  showNextDialog(true);
+                } else {
+                  operation = CommandFactory.Operation.SIGNING_NEXT_PERSON;
+                  params.setPerson( "" );
+                }
+
               } else {
-                operation = CommandFactory.Operation.SIGNING_NEXT_PERSON;
-                params.setPerson( "" );
+
+
+
+                new MaterialDialog.Builder(context)
+                  .title("Внимание!")
+                  .content("Электронный образ превышает максимально допустимый размер и не может быть подписан!")
+                  .positiveText("Продолжить")
+                  .icon(ContextCompat.getDrawable(context, R.drawable.attention))
+                  .show();
+
+                operation = CommandFactory.Operation.INCORRECT;
               }
-
             } else {
-
-
-
               new MaterialDialog.Builder(context)
                 .title("Внимание!")
-                .content("Электронный образ превышает максимально допустимый размер и не может быть подписан!")
+                .content("Выбранные документы не могут быть отправлены по маршруту. Проверьте наличие чистовых электронных образов и подписавшего в маршруте.")
                 .positiveText("Продолжить")
                 .icon(ContextCompat.getDrawable(context, R.drawable.attention))
                 .show();
 
               operation = CommandFactory.Operation.INCORRECT;
             }
+
+
 
             break;
           case R.id.menu_info_sign_prev_person:
@@ -320,7 +348,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     dialogFragment.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
   }
 
-  public static int parseIntOrDefault(String value, int defaultValue) {
+  private static int parseIntOrDefault(String value, int defaultValue) {
     int result = defaultValue;
     try {
       result = Integer.parseInt(value);
@@ -352,6 +380,10 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     }
 
     return result;
+  }
+
+  private boolean hasImages() {
+    return doc.getImages() != null && doc.getImages().size() > 0;
   }
 
   public void invalidate() {
@@ -417,10 +449,31 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       if ( hasActiveDecision() ){
         safeSetVisibility(R.id.menu_info_to_the_approval_performance, false);
         safeSetVisibility(R.id.menu_info_decision_create, false);
-        safeSetVisibility(R.id.menu_info_decision_edit,   true);
+//        safeSetVisibility(R.id.menu_info_decision_edit,   true);
       } else {
         safeSetVisibility(R.id.menu_info_decision_create, true);
       }
+
+      // в офлайне не изменяем видимость кнопки избранное
+//      if  ( !settings.isOnline() ){
+//        MenuItem item = toolbar.getMenu().findItem(R.id.menu_info_decision_edit);
+//        if ( item != null && item.isVisible()  ){
+//          safeSetVisibility(R.id.menu_info_decision_edit, true);
+//        }
+//      }
+
+//      // в онлайне игнорируем кнопку избранное
+//      if  ( settings.isOnline() ){
+//        if ( Arrays.asList( "add_to_folder", "remove_to_folder").contains(command) ){
+//          MenuItem item = toolbar.getMenu().findItem(R.id.menu_info_decision_edit);
+//          if ( item != null && item.isVisible() ){
+//            safeSetVisibility(R.id.menu_info_decision_edit, true);
+//          }
+//        }
+//      }
+
+      EventBus.getDefault().post( new CheckDecisionVisibilityEvent() );
+
 
 
       // resolved https://tasks.n-core.ru/browse/MVDESD-13343
@@ -439,7 +492,11 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         case R.id.menu_info_shared_to_favorites:
           item.setTitle(context.getString(
             isFromFavorites() ? R.string.remove_from_favorites : R.string.to_favorites));
-          item.setIcon( ContextCompat.getDrawable(context, isFromFavorites() ? R.drawable.to_favorites : R.drawable.star) );
+
+          //resolved https://tasks.n-core.ru/browse/MVDESD-13867
+          // 5. Изменить отображение иконки в избранном (звезда)
+          // сделать наоборот
+          item.setIcon( ContextCompat.getDrawable(context, !isFromFavorites() ? R.drawable.to_favorites : R.drawable.star) );
           break;
         case R.id.menu_info_shared_to_control:
           item.setTitle(context.getString( isFromControl() ? R.string.remove_from_control : R.string.to_control));
@@ -818,7 +875,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   @Override
   public void onExecuteSuccess(String command) {
     Timber.tag(TAG).w("updateFromJob %s", command );
-
+    this.command = command;
     switch (command){
       case "check_for_control":
         EventBus.getDefault().post( new ShowSnackEvent("Отметки для постановки на контроль успешно обновлены.") );
@@ -852,5 +909,14 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   @Override
   public void onExecuteError() {
 
+  }
+
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(DecisionVisibilityEvent event){
+    Timber.tag(TAG).e("DecisionVisibilityEvent %s", event.approved);
+    setEditDecisionMenuItemVisible(!event.approved);
+
+    registerEvents();
   }
 }

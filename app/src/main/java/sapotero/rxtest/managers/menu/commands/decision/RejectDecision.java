@@ -34,6 +34,7 @@ public class RejectDecision extends DecisionCommand {
     queueManager.add(this);
     updateLocal();
     setDocOperationStartedInMemory();
+    setAsProcessed();
   }
 
   private void updateLocal() {
