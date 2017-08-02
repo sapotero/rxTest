@@ -92,7 +92,7 @@ public abstract class SharedCommand extends AbstractCommand {
     return operationService.shared(
       getType(),
       getParams().getLogin(),
-      getParams().getToken(),
+      settings.getToken(),
       uids,
       uid,
       getParams().getStatusCode(),

@@ -20,6 +20,7 @@ import rx.subjects.PublishSubject;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Deleter;
+import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.jobs.bus.CreateDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateFavoriteDocumentsJob;
@@ -163,7 +164,7 @@ public class Processor {
     }
 
     if (index != null) {
-      transaction.withFilter(index);
+      transaction.withIndex(index);
     }
 
 
@@ -382,6 +383,8 @@ public class Processor {
 
   private void updateAndSetProcessed(String uid) {
     settings.addTotalDocCount(1);
+    Timber.tag("RecyclerViewRefresh").d("Processor Intersect: Start UpdateDocumentJob for %s", uid);
+    Timber.tag("RecyclerViewRefresh").d("Processor Intersect: index %s, filter %s", index, filter);
     jobManager.addJobInBackground( new UpdateDocumentJob( uid, index, filter, true ) );
   }
 
@@ -391,9 +394,10 @@ public class Processor {
     if ( doc != null && doc.getDocument() != null && doc.getDocument().isFromFavoritesFolder() ) {
       doc.getDocument().setFavorites( false );
       doc.getDocument().setFromFavoritesFolder( false );
-      store.getPublishSubject().onNext( doc );
 
       store.getDocuments().remove( uid );
+      Timber.tag("RecyclerViewRefresh").d("Processor updateAndDropFavorite: sending event to update MainActivity");
+      EventBus.getDefault().post( new UpdateCountEvent() );
       new Deleter().deleteDocument( uid, TAG );
 
     } else {

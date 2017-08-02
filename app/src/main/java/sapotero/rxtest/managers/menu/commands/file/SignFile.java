@@ -89,7 +89,7 @@ public class SignFile extends AbstractCommand {
       Observable<Object> info = imagesService.update(
         getParams().getImageId(),
         getParams().getLogin(),
-        getParams().getToken(),
+        settings.getToken(),
         file_sign
       );
 

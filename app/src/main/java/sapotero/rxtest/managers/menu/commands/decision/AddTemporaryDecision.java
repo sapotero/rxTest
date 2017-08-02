@@ -67,7 +67,6 @@ public class AddTemporaryDecision extends DecisionCommand {
     dataStore
       .update(RDocumentEntity.class)
       .set(RDocumentEntity.CHANGED, true)
-      .set(RDocumentEntity.MD5, "")
       .where(RDocumentEntity.UID.eq( getParams().getDocument() ))
       .get()
       .value();

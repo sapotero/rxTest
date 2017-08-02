@@ -50,8 +50,8 @@ public class CreateProjectsJob extends DocumentJob {
   @Override
   public void doAfterUpdate(RDocumentEntity document) {
     if (document != null) {
-      Timber.tag(TAG).e( "doAfterUpdate %s - %s / %s", uid, null, status );
-      store.process( document, null, status );
+      Timber.tag(TAG).e( "doAfterUpdate %s - %s / %s", uid, status, null );
+      store.process( document, status, null );
     }
   }
 

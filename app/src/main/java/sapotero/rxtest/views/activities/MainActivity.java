@@ -59,6 +59,7 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.query.DBQueryBuilder;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.adapter.JournalSelectorIndexEvent;
+import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.events.service.CheckNetworkEvent;
 import sapotero.rxtest.events.utils.RecalculateMenuEvent;
 import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
@@ -142,8 +143,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private Subscription searchSubjectSubscription;
 
   private int menuIndex;
-
-  private static boolean active = false;
 
   protected void onCreate(Bundle savedInstanceState) {
     setTheme(R.style.AppTheme);
@@ -441,8 +440,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     rxSettings();
 
 
-    active = true;
-
 //    EventBus.getDefault().post( new RecalculateMenuEvent());
 
   }
@@ -506,8 +503,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     super.onPause();
     stopNetworkCheck();
     unsubscribe();
-
-    active = false;
   }
 
   @Override
@@ -823,8 +818,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     DOCUMENT_TYPE_SELECTOR.setSelection(event.index);
   }
 
-  public static boolean isActive() {
-    return active;
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(UpdateCountEvent event) {
+    update();
   }
 
 //  @Subscribe(threadMode = ThreadMode.MAIN)

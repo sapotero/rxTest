@@ -47,7 +47,6 @@ public class FromTheReport extends AbstractCommand {
     dataStore
       .update(RDocumentEntity.class)
       .set( RDocumentEntity.PROCESSED, true)
-      .set( RDocumentEntity.MD5, "" )
       .set( RDocumentEntity.CHANGED, true)
       .where(RDocumentEntity.UID.eq(uid))
       .get()
@@ -85,7 +84,7 @@ public class FromTheReport extends AbstractCommand {
     Observable<OperationResult> info = operationService.report(
       getType(),
       getParams().getLogin(),
-      getParams().getToken(),
+      settings.getToken(),
       uids,
       comment,
       getParams().getStatusCode()

@@ -43,7 +43,6 @@ public class NextPerson extends ApprovalSigningCommand {
     dataStore
       .update(RDocumentEntity.class)
       .set( RDocumentEntity.PROCESSED, true)
-      .set( RDocumentEntity.MD5, "" )
       .set( RDocumentEntity.CHANGED, true)
       .where(RDocumentEntity.UID.eq(getParams().getDocument()))
       .get()

@@ -17,6 +17,7 @@ import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.adapter.JournalSelectorUpdateCountEvent;
+import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.fields.DocumentType;
@@ -91,8 +92,8 @@ public class MemoryStore implements Processable{
           }
 
           if (docs.size() > 0){
-            EventBus.getDefault().post( new JournalSelectorUpdateCountEvent() );
-//            counterRecreate();
+            Timber.tag("RecyclerViewRefresh").d("MemoryStore: sending event to update MainActivity");
+            EventBus.getDefault().post( new UpdateCountEvent() );
           }
 
         },

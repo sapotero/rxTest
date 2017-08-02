@@ -56,7 +56,6 @@ public class ApproveDecision extends DecisionCommand {
     dataStore
       .update(RDocumentEntity.class)
       .set(RDocumentEntity.CHANGED, true)
-      .set(RDocumentEntity.MD5, "")
       .where(RDocumentEntity.UID.eq( getParams().getDocument() ))
       .get()
       .value();
@@ -87,7 +86,6 @@ public class ApproveDecision extends DecisionCommand {
       Integer dec = dataStore
         .update(RDocumentEntity.class)
         .set(RDocumentEntity.PROCESSED, true)
-        .set(RDocumentEntity.MD5, "")
         .where(RDocumentEntity.UID.eq( getParams().getDocument() ))
         .get().value();
 

@@ -58,7 +58,7 @@ public class CreateTemplate extends AbstractCommand {
 
     Observable<Template> info = templatesService.create(
       getParams().getLogin(),
-      getParams().getToken(),
+      settings.getToken(),
       getParams().getComment(),
       type
     );

@@ -74,7 +74,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     return new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( getParams().getHost() + "v3/operations/" )
+      .baseUrl( settings.getHost() + "v3/operations/" )
       .client( okHttpClient )
       .build();
   }
@@ -83,7 +83,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     return new Retrofit.Builder()
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
-      .baseUrl( getParams().getHost() )
+      .baseUrl( settings.getHost() )
       .client( okHttpClient )
       .build();
   }
@@ -117,7 +117,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     if ( doc != null && !doc.isViewed() ){
       Retrofit retrofit =  new Retrofit.Builder()
         .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-        .baseUrl( getParams().getHost() + "v3/operations/" )
+        .baseUrl( settings.getHost() + "v3/operations/" )
         .client( okHttpClient )
         .build();
 
@@ -127,7 +127,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       Observable<ResponseBody> view = operationService.processDocument(
         getParams().getDocument(),
         getParams().getLogin(),
-        getParams().getToken()
+        settings.getToken()
       );
 
       view
@@ -195,7 +195,6 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     store.process(
       store.startTransactionFor( getParams().getDocument() )
         .removeLabel(LabelType.SYNC)
-        .setField(FieldType.MD5, "")
         .setState(InMemoryState.READY)
     );
 
@@ -222,7 +221,6 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     store.process(
       store.startTransactionFor( getParams().getDocument() )
         .removeLabel(LabelType.SYNC)
-        .setField(FieldType.MD5, "")
         .setField(FieldType.PROCESSED, false)
         .setState(InMemoryState.READY)
     );
