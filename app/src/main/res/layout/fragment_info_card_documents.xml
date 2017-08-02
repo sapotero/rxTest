@@ -242,7 +242,8 @@
         android:layout_height="match_parent"
         android:background="@color/md_grey_50"
         android:visibility="gone"
-        android:layout_alignParentTop="true">
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="48dp">
 
         <ProgressBar
             android:id="@+id/progressBarLoadingRecite"

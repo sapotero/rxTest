@@ -460,7 +460,11 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         case R.id.menu_info_shared_to_favorites:
           item.setTitle(context.getString(
             isFromFavorites() ? R.string.remove_from_favorites : R.string.to_favorites));
-          item.setIcon( ContextCompat.getDrawable(context, isFromFavorites() ? R.drawable.to_favorites : R.drawable.star) );
+
+          //resolved https://tasks.n-core.ru/browse/MVDESD-13867
+          // 5. Изменить отображение иконки в избранном (звезда)
+          // сделать наоборот
+          item.setIcon( ContextCompat.getDrawable(context, !isFromFavorites() ? R.drawable.to_favorites : R.drawable.star) );
           break;
         case R.id.menu_info_shared_to_control:
           item.setTitle(context.getString( isFromControl() ? R.string.remove_from_control : R.string.to_control));
