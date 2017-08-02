@@ -1,5 +1,6 @@
 package sapotero.rxtest.views.activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -27,6 +28,8 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -39,7 +42,6 @@ import butterknife.OnClick;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
 import rx.Observable;
-import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
@@ -53,7 +55,6 @@ import sapotero.rxtest.events.crypto.SignDataWrongPinEvent;
 import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
 import sapotero.rxtest.events.decision.ShowDecisionConstructor;
 import sapotero.rxtest.events.document.DropControlEvent;
-import sapotero.rxtest.events.utils.NoDocumentsEvent;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.events.view.ShowPrevDocumentEvent;
 import sapotero.rxtest.events.view.ShowSnackEvent;
@@ -64,6 +65,7 @@ import sapotero.rxtest.managers.toolbar.ToolbarManager;
 import sapotero.rxtest.services.task.UpdateCurrentDocumentTask;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
+import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.adapters.TabSigningPagerAdapter;
 import sapotero.rxtest.views.fragments.InfoActivityDecisionPreviewFragment;
@@ -91,13 +93,22 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   @BindView(R.id.toolbar) Toolbar toolbar;
 
+  public static final String EXTRA_DOCUMENTUIDS_KEY = "document_uids";
+
   private String TAG = this.getClass().getSimpleName();
   private CompositeSubscription subscription;
   private ToolbarManager toolbarManager;
   private Fields.Journal journal;
   private Fields.Status  status;
   private ScheduledThreadPoolExecutor scheduller;
-  private Subscription loggerSubscription;
+
+  private List<String> documentUids;
+
+  public static Intent newIntent(Context context, ArrayList<String> documentUids) {
+    Intent intent = new Intent(context, InfoActivity.class);
+    intent.putStringArrayListExtra(EXTRA_DOCUMENTUIDS_KEY, documentUids);
+    return intent;
+  }
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -111,13 +122,8 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
     clearImageIndex();
 
+    documentUids = getIntent().getStringArrayListExtra(EXTRA_DOCUMENTUIDS_KEY);
   }
-
-
-
-
-
-
 
   private void initInfoActivity() {
     if (EventBus.getDefault().isRegistered(this)) {
@@ -279,16 +285,12 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
       scheduller.shutdown();
     }
 
-    if (loggerSubscription != null) {
-      loggerSubscription.unsubscribe();
-    }
-
     unsubscribe();
 
     finish();
   }
 
-  public void exitIfAlreadySeenThisFuckingDocument(){
+  public void exitIfAlreadySeenThisDocument() {
     if (Objects.equals(settings.getLastSeenUid(), settings.getUid())){
       Timber.tag(TAG).e("exitIfAlreadySeenThisDocument");
       finish();
@@ -440,50 +442,89 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(NoDocumentsEvent event) throws Exception {
-    Timber.tag(TAG).e("NoDocumentsEvent");
-    finish();
-  }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(ShowPrevDocumentEvent event) throws Exception {
     Timber.tag(TAG).e("ShowPrevDocumentEvent");
     showPrevDocument();
   }
 
   private void showPrevDocument() {
-
     Timber.tag("SHOW_PREV").e("info_act");
 
+    getPrevFromCurrentPosition();
 
-    MainActivity.RAdapter.getPrevFromPosition( settings.getMainMenuPosition() );
-
-    exitIfAlreadySeenThisFuckingDocument();
+    exitIfAlreadySeenThisDocument();
 
     clearImageIndex();
     initInfoActivity();
     updateCurrent();
+  }
+
+  private void getPrevFromCurrentPosition() {
+    getPrevNextDoc(false);
+  }
+
+  private void getPrevNextDoc(boolean next) {
+    if ( documentUids.size() == 0 ) {
+      finish();
+    } else {
+      int position = settings.getMainMenuPosition();
+      position = next ? position + 1 : position - 1;
+      position = checkBounds( position );
+      setNewDocument( position );
+    }
+  }
+
+  private int checkBounds(int position) {
+    int result = position;
+
+    if ( position < 0 ) {
+      result = documentUids.size() - 1;
+    }
+
+    if ( position >= documentUids.size() ) {
+      result = 0;
+    }
+
+    return result;
+  }
+
+  private void setNewDocument(int position) {
+    InMemoryDocument item = store.getDocuments().get( documentUids.get(position) );
+
+    if ( item != null ) {
+      settings.setMainMenuPosition(position);
+      settings.setUid(item.getUid());
+      settings.setRegNumber(item.getDocument().getRegistrationNumber());
+      settings.setStatusCode(item.getFilter());
+      settings.setRegDate(item.getDocument().getRegistrationDate());
+    }
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(ShowNextDocumentEvent event){
-    Timber.tag(TAG).e("ShowNextDocumentEvent");
+    Timber.tag(TAG).e("ShowNextDocumentEvent: showing next document");
     showNextDocument();
+
+    if ( event.isRemoveUid() ) {
+      Timber.tag(TAG).e("ShowNextDocumentEvent: removing uid from list");
+      documentUids.remove( event.getUid() );
+    }
   }
 
   private void showNextDocument() {
-
     Timber.tag("SHOW_NEXT").e("info_act");
 
+    getNextFromCurrentPosition();
 
-    MainActivity.RAdapter.getNextFromPosition( settings.getMainMenuPosition() );
-
-    exitIfAlreadySeenThisFuckingDocument();
+    exitIfAlreadySeenThisDocument();
 
     clearImageIndex();
     initInfoActivity();
     updateCurrent();
+  }
 
+  private void getNextFromCurrentPosition() {
+    getPrevNextDoc(true);
   }
 
   private void clearImageIndex() {

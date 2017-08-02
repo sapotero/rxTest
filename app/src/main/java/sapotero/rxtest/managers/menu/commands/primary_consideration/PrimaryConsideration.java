@@ -53,7 +53,8 @@ public class PrimaryConsideration extends AbstractCommand {
       .where(RDocumentEntity.UID.eq(uid))
       .get()
       .value();
-    EventBus.getDefault().post( new ShowNextDocumentEvent());
+
+    EventBus.getDefault().post( new ShowNextDocumentEvent( true, getParams().getDocument() ));
   }
 
   @Override

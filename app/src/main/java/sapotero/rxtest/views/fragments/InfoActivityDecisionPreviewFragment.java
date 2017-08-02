@@ -180,7 +180,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
             operationManager.execute(operation, params);
             updateAfteButtonPressed();
-            EventBus.getDefault().post( new ShowNextDocumentEvent());
+            EventBus.getDefault().post( new ShowNextDocumentEvent( true, settings.getUid() ));
           })
           .autoDismiss(true);
 
@@ -197,7 +197,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
       operationManager.execute(operation, params);
       updateAfteButtonPressed();
-      EventBus.getDefault().post( new ShowNextDocumentEvent());
+      EventBus.getDefault().post( new ShowNextDocumentEvent( true, settings.getUid() ));
     }
 
     Timber.tag(TAG).v("decision_preview_next end");
@@ -226,7 +226,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
       operationManager.execute(operation, params);
       updateAfteButtonPressed();
-      EventBus.getDefault().post( new ShowNextDocumentEvent());
+      EventBus.getDefault().post( new ShowNextDocumentEvent( true, settings.getUid() ));
     }
   }
 
@@ -250,7 +250,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
         operationManager.execute(operation, commandParams);
         updateAfteButtonPressed();
-        EventBus.getDefault().post( new ShowNextDocumentEvent());
+        EventBus.getDefault().post( new ShowNextDocumentEvent( true, settings.getUid() ));
       })
       .autoDismiss(true);
 

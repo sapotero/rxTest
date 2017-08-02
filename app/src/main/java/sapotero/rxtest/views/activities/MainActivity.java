@@ -130,8 +130,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   private final int SETTINGS_REJECTION_TEMPLATES = 22;
 
-  @SuppressLint("StaticFieldLeak")
-  public static DocumentsAdapter RAdapter;
+  public DocumentsAdapter RAdapter;
 
   public  DBQueryBuilder dbQueryBuilder;
   public  MenuBuilder menuBuilder;
@@ -176,7 +175,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       .withProgressBar( progressBar );
 
     dataLoader = new DataLoaderManager(this);
-
 
     initToolbar();
     
@@ -296,19 +294,10 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     GridLayoutManager gridLayoutManager = new GridLayoutManager(this, columnCount, GridLayoutManager.VERTICAL, false);
 
     RAdapter = new DocumentsAdapter(this, new ArrayList<>());
-    RAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-      @Override
-      public void onChanged() {
-        super.onChanged();
-//        updateCount();
-      }
-    });
 
     rv.addItemDecoration(new GridSpacingItemDecoration(columnCount, spacing, true));
     rv.setLayoutManager(gridLayoutManager);
     rv.setAdapter(RAdapter);
-
-
 
     organization_adapter = new OrganizationAdapter(this, new ArrayList<>());
     ORGANIZATION_SELECTOR.setAdapter(organization_adapter, true, selected -> {

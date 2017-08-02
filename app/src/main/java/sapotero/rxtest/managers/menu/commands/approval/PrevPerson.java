@@ -22,7 +22,7 @@ public class PrevPerson extends ApprovalSigningCommand {
   @Override
   public void execute() {
     queueManager.add(this);
-    EventBus.getDefault().post( new ShowNextDocumentEvent());
+    EventBus.getDefault().post( new ShowNextDocumentEvent( true, getParams().getDocument() ));
 
     setDocOperationProcessedStartedInMemory();
     setAsProcessed();
