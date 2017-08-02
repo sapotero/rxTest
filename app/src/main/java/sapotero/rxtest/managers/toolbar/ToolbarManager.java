@@ -337,7 +337,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     dialogFragment.show( activity.getFragmentManager(), "SelectOshsDialogFragment");
   }
 
-  public static int parseIntOrDefault(String value, int defaultValue) {
+  private static int parseIntOrDefault(String value, int defaultValue) {
     int result = defaultValue;
     try {
       result = Integer.parseInt(value);
@@ -438,7 +438,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       if ( hasActiveDecision() ){
         safeSetVisibility(R.id.menu_info_to_the_approval_performance, false);
         safeSetVisibility(R.id.menu_info_decision_create, false);
-        safeSetVisibility(R.id.menu_info_decision_edit,   true);
+//        safeSetVisibility(R.id.menu_info_decision_edit,   true);
       } else {
         safeSetVisibility(R.id.menu_info_decision_create, true);
       }
