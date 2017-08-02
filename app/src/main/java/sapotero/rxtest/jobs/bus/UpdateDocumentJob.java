@@ -114,16 +114,7 @@ public class UpdateDocumentJob extends DocumentJob {
 
     if ( documentExisting != null && documentExisting.isChanged() != null && !documentExisting.isChanged() ) {
       Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Loading document");
-      InMemoryDocument docInMemory = store.getDocuments().get(uid);
-
-      if ( docInMemory != null ) {
-        Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: setAllowUpdate( true )");
-        docInMemory.setAllowUpdate( true );
-        store.getDocuments().put(uid, docInMemory);
-      }
-
       loadDocument(uid, TAG);
-
     } else {
       Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Document has Sync label, quit loading");
       EventBus.getDefault().post( new StepperLoadDocumentEvent( uid ) );
@@ -133,13 +124,6 @@ public class UpdateDocumentJob extends DocumentJob {
   @Override
   public void doAfterLoad(DocumentInfo documentReceived) {
     Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: doAfterLoad");
-
-    InMemoryDocument docInMemory = store.getDocuments().get(uid);
-
-    if ( docInMemory != null && !docInMemory.isAllowUpdate() ) {
-      Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Update not allowed, quit");
-      return;
-    }
 
     RDocumentEntity documentExisting = dataStore
       .select(RDocumentEntity.class)
@@ -250,8 +234,8 @@ public class UpdateDocumentJob extends DocumentJob {
 
     if (document != null) {
       Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: doAfterUpdate");
-      Timber.tag(TAG).e( "doAfterUpdate %s - %s / %s", uid, index, filter );
-      store.process( document, index, filter );
+      Timber.tag(TAG).e( "doAfterUpdate %s - %s / %s", uid, filter, index );
+      store.process( document, filter, index );
     }
   }
 

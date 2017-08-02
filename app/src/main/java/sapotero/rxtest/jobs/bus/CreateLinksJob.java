@@ -98,7 +98,7 @@ public class CreateLinksJob extends DocumentJob {
             result -> {
               Timber.tag(TAG).d("Set first link %s in doc %s", firstLinkRegNum, result.getUid());
               // Update parent doc in memory
-              store.process( result, result.getDocumentType(), result.getFilter() );
+              store.process( result, result.getFilter(), result.getDocumentType() );
             },
             error -> Timber.tag(TAG).e(error)
           );

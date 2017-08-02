@@ -55,10 +55,4 @@ public class InMemoryDocumentTest {
     inMemoryDocument.setAsReady();
     Assert.assertEquals(inMemoryDocument.getState(), InMemoryState.READY);
   }
-
-  @Test
-  public void testIsAllowUpdate() throws Exception {
-    Boolean result = inMemoryDocument.isAllowUpdate();
-    Assert.assertEquals(Boolean.TRUE, result);
-  }
 }
