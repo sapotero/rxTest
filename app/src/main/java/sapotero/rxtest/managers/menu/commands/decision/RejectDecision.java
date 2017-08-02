@@ -55,7 +55,6 @@ public class RejectDecision extends DecisionCommand {
       Integer dec = dataStore
         .update(RDocumentEntity.class)
         .set(RDocumentEntity.PROCESSED, true)
-        .set(RDocumentEntity.MD5, "")
         .where(RDocumentEntity.UID.eq( getParams().getDocument() ))
         .get().value();
 

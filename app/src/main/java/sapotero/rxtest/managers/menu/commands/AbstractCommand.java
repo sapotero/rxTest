@@ -153,7 +153,6 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     store.process(
       store.startTransactionFor( getParams().getDocument() )
         .removeLabel(LabelType.SYNC)
-        .setField(FieldType.MD5, "")
         .setState(InMemoryState.READY)
     );
 
@@ -180,7 +179,6 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     store.process(
       store.startTransactionFor( getParams().getDocument() )
         .removeLabel(LabelType.SYNC)
-        .setField(FieldType.MD5, "")
         .setField(FieldType.PROCESSED, false)
         .setState(InMemoryState.READY)
     );

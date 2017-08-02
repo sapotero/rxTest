@@ -45,7 +45,6 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
     dataStore
       .update(RDocumentEntity.class)
       .set( RDocumentEntity.PROCESSED, true)
-      .set( RDocumentEntity.MD5, "" )
       .set( RDocumentEntity.CHANGED, true)
       .where(RDocumentEntity.UID.eq(uid))
       .get()
