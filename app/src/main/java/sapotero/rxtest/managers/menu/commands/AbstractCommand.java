@@ -117,7 +117,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     if ( doc != null && !doc.isViewed() ){
       Retrofit retrofit =  new Retrofit.Builder()
         .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-        .baseUrl( getParams().getHost() + "v3/operations/" )
+        .baseUrl( settings.getHost() + "v3/operations/" )
         .client( okHttpClient )
         .build();
 
@@ -127,7 +127,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       Observable<ResponseBody> view = operationService.processDocument(
         getParams().getDocument(),
         getParams().getLogin(),
-        getParams().getToken()
+        settings.getToken()
       );
 
       view
