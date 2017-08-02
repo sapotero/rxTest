@@ -32,7 +32,7 @@ android {
         prod {
             applicationId "sapotero.rxtest"
             versionCode 2
-            versionName "0.9.1"
+            versionName "0.9.2"
         }
 
         develop {
