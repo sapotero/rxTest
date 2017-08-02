@@ -112,6 +112,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   private Toast toast;
   private boolean toastShown = false;
   private Subscription sub;
+  private Subscription reload;
 
   public InfoCardDocumentsFragment() {
     swipeUtil = new SwipeUtil();
@@ -325,6 +326,35 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   private void showFileLoading(boolean show) {
     loading_image.setVisibility( show ? View.VISIBLE : View.GONE );
     pdfView.setEnabled(!show);
+
+    if (show){
+      startReloadSubscription();
+    } else {
+      stopReloadSubscription();
+    }
+  }
+
+  private void startReloadSubscription() {
+    stopReloadSubscription();
+
+    reload = PublishSubject.create().buffer( 5000, TimeUnit.MILLISECONDS )
+      .onBackpressureBuffer(1)
+      .onBackpressureDrop()
+      .subscribeOn(Schedulers.computation())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe( data->{
+        try {
+          Timber.d("startReloadSubscription");
+          setPdfPreview();
+        } catch (FileNotFoundException e) {
+          Timber.e(e);
+        }
+      }, Timber::e );
+  }
+  private void stopReloadSubscription() {
+    if (reload != null) {
+      reload.unsubscribe();
+    }
   }
 
   private void setDirection(int page, float positionOffset) {
