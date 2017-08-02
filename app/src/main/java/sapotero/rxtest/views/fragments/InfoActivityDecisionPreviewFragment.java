@@ -72,6 +72,8 @@ import sapotero.rxtest.db.requery.models.decisions.RPerformer;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.events.decision.ApproveDecisionEvent;
 import sapotero.rxtest.events.decision.CheckActiveDecisionEvent;
+import sapotero.rxtest.events.decision.CheckDecisionVisibilityEvent;
+import sapotero.rxtest.events.decision.DecisionVisibilityEvent;
 import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
 import sapotero.rxtest.events.decision.RejectDecisionEvent;
 import sapotero.rxtest.events.decision.ShowDecisionConstructor;
@@ -1349,6 +1351,11 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(CheckActiveDecisionEvent event) throws Exception {
     checkActiveDecision();
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(CheckDecisionVisibilityEvent event) throws Exception {
+    EventBus.getDefault().post( new DecisionVisibilityEvent( current_decision.isApproved() ) );
   }
 
 
