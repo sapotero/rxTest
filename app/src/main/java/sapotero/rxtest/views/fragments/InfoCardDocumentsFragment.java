@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.birbit.android.jobqueue.JobManager;
 import com.github.barteksc.pdfviewer.PDFView;
+import com.google.gson.Gson;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -80,6 +81,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   @BindView(R.id.info_card_pdf_fullscreen_button) FrameLayout fullscreen;
   @BindView(R.id.deleted_image) FrameLayout deletedImage;
   @BindView(R.id.broken_image) FrameLayout broken_image;
+  @BindView(R.id.loading_image) FrameLayout loading_image;
   @BindView(R.id.info_card_pdf_reload) Button reloadImageButton;
   @BindView(R.id.info_card_pdf_no_files) TextView no_files;
 
@@ -246,26 +248,28 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   private void setPdfPreview() throws FileNotFoundException {
 
     Image image = adapter.getItem(index);
+    file = new File(getContext().getFilesDir(), String.format( "%s_%s", image.getMd5(), image.getTitle() ));
 
-    // Проверяем, существует ли ЭО
-    // ЭО автоматически удаляются через период времени
-    // заданный в настройках
-    if ( image.isDeleted() ){
-      showDownloadButton();
-    } else {
 
-      contentType = image.getContentType();
-      document_title.setText( image.getTitle() );
+    Timber.tag(TAG).e("image: %s", new Gson().toJson(image) );
+    Timber.tag(TAG).e("file: %s", file.toString() );
 
-      file = new File(getContext().getFilesDir(), String.format( "%s_%s", image.getMd5(), image.getTitle() ));
+    // Проверяем что файл загружен полность,
+    // иначе рисуем крутилку с окошком
+    if (image.getSize() != null && file.length() == image.getSize()){
+      Timber.tag(TAG).e("image size: %s | %s", file.length(), image.getSize());
+      showFileLoading(false);
 
-      // Проверяем что файл загружен полность,
-      // иначе рисуем крутилку с окошком
-      if (file.length() != image.getSize()){
-        Timber.tag(TAG).e("image size: %s | %s", file.length(), image.getSize());
-        showFileLoading(true);
+      // Проверяем, существует ли ЭО
+      // ЭО автоматически удаляются через период времени
+      // заданный в настройках
+      if ( image.isDeleted() ){
+        showDownloadButton();
       } else {
-        showFileLoading(false);
+
+        contentType = image.getContentType();
+        document_title.setText( image.getTitle() );
+
         if ( Objects.equals(contentType, "application/pdf") ) {
           InputStream targetStream = new FileInputStream(file);
 
@@ -275,7 +279,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
             pdfView
               .fromStream(targetStream)
-//         .fromFile( file )
+  //         .fromFile( file )
               .enableSwipe(true)
               .enableDoubletap(true)
               .defaultPage(0)
@@ -313,11 +317,14 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
         updateZoomVisibility();
 
       }
+    } else {
+      showFileLoading(true);
     }
   }
 
-  private void showFileLoading(boolean b) {
-
+  private void showFileLoading(boolean show) {
+    loading_image.setVisibility( show ? View.VISIBLE : View.GONE );
+    pdfView.setEnabled(!show);
   }
 
   private void setDirection(int page, float positionOffset) {

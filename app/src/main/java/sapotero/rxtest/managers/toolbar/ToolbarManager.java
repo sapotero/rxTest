@@ -79,7 +79,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   private void getFirstForLenovo() {
     doc = dataStore
       .select(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq(settings.getUid())).get().first();
+      .where(RDocumentEntity.UID.eq(settings.getUid())).get().firstOrNull();
   }
 
   private void setListener() {
