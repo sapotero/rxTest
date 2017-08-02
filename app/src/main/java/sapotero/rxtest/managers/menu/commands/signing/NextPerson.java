@@ -41,6 +41,7 @@ public class NextPerson extends ApprovalSigningCommand {
     setDocOperationProcessedStartedInMemory();
 
     resetSignImageError();
+    setAsProcessed();
   }
 
   private void resetSignImageError() {

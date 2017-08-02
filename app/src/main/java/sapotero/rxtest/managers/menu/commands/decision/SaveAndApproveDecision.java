@@ -40,6 +40,7 @@ public class SaveAndApproveDecision extends DecisionCommand {
     updateLocal();
 
     setDocOperationStartedInMemory();
+    setAsProcessed();
   }
 
   @Override

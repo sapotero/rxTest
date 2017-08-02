@@ -187,32 +187,49 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
           case R.id.menu_info_sign_next_person:
 
-            //проверим что все образы меньше 25Мб
-            if ( checkImagesSize() ){
+            //resolved https://tasks.n-core.ru/browse/MVDESD-13952
+            // при подписании проекта без ЭО не подписывать
+            // и не перемещать в обработанные
+            if ( hasImages() ){
 
-              // настройка
-              // Показывать подтверждения о действиях с документом
-              if ( settings.isActionsConfirm() ){
-                operation = CommandFactory.Operation.INCORRECT;
-                showNextDialog(true);
+              //проверим что все образы меньше 25Мб
+              if ( checkImagesSize() ){
+
+                // настройка
+                // Показывать подтверждения о действиях с документом
+                if ( settings.isActionsConfirm() ){
+                  operation = CommandFactory.Operation.INCORRECT;
+                  showNextDialog(true);
+                } else {
+                  operation = CommandFactory.Operation.SIGNING_NEXT_PERSON;
+                  params.setPerson( "" );
+                }
+
               } else {
-                operation = CommandFactory.Operation.SIGNING_NEXT_PERSON;
-                params.setPerson( "" );
+
+
+
+                new MaterialDialog.Builder(context)
+                  .title("Внимание!")
+                  .content("Электронный образ превышает максимально допустимый размер и не может быть подписан!")
+                  .positiveText("Продолжить")
+                  .icon(ContextCompat.getDrawable(context, R.drawable.attention))
+                  .show();
+
+                operation = CommandFactory.Operation.INCORRECT;
               }
-
             } else {
-
-
-
               new MaterialDialog.Builder(context)
                 .title("Внимание!")
-                .content("Электронный образ превышает максимально допустимый размер и не может быть подписан!")
+                .content("Выбранные документы не могут быть отправлены по маршруту. Проверьте наличие чистовых электронных образов и подписавшего в маршруте.")
                 .positiveText("Продолжить")
                 .icon(ContextCompat.getDrawable(context, R.drawable.attention))
                 .show();
 
               operation = CommandFactory.Operation.INCORRECT;
             }
+
+
 
             break;
           case R.id.menu_info_sign_prev_person:
@@ -352,6 +369,10 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     }
 
     return result;
+  }
+
+  private boolean hasImages() {
+    return doc.getImages() != null && doc.getImages().size() > 0;
   }
 
   public void invalidate() {

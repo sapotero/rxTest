@@ -25,6 +25,7 @@ public class PrevPerson extends ApprovalSigningCommand {
     EventBus.getDefault().post( new ShowNextDocumentEvent());
 
     setDocOperationProcessedStartedInMemory();
+    setAsProcessed();
   }
 
   @Override

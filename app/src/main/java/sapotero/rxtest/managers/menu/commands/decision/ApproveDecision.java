@@ -39,6 +39,7 @@ public class ApproveDecision extends DecisionCommand {
     updateLocal();
     queueManager.add(this);
     setDocOperationStartedInMemory();
+    setAsProcessed();
   }
 
   private void updateLocal() {

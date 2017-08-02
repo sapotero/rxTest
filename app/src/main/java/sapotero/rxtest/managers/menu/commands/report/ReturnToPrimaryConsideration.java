@@ -37,6 +37,7 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
     queueManager.add(this);
     update();
     setDocOperationProcessedStartedInMemory();
+    setAsProcessed();
   }
 
   private void update() {

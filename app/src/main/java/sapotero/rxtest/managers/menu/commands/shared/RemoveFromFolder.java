@@ -39,6 +39,8 @@ public class RemoveFromFolder extends SharedCommand {
     store.process( transaction );
 
     queueManager.add(this);
+
+    setAsProcessed();
   }
 
   @Override
