@@ -565,5 +565,6 @@
     </string-array>
 
     <string name="crash_toast_text">Приложение остановлено. Обратитесь к администратору устройства.</string>
+    <string name="loading_file">Выполняется загрузка ЭО</string>
 
 </resources>
