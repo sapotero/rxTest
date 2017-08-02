@@ -46,6 +46,7 @@ public class AddAndApproveDecision extends DecisionCommand {
         .setLabel(LabelType.SYNC)
         .setState(InMemoryState.LOADING)
     );
+    setAsProcessed();
   }
 
   private void updateLocal() {

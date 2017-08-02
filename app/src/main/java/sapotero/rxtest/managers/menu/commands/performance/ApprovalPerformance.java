@@ -32,6 +32,7 @@ public class ApprovalPerformance extends AbstractCommand {
   public void execute() {
     queueManager.add(this);
     EventBus.getDefault().post( new ShowNextDocumentEvent());
+    setAsProcessed();
   }
 
   @Override

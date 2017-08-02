@@ -105,33 +105,42 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     return sign;
   }
 
+  private RDocumentEntity findDocumentByUID(){
+    return dataStore
+      .select(RDocumentEntity.class)
+      .where(RDocumentEntity.UID.eq(getParams().getDocument()))
+      .get().firstOrNull();
+  }
+
   public void setAsProcessed(){
+    RDocumentEntity doc = findDocumentByUID();
+    if ( doc != null && !doc.isViewed() ){
+      Retrofit retrofit =  new Retrofit.Builder()
+        .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+        .baseUrl( getParams().getHost() + "v3/operations/" )
+        .client( okHttpClient )
+        .build();
 
-    Retrofit retrofit =  new Retrofit.Builder()
-      .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-      .baseUrl( getParams().getHost() + "v3/operations/" )
-      .client( okHttpClient )
-      .build();
-
-    DocumentsService operationService = retrofit.create( DocumentsService.class );
+      DocumentsService operationService = retrofit.create( DocumentsService.class );
 
 //     добавить проверку на то, что документ уже был обработан/просмотрен
-     Observable<ResponseBody> view = operationService.processDocument(
-      getParams().getDocument(),
-      getParams().getLogin(),
-      getParams().getToken()
-    );
+      Observable<ResponseBody> view = operationService.processDocument(
+        getParams().getDocument(),
+        getParams().getLogin(),
+        getParams().getToken()
+      );
 
-    view
-      .subscribeOn( Schedulers.computation() )
-      .observeOn( AndroidSchedulers.mainThread() )
-      .subscribe( body -> {
-        try {
-          Timber.d( "setAsProcessed : %s | %s", getParams().getDocument(), body.string() );
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
-      }, Timber::e);
+      view
+        .subscribeOn( Schedulers.computation() )
+        .observeOn( AndroidSchedulers.mainThread() )
+        .subscribe( body -> {
+          try {
+            Timber.d( "setAsProcessed : %s | %s", getParams().getDocument(), body.string() );
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+        }, Timber::e);
+    }
   }
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13258

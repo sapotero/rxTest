@@ -40,6 +40,7 @@ public class PrimaryConsideration extends AbstractCommand {
     queueManager.add(this);
 
     setDocOperationProcessedStartedInMemory();
+    setAsProcessed();
   }
 
   private void update(){

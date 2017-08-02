@@ -36,6 +36,7 @@ public class AddTemporaryDecision extends DecisionCommand {
     queueManager.add(this);
 
     setDocOperationStartedInMemory();
+    setAsProcessed();
   }
 
   @Override
