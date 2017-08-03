@@ -53,7 +53,6 @@ import static org.acra.ReportField.RADIOLOG;
 import static org.acra.ReportField.REPORT_ID;
 import static org.acra.ReportField.SETTINGS_GLOBAL;
 import static org.acra.ReportField.SETTINGS_SECURE;
-import static org.acra.ReportField.SETTINGS_SYSTEM;
 import static org.acra.ReportField.SHARED_PREFERENCES;
 import static org.acra.ReportField.STACK_TRACE;
 import static org.acra.ReportField.STACK_TRACE_HASH;
@@ -67,11 +66,7 @@ import static org.acra.ReportField.USER_IP;
 
 // на проде отправлем ошибки сюда
 // rgiliazov6@mvd.ru
-
-//@ReportsCrashes(
-//  mailTo = "esapozhnikov@n-core.ru",
-//  mode = ReportingInteractionMode.TOAST,
-//  resToastText = R.string.crashed)
+// в бою android-app-logs.sed.mvd.ru
 
 @ReportsCrashes(formUri = "http://10.0.32.77/send",
 //  mailTo = "esapozhnikov@n-core.ru",
