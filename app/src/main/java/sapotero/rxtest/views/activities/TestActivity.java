@@ -56,6 +56,7 @@ public class TestActivity extends AppCompatActivity {
         data -> {
           Timber.e("+");
           if ( adapter.getCount() > 0 ) {
+
             for (int i = 0; i < adapter.getFragments().size(); i++) {
               FragmentBuilder fragment = adapter.getFragments().get(i);
               String result = String.format(fragment.getButton().getLabel(), fragment.getCount());
