@@ -23,6 +23,7 @@ import sapotero.rxtest.views.activities.SettingsTemplatesActivity;
 import sapotero.rxtest.views.activities.TestActivity;
 import sapotero.rxtest.views.adapters.DecisionAdapter;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
+import sapotero.rxtest.views.adapters.SearchResultAdapter;
 import sapotero.rxtest.views.adapters.main.FragmentBuilder;
 import sapotero.rxtest.views.adapters.models.DocumentTypeItem;
 import sapotero.rxtest.views.adapters.spinner.JournalSelectorAdapter;
@@ -50,6 +51,7 @@ public interface ManagerComponent {
   void inject(SettingsTemplatesActivity activity);
 
   void inject(MainService service);
+  void inject(SearchResultAdapter searchResultAdapter);
 
   void inject(InfoActivityDecisionPreviewFragment fragment);
   void inject(DecisionTemplateFragment fragment);

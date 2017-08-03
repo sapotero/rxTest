@@ -17,6 +17,8 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.utils.ISettings;
+import sapotero.rxtest.utils.memory.MemoryStore;
+import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.views.activities.InfoActivity;
 
 public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapter.ViewHolder> {
@@ -24,12 +26,13 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapte
   private final List<RDocumentEntity> mDataset;
 
   @Inject ISettings settings;
+  @Inject MemoryStore store;
 
   public SearchResultAdapter(Context context, List<RDocumentEntity> mDataset) {
     this.context = context;
     this.mDataset = mDataset;
 
-    EsdApplication.getDataComponent().inject(this);
+    EsdApplication.getManagerComponent().inject(this);
   }
 
   @Override
@@ -41,20 +44,27 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapte
 
   @Override
   public void onBindViewHolder(SearchResultAdapter.ViewHolder holder, int position) {
-    RDocumentEntity doc = mDataset.get(position);
-    holder.mNumber.setText( doc.getRegistrationNumber() );
-    holder.mTitle.setText(  doc.getShortDescription() );
+    RDocumentEntity _doc = mDataset.get(position);
 
-    holder.mCard.setOnClickListener(v -> {
-      settings.setUid( doc.getUid() );
-      settings.setRegNumber( doc.getRegistrationNumber() );
-      settings.setStatusCode( doc.getFilter() );
-      settings.setRegDate( doc.getRegistrationDate() );
-      settings.setLoadFromSearch( true );
+    InMemoryDocument doc = store.getDocuments().get(_doc.getUid()  );
 
-      Intent intent = new Intent(context, InfoActivity.class);
-      context.startActivity(intent);
-    });
+    holder.mNumber.setText( _doc.getRegistrationNumber() );
+    holder.mTitle.setText(  _doc.getShortDescription() );
+
+    if (doc != null) {
+
+      holder.mCard.setOnClickListener(v -> {
+        settings.setUid( doc.getUid() );
+        settings.setIsProject( doc.isProject() );
+        settings.setRegNumber( doc.getDocument().getRegistrationNumber() );
+        settings.setStatusCode( doc.getFilter() );
+        settings.setRegDate( doc.getDocument().getRegistrationDate() );
+        settings.setLoadFromSearch( true );
+
+        Intent intent = new Intent(context, InfoActivity.class);
+        context.startActivity(intent);
+      });
+    }
   }
 
   @Override
