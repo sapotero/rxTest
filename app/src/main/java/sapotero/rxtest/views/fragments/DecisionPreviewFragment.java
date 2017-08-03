@@ -336,7 +336,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
     block_view.setTypeface( Typeface.create("sans-serif-light", Typeface.NORMAL) );
 
 
-    if ( !isOnlyOneBlock && block.getHidePerformers() != null && block.getHidePerformers() ){
+    if ( !isOnlyOneBlock && block.getHidePerformers() != null && block.getHidePerformers() && ( block.getAppealText() == null || Objects.equals(block.getAppealText(), "") ) ) {
       block_view.setText( String.format( "%s. %s", block.getNumber(), block.getText() ) );
     } else {
       block_view.setText( block.getText() );
