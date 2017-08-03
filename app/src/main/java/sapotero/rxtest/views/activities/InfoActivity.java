@@ -497,6 +497,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     if ( item != null ) {
       settings.setMainMenuPosition(position);
       settings.setUid(item.getUid());
+      settings.setIsProject( item.isProject() );
       settings.setRegNumber(item.getDocument().getRegistrationNumber());
       settings.setStatusCode(item.getFilter());
       settings.setRegDate(item.getDocument().getRegistrationDate());
