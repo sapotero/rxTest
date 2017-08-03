@@ -21,6 +21,8 @@ public class UpdateAllDocumentsTask implements Runnable {
   @Override
   public void run() {
     dataLoaderInterface.updateByCurrentStatus(MainMenuItem.ALL, null, false);
+    dataLoaderInterface.updateFavorites(true);
+    dataLoaderInterface.updateProcessed(true);
     EventBus.getDefault().post( new UpdateMainActivityEvent() );
   }
 }

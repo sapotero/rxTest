@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
 import com.googlecode.totallylazy.Sequence;
 
 import java.util.ArrayList;
@@ -182,9 +181,16 @@ public class JournalSelectorAdapter extends RecyclerView.Adapter<JournalSelector
   }
 
   public int getItemPosition(int position) {
-    Timber.e( new Gson().toJson(positions) );
 
-    return positions.get(position);
+    int _position = 0;
+
+    try{
+      _position = positions.get(position);
+    } catch(Exception e){
+      Timber.e(e);
+    }
+
+    return _position;
   }
 
   class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
