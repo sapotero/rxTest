@@ -152,10 +152,7 @@ public class DecisionTemplateFragment extends Fragment {
     adapter = new DecisionTemplateRecyclerAdapter(new ArrayList<>(), mListener);
     recyclerView.setAdapter(adapter);
 
-
     invalidateDecisions();
-
-
   }
 
   private void invalidateDecisions() {
@@ -181,7 +178,6 @@ public class DecisionTemplateFragment extends Fragment {
       );
   }
 
-
   @Override
   public void onAttach(Context context) {
     super.onAttach(context);
@@ -198,13 +194,12 @@ public class DecisionTemplateFragment extends Fragment {
     mListener = null;
   }
 
-  public interface OnListFragmentInteractionListener {
-    void onListFragmentInteraction(RTemplateEntity item);
-  }
-
-
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(AddDecisionTemplateEvent event){
     invalidateDecisions();
+  }
+
+  public interface OnListFragmentInteractionListener {
+    void onListFragmentInteraction(RTemplateEntity item);
   }
 }

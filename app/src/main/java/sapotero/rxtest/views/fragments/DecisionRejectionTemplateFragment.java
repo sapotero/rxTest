@@ -155,22 +155,6 @@ public class DecisionRejectionTemplateFragment extends Fragment {
     invalidateDecisions();
   }
 
-
-  @Override
-  public void onAttach(Context context) {
-    super.onAttach(context);
-    if (context instanceof OnListFragmentInteractionListener) {
-      mListener = (OnListFragmentInteractionListener) context;
-    } else {
-      throw new RuntimeException(context.toString() + " must implement OnListFragmentInteractionListener");
-    }
-  }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(AddDecisionTemplateEvent event){
-    invalidateDecisions();
-  }
-
   private void invalidateDecisions() {
     dataStore
       .select(RTemplateEntity.class)
@@ -195,9 +179,24 @@ public class DecisionRejectionTemplateFragment extends Fragment {
   }
 
   @Override
+  public void onAttach(Context context) {
+    super.onAttach(context);
+    if (context instanceof OnListFragmentInteractionListener) {
+      mListener = (OnListFragmentInteractionListener) context;
+    } else {
+      throw new RuntimeException(context.toString() + " must implement OnListFragmentInteractionListener");
+    }
+  }
+
+  @Override
   public void onDetach() {
     super.onDetach();
     mListener = null;
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(AddDecisionTemplateEvent event){
+    invalidateDecisions();
   }
 
   public interface OnListFragmentInteractionListener {
