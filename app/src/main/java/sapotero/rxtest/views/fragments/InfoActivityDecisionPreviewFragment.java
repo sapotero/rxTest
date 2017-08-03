@@ -547,9 +547,13 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
         current_decision.isApproved() != null && current_decision.isApproved()
         || doc.isProcessed() != null && doc.isProcessed()
       ){
-      toolbarManager.setEditDecisionMenuItemVisible(false);
+      if ( toolbarManager != null ) {
+        toolbarManager.setEditDecisionMenuItemVisible(false);
+      }
     } else {
-      toolbarManager.setEditDecisionMenuItemVisible(true);
+      if ( toolbarManager != null ) {
+        toolbarManager.setEditDecisionMenuItemVisible(true);
+      }
     }
 
   }
