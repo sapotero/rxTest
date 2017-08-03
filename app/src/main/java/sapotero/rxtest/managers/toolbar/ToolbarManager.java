@@ -475,6 +475,12 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       EventBus.getDefault().post( new CheckDecisionVisibilityEvent() );
 
 
+      if (isFromFavoritesFolder()){
+        safeSetVisibility(R.id.menu_info_decision_create_with_assignment, settings.isShowCreateDecisionPost());
+      }
+      if ( settings.isProject() ){
+        safeSetVisibility(R.id.menu_info_decision_create_with_assignment, false);
+      }
 
       // resolved https://tasks.n-core.ru/browse/MVDESD-13343
       // Или если нет активной резолюции
@@ -482,13 +488,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         clearToolbar();
       }
 
-      if (isFromFavoritesFolder()){
-        safeSetVisibility(R.id.menu_info_decision_create_with_assignment, settings.isShowCreateDecisionPost());
-
-        if (isFromProject()){
-          safeSetVisibility(R.id.menu_info_decision_create_with_assignment, false);
-        }
-      }
     }
   }
 
