@@ -19,7 +19,7 @@ public class InMemoryDocumentMapper {
     return imd;
   }
 
-  private static Document convert(RDocumentEntity doc) {
+  public static Document convert(RDocumentEntity doc) {
 
     Document document = new Document();
     document.setUid( doc.getUid() );
