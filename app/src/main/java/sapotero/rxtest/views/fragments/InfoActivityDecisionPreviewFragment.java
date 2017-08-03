@@ -420,7 +420,6 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     loadDocument();
 
     gestureDetector = new GestureDetector( getContext(),new GestureListener() );
-
     desigion_view_root.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
     preview_body.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
 
