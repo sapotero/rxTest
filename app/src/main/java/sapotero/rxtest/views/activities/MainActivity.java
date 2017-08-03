@@ -1,6 +1,5 @@
 package sapotero.rxtest.views.activities;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -799,12 +798,16 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(JournalSelectorIndexEvent event) {
-    if ( menuIndex != event.index ) {
-      // Reset previous state of organization filter on journal change
-      settings.setOrganizationFilterActive( false );
+    try {
+      if ( menuIndex != event.index ) {
+        // Reset previous state of organization filter on journal change
+        settings.setOrganizationFilterActive( false );
+      }
+      menuIndex = event.index;
+      DOCUMENT_TYPE_SELECTOR.setSelection(event.index);
+    } catch (Exception e) {
+      e.printStackTrace();
     }
-    menuIndex = event.index;
-    DOCUMENT_TYPE_SELECTOR.setSelection(event.index);
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
