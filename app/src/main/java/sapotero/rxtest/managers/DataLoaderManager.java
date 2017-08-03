@@ -77,6 +77,8 @@ public class DataLoaderManager {
 
   private SimpleDateFormat dateFormat;
   private CompositeSubscription subscription;
+  private CompositeSubscription subscriptionFavorites;
+  private CompositeSubscription subscriptionProcessed;
   private CompositeSubscription subscriptionInitV2;
   private CompositeSubscription subscriptionUpdateAuth;
   private final Context context;
@@ -651,11 +653,6 @@ public class DataLoaderManager {
         );
       }
     }
-
-    if (items == MainMenuItem.ALL){
-      updateFavorites(true);
-      updateProcessed(true);
-    }
   }
 
   private void checkImagesToDelete() {
@@ -827,7 +824,13 @@ public class DataLoaderManager {
 
       Timber.tag("LoadSequence").d("Loading list of favorites");
       favoritesDataLoading = true;
-      subscription.add(
+
+      if (subscriptionFavorites != null) {
+        subscriptionFavorites.unsubscribe();
+      }
+      subscriptionFavorites = new CompositeSubscription();
+
+      subscriptionFavorites.add(
         docService.getByFolders(settings.getLogin(), settings.getToken(), null, 500, 0, favorites_folder.getUid(), null)
           .subscribeOn( Schedulers.io() )
           .observeOn( AndroidSchedulers.mainThread() )
@@ -903,7 +906,14 @@ public class DataLoaderManager {
 
       Timber.tag("LoadSequence").d("Loading list of processed");
       processedDataLoading = true;
-      subscription.add(
+
+      if (subscriptionProcessed != null) {
+        subscriptionProcessed.unsubscribe();
+      }
+
+      subscriptionProcessed = new CompositeSubscription();
+
+      subscriptionProcessed.add(
         docService.getByFolders(settings.getLogin(), settings.getToken(), null, 500, 0, processed_folder.getUid(), date)
           .subscribeOn( Schedulers.io() )
           .observeOn( AndroidSchedulers.mainThread() )

@@ -13,11 +13,21 @@ public class InMemoryDocument implements Serializable {
   public Integer year;
   public Boolean hasDecision = false;
   public Boolean processed   = false;
+  public Boolean project     = false;
 
   public Document document;
   public InMemoryState state = InMemoryState.LOADING;
 
   public InMemoryDocument() {
+  }
+
+  public Boolean isProject() {
+    return project;
+  }
+
+  public InMemoryDocument setProject(Boolean project) {
+    this.project = project;
+    return this;
   }
 
   public Integer getYear() {
