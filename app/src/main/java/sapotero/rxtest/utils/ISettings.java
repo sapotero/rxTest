@@ -16,6 +16,10 @@ public interface ISettings {
 
   void setFirstRun(boolean value);
 
+  boolean isProject();
+
+  void setIsProject(boolean value);
+
   boolean isSignedWithDc();
 
   void setSignedWithDc(boolean value);

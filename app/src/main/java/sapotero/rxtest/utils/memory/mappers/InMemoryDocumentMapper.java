@@ -71,6 +71,7 @@ public class InMemoryDocumentMapper {
     imd.setProcessed( imd.getDocument().isProcessed() );
     imd.setHasDecision( document.isWithDecision() != null ? document.isWithDecision() : false );
 
+    imd.setProject(document.getRoute() != null);
     imd.setAsReady();
 
     return imd;

@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -27,12 +26,10 @@ import sapotero.rxtest.jobs.bus.CreateFavoriteDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateProcessedDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateProjectsJob;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
-import sapotero.rxtest.jobs.bus.UpsertDocumentJob;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.fields.DocumentType;
-import sapotero.rxtest.utils.memory.fields.FieldType;
 import sapotero.rxtest.utils.memory.fields.InMemoryState;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import sapotero.rxtest.utils.memory.mappers.InMemoryDocumentMapper;
@@ -245,7 +242,7 @@ public class Processor {
 
         return Collections.singletonList("");
       })
-      .buffer(200, TimeUnit.MILLISECONDS)
+//      .buffer(200, TimeUnit.MILLISECONDS)
       .subscribeOn(Schedulers.immediate())
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(
@@ -264,17 +261,6 @@ public class Processor {
     for ( Document doc : documents.values() ) {
       validate( doc );
     }
-  }
-
-  private void setAsUnprocessed(String uid) {
-
-    if (store.getDocuments().containsKey(uid)){
-      store.process(
-        store.startTransactionFor(uid)
-          .setField(FieldType.PROCESSED, false)
-      );
-    }
-
   }
 
   private ArrayList<ConditionBuilder> conditions() {
@@ -330,7 +316,7 @@ public class Processor {
 
         return Collections.singletonList("");
       })
-      .buffer(200, TimeUnit.MILLISECONDS)
+//      .buffer(200, TimeUnit.MILLISECONDS)
       .subscribeOn(Schedulers.immediate())
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(
@@ -410,11 +396,6 @@ public class Processor {
 
       jobManager.addJobInBackground( new UpdateDocumentJob( uid, documentType, true ) );
     }
-  }
-
-  private void upsert(Document uid) {
-    settings.addTotalDocCount(1);
-    jobManager.addJobInBackground( new UpsertDocumentJob( uid, index, filter) );
   }
 
 }

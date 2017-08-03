@@ -158,8 +158,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
       e.printStackTrace();
     }
 
-
-    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL ){
+    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || settings.isProject() ){
       TabSigningPagerAdapter adapter = new TabSigningPagerAdapter( getSupportFragmentManager() );
       viewPager.setAdapter(adapter);
     } else {
@@ -195,7 +194,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
     fragmentTransaction.addToBackStack("PREVIEW");
 
-    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL ){
+    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || settings.isProject() ){
       fragmentTransaction.replace( R.id.activity_info_preview_container, new RoutePreviewFragment(), "PREVIEW" );
     } else {
       fragmentTransaction.replace( R.id.activity_info_preview_container, new InfoActivityDecisionPreviewFragment(toolbarManager), "PREVIEW" );
@@ -502,6 +501,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
       settings.setRegNumber(item.getDocument().getRegistrationNumber());
       settings.setStatusCode(item.getFilter());
       settings.setRegDate(item.getDocument().getRegistrationDate());
+      settings.setIsProject(item.isProject());
     }
   }
 
