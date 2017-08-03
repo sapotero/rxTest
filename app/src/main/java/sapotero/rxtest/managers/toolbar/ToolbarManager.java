@@ -484,6 +484,10 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
       if (isFromFavoritesFolder()){
         safeSetVisibility(R.id.menu_info_decision_create_with_assignment, settings.isShowCreateDecisionPost());
+
+        if (isFromProject()){
+          safeSetVisibility(R.id.menu_info_decision_create_with_assignment, false);
+        }
       }
     }
   }
