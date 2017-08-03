@@ -1,10 +1,15 @@
 package sapotero.rxtest.managers.menu.commands.templates;
 
+import org.greenrobot.eventbus.EventBus;
+
+import java.util.Collections;
+
 import retrofit2.Retrofit;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RTemplateEntity;
+import sapotero.rxtest.events.decision.AddDecisionTemplateEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.TemplatesService;
@@ -57,17 +62,26 @@ public class RemoveTemplate extends AbstractCommand {
       .subscribe(
         data -> {
           queueManager.setExecutedRemote(this);
-          remove(data);
+          remove();
         },
         error -> {
           if (callback != null){
             callback.onCommandExecuteError(getType());
           }
+
+          if ( settings.isOnline() ) {
+            queueManager.setExecutedWithError( this, Collections.singletonList( error.getLocalizedMessage() ) );
+          }
         }
       );
   }
 
-  private void remove(Template data) {
-    dataStore.delete(RTemplateEntity.class).where(RTemplateEntity.UID.eq(data.getId())).get().value();
+  private void remove() {
+    dataStore
+      .delete( RTemplateEntity.class )
+      .where(RTemplateEntity.UID.eq( getParams().getUuid() ))
+      .get().value();
+
+    EventBus.getDefault().post( new AddDecisionTemplateEvent() );
   }
 }

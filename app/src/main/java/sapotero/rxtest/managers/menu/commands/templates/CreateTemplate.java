@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.Collections;
 import java.util.Objects;
 
 import retrofit2.Retrofit;
@@ -75,6 +76,10 @@ public class CreateTemplate extends AbstractCommand {
         error -> {
           if (callback != null){
             callback.onCommandExecuteError(getType());
+          }
+
+          if ( settings.isOnline() ) {
+            queueManager.setExecutedWithError( this, Collections.singletonList( error.getLocalizedMessage() ) );
           }
         }
       );

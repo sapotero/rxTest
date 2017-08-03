@@ -1,5 +1,7 @@
 package sapotero.rxtest.managers.menu.commands.templates;
 
+import java.util.Collections;
+
 import retrofit2.Retrofit;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
@@ -61,6 +63,10 @@ public class UpdateTemplate extends AbstractCommand {
         error -> {
           if (callback != null){
             callback.onCommandExecuteError(getType());
+          }
+
+          if ( settings.isOnline() ) {
+            queueManager.setExecutedWithError( this, Collections.singletonList( error.getLocalizedMessage() ) );
           }
         }
       );
