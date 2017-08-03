@@ -11,6 +11,13 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
+import android.view.View;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.DecelerateInterpolator;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -18,12 +25,15 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
+import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
@@ -50,6 +60,7 @@ import timber.log.Timber;
 public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivityDecisionPreviewFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, RoutePreviewFragment.OnFragmentInteractionListener, InfoCardDocumentsFragment.OnFragmentInteractionListener, InfoCardWebViewFragment.OnFragmentInteractionListener, InfoCardLinksFragment.OnFragmentInteractionListener, InfoCardFieldsFragment.OnFragmentInteractionListener, /*CurrentDocumentManager.Callback,*/ SelectOshsDialogFragment.Callback {
 
   @BindView(R.id.activity_info_preview_container) LinearLayout preview_container;
+  @BindView(R.id.frame_preview_decision) FrameLayout frame;
 
   @BindView(R.id.tab_main) ViewPager viewPager;
   @BindView(R.id.tabs) TabLayout tabLayout;
@@ -109,17 +120,56 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
   }
 
   private void setPreview() {
+    addLoader();
 
     android.support.v4.app.FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+    fragmentTransaction.addToBackStack("PREVIEW");
 
     // FIX всегда отображаем резолюции
 //    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL ){
 //      fragmentTransaction.addByOne( R.id.activity_info_preview_container, new RoutePreviewFragment().withUid(UID) );
 //    } else {
-      fragmentTransaction.add( R.id.activity_info_preview_container, new InfoActivityDecisionPreviewFragment().withUid(UID) );
+      fragmentTransaction.replace( R.id.activity_info_preview_container, new InfoActivityDecisionPreviewFragment().withUid(UID), "PREVIEW" );
 //    }
 
     fragmentTransaction.commit();
+  }
+
+  private void addLoader() {
+    preview_container.removeAllViews();
+
+    frame.setVisibility(View.VISIBLE);
+
+    int durationMillis = 300;
+
+    Animation fadeIn = new AlphaAnimation(0, 1);
+    fadeIn.setInterpolator(new DecelerateInterpolator());
+    fadeIn.setDuration(durationMillis);
+
+    Animation fadeOut = new AlphaAnimation(1, 0);
+    fadeOut.setInterpolator(new AccelerateInterpolator());
+    fadeOut.setStartOffset(durationMillis);
+    fadeOut.setDuration(durationMillis);
+
+    AnimationSet animation = new AnimationSet(true);
+    AnimationSet wrapperAnimation = new AnimationSet(true);
+
+    wrapperAnimation.addAnimation(fadeIn);
+    animation.addAnimation(fadeOut);
+
+    frame.setAnimation(animation);
+    preview_container.setAnimation(wrapperAnimation);
+
+    Observable.just("")
+      .delay(durationMillis, TimeUnit.MILLISECONDS)
+      .subscribeOn( Schedulers.newThread() )
+      .observeOn( AndroidSchedulers.mainThread() )
+      .subscribe(
+        data  -> {
+          frame.setVisibility(View.GONE);
+        },
+        Timber::e
+      );
   }
 
   private void setToolbar() {

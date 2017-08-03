@@ -85,7 +85,7 @@ public class SaveAndApproveDecision extends DecisionCommand {
     if (
       Objects.equals(getParams().getDecisionModel().getSignerId(), getParams().getCurrentUserId())
       // или если подписывающий министр
-//      || ( red != null && red.startTransactionFor(0).equals(true) )
+      || ( red != null && red.get(0).equals(true) )
       ) {
       dataStore
         .update(RDocumentEntity.class)
