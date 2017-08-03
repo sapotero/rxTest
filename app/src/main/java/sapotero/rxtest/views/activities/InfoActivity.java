@@ -123,6 +123,10 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     clearImageIndex();
 
     documentUids = getIntent().getStringArrayListExtra(EXTRA_DOCUMENTUIDS_KEY);
+
+    if ( documentUids == null ) {
+      documentUids = new ArrayList<>();
+    }
   }
 
   private void initInfoActivity() {
@@ -507,7 +511,16 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
     if ( event.isRemoveUid() ) {
       Timber.tag(TAG).e("ShowNextDocumentEvent: removing uid from list");
-      documentUids.remove( event.getUid() );
+      int index = documentUids.indexOf( event.getUid() );
+
+      if ( index > -1 ) {
+        documentUids.remove( index );
+
+        int mainMenuPosition = settings.getMainMenuPosition();
+        if ( index < mainMenuPosition ) {
+          settings.setMainMenuPosition( mainMenuPosition - 1 );
+        }
+      }
     }
   }
 
