@@ -1207,7 +1207,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       block_view.setTextColor( Color.BLACK );
       block_view.setTypeface( Typeface.create("sans-serif-light", Typeface.NORMAL) );
 
-      if ( !isOnlyOneBlock && block.isHidePerformers() != null && block.isHidePerformers() ){
+      if ( !isOnlyOneBlock && block.isHidePerformers() != null && block.isHidePerformers() && ( block.getAppealText() == null || Objects.equals(block.getAppealText(), "") ) ) {
         block_view.setText( String.format( "%s. %s", block.getNumber(), block.getText() ) );
       } else {
         block_view.setText( block.getText() );
