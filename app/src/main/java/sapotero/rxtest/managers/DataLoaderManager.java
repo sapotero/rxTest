@@ -651,6 +651,11 @@ public class DataLoaderManager {
         );
       }
     }
+
+    if (items == MainMenuItem.ALL){
+      updateFavorites(true);
+      updateProcessed(true);
+    }
   }
 
   private void checkImagesToDelete() {
