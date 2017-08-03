@@ -201,6 +201,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
       fragmentTransaction.replace( R.id.activity_info_preview_container, new InfoActivityDecisionPreviewFragment(toolbarManager), "PREVIEW" );
     }
 
+
     fragmentTransaction.commit();
   }
 
