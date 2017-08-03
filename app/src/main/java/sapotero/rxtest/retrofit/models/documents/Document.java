@@ -72,8 +72,17 @@ public class Document implements Serializable {
   private transient boolean fromFavoritesFolder = false;
   private transient boolean fromProcessedFolder = false;
   private transient boolean processed = false;
-
+  private transient boolean isProject = false;
   private transient String firstLink = "";
+
+  public boolean isProject() {
+    return isProject;
+  }
+
+  public Document setProject(boolean project) {
+    isProject = project;
+    return this;
+  }
 
   public String getFirstLink() {
     return firstLink;

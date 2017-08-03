@@ -477,9 +477,12 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
       if (isFromFavoritesFolder()){
         safeSetVisibility(R.id.menu_info_decision_create_with_assignment, settings.isShowCreateDecisionPost());
-      }
-      if ( settings.isProject() ){
-        safeSetVisibility(R.id.menu_info_decision_create_with_assignment, false);
+
+        if ( settings.isProject() ){
+          safeSetVisibility(R.id.menu_info_decision_create_with_assignment, false);
+          safeSetVisibility(R.id.menu_info_decision_edit, false);
+          safeSetVisibility(R.id.menu_info_decision_create, false);
+        }
       }
 
       // resolved https://tasks.n-core.ru/browse/MVDESD-13343

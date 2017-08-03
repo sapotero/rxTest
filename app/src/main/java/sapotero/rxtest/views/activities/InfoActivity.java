@@ -455,10 +455,9 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     Timber.tag("SHOW_PREV").e("info_act");
 
     getPrevFromCurrentPosition();
-
     exitIfAlreadySeenThisDocument();
-
     clearImageIndex();
+
     initInfoActivity();
     updateCurrent();
   }

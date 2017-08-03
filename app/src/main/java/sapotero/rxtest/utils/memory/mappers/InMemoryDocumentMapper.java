@@ -62,15 +62,17 @@ public class InMemoryDocumentMapper {
   public static InMemoryDocument fromDB(RDocumentEntity document) {
 
     InMemoryDocument imd = new InMemoryDocument();
+    Document doc = convert(document);
+    doc.setProject(document.getRoute() != null);
+
     imd.setUid( document.getUid() );
     imd.setMd5( document.getMd5() );
     imd.setFilter(document.getFilter());
     imd.setIndex(document.getDocumentType());
-    imd.setDocument( convert(document) );
+    imd.setDocument( doc );
     imd.setYear( document.getYear() );
     imd.setProcessed( imd.getDocument().isProcessed() );
     imd.setHasDecision( document.isWithDecision() != null ? document.isWithDecision() : false );
-
     imd.setProject(document.getRoute() != null);
     imd.setAsReady();
 
