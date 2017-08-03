@@ -12,8 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import org.greenrobot.eventbus.EventBus;
-
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -22,15 +21,11 @@ import java.util.Objects;
 
 import javax.inject.Inject;
 
-import io.requery.Persistable;
-import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.utils.Fields;
-import sapotero.rxtest.events.utils.NoDocumentsEvent;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.ISettings;
-import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.views.activities.InfoActivity;
 import timber.log.Timber;
@@ -38,7 +33,6 @@ import timber.log.Timber;
 public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.DocumentViewHolder> {
 
   @Inject ISettings settings;
-  @Inject MemoryStore store;
 
   private List<InMemoryDocument> documents;
   private Context mContext;
@@ -65,7 +59,6 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.documents_adapter_item_layout, parent, false);
     return new DocumentViewHolder(view);
   }
-
 
   @Override
   public void onBindViewHolder(final DocumentViewHolder viewHolder, final int position) {
@@ -148,7 +141,12 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
         settings.setLoadFromSearch( false );
         settings.setRegDate( item.getRegistrationDate() );
 
-        Intent intent = new Intent(mContext, InfoActivity.class);
+        ArrayList<String> documentUids = new ArrayList<>();
+        for (InMemoryDocument inMemoryDocument : documents) {
+          documentUids.add( inMemoryDocument.getUid() );
+        }
+
+        Intent intent = InfoActivity.newIntent(mContext, documentUids);
 
         Activity activity = (Activity) mContext;
         activity.startActivity(intent);
@@ -220,51 +218,6 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     }
 
     return documents.get(position);
-  }
-
-  public void getNextFromPosition(int position) {
-    position += 1;
-
-    if ( documents.size() == 0 ){
-      EventBus.getDefault().post( new NoDocumentsEvent() );
-    } else {
-
-      if (position >= documents.size()) {
-        position = 0;
-      }
-
-      InMemoryDocument item = documents.get(position);
-      settings.setMainMenuPosition(position);
-      settings.setUid(item.getUid());
-      settings.setRegNumber(item.getDocument().getRegistrationNumber());
-      settings.setStatusCode(item.getFilter());
-      settings.setRegDate(item.getDocument().getRegistrationDate());
-    }
-
-  }
-
-  public void getPrevFromPosition(int position) {
-    position -= 1;
-
-    if ( documents.size() == 0 ){
-      EventBus.getDefault().post( new NoDocumentsEvent() );
-    } else {
-      if ( position < 0 ){
-        position = documents.size() - 1;
-      }
-      if ( position == documents.size() ){
-        position = 0;
-      }
-
-      InMemoryDocument item = documents.get(position);
-      settings.setMainMenuPosition(position);
-      settings.setUid(item.getUid());
-      settings.setRegNumber(item.getDocument().getRegistrationNumber());
-      settings.setStatusCode(item.getFilter());
-      settings.setRegDate(item.getDocument().getRegistrationDate());
-    }
-
-
   }
 
   public void clear(){

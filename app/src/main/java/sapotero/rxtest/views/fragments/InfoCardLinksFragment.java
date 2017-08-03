@@ -191,7 +191,7 @@ public class InfoCardLinksFragment extends Fragment {
         .select( RDocumentEntity.class )
         .where( RDocumentEntity.UID.eq( _link.getUid() ) )
         .get()
-        .first();
+        .firstOrNull();
 
       if ( document != null ){
         String htmlData = "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />" + new String(Base64.decode( document.getInfoCard(), Base64.DEFAULT) ) ;

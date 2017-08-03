@@ -100,7 +100,7 @@ public class SaveAndApproveDecision extends DecisionCommand {
           .setField(FieldType.PROCESSED, true)
       );
 
-      EventBus.getDefault().post( new ShowNextDocumentEvent());
+      EventBus.getDefault().post( new ShowNextDocumentEvent( true, getParams().getDocument() ));
     }
 
     EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( getParams().getDecisionModel().getId() ));

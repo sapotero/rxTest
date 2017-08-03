@@ -38,7 +38,7 @@ public class AddAndApproveDecision extends DecisionCommand {
   @Override
   public void execute() {
     updateLocal();
-    EventBus.getDefault().post( new ShowNextDocumentEvent() );
+    EventBus.getDefault().post( new ShowNextDocumentEvent( true, getParams().getDocument() ) );
 
     queueManager.add(this);
     store.process(

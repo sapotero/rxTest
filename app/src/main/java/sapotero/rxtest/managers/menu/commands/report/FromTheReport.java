@@ -52,7 +52,7 @@ public class FromTheReport extends AbstractCommand {
       .get()
       .value();
 
-    EventBus.getDefault().post( new ShowNextDocumentEvent());
+    EventBus.getDefault().post( new ShowNextDocumentEvent( true, getParams().getDocument() ));
   }
 
   @Override

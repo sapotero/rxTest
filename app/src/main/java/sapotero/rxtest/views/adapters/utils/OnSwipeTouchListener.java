@@ -80,7 +80,7 @@ public class OnSwipeTouchListener implements View.OnTouchListener {
 
   private void onSwipeLeft() {
     Timber.tag(TAG).e("onSwipeLeft");
-    EventBus.getDefault().post( new ShowNextDocumentEvent());
+    EventBus.getDefault().post( new ShowNextDocumentEvent( false, "" ));
   }
 
   private void onSwipeTop() {

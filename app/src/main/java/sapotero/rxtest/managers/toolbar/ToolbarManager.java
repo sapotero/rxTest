@@ -915,7 +915,10 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(DecisionVisibilityEvent event){
     Timber.tag(TAG).e("DecisionVisibilityEvent %s", event.approved);
-    setEditDecisionMenuItemVisible(!event.approved);
+
+    if ( event.approved != null ) {
+      setEditDecisionMenuItemVisible(!event.approved);
+    }
 
     registerEvents();
   }
