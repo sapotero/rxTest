@@ -29,7 +29,7 @@ public class QueueSupervisor implements JobCountInterface {
   private final CommandFactory commandFactory;
   private ThreadPoolExecutor   commandPool;
 
-  public static int THREAD_POOL_SIZE = 16;
+  public static int THREAD_POOL_SIZE = 64;
 
   public QueueSupervisor() {
     this.commandFactory = CommandFactory.getInstance();
