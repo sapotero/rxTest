@@ -15,6 +15,7 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.images.RSignImageEntity;
 import sapotero.rxtest.db.requery.models.queue.QueueEntity;
+import sapotero.rxtest.db.requery.models.utils.RApprovalNextPersonEntity;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.document.Decision;
@@ -49,6 +50,21 @@ public class QueueDBManager implements JobCountInterface {
       .where(RSignImageEntity.SIGNED.eq(false))
       .and(RSignImageEntity.ERROR.eq(false))
       .get();
+
+
+    dataStore
+      .update(RSignImageEntity.class)
+      .set( RSignImageEntity.SIGN_TASK_STARTED, false )
+      .where( RSignImageEntity.SIGN_TASK_STARTED.eq( true ) )
+      .get()
+      .value();
+
+    dataStore
+      .update( RApprovalNextPersonEntity.class )
+      .set( RApprovalNextPersonEntity.TASK_STARTED, false )
+      .where( RApprovalNextPersonEntity.TASK_STARTED.eq( true ) )
+      .get()
+      .value();
 
   }
 

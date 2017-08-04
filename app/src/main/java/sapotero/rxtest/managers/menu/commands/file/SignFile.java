@@ -73,6 +73,7 @@ public class SignFile extends AbstractCommand {
       return;
     }
 
+    String file_sign = getSign();
 
     Retrofit retrofit = getRetrofit();
 
@@ -80,7 +81,6 @@ public class SignFile extends AbstractCommand {
 
     Timber.tag(TAG).d("Generating sign");
 
-    String file_sign = getSign();
 
     setSignTaskStarted( getParams().getImageId(), true );
 
