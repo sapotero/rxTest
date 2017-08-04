@@ -109,7 +109,6 @@ public class InfoCardLinksFragment extends Fragment {
 
       @Override
       public void onNothingSelected(AdapterView<?> parent) {
-        show();
       }
     });
 
@@ -158,6 +157,8 @@ public class InfoCardLinksFragment extends Fragment {
 
               adapter.add(new Link(_doc.getUid(), _doc.getTitle()));
             }
+
+            show();
           }
         }, error -> {
           Timber.tag(TAG).e(error);
