@@ -86,6 +86,15 @@ public class InfoCardLinksFragment extends Fragment {
 
     view.setOnTouchListener( new OnSwipeTouchListener( getContext() ) );
 
+    return view;
+  }
+
+  @Override
+  public void onResume(){
+    super.onResume();
+
+
+
     adapter = new LinkAdapter(getContext(), new ArrayList<Link>());
 
     loadSettings();
@@ -103,13 +112,6 @@ public class InfoCardLinksFragment extends Fragment {
         show();
       }
     });
-
-    return view;
-  }
-
-  @Override
-  public void onResume(){
-    super.onResume();
 
   }
 

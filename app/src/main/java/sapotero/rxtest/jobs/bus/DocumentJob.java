@@ -19,8 +19,10 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.mapper.DocumentMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
+import sapotero.rxtest.db.requery.utils.Deleter;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.retrofit.DocumentService;
@@ -109,36 +111,45 @@ abstract class DocumentJob extends BaseJob {
   }
 
   void saveDocument(DocumentInfo documentReceived, RDocumentEntity documentToSave, boolean isLink, String TAG) {
-    if ( !existInDb( documentToSave ) ) {
+    RDocumentEntity existingDoc =
       dataStore
-        .insert( documentToSave )
-        .toObservable()
-        .subscribeOn( Schedulers.io() )
-        .observeOn( AndroidSchedulers.mainThread() )
-        .subscribe(
-          result -> {
-            Timber.tag(TAG).d("Created " + result.getUid());
-            doAfterUpdate(result);
-            loadLinkedData( documentReceived, result, isLink );
-          },
-          error -> Timber.tag(TAG).e(error)
-        );
+        .select(RDocumentEntity.class)
+        .where(RDecisionEntity.UID.eq( documentToSave.getUid() ))
+        .get().firstOrNull();
+
+    if ( isLink ) {
+      // If link, insert only if doesn't exist
+      if ( !exist( existingDoc ) ) {
+        insert(documentReceived, documentToSave, isLink, TAG);
+      }
+    } else {
+      // If not link and doesn't exist, insert
+      if ( !exist( existingDoc ) ) {
+        insert(documentReceived, documentToSave, isLink, TAG);
+      } else {
+        // If not link and exists and is from links, delete existing and insert new instead
+        if ( existingDoc.isFromLinks() ) {
+          new Deleter().deleteDocument(existingDoc, TAG);
+          insert(documentReceived, documentToSave, isLink, TAG);
+        }
+      }
     }
   }
 
-  private boolean existInDb(RDocumentEntity documentToSave) {
-    boolean result = false;
-
-    Integer count = dataStore
-      .count(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq(documentToSave.getUid()))
-      .get().value();
-
-    if( count != 0 ){
-      result = true;
-    }
-
-    return result;
+  private void insert(DocumentInfo documentReceived, RDocumentEntity documentToSave, boolean isLink, String TAG) {
+    dataStore
+      .insert( documentToSave )
+      .toObservable()
+      .subscribeOn( Schedulers.io() )
+      .observeOn( AndroidSchedulers.mainThread() )
+      .subscribe(
+        result -> {
+          Timber.tag(TAG).d("Created " + result.getUid());
+          doAfterUpdate(result);
+          loadLinkedData( documentReceived, result, isLink );
+        },
+        error -> Timber.tag(TAG).e(error)
+      );
   }
 
   void updateDocument(DocumentInfo documentReceived, RDocumentEntity documentToUpdate, String TAG) {
