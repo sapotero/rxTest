@@ -41,12 +41,12 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
+import sapotero.rxtest.db.requery.models.RRouteEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.bus.MassInsertDoneEvent;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
-import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.adapters.TabSigningPagerAdapter;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
@@ -88,7 +88,7 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
   private RDocumentEntity doc;
   private boolean showInfoCard = false;
 
-  private InMemoryDocument inMemDoc;
+  private RDocumentEntity documentEntity;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -201,14 +201,14 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
       }
     );
 
-    inMemDoc = store.getDocuments().get(UID);
+    documentEntity = dataStore.select(RDocumentEntity.class).where(RDocumentEntity.UID.eq(UID)).get().firstOrNull();
 
-    status  = Fields.Status.findStatus( inMemDoc.getFilter() );
+    String _filter = documentEntity.getFilter() != null ? documentEntity.getFilter() : "";
+
+    status  = Fields.Status.findStatus( _filter  );
     journal = Fields.getJournalByUid( UID );
 
     toolbar.setTitle( String.format("%s от %s", doc.getRegistrationNumber(), doc.getRegistrationDate() ) );
-
-    Timber.tag("MENU").e( "STATUS CODE: %s", inMemDoc.getFilter() );
 
   }
   private void setTabContent() {
@@ -234,7 +234,9 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
         viewPager.setAdapter(adapter);
 
       } else{
-        if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || inMemDoc.isProject() ) {
+        Boolean isProject = documentEntity.getRoute() != null && ((RRouteEntity) documentEntity.getRoute()).getSteps() != null && ((RRouteEntity) documentEntity.getRoute()).getSteps().size() > 0;
+
+        if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || isProject ) {
           TabSigningPagerAdapter adapter = new TabSigningPagerAdapter( getSupportFragmentManager() );
           adapter.withUid(UID);
           viewPager.setAdapter(adapter);
