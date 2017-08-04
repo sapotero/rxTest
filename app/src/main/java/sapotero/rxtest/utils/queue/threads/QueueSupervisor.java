@@ -45,7 +45,6 @@ public class QueueSupervisor implements JobCountInterface {
 
     Handler handler = new Handler();
     handler.postDelayed(new SuperVisor(commandPool, handler), 1000);
-
   }
 
   public Command create(QueueEntity task){

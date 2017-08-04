@@ -9,6 +9,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import io.requery.Persistable;
+import io.requery.rx.RxScalar;
 import io.requery.rx.SingleEntityStore;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.application.EsdApplication;
@@ -26,7 +27,24 @@ public class QueueDBManager implements JobCountInterface {
 
   public QueueDBManager() {
     EsdApplication.getDataComponent().inject(this);
+
+    dropRunningTasks();
   }
+
+
+  private void dropRunningTasks() {
+    RxScalar<Integer> list = dataStore
+      .update(QueueEntity.class)
+      .set(QueueEntity.RUNNING, false)
+      .where(QueueEntity.RUNNING.eq(true))
+      .get();
+
+    Timber.tag(TAG).e("dropRunningTasks %s", list.toString() );
+
+
+
+  }
+
 
   public void add(Command command){
     if (command != null && command.getParams() != null) {
