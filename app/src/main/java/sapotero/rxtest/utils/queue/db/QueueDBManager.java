@@ -13,6 +13,7 @@ import io.requery.rx.RxScalar;
 import io.requery.rx.SingleEntityStore;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.models.images.RSignImageEntity;
 import sapotero.rxtest.db.requery.models.queue.QueueEntity;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -42,6 +43,12 @@ public class QueueDBManager implements JobCountInterface {
     Timber.tag(TAG).e("dropRunningTasks %s", list.toString() );
 
 
+    dataStore
+      .update(RSignImageEntity.class)
+      .set(RSignImageEntity.SIGNING, false)
+      .where(RSignImageEntity.SIGNED.eq(false))
+      .and(RSignImageEntity.ERROR.eq(false))
+      .get();
 
   }
 
