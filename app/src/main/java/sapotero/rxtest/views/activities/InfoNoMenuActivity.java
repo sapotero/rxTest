@@ -22,6 +22,8 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.birbit.android.jobqueue.JobManager;
+
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -44,6 +46,7 @@ import sapotero.rxtest.db.requery.models.RFolderEntity;
 import sapotero.rxtest.db.requery.models.RRouteEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.bus.MassInsertDoneEvent;
+import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
@@ -68,6 +71,7 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
   @BindView(R.id.tab_main) ViewPager viewPager;
   @BindView(R.id.tabs) TabLayout tabLayout;
 
+  @Inject JobManager jobManager;
   @Inject ISettings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject MemoryStore store;
@@ -197,7 +201,7 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
     toolbar.setContentInsetStartWithNavigation(250);
 
     toolbar.setNavigationOnClickListener(v ->{
-      finish();
+      closeActivity();
       }
     );
 
@@ -211,6 +215,12 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
     toolbar.setTitle( String.format("%s от %s", doc.getRegistrationNumber(), doc.getRegistrationDate() ) );
 
   }
+
+  private void closeActivity() {
+    settings.setImageIndex(0);
+    finish();
+  }
+
   private void setTabContent() {
 
     if (viewPager.getAdapter() == null) {
@@ -243,6 +253,8 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
         } else {
           TabPagerAdapter adapter = new TabPagerAdapter ( getSupportFragmentManager() );
           adapter.withUid(UID);
+          adapter.withoutZoom(true);
+          adapter.withEnableDoubleTap(false);
           viewPager.setAdapter(adapter);
         }
       }
@@ -311,8 +323,15 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
   @Override
   protected void onResume() {
     super.onResume();
+
+    if ( documentEntity != null && documentEntity.isFromLinks() != null && documentEntity.isFromLinks() ) {
+      updateDocument();
+    }
   }
 
+  private void updateDocument() {
+    jobManager.addJobInBackground( new UpdateDocumentJob( UID, true ) );
+  }
 
 //  /* CurrentDocumentManager.Callback */
 //  @Override
@@ -324,7 +343,6 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
 //  public void onGetStateError() {
 //    Timber.tag("DocumentManagerCallback").i("onGetStateError");
 //  }
-
 
   @Override
   public void onSearchSuccess(Oshs user, CommandFactory.Operation operation, String uid) {
@@ -345,6 +363,6 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
 
   @Override
   public void onBackPressed() {
-    finish();
+    closeActivity();
   }
 }
