@@ -51,6 +51,7 @@ public class UpdateDocumentJob extends DocumentJob {
   private int oldSignerId;
   private int oldRouteId;
 
+  private boolean fromLinks = false;
 
   public UpdateDocumentJob(String uid) {
     super( new Params(PRIORITY).requireNetwork().persist() );
@@ -96,6 +97,16 @@ public class UpdateDocumentJob extends DocumentJob {
     this.uid = uid;
     this.documentType = documentType;
     this.forceDropFavorite = forceDropFavorite;
+    this.forceUpdate = true;
+  }
+
+  public UpdateDocumentJob(String uid, boolean fromLinks) {
+    super( new Params(PRIORITY).requireNetwork().persist() );
+
+    this.uid = uid;
+    this.fromLinks = fromLinks;
+
+    // если ссылка, то обновляем принудительно, чтобы загрузились образы
     this.forceUpdate = true;
   }
 
@@ -213,7 +224,7 @@ public class UpdateDocumentJob extends DocumentJob {
           documentExisting.setFromFavoritesFolder( false );
         }
 
-        documentExisting.setFromLinks( false );
+        documentExisting.setFromLinks( fromLinks );
         documentExisting.setChanged( false );
 
         Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: writing update to data store");
@@ -232,7 +243,7 @@ public class UpdateDocumentJob extends DocumentJob {
   public void doAfterUpdate(RDocumentEntity document) {
     deleteLinkedDataPartTwo();
 
-    if (document != null) {
+    if (document != null && !fromLinks) {
       Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: doAfterUpdate");
       Timber.tag(TAG).e( "doAfterUpdate %s - %s / %s", uid, filter, index );
       store.process( document, filter, index );
