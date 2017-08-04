@@ -64,7 +64,7 @@ public class InMemoryDocumentMapper {
 
     InMemoryDocument imd = new InMemoryDocument();
     Document doc = convert(document);
-    doc.setProject(document.getRoute() != null);
+    doc.setProject(document.getRoute() != null && ((RRouteEntity) document.getRoute()).getSteps() != null && ((RRouteEntity) document.getRoute()).getSteps().size() > 0);
 
     imd.setUid( document.getUid() );
     imd.setMd5( document.getMd5() );
