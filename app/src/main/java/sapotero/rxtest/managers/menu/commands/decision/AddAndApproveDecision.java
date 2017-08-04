@@ -4,15 +4,12 @@ import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.util.Objects;
-
 import io.requery.query.Tuple;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
-import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.DecisionCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -81,11 +78,13 @@ public class AddAndApproveDecision extends DecisionCommand {
       .get()
       .value();
 
-    if (
-      Objects.equals(getParams().getDecisionModel().getSignerId(), getParams().getCurrentUserId())
-      // или если подписывающий министр
-      || ( red != null && red.get(0).equals(true) )
-      ){
+    // всегда перемещаем в обработанные при создании и подписании резолюции
+//    if (
+//
+//      Objects.equals(getParams().getDecisionModel().getSignerId(), getParams().getCurrentUserId())
+//      // или если подписывающий министр
+//      || ( red != null && red.get(0).equals(true) )
+//      ){
       Integer dec = dataStore
         .update(RDocumentEntity.class)
         .set(RDocumentEntity.PROCESSED, true)
@@ -97,9 +96,10 @@ public class AddAndApproveDecision extends DecisionCommand {
         store.startTransactionFor( getParams().getDocument() )
           .setField(FieldType.PROCESSED, true)
       );
-    }
+//    }
 
-    EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( getParams().getDecisionModel().getId() ));
+    EventBus.getDefault().post( new ShowNextDocumentEvent( true, getParams().getDocument() ));
+//    EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( getParams().getDecisionModel().getId() ));
   }
 
   @Override
