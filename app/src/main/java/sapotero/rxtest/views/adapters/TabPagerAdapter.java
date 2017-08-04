@@ -10,6 +10,7 @@ import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
 public class TabPagerAdapter extends FragmentPagerAdapter {
   private String uid;
   private boolean zoom = false;
+  private boolean doubleTapEnabled = true;
 
   public TabPagerAdapter(FragmentManager fragmentManager) {
     super(fragmentManager);
@@ -23,7 +24,7 @@ public class TabPagerAdapter extends FragmentPagerAdapter {
       case 0:
         return new InfoCardDocumentsFragment().withUid(uid).withOutZoom(zoom);
       case 1:
-        return new InfoCardWebViewFragment().withUid(uid);
+        return new InfoCardWebViewFragment().withUid(uid).withEnableDoubleTap(doubleTapEnabled);
       default:
         return null;
     }
@@ -51,5 +52,9 @@ public class TabPagerAdapter extends FragmentPagerAdapter {
 
   public void withoutZoom(boolean bool) {
     this.zoom = bool;
+  }
+
+  public void withEnableDoubleTap(boolean doubleTapEnabled) {
+    this.doubleTapEnabled = doubleTapEnabled;
   }
 }

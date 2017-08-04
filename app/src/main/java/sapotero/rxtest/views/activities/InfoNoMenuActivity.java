@@ -197,7 +197,7 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
     toolbar.setContentInsetStartWithNavigation(250);
 
     toolbar.setNavigationOnClickListener(v ->{
-      finish();
+      closeActivity();
       }
     );
 
@@ -211,6 +211,12 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
     toolbar.setTitle( String.format("%s от %s", doc.getRegistrationNumber(), doc.getRegistrationDate() ) );
 
   }
+
+  private void closeActivity() {
+    settings.setImageIndex(0);
+    finish();
+  }
+
   private void setTabContent() {
 
     if (viewPager.getAdapter() == null) {
@@ -243,6 +249,8 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
         } else {
           TabPagerAdapter adapter = new TabPagerAdapter ( getSupportFragmentManager() );
           adapter.withUid(UID);
+          adapter.withoutZoom(true);
+          adapter.withEnableDoubleTap(false);
           viewPager.setAdapter(adapter);
         }
       }
@@ -345,6 +353,6 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
 
   @Override
   public void onBackPressed() {
-    finish();
+    closeActivity();
   }
 }

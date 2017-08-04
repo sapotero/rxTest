@@ -47,6 +47,7 @@ public class InfoCardWebViewFragment extends Fragment {
   private OnFragmentInteractionListener mListener;
   private String TAG = this.getClass().getSimpleName();
   private String uid;
+  private boolean doubleTabEnabled = true;
 
   public InfoCardWebViewFragment() {
   }
@@ -83,7 +84,9 @@ public class InfoCardWebViewFragment extends Fragment {
       }
     });
 
-    infocard.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
+    if ( doubleTabEnabled ) {
+      infocard.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
+    }
 
     final WebSettings webSettings = infocard.getSettings();
     webSettings.setRenderPriority(WebSettings.RenderPriority.HIGH);
@@ -160,8 +163,13 @@ public class InfoCardWebViewFragment extends Fragment {
     mListener = null;
   }
 
-  public Fragment withUid(String uid) {
+  public InfoCardWebViewFragment withUid(String uid) {
     this.uid = uid;
+    return this;
+  }
+
+  public InfoCardWebViewFragment withEnableDoubleTap(boolean doubleTabEnabled) {
+    this.doubleTabEnabled = doubleTabEnabled;
     return this;
   }
 
