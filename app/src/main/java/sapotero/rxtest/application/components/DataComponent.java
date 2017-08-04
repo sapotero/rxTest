@@ -62,7 +62,6 @@ public interface DataComponent {
   void inject(FileSignActivity activity);
   void inject(DocumentImageFullScreenActivity activity);
   void inject(DocumentInfocardFullScreenActivity activity);
-  void inject(InfoNoMenuActivity activity);
 
   void inject(DocumentTypeAdapter adapter);
   void inject(PrimaryConsiderationAdapter adapter);

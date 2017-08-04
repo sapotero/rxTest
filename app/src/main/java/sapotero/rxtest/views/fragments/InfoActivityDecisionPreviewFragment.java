@@ -123,10 +123,12 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
   @BindView(R.id.activity_info_decision_preview_next_person) Button next_person_button;
   @BindView(R.id.activity_info_decision_preview_prev_person) Button prev_person_button;
+  @BindView(R.id.activity_info_decision_preview_buttons_wrapper) LinearLayout buttons_wrapper;
   @BindView(R.id.activity_info_decision_preview_approved_text) TextView approved_text;
   @BindView(R.id.activity_info_decision_preview_acition_text)  TextView action_text;
   @BindView(R.id.activity_info_decision_preview_temporary) TextView temporary;
   @BindView(R.id.activity_info_decision_preview_count) TextView decision_count;
+  @BindView(R.id.activity_info_decision_bottom_line) View bottom_line;
 
   private DecisionSpinnerAdapter decision_spinner_adapter;
   private Preview preview;
@@ -140,6 +142,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   private InfoActivityDecisionPreviewFragment fragment;
   private SelectTemplateDialogFragment templates;
   private MaterialDialog.Builder prev_dialog;
+
+  private boolean buttonsEnabled = true;
 
   public InfoActivityDecisionPreviewFragment() {
   }
@@ -408,6 +412,11 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
     fragment = this;
 
+    if ( !buttonsEnabled ) {
+      buttons_wrapper.setVisibility(View.GONE);
+      bottom_line.setVisibility(View.GONE);
+    }
+
     return view;
   }
 
@@ -420,8 +429,11 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     loadDocument();
 
     gestureDetector = new GestureDetector( getContext(),new GestureListener() );
-    desigion_view_root.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
-    preview_body.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
+
+    if ( buttonsEnabled ) {
+      desigion_view_root.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
+      preview_body.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
+    }
 
     preview = new Preview(getContext());
   }
@@ -646,8 +658,6 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     } else {
       action_wrapper.setVisibility(View.GONE);
     }
-
-
   }
 
   private void setActionText(String action_temporary_text) {
@@ -675,7 +685,6 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     } else {
       action_wrapper.setVisibility(View.GONE);
     }
-
   }
 
   private void setSignEnabled(boolean active) {
@@ -728,8 +737,13 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     mListener = null;
   }
 
-  public Fragment withUid(String uid) {
+  public InfoActivityDecisionPreviewFragment withUid(String uid) {
     this.uid = uid;
+    return this;
+  }
+
+  public InfoActivityDecisionPreviewFragment withEnableButtons(boolean buttonsEnabled) {
+    this.buttonsEnabled = buttonsEnabled;
     return this;
   }
 
@@ -746,7 +760,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     if ( decision_spinner_adapter.size() > 0 ){
       decision = decision_spinner_adapter.getItem( decision_spinner.getSelectedItemPosition() );
       magnifer.setDecision( decision );
-      magnifer.setRegNumber( settings.getRegNumber() );
+      magnifer.setRegNumber( doc == null ? settings.getRegNumber() : doc.getRegistrationNumber() );
     }
 
     magnifer.show( getFragmentManager() , "DecisionMagniferFragment");
@@ -790,18 +804,23 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       .autoDismiss(false)
       .build();
 
-    MaterialDialog materialDialog = new MaterialDialog.Builder(getContext())
+    MaterialDialog.Builder materialDialogBuilder = new MaterialDialog.Builder(getContext())
       .title("Комментарий резолюции")
       .content( current_decision.getComment() )
       .positiveText(R.string.constructor_close)
-      .neutralText(R.string.decision_preview_edit)
-      .onPositive((dialog, which) -> { dialog.dismiss(); })
-      .onNeutral((dialog, which) -> {
-        dialog.dismiss();
-        editDialog.show();
-      })
-      .autoDismiss(false)
-      .build();
+      .onPositive((dialog, which) -> dialog.dismiss())
+      .autoDismiss(false);
+
+    if ( buttonsEnabled ) {
+      materialDialogBuilder
+        .neutralText(R.string.decision_preview_edit)
+        .onNeutral((dialog, which) -> {
+          dialog.dismiss();
+          editDialog.show();
+        });
+    }
+
+    MaterialDialog materialDialog = materialDialogBuilder.build();
 
     materialDialog.show();
   }
@@ -1050,7 +1069,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
         }
       }
 
-      printSigner( decision, settings.getRegNumber() );
+      printSigner( decision, doc == null ? settings.getRegNumber() : doc.getRegistrationNumber() );
     }
 
     private void showEmpty(){

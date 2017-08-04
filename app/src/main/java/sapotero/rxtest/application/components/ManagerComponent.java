@@ -17,6 +17,7 @@ import sapotero.rxtest.utils.memory.utils.Processor;
 import sapotero.rxtest.utils.queue.utils.QueueManagerModule;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.activities.InfoActivity;
+import sapotero.rxtest.views.activities.InfoNoMenuActivity;
 import sapotero.rxtest.views.activities.LoginActivity;
 import sapotero.rxtest.views.activities.MainActivity;
 import sapotero.rxtest.views.activities.SettingsTemplatesActivity;
@@ -49,6 +50,7 @@ public interface ManagerComponent {
   void inject(InfoActivity activity);
   void inject(DecisionConstructorActivity activity);
   void inject(SettingsTemplatesActivity activity);
+  void inject(InfoNoMenuActivity activity);
 
   void inject(MainService service);
   void inject(SearchResultAdapter searchResultAdapter);

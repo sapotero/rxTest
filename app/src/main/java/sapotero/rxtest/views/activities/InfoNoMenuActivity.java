@@ -18,6 +18,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -44,6 +45,8 @@ import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.bus.MassInsertDoneEvent;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.utils.ISettings;
+import sapotero.rxtest.utils.memory.MemoryStore;
+import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.adapters.TabSigningPagerAdapter;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
@@ -67,6 +70,7 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
 
   @Inject ISettings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
+  @Inject MemoryStore store;
 
   private byte[] CARD;
 
@@ -84,6 +88,8 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
   private RDocumentEntity doc;
   private boolean showInfoCard = false;
 
+  private InMemoryDocument inMemDoc;
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
 
@@ -93,7 +99,7 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
     setContentView(R.layout.activity_info);
     ButterKnife.bind(this);
 
-    EsdApplication.getDataComponent().inject(this);
+    EsdApplication.getManagerComponent().inject(this);
 
 //    documentManager = new CurrentDocumentManager(this);
 //    documentManager.registerCallBack(this);
@@ -117,6 +123,17 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
 
     setPreview();
     setTabContent();
+    disableArrows();
+  }
+
+  private void disableArrows() {
+    ImageButton prev = (ImageButton) findViewById(R.id.activity_info_prev_document);
+    ImageButton next = (ImageButton) findViewById(R.id.activity_info_next_document);
+
+    prev.setClickable(false);
+    next.setClickable(false);
+    prev.setAlpha(0.5f);
+    next.setAlpha(0.5f);
   }
 
   private void setPreview() {
@@ -129,7 +146,7 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
 //    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL ){
 //      fragmentTransaction.addByOne( R.id.activity_info_preview_container, new RoutePreviewFragment().withUid(UID) );
 //    } else {
-      fragmentTransaction.replace( R.id.activity_info_preview_container, new InfoActivityDecisionPreviewFragment().withUid(UID), "PREVIEW" );
+      fragmentTransaction.replace( R.id.activity_info_preview_container, new InfoActivityDecisionPreviewFragment().withUid(UID).withEnableButtons(false), "PREVIEW" );
 //    }
 
     fragmentTransaction.commit();
@@ -184,12 +201,14 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
       }
     );
 
-    status  = Fields.Status.findStatus(settings.getStatusCode());
+    inMemDoc = store.getDocuments().get(UID);
+
+    status  = Fields.Status.findStatus( inMemDoc.getFilter() );
     journal = Fields.getJournalByUid( UID );
 
     toolbar.setTitle( String.format("%s от %s", doc.getRegistrationNumber(), doc.getRegistrationDate() ) );
 
-    Timber.tag("MENU").e( "STATUS CODE: %s", settings.getStatusCode() );
+    Timber.tag("MENU").e( "STATUS CODE: %s", inMemDoc.getFilter() );
 
   }
   private void setTabContent() {
@@ -215,7 +234,7 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
         viewPager.setAdapter(adapter);
 
       } else{
-        if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL ){
+        if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || inMemDoc.isProject() ) {
           TabSigningPagerAdapter adapter = new TabSigningPagerAdapter( getSupportFragmentManager() );
           adapter.withUid(UID);
           viewPager.setAdapter(adapter);
@@ -320,5 +339,10 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
     ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
     NetworkInfo netInfo = cm.getActiveNetworkInfo();
     return netInfo != null && netInfo.isConnectedOrConnecting();
+  }
+
+  @Override
+  public void onBackPressed() {
+    finish();
   }
 }
