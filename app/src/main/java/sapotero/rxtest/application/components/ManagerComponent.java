@@ -30,7 +30,6 @@ import sapotero.rxtest.views.adapters.models.DocumentTypeItem;
 import sapotero.rxtest.views.adapters.spinner.JournalSelectorAdapter;
 import sapotero.rxtest.views.custom.stepper.build.steps.StepperAuthFragment;
 import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
-import sapotero.rxtest.views.fragments.DecisionRejectionTemplateFragment;
 import sapotero.rxtest.views.fragments.DecisionTemplateFragment;
 import sapotero.rxtest.views.fragments.InfoActivityDecisionPreviewFragment;
 import sapotero.rxtest.views.fragments.InfoCardDocumentsFragment;
@@ -57,7 +56,6 @@ public interface ManagerComponent {
 
   void inject(InfoActivityDecisionPreviewFragment fragment);
   void inject(DecisionTemplateFragment fragment);
-  void inject(DecisionRejectionTemplateFragment fragment);
   void inject(DecisionPreviewFragment fragment);
   void inject(StepperAuthFragment fragment);
 

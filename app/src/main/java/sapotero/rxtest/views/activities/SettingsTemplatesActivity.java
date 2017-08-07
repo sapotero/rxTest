@@ -21,12 +21,10 @@ import sapotero.rxtest.db.requery.models.RTemplateEntity;
 import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
-import sapotero.rxtest.utils.ISettings;
-import sapotero.rxtest.views.fragments.DecisionRejectionTemplateFragment;
 import sapotero.rxtest.views.fragments.DecisionTemplateFragment;
 import timber.log.Timber;
 
-public class SettingsTemplatesActivity extends AppCompatActivity implements DecisionTemplateFragment.OnListFragmentInteractionListener, DecisionRejectionTemplateFragment.OnListFragmentInteractionListener {
+public class SettingsTemplatesActivity extends AppCompatActivity implements DecisionTemplateFragment.OnListFragmentInteractionListener {
 
   @Inject OperationManager operationManager;
 
@@ -55,8 +53,8 @@ public class SettingsTemplatesActivity extends AppCompatActivity implements Deci
   private void initFragments() {
     FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
 
-    fragmentTransaction.add( R.id.activity_settings_content_wrapper, new DecisionTemplateFragment() );
-    fragmentTransaction.add( R.id.activity_settings_content_wrapper, new DecisionRejectionTemplateFragment() );
+    fragmentTransaction.add( R.id.activity_settings_content_wrapper, new DecisionTemplateFragment().withType(DecisionTemplateFragment.TemplateType.DECISION) );
+    fragmentTransaction.add( R.id.activity_settings_content_wrapper, new DecisionTemplateFragment().withType(DecisionTemplateFragment.TemplateType.REJECTION) );
 
     fragmentTransaction.commit();
   }

@@ -56,15 +56,42 @@ public class DecisionTemplateFragment extends Fragment {
   private OnListFragmentInteractionListener mListener;
   private DecisionTemplateRecyclerAdapter adapter;
   private String TAG = this.getClass().getSimpleName();
-  private String DECISION = "decision";
+
+  private TemplateType templateType = TemplateType.DECISION;
+
+  public enum TemplateType {
+    DECISION( "decision", null, "Шаблоны резолюции"),
+    REJECTION( "rejection", "rejection", "Шаблоны отклоненния");
+
+    private String type;
+    private String typeForApi;
+    private String title;
+
+    TemplateType(String type, String typeForApi, String title) {
+      this.type = type;
+      this.typeForApi = typeForApi;
+      this.title = title;
+    }
+
+    public String getType() {
+      return type;
+    }
+
+    public String getTypeForApi() {
+      return typeForApi;
+    }
+
+    public String getTitle() {
+      return title;
+    }
+  }
 
   public DecisionTemplateFragment() {
   }
 
-
-  @Override
-  public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
+  public Fragment withType(TemplateType templateType) {
+    this.templateType = templateType;
+    return this;
   }
 
   @Override
@@ -91,7 +118,7 @@ public class DecisionTemplateFragment extends Fragment {
     Toolbar toolbar = (Toolbar) view.findViewById(R.id.fragment_decision_template_toolbar);
 
     toolbar.inflateMenu(R.menu.fragment_decision_template_menu);
-    toolbar.setTitle("Шаблоны резолюции");
+    toolbar.setTitle( templateType.getTitle() );
 
     toolbar.setOnMenuItemClickListener(item -> {
       switch (item.getItemId()){
@@ -135,7 +162,7 @@ public class DecisionTemplateFragment extends Fragment {
         CommandFactory.Operation operation = CommandFactory.Operation.CREATE_DECISION_TEMPLATE;
         CommandParams params = new CommandParams();
         params.setComment( dialog.getInputEditText().getText().toString() );
-        params.setLabel( DECISION );
+        params.setLabel( templateType.getType() );
         operationManager.execute(operation, params);
 
       })
@@ -151,13 +178,13 @@ public class DecisionTemplateFragment extends Fragment {
 
     AuthService auth = retrofit.create(AuthService.class);
 
-    deleteTemplates( "decision" );
+    deleteTemplates( templateType.getType() );
 
-    auth.getTemplates(settings.getLogin(), settings.getToken(), null)
+    auth.getTemplates(settings.getLogin(), settings.getToken(), templateType.getTypeForApi())
       .subscribeOn(Schedulers.computation())
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe( templates -> {
-        jobManager.addJobInBackground(new CreateTemplatesJob(templates, null));
+        jobManager.addJobInBackground(new CreateTemplatesJob(templates, templateType.getTypeForApi()));
       }, error -> {
         Timber.tag(TAG).e(error);
       });
@@ -190,7 +217,7 @@ public class DecisionTemplateFragment extends Fragment {
     dataStore
       .select(RTemplateEntity.class)
       .where(RTemplateEntity.USER.eq( settings.getLogin() ))
-      .and(RTemplateEntity.TYPE.eq(DECISION))
+      .and(RTemplateEntity.TYPE.eq( templateType.getType() ))
       .get()
       .toObservable()
       .toList()
@@ -198,7 +225,7 @@ public class DecisionTemplateFragment extends Fragment {
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         templates -> {
-          Timber.tag(TAG).e("templates: %s", templates);
+          Timber.tag(TAG).e("%s templates: %s", templateType.getType(), templates);
           if (templates.size() > 0) {
             adapter.addList( templates );
           }
