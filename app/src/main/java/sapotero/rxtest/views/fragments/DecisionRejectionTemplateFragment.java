@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.birbit.android.jobqueue.JobManager;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -25,15 +26,20 @@ import javax.inject.Inject;
 
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
+import okhttp3.OkHttpClient;
+import retrofit2.Retrofit;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RTemplateEntity;
 import sapotero.rxtest.events.decision.AddDecisionTemplateEvent;
+import sapotero.rxtest.jobs.bus.CreateTemplatesJob;
 import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.retrofit.Api.AuthService;
+import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.adapters.DecisionRejectionTemplateRecyclerAdapter;
 import sapotero.rxtest.views.adapters.decorators.DividerItemDecoration;
@@ -44,6 +50,8 @@ public class DecisionRejectionTemplateFragment extends Fragment {
   @Inject ISettings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject OperationManager operationManager;
+  @Inject OkHttpClient okHttpClient;
+  @Inject JobManager jobManager;
 
   private OnListFragmentInteractionListener mListener;
   private DecisionRejectionTemplateRecyclerAdapter adapter;
@@ -139,7 +147,18 @@ public class DecisionRejectionTemplateFragment extends Fragment {
   }
 
   private void refresh() {
+    Retrofit retrofit = new RetrofitManager(getContext(), settings.getHost(), okHttpClient).process();
 
+    AuthService auth = retrofit.create(AuthService.class);
+
+    auth.getTemplates(settings.getLogin(), settings.getToken(), "rejection")
+      .subscribeOn(Schedulers.computation())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe( templates -> {
+        jobManager.addJobInBackground(new CreateTemplatesJob(templates, "rejection"));
+      }, error -> {
+        Timber.tag(TAG).e(error);
+      });
   }
 
   private void populateAdapter(View view) {

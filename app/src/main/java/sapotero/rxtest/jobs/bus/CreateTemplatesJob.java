@@ -7,11 +7,14 @@ import com.birbit.android.jobqueue.CancelReason;
 import com.birbit.android.jobqueue.Params;
 import com.birbit.android.jobqueue.RetryConstraint;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.ArrayList;
 import java.util.Objects;
 
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RTemplateEntity;
+import sapotero.rxtest.events.decision.AddDecisionTemplateEvent;
 import sapotero.rxtest.retrofit.models.Template;
 import timber.log.Timber;
 
@@ -55,6 +58,7 @@ public class CreateTemplatesJob extends BaseJob {
       .observeOn(Schedulers.io())
       .subscribe(u -> {
         Timber.tag(TAG).v("addByOne " + u.getTitle() );
+        EventBus.getDefault().post( new AddDecisionTemplateEvent() );
       }, Timber::e);
   }
 
