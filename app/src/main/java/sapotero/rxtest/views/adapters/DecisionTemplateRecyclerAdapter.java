@@ -16,10 +16,16 @@ public class DecisionTemplateRecyclerAdapter extends RecyclerView.Adapter<Decisi
 
   private final List<RTemplateEntity> mValues;
   private final DecisionTemplateFragment.OnListFragmentInteractionListener mListener;
+  private final DecisionTemplateFragment.TemplateType templateType;
 
-  public DecisionTemplateRecyclerAdapter(List<RTemplateEntity> items, DecisionTemplateFragment.OnListFragmentInteractionListener mListener) {
+  public DecisionTemplateRecyclerAdapter(
+          List<RTemplateEntity> items,
+          DecisionTemplateFragment.OnListFragmentInteractionListener mListener,
+          DecisionTemplateFragment.TemplateType templateType) {
+
     this.mValues = items;
     this.mListener = mListener;
+    this.templateType = templateType;
   }
 
   @Override
@@ -39,7 +45,7 @@ public class DecisionTemplateRecyclerAdapter extends RecyclerView.Adapter<Decisi
 
       holder.mView.setOnLongClickListener(view -> {
         if (null != mListener) {
-          mListener.onListFragmentInteraction(holder.mItem);
+          mListener.onListFragmentInteraction(holder.mItem, templateType);
         }
         return false;
       });
@@ -52,7 +58,7 @@ public class DecisionTemplateRecyclerAdapter extends RecyclerView.Adapter<Decisi
     return mValues.size();
   }
 
-  public void addItem(RTemplateEntity tmp) {
+  private void addItem(RTemplateEntity tmp) {
     mValues.add(tmp);
     notifyItemInserted(mValues.size());
   }

@@ -60,17 +60,19 @@ public class DecisionTemplateFragment extends Fragment {
   private TemplateType templateType = TemplateType.DECISION;
 
   public enum TemplateType {
-    DECISION( "decision", null, "Шаблоны резолюции"),
-    REJECTION( "rejection", "rejection", "Шаблоны отклоненния");
+    DECISION( "decision", null, "Шаблоны резолюции", "Введите текст резолюции"),
+    REJECTION( "rejection", "rejection", "Шаблоны отклоненния", "Введите текст отклонения");
 
     private String type;
     private String typeForApi;
     private String title;
+    private String hint;
 
-    TemplateType(String type, String typeForApi, String title) {
+    TemplateType(String type, String typeForApi, String title, String hint) {
       this.type = type;
       this.typeForApi = typeForApi;
       this.title = title;
+      this.hint = hint;
     }
 
     public String getType() {
@@ -83,6 +85,10 @@ public class DecisionTemplateFragment extends Fragment {
 
     public String getTitle() {
       return title;
+    }
+
+    public String getHint() {
+      return hint;
     }
   }
 
@@ -133,7 +139,6 @@ public class DecisionTemplateFragment extends Fragment {
       }
       return false;
     });
-
   }
 
   private void addDecisionTemplateDialog() {
@@ -144,7 +149,7 @@ public class DecisionTemplateFragment extends Fragment {
           | InputType.TYPE_TEXT_FLAG_MULTI_LINE
           | InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE
           | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT)
-      .input(R.string.fragment_decision_template_add_hint, R.string.dialog_empty_value,
+      .input(templateType.getHint(), "",
         (dialog, input) -> {
           Timber.tag("ADD").e("asd");
 
@@ -153,9 +158,7 @@ public class DecisionTemplateFragment extends Fragment {
           }
         })
       .negativeText(R.string.constructor_close)
-      .onNegative((dialog, which) -> {
-        Timber.tag("-").e("asd");
-      })
+      .onNegative((dialog, which) -> Timber.tag("-").e("asd"))
       .positiveText(R.string.constructor_save)
       .onPositive((dialog, which) -> {
 
@@ -174,20 +177,18 @@ public class DecisionTemplateFragment extends Fragment {
   }
 
   private void refresh() {
-    Retrofit retrofit = new RetrofitManager(getContext(), settings.getHost(), okHttpClient).process();
-
-    AuthService auth = retrofit.create(AuthService.class);
-
     deleteTemplates( templateType.getType() );
+
+    Retrofit retrofit = new RetrofitManager(getContext(), settings.getHost(), okHttpClient).process();
+    AuthService auth = retrofit.create(AuthService.class);
 
     auth.getTemplates(settings.getLogin(), settings.getToken(), templateType.getTypeForApi())
       .subscribeOn(Schedulers.computation())
       .observeOn(AndroidSchedulers.mainThread())
-      .subscribe( templates -> {
-        jobManager.addJobInBackground(new CreateTemplatesJob(templates, templateType.getTypeForApi()));
-      }, error -> {
-        Timber.tag(TAG).e(error);
-      });
+      .subscribe(
+        templates -> jobManager.addJobInBackground(new CreateTemplatesJob(templates, templateType.getTypeForApi())),
+        error -> Timber.tag(TAG).e(error)
+      );
   }
 
   private void deleteTemplates(String type) {
@@ -207,7 +208,7 @@ public class DecisionTemplateFragment extends Fragment {
     recyclerView.setLayoutManager(new LinearLayoutManager(context));
     recyclerView.addItemDecoration( new DividerItemDecoration(ContextCompat.getDrawable(context, R.drawable.devider)));
 
-    adapter = new DecisionTemplateRecyclerAdapter(new ArrayList<>(), mListener);
+    adapter = new DecisionTemplateRecyclerAdapter(new ArrayList<>(), mListener, templateType);
     recyclerView.setAdapter(adapter);
 
     invalidateDecisions();
@@ -230,9 +231,7 @@ public class DecisionTemplateFragment extends Fragment {
             adapter.addList( templates );
           }
         },
-        error -> {
-          Timber.tag(TAG).e(error);
-        }
+        error -> Timber.tag(TAG).e(error)
       );
   }
 
@@ -258,6 +257,6 @@ public class DecisionTemplateFragment extends Fragment {
   }
 
   public interface OnListFragmentInteractionListener {
-    void onListFragmentInteraction(RTemplateEntity item);
+    void onListFragmentInteraction(RTemplateEntity item, TemplateType templateType);
   }
 }

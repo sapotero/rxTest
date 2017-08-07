@@ -6,7 +6,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
-import android.widget.LinearLayout;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -28,10 +27,7 @@ public class SettingsTemplatesActivity extends AppCompatActivity implements Deci
 
   @Inject OperationManager operationManager;
 
-  @BindView(R.id.activity_settings_content_wrapper) LinearLayout wrapper;
   @BindView(R.id.toolbar) Toolbar toolbar;
-
-  private String TAG = this.getClass().getSimpleName();
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -42,12 +38,9 @@ public class SettingsTemplatesActivity extends AppCompatActivity implements Deci
     ButterKnife.bind(this);
     EsdApplication.getManagerComponent().inject(this);
 
-
-
     initToolBar();
 
     initFragments();
-
   }
 
   private void initFragments() {
@@ -67,24 +60,11 @@ public class SettingsTemplatesActivity extends AppCompatActivity implements Deci
     toolbar.setTitleTextColor( ContextCompat.getColor(this, R.color.md_grey_100) );
     toolbar.setSubtitleTextColor( ContextCompat.getColor(this, R.color.md_grey_400) );
 
-    toolbar.setNavigationOnClickListener(v -> {
-      finish();
-      }
-    );
-  }
-
-
-  @Override protected void onResume() {
-    super.onResume();
-
-  }
-
-  @Override protected void onPause() {
-    super.onPause();
+    toolbar.setNavigationOnClickListener(v -> finish());
   }
 
   @Override
-  public void onListFragmentInteraction(RTemplateEntity item) {
+  public void onListFragmentInteraction(RTemplateEntity item, DecisionTemplateFragment.TemplateType templateType) {
     if (item != null) {
       MaterialDialog add_dialog = new MaterialDialog.Builder(this)
         .title(R.string.fragment_decision_template_edit)
@@ -93,14 +73,11 @@ public class SettingsTemplatesActivity extends AppCompatActivity implements Deci
             | InputType.TYPE_TEXT_FLAG_MULTI_LINE
             | InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE
             | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT)
-        .input("Введите текст резолюции", item.getTitle(),
-          (dialog, input) -> {
-            Timber.tag("ADD").e("input");
-          })
+        .input(templateType.getHint(), item.getTitle(),
+          (dialog, input) -> Timber.tag("ADD").e("input")
+        )
         .negativeText(R.string.constructor_close)
-        .onNegative((dialog, which) -> {
-          Timber.tag("-").e("close");
-        })
+        .onNegative((dialog, which) -> Timber.tag("-").e("close"))
         .neutralText(R.string.constructor_delete)
         .onNeutral((dialog, which) -> {
           Timber.tag("-+").e("delete");
