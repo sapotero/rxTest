@@ -37,6 +37,7 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RFavoriteUserEntity;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
 import sapotero.rxtest.db.requery.models.RPrimaryConsiderationEntity;
+import sapotero.rxtest.db.requery.models.RTemplateEntity;
 import sapotero.rxtest.events.auth.AuthDcCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthDcCheckSuccessEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
@@ -127,6 +128,7 @@ public class DataLoaderManager {
               setCurrentUserPosition(user.getPosition());
 
               deleteUsers();
+              deleteTemplates();
 
             // получаем папки
               subscriptionInitV2.add(
@@ -269,6 +271,13 @@ public class DataLoaderManager {
     dataStore
       .delete(RColleagueEntity.class)
       .where(RColleagueEntity.USER.eq(settings.getLogin()))
+      .get().value();
+  }
+
+  private void deleteTemplates() {
+    dataStore
+      .delete(RTemplateEntity.class)
+      .where(RTemplateEntity.USER.eq(settings.getLogin()))
       .get().value();
   }
 

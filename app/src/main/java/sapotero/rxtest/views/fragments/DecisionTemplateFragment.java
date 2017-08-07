@@ -151,6 +151,8 @@ public class DecisionTemplateFragment extends Fragment {
 
     AuthService auth = retrofit.create(AuthService.class);
 
+    deleteTemplates( "decision" );
+
     auth.getTemplates(settings.getLogin(), settings.getToken(), null)
       .subscribeOn(Schedulers.computation())
       .observeOn(AndroidSchedulers.mainThread())
@@ -159,6 +161,16 @@ public class DecisionTemplateFragment extends Fragment {
       }, error -> {
         Timber.tag(TAG).e(error);
       });
+  }
+
+  private void deleteTemplates(String type) {
+    int count = dataStore
+      .delete(RTemplateEntity.class)
+      .where(RTemplateEntity.USER.eq(settings.getLogin()))
+      .and(RTemplateEntity.TYPE.eq( type ))
+      .get().value();
+
+    Timber.tag(TAG).d("Deleted %s templates of type %s", count, type);
   }
 
   private void populateAdapter(View view) {
