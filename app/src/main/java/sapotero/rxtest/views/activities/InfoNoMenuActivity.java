@@ -249,6 +249,7 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
         if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || isProject ) {
           TabSigningPagerAdapter adapter = new TabSigningPagerAdapter( getSupportFragmentManager() );
           adapter.withUid(UID);
+          adapter.withoutZoom(true);
           viewPager.setAdapter(adapter);
         } else {
           TabPagerAdapter adapter = new TabPagerAdapter ( getSupportFragmentManager() );

@@ -214,6 +214,7 @@ public class InfoCardLinksFragment extends Fragment {
     Link _link = adapter.getItem( wrapper.getSelectedItemPosition() );
     try {
       if (!Objects.equals(_link.getUid(), "0")){
+        settings.setImageIndex(0);
         Intent intent = new Intent(mContext, InfoNoMenuActivity.class);
         intent.putExtra( "UID", _link.getUid() );
         startActivity(intent);
