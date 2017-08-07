@@ -1,8 +1,6 @@
 package sapotero.rxtest.views.fragments;
 
-import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Base64;
@@ -44,24 +42,11 @@ public class InfoCardWebViewFragment extends Fragment {
   @Inject ISettings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
-  private OnFragmentInteractionListener mListener;
   private String TAG = this.getClass().getSimpleName();
   private String uid;
   private boolean doubleTabEnabled = true;
 
   public InfoCardWebViewFragment() {
-  }
-
-  public static InfoCardWebViewFragment newInstance(String param1, String param2) {
-    InfoCardWebViewFragment fragment = new InfoCardWebViewFragment();
-    return fragment;
-  }
-
-  @Override
-  public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    if (getArguments() != null) {
-    }
   }
 
   @Override
@@ -123,12 +108,6 @@ public class InfoCardWebViewFragment extends Fragment {
     unregisterEventBus();
   }
 
-  public void onButtonPressed(Uri uri) {
-    if (mListener != null) {
-      mListener.onFragmentInteraction(uri);
-    }
-  }
-
   public void setWebView() {
     infocard.loadUrl("about:blank");
 
@@ -147,22 +126,6 @@ public class InfoCardWebViewFragment extends Fragment {
     }
   }
 
-  @Override
-  public void onAttach(Context context) {
-    super.onAttach(context);
-    if (context instanceof OnFragmentInteractionListener) {
-      mListener = (OnFragmentInteractionListener) context;
-    } else {
-      throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
-    }
-  }
-
-  @Override
-  public void onDetach() {
-    super.onDetach();
-    mListener = null;
-  }
-
   public InfoCardWebViewFragment withUid(String uid) {
     this.uid = uid;
     return this;
@@ -171,10 +134,6 @@ public class InfoCardWebViewFragment extends Fragment {
   public InfoCardWebViewFragment withEnableDoubleTap(boolean doubleTabEnabled) {
     this.doubleTabEnabled = doubleTabEnabled;
     return this;
-  }
-
-  public interface OnFragmentInteractionListener {
-    void onFragmentInteraction(Uri uri);
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)

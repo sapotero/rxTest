@@ -1,7 +1,6 @@
 package sapotero.rxtest.views.activities;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
@@ -43,23 +42,15 @@ import sapotero.rxtest.db.requery.models.RRouteEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.bus.MassInsertDoneEvent;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
-import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.adapters.TabSigningPagerAdapter;
-import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
-import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
 import sapotero.rxtest.views.fragments.InfoActivityDecisionPreviewFragment;
-import sapotero.rxtest.views.fragments.InfoCardDocumentsFragment;
-import sapotero.rxtest.views.fragments.InfoCardFieldsFragment;
-import sapotero.rxtest.views.fragments.InfoCardLinksFragment;
-import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
 import sapotero.rxtest.views.fragments.RoutePreviewFragment;
-import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import timber.log.Timber;
 
-public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivityDecisionPreviewFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, RoutePreviewFragment.OnFragmentInteractionListener, InfoCardDocumentsFragment.OnFragmentInteractionListener, InfoCardWebViewFragment.OnFragmentInteractionListener, InfoCardLinksFragment.OnFragmentInteractionListener, InfoCardFieldsFragment.OnFragmentInteractionListener, /*CurrentDocumentManager.Callback,*/ SelectOshsDialogFragment.Callback {
+public class InfoNoMenuActivity extends AppCompatActivity {
 
   @BindView(R.id.activity_info_preview_container) LinearLayout preview_container;
   @BindView(R.id.frame_preview_decision) FrameLayout frame;
@@ -281,10 +272,6 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
   }
 
   @Override
-  public void onFragmentInteraction(Uri uri) {
-  }
-
-  @Override
   protected void onResume() {
     super.onResume();
 
@@ -295,16 +282,6 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
 
   private void updateDocument() {
     jobManager.addJobInBackground( new UpdateDocumentJob( UID, true ) );
-  }
-
-  @Override
-  public void onSearchSuccess(Oshs user, CommandFactory.Operation operation, String uid) {
-
-  }
-
-  @Override
-  public void onSearchError(Throwable error) {
-
   }
 
   @Override

@@ -91,7 +91,6 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   @BindView(R.id.open_in_another_app_wrapper) LinearLayout open_in_another_app_wrapper;
   @BindView(R.id.pdf_linear_wrapper) RelativeLayout pdf_linear_wrapper;
 
-  private OnFragmentInteractionListener mListener;
   private Context mContext;
   private String TAG = this.getClass().getSimpleName();
 
@@ -508,12 +507,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   @Override
   public void onAttach(Context context) {
     super.onAttach(context);
-    if (context instanceof OnFragmentInteractionListener) {
-      mListener = (OnFragmentInteractionListener) context;
-      mContext = context;
-    } else {
-      throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
-    }
+    mContext = context;
   }
 
   @Override
@@ -562,10 +556,6 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   public InfoCardDocumentsFragment withOutZoom(Boolean withOutZoom) {
     this.withOutZoom = withOutZoom;
     return this;
-  }
-
-  public interface OnFragmentInteractionListener {
-    void onFragmentInteraction(Uri uri);
   }
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13415
