@@ -81,6 +81,7 @@ public class SignFile extends AbstractCommand {
 
     Timber.tag(TAG).d("Generating sign");
 
+
     String file_sign = getSign();
 
     if (file_sign != null) {

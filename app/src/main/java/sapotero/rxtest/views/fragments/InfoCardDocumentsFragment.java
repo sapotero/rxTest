@@ -315,12 +315,14 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
         updateDocumentCount();
         updatePageCount();
-        updateZoomVisibility();
+        updateVisibility();
 
       }
     } else {
       showFileLoading(true);
     }
+
+    hideZoom();
   }
 
   private void showFileLoading(boolean show) {
@@ -400,11 +402,15 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     deletedImage.setVisibility(View.VISIBLE);
   }
 
-  private void updateZoomVisibility() {
+  private void updateVisibility() {
+    hideZoom();
+    deletedImage.setVisibility(View.GONE);
+  }
+
+  private void hideZoom() {
     if (withOutZoom){
       fullscreen.setVisibility(View.GONE);
     }
-    deletedImage.setVisibility(View.GONE);
   }
 
   public void updateDocumentCount(){

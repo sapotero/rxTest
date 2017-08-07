@@ -1,6 +1,7 @@
 package sapotero.rxtest.utils.memory.mappers;
 
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.db.requery.models.RRouteEntity;
 import sapotero.rxtest.db.requery.models.RSignerEntity;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.retrofit.models.documents.Signer;
@@ -19,7 +20,7 @@ public class InMemoryDocumentMapper {
     return imd;
   }
 
-  private static Document convert(RDocumentEntity doc) {
+  public static Document convert(RDocumentEntity doc) {
 
     Document document = new Document();
     document.setUid( doc.getUid() );
@@ -62,15 +63,18 @@ public class InMemoryDocumentMapper {
   public static InMemoryDocument fromDB(RDocumentEntity document) {
 
     InMemoryDocument imd = new InMemoryDocument();
+    Document doc = convert(document);
+    doc.setProject(document.getRoute() != null && ((RRouteEntity) document.getRoute()).getSteps() != null && ((RRouteEntity) document.getRoute()).getSteps().size() > 0);
+
     imd.setUid( document.getUid() );
     imd.setMd5( document.getMd5() );
     imd.setFilter(document.getFilter());
     imd.setIndex(document.getDocumentType());
-    imd.setDocument( convert(document) );
+    imd.setDocument( doc );
     imd.setYear( document.getYear() );
     imd.setProcessed( imd.getDocument().isProcessed() );
     imd.setHasDecision( document.isWithDecision() != null ? document.isWithDecision() : false );
-
+    imd.setProject(document.getRoute() != null && ((RRouteEntity) document.getRoute()).getSteps() != null && ((RRouteEntity) document.getRoute()).getSteps().size() > 0);
     imd.setAsReady();
 
     return imd;

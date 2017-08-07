@@ -48,6 +48,7 @@ public class Settings implements ISettings {
   private static final String ORGANIZATION_FILTER_SELECTION_KEY = "organization.filter.savedselection";
 
   public static String FIRST_RUN_KEY;
+  public static String IS_PROJECT;
   private static String HOST_KEY;
   private static String ACTIONS_CONFIRM_KEY;
   private static String CONTROL_CONFIRM_KEY;
@@ -76,6 +77,7 @@ public class Settings implements ISettings {
   private RxSharedPreferences settings;
 
   private Preference<Boolean> firstRunFlag;
+  private Preference<Boolean> isProject;
   private Preference<Boolean> signWithDc;
   private Preference<Integer> totalDocCount;
   private Preference<Integer> docProjCount;
@@ -141,6 +143,7 @@ public class Settings implements ISettings {
 
   private void loadSettings() {
     FIRST_RUN_KEY                  = context.getResources().getString(R.string.first_run_key);
+    IS_PROJECT                     = context.getResources().getString(R.string.is_project_key);
     HOST_KEY                       = context.getResources().getString(R.string.host_key);
     ACTIONS_CONFIRM_KEY            = context.getResources().getString(R.string.actions_confirm_key);
     CONTROL_CONFIRM_KEY            = context.getResources().getString(R.string.control_confirm_key);
@@ -166,6 +169,7 @@ public class Settings implements ISettings {
     DEBUG_ENABLED_KEY              = context.getResources().getString(R.string.debug_enabled_key);
 
     firstRunFlag                   = settings.getBoolean(FIRST_RUN_KEY);
+    isProject                      = settings.getBoolean(IS_PROJECT);
     signWithDc                     = settings.getBoolean(SIGN_WITH_DC_KEY);
     totalDocCount                  = settings.getInteger(DOCUMENTS_TOTAL_COUNT_KEY);
     docProjCount                   = settings.getInteger(DOCPROJ_COUNT_KEY);
@@ -241,9 +245,21 @@ public class Settings implements ISettings {
   }
 
   @Override
+  public void setIsProject(boolean value) {
+    setBoolean(isProject, value);
+  }
+
+
+  @Override
+  public boolean isProject() {
+    return getBoolean(isProject);
+  }
+
+  @Override
   public void setFirstRun(boolean value) {
     setBoolean(firstRunFlag, value);
   }
+
 
   @Override
   public boolean isSignedWithDc() {

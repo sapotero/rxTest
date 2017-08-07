@@ -92,6 +92,16 @@ public class TestSettings implements ISettings {
   }
 
   @Override
+  public boolean isProject() {
+    return false;
+  }
+
+  @Override
+  public void setIsProject(boolean value) {
+
+  }
+
+  @Override
   public boolean isSignedWithDc() {
     return signWithDc;
   }

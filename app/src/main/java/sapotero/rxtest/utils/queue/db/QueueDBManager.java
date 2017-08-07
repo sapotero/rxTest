@@ -9,10 +9,13 @@ import java.util.List;
 import javax.inject.Inject;
 
 import io.requery.Persistable;
+import io.requery.rx.RxScalar;
 import io.requery.rx.SingleEntityStore;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.models.images.RSignImageEntity;
 import sapotero.rxtest.db.requery.models.queue.QueueEntity;
+import sapotero.rxtest.db.requery.models.utils.RApprovalNextPersonEntity;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.document.Decision;
@@ -26,7 +29,45 @@ public class QueueDBManager implements JobCountInterface {
 
   public QueueDBManager() {
     EsdApplication.getDataComponent().inject(this);
+
+    dropRunningTasks();
   }
+
+
+  private void dropRunningTasks() {
+    RxScalar<Integer> list = dataStore
+      .update(QueueEntity.class)
+      .set(QueueEntity.RUNNING, false)
+      .where(QueueEntity.RUNNING.eq(true))
+      .get();
+
+    Timber.tag(TAG).e("dropRunningTasks %s", list.toString() );
+
+
+    dataStore
+      .update(RSignImageEntity.class)
+      .set(RSignImageEntity.SIGNING, false)
+      .where(RSignImageEntity.SIGNED.eq(false))
+      .and(RSignImageEntity.ERROR.eq(false))
+      .get();
+
+
+    dataStore
+      .update(RSignImageEntity.class)
+      .set( RSignImageEntity.SIGN_TASK_STARTED, false )
+      .where( RSignImageEntity.SIGN_TASK_STARTED.eq( true ) )
+      .get()
+      .value();
+
+    dataStore
+      .update( RApprovalNextPersonEntity.class )
+      .set( RApprovalNextPersonEntity.TASK_STARTED, false )
+      .where( RApprovalNextPersonEntity.TASK_STARTED.eq( true ) )
+      .get()
+      .value();
+
+  }
+
 
   public void add(Command command){
     if (command != null && command.getParams() != null) {

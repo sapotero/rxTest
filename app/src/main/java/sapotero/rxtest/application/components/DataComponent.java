@@ -30,7 +30,6 @@ import sapotero.rxtest.views.adapters.DocumentLinkAdapter;
 import sapotero.rxtest.views.adapters.DocumentTypeAdapter;
 import sapotero.rxtest.views.adapters.PrimaryConsiderationAdapter;
 import sapotero.rxtest.views.adapters.PrimaryUsersAdapter;
-import sapotero.rxtest.views.adapters.SearchResultAdapter;
 import sapotero.rxtest.views.custom.OrganizationSpinner;
 import sapotero.rxtest.views.custom.stepper.build.steps.StepperChooseAuthTypeFragment;
 import sapotero.rxtest.views.custom.stepper.build.steps.StepperLoadDataFragment;
@@ -63,11 +62,9 @@ public interface DataComponent {
   void inject(FileSignActivity activity);
   void inject(DocumentImageFullScreenActivity activity);
   void inject(DocumentInfocardFullScreenActivity activity);
-  void inject(InfoNoMenuActivity activity);
 
   void inject(DocumentTypeAdapter adapter);
   void inject(PrimaryConsiderationAdapter adapter);
-  void inject(SearchResultAdapter searchResultAdapter);
   void inject(DocumentLinkAdapter documentLinkAdapter);
   void inject(PrimaryUsersAdapter primaryUsersAdapter);
   void inject(DecisionSpinnerAdapter decisionSpinnerAdapter);

@@ -11,12 +11,24 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
+import android.view.View;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.DecelerateInterpolator;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+
+import com.birbit.android.jobqueue.JobManager;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -24,16 +36,20 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
+import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
+import sapotero.rxtest.db.requery.models.RRouteEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.bus.MassInsertDoneEvent;
+import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.utils.ISettings;
+import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.adapters.TabSigningPagerAdapter;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
@@ -50,12 +66,15 @@ import timber.log.Timber;
 public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivityDecisionPreviewFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, RoutePreviewFragment.OnFragmentInteractionListener, InfoCardDocumentsFragment.OnFragmentInteractionListener, InfoCardWebViewFragment.OnFragmentInteractionListener, InfoCardLinksFragment.OnFragmentInteractionListener, InfoCardFieldsFragment.OnFragmentInteractionListener, /*CurrentDocumentManager.Callback,*/ SelectOshsDialogFragment.Callback {
 
   @BindView(R.id.activity_info_preview_container) LinearLayout preview_container;
+  @BindView(R.id.frame_preview_decision) FrameLayout frame;
 
   @BindView(R.id.tab_main) ViewPager viewPager;
   @BindView(R.id.tabs) TabLayout tabLayout;
 
+  @Inject JobManager jobManager;
   @Inject ISettings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
+  @Inject MemoryStore store;
 
   private byte[] CARD;
 
@@ -73,6 +92,8 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
   private RDocumentEntity doc;
   private boolean showInfoCard = false;
 
+  private RDocumentEntity documentEntity;
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
 
@@ -82,7 +103,7 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
     setContentView(R.layout.activity_info);
     ButterKnife.bind(this);
 
-    EsdApplication.getDataComponent().inject(this);
+    EsdApplication.getManagerComponent().inject(this);
 
 //    documentManager = new CurrentDocumentManager(this);
 //    documentManager.registerCallBack(this);
@@ -106,20 +127,70 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
 
     setPreview();
     setTabContent();
+    disableArrows();
+  }
+
+  private void disableArrows() {
+    ImageButton prev = (ImageButton) findViewById(R.id.activity_info_prev_document);
+    ImageButton next = (ImageButton) findViewById(R.id.activity_info_next_document);
+
+    prev.setClickable(false);
+    next.setClickable(false);
+    prev.setAlpha(0.5f);
+    next.setAlpha(0.5f);
   }
 
   private void setPreview() {
+    addLoader();
 
     android.support.v4.app.FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+    fragmentTransaction.addToBackStack("PREVIEW");
 
     // FIX всегда отображаем резолюции
 //    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL ){
 //      fragmentTransaction.addByOne( R.id.activity_info_preview_container, new RoutePreviewFragment().withUid(UID) );
 //    } else {
-      fragmentTransaction.add( R.id.activity_info_preview_container, new InfoActivityDecisionPreviewFragment().withUid(UID) );
+      fragmentTransaction.replace( R.id.activity_info_preview_container, new InfoActivityDecisionPreviewFragment().withUid(UID).withEnableButtons(false), "PREVIEW" );
 //    }
 
     fragmentTransaction.commit();
+  }
+
+  private void addLoader() {
+    preview_container.removeAllViews();
+
+    frame.setVisibility(View.VISIBLE);
+
+    int durationMillis = 300;
+
+    Animation fadeIn = new AlphaAnimation(0, 1);
+    fadeIn.setInterpolator(new DecelerateInterpolator());
+    fadeIn.setDuration(durationMillis);
+
+    Animation fadeOut = new AlphaAnimation(1, 0);
+    fadeOut.setInterpolator(new AccelerateInterpolator());
+    fadeOut.setStartOffset(durationMillis);
+    fadeOut.setDuration(durationMillis);
+
+    AnimationSet animation = new AnimationSet(true);
+    AnimationSet wrapperAnimation = new AnimationSet(true);
+
+    wrapperAnimation.addAnimation(fadeIn);
+    animation.addAnimation(fadeOut);
+
+    frame.setAnimation(animation);
+    preview_container.setAnimation(wrapperAnimation);
+
+    Observable.just("")
+      .delay(durationMillis, TimeUnit.MILLISECONDS)
+      .subscribeOn( Schedulers.newThread() )
+      .observeOn( AndroidSchedulers.mainThread() )
+      .subscribe(
+        data  -> {
+          frame.setVisibility(View.GONE);
+        },
+        Timber::e
+      );
   }
 
   private void setToolbar() {
@@ -130,18 +201,26 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
     toolbar.setContentInsetStartWithNavigation(250);
 
     toolbar.setNavigationOnClickListener(v ->{
-      finish();
+      closeActivity();
       }
     );
 
-    status  = Fields.Status.findStatus(settings.getStatusCode());
+    documentEntity = dataStore.select(RDocumentEntity.class).where(RDocumentEntity.UID.eq(UID)).get().firstOrNull();
+
+    String _filter = documentEntity.getFilter() != null ? documentEntity.getFilter() : "";
+
+    status  = Fields.Status.findStatus( _filter  );
     journal = Fields.getJournalByUid( UID );
 
     toolbar.setTitle( String.format("%s от %s", doc.getRegistrationNumber(), doc.getRegistrationDate() ) );
 
-    Timber.tag("MENU").e( "STATUS CODE: %s", settings.getStatusCode() );
-
   }
+
+  private void closeActivity() {
+    settings.setImageIndex(0);
+    finish();
+  }
+
   private void setTabContent() {
 
     if (viewPager.getAdapter() == null) {
@@ -165,13 +244,17 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
         viewPager.setAdapter(adapter);
 
       } else{
-        if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL ){
+        Boolean isProject = documentEntity.getRoute() != null && ((RRouteEntity) documentEntity.getRoute()).getSteps() != null && ((RRouteEntity) documentEntity.getRoute()).getSteps().size() > 0;
+
+        if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || isProject ) {
           TabSigningPagerAdapter adapter = new TabSigningPagerAdapter( getSupportFragmentManager() );
           adapter.withUid(UID);
           viewPager.setAdapter(adapter);
         } else {
           TabPagerAdapter adapter = new TabPagerAdapter ( getSupportFragmentManager() );
           adapter.withUid(UID);
+          adapter.withoutZoom(true);
+          adapter.withEnableDoubleTap(false);
           viewPager.setAdapter(adapter);
         }
       }
@@ -240,8 +323,15 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
   @Override
   protected void onResume() {
     super.onResume();
+
+    if ( documentEntity != null && documentEntity.isFromLinks() != null && documentEntity.isFromLinks() ) {
+      updateDocument();
+    }
   }
 
+  private void updateDocument() {
+    jobManager.addJobInBackground( new UpdateDocumentJob( UID, true ) );
+  }
 
 //  /* CurrentDocumentManager.Callback */
 //  @Override
@@ -253,7 +343,6 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
 //  public void onGetStateError() {
 //    Timber.tag("DocumentManagerCallback").i("onGetStateError");
 //  }
-
 
   @Override
   public void onSearchSuccess(Oshs user, CommandFactory.Operation operation, String uid) {
@@ -270,5 +359,10 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
     ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
     NetworkInfo netInfo = cm.getActiveNetworkInfo();
     return netInfo != null && netInfo.isConnectedOrConnecting();
+  }
+
+  @Override
+  public void onBackPressed() {
+    closeActivity();
   }
 }

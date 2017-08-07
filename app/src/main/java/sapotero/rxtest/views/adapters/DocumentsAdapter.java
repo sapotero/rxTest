@@ -135,6 +135,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       viewHolder.cv.setOnClickListener(view -> {
 
         settings.setUid( item.getUid() );
+        settings.setIsProject( item.isProject() );
         settings.setMainMenuPosition( viewHolder.getAdapterPosition() );
         settings.setRegNumber( item.getRegistrationNumber() );
         settings.setStatusCode( doc.getFilter() );

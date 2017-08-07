@@ -86,6 +86,15 @@ public class InfoCardLinksFragment extends Fragment {
 
     view.setOnTouchListener( new OnSwipeTouchListener( getContext() ) );
 
+    return view;
+  }
+
+  @Override
+  public void onResume(){
+    super.onResume();
+
+
+
     adapter = new LinkAdapter(getContext(), new ArrayList<Link>());
 
     loadSettings();
@@ -100,16 +109,8 @@ public class InfoCardLinksFragment extends Fragment {
 
       @Override
       public void onNothingSelected(AdapterView<?> parent) {
-        show();
       }
     });
-
-    return view;
-  }
-
-  @Override
-  public void onResume(){
-    super.onResume();
 
   }
 
@@ -156,6 +157,8 @@ public class InfoCardLinksFragment extends Fragment {
 
               adapter.add(new Link(_doc.getUid(), _doc.getTitle()));
             }
+
+            show();
           }
         }, error -> {
           Timber.tag(TAG).e(error);

@@ -56,17 +56,6 @@ public class CreateLinksJob extends DocumentJob {
     if ( exist( existingLink ) ) {
       EventBus.getDefault().post( new StepperLoadDocumentEvent(linkUid) );
 
-      // Linked document exists, update it with fromLinks = true
-      existingLink.setFromLinks( true );
-      dataStore
-        .update( existingLink )
-        .subscribeOn( Schedulers.io() )
-        .observeOn( AndroidSchedulers.mainThread() )
-        .subscribe(
-          result -> Timber.tag(TAG).d("Set existing doc %s as link", result.getUid()),
-          error -> Timber.tag(TAG).e(error)
-        );
-
       // Set link's reg number as first link in parent doc
       saveFirstLink( existingLink.getRegistrationNumber() );
 
