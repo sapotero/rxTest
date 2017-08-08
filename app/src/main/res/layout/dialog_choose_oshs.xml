@@ -14,14 +14,20 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_margin="20dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="10dp"
             android:text="@string/dialog_oshs_title"
             android:textAppearance="?android:attr/textAppearanceLarge">
         </TextView>
 
         <FrameLayout android:layout_width="match_parent"
                      android:layout_height="wrap_content"
-                     android:layout_margin="@dimen/date_offset"
+                     android:layout_marginStart="@dimen/date_offset"
+                     android:layout_marginEnd="@dimen/date_offset"
+                     android:layout_marginTop="0sp"
+                     android:layout_marginBottom="0sp"
                      android:minWidth="800dp"
                      android:id="@+id/oshs_wrapper"
                      android:focusableInTouchMode="true">
@@ -67,7 +73,7 @@
             android:paddingTop="0sp"
             android:paddingStart="@dimen/date_offset"
             android:paddingEnd="@dimen/date_offset"
-            android:paddingBottom="@dimen/date_offset"
+            android:paddingBottom="0sp"
             android:minWidth="800dp"
 
             />

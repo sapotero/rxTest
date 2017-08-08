@@ -376,6 +376,8 @@ public class SelectOshsDialogFragment extends DialogFragment implements PrimaryU
       );
     }
 
+    // resolved https://tasks.n-core.ru/browse/MVDESD-14013
+    // Диалог добавления исполнителей
     if ( withPerformers ) {
       title.setAdapter(autocomplete_adapter);
       title.setFocusable(true);
@@ -405,6 +407,9 @@ public class SelectOshsDialogFragment extends DialogFragment implements PrimaryU
     return view;
   }
 
+  // resolved https://tasks.n-core.ru/browse/MVDESD-14013
+  // Диалог добавления исполнителей
+  // This callback is called only if withPerformers = true (listener is registered only in this case)
   @Override
   public void onPrimaryUsersAdapterFilterComplete() {
     autocomplete_adapter.clear();
@@ -431,6 +436,9 @@ public class SelectOshsDialogFragment extends DialogFragment implements PrimaryU
     title.filter( title.getText().toString() );
   }
 
+  // resolved https://tasks.n-core.ru/browse/MVDESD-14013
+  // Диалог добавления исполнителей
+  // This callback is called only if withPerformers = true (listener is registered only in this case)
   @Override
   public void onOshsAutoCompleteAdapterFilterComplete() {
     resultFromOshs.clear();
