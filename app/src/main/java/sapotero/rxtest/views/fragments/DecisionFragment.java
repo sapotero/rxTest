@@ -456,6 +456,8 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     // Показывать организации в поиске исполнителей
     oshs.withOrganizations(true);
 
+    oshs.withPerformers(true);
+
     oshs.registerCallBack( this );
 
     ArrayList<String> users = new ArrayList<>();

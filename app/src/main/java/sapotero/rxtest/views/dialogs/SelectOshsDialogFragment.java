@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
+import android.support.design.widget.TextInputLayout;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -48,7 +49,7 @@ import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 import sapotero.rxtest.views.custom.DelayAutoCompleteTextView;
 import timber.log.Timber;
 
-public class SelectOshsDialogFragment extends DialogFragment implements View.OnClickListener {
+public class SelectOshsDialogFragment extends DialogFragment implements PrimaryUsersAdapter.FilterListener {
 
   @Inject ISettings settings;
   @Inject Mappers mappers;
@@ -57,6 +58,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
   private String TAG = this.getClass().getSimpleName();
 
   @BindView(R.id.user_autocomplete_field) DelayAutoCompleteTextView title;
+  @BindView(R.id.user_autocomplete_textinputlayout) TextInputLayout textInputLayout;
   @BindView(R.id.pb_loading_indicator) ProgressBar indicator;
   @BindView(R.id.oshs_wrapper) FrameLayout oshs_wrapper;
 
@@ -74,9 +76,13 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
   // If true, organizations will be included in search results
   private boolean withOrganizations = false;
 
+  private boolean withPerformers = false;
+
   private PrimaryConsiderationPeople user = null;
   private OshsAutoCompleteAdapter autocomplete_adapter;
   private String documentUid = null;
+
+  private boolean filterEnabled = true;
 
   public void setIgnoreUsers(ArrayList<String> users) {
     Timber.tag("setIgnoreUsers").e("users %s", new Gson().toJson(users) );
@@ -110,6 +116,10 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
 
   public void withOrganizations(boolean withOrganizations) {
     this.withOrganizations = withOrganizations;
+  }
+
+  public void withPerformers(boolean withPerformers) {
+    this.withPerformers = withPerformers;
   }
 
   public interface Callback {
@@ -351,12 +361,59 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
           title.cancelPendingInputEvents();
           title.hideIndicator();
 
+          filterEnabled = false;
+
           // dismiss();
         }
       );
     }
 
+    if ( withPerformers ) {
+      title.setAdapter(null);
+      title.setFocusable(true);
+      title.setFocusableInTouchMode(true);
+      adapter.registerListener(this);
+      title.addTextChangedListener(new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+          if (charSequence != null && charSequence.length() >= 1) {
+            adapter.getFilter().filter(charSequence);
+          } else {
+            adapter.cancelFiltering();
+            title.setAdapter(null);
+          }
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+        }
+      });
+      title.setOnFocusChangeListener((v, hasFocus) -> {
+        if ( hasFocus ) {
+          filterEnabled = true;
+        }
+      });
+    }
+
     return view;
+  }
+
+  @Override
+  public void onFilterComplete() {
+    if ( adapter.getCount() < 1 ) {
+      if ( filterEnabled ) {
+        autocomplete_adapter.clear();
+        title.setAdapter( autocomplete_adapter );
+        autocomplete_adapter.getFilter().filter( title.getText().toString() );
+        title.showDropDown();
+      }
+    } else {
+      title.setAdapter(null);
+    }
   }
 
   public void onDismiss(DialogInterface dialog) {
@@ -367,12 +424,5 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
   public void onCancel(DialogInterface dialog) {
     super.onCancel(dialog);
     Timber.tag(TAG).i( "onCancel");
-  }
-
-
-
-  @Override
-  public void onClick(View v) {
-
   }
 }

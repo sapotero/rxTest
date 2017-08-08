@@ -171,4 +171,9 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
   public void withOrganizations(boolean withOrganizations) {
     this.withOrganizations = withOrganizations;
   }
+
+  public void clear() {
+    resultList.clear();
+    notifyDataSetChanged();
+  }
 }

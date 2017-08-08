@@ -32,6 +32,8 @@ public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
   private ArrayList<PrimaryConsiderationPeople> resultItems;
   private String TAG = DecisionAdapter.class.getSimpleName();
 
+  private FilterListener filterListener = null;
+
   public PrimaryUsersAdapter(Context context, ArrayList<PrimaryConsiderationPeople> items) {
     this.sourceItems = items;
     this.resultItems = items;
@@ -40,6 +42,9 @@ public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
     EsdApplication.getDataComponent().inject(this);
   }
 
+  public void registerListener(FilterListener filterListener) {
+    this.filterListener = filterListener;
+  }
 
   @Override
   public View getView(int position, View view, ViewGroup parent) {
@@ -110,6 +115,10 @@ public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
           resultItems = new ArrayList<>();
           notifyDataSetChanged();
         }
+
+        if ( filterListener != null ) {
+          filterListener.onFilterComplete();
+        }
       }
     };
   }
@@ -147,4 +156,7 @@ public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
     super.notifyDataSetChanged();
   }
 
+  public interface FilterListener {
+    void onFilterComplete();
+  }
 }
