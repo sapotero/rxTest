@@ -46,6 +46,10 @@ public class DelayAutoCompleteTextView extends AutoCompleteTextView {
     mAutoCompleteDelay = autoCompleteDelay;
   }
 
+  public void filter(CharSequence text) {
+    performFiltering(text, 0);
+  }
+
   @Override
   protected void performFiltering(CharSequence text, int keyCode) {
     if (isFocused()) {

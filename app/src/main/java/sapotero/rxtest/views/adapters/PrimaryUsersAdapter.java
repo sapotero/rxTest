@@ -32,6 +32,8 @@ public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
   private ArrayList<PrimaryConsiderationPeople> resultItems;
   private String TAG = DecisionAdapter.class.getSimpleName();
 
+  private PrimaryUsersAdapterFilterListener primaryUsersAdapterFilterListener = null;
+
   public PrimaryUsersAdapter(Context context, ArrayList<PrimaryConsiderationPeople> items) {
     this.sourceItems = items;
     this.resultItems = items;
@@ -40,6 +42,9 @@ public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
     EsdApplication.getDataComponent().inject(this);
   }
 
+  public void registerListener(PrimaryUsersAdapterFilterListener primaryUsersAdapterFilterListener) {
+    this.primaryUsersAdapterFilterListener = primaryUsersAdapterFilterListener;
+  }
 
   @Override
   public View getView(int position, View view, ViewGroup parent) {
@@ -110,6 +115,10 @@ public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
           resultItems = new ArrayList<>();
           notifyDataSetChanged();
         }
+
+        if ( primaryUsersAdapterFilterListener != null ) {
+          primaryUsersAdapterFilterListener.onPrimaryUsersAdapterFilterComplete();
+        }
       }
     };
   }
@@ -138,6 +147,10 @@ public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
     return 0;
   }
 
+  public List<PrimaryConsiderationPeople> getResultItems() {
+    return resultItems;
+  }
+
   @Override
   public void notifyDataSetChanged() {
     // resolved https://tasks.n-core.ru/browse/MVDESD-13414
@@ -147,4 +160,22 @@ public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
     super.notifyDataSetChanged();
   }
 
+  public void addResultItem(PrimaryConsiderationPeople user) {
+    resultItems.add( user );
+    notifyDataSetChanged();
+  }
+
+  public void addFirstResultItem(PrimaryConsiderationPeople user) {
+    resultItems.add( 0, user );
+    notifyDataSetChanged();
+  }
+
+  public void removeItem(PrimaryConsiderationPeople user) {
+    resultItems.remove( user );
+    notifyDataSetChanged();
+  }
+
+  public interface PrimaryUsersAdapterFilterListener {
+    void onPrimaryUsersAdapterFilterComplete();
+  }
 }
