@@ -64,7 +64,10 @@
             android:layout_weight="1"
             android:divider="@color/md_grey_100"
             android:dividerHeight="1dp"
-            android:padding="@dimen/date_offset"
+            android:paddingTop="0sp"
+            android:paddingStart="@dimen/date_offset"
+            android:paddingEnd="@dimen/date_offset"
+            android:paddingBottom="@dimen/date_offset"
             android:minWidth="800dp"
 
             />
