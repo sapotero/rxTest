@@ -22,6 +22,8 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -50,6 +52,9 @@ import sapotero.rxtest.views.custom.DelayAutoCompleteTextView;
 import timber.log.Timber;
 
 public class SelectOshsDialogFragment extends DialogFragment implements PrimaryUsersAdapter.PrimaryUsersAdapterFilterListener, OshsAutoCompleteAdapter.OshsAutoCompleteAdapterFilterListener {
+
+  public static final String SEPARATOR_FAVORITES_TEXT = "Результат поиска по избранному:";
+  public static final String SEPARATOR_OSHS_TEXT = "Результат поиска по ОШС МВД:";
 
   @Inject ISettings settings;
   @Inject Mappers mappers;
@@ -81,6 +86,8 @@ public class SelectOshsDialogFragment extends DialogFragment implements PrimaryU
   private PrimaryConsiderationPeople user = null;
   private OshsAutoCompleteAdapter autocomplete_adapter;
   private String documentUid = null;
+
+  private List<PrimaryConsiderationPeople> resultFromOshs = new ArrayList<>();
 
   public void setIgnoreUsers(ArrayList<String> users) {
     Timber.tag("setIgnoreUsers").e("users %s", new Gson().toJson(users) );
@@ -197,27 +204,30 @@ public class SelectOshsDialogFragment extends DialogFragment implements PrimaryU
     list.setAdapter(adapter);
 
     list.setOnItemClickListener((parent, view12, position, id) -> {
-      title.clearFocus();
+      if ( !Objects.equals( adapter.getItem(position).getOrganization(), SEPARATOR_FAVORITES_TEXT)
+        && !Objects.equals( adapter.getItem(position).getOrganization(), SEPARATOR_OSHS_TEXT) ) {
 
-      if ( !withSearch || withPrimaryConsideration ){
-        user = adapter.getItem(position);
+        title.clearFocus();
 
-        if (user != null) {
-          title.setAdapter(null);
-          indicator.setVisibility(View.GONE);
-          title.setText( user.getName() );
+        if (!withSearch || withPrimaryConsideration) {
+          user = adapter.getItem(position);
+
+          if (user != null) {
+            title.setAdapter(null);
+            indicator.setVisibility(View.GONE);
+            title.setText(user.getName());
+          }
+
         }
 
-      }
-
-      if (withConfirm){
-        user = adapter.getItem(position);
-        if (user != null) {
-          indicator.setVisibility(View.GONE);
-          title.setText( user.getName() );
-          title.cancelPendingInputEvents();
-          title.hideIndicator();
-        }
+        if (withConfirm) {
+          user = adapter.getItem(position);
+          if (user != null) {
+            indicator.setVisibility(View.GONE);
+            title.setText(user.getName());
+            title.cancelPendingInputEvents();
+            title.hideIndicator();
+          }
 
 //        Timber.tag("withConfirm").w("%s", user.getName());
 
@@ -227,18 +237,20 @@ public class SelectOshsDialogFragment extends DialogFragment implements PrimaryU
 //          title.setText( user.getName() );
 //        }
 
-      } else {
+        } else {
 
-        if (callback != null) {
-          Oshs _user = adapter.getOshs(position);
-          callback.onSearchSuccess(_user, operation, documentUid);
-          dismiss();
+          if (callback != null) {
+            Oshs _user = adapter.getOshs(position);
+            callback.onSearchSuccess(_user, operation, documentUid);
+            dismiss();
+          }
         }
-      }
 
-      if (view12 != null) {
-        InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
-        inputManager.hideSoftInputFromWindow(view12.getWindowToken(), 0);
+        if (view12 != null) {
+          InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
+          inputManager.hideSoftInputFromWindow(view12.getWindowToken(), 0);
+        }
+
       }
     });
 
@@ -377,9 +389,10 @@ public class SelectOshsDialogFragment extends DialogFragment implements PrimaryU
 
         @Override
         public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-          adapter.cancelFiltering();
           if (charSequence != null && charSequence.length() >= 1) {
             adapter.getFilter().filter(charSequence);
+          } else {
+            adapter.cancelFiltering();
           }
         }
 
@@ -397,9 +410,22 @@ public class SelectOshsDialogFragment extends DialogFragment implements PrimaryU
     autocomplete_adapter.clear();
     autocomplete_adapter.setIgnoreUsers(user_ids);
 
+    PrimaryConsiderationPeople separatorFavorites = new PrimaryConsiderationPeople();
+    separatorFavorites.setOrganization( SEPARATOR_FAVORITES_TEXT );
+    adapter.removeItem( separatorFavorites );
+
+    if ( adapter.getCount() > 0 ) {
+      adapter.addFirstResultItem( separatorFavorites );
+    }
+
     // Do not search in OSHS people, which already present in favorites list
     for ( PrimaryConsiderationPeople people : adapter.getResultItems() ) {
       autocomplete_adapter.addIgnoreUser( people.getId() );
+    }
+
+    // Remove previous OSHS search results from list
+    for ( PrimaryConsiderationPeople people : resultFromOshs ) {
+      adapter.removeItem( people );
     }
 
     title.filter( title.getText().toString() );
@@ -407,10 +433,19 @@ public class SelectOshsDialogFragment extends DialogFragment implements PrimaryU
 
   @Override
   public void onOshsAutoCompleteAdapterFilterComplete() {
+    resultFromOshs.clear();
+
+    PrimaryConsiderationPeople separatorOshs = new PrimaryConsiderationPeople();
+    separatorOshs.setOrganization(SEPARATOR_OSHS_TEXT);
+    resultFromOshs.add( separatorOshs );
+    adapter.addResultItem( separatorOshs );
+
     for ( Oshs oshs : autocomplete_adapter.getResultList() ) {
       PrimaryConsiderationPeople people = (PrimaryConsiderationPeople) mappers.getPerformerMapper().convert(oshs, PerformerMapper.DestinationType.PRIMARYCONSIDERATIONPEOPLE);
+      resultFromOshs.add(people);
       adapter.addResultItem( people );
     }
+
     title.dismissDropDown();
   }
 

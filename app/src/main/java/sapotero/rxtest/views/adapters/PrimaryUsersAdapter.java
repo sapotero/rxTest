@@ -164,6 +164,16 @@ public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
     notifyDataSetChanged();
   }
 
+  public void addFirstResultItem(PrimaryConsiderationPeople user) {
+    resultItems.add( 0, user );
+    notifyDataSetChanged();
+  }
+
+  public void removeItem(PrimaryConsiderationPeople user) {
+    resultItems.remove( user );
+    notifyDataSetChanged();
+  }
+
   public interface PrimaryUsersAdapterFilterListener {
     void onPrimaryUsersAdapterFilterComplete();
   }
