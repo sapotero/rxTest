@@ -626,6 +626,7 @@ public class RoutePreviewFragment extends Fragment {
         final_layout.setBackgroundResource(typedValue.resourceId);
 
         final_layout.setOnClickListener(v -> {
+          settings.setImageIndex(0);
           Intent intent = new Intent(context, InfoNoMenuActivity.class);
           intent.putExtra( "UID", uid );
           intent.putExtra( "CARD", true );

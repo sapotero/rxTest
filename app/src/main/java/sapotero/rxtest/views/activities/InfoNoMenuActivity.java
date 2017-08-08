@@ -241,6 +241,8 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
         // для перехода по ссылкам из блока Согласование письмами
         TabPagerAdapter adapter = new TabPagerAdapter ( getSupportFragmentManager() );
         adapter.withUid(UID);
+        adapter.withoutZoom(true);
+        adapter.withEnableDoubleTap(false);
         viewPager.setAdapter(adapter);
 
       } else{
