@@ -47,10 +47,16 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
   // If true, organizations will be included in search results
   private boolean withOrganizations = false;
 
+  private OshsAutoCompleteAdapterFilterListener oshsAutoCompleteAdapterFilterListener = null;
+
   public OshsAutoCompleteAdapter(Context context, View view) {
     mContext = context;
     EsdApplication.getNetworkComponent().inject( this );
     this.view = view;
+  }
+
+  public void registerListener(OshsAutoCompleteAdapterFilterListener oshsAutoCompleteAdapterFilterListener) {
+    this.oshsAutoCompleteAdapterFilterListener = oshsAutoCompleteAdapterFilterListener;
   }
 
   @Override
@@ -115,6 +121,10 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
           }
 
+          if ( oshsAutoCompleteAdapterFilterListener != null ) {
+            oshsAutoCompleteAdapterFilterListener.onOshsAutoCompleteAdapterFilterComplete();
+          }
+
           notifyDataSetChanged();
         } else {
           notifyDataSetInvalidated();
@@ -160,7 +170,15 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
   public void setIgnoreUsers(ArrayList<String> users) {
     ignore_user_ids = new ArrayList<>();
     if (users != null) {
-      ignore_user_ids = users;
+      for ( String ignoreUser : users ) {
+        ignore_user_ids.add( ignoreUser );
+      }
+    }
+  }
+
+  public void addIgnoreUser(String ignoreUser) {
+    if ( ignore_user_ids != null ) {
+      ignore_user_ids.add( ignoreUser );
     }
   }
 
@@ -175,5 +193,13 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
   public void clear() {
     resultList.clear();
     notifyDataSetChanged();
+  }
+
+  public List<Oshs> getResultList() {
+    return resultList;
+  }
+
+  public interface OshsAutoCompleteAdapterFilterListener {
+    void onOshsAutoCompleteAdapterFilterComplete();
   }
 }

@@ -49,7 +49,7 @@ import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 import sapotero.rxtest.views.custom.DelayAutoCompleteTextView;
 import timber.log.Timber;
 
-public class SelectOshsDialogFragment extends DialogFragment implements PrimaryUsersAdapter.FilterListener {
+public class SelectOshsDialogFragment extends DialogFragment implements PrimaryUsersAdapter.PrimaryUsersAdapterFilterListener, OshsAutoCompleteAdapter.OshsAutoCompleteAdapterFilterListener {
 
   @Inject ISettings settings;
   @Inject Mappers mappers;
@@ -81,8 +81,6 @@ public class SelectOshsDialogFragment extends DialogFragment implements PrimaryU
   private PrimaryConsiderationPeople user = null;
   private OshsAutoCompleteAdapter autocomplete_adapter;
   private String documentUid = null;
-
-  private boolean filterEnabled = true;
 
   public void setIgnoreUsers(ArrayList<String> users) {
     Timber.tag("setIgnoreUsers").e("users %s", new Gson().toJson(users) );
@@ -361,8 +359,6 @@ public class SelectOshsDialogFragment extends DialogFragment implements PrimaryU
           title.cancelPendingInputEvents();
           title.hideIndicator();
 
-          filterEnabled = false;
-
           // dismiss();
         }
       );
@@ -373,6 +369,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements PrimaryU
       title.setFocusable(true);
       title.setFocusableInTouchMode(true);
       adapter.registerListener(this);
+      autocomplete_adapter.registerListener(this);
       title.addTextChangedListener(new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -380,21 +377,14 @@ public class SelectOshsDialogFragment extends DialogFragment implements PrimaryU
 
         @Override
         public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+          adapter.cancelFiltering();
           if (charSequence != null && charSequence.length() >= 1) {
             adapter.getFilter().filter(charSequence);
-          } else {
-            adapter.cancelFiltering();
-            title.setAdapter(null);
           }
         }
 
         @Override
         public void afterTextChanged(Editable editable) {
-        }
-      });
-      title.setOnFocusChangeListener((v, hasFocus) -> {
-        if ( hasFocus ) {
-          filterEnabled = true;
         }
       });
     }
@@ -403,16 +393,23 @@ public class SelectOshsDialogFragment extends DialogFragment implements PrimaryU
   }
 
   @Override
-  public void onFilterComplete() {
-    if ( adapter.getCount() < 1 ) {
-      if ( filterEnabled ) {
-        autocomplete_adapter.clear();
-        title.setAdapter( autocomplete_adapter );
-        autocomplete_adapter.getFilter().filter( title.getText().toString() );
-        title.showDropDown();
-      }
-    } else {
-      title.setAdapter(null);
+  public void onPrimaryUsersAdapterFilterComplete() {
+    autocomplete_adapter.clear();
+    autocomplete_adapter.setIgnoreUsers(user_ids);
+
+    // Do not search in OSHS people, which already present in favorites list
+    for ( PrimaryConsiderationPeople people : adapter.getResultItems() ) {
+      autocomplete_adapter.addIgnoreUser( people.getId() );
+    }
+
+    autocomplete_adapter.getFilter().filter( title.getText().toString() );
+  }
+
+  @Override
+  public void onOshsAutoCompleteAdapterFilterComplete() {
+    for ( Oshs oshs : autocomplete_adapter.getResultList() ) {
+      PrimaryConsiderationPeople people = (PrimaryConsiderationPeople) mappers.getPerformerMapper().convert(oshs, PerformerMapper.DestinationType.PRIMARYCONSIDERATIONPEOPLE);
+      adapter.addResultItem( people );
     }
   }
 

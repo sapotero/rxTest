@@ -11,7 +11,6 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -32,7 +31,7 @@ public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
   private ArrayList<PrimaryConsiderationPeople> resultItems;
   private String TAG = DecisionAdapter.class.getSimpleName();
 
-  private FilterListener filterListener = null;
+  private PrimaryUsersAdapterFilterListener primaryUsersAdapterFilterListener = null;
 
   public PrimaryUsersAdapter(Context context, ArrayList<PrimaryConsiderationPeople> items) {
     this.sourceItems = items;
@@ -42,8 +41,8 @@ public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
     EsdApplication.getDataComponent().inject(this);
   }
 
-  public void registerListener(FilterListener filterListener) {
-    this.filterListener = filterListener;
+  public void registerListener(PrimaryUsersAdapterFilterListener primaryUsersAdapterFilterListener) {
+    this.primaryUsersAdapterFilterListener = primaryUsersAdapterFilterListener;
   }
 
   @Override
@@ -116,8 +115,8 @@ public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
           notifyDataSetChanged();
         }
 
-        if ( filterListener != null ) {
-          filterListener.onFilterComplete();
+        if ( primaryUsersAdapterFilterListener != null ) {
+          primaryUsersAdapterFilterListener.onPrimaryUsersAdapterFilterComplete();
         }
       }
     };
@@ -147,6 +146,10 @@ public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
     return 0;
   }
 
+  public List<PrimaryConsiderationPeople> getResultItems() {
+    return resultItems;
+  }
+
   @Override
   public void notifyDataSetChanged() {
     // resolved https://tasks.n-core.ru/browse/MVDESD-13414
@@ -156,7 +159,12 @@ public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
     super.notifyDataSetChanged();
   }
 
-  public interface FilterListener {
-    void onFilterComplete();
+  public void addResultItem(PrimaryConsiderationPeople user) {
+    resultItems.add( user );
+    notifyDataSetChanged();
+  }
+
+  public interface PrimaryUsersAdapterFilterListener {
+    void onPrimaryUsersAdapterFilterComplete();
   }
 }
