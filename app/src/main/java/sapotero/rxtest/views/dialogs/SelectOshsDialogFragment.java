@@ -365,7 +365,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements PrimaryU
     }
 
     if ( withPerformers ) {
-      title.setAdapter(null);
+      title.setAdapter(autocomplete_adapter);
       title.setFocusable(true);
       title.setFocusableInTouchMode(true);
       adapter.registerListener(this);
@@ -402,7 +402,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements PrimaryU
       autocomplete_adapter.addIgnoreUser( people.getId() );
     }
 
-    autocomplete_adapter.getFilter().filter( title.getText().toString() );
+    title.filter( title.getText().toString() );
   }
 
   @Override
@@ -411,6 +411,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements PrimaryU
       PrimaryConsiderationPeople people = (PrimaryConsiderationPeople) mappers.getPerformerMapper().convert(oshs, PerformerMapper.DestinationType.PRIMARYCONSIDERATIONPEOPLE);
       adapter.addResultItem( people );
     }
+    title.dismissDropDown();
   }
 
   public void onDismiss(DialogInterface dialog) {
