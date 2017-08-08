@@ -197,53 +197,53 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
       .get()
       .firstOrNull();
 
+    if ( document != null ) {
+      //resolved https://tasks.n-core.ru/browse/MVDESD-12626 - срочность
+      if (document.getUrgency() != null) {
+        urgency.setVisibility(View.VISIBLE);
+      }
 
-    //resolved https://tasks.n-core.ru/browse/MVDESD-12626 - срочность
-    if ( document.getUrgency() != null ){
-      urgency.setVisibility(View.VISIBLE);
+      index = settings.getImageIndex();
+
+      if (document.getImages().size() > 0) {
+        adapter.clear();
+
+        List<RImageEntity> tmp = new ArrayList<>();
+
+        for (RImage image : document.getImages()) {
+          RImageEntity img = (RImageEntity) image;
+          tmp.add(img);
+        }
+
+        try {
+          Collections.sort(tmp, (o1, o2) -> o1.getCreatedAt().compareTo(o2.getCreatedAt()));
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+
+        try {
+          Collections.sort(tmp, (o1, o2) -> o1.getNumber().compareTo(o2.getNumber()));
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+
+
+        for (RImageEntity image : tmp) {
+          adapter.add(image);
+        }
+
+        showPdf();
+
+        no_files.setVisibility(View.GONE);
+        pdf_wrapper.setVisibility(View.VISIBLE);
+
+      } else {
+        disablePdfView();
+        no_files.setVisibility(View.VISIBLE);
+        pdf_wrapper.setVisibility(View.GONE);
+        open_in_another_app_wrapper.setVisibility(View.GONE);
+      }
     }
-
-    index = settings.getImageIndex();
-
-    if (document.getImages().size() > 0){
-      adapter.clear();
-
-      List<RImageEntity> tmp = new ArrayList<>();
-
-      for (RImage image : document.getImages()) {
-        RImageEntity img = (RImageEntity) image;
-        tmp.add(img);
-      }
-
-      try {
-        Collections.sort(tmp, (o1, o2) -> o1.getCreatedAt().compareTo(o2.getCreatedAt()));
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-
-      try {
-        Collections.sort(tmp, (o1, o2) -> o1.getNumber().compareTo( o2.getNumber() ));
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-
-
-      for (RImageEntity image : tmp) {
-        adapter.add( image );
-      }
-
-      showPdf();
-
-      no_files.setVisibility(View.GONE);
-      pdf_wrapper.setVisibility(View.VISIBLE);
-
-    } else {
-      disablePdfView();
-      no_files.setVisibility(View.VISIBLE);
-      pdf_wrapper.setVisibility(View.GONE);
-      open_in_another_app_wrapper.setVisibility(View.GONE);
-    }
-
   }
 
   private void setPdfPreview() throws FileNotFoundException {

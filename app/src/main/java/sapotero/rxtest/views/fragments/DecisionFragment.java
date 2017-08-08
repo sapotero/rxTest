@@ -480,6 +480,10 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     // Показывать организации в поиске исполнителей
     oshs.withOrganizations(true);
 
+    // resolved https://tasks.n-core.ru/browse/MVDESD-14013
+    // Диалог добавления исполнителей
+    oshs.withPerformers(true);
+
     oshs.registerCallBack( this );
 
     ArrayList<String> users = new ArrayList<>();
