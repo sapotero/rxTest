@@ -263,7 +263,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       .get().firstOrNull();
   }
 
-  void printLog(OperationResult data, String TAG) {
+  public void printLog(OperationResult data, String TAG) {
     Timber.tag(TAG).i("ok: %s", data.getOk());
     Timber.tag(TAG).i("error: %s", data.getMessage());
     Timber.tag(TAG).i("type: %s", data.getType());

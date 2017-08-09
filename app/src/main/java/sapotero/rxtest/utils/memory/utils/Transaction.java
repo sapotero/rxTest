@@ -65,6 +65,15 @@ public class Transaction {
         case FAVORITES:
           document.getDocument().setFavorites(value);
           break;
+        case RETURNED:
+          document.getDocument().setReturned(value);
+          break;
+        case REJECTED:
+          document.getDocument().setRejected(value);
+          break;
+        case AGAIN:
+          document.getDocument().setAgain(value);
+          break;
       }
     }
   }

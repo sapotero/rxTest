@@ -17,7 +17,7 @@ public abstract class ApprovalSigningCommand extends AbstractCommand {
     super(params);
   }
 
-  private Observable<OperationResult> getOperationResultObservable() {
+  protected Observable<OperationResult> getOperationResultObservable() {
     Retrofit retrofit = getOperationsRetrofit();
 
     OperationService operationService = retrofit.create( OperationService.class );
