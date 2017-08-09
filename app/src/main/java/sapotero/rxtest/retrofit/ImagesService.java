@@ -1,5 +1,7 @@
 package sapotero.rxtest.retrofit;
 
+import okhttp3.RequestBody;
+import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
@@ -13,7 +15,7 @@ public interface ImagesService {
     @Path("image_id") String image_id,
     @Query("login") String login,
     @Query("auth_token") String auth_token,
-    @Query("sign") String sign
+    @Body RequestBody body
   );
 
   @GET("/v2/images/{image_id}.json")

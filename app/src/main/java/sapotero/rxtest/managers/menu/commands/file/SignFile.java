@@ -2,6 +2,7 @@ package sapotero.rxtest.managers.menu.commands.file;
 
 import java.util.Collections;
 
+import okhttp3.RequestBody;
 import retrofit2.Retrofit;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
@@ -87,11 +88,13 @@ public class SignFile extends AbstractCommand {
     if (file_sign != null) {
       Timber.tag(TAG).d("Sign generated");
 
+      RequestBody signBody = getSignBody(file_sign);
+
       Observable<Object> info = imagesService.update(
         getParams().getImageId(),
         getParams().getLogin(),
         settings.getToken(),
-        file_sign
+        signBody
       );
 
       Timber.tag(TAG).d("Sending image sign request");

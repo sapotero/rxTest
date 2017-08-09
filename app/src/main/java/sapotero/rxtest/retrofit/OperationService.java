@@ -2,6 +2,8 @@ package sapotero.rxtest.retrofit;
 
 import java.util.ArrayList;
 
+import okhttp3.RequestBody;
+import retrofit2.http.Body;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
@@ -60,7 +62,7 @@ public interface OperationService{
     @Query("operation_data[comment]") String operation_data,
     @Query("status_code") String status_code,
     @Query("operation_data[official_id]") String official_id,
-    @Query("sign") String sign
+    @Body RequestBody body
   );
 
   @PUT("{operation_name}.json")

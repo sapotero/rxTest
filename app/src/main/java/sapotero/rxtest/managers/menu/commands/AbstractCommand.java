@@ -1,5 +1,7 @@
 package sapotero.rxtest.managers.menu.commands;
 
+import com.google.gson.Gson;
+
 import org.acra.ACRA;
 
 import java.io.IOException;
@@ -13,7 +15,9 @@ import javax.inject.Inject;
 
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
+import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
@@ -32,6 +36,7 @@ import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.DocumentsService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
+import sapotero.rxtest.retrofit.models.wrapper.SignWrapper;
 import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
@@ -103,6 +108,18 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     }
 
     return sign;
+  }
+
+  protected RequestBody getSignBody(String sign) {
+    SignWrapper signWrapper = new SignWrapper();
+    signWrapper.setSign(sign);
+
+    String signJson = new Gson().toJson( signWrapper );
+
+    return RequestBody.create(
+      MediaType.parse("application/json"),
+      signJson
+    );
   }
 
   private RDocumentEntity findDocumentByUID(){

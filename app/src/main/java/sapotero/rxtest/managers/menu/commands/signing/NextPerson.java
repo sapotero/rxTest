@@ -1,7 +1,5 @@
 package sapotero.rxtest.managers.menu.commands.signing;
 
-import com.google.gson.Gson;
-
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.Collections;
@@ -127,16 +125,11 @@ public class NextPerson extends ApprovalSigningCommand {
     for (RImage img : images) {
       RImageEntity image = (RImageEntity) img;
 
-      Timber.tag(TAG).e("++image: %s", new Gson().toJson(image)  );
-
-
       boolean isSigned = image.isSigned() != null ? image.isSigned() : false;
 
       if ( !isSigned ) {
 
         RSignImageEntity signImage = getSignImage( image.getImageId() );
-
-        Timber.tag(TAG).e("+++signImage: %s", new Gson().toJson(signImage)  );
 
         if ( signImage == null ) {
           signImage = createNewSignImage( image.getImageId() );
