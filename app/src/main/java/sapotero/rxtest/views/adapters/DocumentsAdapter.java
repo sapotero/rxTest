@@ -179,6 +179,23 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
         viewHolder.date.setTextColor( ContextCompat.getColor(mContext, R.color.md_grey_800 ) );
       }
 
+      if ( item.isReturned() ) {
+        viewHolder.returned_label.setVisibility(View.VISIBLE);
+      } else {
+        viewHolder.returned_label.setVisibility(View.GONE);
+      }
+
+      if ( item.isRejected() ) {
+        viewHolder.rejected_label.setVisibility(View.VISIBLE);
+      } else {
+        viewHolder.rejected_label.setVisibility(View.GONE);
+      }
+
+      if ( item.isAgain() ) {
+        viewHolder.again_label.setVisibility(View.VISIBLE);
+      } else {
+        viewHolder.again_label.setVisibility(View.GONE);
+      }
     }
 
 
@@ -250,6 +267,9 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     private TextView badge;
     private TextView control_label;
     private TextView favorite_label;
+    private TextView returned_label;
+    private TextView rejected_label;
+    private TextView again_label;
 
     private CardView cv;
     private TextView title;
@@ -272,9 +292,15 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
       sync_label = (TextView)itemView.findViewById(R.id.sync_label);
       control_label  = (TextView)itemView.findViewById(R.id.control_label);
       lock_label  = (TextView)itemView.findViewById(R.id.lock_label);
+      returned_label  = (TextView)itemView.findViewById(R.id.returned_label);
+      rejected_label  = (TextView)itemView.findViewById(R.id.rejected_label);
+      again_label  = (TextView)itemView.findViewById(R.id.again_label);
 
       favorite_label.setVisibility(View.GONE);
       control_label.setVisibility(View.GONE);
+      returned_label.setVisibility(View.GONE);
+      rejected_label.setVisibility(View.GONE);
+      again_label.setVisibility(View.GONE);
     }
 
     public int getBackgroundResourceId() {

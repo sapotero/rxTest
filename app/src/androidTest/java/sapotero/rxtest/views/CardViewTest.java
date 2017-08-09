@@ -70,6 +70,9 @@ public class CardViewTest {
     String dummySync = "dummySync";
     String dummyControl = "dummyControl";
     String dummyLock = "dummyLock";
+    String dummyReturned = "dummyReturned";
+    String dummyRejected = "dummyRejected";
+    String dummyAgain = "dummyAgain";
 
     activity.runOnUiThread(() -> {
       TextView title = (TextView) activity.findViewById(R.id.swipe_layout_title);
@@ -81,6 +84,9 @@ public class CardViewTest {
       TextView sync_label = (TextView) activity.findViewById(R.id.sync_label);
       TextView control_label = (TextView) activity.findViewById(R.id.control_label);
       TextView lock_label = (TextView) activity.findViewById(R.id.lock_label);
+      TextView returned_label = (TextView) activity.findViewById(R.id.returned_label);
+      TextView rejected_label = (TextView) activity.findViewById(R.id.rejected_label);
+      TextView again_label = (TextView) activity.findViewById(R.id.again_label);
 
       title.setText( dummyTitle );
       subtitle.setText( dummySubtitle );
@@ -91,6 +97,9 @@ public class CardViewTest {
       sync_label.setText( dummySync );
       control_label.setText( dummyControl );
       lock_label.setText( dummyLock );
+      returned_label.setText( dummyReturned );
+      rejected_label.setText( dummyRejected );
+      again_label.setText( dummyAgain );
     });
 
     instrumentation.waitForIdleSync();
@@ -104,5 +113,8 @@ public class CardViewTest {
     onView( withText( dummySync )).check(matches(isDisplayed()));
     onView( withText( dummyControl )).check(matches(isDisplayed()));
     onView( withText( dummyLock )).check(matches(withEffectiveVisibility(ViewMatchers.Visibility.GONE)));
+    onView( withText( dummyReturned )).check(matches(isDisplayed()));
+    onView( withText( dummyRejected )).check(matches(isDisplayed()));
+    onView( withText( dummyAgain )).check(matches(isDisplayed()));
   }
 }
