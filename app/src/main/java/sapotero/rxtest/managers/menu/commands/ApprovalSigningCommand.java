@@ -1,8 +1,12 @@
 package sapotero.rxtest.managers.menu.commands;
 
+import com.google.gson.Gson;
+
 import java.util.ArrayList;
 import java.util.Collections;
 
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
 import retrofit2.Retrofit;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
@@ -10,6 +14,8 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
+import sapotero.rxtest.retrofit.models.wrapper.SignWrapper;
+import timber.log.Timber;
 
 public abstract class ApprovalSigningCommand extends AbstractCommand {
 
@@ -35,6 +41,8 @@ public abstract class ApprovalSigningCommand extends AbstractCommand {
     Observable<OperationResult> info;
 
     if (sign != null) {
+      RequestBody signBody = getSignBody(sign);
+
       info = operationService.approvalSign(
         getType(),
         getParams().getLogin(),
@@ -43,8 +51,9 @@ public abstract class ApprovalSigningCommand extends AbstractCommand {
         comment,
         getParams().getStatusCode(),
         getParams().getPerson(),
-        sign
+        signBody
       );
+
     } else {
       info = null;
     }
