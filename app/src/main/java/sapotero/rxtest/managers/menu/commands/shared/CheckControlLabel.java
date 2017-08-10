@@ -8,8 +8,6 @@ import timber.log.Timber;
 
 public class CheckControlLabel extends SharedCommand {
 
-  private String TAG = this.getClass().getSimpleName();
-
   public CheckControlLabel(CommandParams params) {
     super(params);
   }
@@ -60,7 +58,7 @@ public class CheckControlLabel extends SharedCommand {
 
   @Override
   public void executeRemote() {
-    remoteControlLabelOperation( this, TAG );
+    remoteControlLabelOperation();
   }
 
   @Override

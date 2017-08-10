@@ -16,8 +16,6 @@ import timber.log.Timber;
 
 public class SignFile extends AbstractCommand {
 
-  private String TAG = this.getClass().getSimpleName();
-
   public SignFile(CommandParams params) {
     super(params);
   }

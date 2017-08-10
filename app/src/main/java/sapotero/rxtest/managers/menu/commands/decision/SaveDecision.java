@@ -23,8 +23,6 @@ import timber.log.Timber;
 
 public class SaveDecision extends DecisionCommand {
 
-  private String TAG = this.getClass().getSimpleName();
-
   public SaveDecision(CommandParams params) {
     super(params);
   }
@@ -128,16 +126,16 @@ public class SaveDecision extends DecisionCommand {
     Decision _decision = getParams().getDecisionModel();
     _decision.setDocumentUid( null );
 
-    Observable<DecisionError> info = getDecisionUpdateOperationObservable(_decision, TAG);
+    Observable<DecisionError> info = getDecisionUpdateOperationObservable(_decision);
 
     info.subscribeOn( Schedulers.computation() )
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         data -> {
-          onSuccess( this, data, false, true, TAG );
+          onSuccess( data, false, true );
           finishOperationOnSuccess();
         },
-        error -> onError( this, error.getLocalizedMessage(), true, TAG )
+        error -> onError( error.getLocalizedMessage(), true )
       );
   }
 }

@@ -26,27 +26,27 @@ public abstract class SharedCommand extends AbstractCommand {
     super(params);
   }
 
-  public void onError(Command command, String message) {
+  public void onError(String message) {
     if (callback != null){
       callback.onCommandExecuteError(getType());
     }
 
     if ( settings.isOnline() ) {
-      queueManager.setExecutedWithError( command, Collections.singletonList( message ) );
+      queueManager.setExecutedWithError( this, Collections.singletonList( message ) );
       setError();
     }
   }
 
   protected abstract void setError();
 
-  private void checkMessage(Command command, String message, boolean recalculateMenu) {
+  private void checkMessage(String message, boolean recalculateMenu) {
     Timber.tag("RecyclerViewRefresh").d("SharedCommand: response message: %s", message);
 
     if (message != null && !message.toLowerCase().contains("успешно") ) {
-      queueManager.setExecutedWithError( command, Collections.singletonList( message ) );
+      queueManager.setExecutedWithError( this, Collections.singletonList( message ) );
       setError();
     } else {
-      queueManager.setExecutedRemote( command );
+      queueManager.setExecutedRemote( this );
       setSuccess();
       if ( recalculateMenu ) {
         EventBus.getDefault().post( new RecalculateMenuEvent() );
@@ -56,8 +56,8 @@ public abstract class SharedCommand extends AbstractCommand {
 
   protected abstract void setSuccess();
 
-  private void onControlLabelSuccess(Command command, OperationResult result, RDocumentEntity doc, String TAG) {
-    printLog( result, TAG );
+  private void onControlLabelSuccess(OperationResult result, RDocumentEntity doc) {
+    printOperationResult( result );
 
     if ( Objects.equals(result.getType(), "danger") && result.getMessage() != null){
       EventBus.getDefault().post( new ShowSnackEvent( result.getMessage() ));
@@ -66,17 +66,17 @@ public abstract class SharedCommand extends AbstractCommand {
         EventBus.getDefault().post( new DropControlEvent( doc.isControl() ));
       }
 
-      queueManager.setExecutedWithError( command, Collections.singletonList( result.getMessage() ) );
+      queueManager.setExecutedWithError( this, Collections.singletonList( result.getMessage() ) );
       setError();
 
     } else {
-      checkMessage( command, result.getMessage(), false );
+      checkMessage( result.getMessage(), false );
     }
   }
 
-  private void onFolderSuccess(Command command, OperationResult data, boolean recalculateMenu, String TAG) {
-    printLog( data, TAG );
-    checkMessage( command, data.getMessage(), recalculateMenu );
+  private void onFolderSuccess(OperationResult data, boolean recalculateMenu) {
+    printOperationResult( data );
+    checkMessage( data.getMessage(), recalculateMenu );
   }
 
   private Observable<OperationResult> getOperationResultObservable() {
@@ -101,21 +101,21 @@ public abstract class SharedCommand extends AbstractCommand {
     );
   }
 
-  protected void remoteFolderOperation(Command command, boolean recalculateMenu, String TAG) {
-    printCommandType( command, TAG );
+  protected void remoteFolderOperation(boolean recalculateMenu) {
+    printCommandType();
 
     Observable<OperationResult> info = getOperationResultObservable();
 
     info.subscribeOn( Schedulers.computation() )
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
-        data -> onFolderSuccess( command, data, recalculateMenu, TAG ),
-        error -> onError( command, error.getLocalizedMessage() )
+        data -> onFolderSuccess( data, recalculateMenu ),
+        error -> onError( error.getLocalizedMessage() )
       );
   }
 
-  protected void remoteControlLabelOperation(Command command, String TAG) {
-    printCommandType( command, TAG );
+  protected void remoteControlLabelOperation() {
+    printCommandType();
 
     Observable<OperationResult> info = getOperationResultObservable();
 
@@ -127,8 +127,8 @@ public abstract class SharedCommand extends AbstractCommand {
     info.subscribeOn( Schedulers.computation() )
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
-        result -> onControlLabelSuccess( command, result, doc, TAG ),
-        error -> onError( command, error.getLocalizedMessage() )
+        result -> onControlLabelSuccess( result, doc ),
+        error -> onError( error.getLocalizedMessage() )
       );
   }
 }

@@ -24,8 +24,6 @@ import timber.log.Timber;
 
 public class ApproveDecision extends DecisionCommand {
 
-  private String TAG = this.getClass().getSimpleName();
-
   public ApproveDecision(CommandParams params) {
     super(params);
   }
@@ -131,20 +129,20 @@ public class ApproveDecision extends DecisionCommand {
         _decision.setAssignment(true);
       }
 
-      Observable<DecisionError> info = getDecisionUpdateOperationObservable(_decision, TAG);
+      Observable<DecisionError> info = getDecisionUpdateOperationObservable(_decision);
 
       info.subscribeOn( Schedulers.computation() )
         .observeOn( AndroidSchedulers.mainThread() )
         .subscribe(
           data -> {
-            onSuccess( this, data, true, false, TAG );
+            onSuccess( data, true, false );
             finishOperationOnSuccess();
           },
-          error -> onError( this, error.getLocalizedMessage(), true, TAG )
+          error -> onError( error.getLocalizedMessage(), true )
         );
 
     } else {
-      onError( this, SIGN_ERROR_MESSAGE, true, TAG );
+      onError( SIGN_ERROR_MESSAGE, true );
     }
   }
 }

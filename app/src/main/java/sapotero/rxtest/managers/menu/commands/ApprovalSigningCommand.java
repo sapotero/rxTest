@@ -1,11 +1,8 @@
 package sapotero.rxtest.managers.menu.commands;
 
-import com.google.gson.Gson;
-
 import java.util.ArrayList;
 import java.util.Collections;
 
-import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Retrofit;
 import rx.Observable;
@@ -14,7 +11,6 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
-import sapotero.rxtest.retrofit.models.wrapper.SignWrapper;
 import timber.log.Timber;
 
 public abstract class ApprovalSigningCommand extends AbstractCommand {
@@ -61,7 +57,7 @@ public abstract class ApprovalSigningCommand extends AbstractCommand {
     return info;
   }
 
-  protected void remoteOperation(String TAG) {
+  protected void remoteOperation() {
     Observable<OperationResult> info = getOperationResultObservable();
 
     if (info != null) {
@@ -69,7 +65,7 @@ public abstract class ApprovalSigningCommand extends AbstractCommand {
         .observeOn( AndroidSchedulers.mainThread() )
         .subscribe(
           data -> {
-            printLog( data, TAG );
+            printOperationResult( data );
 
             if (data.getMessage() != null && !data.getMessage().toLowerCase().contains("успешно") ) {
               queueManager.setExecutedWithError(this, Collections.singletonList( data.getMessage() ) );
@@ -80,23 +76,23 @@ public abstract class ApprovalSigningCommand extends AbstractCommand {
             finishOperationOnSuccess();
           },
           error -> {
-            onError(error.getLocalizedMessage(), TAG);
+            onError(error.getLocalizedMessage());
           }
         );
 
     } else {
-      onError(SIGN_ERROR_MESSAGE, TAG);
+      onError(SIGN_ERROR_MESSAGE);
     }
   }
 
-  private void onError(String errorMessage, String TAG) {
-    onError( this, errorMessage, true, TAG );
+  private void onError(String errorMessage) {
+    onError( errorMessage, true );
     onRemoteError();
   }
 
   public abstract void onRemoteError();
 
-  protected void remoteRejectedOperation(String TAG) {
+  protected void remoteRejectedOperation() {
     Observable<OperationResult> info = getOperationResultObservable();
 
     if (info != null) {
@@ -104,33 +100,21 @@ public abstract class ApprovalSigningCommand extends AbstractCommand {
         .observeOn( AndroidSchedulers.mainThread() )
         .subscribe(
           data -> {
-            printLog( data, TAG );
+            printOperationResult( data );
 
             if (data.getMessage() != null && !data.getMessage().toLowerCase().contains("успешно") ) {
               sendErrorCallback( data.getMessage() );
               finishRejectedOperationOnError( data.getMessage() );
             } else {
-              finishRejectedOperationOnSuccess( TAG );
+              finishRejectedOperationOnSuccess();
             }
           },
 
-          error -> handleRejectedOperationError( error.getLocalizedMessage(), TAG )
+          error -> handleRejectedOperationError( error.getLocalizedMessage() )
         );
 
     } else {
-      handleRejectedOperationError( SIGN_ERROR_MESSAGE, TAG );
+      handleRejectedOperationError( SIGN_ERROR_MESSAGE );
     }
-  }
-
-  private void handleRejectedOperationError(String errorMessage, String TAG) {
-    Timber.tag(TAG).i("error: %s", errorMessage);
-
-    sendErrorCallback( errorMessage );
-
-    if ( settings.isOnline() ) {
-      finishRejectedOperationOnError( errorMessage );
-    }
-
-    onRemoteError();
   }
 }

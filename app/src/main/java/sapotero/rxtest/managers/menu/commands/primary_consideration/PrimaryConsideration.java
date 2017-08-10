@@ -8,7 +8,6 @@ import retrofit2.Retrofit;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -17,8 +16,6 @@ import sapotero.rxtest.retrofit.models.OperationResult;
 import timber.log.Timber;
 
 public class PrimaryConsideration extends AbstractCommand {
-
-  private String TAG = this.getClass().getSimpleName();
 
   public PrimaryConsideration(CommandParams params) {
     super(params);
@@ -30,31 +27,12 @@ public class PrimaryConsideration extends AbstractCommand {
 
   @Override
   public void execute() {
-    dataStore
-      .update(RDocumentEntity.class)
-      .set(RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq( params.getDocument() ))
-      .get()
-      .value();
-
     queueManager.add(this);
-
-    setDocOperationProcessedStartedInMemory();
-    setAsProcessed();
-  }
-
-  private void update(){
-    String uid = getParams().getDocument();
-
-    dataStore
-      .update(RDocumentEntity.class)
-      .set( RDocumentEntity.PROCESSED, true)
-      .set( RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq(uid))
-      .get()
-      .value();
-
     EventBus.getDefault().post( new ShowNextDocumentEvent( true, getParams().getDocument() ));
+
+    saveOldLabelValues();
+    startRejectedOperationInMemory();
+    setAsProcessed();
   }
 
   @Override
@@ -64,20 +42,8 @@ public class PrimaryConsideration extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    dataStore
-      .update(RDocumentEntity.class)
-      .set( RDocumentEntity.PROCESSED, true)
-      .set( RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq(getParams().getDocument()))
-      .get()
-      .value();
-
-    if ( callback != null ){
-      callback.onCommandExecuteSuccess( getType() );
-    }
-
-    update();
-
+    startRejectedOperationInDb();
+    sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }
 
@@ -106,16 +72,12 @@ public class PrimaryConsideration extends AbstractCommand {
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         data -> {
-          Timber.tag(TAG).i("ok: %s", data.getOk());
-          Timber.tag(TAG).i("error: %s", data.getMessage());
-          Timber.tag(TAG).i("type: %s", data.getType());
+          printOperationResult( data );
 
-          queueManager.setExecutedRemote(this);
-
-          finishOperationOnSuccess();
-
+          finishRejectedOperationOnSuccess();
         },
-        error -> onError( this, error.getLocalizedMessage(), true, TAG )
+
+        error -> handleRejectedOperationError( error.getLocalizedMessage() )
       );
   }
 }

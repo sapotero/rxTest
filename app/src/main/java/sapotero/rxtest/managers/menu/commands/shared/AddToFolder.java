@@ -9,8 +9,6 @@ import timber.log.Timber;
 
 public class AddToFolder extends SharedCommand {
 
-  private String TAG = this.getClass().getSimpleName();
-
   public AddToFolder(CommandParams params) {
     super(params);
   }
@@ -58,7 +56,7 @@ public class AddToFolder extends SharedCommand {
 
   @Override
   public void executeRemote() {
-    remoteFolderOperation( this, false, TAG );
+    remoteFolderOperation( false );
   }
 
   @Override

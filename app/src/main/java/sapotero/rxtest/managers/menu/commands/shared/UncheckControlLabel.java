@@ -8,8 +8,6 @@ import timber.log.Timber;
 
 public class UncheckControlLabel extends SharedCommand {
 
-  private String TAG = this.getClass().getSimpleName();
-
   public UncheckControlLabel(CommandParams params) {
     super(params);
   }
@@ -60,7 +58,7 @@ public class UncheckControlLabel extends SharedCommand {
 
   @Override
   public void executeRemote() {
-    remoteControlLabelOperation( this, TAG );
+    remoteControlLabelOperation();
   }
 
   @Override

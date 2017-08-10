@@ -18,8 +18,6 @@ import timber.log.Timber;
 
 public class ApprovalPerformance extends AbstractCommand {
 
-  private String TAG = this.getClass().getSimpleName();
-
   public ApprovalPerformance(CommandParams params) {
     super(params);
   }

@@ -23,8 +23,6 @@ public class NextPerson extends ApprovalSigningCommand {
   private static final int IMAGE_SIGN_ERROR = 1;
   private static final int NOT_ALL_IMAGES_SIGNED = 2;
 
-  private String TAG = this.getClass().getSimpleName();
-
   public NextPerson(CommandParams params) {
     super(params);
   }
@@ -83,12 +81,12 @@ public class NextPerson extends ApprovalSigningCommand {
 
   @Override
   public void executeRemote() {
-    printCommandType( this, TAG );
+    printCommandType();
 
     int result = signImages();
 
     if ( result == ALL_IMAGES_SIGNED ) {
-      remoteOperation(TAG);
+      remoteOperation();
     }
 
     if ( result == IMAGE_SIGN_ERROR ) {
@@ -99,7 +97,7 @@ public class NextPerson extends ApprovalSigningCommand {
         callback.onCommandExecuteError( errorMessage );
       }
 
-      finishOperationProcessedOnError( this, Collections.singletonList( errorMessage ) );
+      finishOperationProcessedOnError( Collections.singletonList( errorMessage ) );
     }
   }
 

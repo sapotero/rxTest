@@ -13,8 +13,6 @@ import timber.log.Timber;
 
 public class RemoveFromFolder extends SharedCommand {
 
-  private String TAG = this.getClass().getSimpleName();
-
   public RemoveFromFolder(CommandParams params) {
     super(params);
   }
@@ -60,7 +58,7 @@ public class RemoveFromFolder extends SharedCommand {
 
   @Override
   public void executeRemote() {
-    remoteFolderOperation( this, true, TAG );
+    remoteFolderOperation( true );
   }
 
   @Override

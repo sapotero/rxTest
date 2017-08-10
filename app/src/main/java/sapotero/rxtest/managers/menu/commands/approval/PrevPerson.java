@@ -8,8 +8,6 @@ import sapotero.rxtest.managers.menu.utils.CommandParams;
 
 public class PrevPerson extends ApprovalSigningCommand {
 
-  private String TAG = this.getClass().getSimpleName();
-
   public PrevPerson(CommandParams params) {
     super(params);
   }
@@ -42,8 +40,8 @@ public class PrevPerson extends ApprovalSigningCommand {
 
   @Override
   public void executeRemote() {
-    printCommandType( this, TAG );
-    remoteRejectedOperation( TAG );
+    printCommandType();
+    remoteRejectedOperation();
   }
 
   @Override

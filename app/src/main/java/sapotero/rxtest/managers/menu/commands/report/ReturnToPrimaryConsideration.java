@@ -18,8 +18,6 @@ import timber.log.Timber;
 
 public class ReturnToPrimaryConsideration extends AbstractCommand {
 
-  private String TAG = this.getClass().getSimpleName();
-
   public ReturnToPrimaryConsideration(CommandParams params) {
     super(params);
   }
@@ -95,16 +93,14 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         data -> {
-          Timber.tag(TAG).i("ok: %s", data.getOk());
-          Timber.tag(TAG).i("error: %s", data.getMessage());
-          Timber.tag(TAG).i("type: %s", data.getType());
+          printOperationResult( data );
 
           queueManager.setExecutedRemote(this);
 
           finishOperationOnSuccess();
 
         },
-        error -> onError( this, error.getLocalizedMessage(), true, TAG )
+        error -> onError( error.getLocalizedMessage(), true )
       );
   }
 }

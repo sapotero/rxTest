@@ -12,8 +12,6 @@ import timber.log.Timber;
 
 public class NextPerson extends ApprovalSigningCommand {
 
-  private String TAG = this.getClass().getSimpleName();
-
   public NextPerson(CommandParams params) {
     super(params);
   }
@@ -70,8 +68,8 @@ public class NextPerson extends ApprovalSigningCommand {
       setTaskStarted( getParams().getDocument(), true );
     }
 
-    printCommandType( this, TAG );
-    remoteOperation(TAG);
+    printCommandType();
+    remoteOperation();
   }
 
   private RApprovalNextPersonEntity createNewRApprovalNextPersonEntity(String uid) {

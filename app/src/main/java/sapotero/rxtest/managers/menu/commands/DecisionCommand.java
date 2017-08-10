@@ -24,7 +24,7 @@ public abstract class DecisionCommand extends AbstractCommand {
     super(params);
   }
 
-  protected Observable<DecisionError> getDecisionCreateOperationObservable(Decision decision, String TAG) {
+  protected Observable<DecisionError> getDecisionCreateOperationObservable(Decision decision) {
     String json_m = new Gson().toJson( decision );
 
     RequestBody json = RequestBody.create(
@@ -45,7 +45,7 @@ public abstract class DecisionCommand extends AbstractCommand {
     );
   }
 
-  protected Observable<DecisionError> getDecisionUpdateOperationObservable(Decision decision, String TAG) {
+  protected Observable<DecisionError> getDecisionUpdateOperationObservable(Decision decision) {
     DecisionWrapper wrapper = new DecisionWrapper();
     wrapper.setDecision(decision);
 
@@ -71,23 +71,23 @@ public abstract class DecisionCommand extends AbstractCommand {
     );
   }
 
-  protected void onSuccess(Command command, DecisionError data, boolean sendEvents, boolean updateDecisionFirstTable, String TAG) {
+  protected void onSuccess(DecisionError data, boolean sendEvents, boolean updateDecisionFirstTable) {
     if ( notEmpty( data.getErrors() ) ) {
-      queueManager.setExecutedWithError(command, data.getErrors());
+      queueManager.setExecutedWithError(this, data.getErrors());
 
       if ( sendEvents ) {
         EventBus.getDefault().post( new ForceUpdateDocumentEvent( data.getDocumentUid() ));
       }
 
     } else {
-      queueManager.setExecutedRemote(command);
+      queueManager.setExecutedRemote(this);
 
       if ( sendEvents ) {
         EventBus.getDefault().post( new UpdateDocumentEvent( data.getDocumentUid() ));
       }
 
       if ( updateDecisionFirstTable ) {
-        checkCreatorAndSignerIsCurrentUser(data, TAG);
+        checkCreatorAndSignerIsCurrentUser(data);
       }
     }
   }

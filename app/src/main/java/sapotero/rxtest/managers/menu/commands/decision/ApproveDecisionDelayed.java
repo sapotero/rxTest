@@ -15,8 +15,6 @@ import timber.log.Timber;
 
 public class ApproveDecisionDelayed extends DecisionCommand {
 
-  private String TAG = this.getClass().getSimpleName();
-
   public ApproveDecisionDelayed(CommandParams params) {
     super(params);
   }
@@ -81,13 +79,13 @@ public class ApproveDecisionDelayed extends DecisionCommand {
         _decision.setAssignment(true);
       }
 
-      Observable<DecisionError> info = getDecisionUpdateOperationObservable(_decision, TAG);
+      Observable<DecisionError> info = getDecisionUpdateOperationObservable(_decision);
 
       info.subscribeOn( Schedulers.computation() )
         .observeOn( AndroidSchedulers.mainThread() )
         .subscribe(
           data -> {
-            onSuccess( this, data, true, false, TAG );
+            onSuccess( data, true, false );
           },
           error -> {
             Timber.tag(TAG).i("error: %s", error);

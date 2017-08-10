@@ -62,6 +62,8 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
 
   protected static final String SIGN_ERROR_MESSAGE = "Произошла ошибка электронной подписи";
 
+  public String TAG = this.getClass().getSimpleName();
+
   public CommandParams params;
 
   private boolean returnedOldValue;
@@ -74,6 +76,10 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
 
   public CommandParams getParams() {
     return params;
+  }
+
+  public String getTAG() {
+    return TAG;
   }
 
   public Callback callback;
@@ -169,7 +175,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13258
   // 1. Созданные мной и подписант я
-  void checkCreatorAndSignerIsCurrentUser(DecisionError data, String TAG) {
+  void checkCreatorAndSignerIsCurrentUser(DecisionError data) {
     String decisionUid = data.getDecisionUid();
 
     // Если создал резолюцию я и подписант я, то сохранить UID этой резолюции в отдельную таблицу
@@ -234,12 +240,12 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       .value();
   }
 
-  private void finishOperationOnError(Command command, List<String> errors) {
+  private void finishOperationOnError(List<String> errors) {
     finishOperationOnSuccess();
-    queueManager.setExecutedWithError( command, errors );
+    queueManager.setExecutedWithError( this, errors );
   }
 
-  protected void finishOperationProcessedOnError(Command command, List<String> errors) {
+  protected void finishOperationProcessedOnError(List<String> errors) {
     Timber.tag("RecyclerViewRefresh").d("Command: Remove sync label");
 
     store.process(
@@ -257,14 +263,14 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       .get()
       .value();
 
-    queueManager.setExecutedWithError( command, errors );
+    queueManager.setExecutedWithError( this, errors );
   }
 
   public <T> boolean notEmpty(Collection<T> collection) {
     return collection != null && collection.size() > 0;
   }
 
-  public void onError(Command command, String errorMessage, boolean setProcessedFalse, String TAG) {
+  public void onError(String errorMessage, boolean setProcessedFalse) {
     Timber.tag(TAG).i("error: %s", errorMessage);
 
     if (callback != null){
@@ -273,9 +279,9 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
 
     if ( settings.isOnline() ) {
       if ( setProcessedFalse ) {
-        finishOperationProcessedOnError( command, Collections.singletonList( errorMessage ) );
+        finishOperationProcessedOnError( Collections.singletonList( errorMessage ) );
       } else {
-        finishOperationOnError( command, Collections.singletonList( errorMessage ) );
+        finishOperationOnError( Collections.singletonList( errorMessage ) );
       }
     }
   }
@@ -287,14 +293,14 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       .get().firstOrNull();
   }
 
-  void printLog(OperationResult data, String TAG) {
+  protected void printOperationResult(OperationResult data) {
     Timber.tag(TAG).i("ok: %s", data.getOk());
     Timber.tag(TAG).i("error: %s", data.getMessage());
     Timber.tag(TAG).i("type: %s", data.getType());
   }
 
-  protected void printCommandType(Command command, String TAG) {
-    Timber.tag(TAG).i( "type: %s", command.getClass().getName() );
+  protected void printCommandType() {
+    Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
   }
 
   protected void sendSuccessCallback() {
@@ -340,7 +346,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       .value();
   }
 
-  void finishRejectedOperationOnSuccess(String TAG) {
+  protected void finishRejectedOperationOnSuccess() {
     store.process(
       store.startTransactionFor( getParams().getDocument() )
         .removeLabel(LabelType.SYNC)
@@ -354,12 +360,12 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       .get()
       .value();
 
-    setDocumentCondition( DocumentCondition.REJECTED, TAG );
+    setDocumentCondition( DocumentCondition.REJECTED );
 
     queueManager.setExecutedRemote(this);
   }
 
-  private void setDocumentCondition(DocumentCondition documentCondition, String TAG) {
+  private void setDocumentCondition(DocumentCondition documentCondition) {
     RReturnedRejectedAgainEntity returnedRejectedAgainEntity = dataStore
       .select( RReturnedRejectedAgainEntity.class )
       .where( RReturnedRejectedAgainEntity.DOCUMENT_UID.eq( getParams().getDocument() ) )
@@ -428,4 +434,13 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     queueManager.setExecutedWithError( this, Collections.singletonList( errorMessage ) );
   }
 
+  protected void handleRejectedOperationError(String errorMessage) {
+    Timber.tag(TAG).i("error: %s", errorMessage);
+
+    sendErrorCallback( errorMessage );
+
+    if ( settings.isOnline() ) {
+      finishRejectedOperationOnError( errorMessage );
+    }
+  }
 }

@@ -17,8 +17,6 @@ import timber.log.Timber;
 
 public class DelegatePerformance extends AbstractCommand {
 
-  private String TAG = this.getClass().getSimpleName();
-
   public DelegatePerformance(CommandParams params) {
     super(params);
   }

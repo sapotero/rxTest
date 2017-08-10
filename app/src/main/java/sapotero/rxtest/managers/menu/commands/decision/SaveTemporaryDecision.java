@@ -17,8 +17,6 @@ import timber.log.Timber;
 
 public class SaveTemporaryDecision extends DecisionCommand {
 
-  private String TAG = this.getClass().getSimpleName();
-
   public SaveTemporaryDecision(CommandParams params) {
     super(params);
   }

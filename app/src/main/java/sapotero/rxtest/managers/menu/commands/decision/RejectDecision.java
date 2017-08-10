@@ -19,8 +19,6 @@ import timber.log.Timber;
 
 public class RejectDecision extends DecisionCommand {
 
-  private String TAG = this.getClass().getSimpleName();
-
   public RejectDecision(CommandParams params) {
     super(params);
   }
@@ -99,16 +97,16 @@ public class RejectDecision extends DecisionCommand {
       formated_decision.setComment( String.format( "Причина отклонения: %s", getParams().getComment() ) );
     }
 
-    Observable<DecisionError> info = getDecisionUpdateOperationObservable(formated_decision, TAG);
+    Observable<DecisionError> info = getDecisionUpdateOperationObservable(formated_decision);
 
     info.subscribeOn( Schedulers.computation() )
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         data -> {
-          onSuccess( this, data, true, false, TAG );
+          onSuccess( data, true, false );
           finishOperationOnSuccess();
         },
-        error -> onError( this, error.getLocalizedMessage(), false, TAG )
+        error -> onError( error.getLocalizedMessage(), false )
       );
   }
 }

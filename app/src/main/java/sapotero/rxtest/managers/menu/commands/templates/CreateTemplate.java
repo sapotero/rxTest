@@ -21,8 +21,6 @@ import timber.log.Timber;
 
 public class CreateTemplate extends AbstractCommand {
 
-  private String TAG = this.getClass().getSimpleName();
-
   public CreateTemplate(CommandParams params) {
     super(params);
   }
