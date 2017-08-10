@@ -51,9 +51,7 @@ public class CheckControlLabel extends SharedCommand {
 
     queueManager.setExecutedLocal(this);
 
-    if ( callback != null ){
-      callback.onCommandExecuteSuccess( getType() );
-    }
+    sendSuccessCallback();
   }
 
   @Override

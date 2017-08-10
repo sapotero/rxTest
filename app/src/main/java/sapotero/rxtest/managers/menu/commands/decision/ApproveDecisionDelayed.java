@@ -30,9 +30,7 @@ public class ApproveDecisionDelayed extends DecisionCommand {
   }
 
   public void update() {
-    if (callback != null ){
-      callback.onCommandExecuteSuccess( getType() );
-    }
+    sendSuccessCallback();
 
     try {
       dataStore
@@ -53,9 +51,7 @@ public class ApproveDecisionDelayed extends DecisionCommand {
   public void executeLocal() {
     update();
 
-    if ( callback != null ){
-      callback.onCommandExecuteSuccess( getType() );
-    }
+    sendSuccessCallback();
 
     queueManager.setExecutedLocal(this);
   }
@@ -89,18 +85,14 @@ public class ApproveDecisionDelayed extends DecisionCommand {
           },
           error -> {
             Timber.tag(TAG).i("error: %s", error);
-            if (callback != null){
-              callback.onCommandExecuteError(getType());
-            }
+            sendErrorCallback( getType() );
 //            queueManager.setExecutedWithError(this, Collections.singletonList("http_error"));
             EventBus.getDefault().post( new ForceUpdateDocumentEvent( getParams().getDocument() ));
           }
         );
     } else {
       Timber.tag(TAG).i("error: no decision yet");
-      if (callback != null){
-        callback.onCommandExecuteError(getType());
-      }
+      sendErrorCallback( getType() );
     }
   }
 

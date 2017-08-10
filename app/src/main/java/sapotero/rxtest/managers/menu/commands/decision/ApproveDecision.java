@@ -107,9 +107,7 @@ public class ApproveDecision extends DecisionCommand {
 
   @Override
   public void executeLocal() {
-    if ( callback != null ){
-      callback.onCommandExecuteSuccess( getType() );
-    }
+    sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }
 
@@ -136,7 +134,7 @@ public class ApproveDecision extends DecisionCommand {
         .subscribe(
           data -> {
             onSuccess( data, true, false );
-            finishOperationOnSuccess();
+            removeSyncChanged();
           },
           error -> onError( error.getLocalizedMessage(), true )
         );

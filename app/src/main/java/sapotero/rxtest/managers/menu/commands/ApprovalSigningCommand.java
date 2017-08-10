@@ -72,7 +72,7 @@ public abstract class ApprovalSigningCommand extends AbstractCommand {
               queueManager.setExecutedRemote(this);
             }
 
-            finishOperationOnSuccess();
+            removeSyncChanged();
           },
           error -> {
             onError(error.getLocalizedMessage());

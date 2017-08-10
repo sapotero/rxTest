@@ -64,9 +64,7 @@ public class ApprovalPerformance extends AbstractCommand {
           queueManager.setExecutedRemote(this);
         },
         error -> {
-          if (callback != null){
-            callback.onCommandExecuteError(getType());
-          }
+          sendErrorCallback( getType() );
         }
       );
   }
@@ -81,9 +79,7 @@ public class ApprovalPerformance extends AbstractCommand {
       .get()
       .value();
 
-    if (callback != null){
-      callback.onCommandExecuteSuccess(getType());
-    }
+    sendErrorCallback( getType() );
 
     queueManager.setExecutedLocal(this);
   }

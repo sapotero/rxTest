@@ -34,10 +34,7 @@ public class UpdateTemplate extends AbstractCommand {
   @Override
   public void executeLocal() {
     queueManager.setExecutedLocal(this);
-
-    if ( callback != null ){
-      callback.onCommandExecuteSuccess( getType() );
-    }
+    sendSuccessCallback();
   }
 
   @Override
@@ -61,9 +58,7 @@ public class UpdateTemplate extends AbstractCommand {
           queueManager.setExecutedRemote(this);
         },
         error -> {
-          if (callback != null){
-            callback.onCommandExecuteError(getType());
-          }
+          sendErrorCallback( getType() );
 
           if ( settings.isOnline() ) {
             queueManager.setExecutedWithError( this, Collections.singletonList( error.getLocalizedMessage() ) );

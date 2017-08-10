@@ -50,10 +50,7 @@ public class RemoveFromFolder extends SharedCommand {
   @Override
   public void executeLocal() {
     queueManager.setExecutedLocal(this);
-
-    if ( callback != null ){
-      callback.onCommandExecuteSuccess( getType() );
-    }
+    sendSuccessCallback();
   }
 
   @Override

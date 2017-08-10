@@ -25,7 +25,7 @@ public class NextPerson extends ApprovalSigningCommand {
     queueManager.add(this);
     EventBus.getDefault().post( new ShowNextDocumentEvent( true,  getParams().getDocument() ));
 
-    setDocOperationProcessedStartedInMemory();
+    setSyncAndProcessedInMemory();
 
     setTaskStarted( getParams().getDocument(), false );
     setAsProcessed();
@@ -46,9 +46,7 @@ public class NextPerson extends ApprovalSigningCommand {
       .get()
       .value();
 
-    if (callback != null){
-      callback.onCommandExecuteSuccess(getType());
-    }
+    sendSuccessCallback();
 
     queueManager.setExecutedLocal(this);
   }

@@ -97,7 +97,7 @@ public class RejectDecision extends DecisionCommand {
             if ( signerIsCurrentUser() ) {
               finishRejectedOperationOnSuccess();
             } else {
-              finishOperationOnSuccess();
+              removeSyncChanged();
               queueManager.setExecutedRemote(this);
             }
 
@@ -123,7 +123,7 @@ public class RejectDecision extends DecisionCommand {
     if ( signerIsCurrentUser() ) {
       finishRejectedOperationOnError( errors );
     } else {
-      finishOperationProcessedOnError( errors );
+      finishOperationWithProcessedOnError( errors );
     }
 
     EventBus.getDefault().post( new ForceUpdateDocumentEvent( getParams().getDocument() ));

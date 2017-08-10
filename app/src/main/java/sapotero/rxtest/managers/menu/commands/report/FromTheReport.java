@@ -30,7 +30,7 @@ public class FromTheReport extends AbstractCommand {
   public void execute() {
     queueManager.add(this);
     update();
-    setDocOperationProcessedStartedInMemory();
+    setSyncAndProcessedInMemory();
     setAsProcessed();
   }
 
@@ -55,10 +55,7 @@ public class FromTheReport extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    if (callback != null){
-      callback.onCommandExecuteSuccess(getType());
-    }
-
+    sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }
 
@@ -96,7 +93,7 @@ public class FromTheReport extends AbstractCommand {
 
           queueManager.setExecutedRemote(this);
 
-          finishOperationOnSuccess();
+          removeSyncChanged();
 
         },
         error -> onError( error.getLocalizedMessage(), true )

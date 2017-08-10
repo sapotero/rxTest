@@ -57,9 +57,7 @@ public class AddDecision extends DecisionCommand {
       .get()
       .value();
 
-    if (callback != null ){
-      callback.onCommandExecuteSuccess( getType() );
-    }
+    sendSuccessCallback();
 
     queueManager.setExecutedLocal(this);
   }
@@ -83,7 +81,7 @@ public class AddDecision extends DecisionCommand {
       .subscribe(
         data -> {
           onSuccess( data, true, true );
-          finishOperationOnSuccess();
+          removeSyncChanged();
         },
         error -> onError( error.getLocalizedMessage(), false )
       );

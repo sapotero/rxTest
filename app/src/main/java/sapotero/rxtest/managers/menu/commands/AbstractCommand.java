@@ -217,7 +217,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       .value();
   }
 
-  protected void setDocOperationProcessedStartedInMemory() {
+  protected void setSyncAndProcessedInMemory() {
     Timber.tag("RecyclerViewRefresh").d("Command: Set sync label");
 
     store.process(
@@ -228,7 +228,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     );
   }
 
-  protected void finishOperationOnSuccess() {
+  protected void removeSyncChanged() {
     Timber.tag("RecyclerViewRefresh").d("Command: Remove sync label");
 
     store.process(
@@ -249,12 +249,12 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       .value();
   }
 
-  private void finishOperationOnError(List<String> errors) {
-    finishOperationOnSuccess();
+  private void finishOperationWithoutProcessedOnError(List<String> errors) {
+    removeSyncChanged();
     queueManager.setExecutedWithError( this, errors );
   }
 
-  protected void finishOperationProcessedOnError(List<String> errors) {
+  protected void finishOperationWithProcessedOnError(List<String> errors) {
     Timber.tag("RecyclerViewRefresh").d("Command: Remove sync label");
 
     store.process(
@@ -286,9 +286,9 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
 
     if ( settings.isOnline() ) {
       if ( setProcessedFalse ) {
-        finishOperationProcessedOnError( Collections.singletonList( errorMessage ) );
+        finishOperationWithProcessedOnError( Collections.singletonList( errorMessage ) );
       } else {
-        finishOperationOnError( Collections.singletonList( errorMessage ) );
+        finishOperationWithoutProcessedOnError( Collections.singletonList( errorMessage ) );
       }
     }
   }

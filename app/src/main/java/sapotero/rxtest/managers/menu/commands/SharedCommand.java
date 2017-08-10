@@ -27,9 +27,7 @@ public abstract class SharedCommand extends AbstractCommand {
   }
 
   public void onError(String message) {
-    if (callback != null){
-      callback.onCommandExecuteError(getType());
-    }
+    sendErrorCallback( getType() );
 
     if ( settings.isOnline() ) {
       queueManager.setExecutedWithError( this, Collections.singletonList( message ) );

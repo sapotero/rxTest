@@ -60,14 +60,10 @@ public class DelegatePerformance extends AbstractCommand {
           Timber.tag(TAG).i("error: %s", data.getMessage());
           Timber.tag(TAG).i("type: %s", data.getType());
 
-          if (callback != null){
-            callback.onCommandExecuteSuccess(getType());
-          }
+          sendSuccessCallback();
         },
         error -> {
-          if (callback != null){
-            callback.onCommandExecuteError(getType());
-          }
+          sendErrorCallback( getType() );
         }
       );
 

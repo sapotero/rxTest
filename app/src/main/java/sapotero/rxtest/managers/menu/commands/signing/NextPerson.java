@@ -36,7 +36,7 @@ public class NextPerson extends ApprovalSigningCommand {
     queueManager.add(this);
     EventBus.getDefault().post( new ShowNextDocumentEvent( true,  getParams().getDocument() ));
 
-    setDocOperationProcessedStartedInMemory();
+    setSyncAndProcessedInMemory();
 
     resetSignImageError();
     setAsProcessed();
@@ -97,7 +97,7 @@ public class NextPerson extends ApprovalSigningCommand {
         callback.onCommandExecuteError( errorMessage );
       }
 
-      finishOperationProcessedOnError( Collections.singletonList( errorMessage ) );
+      finishOperationWithProcessedOnError( Collections.singletonList( errorMessage ) );
     }
   }
 

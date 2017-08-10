@@ -55,10 +55,7 @@ public class SaveDecision extends DecisionCommand {
 
   @Override
   public void executeLocal() {
-    if ( callback != null ){
-      callback.onCommandExecuteSuccess( getType() );
-    }
-
+    sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }
 
@@ -133,7 +130,7 @@ public class SaveDecision extends DecisionCommand {
       .subscribe(
         data -> {
           onSuccess( data, false, true );
-          finishOperationOnSuccess();
+          removeSyncChanged();
         },
         error -> onError( error.getLocalizedMessage(), true )
       );

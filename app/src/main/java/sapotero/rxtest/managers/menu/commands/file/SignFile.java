@@ -40,11 +40,7 @@ public class SignFile extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-
-    if (callback != null ){
-      callback.onCommandExecuteSuccess( getType() );
-    }
-
+    sendSuccessCallback();
     queueManager.setExecutedLocal(this);
     setAsProcessed();
   }
@@ -117,9 +113,7 @@ public class SignFile extends AbstractCommand {
   private void onError() {
     Timber.tag(TAG).i("Sign error");
 
-    if (callback != null) {
-      callback.onCommandExecuteError(getType());
-    }
+    sendErrorCallback( getType() );
 
     if ( settings.isOnline() ) {
       String errorMessage = "Ошибка подписания электронного образа";
