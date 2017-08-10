@@ -56,7 +56,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
   @Inject public QueueManager queueManager;
   @Inject public MemoryStore store;
 
-  public static final String SIGN_ERROR_MESSAGE = "Произошла ошибка электронной подписи";
+  protected static final String SIGN_ERROR_MESSAGE = "Произошла ошибка электронной подписи";
 
   public CommandParams params;
 
@@ -280,7 +280,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       .get().firstOrNull();
   }
 
-  public void printLog(OperationResult data, String TAG) {
+  protected void printLog(OperationResult data, String TAG) {
     Timber.tag(TAG).i("ok: %s", data.getOk());
     Timber.tag(TAG).i("error: %s", data.getMessage());
     Timber.tag(TAG).i("type: %s", data.getType());

@@ -13,5 +13,6 @@ public class RReturnedRejectedAgain {
   int id;
 
   String documentUid;
+  String user;
   DocumentCondition documentCondition;
 }

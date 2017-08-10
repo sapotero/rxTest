@@ -8,6 +8,9 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.db.requery.models.utils.RReturnedRejectedAgain;
+import sapotero.rxtest.db.requery.models.utils.RReturnedRejectedAgainEntity;
+import sapotero.rxtest.db.requery.models.utils.enums.DocumentCondition;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.ApprovalSigningCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -65,11 +68,11 @@ public class PrevPerson extends ApprovalSigningCommand {
   public void executeLocal() {
     dataStore
       .update(RDocumentEntity.class)
-      .set( RDocumentEntity.PROCESSED, true)
       .set( RDocumentEntity.CHANGED, true)
       .set( RDocumentEntity.REJECTED, true )
       .set( RDocumentEntity.RETURNED, false )
       .set( RDocumentEntity.AGAIN, false )
+      .set( RDocumentEntity.PROCESSED, true)
       .where(RDocumentEntity.UID.eq(getParams().getDocument()))
       .get()
       .value();
@@ -95,73 +98,126 @@ public class PrevPerson extends ApprovalSigningCommand {
             printLog( data, TAG );
 
             if (data.getMessage() != null && !data.getMessage().toLowerCase().contains("успешно") ) {
-              queueManager.setExecutedWithError(this, Collections.singletonList( data.getMessage() ) );
+              sendErrorCallback( data.getMessage() );
+              setError( data.getMessage() );
             } else {
-              queueManager.setExecutedRemote(this);
+              setSuccess();
             }
-
-            store.process(
-              store.startTransactionFor( getParams().getDocument() )
-                .removeLabel(LabelType.SYNC)
-                .setState(InMemoryState.READY)
-            );
-
-            dataStore
-              .update(RDocumentEntity.class)
-              .set( RDocumentEntity.CHANGED, false)
-              .where(RDocumentEntity.UID.eq(getParams().getDocument()))
-              .get()
-              .value();
-
           },
+
           error -> {
-            String errorMessage = error.getLocalizedMessage();
-
-            Timber.tag(TAG).i("error: %s", errorMessage);
-
-            if (callback != null){
-              callback.onCommandExecuteError( errorMessage );
-            }
-
-            if ( settings.isOnline() ) {
-              Transaction transaction = store.startTransactionFor( getParams().getDocument() )
-                .removeLabel(LabelType.SYNC)
-                .removeLabel(LabelType.REJECTED)
-                .setField(FieldType.PROCESSED, false)
-                .setState(InMemoryState.READY);
-
-              if ( returnedOldValue ) {
-                transaction.setLabel(LabelType.RETURNED);
-              }
-
-              if ( againOldValue ) {
-                transaction.setLabel(LabelType.AGAIN);
-              }
-
-              store.process( transaction );
-
-              dataStore
-                .update(RDocumentEntity.class)
-                .set( RDocumentEntity.PROCESSED, false)
-                .set( RDocumentEntity.CHANGED, false)
-                .set( RDocumentEntity.REJECTED, false)
-                .set( RDocumentEntity.RETURNED, returnedOldValue)
-                .set( RDocumentEntity.AGAIN, againOldValue)
-                .where(RDocumentEntity.UID.eq( getParams().getDocument() ) )
-                .get()
-                .value();
-
-              queueManager.setExecutedWithError( this, Collections.singletonList( errorMessage ) );
-            }
+            handleError( error.getLocalizedMessage() );
           }
         );
 
     } else {
-//      onError(SIGN_ERROR_MESSAGE, TAG);
+      handleError(SIGN_ERROR_MESSAGE);
     }
 
+  }
 
+  private void handleError(String errorMessage) {
+    Timber.tag(TAG).i("error: %s", errorMessage);
 
+    sendErrorCallback( errorMessage );
+
+    if ( settings.isOnline() ) {
+      setError( errorMessage );
+    }
+  }
+
+  private void sendErrorCallback(String errorMessage) {
+    if ( callback != null ) {
+      callback.onCommandExecuteError( errorMessage );
+    }
+  }
+
+  private void setSuccess() {
+    store.process(
+      store.startTransactionFor( getParams().getDocument() )
+        .removeLabel(LabelType.SYNC)
+        .setState(InMemoryState.READY)
+    );
+
+    dataStore
+      .update(RDocumentEntity.class)
+      .set( RDocumentEntity.CHANGED, false)
+      .where(RDocumentEntity.UID.eq(getParams().getDocument()))
+      .get()
+      .value();
+
+    setDocumentCondition( DocumentCondition.REJECTED );
+
+    queueManager.setExecutedRemote(this);
+  }
+
+  private void setDocumentCondition(DocumentCondition documentCondition) {
+    RReturnedRejectedAgainEntity returnedRejectedAgainEntity = dataStore
+      .select( RReturnedRejectedAgainEntity.class )
+      .where( RReturnedRejectedAgainEntity.DOCUMENT_UID.eq( getParams().getDocument() ) )
+      .and( RReturnedRejectedAgainEntity.USER.eq( getParams().getLogin() ) )
+      .get().firstOrNull();
+
+    if ( returnedRejectedAgainEntity != null ) {
+      returnedRejectedAgainEntity.setDocumentCondition( documentCondition );
+
+      dataStore
+        .update( returnedRejectedAgainEntity )
+        .toObservable()
+        .subscribeOn(Schedulers.computation())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(
+          result -> Timber.tag(TAG).d("Updated document condition in ReturnedRejectedAgain table"),
+          error -> Timber.tag(TAG).e(error)
+        );
+
+    } else {
+      returnedRejectedAgainEntity = new RReturnedRejectedAgainEntity();
+      returnedRejectedAgainEntity.setDocumentUid( getParams().getDocument() );
+      returnedRejectedAgainEntity.setUser( getParams().getLogin() );
+      returnedRejectedAgainEntity.setDocumentCondition( documentCondition );
+
+      dataStore
+        .insert( returnedRejectedAgainEntity )
+        .toObservable()
+        .subscribeOn(Schedulers.computation())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(
+          result -> Timber.tag(TAG).d("Added document condition to ReturnedRejectedAgain table"),
+          error -> Timber.tag(TAG).e(error)
+        );
+    }
+  }
+
+  private void setError(String errorMessage) {
+    Transaction transaction = store.startTransactionFor( getParams().getDocument() )
+      .removeLabel(LabelType.SYNC)
+      .removeLabel(LabelType.REJECTED)
+      .setField(FieldType.PROCESSED, false)
+      .setState(InMemoryState.READY);
+
+    if ( returnedOldValue ) {
+      transaction.setLabel(LabelType.RETURNED);
+    }
+
+    if ( againOldValue ) {
+      transaction.setLabel(LabelType.AGAIN);
+    }
+
+    store.process( transaction );
+
+    dataStore
+      .update(RDocumentEntity.class)
+      .set( RDocumentEntity.CHANGED, false)
+      .set( RDocumentEntity.REJECTED, false)
+      .set( RDocumentEntity.RETURNED, returnedOldValue)
+      .set( RDocumentEntity.AGAIN, againOldValue)
+      .set( RDocumentEntity.PROCESSED, false)
+      .where(RDocumentEntity.UID.eq( getParams().getDocument() ) )
+      .get()
+      .value();
+
+    queueManager.setExecutedWithError( this, Collections.singletonList( errorMessage ) );
   }
 
   @Override
