@@ -2,7 +2,6 @@ package sapotero.rxtest.managers.menu.commands.signing;
 
 import org.greenrobot.eventbus.EventBus;
 
-import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.ApprovalSigningCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -24,7 +23,8 @@ public class PrevPerson extends ApprovalSigningCommand {
     queueManager.add(this);
     EventBus.getDefault().post( new ShowNextDocumentEvent( true, getParams().getDocument() ));
 
-    setDocOperationProcessedStartedInMemory();
+    saveOldLabelValues();
+    startRejectedOperationInMemory();
     setAsProcessed();
   }
 
@@ -35,25 +35,15 @@ public class PrevPerson extends ApprovalSigningCommand {
 
   @Override
   public void executeLocal() {
-    dataStore
-      .update(RDocumentEntity.class)
-      .set( RDocumentEntity.PROCESSED, true)
-      .set( RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq(getParams().getDocument()))
-      .get()
-      .value();
-
-    if (callback != null){
-      callback.onCommandExecuteSuccess(getType());
-    }
-
+    startRejectedOperationInDb();
+    sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }
 
   @Override
   public void executeRemote() {
     printCommandType( this, TAG );
-    remoteOperation(TAG);
+    remoteRejectedOperation( TAG );
   }
 
   @Override
