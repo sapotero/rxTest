@@ -95,4 +95,42 @@ public abstract class ApprovalSigningCommand extends AbstractCommand {
   }
 
   public abstract void onRemoteError();
+
+  protected void remoteRejectedOperation(String TAG) {
+    Observable<OperationResult> info = getOperationResultObservable();
+
+    if (info != null) {
+      info.subscribeOn( Schedulers.computation() )
+        .observeOn( AndroidSchedulers.mainThread() )
+        .subscribe(
+          data -> {
+            printLog( data, TAG );
+
+            if (data.getMessage() != null && !data.getMessage().toLowerCase().contains("успешно") ) {
+              sendErrorCallback( data.getMessage() );
+              finishRejectedOperationOnError( data.getMessage() );
+            } else {
+              finishRejectedOperationOnSuccess( TAG );
+            }
+          },
+
+          error -> handleRejectedOperationError( error.getLocalizedMessage(), TAG )
+        );
+
+    } else {
+      handleRejectedOperationError( SIGN_ERROR_MESSAGE, TAG );
+    }
+  }
+
+  private void handleRejectedOperationError(String errorMessage, String TAG) {
+    Timber.tag(TAG).i("error: %s", errorMessage);
+
+    sendErrorCallback( errorMessage );
+
+    if ( settings.isOnline() ) {
+      finishRejectedOperationOnError( errorMessage );
+    }
+
+    onRemoteError();
+  }
 }

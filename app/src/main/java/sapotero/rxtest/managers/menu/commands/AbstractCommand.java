@@ -30,6 +30,8 @@ import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDisplayFirstDecisionEntity;
 import sapotero.rxtest.db.requery.models.images.RSignImageEntity;
+import sapotero.rxtest.db.requery.models.utils.RReturnedRejectedAgainEntity;
+import sapotero.rxtest.db.requery.models.utils.enums.DocumentCondition;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.interfaces.Operation;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -43,6 +45,8 @@ import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.fields.FieldType;
 import sapotero.rxtest.utils.memory.fields.InMemoryState;
 import sapotero.rxtest.utils.memory.fields.LabelType;
+import sapotero.rxtest.utils.memory.models.InMemoryDocument;
+import sapotero.rxtest.utils.memory.utils.Transaction;
 import sapotero.rxtest.utils.queue.QueueManager;
 import timber.log.Timber;
 
@@ -59,6 +63,9 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
   protected static final String SIGN_ERROR_MESSAGE = "Произошла ошибка электронной подписи";
 
   public CommandParams params;
+
+  private boolean returnedOldValue;
+  private boolean againOldValue;
 
   public AbstractCommand(CommandParams params) {
     EsdApplication.getManagerComponent().inject(this);
@@ -280,7 +287,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       .get().firstOrNull();
   }
 
-  protected void printLog(OperationResult data, String TAG) {
+  void printLog(OperationResult data, String TAG) {
     Timber.tag(TAG).i("ok: %s", data.getOk());
     Timber.tag(TAG).i("error: %s", data.getMessage());
     Timber.tag(TAG).i("type: %s", data.getType());
@@ -289,4 +296,136 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
   protected void printCommandType(Command command, String TAG) {
     Timber.tag(TAG).i( "type: %s", command.getClass().getName() );
   }
+
+  protected void sendSuccessCallback() {
+    if ( callback != null ) {
+      callback.onCommandExecuteSuccess( getType() );
+    }
+  }
+
+  void sendErrorCallback(String errorMessage) {
+    if ( callback != null ) {
+      callback.onCommandExecuteError( errorMessage );
+    }
+  }
+
+  protected void saveOldLabelValues() {
+    InMemoryDocument inMemoryDocument = store.getDocuments().get( getParams().getDocument() );
+    returnedOldValue = inMemoryDocument.getDocument().isReturned();
+    againOldValue = inMemoryDocument.getDocument().isAgain();
+  }
+
+  protected void startRejectedOperationInMemory() {
+    store.process(
+      store.startTransactionFor( getParams().getDocument() )
+        .setLabel(LabelType.SYNC)
+        .setLabel(LabelType.REJECTED)
+        .removeLabel(LabelType.RETURNED)
+        .removeLabel(LabelType.AGAIN)
+        .setField(FieldType.PROCESSED, true)
+        .setState(InMemoryState.LOADING)
+    );
+  }
+
+  protected void startRejectedOperationInDb() {
+    dataStore
+      .update(RDocumentEntity.class)
+      .set( RDocumentEntity.CHANGED, true)
+      .set( RDocumentEntity.REJECTED, true )
+      .set( RDocumentEntity.RETURNED, false )
+      .set( RDocumentEntity.AGAIN, false )
+      .set( RDocumentEntity.PROCESSED, true)
+      .where(RDocumentEntity.UID.eq(getParams().getDocument()))
+      .get()
+      .value();
+  }
+
+  void finishRejectedOperationOnSuccess(String TAG) {
+    store.process(
+      store.startTransactionFor( getParams().getDocument() )
+        .removeLabel(LabelType.SYNC)
+        .setState(InMemoryState.READY)
+    );
+
+    dataStore
+      .update(RDocumentEntity.class)
+      .set( RDocumentEntity.CHANGED, false)
+      .where(RDocumentEntity.UID.eq(getParams().getDocument()))
+      .get()
+      .value();
+
+    setDocumentCondition( DocumentCondition.REJECTED, TAG );
+
+    queueManager.setExecutedRemote(this);
+  }
+
+  private void setDocumentCondition(DocumentCondition documentCondition, String TAG) {
+    RReturnedRejectedAgainEntity returnedRejectedAgainEntity = dataStore
+      .select( RReturnedRejectedAgainEntity.class )
+      .where( RReturnedRejectedAgainEntity.DOCUMENT_UID.eq( getParams().getDocument() ) )
+      .and( RReturnedRejectedAgainEntity.USER.eq( getParams().getLogin() ) )
+      .get().firstOrNull();
+
+    if ( returnedRejectedAgainEntity != null ) {
+      returnedRejectedAgainEntity.setDocumentCondition( documentCondition );
+
+      dataStore
+        .update( returnedRejectedAgainEntity )
+        .toObservable()
+        .subscribeOn(Schedulers.computation())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(
+          result -> Timber.tag(TAG).d("Updated document condition in ReturnedRejectedAgain table"),
+          error -> Timber.tag(TAG).e(error)
+        );
+
+    } else {
+      returnedRejectedAgainEntity = new RReturnedRejectedAgainEntity();
+      returnedRejectedAgainEntity.setDocumentUid( getParams().getDocument() );
+      returnedRejectedAgainEntity.setUser( getParams().getLogin() );
+      returnedRejectedAgainEntity.setDocumentCondition( documentCondition );
+
+      dataStore
+        .insert( returnedRejectedAgainEntity )
+        .toObservable()
+        .subscribeOn(Schedulers.computation())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(
+          result -> Timber.tag(TAG).d("Added document condition to ReturnedRejectedAgain table"),
+          error -> Timber.tag(TAG).e(error)
+        );
+    }
+  }
+
+  void finishRejectedOperationOnError(String errorMessage) {
+    Transaction transaction = store.startTransactionFor( getParams().getDocument() )
+            .removeLabel(LabelType.SYNC)
+            .removeLabel(LabelType.REJECTED)
+            .setField(FieldType.PROCESSED, false)
+            .setState(InMemoryState.READY);
+
+    if ( returnedOldValue ) {
+      transaction.setLabel(LabelType.RETURNED);
+    }
+
+    if ( againOldValue ) {
+      transaction.setLabel(LabelType.AGAIN);
+    }
+
+    store.process( transaction );
+
+    dataStore
+      .update(RDocumentEntity.class)
+      .set( RDocumentEntity.CHANGED, false)
+      .set( RDocumentEntity.REJECTED, false)
+      .set( RDocumentEntity.RETURNED, returnedOldValue)
+      .set( RDocumentEntity.AGAIN, againOldValue)
+      .set( RDocumentEntity.PROCESSED, false)
+      .where(RDocumentEntity.UID.eq( getParams().getDocument() ) )
+      .get()
+      .value();
+
+    queueManager.setExecutedWithError( this, Collections.singletonList( errorMessage ) );
+  }
+
 }
