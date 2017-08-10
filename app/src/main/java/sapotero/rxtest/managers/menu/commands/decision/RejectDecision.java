@@ -2,19 +2,22 @@ package sapotero.rxtest.managers.menu.commands.decision;
 
 import com.google.gson.Gson;
 
+import org.greenrobot.eventbus.EventBus;
+
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
+import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
+import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.DecisionCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
-import sapotero.rxtest.utils.memory.fields.FieldType;
-import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
 public class RejectDecision extends DecisionCommand {
@@ -30,41 +33,27 @@ public class RejectDecision extends DecisionCommand {
   @Override
   public void execute() {
     queueManager.add(this);
+    saveOldLabelValues();
     updateLocal();
-    setDocOperationStartedInMemory();
     setAsProcessed();
   }
 
   private void updateLocal() {
     Timber.tag(TAG).e("1 updateLocal params%s", new Gson().toJson( getParams() ));
 
-    dataStore
-      .update(RDecisionEntity.class)
-      .set(RDecisionEntity.CHANGED, true)
-      .set(RDecisionEntity.TEMPORARY, true)
-      .where(RDecisionEntity.UID.eq( getParams().getDecisionId() ))
-      .get().value();
+    setDecisionTemporary();
 
-    if (Objects.equals(getParams().getDecisionModel().getSignerId(), getParams().getCurrentUserId())){
-
-      String uid = getParams().getDocument();
-
-      Timber.tag(TAG).i( "3 updateLocal document uid:\n%s\n%s\n", getParams().getDecisionModel().getDocumentUid(), getParams().getDocument() );
-
-      Integer dec = dataStore
-        .update(RDocumentEntity.class)
-        .set(RDocumentEntity.PROCESSED, true)
-        .where(RDocumentEntity.UID.eq( getParams().getDocument() ))
-        .get().value();
-
-      Timber.tag(TAG).e("3 updateLocal document %s | %s", uid, dec > 0);
-
-      store.process(
-        store.startTransactionFor( uid )
-          .setLabel(LabelType.SYNC)
-          .setField(FieldType.PROCESSED, true)
-      );
+    if ( signerIsCurrentUser() ) {
+      startRejectedOperationInMemory();
+      startRejectedOperationInDb();
+    } else {
+      setSyncLabelInMemory();
+      setChangedInDb();
     }
+  }
+
+  private boolean signerIsCurrentUser() {
+    return Objects.equals( getParams().getDecisionModel().getSignerId(), getParams().getCurrentUserId() );
   }
 
   @Override
@@ -74,10 +63,7 @@ public class RejectDecision extends DecisionCommand {
 
   @Override
   public void executeLocal() {
-    if ( callback != null ){
-      callback.onCommandExecuteSuccess( getType() );
-    }
-
+    sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }
 
@@ -103,10 +89,52 @@ public class RejectDecision extends DecisionCommand {
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         data -> {
-          onSuccess( data, true, false );
-          finishOperationOnSuccess();
+          if ( notEmpty( data.getErrors() ) ) {
+            sendErrorCallback( "error" );
+            finishOnError( data.getErrors() );
+
+          } else {
+            if ( signerIsCurrentUser() ) {
+              finishRejectedOperationOnSuccess();
+            } else {
+              finishOperationOnSuccess();
+              queueManager.setExecutedRemote(this);
+            }
+
+            EventBus.getDefault().post( new UpdateDocumentEvent( getParams().getDocument() ));
+          }
         },
-        error -> onError( error.getLocalizedMessage(), false )
+
+        error -> {
+          String errorMessage = error.getLocalizedMessage();
+
+          Timber.tag(TAG).i("error: %s", errorMessage);
+
+          sendErrorCallback( errorMessage );
+
+          if ( settings.isOnline() ) {
+            finishOnError( Collections.singletonList( errorMessage ) );
+          }
+        }
       );
+  }
+
+  private void finishOnError(List<String> errors) {
+    if ( signerIsCurrentUser() ) {
+      finishRejectedOperationOnError( errors );
+    } else {
+      finishOperationProcessedOnError( errors );
+    }
+
+    EventBus.getDefault().post( new ForceUpdateDocumentEvent( getParams().getDocument() ));
+  }
+
+  private void setDecisionTemporary() {
+    dataStore
+      .update(RDecisionEntity.class)
+      .set(RDecisionEntity.CHANGED, true)
+      .set(RDecisionEntity.TEMPORARY, true)
+      .where(RDecisionEntity.UID.eq( getParams().getDecisionId() ))
+      .get().value();
   }
 }

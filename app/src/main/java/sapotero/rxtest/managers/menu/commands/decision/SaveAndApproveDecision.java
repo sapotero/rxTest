@@ -37,7 +37,7 @@ public class SaveAndApproveDecision extends DecisionCommand {
     queueManager.add(this);
     updateLocal();
 
-    setDocOperationStartedInMemory();
+    setSyncLabelInMemory();
     setAsProcessed();
   }
 

@@ -33,7 +33,7 @@ public class AddDecision extends DecisionCommand {
     Command command = operation.getCommand(null, _params);
     command.execute();
 
-    setDocOperationStartedInMemory();
+    setSyncLabelInMemory();
 
     Timber.tag(TAG).w("ASSIGNMENT: %s", getParams().isAssignment() );
 

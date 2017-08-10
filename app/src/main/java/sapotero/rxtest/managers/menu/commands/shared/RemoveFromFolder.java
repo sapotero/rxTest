@@ -82,7 +82,7 @@ public class RemoveFromFolder extends SharedCommand {
         .removeLabel(LabelType.FAVORITES);
       store.process( transaction );
 
-      setChangedFalse();
+      removeChangedInDb();
     }
   }
 

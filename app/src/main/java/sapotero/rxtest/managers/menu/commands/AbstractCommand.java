@@ -198,7 +198,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     }
   }
 
-  protected void setDocOperationStartedInMemory() {
+  protected void setSyncLabelInMemory() {
     Timber.tag("RecyclerViewRefresh").d("Command: Set sync label");
 
     store.process(
@@ -206,6 +206,15 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
         .setLabel(LabelType.SYNC)
         .setState(InMemoryState.LOADING)
     );
+  }
+
+  protected void setChangedInDb() {
+    dataStore
+      .update(RDocumentEntity.class)
+      .set(RDocumentEntity.CHANGED, true)
+      .where(RDocumentEntity.UID.eq( getParams().getDocument() ))
+      .get()
+      .value();
   }
 
   protected void setDocOperationProcessedStartedInMemory() {
@@ -228,10 +237,10 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
         .setState(InMemoryState.READY)
     );
 
-    setChangedFalse();
+    removeChangedInDb();
   }
 
-  protected void setChangedFalse() {
+  protected void removeChangedInDb() {
     dataStore
       .update(RDocumentEntity.class)
       .set( RDocumentEntity.CHANGED, false)
@@ -273,9 +282,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
   public void onError(String errorMessage, boolean setProcessedFalse) {
     Timber.tag(TAG).i("error: %s", errorMessage);
 
-    if (callback != null){
-      callback.onCommandExecuteError( errorMessage );
-    }
+    sendErrorCallback( errorMessage );
 
     if ( settings.isOnline() ) {
       if ( setProcessedFalse ) {
@@ -309,7 +316,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     }
   }
 
-  void sendErrorCallback(String errorMessage) {
+  protected void sendErrorCallback(String errorMessage) {
     if ( callback != null ) {
       callback.onCommandExecuteError( errorMessage );
     }
@@ -341,7 +348,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       .set( RDocumentEntity.RETURNED, false )
       .set( RDocumentEntity.AGAIN, false )
       .set( RDocumentEntity.PROCESSED, true)
-      .where(RDocumentEntity.UID.eq(getParams().getDocument()))
+      .where(RDocumentEntity.UID.eq( getParams().getDocument() ))
       .get()
       .value();
   }
@@ -403,12 +410,12 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     }
   }
 
-  void finishRejectedOperationOnError(String errorMessage) {
+  protected void finishRejectedOperationOnError(List<String> errors) {
     Transaction transaction = store.startTransactionFor( getParams().getDocument() )
-            .removeLabel(LabelType.SYNC)
-            .removeLabel(LabelType.REJECTED)
-            .setField(FieldType.PROCESSED, false)
-            .setState(InMemoryState.READY);
+      .removeLabel(LabelType.SYNC)
+      .removeLabel(LabelType.REJECTED)
+      .setField(FieldType.PROCESSED, false)
+      .setState(InMemoryState.READY);
 
     if ( returnedOldValue ) {
       transaction.setLabel(LabelType.RETURNED);
@@ -431,7 +438,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       .get()
       .value();
 
-    queueManager.setExecutedWithError( this, Collections.singletonList( errorMessage ) );
+    queueManager.setExecutedWithError( this, errors );
   }
 
   void handleRejectedOperationError(String errorMessage) {
@@ -440,7 +447,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     sendErrorCallback( errorMessage );
 
     if ( settings.isOnline() ) {
-      finishRejectedOperationOnError( errorMessage );
+      finishRejectedOperationOnError( Collections.singletonList( errorMessage ) );
     }
   }
 
@@ -449,7 +456,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
 
     if (data.getMessage() != null && !data.getMessage().toLowerCase().contains("успешно") ) {
       sendErrorCallback( data.getMessage() );
-      finishRejectedOperationOnError( data.getMessage() );
+      finishRejectedOperationOnError( Collections.singletonList( data.getMessage() ) );
     } else {
       finishRejectedOperationOnSuccess();
     }

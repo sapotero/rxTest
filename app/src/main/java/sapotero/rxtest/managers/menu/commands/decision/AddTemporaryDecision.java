@@ -33,7 +33,7 @@ public class AddTemporaryDecision extends DecisionCommand {
     addDecision();
     queueManager.add(this);
 
-    setDocOperationStartedInMemory();
+    setSyncLabelInMemory();
     setAsProcessed();
   }
 

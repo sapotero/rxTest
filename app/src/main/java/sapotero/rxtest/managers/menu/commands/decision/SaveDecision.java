@@ -44,7 +44,7 @@ public class SaveDecision extends DecisionCommand {
 
     update();
 
-    setDocOperationStartedInMemory();
+    setSyncLabelInMemory();
     setAsProcessed();
   }
 

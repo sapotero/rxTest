@@ -36,7 +36,7 @@ public class ApproveDecision extends DecisionCommand {
   public void execute() {
     updateLocal();
     queueManager.add(this);
-    setDocOperationStartedInMemory();
+    setSyncLabelInMemory();
     setAsProcessed();
   }
 

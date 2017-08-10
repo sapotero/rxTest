@@ -68,7 +68,7 @@ public class AddToFolder extends SharedCommand {
       .setLabel(LabelType.FAVORITES);
     store.process( transaction );
 
-    setChangedFalse();
+    removeChangedInDb();
   }
 
   @Override
