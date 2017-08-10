@@ -434,7 +434,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     queueManager.setExecutedWithError( this, Collections.singletonList( errorMessage ) );
   }
 
-  protected void handleRejectedOperationError(String errorMessage) {
+  void handleRejectedOperationError(String errorMessage) {
     Timber.tag(TAG).i("error: %s", errorMessage);
 
     sendErrorCallback( errorMessage );
@@ -442,5 +442,25 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     if ( settings.isOnline() ) {
       finishRejectedOperationOnError( errorMessage );
     }
+  }
+
+  private void checkRejectedOperationResult(OperationResult data) {
+    printOperationResult( data );
+
+    if (data.getMessage() != null && !data.getMessage().toLowerCase().contains("успешно") ) {
+      sendErrorCallback( data.getMessage() );
+      finishRejectedOperationOnError( data.getMessage() );
+    } else {
+      finishRejectedOperationOnSuccess();
+    }
+  }
+
+  protected void sendRejectedOperationRequest(Observable<OperationResult> info) {
+    info.subscribeOn( Schedulers.computation() )
+      .observeOn( AndroidSchedulers.mainThread() )
+      .subscribe(
+        this::checkRejectedOperationResult,
+        error -> handleRejectedOperationError( error.getLocalizedMessage() )
+      );
   }
 }

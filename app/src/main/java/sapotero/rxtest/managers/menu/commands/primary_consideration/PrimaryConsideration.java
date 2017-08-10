@@ -6,8 +6,6 @@ import java.util.ArrayList;
 
 import retrofit2.Retrofit;
 import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -68,16 +66,6 @@ public class PrimaryConsideration extends AbstractCommand {
       getParams().getPerson()
     );
 
-    info.subscribeOn( Schedulers.computation() )
-      .observeOn( AndroidSchedulers.mainThread() )
-      .subscribe(
-        data -> {
-          printOperationResult( data );
-
-          finishRejectedOperationOnSuccess();
-        },
-
-        error -> handleRejectedOperationError( error.getLocalizedMessage() )
-      );
+    sendRejectedOperationRequest( info );
   }
 }

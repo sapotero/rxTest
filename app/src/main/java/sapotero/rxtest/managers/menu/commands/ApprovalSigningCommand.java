@@ -11,7 +11,6 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
-import timber.log.Timber;
 
 public abstract class ApprovalSigningCommand extends AbstractCommand {
 
@@ -96,23 +95,7 @@ public abstract class ApprovalSigningCommand extends AbstractCommand {
     Observable<OperationResult> info = getOperationResultObservable();
 
     if (info != null) {
-      info.subscribeOn( Schedulers.computation() )
-        .observeOn( AndroidSchedulers.mainThread() )
-        .subscribe(
-          data -> {
-            printOperationResult( data );
-
-            if (data.getMessage() != null && !data.getMessage().toLowerCase().contains("успешно") ) {
-              sendErrorCallback( data.getMessage() );
-              finishRejectedOperationOnError( data.getMessage() );
-            } else {
-              finishRejectedOperationOnSuccess();
-            }
-          },
-
-          error -> handleRejectedOperationError( error.getLocalizedMessage() )
-        );
-
+      sendRejectedOperationRequest( info );
     } else {
       handleRejectedOperationError( SIGN_ERROR_MESSAGE );
     }
