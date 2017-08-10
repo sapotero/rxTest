@@ -6,9 +6,6 @@ import java.util.ArrayList;
 
 import retrofit2.Retrofit;
 import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
-import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
@@ -33,23 +30,11 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
   @Override
   public void execute() {
     queueManager.add(this);
-    update();
-    setDocOperationProcessedStartedInMemory();
-    setAsProcessed();
-  }
-
-  private void update() {
-    String uid = getParams().getDocument();
-
-    dataStore
-      .update(RDocumentEntity.class)
-      .set( RDocumentEntity.PROCESSED, true)
-      .set( RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq(uid))
-      .get()
-      .value();
-
     EventBus.getDefault().post( new ShowNextDocumentEvent( true, getParams().getDocument() ));
+
+    saveOldLabelValues();
+    startRejectedOperationInMemory();
+    setAsProcessed();
   }
 
   @Override
@@ -59,10 +44,8 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-    if (callback != null){
-      callback.onCommandExecuteSuccess(getType());
-    }
-
+    startRejectedOperationInDb();
+    sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }
 
@@ -89,18 +72,6 @@ public class ReturnToPrimaryConsideration extends AbstractCommand {
       getParams().getStatusCode()
     );
 
-    info.subscribeOn( Schedulers.computation() )
-      .observeOn( AndroidSchedulers.mainThread() )
-      .subscribe(
-        data -> {
-          printOperationResult( data );
-
-          queueManager.setExecutedRemote(this);
-
-          finishOperationOnSuccess();
-
-        },
-        error -> onError( error.getLocalizedMessage(), true )
-      );
+    sendRejectedOperationRequest( info );
   }
 }
