@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.Objects;
+
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Retrofit;
@@ -90,5 +92,9 @@ public abstract class DecisionCommand extends AbstractCommand {
         checkCreatorAndSignerIsCurrentUser(data);
       }
     }
+  }
+
+  protected boolean signerIsCurrentUser() {
+    return Objects.equals( getParams().getDecisionModel().getSignerId(), getParams().getCurrentUserId() );
   }
 }

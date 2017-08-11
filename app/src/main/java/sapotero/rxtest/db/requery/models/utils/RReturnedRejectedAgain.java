@@ -5,7 +5,11 @@ import io.requery.Generated;
 import io.requery.Key;
 import sapotero.rxtest.db.requery.models.utils.enums.DocumentCondition;
 
-// Keeps current document condition for returned, rejected, again labels
+// resolved https://tasks.n-core.ru/browse/MVDESD-13213
+// Плашки "Возвращено" и "Повторно"
+
+// Хранит состояние документа после выполнения операции для корректного проставления плашки
+// в случае, если документ будет снова направлен пользователю.
 @Entity
 public class RReturnedRejectedAgain {
   @Key

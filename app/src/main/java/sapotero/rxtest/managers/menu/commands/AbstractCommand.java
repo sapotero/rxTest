@@ -66,9 +66,6 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
 
   public CommandParams params;
 
-  private boolean returnedOldValue;
-  private boolean againOldValue;
-
   public AbstractCommand(CommandParams params) {
     EsdApplication.getManagerComponent().inject(this);
     this.params = params;
@@ -249,7 +246,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       .value();
   }
 
-  private void finishOperationWithoutProcessedOnError(List<String> errors) {
+  protected void finishOperationWithoutProcessedOnError(List<String> errors) {
     removeSyncChanged();
     queueManager.setExecutedWithError( this, errors );
   }
@@ -324,8 +321,8 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
 
   protected void saveOldLabelValues() {
     InMemoryDocument inMemoryDocument = store.getDocuments().get( getParams().getDocument() );
-    returnedOldValue = inMemoryDocument.getDocument().isReturned();
-    againOldValue = inMemoryDocument.getDocument().isAgain();
+    getParams().setReturnedOldValue( inMemoryDocument.getDocument().isReturned() );
+    getParams().setAgainOldValue( inMemoryDocument.getDocument().isAgain() );
   }
 
   protected void startRejectedOperationInMemory() {
@@ -354,21 +351,8 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
   }
 
   protected void finishRejectedOperationOnSuccess() {
-    store.process(
-      store.startTransactionFor( getParams().getDocument() )
-        .removeLabel(LabelType.SYNC)
-        .setState(InMemoryState.READY)
-    );
-
-    dataStore
-      .update(RDocumentEntity.class)
-      .set( RDocumentEntity.CHANGED, false)
-      .where(RDocumentEntity.UID.eq(getParams().getDocument()))
-      .get()
-      .value();
-
+    removeSyncChanged();
     setDocumentCondition( DocumentCondition.REJECTED );
-
     queueManager.setExecutedRemote(this);
   }
 
@@ -410,12 +394,15 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     }
   }
 
-  protected void finishRejectedOperationOnError(List<String> errors) {
+  protected void finishRejectedProcessedOperationOnError(List<String> errors) {
     Transaction transaction = store.startTransactionFor( getParams().getDocument() )
       .removeLabel(LabelType.SYNC)
       .removeLabel(LabelType.REJECTED)
       .setField(FieldType.PROCESSED, false)
       .setState(InMemoryState.READY);
+
+    boolean returnedOldValue = getParams().getReturnedOldValue();
+    boolean againOldValue = getParams().getAgainOldValue();
 
     if ( returnedOldValue ) {
       transaction.setLabel(LabelType.RETURNED);
@@ -447,7 +434,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     sendErrorCallback( errorMessage );
 
     if ( settings.isOnline() ) {
-      finishRejectedOperationOnError( Collections.singletonList( errorMessage ) );
+      finishRejectedProcessedOperationOnError( Collections.singletonList( errorMessage ) );
     }
   }
 
@@ -456,7 +443,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
 
     if (data.getMessage() != null && !data.getMessage().toLowerCase().contains("успешно") ) {
       sendErrorCallback( data.getMessage() );
-      finishRejectedOperationOnError( Collections.singletonList( data.getMessage() ) );
+      finishRejectedProcessedOperationOnError( Collections.singletonList( data.getMessage() ) );
     } else {
       finishRejectedOperationOnSuccess();
     }
@@ -469,5 +456,34 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
         this::checkRejectedOperationResult,
         error -> handleRejectedOperationError( error.getLocalizedMessage() )
       );
+  }
+
+  protected void startProcessedOperationInMemory() {
+    store.process(
+      store.startTransactionFor( getParams().getDocument() )
+        .setLabel(LabelType.SYNC)
+        .removeLabel(LabelType.RETURNED)
+        .removeLabel(LabelType.AGAIN)
+        .setField(FieldType.PROCESSED, true)
+        .setState(InMemoryState.LOADING)
+    );
+  }
+
+  protected void startProcessedOperationInDb() {
+    dataStore
+      .update(RDocumentEntity.class)
+      .set( RDocumentEntity.CHANGED, true)
+      .set( RDocumentEntity.RETURNED, false )
+      .set( RDocumentEntity.AGAIN, false )
+      .set( RDocumentEntity.PROCESSED, true)
+      .where(RDocumentEntity.UID.eq( getParams().getDocument() ))
+      .get()
+      .value();
+  }
+
+  protected void finishProcessedOperationOnSuccess() {
+    removeSyncChanged();
+    setDocumentCondition( DocumentCondition.PROCESSED );
+    queueManager.setExecutedRemote(this);
   }
 }

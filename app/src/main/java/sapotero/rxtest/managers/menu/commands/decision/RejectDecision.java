@@ -6,7 +6,6 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
@@ -32,8 +31,8 @@ public class RejectDecision extends DecisionCommand {
 
   @Override
   public void execute() {
+    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
     queueManager.add(this);
-    saveOldLabelValues();
     updateLocal();
     setAsProcessed();
   }
@@ -41,7 +40,7 @@ public class RejectDecision extends DecisionCommand {
   private void updateLocal() {
     Timber.tag(TAG).e("1 updateLocal params%s", new Gson().toJson( getParams() ));
 
-    setDecisionTemporary();
+    setDecisionChangedTemporary();
 
     if ( signerIsCurrentUser() ) {
       startRejectedOperationInMemory();
@@ -50,10 +49,6 @@ public class RejectDecision extends DecisionCommand {
       setSyncLabelInMemory();
       setChangedInDb();
     }
-  }
-
-  private boolean signerIsCurrentUser() {
-    return Objects.equals( getParams().getDecisionModel().getSignerId(), getParams().getCurrentUserId() );
   }
 
   @Override
@@ -119,22 +114,22 @@ public class RejectDecision extends DecisionCommand {
       );
   }
 
-  private void finishOnError(List<String> errors) {
-    if ( signerIsCurrentUser() ) {
-      finishRejectedOperationOnError( errors );
-    } else {
-      finishOperationWithProcessedOnError( errors );
-    }
-
-    EventBus.getDefault().post( new ForceUpdateDocumentEvent( getParams().getDocument() ));
-  }
-
-  private void setDecisionTemporary() {
+  private void setDecisionChangedTemporary() {
     dataStore
       .update(RDecisionEntity.class)
       .set(RDecisionEntity.CHANGED, true)
       .set(RDecisionEntity.TEMPORARY, true)
       .where(RDecisionEntity.UID.eq( getParams().getDecisionId() ))
       .get().value();
+  }
+
+  private void finishOnError(List<String> errors) {
+    if ( signerIsCurrentUser() ) {
+      finishRejectedProcessedOperationOnError( errors );
+    } else {
+      finishOperationWithoutProcessedOnError( errors );
+    }
+
+    EventBus.getDefault().post( new ForceUpdateDocumentEvent( getParams().getDocument() ));
   }
 }

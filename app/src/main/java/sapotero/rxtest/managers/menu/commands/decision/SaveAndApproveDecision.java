@@ -78,7 +78,7 @@ public class SaveAndApproveDecision extends DecisionCommand {
     Timber.tag(TAG).e("-------- %s %s", getParams().getDecisionModel().getSignerId(), getParams().getCurrentUserId());
 
     if (
-      Objects.equals(getParams().getDecisionModel().getSignerId(), getParams().getCurrentUserId())
+        signerIsCurrentUser()
         // или если подписывающий министр
         || ( red != null && red.get(0).equals(true) )
       ) {
