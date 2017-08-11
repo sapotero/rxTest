@@ -5,14 +5,15 @@ import com.google.gson.Gson;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.Collections;
+import java.util.List;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.mapper.BlockMapper;
-import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
+import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.managers.menu.commands.DecisionCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -35,12 +36,7 @@ public class SaveDecision extends DecisionCommand {
   public void execute() {
     // resolved https://tasks.n-core.ru/browse/MVDESD-13366
     // ставим плашку всегда
-    dataStore
-      .update(RDocumentEntity.class)
-      .set(RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq( getParams().getDocument() ))
-      .get()
-      .value();
+    setChangedInDb();
 
     update();
 
@@ -128,11 +124,14 @@ public class SaveDecision extends DecisionCommand {
     info.subscribeOn( Schedulers.computation() )
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
-        data -> {
-          onSuccess( data, false, true );
-          removeSyncChanged();
-        },
-        error -> onError( error.getLocalizedMessage(), true )
+        data -> onDecisionSuccess( data, true ),
+        error -> onDecisionError( error.getLocalizedMessage() )
       );
+  }
+
+  @Override
+  public void finishOnError(List<String> errors) {
+    finishOperationWithoutProcessedOnError( errors );
+    EventBus.getDefault().post( new ForceUpdateDocumentEvent( getParams().getDocument() ));
   }
 }

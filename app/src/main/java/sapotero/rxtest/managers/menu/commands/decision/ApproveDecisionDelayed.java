@@ -2,6 +2,8 @@ package sapotero.rxtest.managers.menu.commands.decision;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.List;
+
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -80,15 +82,8 @@ public class ApproveDecisionDelayed extends DecisionCommand {
       info.subscribeOn( Schedulers.computation() )
         .observeOn( AndroidSchedulers.mainThread() )
         .subscribe(
-          data -> {
-            onSuccess( data, true, false );
-          },
-          error -> {
-            Timber.tag(TAG).i("error: %s", error);
-            sendErrorCallback( getType() );
-//            queueManager.setExecutedWithError(this, Collections.singletonList("http_error"));
-            EventBus.getDefault().post( new ForceUpdateDocumentEvent( getParams().getDocument() ));
-          }
+          data -> onDecisionSuccess( data, false ),
+          error -> onDecisionError( error.getLocalizedMessage() )
         );
     } else {
       Timber.tag(TAG).i("error: no decision yet");
@@ -98,5 +93,11 @@ public class ApproveDecisionDelayed extends DecisionCommand {
 
   private RDecisionEntity getDecision(String uid){
     return dataStore.select(RDecisionEntity.class).where(RDecisionEntity.UID.eq(uid)).get().firstOrNull();
+  }
+
+  @Override
+  public void finishOnError(List<String> errors) {
+    finishOperationWithoutProcessedOnError( errors );
+    EventBus.getDefault().post( new ForceUpdateDocumentEvent( getParams().getDocument() ));
   }
 }

@@ -2,6 +2,7 @@ package sapotero.rxtest.managers.menu.commands.decision;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -62,14 +63,7 @@ public class AddTemporaryDecision extends DecisionCommand {
 
     // resolved https://tasks.n-core.ru/browse/MVDESD-13366
     // ставим плашку всегда
-    dataStore
-      .update(RDocumentEntity.class)
-      .set(RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq( getParams().getDocument() ))
-      .get()
-      .value();
-
-
+    setChangedInDb();
 
     Decision dec = getParams().getDecisionModel();
 
@@ -138,14 +132,16 @@ public class AddTemporaryDecision extends DecisionCommand {
             Timber.tag(TAG).e("Updated: %s", data.getId());
             EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( getParams().getDecisionModel().getId() ));
           },
-          error -> {
-            Timber.tag(TAG).e("Error: %s", error);
-          });
+          error -> Timber.tag(TAG).e("Error: %s", error));
     }
   }
 
   @Override
   public void executeRemote() {
    queueManager.setExecutedRemote(this);
+  }
+
+  @Override
+  public void finishOnError(List<String> errors) {
   }
 }

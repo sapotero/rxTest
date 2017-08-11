@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 import io.requery.query.Tuple;
@@ -75,26 +77,33 @@ public abstract class DecisionCommand extends AbstractCommand {
     );
   }
 
-  protected void onSuccess(DecisionError data, boolean sendEvents, boolean updateDecisionFirstTable) {
+  protected void onDecisionSuccess(DecisionError data, boolean updateDecisionFirstTable) {
     if ( notEmpty( data.getErrors() ) ) {
-      queueManager.setExecutedWithError(this, data.getErrors());
-
-      if ( sendEvents ) {
-        EventBus.getDefault().post( new ForceUpdateDocumentEvent( data.getDocumentUid() ));
-      }
+      sendErrorCallback( "error" );
+      finishOnError( data.getErrors() );
 
     } else {
+      removeSyncChanged();
       queueManager.setExecutedRemote(this);
-
-      if ( sendEvents ) {
-        EventBus.getDefault().post( new UpdateDocumentEvent( data.getDocumentUid() ));
-      }
+      EventBus.getDefault().post( new UpdateDocumentEvent( data.getDocumentUid() ));
 
       if ( updateDecisionFirstTable ) {
         checkCreatorAndSignerIsCurrentUser(data);
       }
     }
   }
+
+  protected void onDecisionError(String errorMessage) {
+    Timber.tag(TAG).i("error: %s", errorMessage);
+
+    sendErrorCallback( errorMessage );
+
+    if ( settings.isOnline() ) {
+      finishOnError( Collections.singletonList( errorMessage ) );
+    }
+  }
+
+  public abstract void finishOnError(List<String> errors);
 
   protected boolean signerIsCurrentUser() {
     return Objects.equals( getParams().getDecisionModel().getSignerId(), getParams().getCurrentUserId() );
@@ -123,5 +132,4 @@ public abstract class DecisionCommand extends AbstractCommand {
       // или если подписывающий министр
       || red != null && red.get(0).equals(true);
   }
-
 }

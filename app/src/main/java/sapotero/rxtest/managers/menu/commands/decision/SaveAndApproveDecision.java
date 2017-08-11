@@ -102,17 +102,7 @@ public class SaveAndApproveDecision extends DecisionCommand {
             }
           },
 
-          error -> {
-            String errorMessage = error.getLocalizedMessage();
-
-            Timber.tag(TAG).i("error: %s", errorMessage);
-
-            sendErrorCallback( errorMessage );
-
-            if ( settings.isOnline() ) {
-              finishOnError( Collections.singletonList( errorMessage ) );
-            }
-          }
+          error -> onDecisionError( error.getLocalizedMessage() )
         );
 
     } else {
@@ -121,7 +111,8 @@ public class SaveAndApproveDecision extends DecisionCommand {
     }
   }
 
-  private void finishOnError(List<String> errors) {
+  @Override
+  public void finishOnError(List<String> errors) {
     if ( isActiveOrRed() ) {
       finishRejectedProcessedOperationOnError( errors );
     } else {

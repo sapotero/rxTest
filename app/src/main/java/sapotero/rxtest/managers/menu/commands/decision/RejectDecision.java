@@ -100,17 +100,7 @@ public class RejectDecision extends DecisionCommand {
           }
         },
 
-        error -> {
-          String errorMessage = error.getLocalizedMessage();
-
-          Timber.tag(TAG).i("error: %s", errorMessage);
-
-          sendErrorCallback( errorMessage );
-
-          if ( settings.isOnline() ) {
-            finishOnError( Collections.singletonList( errorMessage ) );
-          }
-        }
+        error -> onDecisionError( error.getLocalizedMessage() )
       );
   }
 
@@ -123,7 +113,8 @@ public class RejectDecision extends DecisionCommand {
       .get().value();
   }
 
-  private void finishOnError(List<String> errors) {
+  @Override
+  public void finishOnError(List<String> errors) {
     if ( signerIsCurrentUser() ) {
       finishRejectedProcessedOperationOnError( errors );
     } else {

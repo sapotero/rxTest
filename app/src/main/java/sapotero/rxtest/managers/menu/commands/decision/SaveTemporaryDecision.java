@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.List;
+
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
@@ -107,5 +109,9 @@ public class SaveTemporaryDecision extends DecisionCommand {
   @Override
   public void executeRemote() {
 //    queueManager.setExecutedRemote(this);
+  }
+
+  @Override
+  public void finishOnError(List<String> errors) {
   }
 }

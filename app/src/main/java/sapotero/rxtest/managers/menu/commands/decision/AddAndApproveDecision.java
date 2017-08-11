@@ -103,17 +103,7 @@ public class AddAndApproveDecision extends DecisionCommand {
             }
           },
 
-          error -> {
-            String errorMessage = error.getLocalizedMessage();
-
-            Timber.tag(TAG).i("error: %s", errorMessage);
-
-            sendErrorCallback( errorMessage );
-
-            if ( settings.isOnline() ) {
-              finishOnError( Collections.singletonList( errorMessage ) );
-            }
-          }
+          error -> onDecisionError( error.getLocalizedMessage() )
         );
 
     } else {
@@ -122,7 +112,8 @@ public class AddAndApproveDecision extends DecisionCommand {
     }
   }
 
-  private void finishOnError(List<String> errors) {
+  @Override
+  public void finishOnError(List<String> errors) {
     finishRejectedProcessedOperationOnError( errors );
     EventBus.getDefault().post( new ForceUpdateDocumentEvent( getParams().getDocument() ));
   }
