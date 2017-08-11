@@ -6,10 +6,12 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.util.Objects;
 
+import io.requery.query.Tuple;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Retrofit;
 import rx.Observable;
+import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.managers.menu.interfaces.Command;
@@ -97,4 +99,29 @@ public abstract class DecisionCommand extends AbstractCommand {
   protected boolean signerIsCurrentUser() {
     return Objects.equals( getParams().getDecisionModel().getSignerId(), getParams().getCurrentUserId() );
   }
+
+  protected void setDecisionTemporary() {
+    Integer count = dataStore
+      .update(RDecisionEntity.class)
+      .set(RDecisionEntity.TEMPORARY, true)
+      .where(RDecisionEntity.UID.eq( getParams().getDecisionModel().getId() ))
+      .get().value();
+
+    Timber.tag(TAG).i( "updateLocal: %s", count );
+  }
+
+  protected boolean isActiveOrRed() {
+    Tuple red = dataStore
+      .select(RDecisionEntity.RED)
+      .where(RDecisionEntity.UID.eq(getParams().getDecisionModel().getId()))
+      .get().firstOrNull();
+
+    return
+      // если активная резолюция
+      signerIsCurrentUser()
+
+      // или если подписывающий министр
+      || red != null && red.get(0).equals(true);
+  }
+
 }

@@ -4,20 +4,18 @@ import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 
-import io.requery.query.Tuple;
+import java.util.Collections;
+import java.util.List;
+
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
+import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.DecisionCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
-import sapotero.rxtest.utils.memory.fields.FieldType;
-import sapotero.rxtest.utils.memory.fields.InMemoryState;
-import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
 public class AddAndApproveDecision extends DecisionCommand {
@@ -32,71 +30,29 @@ public class AddAndApproveDecision extends DecisionCommand {
 
   @Override
   public void execute() {
-    updateLocal();
-    EventBus.getDefault().post( new ShowNextDocumentEvent( true, getParams().getDocument() ) );
-
+    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
     queueManager.add(this);
-    store.process(
-      store.startTransactionFor( getParams().getDocument() )
-        .setLabel(LabelType.SYNC)
-        .setState(InMemoryState.LOADING)
-    );
+    updateLocal();
     setAsProcessed();
+
+    EventBus.getDefault().post( new ShowNextDocumentEvent( true, getParams().getDocument() ) );
   }
 
   private void updateLocal() {
-
     Timber.tag(TAG).e("updateLocal %s", new Gson().toJson( getParams() ));
 
-    Integer count = dataStore
-      .update(RDecisionEntity.class)
-      .set(RDecisionEntity.TEMPORARY, true)
-      .where(RDecisionEntity.UID.eq( getParams().getDecisionModel().getId() ))
-      .get().value();
-    Timber.tag(TAG).i( "updateLocal: %s", count );
-
-    Tuple red = dataStore
-      .select(RDecisionEntity.RED)
-      .where(RDecisionEntity.UID.eq( getParams().getDecisionModel().getId() ))
-      .get().firstOrNull();
-
-    dataStore
-      .update(RDocumentEntity.class)
-      .set(RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq( getParams().getDocument() ))
-      .get()
-      .value();
+    setDecisionTemporary();
 
     // resolved https://tasks.n-core.ru/browse/MVDESD-13366
     // ставим плашку всегда
-    dataStore
-      .update(RDocumentEntity.class)
-      .set(RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq( getParams().getDocument() ))
-      .get()
-      .value();
+    setChangedInDb();
 
     // всегда перемещаем в обработанные при создании и подписании резолюции
-//    if (
-//
-//      Objects.equals(getParams().getDecisionModel().getSignerId(), getParams().getCurrentUserId())
-//      // или если подписывающий министр
-//      || ( red != null && red.get(0).equals(true) )
-//      ){
-      Integer dec = dataStore
-        .update(RDocumentEntity.class)
-        .set(RDocumentEntity.PROCESSED, true)
-        .where(RDocumentEntity.UID.eq( getParams().getDocument() ))
-        .get()
-        .value();
-
-      store.process(
-        store.startTransactionFor( getParams().getDocument() )
-          .setField(FieldType.PROCESSED, true)
-      );
+//    if ( isActiveOrRed() ) {
+    startProcessedOperationInMemory();
+    startProcessedOperationInDb();
 //    }
 
-    EventBus.getDefault().post( new ShowNextDocumentEvent( true, getParams().getDocument() ));
 //    EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( getParams().getDecisionModel().getId() ));
   }
 
@@ -137,14 +93,37 @@ public class AddAndApproveDecision extends DecisionCommand {
         .observeOn( AndroidSchedulers.mainThread() )
         .subscribe(
           data -> {
-            onSuccess( data, false, true );
-            removeSyncChanged();
+            if ( notEmpty( data.getErrors() ) ) {
+              sendErrorCallback( "error" );
+              finishOnError( data.getErrors() );
+
+            } else {
+              finishProcessedOperationOnSuccess();
+              checkCreatorAndSignerIsCurrentUser(data);
+            }
           },
-          error -> onError( error.getLocalizedMessage(), true )
+
+          error -> {
+            String errorMessage = error.getLocalizedMessage();
+
+            Timber.tag(TAG).i("error: %s", errorMessage);
+
+            sendErrorCallback( errorMessage );
+
+            if ( settings.isOnline() ) {
+              finishOnError( Collections.singletonList( errorMessage ) );
+            }
+          }
         );
 
     } else {
-      onError( SIGN_ERROR_MESSAGE, true );
+      sendErrorCallback( SIGN_ERROR_MESSAGE );
+      finishOnError( Collections.singletonList( SIGN_ERROR_MESSAGE ) );
     }
+  }
+
+  private void finishOnError(List<String> errors) {
+    finishRejectedProcessedOperationOnError( errors );
+    EventBus.getDefault().post( new ForceUpdateDocumentEvent( getParams().getDocument() ));
   }
 }

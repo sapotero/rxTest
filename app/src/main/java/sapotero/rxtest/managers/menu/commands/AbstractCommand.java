@@ -172,7 +172,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13258
   // 1. Созданные мной и подписант я
-  void checkCreatorAndSignerIsCurrentUser(DecisionError data) {
+  protected void checkCreatorAndSignerIsCurrentUser(DecisionError data) {
     String decisionUid = data.getDecisionUid();
 
     // Если создал резолюцию я и подписант я, то сохранить UID этой резолюции в отдельную таблицу

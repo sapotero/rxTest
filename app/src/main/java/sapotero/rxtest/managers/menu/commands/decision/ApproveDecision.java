@@ -128,28 +128,6 @@ public class ApproveDecision extends DecisionCommand {
     }
   }
 
-  private void setDecisionTemporary() {
-    dataStore
-      .update(RDecisionEntity.class)
-      .set(RDecisionEntity.TEMPORARY, true)
-      .where(RDecisionEntity.UID.eq(getParams().getDecisionModel().getId()))
-      .get().value();
-  }
-
-  private boolean isActiveOrRed() {
-    Tuple red = dataStore
-      .select(RDecisionEntity.RED)
-      .where(RDecisionEntity.UID.eq(getParams().getDecisionModel().getId()))
-      .get().firstOrNull();
-
-    return
-      // если активная резолюция
-      signerIsCurrentUser()
-
-      // или если подписывающий министр
-      || red != null && red.get(0).equals(true);
-  }
-
   private void sendInvalidateDecisionEvent() {
     Observable.just("").timeout(100, TimeUnit.MILLISECONDS).subscribe(
       data -> {
@@ -169,5 +147,4 @@ public class ApproveDecision extends DecisionCommand {
 
     EventBus.getDefault().post( new ForceUpdateDocumentEvent( getParams().getDocument() ));
   }
-
 }
