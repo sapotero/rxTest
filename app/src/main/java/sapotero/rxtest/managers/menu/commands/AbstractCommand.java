@@ -246,6 +246,11 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       .value();
   }
 
+  protected void finishOperationWithoutProcessedOnSuccess() {
+    removeSyncChanged();
+    queueManager.setExecutedRemote(this);
+  }
+
   protected void finishOperationWithoutProcessedOnError(List<String> errors) {
     removeSyncChanged();
     queueManager.setExecutedWithError( this, errors );

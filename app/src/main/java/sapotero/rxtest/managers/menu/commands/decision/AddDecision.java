@@ -2,12 +2,9 @@ package sapotero.rxtest.managers.menu.commands.decision;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.util.Collections;
 import java.util.List;
 
 import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.DecisionCommand;
@@ -76,17 +73,18 @@ public class AddDecision extends DecisionCommand {
     }
 
     Observable<DecisionError> info = getDecisionCreateOperationObservable(decision);
-
-    info.subscribeOn( Schedulers.computation() )
-      .observeOn( AndroidSchedulers.mainThread() )
-      .subscribe(
-        data -> onDecisionSuccess( data, true ),
-        error -> onDecisionError( error.getLocalizedMessage() )
-      );
+    sendDecisionOperationRequest( info );
   }
 
   @Override
-  public void finishOnError(List<String> errors) {
+  public void finishOnDecisionSuccess(DecisionError data) {
+    finishOperationWithoutProcessedOnSuccess();
+    checkCreatorAndSignerIsCurrentUser(data);
+    EventBus.getDefault().post( new UpdateDocumentEvent( data.getDocumentUid() ));
+  }
+
+  @Override
+  public void finishOnDecisionError(List<String> errors) {
     finishOperationWithoutProcessedOnError( errors );
     EventBus.getDefault().post( new ForceUpdateDocumentEvent( getParams().getDocument() ));
   }

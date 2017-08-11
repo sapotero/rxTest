@@ -8,8 +8,6 @@ import java.util.Collections;
 import java.util.List;
 
 import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.DecisionCommand;
@@ -86,34 +84,23 @@ public class AddAndApproveDecision extends DecisionCommand {
 
     if ( sign != null ) {
       decision.setSign(sign);
-
       Observable<DecisionError> info = getDecisionCreateOperationObservable(decision);
-
-      info.subscribeOn( Schedulers.computation() )
-        .observeOn( AndroidSchedulers.mainThread() )
-        .subscribe(
-          data -> {
-            if ( notEmpty( data.getErrors() ) ) {
-              sendErrorCallback( "error" );
-              finishOnError( data.getErrors() );
-
-            } else {
-              finishProcessedOperationOnSuccess();
-              checkCreatorAndSignerIsCurrentUser(data);
-            }
-          },
-
-          error -> onDecisionError( error.getLocalizedMessage() )
-        );
+      sendDecisionOperationRequest( info );
 
     } else {
       sendErrorCallback( SIGN_ERROR_MESSAGE );
-      finishOnError( Collections.singletonList( SIGN_ERROR_MESSAGE ) );
+      finishOnDecisionError( Collections.singletonList( SIGN_ERROR_MESSAGE ) );
     }
   }
 
   @Override
-  public void finishOnError(List<String> errors) {
+  public void finishOnDecisionSuccess(DecisionError data) {
+    finishProcessedOperationOnSuccess();
+    checkCreatorAndSignerIsCurrentUser(data);
+  }
+
+  @Override
+  public void finishOnDecisionError(List<String> errors) {
     finishRejectedProcessedOperationOnError( errors );
     EventBus.getDefault().post( new ForceUpdateDocumentEvent( getParams().getDocument() ));
   }

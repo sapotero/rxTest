@@ -8,11 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import io.requery.query.Tuple;
 import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
-import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
@@ -88,33 +84,11 @@ public class ApproveDecision extends DecisionCommand {
       }
 
       Observable<DecisionError> info = getDecisionUpdateOperationObservable(_decision);
-
-      info.subscribeOn( Schedulers.computation() )
-        .observeOn( AndroidSchedulers.mainThread() )
-        .subscribe(
-          data -> {
-            if ( notEmpty( data.getErrors() ) ) {
-              sendErrorCallback( "error" );
-              finishOnError( data.getErrors() );
-
-            } else {
-              if ( isActiveOrRed() ) {
-                finishProcessedOperationOnSuccess();
-              } else {
-                removeSyncChanged();
-                queueManager.setExecutedRemote(this);
-              }
-
-              EventBus.getDefault().post( new UpdateDocumentEvent( data.getDocumentUid() ));
-            }
-          },
-
-          error -> onDecisionError( error.getLocalizedMessage() )
-        );
+      sendDecisionOperationRequest( info );
 
     } else {
       sendErrorCallback( SIGN_ERROR_MESSAGE );
-      finishOnError( Collections.singletonList( SIGN_ERROR_MESSAGE ) );
+      finishOnDecisionError( Collections.singletonList( SIGN_ERROR_MESSAGE ) );
     }
   }
 
@@ -129,7 +103,18 @@ public class ApproveDecision extends DecisionCommand {
   }
 
   @Override
-  public void finishOnError(List<String> errors) {
+  public void finishOnDecisionSuccess(DecisionError data) {
+    if ( isActiveOrRed() ) {
+      finishProcessedOperationOnSuccess();
+    } else {
+      finishOperationWithoutProcessedOnSuccess();
+    }
+
+    EventBus.getDefault().post( new UpdateDocumentEvent( data.getDocumentUid() ));
+  }
+
+  @Override
+  public void finishOnDecisionError(List<String> errors) {
     if ( isActiveOrRed() ) {
       finishRejectedProcessedOperationOnError( errors );
     } else {

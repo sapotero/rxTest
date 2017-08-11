@@ -13,10 +13,10 @@ import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Retrofit;
 import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
-import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
-import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Decision;
@@ -77,33 +77,40 @@ public abstract class DecisionCommand extends AbstractCommand {
     );
   }
 
-  protected void onDecisionSuccess(DecisionError data, boolean updateDecisionFirstTable) {
+  protected void sendDecisionOperationRequest(Observable<DecisionError> info) {
+    info.subscribeOn( Schedulers.computation() )
+      .observeOn( AndroidSchedulers.mainThread() )
+      .subscribe(
+        this::onDecisionSuccess,
+        this::onDecisionError
+      );
+  }
+
+  protected void onDecisionSuccess(DecisionError data) {
     if ( notEmpty( data.getErrors() ) ) {
       sendErrorCallback( "error" );
-      finishOnError( data.getErrors() );
+      finishOnDecisionError( data.getErrors() );
 
     } else {
-      removeSyncChanged();
-      queueManager.setExecutedRemote(this);
-      EventBus.getDefault().post( new UpdateDocumentEvent( data.getDocumentUid() ));
-
-      if ( updateDecisionFirstTable ) {
-        checkCreatorAndSignerIsCurrentUser(data);
-      }
+      finishOnDecisionSuccess( data );
     }
   }
 
-  protected void onDecisionError(String errorMessage) {
+  public abstract void finishOnDecisionSuccess(DecisionError data);
+
+  public abstract void finishOnDecisionError(List<String> errors);
+
+  protected void onDecisionError(Throwable error) {
+    String errorMessage = error.getLocalizedMessage();
+
     Timber.tag(TAG).i("error: %s", errorMessage);
 
     sendErrorCallback( errorMessage );
 
     if ( settings.isOnline() ) {
-      finishOnError( Collections.singletonList( errorMessage ) );
+      finishOnDecisionError( Collections.singletonList( errorMessage ) );
     }
   }
-
-  public abstract void finishOnError(List<String> errors);
 
   protected boolean signerIsCurrentUser() {
     return Objects.equals( getParams().getDecisionModel().getSignerId(), getParams().getCurrentUserId() );

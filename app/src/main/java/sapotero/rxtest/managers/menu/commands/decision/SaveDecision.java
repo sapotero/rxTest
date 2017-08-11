@@ -14,6 +14,7 @@ import sapotero.rxtest.db.mapper.BlockMapper;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
+import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.managers.menu.commands.DecisionCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -120,17 +121,18 @@ public class SaveDecision extends DecisionCommand {
     _decision.setDocumentUid( null );
 
     Observable<DecisionError> info = getDecisionUpdateOperationObservable(_decision);
-
-    info.subscribeOn( Schedulers.computation() )
-      .observeOn( AndroidSchedulers.mainThread() )
-      .subscribe(
-        data -> onDecisionSuccess( data, true ),
-        error -> onDecisionError( error.getLocalizedMessage() )
-      );
+    sendDecisionOperationRequest( info );
   }
 
   @Override
-  public void finishOnError(List<String> errors) {
+  public void finishOnDecisionSuccess(DecisionError data) {
+    finishOperationWithoutProcessedOnSuccess();
+    checkCreatorAndSignerIsCurrentUser(data);
+    EventBus.getDefault().post( new UpdateDocumentEvent( data.getDocumentUid() ));
+  }
+
+  @Override
+  public void finishOnDecisionError(List<String> errors) {
     finishOperationWithoutProcessedOnError( errors );
     EventBus.getDefault().post( new ForceUpdateDocumentEvent( getParams().getDocument() ));
   }

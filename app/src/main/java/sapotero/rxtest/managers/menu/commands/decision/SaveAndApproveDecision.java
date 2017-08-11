@@ -8,8 +8,6 @@ import java.util.Collections;
 import java.util.List;
 
 import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
@@ -79,40 +77,28 @@ public class SaveAndApproveDecision extends DecisionCommand {
 
     if ( sign != null ) {
       _decision.setSign( sign );
-
       Observable<DecisionError> info = getDecisionUpdateOperationObservable(_decision);
-
-      info.subscribeOn( Schedulers.computation() )
-        .observeOn( AndroidSchedulers.mainThread() )
-        .subscribe(
-          data -> {
-            if ( notEmpty( data.getErrors() ) ) {
-              sendErrorCallback( "error" );
-              finishOnError( data.getErrors() );
-
-            } else {
-              if ( isActiveOrRed() ) {
-                finishProcessedOperationOnSuccess();
-              } else {
-                removeSyncChanged();
-                queueManager.setExecutedRemote(this);
-              }
-
-              checkCreatorAndSignerIsCurrentUser(data);
-            }
-          },
-
-          error -> onDecisionError( error.getLocalizedMessage() )
-        );
+      sendDecisionOperationRequest( info );
 
     } else {
       sendErrorCallback( SIGN_ERROR_MESSAGE );
-      finishOnError( Collections.singletonList( SIGN_ERROR_MESSAGE ) );
+      finishOnDecisionError( Collections.singletonList( SIGN_ERROR_MESSAGE ) );
     }
   }
 
   @Override
-  public void finishOnError(List<String> errors) {
+  public void finishOnDecisionSuccess(DecisionError data) {
+    if ( isActiveOrRed() ) {
+      finishProcessedOperationOnSuccess();
+    } else {
+      finishOperationWithoutProcessedOnSuccess();
+    }
+
+    checkCreatorAndSignerIsCurrentUser(data);
+  }
+
+  @Override
+  public void finishOnDecisionError(List<String> errors) {
     if ( isActiveOrRed() ) {
       finishRejectedProcessedOperationOnError( errors );
     } else {

@@ -5,10 +5,9 @@ import org.greenrobot.eventbus.EventBus;
 import java.util.List;
 
 import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
+import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.DecisionCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.document.Decision;
@@ -78,13 +77,8 @@ public class ApproveDecisionDelayed extends DecisionCommand {
       }
 
       Observable<DecisionError> info = getDecisionUpdateOperationObservable(_decision);
+      sendDecisionOperationRequest( info );
 
-      info.subscribeOn( Schedulers.computation() )
-        .observeOn( AndroidSchedulers.mainThread() )
-        .subscribe(
-          data -> onDecisionSuccess( data, false ),
-          error -> onDecisionError( error.getLocalizedMessage() )
-        );
     } else {
       Timber.tag(TAG).i("error: no decision yet");
       sendErrorCallback( getType() );
@@ -96,7 +90,13 @@ public class ApproveDecisionDelayed extends DecisionCommand {
   }
 
   @Override
-  public void finishOnError(List<String> errors) {
+  public void finishOnDecisionSuccess(DecisionError data) {
+    finishOperationWithoutProcessedOnSuccess();
+    EventBus.getDefault().post( new UpdateDocumentEvent( data.getDocumentUid() ));
+  }
+
+  @Override
+  public void finishOnDecisionError(List<String> errors) {
     finishOperationWithoutProcessedOnError( errors );
     EventBus.getDefault().post( new ForceUpdateDocumentEvent( getParams().getDocument() ));
   }

@@ -4,12 +4,9 @@ import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.util.Collections;
 import java.util.List;
 
 import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
@@ -79,29 +76,7 @@ public class RejectDecision extends DecisionCommand {
     }
 
     Observable<DecisionError> info = getDecisionUpdateOperationObservable(formated_decision);
-
-    info.subscribeOn( Schedulers.computation() )
-      .observeOn( AndroidSchedulers.mainThread() )
-      .subscribe(
-        data -> {
-          if ( notEmpty( data.getErrors() ) ) {
-            sendErrorCallback( "error" );
-            finishOnError( data.getErrors() );
-
-          } else {
-            if ( signerIsCurrentUser() ) {
-              finishRejectedOperationOnSuccess();
-            } else {
-              removeSyncChanged();
-              queueManager.setExecutedRemote(this);
-            }
-
-            EventBus.getDefault().post( new UpdateDocumentEvent( getParams().getDocument() ));
-          }
-        },
-
-        error -> onDecisionError( error.getLocalizedMessage() )
-      );
+    sendDecisionOperationRequest( info );
   }
 
   private void setDecisionChangedTemporary() {
@@ -114,7 +89,18 @@ public class RejectDecision extends DecisionCommand {
   }
 
   @Override
-  public void finishOnError(List<String> errors) {
+  public void finishOnDecisionSuccess(DecisionError data) {
+    if ( signerIsCurrentUser() ) {
+      finishRejectedOperationOnSuccess();
+    } else {
+      finishOperationWithoutProcessedOnSuccess();
+    }
+
+    EventBus.getDefault().post( new UpdateDocumentEvent( getParams().getDocument() ));
+  }
+
+  @Override
+  public void finishOnDecisionError(List<String> errors) {
     if ( signerIsCurrentUser() ) {
       finishRejectedProcessedOperationOnError( errors );
     } else {

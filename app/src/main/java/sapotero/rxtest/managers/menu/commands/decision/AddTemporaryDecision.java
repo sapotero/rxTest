@@ -16,6 +16,7 @@ import sapotero.rxtest.managers.menu.commands.DecisionCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
+import sapotero.rxtest.retrofit.models.v2.DecisionError;
 import sapotero.rxtest.utils.padeg.Declension;
 import timber.log.Timber;
 
@@ -142,6 +143,10 @@ public class AddTemporaryDecision extends DecisionCommand {
   }
 
   @Override
-  public void finishOnError(List<String> errors) {
+  public void finishOnDecisionSuccess(DecisionError data) {
+  }
+
+  @Override
+  public void finishOnDecisionError(List<String> errors) {
   }
 }
