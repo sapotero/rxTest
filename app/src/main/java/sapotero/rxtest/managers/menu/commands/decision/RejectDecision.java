@@ -101,12 +101,7 @@ public class RejectDecision extends DecisionCommand {
 
   @Override
   public void finishOnOperationError(List<String> errors) {
-    if ( signerIsCurrentUser() ) {
-      finishRejectedProcessedOperationOnError( errors );
-    } else {
-      finishOperationOnError( errors );
-    }
-
+    finishRejectedProcessedOperationOnError( errors );
     EventBus.getDefault().post( new ForceUpdateDocumentEvent( getParams().getDocument() ));
   }
 }

@@ -95,7 +95,12 @@ public class AddAndApproveDecision extends DecisionCommand {
 
   @Override
   public void finishOnDecisionSuccess(DecisionError data) {
-    finishProcessedOperationOnSuccess();
+    if ( isActiveOrRed() ) {
+      finishProcessedOperationOnSuccess();
+    } else {
+      finishOperationOnSuccess();
+    }
+
     checkCreatorAndSignerIsCurrentUser(data);
   }
 

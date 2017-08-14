@@ -86,9 +86,9 @@ public class RemoveFromFolder extends SharedCommand {
       store.process( transaction );
 
       removeChangedInDb();
-
-      queueManager.setExecutedRemote(this);
     }
+
+    queueManager.setExecutedRemote(this);
   }
 
   @Override
