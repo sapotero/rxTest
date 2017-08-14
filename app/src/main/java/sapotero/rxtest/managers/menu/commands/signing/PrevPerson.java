@@ -46,10 +46,6 @@ public class PrevPerson extends ApprovalSigningCommand {
   }
 
   @Override
-  public void onRemoteError() {
-  }
-
-  @Override
   public void finishOnOperationSuccess() {
     finishRejectedOperationOnSuccess();
   }

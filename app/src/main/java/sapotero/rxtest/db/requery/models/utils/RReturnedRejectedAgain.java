@@ -18,5 +18,6 @@ public class RReturnedRejectedAgain {
 
   String documentUid;
   String user;
+  String status;
   DocumentCondition documentCondition;
 }

@@ -241,7 +241,7 @@ public class UpdateDocumentJob extends DocumentJob {
       .and( RReturnedRejectedAgainEntity.USER.eq( settings.getLogin() ) )
       .get().firstOrNull();
 
-    if ( returnedRejectedAgainEntity != null ) {
+    if ( returnedRejectedAgainEntity != null && Objects.equals( documentExisting.getFilter(), returnedRejectedAgainEntity.getStatus() ) ) {
       switch (returnedRejectedAgainEntity.getDocumentCondition()) {
         case PROCESSED:
           documentExisting.setReturned( true );

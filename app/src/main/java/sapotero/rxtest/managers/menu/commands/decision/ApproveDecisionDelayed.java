@@ -91,7 +91,7 @@ public class ApproveDecisionDelayed extends DecisionCommand {
 
   @Override
   public void finishOnDecisionSuccess(DecisionError data) {
-    finishOperationWithoutProcessedOnSuccess();
+    finishOperationOnSuccess();
     EventBus.getDefault().post( new UpdateDocumentEvent( data.getDocumentUid() ));
   }
 

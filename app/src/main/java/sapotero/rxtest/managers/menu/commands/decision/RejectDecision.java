@@ -93,7 +93,7 @@ public class RejectDecision extends DecisionCommand {
     if ( signerIsCurrentUser() ) {
       finishRejectedOperationOnSuccess();
     } else {
-      finishOperationWithoutProcessedOnSuccess();
+      finishOperationOnSuccess();
     }
 
     EventBus.getDefault().post( new UpdateDocumentEvent( getParams().getDocument() ));

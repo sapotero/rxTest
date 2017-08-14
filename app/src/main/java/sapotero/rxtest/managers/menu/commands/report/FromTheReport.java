@@ -89,8 +89,7 @@ public class FromTheReport extends OperationResultCommand {
 
   @Override
   public void finishOnOperationSuccess() {
-    removeSyncChanged();
-    queueManager.setExecutedRemote(this);
+    finishOperationOnSuccess();
   }
 
   @Override

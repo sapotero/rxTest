@@ -132,7 +132,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     );
   }
 
-  private RDocumentEntity findDocumentByUID(){
+  protected RDocumentEntity findDocumentByUID(){
     return dataStore
       .select(RDocumentEntity.class)
       .where(RDocumentEntity.UID.eq(getParams().getDocument()))
@@ -246,7 +246,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       .value();
   }
 
-  protected void finishOperationWithoutProcessedOnSuccess() {
+  protected void finishOperationOnSuccess() {
     removeSyncChanged();
     queueManager.setExecutedRemote(this);
   }
@@ -281,18 +281,9 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     return collection != null && collection.size() > 0;
   }
 
-  public void onError(String errorMessage, boolean setProcessedFalse) {
-    Timber.tag(TAG).i("error: %s", errorMessage);
-
-    sendErrorCallback( errorMessage );
-
-    if ( settings.isOnline() ) {
-      if ( setProcessedFalse ) {
-        finishOperationWithProcessedOnError( Collections.singletonList( errorMessage ) );
-      } else {
-        finishOperationWithoutProcessedOnError( Collections.singletonList( errorMessage ) );
-      }
-    }
+  // Return empty list if input list is null
+  protected <T> List<T> nullGuard(List<T> list) {
+    return list != null ? list : Collections.EMPTY_LIST;
   }
 
   protected RSignImageEntity getSignImage(String imageId) {
@@ -302,7 +293,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       .get().firstOrNull();
   }
 
-  protected void printOperationResult(OperationResult data) {
+  void printOperationResult(OperationResult data) {
     Timber.tag(TAG).i("ok: %s", data.getOk());
     Timber.tag(TAG).i("error: %s", data.getMessage());
     Timber.tag(TAG).i("type: %s", data.getType());
@@ -369,6 +360,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       .get().firstOrNull();
 
     if ( returnedRejectedAgainEntity != null ) {
+      returnedRejectedAgainEntity.setStatus( getParams().getStatusCode() );
       returnedRejectedAgainEntity.setDocumentCondition( documentCondition );
 
       dataStore
@@ -385,6 +377,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       returnedRejectedAgainEntity = new RReturnedRejectedAgainEntity();
       returnedRejectedAgainEntity.setDocumentUid( getParams().getDocument() );
       returnedRejectedAgainEntity.setUser( getParams().getLogin() );
+      returnedRejectedAgainEntity.setStatus( getParams().getStatusCode() );
       returnedRejectedAgainEntity.setDocumentCondition( documentCondition );
 
       dataStore

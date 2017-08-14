@@ -126,7 +126,7 @@ public class SaveDecision extends DecisionCommand {
 
   @Override
   public void finishOnDecisionSuccess(DecisionError data) {
-    finishOperationWithoutProcessedOnSuccess();
+    finishOperationOnSuccess();
     checkCreatorAndSignerIsCurrentUser(data);
     EventBus.getDefault().post( new UpdateDocumentEvent( data.getDocumentUid() ));
   }

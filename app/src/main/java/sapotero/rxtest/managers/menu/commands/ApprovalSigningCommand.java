@@ -6,8 +6,6 @@ import java.util.Collections;
 import okhttp3.RequestBody;
 import retrofit2.Retrofit;
 import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
@@ -18,7 +16,7 @@ public abstract class ApprovalSigningCommand extends OperationResultCommand {
     super(params);
   }
 
-  private Observable<OperationResult> getOperationResultObservable() {
+  protected Observable<OperationResult> getOperationResultObservable() {
     Retrofit retrofit = getOperationsRetrofit();
 
     OperationService operationService = retrofit.create( OperationService.class );
@@ -55,41 +53,6 @@ public abstract class ApprovalSigningCommand extends OperationResultCommand {
 
     return info;
   }
-
-  protected void remoteOperation() {
-    Observable<OperationResult> info = getOperationResultObservable();
-
-    if (info != null) {
-      info.subscribeOn( Schedulers.computation() )
-        .observeOn( AndroidSchedulers.mainThread() )
-        .subscribe(
-          data -> {
-            printOperationResult( data );
-
-            if (data.getMessage() != null && !data.getMessage().toLowerCase().contains("успешно") ) {
-              queueManager.setExecutedWithError(this, Collections.singletonList( data.getMessage() ) );
-            } else {
-              queueManager.setExecutedRemote(this);
-            }
-
-            removeSyncChanged();
-          },
-          error -> {
-            onError(error.getLocalizedMessage());
-          }
-        );
-
-    } else {
-      onError(SIGN_ERROR_MESSAGE);
-    }
-  }
-
-  private void onError(String errorMessage) {
-    onError( errorMessage, true );
-    onRemoteError();
-  }
-
-  public abstract void onRemoteError();
 
   protected void approvalSigningRemote() {
     printCommandType();

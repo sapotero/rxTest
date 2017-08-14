@@ -91,7 +91,7 @@ public class SaveAndApproveDecision extends DecisionCommand {
     if ( isActiveOrRed() ) {
       finishProcessedOperationOnSuccess();
     } else {
-      finishOperationWithoutProcessedOnSuccess();
+      finishOperationOnSuccess();
     }
 
     checkCreatorAndSignerIsCurrentUser(data);

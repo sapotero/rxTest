@@ -23,7 +23,7 @@ public abstract class OperationResultCommand extends AbstractCommand {
       );
   }
 
-  void onOperationSuccess(OperationResult data) {
+  protected void onOperationSuccess(OperationResult data) {
     printOperationResult( data );
 
     if (data.getMessage() != null && !data.getMessage().toLowerCase().contains("успешно") ) {

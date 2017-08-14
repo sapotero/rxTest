@@ -78,7 +78,7 @@ public class NextPerson extends ApprovalSigningCommand {
     int result = signImages();
 
     if ( result == ALL_IMAGES_SIGNED ) {
-      remoteOperation();
+      approvalSigningRemote();
     }
 
     if ( result == IMAGE_SIGN_ERROR ) {
@@ -87,7 +87,7 @@ public class NextPerson extends ApprovalSigningCommand {
 
       sendErrorCallback( errorMessage );
 
-      finishRejectedProcessedOperationOnError( Collections.singletonList( errorMessage ) );
+      finishOnOperationError( Collections.singletonList( errorMessage ) );
     }
   }
 
@@ -203,16 +203,12 @@ public class NextPerson extends ApprovalSigningCommand {
   }
 
   @Override
-  public void onRemoteError() {
-  }
-
-  @Override
   public void finishOnOperationSuccess() {
-
+    finishProcessedOperationOnSuccess();
   }
 
   @Override
   public void finishOnOperationError(List<String> errors) {
-
+    finishRejectedProcessedOperationOnError( errors );
   }
 }

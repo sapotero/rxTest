@@ -107,7 +107,7 @@ public class ApproveDecision extends DecisionCommand {
     if ( isActiveOrRed() ) {
       finishProcessedOperationOnSuccess();
     } else {
-      finishOperationWithoutProcessedOnSuccess();
+      finishOperationOnSuccess();
     }
 
     EventBus.getDefault().post( new UpdateDocumentEvent( data.getDocumentUid() ));
