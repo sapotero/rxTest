@@ -198,6 +198,7 @@ public class UpdateDocumentJob extends DocumentJob {
 
         if ( forceProcessed ) {
           Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Set processed = true");
+          clearReturnedRejectedAgainLabels( documentExisting );
           documentExisting.setProcessed( true );
         }
 
@@ -231,9 +232,7 @@ public class UpdateDocumentJob extends DocumentJob {
   }
 
   private void setReturnedRejectedAgainLabel(RDocumentEntity documentExisting) {
-    documentExisting.setReturned( false );
-    documentExisting.setRejected( false );
-    documentExisting.setAgain( false );
+    clearReturnedRejectedAgainLabels( documentExisting );
 
     RReturnedRejectedAgainEntity returnedRejectedAgainEntity = dataStore
       .select( RReturnedRejectedAgainEntity.class )
@@ -251,6 +250,12 @@ public class UpdateDocumentJob extends DocumentJob {
           break;
       }
     }
+  }
+
+  private void clearReturnedRejectedAgainLabels(RDocumentEntity documentExisting) {
+    documentExisting.setReturned( false );
+    documentExisting.setRejected( false );
+    documentExisting.setAgain( false );
   }
 
   @Override

@@ -4,22 +4,15 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
-import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.models.RRouteEntity;
 import sapotero.rxtest.db.requery.models.utils.RApprovalNextPersonEntity;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.ApprovalSigningCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.OperationResult;
-import sapotero.rxtest.retrofit.models.document.DocumentInfo;
-import sapotero.rxtest.retrofit.models.document.Person;
-import sapotero.rxtest.retrofit.models.document.Route;
-import sapotero.rxtest.retrofit.models.document.Step;
 import timber.log.Timber;
 
 public class NextPerson extends ApprovalSigningCommand {
@@ -131,29 +124,6 @@ public class NextPerson extends ApprovalSigningCommand {
   @Override
   public void finishOnOperationSuccess() {
     finishProcessedOperationOnSuccess();
-
-//    RDocumentEntity documentEntity = findDocumentByUID();
-//
-//    boolean saveDocumentCondition = true;
-//
-//    if ( documentEntity != null && documentEntity.getRoute() != null ) {
-//      Route route = mappers.getRouteMapper().toModel( (RRouteEntity) documentEntity.getRoute() );
-//      Step step = getStep( route.getSteps(), "Подписывающие" );
-//
-//      for ( Person person : nullGuard( step.getPeople() ) ) {
-//        if ( Objects.equals( person.getOfficialId(), getParams().getCurrentUserId() ) ) {
-//          saveDocumentCondition = false;
-//        }
-//      }
-//    }
-//
-//    // Если подписывающий равен текущему пользователю, то не рисовать дополнительных плашек,
-//    // когда документ после согласования вернется на подписание.
-//    if ( saveDocumentCondition ) {
-//      finishProcessedOperationOnSuccess();
-//    } else {
-//      finishOperationOnSuccess();
-//    }
   }
 
   @Override
@@ -161,18 +131,4 @@ public class NextPerson extends ApprovalSigningCommand {
     finishRejectedProcessedOperationOnError( errors );
     setTaskStarted( getParams().getDocument(), false );
   }
-
-//  private Step getStep(List<Step> steps, String title) {
-//    Step result = new Step();
-//
-//    for ( Step step : nullGuard( steps) ) {
-//      if ( Objects.equals( step.getTitle(), title) ) {
-//        result = step;
-//        break;
-//      }
-//    }
-//
-//    return result;
-//  }
-
 }
