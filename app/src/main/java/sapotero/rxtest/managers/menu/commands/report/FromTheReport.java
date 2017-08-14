@@ -7,7 +7,6 @@ import java.util.List;
 
 import retrofit2.Retrofit;
 import rx.Observable;
-import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.OperationResultCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -27,9 +26,12 @@ public class FromTheReport extends OperationResultCommand {
 
   @Override
   public void execute() {
+    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
     queueManager.add(this);
-    update();
-    setSyncAndProcessedInMemory();
+    EventBus.getDefault().post( new ShowNextDocumentEvent( true, getParams().getDocument() ));
+
+    startProcessedOperationInMemory();
+
     setAsProcessed();
   }
 
@@ -38,22 +40,9 @@ public class FromTheReport extends OperationResultCommand {
     return "from_the_report";
   }
 
-  private void update(){
-    String uid = getParams().getDocument();
-
-    dataStore
-      .update(RDocumentEntity.class)
-      .set( RDocumentEntity.PROCESSED, true)
-      .set( RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq(uid))
-      .get()
-      .value();
-
-    EventBus.getDefault().post( new ShowNextDocumentEvent( true, getParams().getDocument() ));
-  }
-
   @Override
   public void executeLocal() {
+    startProcessedOperationInDb();
     sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }
@@ -89,11 +78,12 @@ public class FromTheReport extends OperationResultCommand {
 
   @Override
   public void finishOnOperationSuccess() {
+    // Do not save document condition, just finish operation
     finishOperationOnSuccess();
   }
 
   @Override
   public void finishOnOperationError(List<String> errors) {
-    finishOperationWithProcessedOnError( errors );
+    finishRejectedProcessedOperationOnError( errors );
   }
 }

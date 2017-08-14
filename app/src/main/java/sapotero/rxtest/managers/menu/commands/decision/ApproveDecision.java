@@ -118,7 +118,7 @@ public class ApproveDecision extends DecisionCommand {
     if ( isActiveOrRed() ) {
       finishRejectedProcessedOperationOnError( errors );
     } else {
-      finishOperationWithoutProcessedOnError( errors );
+      finishOperationOnError( errors );
     }
 
     EventBus.getDefault().post( new ForceUpdateDocumentEvent( getParams().getDocument() ));

@@ -132,7 +132,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     );
   }
 
-  protected RDocumentEntity findDocumentByUID(){
+  private RDocumentEntity findDocumentByUID(){
     return dataStore
       .select(RDocumentEntity.class)
       .where(RDocumentEntity.UID.eq(getParams().getDocument()))
@@ -214,18 +214,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       .value();
   }
 
-  protected void setSyncAndProcessedInMemory() {
-    Timber.tag("RecyclerViewRefresh").d("Command: Set sync label");
-
-    store.process(
-      store.startTransactionFor( getParams().getDocument() )
-        .setLabel(LabelType.SYNC)
-        .setField(FieldType.PROCESSED, true)
-        .setState(InMemoryState.LOADING)
-    );
-  }
-
-  protected void removeSyncChanged() {
+  private void removeSyncChanged() {
     Timber.tag("RecyclerViewRefresh").d("Command: Remove sync label");
 
     store.process(
@@ -251,39 +240,13 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     queueManager.setExecutedRemote(this);
   }
 
-  protected void finishOperationWithoutProcessedOnError(List<String> errors) {
+  protected void finishOperationOnError(List<String> errors) {
     removeSyncChanged();
-    queueManager.setExecutedWithError( this, errors );
-  }
-
-  protected void finishOperationWithProcessedOnError(List<String> errors) {
-    Timber.tag("RecyclerViewRefresh").d("Command: Remove sync label");
-
-    store.process(
-      store.startTransactionFor( getParams().getDocument() )
-        .removeLabel(LabelType.SYNC)
-        .setField(FieldType.PROCESSED, false)
-        .setState(InMemoryState.READY)
-    );
-
-    dataStore
-      .update(RDocumentEntity.class)
-      .set( RDocumentEntity.PROCESSED, false)
-      .set( RDocumentEntity.CHANGED, false)
-      .where(RDocumentEntity.UID.eq( getParams().getDocument() ) )
-      .get()
-      .value();
-
     queueManager.setExecutedWithError( this, errors );
   }
 
   public <T> boolean notEmpty(Collection<T> collection) {
     return collection != null && collection.size() > 0;
-  }
-
-  // Return empty list if input list is null
-  protected <T> List<T> nullGuard(List<T> list) {
-    return list != null ? list : Collections.EMPTY_LIST;
   }
 
   protected RSignImageEntity getSignImage(String imageId) {

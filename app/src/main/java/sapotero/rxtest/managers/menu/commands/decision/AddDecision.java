@@ -85,7 +85,7 @@ public class AddDecision extends DecisionCommand {
 
   @Override
   public void finishOnOperationError(List<String> errors) {
-    finishOperationWithoutProcessedOnError( errors );
+    finishOperationOnError( errors );
     EventBus.getDefault().post( new ForceUpdateDocumentEvent( getParams().getDocument() ));
   }
 }
