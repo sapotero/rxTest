@@ -1,6 +1,7 @@
 package sapotero.rxtest.managers.menu.commands.file;
 
 import java.util.Collections;
+import java.util.List;
 
 import okhttp3.RequestBody;
 import retrofit2.Retrofit;
@@ -178,5 +179,9 @@ public class SignFile extends AbstractCommand {
       .value();
 
     Timber.tag(TAG).i("Set sign task started = %s", value);
+  }
+
+  @Override
+  public void finishOnOperationError(List<String> errors) {
   }
 }

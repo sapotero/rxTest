@@ -12,13 +12,13 @@ import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 
-public abstract class ApprovalSigningCommand extends AbstractCommand {
+public abstract class ApprovalSigningCommand extends OperationResultCommand {
 
   public ApprovalSigningCommand(CommandParams params) {
     super(params);
   }
 
-  protected Observable<OperationResult> getOperationResultObservable() {
+  private Observable<OperationResult> getOperationResultObservable() {
     Retrofit retrofit = getOperationsRetrofit();
 
     OperationService operationService = retrofit.create( OperationService.class );
@@ -91,13 +91,17 @@ public abstract class ApprovalSigningCommand extends AbstractCommand {
 
   public abstract void onRemoteError();
 
-  protected void remoteRejectedOperation() {
+  protected void approvalSigningRemote() {
+    printCommandType();
+
     Observable<OperationResult> info = getOperationResultObservable();
 
     if (info != null) {
-      sendRejectedOperationRequest( info );
+      sendOperationRequest(info);
+
     } else {
-      handleRejectedOperationError( SIGN_ERROR_MESSAGE );
+      sendErrorCallback( SIGN_ERROR_MESSAGE );
+      finishOnOperationError( Collections.singletonList( SIGN_ERROR_MESSAGE ) );
     }
   }
 }

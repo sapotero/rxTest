@@ -147,6 +147,6 @@ public class AddTemporaryDecision extends DecisionCommand {
   }
 
   @Override
-  public void finishOnDecisionError(List<String> errors) {
+  public void finishOnOperationError(List<String> errors) {
   }
 }

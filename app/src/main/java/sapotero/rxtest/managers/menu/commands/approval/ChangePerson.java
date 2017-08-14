@@ -2,6 +2,8 @@ package sapotero.rxtest.managers.menu.commands.approval;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.List;
+
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.ApprovalSigningCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -40,11 +42,20 @@ public class ChangePerson extends ApprovalSigningCommand {
 
   @Override
   public void executeRemote() {
-    printCommandType();
-    remoteRejectedOperation();
+    approvalSigningRemote();
   }
 
   @Override
   public void onRemoteError() {
+  }
+
+  @Override
+  public void finishOnOperationSuccess() {
+    finishRejectedOperationOnSuccess();
+  }
+
+  @Override
+  public void finishOnOperationError(List<String> errors) {
+    finishRejectedProcessedOperationOnError( errors );
   }
 }

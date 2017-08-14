@@ -3,6 +3,7 @@ package sapotero.rxtest.managers.menu.commands.performance;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Retrofit;
 import rx.Observable;
@@ -84,5 +85,9 @@ public class DelegatePerformance extends AbstractCommand {
   @Override
   public void executeRemote() {
 
+  }
+
+  @Override
+  public void finishOnOperationError(List<String> errors) {
   }
 }

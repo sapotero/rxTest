@@ -1,6 +1,6 @@
 package sapotero.rxtest.managers.menu.commands.templates;
 
-import java.util.Collections;
+import java.util.List;
 
 import retrofit2.Retrofit;
 import rx.Observable;
@@ -57,13 +57,12 @@ public class UpdateTemplate extends AbstractCommand {
         data -> {
           queueManager.setExecutedRemote(this);
         },
-        error -> {
-          sendErrorCallback( getType() );
-
-          if ( settings.isOnline() ) {
-            queueManager.setExecutedWithError( this, Collections.singletonList( error.getLocalizedMessage() ) );
-          }
-        }
+        this::onOperationError
       );
+  }
+
+  @Override
+  public void finishOnOperationError(List<String> errors) {
+    queueManager.setExecutedWithError( this, errors );
   }
 }

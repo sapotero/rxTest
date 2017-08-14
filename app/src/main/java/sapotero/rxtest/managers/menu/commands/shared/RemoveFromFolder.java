@@ -2,11 +2,15 @@ package sapotero.rxtest.managers.menu.commands.shared;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.List;
+
+import rx.Observable;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Deleter;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.managers.menu.commands.SharedCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import sapotero.rxtest.utils.memory.utils.Transaction;
 import timber.log.Timber;
@@ -55,11 +59,13 @@ public class RemoveFromFolder extends SharedCommand {
 
   @Override
   public void executeRemote() {
-    remoteFolderOperation( true );
+    printCommandType();
+    Observable<OperationResult> info = getOperationResultObservable();
+    sendOperationRequest( info );
   }
 
   @Override
-  protected void setSuccess() {
+  public void finishOnOperationSuccess() {
     RDocumentEntity documentEntity = dataStore
       .select( RDocumentEntity.class )
       .where( RDocumentEntity.UID.eq( getParams().getDocument() ) )
@@ -80,11 +86,13 @@ public class RemoveFromFolder extends SharedCommand {
       store.process( transaction );
 
       removeChangedInDb();
+
+      queueManager.setExecutedRemote(this);
     }
   }
 
   @Override
-  protected void setError() {
+  public void finishOnOperationError(List<String> errors) {
     Transaction transaction = new Transaction();
     transaction
       .from( store.getDocuments().get(getParams().getDocument()) )
@@ -99,5 +107,7 @@ public class RemoveFromFolder extends SharedCommand {
       .where( RDocumentEntity.UID.eq( getParams().getDocument() ) )
       .get()
       .value();
+
+    queueManager.setExecutedWithError( this, errors );
   }
 }

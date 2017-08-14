@@ -2,7 +2,7 @@ package sapotero.rxtest.managers.menu.commands.templates;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.util.Collections;
+import java.util.List;
 
 import retrofit2.Retrofit;
 import rx.Observable;
@@ -61,13 +61,7 @@ public class RemoveTemplate extends AbstractCommand {
           queueManager.setExecutedRemote(this);
           remove();
         },
-        error -> {
-          sendErrorCallback( getType() );
-
-          if ( settings.isOnline() ) {
-            queueManager.setExecutedWithError( this, Collections.singletonList( error.getLocalizedMessage() ) );
-          }
-        }
+        this::onOperationError
       );
   }
 
@@ -78,5 +72,10 @@ public class RemoveTemplate extends AbstractCommand {
       .get().value();
 
     EventBus.getDefault().post( new AddDecisionTemplateEvent() );
+  }
+
+  @Override
+  public void finishOnOperationError(List<String> errors) {
+    queueManager.setExecutedWithError( this, errors );
   }
 }

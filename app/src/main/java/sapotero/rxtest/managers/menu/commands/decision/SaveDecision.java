@@ -132,7 +132,7 @@ public class SaveDecision extends DecisionCommand {
   }
 
   @Override
-  public void finishOnDecisionError(List<String> errors) {
+  public void finishOnOperationError(List<String> errors) {
     finishOperationWithoutProcessedOnError( errors );
     EventBus.getDefault().post( new ForceUpdateDocumentEvent( getParams().getDocument() ));
   }

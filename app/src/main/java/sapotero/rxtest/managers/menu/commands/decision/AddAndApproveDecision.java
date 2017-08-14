@@ -89,7 +89,7 @@ public class AddAndApproveDecision extends DecisionCommand {
 
     } else {
       sendErrorCallback( SIGN_ERROR_MESSAGE );
-      finishOnDecisionError( Collections.singletonList( SIGN_ERROR_MESSAGE ) );
+      finishOnOperationError( Collections.singletonList( SIGN_ERROR_MESSAGE ) );
     }
   }
 
@@ -100,7 +100,7 @@ public class AddAndApproveDecision extends DecisionCommand {
   }
 
   @Override
-  public void finishOnDecisionError(List<String> errors) {
+  public void finishOnOperationError(List<String> errors) {
     finishRejectedProcessedOperationOnError( errors );
     EventBus.getDefault().post( new ForceUpdateDocumentEvent( getParams().getDocument() ));
   }

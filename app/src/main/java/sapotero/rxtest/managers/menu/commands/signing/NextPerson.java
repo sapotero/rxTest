@@ -3,6 +3,7 @@ package sapotero.rxtest.managers.menu.commands.signing;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import rx.schedulers.Schedulers;
@@ -33,10 +34,11 @@ public class NextPerson extends ApprovalSigningCommand {
 
   @Override
   public void execute() {
+    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
     queueManager.add(this);
     EventBus.getDefault().post( new ShowNextDocumentEvent( true,  getParams().getDocument() ));
 
-    setSyncAndProcessedInMemory();
+    startProcessedOperationInMemory();
 
     resetSignImageError();
     setAsProcessed();
@@ -64,18 +66,8 @@ public class NextPerson extends ApprovalSigningCommand {
 
   @Override
   public void executeLocal() {
-    dataStore
-      .update(RDocumentEntity.class)
-      .set( RDocumentEntity.PROCESSED, true)
-      .set( RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq(getParams().getDocument()))
-      .get()
-      .value();
-
-    if (callback != null){
-      callback.onCommandExecuteSuccess(getType());
-    }
-
+    startProcessedOperationInDb();
+    sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }
 
@@ -93,11 +85,9 @@ public class NextPerson extends ApprovalSigningCommand {
       String errorMessage = "Электронные образы не были подписаны";
       Timber.tag(TAG).i("error: %s", errorMessage);
 
-      if (callback != null){
-        callback.onCommandExecuteError( errorMessage );
-      }
+      sendErrorCallback( errorMessage );
 
-      finishOperationWithProcessedOnError( Collections.singletonList( errorMessage ) );
+      finishRejectedProcessedOperationOnError( Collections.singletonList( errorMessage ) );
     }
   }
 
@@ -214,5 +204,15 @@ public class NextPerson extends ApprovalSigningCommand {
 
   @Override
   public void onRemoteError() {
+  }
+
+  @Override
+  public void finishOnOperationSuccess() {
+
+  }
+
+  @Override
+  public void finishOnOperationError(List<String> errors) {
+
   }
 }

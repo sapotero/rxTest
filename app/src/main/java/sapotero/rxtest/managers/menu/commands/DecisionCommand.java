@@ -82,14 +82,14 @@ public abstract class DecisionCommand extends AbstractCommand {
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         this::onDecisionSuccess,
-        this::onDecisionError
+        this::onOperationError
       );
   }
 
-  protected void onDecisionSuccess(DecisionError data) {
+  private void onDecisionSuccess(DecisionError data) {
     if ( notEmpty( data.getErrors() ) ) {
       sendErrorCallback( "error" );
-      finishOnDecisionError( data.getErrors() );
+      finishOnOperationError( data.getErrors() );
 
     } else {
       finishOnDecisionSuccess( data );
@@ -97,20 +97,6 @@ public abstract class DecisionCommand extends AbstractCommand {
   }
 
   public abstract void finishOnDecisionSuccess(DecisionError data);
-
-  public abstract void finishOnDecisionError(List<String> errors);
-
-  protected void onDecisionError(Throwable error) {
-    String errorMessage = error.getLocalizedMessage();
-
-    Timber.tag(TAG).i("error: %s", errorMessage);
-
-    sendErrorCallback( errorMessage );
-
-    if ( settings.isOnline() ) {
-      finishOnDecisionError( Collections.singletonList( errorMessage ) );
-    }
-  }
 
   protected boolean signerIsCurrentUser() {
     return Objects.equals( getParams().getDecisionModel().getSignerId(), getParams().getCurrentUserId() );

@@ -3,17 +3,18 @@ package sapotero.rxtest.managers.menu.commands.primary_consideration;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Retrofit;
 import rx.Observable;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
-import sapotero.rxtest.managers.menu.commands.AbstractCommand;
+import sapotero.rxtest.managers.menu.commands.OperationResultCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import timber.log.Timber;
 
-public class PrimaryConsideration extends AbstractCommand {
+public class PrimaryConsideration extends OperationResultCommand {
 
   public PrimaryConsideration(CommandParams params) {
     super(params);
@@ -66,6 +67,16 @@ public class PrimaryConsideration extends AbstractCommand {
       getParams().getPerson()
     );
 
-    sendRejectedOperationRequest( info );
+    sendOperationRequest( info );
+  }
+
+  @Override
+  public void finishOnOperationSuccess() {
+    finishRejectedOperationOnSuccess();
+  }
+
+  @Override
+  public void finishOnOperationError(List<String> errors) {
+    finishRejectedProcessedOperationOnError( errors );
   }
 }

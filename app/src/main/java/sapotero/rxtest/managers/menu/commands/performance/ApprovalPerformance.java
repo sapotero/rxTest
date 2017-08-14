@@ -3,6 +3,7 @@ package sapotero.rxtest.managers.menu.commands.performance;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Retrofit;
 import rx.Observable;
@@ -87,5 +88,9 @@ public class ApprovalPerformance extends AbstractCommand {
   @Override
   public String getType() {
     return "to_the_approval_performance";
+  }
+
+  @Override
+  public void finishOnOperationError(List<String> errors) {
   }
 }

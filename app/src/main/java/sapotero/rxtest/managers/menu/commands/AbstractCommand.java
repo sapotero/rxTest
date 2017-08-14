@@ -433,36 +433,6 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     queueManager.setExecutedWithError( this, errors );
   }
 
-  void handleRejectedOperationError(String errorMessage) {
-    Timber.tag(TAG).i("error: %s", errorMessage);
-
-    sendErrorCallback( errorMessage );
-
-    if ( settings.isOnline() ) {
-      finishRejectedProcessedOperationOnError( Collections.singletonList( errorMessage ) );
-    }
-  }
-
-  private void checkRejectedOperationResult(OperationResult data) {
-    printOperationResult( data );
-
-    if (data.getMessage() != null && !data.getMessage().toLowerCase().contains("успешно") ) {
-      sendErrorCallback( data.getMessage() );
-      finishRejectedProcessedOperationOnError( Collections.singletonList( data.getMessage() ) );
-    } else {
-      finishRejectedOperationOnSuccess();
-    }
-  }
-
-  protected void sendRejectedOperationRequest(Observable<OperationResult> info) {
-    info.subscribeOn( Schedulers.computation() )
-      .observeOn( AndroidSchedulers.mainThread() )
-      .subscribe(
-        this::checkRejectedOperationResult,
-        error -> handleRejectedOperationError( error.getLocalizedMessage() )
-      );
-  }
-
   protected void startProcessedOperationInMemory() {
     store.process(
       store.startTransactionFor( getParams().getDocument() )
@@ -491,4 +461,18 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     setDocumentCondition( DocumentCondition.PROCESSED );
     queueManager.setExecutedRemote(this);
   }
+
+  protected void onOperationError(Throwable error) {
+    String errorMessage = error.getLocalizedMessage();
+
+    Timber.tag(TAG).i("error: %s", errorMessage);
+
+    sendErrorCallback( errorMessage );
+
+    if ( settings.isOnline() ) {
+      finishOnOperationError( Collections.singletonList( errorMessage ) );
+    }
+  }
+
+  public abstract void finishOnOperationError(List<String> errors);
 }

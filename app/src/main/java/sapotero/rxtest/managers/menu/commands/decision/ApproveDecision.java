@@ -88,7 +88,7 @@ public class ApproveDecision extends DecisionCommand {
 
     } else {
       sendErrorCallback( SIGN_ERROR_MESSAGE );
-      finishOnDecisionError( Collections.singletonList( SIGN_ERROR_MESSAGE ) );
+      finishOnOperationError( Collections.singletonList( SIGN_ERROR_MESSAGE ) );
     }
   }
 
@@ -114,7 +114,7 @@ public class ApproveDecision extends DecisionCommand {
   }
 
   @Override
-  public void finishOnDecisionError(List<String> errors) {
+  public void finishOnOperationError(List<String> errors) {
     if ( isActiveOrRed() ) {
       finishRejectedProcessedOperationOnError( errors );
     } else {

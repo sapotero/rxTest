@@ -100,7 +100,7 @@ public class RejectDecision extends DecisionCommand {
   }
 
   @Override
-  public void finishOnDecisionError(List<String> errors) {
+  public void finishOnOperationError(List<String> errors) {
     if ( signerIsCurrentUser() ) {
       finishRejectedProcessedOperationOnError( errors );
     } else {

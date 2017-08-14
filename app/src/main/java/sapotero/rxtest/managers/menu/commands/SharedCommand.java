@@ -12,72 +12,35 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.document.DropControlEvent;
-import sapotero.rxtest.events.utils.RecalculateMenuEvent;
 import sapotero.rxtest.events.view.ShowSnackEvent;
-import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
-import timber.log.Timber;
 
-public abstract class SharedCommand extends AbstractCommand {
+public abstract class SharedCommand extends OperationResultCommand {
 
   public SharedCommand(CommandParams params) {
     super(params);
   }
 
-  public void onError(String message) {
-    sendErrorCallback( getType() );
-
-    if ( settings.isOnline() ) {
-      queueManager.setExecutedWithError( this, Collections.singletonList( message ) );
-      setError();
-    }
-  }
-
-  protected abstract void setError();
-
-  private void checkMessage(String message, boolean recalculateMenu) {
-    Timber.tag("RecyclerViewRefresh").d("SharedCommand: response message: %s", message);
-
-    if (message != null && !message.toLowerCase().contains("успешно") ) {
-      queueManager.setExecutedWithError( this, Collections.singletonList( message ) );
-      setError();
-    } else {
-      queueManager.setExecutedRemote( this );
-      setSuccess();
-      if ( recalculateMenu ) {
-        EventBus.getDefault().post( new RecalculateMenuEvent() );
-      }
-    }
-  }
-
-  protected abstract void setSuccess();
-
   private void onControlLabelSuccess(OperationResult result, RDocumentEntity doc) {
-    printOperationResult( result );
-
     if ( Objects.equals(result.getType(), "danger") && result.getMessage() != null){
+      printOperationResult( result );
+
       EventBus.getDefault().post( new ShowSnackEvent( result.getMessage() ));
 
       if (doc != null) {
         EventBus.getDefault().post( new DropControlEvent( doc.isControl() ));
       }
 
-      queueManager.setExecutedWithError( this, Collections.singletonList( result.getMessage() ) );
-      setError();
+      finishOnOperationError( Collections.singletonList( result.getMessage() ) );
 
     } else {
-      checkMessage( result.getMessage(), false );
+      onOperationSuccess( result );
     }
   }
 
-  private void onFolderSuccess(OperationResult data, boolean recalculateMenu) {
-    printOperationResult( data );
-    checkMessage( data.getMessage(), recalculateMenu );
-  }
-
-  private Observable<OperationResult> getOperationResultObservable() {
+  protected Observable<OperationResult> getOperationResultObservable() {
     Retrofit retrofit = getOperationsRetrofit();
 
     OperationService operationService = retrofit.create( OperationService.class );
@@ -99,19 +62,6 @@ public abstract class SharedCommand extends AbstractCommand {
     );
   }
 
-  protected void remoteFolderOperation(boolean recalculateMenu) {
-    printCommandType();
-
-    Observable<OperationResult> info = getOperationResultObservable();
-
-    info.subscribeOn( Schedulers.computation() )
-      .observeOn( AndroidSchedulers.mainThread() )
-      .subscribe(
-        data -> onFolderSuccess( data, recalculateMenu ),
-        error -> onError( error.getLocalizedMessage() )
-      );
-  }
-
   protected void remoteControlLabelOperation() {
     printCommandType();
 
@@ -126,7 +76,7 @@ public abstract class SharedCommand extends AbstractCommand {
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         result -> onControlLabelSuccess( result, doc ),
-        error -> onError( error.getLocalizedMessage() )
+        this::onOperationError
       );
   }
 }

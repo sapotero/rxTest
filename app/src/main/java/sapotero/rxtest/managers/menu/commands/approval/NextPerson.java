@@ -2,6 +2,8 @@ package sapotero.rxtest.managers.menu.commands.approval;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.List;
+
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.utils.RApprovalNextPersonEntity;
@@ -109,5 +111,15 @@ public class NextPerson extends ApprovalSigningCommand {
   @Override
   public void onRemoteError() {
     setTaskStarted( getParams().getDocument(), false );
+  }
+
+  @Override
+  public void finishOnOperationSuccess() {
+
+  }
+
+  @Override
+  public void finishOnOperationError(List<String> errors) {
+
   }
 }

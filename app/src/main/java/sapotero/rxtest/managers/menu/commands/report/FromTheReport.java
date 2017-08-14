@@ -3,20 +3,19 @@ package sapotero.rxtest.managers.menu.commands.report;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Retrofit;
 import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
-import sapotero.rxtest.managers.menu.commands.AbstractCommand;
+import sapotero.rxtest.managers.menu.commands.OperationResultCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import timber.log.Timber;
 
-public class FromTheReport extends AbstractCommand {
+public class FromTheReport extends OperationResultCommand {
 
   public FromTheReport(CommandParams params) {
     super(params);
@@ -85,18 +84,17 @@ public class FromTheReport extends AbstractCommand {
       getParams().getStatusCode()
     );
 
-    info.subscribeOn( Schedulers.computation() )
-      .observeOn( AndroidSchedulers.mainThread() )
-      .subscribe(
-        data -> {
-          printOperationResult( data );
+    sendOperationRequest( info );
+  }
 
-          queueManager.setExecutedRemote(this);
+  @Override
+  public void finishOnOperationSuccess() {
+    removeSyncChanged();
+    queueManager.setExecutedRemote(this);
+  }
 
-          removeSyncChanged();
-
-        },
-        error -> onError( error.getLocalizedMessage(), true )
-      );
+  @Override
+  public void finishOnOperationError(List<String> errors) {
+    finishOperationWithProcessedOnError( errors );
   }
 }
