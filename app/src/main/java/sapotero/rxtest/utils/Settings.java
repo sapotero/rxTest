@@ -46,6 +46,9 @@ public class Settings implements ISettings {
   private static final String SHOW_PRIMARY_CONSIDERATION = "show_primary_consideration";
   private static final String ORGANIZATION_FILTER_ACTIVE_KEY = "organization.filter.active";
   private static final String ORGANIZATION_FILTER_SELECTION_KEY = "organization.filter.savedselection";
+  private static final String IS_SUBSTITUTE_MODE_KEY = "substitute.mode";
+  private static final String OLD_LOGIN_KEY = "old_login";
+  private static final String OLD_CURRENT_USER_KEY = "old_current_user";
 
   public static String FIRST_RUN_KEY;
   public static String IS_PROJECT;
@@ -134,6 +137,9 @@ public class Settings implements ISettings {
   private Preference<Boolean> showPrimaryConsideration;
   private Preference<Boolean> organizationFilterActive;
   private Preference<Set<String>> organizationFilterSelection;
+  private Preference<Boolean> isSubstituteMode;
+  private Preference<String> oldLogin;
+  private Preference<String> oldCurrentUser;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -173,7 +179,6 @@ public class Settings implements ISettings {
     signWithDc                     = settings.getBoolean(SIGN_WITH_DC_KEY);
     totalDocCount                  = settings.getInteger(DOCUMENTS_TOTAL_COUNT_KEY);
     docProjCount                   = settings.getInteger(DOCPROJ_COUNT_KEY);
-    login                          = settings.getString(LOGIN_KEY);
     login                          = settings.getString(LOGIN_KEY);
     token                          = settings.getString(TOKEN_KEY);
     host                           = settings.getString(HOST_KEY);
@@ -227,6 +232,9 @@ public class Settings implements ISettings {
     showPrimaryConsideration       = settings.getBoolean(SHOW_PRIMARY_CONSIDERATION);
     organizationFilterActive       = settings.getBoolean(ORGANIZATION_FILTER_ACTIVE_KEY);
     organizationFilterSelection    = settings.getStringSet(ORGANIZATION_FILTER_SELECTION_KEY);
+    isSubstituteMode               = settings.getBoolean(IS_SUBSTITUTE_MODE_KEY);
+    oldLogin                       = settings.getString(OLD_LOGIN_KEY);
+    oldCurrentUser                 = settings.getString(OLD_CURRENT_USER_KEY);
   }
 
   @Override
@@ -345,7 +353,6 @@ public class Settings implements ISettings {
   public String getLogin() {
     return getString(login);
   }
-
 
   @Override
   public void setLogin(String value) {
@@ -837,5 +844,35 @@ public class Settings implements ISettings {
   @Override
   public void setOrganizationFilterSelection(Set<String> value) {
     setStringSet(organizationFilterSelection, value);
+  }
+
+  @Override
+  public boolean isSubstituteMode() {
+    return getBoolean(isSubstituteMode);
+  }
+
+  @Override
+  public void setSubstituteMode(boolean value) {
+    setBoolean(isSubstituteMode, value);
+  }
+
+  @Override
+  public String getOldLogin() {
+    return getString(oldLogin);
+  }
+
+  @Override
+  public void setOldLogin(String value) {
+    setString(oldLogin, value);
+  }
+
+  @Override
+  public String getOldCurrentUser() {
+    return getString(oldCurrentUser);
+  }
+
+  @Override
+  public void setOldCurrentUser(String value) {
+    setString(oldCurrentUser, value);
   }
 }

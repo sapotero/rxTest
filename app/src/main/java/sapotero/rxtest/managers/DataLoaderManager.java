@@ -43,6 +43,7 @@ import sapotero.rxtest.events.auth.AuthDcCheckSuccessEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckSuccessEvent;
 import sapotero.rxtest.events.stepper.load.StepperDocumentCountReadyEvent;
+import sapotero.rxtest.events.view.UpdateDrawerEvent;
 import sapotero.rxtest.jobs.bus.CreateAssistantJob;
 import sapotero.rxtest.jobs.bus.CreateColleagueJob;
 import sapotero.rxtest.jobs.bus.CreateFavoriteUsersJob;
@@ -105,7 +106,7 @@ public class DataLoaderManager {
 
   }
 
-  private void initV2(boolean loadAllDocs) {
+  public void initV2(boolean loadAllDocs) {
     Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
 
     AuthService auth = retrofit.create(AuthService.class);
@@ -126,6 +127,8 @@ public class DataLoaderManager {
               setCurrentUserId(user.getId());
               setCurrentUserOrganization(user.getOrganization());
               setCurrentUserPosition(user.getPosition());
+
+//              EventBus.getDefault().post( new UpdateDrawerEvent() );
 
               deleteUsers();
               deleteTemplates();

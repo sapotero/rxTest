@@ -221,4 +221,16 @@ public interface ISettings {
   Set<String> getOrganizationFilterSelection();
 
   void setOrganizationFilterSelection(Set<String> value);
+
+  boolean isSubstituteMode();
+
+  void setSubstituteMode(boolean value);
+
+  String getOldLogin();
+
+  void setOldLogin(String value);
+
+  String getOldCurrentUser();
+
+  void setOldCurrentUser(String value);
 }

@@ -44,7 +44,17 @@ public class OkHttpModule {
           Request original = chain.request();
           HttpUrl originalHttpUrl = original.url();
 
-          HttpUrl url = originalHttpUrl.newBuilder()
+          HttpUrl.Builder httpUrlBuilder = originalHttpUrl.newBuilder();
+
+          // resolved https://tasks.n-core.ru/browse/MVDESD-12618
+          // В режиме замещения ко всем запросам добавляется дополнительный параметр my_login,
+          // содержащий логин основного пользователя.
+          if ( settings.isSubstituteMode() ) {
+            httpUrlBuilder
+              .addQueryParameter("my_login",  settings.getOldLogin() );
+          }
+
+          HttpUrl url = httpUrlBuilder
             .addQueryParameter("request_uid",  UUID.randomUUID().toString() )
             .build();
 

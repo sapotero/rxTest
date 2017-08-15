@@ -45,6 +45,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
+import okhttp3.OkHttpClient;
+import retrofit2.Retrofit;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -61,8 +63,11 @@ import sapotero.rxtest.events.adapter.JournalSelectorIndexEvent;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.events.service.CheckNetworkEvent;
 import sapotero.rxtest.events.utils.RecalculateMenuEvent;
+import sapotero.rxtest.events.view.UpdateDrawerEvent;
 import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
 import sapotero.rxtest.managers.DataLoaderManager;
+import sapotero.rxtest.retrofit.Api.AuthService;
+import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
@@ -87,6 +92,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject QueueManager queue;
   @Inject MemoryStore store;
+  @Inject OkHttpClient okHttpClient;
 
   @BindView (R.id.toolbar)                          Toolbar             toolbar;
   @BindView (R.id.documentsRecycleView)             RecyclerView        rv;
@@ -179,8 +185,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     
     initSearchSub();
     initSearch();
-
-//    rxSettings();
 
     setFirstRunFalse();
 
@@ -425,7 +429,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     subscribeToNetworkCheckResults();
     update();
 
-    rxSettings();
+    initDrawer();
 
 
 //    EventBus.getDefault().post( new RecalculateMenuEvent());
@@ -649,23 +653,88 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     IProfile[] profiles = new ProfileDrawerItem[ colleagues.size() + 1 ];
 
+    // Не в режиме замещения в заголовке отображается основной пользователь,
+    // в режиме замещения - коллега, которого пользователь замещает.
     profiles[0] = new ProfileDrawerItem()
       .withName( settings.getCurrentUserOrganization() )
       .withEmail( settings.getCurrentUser() )
       .withSetSelected( true )
       .withIcon( R.drawable.gerb );
 
-    int i = 1;
+    // resolved https://tasks.n-core.ru/browse/MVDESD-12618
+    // Режим замещения
+    if ( !settings.isSubstituteMode() ) {
+      // Не в режиме замещения в списке аккаунтов отображается список коллег, которых можно замещать
+      int i = 1;
 
-    for (RColleagueEntity colleague : colleagues) {
-      String colleagueName = splitName( colleague.getOfficialName() );
+      for (RColleagueEntity colleague : colleagues) {
+        String colleagueName = splitName( colleague.getOfficialName() );
 
-      profiles[i] = new ProfileDrawerItem()
-        .withName( colleagueName )
+        profiles[i] = new ProfileDrawerItem()
+          .withName( colleagueName )
+          .withIdentifier( colleague.getId() )
+          .withSelectable( false )
+          .withSetSelected( false )
+          .withOnDrawerItemClickListener((view, position, drawerItem) -> {
+            // Переход в режим замещения
+
+            if ( settings.isOnline() ) {
+              // TODO: ждать завершения команд в очереди, если очередь не пуста
+
+              RColleagueEntity colleagueEntity = dataStore
+                .select(RColleagueEntity.class)
+                .where(RColleagueEntity.ID.eq( (int) drawerItem.getIdentifier() ))
+                .and(RColleagueEntity.ACTIVED.eq(true))
+                .get().firstOrNull();
+
+              if ( colleagueEntity != null ) {
+                Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
+                AuthService auth = retrofit.create(AuthService.class);
+
+                auth.switchToColleague(colleagueEntity.getColleagueId(), settings.getLogin(), settings.getToken())
+                  .subscribeOn(Schedulers.computation())
+                  .observeOn(AndroidSchedulers.mainThread())
+                  .subscribe( colleagueResponse -> {
+                    settings.setSubstituteMode( true );
+                    settings.setOldLogin( settings.getLogin() );
+                    settings.setOldCurrentUser( settings.getCurrentUser() );
+                    settings.setLogin( colleagueResponse.getLogin() );
+                    settings.setToken( colleagueResponse.getAuthToken() );
+
+                    // TODO: change to true to load all documents
+                    dataLoader.initV2( false );
+
+                    // TODO: switch to colleague here
+
+                    // вывести диалог с прогресс баром загрузки документов коллеги
+
+                  }, error -> {
+                    Timber.tag(TAG).e(error);
+                  });
+              }
+            }
+
+            return false;
+          })
+          .withIcon( R.drawable.gerb );
+
+        i++;
+      }
+
+    } else {
+      // В режиме замещения в списке аккаунтов отображается основной пользователь
+
+      profiles[1] = new ProfileDrawerItem()
+        .withName( settings.getOldCurrentUser() )
         .withSelectable( false )
         .withSetSelected( false )
+        .withOnDrawerItemClickListener((view, position, drawerItem) -> {
+          // Выход из режима замещения
+
+          // TODO: выход из режима замещения
+          return false;
+        })
         .withIcon( R.drawable.gerb );
-      i++;
     }
 
     AccountHeader headerResult = new AccountHeaderBuilder()
@@ -721,7 +790,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     );
   }
 
-  public void rxSettings() {
+  public void initDrawer() {
     drawer_build_head();
 
     Fields.Menu menu = Fields.Menu.ALL;
@@ -820,4 +889,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 //    Timber.tag(TAG).d("JournalSelectorUpdateCountEvent");
 //  }
 
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(UpdateDrawerEvent event) {
+    initDrawer();
+  }
 }

@@ -65,6 +65,9 @@ public class TestSettings implements ISettings {
   public boolean showPrimaryConsideration;
   public boolean organizationFilterActive;
   public Set<String> organizationFilterSelection;
+  public boolean isSubstituteMode;
+  public String oldLogin;
+  public String oldCurrentUser;
 
   public TestSettings() {
     login = "dummyLogin";
@@ -603,5 +606,35 @@ public class TestSettings implements ISettings {
   @Override
   public void setOrganizationFilterSelection(Set<String> value) {
     organizationFilterSelection = value;
+  }
+
+  @Override
+  public boolean isSubstituteMode() {
+    return isSubstituteMode;
+  }
+
+  @Override
+  public void setSubstituteMode(boolean value) {
+    isSubstituteMode = value;
+  }
+
+  @Override
+  public String getOldLogin() {
+    return oldLogin;
+  }
+
+  @Override
+  public void setOldLogin(String value) {
+    oldLogin = value;
+  }
+
+  @Override
+  public String getOldCurrentUser() {
+    return oldCurrentUser;
+  }
+
+  @Override
+  public void setOldCurrentUser(String value) {
+    oldCurrentUser = value;
   }
 }
