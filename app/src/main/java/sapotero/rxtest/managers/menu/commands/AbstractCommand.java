@@ -28,7 +28,6 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.models.decisions.RDisplayFirstDecisionEntity;
 import sapotero.rxtest.db.requery.models.images.RSignImageEntity;
 import sapotero.rxtest.db.requery.models.utils.RReturnedRejectedAgainEntity;
 import sapotero.rxtest.db.requery.models.utils.enums.DocumentCondition;
@@ -37,7 +36,6 @@ import sapotero.rxtest.managers.menu.interfaces.Operation;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.DocumentsService;
 import sapotero.rxtest.retrofit.models.OperationResult;
-import sapotero.rxtest.retrofit.models.v2.DecisionError;
 import sapotero.rxtest.retrofit.models.wrapper.SignWrapper;
 import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.ISettings;
@@ -167,31 +165,6 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
             e.printStackTrace();
           }
         }, Timber::e);
-    }
-  }
-
-  // resolved https://tasks.n-core.ru/browse/MVDESD-13258
-  // 1. Созданные мной и подписант я
-  protected void checkCreatorAndSignerIsCurrentUser(DecisionError data) {
-    String decisionUid = data.getDecisionUid();
-
-    // Если создал резолюцию я и подписант я, то сохранить UID этой резолюции в отдельную таблицу
-    if ( decisionUid != null && !decisionUid.equals("") ) {
-      if ( Objects.equals( data.getDecisionSignerId(), getParams().getCurrentUserId() ) ) {
-        RDisplayFirstDecisionEntity rDisplayFirstDecisionEntity = new RDisplayFirstDecisionEntity();
-        rDisplayFirstDecisionEntity.setDecisionUid( decisionUid );
-        rDisplayFirstDecisionEntity.setUserId( getParams().getCurrentUserId() );
-
-        dataStore
-          .insert( rDisplayFirstDecisionEntity )
-          .toObservable()
-          .subscribeOn(Schedulers.computation())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(
-            result -> Timber.tag(TAG).v("Added decision to display first decision table"),
-            error -> Timber.tag(TAG).e(error)
-          );
-      }
     }
   }
 

@@ -16,6 +16,7 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
+import sapotero.rxtest.db.requery.models.decisions.RDisplayFirstDecisionEntity;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.DocumentService;
@@ -124,5 +125,30 @@ public abstract class DecisionCommand extends AbstractCommand {
 
       // или если подписывающий министр
       || red != null && red.get(0).equals(true);
+  }
+
+  // resolved https://tasks.n-core.ru/browse/MVDESD-13258
+  // 1. Созданные мной и подписант я
+  protected void checkCreatorAndSignerIsCurrentUser(DecisionError data) {
+    String decisionUid = data.getDecisionUid();
+
+    // Если создал резолюцию я и подписант я, то сохранить UID этой резолюции в отдельную таблицу
+    if ( decisionUid != null && !decisionUid.equals("") ) {
+      if ( Objects.equals( data.getDecisionSignerId(), getParams().getCurrentUserId() ) ) {
+        RDisplayFirstDecisionEntity rDisplayFirstDecisionEntity = new RDisplayFirstDecisionEntity();
+        rDisplayFirstDecisionEntity.setDecisionUid( decisionUid );
+        rDisplayFirstDecisionEntity.setUserId( getParams().getCurrentUserId() );
+
+        dataStore
+          .insert( rDisplayFirstDecisionEntity )
+          .toObservable()
+          .subscribeOn(Schedulers.computation())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe(
+            result -> Timber.tag(TAG).v("Added decision to display first decision table"),
+            error -> Timber.tag(TAG).e(error)
+          );
+      }
+    }
   }
 }
