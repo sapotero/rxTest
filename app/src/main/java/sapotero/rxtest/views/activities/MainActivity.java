@@ -779,6 +779,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
             settings.setLogin( colleagueResponse.getLogin() );
             settings.setToken( colleagueResponse.getAuthToken() );
 
+            initJournalSelectionPosition();
+
             store.clear();
 
             settings.setFavoritesLoaded( false );
@@ -795,11 +797,19 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     }
   }
 
+  private void initJournalSelectionPosition() {
+    if ( journalSelector.getPosition() == -1 ) {
+      journalSelector.setPosition( ALL );
+    }
+  }
+
   private void stopSubstituteMode() {
     Timber.tag("Substitute").d("Stopping substitute mode");
 
     settings.setSubstituteMode( false );
     settings.setLogin( settings.getOldLogin() );
+
+    initJournalSelectionPosition();
 
     dataLoader.updateAuth(null, true);
 
