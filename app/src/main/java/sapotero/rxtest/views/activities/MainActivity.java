@@ -63,6 +63,7 @@ import sapotero.rxtest.events.adapter.JournalSelectorIndexEvent;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.events.service.CheckNetworkEvent;
 import sapotero.rxtest.events.utils.RecalculateMenuEvent;
+import sapotero.rxtest.events.utils.ReceivedTokenEvent;
 import sapotero.rxtest.events.view.UpdateDrawerEvent;
 import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
 import sapotero.rxtest.managers.DataLoaderManager;
@@ -209,7 +210,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     if (sign == null) {
       sign = "";
     }
-    dataLoader.updateAuth(sign);
+    dataLoader.updateAuth(sign, false);
   }
 
   private void initSearch() {
@@ -355,7 +356,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
         case R.id.reload:
 
-          dataLoader.updateAuth(null);
+          dataLoader.updateAuth(null, false);
           updateByStatus();
 
 //          if (menuBuilder.getItem() != MainMenuItem.PROCESSED || menuBuilder.getItem() != MainMenuItem.FAVORITES ){
@@ -779,7 +780,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
             settings.setToken( colleagueResponse.getAuthToken() );
 
             store.clear();
-            update();
 
             settings.setFavoritesLoaded( false );
             settings.setProcessedLoaded( false );
@@ -801,17 +801,11 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     settings.setSubstituteMode( false );
     settings.setLogin( settings.getOldLogin() );
 
-    updateToken();
-
-    store.clear();
-    update();
+    dataLoader.updateAuth(null, true);
 
     // TODO: Вывести диалог с прогресс баром на время получения токена
 
     // TODO: После получения токена показать документы пользователя:
-    // очистить memory store
-    // загрузить из базы
-    // после загрузки обновить MainActivity
   }
 
   private void drawer_add_item(int index, String title, Long identifier) {
@@ -925,6 +919,13 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(UpdateDrawerEvent event) {
+    Timber.tag(TAG).i("UpdateDrawerEvent");
     initDrawer();
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(ReceivedTokenEvent event) {
+    Timber.tag(TAG).i("ReceivedTokenEvent");
+    store.clear();
   }
 }

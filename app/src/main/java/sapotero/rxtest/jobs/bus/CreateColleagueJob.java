@@ -44,6 +44,11 @@ public class CreateColleagueJob extends BaseJob {
       }
       index++;
     }
+
+    // In substitute mode update drawer only once to display the colleague we currently substitute
+    if ( settings.isSubstituteMode() ) {
+      EventBus.getDefault().post( new UpdateDrawerEvent() );
+    }
   }
 
   private void add(Colleague user, int index) {
@@ -57,7 +62,11 @@ public class CreateColleagueJob extends BaseJob {
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(u -> {
         Timber.tag(TAG).v("addByOne " + u.getOfficialName() );
-        EventBus.getDefault().post( new UpdateDrawerEvent() );
+
+        // If not in substitute mode update drawer for every actived colleague
+        if ( u.isActived() && !settings.isSubstituteMode() ) {
+          EventBus.getDefault().post( new UpdateDrawerEvent() );
+        }
       }, Timber::e);
   }
 

@@ -128,34 +128,27 @@ public class MemoryStore implements Processable{
   };
 
   public void loadFromDB() {
-//    dataStore
-//      .select(RDocumentEntity.class)
-//      .where(RDocumentEntity.FROM_LINKS.eq(false))
-//      .and(RDocumentEntity.USER.eq(settings.getLogin()))
-//      .get().toObservable()
-//      .toList()
-//      .subscribeOn(Schedulers.immediate())
-//      .observeOn(AndroidSchedulers.mainThread())
-//      .subscribe(
-//        docs -> {
-//          for (RDocumentEntity doc : docs) {
-//            InMemoryDocument document = InMemoryDocumentMapper.fromDB(doc);
-//            documents.put(doc.getUid(), document);
-//          }
-//        },
-//        Timber::e
-//      );
-
-    List<RDocumentEntity> docs = dataStore
+    dataStore
       .select(RDocumentEntity.class)
       .where(RDocumentEntity.FROM_LINKS.eq(false))
       .and(RDocumentEntity.USER.eq(settings.getLogin()))
-      .get().toList();
+      .get().toObservable()
+      .toList()
+      .subscribeOn(Schedulers.immediate())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(
+        docs -> {
+          for (RDocumentEntity doc : docs) {
+            InMemoryDocument document = InMemoryDocumentMapper.fromDB(doc);
+            documents.put(doc.getUid(), document);
+          }
 
-    for (RDocumentEntity doc : docs) {
-      InMemoryDocument document = InMemoryDocumentMapper.fromDB(doc);
-      documents.put(doc.getUid(), document);
-    }
+          if (docs.size() > 0){
+            EventBus.getDefault().post( new UpdateCountEvent() );
+          }
+        },
+        Timber::e
+      );
   }
 
   public Transaction startTransactionFor(String uid){

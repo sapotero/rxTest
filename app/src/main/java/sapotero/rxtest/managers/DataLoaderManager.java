@@ -43,6 +43,7 @@ import sapotero.rxtest.events.auth.AuthDcCheckSuccessEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckSuccessEvent;
 import sapotero.rxtest.events.stepper.load.StepperDocumentCountReadyEvent;
+import sapotero.rxtest.events.utils.ReceivedTokenEvent;
 import sapotero.rxtest.events.view.UpdateDrawerEvent;
 import sapotero.rxtest.jobs.bus.CreateAssistantJob;
 import sapotero.rxtest.jobs.bus.CreateColleagueJob;
@@ -374,7 +375,7 @@ public class DataLoaderManager {
   }
 
 
-  public void updateAuth( String sign ){
+  public void updateAuth( String sign, boolean sendEvent ){
     if ( settings.isSubstituteMode() ) {
       return;
     }
@@ -407,6 +408,10 @@ public class DataLoaderManager {
           data -> {
             Timber.tag(TAG).i("updateAuth: token" + data.getAuthToken());
             setToken( data.getAuthToken() );
+
+            if ( sendEvent ) {
+              EventBus.getDefault().post( new ReceivedTokenEvent() );
+            }
 
             initV2(false);
           },
