@@ -82,6 +82,9 @@ public class UpdateDocumentJob extends DocumentJob {
     this.filter = filter;
 
     this.forceProcessed = forceProcessed;
+
+    // Чтобы убрать документ в обработанные, принудительно его обноваляем
+    this.forceUpdate = true;
   }
 
   public UpdateDocumentJob(String uid, DocumentType documentType) {
