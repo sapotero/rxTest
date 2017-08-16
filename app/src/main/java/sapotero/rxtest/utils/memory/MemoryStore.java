@@ -3,6 +3,7 @@ package sapotero.rxtest.utils.memory;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -127,23 +128,34 @@ public class MemoryStore implements Processable{
   };
 
   public void loadFromDB() {
-    dataStore
+//    dataStore
+//      .select(RDocumentEntity.class)
+//      .where(RDocumentEntity.FROM_LINKS.eq(false))
+//      .and(RDocumentEntity.USER.eq(settings.getLogin()))
+//      .get().toObservable()
+//      .toList()
+//      .subscribeOn(Schedulers.immediate())
+//      .observeOn(AndroidSchedulers.mainThread())
+//      .subscribe(
+//        docs -> {
+//          for (RDocumentEntity doc : docs) {
+//            InMemoryDocument document = InMemoryDocumentMapper.fromDB(doc);
+//            documents.put(doc.getUid(), document);
+//          }
+//        },
+//        Timber::e
+//      );
+
+    List<RDocumentEntity> docs = dataStore
       .select(RDocumentEntity.class)
       .where(RDocumentEntity.FROM_LINKS.eq(false))
       .and(RDocumentEntity.USER.eq(settings.getLogin()))
-      .get().toObservable()
-      .toList()
-      .subscribeOn(Schedulers.immediate())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(
-        docs -> {
-          for (RDocumentEntity doc : docs) {
-            InMemoryDocument document = InMemoryDocumentMapper.fromDB(doc);
-            documents.put(doc.getUid(), document);
-          }
-        },
-        Timber::e
-      );
+      .get().toList();
+
+    for (RDocumentEntity doc : docs) {
+      InMemoryDocument document = InMemoryDocumentMapper.fromDB(doc);
+      documents.put(doc.getUid(), document);
+    }
   }
 
   public Transaction startTransactionFor(String uid){

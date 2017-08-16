@@ -128,8 +128,6 @@ public class DataLoaderManager {
               setCurrentUserOrganization(user.getOrganization());
               setCurrentUserPosition(user.getPosition());
 
-//              EventBus.getDefault().post( new UpdateDrawerEvent() );
-
               deleteUsers();
               deleteTemplates();
 
@@ -243,6 +241,7 @@ public class DataLoaderManager {
                   jobManager.addJobInBackground(new CreateColleagueJob(data));
                 }, error -> {
                   Timber.tag(TAG).e(error);
+                  EventBus.getDefault().post( new UpdateDrawerEvent() );
                 })
             );
 
@@ -376,6 +375,10 @@ public class DataLoaderManager {
 
 
   public void updateAuth( String sign ){
+    if ( settings.isSubstituteMode() ) {
+      return;
+    }
+
     Timber.tag(TAG).i("updateAuth: %s", sign );
 
     Retrofit retrofit = new RetrofitManager( context, settings.getHost(), okHttpClient).process();

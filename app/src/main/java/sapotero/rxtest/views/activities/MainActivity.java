@@ -148,6 +148,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   private int menuIndex;
 
+  private List<RColleagueEntity> colleagues;
+
   protected void onCreate(Bundle savedInstanceState) {
     setTheme(R.style.AppTheme);
 
@@ -646,74 +648,35 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       .and(RColleagueEntity.ACTIVED.eq(true))
       .get().toList();
 
-    List<RColleagueEntity> colleagues = new ArrayList<>();
+    colleagues = new ArrayList<>();
     colleagues.addAll( colleaguesFromDB );
 
     Collections.sort(colleagues, (o1, o2) -> o1.getSortIndex() != null && o2.getSortIndex() != null ? o1.getSortIndex().compareTo( o2.getSortIndex() ) : 0 );
 
-    IProfile[] profiles = new ProfileDrawerItem[ colleagues.size() + 1 ];
-
-    // Не в режиме замещения в заголовке отображается основной пользователь,
-    // в режиме замещения - коллега, которого пользователь замещает.
-    profiles[0] = new ProfileDrawerItem()
-      .withName( settings.getCurrentUserOrganization() )
-      .withEmail( settings.getCurrentUser() )
-      .withSetSelected( true )
-      .withIcon( R.drawable.gerb );
+    IProfile[] profiles;
 
     // resolved https://tasks.n-core.ru/browse/MVDESD-12618
     // Режим замещения
     if ( !settings.isSubstituteMode() ) {
-      // Не в режиме замещения в списке аккаунтов отображается список коллег, которых можно замещать
+      // Не в режиме замещения в заголовке отображается основной пользователь,
+      // а в списке аккаунтов - список коллег, которых можно замещать
+      profiles = new ProfileDrawerItem[ colleagues.size() + 1 ];
+
+      addMainProfile( profiles );
+
       int i = 1;
 
-      for (RColleagueEntity colleague : colleagues) {
-        String colleagueName = splitName( colleague.getOfficialName() );
+      for (int colleagueIndex = 0; colleagueIndex < colleagues.size(); colleagueIndex++) {
+        String colleagueName = splitName( colleagues.get(colleagueIndex).getOfficialName() );
 
         profiles[i] = new ProfileDrawerItem()
           .withName( colleagueName )
-          .withIdentifier( colleague.getId() )
+          .withIdentifier( colleagueIndex )
           .withSelectable( false )
           .withSetSelected( false )
           .withOnDrawerItemClickListener((view, position, drawerItem) -> {
             // Переход в режим замещения
-
-            if ( settings.isOnline() ) {
-              // TODO: ждать завершения команд в очереди, если очередь не пуста
-
-              RColleagueEntity colleagueEntity = dataStore
-                .select(RColleagueEntity.class)
-                .where(RColleagueEntity.ID.eq( (int) drawerItem.getIdentifier() ))
-                .and(RColleagueEntity.ACTIVED.eq(true))
-                .get().firstOrNull();
-
-              if ( colleagueEntity != null ) {
-                Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
-                AuthService auth = retrofit.create(AuthService.class);
-
-                auth.switchToColleague(colleagueEntity.getColleagueId(), settings.getLogin(), settings.getToken())
-                  .subscribeOn(Schedulers.computation())
-                  .observeOn(AndroidSchedulers.mainThread())
-                  .subscribe( colleagueResponse -> {
-                    settings.setSubstituteMode( true );
-                    settings.setOldLogin( settings.getLogin() );
-                    settings.setOldCurrentUser( settings.getCurrentUser() );
-                    settings.setLogin( colleagueResponse.getLogin() );
-                    settings.setToken( colleagueResponse.getAuthToken() );
-
-                    // TODO: change to true to load all documents
-                    dataLoader.initV2( false );
-
-                    // TODO: switch to colleague here
-
-                    // вывести диалог с прогресс баром загрузки документов коллеги
-
-                  }, error -> {
-                    Timber.tag(TAG).e(error);
-                  });
-              }
-            }
-
+            startSubstituteMode( (int) drawerItem.getIdentifier() );
             return false;
           })
           .withIcon( R.drawable.gerb );
@@ -722,7 +685,11 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       }
 
     } else {
-      // В режиме замещения в списке аккаунтов отображается основной пользователь
+      // В режиме замещения в заголовке отображается коллега, которого пользователь замещает,
+      // а в списке аккаунтов - основной пользователь
+      profiles = new ProfileDrawerItem[ 2 ];
+
+      addMainProfile( profiles );
 
       profiles[1] = new ProfileDrawerItem()
         .withName( settings.getOldCurrentUser() )
@@ -730,8 +697,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
         .withSetSelected( false )
         .withOnDrawerItemClickListener((view, position, drawerItem) -> {
           // Выход из режима замещения
-
-          // TODO: выход из режима замещения
+          stopSubstituteMode();
           return false;
         })
         .withIcon( R.drawable.gerb );
@@ -759,6 +725,14 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     );
   }
 
+  private void addMainProfile(IProfile[] profiles) {
+    profiles[0] = new ProfileDrawerItem()
+      .withName( settings.getCurrentUserOrganization() )
+      .withEmail( settings.getCurrentUser() )
+      .withSetSelected( true )
+      .withIcon( R.drawable.gerb );
+  }
+
   private String splitName(String nameToSplit) {
     String name = nameToSplit;
 
@@ -778,6 +752,66 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     }
 
     return name;
+  }
+
+  private void startSubstituteMode(int colleagueIndex) {
+    if ( settings.isOnline() ) {
+      // TODO: ждать завершения команд в очереди, если очередь не пуста
+
+      Timber.tag("Substitute").d("Starting substitute mode");
+
+      if ( colleagues != null && colleagueIndex < colleagues.size() ) {
+        RColleagueEntity colleagueEntity = colleagues.get( colleagueIndex );
+
+        Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
+        AuthService auth = retrofit.create(AuthService.class);
+
+        auth.switchToColleague(colleagueEntity.getColleagueId(), settings.getLogin(), settings.getToken())
+          .subscribeOn(Schedulers.computation())
+          .observeOn(AndroidSchedulers.mainThread())
+          .subscribe( colleagueResponse -> {
+            Timber.tag("Substitute").d("Received colleague token");
+
+            settings.setSubstituteMode( true );
+            settings.setOldLogin( settings.getLogin() );
+            settings.setOldCurrentUser( settings.getCurrentUser() );
+            settings.setLogin( colleagueResponse.getLogin() );
+            settings.setToken( colleagueResponse.getAuthToken() );
+
+            store.clear();
+            update();
+
+            settings.setFavoritesLoaded( false );
+            settings.setProcessedLoaded( false );
+
+            dataLoader.initV2( true );
+
+            // TODO: вывести диалог с прогресс баром загрузки документов коллеги
+
+          }, error -> {
+            Timber.tag(TAG).e(error);
+          });
+      }
+    }
+  }
+
+  private void stopSubstituteMode() {
+    Timber.tag("Substitute").d("Stopping substitute mode");
+
+    settings.setSubstituteMode( false );
+    settings.setLogin( settings.getOldLogin() );
+
+    updateToken();
+
+    store.clear();
+    update();
+
+    // TODO: Вывести диалог с прогресс баром на время получения токена
+
+    // TODO: После получения токена показать документы пользователя:
+    // очистить memory store
+    // загрузить из базы
+    // после загрузки обновить MainActivity
   }
 
   private void drawer_add_item(int index, String title, Long identifier) {

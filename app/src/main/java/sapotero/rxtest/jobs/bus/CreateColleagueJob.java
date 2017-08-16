@@ -7,11 +7,14 @@ import com.birbit.android.jobqueue.CancelReason;
 import com.birbit.android.jobqueue.Params;
 import com.birbit.android.jobqueue.RetryConstraint;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.ArrayList;
 
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RColleagueEntity;
+import sapotero.rxtest.events.view.UpdateDrawerEvent;
 import sapotero.rxtest.retrofit.models.Colleague;
 import timber.log.Timber;
 
@@ -41,7 +44,6 @@ public class CreateColleagueJob extends BaseJob {
       }
       index++;
     }
-
   }
 
   private void add(Colleague user, int index) {
@@ -55,6 +57,7 @@ public class CreateColleagueJob extends BaseJob {
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(u -> {
         Timber.tag(TAG).v("addByOne " + u.getOfficialName() );
+        EventBus.getDefault().post( new UpdateDrawerEvent() );
       }, Timber::e);
   }
 
