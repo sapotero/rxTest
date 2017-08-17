@@ -233,6 +233,15 @@ public class Processor {
         Timber.tag(TAG).e("add: %s", add.size());
         Timber.tag(TAG).e("rem: %s", remove.size());
 
+        // Для тех документов, которые надо добавить во вкладку, если они есть в памяти,
+        // сбрасываем MD5, чтобы далее для их обновления была вызвана UpdateDocumentJob.
+        for (String uid : add) {
+          InMemoryDocument documentInMemory = store.getDocuments().get( uid );
+          if ( documentInMemory != null ) {
+            documentInMemory.setMd5("");
+            store.getDocuments().put( uid, documentInMemory );
+          }
+        }
 
         for (String uid : remove) {
           updateAndSetProcessed( uid );
