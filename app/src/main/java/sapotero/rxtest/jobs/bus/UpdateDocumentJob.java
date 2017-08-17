@@ -173,14 +173,6 @@ public class UpdateDocumentJob extends DocumentJob {
         boolean isFromProcessedFolder = Boolean.TRUE.equals( documentExisting.isFromProcessedFolder() );
         documentMapper.setNestedFields( documentExisting, documentReceived, isFromProcessedFolder );
 
-        // resolved https://tasks.n-core.ru/browse/MVDESD-14072
-        // Если в прилетевшем JSON'е нет маршрута, принудительно удаляем маршрут из документа в базе
-        // (проект прилетает после подписания и регистрации в WS).
-        // Иначе в дальнейшем удаление маршрута, связанного с документом, приводит к удалению документа.
-        if ( documentReceived.getRoute() == null ) {
-          documentExisting.setRoute( null );
-        }
-
         boolean isSetProcessedFalse = true;
 
         if ( isFromProcessedFolder ) {
