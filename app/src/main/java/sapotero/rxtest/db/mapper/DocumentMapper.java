@@ -343,6 +343,8 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
   }
 
   private void setRoute(RDocumentEntity entity, Route route) {
+    entity.setRoute( null );
+
     if ( exist( route ) ) {
       RRouteEntity routeEntity = mappers.getRouteMapper().toEntity( route );
       entity.setRoute( routeEntity );
