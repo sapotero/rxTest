@@ -850,7 +850,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void dismissStartSubstituteDialog() {
-    if ( startSubstituteDialog != null ) {
+    if ( startSubstituteDialog != null && startSubstituteDialog.isShowing() ) {
       startSubstituteDialog.dismiss();
     }
   }
@@ -871,7 +871,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void dismissStopSubstituteDialog() {
-    if ( stopSubstituteDialog != null ) {
+    if ( stopSubstituteDialog != null && stopSubstituteDialog.isShowing() ) {
       stopSubstituteDialog.dismiss();
     }
   }
@@ -1042,7 +1042,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     int totalDocCount = settings.getTotalDocCount();
 
-    Timber.tag(TAG).d("TOTAL: %s/%s | %s", totalDocCount, loadedTotal, message );
+    Timber.tag("StepperLoadData").d("TOTAL: %s/%s | %s", totalDocCount, loadedTotal, message );
 
     if ( isReceivedTotalCount && totalDocCount != 0) {
       int perc = PercentCalculator.calculatePercent(loadedTotal, totalDocCount);
