@@ -61,8 +61,13 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.query.DBQueryBuilder;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.adapter.JournalSelectorIndexEvent;
+import sapotero.rxtest.events.bus.FileDownloadedEvent;
+import sapotero.rxtest.events.bus.UpdateFavoritesAndProcessedEvent;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.events.service.CheckNetworkEvent;
+import sapotero.rxtest.events.stepper.load.StepperDocumentCountReadyEvent;
+import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
+import sapotero.rxtest.events.utils.ErrorReceiveTokenEvent;
 import sapotero.rxtest.events.utils.RecalculateMenuEvent;
 import sapotero.rxtest.events.utils.ReceivedTokenEvent;
 import sapotero.rxtest.events.view.UpdateDrawerEvent;
@@ -72,6 +77,7 @@ import sapotero.rxtest.retrofit.Api.AuthService;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.ISettings;
+import sapotero.rxtest.utils.load.PercentCalculator;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
@@ -151,7 +157,13 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private int menuIndex;
 
   private List<RColleagueEntity> colleagues;
+  private MaterialDialog startSubstituteDialog;
   private MaterialDialog stopSubstituteDialog;
+
+  private int loadedTotal = 0;
+  private int loadedDocProj = 0;
+  private boolean isReceivedTotalCount = false;
+  private boolean isUpdateFavoritesAndProcessedEventSent = false;
 
   protected void onCreate(Bundle savedInstanceState) {
     setTheme(R.style.AppTheme);
@@ -759,11 +771,13 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   private void startSubstituteMode(int colleagueIndex) {
     if ( settings.isOnline() ) {
-      // TODO: ждать завершения команд в очереди, если очередь не пуста
-
-      Timber.tag("Substitute").d("Starting substitute mode");
-
       if ( colleagues != null && colleagueIndex < colleagues.size() ) {
+        Timber.tag("Substitute").d("Starting substitute mode");
+
+        showStartSubstituteDialog();
+
+        // TODO: ждать завершения команд в очереди, если очередь не пуста
+
         RColleagueEntity colleagueEntity = colleagues.get( colleagueIndex );
 
         Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
@@ -785,17 +799,24 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
             store.clear();
 
+            loadedTotal = 0;
+            loadedDocProj = 0;
+            isReceivedTotalCount = false;
+            isUpdateFavoritesAndProcessedEventSent = false;
+
             settings.setFavoritesLoaded( false );
             settings.setProcessedLoaded( false );
 
             dataLoader.initV2( true );
 
-            // TODO: вывести диалог с прогресс баром загрузки документов коллеги
-
           }, error -> {
             Timber.tag(TAG).e(error);
+            dismissStartSubstituteDialog();
+            Toast.makeText(this, "Ошибка входа в режим замещения", Toast.LENGTH_SHORT).show();
           });
       }
+    } else {
+      Toast.makeText(this, "Невозможно войти в режим замещения в оффлайне", Toast.LENGTH_SHORT).show();
     }
   }
 
@@ -806,20 +827,42 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void stopSubstituteMode() {
-    Timber.tag("Substitute").d("Stopping substitute mode");
+    if ( settings.isOnline() ) {
+      Timber.tag("Substitute").d("Stopping substitute mode");
 
-    settings.setSubstituteMode( false );
-    settings.setLogin( settings.getOldLogin() );
+      settings.setSubstituteMode( false );
+      settings.setLogin( settings.getOldLogin() );
 
-    initJournalSelectionPosition();
+      initJournalSelectionPosition();
 
-    showStopSubstituteDialog();
+      showStopSubstituteDialog();
 
-    dataLoader.updateAuth(null, true);
+      dataLoader.updateAuth(null, true);
 
-    // TODO: Вывести диалог с прогресс баром на время получения токена
+    } else {
+      Toast.makeText(this, "Невозможно выйти из режима замещения в оффлайне", Toast.LENGTH_SHORT).show();
+    }
+  }
 
-    // TODO: После получения токена показать документы пользователя:
+  private void showStartSubstituteDialog() {
+    prepareStartSubstituteDialog();
+    startSubstituteDialog.show();
+  }
+
+  private void dismissStartSubstituteDialog() {
+    if ( startSubstituteDialog != null ) {
+      startSubstituteDialog.dismiss();
+    }
+  }
+
+  private void prepareStartSubstituteDialog() {
+    if (startSubstituteDialog == null){
+      startSubstituteDialog = new MaterialDialog.Builder( this )
+        .title(R.string.app_name)
+        .content(R.string.start_substitute)
+        .cancelable(false)
+        .progress(true, 0).build();
+    }
   }
 
   private void showStopSubstituteDialog() {
@@ -944,6 +987,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(UpdateCountEvent event) {
+    Timber.tag(TAG).i("UpdateCountEvent");
     update();
     dismissStopSubstituteDialog();
   }
@@ -963,5 +1007,56 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   public void onMessageEvent(ReceivedTokenEvent event) {
     Timber.tag(TAG).i("ReceivedTokenEvent");
     store.clear();
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(ErrorReceiveTokenEvent event) {
+    Timber.tag(TAG).i("ErrorReceiveTokenEvent");
+    dismissStopSubstituteDialog();
+    Toast.makeText(this, "Ошибка выхода из режима замещения", Toast.LENGTH_SHORT).show();
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(StepperLoadDocumentEvent event) {
+    updateProgressBar(event.message);
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(FileDownloadedEvent event) {
+    updateProgressBar(event.path);
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(StepperDocumentCountReadyEvent event) {
+    isReceivedTotalCount = true;
+    if (settings.getTotalDocCount() == 0) {
+      dismissStartSubstituteDialog();
+    } else {
+      updateProgressBar("Document count ready");
+    }
+  }
+
+  private void updateProgressBar(String message) {
+    loadedTotal++;
+    loadedDocProj++;
+
+    int totalDocCount = settings.getTotalDocCount();
+
+    Timber.tag(TAG).d("TOTAL: %s/%s | %s", totalDocCount, loadedTotal, message );
+
+    if ( isReceivedTotalCount && totalDocCount != 0) {
+      int perc = PercentCalculator.calculatePercent(loadedTotal, totalDocCount);
+
+      if ( perc >= 100 ) {
+        dismissStartSubstituteDialog();
+      }
+
+      if ( PercentCalculator.calculatePercent( loadedDocProj, settings.getDocProjCount() ) > 98 ) {
+        if ( !isUpdateFavoritesAndProcessedEventSent ) {
+          isUpdateFavoritesAndProcessedEventSent = true;
+          EventBus.getDefault().post( new UpdateFavoritesAndProcessedEvent() );
+        }
+      }
+    }
   }
 }
