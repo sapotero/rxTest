@@ -17,6 +17,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.birbit.android.jobqueue.JobManager;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
@@ -150,6 +151,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private int menuIndex;
 
   private List<RColleagueEntity> colleagues;
+  private MaterialDialog stopSubstituteDialog;
 
   protected void onCreate(Bundle savedInstanceState) {
     setTheme(R.style.AppTheme);
@@ -811,11 +813,34 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     initJournalSelectionPosition();
 
+    showStopSubstituteDialog();
+
     dataLoader.updateAuth(null, true);
 
     // TODO: Вывести диалог с прогресс баром на время получения токена
 
     // TODO: После получения токена показать документы пользователя:
+  }
+
+  private void showStopSubstituteDialog() {
+    prepareStopSubstituteDialog();
+    stopSubstituteDialog.show();
+  }
+
+  private void dismissStopSubstituteDialog() {
+    if ( stopSubstituteDialog != null ) {
+      stopSubstituteDialog.dismiss();
+    }
+  }
+
+  private void prepareStopSubstituteDialog() {
+    if (stopSubstituteDialog == null){
+      stopSubstituteDialog = new MaterialDialog.Builder( this )
+        .title(R.string.app_name)
+        .content(R.string.stop_substitute)
+        .cancelable(false)
+        .progress(true, 0).build();
+    }
   }
 
   private void drawer_add_item(int index, String title, Long identifier) {
@@ -920,6 +945,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(UpdateCountEvent event) {
     update();
+    dismissStopSubstituteDialog();
   }
 
 //  @Subscribe(threadMode = ThreadMode.MAIN)
