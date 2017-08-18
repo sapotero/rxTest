@@ -123,9 +123,13 @@ public class InfoCardLinksFragment extends Fragment {
               RDocumentEntity _doc = dataStore
                 .select(RDocumentEntity.class)
                 .where(RDocumentEntity.UID.eq(_tmp.getUid()))
-                .get().first();
+                .get().firstOrNull();
 
-              adapter.add(new Link(_doc.getUid(), _doc.getTitle()));
+              if ( _doc != null ) {
+                adapter.add(new Link(_doc.getUid(), _doc.getTitle()));
+              } else {
+                adapter.add(new Link( "0", "" ) );
+              }
             }
 
             show();
