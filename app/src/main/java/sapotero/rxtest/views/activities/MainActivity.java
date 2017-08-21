@@ -164,6 +164,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private int loadedDocProj = 0;
   private boolean isReceivedTotalCount = false;
   private boolean isUpdateFavoritesAndProcessedEventSent = false;
+  private boolean switchToSubstituteModeStarted = false;
 
   protected void onCreate(Bundle savedInstanceState) {
     setTheme(R.style.AppTheme);
@@ -789,6 +790,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
           .subscribe( colleagueResponse -> {
             Timber.tag("Substitute").d("Received colleague token");
 
+            switchToSubstituteModeStarted = true;
+
             settings.setSubstituteMode( true );
             settings.setOldLogin( settings.getLogin() );
             settings.setOldCurrentUser( settings.getCurrentUser() );
@@ -987,9 +990,11 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(UpdateCountEvent event) {
-    Timber.tag(TAG).i("UpdateCountEvent");
-    update();
-    dismissStopSubstituteDialog();
+    if ( !switchToSubstituteModeStarted ) {
+      Timber.tag(TAG).i("UpdateCountEvent");
+      update();
+      dismissStopSubstituteDialog();
+    }
   }
 
 //  @Subscribe(threadMode = ThreadMode.MAIN)
@@ -1018,21 +1023,27 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(StepperLoadDocumentEvent event) {
-    updateProgressBar(event.message);
+    if ( switchToSubstituteModeStarted ) {
+      updateProgressBar(event.message);
+    }
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(FileDownloadedEvent event) {
-    updateProgressBar(event.path);
+    if ( switchToSubstituteModeStarted ) {
+      updateProgressBar(event.path);
+    }
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(StepperDocumentCountReadyEvent event) {
-    isReceivedTotalCount = true;
-    if (settings.getTotalDocCount() == 0) {
-      dismissStartSubstituteDialog();
-    } else {
-      updateProgressBar("Document count ready");
+    if ( switchToSubstituteModeStarted ) {
+      isReceivedTotalCount = true;
+      if (settings.getTotalDocCount() == 0) {
+        finishStartingSubstituteMode();
+      } else {
+        updateProgressBar("Document count ready");
+      }
     }
   }
 
@@ -1048,7 +1059,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       int perc = PercentCalculator.calculatePercent(loadedTotal, totalDocCount);
 
       if ( perc >= 100 ) {
-        dismissStartSubstituteDialog();
+        finishStartingSubstituteMode();
       }
 
       if ( PercentCalculator.calculatePercent( loadedDocProj, settings.getDocProjCount() ) > 98 ) {
@@ -1058,5 +1069,11 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
         }
       }
     }
+  }
+
+  private void finishStartingSubstituteMode() {
+    switchToSubstituteModeStarted = false;
+    update();
+    dismissStartSubstituteDialog();
   }
 }
