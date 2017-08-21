@@ -49,6 +49,7 @@ public class Settings implements ISettings {
   private static final String IS_SUBSTITUTE_MODE_KEY = "substitute.mode";
   private static final String OLD_LOGIN_KEY = "old_login";
   private static final String OLD_CURRENT_USER_KEY = "old_current_user";
+  private static final String COLLEAGUE_ID_KEY = "colleague.id";
 
   public static String FIRST_RUN_KEY;
   public static String IS_PROJECT;
@@ -140,6 +141,7 @@ public class Settings implements ISettings {
   private Preference<Boolean> isSubstituteMode;
   private Preference<String> oldLogin;
   private Preference<String> oldCurrentUser;
+  private Preference<String> colleagueId;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -235,6 +237,7 @@ public class Settings implements ISettings {
     isSubstituteMode               = settings.getBoolean(IS_SUBSTITUTE_MODE_KEY);
     oldLogin                       = settings.getString(OLD_LOGIN_KEY);
     oldCurrentUser                 = settings.getString(OLD_CURRENT_USER_KEY);
+    colleagueId                    = settings.getString(COLLEAGUE_ID_KEY);
   }
 
   @Override
@@ -874,5 +877,15 @@ public class Settings implements ISettings {
   @Override
   public void setOldCurrentUser(String value) {
     setString(oldCurrentUser, value);
+  }
+
+  @Override
+  public String getColleagueId() {
+    return getString(colleagueId);
+  }
+
+  @Override
+  public void setColleagueId(String value) {
+    setString(colleagueId, value);
   }
 }

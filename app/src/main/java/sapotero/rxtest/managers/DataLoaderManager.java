@@ -2,6 +2,7 @@ package sapotero.rxtest.managers;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
+import android.widget.Toast;
 
 import com.birbit.android.jobqueue.JobManager;
 import com.birbit.android.jobqueue.TagConstraint;
@@ -100,6 +101,9 @@ public class DataLoaderManager {
   private boolean processedDataLoading = false;
   private boolean processFavoritesData = false;
   private boolean processProcessedData = false;
+
+  private boolean updateAuthStarted = false;
+  private boolean switchToSubstituteModeAfterReceiveToken = false;
 
   public DataLoaderManager(Context context) {
 
@@ -377,8 +381,18 @@ public class DataLoaderManager {
 
 
   public void updateAuth( String sign, boolean sendEvent ){
-    if ( settings.isSubstituteMode() ) {
+    if ( updateAuthStarted ) {
       return;
+    }
+
+    updateAuthStarted = true;
+    switchToSubstituteModeAfterReceiveToken = false;
+
+    if ( settings.isSubstituteMode() ) {
+      switchToSubstituteModeAfterReceiveToken = true;
+
+      settings.setSubstituteMode( false );
+      settings.setLogin( settings.getOldLogin() );
     }
 
     Timber.tag(TAG).i("updateAuth: %s", sign );
@@ -396,7 +410,6 @@ public class DataLoaderManager {
 
     Timber.tag(TAG).i("json: %s", json .toString());
 
-
     Observable<AuthSignToken> authSubscription = getAuthSubscription();
 
     unsubscribeUpdateAuth();
@@ -410,20 +423,54 @@ public class DataLoaderManager {
             Timber.tag(TAG).i("updateAuth: token" + data.getAuthToken());
             setToken( data.getAuthToken() );
 
-            if ( sendEvent ) {
-              EventBus.getDefault().post( new ReceivedTokenEvent() );
-            }
+            if ( !switchToSubstituteModeAfterReceiveToken ) {
+              if ( sendEvent ) {
+                EventBus.getDefault().post( new ReceivedTokenEvent() );
+              }
+              initV2(false);
+              updateAuthStarted = false;
 
-            initV2(false);
+            } else {
+              switchToSubstituteModeAfterReceiveToken = false;
+              getColleagueToken();
+            }
           },
           error -> {
             Timber.tag(TAG).i("updateAuth error: %s" , error );
+            updateAuthStarted = false;
             if ( sendEvent ) {
               EventBus.getDefault().post( new ErrorReceiveTokenEvent() );
             }
           }
         )
     );
+  }
+
+  private void getColleagueToken() {
+    Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
+    AuthService auth = retrofit.create(AuthService.class);
+
+    auth.switchToColleague(settings.getColleagueId(), settings.getLogin(), settings.getToken())
+      .subscribeOn(Schedulers.computation())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(
+        colleagueResponse -> {
+          settings.setSubstituteMode( true );
+          settings.setOldLogin( settings.getLogin() );
+          settings.setLogin( colleagueResponse.getLogin() );
+          settings.setToken( colleagueResponse.getAuthToken() );
+          updateAuthStarted = false;
+          initV2(false);
+          EventBus.getDefault().post( new ReceivedTokenEvent() );
+        },
+        error -> {
+          Timber.tag(TAG).e(error);
+          settings.setSubstituteMode( true );
+          settings.setOldLogin( settings.getLogin() );
+          updateAuthStarted = false;
+          EventBus.getDefault().post( new ErrorReceiveTokenEvent() );
+        }
+      );
   }
 
   public void tryToSignWithDc(String sign){

@@ -68,6 +68,7 @@ public class TestSettings implements ISettings {
   public boolean isSubstituteMode;
   public String oldLogin;
   public String oldCurrentUser;
+  private String colleagueId;
 
   public TestSettings() {
     login = "dummyLogin";
@@ -636,5 +637,15 @@ public class TestSettings implements ISettings {
   @Override
   public void setOldCurrentUser(String value) {
     oldCurrentUser = value;
+  }
+
+  @Override
+  public String getColleagueId() {
+    return colleagueId;
+  }
+
+  @Override
+  public void setColleagueId(String value) {
+    colleagueId = value;
   }
 }

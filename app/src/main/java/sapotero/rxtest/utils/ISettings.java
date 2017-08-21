@@ -233,4 +233,8 @@ public interface ISettings {
   String getOldCurrentUser();
 
   void setOldCurrentUser(String value);
+
+  String getColleagueId();
+
+  void setColleagueId(String value);
 }

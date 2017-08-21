@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.birbit.android.jobqueue.JobManager;
+import com.birbit.android.jobqueue.TagConstraint;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.DrawerBuilder;
@@ -165,6 +166,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private boolean isReceivedTotalCount = false;
   private boolean isUpdateFavoritesAndProcessedEventSent = false;
   private boolean switchToSubstituteModeStarted = false;
+  private boolean exitFromSubstituteModeStarted = false;
 
   protected void onCreate(Bundle savedInstanceState) {
     setTheme(R.style.AppTheme);
@@ -371,8 +373,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
         case R.id.reload:
 
-          dataLoader.updateAuth(null, false);
-          updateByStatus();
+          Toast.makeText(this, "Обновление данных...", Toast.LENGTH_SHORT).show();
+          dataLoader.updateAuth(null, true);
 
 //          if (menuBuilder.getItem() != MainMenuItem.PROCESSED || menuBuilder.getItem() != MainMenuItem.FAVORITES ){
 //            updateProgressBar();
@@ -431,7 +433,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   private void updateByStatus() {
     dataLoader.updateByCurrentStatus( menuBuilder.getItem(), null, false);
-    Toast.makeText(this, "Обновление данных...", Toast.LENGTH_SHORT).show();
   }
 
 
@@ -790,6 +791,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
           .subscribe( colleagueResponse -> {
             Timber.tag("Substitute").d("Received colleague token");
 
+            jobManager.cancelJobsInBackground(null, TagConstraint.ANY, "DocJob");
+
             switchToSubstituteModeStarted = true;
 
             settings.setSubstituteMode( true );
@@ -797,6 +800,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
             settings.setOldCurrentUser( settings.getCurrentUser() );
             settings.setLogin( colleagueResponse.getLogin() );
             settings.setToken( colleagueResponse.getAuthToken() );
+            settings.setColleagueId( colleagueEntity.getColleagueId() );
 
             initJournalSelectionPosition();
 
@@ -832,6 +836,10 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private void stopSubstituteMode() {
     if ( settings.isOnline() ) {
       Timber.tag("Substitute").d("Stopping substitute mode");
+
+      jobManager.cancelJobsInBackground(null, TagConstraint.ANY, "DocJob");
+
+      exitFromSubstituteModeStarted = true;
 
       settings.setSubstituteMode( false );
       settings.setLogin( settings.getOldLogin() );
@@ -1010,15 +1018,23 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(ReceivedTokenEvent event) {
-    Timber.tag(TAG).i("ReceivedTokenEvent");
-    store.clear();
+    if ( exitFromSubstituteModeStarted ) {
+      Timber.tag(TAG).i("ReceivedTokenEvent");
+      exitFromSubstituteModeStarted = false;
+      store.clear();
+    } else {
+      updateByStatus();
+    }
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(ErrorReceiveTokenEvent event) {
-    Timber.tag(TAG).i("ErrorReceiveTokenEvent");
-    dismissStopSubstituteDialog();
-    Toast.makeText(this, "Ошибка выхода из режима замещения", Toast.LENGTH_SHORT).show();
+    if ( exitFromSubstituteModeStarted ) {
+      Timber.tag(TAG).i("ErrorReceiveTokenEvent");
+      exitFromSubstituteModeStarted = false;
+      dismissStopSubstituteDialog();
+      Toast.makeText(this, "Ошибка выхода из режима замещения", Toast.LENGTH_SHORT).show();
+    }
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
