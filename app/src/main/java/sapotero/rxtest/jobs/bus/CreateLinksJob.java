@@ -50,7 +50,7 @@ public class CreateLinksJob extends DocumentJob {
     RDocumentEntity existingLink =
       dataStore
         .select(RDocumentEntity.class)
-        .where(RDecisionEntity.UID.eq(linkUid))
+        .where(RDocumentEntity.UID.eq(linkUid))
         .get().firstOrNull();
 
     if ( exist( existingLink ) ) {
@@ -73,7 +73,7 @@ public class CreateLinksJob extends DocumentJob {
       RDocumentEntity parentDoc =
         dataStore
           .select(RDocumentEntity.class)
-          .where(RDecisionEntity.UID.eq(parentUid))
+          .where(RDocumentEntity.UID.eq(parentUid))
           .get().firstOrNull();
 
       if ( exist( parentDoc ) ) {

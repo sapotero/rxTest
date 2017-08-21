@@ -257,4 +257,55 @@ public class RecyclerViewTest {
     onView(withId(R.id.swipe_layout_date)).check(matches(withTextColor(ContextCompat.getColor( activity, R.color.md_red_A700 ))));
     assertEquals( R.drawable.top_border, viewHolder.getBackgroundResourceId() );
   }
+
+  @Test
+  public void returned() {
+    dummyDoc = generateDocument();
+    dummyDoc.getDocument().setReturned(true);
+
+    addDoc();
+
+    onView(withId(R.id.returned_label)).check(matches(isDisplayed()));
+  }
+
+  @Test
+  public void rejected() {
+    dummyDoc = generateDocument();
+    dummyDoc.getDocument().setRejected(true);
+
+    addDoc();
+
+    onView(withId(R.id.rejected_label)).check(matches(isDisplayed()));
+  }
+
+  @Test
+  public void again() {
+    dummyDoc = generateDocument();
+    dummyDoc.getDocument().setAgain(true);
+
+    addDoc();
+
+    onView(withId(R.id.again_label)).check(matches(isDisplayed()));
+  }
+
+  @Test
+  public void showAllLabels() {
+    dummyDoc = generateDocument();
+    dummyDoc.getDocument().setChanged(true);
+    dummyDoc.getDocument().setUrgency( "Весьма срочно" );
+    dummyDoc.getDocument().setControl(true);
+    dummyDoc.getDocument().setFavorites(true);
+    dummyDoc.getDocument().setFromFavoritesFolder(true);
+    dummyDoc.getDocument().setReturned(true);
+
+    addDoc();
+
+    // These labels must be visible simultaneously
+    onView(withId(R.id.sync_label)).check(matches(isDisplayed()));
+    onView(withText(dummyDoc.getDocument().getUrgency())).check(matches(isDisplayed()));
+    onView(withId(R.id.control_label)).check(matches(isDisplayed()));
+    onView(withId(R.id.favorite_label)).check(matches(isDisplayed()));
+    onView(withId(R.id.lock_label)).check(matches(isDisplayed()));
+    onView(withId(R.id.returned_label)).check(matches(isDisplayed()));
+  }
 }

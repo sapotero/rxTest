@@ -1,10 +1,6 @@
 package sapotero.rxtest.views.activities;
 
-import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
@@ -42,57 +38,39 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.models.RFolderEntity;
 import sapotero.rxtest.db.requery.models.RRouteEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.bus.MassInsertDoneEvent;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
-import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.adapters.TabSigningPagerAdapter;
-import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
-import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
 import sapotero.rxtest.views.fragments.InfoActivityDecisionPreviewFragment;
-import sapotero.rxtest.views.fragments.InfoCardDocumentsFragment;
-import sapotero.rxtest.views.fragments.InfoCardFieldsFragment;
-import sapotero.rxtest.views.fragments.InfoCardLinksFragment;
-import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
 import sapotero.rxtest.views.fragments.RoutePreviewFragment;
-import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import timber.log.Timber;
 
-public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivityDecisionPreviewFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, RoutePreviewFragment.OnFragmentInteractionListener, InfoCardDocumentsFragment.OnFragmentInteractionListener, InfoCardWebViewFragment.OnFragmentInteractionListener, InfoCardLinksFragment.OnFragmentInteractionListener, InfoCardFieldsFragment.OnFragmentInteractionListener, /*CurrentDocumentManager.Callback,*/ SelectOshsDialogFragment.Callback {
+public class InfoNoMenuActivity extends AppCompatActivity {
 
   @BindView(R.id.activity_info_preview_container) LinearLayout preview_container;
   @BindView(R.id.frame_preview_decision) FrameLayout frame;
-
   @BindView(R.id.tab_main) ViewPager viewPager;
   @BindView(R.id.tabs) TabLayout tabLayout;
+  @BindView(R.id.toolbar) Toolbar toolbar;
 
   @Inject JobManager jobManager;
   @Inject ISettings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject MemoryStore store;
 
-  private byte[] CARD;
-
-//  private CurrentDocumentManager documentManager;
   private String TAG = this.getClass().getSimpleName();
-
-  @BindView(R.id.toolbar) Toolbar toolbar;
-  //  private Preview preview;
   private Fields.Status status;
-  private Fields.Journal journal;
-  private SelectOshsDialogFragment oshs;
 
-  private Menu menu;
   private String UID;
   private RDocumentEntity doc;
-  private boolean showInfoCard = false;
 
-  private RDocumentEntity documentEntity;
+  private boolean showInfoCard = false;
+  private boolean isProject = false;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -104,9 +82,6 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
     ButterKnife.bind(this);
 
     EsdApplication.getManagerComponent().inject(this);
-
-//    documentManager = new CurrentDocumentManager(this);
-//    documentManager.registerCallBack(this);
 
     Intent intent = getIntent();
     if ( intent != null ){
@@ -120,7 +95,9 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
 
       doc = dataStore
         .select(RDocumentEntity.class)
-        .where(RDocumentEntity.UID.eq(UID)).get().first();
+        .where(RDocumentEntity.UID.eq(UID)).get().firstOrNull();
+
+      isProject = doc.getRoute() != null && ((RRouteEntity) doc.getRoute()).getSteps() != null && ((RRouteEntity) doc.getRoute()).getSteps().size() > 0;
     }
 
     setToolbar();
@@ -146,12 +123,11 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
     android.support.v4.app.FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
     fragmentTransaction.addToBackStack("PREVIEW");
 
-    // FIX всегда отображаем резолюции
-//    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL ){
-//      fragmentTransaction.addByOne( R.id.activity_info_preview_container, new RoutePreviewFragment().withUid(UID) );
-//    } else {
+    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || isProject ) {
+      fragmentTransaction.replace( R.id.activity_info_preview_container, new RoutePreviewFragment().withUid(UID), "PREVIEW" );
+    } else {
       fragmentTransaction.replace( R.id.activity_info_preview_container, new InfoActivityDecisionPreviewFragment().withUid(UID).withEnableButtons(false), "PREVIEW" );
-//    }
+    }
 
     fragmentTransaction.commit();
   }
@@ -194,7 +170,6 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
   }
 
   private void setToolbar() {
-
     toolbar.setTitleTextColor( getResources().getColor( R.color.md_grey_100 ) );
     toolbar.setSubtitleTextColor( getResources().getColor( R.color.md_grey_400 ) );
 
@@ -205,15 +180,11 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
       }
     );
 
-    documentEntity = dataStore.select(RDocumentEntity.class).where(RDocumentEntity.UID.eq(UID)).get().firstOrNull();
-
-    String _filter = documentEntity.getFilter() != null ? documentEntity.getFilter() : "";
+    String _filter = doc.getFilter() != null ? doc.getFilter() : "";
 
     status  = Fields.Status.findStatus( _filter  );
-    journal = Fields.getJournalByUid( UID );
 
     toolbar.setTitle( String.format("%s от %s", doc.getRegistrationNumber(), doc.getRegistrationDate() ) );
-
   }
 
   private void closeActivity() {
@@ -222,22 +193,8 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
   }
 
   private void setTabContent() {
-
     if (viewPager.getAdapter() == null) {
-
-      Timber.tag(TAG).e("setTabContent %s", "%" + Fields.Journal.CITIZEN_REQUESTS.getValue() );
-
-      dataStore
-        .select(RFolderEntity.class)
-        .get().toObservable()
-        .observeOn(Schedulers.io())
-        .subscribeOn(AndroidSchedulers.mainThread())
-        .subscribe( folder -> {
-          Timber.e( "%s - %s ", folder.getType(), folder.getTitle() );
-        }, Timber::e);
-
       if ( showInfoCard ){
-
         // для перехода по ссылкам из блока Согласование письмами
         TabPagerAdapter adapter = new TabPagerAdapter ( getSupportFragmentManager() );
         adapter.withUid(UID);
@@ -246,12 +203,12 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
         viewPager.setAdapter(adapter);
 
       } else{
-        Boolean isProject = documentEntity.getRoute() != null && ((RRouteEntity) documentEntity.getRoute()).getSteps() != null && ((RRouteEntity) documentEntity.getRoute()).getSteps().size() > 0;
-
         if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || isProject ) {
           TabSigningPagerAdapter adapter = new TabSigningPagerAdapter( getSupportFragmentManager() );
           adapter.withUid(UID);
+          adapter.withoutZoom(true);
           viewPager.setAdapter(adapter);
+
         } else {
           TabPagerAdapter adapter = new TabPagerAdapter ( getSupportFragmentManager() );
           adapter.withUid(UID);
@@ -260,7 +217,6 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
           viewPager.setAdapter(adapter);
         }
       }
-
 
       viewPager.setOffscreenPageLimit(10);
 
@@ -282,7 +238,6 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
 
     tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
     tabLayout.setupWithViewPager(viewPager);
-
   }
 
   @Override
@@ -290,8 +245,6 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
     Timber.tag(TAG).i(String.valueOf(menu));
     return false;
   }
-
-
 
   @Override
   public void onStart() {
@@ -319,48 +272,16 @@ public class InfoNoMenuActivity extends AppCompatActivity implements InfoActivit
   }
 
   @Override
-  public void onFragmentInteraction(Uri uri) {
-  }
-
-  @Override
   protected void onResume() {
     super.onResume();
 
-    if ( documentEntity != null && documentEntity.isFromLinks() != null && documentEntity.isFromLinks() ) {
+    if ( doc != null && doc.isFromLinks() != null && doc.isFromLinks() ) {
       updateDocument();
     }
   }
 
   private void updateDocument() {
     jobManager.addJobInBackground( new UpdateDocumentJob( UID, true ) );
-  }
-
-//  /* CurrentDocumentManager.Callback */
-//  @Override
-//  public void onGetStateSuccess() {
-//    Timber.tag("DocumentManagerCallback").i("onGetStateSuccess");
-//  }
-//
-//  @Override
-//  public void onGetStateError() {
-//    Timber.tag("DocumentManagerCallback").i("onGetStateError");
-//  }
-
-  @Override
-  public void onSearchSuccess(Oshs user, CommandFactory.Operation operation, String uid) {
-
-  }
-
-  @Override
-  public void onSearchError(Throwable error) {
-
-  }
-
-
-  public boolean isOnline() {
-    ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-    NetworkInfo netInfo = cm.getActiveNetworkInfo();
-    return netInfo != null && netInfo.isConnectedOrConnecting();
   }
 
   @Override

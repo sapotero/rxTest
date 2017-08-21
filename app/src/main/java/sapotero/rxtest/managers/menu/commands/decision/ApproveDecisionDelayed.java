@@ -2,11 +2,12 @@ package sapotero.rxtest.managers.menu.commands.decision;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.List;
+
 import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
+import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.DecisionCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.document.Decision;
@@ -14,8 +15,6 @@ import sapotero.rxtest.retrofit.models.v2.DecisionError;
 import timber.log.Timber;
 
 public class ApproveDecisionDelayed extends DecisionCommand {
-
-  private String TAG = this.getClass().getSimpleName();
 
   public ApproveDecisionDelayed(CommandParams params) {
     super(params);
@@ -32,9 +31,7 @@ public class ApproveDecisionDelayed extends DecisionCommand {
   }
 
   public void update() {
-    if (callback != null ){
-      callback.onCommandExecuteSuccess( getType() );
-    }
+    sendSuccessCallback();
 
     try {
       dataStore
@@ -55,9 +52,7 @@ public class ApproveDecisionDelayed extends DecisionCommand {
   public void executeLocal() {
     update();
 
-    if ( callback != null ){
-      callback.onCommandExecuteSuccess( getType() );
-    }
+    sendSuccessCallback();
 
     queueManager.setExecutedLocal(this);
   }
@@ -81,32 +76,28 @@ public class ApproveDecisionDelayed extends DecisionCommand {
         _decision.setAssignment(true);
       }
 
-      Observable<DecisionError> info = getDecisionUpdateOperationObservable(_decision, TAG);
+      Observable<DecisionError> info = getDecisionUpdateOperationObservable(_decision);
+      sendDecisionOperationRequest( info );
 
-      info.subscribeOn( Schedulers.computation() )
-        .observeOn( AndroidSchedulers.mainThread() )
-        .subscribe(
-          data -> {
-            onSuccess( this, data, true, false, TAG );
-          },
-          error -> {
-            Timber.tag(TAG).i("error: %s", error);
-            if (callback != null){
-              callback.onCommandExecuteError(getType());
-            }
-//            queueManager.setExecutedWithError(this, Collections.singletonList("http_error"));
-            EventBus.getDefault().post( new ForceUpdateDocumentEvent( getParams().getDocument() ));
-          }
-        );
     } else {
       Timber.tag(TAG).i("error: no decision yet");
-      if (callback != null){
-        callback.onCommandExecuteError(getType());
-      }
+      sendErrorCallback( getType() );
     }
   }
 
   private RDecisionEntity getDecision(String uid){
     return dataStore.select(RDecisionEntity.class).where(RDecisionEntity.UID.eq(uid)).get().firstOrNull();
+  }
+
+  @Override
+  public void finishOnDecisionSuccess(DecisionError data) {
+    finishOperationOnSuccess();
+    EventBus.getDefault().post( new UpdateDocumentEvent( data.getDocumentUid() ));
+  }
+
+  @Override
+  public void finishOnOperationError(List<String> errors) {
+    finishOperationOnError( errors );
+    EventBus.getDefault().post( new ForceUpdateDocumentEvent( getParams().getDocument() ));
   }
 }

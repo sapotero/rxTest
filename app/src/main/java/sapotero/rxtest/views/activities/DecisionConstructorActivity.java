@@ -1,7 +1,6 @@
 package sapotero.rxtest.views.activities;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -63,18 +62,9 @@ import sapotero.rxtest.views.custom.SpinnerWithLabel;
 import sapotero.rxtest.views.dialogs.DecisionTextDialog;
 import sapotero.rxtest.views.dialogs.InfoCardDialogFragment;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
-import sapotero.rxtest.views.dialogs.SelectTemplateDialogFragment;
-import sapotero.rxtest.views.fragments.DecisionFragment;
-import sapotero.rxtest.views.fragments.DecisionPreviewFragment;
-import sapotero.rxtest.views.fragments.InfoActivityDecisionPreviewFragment;
-import sapotero.rxtest.views.fragments.InfoCardDocumentsFragment;
-import sapotero.rxtest.views.fragments.InfoCardFieldsFragment;
-import sapotero.rxtest.views.fragments.InfoCardLinksFragment;
-import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
-import sapotero.rxtest.views.fragments.RoutePreviewFragment;
 import timber.log.Timber;
 
-public class DecisionConstructorActivity extends AppCompatActivity implements DecisionFragment.OnFragmentInteractionListener, DecisionPreviewFragment.OnFragmentInteractionListener, OperationManager.Callback, SelectOshsDialogFragment.Callback, SelectTemplateDialogFragment.Callback,  InfoActivityDecisionPreviewFragment.OnFragmentInteractionListener, RoutePreviewFragment.OnFragmentInteractionListener, InfoCardDocumentsFragment.OnFragmentInteractionListener, InfoCardWebViewFragment.OnFragmentInteractionListener, InfoCardLinksFragment.OnFragmentInteractionListener, InfoCardFieldsFragment.OnFragmentInteractionListener {
+public class DecisionConstructorActivity extends AppCompatActivity implements OperationManager.Callback, SelectOshsDialogFragment.Callback {
 
   @Inject ISettings settings;
   @Inject Mappers mappers;
@@ -871,11 +861,6 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
     }
   }
 
-
-    @Override
-    public void onFragmentInteraction (Uri uri){
-    }
-
     @Override
     public void onStart () {
       super.onStart();
@@ -1042,9 +1027,5 @@ public class DecisionConstructorActivity extends AppCompatActivity implements De
 
     private String getCurrentUserPosition () {
       return settings.getCurrentUserPosition();
-    }
-
-    @Override
-    public void onSelectTemplate (String template){
     }
 }

@@ -1,5 +1,7 @@
 package sapotero.rxtest.managers.menu.commands.templates;
 
+import java.util.List;
+
 import retrofit2.Retrofit;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
@@ -32,10 +34,7 @@ public class UpdateTemplate extends AbstractCommand {
   @Override
   public void executeLocal() {
     queueManager.setExecutedLocal(this);
-
-    if ( callback != null ){
-      callback.onCommandExecuteSuccess( getType() );
-    }
+    sendSuccessCallback();
   }
 
   @Override
@@ -58,11 +57,12 @@ public class UpdateTemplate extends AbstractCommand {
         data -> {
           queueManager.setExecutedRemote(this);
         },
-        error -> {
-          if (callback != null){
-            callback.onCommandExecuteError(getType());
-          }
-        }
+        this::onOperationError
       );
+  }
+
+  @Override
+  public void finishOnOperationError(List<String> errors) {
+    queueManager.setExecutedWithError( this, errors );
   }
 }

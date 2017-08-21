@@ -56,6 +56,9 @@ public class InMemoryDocumentMapper {
 
     document.setSigner( signer );
     document.setViewed( doc.isViewed() );
+    document.setReturned( doc.isReturned() );
+    document.setRejected( doc.isRejected() );
+    document.setAgain( doc.isAgain() );
 
     return document;
   }

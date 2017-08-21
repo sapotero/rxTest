@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.birbit.android.jobqueue.JobManager;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -25,15 +26,20 @@ import javax.inject.Inject;
 
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
+import okhttp3.OkHttpClient;
+import retrofit2.Retrofit;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RTemplateEntity;
 import sapotero.rxtest.events.decision.AddDecisionTemplateEvent;
+import sapotero.rxtest.jobs.bus.CreateTemplatesJob;
 import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.retrofit.Api.AuthService;
+import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.adapters.DecisionTemplateRecyclerAdapter;
 import sapotero.rxtest.views.adapters.decorators.DividerItemDecoration;
@@ -44,19 +50,54 @@ public class DecisionTemplateFragment extends Fragment {
   @Inject ISettings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject OperationManager operationManager;
+  @Inject OkHttpClient okHttpClient;
+  @Inject JobManager jobManager;
 
   private OnListFragmentInteractionListener mListener;
   private DecisionTemplateRecyclerAdapter adapter;
   private String TAG = this.getClass().getSimpleName();
-  private String DECISION = "decision";
+
+  private TemplateType templateType = TemplateType.DECISION;
+
+  public enum TemplateType {
+    DECISION( "decision", null, "Шаблоны резолюции", "Введите текст резолюции"),
+    REJECTION( "rejection", "rejection", "Шаблоны отклоненния", "Введите текст отклонения");
+
+    private String type;
+    private String typeForApi;
+    private String title;
+    private String hint;
+
+    TemplateType(String type, String typeForApi, String title, String hint) {
+      this.type = type;
+      this.typeForApi = typeForApi;
+      this.title = title;
+      this.hint = hint;
+    }
+
+    public String getType() {
+      return type;
+    }
+
+    public String getTypeForApi() {
+      return typeForApi;
+    }
+
+    public String getTitle() {
+      return title;
+    }
+
+    public String getHint() {
+      return hint;
+    }
+  }
 
   public DecisionTemplateFragment() {
   }
 
-
-  @Override
-  public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
+  public Fragment withType(TemplateType templateType) {
+    this.templateType = templateType;
+    return this;
   }
 
   @Override
@@ -83,7 +124,7 @@ public class DecisionTemplateFragment extends Fragment {
     Toolbar toolbar = (Toolbar) view.findViewById(R.id.fragment_decision_template_toolbar);
 
     toolbar.inflateMenu(R.menu.fragment_decision_template_menu);
-    toolbar.setTitle("Шаблоны резолюции");
+    toolbar.setTitle( templateType.getTitle() );
 
     toolbar.setOnMenuItemClickListener(item -> {
       switch (item.getItemId()){
@@ -98,7 +139,6 @@ public class DecisionTemplateFragment extends Fragment {
       }
       return false;
     });
-
   }
 
   private void addDecisionTemplateDialog() {
@@ -109,7 +149,7 @@ public class DecisionTemplateFragment extends Fragment {
           | InputType.TYPE_TEXT_FLAG_MULTI_LINE
           | InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE
           | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT)
-      .input(R.string.fragment_decision_template_add_hint, R.string.dialog_empty_value,
+      .input(templateType.getHint(), "",
         (dialog, input) -> {
           Timber.tag("ADD").e("asd");
 
@@ -118,16 +158,14 @@ public class DecisionTemplateFragment extends Fragment {
           }
         })
       .negativeText(R.string.constructor_close)
-      .onNegative((dialog, which) -> {
-        Timber.tag("-").e("asd");
-      })
+      .onNegative((dialog, which) -> Timber.tag("-").e("asd"))
       .positiveText(R.string.constructor_save)
       .onPositive((dialog, which) -> {
 
         CommandFactory.Operation operation = CommandFactory.Operation.CREATE_DECISION_TEMPLATE;
         CommandParams params = new CommandParams();
         params.setComment( dialog.getInputEditText().getText().toString() );
-        params.setLabel( DECISION );
+        params.setLabel( templateType.getType() );
         operationManager.execute(operation, params);
 
       })
@@ -139,7 +177,28 @@ public class DecisionTemplateFragment extends Fragment {
   }
 
   private void refresh() {
+    deleteTemplates( templateType.getType() );
 
+    Retrofit retrofit = new RetrofitManager(getContext(), settings.getHost(), okHttpClient).process();
+    AuthService auth = retrofit.create(AuthService.class);
+
+    auth.getTemplates(settings.getLogin(), settings.getToken(), templateType.getTypeForApi())
+      .subscribeOn(Schedulers.computation())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(
+        templates -> jobManager.addJobInBackground(new CreateTemplatesJob(templates, templateType.getTypeForApi())),
+        error -> Timber.tag(TAG).e(error)
+      );
+  }
+
+  private void deleteTemplates(String type) {
+    int count = dataStore
+      .delete(RTemplateEntity.class)
+      .where(RTemplateEntity.USER.eq(settings.getLogin()))
+      .and(RTemplateEntity.TYPE.eq( type ))
+      .get().value();
+
+    Timber.tag(TAG).d("Deleted %s templates of type %s", count, type);
   }
 
   private void populateAdapter(View view) {
@@ -149,20 +208,17 @@ public class DecisionTemplateFragment extends Fragment {
     recyclerView.setLayoutManager(new LinearLayoutManager(context));
     recyclerView.addItemDecoration( new DividerItemDecoration(ContextCompat.getDrawable(context, R.drawable.devider)));
 
-    adapter = new DecisionTemplateRecyclerAdapter(new ArrayList<>(), mListener);
+    adapter = new DecisionTemplateRecyclerAdapter(new ArrayList<>(), mListener, templateType);
     recyclerView.setAdapter(adapter);
 
-
     invalidateDecisions();
-
-
   }
 
   private void invalidateDecisions() {
     dataStore
       .select(RTemplateEntity.class)
       .where(RTemplateEntity.USER.eq( settings.getLogin() ))
-      .and(RTemplateEntity.TYPE.eq(DECISION))
+      .and(RTemplateEntity.TYPE.eq( templateType.getType() ))
       .get()
       .toObservable()
       .toList()
@@ -170,17 +226,14 @@ public class DecisionTemplateFragment extends Fragment {
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
         templates -> {
-          Timber.tag(TAG).e("templates: %s", templates);
+          Timber.tag(TAG).e("%s templates: %s", templateType.getType(), templates);
           if (templates.size() > 0) {
             adapter.addList( templates );
           }
         },
-        error -> {
-          Timber.tag(TAG).e(error);
-        }
+        error -> Timber.tag(TAG).e(error)
       );
   }
-
 
   @Override
   public void onAttach(Context context) {
@@ -198,13 +251,12 @@ public class DecisionTemplateFragment extends Fragment {
     mListener = null;
   }
 
-  public interface OnListFragmentInteractionListener {
-    void onListFragmentInteraction(RTemplateEntity item);
-  }
-
-
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(AddDecisionTemplateEvent event){
     invalidateDecisions();
+  }
+
+  public interface OnListFragmentInteractionListener {
+    void onListFragmentInteraction(RTemplateEntity item, TemplateType templateType);
   }
 }

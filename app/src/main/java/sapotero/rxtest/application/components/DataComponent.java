@@ -14,7 +14,6 @@ import sapotero.rxtest.db.mapper.utils.MappersModule;
 import sapotero.rxtest.db.requery.utils.Deleter;
 import sapotero.rxtest.db.requery.utils.RequeryDbModule;
 import sapotero.rxtest.db.requery.utils.validation.ValidationModule;
-import sapotero.rxtest.managers.CurrentDocumentManager;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.managers.view.DecisionManager;
 import sapotero.rxtest.retrofit.utils.OkHttpModule;
@@ -23,7 +22,6 @@ import sapotero.rxtest.utils.queue.db.QueueDBManager;
 import sapotero.rxtest.views.activities.DocumentImageFullScreenActivity;
 import sapotero.rxtest.views.activities.DocumentInfocardFullScreenActivity;
 import sapotero.rxtest.views.activities.FileSignActivity;
-import sapotero.rxtest.views.activities.InfoNoMenuActivity;
 import sapotero.rxtest.views.activities.LogActivity;
 import sapotero.rxtest.views.adapters.DecisionSpinnerAdapter;
 import sapotero.rxtest.views.adapters.DocumentLinkAdapter;
@@ -83,7 +81,6 @@ public interface DataComponent {
 
   void inject(ItemsBuilder itemsBuilder);
   void inject(QueueDBManager queueDBManager);
-  void inject(CurrentDocumentManager currentDocumentManager);
 
   void inject(DecisionManager decisionManager);
 

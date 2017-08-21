@@ -138,6 +138,12 @@ public abstract class RDocument implements Persistable {
   @OneToMany(mappedBy = "document", cascade = {CascadeAction.DELETE, CascadeAction.SAVE})
   Set<RLinks> links;
 
+  Boolean returned;
+
+  Boolean rejected;
+
+  Boolean again;
+
 //  exemplars: Тип массив структур Экземпляры документа,
 //  decisions: Тип массив структур Резолюции документа,
 //  images: Тип массив структур Электронные образы,

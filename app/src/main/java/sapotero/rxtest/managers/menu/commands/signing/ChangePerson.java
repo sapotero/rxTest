@@ -2,14 +2,13 @@ package sapotero.rxtest.managers.menu.commands.signing;
 
 import org.greenrobot.eventbus.EventBus;
 
-import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import java.util.List;
+
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.ApprovalSigningCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 
 public class ChangePerson extends ApprovalSigningCommand {
-
-  private String TAG = this.getClass().getSimpleName();
 
   public ChangePerson(CommandParams params) {
     super(params);
@@ -21,10 +20,11 @@ public class ChangePerson extends ApprovalSigningCommand {
 
   @Override
   public void execute() {
+    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
     queueManager.add(this);
     EventBus.getDefault().post( new ShowNextDocumentEvent( true, getParams().getDocument() ));
 
-    setDocOperationProcessedStartedInMemory();
+    startRejectedOperationInMemory();
     setAsProcessed();
   }
 
@@ -35,28 +35,23 @@ public class ChangePerson extends ApprovalSigningCommand {
 
   @Override
   public void executeLocal() {
-    dataStore
-      .update(RDocumentEntity.class)
-      .set( RDocumentEntity.PROCESSED, true)
-      .set( RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq(getParams().getDocument()))
-      .get()
-      .value();
-
-    if (callback != null){
-      callback.onCommandExecuteSuccess(getType());
-    }
-
+    startRejectedOperationInDb();
+    sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }
 
   @Override
   public void executeRemote() {
-    printCommandType( this, TAG );
-    remoteOperation(TAG);
+    approvalSigningRemote();
   }
 
   @Override
-  public void onRemoteError() {
+  public void finishOnOperationSuccess() {
+    finishRejectedOperationOnSuccess();
+  }
+
+  @Override
+  public void finishOnOperationError(List<String> errors) {
+    finishRejectedProcessedOperationOnError( errors );
   }
 }
