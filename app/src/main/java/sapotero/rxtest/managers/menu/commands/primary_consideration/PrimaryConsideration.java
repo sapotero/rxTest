@@ -30,7 +30,7 @@ public class PrimaryConsideration extends OperationResultCommand {
     queueManager.add(this);
     EventBus.getDefault().post( new ShowNextDocumentEvent( true, getParams().getDocument() ));
 
-    startRejectedOperationInMemory();
+    startProcessedOperationInMemory();
     setAsProcessed();
   }
 
@@ -41,7 +41,7 @@ public class PrimaryConsideration extends OperationResultCommand {
 
   @Override
   public void executeLocal() {
-    startRejectedOperationInDb();
+    startProcessedOperationInDb();
     sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }
@@ -72,7 +72,7 @@ public class PrimaryConsideration extends OperationResultCommand {
 
   @Override
   public void finishOnOperationSuccess() {
-    finishRejectedOperationOnSuccess();
+    finishProcessedOperationOnSuccess();
   }
 
   @Override
