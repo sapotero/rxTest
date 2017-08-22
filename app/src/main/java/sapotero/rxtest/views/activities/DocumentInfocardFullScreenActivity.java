@@ -11,6 +11,12 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.SeekBar;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
+import java.util.Objects;
+
 import javax.inject.Inject;
 
 import butterknife.BindView;
@@ -23,6 +29,7 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.utils.ISettings;
 import timber.log.Timber;
 
@@ -38,6 +45,7 @@ public class DocumentInfocardFullScreenActivity extends AppCompatActivity {
   private String TAG = this.getClass().getSimpleName();
   private WebSettings webSettings;
   private int FONT_SIZE = 16;
+  private int ZOOM_MIN_FONT_SIZE = 12;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +57,7 @@ public class DocumentInfocardFullScreenActivity extends AppCompatActivity {
     ButterKnife.bind(this);
     EsdApplication.getDataComponent().inject(this);
 
+    initEvents();
 
     toolbar.setTitleTextColor(getResources().getColor(R.color.md_black_1000));
     toolbar.setNavigationOnClickListener(v ->{
@@ -70,7 +79,7 @@ public class DocumentInfocardFullScreenActivity extends AppCompatActivity {
     zoom.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
       @Override
       public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-        webSettings.setDefaultFontSize(12 + i);
+        webSettings.setDefaultFontSize(ZOOM_MIN_FONT_SIZE + i);
       }
 
       @Override
@@ -164,6 +173,27 @@ public class DocumentInfocardFullScreenActivity extends AppCompatActivity {
 
   @Override protected void onDestroy() {
     super.onDestroy();
+    unregisterEventBus();
   }
 
+  private void initEvents() {
+    Timber.tag(TAG).v("initEvents");
+    unregisterEventBus();
+    EventBus.getDefault().register(this);
+  }
+
+  private void unregisterEventBus() {
+    if (EventBus.getDefault().isRegistered(this)) {
+      EventBus.getDefault().unregister(this);
+    }
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(UpdateCurrentDocumentEvent event) throws Exception {
+    Timber.tag(TAG).w("UpdateCurrentDocumentEvent %s", event.uid);
+    if (Objects.equals(event.uid, settings.getUid())) {
+      setDocument();
+      webSettings.setDefaultFontSize(ZOOM_MIN_FONT_SIZE + zoom.getProgress());
+    }
+  }
 }

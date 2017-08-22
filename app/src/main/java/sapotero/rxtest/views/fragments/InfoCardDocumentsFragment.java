@@ -24,6 +24,10 @@ import com.birbit.android.jobqueue.JobManager;
 import com.github.barteksc.pdfviewer.PDFView;
 import com.google.gson.Gson;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -50,6 +54,7 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
+import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.jobs.bus.ReloadProcessedImageJob;
 import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.utils.ISettings;
@@ -129,6 +134,8 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     View view = inflater.inflate(R.layout.fragment_info_card_documents, container, false);
     ButterKnife.bind(this, view);
     EsdApplication.getManagerComponent().inject( this );
+
+    initEvents();
 
     if (null != savedInstanceState) {
       index = savedInstanceState.getInt(STATE_CURRENT_PAGE_INDEX, 0);
@@ -503,6 +510,9 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
       index = settings.getImageIndex();
       showPdf();
     }
+    if ( resultCode == Activity.RESULT_CANCELED && requestCode == REQUEST_CODE_INDEX ) {
+      updateAfterDocUpdated();
+    }
   }
 
   @Override
@@ -589,6 +599,37 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     }
   }
 
+  private void initEvents() {
+    Timber.tag(TAG).v("initEvents");
+    unregisterEventBus();
+    EventBus.getDefault().register(this);
+  }
+
+  private void unregisterEventBus() {
+    if (EventBus.getDefault().isRegistered(this)) {
+      EventBus.getDefault().unregister(this);
+    }
+  }
+
+  @Override
+  public void onDestroy(){
+    super.onDestroy();
+    unregisterEventBus();
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(UpdateCurrentDocumentEvent event) throws Exception {
+    Timber.tag(TAG).w("UpdateCurrentDocumentEvent %s", event.uid);
+    if (Objects.equals(event.uid, uid != null ? uid : settings.getUid())) {
+      updateAfterDocUpdated();
+      getActivity().setResult(Activity.RESULT_CANCELED);
+    }
+  }
+
+  private void updateAfterDocUpdated() {
+    settings.setImageIndex(0);
+    updateDocument();
+  }
 
   private static class SwipeUtil{
 
