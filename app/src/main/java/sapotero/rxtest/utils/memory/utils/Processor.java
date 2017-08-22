@@ -386,6 +386,8 @@ public class Processor {
     } else {
       if ( Objects.equals( md5, "" ) ) {
         jobManager.addJobInBackground( new UpdateDocumentJob( uid, documentType ) );
+      } else {
+        EventBus.getDefault().post( new StepperLoadDocumentEvent( uid ) );
       }
     }
   }
