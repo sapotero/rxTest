@@ -24,7 +24,7 @@ public class ChangePerson extends ApprovalSigningCommand {
     queueManager.add(this);
     EventBus.getDefault().post( new ShowNextDocumentEvent( true, getParams().getDocument() ));
 
-    startRejectedOperationInMemory();
+    startProcessedOperationInMemory();
     setAsProcessed();
   }
 
@@ -35,7 +35,7 @@ public class ChangePerson extends ApprovalSigningCommand {
 
   @Override
   public void executeLocal() {
-    startRejectedOperationInDb();
+    startProcessedOperationInDb();
     sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }
@@ -47,7 +47,7 @@ public class ChangePerson extends ApprovalSigningCommand {
 
   @Override
   public void finishOnOperationSuccess() {
-    finishRejectedOperationOnSuccess();
+    finishProcessedOperationOnSuccess();
   }
 
   @Override
