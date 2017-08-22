@@ -50,6 +50,7 @@ public class Settings implements ISettings {
   private static final String OLD_LOGIN_KEY = "old_login";
   private static final String OLD_CURRENT_USER_KEY = "old_current_user";
   private static final String COLLEAGUE_ID_KEY = "colleague.id";
+  private static final String UPDATE_AUTH_STARTED_KEY = "update.auth.started";
 
   public static String FIRST_RUN_KEY;
   public static String IS_PROJECT;
@@ -142,6 +143,7 @@ public class Settings implements ISettings {
   private Preference<String> oldLogin;
   private Preference<String> oldCurrentUser;
   private Preference<String> colleagueId;
+  private Preference<Boolean> isUpdateAuthStarted;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -238,6 +240,7 @@ public class Settings implements ISettings {
     oldLogin                       = settings.getString(OLD_LOGIN_KEY);
     oldCurrentUser                 = settings.getString(OLD_CURRENT_USER_KEY);
     colleagueId                    = settings.getString(COLLEAGUE_ID_KEY);
+    isUpdateAuthStarted            = settings.getBoolean(UPDATE_AUTH_STARTED_KEY);
   }
 
   @Override
@@ -887,5 +890,15 @@ public class Settings implements ISettings {
   @Override
   public void setColleagueId(String value) {
     setString(colleagueId, value);
+  }
+
+  @Override
+  public boolean isUpdateAuthStarted() {
+    return getBoolean(isUpdateAuthStarted);
+  }
+
+  @Override
+  public void setUpdateAuthStarted(boolean value) {
+    setBoolean(isUpdateAuthStarted, value);
   }
 }

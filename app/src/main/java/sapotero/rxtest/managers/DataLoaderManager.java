@@ -381,18 +381,17 @@ public class DataLoaderManager {
 
 
   public void updateAuth( String sign, boolean sendEvent ){
-    if ( updateAuthStarted ) {
+    if ( settings.isUpdateAuthStarted() ) {
       return;
     }
 
-    updateAuthStarted = true;
+    settings.setUpdateAuthStarted( true );
     switchToSubstituteModeAfterReceiveToken = false;
 
     if ( settings.isSubstituteMode() ) {
       switchToSubstituteModeAfterReceiveToken = true;
-
       settings.setSubstituteMode( false );
-      settings.setLogin( settings.getOldLogin() );
+      swapLogin();
     }
 
     Timber.tag(TAG).i("updateAuth: %s", sign );
@@ -427,8 +426,9 @@ public class DataLoaderManager {
               if ( sendEvent ) {
                 EventBus.getDefault().post( new ReceivedTokenEvent() );
               }
+
               initV2(false);
-              updateAuthStarted = false;
+              settings.setUpdateAuthStarted( false );
 
             } else {
               switchToSubstituteModeAfterReceiveToken = false;
@@ -437,13 +437,27 @@ public class DataLoaderManager {
           },
           error -> {
             Timber.tag(TAG).i("updateAuth error: %s" , error );
-            updateAuthStarted = false;
+
+            if ( switchToSubstituteModeAfterReceiveToken ) {
+              switchToSubstituteModeAfterReceiveToken = false;
+              settings.setSubstituteMode( true );
+              swapLogin();
+            }
+
             if ( sendEvent ) {
               EventBus.getDefault().post( new ErrorReceiveTokenEvent() );
             }
+
+            settings.setUpdateAuthStarted( false );
           }
         )
     );
+  }
+
+  private void swapLogin() {
+    String tempLogin = settings.getLogin();
+    settings.setLogin( settings.getOldLogin() );
+    settings.setOldLogin( tempLogin );
   }
 
   private void getColleagueToken() {
@@ -459,16 +473,16 @@ public class DataLoaderManager {
           settings.setOldLogin( settings.getLogin() );
           settings.setLogin( colleagueResponse.getLogin() );
           settings.setToken( colleagueResponse.getAuthToken() );
-          updateAuthStarted = false;
           initV2(false);
           EventBus.getDefault().post( new ReceivedTokenEvent() );
+          settings.setUpdateAuthStarted( false );
         },
         error -> {
           Timber.tag(TAG).e(error);
           settings.setSubstituteMode( true );
-          settings.setOldLogin( settings.getLogin() );
-          updateAuthStarted = false;
+          swapLogin();
           EventBus.getDefault().post( new ErrorReceiveTokenEvent() );
+          settings.setUpdateAuthStarted( false );
         }
       );
   }

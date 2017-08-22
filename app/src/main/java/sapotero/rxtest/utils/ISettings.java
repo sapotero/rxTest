@@ -237,4 +237,8 @@ public interface ISettings {
   String getColleagueId();
 
   void setColleagueId(String value);
+
+  boolean isUpdateAuthStarted();
+
+  void setUpdateAuthStarted(boolean value);
 }
