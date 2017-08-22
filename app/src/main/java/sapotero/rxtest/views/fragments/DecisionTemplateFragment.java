@@ -177,8 +177,6 @@ public class DecisionTemplateFragment extends Fragment {
   }
 
   private void refresh() {
-    deleteTemplates( templateType.getType() );
-
     Retrofit retrofit = new RetrofitManager(getContext(), settings.getHost(), okHttpClient).process();
     AuthService auth = retrofit.create(AuthService.class);
 
@@ -186,7 +184,10 @@ public class DecisionTemplateFragment extends Fragment {
       .subscribeOn(Schedulers.computation())
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(
-        templates -> jobManager.addJobInBackground(new CreateTemplatesJob(templates, templateType.getTypeForApi())),
+        templates -> {
+          deleteTemplates( templateType.getType() );
+          jobManager.addJobInBackground(new CreateTemplatesJob(templates, templateType.getTypeForApi()));
+        },
         error -> Timber.tag(TAG).e(error)
       );
   }
