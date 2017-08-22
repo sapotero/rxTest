@@ -67,6 +67,7 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity {
     fragmentTransaction.add(R.id.activity_document_image_full_screen_wrapper, fragment);
     fragmentTransaction.commit();
 
+    setResult(RESULT_OK);
 
     toolbar.setTitleTextColor(getResources().getColor(R.color.md_black_1000));
     toolbar.setNavigationOnClickListener(v ->{
@@ -86,7 +87,6 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity {
   }
 
   private void closeActivity() {
-    setResult(RESULT_OK);
     finish();
   }
 }
