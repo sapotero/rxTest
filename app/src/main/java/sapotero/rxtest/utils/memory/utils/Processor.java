@@ -13,6 +13,8 @@ import java.util.Objects;
 
 import javax.inject.Inject;
 
+import io.requery.Persistable;
+import io.requery.rx.SingleEntityStore;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -44,6 +46,7 @@ public class Processor {
   @Inject MemoryStore store;
   @Inject JobManager jobManager;
   @Inject ISettings settings;
+  @Inject SingleEntityStore<Persistable> dataStore;
 
   enum Source {
     EMPTY,
@@ -260,13 +263,30 @@ public class Processor {
   }
 
   private void resetMd5(List<String> add) {
-    // Для тех документов, которые надо добавить во вкладку, если они есть в памяти,
-    // сбрасываем MD5, чтобы далее для их обновления была вызвана UpdateDocumentJob.
     for (String uid : add) {
       InMemoryDocument documentInMemory = store.getDocuments().get( uid );
+
       if ( documentInMemory != null ) {
+        // Для тех документов, которые надо добавить во вкладку, если они есть в памяти,
+        // сбрасываем MD5, чтобы далее для их обновления была вызвана UpdateDocumentJob.
         documentInMemory.setMd5("");
         store.getDocuments().put( uid, documentInMemory );
+
+      } else {
+        RDocumentEntity documentInDb = dataStore
+          .select(RDocumentEntity.class)
+          .where(RDocumentEntity.UID.eq(uid))
+          .get().firstOrNull();
+
+        if ( documentInDb != null ) {
+          // Если их нет в памяти, но они есть в базе, то добавляем в память и
+          // сбрасываем MD5, чтобы далее для их обновления была вызвана UpdateDocumentJob.
+          // (Нужно для перехода в режим замещения и обратно,
+          // когда один и тот же документ присутсвует у обоих пользователей)
+          documentInMemory = InMemoryDocumentMapper.fromDB( documentInDb );
+          documentInMemory.setMd5("");
+          store.getDocuments().put( uid, documentInMemory );
+        }
       }
     }
   }
