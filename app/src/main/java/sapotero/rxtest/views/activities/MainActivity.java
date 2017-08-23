@@ -62,12 +62,8 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.query.DBQueryBuilder;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.adapter.JournalSelectorIndexEvent;
-import sapotero.rxtest.events.bus.FileDownloadedEvent;
-import sapotero.rxtest.events.bus.UpdateFavoritesAndProcessedEvent;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.events.service.CheckNetworkEvent;
-import sapotero.rxtest.events.stepper.load.StepperDocumentCountReadyEvent;
-import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.events.utils.ErrorReceiveTokenEvent;
 import sapotero.rxtest.events.utils.RecalculateMenuEvent;
 import sapotero.rxtest.events.utils.ReceivedTokenEvent;
@@ -78,7 +74,6 @@ import sapotero.rxtest.retrofit.Api.AuthService;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.ISettings;
-import sapotero.rxtest.utils.load.PercentCalculator;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.queue.QueueManager;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
@@ -162,11 +157,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private MaterialDialog startSubstituteDialog;
   private MaterialDialog stopSubstituteDialog;
 
-  private int loadedTotal = 0;
-  private int loadedDocProj = 0;
-  private boolean isReceivedTotalCount = false;
-  private boolean isUpdateFavoritesAndProcessedEventSent = false;
-  private boolean switchToSubstituteModeStarted = false;
   private boolean exitFromSubstituteModeStarted = false;
 
   protected void onCreate(Bundle savedInstanceState) {
@@ -826,8 +816,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
               jobManager.cancelJobsInBackground(null, TagConstraint.ANY, "DocJob");
 
-              switchToSubstituteModeStarted = true;
-
               settings.setSubstituteMode( true );
               settings.setOldLogin( settings.getLogin() );
               settings.setOldCurrentUser( settings.getCurrentUser() );
@@ -838,14 +826,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
               initJournalSelectionPosition();
 
               store.clear();
-
-              loadedTotal = 0;
-              loadedDocProj = 0;
-              isReceivedTotalCount = false;
-              isUpdateFavoritesAndProcessedEventSent = false;
-
-              settings.setFavoritesLoaded( false );
-              settings.setProcessedLoaded( false );
 
               dataLoader.initV2( true );
 
@@ -1045,11 +1025,10 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(UpdateCountEvent event) {
-    if ( !switchToSubstituteModeStarted ) {
-      Timber.tag(TAG).i("UpdateCountEvent");
-      update();
-      dismissStopSubstituteDialog();
-    }
+    Timber.tag(TAG).i("UpdateCountEvent");
+    update();
+    dismissStartSubstituteDialog();
+    dismissStopSubstituteDialog();
   }
 
 //  @Subscribe(threadMode = ThreadMode.MAIN)
@@ -1084,61 +1063,5 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       dismissStopSubstituteDialog();
       Toast.makeText(this, "Ошибка выхода из режима замещения", Toast.LENGTH_SHORT).show();
     }
-  }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(StepperLoadDocumentEvent event) {
-    if ( switchToSubstituteModeStarted ) {
-      updateProgressBar(event.message);
-    }
-  }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(FileDownloadedEvent event) {
-    if ( switchToSubstituteModeStarted ) {
-      updateProgressBar(event.path);
-    }
-  }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(StepperDocumentCountReadyEvent event) {
-    if ( switchToSubstituteModeStarted ) {
-      isReceivedTotalCount = true;
-      if (settings.getTotalDocCount() == 0) {
-        finishStartingSubstituteMode();
-      } else {
-        updateProgressBar("Document count ready");
-      }
-    }
-  }
-
-  private void updateProgressBar(String message) {
-    loadedTotal++;
-    loadedDocProj++;
-
-    int totalDocCount = settings.getTotalDocCount();
-
-    Timber.tag("StepperLoadData").d("TOTAL: %s/%s | %s", totalDocCount, loadedTotal, message );
-
-    if ( isReceivedTotalCount && totalDocCount != 0) {
-      int perc = PercentCalculator.calculatePercent(loadedTotal, totalDocCount);
-
-      if ( perc >= 100 ) {
-        finishStartingSubstituteMode();
-      }
-
-      if ( PercentCalculator.calculatePercent( loadedDocProj, settings.getDocProjCount() ) > 98 ) {
-        if ( !isUpdateFavoritesAndProcessedEventSent ) {
-          isUpdateFavoritesAndProcessedEventSent = true;
-          EventBus.getDefault().post( new UpdateFavoritesAndProcessedEvent() );
-        }
-      }
-    }
-  }
-
-  private void finishStartingSubstituteMode() {
-    switchToSubstituteModeStarted = false;
-    update();
-    dismissStartSubstituteDialog();
   }
 }
