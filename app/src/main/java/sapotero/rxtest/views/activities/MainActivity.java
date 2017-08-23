@@ -842,7 +842,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       exitFromSubstituteModeStarted = true;
 
       settings.setSubstituteMode( false );
-      settings.setLogin( settings.getOldLogin() );
+      swapLogin();
 
       initJournalSelectionPosition();
 
@@ -853,6 +853,12 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     } else {
       Toast.makeText(this, "Невозможно выйти из режима замещения в оффлайне", Toast.LENGTH_SHORT).show();
     }
+  }
+
+  private void swapLogin() {
+    String tempLogin = settings.getLogin();
+    settings.setLogin( settings.getOldLogin() );
+    settings.setOldLogin( tempLogin );
   }
 
   private void showStartSubstituteDialog() {
@@ -1032,6 +1038,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     if ( exitFromSubstituteModeStarted ) {
       Timber.tag(TAG).i("ErrorReceiveTokenEvent");
       exitFromSubstituteModeStarted = false;
+      settings.setSubstituteMode( true );
+      swapLogin();
       dismissStopSubstituteDialog();
       Toast.makeText(this, "Ошибка выхода из режима замещения", Toast.LENGTH_SHORT).show();
     }
