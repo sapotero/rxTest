@@ -112,4 +112,8 @@ public class QueueManager {
   public void removeAll() {
     dBManager.removeAll();
   }
+
+  public boolean isAllTasksComplete() {
+    return dBManager.isAllTasksComplete();
+  }
 }

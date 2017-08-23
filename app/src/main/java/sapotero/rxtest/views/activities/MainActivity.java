@@ -808,53 +808,56 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private void startSubstituteMode(int colleagueIndex) {
     if ( settings.isOnline() ) {
       if ( colleagues != null && colleagueIndex < colleagues.size() ) {
-        Timber.tag("Substitute").d("Starting substitute mode");
+        if ( queue.isAllTasksComplete() ) {
+          Timber.tag("Substitute").d("Starting substitute mode");
 
-        showStartSubstituteDialog();
+          showStartSubstituteDialog();
 
-        // TODO: ждать завершения команд в очереди, если очередь не пуста
+          RColleagueEntity colleagueEntity = colleagues.get( colleagueIndex );
 
-        RColleagueEntity colleagueEntity = colleagues.get( colleagueIndex );
+          Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
+          AuthService auth = retrofit.create(AuthService.class);
 
-        Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
-        AuthService auth = retrofit.create(AuthService.class);
+          auth.switchToColleague(colleagueEntity.getColleagueId(), settings.getLogin(), settings.getToken())
+            .subscribeOn(Schedulers.computation())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe( colleagueResponse -> {
+              Timber.tag("Substitute").d("Received colleague token");
 
-        auth.switchToColleague(colleagueEntity.getColleagueId(), settings.getLogin(), settings.getToken())
-          .subscribeOn(Schedulers.computation())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe( colleagueResponse -> {
-            Timber.tag("Substitute").d("Received colleague token");
+              jobManager.cancelJobsInBackground(null, TagConstraint.ANY, "DocJob");
 
-            jobManager.cancelJobsInBackground(null, TagConstraint.ANY, "DocJob");
+              switchToSubstituteModeStarted = true;
 
-            switchToSubstituteModeStarted = true;
+              settings.setSubstituteMode( true );
+              settings.setOldLogin( settings.getLogin() );
+              settings.setOldCurrentUser( settings.getCurrentUser() );
+              settings.setLogin( colleagueResponse.getLogin() );
+              settings.setToken( colleagueResponse.getAuthToken() );
+              settings.setColleagueId( colleagueEntity.getColleagueId() );
 
-            settings.setSubstituteMode( true );
-            settings.setOldLogin( settings.getLogin() );
-            settings.setOldCurrentUser( settings.getCurrentUser() );
-            settings.setLogin( colleagueResponse.getLogin() );
-            settings.setToken( colleagueResponse.getAuthToken() );
-            settings.setColleagueId( colleagueEntity.getColleagueId() );
+              initJournalSelectionPosition();
 
-            initJournalSelectionPosition();
+              store.clear();
 
-            store.clear();
+              loadedTotal = 0;
+              loadedDocProj = 0;
+              isReceivedTotalCount = false;
+              isUpdateFavoritesAndProcessedEventSent = false;
 
-            loadedTotal = 0;
-            loadedDocProj = 0;
-            isReceivedTotalCount = false;
-            isUpdateFavoritesAndProcessedEventSent = false;
+              settings.setFavoritesLoaded( false );
+              settings.setProcessedLoaded( false );
 
-            settings.setFavoritesLoaded( false );
-            settings.setProcessedLoaded( false );
+              dataLoader.initV2( true );
 
-            dataLoader.initV2( true );
+            }, error -> {
+              Timber.tag(TAG).e(error);
+              dismissStartSubstituteDialog();
+              Toast.makeText(this, "Ошибка входа в режим замещения", Toast.LENGTH_SHORT).show();
+            });
 
-          }, error -> {
-            Timber.tag(TAG).e(error);
-            dismissStartSubstituteDialog();
-            Toast.makeText(this, "Ошибка входа в режим замещения", Toast.LENGTH_SHORT).show();
-          });
+        } else {
+          Toast.makeText(this, "Невозможно войти в режим замещения: дождитесь обработки очереди запросов", Toast.LENGTH_SHORT).show();
+        }
       }
     } else {
       Toast.makeText(this, "Невозможно войти в режим замещения в оффлайне", Toast.LENGTH_SHORT).show();
@@ -869,23 +872,25 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   private void stopSubstituteMode() {
     if ( settings.isOnline() ) {
-      Timber.tag("Substitute").d("Stopping substitute mode");
+      if ( queue.isAllTasksComplete() ) {
+        Timber.tag("Substitute").d("Stopping substitute mode");
 
-      // TODO: при выходе тоже ждать завершения команд в очереди
+        jobManager.cancelJobsInBackground(null, TagConstraint.ANY, "DocJob");
 
-      jobManager.cancelJobsInBackground(null, TagConstraint.ANY, "DocJob");
+        exitFromSubstituteModeStarted = true;
 
-      exitFromSubstituteModeStarted = true;
+        settings.setSubstituteMode( false );
+        swapLogin();
 
-      settings.setSubstituteMode( false );
-      swapLogin();
+        initJournalSelectionPosition();
 
-      initJournalSelectionPosition();
+        showStopSubstituteDialog();
 
-      showStopSubstituteDialog();
+        dataLoader.updateAuth(null, true);
 
-      dataLoader.updateAuth(null, true);
-
+      } else {
+        Toast.makeText(this, "Невозможно выйти из режима замещения: дождитесь обработки очереди запросов", Toast.LENGTH_SHORT).show();
+      }
     } else {
       Toast.makeText(this, "Невозможно выйти из режима замещения в оффлайне", Toast.LENGTH_SHORT).show();
     }
