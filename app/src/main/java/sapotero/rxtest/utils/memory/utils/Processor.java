@@ -141,15 +141,12 @@ public class Processor {
         commit( transaction );
         break;
       case TRANSACTION:
-        Timber.w("TRANSACTION" + transaction);
         commit( this.transaction );
         break;
       case INTERSECT:
-        Timber.w("INTERSECT");
         intersect();
         break;
       case FOLDER:
-        Timber.w("FOLDER");
         loadFromFolder();
         break;
       case EMPTY:
