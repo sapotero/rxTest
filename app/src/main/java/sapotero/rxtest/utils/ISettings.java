@@ -224,6 +224,8 @@ public interface ISettings {
 
   boolean isSubstituteMode();
 
+  Preference<Boolean> getSubstituteModePreference();
+
   void setSubstituteMode(boolean value);
 
   String getOldLogin();

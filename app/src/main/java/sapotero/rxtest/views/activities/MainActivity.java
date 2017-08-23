@@ -152,6 +152,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private SearchView searchView;
   private MainActivity context;
   private CompositeSubscription subscription;
+  private CompositeSubscription subscriptionSubstituteMode;
   private PublishSubject<Integer> searchSubject = PublishSubject.create();
   private Subscription searchSubjectSubscription;
 
@@ -364,6 +365,10 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     toolbar.setOnMenuItemClickListener(item -> {
       switch (item.getItemId()) {
 
+        case R.id.substituteModeLabel:
+          // Do nothing, it's just a label
+          break;
+
         case R.id.removeQueue:
           queue.removeAll();
           break;
@@ -446,6 +451,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     initEvents();
     startNetworkCheck();
     subscribeToNetworkCheckResults();
+    subscribeToSubstituteModeResults();
     update();
 
     initDrawer();
@@ -487,6 +493,27 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     );
   }
 
+  private void subscribeToSubstituteModeResults() {
+    unsubscribeSubstituteMode();
+    subscriptionSubstituteMode = new CompositeSubscription();
+
+    subscriptionSubstituteMode.add(
+      settings.getSubstituteModePreference()
+        .asObservable()
+        .subscribe(
+          result -> {
+            boolean isSubstituteMode = result != null ? result : false;
+            try {
+              toolbar.getMenu().findItem(R.id.substituteModeLabel).setVisible( isSubstituteMode );
+            } catch (Exception e) {
+              Timber.tag(TAG).e(e);
+            }
+          },
+          Timber::e
+        )
+    );
+  }
+
   private void updateOrganizationFilter() {
     if ( settings.isOrganizationFilterActive() ) {
       try {
@@ -509,11 +536,18 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     }
   }
 
+  private void unsubscribeSubstituteMode() {
+    if ( subscriptionSubstituteMode != null && subscriptionSubstituteMode.hasSubscriptions() ) {
+      subscriptionSubstituteMode.unsubscribe();
+    }
+  }
+
   @Override
   protected void onPause() {
     super.onPause();
     stopNetworkCheck();
     unsubscribe();
+    unsubscribeSubstituteMode();
   }
 
   @Override
@@ -836,6 +870,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private void stopSubstituteMode() {
     if ( settings.isOnline() ) {
       Timber.tag("Substitute").d("Stopping substitute mode");
+
+      // TODO: при выходе тоже ждать завершения команд в очереди
 
       jobManager.cancelJobsInBackground(null, TagConstraint.ANY, "DocJob");
 

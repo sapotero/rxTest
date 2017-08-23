@@ -863,6 +863,11 @@ public class Settings implements ISettings {
   }
 
   @Override
+  public Preference<Boolean> getSubstituteModePreference() {
+    return isSubstituteMode;
+  }
+
+  @Override
   public String getOldLogin() {
     return getString(oldLogin);
   }

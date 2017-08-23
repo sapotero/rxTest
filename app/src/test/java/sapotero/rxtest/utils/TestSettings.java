@@ -616,6 +616,11 @@ public class TestSettings implements ISettings {
   }
 
   @Override
+  public Preference<Boolean> getSubstituteModePreference() {
+    return null;
+  }
+
+  @Override
   public void setSubstituteMode(boolean value) {
     isSubstituteMode = value;
   }
