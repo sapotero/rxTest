@@ -32,18 +32,11 @@ public abstract class RDocument implements Persistable {
   @Index("doc_year_index")
   int year;
 
-//  @Index("md5_index")
-  String md5;
-
-//  @Index("user_index")
-  String user;
-
-  //  Запрос на получение документов по api v3
-  //  /v3/documents.json?status_code=primary_consideration&addressed_to_type=group
-//  @Index("addressedToType_index")
-  String addressedToType;
-
   Integer sortKey;
+
+  String md5;
+  String user;
+  String addressedToType;
   String title;
   String registrationNumber;
   String registrationDate;
@@ -52,68 +45,39 @@ public abstract class RDocument implements Persistable {
   String comment;
   String externalDocumentNumber;
   String receiptDate;
+  String organization;
+  String filter;
+  String documentType;
+  String infoCard;
+  String folder;
+  String updatedAt;
 
+
+  Boolean control;
   Boolean viewed;
-
-//  @Index("changed_index")
   Boolean changed;
+  Boolean favorites;
+  Boolean processed;
+
+  @Column(value="0")
+  Integer processedDate;
+
+  Boolean fromProcessedFolder;
+
+  Boolean fromFavoritesFolder;
+  Boolean fromLinks;
+  Boolean expired;
+  String firstLink;
 
   @ForeignKey
   @OneToOne
   RSigner signer;
-
-//  @Index("organization_index")
-  String organization;
-
-//  @Index("filter_index")
-  String filter;
-
-//  @Index("documentType_index")
-  String documentType;
-
-  String infoCard;
-
-//  @Index("folder_index")
-  String folder;
-
-//  @Index("control_index")
-  Boolean control;
-
-//  @Index("favorites_index")
-  Boolean favorites;
-
-//  @Index("processed_index")
-  Boolean processed;
-
-  // resolved https://tasks.n-core.ru/browse/MVDESD-13232
-  // удалять обработанные за период текущая дата - Срок хранения ЭО в обработанных документах
-  @Column(value="0")
-  Integer processedDate;
-
-
-  // из папки обработанное
-//  @Index("fromProcessedFolder_index")
-  Boolean fromProcessedFolder;
-
-  // из папки избранное
-//  @Index("fromFavoritesFolder_index")
-  Boolean fromFavoritesFolder;
-
-  // из папки обработанное
-//  @Index("fromLinks_index")
-  Boolean fromLinks;
-
-//  @Index("expired_index")
-  Boolean expired;
 
   @Column(value="false")
   Boolean withDecision;
 
   @Column(value="false")
   Boolean red;
-
-  // Registration number of the first link in the list of links
-  String firstLink;
 
   @OneToMany(mappedBy = "document", cascade = {CascadeAction.DELETE, CascadeAction.SAVE})
   Set<RDecision> decisions;
