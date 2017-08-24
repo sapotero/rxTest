@@ -283,6 +283,9 @@ public class Processor {
           // сбрасываем MD5, чтобы далее для их обновления была вызвана UpdateDocumentJob.
           // (Нужно для перехода в режим замещения и обратно,
           // когда один и тот же документ присутсвует у обоих пользователей)
+
+          // TODO: сохраняем состояние документа и его userа
+
           documentInMemory = InMemoryDocumentMapper.fromDB( documentInDb );
           documentInMemory.setMd5("");
           store.getDocuments().put( uid, documentInMemory );
