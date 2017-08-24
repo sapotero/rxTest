@@ -8,6 +8,12 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
+import java.util.Objects;
+
 import javax.inject.Inject;
 
 import butterknife.BindView;
@@ -19,6 +25,7 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.adapters.utils.OnSwipeTouchListener;
 import timber.log.Timber;
@@ -40,6 +47,7 @@ public class InfoCardFieldsFragment extends Fragment {
   @BindView(R.id.field_comment) TextView field_comment;
   @BindView(R.id.field_external_number) TextView field_external_number;
   private String uid;
+  private String TAG = this.getClass().getSimpleName();
 
   public InfoCardFieldsFragment() {
   }
@@ -49,6 +57,8 @@ public class InfoCardFieldsFragment extends Fragment {
     View view = inflater.inflate(R.layout.fragment_info_card_fields, container, false);
     ButterKnife.bind(this, view);
     EsdApplication.getDataComponent().inject( this );
+
+    initEvents();
 
     view.setOnTouchListener( new OnSwipeTouchListener( getContext() ) );
 
@@ -97,5 +107,31 @@ public class InfoCardFieldsFragment extends Fragment {
   public Fragment withUid(String uid) {
     this.uid = uid;
     return this;
+  }
+
+  private void initEvents() {
+    Timber.tag(TAG).v("initEvents");
+    unregisterEventBus();
+    EventBus.getDefault().register(this);
+  }
+
+  private void unregisterEventBus() {
+    if (EventBus.getDefault().isRegistered(this)) {
+      EventBus.getDefault().unregister(this);
+    }
+  }
+
+  @Override
+  public void onDestroy(){
+    super.onDestroy();
+    unregisterEventBus();
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(UpdateCurrentDocumentEvent event) throws Exception {
+    Timber.tag(TAG).w("UpdateCurrentDocumentEvent %s", event.uid);
+    if (Objects.equals(event.uid, uid != null ? uid : settings.getUid())) {
+      loadSettings();
+    }
   }
 }

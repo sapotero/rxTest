@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -182,7 +183,7 @@ public class Processor {
       // изменилось MD5
       if ( Filter.isChanged( doc.getMd5(), document.getMd5() ) ){
         Timber.tag(TAG).e("md5     : %s | %s", doc.getMd5(), document.getMd5());
-        updateJob( doc.getUid() );
+        updateJob( doc.getUid(), doc.getMd5() );
       } else {
         EventBus.getDefault().post( new StepperLoadDocumentEvent( doc.getUid() ) );
       }
@@ -233,15 +234,7 @@ public class Processor {
         Timber.tag(TAG).e("add: %s", add.size());
         Timber.tag(TAG).e("rem: %s", remove.size());
 
-        // Для тех документов, которые надо добавить во вкладку, если они есть в памяти,
-        // сбрасываем MD5, чтобы далее для их обновления была вызвана UpdateDocumentJob.
-        for (String uid : add) {
-          InMemoryDocument documentInMemory = store.getDocuments().get( uid );
-          if ( documentInMemory != null ) {
-            documentInMemory.setMd5("");
-            store.getDocuments().put( uid, documentInMemory );
-          }
-        }
+        resetMd5(add);
 
         for (String uid : remove) {
           updateAndSetProcessed( uid );
@@ -264,6 +257,18 @@ public class Processor {
 
 
     return new ArrayList<>();
+  }
+
+  private void resetMd5(List<String> add) {
+    // Для тех документов, которые надо добавить во вкладку, если они есть в памяти,
+    // сбрасываем MD5, чтобы далее для их обновления была вызвана UpdateDocumentJob.
+    for (String uid : add) {
+      InMemoryDocument documentInMemory = store.getDocuments().get( uid );
+      if ( documentInMemory != null ) {
+        documentInMemory.setMd5("");
+        store.getDocuments().put( uid, documentInMemory );
+      }
+    }
   }
 
   private void validateDocuments() {
@@ -290,9 +295,9 @@ public class Processor {
   private void loadFromFolder() {
     if ( documentType == DocumentType.FAVORITE ) {
       intersectFavorites();
+    } else {
+      validateDocuments();
     }
-
-    validateDocuments();
   }
 
   private void intersectFavorites() {
@@ -314,14 +319,21 @@ public class Processor {
         List<String> remove = new ArrayList<>(memory);
         remove.removeAll(api);
 
+        List<String> add = new ArrayList<>(api);
+        add.removeAll(memory);
+
         Timber.tag(TAG).d("memory favorites: %s", memory.size());
         Timber.tag(TAG).d("api favorites: %s", api.size());
         Timber.tag(TAG).d("remove favorites: %s", remove.size());
+
+        resetMd5(add);
 
         for (String uid : remove) {
           Timber.tag(TAG).d("Removing from favorites: %s", uid);
           updateAndDropFavorite( uid );
         }
+
+        validateDocuments();
 
         return Collections.singletonList("");
       })
@@ -368,11 +380,13 @@ public class Processor {
     }
   }
 
-  private void updateJob(String uid) {
+  private void updateJob(String uid, String md5) {
     if (documentType == DocumentType.DOCUMENT) {
       jobManager.addJobInBackground( new UpdateDocumentJob( uid, index, filter ) );
     } else {
-      jobManager.addJobInBackground( new UpdateDocumentJob( uid, documentType ) );
+      if ( Objects.equals( md5, "" ) ) {
+        jobManager.addJobInBackground( new UpdateDocumentJob( uid, documentType ) );
+      }
     }
   }
 

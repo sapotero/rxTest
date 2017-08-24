@@ -14,6 +14,10 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Set;
@@ -32,6 +36,7 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RLinks;
 import sapotero.rxtest.db.requery.models.RLinksEntity;
+import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.activities.InfoNoMenuActivity;
 import sapotero.rxtest.views.adapters.LinkAdapter;
@@ -65,6 +70,8 @@ public class InfoCardLinksFragment extends Fragment {
     EsdApplication.getDataComponent().inject( this );
     ButterKnife.bind(this, view);
 
+    initEvents();
+
     view.setOnTouchListener( new OnSwipeTouchListener( getContext() ) );
 
     return view;
@@ -93,6 +100,9 @@ public class InfoCardLinksFragment extends Fragment {
 
   private void loadSettings() {
     Timber.e( " loadSettings");
+
+    adapter.clear();
+    webview.loadUrl("about:blank");
 
     adapter.add( new Link( "0", "Нет связанных документов" ) );
 
@@ -208,5 +218,31 @@ public class InfoCardLinksFragment extends Fragment {
   public Fragment withUid(String uid) {
     this.uid = uid;
     return this;
+  }
+
+  private void initEvents() {
+    Timber.tag(TAG).v("initEvents");
+    unregisterEventBus();
+    EventBus.getDefault().register(this);
+  }
+
+  private void unregisterEventBus() {
+    if (EventBus.getDefault().isRegistered(this)) {
+      EventBus.getDefault().unregister(this);
+    }
+  }
+
+  @Override
+  public void onDestroy(){
+    super.onDestroy();
+    unregisterEventBus();
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(UpdateCurrentDocumentEvent event) throws Exception {
+    Timber.tag(TAG).w("UpdateCurrentDocumentEvent %s", event.uid);
+    if (Objects.equals(event.uid, uid != null ? uid : settings.getUid())) {
+      loadSettings();
+    }
   }
 }
