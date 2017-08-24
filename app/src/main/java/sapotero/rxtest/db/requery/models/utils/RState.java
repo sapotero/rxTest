@@ -7,7 +7,7 @@ import io.requery.Entity;
 import io.requery.Generated;
 import io.requery.Key;
 
-// Хранит старое состояние документа перед сменой режима
+// Хранит старое состояние документов, принадлежащих нескольким пользователям, перед сменой режима
 @Entity
 public abstract class RState {
   @Key

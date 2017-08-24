@@ -13,6 +13,8 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.utils.RStateEntity;
 import timber.log.Timber;
 
+// resolved https://tasks.n-core.ru/browse/MVDESD-12618
+// Режим замещения
 
 // Сохраняет и восстанавливает состояние документа при входе и выходе из режима замещения
 public class DocumentStateSaver {
@@ -23,6 +25,11 @@ public class DocumentStateSaver {
     EsdApplication.getDataComponent().inject(this);
   }
 
+  // Если документа нет в памяти, но он есть в базе и пользователь не равен текущему, то:
+  // 1. Сохраняем состояние документа с тем логином, который в документе
+  // 2. Очищаем состояние документа
+  // 3. Сохраняем состояние документа с текущим логином
+  // (нужно, чтобы для этого документа было сохранено состояние при обратном переключении режима)
   public void saveDocumentState(RDocumentEntity doc, String currentLogin, String TAG) {
     createUpdateDocumentStateForLogin( doc, doc.getUser(), TAG );
     dropDocumentState( doc );
@@ -98,6 +105,9 @@ public class DocumentStateSaver {
     stateEntity.setAgain( doc.isAgain() );
   }
 
+  // При переключении режима:
+  // 1. Сохраняем состояние документа для логина, из режима которого выходим
+  // 2. Восстанавливаем состояние документа для логина, в режим которого входим
   public void saveRestoreDocumentStates(String currentLogin, String previousLogin, String TAG) {
     saveDocumentStates( previousLogin, TAG );
     restoreDocumentStates( currentLogin, TAG );

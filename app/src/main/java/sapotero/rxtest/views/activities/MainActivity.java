@@ -826,8 +826,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
               initJournalSelectionPosition();
 
-              new DocumentStateSaver().saveRestoreDocumentStates( settings.getLogin(), settings.getOldLogin(), TAG );
-              store.clear();
+              switchDocuments();
 
               dataLoader.initV2( true );
 
@@ -844,6 +843,13 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     } else {
       Toast.makeText(this, "Невозможно войти в режим замещения в оффлайне", Toast.LENGTH_SHORT).show();
     }
+  }
+
+  private void switchDocuments() {
+    // Сначала сохраняем/восстанавливаем состояние тех документов, которые имеются у обоих пользователей,
+    // затем перезагружаем MemoryStore
+    new DocumentStateSaver().saveRestoreDocumentStates( settings.getLogin(), settings.getOldLogin(), TAG );
+    store.clear();
   }
 
   private void initJournalSelectionPosition() {
@@ -1049,8 +1055,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     if ( exitFromSubstituteModeStarted ) {
       Timber.tag(TAG).i("ReceivedTokenEvent");
       exitFromSubstituteModeStarted = false;
-      new DocumentStateSaver().saveRestoreDocumentStates( settings.getLogin(), settings.getOldLogin(), TAG );
-      store.clear();
+      switchDocuments();
     } else {
       updateByStatus();
     }
