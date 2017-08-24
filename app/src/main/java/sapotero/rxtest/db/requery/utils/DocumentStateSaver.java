@@ -51,7 +51,7 @@ public class DocumentStateSaver {
     } else {
       stateEntity = new RStateEntity();
       stateEntity.setUid( doc.getUid() );
-      stateEntity.setUser( doc.getUser() );
+      stateEntity.setUser( login );
       saveFields( stateEntity, doc );
       dataStore
         .insert( stateEntity )
