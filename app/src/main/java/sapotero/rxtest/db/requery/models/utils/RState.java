@@ -18,4 +18,13 @@ public abstract class RState {
   String user;
   String filter;
   String documentType;
+  Boolean control;
+  Boolean favorites;
+  Boolean processed;
+  Boolean fromProcessedFolder;
+  Boolean fromFavoritesFolder;
+  Boolean fromLinks;
+  Boolean returned;
+  Boolean rejected;
+  Boolean again;
 }

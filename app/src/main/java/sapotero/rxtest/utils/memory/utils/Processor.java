@@ -22,6 +22,7 @@ import rx.subjects.PublishSubject;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Deleter;
+import sapotero.rxtest.db.requery.utils.DocumentStateSaver;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.jobs.bus.CreateDocumentsJob;
@@ -267,7 +268,7 @@ public class Processor {
       InMemoryDocument documentInMemory = store.getDocuments().get( uid );
 
       if ( documentInMemory != null ) {
-        if ( documentInMemory.isProcessed() ) {
+        if ( documentInMemory.isProcessed() || documentType == DocumentType.FAVORITE ) {
           // Для тех документов, которые надо добавить во вкладку, если они есть в памяти,
           // сбрасываем MD5, чтобы далее для их обновления была вызвана UpdateDocumentJob.
           documentInMemory.setMd5("");
@@ -280,14 +281,13 @@ public class Processor {
           .where(RDocumentEntity.UID.eq(uid))
           .get().firstOrNull();
 
-        if ( documentInDb != null ) {
-          // Если их нет в памяти, но они есть в базе, то добавляем в память и
-          // сбрасываем MD5, чтобы далее для их обновления была вызвана UpdateDocumentJob.
+        if ( documentInDb != null && !Objects.equals( documentInDb.getUser(), settings.getLogin() ) ) {
+          // Если их нет в памяти, но они есть в базе и пользователь не равен текущему, то сохраняем состояние документов,
+          // добавляем их память и сбрасываем MD5, чтобы далее для их обновления была вызвана UpdateDocumentJob.
           // (Нужно для перехода в режим замещения и обратно,
           // когда один и тот же документ присутсвует у обоих пользователей)
 
-          // TODO: сохраняем состояние документа и его userа
-
+          new DocumentStateSaver().saveDocumentState( documentInDb, settings.getLogin(), TAG );
           documentInMemory = InMemoryDocumentMapper.fromDB( documentInDb );
           documentInMemory.setMd5("");
           store.getDocuments().put( uid, documentInMemory );

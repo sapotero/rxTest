@@ -12,6 +12,7 @@ import sapotero.rxtest.db.mapper.PrimaryConsiderationMapper;
 import sapotero.rxtest.db.mapper.TemplateMapper;
 import sapotero.rxtest.db.mapper.utils.MappersModule;
 import sapotero.rxtest.db.requery.utils.Deleter;
+import sapotero.rxtest.db.requery.utils.DocumentStateSaver;
 import sapotero.rxtest.db.requery.utils.RequeryDbModule;
 import sapotero.rxtest.db.requery.utils.validation.ValidationModule;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -85,6 +86,7 @@ public interface DataComponent {
   void inject(DecisionManager decisionManager);
 
   void inject(Deleter deleter);
+  void inject(DocumentStateSaver documentStateSaver);
 
   void inject(OrganizationSpinner organizationSpinner);
 

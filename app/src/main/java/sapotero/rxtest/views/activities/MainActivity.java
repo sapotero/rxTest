@@ -60,6 +60,7 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RColleagueEntity;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.query.DBQueryBuilder;
+import sapotero.rxtest.db.requery.utils.DocumentStateSaver;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.adapter.JournalSelectorIndexEvent;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
@@ -825,6 +826,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
               initJournalSelectionPosition();
 
+              new DocumentStateSaver().saveRestoreDocumentStates( settings.getLogin(), settings.getOldLogin(), TAG );
               store.clear();
 
               dataLoader.initV2( true );
@@ -1047,6 +1049,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     if ( exitFromSubstituteModeStarted ) {
       Timber.tag(TAG).i("ReceivedTokenEvent");
       exitFromSubstituteModeStarted = false;
+      new DocumentStateSaver().saveRestoreDocumentStates( settings.getLogin(), settings.getOldLogin(), TAG );
       store.clear();
     } else {
       updateByStatus();
