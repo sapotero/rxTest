@@ -16,6 +16,7 @@ import sapotero.rxtest.events.utils.RecalculateMenuEvent;
 import sapotero.rxtest.events.view.ShowSnackEvent;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.managers.menu.utils.DateUtil;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import timber.log.Timber;
@@ -59,6 +60,9 @@ public abstract class SharedCommand extends AbstractCommand {
   private void onControlLabelSuccess(Command command, OperationResult result, RDocumentEntity doc, String TAG) {
     printLog( result, TAG );
 
+    String timeNow = DateUtil.getTimestamp();
+    Timber.tag("++").d("DateUtil: timestamp: %s | valid: %s", timeNow, DateUtil.isSomeTimePassed( timeNow ) );
+
     if ( Objects.equals(result.getType(), "danger") && result.getMessage() != null){
       EventBus.getDefault().post( new ShowSnackEvent( result.getMessage() ));
 
@@ -75,6 +79,9 @@ public abstract class SharedCommand extends AbstractCommand {
   }
 
   private void onFolderSuccess(Command command, OperationResult data, boolean recalculateMenu, String TAG) {
+
+
+
     printLog( data, TAG );
     checkMessage( command, data.getMessage(), recalculateMenu );
   }
