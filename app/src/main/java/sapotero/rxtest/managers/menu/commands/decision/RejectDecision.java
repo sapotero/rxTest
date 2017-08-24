@@ -15,6 +15,7 @@ import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
 import sapotero.rxtest.utils.memory.fields.FieldType;
 import sapotero.rxtest.utils.memory.fields.LabelType;
+import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import timber.log.Timber;
 
 public class RejectDecision extends DecisionCommand {
@@ -47,7 +48,13 @@ public class RejectDecision extends DecisionCommand {
       .where(RDecisionEntity.UID.eq( getParams().getDecisionId() ))
       .get().value();
 
-    if (Objects.equals(getParams().getDecisionModel().getSignerId(), getParams().getCurrentUserId())){
+    InMemoryDocument doc = store.getDocuments().get(getParams().getDocument());
+
+    if (doc != null) {
+      Timber.tag(TAG).d("++++++doc index: %s | status: %s", doc.getIndex(), doc.getFilter());
+    }
+
+    if ( Objects.equals(getParams().getDecisionModel().getSignerId(), getParams().getCurrentUserId()) || (doc != null && Objects.equals(doc.getFilter(), "primary_consideration")) ){
 
       String uid = getParams().getDocument();
 
