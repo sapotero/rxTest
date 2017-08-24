@@ -9,7 +9,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -104,7 +103,6 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   @Inject OperationManager operationManager;
 
   private ToolbarManager toolbarManager;
-  private OnFragmentInteractionListener mListener;
 
   @BindView(R.id.activity_info_decision_preview_head) LinearLayout preview_head;
   @BindView(R.id.activity_info_decision_preview_acition_wrapper) LinearLayout action_wrapper;
@@ -721,22 +719,6 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     unregisterEventBus();
   }
 
-  @Override
-  public void onAttach(Context context) {
-    super.onAttach(context);
-    if (context instanceof OnFragmentInteractionListener) {
-      mListener = (OnFragmentInteractionListener) context;
-    } else {
-      throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
-    }
-  }
-
-  @Override
-  public void onDetach() {
-    super.onDetach();
-    mListener = null;
-  }
-
   public InfoActivityDecisionPreviewFragment withUid(String uid) {
     this.uid = uid;
     return this;
@@ -745,10 +727,6 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   public InfoActivityDecisionPreviewFragment withEnableButtons(boolean buttonsEnabled) {
     this.buttonsEnabled = buttonsEnabled;
     return this;
-  }
-
-  public interface OnFragmentInteractionListener {
-    void onFragmentInteraction(Uri uri);
   }
 
   @OnClick(R.id.activity_info_button_magnifer)

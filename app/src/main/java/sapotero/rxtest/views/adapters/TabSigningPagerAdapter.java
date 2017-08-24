@@ -11,6 +11,7 @@ import sapotero.rxtest.views.fragments.InfoCardLinksFragment;
 public class TabSigningPagerAdapter extends FragmentPagerAdapter {
 
   private String uid;
+  private boolean withoutZoom = false;
 
   public TabSigningPagerAdapter(FragmentManager fragmentManager) {
     super(fragmentManager);
@@ -20,7 +21,7 @@ public class TabSigningPagerAdapter extends FragmentPagerAdapter {
   public Fragment getItem(int position) {
     switch (position) {
       case 0:
-        return new InfoCardDocumentsFragment().withUid(uid);
+        return new InfoCardDocumentsFragment().withUid(uid).withOutZoom(withoutZoom);
       case 1:
         return new InfoCardFieldsFragment().withUid(uid);
       case 2:
@@ -47,8 +48,11 @@ public class TabSigningPagerAdapter extends FragmentPagerAdapter {
     return 3;
   }
 
-
   public void withUid(String uid) {
     this.uid = uid;
+  }
+
+  public void withoutZoom(boolean bool) {
+    this.withoutZoom = bool;
   }
 }

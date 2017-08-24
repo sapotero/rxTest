@@ -16,10 +16,16 @@ public class DecisionTemplateRecyclerAdapter extends RecyclerView.Adapter<Decisi
 
   private final List<RTemplateEntity> mValues;
   private final DecisionTemplateFragment.OnListFragmentInteractionListener mListener;
+  private final DecisionTemplateFragment.TemplateType templateType;
 
-  public DecisionTemplateRecyclerAdapter(List<RTemplateEntity> items, DecisionTemplateFragment.OnListFragmentInteractionListener mListener) {
+  public DecisionTemplateRecyclerAdapter(
+          List<RTemplateEntity> items,
+          DecisionTemplateFragment.OnListFragmentInteractionListener mListener,
+          DecisionTemplateFragment.TemplateType templateType) {
+
     this.mValues = items;
     this.mListener = mListener;
+    this.templateType = templateType;
   }
 
   @Override
@@ -35,18 +41,11 @@ public class DecisionTemplateRecyclerAdapter extends RecyclerView.Adapter<Decisi
 
     if (item != null) {
       holder.mItem = item;
-//      holder.mIdView.setText(item.getType());
       holder.mContentView.setText(item.getTitle());
-
-//      holder.mView.setOnClickListener(v -> {
-//        if (null != mListener) {
-//          mListener.onListFragmentInteraction(holder.mItem);
-//        }
-//      });
 
       holder.mView.setOnLongClickListener(view -> {
         if (null != mListener) {
-          mListener.onListFragmentInteraction(holder.mItem);
+          mListener.onListFragmentInteraction(holder.mItem, templateType);
         }
         return false;
       });
@@ -59,7 +58,7 @@ public class DecisionTemplateRecyclerAdapter extends RecyclerView.Adapter<Decisi
     return mValues.size();
   }
 
-  public void addItem(RTemplateEntity tmp) {
+  private void addItem(RTemplateEntity tmp) {
     mValues.add(tmp);
     notifyItemInserted(mValues.size());
   }
@@ -76,13 +75,11 @@ public class DecisionTemplateRecyclerAdapter extends RecyclerView.Adapter<Decisi
   public class ViewHolder extends RecyclerView.ViewHolder {
     RTemplateEntity mItem;
     final View mView;
-//    final TextView mIdView;
     final TextView mContentView;
 
     public ViewHolder(View view) {
       super(view);
       mView = view;
-//      mIdView = (TextView) view.findViewById(R.id.id);
       mContentView = (TextView) view.findViewById(R.id.content);
     }
 

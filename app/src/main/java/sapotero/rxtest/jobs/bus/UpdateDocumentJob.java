@@ -13,24 +13,13 @@ import java.util.Objects;
 
 import sapotero.rxtest.db.mapper.DocumentMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.models.RLinksEntity;
 import sapotero.rxtest.db.requery.models.RRouteEntity;
 import sapotero.rxtest.db.requery.models.RSignerEntity;
-import sapotero.rxtest.db.requery.models.RStepEntity;
-import sapotero.rxtest.db.requery.models.actions.RActionEntity;
-import sapotero.rxtest.db.requery.models.control_labels.RControlLabelsEntity;
-import sapotero.rxtest.db.requery.models.decisions.RBlock;
-import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
-import sapotero.rxtest.db.requery.models.decisions.RDecision;
-import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
-import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
-import sapotero.rxtest.db.requery.models.exemplars.RExemplarEntity;
-import sapotero.rxtest.db.requery.models.images.RImageEntity;
+import sapotero.rxtest.db.requery.models.utils.RReturnedRejectedAgainEntity;
 import sapotero.rxtest.db.requery.utils.Deleter;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
 import sapotero.rxtest.utils.memory.fields.DocumentType;
-import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import timber.log.Timber;
 
 // Updates ordinary documents, projects, documents from favorite folder and documents from processed folder
@@ -206,10 +195,13 @@ public class UpdateDocumentJob extends DocumentJob {
           Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Set processed = false");
           documentExisting.setProcessed( false );
           documentExisting.setFromProcessedFolder( false );
+
+          setReturnedRejectedAgainLabel( documentExisting );
         }
 
         if ( forceProcessed ) {
           Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Set processed = true");
+          clearReturnedRejectedAgainLabels( documentExisting );
           documentExisting.setProcessed( true );
         }
 
@@ -240,6 +232,33 @@ public class UpdateDocumentJob extends DocumentJob {
     } else {
       Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Document has Sync label, quit updating in DB");
     }
+  }
+
+  private void setReturnedRejectedAgainLabel(RDocumentEntity documentExisting) {
+    clearReturnedRejectedAgainLabels( documentExisting );
+
+    RReturnedRejectedAgainEntity returnedRejectedAgainEntity = dataStore
+      .select( RReturnedRejectedAgainEntity.class )
+      .where( RReturnedRejectedAgainEntity.DOCUMENT_UID.eq( documentExisting.getUid() ) )
+      .and( RReturnedRejectedAgainEntity.USER.eq( settings.getLogin() ) )
+      .get().firstOrNull();
+
+    if ( returnedRejectedAgainEntity != null && Objects.equals( documentExisting.getFilter(), returnedRejectedAgainEntity.getStatus() ) ) {
+      switch (returnedRejectedAgainEntity.getDocumentCondition()) {
+        case PROCESSED:
+          documentExisting.setReturned( true );
+          break;
+        case REJECTED:
+          documentExisting.setAgain( true );
+          break;
+      }
+    }
+  }
+
+  private void clearReturnedRejectedAgainLabels(RDocumentEntity documentExisting) {
+    documentExisting.setReturned( false );
+    documentExisting.setRejected( false );
+    documentExisting.setAgain( false );
   }
 
   @Override

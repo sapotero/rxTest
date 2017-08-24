@@ -73,6 +73,9 @@ public class Document implements Serializable {
   private transient boolean fromProcessedFolder = false;
   private transient boolean processed = false;
   private transient boolean isProject = false;
+  private transient boolean returned = false;
+  private transient boolean rejected = false;
+  private transient boolean again = false;
   private transient String firstLink = "";
 
   public boolean isProject() {
@@ -405,5 +408,29 @@ public class Document implements Serializable {
 
   public boolean isFromProcessedFolder() {
       return fromProcessedFolder;
+  }
+
+  public boolean isReturned() {
+    return returned;
+  }
+
+  public void setReturned(boolean returned) {
+    this.returned = returned;
+  }
+
+  public boolean isRejected() {
+    return rejected;
+  }
+
+  public void setRejected(boolean rejected) {
+    this.rejected = rejected;
+  }
+
+  public boolean isAgain() {
+    return again;
+  }
+
+  public void setAgain(boolean again) {
+    this.again = again;
   }
 }

@@ -1,7 +1,5 @@
 package sapotero.rxtest.views.fragments;
 
-import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -37,12 +35,6 @@ public class InfoCardFieldsFragment extends Fragment {
   @Inject ISettings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
-  private String TAG = this.getClass().getSimpleName();
-
-  private OnFragmentInteractionListener mListener;
-  private Context mContext;
-  private String document;
-
   @BindView(R.id.wrapper_field_created_at) LinearLayout wrapper_field_created_at;
   @BindView(R.id.wrapper_field_short_description) LinearLayout wrapper_field_short_description;
   @BindView(R.id.wrapper_field_urgency) LinearLayout wrapper_field_urgency;
@@ -55,19 +47,9 @@ public class InfoCardFieldsFragment extends Fragment {
   @BindView(R.id.field_comment) TextView field_comment;
   @BindView(R.id.field_external_number) TextView field_external_number;
   private String uid;
+  private String TAG = this.getClass().getSimpleName();
 
   public InfoCardFieldsFragment() {
-  }
-
-  public static InfoCardFieldsFragment newInstance(String param1, String param2) {
-    InfoCardFieldsFragment fragment = new InfoCardFieldsFragment();
-    return fragment;
-  }
-
-  @Override
-  public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-
   }
 
   @Override
@@ -84,13 +66,6 @@ public class InfoCardFieldsFragment extends Fragment {
 
     return view;
   }
-
-  public void onButtonPressed(Uri uri) {
-    if (mListener != null) {
-      mListener.onFragmentInteraction(uri);
-    }
-  }
-
 
   private void loadSettings() {
     dataStore
@@ -128,30 +103,10 @@ public class InfoCardFieldsFragment extends Fragment {
         }
       }, Timber::e);
   }
- @Override
-  public void onAttach(Context context) {
-    super.onAttach(context);
-    if (context instanceof OnFragmentInteractionListener) {
-      mListener = (OnFragmentInteractionListener) context;
-      mContext = context;
-    } else {
-      throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
-    }
-  }
-
-  @Override
-  public void onDetach() {
-    super.onDetach();
-    mListener = null;
-  }
 
   public Fragment withUid(String uid) {
     this.uid = uid;
     return this;
-  }
-
-  public interface OnFragmentInteractionListener {
-    void onFragmentInteraction(Uri uri);
   }
 
   private void initEvents() {

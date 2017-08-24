@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.List;
 import java.util.Objects;
 
 import retrofit2.Retrofit;
@@ -19,8 +20,6 @@ import sapotero.rxtest.retrofit.models.Template;
 import timber.log.Timber;
 
 public class CreateTemplate extends AbstractCommand {
-
-  private String TAG = this.getClass().getSimpleName();
 
   public CreateTemplate(CommandParams params) {
     super(params);
@@ -69,14 +68,9 @@ public class CreateTemplate extends AbstractCommand {
       .subscribe(
         data -> {
           queueManager.setExecutedRemote(this);
-
           insertTemplate(data);
         },
-        error -> {
-          if (callback != null){
-            callback.onCommandExecuteError(getType());
-          }
-        }
+        this::onOperationError
       );
   }
 
@@ -96,9 +90,12 @@ public class CreateTemplate extends AbstractCommand {
 
           EventBus.getDefault().post( new AddDecisionTemplateEvent() );
         },
-        error -> {
-          Timber.tag(TAG).e(error);
-        }
+        error -> Timber.tag(TAG).e(error)
       );
+  }
+
+  @Override
+  public void finishOnOperationError(List<String> errors) {
+    queueManager.setExecutedWithError( this, errors );
   }
 }

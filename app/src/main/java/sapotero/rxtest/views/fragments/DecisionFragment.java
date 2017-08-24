@@ -3,11 +3,9 @@ package sapotero.rxtest.views.fragments;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.speech.RecognizerIntent;
-import android.speech.SpeechRecognizer;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
@@ -46,7 +44,6 @@ import sapotero.rxtest.managers.view.builders.BlockFactory;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Performer;
-import sapotero.rxtest.retrofit.utils.OshsService;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.adapters.PrimaryConsiderationAdapter;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
@@ -84,14 +81,9 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   private static final long SPEECH_RECOGNITION_DELAY = 300L;
   protected String mQuery = null;
 
-  private OnFragmentInteractionListener mListener;
-
   private String TAG = this.getClass().getSimpleName();
   private Context mContext;
 
-  private String login;
-  private String token;
-  private OshsService oshsService;
   private int number;
   private Block block;
   private PrimaryConsiderationAdapter adapter;
@@ -101,7 +93,6 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
 
   public Callback callback;
   private BlockFactory blockFactory;
-  private SpeechRecognizer speechRecognizer;
   private boolean mSpeechRecognized = false;
   private int mSelection = -1;
 
@@ -142,10 +133,6 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   public DecisionFragment() {
   }
 
-  public static DecisionFragment newInstance() {
-    return new DecisionFragment();
-  }
-
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -164,8 +151,6 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     View view = inflater.inflate(R.layout.fragment_decision, container, false);
     ButterKnife.bind(this, view);
     EsdApplication.getDataComponent().inject( this );
-
-    loadSettings();
 
     speakButton.setOnClickListener(v -> {
       Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
@@ -407,10 +392,6 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     }
   }
 
-  public interface OnFragmentInteractionListener {
-    void onFragmentInteraction(Uri uri);
-  }
-
   public Block getBlock(){
     Block block = new Block();
 
@@ -462,11 +443,6 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     if (card_toolbar != null) {
       card_toolbar.setTitle("Блок " + number);
     }
-  }
-
-  private void loadSettings() {
-    login = settings.getLogin();
-    token = settings.getToken();
   }
 
   private void showAddOshsDialog() {
@@ -559,17 +535,6 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
   public void onAttach(Context context) {
     super.onAttach(context);
     mContext = context;
-    if (context instanceof OnFragmentInteractionListener) {
-      mListener = (OnFragmentInteractionListener) context;
-    } else {
-      throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
-    }
-  }
-
-  @Override
-  public void onDetach() {
-    super.onDetach();
-    mListener = null;
   }
 
   @Override

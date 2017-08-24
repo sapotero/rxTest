@@ -3,6 +3,7 @@ package sapotero.rxtest.managers.menu.commands.performance;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Retrofit;
 import rx.Observable;
@@ -17,8 +18,6 @@ import sapotero.rxtest.retrofit.models.OperationResult;
 import timber.log.Timber;
 
 public class ApprovalPerformance extends AbstractCommand {
-
-  private String TAG = this.getClass().getSimpleName();
 
   public ApprovalPerformance(CommandParams params) {
     super(params);
@@ -66,9 +65,7 @@ public class ApprovalPerformance extends AbstractCommand {
           queueManager.setExecutedRemote(this);
         },
         error -> {
-          if (callback != null){
-            callback.onCommandExecuteError(getType());
-          }
+          sendErrorCallback( getType() );
         }
       );
   }
@@ -83,9 +80,7 @@ public class ApprovalPerformance extends AbstractCommand {
       .get()
       .value();
 
-    if (callback != null){
-      callback.onCommandExecuteSuccess(getType());
-    }
+    sendErrorCallback( getType() );
 
     queueManager.setExecutedLocal(this);
   }
@@ -93,5 +88,9 @@ public class ApprovalPerformance extends AbstractCommand {
   @Override
   public String getType() {
     return "to_the_approval_performance";
+  }
+
+  @Override
+  public void finishOnOperationError(List<String> errors) {
   }
 }

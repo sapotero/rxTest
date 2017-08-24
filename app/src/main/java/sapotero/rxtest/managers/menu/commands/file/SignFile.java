@@ -1,6 +1,7 @@
 package sapotero.rxtest.managers.menu.commands.file;
 
 import java.util.Collections;
+import java.util.List;
 
 import okhttp3.RequestBody;
 import retrofit2.Retrofit;
@@ -15,8 +16,6 @@ import sapotero.rxtest.retrofit.ImagesService;
 import timber.log.Timber;
 
 public class SignFile extends AbstractCommand {
-
-  private String TAG = this.getClass().getSimpleName();
 
   public SignFile(CommandParams params) {
     super(params);
@@ -42,11 +41,7 @@ public class SignFile extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-
-    if (callback != null ){
-      callback.onCommandExecuteSuccess( getType() );
-    }
-
+    sendSuccessCallback();
     queueManager.setExecutedLocal(this);
     setAsProcessed();
   }
@@ -119,9 +114,7 @@ public class SignFile extends AbstractCommand {
   private void onError() {
     Timber.tag(TAG).i("Sign error");
 
-    if (callback != null) {
-      callback.onCommandExecuteError(getType());
-    }
+    sendErrorCallback( getType() );
 
     if ( settings.isOnline() ) {
       String errorMessage = "Ошибка подписания электронного образа";
@@ -186,5 +179,9 @@ public class SignFile extends AbstractCommand {
       .value();
 
     Timber.tag(TAG).i("Set sign task started = %s", value);
+  }
+
+  @Override
+  public void finishOnOperationError(List<String> errors) {
   }
 }

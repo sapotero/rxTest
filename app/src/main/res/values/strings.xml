@@ -209,7 +209,7 @@
     <string name="constructor_close">Закрыть</string>
     <string name="constructor_clear">Очистить</string>
     <string name="constructor_delete">Удалить</string>
-    <string name="wait_for_sync">Ожидает синхронизации</string>
+    <string name="wait_for_sync">Синхр.</string>
 
     <string name="menu_info_from_the_report">Возврата с доклада</string>
     <string name="return_to_the_primary_consideration">Отклонить</string>
@@ -476,6 +476,9 @@
     <string name="sign_as_current_user">Лично</string>
     <string name="favorites_text"> Избранное </string>
     <string name="control_text"> На контроле </string>
+    <string name="returned_text"> Возвращено </string>
+    <string name="rejected_text"> Отклонено </string>
+    <string name="again_text"> Повторно </string>
 
     <string name="primary_consideration_oshs_dialog_yes"> Передать документ </string>
     <string name="error_csp_not_installed"> Внимание! </string>

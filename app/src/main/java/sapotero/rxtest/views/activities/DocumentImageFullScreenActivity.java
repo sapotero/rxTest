@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
@@ -26,11 +25,9 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.utils.ISettings;
-import sapotero.rxtest.views.adapters.DocumentLinkAdapter;
 import sapotero.rxtest.views.fragments.InfoCardDocumentsFragment;
-import timber.log.Timber;
 
-public class DocumentImageFullScreenActivity extends AppCompatActivity implements InfoCardDocumentsFragment.OnFragmentInteractionListener {
+public class DocumentImageFullScreenActivity extends AppCompatActivity {
 
   @BindView(R.id.document_image_toolbar) Toolbar toolbar;
   @BindView(R.id.activity_document_image_full_screen_wrapper) FrameLayout wrapper;
@@ -39,12 +36,6 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity implement
 
   public static final String EXTRA_FILES_KEY = "files";
   public static final String EXTRA_INDEX_KEY = "index";
-
-  private String TAG = this.getClass().getSimpleName();
-
-  private ArrayList<Image> files = new ArrayList<Image>();
-  private DocumentLinkAdapter adapter;
-  private Integer index;
 
   private InfoCardDocumentsFragment fragment;
 
@@ -97,10 +88,5 @@ public class DocumentImageFullScreenActivity extends AppCompatActivity implement
 
   private void closeActivity() {
     finish();
-  }
-
-  @Override
-  public void onFragmentInteraction(Uri uri) {
-    Timber.tag(TAG).v(uri.toString());
   }
 }

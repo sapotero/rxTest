@@ -4,27 +4,20 @@ import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.util.Objects;
+import java.util.Collections;
+import java.util.List;
 
-import io.requery.query.Tuple;
 import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
-import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
+import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.DecisionCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
-import sapotero.rxtest.utils.memory.fields.FieldType;
-import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
 public class SaveAndApproveDecision extends DecisionCommand {
-
-  private String TAG = this.getClass().getSimpleName();
 
   public SaveAndApproveDecision(CommandParams params) {
     super(params);
@@ -36,10 +29,9 @@ public class SaveAndApproveDecision extends DecisionCommand {
 
   @Override
   public void execute() {
+    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
     queueManager.add(this);
     updateLocal();
-
-    setDocOperationStartedInMemory();
     setAsProcessed();
   }
 
@@ -50,57 +42,24 @@ public class SaveAndApproveDecision extends DecisionCommand {
 
   @Override
   public void executeLocal() {
-    if ( callback != null ){
-      callback.onCommandExecuteSuccess( getType() );
-    }
-
+    sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }
 
   private void updateLocal() {
     Timber.tag(TAG).e("updateLocal %s", new Gson().toJson( getParams() ));
 
-    Integer count = dataStore
-      .update(RDecisionEntity.class)
-      .set(RDecisionEntity.TEMPORARY, true)
-      .where(RDecisionEntity.UID.eq( getParams().getDecisionModel().getId() ))
-      .get().value();
+    setDecisionTemporary();
 
-    Timber.tag(TAG).i( "updateLocal: %s", count );
+    setChangedInDb();
 
-    Tuple red = dataStore
-      .select(RDecisionEntity.RED)
-      .where(RDecisionEntity.UID.eq(getParams().getDecisionModel().getId()))
-      .get().firstOrNull();
-
-    dataStore
-      .update(RDocumentEntity.class)
-      .set(RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq( getParams().getDocument() ))
-      .get()
-      .value();
-
-    Timber.tag(TAG).e("-------- %s %s", getParams().getDecisionModel().getSignerId(), getParams().getCurrentUserId());
-
-    if (
-      Objects.equals(getParams().getDecisionModel().getSignerId(), getParams().getCurrentUserId())
-        // или если подписывающий министр
-        || ( red != null && red.get(0).equals(true) )
-      ) {
-      dataStore
-        .update(RDocumentEntity.class)
-        .set(RDocumentEntity.PROCESSED, true)
-        .where(RDocumentEntity.UID.eq(  getParams().getDocument() ))
-        .get()
-        .value();
-
-      store.process(
-        store.startTransactionFor(  getParams().getDocument() )
-          .setLabel(LabelType.SYNC)
-          .setField(FieldType.PROCESSED, true)
-      );
-
+    if ( isActiveOrRed() ) {
+      startProcessedOperationInMemory();
+      startProcessedOperationInDb();
       EventBus.getDefault().post( new ShowNextDocumentEvent( true, getParams().getDocument() ));
+
+    } else {
+      setSyncLabelInMemory();
     }
 
     EventBus.getDefault().post( new InvalidateDecisionSpinnerEvent( getParams().getDecisionModel().getId() ));
@@ -118,21 +77,29 @@ public class SaveAndApproveDecision extends DecisionCommand {
 
     if ( sign != null ) {
       _decision.setSign( sign );
-
-      Observable<DecisionError> info = getDecisionUpdateOperationObservable(_decision, TAG);
-
-      info.subscribeOn( Schedulers.computation() )
-        .observeOn( AndroidSchedulers.mainThread() )
-        .subscribe(
-          data -> {
-            onSuccess( this, data, false, true, TAG );
-            finishOperationOnSuccess();
-          },
-          error -> onError( this, error.getLocalizedMessage(), true, TAG )
-        );
+      Observable<DecisionError> info = getDecisionUpdateOperationObservable(_decision);
+      sendDecisionOperationRequest( info );
 
     } else {
-      onError( this, SIGN_ERROR_MESSAGE, true, TAG );
+      sendErrorCallback( SIGN_ERROR_MESSAGE );
+      finishOnOperationError( Collections.singletonList( SIGN_ERROR_MESSAGE ) );
     }
+  }
+
+  @Override
+  public void finishOnDecisionSuccess(DecisionError data) {
+    if ( isActiveOrRed() ) {
+      finishProcessedOperationOnSuccess();
+    } else {
+      finishOperationOnSuccess();
+    }
+
+    checkCreatorAndSignerIsCurrentUser(data);
+  }
+
+  @Override
+  public void finishOnOperationError(List<String> errors) {
+    finishRejectedProcessedOperationOnError( errors );
+    EventBus.getDefault().post( new ForceUpdateDocumentEvent( getParams().getDocument() ));
   }
 }

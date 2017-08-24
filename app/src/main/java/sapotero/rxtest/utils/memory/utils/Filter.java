@@ -133,7 +133,7 @@ public class Filter {
   }
 
   public Boolean byYear(InMemoryDocument doc) {
-    return settings.getYears().contains( String.valueOf(doc.getYear()) );
+    return doc.getYear() == 0 || settings.getYears().contains(String.valueOf(doc.getYear()));
   }
 
   public Boolean isFavorites(InMemoryDocument doc) {

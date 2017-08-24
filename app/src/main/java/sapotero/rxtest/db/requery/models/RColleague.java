@@ -6,7 +6,7 @@ import io.requery.Index;
 import io.requery.Key;
 
 @Entity
-public class RColleague {
+public abstract class RColleague {
   @Key
   @Generated
   int id;
