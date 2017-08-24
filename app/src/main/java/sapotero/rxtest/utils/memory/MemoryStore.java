@@ -1,5 +1,7 @@
 package sapotero.rxtest.utils.memory;
 
+import com.google.gson.Gson;
+
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.HashMap;
@@ -90,7 +92,7 @@ public class MemoryStore implements Processable{
 
 
             if (doc.getUpdatedAt() != null){
-              Timber.tag(TAG).d(" * UPDATED_AT less than 5 minutes ago %s", doc.getUpdatedAt());
+              Timber.tag(TAG).d(" * doc %s", new Gson().toJson(doc) );
             }
 
 

@@ -392,8 +392,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   }
 
   public void invalidate() {
-    safeSetVisibility(R.id.menu_info_decision_edit, false);
-
     getFirstForLenovo();
 
     if (doc != null){
@@ -477,7 +475,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         clearToolbar();
       }
 
-
+      EventBus.getDefault().post( new CheckDecisionVisibilityEvent() );
 
     }
   }

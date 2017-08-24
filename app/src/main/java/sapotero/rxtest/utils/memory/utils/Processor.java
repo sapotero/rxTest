@@ -27,10 +27,12 @@ import sapotero.rxtest.jobs.bus.CreateFavoriteDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateProcessedDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateProjectsJob;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
+import sapotero.rxtest.managers.menu.utils.DateUtil;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.fields.DocumentType;
+import sapotero.rxtest.utils.memory.fields.FieldType;
 import sapotero.rxtest.utils.memory.fields.InMemoryState;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import sapotero.rxtest.utils.memory.mappers.InMemoryDocumentMapper;
@@ -136,6 +138,7 @@ public class Processor {
         Timber.w("process as db");
         transaction
           .from(InMemoryDocumentMapper.fromDB(document_from_db))
+          .setField(FieldType.UPDATED_AT, DateUtil.getTimestampEarly() )
           .setState(InMemoryState.READY);
 
         commit( transaction );
@@ -175,11 +178,9 @@ public class Processor {
     if ( store.getDocuments().keySet().contains( document.getUid() ) ){
       InMemoryDocument doc = store.getDocuments().get( document.getUid() );
 
-
-
-      Timber.tag(TAG).e("    * %s | %s", doc.getFilter(), filter);
-      if (doc.getUpdatedAt() != null){
-        Timber.tag(TAG).d("    * UPDATED_AT less than 5 minutes ago %s", doc.getUpdatedAt());
+      Timber.tag(TAG).e("    * %s | %s | %s", doc.getFilter(), filter, doc.getUpdatedAt());
+      if (doc.getUpdatedAt() != null) {
+        Timber.tag(TAG).e("    ** %s @ %s", doc.getUpdatedAt(), DateUtil.isSomeTimePassed(doc.getUpdatedAt()) );
       }
 
       // изменилось MD5
