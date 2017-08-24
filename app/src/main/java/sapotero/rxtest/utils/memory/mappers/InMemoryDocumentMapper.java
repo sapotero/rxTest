@@ -70,6 +70,7 @@ public class InMemoryDocumentMapper {
     doc.setProject(document.getRoute() != null && ((RRouteEntity) document.getRoute()).getSteps() != null && ((RRouteEntity) document.getRoute()).getSteps().size() > 0);
 
     imd.setUid( document.getUid() );
+    imd.setUpdatedAt( document.getUpdatedAt() );
     imd.setMd5( document.getMd5() );
     imd.setFilter(document.getFilter());
     imd.setIndex(document.getDocumentType());

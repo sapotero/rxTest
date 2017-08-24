@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
+import java.util.Objects;
 
 import rx.Observable;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
@@ -14,6 +15,7 @@ import sapotero.rxtest.managers.menu.commands.DecisionCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
+import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import timber.log.Timber;
 
 public class RejectDecision extends DecisionCommand {
@@ -35,11 +37,24 @@ public class RejectDecision extends DecisionCommand {
   }
 
   private void updateLocal() {
-    Timber.tag(TAG).e("1 updateLocal params%s", new Gson().toJson( getParams() ));
+    Timber.tag(TAG).e("1 updateLocal params%s", new Gson().toJson(getParams()));
 
     setDecisionChangedTemporary();
 
-    if ( signerIsCurrentUser() ) {
+    dataStore
+      .update(RDecisionEntity.class)
+      .set(RDecisionEntity.CHANGED, true)
+      .set(RDecisionEntity.TEMPORARY, true)
+      .where(RDecisionEntity.UID.eq(getParams().getDecisionId()))
+      .get().value();
+
+    InMemoryDocument doc = store.getDocuments().get(getParams().getDocument());
+
+    if (doc != null) {
+      Timber.tag(TAG).d("++++++doc index: %s | status: %s", doc.getIndex(), doc.getFilter());
+    }
+
+    if ( signerIsCurrentUser() || (doc != null && Objects.equals(doc.getFilter(), "primary_consideration"))) {
       startRejectedOperationInMemory();
       startRejectedOperationInDb();
     } else {
