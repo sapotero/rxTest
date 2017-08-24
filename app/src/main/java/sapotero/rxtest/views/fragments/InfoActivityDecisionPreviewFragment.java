@@ -552,19 +552,19 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     // resolved https://tasks.n-core.ru/browse/MVDESD-13423
     //  Отображать информацию от кого поступила резолюция
     updateActionText(true);
-
-    if (
-        current_decision.isApproved() != null && current_decision.isApproved()
-        || doc.isProcessed() != null && doc.isProcessed()
-      ){
-      if ( toolbarManager != null ) {
-        toolbarManager.setEditDecisionMenuItemVisible(false);
-      }
-    } else {
-      if ( toolbarManager != null ) {
-        toolbarManager.setEditDecisionMenuItemVisible(true);
-      }
-    }
+//
+//    if (
+//        current_decision.isApproved() != null && current_decision.isApproved()
+//        || doc.isProcessed() != null && doc.isProcessed()
+//      ){
+//      if ( toolbarManager != null ) {
+//        toolbarManager.setEditDecisionMenuItemVisible(false);
+//      }
+//    } else {
+//      if ( toolbarManager != null ) {
+//        toolbarManager.setEditDecisionMenuItemVisible(true);
+//      }
+//    }
 
   }
 
@@ -1355,6 +1355,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(CheckDecisionVisibilityEvent event) throws Exception {
+    current_decision = decision_spinner_adapter.getItem(decision_spinner.getSelectedItemPosition()).getDecision();
     EventBus.getDefault().post( new DecisionVisibilityEvent( current_decision.isApproved() ) );
   }
 

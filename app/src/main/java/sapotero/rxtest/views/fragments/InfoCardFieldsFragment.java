@@ -47,7 +47,6 @@ public class InfoCardFieldsFragment extends Fragment {
   @BindView(R.id.field_comment) TextView field_comment;
   @BindView(R.id.field_external_number) TextView field_external_number;
   private String uid;
-
   private String TAG = this.getClass().getSimpleName();
 
   public InfoCardFieldsFragment() {

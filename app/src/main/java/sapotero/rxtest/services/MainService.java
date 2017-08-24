@@ -50,7 +50,6 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.auth.AuthDcCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthDcCheckSuccessEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
@@ -66,7 +65,6 @@ import sapotero.rxtest.events.crypto.SignDataEvent;
 import sapotero.rxtest.events.crypto.SignDataResultEvent;
 import sapotero.rxtest.events.crypto.SignDataWrongPinEvent;
 import sapotero.rxtest.events.decision.SignAfterCreateEvent;
-import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.service.AuthServiceAuthEvent;
 import sapotero.rxtest.events.service.CheckNetworkEvent;
@@ -804,19 +802,6 @@ public class MainService extends Service {
     Timber.tag(TAG).e("UpdateDocumentsByStatusEvent");
     dataLoaderInterface.updateByCurrentStatus( event.item, event.button, false);
   }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(ForceUpdateDocumentEvent event){
-    Timber.tag(TAG).e("ForceUpdateDocumentEvent");
-
-    int count = dataStore.update(RDocumentEntity.class)
-      .set(RDocumentEntity.MD5, "")
-      .where(RDocumentEntity.UID.eq(event.uid))
-      .get()
-      .value();
-    Timber.tag(TAG).e("updated: %s", count);
-  }
-
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13017
   // При первом запуске выгружаем все избранные с ЭО
