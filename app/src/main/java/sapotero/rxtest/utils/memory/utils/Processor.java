@@ -264,7 +264,7 @@ public class Processor {
     // сбрасываем MD5, чтобы далее для их обновления была вызвана UpdateDocumentJob.
     for (String uid : add) {
       InMemoryDocument documentInMemory = store.getDocuments().get( uid );
-      if ( documentInMemory != null ) {
+      if ( documentInMemory != null && documentInMemory.isProcessed()  ) {
         documentInMemory.setMd5("");
         store.getDocuments().put( uid, documentInMemory );
       }

@@ -44,6 +44,7 @@ import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.utils.ISettings;
+import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
 import timber.log.Timber;
@@ -53,6 +54,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject ISettings settings;
   @Inject OperationManager operationManager;
+  @Inject MemoryStore store;
+
 
   private final String TAG = this.getClass().getSimpleName();
 
@@ -924,10 +927,14 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(DecisionVisibilityEvent event){
-    Timber.tag(TAG).e("DecisionVisibilityEvent %s", event.approved);
+    Timber.tag(TAG).e("DecisionVisibilityEvent %s | %s", event.approved, store.getDocuments().get( settings.getUid() ).isProcessed());
 
     if ( event.approved != null ) {
       setEditDecisionMenuItemVisible(!event.approved);
+    }
+
+    if ( store.getDocuments().get( settings.getUid() ).isProcessed() ){
+      setEditDecisionMenuItemVisible(false);
     }
 
     registerEvents();
