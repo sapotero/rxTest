@@ -21,7 +21,7 @@ import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import timber.log.Timber;
 
-public abstract class SharedCommand extends AbstractCommand {
+public abstract class SharedCommand extends OperationResultCommand {
 
   public SharedCommand(CommandParams params) {
     super(params);
@@ -57,36 +57,34 @@ public abstract class SharedCommand extends AbstractCommand {
 
   protected abstract void setSuccess();
 
-  private void onControlLabelSuccess(Command command, OperationResult result, RDocumentEntity doc, String TAG) {
-    printLog( result, TAG );
+  private void onControlLabelSuccess(OperationResult result, RDocumentEntity doc) {
 
     String timeNow = DateUtil.getTimestamp();
     Timber.tag("++").d("DateUtil: timestamp: %s | valid: %s", timeNow, DateUtil.isSomeTimePassed( timeNow ) );
 
+
     if ( Objects.equals(result.getType(), "danger") && result.getMessage() != null){
+      printOperationResult( result );
+
       EventBus.getDefault().post( new ShowSnackEvent( result.getMessage() ));
 
       if (doc != null) {
         EventBus.getDefault().post( new DropControlEvent( doc.isControl() ));
       }
 
-      queueManager.setExecutedWithError( command, Collections.singletonList( result.getMessage() ) );
-      setError();
+      finishOnOperationError( Collections.singletonList( result.getMessage() ) );
 
     } else {
-      checkMessage( command, result.getMessage(), false );
+      onOperationSuccess( result );
     }
   }
 
   private void onFolderSuccess(Command command, OperationResult data, boolean recalculateMenu, String TAG) {
-
-
-
-    printLog( data, TAG );
     checkMessage( command, data.getMessage(), recalculateMenu );
   }
 
-  private Observable<OperationResult> getOperationResultObservable() {
+  protected Observable<OperationResult> getOperationResultObservable() {
+
     Retrofit retrofit = getOperationsRetrofit();
 
     OperationService operationService = retrofit.create( OperationService.class );
@@ -108,21 +106,8 @@ public abstract class SharedCommand extends AbstractCommand {
     );
   }
 
-  protected void remoteFolderOperation(Command command, boolean recalculateMenu, String TAG) {
-    printCommandType( command, TAG );
-
-    Observable<OperationResult> info = getOperationResultObservable();
-
-    info.subscribeOn( Schedulers.computation() )
-      .observeOn( AndroidSchedulers.mainThread() )
-      .subscribe(
-        data -> onFolderSuccess( command, data, recalculateMenu, TAG ),
-        error -> onError( command, error.getLocalizedMessage() )
-      );
-  }
-
-  protected void remoteControlLabelOperation(Command command, String TAG) {
-    printCommandType( command, TAG );
+  protected void remoteControlLabelOperation() {
+    printCommandType();
 
     Observable<OperationResult> info = getOperationResultObservable();
 
@@ -134,8 +119,8 @@ public abstract class SharedCommand extends AbstractCommand {
     info.subscribeOn( Schedulers.computation() )
       .observeOn( AndroidSchedulers.mainThread() )
       .subscribe(
-        result -> onControlLabelSuccess( command, result, doc, TAG ),
-        error -> onError( command, error.getLocalizedMessage() )
+        result -> onControlLabelSuccess( result, doc ),
+        this::onOperationError
       );
   }
 }

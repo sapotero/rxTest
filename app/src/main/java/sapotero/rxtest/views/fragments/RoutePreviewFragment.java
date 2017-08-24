@@ -3,7 +3,6 @@ package sapotero.rxtest.views.fragments;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -69,11 +68,9 @@ public class RoutePreviewFragment extends Fragment {
   private String uid;
 
   private State state;
-  private ArrayList<ItemBuilder> views = new ArrayList<>();
 
   private ImageButton button;
 
-  private OnFragmentInteractionListener mListener;
   private FrameLayout card;
   private FrameLayout frame;
 
@@ -196,22 +193,6 @@ public class RoutePreviewFragment extends Fragment {
 
   }
 
-  @Override
-  public void onAttach(Context context) {
-    super.onAttach(context);
-    if (context instanceof OnFragmentInteractionListener) {
-      mListener = (OnFragmentInteractionListener) context;
-    } else {
-      throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
-    }
-  }
-
-  @Override
-  public void onDetach() {
-    super.onDetach();
-    mListener = null;
-  }
-
   public Fragment withUid(String uid) {
     this.uid = uid;
     return this;
@@ -219,11 +200,6 @@ public class RoutePreviewFragment extends Fragment {
 
   private String getUid() {
     return uid == null ? settings.getUid() : uid ;
-  }
-
-  public interface OnFragmentInteractionListener {
-    void onFragmentInteraction(Uri uri);
-
   }
 
   @Override

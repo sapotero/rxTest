@@ -2,7 +2,6 @@ package sapotero.rxtest.views.activities;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
@@ -31,7 +30,6 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -62,21 +60,16 @@ import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentInfoActivityEvent;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.managers.toolbar.ToolbarManager;
-import sapotero.rxtest.services.task.UpdateCurrentDocumentTask;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.adapters.TabSigningPagerAdapter;
 import sapotero.rxtest.views.fragments.InfoActivityDecisionPreviewFragment;
-import sapotero.rxtest.views.fragments.InfoCardDocumentsFragment;
-import sapotero.rxtest.views.fragments.InfoCardFieldsFragment;
-import sapotero.rxtest.views.fragments.InfoCardLinksFragment;
-import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
 import sapotero.rxtest.views.fragments.RoutePreviewFragment;
 import timber.log.Timber;
 
-public class InfoActivity extends AppCompatActivity implements InfoActivityDecisionPreviewFragment.OnFragmentInteractionListener, RoutePreviewFragment.OnFragmentInteractionListener, InfoCardDocumentsFragment.OnFragmentInteractionListener, InfoCardWebViewFragment.OnFragmentInteractionListener, InfoCardLinksFragment.OnFragmentInteractionListener, InfoCardFieldsFragment.OnFragmentInteractionListener{
+public class InfoActivity extends AppCompatActivity {
 
   @BindView(R.id.activity_info_preview_container) LinearLayout preview_container;
   @BindView(R.id.frame_preview_decision) FrameLayout frame;
@@ -98,9 +91,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   private String TAG = this.getClass().getSimpleName();
   private CompositeSubscription subscription;
   private ToolbarManager toolbarManager;
-  private Fields.Journal journal;
   private Fields.Status  status;
-  private ScheduledThreadPoolExecutor scheduller;
 
   private List<String> documentUids;
 
@@ -142,11 +133,9 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     setLastSeen();
 
     status  = Fields.Status.findStatus( settings.getStatusCode() );
-    journal = Fields.getJournalByUid( settings.getUid() );
 
     setTabContent();
     setPreview();
-
   }
 
   private void setTabContent() {
@@ -285,10 +274,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
       EventBus.getDefault().unregister(this);
     }
 
-    if (scheduller != null){
-      scheduller.shutdown();
-    }
-
     unsubscribe();
 
     finish();
@@ -304,12 +289,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   public void setLastSeen(){
     settings.setLastSeenUid( settings.getUid() );
   }
-
-
-  @Override
-  public void onFragmentInteraction(Uri uri) {
-  }
-
 
   @Override
   protected void onResume() {
@@ -347,11 +326,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     } catch (Exception e) {
       e.printStackTrace();
     }
-  }
-
-  private void startThreadedUpdate() {
-    scheduller = new ScheduledThreadPoolExecutor(1);
-    scheduller.scheduleWithFixedDelay( new UpdateCurrentDocumentTask(settings.getUid()), 0 ,5, TimeUnit.SECONDS );
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)

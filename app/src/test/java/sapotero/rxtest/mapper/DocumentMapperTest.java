@@ -219,6 +219,9 @@ public class DocumentMapperTest {
     assertEquals( false, entity.isChanged() );
     assertEquals( true, entity.isWithDecision() );
     assertEquals( false, entity.isRed() );
+    assertEquals( false, entity.isReturned() );
+    assertEquals( false, entity.isRejected() );
+    assertEquals( false, entity.isAgain() );
 
     assertEquals( dummyDoc.getInfoCard(), entity.getInfoCard() );
 

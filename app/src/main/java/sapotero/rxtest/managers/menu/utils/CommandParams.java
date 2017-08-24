@@ -28,6 +28,9 @@ public class CommandParams implements Serializable {
   private String uuid;
   private String label;
 
+  private boolean returnedOldValue;
+  private boolean againOldValue;
+
   public CommandParams() {
     EsdApplication.getDataComponent().inject(this);
 
@@ -149,5 +152,21 @@ public class CommandParams implements Serializable {
 
   public void setLabel(String label) {
     this.label = label;
+  }
+
+  public boolean getReturnedOldValue() {
+    return returnedOldValue;
+  }
+
+  public void setReturnedOldValue(boolean returnedOldValue) {
+    this.returnedOldValue = returnedOldValue;
+  }
+
+  public boolean getAgainOldValue() {
+    return againOldValue;
+  }
+
+  public void setAgainOldValue(boolean againOldValue) {
+    this.againOldValue = againOldValue;
   }
 }

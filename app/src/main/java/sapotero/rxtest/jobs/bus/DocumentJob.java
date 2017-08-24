@@ -19,7 +19,6 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.mapper.DocumentMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.db.requery.utils.Deleter;
@@ -114,7 +113,7 @@ abstract class DocumentJob extends BaseJob {
     RDocumentEntity existingDoc =
       dataStore
         .select(RDocumentEntity.class)
-        .where(RDecisionEntity.UID.eq( documentToSave.getUid() ))
+        .where(RDocumentEntity.UID.eq( documentToSave.getUid() ))
         .get().firstOrNull();
 
     if ( isLink ) {

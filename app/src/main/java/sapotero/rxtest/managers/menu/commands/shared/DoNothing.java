@@ -1,5 +1,7 @@
 package sapotero.rxtest.managers.menu.commands.shared;
 
+import java.util.List;
+
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 
@@ -36,5 +38,9 @@ public class DoNothing extends AbstractCommand {
   private void update() {
     queueManager.setExecutedLocal(this);
     queueManager.setExecutedRemote(this);
+  }
+
+  @Override
+  public void finishOnOperationError(List<String> errors) {
   }
 }

@@ -5,14 +5,16 @@ import com.google.gson.Gson;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.Collections;
+import java.util.List;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.mapper.BlockMapper;
-import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
+import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
+import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.managers.menu.commands.DecisionCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -22,8 +24,6 @@ import sapotero.rxtest.retrofit.models.v2.DecisionError;
 import timber.log.Timber;
 
 public class SaveDecision extends DecisionCommand {
-
-  private String TAG = this.getClass().getSimpleName();
 
   public SaveDecision(CommandParams params) {
     super(params);
@@ -37,16 +37,11 @@ public class SaveDecision extends DecisionCommand {
   public void execute() {
     // resolved https://tasks.n-core.ru/browse/MVDESD-13366
     // ставим плашку всегда
-    dataStore
-      .update(RDocumentEntity.class)
-      .set(RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq( getParams().getDocument() ))
-      .get()
-      .value();
+    setChangedInDb();
 
     update();
 
-    setDocOperationStartedInMemory();
+    setSyncLabelInMemory();
     setAsProcessed();
   }
 
@@ -57,10 +52,7 @@ public class SaveDecision extends DecisionCommand {
 
   @Override
   public void executeLocal() {
-    if ( callback != null ){
-      callback.onCommandExecuteSuccess( getType() );
-    }
-
+    sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }
 
@@ -128,16 +120,20 @@ public class SaveDecision extends DecisionCommand {
     Decision _decision = getParams().getDecisionModel();
     _decision.setDocumentUid( null );
 
-    Observable<DecisionError> info = getDecisionUpdateOperationObservable(_decision, TAG);
+    Observable<DecisionError> info = getDecisionUpdateOperationObservable(_decision);
+    sendDecisionOperationRequest( info );
+  }
 
-    info.subscribeOn( Schedulers.computation() )
-      .observeOn( AndroidSchedulers.mainThread() )
-      .subscribe(
-        data -> {
-          onSuccess( this, data, false, true, TAG );
-          finishOperationOnSuccess();
-        },
-        error -> onError( this, error.getLocalizedMessage(), true, TAG )
-      );
+  @Override
+  public void finishOnDecisionSuccess(DecisionError data) {
+    finishOperationOnSuccess();
+    checkCreatorAndSignerIsCurrentUser(data);
+    EventBus.getDefault().post( new UpdateDocumentEvent( data.getDocumentUid() ));
+  }
+
+  @Override
+  public void finishOnOperationError(List<String> errors) {
+    finishOperationOnError( errors );
+    EventBus.getDefault().post( new ForceUpdateDocumentEvent( getParams().getDocument() ));
   }
 }

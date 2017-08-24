@@ -2,7 +2,6 @@ package sapotero.rxtest.views.fragments;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Base64;
@@ -55,36 +54,18 @@ public class InfoCardLinksFragment extends Fragment {
   @BindView(R.id.go) Button goButton;
   @BindView(R.id.fragment_info_card_link_disable) TextView disable;
 
-
   private String TAG = this.getClass().getSimpleName();
 
-  private OnFragmentInteractionListener mListener;
   private Context mContext;
-  private String document;
   private String uid;
   private LinkAdapter adapter;
 
   public InfoCardLinksFragment() {
   }
 
-  public static InfoCardLinksFragment newInstance(String param1, String param2) {
-    InfoCardLinksFragment fragment = new InfoCardLinksFragment();
-    return fragment;
-  }
-
-  @Override
-  public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-
-    Timber.tag(TAG).w("onCreate" );
-
-  }
-
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.fragment_info_card_links, container, false);
-
-
 
     EsdApplication.getDataComponent().inject( this );
     ButterKnife.bind(this, view);
@@ -100,13 +81,9 @@ public class InfoCardLinksFragment extends Fragment {
   public void onResume(){
     super.onResume();
 
-
-
     adapter = new LinkAdapter(getContext(), new ArrayList<Link>());
 
     loadSettings();
-
-
 
     wrapper.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
       @Override
@@ -120,13 +97,6 @@ public class InfoCardLinksFragment extends Fragment {
     });
 
   }
-
-  public void onButtonPressed(Uri uri) {
-    if (mListener != null) {
-      mListener.onFragmentInteraction(uri);
-    }
-  }
-
 
   private void loadSettings() {
     Timber.e( " loadSettings");
@@ -163,9 +133,13 @@ public class InfoCardLinksFragment extends Fragment {
               RDocumentEntity _doc = dataStore
                 .select(RDocumentEntity.class)
                 .where(RDocumentEntity.UID.eq(_tmp.getUid()))
-                .get().first();
+                .get().firstOrNull();
 
-              adapter.add(new Link(_doc.getUid(), _doc.getTitle()));
+              if ( _doc != null ) {
+                adapter.add(new Link(_doc.getUid(), _doc.getTitle()));
+              } else {
+                adapter.add(new Link( "0", "" ) );
+              }
             }
 
             show();
@@ -238,27 +212,12 @@ public class InfoCardLinksFragment extends Fragment {
  @Override
   public void onAttach(Context context) {
     super.onAttach(context);
-    if (context instanceof OnFragmentInteractionListener) {
-      mListener = (OnFragmentInteractionListener) context;
-      mContext = context;
-    } else {
-      throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
-    }
-  }
-
-  @Override
-  public void onDetach() {
-    super.onDetach();
-    mListener = null;
+    mContext = context;
   }
 
   public Fragment withUid(String uid) {
     this.uid = uid;
     return this;
-  }
-
-  public interface OnFragmentInteractionListener {
-    void onFragmentInteraction(Uri uri);
   }
 
   private void initEvents() {

@@ -80,6 +80,9 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     entity.setFromProcessedFolder( false );
     entity.setFromFavoritesFolder( false );
     entity.setChanged( false );
+    entity.setReturned( false );
+    entity.setRejected( false );
+    entity.setAgain( false );
   }
 
   public void setBaseFields(RDocumentEntity entity, DocumentInfo model) {

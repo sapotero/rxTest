@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
+import android.support.design.widget.TextInputLayout;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -50,7 +51,7 @@ import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 import sapotero.rxtest.views.custom.DelayAutoCompleteTextView;
 import timber.log.Timber;
 
-public class SelectOshsDialogFragment extends DialogFragment implements View.OnClickListener, PrimaryUsersAdapter.PrimaryUsersAdapterFilterListener, OshsAutoCompleteAdapter.OshsAutoCompleteAdapterFilterListener {
+public class SelectOshsDialogFragment extends DialogFragment implements PrimaryUsersAdapter.PrimaryUsersAdapterFilterListener, OshsAutoCompleteAdapter.OshsAutoCompleteAdapterFilterListener {
 
   public static final String SEPARATOR_FAVORITES_TEXT = "Результат поиска по избранному:";
   public static final String SEPARATOR_OSHS_TEXT = "Результат поиска по ОШС МВД:";
@@ -62,6 +63,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
   private String TAG = this.getClass().getSimpleName();
 
   @BindView(R.id.user_autocomplete_field) DelayAutoCompleteTextView title;
+  @BindView(R.id.user_autocomplete_textinputlayout) TextInputLayout textInputLayout;
   @BindView(R.id.pb_loading_indicator) ProgressBar indicator;
   @BindView(R.id.oshs_wrapper) FrameLayout oshs_wrapper;
 
@@ -463,12 +465,5 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
   public void onCancel(DialogInterface dialog) {
     super.onCancel(dialog);
     Timber.tag(TAG).i( "onCancel");
-  }
-
-
-
-  @Override
-  public void onClick(View v) {
-
   }
 }

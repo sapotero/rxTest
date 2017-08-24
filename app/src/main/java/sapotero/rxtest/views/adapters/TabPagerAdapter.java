@@ -5,6 +5,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
 import sapotero.rxtest.views.fragments.InfoCardDocumentsFragment;
+import sapotero.rxtest.views.fragments.InfoCardLinksFragment;
 import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
 
 public class TabPagerAdapter extends FragmentPagerAdapter {
@@ -16,8 +17,6 @@ public class TabPagerAdapter extends FragmentPagerAdapter {
     super(fragmentManager);
   }
 
-
-
   @Override
   public Fragment getItem(int position) {
     switch (position) {
@@ -25,6 +24,8 @@ public class TabPagerAdapter extends FragmentPagerAdapter {
         return new InfoCardDocumentsFragment().withUid(uid).withOutZoom(zoom);
       case 1:
         return new InfoCardWebViewFragment().withUid(uid).withEnableDoubleTap(doubleTapEnabled);
+      case 2:
+        return new InfoCardLinksFragment().withUid(uid);
       default:
         return null;
     }
@@ -37,13 +38,15 @@ public class TabPagerAdapter extends FragmentPagerAdapter {
         return "Документ";
       case 1:
         return "Инфокарточка";
+      case 2:
+        return "Связанные документы";
     }
     return null;
   }
 
   @Override
   public int getCount() {
-    return 2;
+    return 3;
   }
 
   public void withUid(String uid) {

@@ -28,14 +28,14 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.models.decisions.RDisplayFirstDecisionEntity;
 import sapotero.rxtest.db.requery.models.images.RSignImageEntity;
+import sapotero.rxtest.db.requery.models.utils.RReturnedRejectedAgainEntity;
+import sapotero.rxtest.db.requery.models.utils.enums.DocumentCondition;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.interfaces.Operation;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.DocumentsService;
 import sapotero.rxtest.retrofit.models.OperationResult;
-import sapotero.rxtest.retrofit.models.v2.DecisionError;
 import sapotero.rxtest.retrofit.models.wrapper.SignWrapper;
 import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.ISettings;
@@ -43,6 +43,8 @@ import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.fields.FieldType;
 import sapotero.rxtest.utils.memory.fields.InMemoryState;
 import sapotero.rxtest.utils.memory.fields.LabelType;
+import sapotero.rxtest.utils.memory.models.InMemoryDocument;
+import sapotero.rxtest.utils.memory.utils.Transaction;
 import sapotero.rxtest.utils.queue.QueueManager;
 import timber.log.Timber;
 
@@ -56,7 +58,9 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
   @Inject public QueueManager queueManager;
   @Inject public MemoryStore store;
 
-  public static final String SIGN_ERROR_MESSAGE = "Произошла ошибка электронной подписи";
+  protected static final String SIGN_ERROR_MESSAGE = "Произошла ошибка электронной подписи";
+
+  public String TAG = this.getClass().getSimpleName();
 
   public CommandParams params;
 
@@ -67,6 +71,10 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
 
   public CommandParams getParams() {
     return params;
+  }
+
+  public String getTAG() {
+    return TAG;
   }
 
   public Callback callback;
@@ -160,32 +168,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     }
   }
 
-  // resolved https://tasks.n-core.ru/browse/MVDESD-13258
-  // 1. Созданные мной и подписант я
-  void checkCreatorAndSignerIsCurrentUser(DecisionError data, String TAG) {
-    String decisionUid = data.getDecisionUid();
-
-    // Если создал резолюцию я и подписант я, то сохранить UID этой резолюции в отдельную таблицу
-    if ( decisionUid != null && !decisionUid.equals("") ) {
-      if ( Objects.equals( data.getDecisionSignerId(), getParams().getCurrentUserId() ) ) {
-        RDisplayFirstDecisionEntity rDisplayFirstDecisionEntity = new RDisplayFirstDecisionEntity();
-        rDisplayFirstDecisionEntity.setDecisionUid( decisionUid );
-        rDisplayFirstDecisionEntity.setUserId( getParams().getCurrentUserId() );
-
-        dataStore
-          .insert( rDisplayFirstDecisionEntity )
-          .toObservable()
-          .subscribeOn(Schedulers.computation())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(
-            result -> Timber.tag(TAG).v("Added decision to display first decision table"),
-            error -> Timber.tag(TAG).e(error)
-          );
-      }
-    }
-  }
-
-  protected void setDocOperationStartedInMemory() {
+  protected void setSyncLabelInMemory() {
     Timber.tag("RecyclerViewRefresh").d("Command: Set sync label");
 
     store.process(
@@ -195,18 +178,16 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     );
   }
 
-  protected void setDocOperationProcessedStartedInMemory() {
-    Timber.tag("RecyclerViewRefresh").d("Command: Set sync label");
-
-    store.process(
-      store.startTransactionFor( getParams().getDocument() )
-        .setLabel(LabelType.SYNC)
-        .setField(FieldType.PROCESSED, true)
-        .setState(InMemoryState.LOADING)
-    );
+  protected void setChangedInDb() {
+    dataStore
+      .update(RDocumentEntity.class)
+      .set(RDocumentEntity.CHANGED, true)
+      .where(RDocumentEntity.UID.eq( getParams().getDocument() ))
+      .get()
+      .value();
   }
 
-  protected void finishOperationOnSuccess() {
+  private void removeSyncChanged() {
     Timber.tag("RecyclerViewRefresh").d("Command: Remove sync label");
 
     store.process(
@@ -215,10 +196,10 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
         .setState(InMemoryState.READY)
     );
 
-    setChangedFalse();
+    removeChangedInDb();
   }
 
-  protected void setChangedFalse() {
+  protected void removeChangedInDb() {
     dataStore
       .update(RDocumentEntity.class)
       .set( RDocumentEntity.CHANGED, false)
@@ -227,50 +208,18 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       .value();
   }
 
-  private void finishOperationOnError(Command command, List<String> errors) {
-    finishOperationOnSuccess();
-    queueManager.setExecutedWithError( command, errors );
+  protected void finishOperationOnSuccess() {
+    removeSyncChanged();
+    queueManager.setExecutedRemote(this);
   }
 
-  protected void finishOperationProcessedOnError(Command command, List<String> errors) {
-    Timber.tag("RecyclerViewRefresh").d("Command: Remove sync label");
-
-    store.process(
-      store.startTransactionFor( getParams().getDocument() )
-        .removeLabel(LabelType.SYNC)
-        .setField(FieldType.PROCESSED, false)
-        .setState(InMemoryState.READY)
-    );
-
-    dataStore
-      .update(RDocumentEntity.class)
-      .set( RDocumentEntity.PROCESSED, false)
-      .set( RDocumentEntity.CHANGED, false)
-      .where(RDocumentEntity.UID.eq( getParams().getDocument() ) )
-      .get()
-      .value();
-
-    queueManager.setExecutedWithError( command, errors );
+  protected void finishOperationOnError(List<String> errors) {
+    removeSyncChanged();
+    queueManager.setExecutedWithError( this, errors );
   }
 
   public <T> boolean notEmpty(Collection<T> collection) {
     return collection != null && collection.size() > 0;
-  }
-
-  public void onError(Command command, String errorMessage, boolean setProcessedFalse, String TAG) {
-    Timber.tag(TAG).i("error: %s", errorMessage);
-
-    if (callback != null){
-      callback.onCommandExecuteError( errorMessage );
-    }
-
-    if ( settings.isOnline() ) {
-      if ( setProcessedFalse ) {
-        finishOperationProcessedOnError( command, Collections.singletonList( errorMessage ) );
-      } else {
-        finishOperationOnError( command, Collections.singletonList( errorMessage ) );
-      }
-    }
   }
 
   protected RSignImageEntity getSignImage(String imageId) {
@@ -280,13 +229,179 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
       .get().firstOrNull();
   }
 
-  void printLog(OperationResult data, String TAG) {
+  void printOperationResult(OperationResult data) {
     Timber.tag(TAG).i("ok: %s", data.getOk());
     Timber.tag(TAG).i("error: %s", data.getMessage());
     Timber.tag(TAG).i("type: %s", data.getType());
   }
 
-  protected void printCommandType(Command command, String TAG) {
-    Timber.tag(TAG).i( "type: %s", command.getClass().getName() );
+  protected void printCommandType() {
+    Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
   }
+
+  protected void sendSuccessCallback() {
+    if ( callback != null ) {
+      callback.onCommandExecuteSuccess( getType() );
+    }
+  }
+
+  protected void sendErrorCallback(String errorMessage) {
+    if ( callback != null ) {
+      callback.onCommandExecuteError( errorMessage );
+    }
+  }
+
+  protected void saveOldLabelValues() {
+    InMemoryDocument inMemoryDocument = store.getDocuments().get( getParams().getDocument() );
+    getParams().setReturnedOldValue( inMemoryDocument.getDocument().isReturned() );
+    getParams().setAgainOldValue( inMemoryDocument.getDocument().isAgain() );
+  }
+
+  protected void startRejectedOperationInMemory() {
+    store.process(
+      store.startTransactionFor( getParams().getDocument() )
+        .setLabel(LabelType.SYNC)
+        .setLabel(LabelType.REJECTED)
+        .removeLabel(LabelType.RETURNED)
+        .removeLabel(LabelType.AGAIN)
+        .setField(FieldType.PROCESSED, true)
+        .setState(InMemoryState.LOADING)
+    );
+  }
+
+  protected void startRejectedOperationInDb() {
+    dataStore
+      .update(RDocumentEntity.class)
+      .set( RDocumentEntity.CHANGED, true)
+      .set( RDocumentEntity.REJECTED, true )
+      .set( RDocumentEntity.RETURNED, false )
+      .set( RDocumentEntity.AGAIN, false )
+      .set( RDocumentEntity.PROCESSED, true)
+      .where(RDocumentEntity.UID.eq( getParams().getDocument() ))
+      .get()
+      .value();
+  }
+
+  protected void finishRejectedOperationOnSuccess() {
+    removeSyncChanged();
+    setDocumentCondition( DocumentCondition.REJECTED );
+    queueManager.setExecutedRemote(this);
+  }
+
+  private void setDocumentCondition(DocumentCondition documentCondition) {
+    RReturnedRejectedAgainEntity returnedRejectedAgainEntity = dataStore
+      .select( RReturnedRejectedAgainEntity.class )
+      .where( RReturnedRejectedAgainEntity.DOCUMENT_UID.eq( getParams().getDocument() ) )
+      .and( RReturnedRejectedAgainEntity.USER.eq( getParams().getLogin() ) )
+      .get().firstOrNull();
+
+    if ( returnedRejectedAgainEntity != null ) {
+      returnedRejectedAgainEntity.setStatus( getParams().getStatusCode() );
+      returnedRejectedAgainEntity.setDocumentCondition( documentCondition );
+
+      dataStore
+        .update( returnedRejectedAgainEntity )
+        .toObservable()
+        .subscribeOn(Schedulers.computation())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(
+          result -> Timber.tag(TAG).d("Updated document condition in ReturnedRejectedAgain table"),
+          error -> Timber.tag(TAG).e(error)
+        );
+
+    } else {
+      returnedRejectedAgainEntity = new RReturnedRejectedAgainEntity();
+      returnedRejectedAgainEntity.setDocumentUid( getParams().getDocument() );
+      returnedRejectedAgainEntity.setUser( getParams().getLogin() );
+      returnedRejectedAgainEntity.setStatus( getParams().getStatusCode() );
+      returnedRejectedAgainEntity.setDocumentCondition( documentCondition );
+
+      dataStore
+        .insert( returnedRejectedAgainEntity )
+        .toObservable()
+        .subscribeOn(Schedulers.computation())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(
+          result -> Timber.tag(TAG).d("Added document condition to ReturnedRejectedAgain table"),
+          error -> Timber.tag(TAG).e(error)
+        );
+    }
+  }
+
+  protected void finishRejectedProcessedOperationOnError(List<String> errors) {
+    Transaction transaction = store.startTransactionFor( getParams().getDocument() )
+      .removeLabel(LabelType.SYNC)
+      .removeLabel(LabelType.REJECTED)
+      .setField(FieldType.PROCESSED, false)
+      .setState(InMemoryState.READY);
+
+    boolean returnedOldValue = getParams().getReturnedOldValue();
+    boolean againOldValue = getParams().getAgainOldValue();
+
+    if ( returnedOldValue ) {
+      transaction.setLabel(LabelType.RETURNED);
+    }
+
+    if ( againOldValue ) {
+      transaction.setLabel(LabelType.AGAIN);
+    }
+
+    store.process( transaction );
+
+    dataStore
+      .update(RDocumentEntity.class)
+      .set( RDocumentEntity.CHANGED, false)
+      .set( RDocumentEntity.REJECTED, false)
+      .set( RDocumentEntity.RETURNED, returnedOldValue)
+      .set( RDocumentEntity.AGAIN, againOldValue)
+      .set( RDocumentEntity.PROCESSED, false)
+      .where(RDocumentEntity.UID.eq( getParams().getDocument() ) )
+      .get()
+      .value();
+
+    queueManager.setExecutedWithError( this, errors );
+  }
+
+  protected void startProcessedOperationInMemory() {
+    store.process(
+      store.startTransactionFor( getParams().getDocument() )
+        .setLabel(LabelType.SYNC)
+        .removeLabel(LabelType.RETURNED)
+        .removeLabel(LabelType.AGAIN)
+        .setField(FieldType.PROCESSED, true)
+        .setState(InMemoryState.LOADING)
+    );
+  }
+
+  protected void startProcessedOperationInDb() {
+    dataStore
+      .update(RDocumentEntity.class)
+      .set( RDocumentEntity.CHANGED, true)
+      .set( RDocumentEntity.RETURNED, false )
+      .set( RDocumentEntity.AGAIN, false )
+      .set( RDocumentEntity.PROCESSED, true)
+      .where(RDocumentEntity.UID.eq( getParams().getDocument() ))
+      .get()
+      .value();
+  }
+
+  protected void finishProcessedOperationOnSuccess() {
+    removeSyncChanged();
+    setDocumentCondition( DocumentCondition.PROCESSED );
+    queueManager.setExecutedRemote(this);
+  }
+
+  protected void onOperationError(Throwable error) {
+    String errorMessage = error.getLocalizedMessage();
+
+    Timber.tag(TAG).i("error: %s", errorMessage);
+
+    sendErrorCallback( errorMessage );
+
+    if ( settings.isOnline() ) {
+      finishOnOperationError( Collections.singletonList( errorMessage ) );
+    }
+  }
+
+  public abstract void finishOnOperationError(List<String> errors);
 }
