@@ -12,14 +12,10 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.document.DropControlEvent;
-import sapotero.rxtest.events.utils.RecalculateMenuEvent;
 import sapotero.rxtest.events.view.ShowSnackEvent;
-import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
-import sapotero.rxtest.managers.menu.utils.DateUtil;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
-import timber.log.Timber;
 
 public abstract class SharedCommand extends OperationResultCommand {
 
@@ -27,42 +23,7 @@ public abstract class SharedCommand extends OperationResultCommand {
     super(params);
   }
 
-  public void onError(Command command, String message) {
-    if (callback != null){
-      callback.onCommandExecuteError(getType());
-    }
-
-    if ( settings.isOnline() ) {
-      queueManager.setExecutedWithError( command, Collections.singletonList( message ) );
-      setError();
-    }
-  }
-
-  protected abstract void setError();
-
-  private void checkMessage(Command command, String message, boolean recalculateMenu) {
-    Timber.tag("RecyclerViewRefresh").d("SharedCommand: response message: %s", message);
-
-    if (message != null && !message.toLowerCase().contains("успешно") ) {
-      queueManager.setExecutedWithError( command, Collections.singletonList( message ) );
-      setError();
-    } else {
-      queueManager.setExecutedRemote( command );
-      setSuccess();
-      if ( recalculateMenu ) {
-        EventBus.getDefault().post( new RecalculateMenuEvent() );
-      }
-    }
-  }
-
-  protected abstract void setSuccess();
-
   private void onControlLabelSuccess(OperationResult result, RDocumentEntity doc) {
-
-    String timeNow = DateUtil.getTimestamp();
-    Timber.tag("++").d("DateUtil: timestamp: %s | valid: %s", timeNow, DateUtil.isSomeTimePassed( timeNow ) );
-
-
     if ( Objects.equals(result.getType(), "danger") && result.getMessage() != null){
       printOperationResult( result );
 
@@ -79,12 +40,7 @@ public abstract class SharedCommand extends OperationResultCommand {
     }
   }
 
-  private void onFolderSuccess(Command command, OperationResult data, boolean recalculateMenu, String TAG) {
-    checkMessage( command, data.getMessage(), recalculateMenu );
-  }
-
   protected Observable<OperationResult> getOperationResultObservable() {
-
     Retrofit retrofit = getOperationsRetrofit();
 
     OperationService operationService = retrofit.create( OperationService.class );
