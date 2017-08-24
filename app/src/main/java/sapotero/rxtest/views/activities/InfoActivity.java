@@ -59,6 +59,7 @@ import sapotero.rxtest.events.view.ShowSnackEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentInfoActivityEvent;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
+import sapotero.rxtest.managers.menu.utils.DateUtil;
 import sapotero.rxtest.managers.toolbar.ToolbarManager;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
@@ -538,7 +539,16 @@ public class InfoActivity extends AppCompatActivity {
   }
 
   private void updateDocument() {
-    jobManager.addJobInBackground( new UpdateDocumentJob( settings.getUid() ) );
+    InMemoryDocument doc = store.getDocuments().get(settings.getUid());
+
+    if (
+        // если док не обработан
+        !doc.isProcessed()
+        // или он обработан и время последней команды старше 5 мин
+        || ( doc.isProcessed() && doc.getUpdatedAt() != null && DateUtil.isSomeTimePassed( doc.getUpdatedAt() ) )
+    ){
+      jobManager.addJobInBackground( new UpdateDocumentJob( settings.getUid() ) );
+    }
   }
 
   private void unsubscribe(){
