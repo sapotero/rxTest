@@ -12,6 +12,7 @@ import sapotero.rxtest.managers.menu.commands.SharedCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.managers.menu.utils.DateUtil;
 import sapotero.rxtest.retrofit.models.OperationResult;
+import sapotero.rxtest.utils.memory.fields.FieldType;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import sapotero.rxtest.utils.memory.utils.Transaction;
 import timber.log.Timber;
@@ -73,6 +74,8 @@ public class RemoveFromFolder extends SharedCommand {
     Timber.d("DateUtil: now   %s | %s", timestamp, DateUtil.isSomeTimePassed(timestamp) );
     Timber.d("DateUtil: early %s | %s", timestampEarly, DateUtil.isSomeTimePassed(timestampEarly) );
 
+
+
     RDocumentEntity documentEntity = dataStore
       .select( RDocumentEntity.class )
       .where( RDocumentEntity.UID.eq( getParams().getDocument() ) )
@@ -88,6 +91,7 @@ public class RemoveFromFolder extends SharedCommand {
       Transaction transaction = new Transaction();
       transaction
         .from( store.getDocuments().get(getParams().getDocument()) )
+        .setField(FieldType.UPDATED_AT, DateUtil.getTimestamp())
         .removeLabel(LabelType.SYNC)
         .removeLabel(LabelType.FAVORITES);
       store.process( transaction );

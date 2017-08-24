@@ -165,24 +165,26 @@ public class Processor {
       transaction.withIndex(index);
     }
 
-
     sub.onNext( transaction.commit() );
   }
 
   private void validate(Document document){
-    Timber.tag(TAG).e("->      : %s / %s@%5.10s  ", document.getUid(), filter, index );
-
-//    upsert( document );
+    Timber.tag(TAG).e("-> : %s / %s@%5.10s  ", document.getUid(), filter, index );
 
     // new upsert job
     if ( store.getDocuments().keySet().contains( document.getUid() ) ){
       InMemoryDocument doc = store.getDocuments().get( document.getUid() );
 
-      Timber.tag(TAG).e("filters : %s | %s", doc.getFilter(), filter);
+
+
+      Timber.tag(TAG).e("    * %s | %s", doc.getFilter(), filter);
+      if (doc.getUpdatedAt() != null){
+        Timber.tag(TAG).d("    * UPDATED_AT less than 5 minutes ago %s", doc.getUpdatedAt());
+      }
 
       // изменилось MD5
       if ( Filter.isChanged( doc.getMd5(), document.getMd5() ) ){
-        Timber.tag(TAG).e("md5     : %s | %s", doc.getMd5(), document.getMd5());
+//        Timber.tag(TAG).e("md5     : %s | %s", doc.getMd5(), document.getMd5());
         updateJob( doc.getUid(), doc.getMd5() );
       } else {
         EventBus.getDefault().post( new StepperLoadDocumentEvent( doc.getUid() ) );
@@ -262,11 +264,13 @@ public class Processor {
   private void resetMd5(List<String> add) {
     // Для тех документов, которые надо добавить во вкладку, если они есть в памяти,
     // сбрасываем MD5, чтобы далее для их обновления была вызвана UpdateDocumentJob.
+
+    // проверить source - сделать исключение для папок обработанные и избранное из ws
     for (String uid : add) {
-      InMemoryDocument documentInMemory = store.getDocuments().get( uid );
-      if ( documentInMemory != null && documentInMemory.isProcessed()  ) {
-        documentInMemory.setMd5("");
-        store.getDocuments().put( uid, documentInMemory );
+      InMemoryDocument inMemoryDocument = store.getDocuments().get( uid );
+      if ( inMemoryDocument != null && inMemoryDocument.isProcessed()  ) {
+        inMemoryDocument.setMd5("");
+        store.getDocuments().put( uid, inMemoryDocument );
       }
     }
   }

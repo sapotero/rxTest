@@ -16,7 +16,6 @@ import rx.subjects.PublishSubject;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.events.adapter.JournalSelectorUpdateCountEvent;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.ISettings;
@@ -88,6 +87,13 @@ public class MemoryStore implements Processable{
           for (InMemoryDocument doc: docs ) {
             documents.put( doc.getUid(), doc );
             Timber.tag("RecyclerViewRefresh").d("MemoryStore: pub.onNext()");
+
+
+            if (doc.getUpdatedAt() != null){
+              Timber.tag(TAG).d(" * UPDATED_AT less than 5 minutes ago %s", doc.getUpdatedAt());
+            }
+
+
             pub.onNext( doc );
           }
 

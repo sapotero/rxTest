@@ -34,6 +34,7 @@ import sapotero.rxtest.db.requery.models.utils.enums.DocumentCondition;
 import sapotero.rxtest.managers.menu.interfaces.Command;
 import sapotero.rxtest.managers.menu.interfaces.Operation;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.managers.menu.utils.DateUtil;
 import sapotero.rxtest.retrofit.DocumentsService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.retrofit.models.wrapper.SignWrapper;
@@ -203,6 +204,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     dataStore
       .update(RDocumentEntity.class)
       .set( RDocumentEntity.CHANGED, false)
+      .set( RDocumentEntity.UPDATED_AT, DateUtil.getTimestamp() )
       .where(RDocumentEntity.UID.eq(getParams().getDocument()))
       .get()
       .value();
