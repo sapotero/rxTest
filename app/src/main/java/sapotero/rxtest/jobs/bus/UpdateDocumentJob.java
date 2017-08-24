@@ -189,12 +189,13 @@ public class UpdateDocumentJob extends DocumentJob {
           documentExisting.setProcessed( false );
         }
 
-        // Если документ адресован текущему пользователю, то убрать из обработанных и из папки обработанных
+        // Если документ адресован текущему пользователю, то убрать из обработанных и из папки обработанных и из папки избранных
         // (например, документ возвращен текущему пользователю после отклонения)
         if ( addressedToCurrentUser( documentReceived, documentExisting, documentMapper ) ) {
           Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Set processed = false");
           documentExisting.setProcessed( false );
           documentExisting.setFromProcessedFolder( false );
+          documentExisting.setFromFavoritesFolder( false );
 
           setReturnedRejectedAgainLabel( documentExisting );
         }
