@@ -78,7 +78,7 @@ public class MemoryStore implements Processable{
     Timber.w("startSub");
 
     sub
-      .buffer( 200, TimeUnit.MILLISECONDS )
+      .buffer( 500, TimeUnit.MILLISECONDS )
       .onBackpressureBuffer(512)
       .onBackpressureDrop()
       .subscribeOn(Schedulers.computation())
