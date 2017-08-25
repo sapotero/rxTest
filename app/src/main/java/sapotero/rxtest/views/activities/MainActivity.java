@@ -445,7 +445,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     startNetworkCheck();
     subscribeToNetworkCheckResults();
     subscribeToSubstituteModeResults();
-    update();
+
+    update( true );
 
     initDrawer();
 
@@ -518,7 +519,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     }
   }
 
-  public void update() {
+  public void update(boolean reloadDocuments) {
+    settings.setTabChanged( reloadDocuments );
     updateCount();
     updateOrganizationFilter();
   }
@@ -553,16 +555,20 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   @Override
   protected void onDestroy() {
-    // Reset previous state of organization filter on application quit
+    // Reset previous state of organization filter and set tab changed on application quit
     settings.setOrganizationFilterActive( false );
+    settings.setTabChanged(true);
 
     super.onDestroy();
   }
 
   private void setJournalType(int type) {
+    // Reset previous state of organization filter and set tab changed
+    settings.setOrganizationFilterActive(false);
+    settings.setTabChanged(true);
+
     menuBuilder.selectJournal( type );
     journalSelector.selectJournal(type);
-
   }
 
   private void drawer_build_bottom() {
@@ -1023,8 +1029,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   public void onMessageEvent(JournalSelectorIndexEvent event) {
     try {
       if ( menuIndex != event.index ) {
-        // Reset previous state of organization filter on journal change
+        // Reset previous state of organization filter on journal change and set tab changed
         settings.setOrganizationFilterActive( false );
+        settings.setTabChanged( true );
       }
       menuIndex = event.index;
       DOCUMENT_TYPE_SELECTOR.setSelection(event.index);
@@ -1036,7 +1043,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(UpdateCountEvent event) {
     Timber.tag(TAG).i("UpdateCountEvent");
-    update();
+    update( false );
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
@@ -1048,7 +1055,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       dataLoader.initV2( true );
     }
 
-    update();
+    update( false );
     dismissStartSubstituteDialog();
     dismissStopSubstituteDialog();
   }

@@ -273,8 +273,9 @@ public class ButtonBuilder {
     view.setOnClickListener(v -> {
       // If previous state was false and after click state changed to true, then user switched between tabs
       if ( !previousState && view.isChecked() ) {
-        // Reset previous state of organization filter
+        // Reset previous state of organization filter and set tab changed
         settings.setOrganizationFilterActive( false );
+        settings.setTabChanged(true);
       }
     });
 

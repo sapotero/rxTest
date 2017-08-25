@@ -243,4 +243,8 @@ public interface ISettings {
   boolean isUpdateAuthStarted();
 
   void setUpdateAuthStarted(boolean value);
+
+  boolean isTabChanged();
+
+  void setTabChanged(boolean value);
 }

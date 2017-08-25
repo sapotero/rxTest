@@ -70,6 +70,7 @@ public class TestSettings implements ISettings {
   public String oldCurrentUser;
   public String colleagueId;
   public Boolean isUpdateAuthStarted;
+  public Boolean isTabChanged;
 
   public TestSettings() {
     login = "dummyLogin";
@@ -663,5 +664,15 @@ public class TestSettings implements ISettings {
   @Override
   public void setUpdateAuthStarted(boolean value) {
     isUpdateAuthStarted = value;
+  }
+
+  @Override
+  public boolean isTabChanged() {
+    return isTabChanged;
+  }
+
+  @Override
+  public void setTabChanged(boolean value) {
+    isTabChanged = value;
   }
 }
