@@ -37,7 +37,7 @@ public class PrimaryConsiderationMapper extends AbstractMapper<Oshs, RPrimaryCon
     entity.setIsGroup( model.getIsGroup() );
     entity.setIsOrganization( model.getIsOrganization() );
     entity.setUser( settings.getLogin() );
-    entity.setImage( model.getImage() );
+    entity.setImage( model.getIImage() );
 
     return entity;
   }
