@@ -223,7 +223,8 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
         }
       }
 
-    } else {
+    }
+    else {
       onButtonBuilderUpdate(index);
     }
 
