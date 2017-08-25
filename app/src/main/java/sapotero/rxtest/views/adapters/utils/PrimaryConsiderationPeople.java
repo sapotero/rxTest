@@ -11,6 +11,7 @@ public class PrimaryConsiderationPeople implements IPerformer {
   private String id;
   private String name;
   private String position;
+  private String image;
   private String organization;
   private String gender;
   private boolean isOriginal = false;
@@ -31,6 +32,15 @@ public class PrimaryConsiderationPeople implements IPerformer {
     } else {
       return false;
     }
+  }
+
+  public String getImage() {
+    return image;
+  }
+
+  public PrimaryConsiderationPeople setImage(String image) {
+    this.image = image;
+    return this;
   }
 
   public String getAssistantId() {
@@ -282,5 +292,15 @@ public class PrimaryConsiderationPeople implements IPerformer {
   @Override
   public void setIsIPerformerOrganization(Boolean isOrganization) {
     setIsOrganization( getBooleanValue(isOrganization) );
+  }
+
+  @Override
+  public String getIImage() {
+    return getImage();
+  }
+
+  @Override
+  public void setIImage(String image) {
+    setImage(image);
   }
 }

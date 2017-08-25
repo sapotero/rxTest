@@ -36,4 +36,6 @@ public interface IPerformer {
   void setIsIPerformerGroup(Boolean isGroup);
   Boolean isIPerformerOrganization();
   void setIsIPerformerOrganization(Boolean isOrganization);
+  String getIImage();
+  void setIImage(String image);
 }
