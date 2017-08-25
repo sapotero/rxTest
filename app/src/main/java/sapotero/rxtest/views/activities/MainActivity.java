@@ -66,6 +66,7 @@ import sapotero.rxtest.events.adapter.JournalSelectorIndexEvent;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.events.service.CheckNetworkEvent;
 import sapotero.rxtest.events.utils.ErrorReceiveTokenEvent;
+import sapotero.rxtest.events.utils.LoadedFromDbEvent;
 import sapotero.rxtest.events.utils.RecalculateMenuEvent;
 import sapotero.rxtest.events.utils.ReceivedTokenEvent;
 import sapotero.rxtest.events.view.UpdateDrawerEvent;
@@ -158,6 +159,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private MaterialDialog startSubstituteDialog;
   private MaterialDialog stopSubstituteDialog;
 
+  private boolean switchToSubstituteModeStarted = false;
   private boolean exitFromSubstituteModeStarted = false;
 
   protected void onCreate(Bundle savedInstanceState) {
@@ -817,6 +819,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
               jobManager.cancelJobsInBackground(null, TagConstraint.ANY, "DocJob");
 
+              switchToSubstituteModeStarted = true;
+
               settings.setSubstituteMode( true );
               settings.setOldLogin( settings.getLogin() );
               settings.setOldCurrentUser( settings.getCurrentUser() );
@@ -827,8 +831,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
               initJournalSelectionPosition();
 
               switchDocuments();
-
-              dataLoader.initV2( true );
 
             }, error -> {
               Timber.tag(TAG).e(error);
@@ -1035,14 +1037,21 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   public void onMessageEvent(UpdateCountEvent event) {
     Timber.tag(TAG).i("UpdateCountEvent");
     update();
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(LoadedFromDbEvent event) {
+    Timber.tag(TAG).i("LoadedFromDbEvent");
+
+    if ( switchToSubstituteModeStarted ) {
+      switchToSubstituteModeStarted = false;
+      dataLoader.initV2( true );
+    }
+
+    update();
     dismissStartSubstituteDialog();
     dismissStopSubstituteDialog();
   }
-
-//  @Subscribe(threadMode = ThreadMode.MAIN)
-//  public void onMessageEvent(JournalSelectorUpdateCountEvent event) {
-//    Timber.tag(TAG).d("JournalSelectorUpdateCountEvent");
-//  }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(UpdateDrawerEvent event) {

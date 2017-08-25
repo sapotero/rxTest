@@ -169,7 +169,7 @@ public class Processor {
       transaction.withIndex(index);
     }
 
-
+    Timber.tag(TAG).d("Transaction sub.onNext() for %s", transaction.commit().getUid());
     sub.onNext( transaction.commit() );
   }
 

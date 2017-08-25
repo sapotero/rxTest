@@ -3,7 +3,6 @@ package sapotero.rxtest.utils.memory;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -17,8 +16,8 @@ import rx.subjects.PublishSubject;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.events.adapter.JournalSelectorUpdateCountEvent;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
+import sapotero.rxtest.events.utils.LoadedFromDbEvent;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.fields.DocumentType;
@@ -88,7 +87,7 @@ public class MemoryStore implements Processable{
         docs -> {
           for (InMemoryDocument doc: docs ) {
             documents.put( doc.getUid(), doc );
-            Timber.tag("RecyclerViewRefresh").d("MemoryStore: pub.onNext()");
+            Timber.tag("RecyclerViewRefresh").d("MemoryStore: pub.onNext() for %s", doc.getUid());
             pub.onNext( doc );
           }
 
@@ -123,9 +122,10 @@ public class MemoryStore implements Processable{
   }
 
   public void clear(){
+    Timber.tag(TAG).d("MEMORY STORE CLEAR");
     documents.clear();
     loadFromDB();
-  };
+  }
 
   public void loadFromDB() {
     dataStore
@@ -143,9 +143,7 @@ public class MemoryStore implements Processable{
             documents.put(doc.getUid(), document);
           }
 
-          if (docs.size() > 0){
-            EventBus.getDefault().post( new UpdateCountEvent() );
-          }
+          EventBus.getDefault().post( new LoadedFromDbEvent() );
         },
         Timber::e
       );
