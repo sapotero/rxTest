@@ -1,5 +1,7 @@
 package sapotero.rxtest.utils.memory.utils;
 
+import android.util.Log;
+
 import com.birbit.android.jobqueue.JobManager;
 import com.googlecode.totallylazy.Sequence;
 
@@ -15,6 +17,7 @@ import javax.inject.Inject;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Func2;
 import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 import sapotero.rxtest.application.EsdApplication;
@@ -128,12 +131,10 @@ public class Processor {
   }
 
   public void execute() {
-
-    Transaction transaction = new Transaction();
+      Transaction transaction = new Transaction();
 
     switch (source){
       case DB:
-        Timber.w("process as db");
         transaction
           .from(InMemoryDocumentMapper.fromDB(document_from_db))
           .setState(InMemoryState.READY);
@@ -141,10 +142,10 @@ public class Processor {
         commit( transaction );
         break;
       case TRANSACTION:
-        commit( this.transaction );
+          commit( this.transaction );
         break;
       case INTERSECT:
-        intersect();
+          intersect();
         break;
       case FOLDER:
         loadFromFolder();
@@ -197,7 +198,7 @@ public class Processor {
 
   private ArrayList<String> intersect(){
 
-    Filter imdFilter = new Filter( conditions() );
+      Filter imdFilter = new Filter( conditions() );
 
     Sequence<InMemoryDocument> _docs = sequence(store.getDocuments().values());
 
@@ -231,16 +232,25 @@ public class Processor {
         List<String> remove = new ArrayList<>(memory);
         remove.removeAll(api);
 
+
+
         Timber.tag(TAG).e("add: %s", add.size());
         Timber.tag(TAG).e("rem: %s", remove.size());
 
         resetMd5(add);
 
         for (String uid : remove) {
-          updateAndSetProcessed( uid );
+            updateAndSetProcessed( uid );
         }
 
         validateDocuments();
+        /*генирация уведомления, в случ. появления нового документа*/
+          if( add.size() > 0 ){
+              for ( String item : add ) {
+                  documents.get(item).getTitle();
+              }
+              new NotifiManager(add.size()).generateNotifyMsg();
+          }
 
         return Collections.singletonList("");
       })
