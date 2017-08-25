@@ -28,6 +28,7 @@ public abstract class RFavoriteUser {
   String middleName;
   Boolean isOrganization;
   Boolean isGroup;
+  String image;
 
   @Index("fu_user_index")
   String  user;
