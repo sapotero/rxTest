@@ -541,11 +541,11 @@ public class InfoActivity extends AppCompatActivity {
   private void updateDocument() {
     InMemoryDocument doc = store.getDocuments().get(settings.getUid());
 
-    if (
+    if ( doc != null
         // если док не обработан
-        !doc.isProcessed()
+        && !doc.isProcessed()
         // или он обработан и время последней команды старше 5 мин
-        || ( doc.isProcessed() && doc.getUpdatedAt() != null && DateUtil.isSomeTimePassed( doc.getUpdatedAt() ) )
+        || ( doc != null && doc.isProcessed() && doc.getUpdatedAt() != null && DateUtil.isSomeTimePassed( doc.getUpdatedAt() ) )
     ){
       jobManager.addJobInBackground( new UpdateDocumentJob( settings.getUid() ) );
     }

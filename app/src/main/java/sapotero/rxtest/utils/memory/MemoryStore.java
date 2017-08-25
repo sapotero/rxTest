@@ -1,7 +1,5 @@
 package sapotero.rxtest.utils.memory;
 
-import com.google.gson.Gson;
-
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.HashMap;
@@ -89,12 +87,6 @@ public class MemoryStore implements Processable{
           for (InMemoryDocument doc: docs ) {
             documents.put( doc.getUid(), doc );
             Timber.tag("RecyclerViewRefresh").d("MemoryStore: pub.onNext()");
-
-
-            if (doc.getUpdatedAt() != null){
-              Timber.tag(TAG).d(" * doc %s", new Gson().toJson(doc) );
-            }
-
 
             pub.onNext( doc );
           }
