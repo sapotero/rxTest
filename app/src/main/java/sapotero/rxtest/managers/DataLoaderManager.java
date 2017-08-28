@@ -639,10 +639,18 @@ public class DataLoaderManager {
 
       // обновляем всё
       if (items == MainMenuItem.ALL || items.getIndex() == 11 || items == MainMenuItem.ON_CONTROL) {
-        statuses.add("primary_consideration");
-        statuses.add("sent_to_the_report");
-        sp.add("approval");
-        sp.add("signing");
+        if ( !statuses.contains("primary_consideration") ) {
+          statuses.add("primary_consideration");
+        }
+        if ( !statuses.contains( "sent_to_the_report" ) ) {
+          statuses.add("sent_to_the_report");
+        }
+        if ( !sp.contains( "approval" ) ) {
+          sp.add("approval");
+        }
+        if ( !sp.contains( "signing" ) ) {
+          sp.add("signing");
+        }
 
         indexes.add("citizen_requests_production_db_core_cards_citizen_requests_cards");
         indexes.add("incoming_documents_production_db_core_cards_incoming_documents_cards");
