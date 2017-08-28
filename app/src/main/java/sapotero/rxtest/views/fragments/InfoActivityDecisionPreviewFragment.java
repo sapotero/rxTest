@@ -465,6 +465,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     decision_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
       @Override
       public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+        decision_spinner_adapter.setSelection(position);
         if ( decision_spinner_adapter.getCount() > 0 ) {
           Timber.tag(TAG).e("onItemSelected %s %s ", position, id);
           current_decision = decision_spinner_adapter.getItem(position).getDecision();
@@ -475,6 +476,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
       @Override
       public void onNothingSelected(AdapterView<?> adapterView) {
+        decision_spinner_adapter.setSelection(-1);
         if ( decision_spinner_adapter.getCount() > 0 ){
           current_decision = decision_spinner_adapter.getItem(0).getDecision();
           Timber.tag(TAG).e("onNothingSelected");
