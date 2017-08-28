@@ -1,12 +1,17 @@
 package sapotero.rxtest.views.adapters;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.support.v4.content.ContextCompat;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -56,7 +61,7 @@ public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
       viewHolder = new ViewHolder();
       viewHolder.name = (TextView) view.findViewById(R.id.primary_user__name);
       viewHolder.title = (TextView) view.findViewById(R.id.primary_user__title);
-
+      viewHolder.image = (ImageView) view.findViewById(R.id.primary_user__image);
 
       view.setTag(viewHolder);
     } else {
@@ -66,6 +71,21 @@ public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
 
     viewHolder.name.setText( user.getName() );
     viewHolder.title.setText( user.getOrganization() );
+
+    if (user.getIImage() != null){
+      try {
+        String str = user.getIImage().replaceAll("(\\n)", "");
+        byte[] decodedString = Base64.decode(str.getBytes(), Base64.DEFAULT);
+        Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+        viewHolder.image.setImageBitmap(decodedByte);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    } else {
+      viewHolder.image.setImageDrawable(ContextCompat.getDrawable(context, R.drawable._person));
+    }
+
+
 
     return view;
   }
@@ -130,6 +150,7 @@ public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
   private static class ViewHolder {
     public TextView name;
     public TextView title;
+    public ImageView image;
   }
 
   @Override

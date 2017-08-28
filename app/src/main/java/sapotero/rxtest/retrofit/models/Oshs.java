@@ -418,4 +418,14 @@ public class Oshs implements Serializable, IPerformer {
   public void setIsIPerformerOrganization(Boolean isOrganization) {
     setIsOrganization(isOrganization);
   }
+
+  @Override
+  public String getIImage() {
+    return getImage();
+  }
+
+  @Override
+  public void setIImage(String image) {
+    setImage(image);
+  }
 }

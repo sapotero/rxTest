@@ -400,4 +400,14 @@ public class Performer implements IPerformer {
     public void setIsIPerformerOrganization(Boolean isOrganization) {
         setOrganization(isOrganization);
     }
+
+    @Override
+    public String getIImage() {
+        return null;
+    }
+
+    @Override
+    public void setIImage(String image) {
+
+    }
 }

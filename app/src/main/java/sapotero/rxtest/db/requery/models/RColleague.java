@@ -17,6 +17,7 @@ public abstract class RColleague {
   String officialId;
   String officialName;
   Boolean actived;
+  String image;
 
   @Index("colleague_user_index")
   String user;

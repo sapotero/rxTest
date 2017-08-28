@@ -26,6 +26,7 @@ public abstract class RAssistant {
   String  assistantName;
   Boolean forDecision;
   String  title;
+  String image;
 
   @Index("assistant_user_index")
   String  user;
