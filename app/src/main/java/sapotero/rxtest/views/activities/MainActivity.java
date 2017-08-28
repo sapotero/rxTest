@@ -430,7 +430,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void updateByStatus() {
-    dataLoader.updateByCurrentStatus( menuBuilder.getItem(), null, false);
+    dataLoader.updateByCurrentStatus( menuBuilder.getItem(), null);
   }
 
 
