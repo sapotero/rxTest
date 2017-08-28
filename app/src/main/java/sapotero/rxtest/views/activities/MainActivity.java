@@ -562,10 +562,10 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     super.onDestroy();
   }
 
-  private void setJournalType(int type) {
+  private void setJournalType(int type, boolean reloadDocuments) {
     // Reset previous state of organization filter and set tab changed
     settings.setOrganizationFilterActive(false);
-    settings.setTabChanged(true);
+    settings.setTabChanged(reloadDocuments);
 
     menuBuilder.selectJournal( type );
     journalSelector.selectJournal(type);
@@ -614,40 +614,40 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
           switch ((int) drawerItem.getIdentifier()) {
             case ALL:
-              setJournalType(ALL);
+              setJournalType(ALL, true);
               break;
             case INCOMING_DOCUMENTS:
-              setJournalType(INCOMING_DOCUMENTS);
+              setJournalType(INCOMING_DOCUMENTS, true);
               break;
             case CITIZEN_REQUESTS:
-              setJournalType(CITIZEN_REQUESTS);
+              setJournalType(CITIZEN_REQUESTS, true);
               break;
             case APPROVE_ASSIGN:
-              setJournalType(APPROVE_ASSIGN);
+              setJournalType(APPROVE_ASSIGN, true);
               break;
             case INCOMING_ORDERS:
-              setJournalType(INCOMING_ORDERS);
+              setJournalType(INCOMING_ORDERS, true);
               break;
             case ORDERS:
-              setJournalType(ORDERS);
+              setJournalType(ORDERS, true);
               break;
             case ORDERS_DDO:
-              setJournalType(ORDERS_DDO);
+              setJournalType(ORDERS_DDO, true);
               break;
             case IN_DOCUMENTS:
-              setJournalType(IN_DOCUMENTS);
+              setJournalType(IN_DOCUMENTS, true);
               break;
             case ON_CONTROL:
-              setJournalType(ON_CONTROL);
+              setJournalType(ON_CONTROL, true);
               break;
             case PROCESSED:
-              setJournalType(PROCESSED);
+              setJournalType(PROCESSED, true);
               break;
             case FAVORITES:
-              setJournalType(FAVORITES);
+              setJournalType(FAVORITES, true);
               break;
             case SETTINGS_VIEW_TYPE_APPROVE:
-              setJournalType(8);
+              setJournalType(8, true);
               break;
 
             case SETTINGS_VIEW:
@@ -1053,11 +1053,19 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     if ( switchToSubstituteModeStarted ) {
       switchToSubstituteModeStarted = false;
       dataLoader.initV2( true );
-    }
+      setJournalType(ALL, false);
+      update( false );
+      dismissStartSubstituteDialog();
 
-    update( false );
-    dismissStartSubstituteDialog();
-    dismissStopSubstituteDialog();
+    } else if ( exitFromSubstituteModeStarted ) {
+      exitFromSubstituteModeStarted = false;
+      setJournalType(ALL, false);
+      update( true );
+      dismissStopSubstituteDialog();
+
+    } else {
+      update( false );
+    }
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
@@ -1070,7 +1078,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   public void onMessageEvent(ReceivedTokenEvent event) {
     if ( exitFromSubstituteModeStarted ) {
       Timber.tag(TAG).i("ReceivedTokenEvent");
-      exitFromSubstituteModeStarted = false;
       switchDocuments();
     } else {
       updateByStatus();
