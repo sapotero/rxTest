@@ -134,8 +134,8 @@ public class MemoryStore implements Processable{
       .and(RDocumentEntity.USER.eq(settings.getLogin()))
       .get().toObservable()
       .toList()
-      .subscribeOn(Schedulers.computation())
-      .observeOn(Schedulers.computation())
+      .subscribeOn(Schedulers.immediate())
+      .observeOn(AndroidSchedulers.mainThread())
       .subscribe(
         docs -> {
           for (RDocumentEntity doc : docs) {

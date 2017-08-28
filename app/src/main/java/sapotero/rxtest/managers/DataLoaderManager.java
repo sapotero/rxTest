@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -707,6 +708,8 @@ public class DataLoaderManager {
       for (String index: indexes ) {
         for (String status: statuses ) {
 
+          String login = settings.getLogin();
+
           subscription.add(
             docService
               .getDocumentsByIndexes(settings.getLogin(), settings.getToken(), index, status, null , 500, getYears())
@@ -718,8 +721,11 @@ public class DataLoaderManager {
                   requestCount--;
                   updateDocCount( data, true );
                   checkAndSendCountReady();
-                  Timber.tag("LoadSequence").d("Processing list of documents");
-                  processDocuments( data, status, index, null, DocumentType.DOCUMENT );
+                  if ( Objects.equals( login, settings.getLogin() ) ) {
+                    // Обрабатываем полученный список только если логин не поменялся (при входе/выходе в режим замещения)
+                    Timber.tag("LoadSequence").d("Processing list of documents");
+                    processDocuments( data, status, index, null, DocumentType.DOCUMENT );
+                  }
                 },
                 error -> {
                   requestCount--;
@@ -732,6 +738,9 @@ public class DataLoaderManager {
 
 
       for (String code : sp) {
+
+        String login = settings.getLogin();
+
         subscription.add(
           docService
             .getDocuments(settings.getLogin(), settings.getToken(), code, null , 500, 0, getYears())
@@ -743,8 +752,11 @@ public class DataLoaderManager {
                 requestCount--;
                 updateDocCount( data, true );
                 checkAndSendCountReady();
-                Timber.tag("LoadSequence").d("Processing list of projects");
-                processDocuments( data, code, null, null, DocumentType.DOCUMENT );
+                if ( Objects.equals( login, settings.getLogin() ) ) {
+                  // Обрабатываем полученный список только если логин не поменялся (при входе/выходе в режим замещения)
+                  Timber.tag("LoadSequence").d("Processing list of projects");
+                  processDocuments( data, code, null, null, DocumentType.DOCUMENT );
+                }
               },
               error -> {
                 requestCount--;
@@ -926,10 +938,9 @@ public class DataLoaderManager {
       Timber.tag("LoadSequence").d("Loading list of favorites");
       favoritesDataLoading = true;
 
-      if (subscriptionFavorites != null) {
-        subscriptionFavorites.unsubscribe();
-      }
-      subscriptionFavorites = new CompositeSubscription();
+      unsubscribeFavorites();
+
+      String login = settings.getLogin();
 
       subscriptionFavorites.add(
         docService.getByFolders(settings.getLogin(), settings.getToken(), null, 500, 0, favorites_folder.getUid(), null)
@@ -943,8 +954,11 @@ public class DataLoaderManager {
               favoritesDataLoaded = true;
               updateDocCount( favoritesData, false );
               if ( processFavoritesData ) {
-                Timber.tag("LoadSequence").d("Processing list of favorites");
-                processFavorites(favorites_folder);
+                if ( Objects.equals( login, settings.getLogin() ) ) {
+                  // Обрабатываем полученный список только если логин не поменялся (при входе/выходе в режим замещения)
+                  Timber.tag("LoadSequence").d("Processing list of favorites");
+                  processFavorites(favorites_folder);
+                }
               } else {
                 Timber.tag("LoadSequence").d("processLoadedData = false, quit processing list of favorites");
               }
@@ -955,6 +969,13 @@ public class DataLoaderManager {
           )
       );
     }
+  }
+
+  private void unsubscribeFavorites() {
+    if (subscriptionFavorites != null) {
+      subscriptionFavorites.unsubscribe();
+    }
+    subscriptionFavorites = new CompositeSubscription();
   }
 
   private void processFavorites(RFolderEntity favorites_folder) {
@@ -1008,11 +1029,9 @@ public class DataLoaderManager {
       Timber.tag("LoadSequence").d("Loading list of processed");
       processedDataLoading = true;
 
-      if (subscriptionProcessed != null) {
-        subscriptionProcessed.unsubscribe();
-      }
+      unsubscribeProcessed();
 
-      subscriptionProcessed = new CompositeSubscription();
+      String login = settings.getLogin();
 
       subscriptionProcessed.add(
         docService.getByFolders(settings.getLogin(), settings.getToken(), null, 500, 0, processed_folder.getUid(), date)
@@ -1026,8 +1045,11 @@ public class DataLoaderManager {
               processedDataLoaded = true;
               updateDocCount( processedData, false );
               if ( processProcessedData ) {
-                Timber.tag("LoadSequence").d("Processing list of processed");
-                processProcessed( processed_folder );
+                if ( Objects.equals( login, settings.getLogin() ) ) {
+                  // Обрабатываем полученный список только если логин не поменялся (при входе/выходе в режим замещения)
+                  Timber.tag("LoadSequence").d("Processing list of processed");
+                  processProcessed( processed_folder );
+                }
               } else {
                 Timber.tag("LoadSequence").d("processLoadedData = false, quit processing list of processed");
               }
@@ -1040,8 +1062,25 @@ public class DataLoaderManager {
     }
   }
 
+  private void unsubscribeProcessed() {
+    if (subscriptionProcessed != null) {
+      subscriptionProcessed.unsubscribe();
+    }
+    subscriptionProcessed = new CompositeSubscription();
+  }
+
   private void processProcessed(RFolderEntity processed_folder) {
     processDocuments( processedData, null, null, processed_folder.getUid(), DocumentType.PROCESSED );
+  }
+
+  public void unsubcribeAll() {
+    Timber.tag(TAG).d("Unsubscribe all");
+
+    unsubscribe();
+    unsubscribeFavorites();
+    unsubscribeProcessed();
+    unsubscribeInitV2();
+    unsubscribeUpdateAuth();
   }
 
 //  @Subscribe(threadMode = ThreadMode.BACKGROUND)

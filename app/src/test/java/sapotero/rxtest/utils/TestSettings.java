@@ -69,8 +69,8 @@ public class TestSettings implements ISettings {
   public String oldLogin;
   public String oldCurrentUser;
   public String colleagueId;
-  public Boolean isUpdateAuthStarted;
-  public Boolean isTabChanged;
+  public boolean isUpdateAuthStarted;
+  public boolean isTabChanged;
 
   public TestSettings() {
     login = "dummyLogin";

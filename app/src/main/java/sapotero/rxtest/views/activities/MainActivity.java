@@ -196,7 +196,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     dataLoader = new DataLoaderManager(this);
 
     initToolbar();
-    
+
     initSearchSub();
     initSearch();
 
@@ -834,8 +834,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
               settings.setToken( colleagueResponse.getAuthToken() );
               settings.setColleagueId( colleagueEntity.getColleagueId() );
 
-              initJournalSelectionPosition();
-
+              dataLoader.unsubcribeAll();
               switchDocuments();
 
             }, error -> {
@@ -860,12 +859,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     store.clear();
   }
 
-  private void initJournalSelectionPosition() {
-    if ( journalSelector.getPosition() == -1 ) {
-      journalSelector.setPosition( ALL );
-    }
-  }
-
   private void stopSubstituteMode() {
     if ( settings.isOnline() ) {
       if ( queue.isAllTasksComplete() ) {
@@ -878,8 +871,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
         settings.setSubstituteMode( false );
         swapLogin();
 
-        initJournalSelectionPosition();
-
+        dataLoader.unsubcribeAll();
         showStopSubstituteDialog();
 
         dataLoader.updateAuth(null, true);
