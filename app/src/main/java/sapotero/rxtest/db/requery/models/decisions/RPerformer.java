@@ -15,6 +15,7 @@ public abstract class RPerformer {
 
   Integer number;
   String performerId;
+  String image;
   String performerType;
   String performerText;
   String performerGender;
