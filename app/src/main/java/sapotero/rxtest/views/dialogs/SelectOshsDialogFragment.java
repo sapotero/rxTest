@@ -135,6 +135,11 @@ public class SelectOshsDialogFragment extends DialogFragment implements PrimaryU
     this.callback = callback;
   }
 
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setCancelable(false);
+  }
 
   @RequiresApi(api = Build.VERSION_CODES.M)
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
