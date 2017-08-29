@@ -7,56 +7,61 @@ import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import javax.inject.Inject;
+
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.views.activities.InfoActivity;
+import timber.log.Timber;
 
-/*NotifiManager создаёт системные уведомлениея ( Notification ) на основании коллекции докуметов переданной в конструктор.
+    /** NotifiManager создаёт системные  уведомления ( Notification ) на основании коллекции докуметов, переданной в конструктор.
         addedDocList - список UID докуметов
         documentsMap - Map документов
-*/
+        currentNotifiId -  уникальный ID уведомления.
+     **/
 public class NotifiManager {
 
-
-    @Inject Context context;
+    @Inject Context appContext;
     private final String TAG = NotifiManager.class.getSimpleName();
     private List<String> addedDocList;
     private HashMap<String, Document> documentsMap;
+    private int currentNotificationId;
+    private final int THRESHOLD_VALUE = 5; /*величина больше которой, уведомления группируем. InboxStyle */
 
-    public NotifiManager(List<String> addedDocList, HashMap<String, Document> documentsMap) {
+    public NotifiManager(List<String> addedDocList, HashMap<String, Document> documentsMap, int currentNotificationId) {
         this.addedDocList = addedDocList;
         this.documentsMap = documentsMap;
+        this.currentNotificationId = currentNotificationId;
         EsdApplication.getNetworkComponent().inject(this);
     }
 
     void generateNotifyMsg() {
-        if (addedDocList.size() > 5) {
-            showGroupSummaryNotification("Вам поступили входящие документы:",addedDocList, 0);
+        if (addedDocList.size() > THRESHOLD_VALUE) {
+            showGroupSummaryNotification("Вам поступили входящие документы:", addedDocList, currentNotificationId);
         } else {
-            for (String item : addedDocList) {
-                showSingleNotification("Вам поступил входящий документ:", documentsMap.get(item).getTitle(), 0);
+            for (String uidDoc : addedDocList) {
+                showSingleNotification("Вам поступил входящий документ:", documentsMap.get(uidDoc).getTitle(), currentNotificationId);
             }
         }
     }
 
+    private void showSingleNotification(String title, String msg, int notificationId) {
+        NotificationManagerCompat notificationManagerCompat = (NotificationManagerCompat) NotificationManagerCompat.from(appContext);
 
-    private void showSingleNotification(String title,
-                                        String message,
-                                        int notificationId) {
-        NotificationManagerCompat notificationManagerCompat = (NotificationManagerCompat) NotificationManagerCompat.from(context);
+        ArrayList<String> documentsUidsList = new ArrayList<>();
+        documentsUidsList.addAll(addedDocList);
+        Intent intent = InfoActivity.newIntent(appContext, documentsUidsList);
+        PendingIntent pireadDoc = PendingIntent.getActivity(appContext, 0, intent, 0);
 
-        Intent readDocIntent = new Intent(context, InfoActivity.class);
-        PendingIntent pireadDoc = PendingIntent.getActivity(context, 0, readDocIntent, 0);
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext);
         builder.setContentTitle(title)
-                .setContentText(message)
+                .setContentText("№:" + msg)
                 .setSmallIcon(R.drawable.ic_error)
-                .setGroupSummary(false)
+                .setGroupSummary(true)
                 .setGroup("group")
                 .addAction(R.drawable.ic_error,
                         "Открыть документ",
@@ -64,28 +69,26 @@ public class NotifiManager {
                 .setDefaults(Notification.DEFAULT_ALL)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setVisibility(Notification.VISIBILITY_PUBLIC);
+        Timber.tag(TAG).d("notificationId = " + notificationId);
         notificationManagerCompat.notify(notificationId, builder.build());
     }
 
-    private void showGroupSummaryNotification(String title,
-                                              List<String> addedDocList,
-                                              int notificationId) {
-        NotificationManagerCompat notificationManagerCompat = (NotificationManagerCompat) NotificationManagerCompat.from(context);
+    private void showGroupSummaryNotification(String title, List<String> addedDocList, int notificationId) {
+        NotificationManagerCompat notificationManagerCompat = (NotificationManagerCompat) NotificationManagerCompat.from(appContext);
 
-        Intent readDocIntent = new Intent(context, InfoActivity.class);
-        PendingIntent pireadDoc = PendingIntent.getActivity(context, 0, readDocIntent, 0);
+        Intent readDocIntent = new Intent(appContext, InfoActivity.class);
+        PendingIntent pireadDoc = PendingIntent.getActivity(appContext, 0, readDocIntent, 0);
 
         NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle()
-                .setSummaryText("setSummaryText")
-                .setBigContentTitle("BigContentTitle");
-
+                .setBigContentTitle("BigContentTitle")
+                .setSummaryText("больше " + THRESHOLD_VALUE + " входящих документов...");
         for (String uidDoc : addedDocList) {
             inboxStyle.addLine(documentsMap.get(uidDoc).getTitle());
         }
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext);
         builder.setContentTitle(title)
-//              .setContentText(message)
+                .setContentText(addedDocList.size()+" входящих...")
                 .setStyle(inboxStyle)
                 .setNumber(addedDocList.size())
                 .setSmallIcon(R.drawable.ic_error)

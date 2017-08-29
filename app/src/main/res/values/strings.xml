@@ -536,6 +536,7 @@
     <string name="SHOW_PRIMARY_CONSIDERATION_KEY">SHOW_PRIMARY_CONSIDERATION</string>
     <string name="processed_load_period_key">settings_processed_load_period</string>
     <string name="processed_delete_period_key">settings_processed_delete_period</string>
+    <string name="notification_enabled_key">notification_enabled</string>
 
     <string-array name="settings_view_processed_load_period">
         <item>1 неделя</item>

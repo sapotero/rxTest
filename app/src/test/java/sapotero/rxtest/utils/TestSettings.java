@@ -604,4 +604,14 @@ public class TestSettings implements ISettings {
   public void setOrganizationFilterSelection(Set<String> value) {
     organizationFilterSelection = value;
   }
+
+  @Override
+  public int getNotificationId() {
+    return 0;
+  }
+
+  @Override
+  public void setNotificationId(int value) {
+
+  }
 }

@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -65,6 +66,7 @@ public class Processor {
   private HashMap<String, Document> documents;
   private Transaction transaction;
   private Source source = Source.EMPTY;
+
 
   public Processor(PublishSubject<InMemoryDocument> subscribeSubject) {
     EsdApplication.getManagerComponent().inject(this);
@@ -242,10 +244,15 @@ public class Processor {
 
         validateDocuments();
 
-        /*генерация уведомления, в случ. получения нового документа. Отсутствующего в MemoryStore*/
-          if (add.size() > 0) {
-              NotifiManager mNotifiManager = new NotifiManager(add, documents);
+        /*генерация уведомления, в случ. получения нового документа, отсутствующего в MemoryStore*/
+          if (add.size() > 0 && settings.isDebugEnabled()) {
+            int notificationId = UUID.randomUUID().hashCode();
+              Timber.tag(TAG).e("1 settings.getNotificationId() = " + settings.getNotificationId());
+              NotifiManager mNotifiManager = new NotifiManager(add, documents, notificationId);
               mNotifiManager.generateNotifyMsg();
+              Timber.tag(TAG).e("2 notificationId = " + notificationId);
+              settings.setNotificationId(notificationId);
+              Timber.tag(TAG).e("3 settings.getNotificationId() = " + settings.getNotificationId());
           }
 
         return Collections.singletonList("");

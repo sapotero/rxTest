@@ -221,4 +221,13 @@ public interface ISettings {
   Set<String> getOrganizationFilterSelection();
 
   void setOrganizationFilterSelection(Set<String> value);
+
+  int getNotificationId();
+
+  void setNotificationId(int value);
+
+  boolean isNotificationEnabled();
+
+
+
 }

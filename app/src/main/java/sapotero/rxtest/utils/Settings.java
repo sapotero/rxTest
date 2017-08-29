@@ -46,6 +46,7 @@ public class Settings implements ISettings {
   private static final String SHOW_PRIMARY_CONSIDERATION = "show_primary_consideration";
   private static final String ORGANIZATION_FILTER_ACTIVE_KEY = "organization.filter.active";
   private static final String ORGANIZATION_FILTER_SELECTION_KEY = "organization.filter.savedselection";
+  private static final String NOTIFICATION_ID = "notification.id";
 
   public static String FIRST_RUN_KEY;
   public static String IS_PROJECT;
@@ -72,6 +73,7 @@ public class Settings implements ISettings {
   private static String SHOW_APPROVE_ON_PRIMARY_KEY;
   private static String MAX_IMAGE_SIZE_KEY;
   private static String DEBUG_ENABLED_KEY;
+  private static String NOTIFICATION_ENABLED_KEY;
 
   private Context context;
   private RxSharedPreferences settings;
@@ -134,6 +136,7 @@ public class Settings implements ISettings {
   private Preference<Boolean> showPrimaryConsideration;
   private Preference<Boolean> organizationFilterActive;
   private Preference<Set<String>> organizationFilterSelection;
+  private Preference<Integer> notificationId;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -167,6 +170,7 @@ public class Settings implements ISettings {
     SHOW_APPROVE_ON_PRIMARY_KEY    = context.getResources().getString(R.string.show_approve_on_primary_key);
     MAX_IMAGE_SIZE_KEY             = context.getResources().getString(R.string.max_image_size_key);
     DEBUG_ENABLED_KEY              = context.getResources().getString(R.string.debug_enabled_key);
+    NOTIFICATION_ENABLED_KEY       = context.getResources().getString(R.string.notification_enabled_key);
 
     firstRunFlag                   = settings.getBoolean(FIRST_RUN_KEY);
     isProject                      = settings.getBoolean(IS_PROJECT);
@@ -227,6 +231,7 @@ public class Settings implements ISettings {
     showPrimaryConsideration       = settings.getBoolean(SHOW_PRIMARY_CONSIDERATION);
     organizationFilterActive       = settings.getBoolean(ORGANIZATION_FILTER_ACTIVE_KEY);
     organizationFilterSelection    = settings.getStringSet(ORGANIZATION_FILTER_SELECTION_KEY);
+    notificationId                 = settings.getInteger(NOTIFICATION_ID);
   }
 
   @Override
@@ -838,4 +843,19 @@ public class Settings implements ISettings {
   public void setOrganizationFilterSelection(Set<String> value) {
     setStringSet(organizationFilterSelection, value);
   }
+
+  @Override
+  public int getNotificationId() {
+    return getInteger(notificationId);
+  }
+
+  @Override
+  public void setNotificationId(int value) {
+      setInteger(notificationId, value);
+  }
+
+    @Override
+    public boolean isNotificationEnabled() {
+        return false;
+    }
 }
