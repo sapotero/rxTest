@@ -194,6 +194,11 @@ public class DecisionSpinnerAdapter extends BaseAdapter {
     TextView itemView = (TextView) super.getDropDownView(position, convertView, parent);
     itemView.setTextColor( ContextCompat.getColor(context, position == mPos ? R.color.md_grey_900 : R.color.md_grey_600) );
 
+    //resolved https://tasks.n-core.ru/browse/MVDESD-14112
+    // увеличить ширину списка и увеличить отступ
+    itemView.setPadding( 16, 24, 16, 24);
+    itemView.setWidth(476);
+
     if (position == mPos){
       itemView.setPaintFlags( Paint.FAKE_BOLD_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG );
     }
