@@ -294,13 +294,13 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   private void setAsFakeProcessed() {
     // resolved https://tasks.n-core.ru/browse/MVDESD-13366
     // ставим плашку всегда
-    dataStore
-      .update(RDocumentEntity.class)
-      .set(RDocumentEntity.CHANGED, true)
-      .set(RDocumentEntity.MD5, "")
-      .where(RDocumentEntity.UID.eq( settings.getUid() ))
-      .get()
-      .value();
+//    dataStore
+//      .update(RDocumentEntity.class)
+//      .set(RDocumentEntity.CHANGED, true)
+//      .set(RDocumentEntity.MD5, "")
+//      .where(RDocumentEntity.UID.eq( settings.getUid() ))
+//      .get()
+//      .value();
   }
 
   private void updateAfteButtonPressed() {
