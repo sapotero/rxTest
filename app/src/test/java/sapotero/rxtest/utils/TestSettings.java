@@ -421,6 +421,16 @@ public class TestSettings implements ISettings {
   }
 
   @Override
+  public String getInfocardFontSize() {
+    return null;
+  }
+
+  @Override
+  public void setInfocardFontSize(String value) {
+
+  }
+
+  @Override
   public String getStartPage() {
     return startPage;
   }
