@@ -27,10 +27,12 @@ import sapotero.rxtest.jobs.bus.CreateFavoriteDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateProcessedDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateProjectsJob;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
+import sapotero.rxtest.managers.menu.utils.DateUtil;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.fields.DocumentType;
+import sapotero.rxtest.utils.memory.fields.FieldType;
 import sapotero.rxtest.utils.memory.fields.InMemoryState;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import sapotero.rxtest.utils.memory.mappers.InMemoryDocumentMapper;
@@ -136,6 +138,7 @@ public class Processor {
         Timber.w("process as db");
         transaction
           .from(InMemoryDocumentMapper.fromDB(document_from_db))
+          .setField(FieldType.UPDATED_AT, DateUtil.getTimestampEarly() )
           .setState(InMemoryState.READY);
 
         commit( transaction );
@@ -165,28 +168,38 @@ public class Processor {
       transaction.withIndex(index);
     }
 
-
     sub.onNext( transaction.commit() );
   }
 
   private void validate(Document document){
-    Timber.tag(TAG).e("->      : %s / %s@%5.10s  ", document.getUid(), filter, index );
-
-//    upsert( document );
+    Timber.tag(TAG).e("-> : %s / %s@%5.10s  ", document.getUid(), filter, index );
 
     // new upsert job
     if ( store.getDocuments().keySet().contains( document.getUid() ) ){
       InMemoryDocument doc = store.getDocuments().get( document.getUid() );
 
-      Timber.tag(TAG).e("filters : %s | %s", doc.getFilter(), filter);
+      Timber.tag(TAG).e("    * %s | %s | %s", doc.getFilter(), filter, doc.getUpdatedAt());
 
-      // изменилось MD5
-      if ( Filter.isChanged( doc.getMd5(), document.getMd5() ) ){
-        Timber.tag(TAG).e("md5     : %s | %s", doc.getMd5(), document.getMd5());
-        updateJob( doc.getUid(), doc.getMd5() );
-      } else {
-        EventBus.getDefault().post( new StepperLoadDocumentEvent( doc.getUid() ) );
+      int time = 600;
+      try {
+        time = Integer.parseInt(settings.getUpdateTime());
+      } catch (NumberFormatException e) {
+        Timber.e(e);
       }
+
+      if (doc.getUpdatedAt() != null) {
+        Timber.tag(TAG).e("    ** %s @ %s", doc.getUpdatedAt(), DateUtil.isSomeTimePassed(doc.getUpdatedAt(), time) );
+      } else {
+
+        // изменилось MD5
+        if ( Filter.isChanged( doc.getMd5(), document.getMd5() ) ){
+        // Timber.tag(TAG).e("md5     : %s | %s", doc.getMd5(), document.getMd5());
+          updateJob( doc.getUid(), doc.getMd5() );
+        } else {
+          EventBus.getDefault().post( new StepperLoadDocumentEvent( doc.getUid() ) );
+        }
+      }
+
 
     } else {
       Timber.tag(TAG).e("new: %s", document.getUid());
@@ -262,11 +275,13 @@ public class Processor {
   private void resetMd5(List<String> add) {
     // Для тех документов, которые надо добавить во вкладку, если они есть в памяти,
     // сбрасываем MD5, чтобы далее для их обновления была вызвана UpdateDocumentJob.
+
+    // проверить source - сделать исключение для папок обработанные и избранное из ws
     for (String uid : add) {
-      InMemoryDocument documentInMemory = store.getDocuments().get( uid );
-      if ( documentInMemory != null && documentInMemory.isProcessed()  ) {
-        documentInMemory.setMd5("");
-        store.getDocuments().put( uid, documentInMemory );
+      InMemoryDocument inMemoryDocument = store.getDocuments().get( uid );
+      if ( inMemoryDocument != null && inMemoryDocument.isProcessed()  ) {
+        inMemoryDocument.setMd5("");
+        store.getDocuments().put( uid, inMemoryDocument );
       }
     }
   }

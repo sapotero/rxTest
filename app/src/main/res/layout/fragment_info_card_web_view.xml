@@ -1,15 +1,16 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
              xmlns:tools="http://schemas.android.com/tools"
-                android:id="@+id/fragment_info_card_web_wrapper"
+             android:id="@+id/fragment_info_card_web_wrapper"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
              tools:context="sapotero.rxtest.views.fragments.InfoCardWebViewFragment">
 
-
         <WebView
+            android:id="@+id/web_infocard"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/web_infocard">
+            android:paddingEnd="@dimen/date_offset"
+            android:splitTrack="false">
 
         </WebView>
 

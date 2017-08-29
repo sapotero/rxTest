@@ -27,7 +27,7 @@ public final class RequeryDbModule {
   @DataScope
   SingleEntityStore<Persistable> provideDatabase(Context context) {
 
-    DatabaseSource source = new DatabaseSource(context, Models.DEFAULT, 21);
+    DatabaseSource source = new DatabaseSource(context, Models.DEFAULT, 22);
 
     EntityModel model = Models.DEFAULT;
 

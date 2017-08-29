@@ -6,6 +6,7 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import rx.Observable;
@@ -14,8 +15,12 @@ import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.managers.menu.commands.DecisionCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.managers.menu.utils.DateUtil;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
+import sapotero.rxtest.utils.memory.fields.FieldType;
+import sapotero.rxtest.utils.memory.fields.LabelType;
+import sapotero.rxtest.utils.memory.utils.Transaction;
 import timber.log.Timber;
 
 public class ApproveDecision extends DecisionCommand {
@@ -77,7 +82,11 @@ public class ApproveDecision extends DecisionCommand {
       Decision _decision = getParams().getDecisionModel();
       _decision.setDocumentUid( null );
       _decision.setApproved(true);
-      _decision.setSign( sign );
+
+      // resolved https://tasks.n-core.ru/browse/MVDESD-14141
+      // при нажатии кнопки согласовать - не отправляем подпись
+      Boolean equals = Objects.equals(store.getDocuments().get(params.getDocument()).getFilter(), "primary_consideration") && !Objects.equals(getParams().getDecisionModel().getSignerId(), settings.getCurrentUserId());
+      _decision.setSign( equals? null : sign );
 
       if ( getParams().isAssignment() ) {
         _decision.setAssignment(true);
@@ -109,6 +118,13 @@ public class ApproveDecision extends DecisionCommand {
     } else {
       finishOperationOnSuccess();
     }
+
+    Transaction transaction = new Transaction();
+    transaction
+      .from( store.getDocuments().get(getParams().getDocument()) )
+      .setField(FieldType.UPDATED_AT, DateUtil.getTimestamp())
+      .removeLabel(LabelType.SYNC);
+    store.process( transaction );
 
     EventBus.getDefault().post( new UpdateDocumentEvent( data.getDocumentUid() ));
   }

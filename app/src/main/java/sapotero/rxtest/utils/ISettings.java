@@ -70,6 +70,10 @@ public interface ISettings {
 
   void setUid(String value);
 
+  String getUpdateTime();
+
+  void setUpdateTime(String value);
+
   String getStatusCode();
 
   void setStatusCode(String value);
@@ -147,6 +151,10 @@ public interface ISettings {
   String getPrevDialogComment();
 
   void setPrevDialogComment(String value);
+
+  String getInfocardFontSize();
+
+  void setInfocardFontSize(String value);
 
   String getStartPage();
 
