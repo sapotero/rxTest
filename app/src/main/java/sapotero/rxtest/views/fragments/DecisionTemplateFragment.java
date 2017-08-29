@@ -143,6 +143,7 @@ public class DecisionTemplateFragment extends Fragment {
 
   private void addDecisionTemplateDialog() {
     MaterialDialog add_dialog = new MaterialDialog.Builder(getContext())
+      .cancelable(false)
       .title(R.string.fragment_decision_template_add)
       .inputType(
         InputType.TYPE_CLASS_TEXT

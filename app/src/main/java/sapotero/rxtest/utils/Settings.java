@@ -46,6 +46,7 @@ public class Settings implements ISettings {
   private static final String SHOW_PRIMARY_CONSIDERATION = "show_primary_consideration";
   private static final String ORGANIZATION_FILTER_ACTIVE_KEY = "organization.filter.active";
   private static final String ORGANIZATION_FILTER_SELECTION_KEY = "organization.filter.savedselection";
+  private static final String TAB_CHANGED_KEY = "tab.changed";
 
   public static String FIRST_RUN_KEY;
   public static String IS_PROJECT;
@@ -137,8 +138,8 @@ public class Settings implements ISettings {
   private Preference<Boolean> showPrimaryConsideration;
   private Preference<Boolean> organizationFilterActive;
   private Preference<Set<String>> organizationFilterSelection;
+  private Preference<Boolean> isTabChanged;
   private Preference<String> updateTime;
-
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -236,6 +237,7 @@ public class Settings implements ISettings {
     showPrimaryConsideration       = settings.getBoolean(SHOW_PRIMARY_CONSIDERATION);
     organizationFilterActive       = settings.getBoolean(ORGANIZATION_FILTER_ACTIVE_KEY);
     organizationFilterSelection    = settings.getStringSet(ORGANIZATION_FILTER_SELECTION_KEY);
+    isTabChanged                   = settings.getBoolean(TAB_CHANGED_KEY);
   }
 
   @Override
@@ -870,5 +872,15 @@ public class Settings implements ISettings {
   @Override
   public void setOrganizationFilterSelection(Set<String> value) {
     setStringSet(organizationFilterSelection, value);
+  }
+
+  @Override
+  public boolean isTabChanged() {
+    return getBoolean(isTabChanged);
+  }
+
+  @Override
+  public void setTabChanged(boolean value) {
+    setBoolean(isTabChanged, value);
   }
 }

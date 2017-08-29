@@ -768,7 +768,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
           .input(R.string.comment_hint, R.string.dialog_empty_value, (dialog12, input) -> {
             settings.setPrevDialogComment( input.toString() );
             params.setComment( input.toString() );
-          });
+          }).cancelable(false);
       }
 
 
@@ -805,7 +805,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         .input(R.string.comment_hint, R.string.dialog_empty_value, (dialog12, input) -> {
           settings.setPrevDialogComment( input.toString() );
           params.setComment( input.toString() );
-        });
+        }).cancelable(false);
     }
 
 
