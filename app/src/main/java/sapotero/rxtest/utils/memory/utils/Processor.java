@@ -189,6 +189,7 @@ public class Processor {
 
       if (doc.getUpdatedAt() != null) {
         Timber.tag(TAG).e("    ** %s @ %s", doc.getUpdatedAt(), DateUtil.isSomeTimePassed(doc.getUpdatedAt(), time) );
+        EventBus.getDefault().post( new StepperLoadDocumentEvent( doc.getUid() ) );
       } else {
 
         // изменилось MD5
