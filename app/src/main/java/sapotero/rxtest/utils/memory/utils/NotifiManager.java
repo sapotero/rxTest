@@ -50,6 +50,7 @@ public class NotifiManager {
     }
 
     private void showSingleNotification(String title, String msg, int notificationId) {
+        // TODO: вынести строки в ресурсы
         NotificationManagerCompat notificationManagerCompat = (NotificationManagerCompat) NotificationManagerCompat.from(appContext);
 
         ArrayList<String> documentsUidsList = new ArrayList<>();
@@ -74,6 +75,7 @@ public class NotifiManager {
     }
 
     private void showGroupSummaryNotification(String title, List<String> addedDocList, int notificationId) {
+        // TODO: вынести строки в ресурсы
         NotificationManagerCompat notificationManagerCompat = (NotificationManagerCompat) NotificationManagerCompat.from(appContext);
 
         Intent readDocIntent = new Intent(appContext, InfoActivity.class);

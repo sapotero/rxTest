@@ -244,15 +244,15 @@ public class Processor {
 
         validateDocuments();
 
-        /*генерация уведомления, в случ. получения нового документа, отсутствующего в MemoryStore*/
-          if (add.size() > 0 && settings.isDebugEnabled()) {
+        /* генерация уведомления, в случ. получения нового документа, отсутствующего в MemoryStore*/
+        settings.getNotificatedJournals();
+        Timber.tag(TAG).e("settings.getNotificatedJournals() = " + settings.getNotificatedJournals());
+        if (add.size() > 0 ) {
             int notificationId = UUID.randomUUID().hashCode();
-              Timber.tag(TAG).e("1 settings.getNotificationId() = " + settings.getNotificationId());
+              Timber.tag(TAG).e("1 settings.getNotificationId() = " + notificationId );
               NotifiManager mNotifiManager = new NotifiManager(add, documents, notificationId);
               mNotifiManager.generateNotifyMsg();
               Timber.tag(TAG).e("2 notificationId = " + notificationId);
-              settings.setNotificationId(notificationId);
-              Timber.tag(TAG).e("3 settings.getNotificationId() = " + settings.getNotificationId());
           }
 
         return Collections.singletonList("");

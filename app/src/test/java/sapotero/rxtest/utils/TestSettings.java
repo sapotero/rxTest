@@ -605,13 +605,4 @@ public class TestSettings implements ISettings {
     organizationFilterSelection = value;
   }
 
-  @Override
-  public int getNotificationId() {
-    return 0;
-  }
-
-  @Override
-  public void setNotificationId(int value) {
-
-  }
 }

@@ -222,12 +222,7 @@ public interface ISettings {
 
   void setOrganizationFilterSelection(Set<String> value);
 
-  int getNotificationId();
+  Set<String> getNotificatedJournals();
 
-  void setNotificationId(int value);
-
-  boolean isNotificationEnabled();
-
-
-
+  Preference<Set<String>> getNotificatedJournalsPreference();
 }
