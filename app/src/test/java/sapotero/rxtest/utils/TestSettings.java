@@ -65,6 +65,7 @@ public class TestSettings implements ISettings {
   public boolean showPrimaryConsideration;
   public boolean organizationFilterActive;
   public Set<String> organizationFilterSelection;
+  public boolean isTabChanged;
 
   public TestSettings() {
     login = "dummyLogin";
@@ -603,5 +604,15 @@ public class TestSettings implements ISettings {
   @Override
   public void setOrganizationFilterSelection(Set<String> value) {
     organizationFilterSelection = value;
+  }
+
+  @Override
+  public boolean isTabChanged() {
+    return isTabChanged;
+  }
+
+  @Override
+  public void setTabChanged(boolean value) {
+    isTabChanged = value;
   }
 }

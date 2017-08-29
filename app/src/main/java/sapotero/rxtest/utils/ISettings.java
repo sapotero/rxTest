@@ -221,4 +221,8 @@ public interface ISettings {
   Set<String> getOrganizationFilterSelection();
 
   void setOrganizationFilterSelection(Set<String> value);
+
+  boolean isTabChanged();
+
+  void setTabChanged(boolean value);
 }
