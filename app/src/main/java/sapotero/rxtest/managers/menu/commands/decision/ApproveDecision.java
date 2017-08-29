@@ -14,8 +14,12 @@ import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.managers.menu.commands.DecisionCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.managers.menu.utils.DateUtil;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
+import sapotero.rxtest.utils.memory.fields.FieldType;
+import sapotero.rxtest.utils.memory.fields.LabelType;
+import sapotero.rxtest.utils.memory.utils.Transaction;
 import timber.log.Timber;
 
 public class ApproveDecision extends DecisionCommand {
@@ -109,6 +113,13 @@ public class ApproveDecision extends DecisionCommand {
     } else {
       finishOperationOnSuccess();
     }
+
+    Transaction transaction = new Transaction();
+    transaction
+      .from( store.getDocuments().get(getParams().getDocument()) )
+      .setField(FieldType.UPDATED_AT, DateUtil.getTimestamp())
+      .removeLabel(LabelType.SYNC);
+    store.process( transaction );
 
     EventBus.getDefault().post( new UpdateDocumentEvent( data.getDocumentUid() ));
   }

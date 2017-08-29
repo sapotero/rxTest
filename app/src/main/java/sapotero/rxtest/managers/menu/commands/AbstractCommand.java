@@ -183,6 +183,7 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     dataStore
       .update(RDocumentEntity.class)
       .set(RDocumentEntity.CHANGED, true)
+      .set( RDocumentEntity.UPDATED_AT, DateUtil.getTimestamp() )
       .where(RDocumentEntity.UID.eq( getParams().getDocument() ))
       .get()
       .value();
@@ -286,6 +287,8 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
 
   protected void finishRejectedOperationOnSuccess() {
     removeSyncChanged();
+
+
     setDocumentCondition( DocumentCondition.REJECTED );
     queueManager.setExecutedRemote(this);
   }

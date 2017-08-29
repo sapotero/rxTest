@@ -181,15 +181,17 @@ public class Processor {
       Timber.tag(TAG).e("    * %s | %s | %s", doc.getFilter(), filter, doc.getUpdatedAt());
       if (doc.getUpdatedAt() != null) {
         Timber.tag(TAG).e("    ** %s @ %s", doc.getUpdatedAt(), DateUtil.isSomeTimePassed(doc.getUpdatedAt()) );
+      } else {
+
+        // изменилось MD5
+        if ( Filter.isChanged( doc.getMd5(), document.getMd5() ) ){
+        // Timber.tag(TAG).e("md5     : %s | %s", doc.getMd5(), document.getMd5());
+          updateJob( doc.getUid(), doc.getMd5() );
+        } else {
+          EventBus.getDefault().post( new StepperLoadDocumentEvent( doc.getUid() ) );
+        }
       }
 
-      // изменилось MD5
-      if ( Filter.isChanged( doc.getMd5(), document.getMd5() ) ){
-//        Timber.tag(TAG).e("md5     : %s | %s", doc.getMd5(), document.getMd5());
-        updateJob( doc.getUid(), doc.getMd5() );
-      } else {
-        EventBus.getDefault().post( new StepperLoadDocumentEvent( doc.getUid() ) );
-      }
 
     } else {
       Timber.tag(TAG).e("new: %s", document.getUid());
