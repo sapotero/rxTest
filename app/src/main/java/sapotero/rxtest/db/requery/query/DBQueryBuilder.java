@@ -9,6 +9,7 @@ import com.google.gson.Gson;
 import com.googlecode.totallylazy.Sequence;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -111,6 +112,7 @@ public class DBQueryBuilder {
         .filter(filter::isProcessed)
         .filter(filter::isFavorites)
         .filter(filter::isControl)
+        .sortBy(filter::byJournalDateNumber)
         .toList();
       long endTime = System.nanoTime();
 

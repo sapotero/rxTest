@@ -5,7 +5,10 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -173,6 +176,46 @@ public class Filter {
 
     if (imd1.getDocument().getSortKey() != null && imd2.getDocument().getSortKey() != null) {
       result = imd1.getDocument().getSortKey().compareTo( imd2.getDocument().getSortKey() );
+    }
+
+    return result;
+  }
+
+  public int byJournalDateNumber(InMemoryDocument o1, InMemoryDocument o2) {
+    int result = 0;
+
+    if ( o1.getDocument() != null && o2.getDocument() != null ) {
+      // Sort by journal
+      if ( o1.getIndex() != null && o2.getIndex() != null ) {
+        result = o1.getIndex().compareTo( o2.getIndex() );
+      }
+
+      // Sort by date
+      if ( result == 0 ) {
+        if ( o1.getDocument().getRegistrationDate() != null && o2.getDocument().getRegistrationDate() != null ) {
+          try {
+            SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
+            Date date1 = format.parse( o1.getDocument().getRegistrationDate() );
+            Date date2 = format.parse( o2.getDocument().getRegistrationDate() );
+            result = date2.compareTo( date1 );
+          } catch (ParseException e) {
+            Timber.e(e);
+          }
+        }
+      }
+
+      // Sort by registration number
+      if ( result == 0 ) {
+        if ( o1.getDocument().getRegistrationNumber() != null && o2.getDocument().getRegistrationNumber() != null ) {
+          try {
+            Integer regNum1 = Integer.valueOf( o1.getDocument().getRegistrationNumber() );
+            Integer regNum2 = Integer.valueOf( o2.getDocument().getRegistrationNumber() );
+            result = regNum2.compareTo( regNum1 );
+          } catch (NumberFormatException e) {
+            Timber.e(e);
+          }
+        }
+      }
     }
 
     return result;
