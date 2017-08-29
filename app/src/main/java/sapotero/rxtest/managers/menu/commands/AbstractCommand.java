@@ -246,6 +246,14 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
     if ( callback != null ) {
       callback.onCommandExecuteSuccess( getType() );
     }
+
+    Transaction transaction = new Transaction();
+    transaction
+      .from( store.getDocuments().get(getParams().getDocument()) )
+      .setField(FieldType.UPDATED_AT, DateUtil.getTimestamp())
+      .removeLabel(LabelType.SYNC);
+    store.process( transaction );
+
   }
 
   protected void sendErrorCallback(String errorMessage) {
