@@ -574,5 +574,10 @@
 
     <string name="crash_toast_text">Приложение остановлено. Обратитесь к администратору устройства.</string>
     <string name="loading_file">Выполняется загрузка ЭО</string>
+    <string name="zoom">Масштаб</string>
+
+    <string name="zoomTextSize">16</string>
+    <string name="zoomText">Размер текста инфокарточки по умолчанию</string>
+    <string name="zoomTextSize_key">zoomTextSize</string>
 
 </resources>

@@ -119,6 +119,11 @@
             android:defaultValue="true"
             />
 
+        <EditTextPreference
+            android:key="@string/zoomTextSize_key"
+            android:title="@string/zoomText"
+            android:defaultValue="@string/zoomTextSize"/>
+
 
 
     </android.support.v7.preference.PreferenceCategory>

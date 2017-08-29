@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.RelativeLayout;
 
 import org.greenrobot.eventbus.EventBus;
@@ -83,6 +84,15 @@ public class InfoCardWebViewFragment extends Fragment {
     webSettings.setNeedInitialFocus(false);
     webSettings.setSaveFormData(false);
 
+    int fontsize = 16;
+    try {
+      fontsize = Integer.parseInt(settings.getInfocardFontSize());
+    } catch (NumberFormatException e) {
+      Timber.e(e);
+    }
+
+    webSettings.setDefaultFontSize( fontsize );
+
     wrapper.setOnTouchListener( new OnSwipeTouchListener( getContext() ) );
 
     setWebView();
@@ -123,7 +133,14 @@ public class InfoCardWebViewFragment extends Fragment {
 
       String htmlData = "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />" + new String(Base64.decode( doc.getInfoCard(), Base64.DEFAULT) );
       infocard.loadDataWithBaseURL("file:///android_asset/", htmlData, "text/html", "UTF-8", null);
+      infocard.setWebViewClient(new WebViewClient(){
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+          return true;
+        }
+      });
     }
+
   }
 
   public InfoCardWebViewFragment withUid(String uid) {

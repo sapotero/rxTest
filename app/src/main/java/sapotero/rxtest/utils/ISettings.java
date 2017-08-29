@@ -152,6 +152,10 @@ public interface ISettings {
 
   void setPrevDialogComment(String value);
 
+  String getInfocardFontSize();
+
+  void setInfocardFontSize(String value);
+
   String getStartPage();
 
   String getImageLoadPeriod();
