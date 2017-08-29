@@ -9,6 +9,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Base64;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.SeekBar;
 
 import org.greenrobot.eventbus.EventBus;
@@ -158,6 +159,12 @@ public class DocumentInfocardFullScreenActivity extends AppCompatActivity {
     webSettings.setNeedInitialFocus(false);
     webSettings.setSaveFormData(false);
     webview.setBackgroundColor(ContextCompat.getColor(this, R.color.md_white_1000));
+    webview.setWebViewClient(new WebViewClient(){
+      @Override
+      public boolean shouldOverrideUrlLoading(WebView view, String url) {
+        return true;
+      }
+    });
 
 
   }
