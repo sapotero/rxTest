@@ -194,7 +194,8 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
       // Показывать комментарий при отклонении
       if ( settings.isShowCommentPost() ){
         prev_dialog.inputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES )
-          .input(R.string.comment_hint, R.string.dialog_empty_value, (dialog12, input) -> {});
+          .input(R.string.comment_hint, R.string.dialog_empty_value, (dialog12, input) -> {})
+          .cancelable(false);
       }
 
 

@@ -260,6 +260,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     // Показывать комментарий при отклонении
     if ( settings.isShowCommentPost() || !settings.isShowCommentPost() && settings.isActionsConfirm()  ){
       prev_dialog
+        .cancelable(false)
         .inputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES )
         .input(R.string.comment_hint, R.string.dialog_empty_value, (dialog12, input) -> {})
         .neutralText("Шаблон")
@@ -782,6 +783,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       .onNegative((dialog, which) -> dialog.dismiss())
       .onNeutral((dialog, which) -> dialog.getInputEditText().setText(""))
       .autoDismiss(false)
+      .cancelable(false)
       .build();
 
     MaterialDialog.Builder materialDialogBuilder = new MaterialDialog.Builder(getContext())

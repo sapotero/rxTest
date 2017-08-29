@@ -67,6 +67,7 @@ public class SettingsTemplatesActivity extends AppCompatActivity implements Deci
   public void onListFragmentInteraction(RTemplateEntity item, DecisionTemplateFragment.TemplateType templateType) {
     if (item != null) {
       MaterialDialog add_dialog = new MaterialDialog.Builder(this)
+        .cancelable(false)
         .title(R.string.fragment_decision_template_edit)
         .inputType(
           InputType.TYPE_CLASS_TEXT
