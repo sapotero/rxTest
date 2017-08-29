@@ -436,9 +436,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
     initEvents();
 
-    if (current_decision != null) {
-      EventBus.getDefault().post( new DecisionVisibilityEvent( current_decision.isApproved() ) );
-    }
+    sendDecisionVisibilityEvent();
   }
 
   private void initToolBar() {
@@ -972,10 +970,17 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       settings.setDecisionActiveId( current_decision.getId() );
 
       updateVisibility( current_decision.isApproved() );
-      EventBus.getDefault().post( new DecisionVisibilityEvent( current_decision.isApproved() ) );
+
+      sendDecisionVisibilityEvent();
 
     }
 
+  }
+
+  private void sendDecisionVisibilityEvent() {
+    if (current_decision != null) {
+      EventBus.getDefault().post( new DecisionVisibilityEvent( current_decision.isApproved() ) );
+    }
   }
 
   private void loadFromJson(){
@@ -1062,6 +1067,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       }
 
       printSigner( decision, doc == null ? settings.getRegNumber() : doc.getRegistrationNumber() );
+
+      sendDecisionVisibilityEvent();
     }
 
     private void showEmpty(){
