@@ -541,11 +541,19 @@ public class InfoActivity extends AppCompatActivity {
   private void updateDocument() {
     InMemoryDocument doc = store.getDocuments().get(settings.getUid());
 
+    int time = 600;
+    try {
+      time = Integer.parseInt(settings.getUpdateTime());
+    } catch (NumberFormatException e) {
+      Timber.e(e);
+    }
+
     if ( doc != null
         // если док не обработан
         && !doc.isProcessed()
         // или он обработан и время последней команды старше 5 мин
-        || ( doc != null && doc.isProcessed() && doc.getUpdatedAt() != null && DateUtil.isSomeTimePassed( doc.getUpdatedAt() ) )
+        || ( doc != null && doc.isProcessed() && doc.getUpdatedAt() != null
+        && DateUtil.isSomeTimePassed( doc.getUpdatedAt(), time ) )
     ){
       jobManager.addJobInBackground( new UpdateDocumentJob( settings.getUid() ) );
     }

@@ -179,8 +179,16 @@ public class Processor {
       InMemoryDocument doc = store.getDocuments().get( document.getUid() );
 
       Timber.tag(TAG).e("    * %s | %s | %s", doc.getFilter(), filter, doc.getUpdatedAt());
+
+      int time = 600;
+      try {
+        time = Integer.parseInt(settings.getUpdateTime());
+      } catch (NumberFormatException e) {
+        Timber.e(e);
+      }
+
       if (doc.getUpdatedAt() != null) {
-        Timber.tag(TAG).e("    ** %s @ %s", doc.getUpdatedAt(), DateUtil.isSomeTimePassed(doc.getUpdatedAt()) );
+        Timber.tag(TAG).e("    ** %s @ %s", doc.getUpdatedAt(), DateUtil.isSomeTimePassed(doc.getUpdatedAt(), time) );
       } else {
 
         // изменилось MD5

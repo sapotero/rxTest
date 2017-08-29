@@ -125,6 +125,12 @@
 
     <android.support.v7.preference.PreferenceCategory
         android:title="Настройки операций">
+
+        <EditTextPreference
+            android:key="@string/update_time_key"
+            android:title="@string/update_time_title"
+            android:defaultValue="@string/update_time_value"/>
+
         <SwitchPreference
             android:key="@string/show_create_decision_post_key"
             android:title="Показывать кнопку «Создать поручение»"

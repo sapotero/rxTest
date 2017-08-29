@@ -24,4 +24,19 @@ public class DateUtil {
 
     return result;
   }
+
+  public static Boolean isSomeTimePassed(String time, int waitTime){
+    Boolean result = false;
+
+    try {
+      long currentTime = System.currentTimeMillis()/ 1000L;
+      long testTime = Long.valueOf(time);
+
+      result = currentTime > (testTime + waitTime);
+    } catch (NumberFormatException e) {
+      e.printStackTrace();
+    }
+
+    return result;
+  }
 }

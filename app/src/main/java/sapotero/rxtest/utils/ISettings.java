@@ -70,6 +70,10 @@ public interface ISettings {
 
   void setUid(String value);
 
+  String getUpdateTime();
+
+  void setUpdateTime(String value);
+
   String getStatusCode();
 
   void setStatusCode(String value);
