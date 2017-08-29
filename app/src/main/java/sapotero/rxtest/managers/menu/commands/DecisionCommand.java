@@ -2,10 +2,6 @@ package sapotero.rxtest.managers.menu.commands;
 
 import com.google.gson.Gson;
 
-import org.greenrobot.eventbus.EventBus;
-
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 
 import io.requery.query.Tuple;
@@ -17,12 +13,15 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDisplayFirstDecisionEntity;
-import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.managers.menu.utils.DateUtil;
 import sapotero.rxtest.retrofit.DocumentService;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
 import sapotero.rxtest.retrofit.models.wrapper.DecisionWrapper;
+import sapotero.rxtest.utils.memory.fields.FieldType;
+import sapotero.rxtest.utils.memory.fields.LabelType;
+import sapotero.rxtest.utils.memory.utils.Transaction;
 import timber.log.Timber;
 
 public abstract class DecisionCommand extends AbstractCommand {
@@ -91,6 +90,13 @@ public abstract class DecisionCommand extends AbstractCommand {
     if ( notEmpty( data.getErrors() ) ) {
       sendErrorCallback( "error" );
       finishOnOperationError( data.getErrors() );
+
+      Transaction transaction = new Transaction();
+      transaction
+        .from( store.getDocuments().get(getParams().getDocument()) )
+        .setField(FieldType.UPDATED_AT, DateUtil.getTimestamp())
+        .removeLabel(LabelType.SYNC);
+      store.process( transaction );
 
     } else {
       finishOnDecisionSuccess( data );

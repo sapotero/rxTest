@@ -12,7 +12,11 @@ import sapotero.rxtest.db.requery.models.images.RSignImageEntity;
 import sapotero.rxtest.db.requery.models.queue.FileSignEntity;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.managers.menu.utils.DateUtil;
 import sapotero.rxtest.retrofit.ImagesService;
+import sapotero.rxtest.utils.memory.fields.FieldType;
+import sapotero.rxtest.utils.memory.fields.LabelType;
+import sapotero.rxtest.utils.memory.utils.Transaction;
 import timber.log.Timber;
 
 public class SignFile extends AbstractCommand {
@@ -134,6 +138,13 @@ public class SignFile extends AbstractCommand {
     task.setDocumentId( getParams().getDocument() );
     task.setSign( sign );
 
+    Transaction transaction = new Transaction();
+    transaction
+      .from( store.getDocuments().get(getParams().getDocument()) )
+      .setField(FieldType.UPDATED_AT, DateUtil.getTimestamp())
+      .removeLabel(LabelType.SYNC);
+    store.process( transaction );
+
     dataStore
       .insert(task)
       .toObservable()
@@ -154,6 +165,7 @@ public class SignFile extends AbstractCommand {
       .where( RSignImageEntity.IMAGE_ID.eq( imageId ) )
       .get()
       .value();
+
 
     Timber.tag(TAG).i("Set sign success");
   }

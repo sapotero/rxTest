@@ -508,6 +508,10 @@
     </string-array>
 
 
+    <string name="update_time_title">Задержка обновления документа</string>
+    <string name="update_time_value">600</string>
+    <string name="update_time_key">settings_update_time</string>
+
     <string name="host_key_title">Домен</string>
     <string name="settings_journal_title">Журналы</string>
 

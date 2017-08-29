@@ -73,6 +73,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     this.toolbar = toolbar;
     EsdApplication.getManagerComponent().inject(this);
 
+    registerEvents();
     setListener();
 
     buildDialog();
@@ -82,7 +83,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     // FIX починить и убрать из релиза
     getFirstForLenovo();
 
-    registerEvents();
+    EventBus.getDefault().post( new CheckDecisionVisibilityEvent() );
+
   }
 
   private void registerEvents() {
@@ -457,27 +459,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         safeSetVisibility(R.id.menu_info_decision_create, true);
       }
 
-      // в офлайне не изменяем видимость кнопки избранное
-//      if  ( !settings.isOnline() ){
-//        MenuItem item = toolbar.getMenu().findItem(R.id.menu_info_decision_edit);
-//        if ( item != null && item.isVisible()  ){
-//          safeSetVisibility(R.id.menu_info_decision_edit, true);
-//        }
-//      }
-
-//      // в онлайне игнорируем кнопку избранное
-//      if  ( settings.isOnline() ){
-//        if ( Arrays.asList( "add_to_folder", "remove_to_folder").contains(command) ){
-//          MenuItem item = toolbar.getMenu().findItem(R.id.menu_info_decision_edit);
-//          if ( item != null && item.isVisible() ){
-//            safeSetVisibility(R.id.menu_info_decision_edit, true);
-//          }
-//        }
-//      }
-
-      EventBus.getDefault().post( new CheckDecisionVisibilityEvent() );
-
-
       if (isFromFavoritesFolder()){
         safeSetVisibility(R.id.menu_info_decision_create_with_assignment, settings.isShowCreateDecisionPost());
 
@@ -493,6 +474,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       if ( isShared() ){
         clearToolbar();
       }
+
+      EventBus.getDefault().post( new CheckDecisionVisibilityEvent() );
 
     }
   }
@@ -571,26 +554,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
   private void clearToolbar() {
     toolbar.getMenu().clear();
-    // раскоментить в следующей версии
-    // когда будет понимание как всё должно работать
-//    if ( doc != null && doc.getFilter() != null && Objects.equals(doc.getFilter(), Fields.Status.PRIMARY_CONSIDERATION.getValue())){
-//      toolbar.inflateMenu(R.menu.info_menu_primary_consideration);
-//
-//      decision_count = doc.getDecisions().size();
-//      switch (decision_count) {
-//        case 0:
-//          processEmptyDecisions();
-//          break;
-//        default:
-//          try {
-//            toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(false);
-//            toolbar.getMenu().findItem(R.id.menu_info_decision_edit).setVisible(false);
-//          } catch (Exception e) {
-//            Timber.tag(TAG).v(e);
-//          }
-//          break;
-//      }
-//    }
   }
 
   private void showAsProcessed(Boolean showCreateButton) {

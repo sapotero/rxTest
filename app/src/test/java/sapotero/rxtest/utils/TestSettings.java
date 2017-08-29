@@ -226,6 +226,16 @@ public class TestSettings implements ISettings {
   }
 
   @Override
+  public String getUpdateTime() {
+    return null;
+  }
+
+  @Override
+  public void setUpdateTime(String value) {
+
+  }
+
+  @Override
   public String getStatusCode() {
     return statusCode;
   }

@@ -35,9 +35,8 @@ public class InMemoryDocument implements Serializable {
     return updatedAt;
   }
 
-  public InMemoryDocument setUpdatedAt(String updatedAt) {
+  public void setUpdatedAt(String updatedAt) {
     this.updatedAt = updatedAt;
-    return this;
   }
 
   public Integer getYear() {

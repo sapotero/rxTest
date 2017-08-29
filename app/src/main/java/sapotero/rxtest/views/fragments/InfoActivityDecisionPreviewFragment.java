@@ -419,7 +419,6 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   }
 
   private void invalidate() {
-    initEvents();
 
     initToolBar();
 
@@ -434,6 +433,10 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     }
 
     preview = new Preview(getContext());
+
+    initEvents();
+
+    sendDecisionVisibilityEvent();
   }
 
   private void initToolBar() {
@@ -886,6 +889,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
             current_decision = decision_spinner_adapter.getItem(0).getDecision();
             Timber.tag(TAG).e("decision_spinner_adapter > 0");
             displayDecision();
+
+
           }
 
           if (decision_spinner_adapter.size() == 1){
@@ -898,10 +903,14 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
             decision_count.setVisibility(View.VISIBLE);
             invalidateSpinner(true);
           }
+
+
         } else {
           Timber.e("no decisions");
 
           if (toolbarManager != null) {
+
+
 
             if (doc.isProcessed() != null && !doc.isProcessed()){
               toolbarManager.setEditDecisionMenuItemVisible(false);
@@ -962,8 +971,16 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
       updateVisibility( current_decision.isApproved() );
 
+      sendDecisionVisibilityEvent();
+
     }
 
+  }
+
+  private void sendDecisionVisibilityEvent() {
+    if (current_decision != null) {
+      EventBus.getDefault().post( new DecisionVisibilityEvent( current_decision.isApproved() ) );
+    }
   }
 
   private void loadFromJson(){
@@ -1050,6 +1067,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       }
 
       printSigner( decision, doc == null ? settings.getRegNumber() : doc.getRegistrationNumber() );
+
+      sendDecisionVisibilityEvent();
     }
 
     private void showEmpty(){

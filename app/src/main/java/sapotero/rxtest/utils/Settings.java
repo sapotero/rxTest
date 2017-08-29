@@ -49,6 +49,7 @@ public class Settings implements ISettings {
 
   public static String FIRST_RUN_KEY;
   public static String IS_PROJECT;
+  private static String UPDATE_TIME_KEY;
   private static String HOST_KEY;
   private static String INFOCARD_FONTSIZE;
   private static String ACTIONS_CONFIRM_KEY;
@@ -136,6 +137,8 @@ public class Settings implements ISettings {
   private Preference<Boolean> showPrimaryConsideration;
   private Preference<Boolean> organizationFilterActive;
   private Preference<Set<String>> organizationFilterSelection;
+  private Preference<String> updateTime;
+
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -144,6 +147,7 @@ public class Settings implements ISettings {
   }
 
   private void loadSettings() {
+    UPDATE_TIME_KEY                = context.getResources().getString(R.string.update_time_key);
     FIRST_RUN_KEY                  = context.getResources().getString(R.string.first_run_key);
     IS_PROJECT                     = context.getResources().getString(R.string.is_project_key);
     HOST_KEY                       = context.getResources().getString(R.string.host_key);
@@ -176,6 +180,7 @@ public class Settings implements ISettings {
     signWithDc                     = settings.getBoolean(SIGN_WITH_DC_KEY);
     totalDocCount                  = settings.getInteger(DOCUMENTS_TOTAL_COUNT_KEY);
     docProjCount                   = settings.getInteger(DOCPROJ_COUNT_KEY);
+    updateTime                     = settings.getString(UPDATE_TIME_KEY);
     login                          = settings.getString(LOGIN_KEY);
     login                          = settings.getString(LOGIN_KEY);
     token                          = settings.getString(TOKEN_KEY);
@@ -446,6 +451,20 @@ public class Settings implements ISettings {
   public void setUid(String value) {
     setString(uid, value);
   }
+
+
+
+  @Override
+  public String getUpdateTime() {
+    return getString(updateTime);
+  }
+
+  @Override
+  public void setUpdateTime(String value) {
+    setString(updateTime, value);
+  }
+
+
 
   @Override
   public String getStatusCode() {

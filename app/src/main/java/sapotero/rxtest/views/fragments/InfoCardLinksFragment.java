@@ -117,8 +117,6 @@ public class InfoCardLinksFragment extends Fragment {
       .subscribe(
         doc -> {
 
-          Timber.tag("LOAD").e("%s %s", doc, doc.getLinks().size());
-
           if ( doc.getLinks() != null && doc.getLinks().size() > 0 ) {
 
             adapter.clear();
