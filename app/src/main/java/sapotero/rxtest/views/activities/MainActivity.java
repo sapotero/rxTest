@@ -37,6 +37,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -725,8 +726,13 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
           .withSelectable( false )
           .withSetSelected( false )
           .withOnDrawerItemClickListener((view, position, drawerItem) -> {
-            // Переход в режим замещения
-            startSubstituteMode( (int) drawerItem.getIdentifier() );
+            int index = (int) drawerItem.getIdentifier();
+            // Переход в режим замещения, если не в режиме замещения и не ожидаем получения токена
+            if ( !settings.isSubstituteMode() && !settings.isUpdateAuthStarted() ) {
+              startSubstituteMode( index );
+            } else {
+              Toast.makeText(this, "Невозможно войти в режим замещения: дождитесь обновления данных", Toast.LENGTH_SHORT).show();
+            }
             return false;
           })
           .withIcon( R.drawable.gerb );
@@ -746,8 +752,12 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
         .withSelectable( false )
         .withSetSelected( false )
         .withOnDrawerItemClickListener((view, position, drawerItem) -> {
-          // Выход из режима замещения
-          stopSubstituteMode();
+          // Выход из режима замещения, если в режиме замещения и не ожидаем получения токена
+          if ( settings.isSubstituteMode() && !settings.isUpdateAuthStarted() ) {
+            stopSubstituteMode();
+          } else {
+            Toast.makeText(this, "Невозможно выйти из режима замещения: дождитесь обновления данных", Toast.LENGTH_SHORT).show();
+          }
           return false;
         })
         .withIcon( R.drawable.gerb );
