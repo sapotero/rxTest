@@ -6,6 +6,7 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import rx.Observable;
@@ -77,7 +78,11 @@ public class ApproveDecision extends DecisionCommand {
       Decision _decision = getParams().getDecisionModel();
       _decision.setDocumentUid( null );
       _decision.setApproved(true);
-      _decision.setSign( sign );
+
+      // resolved https://tasks.n-core.ru/browse/MVDESD-14141
+      // при нажатии кнопки согласовать - не отправляем подпись
+      Boolean equals = Objects.equals(store.getDocuments().get(params.getDocument()).getFilter(), "primary_consideration") && !Objects.equals(getParams().getDecisionModel().getSignerId(), settings.getCurrentUserId());
+      _decision.setSign( equals? null : sign );
 
       if ( getParams().isAssignment() ) {
         _decision.setAssignment(true);
