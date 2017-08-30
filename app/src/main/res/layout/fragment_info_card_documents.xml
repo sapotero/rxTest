@@ -133,6 +133,26 @@
                     <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:id="@+id/info_card_pdf_open"
+                        android:layout_marginStart="@dimen/half_date_offset"
+                        android:clickable="true"
+                        android:foreground="?selectableItemBackground"
+                        android:layout_weight="4">
+
+                        <ImageButton
+                            android:background="@drawable/open_pdf"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:padding="@dimen/date_offset"
+                            android:clickable="false"
+                            android:layout_gravity="center"
+                            />
+
+                    </FrameLayout>
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
                         android:id="@+id/info_card_pdf_fullscreen_button"
                         android:clickable="true"
                         android:foreground="?selectableItemBackground"
