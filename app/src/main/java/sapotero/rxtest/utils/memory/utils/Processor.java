@@ -171,34 +171,40 @@ public class Processor {
     sub.onNext( transaction.commit() );
   }
 
-  private void validate(Document document){
-    Timber.tag(TAG).e("-> : %s / %s@%5.10s  ", document.getUid(), filter, index );
+  private void validate(Document document) {
+    Timber.tag(TAG).e("-> : %s / %s@%5.10s  ", document.getUid(), filter, index);
 
     // new upsert job
-    if ( store.getDocuments().keySet().contains( document.getUid() ) ){
-      InMemoryDocument doc = store.getDocuments().get( document.getUid() );
+    if (store.getDocuments().keySet().contains(document.getUid())) {
+      InMemoryDocument doc = store.getDocuments().get(document.getUid());
 
       Timber.tag(TAG).e("    * %s | %s | %s", doc.getFilter(), filter, doc.getUpdatedAt());
 
-      int time = 600;
+      int time = 15;
       try {
         time = Integer.parseInt(settings.getUpdateTime());
       } catch (NumberFormatException e) {
         Timber.e(e);
       }
 
-      if (doc.getUpdatedAt() != null) {
-        Timber.tag(TAG).e("    ** %s @ %s", doc.getUpdatedAt(), DateUtil.isSomeTimePassed(doc.getUpdatedAt(), time) );
-        EventBus.getDefault().post( new StepperLoadDocumentEvent( doc.getUid() ) );
+      // изменилось MD5
+      if ( Filter.isChanged(doc.getMd5(), document.getMd5()) ) {
+
+        if ( doc.getUpdatedAt() != null && doc.isProcessed() && !DateUtil.isSomeTimePassed(doc.getUpdatedAt(), time) ) {
+          Timber.tag(TAG).e("    ** %s @ %s || %s : %s ", doc.getUpdatedAt(), DateUtil.isSomeTimePassed(doc.getUpdatedAt(), time), doc.getMd5(), document.getMd5());
+          EventBus.getDefault().post(new StepperLoadDocumentEvent(doc.getUid()));
+
+          if ( Filter.isChanged(doc.getFilter(), filter) ){
+            updateJob(doc.getUid(), doc.getMd5());
+          }
+
+        } else {
+          updateJob(doc.getUid(), doc.getMd5());
+        }
+
       } else {
 
-        // изменилось MD5
-        if ( Filter.isChanged( doc.getMd5(), document.getMd5() ) ){
-        // Timber.tag(TAG).e("md5     : %s | %s", doc.getMd5(), document.getMd5());
-          updateJob( doc.getUid(), doc.getMd5() );
-        } else {
-          EventBus.getDefault().post( new StepperLoadDocumentEvent( doc.getUid() ) );
-        }
+        EventBus.getDefault().post(new StepperLoadDocumentEvent(doc.getUid()));
       }
 
 
@@ -206,7 +212,6 @@ public class Processor {
       Timber.tag(TAG).e("new: %s", document.getUid());
       createJob(document.getUid());
     }
-
   }
 
   private ArrayList<String> intersect(){

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.CardView;
 import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +13,7 @@ import android.widget.BaseAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -26,6 +28,7 @@ import sapotero.rxtest.db.mapper.PerformerMapper;
 import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
+import timber.log.Timber;
 
 public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
 
@@ -62,6 +65,8 @@ public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
       viewHolder.name = (TextView) view.findViewById(R.id.primary_user__name);
       viewHolder.title = (TextView) view.findViewById(R.id.primary_user__title);
       viewHolder.image = (ImageView) view.findViewById(R.id.primary_user__image);
+      viewHolder.image_wrapper = (CardView) view.findViewById(R.id.primary_user__image_wrapper);
+      viewHolder.wrapper = (LinearLayout) view.findViewById(R.id.primary_user__wrapper);
 
       view.setTag(viewHolder);
     } else {
@@ -71,6 +76,8 @@ public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
 
     viewHolder.name.setText( user.getName() );
     viewHolder.title.setText( user.getOrganization() );
+
+    Timber.e( "getIImage %s", user.getIImage() );
 
     if (user.getIImage() != null){
       try {
@@ -83,6 +90,11 @@ public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
       }
     } else {
       viewHolder.image.setImageDrawable(ContextCompat.getDrawable(context, R.drawable._person));
+      viewHolder.image_wrapper.setVisibility(View.VISIBLE);
+    }
+
+    if ( user.isDelimiter() ){
+      viewHolder.image_wrapper.setVisibility(View.GONE);
     }
 
 
@@ -151,6 +163,8 @@ public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
     public TextView name;
     public TextView title;
     public ImageView image;
+    public CardView image_wrapper;
+    public LinearLayout wrapper;
   }
 
   @Override
