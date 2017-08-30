@@ -61,8 +61,9 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
   private int decision_count;
 
-  private final Toolbar toolbar;
-  private final Context context;
+  private Toolbar toolbar;
+//  private Context context = EsdApplication.getApplication().getApplicationContext();
+  private Context context;
 
   private RDocumentEntity doc;
   private MaterialDialog dialog;
@@ -84,6 +85,11 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     getFirstForLenovo();
 
     EventBus.getDefault().post( new CheckDecisionVisibilityEvent() );
+  }
+
+  public ToolbarManager withToolbar(Toolbar toolbar){
+    this.toolbar = toolbar;
+    return this;
   }
 
   private void registerEvents() {
@@ -582,7 +588,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
         Timber.tag(TAG).e("\n%s - %s\n%s ", decision.getSignerId(), decision.isApproved(), settings.getCurrentUserId() );
 
-        if (!decision.isApproved() && Objects.equals(decision.getSignerId(), settings.getCurrentUserId())){
+        if (!decision.isApproved() && Objects.equals(decision.getSignerId(), settings.getCurrentUserId()) || decision.isRed() && !decision.isApproved() ){
           result = true;
         }
       }
@@ -892,9 +898,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   public void onMessageEvent(DecisionVisibilityEvent event){
     Timber.tag(TAG).e("DecisionVisibilityEvent %s | %s", event.approved, store.getDocuments().get( settings.getUid() ).isProcessed());
 
-    if ( event.approved != null ) {
-      setEditDecisionMenuItemVisible(!event.approved);
-    }
+    setEditDecisionMenuItemVisible(event.approved);
 
     if ( store.getDocuments().get( settings.getUid() ).isProcessed() ){
       setEditDecisionMenuItemVisible(false);
