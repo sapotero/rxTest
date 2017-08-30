@@ -103,7 +103,7 @@ public class DBQueryBuilder {
       long startTime = System.nanoTime();
       Sequence<InMemoryDocument> _docs = sequence(store.getDocuments().values());
 
-      List<InMemoryDocument> docs = _docs
+      _docs = _docs
         .filter(filter::byYear)
         .filter(this::byOrganization)
         .filter(this::byDecision)
@@ -111,11 +111,17 @@ public class DBQueryBuilder {
         .filter(filter::byStatus)
         .filter(filter::isProcessed)
         .filter(filter::isFavorites)
-        .filter(filter::isControl)
-        .sortBy(filter::byJournalDateNumber)
-        .toList();
-      long endTime = System.nanoTime();
+        .filter(filter::isControl);
 
+      try {
+        // Long lists with different documents may throw exception "Comparison method violates its general contract"
+        _docs = _docs.sortBy(filter::byJournalDateNumber);
+      } catch (Exception e) {
+        Timber.tag(TAG).e(e);
+      }
+
+      List<InMemoryDocument> docs = _docs.toList();
+      long endTime = System.nanoTime();
       long duration = (endTime - startTime)/1000000;
 
       Timber.e("SIZE: %s | %sms", docs.size(), duration);
