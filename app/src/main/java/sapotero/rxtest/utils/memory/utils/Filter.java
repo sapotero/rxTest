@@ -207,12 +207,13 @@ public class Filter {
 
       // Sort by registration number
       if ( result == 0 && o1.getDocument().getRegistrationNumber() != null && o2.getDocument().getRegistrationNumber() != null ) {
-        try {
-          Integer regNum1 = Integer.valueOf( o1.getDocument().getRegistrationNumber() );
-          Integer regNum2 = Integer.valueOf( o2.getDocument().getRegistrationNumber() );
-          result = regNum2.compareTo( regNum1 );  // вначале наибольший номер
-        } catch (NumberFormatException e) {
-          // Do nothing
+        String regNum1 = o1.getDocument().getRegistrationNumber();
+        String regNum2 = o2.getDocument().getRegistrationNumber();
+
+        if ( regNum1.contains("/") || regNum2.contains("/") ) {
+          result = compareRegNumbersWithPrefixes( regNum1, regNum2 );
+        } else {
+          result = compareRegNumbers( regNum1, regNum2 );
         }
       }
     }
@@ -237,6 +238,49 @@ public class Filter {
       result = 6;
     } else {
       result = 7;
+    }
+
+    return result;
+  }
+
+  private int compareRegNumbers(String o1, String o2) {
+    int result = 0;
+
+    try {
+      Long num1 = Long.valueOf( o1 );
+      Long num2 = Long.valueOf( o2 );
+      result = num2.compareTo( num1 );  // вначале наибольший номер
+    } catch (NumberFormatException e) {
+      // Do nothing
+    }
+
+    return result;
+  }
+
+  private int compareRegNumbersWithPrefixes(String regNum1, String regNum2) {
+    int result = 0;
+
+    if ( regNum1.contains("/") && regNum2.contains("/") ) {
+      try {
+        String[] split1 = regNum1.split("/");
+        String[] split2 = regNum2.split("/");
+
+        if ( split1.length >= 2 && split2.length >= 2 ) {
+          String regNum1Prefix = split1[0];
+          String regNum1Number = split1[1];
+
+          String regNum2Prefix = split2[0];
+          String regNum2Number = split2[1];
+
+          result = compareRegNumbers(regNum1Prefix, regNum2Prefix);
+
+          if ( result == 0 ) {
+            result = compareRegNumbers(regNum1Number, regNum2Number);
+          }
+        }
+      } catch (Exception error) {
+        // Do nothing
+      }
     }
 
     return result;
