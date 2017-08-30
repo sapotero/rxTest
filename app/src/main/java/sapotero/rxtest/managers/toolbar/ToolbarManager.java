@@ -68,6 +68,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   private RDocumentEntity doc;
   private MaterialDialog dialog;
   private String command;
+  private static ToolbarManager instance;
 
   public ToolbarManager (Context context, Toolbar toolbar) {
     this.context = context;
@@ -87,9 +88,39 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     EventBus.getDefault().post( new CheckDecisionVisibilityEvent() );
   }
 
+  public ToolbarManager() {
+  }
+
+  public static ToolbarManager getInstance(){
+    if (instance == null) {
+      instance = new ToolbarManager();
+    }
+    return instance;
+  }
+
   public ToolbarManager withToolbar(Toolbar toolbar){
     this.toolbar = toolbar;
     return this;
+  }
+  public ToolbarManager withContext(Context context){
+    this.context = context;
+    return this;
+  }
+  public ToolbarManager build(){
+    EsdApplication.getManagerComponent().inject(this);
+
+    registerEvents();
+    setListener();
+
+    buildDialog();
+
+    operationManager.registerCallBack(this);
+
+    // FIX починить и убрать из релиза
+    getFirstForLenovo();
+
+    EventBus.getDefault().post( new CheckDecisionVisibilityEvent() );
+    return instance;
   }
 
   private void registerEvents() {
