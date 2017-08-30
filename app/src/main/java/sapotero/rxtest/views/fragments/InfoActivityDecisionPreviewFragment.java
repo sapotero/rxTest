@@ -572,6 +572,18 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 //      }
 //    }
 
+    //resolved https://tasks.n-core.ru/browse/MVDESD-14142
+    // Скрывать кнопки "Подписать", "Отклонить" ,"Редактировать"
+    // если подписант не текущий пользователь (или министр)
+    buttons_wrapper.setVisibility( isCurrentUserOrRed() ? View.VISIBLE : View.GONE);
+    bottom_line.setVisibility( isCurrentUserOrRed() ? View.VISIBLE : View.GONE);
+  }
+
+  private boolean isCurrentUserOrRed() {
+    return current_decision != null && current_decision.getSignerId() != null
+      && current_decision.getSignerId().equals( settings.getCurrentUserId() )
+      || current_decision != null && current_decision.isRed() != null
+      && current_decision.isRed();
   }
 
   private void checkActiveDecision() {
@@ -869,6 +881,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
         preview.showEmpty();
 
         if ( doc.getDecisions().size() > 0 ){
+          bottom_line.setVisibility( View.VISIBLE );
 
           decision_spinner_adapter.clear();
 
@@ -933,6 +946,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
           invalidateSpinner(false);
           showDecisionCardTollbarMenuItems(false);
           EventBus.getDefault().post( new HasNoActiveDecisionConstructor() );
+
+          bottom_line.setVisibility( View.GONE);
 
           updateActionText(true);
         }

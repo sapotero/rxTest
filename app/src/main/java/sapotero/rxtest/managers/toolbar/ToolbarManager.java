@@ -899,7 +899,5 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     if ( store.getDocuments().get( settings.getUid() ).isProcessed() ){
       setEditDecisionMenuItemVisible(false);
     }
-
-    registerEvents();
   }
 }
