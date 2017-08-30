@@ -211,6 +211,20 @@ public class Filter {
     return result;
   }
 
+  public int byDate(InMemoryDocument o1, InMemoryDocument o2) {
+    int result = 0;
+
+    if ( o1.getDocument() == null ) {
+      result = 1;
+    } else if ( o2.getDocument() == null ) {
+      result = -1;
+    } else {
+      result = compareDates( o1.getDocument().getRegistrationDate(), o2.getDocument().getRegistrationDate() );
+    }
+
+    return result;
+  }
+
   private Integer getJournalNumber(String journalName) {
     Integer result;
 

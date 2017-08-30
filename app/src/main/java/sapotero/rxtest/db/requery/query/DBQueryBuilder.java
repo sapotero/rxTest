@@ -113,11 +113,21 @@ public class DBQueryBuilder {
         .filter(filter::isFavorites)
         .filter(filter::isControl);
 
+      // Sort by journal, date, registration number
       try {
         // Long lists with different documents may throw exception "Comparison method violates its general contract"
         _docs = _docs.sortBy(filter::byJournalDateNumber);
-      } catch (Exception e) {
-        Timber.tag(TAG).e(e);
+      } catch (Exception e1) {
+        Timber.tag(TAG).e("Sort by journal, date, number error");
+        Timber.tag(TAG).e(e1);
+
+        // Try to sort by date only
+        try {
+          _docs = _docs.sortBy(filter::byDate);
+        } catch (Exception e2) {
+          Timber.tag(TAG).e("Sort by date error");
+          Timber.tag(TAG).e(e2);
+        }
       }
 
       List<InMemoryDocument> docs = _docs.toList();
