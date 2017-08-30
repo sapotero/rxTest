@@ -124,8 +124,11 @@ public class Filter {
   public Boolean isProcessed(InMemoryDocument doc) {
     Boolean result = true;
 
-    // Фильтруем обработанные для всех журналов, кроме Избранное и На контроле
-    if ( !isFavorites && !isControl ) {
+    // Фильтруем обработанные для всех журналов, кроме Избранное
+    // resolved https://tasks.n-core.ru/browse/MVDESD-13985
+    // Убрать из списка "На контроле" рассмотренные документы
+//    if ( !isFavorites && !isControl ) {
+    if ( !isFavorites ) {
       result = isProcessed == doc.isProcessed();
     }
 
