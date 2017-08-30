@@ -211,20 +211,6 @@ public class Filter {
     return result;
   }
 
-  public int byDate(InMemoryDocument o1, InMemoryDocument o2) {
-    int result = 0;
-
-    if ( o1.getDocument() == null ) {
-      result = 1;
-    } else if ( o2.getDocument() == null ) {
-      result = -1;
-    } else {
-      result = compareDates( o1.getDocument().getRegistrationDate(), o2.getDocument().getRegistrationDate() );
-    }
-
-    return result;
-  }
-
   private Integer getJournalNumber(String journalName) {
     Integer result;
 
@@ -255,24 +241,13 @@ public class Filter {
     } else if ( o2 == null || Objects.equals( o2, "" ) ) {
       result = -1;
     } else {
-      SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
-      Date date1 = new Date();
-      Date date2 = new Date();
-
       try {
-        date1 = format.parse( o1 );
-      } catch (ParseException e) {
-        result = 1;
-      }
-
-      try {
-        date2 = format.parse( o2 );
-      } catch (ParseException e) {
-        result = -1;
-      }
-
-      if ( result == 0 ) {
+        SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
+        Date date1 = format.parse( o1 );
+        Date date2 = format.parse( o2 );
         result = date2.compareTo( date1 );  // вначале свежие
+      } catch (ParseException e) {
+        // Do nothing
       }
     }
 
@@ -300,23 +275,12 @@ public class Filter {
   private int compareNumbers(String o1, String o2) {
     int result = 0;
 
-    Long num1 = 0L;
-    Long num2 = 0L;
-
     try {
-      num1 = Long.valueOf( o1 );
-    } catch (NumberFormatException e) {
-      result = 1;
-    }
-
-    try {
-      num2 = Long.valueOf( o2 );
-    } catch (NumberFormatException e) {
-      result = -1;
-    }
-
-    if ( result == 0 ) {
+      Long num1 = Long.valueOf( o1 );
+      Long num2 = Long.valueOf( o2 );
       result = num2.compareTo( num1 );  // вначале наибольший номер
+    } catch (NumberFormatException e) {
+      // Do nothing
     }
 
     return result;
@@ -326,22 +290,10 @@ public class Filter {
   private int compareRegNumbersWithPrefixes(String regNum1, String regNum2) {
     int result = 0;
 
-    String[] split1 = new String[1];
-    String[] split2 = new String[1];
-
     try {
-      split1 = regNum1.split("/");
-    } catch (Exception error) {
-      result = 1;
-    }
+      String[] split1 = regNum1.split("/");
+      String[] split2 = regNum2.split("/");
 
-    try {
-      split2 = regNum2.split("/");
-    } catch (Exception error) {
-      result = -1;
-    }
-
-    if ( result == 0 ) {
       if ( split1.length >= 2 && split2.length >= 2 ) {
         String regNum1Prefix = split1[0];
         String regNum1Number = split1[1];
@@ -357,6 +309,8 @@ public class Filter {
           result = compareNumbers(regNum1Number, regNum2Number);
         }
       }
+    } catch (Exception error) {
+      // Do nothing
     }
 
     return result;
