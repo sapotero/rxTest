@@ -391,7 +391,12 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
           if ( !toastShown ) {
             toast = Toast.makeText(getContext(), direction.getMessage(), Toast.LENGTH_SHORT);
-            toast.show();
+
+            if ( index == adapter.getCount()-1 && direction != SwipeUtil.DIRECTION.DOWN
+              || index == 0 && direction != SwipeUtil.DIRECTION.UP){
+              toast.show();
+            }
+
             toastShown = true;
 
           }
@@ -440,14 +445,15 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   public void getPrevImage() {
     Timber.tag(TAG).i( "BEFORE %s - %s", index, adapter.getCount() );
     if ( index <= 0 ){
-      index = adapter.getCount()-1;
+      index = 0;
     } else {
       index--;
+      settings.setImageIndex( index );
+      showPdf();
     }
     Timber.tag(TAG).i( "AFTER %s - %s", index, adapter.getCount() );
 
-    settings.setImageIndex( index );
-    showPdf();
+
   }
 
   @OnClick(R.id.info_card_pdf_reload)
@@ -468,14 +474,13 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   public void getNextImage() {
     Timber.tag(TAG).i( "BEFORE %s - %s", index, adapter.getCount() );
     if ( index >= adapter.getCount()-1 ){
-      index = 0;
+      index = adapter.getCount()-1;
     } else {
       index++;
+      settings.setImageIndex( index );
+      showPdf();
     }
     Timber.tag(TAG).i( "AFTER %s - %s", index, adapter.getCount() );
-
-    settings.setImageIndex( index );
-    showPdf();
   }
 
   private void showPdf() {
