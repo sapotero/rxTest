@@ -10,6 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -181,41 +182,62 @@ public class Filter {
     return result;
   }
 
+  // resolved https://tasks.n-core.ru/browse/MVDESD-14115
+  // Сортировка документов списке
   public int byJournalDateNumber(InMemoryDocument o1, InMemoryDocument o2) {
     int result = 0;
 
-    if ( o1.getDocument() != null && o2.getDocument() != null ) {
-      // Sort by journal
-      if ( o1.getIndex() != null && o2.getIndex() != null ) {
-        result = o1.getIndex().compareTo( o2.getIndex() );
-      }
+    // Sort by journal
+    Integer journalNumber1 = getJournalNumber( o1.getIndex() );
+    Integer journalNumber2 = getJournalNumber( o2.getIndex() );
+    result = journalNumber1.compareTo( journalNumber2 );
 
+    if ( result == 0 && o1.getDocument() != null && o2.getDocument() != null ) {
       // Sort by date
-      if ( result == 0 ) {
-        if ( o1.getDocument().getRegistrationDate() != null && o2.getDocument().getRegistrationDate() != null ) {
-          try {
-            SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
-            Date date1 = format.parse( o1.getDocument().getRegistrationDate() );
-            Date date2 = format.parse( o2.getDocument().getRegistrationDate() );
-            result = date2.compareTo( date1 );
-          } catch (ParseException e) {
-            Timber.e(e);
-          }
+      if ( o1.getDocument().getRegistrationDate() != null && o2.getDocument().getRegistrationDate() != null ) {
+        try {
+          SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
+          Date date1 = format.parse( o1.getDocument().getRegistrationDate() );
+          Date date2 = format.parse( o2.getDocument().getRegistrationDate() );
+          result = date2.compareTo( date1 );  // вначале свежие
+        } catch (ParseException e) {
+          // Do nothing
         }
       }
 
       // Sort by registration number
-      if ( result == 0 ) {
-        if ( o1.getDocument().getRegistrationNumber() != null && o2.getDocument().getRegistrationNumber() != null ) {
-          try {
-            Integer regNum1 = Integer.valueOf( o1.getDocument().getRegistrationNumber() );
-            Integer regNum2 = Integer.valueOf( o2.getDocument().getRegistrationNumber() );
-            result = regNum2.compareTo( regNum1 );
-          } catch (NumberFormatException e) {
-            Timber.e(e);
-          }
+      if ( result == 0 && o1.getDocument().getRegistrationNumber() != null && o2.getDocument().getRegistrationNumber() != null ) {
+        try {
+          Integer regNum1 = Integer.valueOf( o1.getDocument().getRegistrationNumber() );
+          Integer regNum2 = Integer.valueOf( o2.getDocument().getRegistrationNumber() );
+          result = regNum2.compareTo( regNum1 );  // вначале наибольший номер
+        } catch (NumberFormatException e) {
+          // Do nothing
         }
       }
+    }
+
+    return result;
+  }
+
+  private Integer getJournalNumber(String journalName) {
+    Integer result;
+
+    // Сначала Входящие-в конце Обращения
+    if ( Objects.equals( journalName, "incoming_documents" ) ) {
+      result = 1;
+    } else if ( Objects.equals( journalName, "incoming_orders" ) ) {
+      result = 2;
+    } else if ( Objects.equals( journalName, "orders" ) ) {
+      result = 3;
+    } else if ( Objects.equals( journalName, "orders_ddo" ) ) {
+      result = 4;
+    } else if ( Objects.equals( journalName, "outgoing_documents" ) ) {
+      result = 5;
+    } else if ( Objects.equals( journalName, "citizen_requests" ) ) {
+      result = 6;
+    } else {
+      result = 7;
     }
 
     return result;
