@@ -192,28 +192,18 @@ public class Filter {
     Integer journalNumber2 = getJournalNumber( o2.getIndex() );
     result = journalNumber1.compareTo( journalNumber2 );
 
-    if ( result == 0 && o1.getDocument() != null && o2.getDocument() != null ) {
-      // Sort by date
-      if ( o1.getDocument().getRegistrationDate() != null && o2.getDocument().getRegistrationDate() != null ) {
-        try {
-          SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
-          Date date1 = format.parse( o1.getDocument().getRegistrationDate() );
-          Date date2 = format.parse( o2.getDocument().getRegistrationDate() );
-          result = date2.compareTo( date1 );  // вначале свежие
-        } catch (ParseException e) {
-          // Do nothing
-        }
-      }
+    if ( result == 0 ) {
+      if ( o1.getDocument() == null ) {
+        result = 1;
+      } else if ( o2.getDocument() == null ) {
+        result = -1;
+      } else {
+        // Sort by date
+        result = compareDates( o1.getDocument().getRegistrationDate(), o2.getDocument().getRegistrationDate() );
 
-      // Sort by registration number
-      if ( result == 0 && o1.getDocument().getRegistrationNumber() != null && o2.getDocument().getRegistrationNumber() != null ) {
-        String regNum1 = o1.getDocument().getRegistrationNumber();
-        String regNum2 = o2.getDocument().getRegistrationNumber();
-
-        if ( regNum1.contains("/") || regNum2.contains("/") ) {
-          result = compareRegNumbersWithPrefixes( regNum1, regNum2 );
-        } else {
-          result = compareRegNumbers( regNum1, regNum2 );
+        // Sort by registration number
+        if ( result == 0 ) {
+          result = compareRegNumbers( o1.getDocument().getRegistrationNumber(), o2.getDocument().getRegistrationNumber() );
         }
       }
     }
@@ -243,15 +233,76 @@ public class Filter {
     return result;
   }
 
-  private int compareRegNumbers(String o1, String o2) {
+  private int compareDates(String o1, String o2) {
     int result = 0;
 
+    if ( o1 == null || Objects.equals( o1, "" ) ) {
+      result = 1;
+    } else if ( o2 == null || Objects.equals( o2, "" ) ) {
+      result = -1;
+    } else {
+      SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
+      Date date1 = new Date();
+      Date date2 = new Date();
+
+      try {
+        date1 = format.parse( o1 );
+      } catch (ParseException e) {
+        result = 1;
+      }
+
+      try {
+        date2 = format.parse( o2 );
+      } catch (ParseException e) {
+        result = -1;
+      }
+
+      if ( result == 0 ) {
+        result = date2.compareTo( date1 );  // вначале свежие
+      }
+    }
+
+    return result;
+  }
+
+  private int compareRegNumbers(String regNum1, String regNum2) {
+    int result = 0;
+
+    if ( regNum1 == null || Objects.equals( regNum1, "" ) ) {
+      result = 1;
+    } else if ( regNum2 == null || Objects.equals( regNum2, "" ) ) {
+      result = -1;
+    } else {
+      if ( regNum1.contains("/") && regNum2.contains("/") ) {
+        result = compareRegNumbersWithPrefixes( regNum1, regNum2 );
+      } else {
+        result = compareNumbers( regNum1, regNum2 );
+      }
+    }
+
+    return result;
+  }
+
+  private int compareNumbers(String o1, String o2) {
+    int result = 0;
+
+    Long num1 = 0L;
+    Long num2 = 0L;
+
     try {
-      Long num1 = Long.valueOf( o1 );
-      Long num2 = Long.valueOf( o2 );
-      result = num2.compareTo( num1 );  // вначале наибольший номер
+      num1 = Long.valueOf( o1 );
     } catch (NumberFormatException e) {
-      // Do nothing
+      result = 1;
+    }
+
+    try {
+      num2 = Long.valueOf( o2 );
+    } catch (NumberFormatException e) {
+      result = -1;
+    }
+
+    if ( result == 0 ) {
+      result = num2.compareTo( num1 );  // вначале наибольший номер
     }
 
     return result;
@@ -260,26 +311,34 @@ public class Filter {
   private int compareRegNumbersWithPrefixes(String regNum1, String regNum2) {
     int result = 0;
 
-    if ( regNum1.contains("/") && regNum2.contains("/") ) {
-      try {
-        String[] split1 = regNum1.split("/");
-        String[] split2 = regNum2.split("/");
+    String[] split1 = new String[1];
+    String[] split2 = new String[1];
 
-        if ( split1.length >= 2 && split2.length >= 2 ) {
-          String regNum1Prefix = split1[0];
-          String regNum1Number = split1[1];
+    try {
+      split1 = regNum1.split("/");
+    } catch (Exception error) {
+      result = 1;
+    }
 
-          String regNum2Prefix = split2[0];
-          String regNum2Number = split2[1];
+    try {
+      split2 = regNum2.split("/");
+    } catch (Exception error) {
+      result = -1;
+    }
 
-          result = compareRegNumbers(regNum1Prefix, regNum2Prefix);
+    if ( result == 0 ) {
+      if ( split1.length >= 2 && split2.length >= 2 ) {
+        String regNum1Prefix = split1[0];
+        String regNum1Number = split1[1];
 
-          if ( result == 0 ) {
-            result = compareRegNumbers(regNum1Number, regNum2Number);
-          }
+        String regNum2Prefix = split2[0];
+        String regNum2Number = split2[1];
+
+        result = compareNumbers(regNum1Prefix, regNum2Prefix);
+
+        if ( result == 0 ) {
+          result = compareNumbers(regNum1Number, regNum2Number);
         }
-      } catch (Exception error) {
-        // Do nothing
       }
     }
 
