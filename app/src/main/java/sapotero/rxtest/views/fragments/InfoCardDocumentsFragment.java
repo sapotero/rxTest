@@ -117,6 +117,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   private boolean toastShown = false;
   private Subscription sub;
   private Subscription reload;
+  private boolean canScroll = true;
 
   public InfoCardDocumentsFragment() {
     swipeUtil = new SwipeUtil();
@@ -152,7 +153,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     directionSub = PublishSubject.create();
 
     sub = directionSub
-      .buffer( 1000, TimeUnit.MILLISECONDS )
+      .buffer( 600, TimeUnit.MILLISECONDS )
       .onBackpressureBuffer(32)
       .onBackpressureDrop()
       .subscribeOn(Schedulers.computation())
@@ -177,11 +178,17 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
               Timber.d("NOT CHANGED: %s", positions.get(0) );
 
               if ( positions.get(0) == 0.0f ){
-                getPrevImage();
+                if (canScroll){
+                  canScroll = false;
+                  getPrevImage();
+                }
               }
 
               if ( positions.get(0) == 1.0f ){
-                getNextImage();
+                if (canScroll){
+                  canScroll = false;
+                  getNextImage();
+                }
               }
             }
 
@@ -386,11 +393,13 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
             toast = Toast.makeText(getContext(), direction.getMessage(), Toast.LENGTH_SHORT);
             toast.show();
             toastShown = true;
+
           }
 
         }
       } else {
         toastShown = false;
+        canScroll = true;
       }
 
 
@@ -500,6 +509,13 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     Intent intent = DocumentImageFullScreenActivity.newIntent( getContext(), adapter.getItems(), index );
     startActivityForResult(intent, REQUEST_CODE_INDEX);
   }
+
+  @OnClick(R.id.info_card_pdf_open)
+  public void openPdf() {
+    openInAnotherApp();
+  }
+
+
 
   // This is called, when DocumentImageFullScreenActivity returns
   // (needed to switch to the image shown in full screen).
