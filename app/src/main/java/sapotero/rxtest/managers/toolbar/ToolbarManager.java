@@ -84,7 +84,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     getFirstForLenovo();
 
     EventBus.getDefault().post( new CheckDecisionVisibilityEvent() );
-
   }
 
   private void registerEvents() {
@@ -96,6 +95,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     doc = dataStore
       .select(RDocumentEntity.class)
       .where(RDocumentEntity.UID.eq(settings.getUid())).get().firstOrNull();
+    registerEvents();
   }
 
   private void setListener() {
