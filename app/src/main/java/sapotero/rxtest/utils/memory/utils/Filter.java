@@ -157,7 +157,9 @@ public class Filter {
     Boolean result = true;
 
     if ( isControl ){
-      result = doc != null && doc.getDocument() != null && doc.getDocument().getControl() != null && doc.getDocument().getControl();
+      // resolved https://tasks.n-core.ru/browse/MVDESD-13985
+      // Не показываем документы из папки Избранное с замочком во вкладке На контроль
+      result = doc != null && doc.getDocument() != null && doc.getDocument().getControl() != null && doc.getDocument().getControl() && !doc.getDocument().isFromFavoritesFolder();
     }
 
     return result;
