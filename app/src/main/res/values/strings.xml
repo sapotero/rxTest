@@ -511,6 +511,10 @@
     </string-array>
 
 
+    <string name="update_time_title">Задержка обновления документа, секунд</string>
+    <string name="update_time_value">300</string>
+    <string name="update_time_key">settings_update_time</string>
+
     <string name="host_key_title">Домен</string>
     <string name="settings_journal_title">Журналы</string>
 
@@ -573,5 +577,10 @@
 
     <string name="crash_toast_text">Приложение остановлено. Обратитесь к администратору устройства.</string>
     <string name="loading_file">Выполняется загрузка ЭО</string>
+    <string name="zoom">Масштаб</string>
+
+    <string name="zoomTextSize">16</string>
+    <string name="zoomText">Размер текста инфокарточки по умолчанию</string>
+    <string name="zoomTextSize_key">zoomTextSize</string>
 
 </resources>

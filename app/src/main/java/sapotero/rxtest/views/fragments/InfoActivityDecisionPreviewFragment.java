@@ -260,6 +260,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     // Показывать комментарий при отклонении
     if ( settings.isShowCommentPost() || !settings.isShowCommentPost() && settings.isActionsConfirm()  ){
       prev_dialog
+        .cancelable(false)
         .inputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES )
         .input(R.string.comment_hint, R.string.dialog_empty_value, (dialog12, input) -> {})
         .neutralText("Шаблон")
@@ -293,13 +294,13 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   private void setAsFakeProcessed() {
     // resolved https://tasks.n-core.ru/browse/MVDESD-13366
     // ставим плашку всегда
-    dataStore
-      .update(RDocumentEntity.class)
-      .set(RDocumentEntity.CHANGED, true)
-      .set(RDocumentEntity.MD5, "")
-      .where(RDocumentEntity.UID.eq( settings.getUid() ))
-      .get()
-      .value();
+//    dataStore
+//      .update(RDocumentEntity.class)
+//      .set(RDocumentEntity.CHANGED, true)
+//      .set(RDocumentEntity.MD5, "")
+//      .where(RDocumentEntity.UID.eq( settings.getUid() ))
+//      .get()
+//      .value();
   }
 
   private void updateAfteButtonPressed() {
@@ -346,7 +347,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       Timber.tag("GestureListener").w("DOUBLE TAP");
 
 
-      if ( doc != null && Objects.equals(doc.getAddressedToType(), "")){
+      if ( doc != null && Objects.equals(doc.getAddressedToType(), "") ){
 
         if ( doc.isFromLinks() != null && !doc.isFromLinks() && current_decision != null ){
 
@@ -364,7 +365,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
             if ( current_decision.isApproved() != null &&
               !current_decision.isApproved() &&
               current_decision.isTemporary() != null &&
-              !current_decision.isTemporary() && !doc.isProcessed()){
+              !current_decision.isTemporary() && !doc.isProcessed() &&  isActiveOrRed()){
               Timber.tag("GestureListener").w("2");
               edit();
             } else {
@@ -419,7 +420,6 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
   }
 
   private void invalidate() {
-    initEvents();
 
     initToolBar();
 
@@ -434,6 +434,10 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     }
 
     preview = new Preview(getContext());
+
+    initEvents();
+
+    sendDecisionVisibilityEvent();
   }
 
   private void initToolBar() {
@@ -465,6 +469,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     decision_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
       @Override
       public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+        decision_spinner_adapter.setSelection(position);
         if ( decision_spinner_adapter.getCount() > 0 ) {
           Timber.tag(TAG).e("onItemSelected %s %s ", position, id);
           current_decision = decision_spinner_adapter.getItem(position).getDecision();
@@ -475,6 +480,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
       @Override
       public void onNothingSelected(AdapterView<?> adapterView) {
+        decision_spinner_adapter.setSelection(-1);
         if ( decision_spinner_adapter.getCount() > 0 ){
           current_decision = decision_spinner_adapter.getItem(0).getDecision();
           Timber.tag(TAG).e("onNothingSelected");
@@ -566,6 +572,18 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 //      }
 //    }
 
+    //resolved https://tasks.n-core.ru/browse/MVDESD-14142
+    // Скрывать кнопки "Подписать", "Отклонить" ,"Редактировать"
+    // если подписант не текущий пользователь (или министр)
+    buttons_wrapper.setVisibility( isActiveOrRed() ? View.VISIBLE : View.GONE);
+    bottom_line.setVisibility( isActiveOrRed() ? View.VISIBLE : View.GONE);
+  }
+
+  private boolean isActiveOrRed() {
+    return current_decision != null && current_decision.getSignerId() != null
+      && current_decision.getSignerId().equals( settings.getCurrentUserId() )
+      || current_decision != null && current_decision.isRed() != null
+      && current_decision.isRed();
   }
 
   private void checkActiveDecision() {
@@ -780,6 +798,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       .onNegative((dialog, which) -> dialog.dismiss())
       .onNeutral((dialog, which) -> dialog.getInputEditText().setText(""))
       .autoDismiss(false)
+      .cancelable(false)
       .build();
 
     MaterialDialog.Builder materialDialogBuilder = new MaterialDialog.Builder(getContext())
@@ -862,6 +881,7 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
         preview.showEmpty();
 
         if ( doc.getDecisions().size() > 0 ){
+          bottom_line.setVisibility( View.VISIBLE );
 
           decision_spinner_adapter.clear();
 
@@ -884,6 +904,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
             current_decision = decision_spinner_adapter.getItem(0).getDecision();
             Timber.tag(TAG).e("decision_spinner_adapter > 0");
             displayDecision();
+
+
           }
 
           if (decision_spinner_adapter.size() == 1){
@@ -896,10 +918,14 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
             decision_count.setVisibility(View.VISIBLE);
             invalidateSpinner(true);
           }
+
+
         } else {
           Timber.e("no decisions");
 
           if (toolbarManager != null) {
+
+
 
             if (doc.isProcessed() != null && !doc.isProcessed()){
               toolbarManager.setEditDecisionMenuItemVisible(false);
@@ -920,6 +946,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
           invalidateSpinner(false);
           showDecisionCardTollbarMenuItems(false);
           EventBus.getDefault().post( new HasNoActiveDecisionConstructor() );
+
+          bottom_line.setVisibility( View.GONE);
 
           updateActionText(true);
         }
@@ -960,8 +988,16 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
       updateVisibility( current_decision.isApproved() );
 
+      sendDecisionVisibilityEvent();
+
     }
 
+  }
+
+  private void sendDecisionVisibilityEvent() {
+    if (current_decision != null) {
+      EventBus.getDefault().post( new DecisionVisibilityEvent( isActiveOrRed() && current_decision.isApproved() != null && !current_decision.isApproved() ) );
+    }
   }
 
   private void loadFromJson(){
@@ -1048,6 +1084,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
       }
 
       printSigner( decision, doc == null ? settings.getRegNumber() : doc.getRegistrationNumber() );
+
+      sendDecisionVisibilityEvent();
     }
 
     private void showEmpty(){
@@ -1355,8 +1393,8 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(CheckDecisionVisibilityEvent event) throws Exception {
-    current_decision = decision_spinner_adapter.getItem(decision_spinner.getSelectedItemPosition()).getDecision();
-    EventBus.getDefault().post( new DecisionVisibilityEvent( current_decision.isApproved() ) );
+//    current_decision = decision_spinner_adapter.getItem(decision_spinner.getSelectedItemPosition()).getDecision();
+    EventBus.getDefault().post( new DecisionVisibilityEvent( isActiveOrRed() && current_decision != null && current_decision.isApproved() != null && current_decision.isApproved() ) );
   }
 
 

@@ -257,6 +257,7 @@ public class ButtonBuilder {
     view.setOnCheckedChangeListener((buttonView, isChecked) -> {
       setActive(isChecked);
       if (isChecked){
+//        EventBus.getDefault().post( new UpdateDocumentsByStatusEvent( getSelectedItem(), MainMenuButton.getByIndex(index) ) );
         callback.onButtonBuilderUpdate(index);
       }
     });

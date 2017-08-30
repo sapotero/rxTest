@@ -59,6 +59,7 @@ import sapotero.rxtest.events.view.ShowSnackEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentInfoActivityEvent;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
+import sapotero.rxtest.managers.menu.utils.DateUtil;
 import sapotero.rxtest.managers.toolbar.ToolbarManager;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
@@ -127,7 +128,12 @@ public class InfoActivity extends AppCompatActivity {
     EventBus.getDefault().register(this);
 
 
-    toolbarManager = new ToolbarManager( this, toolbar);
+//    toolbarManager = new ToolbarManager( this, toolbar);
+//    toolbarManager.init();
+    toolbarManager = ToolbarManager.getInstance();
+    toolbarManager.withToolbar(toolbar);
+    toolbarManager.withContext(this);
+    toolbarManager.build();
     toolbarManager.init();
 
     setLastSeen();
@@ -538,7 +544,24 @@ public class InfoActivity extends AppCompatActivity {
   }
 
   private void updateDocument() {
-    jobManager.addJobInBackground( new UpdateDocumentJob( settings.getUid() ) );
+    InMemoryDocument doc = store.getDocuments().get(settings.getUid());
+
+    int time = 600;
+    try {
+      time = Integer.parseInt(settings.getUpdateTime());
+    } catch (NumberFormatException e) {
+      Timber.e(e);
+    }
+
+    if ( doc != null
+        // если док не обработан
+        && !doc.isProcessed()
+        // или он обработан и время последней команды старше 5 мин
+        || ( doc != null && doc.isProcessed() && doc.getUpdatedAt() != null
+        && DateUtil.isSomeTimePassed( doc.getUpdatedAt(), time ) )
+    ){
+      jobManager.addJobInBackground( new UpdateDocumentJob( settings.getUid() ) );
+    }
   }
 
   private void unsubscribe(){

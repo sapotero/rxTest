@@ -11,11 +11,14 @@ public class PrimaryConsiderationPeople implements IPerformer {
   private String id;
   private String name;
   private String position;
+  private String image;
   private String organization;
   private String gender;
   private boolean isOriginal = false;
   private boolean isResponsible = false;
   private boolean isOrganization = false;
+
+  private boolean isDelimiter = false;
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13414
   // Отображать порядок ДЛ в МП, также как в группах СЭД
@@ -31,6 +34,24 @@ public class PrimaryConsiderationPeople implements IPerformer {
     } else {
       return false;
     }
+  }
+
+  public boolean isDelimiter() {
+    return isDelimiter;
+  }
+
+  public PrimaryConsiderationPeople setDelimiter(boolean delimiter) {
+    isDelimiter = delimiter;
+    return this;
+  }
+
+  public String getImage() {
+    return image;
+  }
+
+  public PrimaryConsiderationPeople setImage(String image) {
+    this.image = image;
+    return this;
   }
 
   public String getAssistantId() {
@@ -282,5 +303,15 @@ public class PrimaryConsiderationPeople implements IPerformer {
   @Override
   public void setIsIPerformerOrganization(Boolean isOrganization) {
     setIsOrganization( getBooleanValue(isOrganization) );
+  }
+
+  @Override
+  public String getIImage() {
+    return getImage();
+  }
+
+  @Override
+  public void setIImage(String image) {
+    setImage(image);
   }
 }

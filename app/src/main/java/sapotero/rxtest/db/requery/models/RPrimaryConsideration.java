@@ -28,6 +28,7 @@ public abstract class RPrimaryConsideration {
   String middleName;
   Boolean isOrganization;
   Boolean isGroup;
+  String image;
 
   @Index("pc_user_index")
   String  user;

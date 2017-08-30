@@ -61,18 +61,21 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
   private int decision_count;
 
-  private final Toolbar toolbar;
-  private final Context context;
+  private Toolbar toolbar;
+//  private Context context = EsdApplication.getApplication().getApplicationContext();
+  private Context context;
 
   private RDocumentEntity doc;
   private MaterialDialog dialog;
   private String command;
+  private static ToolbarManager instance;
 
   public ToolbarManager (Context context, Toolbar toolbar) {
     this.context = context;
     this.toolbar = toolbar;
     EsdApplication.getManagerComponent().inject(this);
 
+    registerEvents();
     setListener();
 
     buildDialog();
@@ -82,7 +85,42 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     // FIX починить и убрать из релиза
     getFirstForLenovo();
 
+    EventBus.getDefault().post( new CheckDecisionVisibilityEvent() );
+  }
+
+  public ToolbarManager() {
+  }
+
+  public static ToolbarManager getInstance(){
+    if (instance == null) {
+      instance = new ToolbarManager();
+    }
+    return instance;
+  }
+
+  public ToolbarManager withToolbar(Toolbar toolbar){
+    this.toolbar = toolbar;
+    return this;
+  }
+  public ToolbarManager withContext(Context context){
+    this.context = context;
+    return this;
+  }
+  public ToolbarManager build(){
+    EsdApplication.getManagerComponent().inject(this);
+
     registerEvents();
+    setListener();
+
+    buildDialog();
+
+    operationManager.registerCallBack(this);
+
+    // FIX починить и убрать из релиза
+    getFirstForLenovo();
+
+    EventBus.getDefault().post( new CheckDecisionVisibilityEvent() );
+    return instance;
   }
 
   private void registerEvents() {
@@ -94,6 +132,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     doc = dataStore
       .select(RDocumentEntity.class)
       .where(RDocumentEntity.UID.eq(settings.getUid())).get().firstOrNull();
+    registerEvents();
   }
 
   private void setListener() {
@@ -457,27 +496,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         safeSetVisibility(R.id.menu_info_decision_create, true);
       }
 
-      // в офлайне не изменяем видимость кнопки избранное
-//      if  ( !settings.isOnline() ){
-//        MenuItem item = toolbar.getMenu().findItem(R.id.menu_info_decision_edit);
-//        if ( item != null && item.isVisible()  ){
-//          safeSetVisibility(R.id.menu_info_decision_edit, true);
-//        }
-//      }
-
-//      // в онлайне игнорируем кнопку избранное
-//      if  ( settings.isOnline() ){
-//        if ( Arrays.asList( "add_to_folder", "remove_to_folder").contains(command) ){
-//          MenuItem item = toolbar.getMenu().findItem(R.id.menu_info_decision_edit);
-//          if ( item != null && item.isVisible() ){
-//            safeSetVisibility(R.id.menu_info_decision_edit, true);
-//          }
-//        }
-//      }
-
-      EventBus.getDefault().post( new CheckDecisionVisibilityEvent() );
-
-
       if (isFromFavoritesFolder()){
         safeSetVisibility(R.id.menu_info_decision_create_with_assignment, settings.isShowCreateDecisionPost());
 
@@ -493,6 +511,8 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
       if ( isShared() ){
         clearToolbar();
       }
+
+      EventBus.getDefault().post( new CheckDecisionVisibilityEvent() );
 
     }
   }
@@ -571,26 +591,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
   private void clearToolbar() {
     toolbar.getMenu().clear();
-    // раскоментить в следующей версии
-    // когда будет понимание как всё должно работать
-//    if ( doc != null && doc.getFilter() != null && Objects.equals(doc.getFilter(), Fields.Status.PRIMARY_CONSIDERATION.getValue())){
-//      toolbar.inflateMenu(R.menu.info_menu_primary_consideration);
-//
-//      decision_count = doc.getDecisions().size();
-//      switch (decision_count) {
-//        case 0:
-//          processEmptyDecisions();
-//          break;
-//        default:
-//          try {
-//            toolbar.getMenu().findItem(R.id.menu_info_decision_create).setVisible(false);
-//            toolbar.getMenu().findItem(R.id.menu_info_decision_edit).setVisible(false);
-//          } catch (Exception e) {
-//            Timber.tag(TAG).v(e);
-//          }
-//          break;
-//      }
-//    }
   }
 
   private void showAsProcessed(Boolean showCreateButton) {
@@ -619,7 +619,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
         Timber.tag(TAG).e("\n%s - %s\n%s ", decision.getSignerId(), decision.isApproved(), settings.getCurrentUserId() );
 
-        if (!decision.isApproved() && Objects.equals(decision.getSignerId(), settings.getCurrentUserId())){
+        if (!decision.isApproved() && Objects.equals(decision.getSignerId(), settings.getCurrentUserId()) || decision.isRed() && !decision.isApproved() ){
           result = true;
         }
       }
@@ -805,7 +805,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
           .input(R.string.comment_hint, R.string.dialog_empty_value, (dialog12, input) -> {
             settings.setPrevDialogComment( input.toString() );
             params.setComment( input.toString() );
-          });
+          }).cancelable(false);
       }
 
 
@@ -842,7 +842,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         .input(R.string.comment_hint, R.string.dialog_empty_value, (dialog12, input) -> {
           settings.setPrevDialogComment( input.toString() );
           params.setComment( input.toString() );
-        });
+        }).cancelable(false);
     }
 
 
@@ -929,14 +929,10 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   public void onMessageEvent(DecisionVisibilityEvent event){
     Timber.tag(TAG).e("DecisionVisibilityEvent %s | %s", event.approved, store.getDocuments().get( settings.getUid() ).isProcessed());
 
-    if ( event.approved != null ) {
-      setEditDecisionMenuItemVisible(!event.approved);
-    }
+    setEditDecisionMenuItemVisible(event.approved);
 
     if ( store.getDocuments().get( settings.getUid() ).isProcessed() ){
       setEditDecisionMenuItemVisible(false);
     }
-
-    registerEvents();
   }
 }

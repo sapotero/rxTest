@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.Spinner;
@@ -116,8 +117,6 @@ public class InfoCardLinksFragment extends Fragment {
       .subscribe(
         doc -> {
 
-          Timber.tag("LOAD").e("%s %s", doc, doc.getLinks().size());
-
           if ( doc.getLinks() != null && doc.getLinks().size() > 0 ) {
 
             adapter.clear();
@@ -185,8 +184,12 @@ public class InfoCardLinksFragment extends Fragment {
         webview.loadDataWithBaseURL("file:///android_asset/", htmlData, "text/html", "UTF-8", null);
         webview.getSettings().setBuiltInZoomControls(true);
         webview.getSettings().setDisplayZoomControls(false);
-
-
+        webview.setWebViewClient(new WebViewClient(){
+          @Override
+          public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            return true;
+          }
+        });
       }
     } catch (Exception e) {
       e.printStackTrace();

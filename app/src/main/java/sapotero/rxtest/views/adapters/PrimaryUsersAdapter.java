@@ -1,12 +1,19 @@
 package sapotero.rxtest.views.adapters;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.CardView;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -21,6 +28,7 @@ import sapotero.rxtest.db.mapper.PerformerMapper;
 import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
+import timber.log.Timber;
 
 public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
 
@@ -56,7 +64,9 @@ public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
       viewHolder = new ViewHolder();
       viewHolder.name = (TextView) view.findViewById(R.id.primary_user__name);
       viewHolder.title = (TextView) view.findViewById(R.id.primary_user__title);
-
+      viewHolder.image = (ImageView) view.findViewById(R.id.primary_user__image);
+      viewHolder.image_wrapper = (CardView) view.findViewById(R.id.primary_user__image_wrapper);
+      viewHolder.wrapper = (LinearLayout) view.findViewById(R.id.primary_user__wrapper);
 
       view.setTag(viewHolder);
     } else {
@@ -66,6 +76,28 @@ public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
 
     viewHolder.name.setText( user.getName() );
     viewHolder.title.setText( user.getOrganization() );
+
+    Timber.e( "getIImage %s", user.getIImage() );
+
+    if (user.getIImage() != null){
+      try {
+        String str = user.getIImage().replaceAll("(\\n)", "");
+        byte[] decodedString = Base64.decode(str.getBytes(), Base64.DEFAULT);
+        Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+        viewHolder.image.setImageBitmap(decodedByte);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    } else {
+      viewHolder.image.setImageDrawable(ContextCompat.getDrawable(context, R.drawable._person));
+      viewHolder.image_wrapper.setVisibility(View.VISIBLE);
+    }
+
+    if ( user.isDelimiter() ){
+      viewHolder.image_wrapper.setVisibility(View.GONE);
+    }
+
+
 
     return view;
   }
@@ -130,6 +162,9 @@ public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
   private static class ViewHolder {
     public TextView name;
     public TextView title;
+    public ImageView image;
+    public CardView image_wrapper;
+    public LinearLayout wrapper;
   }
 
   @Override

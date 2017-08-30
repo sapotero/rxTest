@@ -47,6 +47,7 @@ public class DecisionTextDialog {
         .onNegative((dialog1, which) -> {
           dialog1.dismiss();
         })
+      .cancelable(false)
       .autoDismiss(false);
 //        .dismissListener(dialog1 -> {
 //          parentEditText.setText(textInput.getText());

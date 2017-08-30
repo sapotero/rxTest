@@ -55,7 +55,9 @@ public class Settings implements ISettings {
 
   public static String FIRST_RUN_KEY;
   public static String IS_PROJECT;
+  private static String UPDATE_TIME_KEY;
   private static String HOST_KEY;
+  private static String INFOCARD_FONTSIZE;
   private static String ACTIONS_CONFIRM_KEY;
   private static String CONTROL_CONFIRM_KEY;
   private static String SHOW_COMMENT_POST_KEY;
@@ -89,6 +91,7 @@ public class Settings implements ISettings {
   private Preference<Integer> docProjCount;
   private Preference<String> login;
   private Preference<String> token;
+  private Preference<String> infocard_fontSize;
   private Preference<String> current_activity;
   private Preference<String> host;
   private Preference<String> password;
@@ -146,6 +149,7 @@ public class Settings implements ISettings {
   private Preference<String> colleagueId;
   private Preference<Boolean> isUpdateAuthStarted;
   private Preference<Boolean> isTabChanged;
+  private Preference<String> updateTime;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -154,9 +158,11 @@ public class Settings implements ISettings {
   }
 
   private void loadSettings() {
+    UPDATE_TIME_KEY                = context.getResources().getString(R.string.update_time_key);
     FIRST_RUN_KEY                  = context.getResources().getString(R.string.first_run_key);
     IS_PROJECT                     = context.getResources().getString(R.string.is_project_key);
     HOST_KEY                       = context.getResources().getString(R.string.host_key);
+    INFOCARD_FONTSIZE              = context.getResources().getString(R.string.zoomTextSize_key);
     ACTIONS_CONFIRM_KEY            = context.getResources().getString(R.string.actions_confirm_key);
     CONTROL_CONFIRM_KEY            = context.getResources().getString(R.string.control_confirm_key);
     SHOW_COMMENT_POST_KEY          = context.getResources().getString(R.string.show_comment_post_key);
@@ -185,6 +191,7 @@ public class Settings implements ISettings {
     signWithDc                     = settings.getBoolean(SIGN_WITH_DC_KEY);
     totalDocCount                  = settings.getInteger(DOCUMENTS_TOTAL_COUNT_KEY);
     docProjCount                   = settings.getInteger(DOCPROJ_COUNT_KEY);
+    updateTime                     = settings.getString(UPDATE_TIME_KEY);
     login                          = settings.getString(LOGIN_KEY);
     token                          = settings.getString(TOKEN_KEY);
     host                           = settings.getString(HOST_KEY);
@@ -230,6 +237,7 @@ public class Settings implements ISettings {
     startLoadData                  = settings.getBoolean(START_LOAD_DATA_KEY);
     authType                       = settings.getEnum(STEPPER_AUTH_TYPE_KEY, AuthType.class);
     current_activity               = settings.getString(CURRENT_ACTIVITY_KEY);
+    infocard_fontSize              = settings.getString(INFOCARD_FONTSIZE);
     online                         = settings.getBoolean(IS_ONLINE);
     favoritesLoaded                = settings.getBoolean(FAVORITES_LOADED_KEY);
     processedLoaded                = settings.getBoolean(PROCESSED_LOADED_KEY);
@@ -459,6 +467,20 @@ public class Settings implements ISettings {
     setString(uid, value);
   }
 
+
+
+  @Override
+  public String getUpdateTime() {
+    return getString(updateTime);
+  }
+
+  @Override
+  public void setUpdateTime(String value) {
+    setString(updateTime, value);
+  }
+
+
+
   @Override
   public String getStatusCode() {
     return getString(statusCode);
@@ -668,6 +690,16 @@ public class Settings implements ISettings {
   @Override
   public void setPrevDialogComment(String value) {
     setString(prevDialogComment, value);
+  }
+
+  @Override
+  public String getInfocardFontSize() {
+    return getString(infocard_fontSize);
+  }
+
+  @Override
+  public void setInfocardFontSize(String value) {
+    setString(infocard_fontSize, value);
   }
 
   @Override

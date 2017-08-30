@@ -37,6 +37,7 @@ public class FavoriteUserMapper extends AbstractMapper<Oshs, RFavoriteUserEntity
     entity.setIsGroup( model.getIsGroup() );
     entity.setIsOrganization( model.getIsOrganization() );
     entity.setUser( settings.getLogin() );
+    entity.setImage( model.getIImage() );
 
     return entity;
   }
@@ -55,6 +56,7 @@ public class FavoriteUserMapper extends AbstractMapper<Oshs, RFavoriteUserEntity
     model.setName( entity.getName() );
     model.setIsGroup( entity.isIsGroup() );
     model.setIsOrganization( entity.isIsOrganization() );
+    model.setImage( entity.getImage() );
 
     return model;
   }

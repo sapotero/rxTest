@@ -6,6 +6,7 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import rx.Observable;
 import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
@@ -76,7 +77,13 @@ public class SaveAndApproveDecision extends DecisionCommand {
     String sign = getSign();
 
     if ( sign != null ) {
-      _decision.setSign( sign );
+//      _decision.setSign( sign );
+
+      // resolved https://tasks.n-core.ru/browse/MVDESD-14141
+      // при нажатии кнопки согласовать - не отправляем подпись
+      Boolean equals = Objects.equals(store.getDocuments().get(params.getDocument()).getFilter(), "primary_consideration") && !Objects.equals(getParams().getDecisionModel().getSignerId(), settings.getCurrentUserId());
+      _decision.setSign( equals? null : sign );
+
       Observable<DecisionError> info = getDecisionUpdateOperationObservable(_decision);
       sendDecisionOperationRequest( info );
 

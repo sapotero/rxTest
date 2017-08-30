@@ -30,10 +30,12 @@ import sapotero.rxtest.jobs.bus.CreateFavoriteDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateProcessedDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateProjectsJob;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
+import sapotero.rxtest.managers.menu.utils.DateUtil;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.fields.DocumentType;
+import sapotero.rxtest.utils.memory.fields.FieldType;
 import sapotero.rxtest.utils.memory.fields.InMemoryState;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import sapotero.rxtest.utils.memory.mappers.InMemoryDocumentMapper;
@@ -140,6 +142,7 @@ public class Processor {
         Timber.w("process as db");
         transaction
           .from(InMemoryDocumentMapper.fromDB(document_from_db))
+          .setField(FieldType.UPDATED_AT, DateUtil.getTimestampEarly() )
           .setState(InMemoryState.READY);
 
         commit( transaction );
@@ -173,30 +176,47 @@ public class Processor {
     sub.onNext( transaction.commit() );
   }
 
-  private void validate(Document document){
-    Timber.tag(TAG).e("->      : %s / %s@%5.10s  ", document.getUid(), filter, index );
-
-//    upsert( document );
+  private void validate(Document document) {
+    Timber.tag(TAG).e("-> : %s / %s@%5.10s  ", document.getUid(), filter, index);
 
     // new upsert job
-    if ( store.getDocuments().keySet().contains( document.getUid() ) ){
-      InMemoryDocument doc = store.getDocuments().get( document.getUid() );
+    if (store.getDocuments().keySet().contains(document.getUid())) {
+      InMemoryDocument doc = store.getDocuments().get(document.getUid());
 
-      Timber.tag(TAG).e("filters : %s | %s", doc.getFilter(), filter);
+      Timber.tag(TAG).e("    * %s | %s | %s", doc.getFilter(), filter, doc.getUpdatedAt());
+
+      int time = 15;
+      try {
+        time = Integer.parseInt(settings.getUpdateTime());
+      } catch (NumberFormatException e) {
+        Timber.e(e);
+      }
 
       // изменилось MD5
-      if ( Filter.isChanged( doc.getMd5(), document.getMd5() ) ){
-        Timber.tag(TAG).e("md5     : %s | %s", doc.getMd5(), document.getMd5());
-        updateJob( doc.getUid(), doc.getMd5() );
+      if ( Filter.isChanged(doc.getMd5(), document.getMd5()) ) {
+
+        if ( doc.getUpdatedAt() != null && doc.isProcessed() && !DateUtil.isSomeTimePassed(doc.getUpdatedAt(), time) ) {
+          Timber.tag(TAG).e("    ** %s @ %s || %s : %s ", doc.getUpdatedAt(), DateUtil.isSomeTimePassed(doc.getUpdatedAt(), time), doc.getMd5(), document.getMd5());
+          EventBus.getDefault().post(new StepperLoadDocumentEvent(doc.getUid()));
+
+          if ( Filter.isChanged(doc.getFilter(), filter) ){
+            updateJob(doc.getUid(), doc.getMd5());
+          }
+
+        } else {
+          updateJob(doc.getUid(), doc.getMd5());
+        }
+
       } else {
-        EventBus.getDefault().post( new StepperLoadDocumentEvent( doc.getUid() ) );
+
+        EventBus.getDefault().post(new StepperLoadDocumentEvent(doc.getUid()));
       }
+
 
     } else {
       Timber.tag(TAG).e("new: %s", document.getUid());
       createJob(document.getUid());
     }
-
   }
 
   private ArrayList<String> intersect(){

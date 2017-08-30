@@ -232,6 +232,16 @@ public class TestSettings implements ISettings {
   }
 
   @Override
+  public String getUpdateTime() {
+    return null;
+  }
+
+  @Override
+  public void setUpdateTime(String value) {
+
+  }
+
+  @Override
   public String getStatusCode() {
     return statusCode;
   }
@@ -424,6 +434,16 @@ public class TestSettings implements ISettings {
   @Override
   public void setPrevDialogComment(String value) {
     prevDialogComment = value;
+  }
+
+  @Override
+  public String getInfocardFontSize() {
+    return null;
+  }
+
+  @Override
+  public void setInfocardFontSize(String value) {
+
   }
 
   @Override

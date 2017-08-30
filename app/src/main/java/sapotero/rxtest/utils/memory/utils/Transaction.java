@@ -44,6 +44,9 @@ public class Transaction {
         case FILTER:
           document.setFilter(value);
           break;
+        case UPDATED_AT:
+          document.setUpdatedAt(value);
+          break;
 
       }
     }
