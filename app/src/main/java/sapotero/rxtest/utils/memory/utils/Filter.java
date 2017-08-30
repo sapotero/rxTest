@@ -183,7 +183,7 @@ public class Filter {
   }
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-14115
-  // Сортировка документов списке
+  // Сортировка документов в списке
   public int byJournalDateNumber(InMemoryDocument o1, InMemoryDocument o2) {
     int result = 0;
 
@@ -194,7 +194,7 @@ public class Filter {
 
     if ( result == 0 ) {
       if ( o1.getDocument() == null ) {
-        result = 1;
+        result = 1; // documents with null values should go to the end of the list
       } else if ( o2.getDocument() == null ) {
         result = -1;
       } else {
@@ -308,6 +308,7 @@ public class Filter {
     return result;
   }
 
+  // Сравнение регистрационных номеров вида 3/17790032428
   private int compareRegNumbersWithPrefixes(String regNum1, String regNum2) {
     int result = 0;
 
@@ -334,8 +335,10 @@ public class Filter {
         String regNum2Prefix = split2[0];
         String regNum2Number = split2[1];
 
+        // Сортировка по префиксу (то, что до "/")
         result = compareNumbers(regNum1Prefix, regNum2Prefix);
 
+        // Сортировка по номеру (то, что после "/")
         if ( result == 0 ) {
           result = compareNumbers(regNum1Number, regNum2Number);
         }
