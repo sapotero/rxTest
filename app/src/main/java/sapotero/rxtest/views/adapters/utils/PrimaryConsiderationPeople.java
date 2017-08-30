@@ -18,6 +18,8 @@ public class PrimaryConsiderationPeople implements IPerformer {
   private boolean isResponsible = false;
   private boolean isOrganization = false;
 
+  private boolean isDelimiter = false;
+
   // resolved https://tasks.n-core.ru/browse/MVDESD-13414
   // Отображать порядок ДЛ в МП, также как в группах СЭД
   // Номер элемента в списке из входящего JSON
@@ -32,6 +34,15 @@ public class PrimaryConsiderationPeople implements IPerformer {
     } else {
       return false;
     }
+  }
+
+  public boolean isDelimiter() {
+    return isDelimiter;
+  }
+
+  public PrimaryConsiderationPeople setDelimiter(boolean delimiter) {
+    isDelimiter = delimiter;
+    return this;
   }
 
   public String getImage() {

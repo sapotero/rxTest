@@ -53,8 +53,8 @@ import timber.log.Timber;
 
 public class SelectOshsDialogFragment extends DialogFragment implements PrimaryUsersAdapter.PrimaryUsersAdapterFilterListener, OshsAutoCompleteAdapter.OshsAutoCompleteAdapterFilterListener {
 
-  public static final String SEPARATOR_FAVORITES_TEXT = "Результат поиска по избранному:";
-  public static final String SEPARATOR_OSHS_TEXT = "Результат поиска по ОШС МВД:";
+  public static final String SEPARATOR_FAVORITES_TEXT = "Результат поиска по избранному";
+  public static final String SEPARATOR_OSHS_TEXT = "Результат поиска по ОШС МВД";
 
   @Inject ISettings settings;
   @Inject Mappers mappers;
@@ -422,6 +422,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements PrimaryU
 
     PrimaryConsiderationPeople separatorFavorites = new PrimaryConsiderationPeople();
     separatorFavorites.setOrganization( SEPARATOR_FAVORITES_TEXT );
+    separatorFavorites.setDelimiter(true);
     adapter.removeItem( separatorFavorites );
 
     if ( adapter.getCount() > 0 ) {
@@ -450,6 +451,8 @@ public class SelectOshsDialogFragment extends DialogFragment implements PrimaryU
 
     PrimaryConsiderationPeople separatorOshs = new PrimaryConsiderationPeople();
     separatorOshs.setOrganization(SEPARATOR_OSHS_TEXT);
+    separatorOshs.setDelimiter(true);
+
     resultFromOshs.add( separatorOshs );
     adapter.addResultItem( separatorOshs );
 
