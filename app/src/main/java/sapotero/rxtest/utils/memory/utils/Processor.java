@@ -193,6 +193,11 @@ public class Processor {
         if ( doc.getUpdatedAt() != null && doc.isProcessed() && !DateUtil.isSomeTimePassed(doc.getUpdatedAt(), time) ) {
           Timber.tag(TAG).e("    ** %s @ %s || %s : %s ", doc.getUpdatedAt(), DateUtil.isSomeTimePassed(doc.getUpdatedAt(), time), doc.getMd5(), document.getMd5());
           EventBus.getDefault().post(new StepperLoadDocumentEvent(doc.getUid()));
+
+          if ( Filter.isChanged(doc.getFilter(), filter) ){
+            updateJob(doc.getUid(), doc.getMd5());
+          }
+
         } else {
           updateJob(doc.getUid(), doc.getMd5());
         }
