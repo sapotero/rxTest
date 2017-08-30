@@ -105,15 +105,21 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
   public String getSign() {
     String sign = null;
 
-    try {
-      sign = MainService.getFakeSign( getParams().getPin(), null );
-    } catch (Exception e) {
-      e.printStackTrace();
-      ACRA.getErrorReporter().handleSilentException(e);
-    }
+    // resolved https://tasks.n-core.ru/browse/MVDESD-14117
+    // При входе по логин/паролю давать возможность подписывать документы
+    if ( settings.isSignedWithDc() ) {
+      try {
+        sign = MainService.getFakeSign( getParams().getPin(), null );
+      } catch (Exception e) {
+        e.printStackTrace();
+        ACRA.getErrorReporter().handleSilentException(e);
+      }
 
-    if (Objects.equals(sign, "")) {
-      sign = null;
+      if (Objects.equals(sign, "")) {
+        sign = null;
+      }
+    } else {
+      sign = "";
     }
 
     return sign;
