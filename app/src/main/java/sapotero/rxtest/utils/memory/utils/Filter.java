@@ -223,18 +223,17 @@ public class Filter {
   private Integer getJournalNumber(String journalName) {
     Integer result;
 
-    // Сначала Входящие-в конце Обращения
     if ( Objects.equals( journalName, "incoming_documents" ) ) {
       result = 1;
-    } else if ( Objects.equals( journalName, "incoming_orders" ) ) {
-      result = 2;
-    } else if ( Objects.equals( journalName, "orders" ) ) {
-      result = 3;
-    } else if ( Objects.equals( journalName, "orders_ddo" ) ) {
-      result = 4;
-    } else if ( Objects.equals( journalName, "outgoing_documents" ) ) {
-      result = 5;
     } else if ( Objects.equals( journalName, "citizen_requests" ) ) {
+      result = 2;
+    } else if ( Objects.equals( journalName, "incoming_orders" ) ) {
+      result = 3;
+    } else if ( Objects.equals( journalName, "orders" ) ) {
+      result = 4;
+    } else if ( Objects.equals( journalName, "orders_ddo" ) ) {
+      result = 5;
+    } else if ( Objects.equals( journalName, "outgoing_documents" ) ) {
       result = 6;
     } else {
       result = 7;
