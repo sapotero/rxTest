@@ -285,7 +285,7 @@ public class Processor {
     // проверить source - сделать исключение для папок обработанные и избранное из ws
     for (String uid : add) {
       InMemoryDocument inMemoryDocument = store.getDocuments().get( uid );
-      if ( inMemoryDocument != null && inMemoryDocument.isProcessed()  ) {
+      if ( inMemoryDocument != null && ( inMemoryDocument.isProcessed() || documentType == DocumentType.FAVORITE ) ) {
         inMemoryDocument.setMd5("");
         store.getDocuments().put( uid, inMemoryDocument );
       }
