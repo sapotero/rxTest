@@ -726,11 +726,13 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
           .withSetSelected( false )
           .withOnDrawerItemClickListener((view, position, drawerItem) -> {
             int index = (int) drawerItem.getIdentifier();
-            // Переход в режим замещения, если не в режиме замещения и не ожидаем получения токена
-            if ( !settings.isSubstituteMode() && !settings.isUpdateAuthStarted() ) {
-              startSubstituteMode( index );
-            } else {
-              Toast.makeText(this, "Невозможно войти в режим замещения: дождитесь обновления данных", Toast.LENGTH_SHORT).show();
+            // Переход в режим замещения, если вошли по пину и не в режиме замещения и не ожидаем получения токена
+            if ( settings.isSignedWithDc() ) {
+              if ( !settings.isSubstituteMode() && !settings.isUpdateAuthStarted() ) {
+                startSubstituteMode( index );
+              } else {
+                Toast.makeText(this, "Невозможно войти в режим замещения: дождитесь обновления данных", Toast.LENGTH_SHORT).show();
+              }
             }
             return false;
           })
