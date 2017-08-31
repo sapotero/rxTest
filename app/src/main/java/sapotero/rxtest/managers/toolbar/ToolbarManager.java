@@ -616,11 +616,26 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     if (doc.getDecisions() != null && doc.getDecisions().size() > 0){
       for ( RDecision _decision: doc.getDecisions() ) {
         RDecisionEntity decision = (RDecisionEntity) _decision;
-
-        Timber.tag(TAG).e("\n%s - %s\n%s ", decision.getSignerId(), decision.isApproved(), settings.getCurrentUserId() );
-
         if (!decision.isApproved() && Objects.equals(decision.getSignerId(), settings.getCurrentUserId()) || decision.isRed() && !decision.isApproved() ){
           result = true;
+          break;
+        }
+      }
+    }
+
+    return result;
+  }
+
+  private boolean hasTemporaryDecision() {
+    Boolean result = false;
+
+    if (doc.getDecisions() != null && doc.getDecisions().size() > 0){
+      for ( RDecision _decision: doc.getDecisions() ) {
+        RDecisionEntity decision = (RDecisionEntity) _decision;
+
+        if ( decision.isTemporary() != null && decision.isTemporary()){
+          result = true;
+          break;
         }
       }
     }
@@ -933,6 +948,12 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
     if ( store.getDocuments().get( settings.getUid() ).isProcessed() ){
       setEditDecisionMenuItemVisible(false);
+    }
+
+
+    if ( hasTemporaryDecision() ){
+      safeSetVisibility(R.id.menu_info_decision_edit, false);
+      safeSetVisibility(R.id.menu_info_decision_create, false);
     }
   }
 }
