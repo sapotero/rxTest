@@ -102,8 +102,6 @@ public class DataLoaderManager {
   private boolean processFavoritesData = false;
   private boolean processProcessedData = false;
 
-  private boolean switchToSubstituteModeAfterReceiveToken = false;
-
   public DataLoaderManager(Context context) {
 
     this.context = context;
@@ -385,15 +383,11 @@ public class DataLoaderManager {
     }
 
     settings.setUpdateAuthStarted( true );
-    switchToSubstituteModeAfterReceiveToken = false;
 
-    if ( settings.isSubstituteMode() ) {
-      switchToSubstituteModeAfterReceiveToken = true;
-
-      if ( !settings.isSignedWithDc() ) {
-        // Если вошли по логину, то меняем логин на логин основного пользователя, чтобы правильно сформировался запрос на получение токена
-        swapLogin();
-      }
+    if ( settings.isSubstituteMode() && !settings.isSignedWithDc() ) {
+      // В режиме замещения, если вошли по логину, то меняем логин на логин основного пользователя,
+      // чтобы правильно сформировался запрос на получение токена
+      swapLogin();
     }
 
     Timber.tag(TAG).i("updateAuth: %s", sign );
@@ -413,7 +407,7 @@ public class DataLoaderManager {
 
     Observable<AuthSignToken> authSubscription = getAuthSubscription();
 
-    if ( switchToSubstituteModeAfterReceiveToken && !settings.isSignedWithDc() ) {
+    if ( settings.isSubstituteMode() && !settings.isSignedWithDc() ) {
       // Запрос на получение токена уже сформирован, меняем логин обратно на логин коллеги
       swapLogin();
     }
@@ -429,7 +423,7 @@ public class DataLoaderManager {
             Timber.tag(TAG).i("updateAuth: token" + data.getAuthToken());
             setToken( data.getAuthToken() );
 
-            if ( !switchToSubstituteModeAfterReceiveToken ) {
+            if ( !settings.isSubstituteMode() ) {
               if ( sendEvent ) {
                 EventBus.getDefault().post( new ReceivedTokenEvent() );
               }
@@ -438,14 +432,11 @@ public class DataLoaderManager {
               settings.setUpdateAuthStarted( false );
 
             } else {
-              switchToSubstituteModeAfterReceiveToken = false;
               getColleagueToken();
             }
           },
           error -> {
             Timber.tag(TAG).i("updateAuth error: %s" , error );
-
-            switchToSubstituteModeAfterReceiveToken = false;
 
             if ( sendEvent ) {
               EventBus.getDefault().post( new ErrorReceiveTokenEvent() );
