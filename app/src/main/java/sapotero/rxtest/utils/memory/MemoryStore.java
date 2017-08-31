@@ -121,10 +121,14 @@ public class MemoryStore implements Processable{
 
   }
 
-  public void clear(){
+  public void clear() {
     documents.clear();
+  }
+
+  public void clearAndLoadFromDb() {
+    clear();
     loadFromDB();
-  };
+  }
 
   public void loadFromDB() {
     dataStore

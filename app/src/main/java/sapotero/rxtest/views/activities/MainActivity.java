@@ -284,7 +284,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   private void initAdapters() {
     if (settings.isFirstRun()){
-      store.clear();
+      store.clearAndLoadFromDb();
     }
 
     int columnCount = 2;
