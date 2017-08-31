@@ -257,7 +257,10 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
   }
 
   private void initialize() {
+    // Stop regular refresh (because we are not logged in yet)
     settings.setStartRegularRefresh( false );
+    EventBus.getDefault().postSticky( new StartRegularRefreshEvent(false) );
+
     settings.setUpdateAuthStarted( false );
     PreferenceManager.setDefaultValues(this, R.xml.settings_view, false);
   }
@@ -306,7 +309,7 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
     // Change setting so that regular refresh would be started after MainService recreated on application close
     settings.setStartRegularRefresh( true );
     // Post sticky event, because at this moment MainService may not exist yet
-    EventBus.getDefault().postSticky( new StartRegularRefreshEvent() );
+    EventBus.getDefault().postSticky( new StartRegularRefreshEvent(true) );
 
     finish();
   }

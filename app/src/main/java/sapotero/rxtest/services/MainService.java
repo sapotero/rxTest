@@ -101,6 +101,7 @@ public class MainService extends Service {
   final String TAG = MainService.class.getSimpleName();
   private ScheduledThreadPoolExecutor scheduller;
   private ScheduledFuture futureNetwork;
+  private ScheduledFuture futureRefresh;
 
   @Inject OkHttpClient okHttpClient;
   @Inject ISettings settings;
@@ -204,7 +205,7 @@ public class MainService extends Service {
     // resolved https://tasks.n-core.ru/browse/MVDESD-12618
     // Починить регулярное обновление документов после закрытия приложения
     // Start regular refresh if true in settings
-    startRegularRefresh();
+    startStopRegularRefresh( true );
   }
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13625
@@ -892,14 +893,18 @@ public class MainService extends Service {
     Timber.tag(TAG).d("StartRegularRefreshEvent");
 
     if ( scheduller != null ) {
-      startRegularRefresh();
+      startStopRegularRefresh( event.isStart() );
       EventBus.getDefault().removeStickyEvent(event);
     }
   }
 
-  private void startRegularRefresh() {
-    if ( settings.isStartRegularRefresh() ) {
-      scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 30, 30, TimeUnit.SECONDS );
+  private void startStopRegularRefresh(boolean isStart) {
+    if ( futureRefresh != null && !futureRefresh.isCancelled() ) {
+      futureRefresh.cancel(true);
+    }
+
+    if ( settings.isStartRegularRefresh() && isStart ) {
+      futureRefresh = scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 5*60, 5*60, TimeUnit.SECONDS );
     }
   }
 }
