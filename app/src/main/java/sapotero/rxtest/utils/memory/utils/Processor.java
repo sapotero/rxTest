@@ -39,6 +39,8 @@ import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import timber.log.Timber;
 
+import static com.googlecode.totallylazy.Sequences.breakOn;
+import static com.googlecode.totallylazy.Sequences.cartesianProduct;
 import static com.googlecode.totallylazy.Sequences.sequence;
 
 public class Processor {
@@ -66,6 +68,16 @@ public class Processor {
   private HashMap<String, Document> documents;
   private Transaction transaction;
   private Source source = Source.EMPTY;
+
+  /*константы чекбоксов, в настройках уведомлений журналов */
+  private final String INCOMING_DOCUMENTS    = "1";
+  private final String CITIZEN_REQUESTS      = "2";
+  private final String NPA                   = "3";
+  private final String IN_DOCUMENTS          = "4";
+  private final String ORDERS                = "5";
+  private final String ORDERS_DDO            = "6";
+  private final String SIGNING_OR_APPROVAL   = "7";
+
 
 
   public Processor(PublishSubject<InMemoryDocument> subscribeSubject) {
@@ -243,16 +255,8 @@ public class Processor {
         }
 
         validateDocuments();
-
-        /* генерация уведомления, в случ. получения нового документа, отсутствующего в MemoryStore*/
-        settings.getNotificatedJournals();
-        Timber.tag(TAG).e("settings.getNotificatedJournals() = " + settings.getNotificatedJournals());
-        if (add.size() > 0 ) {
-            int notificationId = UUID.randomUUID().hashCode();
-              Timber.tag(TAG).e("1 settings.getNotificationId() = " + notificationId );
-              NotifiManager mNotifiManager = new NotifiManager(add, documents, notificationId);
-              mNotifiManager.generateNotifyMsg();
-              Timber.tag(TAG).e("2 notificationId = " + notificationId);
+          if (add.size() > 0) {
+             generateNotifiMsg(add);
           }
 
         return Collections.singletonList("");
@@ -263,7 +267,7 @@ public class Processor {
       .subscribe(
         data -> {
 //          EventBus.getDefault().post( new JournalSelectorUpdateCountEvent() );
-          Timber.tag(TAG).e("processed");
+            Timber.tag(TAG).e("processed");
         },
         Timber::e
       );
@@ -271,8 +275,59 @@ public class Processor {
 
     return new ArrayList<>();
   }
+    /* генерация уведомления, в случ. получения нового документа, отсутствующего в MemoryStore*/
+    private void generateNotifiMsg(List<String> addedDocList) {
+        Timber.tag(TAG).d("this.index = " + this.index );
+        Timber.tag(TAG).d("this.filter = " + this.filter );
+        Timber.tag(TAG).d("addedDocList.size() = " + addedDocList.size() );
+        NotifiManager mNotifiManager = new NotifiManager(addedDocList, documents);
 
-  private void resetMd5(List<String> add) {
+        if(index != null){
+            switch (index){
+                case "incoming_documents_production_db_core_cards_incoming_documents_cards":   /*Входящий документ*/
+                if(settings.getNotificatedJournals().contains(INCOMING_DOCUMENTS) ) {
+                    mNotifiManager.generateNotifyMsg("Вам поступил Входящий документ:");}
+                break;
+
+                case "incoming_orders_production_db_core_cards_incoming_orders_cards":         /*НПА*/
+                if(settings.getNotificatedJournals().contains(NPA)){
+                    mNotifiManager.generateNotifyMsg("Вам поступил НПА:");}
+                break;
+
+                case "orders_production_db_core_cards_orders_cards":                           /*Приказ */
+                if(settings.getNotificatedJournals().contains(ORDERS)){
+                    mNotifiManager.generateNotifyMsg("Вам поступил Приказ:");}
+                break;
+
+                case "orders_ddo_production_db_core_cards_orders_ddo_cards":                   /*Приказ ДДО*/
+                if (settings.getNotificatedJournals().contains(ORDERS_DDO)) {
+                    mNotifiManager.generateNotifyMsg("Вам поступил Приказ ДДО:");
+                }
+                break;
+
+                case "outgoing_documents_production_db_core_cards_outgoing_documents_cards":   /*Внутренний документ*/
+                if (settings.getNotificatedJournals().contains(IN_DOCUMENTS)){
+                    mNotifiManager.generateNotifyMsg("Вам поступил Внутренний документ:");
+                }
+                break;
+
+                case "citizen_requests_production_db_core_cards_citizen_requests_cards":       /*Обращение граждан*/
+                if (settings.getNotificatedJournals().contains(CITIZEN_REQUESTS)) {
+                    mNotifiManager.generateNotifyMsg("Вам поступило Обращение граждан:");}
+                break;
+            }
+        } else if(filter == "signing"){
+            if (settings.getNotificatedJournals().contains(SIGNING_OR_APPROVAL)){
+                mNotifiManager.generateNotifyMsg("Вам поступил документ на согласование:");
+            }
+        } else if (filter == "approval"){                                                        /*документ на подпись или на согласование*/
+            if (settings.getNotificatedJournals().contains(SIGNING_OR_APPROVAL)){
+                mNotifiManager.generateNotifyMsg("Вам поступил документ на подпись:");
+            }
+        }
+    }
+
+    private void resetMd5(List<String> add) {
     // Для тех документов, которые надо добавить во вкладку, если они есть в памяти,
     // сбрасываем MD5, чтобы далее для их обновления была вызвана UpdateDocumentJob.
     for (String uid : add) {

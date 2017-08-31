@@ -605,4 +605,14 @@ public class TestSettings implements ISettings {
     organizationFilterSelection = value;
   }
 
+  @Override
+  public Set<String> getNotificatedJournals() {
+    return null;
+  }
+
+  @Override
+  public Preference<Set<String>> getNotificatedJournalsPreference() {
+    return null;
+  }
+
 }

@@ -10,6 +10,8 @@ import android.support.v4.app.NotificationManagerCompat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
+
 import javax.inject.Inject;
 
 import sapotero.rxtest.R;
@@ -18,40 +20,40 @@ import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.views.activities.InfoActivity;
 import timber.log.Timber;
 
-    /** NotifiManager создаёт системные  уведомления ( Notification ) на основании коллекции докуметов, переданной в конструктор.
-        addedDocList - список UID докуметов
-        documentsMap - Map документов
-        currentNotifiId -  уникальный ID уведомления.
-     **/
+      /**
+      * NotifiManager создаёт системные  уведомления ( Notification ) на основании коллекции докуметов, переданной в конструктор.
+      *  addedDocList - список UID докуметов
+      *  documentsMap - Map документов
+      */
 public class NotifiManager {
 
     @Inject Context appContext;
     private final String TAG = NotifiManager.class.getSimpleName();
     private List<String> addedDocList;
     private HashMap<String, Document> documentsMap;
-    private int currentNotificationId;
-    private final int THRESHOLD_VALUE = 5; /*величина больше которой, уведомления группируем. InboxStyle */
+    private int notificationId;
+    private final int THRESHOLD_VALUE = 1; /*величина больше которой, уведомления группируем. InboxStyle */
 
-    public NotifiManager(List<String> addedDocList, HashMap<String, Document> documentsMap, int currentNotificationId) {
+    public NotifiManager(List<String> addedDocList, HashMap<String, Document> documentsMap) {
         this.addedDocList = addedDocList;
         this.documentsMap = documentsMap;
-        this.currentNotificationId = currentNotificationId;
+        this.notificationId = Math.abs( UUID.randomUUID().hashCode() );
         EsdApplication.getNetworkComponent().inject(this);
     }
 
-    void generateNotifyMsg() {
+    void generateNotifyMsg(String title) {
         if (addedDocList.size() > THRESHOLD_VALUE) {
-            showGroupSummaryNotification("Вам поступили входящие документы:", addedDocList, currentNotificationId);
+            showGroupSummaryNotification("Вам поступило новых документов: ", addedDocList);
         } else {
             for (String uidDoc : addedDocList) {
-                showSingleNotification("Вам поступил входящий документ:", documentsMap.get(uidDoc).getTitle(), currentNotificationId);
+                showSingleNotification(title, documentsMap.get(uidDoc).getTitle());
             }
         }
     }
 
-    private void showSingleNotification(String title, String msg, int notificationId) {
-        // TODO: вынести строки в ресурсы
+    private void showSingleNotification(String title, String msg) {
         NotificationManagerCompat notificationManagerCompat = (NotificationManagerCompat) NotificationManagerCompat.from(appContext);
+        notificationId =  UUID.randomUUID().hashCode() ;
 
         ArrayList<String> documentsUidsList = new ArrayList<>();
         documentsUidsList.addAll(addedDocList);
@@ -70,27 +72,27 @@ public class NotifiManager {
                 .setDefaults(Notification.DEFAULT_ALL)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setVisibility(Notification.VISIBILITY_PUBLIC);
-        Timber.tag(TAG).d("notificationId = " + notificationId);
+        Timber.tag(TAG).d("showSingleNotification. notificationId = " + notificationId);
         notificationManagerCompat.notify(notificationId, builder.build());
     }
 
-    private void showGroupSummaryNotification(String title, List<String> addedDocList, int notificationId) {
-        // TODO: вынести строки в ресурсы
+    private void showGroupSummaryNotification(String title, List<String> addedDocList) {
         NotificationManagerCompat notificationManagerCompat = (NotificationManagerCompat) NotificationManagerCompat.from(appContext);
+        notificationId =  UUID.randomUUID().hashCode() ;
 
         Intent readDocIntent = new Intent(appContext, InfoActivity.class);
         PendingIntent pireadDoc = PendingIntent.getActivity(appContext, 0, readDocIntent, 0);
 
         NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle()
-                .setBigContentTitle("BigContentTitle")
-                .setSummaryText("больше " + THRESHOLD_VALUE + " входящих документов...");
+                .setBigContentTitle("Вам поступило новых документов: "+addedDocList.size());
+
         for (String uidDoc : addedDocList) {
             inboxStyle.addLine(documentsMap.get(uidDoc).getTitle());
         }
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext);
-        builder.setContentTitle(title)
-                .setContentText(addedDocList.size()+" входящих...")
+        builder.setContentTitle(title + addedDocList.size())
+                .setContentText(addedDocList.size() + " входящих...")
                 .setStyle(inboxStyle)
                 .setNumber(addedDocList.size())
                 .setSmallIcon(R.drawable.ic_error)
@@ -104,7 +106,6 @@ public class NotifiManager {
                 .setDefaults(Notification.DEFAULT_ALL)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setVisibility(Notification.VISIBILITY_PUBLIC);
-
         notificationManagerCompat.notify(notificationId, builder.build());
     }
 
