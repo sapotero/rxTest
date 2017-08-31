@@ -203,11 +203,8 @@ public class MainService extends Service {
 
     // resolved https://tasks.n-core.ru/browse/MVDESD-12618
     // Починить регулярное обновление документов после закрытия приложения
-    // If there is a sticky event, "consume" it and start regular refresh
-    StartRegularRefreshEvent startRegularRefreshEvent = EventBus.getDefault().removeStickyEvent(StartRegularRefreshEvent.class);
-    if ( startRegularRefreshEvent != null ) {
-      startRegularRefresh();
-    }
+    // Start regular refresh if true in settings
+    startRegularRefresh();
   }
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13625
@@ -890,7 +887,6 @@ public class MainService extends Service {
   // resolved https://tasks.n-core.ru/browse/MVDESD-12618
   // Починить регулярное обновление документов после закрытия приложения
   // If scheduler is already created, start regular refresh.
-  // (otherwise sticky event will be "consumed" in initScheduller() method)
   @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
   public void onMessageEvent(StartRegularRefreshEvent event){
     Timber.tag(TAG).d("StartRegularRefreshEvent");
@@ -902,6 +898,8 @@ public class MainService extends Service {
   }
 
   private void startRegularRefresh() {
-    scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 30, 30, TimeUnit.SECONDS );
+    if ( settings.isStartRegularRefresh() ) {
+      scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 30, 30, TimeUnit.SECONDS );
+    }
   }
 }

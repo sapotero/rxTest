@@ -71,6 +71,7 @@ public class TestSettings implements ISettings {
   public String colleagueId;
   public boolean isUpdateAuthStarted;
   public boolean isTabChanged;
+  public boolean isStartRegularRefresh;
 
   public TestSettings() {
     login = "dummyLogin";
@@ -694,5 +695,15 @@ public class TestSettings implements ISettings {
   @Override
   public void setTabChanged(boolean value) {
     isTabChanged = value;
+  }
+
+  @Override
+  public boolean isStartRegularRefresh() {
+    return isStartRegularRefresh;
+  }
+
+  @Override
+  public void setStartRegularRefresh(boolean value) {
+    isStartRegularRefresh = value;
   }
 }

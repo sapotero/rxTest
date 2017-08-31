@@ -257,6 +257,7 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
   }
 
   private void initialize() {
+    settings.setStartRegularRefresh( false );
     settings.setUpdateAuthStarted( false );
     PreferenceManager.setDefaultValues(this, R.xml.settings_view, false);
   }
@@ -302,6 +303,8 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
 
     // resolved https://tasks.n-core.ru/browse/MVDESD-12618
     // Починить регулярное обновление документов после закрытия приложения
+    // Change setting so that regular refresh would be started after MainService recreated on application close
+    settings.setStartRegularRefresh( true );
     // Post sticky event, because at this moment MainService may not exist yet
     EventBus.getDefault().postSticky( new StartRegularRefreshEvent() );
 

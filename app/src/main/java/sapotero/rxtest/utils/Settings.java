@@ -52,6 +52,7 @@ public class Settings implements ISettings {
   private static final String COLLEAGUE_ID_KEY = "colleague.id";
   private static final String UPDATE_AUTH_STARTED_KEY = "update.auth.started";
   private static final String TAB_CHANGED_KEY = "tab.changed";
+  private static final String START_REGULAR_REFRESH_KEY = "start.regular.refresh";
 
   public static String FIRST_RUN_KEY;
   public static String IS_PROJECT;
@@ -150,6 +151,7 @@ public class Settings implements ISettings {
   private Preference<Boolean> isUpdateAuthStarted;
   private Preference<Boolean> isTabChanged;
   private Preference<String> updateTime;
+  private Preference<Boolean> isStartRegularRefresh;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -252,6 +254,7 @@ public class Settings implements ISettings {
     colleagueId                    = settings.getString(COLLEAGUE_ID_KEY);
     isUpdateAuthStarted            = settings.getBoolean(UPDATE_AUTH_STARTED_KEY);
     isTabChanged                   = settings.getBoolean(TAB_CHANGED_KEY);
+    isStartRegularRefresh          = settings.getBoolean(START_REGULAR_REFRESH_KEY);
   }
 
   @Override
@@ -950,5 +953,15 @@ public class Settings implements ISettings {
   @Override
   public void setTabChanged(boolean value) {
     setBoolean(isTabChanged, value);
+  }
+
+  @Override
+  public boolean isStartRegularRefresh() {
+    return getBoolean(isStartRegularRefresh);
+  }
+
+  @Override
+  public void setStartRegularRefresh(boolean value) {
+    setBoolean(isStartRegularRefresh, value);
   }
 }

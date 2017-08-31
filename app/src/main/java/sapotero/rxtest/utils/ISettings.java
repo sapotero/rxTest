@@ -255,4 +255,8 @@ public interface ISettings {
   boolean isTabChanged();
 
   void setTabChanged(boolean value);
+
+  boolean isStartRegularRefresh();
+
+  void setStartRegularRefresh(boolean value);
 }
