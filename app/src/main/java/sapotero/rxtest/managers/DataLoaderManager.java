@@ -2,7 +2,6 @@ package sapotero.rxtest.managers;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
-import android.widget.Toast;
 
 import com.birbit.android.jobqueue.JobManager;
 import com.birbit.android.jobqueue.TagConstraint;
@@ -392,7 +391,11 @@ public class DataLoaderManager {
     if ( settings.isSubstituteMode() ) {
       switchToSubstituteModeAfterReceiveToken = true;
       settings.setSubstituteMode( false );
-      swapLogin();
+
+      if ( !settings.isSignedWithDc() ) {
+        // Если вошли по логину, то меняем логин на логин основного пользователя, чтобы правильно сформировался запрос на получение токена
+        swapLogin();
+      }
     }
 
     Timber.tag(TAG).i("updateAuth: %s", sign );
@@ -411,6 +414,11 @@ public class DataLoaderManager {
     Timber.tag(TAG).i("json: %s", json .toString());
 
     Observable<AuthSignToken> authSubscription = getAuthSubscription();
+
+    if ( switchToSubstituteModeAfterReceiveToken && !settings.isSignedWithDc() ) {
+      // Запрос на получение токена уже сформирован, меняем логин обратно на логин коллеги
+      swapLogin();
+    }
 
     unsubscribeUpdateAuth();
 
@@ -442,7 +450,6 @@ public class DataLoaderManager {
             if ( switchToSubstituteModeAfterReceiveToken ) {
               switchToSubstituteModeAfterReceiveToken = false;
               settings.setSubstituteMode( true );
-              swapLogin();
             }
 
             if ( sendEvent ) {
@@ -465,13 +472,14 @@ public class DataLoaderManager {
     Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
     AuthService auth = retrofit.create(AuthService.class);
 
-    auth.switchToColleague(settings.getColleagueId(), settings.getLogin(), settings.getToken())
+    // Запрос на получение токена коллеги выполняется от имени основного пользователя
+    auth.switchToColleague(settings.getColleagueId(), settings.getOldLogin(), settings.getToken())
       .subscribeOn(Schedulers.computation())
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(
         colleagueResponse -> {
           settings.setSubstituteMode( true );
-          settings.setOldLogin( settings.getLogin() );
+          // Логин основного пользователя уже сохранен в oldLogin, поэтому только обновляем логин и токен коллеги
           settings.setLogin( colleagueResponse.getLogin() );
           settings.setToken( colleagueResponse.getAuthToken() );
           initV2(false);
@@ -481,7 +489,6 @@ public class DataLoaderManager {
         error -> {
           Timber.tag(TAG).e(error);
           settings.setSubstituteMode( true );
-          swapLogin();
           EventBus.getDefault().post( new ErrorReceiveTokenEvent() );
           settings.setUpdateAuthStarted( false );
         }
