@@ -37,7 +37,6 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -303,7 +302,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   private void initAdapters() {
     if (settings.isFirstRun()){
-      store.clear();
+      store.clearAndLoadFromDb();
     }
 
     int columnCount = 2;
@@ -866,7 +865,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     // Сначала сохраняем/восстанавливаем состояние тех документов, которые имеются у обоих пользователей,
     // затем перезагружаем MemoryStore
     new DocumentStateSaver().saveRestoreDocumentStates( settings.getLogin(), settings.getOldLogin(), TAG );
-    store.clear();
+    store.clearAndLoadFromDb();
   }
 
   private void stopSubstituteMode() {

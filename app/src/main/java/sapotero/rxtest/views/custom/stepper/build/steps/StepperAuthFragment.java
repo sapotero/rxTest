@@ -32,6 +32,7 @@ import sapotero.rxtest.events.stepper.auth.StepperLoginCheckEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckFailEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckSuccessEvent;
 import sapotero.rxtest.utils.ISettings;
+import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.views.custom.stepper.BlockingStep;
 import sapotero.rxtest.views.custom.stepper.StepperLayout;
 import sapotero.rxtest.views.custom.stepper.VerificationError;
@@ -42,6 +43,7 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
 
   @Inject ISettings settings;
   @Inject JobManager jobManager;
+  @Inject MemoryStore store;
 
   final String TAG = this.getClass().getSimpleName();
 
@@ -174,6 +176,7 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
   @Override
   public void onSelected() {
     passwordEditText.setText("");
+    store.clear();
     jobManager.cancelJobsInBackground(null, TagConstraint.ANY, "DocJob");
   }
 

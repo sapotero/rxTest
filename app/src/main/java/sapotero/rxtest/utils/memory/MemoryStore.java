@@ -121,9 +121,13 @@ public class MemoryStore implements Processable{
 
   }
 
-  public void clear(){
+  public void clear() {
     Timber.tag(TAG).d("MEMORY STORE CLEAR");
     documents.clear();
+  }
+
+  public void clearAndLoadFromDb() {
+    clear();
     loadFromDB();
   }
 
