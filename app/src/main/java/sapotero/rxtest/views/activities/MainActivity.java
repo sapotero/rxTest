@@ -726,8 +726,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
           .withSetSelected( false )
           .withOnDrawerItemClickListener((view, position, drawerItem) -> {
             int index = (int) drawerItem.getIdentifier();
-            // Переход в режим замещения, если вошли по пину и не в режиме замещения и не ожидаем получения токена
-            if ( settings.isSignedWithDc() ) {
+            // Переход в режим замещения, если вошли по пину и не показвыать окно авторизации после рестарта
+            // и не в режиме замещения и не ожидаем получения токена
+            if ( settings.isSignedWithDc() && !settings.isFirstRun() ) {
               if ( !settings.isSubstituteMode() && !settings.isUpdateAuthStarted() ) {
                 startSubstituteMode( index );
               } else {
