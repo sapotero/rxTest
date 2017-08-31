@@ -68,8 +68,8 @@ import static org.acra.ReportField.USER_IP;
 // rgiliazov6@mvd.ru
 // в бою android-app-logs.sed.mvd.ru
 
-//@ReportsCrashes(formUri = "http://android-app-logs.sed.mvd.ru/send",
-@ReportsCrashes(formUri = "http://http://10.0.32.77/send",
+@ReportsCrashes(formUri = "http://android-app-logs.sed.mvd.ru/send",
+//@ReportsCrashes(formUri = "http://http://10.0.32.77/send",
   mailTo = "rgiliazov6@mvd.ru",
   customReportContent = {
     REPORT_ID,

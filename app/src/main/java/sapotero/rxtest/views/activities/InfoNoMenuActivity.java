@@ -207,6 +207,8 @@ public class InfoNoMenuActivity extends AppCompatActivity {
           TabSigningPagerAdapter adapter = new TabSigningPagerAdapter( getSupportFragmentManager() );
           adapter.withUid(UID);
           adapter.withoutZoom(true);
+          adapter.withoutLinks(true);
+
           viewPager.setAdapter(adapter);
 
         } else {
@@ -214,6 +216,7 @@ public class InfoNoMenuActivity extends AppCompatActivity {
           adapter.withUid(UID);
           adapter.withoutZoom(true);
           adapter.withEnableDoubleTap(false);
+          adapter.withoutLinks(true);
           viewPager.setAdapter(adapter);
         }
       }

@@ -11,7 +11,8 @@ import sapotero.rxtest.views.fragments.InfoCardLinksFragment;
 public class TabSigningPagerAdapter extends FragmentPagerAdapter {
 
   private String uid;
-  private boolean withoutZoom = false;
+  private boolean withoutZoom  = false;
+  private boolean withoutLinks = false;
 
   public TabSigningPagerAdapter(FragmentManager fragmentManager) {
     super(fragmentManager);
@@ -45,7 +46,7 @@ public class TabSigningPagerAdapter extends FragmentPagerAdapter {
 
   @Override
   public int getCount() {
-    return 3;
+    return withoutLinks ? 2 : 3;
   }
 
   public void withUid(String uid) {
@@ -54,5 +55,9 @@ public class TabSigningPagerAdapter extends FragmentPagerAdapter {
 
   public void withoutZoom(boolean bool) {
     this.withoutZoom = bool;
+  }
+
+  public void withoutLinks(boolean withoutLinks) {
+    this.withoutLinks = withoutLinks;
   }
 }
