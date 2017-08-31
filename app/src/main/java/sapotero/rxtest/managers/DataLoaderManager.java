@@ -102,7 +102,6 @@ public class DataLoaderManager {
   private boolean processFavoritesData = false;
   private boolean processProcessedData = false;
 
-  private boolean updateAuthStarted = false;
   private boolean switchToSubstituteModeAfterReceiveToken = false;
 
   public DataLoaderManager(Context context) {
@@ -390,7 +389,6 @@ public class DataLoaderManager {
 
     if ( settings.isSubstituteMode() ) {
       switchToSubstituteModeAfterReceiveToken = true;
-      settings.setSubstituteMode( false );
 
       if ( !settings.isSignedWithDc() ) {
         // Если вошли по логину, то меняем логин на логин основного пользователя, чтобы правильно сформировался запрос на получение токена
@@ -447,10 +445,7 @@ public class DataLoaderManager {
           error -> {
             Timber.tag(TAG).i("updateAuth error: %s" , error );
 
-            if ( switchToSubstituteModeAfterReceiveToken ) {
-              switchToSubstituteModeAfterReceiveToken = false;
-              settings.setSubstituteMode( true );
-            }
+            switchToSubstituteModeAfterReceiveToken = false;
 
             if ( sendEvent ) {
               EventBus.getDefault().post( new ErrorReceiveTokenEvent() );
@@ -478,7 +473,6 @@ public class DataLoaderManager {
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(
         colleagueResponse -> {
-          settings.setSubstituteMode( true );
           // Логин основного пользователя уже сохранен в oldLogin, поэтому только обновляем логин и токен коллеги
           settings.setLogin( colleagueResponse.getLogin() );
           settings.setToken( colleagueResponse.getAuthToken() );
@@ -488,7 +482,6 @@ public class DataLoaderManager {
         },
         error -> {
           Timber.tag(TAG).e(error);
-          settings.setSubstituteMode( true );
           EventBus.getDefault().post( new ErrorReceiveTokenEvent() );
           settings.setUpdateAuthStarted( false );
         }
