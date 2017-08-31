@@ -512,7 +512,7 @@
 
 
     <string name="update_time_title">Задержка обновления документа, секунд</string>
-    <string name="update_time_value">300</string>
+    <string name="update_time_value">30</string>
     <string name="update_time_key">settings_update_time</string>
 
     <string name="host_key_title">Домен</string>

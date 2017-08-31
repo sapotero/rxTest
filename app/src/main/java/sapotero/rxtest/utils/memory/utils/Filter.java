@@ -124,8 +124,11 @@ public class Filter {
   public Boolean isProcessed(InMemoryDocument doc) {
     Boolean result = true;
 
-    // Фильтруем обработанные для всех журналов, кроме Избранное и На контроле
-    if ( !isFavorites && !isControl ) {
+    // Фильтруем обработанные для всех журналов, кроме Избранное
+    // resolved https://tasks.n-core.ru/browse/MVDESD-13985
+    // Убрать из списка "На контроле" рассмотренные документы
+//    if ( !isFavorites && !isControl ) {
+    if ( !isFavorites ) {
       result = isProcessed == doc.isProcessed();
     }
 
@@ -154,7 +157,9 @@ public class Filter {
     Boolean result = true;
 
     if ( isControl ){
-      result = doc != null && doc.getDocument() != null && doc.getDocument().getControl() != null && doc.getDocument().getControl();
+      // resolved https://tasks.n-core.ru/browse/MVDESD-13985
+      // Не показываем документы из папки Избранное с замочком во вкладке На контроль
+      result = doc != null && doc.getDocument() != null && doc.getDocument().getControl() != null && doc.getDocument().getControl() && !doc.getDocument().isFromFavoritesFolder();
     }
 
     return result;
