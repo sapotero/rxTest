@@ -456,11 +456,11 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void startNetworkCheck() {
-    EventBus.getDefault().post(new CheckNetworkEvent( true ));
+    EventBus.getDefault().postSticky(new CheckNetworkEvent( true ));
   }
 
   private void stopNetworkCheck() {
-    EventBus.getDefault().post(new CheckNetworkEvent( false ));
+    EventBus.getDefault().postSticky(new CheckNetworkEvent( false ));
   }
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13314

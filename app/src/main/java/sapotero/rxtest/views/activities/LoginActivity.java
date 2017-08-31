@@ -300,7 +300,10 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
     Bundle bundle = ActivityOptionsCompat.makeCustomAnimation(this, android.R.anim.fade_in, android.R.anim.fade_out).toBundle();
     startActivity(intent, bundle);
 
-    EventBus.getDefault().post( new StartRegularRefreshEvent() );
+    // resolved https://tasks.n-core.ru/browse/MVDESD-12618
+    // Починить регулярное обновление документов после закрытия приложения
+    // Post sticky event, because at this moment MainService may not exist yet
+    EventBus.getDefault().postSticky( new StartRegularRefreshEvent() );
 
     finish();
   }
