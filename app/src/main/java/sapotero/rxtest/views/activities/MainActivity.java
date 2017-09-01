@@ -177,6 +177,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     context = this;
     searchSubject = PublishSubject.create();
 
+    unregisterEventBus();
+    EventBus.getDefault().register(this);
+
     initAdapters();
 
     menuBuilder = new MenuBuilder(this);
@@ -422,13 +425,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       );
   }
 
-  private void initEvents() {
-    Timber.tag(TAG).v("initEvents");
-    if (EventBus.getDefault().isRegistered(this)) {
-      EventBus.getDefault().unregister(this);
-    }
-    EventBus.getDefault().register(this);
-
+  private void initService() {
+    Timber.tag(TAG).v("initService");
     Intent serviceIntent = MainService.newIntent(this, false);
     startService(serviceIntent);
   }
@@ -445,7 +443,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     initSearch();
 
 
-    initEvents();
+    initService();
     startNetworkCheck();
     subscribeToNetworkCheckResults();
     subscribeToSubstituteModeResults();
@@ -550,20 +548,20 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   @Override
-  public void onStop() {
-    if (EventBus.getDefault().isRegistered(this)) {
-      EventBus.getDefault().unregister(this);
-    }
-    super.onStop();
-  }
-
-  @Override
   protected void onDestroy() {
     // Reset previous state of organization filter and set tab changed on application quit
     settings.setOrganizationFilterActive( false );
     settings.setTabChanged(true);
 
+    unregisterEventBus();
+
     super.onDestroy();
+  }
+
+  private void unregisterEventBus() {
+    if (EventBus.getDefault().isRegistered(this)) {
+      EventBus.getDefault().unregister(this);
+    }
   }
 
   private void setJournalType(int type, boolean reloadDocuments) {
@@ -1112,8 +1110,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(ReceivedTokenEvent event) {
+    Timber.tag(TAG).i("ReceivedTokenEvent");
+
     if ( exitFromSubstituteModeStarted ) {
-      Timber.tag(TAG).i("ReceivedTokenEvent");
       switchDocuments();
     } else {
       updateByStatus();
@@ -1122,8 +1121,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(ErrorReceiveTokenEvent event) {
+    Timber.tag(TAG).i("ErrorReceiveTokenEvent");
+
     if ( exitFromSubstituteModeStarted ) {
-      Timber.tag(TAG).i("ErrorReceiveTokenEvent");
       exitFromSubstituteModeStarted = false;
       settings.setSubstituteMode( true );
       swapLogin();
