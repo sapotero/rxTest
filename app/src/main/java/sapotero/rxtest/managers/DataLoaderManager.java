@@ -130,6 +130,7 @@ public class DataLoaderManager {
               setCurrentUserId(user.getId());
               setCurrentUserOrganization(user.getOrganization());
               setCurrentUserPosition(user.getPosition());
+              setCurrentUserImage(user.getImage());
 
               deleteUsers();
               deleteTemplates();
@@ -328,6 +329,10 @@ public class DataLoaderManager {
 
   private void setCurrentUserPosition(String position) {
     settings.setCurrentUserPosition(position);
+  }
+
+  private void setCurrentUserImage(String image) {
+    settings.setCurrentUserImage(image);
   }
 
   public void setPassword(String password) {

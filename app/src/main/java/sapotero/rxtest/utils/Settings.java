@@ -29,6 +29,7 @@ public class Settings implements ISettings {
   private static final String CURRENT_USER_KEY = "current_user";
   private static final String CURRENT_USER_ORGANIZATION_KEY = "current_user_organization";
   private static final String CURRENT_USER_POSITION_KEY = "current_user_position";
+  private static final String CURRENT_USER_IMAGE_KEY = "current_user_image";
   private static final String MAIN_MENU_POSITION_KEY = "activity_main_menu.position";
   private static final String REGNUMBER_KEY = "activity_main_menu.regnumber";
   private static final String REGDATE_KEY = "activity_main_menu.date";
@@ -104,6 +105,7 @@ public class Settings implements ISettings {
   private Preference<String> currentUser;
   private Preference<String> currentUserOrganization;
   private Preference<String> currentUserPosition;
+  private Preference<String> currentUserImage;
   private Preference<Integer> mainMenuPosition;
   private Preference<String> regNumber;
   private Preference<String> regDate;
@@ -206,6 +208,7 @@ public class Settings implements ISettings {
     currentUser                    = settings.getString(CURRENT_USER_KEY);
     currentUserOrganization        = settings.getString(CURRENT_USER_ORGANIZATION_KEY);
     currentUserPosition            = settings.getString(CURRENT_USER_POSITION_KEY);
+    currentUserImage               = settings.getString(CURRENT_USER_IMAGE_KEY);
     mainMenuPosition               = settings.getInteger(MAIN_MENU_POSITION_KEY);
     regNumber                      = settings.getString(REGNUMBER_KEY);
     regDate                        = settings.getString(REGDATE_KEY);
@@ -532,6 +535,16 @@ public class Settings implements ISettings {
   @Override
   public void setCurrentUserPosition(String value) {
     setString(currentUserPosition, value);
+  }
+
+  @Override
+  public String getCurrentUserImage() {
+    return getString(currentUserImage);
+  }
+
+  @Override
+  public void setCurrentUserImage(String value) {
+    setString(currentUserImage, value);
   }
 
   @Override

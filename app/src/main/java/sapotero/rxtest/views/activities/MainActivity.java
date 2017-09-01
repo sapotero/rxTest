@@ -1,6 +1,8 @@
 package sapotero.rxtest.views.activities;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -8,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Base64;
 import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -37,6 +40,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -788,11 +792,39 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void addMainProfile(IProfile[] profiles) {
-    profiles[0] = new ProfileDrawerItem()
+    Bitmap userImage = getUserImage();
+
+    ProfileDrawerItem profileDrawerItem = new ProfileDrawerItem()
       .withName( settings.getCurrentUserOrganization() )
       .withEmail( settings.getCurrentUser() )
-      .withSetSelected( true )
-      .withIcon( R.drawable.gerb );
+      .withSetSelected( true );
+
+    if ( userImage != null ) {
+      profileDrawerItem.withIcon( userImage );
+    } else {
+      profileDrawerItem.withIcon( R.drawable.gerb );
+    }
+
+    profiles[0] = profileDrawerItem;
+  }
+
+  // resolved https://tasks.n-core.ru/browse/MVDESD-12618
+  // Отображать фото пользователя
+  private Bitmap getUserImage() {
+    Bitmap imageBitmap = null;
+    String imageString = settings.getCurrentUserImage();
+
+    if ( imageString != null && !Objects.equals(imageString, "" ) ) {
+      try {
+        String str = imageString.replaceAll("(\\n)", "");
+        byte[] decodedString = Base64.decode(str.getBytes(), Base64.DEFAULT);
+        imageBitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+      } catch (Exception e) {
+        Timber.tag(TAG).e(e);
+      }
+    }
+
+    return imageBitmap;
   }
 
   private String splitName(String nameToSplit) {

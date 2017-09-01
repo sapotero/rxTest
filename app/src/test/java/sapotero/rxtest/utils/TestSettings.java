@@ -25,6 +25,7 @@ public class TestSettings implements ISettings {
   public String currentUser;
   public String currentUserOrganization;
   public String currentUserPosition;
+  public String currentUserImage;
   public int mainMenuPosition;
   public String regNumber;
   public String regDate;
@@ -705,5 +706,15 @@ public class TestSettings implements ISettings {
   @Override
   public void setStartRegularRefresh(boolean value) {
     isStartRegularRefresh = value;
+  }
+
+  @Override
+  public String getCurrentUserImage() {
+    return currentUserImage;
+  }
+
+  @Override
+  public void setCurrentUserImage(String value) {
+    currentUserImage = value;
   }
 }

@@ -94,6 +94,10 @@ public interface ISettings {
 
   void setCurrentUserPosition(String value);
 
+  String getCurrentUserImage();
+
+  void setCurrentUserImage(String value);
+
   int getMainMenuPosition();
 
   void setMainMenuPosition(int value);
