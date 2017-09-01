@@ -248,6 +248,14 @@ public interface ISettings {
 
   void setOldCurrentUser(String value);
 
+  String getOldCurrentUserOrganization();
+
+  void setOldCurrentUserOrganization(String value);
+
+  String getOldCurrentUserImage();
+
+  void setOldCurrentUserImage(String value);
+
   String getColleagueId();
 
   void setColleagueId(String value);

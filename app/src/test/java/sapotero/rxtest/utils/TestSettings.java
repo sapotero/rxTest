@@ -69,6 +69,8 @@ public class TestSettings implements ISettings {
   public boolean isSubstituteMode;
   public String oldLogin;
   public String oldCurrentUser;
+  public String oldCurrentUserOrganization;
+  public String oldCurrentUserImage;
   public String colleagueId;
   public boolean isUpdateAuthStarted;
   public boolean isTabChanged;
@@ -666,6 +668,26 @@ public class TestSettings implements ISettings {
   @Override
   public void setOldCurrentUser(String value) {
     oldCurrentUser = value;
+  }
+
+  @Override
+  public String getOldCurrentUserOrganization() {
+    return oldCurrentUserOrganization;
+  }
+
+  @Override
+  public void setOldCurrentUserOrganization(String value) {
+    oldCurrentUserOrganization = value;
+  }
+
+  @Override
+  public String getOldCurrentUserImage() {
+    return oldCurrentUserImage;
+  }
+
+  @Override
+  public void setOldCurrentUserImage(String value) {
+    oldCurrentUserImage = value;
   }
 
   @Override

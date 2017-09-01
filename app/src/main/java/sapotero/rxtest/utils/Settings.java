@@ -50,6 +50,8 @@ public class Settings implements ISettings {
   private static final String IS_SUBSTITUTE_MODE_KEY = "substitute.mode";
   private static final String OLD_LOGIN_KEY = "old_login";
   private static final String OLD_CURRENT_USER_KEY = "old_current_user";
+  private static final String OLD_CURRENT_USER_ORGANIZATION_KEY = "old_current_user_organization";
+  private static final String OLD_CURRENT_USER_IMAGE_KEY = "old_current_user_image";
   private static final String COLLEAGUE_ID_KEY = "colleague.id";
   private static final String UPDATE_AUTH_STARTED_KEY = "update.auth.started";
   private static final String TAB_CHANGED_KEY = "tab.changed";
@@ -149,6 +151,8 @@ public class Settings implements ISettings {
   private Preference<Boolean> isSubstituteMode;
   private Preference<String> oldLogin;
   private Preference<String> oldCurrentUser;
+  private Preference<String> oldCurrentUserOrganization;
+  private Preference<String> oldCurrentUserImage;
   private Preference<String> colleagueId;
   private Preference<Boolean> isUpdateAuthStarted;
   private Preference<Boolean> isTabChanged;
@@ -254,6 +258,8 @@ public class Settings implements ISettings {
     isSubstituteMode               = settings.getBoolean(IS_SUBSTITUTE_MODE_KEY);
     oldLogin                       = settings.getString(OLD_LOGIN_KEY);
     oldCurrentUser                 = settings.getString(OLD_CURRENT_USER_KEY);
+    oldCurrentUserOrganization     = settings.getString(OLD_CURRENT_USER_ORGANIZATION_KEY);
+    oldCurrentUserImage            = settings.getString(OLD_CURRENT_USER_IMAGE_KEY);
     colleagueId                    = settings.getString(COLLEAGUE_ID_KEY);
     isUpdateAuthStarted            = settings.getBoolean(UPDATE_AUTH_STARTED_KEY);
     isTabChanged                   = settings.getBoolean(TAB_CHANGED_KEY);
@@ -936,6 +942,26 @@ public class Settings implements ISettings {
   @Override
   public void setOldCurrentUser(String value) {
     setString(oldCurrentUser, value);
+  }
+
+  @Override
+  public String getOldCurrentUserOrganization() {
+    return getString(oldCurrentUserOrganization);
+  }
+
+  @Override
+  public void setOldCurrentUserOrganization(String value) {
+    setString(oldCurrentUserOrganization, value);
+  }
+
+  @Override
+  public String getOldCurrentUserImage() {
+    return getString(oldCurrentUserImage);
+  }
+
+  @Override
+  public void setOldCurrentUserImage(String value) {
+    setString(oldCurrentUserImage, value);
   }
 
   @Override

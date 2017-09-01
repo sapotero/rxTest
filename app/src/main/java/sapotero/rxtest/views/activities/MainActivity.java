@@ -846,6 +846,31 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     return name;
   }
 
+  private String splitOrganization(String nameToSplit) {
+    String name = nameToSplit;
+    String organization = "";
+
+    try {
+      String[] split = name.split("\\(");
+
+      if ( split.length >= 2 ){
+        String part2 = split[1];
+
+        if (part2 != null) {
+          if ( part2.contains(")") ) {
+            part2 = part2.substring( 0, part2.lastIndexOf(")") - 1 );
+          }
+
+          organization = part2;
+        }
+      }
+    } catch (Exception error) {
+      Timber.tag(TAG).d("Error splitting colleague organization: %s", nameToSplit);
+    }
+
+    return organization;
+  }
+
   private void startSubstituteMode(int colleagueIndex) {
     if ( settings.isOnline() ) {
       if ( colleagues != null && colleagueIndex < colleagues.size() ) {
@@ -872,9 +897,16 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
               settings.setSubstituteMode( true );
               settings.setOldLogin( settings.getLogin() );
               settings.setOldCurrentUser( settings.getCurrentUser() );
+              settings.setOldCurrentUserOrganization( settings.getCurrentUserOrganization() );
+              settings.setOldCurrentUserImage( settings.getCurrentUserImage() );
               settings.setLogin( colleagueResponse.getLogin() );
               settings.setToken( colleagueResponse.getAuthToken() );
               settings.setColleagueId( colleagueEntity.getColleagueId() );
+
+              settings.setCurrentUser( splitName( colleagueEntity.getOfficialName() ) );
+              settings.setCurrentUserOrganization( splitOrganization( colleagueEntity.getOfficialName() ) );
+              settings.setCurrentUserImage("");
+              initDrawer();
 
               dataLoader.unsubcribeAll();
 
@@ -912,9 +944,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
         exitFromSubstituteModeStarted = true;
 
         settings.setSubstituteMode( false );
-        // Меняем логин и сразу сохраняем/восстанавливаем состояние тех документов, которые имеются у обоих пользователей,
-        swapLogin();
-        switchDocuments();
+        switchUser();
 
         dataLoader.unsubcribeAll();
         showStopSubstituteDialog();
@@ -929,10 +959,30 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     }
   }
 
+  private void switchUser() {
+    // Меняем логин и сразу сохраняем/восстанавливаем состояние тех документов, которые имеются у обоих пользователей,
+    // и обновляем боковое меню
+    swapLogin();
+    switchDocuments();
+    initDrawer();
+  }
+
   private void swapLogin() {
-    String tempLogin = settings.getLogin();
+    String temp = settings.getLogin();
     settings.setLogin( settings.getOldLogin() );
-    settings.setOldLogin( tempLogin );
+    settings.setOldLogin( temp );
+
+    temp = settings.getCurrentUser();
+    settings.setCurrentUser( settings.getOldCurrentUser() );
+    settings.setOldCurrentUser( temp );
+
+    temp = settings.getCurrentUserOrganization();
+    settings.setCurrentUserOrganization( settings.getOldCurrentUserOrganization() );
+    settings.setOldCurrentUserOrganization( temp );
+
+    temp = settings.getCurrentUserImage();
+    settings.setCurrentUserImage( settings.getOldCurrentUserImage() );
+    settings.setOldCurrentUserImage( temp );
   }
 
   private void showStartSubstituteDialog() {
@@ -1129,9 +1179,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     if ( exitFromSubstituteModeStarted ) {
       exitFromSubstituteModeStarted = false;
       settings.setSubstituteMode( true );
-      // В случае ошибки меняем логин и состояние документов обратно
-      swapLogin();
-      switchDocuments();
+      // В случае ошибки меняем логин и состояние документов и бокового меню обратно
+      switchUser();
       dismissStopSubstituteDialog();
       Toast.makeText(this, "Ошибка выхода из режима замещения", Toast.LENGTH_SHORT).show();
     }
