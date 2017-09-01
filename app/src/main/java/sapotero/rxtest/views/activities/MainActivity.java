@@ -877,7 +877,11 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
               settings.setColleagueId( colleagueEntity.getColleagueId() );
 
               dataLoader.unsubcribeAll();
+
+              // Сначала сохраняем/восстанавливаем состояние тех документов, которые имеются у обоих пользователей,
+              // затем перезагружаем MemoryStore
               switchDocuments();
+              store.clearAndLoadFromDb();
 
             }, error -> {
               Timber.tag(TAG).e(error);
@@ -895,10 +899,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void switchDocuments() {
-    // Сначала сохраняем/восстанавливаем состояние тех документов, которые имеются у обоих пользователей,
-    // затем перезагружаем MemoryStore
     new DocumentStateSaver().saveRestoreDocumentStates( settings.getLogin(), settings.getOldLogin(), TAG );
-    store.clearAndLoadFromDb();
   }
 
   private void stopSubstituteMode() {
@@ -911,7 +912,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
         exitFromSubstituteModeStarted = true;
 
         settings.setSubstituteMode( false );
+        // Меняем логин и сразу сохраняем/восстанавливаем состояние тех документов, которые имеются у обоих пользователей,
         swapLogin();
+        switchDocuments();
 
         dataLoader.unsubcribeAll();
         showStopSubstituteDialog();
@@ -1113,7 +1116,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     Timber.tag(TAG).i("ReceivedTokenEvent");
 
     if ( exitFromSubstituteModeStarted ) {
-      switchDocuments();
+      store.clearAndLoadFromDb();
     } else {
       updateByStatus();
     }
@@ -1126,7 +1129,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     if ( exitFromSubstituteModeStarted ) {
       exitFromSubstituteModeStarted = false;
       settings.setSubstituteMode( true );
+      // В случае ошибки меняем логин и состояние документов обратно
       swapLogin();
+      switchDocuments();
       dismissStopSubstituteDialog();
       Toast.makeText(this, "Ошибка выхода из режима замещения", Toast.LENGTH_SHORT).show();
     }
