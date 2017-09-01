@@ -3,8 +3,6 @@ package sapotero.rxtest.application;
 import android.app.Application;
 import android.content.Context;
 
-import com.facebook.stetho.Stetho;
-
 import org.acra.ACRA;
 import org.acra.ReportingInteractionMode;
 import org.acra.annotation.ReportsCrashes;
@@ -71,6 +69,7 @@ import static org.acra.ReportField.USER_IP;
 // в бою android-app-logs.sed.mvd.ru
 
 @ReportsCrashes(formUri = "http://android-app-logs.sed.mvd.ru/send",
+//@ReportsCrashes(formUri = "http://http://10.0.32.77/send",
   mailTo = "rgiliazov6@mvd.ru",
   customReportContent = {
     REPORT_ID,

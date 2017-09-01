@@ -12,6 +12,7 @@ public class TabPagerAdapter extends FragmentPagerAdapter {
   private String uid;
   private boolean zoom = false;
   private boolean doubleTapEnabled = true;
+  private boolean withoutLinks = false;
 
   public TabPagerAdapter(FragmentManager fragmentManager) {
     super(fragmentManager);
@@ -46,7 +47,7 @@ public class TabPagerAdapter extends FragmentPagerAdapter {
 
   @Override
   public int getCount() {
-    return 3;
+    return withoutLinks ? 2 : 3;
   }
 
   public void withUid(String uid) {
@@ -59,5 +60,9 @@ public class TabPagerAdapter extends FragmentPagerAdapter {
 
   public void withEnableDoubleTap(boolean doubleTapEnabled) {
     this.doubleTapEnabled = doubleTapEnabled;
+  }
+
+  public void withoutLinks(boolean withoutLinks) {
+    this.withoutLinks = withoutLinks;
   }
 }
