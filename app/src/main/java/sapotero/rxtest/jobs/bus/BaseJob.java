@@ -22,7 +22,14 @@ public abstract class BaseJob extends Job {
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject MemoryStore store;
 
+  public String login;
+  public String currentUserId;
+
   protected BaseJob(Params params) {
     super(params);
+
+    // Save user login and id at the moment of job creation, because they can change on substitute mode change
+    login = settings.getLogin();
+    currentUserId = settings.getCurrentUserId();
   }
 }

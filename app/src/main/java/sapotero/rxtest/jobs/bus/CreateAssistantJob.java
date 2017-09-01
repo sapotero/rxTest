@@ -67,7 +67,7 @@ public class CreateAssistantJob extends BaseJob {
     Integer count = dataStore
       .count(RAssistantEntity.TITLE)
       .where(RAssistantEntity.TITLE.eq(user))
-      .and(RAssistantEntity.USER.eq(settings.getLogin()))
+      .and(RAssistantEntity.USER.eq(login))
       .get().value();
 
     if( count != 0 ){

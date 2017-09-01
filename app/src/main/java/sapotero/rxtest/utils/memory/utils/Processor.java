@@ -139,13 +139,16 @@ public class Processor {
 
     switch (source){
       case DB:
-        Timber.w("process as db");
-        transaction
-          .from(InMemoryDocumentMapper.fromDB(document_from_db))
-          .setField(FieldType.UPDATED_AT, DateUtil.getTimestampEarly() )
-          .setState(InMemoryState.READY);
+        // Добавляем документ из job, только если пользователь не сменился
+        if ( Objects.equals( document_from_db.getUser(), settings.getLogin() ) ) {
+          Timber.w("process as db");
+          transaction
+            .from(InMemoryDocumentMapper.fromDB(document_from_db))
+            .setField(FieldType.UPDATED_AT, DateUtil.getTimestampEarly() )
+            .setState(InMemoryState.READY);
 
-        commit( transaction );
+          commit( transaction );
+        }
         break;
       case TRANSACTION:
         commit( this.transaction );

@@ -83,7 +83,7 @@ abstract class DocumentJob extends BaseJob {
     DocumentService documentService = retrofit.create( DocumentService.class );
     return documentService.getInfo(
             uid,
-            settings.getLogin(),
+            login,
             settings.getToken()
     );
   }
@@ -229,7 +229,7 @@ abstract class DocumentJob extends BaseJob {
       List<Status> statuses = exemplar.getStatuses();
       if ( notEmpty( statuses ) ) {
         Status currentStatus = statuses.get( statuses.size() - 1 );
-        if ( Objects.equals( currentStatus.getAddressedToId(), settings.getCurrentUserId() ) ) {
+        if ( Objects.equals( currentStatus.getAddressedToId(), currentUserId ) ) {
           if ( Objects.equals( currentStatus.getStatusCode(), "primary_consideration")
             || Objects.equals( currentStatus.getStatusCode(), "sent_to_the_report") ) {
             result = true;
@@ -250,7 +250,7 @@ abstract class DocumentJob extends BaseJob {
       for (String title : titles) {
         Step step = getStep(steps, title);
         for ( Person person : nullGuard( step.getPeople() ) ) {
-          if ( Objects.equals( person.getOfficialId(), settings.getCurrentUserId() ) ) {
+          if ( Objects.equals( person.getOfficialId(), currentUserId ) ) {
             List<Action> actions = person.getActions();
             if ( notEmpty( actions ) ) {
               String lastActionStatus = actions.get( actions.size() - 1 ).getStatus();

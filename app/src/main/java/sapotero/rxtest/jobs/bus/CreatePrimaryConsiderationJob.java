@@ -67,7 +67,7 @@ public class CreatePrimaryConsiderationJob extends BaseJob {
     Integer count = dataStore
       .count(RPrimaryConsiderationEntity.UID)
       .where(RPrimaryConsiderationEntity.UID.eq(uid))
-      .and(RPrimaryConsiderationEntity.USER.eq(settings.getLogin()))
+      .and(RPrimaryConsiderationEntity.USER.eq(login))
       .get().value();
 
     if( count != 0 ){

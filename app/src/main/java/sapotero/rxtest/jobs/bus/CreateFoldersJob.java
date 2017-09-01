@@ -52,7 +52,7 @@ public class CreateFoldersJob extends BaseJob {
     data.setUid( template.getId() );
     data.setTitle( template.getTitle() );
     data.setType( template.getType() );
-    data.setUser( settings.getLogin() );
+    data.setUser( login );
 
 
     dataStore
@@ -75,7 +75,7 @@ public class CreateFoldersJob extends BaseJob {
     Integer count = dataStore
       .count(RFolderEntity.UID)
       .where(RFolderEntity.UID.eq(uid))
-      .and(RFolderEntity.USER.eq(settings.getLogin()))
+      .and(RFolderEntity.USER.eq(login))
       .get().value();
 
     if( count != 0 ){

@@ -241,7 +241,7 @@ public class UpdateDocumentJob extends DocumentJob {
     RReturnedRejectedAgainEntity returnedRejectedAgainEntity = dataStore
       .select( RReturnedRejectedAgainEntity.class )
       .where( RReturnedRejectedAgainEntity.DOCUMENT_UID.eq( documentExisting.getUid() ) )
-      .and( RReturnedRejectedAgainEntity.USER.eq( settings.getLogin() ) )
+      .and( RReturnedRejectedAgainEntity.USER.eq( login ) )
       .get().firstOrNull();
 
     if ( returnedRejectedAgainEntity != null && Objects.equals( documentExisting.getFilter(), returnedRejectedAgainEntity.getStatus() ) ) {

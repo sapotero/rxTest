@@ -79,7 +79,7 @@ public class CreateColleagueJob extends BaseJob {
     Integer count = dataStore
       .count(RColleagueEntity.class)
       .where(RColleagueEntity.COLLEAGUE_ID.eq(user))
-      .and(RColleagueEntity.USER.eq(settings.getLogin()))
+      .and(RColleagueEntity.USER.eq(login))
       .get().value();
 
     if( count != 0 ){

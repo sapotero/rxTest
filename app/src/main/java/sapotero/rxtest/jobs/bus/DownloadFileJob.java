@@ -134,7 +134,7 @@ public class DownloadFileJob  extends BaseJob {
   }
 
   private void loadFile(){
-    String admin = settings.getLogin();
+    String admin = login;
     String token = settings.getToken();
 
     Retrofit retrofit = new RetrofitManager(getApplicationContext(), settings.getHost(), okHttpClient).process();
@@ -165,7 +165,7 @@ public class DownloadFileJob  extends BaseJob {
 
     Timber.tag(TAG).v( "downloadFile ..." );
 
-    String admin = settings.getLogin();
+    String admin = login;
     String token = settings.getToken();
 
     Timber.tag(TAG).d("host: '%s' | link: '%s'", host.substring(0, host.length()-1), link.getExpiredLink() );
