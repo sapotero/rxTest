@@ -116,15 +116,20 @@ public class DataLoaderManager {
 
     unsubscribeInitV2();
 
+    String login = settings.getLogin();
+    String currentUserId = settings.getCurrentUserId();
+
     subscriptionInitV2.add(
       // получаем данные о пользователе
-      auth.getUserInfoV2(settings.getLogin(), settings.getToken())
+      auth.getUserInfoV2(login, settings.getToken())
         .subscribeOn(Schedulers.computation())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(
           v2 -> {
-              Timber.tag("LoadSequence").d("Received user info");
-//            try {
+            Timber.tag("LoadSequence").d("Received user info");
+
+            // Обрабатываем ответ только если логин не поменялся (при входе/выходе в режим замещения)
+            if ( Objects.equals( login, settings.getLogin() ) ) {
               v2UserOshs user = v2.get(0);
               setCurrentUser(user.getName());
               setCurrentUserId(user.getId());
@@ -132,31 +137,39 @@ public class DataLoaderManager {
               setCurrentUserPosition(user.getPosition());
               setCurrentUserImage(user.getImage());
 
-              deleteUsers();
-              deleteTemplates();
+              deleteUsers(login);
+              deleteTemplates(login);
 
-            // получаем папки
+              // получаем папки
               subscriptionInitV2.add(
-                auth.getFolders(settings.getLogin(), settings.getToken())
+                auth.getFolders(login, settings.getToken())
                   .subscribeOn(Schedulers.computation())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( data -> {
                     Timber.tag("LoadSequence").d("Received list of folders");
-                    jobManager.addJobInBackground(new CreateFoldersJob(data, settings.getLogin()));
-                    loadAllDocs( loadAllDocs );
+                    // Обрабатываем ответ только если логин не поменялся (при входе/выходе в режим замещения)
+                    if ( Objects.equals( login, settings.getLogin() ) ) {
+                      jobManager.addJobInBackground(new CreateFoldersJob(data, login));
+                      loadAllDocs( loadAllDocs, login, currentUserId );
+                    }
                   }, error -> {
                     Timber.tag(TAG).e(error);
-                    loadAllDocs( loadAllDocs );
-                  })
+                    if ( Objects.equals( login, settings.getLogin() ) ) {
+                      loadAllDocs( loadAllDocs, login, currentUserId );
+                    }
+                })
               );
 
 
               subscriptionInitV2.add(
-                auth.getPrimaryConsiderationUsers(settings.getLogin(), settings.getToken())
+                auth.getPrimaryConsiderationUsers(login, settings.getToken())
                   .subscribeOn(Schedulers.computation())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( data -> {
-                    jobManager.addJobInBackground(new CreatePrimaryConsiderationJob(data, settings.getLogin()));
+                    // Обрабатываем ответ только если логин не поменялся (при входе/выходе в режим замещения)
+                    if ( Objects.equals( login, settings.getLogin() ) ) {
+                      jobManager.addJobInBackground(new CreatePrimaryConsiderationJob(data, login));
+                    }
                   }, error -> {
                     Timber.tag(TAG).e(error);
                   })
@@ -164,11 +177,14 @@ public class DataLoaderManager {
 
               // загрузка срочности
               subscriptionInitV2.add(
-                auth.getUrgency(settings.getLogin(), settings.getToken(), "urgency")
+                auth.getUrgency(login, settings.getToken(), "urgency")
                   .subscribeOn(Schedulers.computation())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( urgencies -> {
-                    jobManager.addJobInBackground(new CreateUrgencyJob(urgencies, settings.getLogin()));
+                    // Обрабатываем ответ только если логин не поменялся (при входе/выходе в режим замещения)
+                    if ( Objects.equals( login, settings.getLogin() ) ) {
+                      jobManager.addJobInBackground(new CreateUrgencyJob(urgencies, login));
+                    }
                   }, error -> {
                     Timber.tag(TAG).e(error);
                   })
@@ -176,11 +192,14 @@ public class DataLoaderManager {
 
               // загрузка шаблонов резолюции
               subscriptionInitV2.add(
-                auth.getTemplates(settings.getLogin(), settings.getToken(), null)
+                auth.getTemplates(login, settings.getToken(), null)
                   .subscribeOn(Schedulers.computation())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( templates -> {
-                    jobManager.addJobInBackground(new CreateTemplatesJob(templates, null, settings.getLogin()));
+                    // Обрабатываем ответ только если логин не поменялся (при входе/выходе в режим замещения)
+                    if ( Objects.equals( login, settings.getLogin() ) ) {
+                      jobManager.addJobInBackground(new CreateTemplatesJob(templates, null, login));
+                    }
                   }, error -> {
                     Timber.tag(TAG).e(error);
                   })
@@ -188,11 +207,14 @@ public class DataLoaderManager {
 
               // загрузка шаблонов отклонения
               subscriptionInitV2.add(
-                auth.getTemplates(settings.getLogin(), settings.getToken(), "rejection")
+                auth.getTemplates(login, settings.getToken(), "rejection")
                   .subscribeOn(Schedulers.computation())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( templates -> {
-                    jobManager.addJobInBackground(new CreateTemplatesJob(templates, "rejection", settings.getLogin()));
+                    // Обрабатываем ответ только если логин не поменялся (при входе/выходе в режим замещения)
+                    if ( Objects.equals( login, settings.getLogin() ) ) {
+                      jobManager.addJobInBackground(new CreateTemplatesJob(templates, "rejection", login));
+                    }
                   }, error -> {
                     Timber.tag(TAG).e(error);
                   })
@@ -200,96 +222,111 @@ public class DataLoaderManager {
 
               // получаем группу Избранное(МП)
               subscriptionInitV2.add(
-                auth.getFavoriteUsers(settings.getLogin(), settings.getToken())
+                auth.getFavoriteUsers(login, settings.getToken())
                   .subscribeOn(Schedulers.computation())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( data -> {
-                    jobManager.addJobInBackground(new CreateFavoriteUsersJob(data, settings.getLogin()));
+                    // Обрабатываем ответ только если логин не поменялся (при входе/выходе в режим замещения)
+                    if ( Objects.equals( login, settings.getLogin() ) ) {
+                      jobManager.addJobInBackground(new CreateFavoriteUsersJob(data, login));
+                    }
                   }, error -> {
                     Timber.tag(TAG).e(error);
                   })
               );
 
-            // Доработка api для возврата ВРИО/по поручению
-            // resolved https://tasks.n-core.ru/browse/MVDESD-11453
-            subscriptionInitV2.add(
-              auth.getAssistantByHeadId(settings.getLogin(), settings.getToken(), settings.getCurrentUserId())
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe( data -> {
-                  jobManager.addJobInBackground(new CreateAssistantJob(data, settings.getLogin()));
-                }, error -> {
-                  Timber.tag(TAG).e(error);
-                })
-            );
+              // Доработка api для возврата ВРИО/по поручению
+              // resolved https://tasks.n-core.ru/browse/MVDESD-11453
+              subscriptionInitV2.add(
+                auth.getAssistantByHeadId(login, settings.getToken(), currentUserId)
+                  .subscribeOn(Schedulers.computation())
+                  .observeOn(AndroidSchedulers.mainThread())
+                  .subscribe( data -> {
+                    // Обрабатываем ответ только если логин не поменялся (при входе/выходе в режим замещения)
+                    if ( Objects.equals( login, settings.getLogin() ) ) {
+                      jobManager.addJobInBackground(new CreateAssistantJob(data, login));
+                    }
+                  }, error -> {
+                    Timber.tag(TAG).e(error);
+                  })
+              );
 
-            // resolved https://tasks.n-core.ru/browse/MVDESD-13711
-            subscriptionInitV2.add(
-              auth.getAssistantByAssistantId(settings.getLogin(), settings.getToken(), settings.getCurrentUserId())
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe( data -> {
-                  jobManager.addJobInBackground(new CreateAssistantJob(data, settings.getLogin()));
-                }, error -> {
-                  Timber.tag(TAG).e(error);
-                })
-            );
+              // resolved https://tasks.n-core.ru/browse/MVDESD-13711
+              subscriptionInitV2.add(
+                auth.getAssistantByAssistantId(login, settings.getToken(), currentUserId)
+                  .subscribeOn(Schedulers.computation())
+                  .observeOn(AndroidSchedulers.mainThread())
+                  .subscribe( data -> {
+                    // Обрабатываем ответ только если логин не поменялся (при входе/выходе в режим замещения)
+                    if ( Objects.equals( login, settings.getLogin() ) ) {
+                      jobManager.addJobInBackground(new CreateAssistantJob(data, login));
+                    }
+                  }, error -> {
+                    Timber.tag(TAG).e(error);
+                  })
+              );
 
-            // resolved https://tasks.n-core.ru/browse/MVDESD-13752
-            // Добавить в боковую панель список коллег
-            subscriptionInitV2.add(
-              auth.getColleagues(settings.getLogin(), settings.getToken())
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe( data -> {
-                  jobManager.addJobInBackground(new CreateColleagueJob(data, settings.getLogin()));
-                }, error -> {
-                  Timber.tag(TAG).e(error);
-                  EventBus.getDefault().post( new UpdateDrawerEvent() );
-                })
-            );
+              // resolved https://tasks.n-core.ru/browse/MVDESD-13752
+              // Добавить в боковую панель список коллег
+              subscriptionInitV2.add(
+                auth.getColleagues(login, settings.getToken())
+                  .subscribeOn(Schedulers.computation())
+                  .observeOn(AndroidSchedulers.mainThread())
+                  .subscribe( data -> {
+                    // Обрабатываем ответ только если логин не поменялся (при входе/выходе в режим замещения)
+                    if ( Objects.equals( login, settings.getLogin() ) ) {
+                      jobManager.addJobInBackground(new CreateColleagueJob(data, login));
+                    }
+                  }, error -> {
+                    Timber.tag(TAG).e(error);
+                    EventBus.getDefault().post( new UpdateDrawerEvent() );
+                  })
+              );
+            }
 
           },
           error -> {
             Timber.tag("USER_INFO").e( "ERROR: %s", error);
-            loadAllDocs( loadAllDocs );
+            if ( Objects.equals( login, settings.getLogin() ) ) {
+              loadAllDocs( loadAllDocs, login, currentUserId );
+            }
           })
     );
 
   }
 
-  private void deleteUsers() {
+  private void deleteUsers(String login) {
     dataStore
       .delete(RAssistantEntity.class)
-      .where(RAssistantEntity.USER.eq(settings.getLogin()))
+      .where(RAssistantEntity.USER.eq(login))
       .get().value();
 
     dataStore
       .delete(RFavoriteUserEntity.class)
-      .where(RFavoriteUserEntity.USER.eq(settings.getLogin()))
+      .where(RFavoriteUserEntity.USER.eq(login))
       .get().value();
 
     dataStore
       .delete(RPrimaryConsiderationEntity.class)
-      .where(RPrimaryConsiderationEntity.USER.eq(settings.getLogin()))
+      .where(RPrimaryConsiderationEntity.USER.eq(login))
       .get().value();
 
     dataStore
       .delete(RColleagueEntity.class)
-      .where(RColleagueEntity.USER.eq(settings.getLogin()))
+      .where(RColleagueEntity.USER.eq(login))
       .get().value();
   }
 
-  private void deleteTemplates() {
+  private void deleteTemplates(String login) {
     dataStore
       .delete(RTemplateEntity.class)
-      .where(RTemplateEntity.USER.eq(settings.getLogin()))
+      .where(RTemplateEntity.USER.eq(login))
       .get().value();
   }
 
-  private void loadAllDocs(boolean load) {
+  private void loadAllDocs(boolean load, String login, String currentUserId) {
     if ( load ) {
-      updateByCurrentStatus(MainMenuItem.ALL, null);
+      updateByCurrentStatus(MainMenuItem.ALL, null, login, currentUserId);
     }
   }
 
@@ -571,7 +608,7 @@ public class DataLoaderManager {
     );
   }
 
-  public void updateByCurrentStatus(MainMenuItem items, MainMenuButton button) {
+  public void updateByCurrentStatus(MainMenuItem items, MainMenuButton button, String login, String currentUserId) {
     Timber.tag(TAG).e("updateByCurrentStatus: %s %s", items, button );
 
     if ( !isSubscriptionExist() ) {
@@ -703,13 +740,9 @@ public class DataLoaderManager {
 
       for (String index: indexes ) {
         for (String status: statuses ) {
-
-          String login = settings.getLogin();
-          String currentUserId = settings.getCurrentUserId();
-
           subscription.add(
             docService
-              .getDocumentsByIndexes(settings.getLogin(), settings.getToken(), index, status, null , 500, getYears())
+              .getDocumentsByIndexes(login, settings.getToken(), index, status, null , 500, getYears())
               .subscribeOn(Schedulers.io())
               .observeOn(AndroidSchedulers.mainThread())
               .subscribe(
@@ -735,13 +768,9 @@ public class DataLoaderManager {
 
 
       for (String code : sp) {
-
-        String login = settings.getLogin();
-        String currentUserId = settings.getCurrentUserId();
-
         subscription.add(
           docService
-            .getDocuments(settings.getLogin(), settings.getToken(), code, null , 500, 0, getYears())
+            .getDocuments(login, settings.getToken(), code, null , 500, 0, getYears())
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
@@ -942,7 +971,7 @@ public class DataLoaderManager {
       unsubscribeFavorites();
 
       subscriptionFavorites.add(
-        docService.getByFolders(settings.getLogin(), settings.getToken(), null, 500, 0, favorites_folder.getUid(), null)
+        docService.getByFolders(login, settings.getToken(), null, 500, 0, favorites_folder.getUid(), null)
           .subscribeOn( Schedulers.io() )
           .observeOn( AndroidSchedulers.mainThread() )
           .subscribe(
@@ -1034,7 +1063,7 @@ public class DataLoaderManager {
       unsubscribeProcessed();
 
       subscriptionProcessed.add(
-        docService.getByFolders(settings.getLogin(), settings.getToken(), null, 500, 0, processed_folder.getUid(), date)
+        docService.getByFolders(login, settings.getToken(), null, 500, 0, processed_folder.getUid(), date)
           .subscribeOn( Schedulers.io() )
           .observeOn( AndroidSchedulers.mainThread() )
           .subscribe(

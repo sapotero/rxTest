@@ -4,8 +4,6 @@ import dagger.Component;
 import sapotero.rxtest.application.modules.EsdModule;
 import sapotero.rxtest.application.modules.SettingsModule;
 import sapotero.rxtest.application.scopes.DataScope;
-import sapotero.rxtest.db.mapper.PrimaryConsiderationMapper;
-import sapotero.rxtest.db.mapper.TemplateMapper;
 import sapotero.rxtest.db.mapper.utils.MappersModule;
 import sapotero.rxtest.db.requery.utils.Deleter;
 import sapotero.rxtest.db.requery.utils.DocumentStateSaver;
@@ -14,6 +12,7 @@ import sapotero.rxtest.db.requery.utils.validation.ValidationModule;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.managers.view.DecisionManager;
 import sapotero.rxtest.retrofit.utils.OkHttpModule;
+import sapotero.rxtest.services.task.UpdateAllDocumentsTask;
 import sapotero.rxtest.utils.memory.utils.MemoryStoreModule;
 import sapotero.rxtest.utils.queue.db.QueueDBManager;
 import sapotero.rxtest.views.activities.DocumentImageFullScreenActivity;
@@ -87,4 +86,6 @@ public interface DataComponent {
   void inject(OrganizationSpinner organizationSpinner);
 
   void inject(CommandParams commandParams);
+
+  void inject(UpdateAllDocumentsTask updateAllDocumentsTask);
 }

@@ -175,7 +175,7 @@ public class MemoryStore implements Processable{
       .withFilter(filter)
       .withIndex(index)
       .withLogin(login)
-      .withCurrentUserId(login)
+      .withCurrentUserId(currentUserId)
       .execute();
 
 //    counterRecreate();
@@ -190,7 +190,7 @@ public class MemoryStore implements Processable{
       .withFolder(folderUid)
       .withDocumentType(documentType)
       .withLogin(login)
-      .withCurrentUserId(login)
+      .withCurrentUserId(currentUserId)
       .execute();
   }
 

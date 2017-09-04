@@ -52,7 +52,7 @@ public class CreateDocumentsJob extends DocumentJob {
   @Override
   public void doAfterLoad(DocumentInfo document){
     RDocumentEntity doc = createDocument(document, status, shared);
-    mappers.getDocumentMapper().setJournal(doc, journal);
+    mappers.getDocumentMapper().withLogin(login).withCurrentUserId(currentUserId).setJournal(doc, journal);
     saveDocument(document, doc, false, TAG);
   }
 
