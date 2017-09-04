@@ -187,7 +187,7 @@ public class DecisionTemplateFragment extends Fragment {
       .subscribe(
         templates -> {
           deleteTemplates( templateType.getType() );
-          jobManager.addJobInBackground(new CreateTemplatesJob(templates, templateType.getTypeForApi()));
+          jobManager.addJobInBackground(new CreateTemplatesJob(templates, templateType.getTypeForApi(), settings.getLogin()));
         },
         error -> Timber.tag(TAG).e(error)
       );

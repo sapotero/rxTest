@@ -10,8 +10,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import javax.inject.Inject;
-
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.dagger.components.DaggerTestDataComponent;
 import sapotero.rxtest.dagger.components.TestDataComponent;
@@ -20,8 +18,6 @@ import sapotero.rxtest.db.mapper.PerformerMapper;
 import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RFavoriteUserEntity;
 import sapotero.rxtest.retrofit.models.Oshs;
-import sapotero.rxtest.utils.ISettings;
-import sapotero.rxtest.utils.TestSettings;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 
 import static org.junit.Assert.assertEquals;
@@ -42,10 +38,9 @@ public class FavoriteUserMapperTest {
   private RFavoriteUserEntity entity;
   private Oshs model;
   private PrimaryConsiderationPeople people;
+  private String dummyLogin;
 
   @Mock Mappers mappers;
-
-  @Inject ISettings settings;
 
   @Before
   public void init() {
@@ -63,17 +58,14 @@ public class FavoriteUserMapperTest {
     PowerMockito.when(EsdApplication.getDataComponent()).thenReturn(testDataComponent);
 
     Mockito.when(mappers.getPerformerMapper()).thenReturn(performerMapper);
+
+    dummyLogin = "dummyLogin";
   }
 
   @Test
   public void toEntity() {
     mapper = new FavoriteUserMapper(mappers);
-    entity = mapper.toEntity(dummyOshs);
-
-    PowerMockito.verifyStatic(times(1));
-    EsdApplication.getDataComponent();
-
-    Mockito.verify(settings, times(1)).getLogin();
+    entity = mapper.withLogin(dummyLogin).toEntity(dummyOshs);
 
     assertNotNull( entity );
     assertEquals( 0, entity.getId() );
@@ -87,7 +79,7 @@ public class FavoriteUserMapperTest {
     assertEquals( dummyOshs.getName(), entity.getName() );
     assertEquals( dummyOshs.getIsGroup(), entity.isIsGroup() );
     assertEquals( dummyOshs.getIsOrganization(), entity.isIsOrganization() );
-    assertEquals( ((TestSettings) settings).login, entity.getUser() );
+    assertEquals( dummyLogin, entity.getUser() );
   }
 
   @Test
@@ -95,11 +87,6 @@ public class FavoriteUserMapperTest {
     mapper = new FavoriteUserMapper(mappers);
     entity = mapper.toEntity(dummyOshs);
     model = mapper.toModel(entity);
-
-    PowerMockito.verifyStatic(times(1));
-    EsdApplication.getDataComponent();
-
-    Mockito.verify(settings, times(1)).getLogin();
 
     assertNotNull( model );
     assertEquals( dummyOshs.getOrganization(), model.getOrganization() );
@@ -121,10 +108,6 @@ public class FavoriteUserMapperTest {
     entity.setSortIndex(dummySortIndex);
     people = mapper.toPrimaryConsiderationPeople(entity);
 
-    PowerMockito.verifyStatic(times(1));
-    EsdApplication.getDataComponent();
-
-    Mockito.verify(settings, times(1)).getLogin();
     Mockito.verify(mappers, times(1)).getPerformerMapper();
 
     assertNotNull( people );

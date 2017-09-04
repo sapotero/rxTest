@@ -1,20 +1,12 @@
 package sapotero.rxtest.db.mapper;
 
-import javax.inject.Inject;
-
-import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RColleagueEntity;
 import sapotero.rxtest.retrofit.models.Colleague;
-import sapotero.rxtest.utils.ISettings;
 
 // Maps between Colleague and RColleagueEntity
  public class ColleagueMapper extends AbstractMapper<Colleague, RColleagueEntity> {
 
-  @Inject ISettings settings;
-
-  public ColleagueMapper() {
-    EsdApplication.getDataComponent().inject(this);
-  }
+  private String login = "";
 
   @Override
   public RColleagueEntity toEntity(Colleague model) {
@@ -24,7 +16,7 @@ import sapotero.rxtest.utils.ISettings;
     entity.setOfficialId( model.getOfficialId() );
     entity.setOfficialName( model.getOfficialName() );
     entity.setActived( model.getActived() );
-    entity.setUser( settings.getLogin() );
+    entity.setUser( login );
 
     return entity;
   }
@@ -39,5 +31,10 @@ import sapotero.rxtest.utils.ISettings;
     model.setActived( entity.isActived() );
 
     return model;
+  }
+
+  public ColleagueMapper withLogin(String login) {
+    this.login = login;
+    return this;
   }
 }

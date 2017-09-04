@@ -4,10 +4,6 @@ import dagger.Component;
 import sapotero.rxtest.application.modules.EsdModule;
 import sapotero.rxtest.application.modules.SettingsModule;
 import sapotero.rxtest.application.scopes.DataScope;
-import sapotero.rxtest.db.mapper.AssistantMapper;
-import sapotero.rxtest.db.mapper.ColleagueMapper;
-import sapotero.rxtest.db.mapper.DocumentMapper;
-import sapotero.rxtest.db.mapper.FavoriteUserMapper;
 import sapotero.rxtest.db.mapper.PrimaryConsiderationMapper;
 import sapotero.rxtest.db.mapper.TemplateMapper;
 import sapotero.rxtest.db.mapper.utils.MappersModule;
@@ -89,13 +85,6 @@ public interface DataComponent {
   void inject(DocumentStateSaver documentStateSaver);
 
   void inject(OrganizationSpinner organizationSpinner);
-
-  void inject(AssistantMapper assistantMapper);
-  void inject(ColleagueMapper colleagueMapper);
-  void inject(DocumentMapper documentMapper);
-  void inject(FavoriteUserMapper favoriteUserMapper);
-  void inject(PrimaryConsiderationMapper primaryConsiderationMapper);
-  void inject(TemplateMapper templateMapper);
 
   void inject(CommandParams commandParams);
 }

@@ -27,10 +27,11 @@ public class CreateTemplatesJob extends BaseJob {
 
   private String TAG = this.getClass().getSimpleName();
 
-  public CreateTemplatesJob(ArrayList<Template> templates, String type) {
+  public CreateTemplatesJob(ArrayList<Template> templates, String type, String login) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.templates = templates;
     this.type = type;
+    this.login = login;
   }
 
   @Override
@@ -48,7 +49,7 @@ public class CreateTemplatesJob extends BaseJob {
   }
 
   private void add(Template template) {
-    RTemplateEntity data = mappers.getTemplateMapper().toEntity(template);
+    RTemplateEntity data = mappers.getTemplateMapper().withLogin(login).toEntity(template);
     data.setType( type != null && !Objects.equals(type, "") ? type : "decision");
 
     dataStore

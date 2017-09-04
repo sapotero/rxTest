@@ -1,19 +1,16 @@
 package sapotero.rxtest.db.mapper;
 
-import javax.inject.Inject;
-
-import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RTemplateEntity;
 import sapotero.rxtest.retrofit.models.Template;
-import sapotero.rxtest.utils.ISettings;
 
 // Maps between Template and RTemplateEntity
 public class TemplateMapper extends AbstractMapper<Template, RTemplateEntity> {
 
-  @Inject ISettings settings;
+  private String login = "";
 
-  public TemplateMapper() {
-    EsdApplication.getDataComponent().inject(this);
+  public TemplateMapper withLogin(String login) {
+    this.login = login;
+    return this;
   }
 
   @Override
@@ -23,7 +20,7 @@ public class TemplateMapper extends AbstractMapper<Template, RTemplateEntity> {
     entity.setUid(model.getId());
     entity.setTitle(model.getText());
     entity.setType(model.getType());
-    entity.setUser(settings.getLogin());
+    entity.setUser(login);
 
     return entity;
   }

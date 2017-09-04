@@ -53,7 +53,7 @@ public class CreateColleagueJob extends BaseJob {
   }
 
   private void add(Colleague user, int index) {
-    RColleagueEntity data = mappers.getColleagueMapper().toEntity(user);
+    RColleagueEntity data = mappers.getColleagueMapper().withLogin(login).toEntity(user);
     data.setSortIndex(index);
 
     dataStore

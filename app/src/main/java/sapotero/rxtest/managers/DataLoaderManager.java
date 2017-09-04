@@ -180,7 +180,7 @@ public class DataLoaderManager {
                   .subscribeOn(Schedulers.computation())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( templates -> {
-                    jobManager.addJobInBackground(new CreateTemplatesJob(templates, null));
+                    jobManager.addJobInBackground(new CreateTemplatesJob(templates, null, settings.getLogin()));
                   }, error -> {
                     Timber.tag(TAG).e(error);
                   })
@@ -192,7 +192,7 @@ public class DataLoaderManager {
                   .subscribeOn(Schedulers.computation())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( templates -> {
-                    jobManager.addJobInBackground(new CreateTemplatesJob(templates, "rejection"));
+                    jobManager.addJobInBackground(new CreateTemplatesJob(templates, "rejection", settings.getLogin()));
                   }, error -> {
                     Timber.tag(TAG).e(error);
                   })

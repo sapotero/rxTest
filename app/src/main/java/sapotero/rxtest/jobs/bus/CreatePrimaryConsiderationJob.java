@@ -46,7 +46,7 @@ public class CreatePrimaryConsiderationJob extends BaseJob {
   }
 
   private void add(Oshs user, int index) {
-    RPrimaryConsiderationEntity data = mappers.getPrimaryConsiderationMapper().toEntity(user);
+    RPrimaryConsiderationEntity data = mappers.getPrimaryConsiderationMapper().withLogin(login).toEntity(user);
     data.setSortIndex(index);
 
     dataStore

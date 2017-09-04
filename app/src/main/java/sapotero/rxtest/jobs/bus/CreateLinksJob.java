@@ -99,7 +99,7 @@ public class CreateLinksJob extends DocumentJob {
 
   @Override
   public void doAfterLoad(DocumentInfo document) {
-    DocumentMapper documentMapper = mappers.getDocumentMapper();
+    DocumentMapper documentMapper = mappers.getDocumentMapper().withLogin(login).withCurrentUserId(currentUserId);
     RDocumentEntity doc = new RDocumentEntity();
 
     documentMapper.setSimpleFields(doc, document);

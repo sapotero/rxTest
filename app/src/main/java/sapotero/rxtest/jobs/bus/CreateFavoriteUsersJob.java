@@ -54,7 +54,7 @@ public class CreateFavoriteUsersJob extends BaseJob {
   }
 
   private void add(Oshs user, int index) {
-    RFavoriteUserEntity data = mappers.getFavoriteUserMapper().toEntity(user);
+    RFavoriteUserEntity data = mappers.getFavoriteUserMapper().withLogin(login).toEntity(user);
     data.setSortIndex(index);
 
     dataStore

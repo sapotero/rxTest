@@ -46,7 +46,7 @@ public class CreateAssistantJob extends BaseJob {
   }
 
   private void add(Assistant user, int index) {
-    RAssistantEntity data = mappers.getAssistantMapper().toEntity(user);
+    RAssistantEntity data = mappers.getAssistantMapper().withLogin(login).toEntity(user);
     data.setSortIndex(index);
 
     dataStore

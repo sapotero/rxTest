@@ -164,7 +164,7 @@ public class UpdateDocumentJob extends DocumentJob {
 
         saveIdsToDelete( documentExisting );
 
-        DocumentMapper documentMapper = mappers.getDocumentMapper();
+        DocumentMapper documentMapper = mappers.getDocumentMapper().withLogin(login).withCurrentUserId(currentUserId);
         documentMapper.setBaseFields( documentExisting, documentReceived );
         documentMapper.setJournal( documentExisting, index );
         documentMapper.setFilter( documentExisting, filter );

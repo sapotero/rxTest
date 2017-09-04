@@ -1,25 +1,24 @@
 package sapotero.rxtest.db.mapper;
 
-import javax.inject.Inject;
-
-import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RFavoriteUserEntity;
 import sapotero.rxtest.retrofit.models.Oshs;
-import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 
 // Maps between RFavoriteUserEntity, Oshs and PrimaryConsiderationPeople
 // (model for RFavoriteUserEntity is Oshs)
 public class FavoriteUserMapper extends AbstractMapper<Oshs, RFavoriteUserEntity> {
 
-  @Inject ISettings settings;
-
   private Mappers mappers;
+  private String login = "";
 
   public FavoriteUserMapper(Mappers mappers) {
     this.mappers = mappers;
-    EsdApplication.getDataComponent().inject(this);
+  }
+
+  public FavoriteUserMapper withLogin(String login) {
+    this.login = login;
+    return this;
   }
 
   @Override
@@ -36,7 +35,7 @@ public class FavoriteUserMapper extends AbstractMapper<Oshs, RFavoriteUserEntity
     entity.setName( model.getName() );
     entity.setIsGroup( model.getIsGroup() );
     entity.setIsOrganization( model.getIsOrganization() );
-    entity.setUser( settings.getLogin() );
+    entity.setUser( login );
     entity.setImage( model.getIImage() );
 
     return entity;
