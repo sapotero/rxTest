@@ -42,12 +42,14 @@ public class UpdateDocumentJob extends DocumentJob {
 
   private boolean fromLinks = false;
 
-  public UpdateDocumentJob(String uid) {
+  public UpdateDocumentJob(String uid, String login, String currentUserId) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
+    this.login = login;
+    this.currentUserId = currentUserId;
   }
 
-  public UpdateDocumentJob(String uid, String index, String filter) {
+  public UpdateDocumentJob(String uid, String index, String filter, String login, String currentUserId) {
     super( new Params(PRIORITY).requireNetwork().persist().addTags("DocJob") );
 
     Timber.tag(TAG).e( "create %s - %s / %s", uid, index, filter );
@@ -55,13 +57,15 @@ public class UpdateDocumentJob extends DocumentJob {
     this.uid = uid;
     this.index = getJournalName(index);
     this.filter = filter;
+    this.login = login;
+    this.currentUserId = currentUserId;
 
     // если создаем с указанием типа журнала и статуса
     // то принудительно обновляем документ
     this.forceUpdate = true;
   }
 
-  public UpdateDocumentJob(String uid, String index, String filter, boolean forceProcessed) {
+  public UpdateDocumentJob(String uid, String index, String filter, boolean forceProcessed, String login, String currentUserId) {
     super( new Params(PRIORITY).requireNetwork().persist().addTags("DocJob") );
 
     Timber.tag(TAG).e( "create %s - %s / %s", uid, index, filter );
@@ -69,6 +73,8 @@ public class UpdateDocumentJob extends DocumentJob {
     this.uid = uid;
     this.index = getJournalName(index);
     this.filter = filter;
+    this.login = login;
+    this.currentUserId = currentUserId;
 
     this.forceProcessed = forceProcessed;
 
@@ -76,27 +82,33 @@ public class UpdateDocumentJob extends DocumentJob {
     this.forceUpdate = true;
   }
 
-  public UpdateDocumentJob(String uid, DocumentType documentType) {
+  public UpdateDocumentJob(String uid, DocumentType documentType, String login, String currentUserId) {
     super( new Params(PRIORITY).requireNetwork().persist().addTags("DocJob") );
 
     this.uid = uid;
     this.documentType = documentType;
+    this.login = login;
+    this.currentUserId = currentUserId;
   }
 
-  public UpdateDocumentJob(String uid, DocumentType documentType, boolean forceDropFavorite) {
+  public UpdateDocumentJob(String uid, DocumentType documentType, boolean forceDropFavorite, String login, String currentUserId) {
     super( new Params(PRIORITY).requireNetwork().persist().addTags("DocJob") );
 
     this.uid = uid;
     this.documentType = documentType;
+    this.login = login;
+    this.currentUserId = currentUserId;
     this.forceDropFavorite = forceDropFavorite;
     this.forceUpdate = true;
   }
 
-  public UpdateDocumentJob(String uid, boolean fromLinks) {
+  public UpdateDocumentJob(String uid, boolean fromLinks, String login, String currentUserId) {
     super( new Params(PRIORITY).requireNetwork().persist() );
 
     this.uid = uid;
     this.fromLinks = fromLinks;
+    this.login = login;
+    this.currentUserId = currentUserId;
 
     // если ссылка, то обновляем принудительно, чтобы загрузились образы
     this.forceUpdate = true;

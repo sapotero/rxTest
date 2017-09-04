@@ -22,9 +22,10 @@ public class CreatePrimaryConsiderationJob extends BaseJob {
 
   private String TAG = this.getClass().getSimpleName();
 
-  public CreatePrimaryConsiderationJob(ArrayList<Oshs> users) {
+  public CreatePrimaryConsiderationJob(ArrayList<Oshs> users, String login) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.users = users;
+    this.login = login;
   }
 
   @Override

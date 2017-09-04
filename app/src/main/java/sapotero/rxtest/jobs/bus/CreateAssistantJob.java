@@ -23,9 +23,10 @@ public class CreateAssistantJob extends BaseJob {
 
   private String TAG = this.getClass().getSimpleName();
 
-  public CreateAssistantJob(ArrayList<Assistant> users) {
+  public CreateAssistantJob(ArrayList<Assistant> users, String login) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.users = users;
+    this.login = login;
   }
 
   @Override

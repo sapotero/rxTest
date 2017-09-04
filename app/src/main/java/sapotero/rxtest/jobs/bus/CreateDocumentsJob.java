@@ -26,13 +26,16 @@ public class CreateDocumentsJob extends DocumentJob {
   private String journal;
   private boolean shared = false;
 
-  public CreateDocumentsJob(String uid, String journal, String status, boolean shared) {
+  // Во всех job`ах login и currentUserId передаем в конструкторе, а не из settings,
+  // так как во время выполения job'ы пользователь может измениться (режим замещения)
+  public CreateDocumentsJob(String uid, String journal, String status, boolean shared, String login, String currentUserId) {
     super( new Params(PRIORITY).requireNetwork().persist().addTags("DocJob") );
     this.uid = uid;
     this.journal = getJournalName(journal);
     this.status = status;
     this.shared = shared;
-
+    this.login = login;
+    this.currentUserId = currentUserId;
 
     Timber.tag(TAG).e( "new %s - %s / %s", uid, journal, status );
   }

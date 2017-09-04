@@ -26,9 +26,10 @@ public class CreateColleagueJob extends BaseJob {
 
   private String TAG = this.getClass().getSimpleName();
 
-  public CreateColleagueJob(ArrayList<Colleague> users) {
+  public CreateColleagueJob(ArrayList<Colleague> users, String login) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.users = users;
+    this.login = login;
   }
 
   @Override

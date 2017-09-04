@@ -33,12 +33,14 @@ public class CreateLinksJob extends DocumentJob {
 
   private Fields.Status filter;
 
-  public CreateLinksJob(String linkUid, String parentUid, boolean saveFirstLink) {
+  public CreateLinksJob(String linkUid, String parentUid, boolean saveFirstLink, String login, String currentUserId) {
     super( new Params(PRIORITY).requireNetwork().persist().addTags("DocJob") );
     this.linkUid = linkUid;
     this.parentUid = parentUid;
     this.saveFirstLink = saveFirstLink;
     this.filter = Fields.Status.LINK;
+    this.login = login;
+    this.currentUserId = currentUserId;
   }
 
   @Override

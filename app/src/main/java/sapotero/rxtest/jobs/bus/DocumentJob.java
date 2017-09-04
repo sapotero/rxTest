@@ -37,6 +37,8 @@ import timber.log.Timber;
 
 abstract class DocumentJob extends BaseJob {
 
+  public String currentUserId;
+
   DocumentJob(Params params) {
     super(params);
   }
@@ -182,7 +184,7 @@ abstract class DocumentJob extends BaseJob {
       for (RImage _image : images) {
         settings.addTotalDocCount(1);
         RImageEntity image = (RImageEntity) _image;
-        jobManager.addJobInBackground( new DownloadFileJob( settings.getHost(), image.getPath(), image.getMd5() + "_" + image.getTitle(), image.getId() ) );
+        jobManager.addJobInBackground( new DownloadFileJob( settings.getHost(), image.getPath(), image.getMd5() + "_" + image.getTitle(), image.getId(), settings.getLogin() ) );
       }
     }
   }
@@ -216,7 +218,7 @@ abstract class DocumentJob extends BaseJob {
   private void loadLinkedDoc(String linkUid, String parentUid, boolean saveFirstLink) {
     if ( exist( linkUid ) ) {
       settings.addTotalDocCount(1);
-      jobManager.addJobInBackground( new CreateLinksJob( linkUid, parentUid, saveFirstLink ) );
+      jobManager.addJobInBackground( new CreateLinksJob( linkUid, parentUid, saveFirstLink, settings.getLogin(), settings.getCurrentUserId() ) );
     }
   }
 

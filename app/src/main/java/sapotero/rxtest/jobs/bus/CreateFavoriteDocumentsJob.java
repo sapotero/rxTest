@@ -25,10 +25,12 @@ public class CreateFavoriteDocumentsJob extends DocumentJob {
   private String uid;
   private String folder;
 
-  public CreateFavoriteDocumentsJob(String uid, String folder) {
+  public CreateFavoriteDocumentsJob(String uid, String folder, String login, String currentUserId) {
     super( new Params(PRIORITY).requireNetwork().persist().addTags("DocJob") );
     this.uid     = uid;
     this.folder = folder;
+    this.login = login;
+    this.currentUserId = currentUserId;
   }
 
   @Override

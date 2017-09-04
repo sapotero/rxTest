@@ -398,7 +398,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 //          setEmptyToolbarClickListener();
           break;
         default:
-          jobManager.addJobInBackground(new UpdateAuthTokenJob());
+          jobManager.addJobInBackground(new UpdateAuthTokenJob(settings.getLogin()));
           break;
       }
       return false;

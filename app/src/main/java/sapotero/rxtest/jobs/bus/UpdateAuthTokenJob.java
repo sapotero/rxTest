@@ -25,10 +25,11 @@ public class UpdateAuthTokenJob extends BaseJob {
 
   private String TAG = "UpdateAuthTokenJob";
 
-  public UpdateAuthTokenJob() {
+  public UpdateAuthTokenJob(String login) {
     super( new Params(PRIORITY).requireNetwork().persist() );
 
     TOKEN = "";
+    this.login = login;
   }
 
   @Override

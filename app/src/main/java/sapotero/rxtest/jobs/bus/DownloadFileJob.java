@@ -39,12 +39,13 @@ public class DownloadFileJob  extends BaseJob {
   private String fileName;
   private RImageEntity image;
 
-  DownloadFileJob(String host, String strUrl, String fileName, int id) {
+  DownloadFileJob(String host, String strUrl, String fileName, int id, String login) {
     super( new Params(PRIORITY).requireNetwork().persist().addTags("DocJob") );
     this.host = host;
     this.strUrl = strUrl;
     this.fileName = fileName;
     this.rImageId = id;
+    this.login = login;
   }
 
 

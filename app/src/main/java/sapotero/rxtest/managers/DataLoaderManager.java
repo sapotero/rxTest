@@ -142,7 +142,7 @@ public class DataLoaderManager {
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( data -> {
                     Timber.tag("LoadSequence").d("Received list of folders");
-                    jobManager.addJobInBackground(new CreateFoldersJob(data));
+                    jobManager.addJobInBackground(new CreateFoldersJob(data, settings.getLogin()));
                     loadAllDocs( loadAllDocs );
                   }, error -> {
                     Timber.tag(TAG).e(error);
@@ -156,7 +156,7 @@ public class DataLoaderManager {
                   .subscribeOn(Schedulers.computation())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( data -> {
-                    jobManager.addJobInBackground(new CreatePrimaryConsiderationJob(data));
+                    jobManager.addJobInBackground(new CreatePrimaryConsiderationJob(data, settings.getLogin()));
                   }, error -> {
                     Timber.tag(TAG).e(error);
                   })
@@ -168,7 +168,7 @@ public class DataLoaderManager {
                   .subscribeOn(Schedulers.computation())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( urgencies -> {
-                    jobManager.addJobInBackground(new CreateUrgencyJob(urgencies));
+                    jobManager.addJobInBackground(new CreateUrgencyJob(urgencies, settings.getLogin()));
                   }, error -> {
                     Timber.tag(TAG).e(error);
                   })
@@ -204,7 +204,7 @@ public class DataLoaderManager {
                   .subscribeOn(Schedulers.computation())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( data -> {
-                    jobManager.addJobInBackground(new CreateFavoriteUsersJob(data));
+                    jobManager.addJobInBackground(new CreateFavoriteUsersJob(data, settings.getLogin()));
                   }, error -> {
                     Timber.tag(TAG).e(error);
                   })
@@ -217,7 +217,7 @@ public class DataLoaderManager {
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe( data -> {
-                  jobManager.addJobInBackground(new CreateAssistantJob(data));
+                  jobManager.addJobInBackground(new CreateAssistantJob(data, settings.getLogin()));
                 }, error -> {
                   Timber.tag(TAG).e(error);
                 })
@@ -229,7 +229,7 @@ public class DataLoaderManager {
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe( data -> {
-                  jobManager.addJobInBackground(new CreateAssistantJob(data));
+                  jobManager.addJobInBackground(new CreateAssistantJob(data, settings.getLogin()));
                 }, error -> {
                   Timber.tag(TAG).e(error);
                 })
@@ -242,7 +242,7 @@ public class DataLoaderManager {
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe( data -> {
-                  jobManager.addJobInBackground(new CreateColleagueJob(data));
+                  jobManager.addJobInBackground(new CreateColleagueJob(data, settings.getLogin()));
                 }, error -> {
                   Timber.tag(TAG).e(error);
                   EventBus.getDefault().post( new UpdateDrawerEvent() );

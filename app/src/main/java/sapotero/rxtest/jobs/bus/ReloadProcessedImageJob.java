@@ -42,7 +42,7 @@ public class ReloadProcessedImageJob extends BaseJob {
           .observeOn( AndroidSchedulers.mainThread() )
           .subscribe(
             data -> {
-              jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid()) );
+              jobManager.addJobInBackground( new UpdateDocumentJob(doc.getUid(), settings.getLogin(), settings.getCurrentUserId()) );
             }, Timber::e);
 
       }

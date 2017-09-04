@@ -25,9 +25,10 @@ public class CreateFoldersJob extends BaseJob {
 
   private String TAG = this.getClass().getSimpleName();
 
-  public CreateFoldersJob(ArrayList<Folder> templates) {
+  public CreateFoldersJob(ArrayList<Folder> templates, String login) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.templates = templates;
+    this.login = login;
   }
 
   @Override

@@ -26,9 +26,10 @@ public class CreateFavoriteUsersJob extends BaseJob {
 
   private String TAG = this.getClass().getSimpleName();
 
-  public CreateFavoriteUsersJob(ArrayList<Oshs> users) {
+  public CreateFavoriteUsersJob(ArrayList<Oshs> users, String login) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.users = users;
+    this.login = login;
   }
 
   @Override
