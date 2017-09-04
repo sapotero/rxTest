@@ -19,6 +19,8 @@ public class InMemoryDocument implements Serializable {
   public Document document;
   public InMemoryState state = InMemoryState.LOADING;
 
+  public String user;
+
   public InMemoryDocument() {
   }
 
@@ -115,6 +117,14 @@ public class InMemoryDocument implements Serializable {
 
   public void setUid(String uid) {
     this.uid = uid;
+  }
+
+  public String getUser() {
+    return user;
+  }
+
+  public void setUser(String user) {
+    this.user = user;
   }
 
   @Override

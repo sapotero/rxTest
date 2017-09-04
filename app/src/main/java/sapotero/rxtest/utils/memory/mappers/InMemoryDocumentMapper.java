@@ -80,6 +80,7 @@ public class InMemoryDocumentMapper {
     imd.setHasDecision( document.isWithDecision() != null ? document.isWithDecision() : false );
     imd.setProject(document.getRoute() != null && ((RRouteEntity) document.getRoute()).getSteps() != null && ((RRouteEntity) document.getRoute()).getSteps().size() > 0);
     imd.setAsReady();
+    imd.setUser( document.getUser() );
 
     return imd;
   }

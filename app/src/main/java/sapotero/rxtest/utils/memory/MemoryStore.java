@@ -3,6 +3,7 @@ package sapotero.rxtest.utils.memory;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -85,13 +86,20 @@ public class MemoryStore implements Processable{
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(
         docs -> {
+          int count = 0;
+
           for (InMemoryDocument doc: docs ) {
-            documents.put( doc.getUid(), doc );
-            Timber.tag("RecyclerViewRefresh").d("MemoryStore: pub.onNext() for %s", doc.getUid());
-            pub.onNext( doc );
+            // Добавляем в хранилище только те документы, у которых пользователь равен текущему
+            // (может отличаться при входе/выходе из режима замещения)
+            if ( Objects.equals( doc.getUser(), settings.getLogin() ) ) {
+              documents.put( doc.getUid(), doc );
+              Timber.tag("RecyclerViewRefresh").d("MemoryStore: pub.onNext() for %s", doc.getUid());
+              pub.onNext( doc );
+              count++;
+            }
           }
 
-          if (docs.size() > 0){
+          if (count > 0){
             Timber.tag("RecyclerViewRefresh").d("MemoryStore: sending event to update MainActivity");
             EventBus.getDefault().post( new UpdateCountEvent() );
           }
