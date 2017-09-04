@@ -72,6 +72,9 @@ public class Processor {
   private Transaction transaction;
   private Source source = Source.EMPTY;
 
+  private String login;
+  private String currentUserId;
+
   public Processor(PublishSubject<InMemoryDocument> subscribeSubject) {
     EsdApplication.getManagerComponent().inject(this);
 
@@ -129,6 +132,20 @@ public class Processor {
   public Processor withDocumentType(DocumentType documentType) {
     if (documentType != null) {
       this.documentType = documentType;
+    }
+    return this;
+  }
+
+  public Processor withLogin(String login) {
+    if (login != null) {
+      this.login = login;
+    }
+    return this;
+  }
+
+  public Processor withCurrentUserId(String currentUserId) {
+    if (currentUserId != null) {
+      this.currentUserId = currentUserId;
     }
     return this;
   }
@@ -304,13 +321,13 @@ public class Processor {
           .where(RDocumentEntity.UID.eq(uid))
           .get().firstOrNull();
 
-        if ( documentInDb != null && !Objects.equals( documentInDb.getUser(), settings.getLogin() ) ) {
+        if ( documentInDb != null && !Objects.equals( documentInDb.getUser(), login ) ) {
           // Если их нет в памяти, но они есть в базе и пользователь не равен текущему, то сохраняем состояние документов,
           // добавляем их память и сбрасываем MD5, чтобы далее для их обновления была вызвана UpdateDocumentJob.
           // (Нужно для перехода в режим замещения и обратно,
           // когда один и тот же документ присутсвует у обоих пользователей)
 
-          new DocumentStateSaver().saveDocumentState( documentInDb, settings.getLogin(), TAG );
+          new DocumentStateSaver().saveDocumentState( documentInDb, login, TAG );
           documentInMemory = InMemoryDocumentMapper.fromDB( documentInDb );
           documentInMemory.setMd5("");
           store.getDocuments().put( uid, documentInMemory );
@@ -408,21 +425,21 @@ public class Processor {
     switch (documentType) {
       case DOCUMENT:
         if (index != null) {
-          jobManager.addJobInBackground( new CreateDocumentsJob(uid, index, filter, false, settings.getLogin(), settings.getCurrentUserId()) );
+          jobManager.addJobInBackground( new CreateDocumentsJob(uid, index, filter, false, login, currentUserId) );
         } else {
-          jobManager.addJobInBackground( new CreateProjectsJob(uid, filter, false, settings.getLogin(), settings.getCurrentUserId()) );
+          jobManager.addJobInBackground( new CreateProjectsJob(uid, filter, false, login, currentUserId) );
         }
         break;
 
       case FAVORITE:
         if (folder != null) {
-          jobManager.addJobInBackground( new CreateFavoriteDocumentsJob(uid, folder, settings.getLogin(), settings.getCurrentUserId()) );
+          jobManager.addJobInBackground( new CreateFavoriteDocumentsJob(uid, folder, login, currentUserId) );
         }
         break;
 
       case PROCESSED:
         if (folder != null) {
-          jobManager.addJobInBackground( new CreateProcessedDocumentsJob(uid, folder, settings.getLogin(), settings.getCurrentUserId()) );
+          jobManager.addJobInBackground( new CreateProcessedDocumentsJob(uid, folder, login, currentUserId) );
         }
         break;
     }
@@ -430,10 +447,10 @@ public class Processor {
 
   private void updateJob(String uid, String md5) {
     if (documentType == DocumentType.DOCUMENT) {
-      jobManager.addJobInBackground( new UpdateDocumentJob( uid, index, filter, settings.getLogin(), settings.getCurrentUserId() ) );
+      jobManager.addJobInBackground( new UpdateDocumentJob( uid, index, filter, login, currentUserId ) );
     } else {
       if ( Objects.equals( md5, "" ) ) {
-        jobManager.addJobInBackground( new UpdateDocumentJob( uid, documentType, settings.getLogin(), settings.getCurrentUserId() ) );
+        jobManager.addJobInBackground( new UpdateDocumentJob( uid, documentType, login, currentUserId ) );
       } else {
         EventBus.getDefault().post( new StepperLoadDocumentEvent( uid ) );
       }
@@ -444,7 +461,7 @@ public class Processor {
     settings.addTotalDocCount(1);
     Timber.tag("RecyclerViewRefresh").d("Processor Intersect: Start UpdateDocumentJob for %s", uid);
     Timber.tag("RecyclerViewRefresh").d("Processor Intersect: index %s, filter %s", index, filter);
-    jobManager.addJobInBackground( new UpdateDocumentJob( uid, index, filter, true, settings.getLogin(), settings.getCurrentUserId() ) );
+    jobManager.addJobInBackground( new UpdateDocumentJob( uid, index, filter, true, login, currentUserId ) );
   }
 
   private void updateAndDropFavorite(String uid) {
@@ -467,7 +484,7 @@ public class Processor {
           .removeLabel(LabelType.FAVORITES)
       );
 
-      jobManager.addJobInBackground( new UpdateDocumentJob( uid, documentType, true, settings.getLogin(), settings.getCurrentUserId() ) );
+      jobManager.addJobInBackground( new UpdateDocumentJob( uid, documentType, true, login, currentUserId ) );
     }
   }
 

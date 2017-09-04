@@ -167,26 +167,30 @@ public class MemoryStore implements Processable{
 
 
   @Override
-  public void process(HashMap<String, Document> docs, String filter, String index) {
+  public void process(HashMap<String, Document> docs, String filter, String index, String login, String currentUserId) {
     Timber.tag("RecyclerViewRefresh").d("MemoryStore: Process documents from HashMap");
 
     new Processor(sub)
       .withDocuments(docs)
       .withFilter(filter)
       .withIndex(index)
+      .withLogin(login)
+      .withCurrentUserId(login)
       .execute();
 
 //    counterRecreate();
   }
 
   @Override
-  public void process(HashMap<String, Document> docs, String folderUid, DocumentType documentType ) {
+  public void process(HashMap<String, Document> docs, String folderUid, DocumentType documentType, String login, String currentUserId ) {
     Timber.tag("RecyclerViewRefresh").d("MemoryStore: Process documents from HashMap");
 
     new Processor(sub)
       .withDocuments(docs)
       .withFolder(folderUid)
       .withDocumentType(documentType)
+      .withLogin(login)
+      .withCurrentUserId(login)
       .execute();
   }
 
