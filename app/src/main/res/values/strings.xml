@@ -497,6 +497,9 @@
     <string name="is_online">В сети</string>
     <string name="is_offline">Не в сети</string>
 
+    <string name="start_substitute">Выполняется вход в режим замещения</string>
+    <string name="stop_substitute">Выполняется выход из режима замещения</string>
+
     <string-array name="IntentsCAAddressList">
         <item>http://www.cryptopro.ru/certsrv/</item>
         <item>https://www.cryptopro.ru:5555/ui/</item>

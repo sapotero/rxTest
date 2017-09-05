@@ -7,9 +7,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import javax.inject.Inject;
-
-import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RLinks;
@@ -36,19 +33,27 @@ import sapotero.rxtest.retrofit.models.document.Exemplar;
 import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.retrofit.models.document.Route;
 import sapotero.rxtest.retrofit.models.document.Signer;
-import sapotero.rxtest.utils.ISettings;
 import timber.log.Timber;
 
 // Maps between DocumentInfo and RDocumentEntity
 public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity> {
 
-  @Inject ISettings settings;
-
   private Mappers mappers;
+  private String login = "";
+  private String currentUserId = "";
 
   public DocumentMapper(Mappers mappers) {
     this.mappers = mappers;
-    EsdApplication.getDataComponent().inject(this);
+  }
+
+  public DocumentMapper withLogin(String login) {
+    this.login = login;
+    return this;
+  }
+
+  public DocumentMapper withCurrentUserId(String currentUserId) {
+    this.currentUserId = currentUserId;
+    return this;
   }
 
   @Override
@@ -87,7 +92,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
 
   public void setBaseFields(RDocumentEntity entity, DocumentInfo model) {
     entity.setUid( model.getUid() );
-    entity.setUser( settings.getLogin() );
+    entity.setUser( login );
 
     entity.setMd5( model.getMd5() );
     entity.setSortKey( model.getSortKey() );
@@ -245,7 +250,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
         labelEntity.setDocument( entity );
         entity.getControlLabels().add( labelEntity );
 
-        if ( Objects.equals( labelModel.getOfficialId(), settings.getCurrentUserId() )
+        if ( Objects.equals( labelModel.getOfficialId(), currentUserId )
           && Objects.equals( labelModel.getState(), "Отмечен для постановки на контроль") ) {
           isControl = true;
         }

@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -43,6 +44,9 @@ import sapotero.rxtest.events.auth.AuthDcCheckSuccessEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckSuccessEvent;
 import sapotero.rxtest.events.stepper.load.StepperDocumentCountReadyEvent;
+import sapotero.rxtest.events.utils.ErrorReceiveTokenEvent;
+import sapotero.rxtest.events.utils.ReceivedTokenEvent;
+import sapotero.rxtest.events.view.UpdateDrawerEvent;
 import sapotero.rxtest.jobs.bus.CreateAssistantJob;
 import sapotero.rxtest.jobs.bus.CreateColleagueJob;
 import sapotero.rxtest.jobs.bus.CreateFavoriteUsersJob;
@@ -105,53 +109,67 @@ public class DataLoaderManager {
 
   }
 
-  private void initV2(boolean loadAllDocs) {
+  public void initV2(boolean loadAllDocs) {
     Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
 
     AuthService auth = retrofit.create(AuthService.class);
 
     unsubscribeInitV2();
 
+    String login = settings.getLogin();
+    String currentUserId = settings.getCurrentUserId();
+
     subscriptionInitV2.add(
       // получаем данные о пользователе
-      auth.getUserInfoV2(settings.getLogin(), settings.getToken())
+      auth.getUserInfoV2(login, settings.getToken())
         .subscribeOn(Schedulers.computation())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(
           v2 -> {
-              Timber.tag("LoadSequence").d("Received user info");
-//            try {
+            Timber.tag("LoadSequence").d("Received user info");
+
+            // Обрабатываем ответ только если логин не поменялся (при входе/выходе в режим замещения)
+            if ( Objects.equals( login, settings.getLogin() ) ) {
               v2UserOshs user = v2.get(0);
               setCurrentUser(user.getName());
               setCurrentUserId(user.getId());
               setCurrentUserOrganization(user.getOrganization());
               setCurrentUserPosition(user.getPosition());
+              setCurrentUserImage(user.getImage());
 
-              deleteUsers();
-              deleteTemplates();
+              deleteUsers(login);
+              deleteTemplates(login);
 
-            // получаем папки
+              // получаем папки
               subscriptionInitV2.add(
-                auth.getFolders(settings.getLogin(), settings.getToken())
+                auth.getFolders(login, settings.getToken())
                   .subscribeOn(Schedulers.computation())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( data -> {
                     Timber.tag("LoadSequence").d("Received list of folders");
-                    jobManager.addJobInBackground(new CreateFoldersJob(data));
-                    loadAllDocs( loadAllDocs );
+                    // Обрабатываем ответ только если логин не поменялся (при входе/выходе в режим замещения)
+                    if ( Objects.equals( login, settings.getLogin() ) ) {
+                      jobManager.addJobInBackground(new CreateFoldersJob(data, login));
+                      loadAllDocs( loadAllDocs, login, currentUserId );
+                    }
                   }, error -> {
                     Timber.tag(TAG).e(error);
-                    loadAllDocs( loadAllDocs );
-                  })
+                    if ( Objects.equals( login, settings.getLogin() ) ) {
+                      loadAllDocs( loadAllDocs, login, currentUserId );
+                    }
+                })
               );
 
 
               subscriptionInitV2.add(
-                auth.getPrimaryConsiderationUsers(settings.getLogin(), settings.getToken())
+                auth.getPrimaryConsiderationUsers(login, settings.getToken())
                   .subscribeOn(Schedulers.computation())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( data -> {
-                    jobManager.addJobInBackground(new CreatePrimaryConsiderationJob(data));
+                    // Обрабатываем ответ только если логин не поменялся (при входе/выходе в режим замещения)
+                    if ( Objects.equals( login, settings.getLogin() ) ) {
+                      jobManager.addJobInBackground(new CreatePrimaryConsiderationJob(data, login));
+                    }
                   }, error -> {
                     Timber.tag(TAG).e(error);
                   })
@@ -159,11 +177,14 @@ public class DataLoaderManager {
 
               // загрузка срочности
               subscriptionInitV2.add(
-                auth.getUrgency(settings.getLogin(), settings.getToken(), "urgency")
+                auth.getUrgency(login, settings.getToken(), "urgency")
                   .subscribeOn(Schedulers.computation())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( urgencies -> {
-                    jobManager.addJobInBackground(new CreateUrgencyJob(urgencies));
+                    // Обрабатываем ответ только если логин не поменялся (при входе/выходе в режим замещения)
+                    if ( Objects.equals( login, settings.getLogin() ) ) {
+                      jobManager.addJobInBackground(new CreateUrgencyJob(urgencies, login));
+                    }
                   }, error -> {
                     Timber.tag(TAG).e(error);
                   })
@@ -171,11 +192,14 @@ public class DataLoaderManager {
 
               // загрузка шаблонов резолюции
               subscriptionInitV2.add(
-                auth.getTemplates(settings.getLogin(), settings.getToken(), null)
+                auth.getTemplates(login, settings.getToken(), null)
                   .subscribeOn(Schedulers.computation())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( templates -> {
-                    jobManager.addJobInBackground(new CreateTemplatesJob(templates, null));
+                    // Обрабатываем ответ только если логин не поменялся (при входе/выходе в режим замещения)
+                    if ( Objects.equals( login, settings.getLogin() ) ) {
+                      jobManager.addJobInBackground(new CreateTemplatesJob(templates, null, login));
+                    }
                   }, error -> {
                     Timber.tag(TAG).e(error);
                   })
@@ -183,11 +207,14 @@ public class DataLoaderManager {
 
               // загрузка шаблонов отклонения
               subscriptionInitV2.add(
-                auth.getTemplates(settings.getLogin(), settings.getToken(), "rejection")
+                auth.getTemplates(login, settings.getToken(), "rejection")
                   .subscribeOn(Schedulers.computation())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( templates -> {
-                    jobManager.addJobInBackground(new CreateTemplatesJob(templates, "rejection"));
+                    // Обрабатываем ответ только если логин не поменялся (при входе/выходе в режим замещения)
+                    if ( Objects.equals( login, settings.getLogin() ) ) {
+                      jobManager.addJobInBackground(new CreateTemplatesJob(templates, "rejection", login));
+                    }
                   }, error -> {
                     Timber.tag(TAG).e(error);
                   })
@@ -195,95 +222,111 @@ public class DataLoaderManager {
 
               // получаем группу Избранное(МП)
               subscriptionInitV2.add(
-                auth.getFavoriteUsers(settings.getLogin(), settings.getToken())
+                auth.getFavoriteUsers(login, settings.getToken())
                   .subscribeOn(Schedulers.computation())
                   .observeOn(AndroidSchedulers.mainThread())
                   .subscribe( data -> {
-                    jobManager.addJobInBackground(new CreateFavoriteUsersJob(data));
+                    // Обрабатываем ответ только если логин не поменялся (при входе/выходе в режим замещения)
+                    if ( Objects.equals( login, settings.getLogin() ) ) {
+                      jobManager.addJobInBackground(new CreateFavoriteUsersJob(data, login));
+                    }
                   }, error -> {
                     Timber.tag(TAG).e(error);
                   })
               );
 
-            // Доработка api для возврата ВРИО/по поручению
-            // resolved https://tasks.n-core.ru/browse/MVDESD-11453
-            subscriptionInitV2.add(
-              auth.getAssistantByHeadId(settings.getLogin(), settings.getToken(), settings.getCurrentUserId())
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe( data -> {
-                  jobManager.addJobInBackground(new CreateAssistantJob(data));
-                }, error -> {
-                  Timber.tag(TAG).e(error);
-                })
-            );
+              // Доработка api для возврата ВРИО/по поручению
+              // resolved https://tasks.n-core.ru/browse/MVDESD-11453
+              subscriptionInitV2.add(
+                auth.getAssistantByHeadId(login, settings.getToken(), currentUserId)
+                  .subscribeOn(Schedulers.computation())
+                  .observeOn(AndroidSchedulers.mainThread())
+                  .subscribe( data -> {
+                    // Обрабатываем ответ только если логин не поменялся (при входе/выходе в режим замещения)
+                    if ( Objects.equals( login, settings.getLogin() ) ) {
+                      jobManager.addJobInBackground(new CreateAssistantJob(data, login));
+                    }
+                  }, error -> {
+                    Timber.tag(TAG).e(error);
+                  })
+              );
 
-            // resolved https://tasks.n-core.ru/browse/MVDESD-13711
-            subscriptionInitV2.add(
-              auth.getAssistantByAssistantId(settings.getLogin(), settings.getToken(), settings.getCurrentUserId())
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe( data -> {
-                  jobManager.addJobInBackground(new CreateAssistantJob(data));
-                }, error -> {
-                  Timber.tag(TAG).e(error);
-                })
-            );
+              // resolved https://tasks.n-core.ru/browse/MVDESD-13711
+              subscriptionInitV2.add(
+                auth.getAssistantByAssistantId(login, settings.getToken(), currentUserId)
+                  .subscribeOn(Schedulers.computation())
+                  .observeOn(AndroidSchedulers.mainThread())
+                  .subscribe( data -> {
+                    // Обрабатываем ответ только если логин не поменялся (при входе/выходе в режим замещения)
+                    if ( Objects.equals( login, settings.getLogin() ) ) {
+                      jobManager.addJobInBackground(new CreateAssistantJob(data, login));
+                    }
+                  }, error -> {
+                    Timber.tag(TAG).e(error);
+                  })
+              );
 
-            // resolved https://tasks.n-core.ru/browse/MVDESD-13752
-            // Добавить в боковую панель список коллег
-            subscriptionInitV2.add(
-              auth.getColleagues(settings.getLogin(), settings.getToken())
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe( data -> {
-                  jobManager.addJobInBackground(new CreateColleagueJob(data));
-                }, error -> {
-                  Timber.tag(TAG).e(error);
-                })
-            );
+              // resolved https://tasks.n-core.ru/browse/MVDESD-13752
+              // Добавить в боковую панель список коллег
+              subscriptionInitV2.add(
+                auth.getColleagues(login, settings.getToken())
+                  .subscribeOn(Schedulers.computation())
+                  .observeOn(AndroidSchedulers.mainThread())
+                  .subscribe( data -> {
+                    // Обрабатываем ответ только если логин не поменялся (при входе/выходе в режим замещения)
+                    if ( Objects.equals( login, settings.getLogin() ) ) {
+                      jobManager.addJobInBackground(new CreateColleagueJob(data, login));
+                    }
+                  }, error -> {
+                    Timber.tag(TAG).e(error);
+                    EventBus.getDefault().post( new UpdateDrawerEvent() );
+                  })
+              );
+            }
 
           },
           error -> {
             Timber.tag("USER_INFO").e( "ERROR: %s", error);
-            loadAllDocs( loadAllDocs );
+            if ( Objects.equals( login, settings.getLogin() ) ) {
+              loadAllDocs( loadAllDocs, login, currentUserId );
+            }
           })
     );
 
   }
 
-  private void deleteUsers() {
+  private void deleteUsers(String login) {
     dataStore
       .delete(RAssistantEntity.class)
-      .where(RAssistantEntity.USER.eq(settings.getLogin()))
+      .where(RAssistantEntity.USER.eq(login))
       .get().value();
 
     dataStore
       .delete(RFavoriteUserEntity.class)
-      .where(RFavoriteUserEntity.USER.eq(settings.getLogin()))
+      .where(RFavoriteUserEntity.USER.eq(login))
       .get().value();
 
     dataStore
       .delete(RPrimaryConsiderationEntity.class)
-      .where(RPrimaryConsiderationEntity.USER.eq(settings.getLogin()))
+      .where(RPrimaryConsiderationEntity.USER.eq(login))
       .get().value();
 
     dataStore
       .delete(RColleagueEntity.class)
-      .where(RColleagueEntity.USER.eq(settings.getLogin()))
+      .where(RColleagueEntity.USER.eq(login))
       .get().value();
   }
 
-  private void deleteTemplates() {
+  private void deleteTemplates(String login) {
     dataStore
       .delete(RTemplateEntity.class)
-      .where(RTemplateEntity.USER.eq(settings.getLogin()))
+      .where(RTemplateEntity.USER.eq(login))
       .get().value();
   }
 
-  private void loadAllDocs(boolean load) {
+  private void loadAllDocs(boolean load, String login, String currentUserId) {
     if ( load ) {
-      updateByCurrentStatus(MainMenuItem.ALL, null);
+      updateByCurrentStatus(MainMenuItem.ALL, null, login, currentUserId);
     }
   }
 
@@ -323,6 +366,10 @@ public class DataLoaderManager {
 
   private void setCurrentUserPosition(String position) {
     settings.setCurrentUserPosition(position);
+  }
+
+  private void setCurrentUserImage(String image) {
+    settings.setCurrentUserImage(image);
   }
 
   public void setPassword(String password) {
@@ -372,7 +419,19 @@ public class DataLoaderManager {
   }
 
 
-  public void updateAuth( String sign ){
+  public void updateAuth( String sign, boolean sendEvent ){
+    if ( settings.isUpdateAuthStarted() ) {
+      return;
+    }
+
+    settings.setUpdateAuthStarted( true );
+
+    if ( settings.isSubstituteMode() && !settings.isSignedWithDc() ) {
+      // В режиме замещения, если вошли по логину, то меняем логин на логин основного пользователя,
+      // чтобы правильно сформировался запрос на получение токена
+      swapLogin();
+    }
+
     Timber.tag(TAG).i("updateAuth: %s", sign );
 
     Retrofit retrofit = new RetrofitManager( context, settings.getHost(), okHttpClient).process();
@@ -388,8 +447,12 @@ public class DataLoaderManager {
 
     Timber.tag(TAG).i("json: %s", json .toString());
 
-
     Observable<AuthSignToken> authSubscription = getAuthSubscription();
+
+    if ( settings.isSubstituteMode() && !settings.isSignedWithDc() ) {
+      // Запрос на получение токена уже сформирован, меняем логин обратно на логин коллеги
+      swapLogin();
+    }
 
     unsubscribeUpdateAuth();
 
@@ -402,13 +465,60 @@ public class DataLoaderManager {
             Timber.tag(TAG).i("updateAuth: token" + data.getAuthToken());
             setToken( data.getAuthToken() );
 
-            initV2(false);
+            if ( !settings.isSubstituteMode() ) {
+              if ( sendEvent ) {
+                EventBus.getDefault().post( new ReceivedTokenEvent() );
+              }
+
+              initV2(false);
+              settings.setUpdateAuthStarted( false );
+
+            } else {
+              getColleagueToken();
+            }
           },
           error -> {
             Timber.tag(TAG).i("updateAuth error: %s" , error );
+
+            if ( sendEvent ) {
+              EventBus.getDefault().post( new ErrorReceiveTokenEvent() );
+            }
+
+            settings.setUpdateAuthStarted( false );
           }
         )
     );
+  }
+
+  private void swapLogin() {
+    String tempLogin = settings.getLogin();
+    settings.setLogin( settings.getOldLogin() );
+    settings.setOldLogin( tempLogin );
+  }
+
+  private void getColleagueToken() {
+    Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
+    AuthService auth = retrofit.create(AuthService.class);
+
+    // Запрос на получение токена коллеги выполняется от имени основного пользователя
+    auth.switchToColleague(settings.getColleagueId(), settings.getOldLogin(), settings.getToken())
+      .subscribeOn(Schedulers.computation())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(
+        colleagueResponse -> {
+          // Логин основного пользователя уже сохранен в oldLogin, поэтому только обновляем логин и токен коллеги
+          settings.setLogin( colleagueResponse.getLogin() );
+          settings.setToken( colleagueResponse.getAuthToken() );
+          initV2(false);
+          EventBus.getDefault().post( new ReceivedTokenEvent() );
+          settings.setUpdateAuthStarted( false );
+        },
+        error -> {
+          Timber.tag(TAG).e(error);
+          EventBus.getDefault().post( new ErrorReceiveTokenEvent() );
+          settings.setUpdateAuthStarted( false );
+        }
+      );
   }
 
   public void tryToSignWithDc(String sign){
@@ -498,7 +608,7 @@ public class DataLoaderManager {
     );
   }
 
-  public void updateByCurrentStatus(MainMenuItem items, MainMenuButton button) {
+  public void updateByCurrentStatus(MainMenuItem items, MainMenuButton button, String login, String currentUserId) {
     Timber.tag(TAG).e("updateByCurrentStatus: %s %s", items, button );
 
     if ( !isSubscriptionExist() ) {
@@ -630,10 +740,9 @@ public class DataLoaderManager {
 
       for (String index: indexes ) {
         for (String status: statuses ) {
-
           subscription.add(
             docService
-              .getDocumentsByIndexes(settings.getLogin(), settings.getToken(), index, status, null , 500, getYears())
+              .getDocumentsByIndexes(login, settings.getToken(), index, status, null , 500, getYears())
               .subscribeOn(Schedulers.io())
               .observeOn(AndroidSchedulers.mainThread())
               .subscribe(
@@ -642,8 +751,11 @@ public class DataLoaderManager {
                   requestCount--;
                   updateDocCount( data, true );
                   checkAndSendCountReady();
-                  Timber.tag("LoadSequence").d("Processing list of documents");
-                  processDocuments( data, status, index, null, DocumentType.DOCUMENT );
+                  if ( Objects.equals( login, settings.getLogin() ) ) {
+                    // Обрабатываем полученный список только если логин не поменялся (при входе/выходе в режим замещения)
+                    Timber.tag("LoadSequence").d("Processing list of documents");
+                    processDocuments( data, status, index, null, DocumentType.DOCUMENT, login, currentUserId );
+                  }
                 },
                 error -> {
                   requestCount--;
@@ -658,7 +770,7 @@ public class DataLoaderManager {
       for (String code : sp) {
         subscription.add(
           docService
-            .getDocuments(settings.getLogin(), settings.getToken(), code, null , 500, 0, getYears())
+            .getDocuments(login, settings.getToken(), code, null , 500, 0, getYears())
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
@@ -667,8 +779,11 @@ public class DataLoaderManager {
                 requestCount--;
                 updateDocCount( data, true );
                 checkAndSendCountReady();
-                Timber.tag("LoadSequence").d("Processing list of projects");
-                processDocuments( data, code, null, null, DocumentType.DOCUMENT );
+                if ( Objects.equals( login, settings.getLogin() ) ) {
+                  // Обрабатываем полученный список только если логин не поменялся (при входе/выходе в режим замещения)
+                  Timber.tag("LoadSequence").d("Processing list of projects");
+                  processDocuments( data, code, null, null, DocumentType.DOCUMENT, login, currentUserId );
+                }
               },
               error -> {
                 requestCount--;
@@ -708,7 +823,7 @@ public class DataLoaderManager {
     return settings.getYears().size() == 4 ? null : new ArrayList<>(settings.getYears());
   }
 
-  private void processDocuments(Documents data, String status, String index, String folder, DocumentType documentType) {
+  private void processDocuments(Documents data, String status, String index, String folder, DocumentType documentType, String login, String currentUserId) {
     if (data.getDocuments().size() > 0){
       HashMap<String, Document> doc_hash = new HashMap<>();
 
@@ -717,9 +832,9 @@ public class DataLoaderManager {
       }
 
       if (documentType == DocumentType.DOCUMENT) {
-        store.process( doc_hash, status, index );
+        store.process( doc_hash, status, index, login, currentUserId );
       } else {
-        store.process( doc_hash, folder, documentType );
+        store.process( doc_hash, folder, documentType, login, currentUserId );
       }
     }
   }
@@ -833,11 +948,14 @@ public class DataLoaderManager {
     if ( favorites_folder != null ) {
       Timber.tag(TAG).e("FAVORITES EXIST!");
 
+      String login = settings.getLogin();
+      String currentUserId = settings.getCurrentUserId();
+
       if ( favoritesDataLoaded ) {
         Timber.tag("LoadSequence").d("List of favorites already loaded, quit loading");
         if ( processFavoritesData ) {
           Timber.tag("LoadSequence").d("Processing previously loaded list of favorites");
-          processFavorites(favorites_folder);
+          processFavorites(favorites_folder, login, currentUserId);
         }
         return;
       }
@@ -850,13 +968,10 @@ public class DataLoaderManager {
       Timber.tag("LoadSequence").d("Loading list of favorites");
       favoritesDataLoading = true;
 
-      if (subscriptionFavorites != null) {
-        subscriptionFavorites.unsubscribe();
-      }
-      subscriptionFavorites = new CompositeSubscription();
+      unsubscribeFavorites();
 
       subscriptionFavorites.add(
-        docService.getByFolders(settings.getLogin(), settings.getToken(), null, 500, 0, favorites_folder.getUid(), null)
+        docService.getByFolders(login, settings.getToken(), null, 500, 0, favorites_folder.getUid(), null)
           .subscribeOn( Schedulers.io() )
           .observeOn( AndroidSchedulers.mainThread() )
           .subscribe(
@@ -867,8 +982,11 @@ public class DataLoaderManager {
               favoritesDataLoaded = true;
               updateDocCount( favoritesData, false );
               if ( processFavoritesData ) {
-                Timber.tag("LoadSequence").d("Processing list of favorites");
-                processFavorites(favorites_folder);
+                if ( Objects.equals( login, settings.getLogin() ) ) {
+                  // Обрабатываем полученный список только если логин не поменялся (при входе/выходе в режим замещения)
+                  Timber.tag("LoadSequence").d("Processing list of favorites");
+                  processFavorites(favorites_folder, login, currentUserId);
+                }
               } else {
                 Timber.tag("LoadSequence").d("processLoadedData = false, quit processing list of favorites");
               }
@@ -881,8 +999,15 @@ public class DataLoaderManager {
     }
   }
 
-  private void processFavorites(RFolderEntity favorites_folder) {
-    processDocuments( favoritesData, null, null, favorites_folder.getUid(), DocumentType.FAVORITE );
+  private void unsubscribeFavorites() {
+    if (subscriptionFavorites != null) {
+      subscriptionFavorites.unsubscribe();
+    }
+    subscriptionFavorites = new CompositeSubscription();
+  }
+
+  private void processFavorites(RFolderEntity favorites_folder, String login, String currentUserId) {
+    processDocuments( favoritesData, null, null, favorites_folder.getUid(), DocumentType.FAVORITE, login, currentUserId );
   }
 
   public void updateProcessed(boolean processLoadedData) {
@@ -900,11 +1025,14 @@ public class DataLoaderManager {
 
     if ( processed_folder != null ) {
 
+      String login = settings.getLogin();
+      String currentUserId = settings.getCurrentUserId();
+
       if ( processedDataLoaded ) {
         Timber.tag("LoadSequence").d("List of processed already loaded, quit loading");
         if ( processProcessedData ) {
           Timber.tag("LoadSequence").d("Processing previously loaded list of processed");
-          processProcessed( processed_folder );
+          processProcessed( processed_folder, login, currentUserId );
         }
         return;
       }
@@ -932,14 +1060,10 @@ public class DataLoaderManager {
       Timber.tag("LoadSequence").d("Loading list of processed");
       processedDataLoading = true;
 
-      if (subscriptionProcessed != null) {
-        subscriptionProcessed.unsubscribe();
-      }
-
-      subscriptionProcessed = new CompositeSubscription();
+      unsubscribeProcessed();
 
       subscriptionProcessed.add(
-        docService.getByFolders(settings.getLogin(), settings.getToken(), null, 500, 0, processed_folder.getUid(), date)
+        docService.getByFolders(login, settings.getToken(), null, 500, 0, processed_folder.getUid(), date)
           .subscribeOn( Schedulers.io() )
           .observeOn( AndroidSchedulers.mainThread() )
           .subscribe(
@@ -950,8 +1074,11 @@ public class DataLoaderManager {
               processedDataLoaded = true;
               updateDocCount( processedData, false );
               if ( processProcessedData ) {
-                Timber.tag("LoadSequence").d("Processing list of processed");
-                processProcessed( processed_folder );
+                if ( Objects.equals( login, settings.getLogin() ) ) {
+                  // Обрабатываем полученный список только если логин не поменялся (при входе/выходе в режим замещения)
+                  Timber.tag("LoadSequence").d("Processing list of processed");
+                  processProcessed( processed_folder, login, currentUserId );
+                }
               } else {
                 Timber.tag("LoadSequence").d("processLoadedData = false, quit processing list of processed");
               }
@@ -964,8 +1091,25 @@ public class DataLoaderManager {
     }
   }
 
-  private void processProcessed(RFolderEntity processed_folder) {
-    processDocuments( processedData, null, null, processed_folder.getUid(), DocumentType.PROCESSED );
+  private void unsubscribeProcessed() {
+    if (subscriptionProcessed != null) {
+      subscriptionProcessed.unsubscribe();
+    }
+    subscriptionProcessed = new CompositeSubscription();
+  }
+
+  private void processProcessed(RFolderEntity processed_folder, String login, String currentUserId) {
+    processDocuments( processedData, null, null, processed_folder.getUid(), DocumentType.PROCESSED, login, currentUserId );
+  }
+
+  public void unsubcribeAll() {
+    Timber.tag(TAG).d("Unsubscribe all");
+
+    unsubscribe();
+    unsubscribeFavorites();
+    unsubscribeProcessed();
+    unsubscribeInitV2();
+    unsubscribeUpdateAuth();
   }
 
 //  @Subscribe(threadMode = ThreadMode.BACKGROUND)

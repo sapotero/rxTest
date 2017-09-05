@@ -23,9 +23,10 @@ public class CreateAssistantJob extends BaseJob {
 
   private String TAG = this.getClass().getSimpleName();
 
-  public CreateAssistantJob(ArrayList<Assistant> users) {
+  public CreateAssistantJob(ArrayList<Assistant> users, String login) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.users = users;
+    this.login = login;
   }
 
   @Override
@@ -45,7 +46,7 @@ public class CreateAssistantJob extends BaseJob {
   }
 
   private void add(Assistant user, int index) {
-    RAssistantEntity data = mappers.getAssistantMapper().toEntity(user);
+    RAssistantEntity data = mappers.getAssistantMapper().withLogin(login).toEntity(user);
     data.setSortIndex(index);
 
     dataStore
@@ -67,7 +68,7 @@ public class CreateAssistantJob extends BaseJob {
     Integer count = dataStore
       .count(RAssistantEntity.TITLE)
       .where(RAssistantEntity.TITLE.eq(user))
-      .and(RAssistantEntity.USER.eq(settings.getLogin()))
+      .and(RAssistantEntity.USER.eq(login))
       .get().value();
 
     if( count != 0 ){

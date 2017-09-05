@@ -101,6 +101,7 @@ public class MainService extends Service {
   final String TAG = MainService.class.getSimpleName();
   private ScheduledThreadPoolExecutor scheduller;
   private ScheduledFuture futureNetwork;
+  private ScheduledFuture futureRefresh;
 
   @Inject OkHttpClient okHttpClient;
   @Inject ISettings settings;
@@ -195,6 +196,16 @@ public class MainService extends Service {
     scheduller.setRemoveOnCancelPolicy(true);
 
     scheduller.scheduleWithFixedDelay( new UpdateQueueTask(queue), 0 ,10, TimeUnit.SECONDS );
+
+    CheckNetworkEvent checkNetworkEvent = EventBus.getDefault().removeStickyEvent(CheckNetworkEvent.class);
+    if ( checkNetworkEvent != null ) {
+      startStopNetworkCheck( checkNetworkEvent );
+    }
+
+    // resolved https://tasks.n-core.ru/browse/MVDESD-12618
+    // Починить регулярное обновление документов после закрытия приложения
+    // Start regular refresh if true in settings
+    startStopRegularRefresh( true );
   }
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13625
@@ -207,7 +218,7 @@ public class MainService extends Service {
         boolean isUnauthorized = value != null ? value : false;
         if ( isUnauthorized ) {
           Timber.tag(TAG).d("Unauthorized, logging in");
-          dataLoaderInterface.updateAuth(SIGN);
+          dataLoaderInterface.updateAuth(SIGN, false);
         }
       },
         Timber::e
@@ -711,7 +722,7 @@ public class MainService extends Service {
       .subscribeOn(Schedulers.io())
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(interval -> {
-        dataLoaderInterface.updateAuth(SIGN);
+        dataLoaderInterface.updateAuth(SIGN, false);
       }, Timber::e);
 
     settings.getLoginPreference()
@@ -800,7 +811,7 @@ public class MainService extends Service {
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(UpdateDocumentsByStatusEvent event) throws Exception {
     Timber.tag(TAG).e("UpdateDocumentsByStatusEvent");
-    dataLoaderInterface.updateByCurrentStatus( event.item, event.button);
+    dataLoaderInterface.updateByCurrentStatus( event.item, event.button, settings.getLogin(), settings.getCurrentUserId() );
   }
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13017
@@ -846,10 +857,17 @@ public class MainService extends Service {
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13314
   // Старт / стоп проверки наличия сети
-  @Subscribe(threadMode = ThreadMode.MAIN)
+  @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
   public void onMessageEvent(CheckNetworkEvent event){
+    Timber.tag(TAG).d("CheckNetworkEvent");
 
-    Timber.i("CheckNetworkEvent");
+    if ( scheduller != null ) {
+      startStopNetworkCheck( event );
+      EventBus.getDefault().removeStickyEvent(event);
+    }
+  }
+
+  private void startStopNetworkCheck(CheckNetworkEvent event) {
     // Stop previously started checking network connection task, if exists
     if ( futureNetwork != null && !futureNetwork.isCancelled() ) {
       futureNetwork.cancel(true);
@@ -867,8 +885,26 @@ public class MainService extends Service {
     return intent;
   }
 
-  @Subscribe(threadMode = ThreadMode.MAIN)
+  // resolved https://tasks.n-core.ru/browse/MVDESD-12618
+  // Починить регулярное обновление документов после закрытия приложения
+  // If scheduler is already created, start regular refresh.
+  @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
   public void onMessageEvent(StartRegularRefreshEvent event){
-    scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 5*60, 5*60, TimeUnit.SECONDS );
+    Timber.tag(TAG).d("StartRegularRefreshEvent");
+
+    if ( scheduller != null ) {
+      startStopRegularRefresh( event.isStart() );
+      EventBus.getDefault().removeStickyEvent(event);
+    }
+  }
+
+  private void startStopRegularRefresh(boolean isStart) {
+    if ( futureRefresh != null && !futureRefresh.isCancelled() ) {
+      futureRefresh.cancel(true);
+    }
+
+    if ( settings.isStartRegularRefresh() && isStart ) {
+      futureRefresh = scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 5*60, 5*60, TimeUnit.SECONDS );
+    }
   }
 }

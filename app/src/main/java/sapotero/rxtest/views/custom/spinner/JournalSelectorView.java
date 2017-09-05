@@ -102,4 +102,12 @@ public class JournalSelectorView extends AppCompatTextView implements View.OnCli
       selectJournal(position);
     }
   }
+
+  public int getPosition() {
+    return position;
+  }
+
+  public void setPosition(int position) {
+    this.position = position;
+  }
 }

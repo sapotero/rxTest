@@ -29,6 +29,7 @@ public class Settings implements ISettings {
   private static final String CURRENT_USER_KEY = "current_user";
   private static final String CURRENT_USER_ORGANIZATION_KEY = "current_user_organization";
   private static final String CURRENT_USER_POSITION_KEY = "current_user_position";
+  private static final String CURRENT_USER_IMAGE_KEY = "current_user_image";
   private static final String MAIN_MENU_POSITION_KEY = "activity_main_menu.position";
   private static final String REGNUMBER_KEY = "activity_main_menu.regnumber";
   private static final String REGDATE_KEY = "activity_main_menu.date";
@@ -46,7 +47,15 @@ public class Settings implements ISettings {
   private static final String SHOW_PRIMARY_CONSIDERATION = "show_primary_consideration";
   private static final String ORGANIZATION_FILTER_ACTIVE_KEY = "organization.filter.active";
   private static final String ORGANIZATION_FILTER_SELECTION_KEY = "organization.filter.savedselection";
+  private static final String IS_SUBSTITUTE_MODE_KEY = "substitute.mode";
+  private static final String OLD_LOGIN_KEY = "old_login";
+  private static final String OLD_CURRENT_USER_KEY = "old_current_user";
+  private static final String OLD_CURRENT_USER_ORGANIZATION_KEY = "old_current_user_organization";
+  private static final String OLD_CURRENT_USER_IMAGE_KEY = "old_current_user_image";
+  private static final String COLLEAGUE_ID_KEY = "colleague.id";
+  private static final String UPDATE_AUTH_STARTED_KEY = "update.auth.started";
   private static final String TAB_CHANGED_KEY = "tab.changed";
+  private static final String START_REGULAR_REFRESH_KEY = "start.regular.refresh";
 
   public static String FIRST_RUN_KEY;
   public static String IS_PROJECT;
@@ -98,6 +107,7 @@ public class Settings implements ISettings {
   private Preference<String> currentUser;
   private Preference<String> currentUserOrganization;
   private Preference<String> currentUserPosition;
+  private Preference<String> currentUserImage;
   private Preference<Integer> mainMenuPosition;
   private Preference<String> regNumber;
   private Preference<String> regDate;
@@ -138,8 +148,16 @@ public class Settings implements ISettings {
   private Preference<Boolean> showPrimaryConsideration;
   private Preference<Boolean> organizationFilterActive;
   private Preference<Set<String>> organizationFilterSelection;
+  private Preference<Boolean> isSubstituteMode;
+  private Preference<String> oldLogin;
+  private Preference<String> oldCurrentUser;
+  private Preference<String> oldCurrentUserOrganization;
+  private Preference<String> oldCurrentUserImage;
+  private Preference<String> colleagueId;
+  private Preference<Boolean> isUpdateAuthStarted;
   private Preference<Boolean> isTabChanged;
   private Preference<String> updateTime;
+  private Preference<Boolean> isStartRegularRefresh;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -183,7 +201,6 @@ public class Settings implements ISettings {
     docProjCount                   = settings.getInteger(DOCPROJ_COUNT_KEY);
     updateTime                     = settings.getString(UPDATE_TIME_KEY);
     login                          = settings.getString(LOGIN_KEY);
-    login                          = settings.getString(LOGIN_KEY);
     token                          = settings.getString(TOKEN_KEY);
     host                           = settings.getString(HOST_KEY);
     password                       = settings.getString(PASSWORD_KEY);
@@ -195,6 +212,7 @@ public class Settings implements ISettings {
     currentUser                    = settings.getString(CURRENT_USER_KEY);
     currentUserOrganization        = settings.getString(CURRENT_USER_ORGANIZATION_KEY);
     currentUserPosition            = settings.getString(CURRENT_USER_POSITION_KEY);
+    currentUserImage               = settings.getString(CURRENT_USER_IMAGE_KEY);
     mainMenuPosition               = settings.getInteger(MAIN_MENU_POSITION_KEY);
     regNumber                      = settings.getString(REGNUMBER_KEY);
     regDate                        = settings.getString(REGDATE_KEY);
@@ -237,7 +255,15 @@ public class Settings implements ISettings {
     showPrimaryConsideration       = settings.getBoolean(SHOW_PRIMARY_CONSIDERATION);
     organizationFilterActive       = settings.getBoolean(ORGANIZATION_FILTER_ACTIVE_KEY);
     organizationFilterSelection    = settings.getStringSet(ORGANIZATION_FILTER_SELECTION_KEY);
+    isSubstituteMode               = settings.getBoolean(IS_SUBSTITUTE_MODE_KEY);
+    oldLogin                       = settings.getString(OLD_LOGIN_KEY);
+    oldCurrentUser                 = settings.getString(OLD_CURRENT_USER_KEY);
+    oldCurrentUserOrganization     = settings.getString(OLD_CURRENT_USER_ORGANIZATION_KEY);
+    oldCurrentUserImage            = settings.getString(OLD_CURRENT_USER_IMAGE_KEY);
+    colleagueId                    = settings.getString(COLLEAGUE_ID_KEY);
+    isUpdateAuthStarted            = settings.getBoolean(UPDATE_AUTH_STARTED_KEY);
     isTabChanged                   = settings.getBoolean(TAB_CHANGED_KEY);
+    isStartRegularRefresh          = settings.getBoolean(START_REGULAR_REFRESH_KEY);
   }
 
   @Override
@@ -356,7 +382,6 @@ public class Settings implements ISettings {
   public String getLogin() {
     return getString(login);
   }
-
 
   @Override
   public void setLogin(String value) {
@@ -516,6 +541,16 @@ public class Settings implements ISettings {
   @Override
   public void setCurrentUserPosition(String value) {
     setString(currentUserPosition, value);
+  }
+
+  @Override
+  public String getCurrentUserImage() {
+    return getString(currentUserImage);
+  }
+
+  @Override
+  public void setCurrentUserImage(String value) {
+    setString(currentUserImage, value);
   }
 
   @Override
@@ -875,6 +910,81 @@ public class Settings implements ISettings {
   }
 
   @Override
+  public boolean isSubstituteMode() {
+    return getBoolean(isSubstituteMode);
+  }
+
+  @Override
+  public void setSubstituteMode(boolean value) {
+    setBoolean(isSubstituteMode, value);
+  }
+
+  @Override
+  public Preference<Boolean> getSubstituteModePreference() {
+    return isSubstituteMode;
+  }
+
+  @Override
+  public String getOldLogin() {
+    return getString(oldLogin);
+  }
+
+  @Override
+  public void setOldLogin(String value) {
+    setString(oldLogin, value);
+  }
+
+  @Override
+  public String getOldCurrentUser() {
+    return getString(oldCurrentUser);
+  }
+
+  @Override
+  public void setOldCurrentUser(String value) {
+    setString(oldCurrentUser, value);
+  }
+
+  @Override
+  public String getOldCurrentUserOrganization() {
+    return getString(oldCurrentUserOrganization);
+  }
+
+  @Override
+  public void setOldCurrentUserOrganization(String value) {
+    setString(oldCurrentUserOrganization, value);
+  }
+
+  @Override
+  public String getOldCurrentUserImage() {
+    return getString(oldCurrentUserImage);
+  }
+
+  @Override
+  public void setOldCurrentUserImage(String value) {
+    setString(oldCurrentUserImage, value);
+  }
+
+  @Override
+  public String getColleagueId() {
+    return getString(colleagueId);
+  }
+
+  @Override
+  public void setColleagueId(String value) {
+    setString(colleagueId, value);
+  }
+
+  @Override
+  public boolean isUpdateAuthStarted() {
+    return getBoolean(isUpdateAuthStarted);
+  }
+
+  @Override
+  public void setUpdateAuthStarted(boolean value) {
+    setBoolean(isUpdateAuthStarted, value);
+  }
+
+  @Override
   public boolean isTabChanged() {
     return getBoolean(isTabChanged);
   }
@@ -882,5 +992,15 @@ public class Settings implements ISettings {
   @Override
   public void setTabChanged(boolean value) {
     setBoolean(isTabChanged, value);
+  }
+
+  @Override
+  public boolean isStartRegularRefresh() {
+    return getBoolean(isStartRegularRefresh);
+  }
+
+  @Override
+  public void setStartRegularRefresh(boolean value) {
+    setBoolean(isStartRegularRefresh, value);
   }
 }

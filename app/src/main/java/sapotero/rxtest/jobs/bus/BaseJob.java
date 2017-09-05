@@ -22,6 +22,8 @@ public abstract class BaseJob extends Job {
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject MemoryStore store;
 
+  public String login;
+
   protected BaseJob(Params params) {
     super(params);
   }

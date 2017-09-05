@@ -5,6 +5,13 @@
     tools:context="net.taptools.android.sportshistory.PlayerProfileActivity">
 
     <item
+        android:id="@+id/substituteModeLabel"
+        app:showAsAction="always|withText"
+        android:icon="@drawable/users_white"
+        android:visible="false"
+        android:title=" Режим замещения"/>
+
+    <item
         android:id="@+id/removeQueue"
         app:showAsAction="always|withText"
         android:icon="@drawable/dismiss"

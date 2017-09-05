@@ -3,12 +3,9 @@ package sapotero.rxtest.mapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-
-import javax.inject.Inject;
 
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.dagger.components.DaggerTestDataComponent;
@@ -16,14 +13,11 @@ import sapotero.rxtest.dagger.components.TestDataComponent;
 import sapotero.rxtest.db.mapper.ColleagueMapper;
 import sapotero.rxtest.db.requery.models.RColleagueEntity;
 import sapotero.rxtest.retrofit.models.Colleague;
-import sapotero.rxtest.utils.ISettings;
-import sapotero.rxtest.utils.TestSettings;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.times;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ EsdApplication.class })
@@ -35,8 +29,7 @@ public class ColleagueMapperTest {
   private Integer dummySortIndex;
   private RColleagueEntity entity;
   private Colleague model;
-
-  @Inject ISettings settings;
+  private String dummyLogin;
 
   @Before
   public void init() {
@@ -56,17 +49,13 @@ public class ColleagueMapperTest {
     dummyColleague.setOfficialId( "56eaaddb1372000002000001" );
     dummyColleague.setOfficialName( "Руководитель О. (ОДиР ГУ МВД России по Самарской области, Начальник)" );
     dummyColleague.setActived( true );
+    dummyLogin = "dummyLogin";
   }
 
   @Test
   public void toEntity() {
     mapper = new ColleagueMapper();
-    entity = mapper.toEntity(dummyColleague);
-
-    PowerMockito.verifyStatic(times(1));
-    EsdApplication.getDataComponent();
-
-    Mockito.verify(settings, times(1)).getLogin();
+    entity = mapper.withLogin(dummyLogin).toEntity(dummyColleague);
 
     assertNotNull( entity );
     assertEquals( 0, entity.getId() );
@@ -74,7 +63,7 @@ public class ColleagueMapperTest {
     assertEquals( dummyColleague.getOfficialId(), entity.getOfficialId() );
     assertEquals( dummyColleague.getOfficialName(), entity.getOfficialName() );
     assertEquals( dummyColleague.getActived(), entity.isActived() );
-    assertEquals( ((TestSettings) settings).login, entity.getUser() );
+    assertEquals( dummyLogin, entity.getUser() );
   }
 
   @Test
@@ -82,11 +71,6 @@ public class ColleagueMapperTest {
     mapper = new ColleagueMapper();
     entity = mapper.toEntity(dummyColleague);
     model = mapper.toModel(entity);
-
-    PowerMockito.verifyStatic(times(1));
-    EsdApplication.getDataComponent();
-
-    Mockito.verify(settings, times(1)).getLogin();
 
     assertNotNull( model );
     assertEquals( dummyColleague.getColleagueId(), model.getColleagueId() );

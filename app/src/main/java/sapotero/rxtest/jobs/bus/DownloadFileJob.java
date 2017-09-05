@@ -15,6 +15,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Objects;
 
 import okhttp3.ResponseBody;
 import retrofit2.Response;
@@ -39,12 +40,13 @@ public class DownloadFileJob  extends BaseJob {
   private String fileName;
   private RImageEntity image;
 
-  DownloadFileJob(String host, String strUrl, String fileName, int id) {
+  DownloadFileJob(String host, String strUrl, String fileName, int id, String login) {
     super( new Params(PRIORITY).requireNetwork().persist().addTags("DocJob") );
     this.host = host;
     this.strUrl = strUrl;
     this.fileName = fileName;
     this.rImageId = id;
+    this.login = login;
   }
 
 
@@ -55,6 +57,12 @@ public class DownloadFileJob  extends BaseJob {
 
   @Override
   public void onRun() throws Throwable {
+    if ( !Objects.equals( login, settings.getLogin() ) ) {
+      // Запускаем job только если логин не сменился (режим замещения)
+      Timber.tag(TAG).d("Login changed, quit onRun for image %s", rImageId);
+      return;
+    }
+
     getImage();
 
     boolean sendEvent = true;
@@ -134,7 +142,7 @@ public class DownloadFileJob  extends BaseJob {
   }
 
   private void loadFile(){
-    String admin = settings.getLogin();
+    String admin = login;
     String token = settings.getToken();
 
     Retrofit retrofit = new RetrofitManager(getApplicationContext(), settings.getHost(), okHttpClient).process();
@@ -165,7 +173,7 @@ public class DownloadFileJob  extends BaseJob {
 
     Timber.tag(TAG).v( "downloadFile ..." );
 
-    String admin = settings.getLogin();
+    String admin = login;
     String token = settings.getToken();
 
     Timber.tag(TAG).d("host: '%s' | link: '%s'", host.substring(0, host.length()-1), link.getExpiredLink() );

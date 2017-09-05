@@ -1,6 +1,8 @@
 package sapotero.rxtest.views.activities;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -8,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Base64;
 import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -17,7 +20,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.birbit.android.jobqueue.JobManager;
+import com.birbit.android.jobqueue.TagConstraint;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.DrawerBuilder;
@@ -35,6 +40,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -45,6 +51,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
+import okhttp3.OkHttpClient;
+import retrofit2.Retrofit;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -56,13 +64,20 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RColleagueEntity;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.query.DBQueryBuilder;
+import sapotero.rxtest.db.requery.utils.DocumentStateSaver;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.adapter.JournalSelectorIndexEvent;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.events.service.CheckNetworkEvent;
+import sapotero.rxtest.events.utils.ErrorReceiveTokenEvent;
+import sapotero.rxtest.events.utils.LoadedFromDbEvent;
 import sapotero.rxtest.events.utils.RecalculateMenuEvent;
+import sapotero.rxtest.events.utils.ReceivedTokenEvent;
+import sapotero.rxtest.events.view.UpdateDrawerEvent;
 import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
 import sapotero.rxtest.managers.DataLoaderManager;
+import sapotero.rxtest.retrofit.Api.AuthService;
+import sapotero.rxtest.retrofit.utils.RetrofitManager;
 import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
@@ -87,6 +102,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject QueueManager queue;
   @Inject MemoryStore store;
+  @Inject OkHttpClient okHttpClient;
 
   @BindView (R.id.toolbar)                          Toolbar             toolbar;
   @BindView (R.id.documentsRecycleView)             RecyclerView        rv;
@@ -137,10 +153,18 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private SearchView searchView;
   private MainActivity context;
   private CompositeSubscription subscription;
+  private CompositeSubscription subscriptionSubstituteMode;
   private PublishSubject<Integer> searchSubject = PublishSubject.create();
   private Subscription searchSubjectSubscription;
 
   private int menuIndex;
+
+  private List<RColleagueEntity> colleagues;
+  private MaterialDialog startSubstituteDialog;
+  private MaterialDialog stopSubstituteDialog;
+
+  private boolean switchToSubstituteModeStarted = false;
+  private boolean exitFromSubstituteModeStarted = false;
 
   protected void onCreate(Bundle savedInstanceState) {
     setTheme(R.style.AppTheme);
@@ -152,6 +176,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     EsdApplication.getManagerComponent().inject(this);
     context = this;
     searchSubject = PublishSubject.create();
+
+    unregisterEventBus();
+    EventBus.getDefault().register(this);
 
     initAdapters();
 
@@ -176,11 +203,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     dataLoader = new DataLoaderManager(this);
 
     initToolbar();
-    
+
     initSearchSub();
     initSearch();
-
-//    rxSettings();
 
     setFirstRunFalse();
 
@@ -203,7 +228,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     if (sign == null) {
       sign = "";
     }
-    dataLoader.updateAuth(sign);
+    dataLoader.updateAuth(sign, false);
   }
 
   private void initSearch() {
@@ -340,6 +365,10 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     toolbar.setOnMenuItemClickListener(item -> {
       switch (item.getItemId()) {
 
+        case R.id.substituteModeLabel:
+          // Do nothing, it's just a label
+          break;
+
         case R.id.removeQueue:
           queue.removeAll();
           break;
@@ -349,8 +378,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
         case R.id.reload:
 
-          dataLoader.updateAuth(null);
-          updateByStatus();
+          Toast.makeText(this, "Обновление данных...", Toast.LENGTH_SHORT).show();
+          dataLoader.updateAuth(null, true);
 
 //          if (menuBuilder.getItem() != MainMenuItem.PROCESSED || menuBuilder.getItem() != MainMenuItem.FAVORITES ){
 //            updateProgressBar();
@@ -369,7 +398,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 //          setEmptyToolbarClickListener();
           break;
         default:
-          jobManager.addJobInBackground(new UpdateAuthTokenJob());
+          jobManager.addJobInBackground(new UpdateAuthTokenJob(settings.getLogin()));
           break;
       }
       return false;
@@ -396,20 +425,14 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       );
   }
 
-  private void initEvents() {
-    Timber.tag(TAG).v("initEvents");
-    if (EventBus.getDefault().isRegistered(this)) {
-      EventBus.getDefault().unregister(this);
-    }
-    EventBus.getDefault().register(this);
-
+  private void initService() {
+    Timber.tag(TAG).v("initService");
     Intent serviceIntent = MainService.newIntent(this, false);
     startService(serviceIntent);
   }
 
   private void updateByStatus() {
-    dataLoader.updateByCurrentStatus( menuBuilder.getItem(), null);
-    Toast.makeText(this, "Обновление данных...", Toast.LENGTH_SHORT).show();
+    dataLoader.updateByCurrentStatus( menuBuilder.getItem(), null, settings.getLogin(), settings.getCurrentUserId());
   }
 
 
@@ -420,12 +443,14 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     initSearch();
 
 
-    initEvents();
+    initService();
     startNetworkCheck();
     subscribeToNetworkCheckResults();
+    subscribeToSubstituteModeResults();
+
     update( true );
 
-    rxSettings();
+    initDrawer();
 
 
 //    EventBus.getDefault().post( new RecalculateMenuEvent());
@@ -433,11 +458,11 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void startNetworkCheck() {
-    EventBus.getDefault().post(new CheckNetworkEvent( true ));
+    EventBus.getDefault().postSticky(new CheckNetworkEvent( true ));
   }
 
   private void stopNetworkCheck() {
-    EventBus.getDefault().post(new CheckNetworkEvent( false ));
+    EventBus.getDefault().postSticky(new CheckNetworkEvent( false ));
   }
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13314
@@ -455,6 +480,27 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
             try {
               toolbar.getMenu().findItem(R.id.online).setTitle( isConnectedToInternet ? R.string.is_online : R.string.is_offline );
               toolbar.getMenu().findItem(R.id.online).setIcon(  isConnectedToInternet ? R.drawable.icon_online : R.drawable.icon_offline );
+            } catch (Exception e) {
+              Timber.tag(TAG).e(e);
+            }
+          },
+          Timber::e
+        )
+    );
+  }
+
+  private void subscribeToSubstituteModeResults() {
+    unsubscribeSubstituteMode();
+    subscriptionSubstituteMode = new CompositeSubscription();
+
+    subscriptionSubstituteMode.add(
+      settings.getSubstituteModePreference()
+        .asObservable()
+        .subscribe(
+          result -> {
+            boolean isSubstituteMode = result != null ? result : false;
+            try {
+              toolbar.getMenu().findItem(R.id.substituteModeLabel).setVisible( isSubstituteMode );
             } catch (Exception e) {
               Timber.tag(TAG).e(e);
             }
@@ -487,19 +533,18 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     }
   }
 
+  private void unsubscribeSubstituteMode() {
+    if ( subscriptionSubstituteMode != null && subscriptionSubstituteMode.hasSubscriptions() ) {
+      subscriptionSubstituteMode.unsubscribe();
+    }
+  }
+
   @Override
   protected void onPause() {
     super.onPause();
     stopNetworkCheck();
     unsubscribe();
-  }
-
-  @Override
-  public void onStop() {
-    if (EventBus.getDefault().isRegistered(this)) {
-      EventBus.getDefault().unregister(this);
-    }
-    super.onStop();
+    unsubscribeSubstituteMode();
   }
 
   @Override
@@ -508,17 +553,24 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     settings.setOrganizationFilterActive( false );
     settings.setTabChanged(true);
 
+    unregisterEventBus();
+
     super.onDestroy();
   }
 
-  private void setJournalType(int type) {
+  private void unregisterEventBus() {
+    if (EventBus.getDefault().isRegistered(this)) {
+      EventBus.getDefault().unregister(this);
+    }
+  }
+
+  private void setJournalType(int type, boolean reloadDocuments) {
     // Reset previous state of organization filter and set tab changed
     settings.setOrganizationFilterActive(false);
-    settings.setTabChanged(true);
+    settings.setTabChanged(reloadDocuments);
 
     menuBuilder.selectJournal( type );
     journalSelector.selectJournal(type);
-
   }
 
   private void drawer_build_bottom() {
@@ -564,40 +616,40 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
           switch ((int) drawerItem.getIdentifier()) {
             case ALL:
-              setJournalType(ALL);
+              setJournalType(ALL, true);
               break;
             case INCOMING_DOCUMENTS:
-              setJournalType(INCOMING_DOCUMENTS);
+              setJournalType(INCOMING_DOCUMENTS, true);
               break;
             case CITIZEN_REQUESTS:
-              setJournalType(CITIZEN_REQUESTS);
+              setJournalType(CITIZEN_REQUESTS, true);
               break;
             case APPROVE_ASSIGN:
-              setJournalType(APPROVE_ASSIGN);
+              setJournalType(APPROVE_ASSIGN, true);
               break;
             case INCOMING_ORDERS:
-              setJournalType(INCOMING_ORDERS);
+              setJournalType(INCOMING_ORDERS, true);
               break;
             case ORDERS:
-              setJournalType(ORDERS);
+              setJournalType(ORDERS, true);
               break;
             case ORDERS_DDO:
-              setJournalType(ORDERS_DDO);
+              setJournalType(ORDERS_DDO, true);
               break;
             case IN_DOCUMENTS:
-              setJournalType(IN_DOCUMENTS);
+              setJournalType(IN_DOCUMENTS, true);
               break;
             case ON_CONTROL:
-              setJournalType(ON_CONTROL);
+              setJournalType(ON_CONTROL, true);
               break;
             case PROCESSED:
-              setJournalType(PROCESSED);
+              setJournalType(PROCESSED, true);
               break;
             case FAVORITES:
-              setJournalType(FAVORITES);
+              setJournalType(FAVORITES, true);
               break;
             case SETTINGS_VIEW_TYPE_APPROVE:
-              setJournalType(8);
+              setJournalType(8, true);
               break;
 
             case SETTINGS_VIEW:
@@ -648,30 +700,71 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       .and(RColleagueEntity.ACTIVED.eq(true))
       .get().toList();
 
-    List<RColleagueEntity> colleagues = new ArrayList<>();
+    colleagues = new ArrayList<>();
     colleagues.addAll( colleaguesFromDB );
 
     Collections.sort(colleagues, (o1, o2) -> o1.getSortIndex() != null && o2.getSortIndex() != null ? o1.getSortIndex().compareTo( o2.getSortIndex() ) : 0 );
 
-    IProfile[] profiles = new ProfileDrawerItem[ colleagues.size() + 1 ];
+    IProfile[] profiles;
 
-    profiles[0] = new ProfileDrawerItem()
-      .withName( settings.getCurrentUserOrganization() )
-      .withEmail( settings.getCurrentUser() )
-      .withSetSelected( true )
-      .withIcon( R.drawable.gerb );
+    // resolved https://tasks.n-core.ru/browse/MVDESD-12618
+    // Режим замещения
+    if ( !settings.isSubstituteMode() ) {
+      // Не в режиме замещения в заголовке отображается основной пользователь,
+      // а в списке аккаунтов - список коллег, которых можно замещать
+      profiles = new ProfileDrawerItem[ colleagues.size() + 1 ];
 
-    int i = 1;
+      addMainProfile( profiles );
 
-    for (RColleagueEntity colleague : colleagues) {
-      String colleagueName = splitName( colleague.getOfficialName() );
+      int i = 1;
 
-      profiles[i] = new ProfileDrawerItem()
-        .withName( colleagueName )
+      for (int colleagueIndex = 0; colleagueIndex < colleagues.size(); colleagueIndex++) {
+        String colleagueName = splitName( colleagues.get(colleagueIndex).getOfficialName() );
+
+        profiles[i] = new ProfileDrawerItem()
+          .withName( colleagueName )
+          .withIdentifier( colleagueIndex )
+          .withSelectable( false )
+          .withSetSelected( false )
+          .withOnDrawerItemClickListener((view, position, drawerItem) -> {
+            int index = (int) drawerItem.getIdentifier();
+            // Переход в режим замещения, если вошли по пину и не показвыать окно авторизации после рестарта
+            // и не в режиме замещения и не ожидаем получения токена
+            if ( settings.isSignedWithDc() && !settings.isFirstRun() ) {
+              if ( !settings.isSubstituteMode() && !settings.isUpdateAuthStarted() ) {
+                startSubstituteMode( index );
+              } else {
+                Toast.makeText(this, "Невозможно войти в режим замещения: дождитесь обновления данных", Toast.LENGTH_SHORT).show();
+              }
+            }
+            return false;
+          })
+          .withIcon( R.drawable.gerb );
+
+        i++;
+      }
+
+    } else {
+      // В режиме замещения в заголовке отображается коллега, которого пользователь замещает,
+      // а в списке аккаунтов - основной пользователь
+      profiles = new ProfileDrawerItem[ 2 ];
+
+      addMainProfile( profiles );
+
+      profiles[1] = new ProfileDrawerItem()
+        .withName( settings.getOldCurrentUser() )
         .withSelectable( false )
         .withSetSelected( false )
+        .withOnDrawerItemClickListener((view, position, drawerItem) -> {
+          // Выход из режима замещения, если в режиме замещения и не ожидаем получения токена
+          if ( settings.isSubstituteMode() && !settings.isUpdateAuthStarted() ) {
+            stopSubstituteMode();
+          } else {
+            Toast.makeText(this, "Невозможно выйти из режима замещения: дождитесь обновления данных", Toast.LENGTH_SHORT).show();
+          }
+          return false;
+        })
         .withIcon( R.drawable.gerb );
-      i++;
     }
 
     AccountHeader headerResult = new AccountHeaderBuilder()
@@ -696,6 +789,42 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     );
   }
 
+  private void addMainProfile(IProfile[] profiles) {
+    Bitmap userImage = getUserImage();
+
+    ProfileDrawerItem profileDrawerItem = new ProfileDrawerItem()
+      .withName( settings.getCurrentUserOrganization() )
+      .withEmail( settings.getCurrentUser() )
+      .withSetSelected( true );
+
+    if ( userImage != null ) {
+      profileDrawerItem.withIcon( userImage );
+    } else {
+      profileDrawerItem.withIcon( R.drawable.gerb );
+    }
+
+    profiles[0] = profileDrawerItem;
+  }
+
+  // resolved https://tasks.n-core.ru/browse/MVDESD-12618
+  // Отображать фото пользователя
+  private Bitmap getUserImage() {
+    Bitmap imageBitmap = null;
+    String imageString = settings.getCurrentUserImage();
+
+    if ( imageString != null && !Objects.equals(imageString, "" ) ) {
+      try {
+        String str = imageString.replaceAll("(\\n)", "");
+        byte[] decodedString = Base64.decode(str.getBytes(), Base64.DEFAULT);
+        imageBitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+      } catch (Exception e) {
+        Timber.tag(TAG).e(e);
+      }
+    }
+
+    return imageBitmap;
+  }
+
   private String splitName(String nameToSplit) {
     String name = nameToSplit;
 
@@ -717,6 +846,187 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     return name;
   }
 
+  private String splitOrganization(String nameToSplit) {
+    String name = nameToSplit;
+    String organization = "";
+
+    try {
+      String[] split = name.split("\\(");
+
+      if ( split.length >= 2 ){
+        String part2 = split[1];
+
+        if (part2 != null) {
+          if ( part2.contains(")") ) {
+            part2 = part2.substring( 0, part2.lastIndexOf(")") - 1 );
+          }
+
+          organization = part2;
+        }
+      }
+    } catch (Exception error) {
+      Timber.tag(TAG).d("Error splitting colleague organization: %s", nameToSplit);
+    }
+
+    return organization;
+  }
+
+  private void startSubstituteMode(int colleagueIndex) {
+    if ( settings.isOnline() ) {
+      if ( colleagues != null && colleagueIndex < colleagues.size() ) {
+        if ( queue.isAllTasksComplete() ) {
+          Timber.tag("Substitute").d("Starting substitute mode");
+
+          showStartSubstituteDialog();
+
+          RColleagueEntity colleagueEntity = colleagues.get( colleagueIndex );
+
+          Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
+          AuthService auth = retrofit.create(AuthService.class);
+
+          auth.switchToColleague(colleagueEntity.getColleagueId(), settings.getLogin(), settings.getToken())
+            .subscribeOn(Schedulers.computation())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe( colleagueResponse -> {
+              Timber.tag("Substitute").d("Received colleague token");
+
+              jobManager.cancelJobsInBackground(null, TagConstraint.ANY, "DocJob");
+
+              switchToSubstituteModeStarted = true;
+
+              settings.setSubstituteMode( true );
+              settings.setOldLogin( settings.getLogin() );
+              settings.setOldCurrentUser( settings.getCurrentUser() );
+              settings.setOldCurrentUserOrganization( settings.getCurrentUserOrganization() );
+              settings.setOldCurrentUserImage( settings.getCurrentUserImage() );
+              settings.setLogin( colleagueResponse.getLogin() );
+              settings.setToken( colleagueResponse.getAuthToken() );
+              settings.setColleagueId( colleagueEntity.getColleagueId() );
+
+              settings.setCurrentUser( splitName( colleagueEntity.getOfficialName() ) );
+              settings.setCurrentUserOrganization( splitOrganization( colleagueEntity.getOfficialName() ) );
+              settings.setCurrentUserImage("");
+              initDrawer();
+
+              dataLoader.unsubcribeAll();
+
+              // Сначала сохраняем/восстанавливаем состояние тех документов, которые имеются у обоих пользователей,
+              // затем перезагружаем MemoryStore
+              switchDocuments();
+              store.clearAndLoadFromDb();
+
+            }, error -> {
+              Timber.tag(TAG).e(error);
+              dismissStartSubstituteDialog();
+              Toast.makeText(this, "Ошибка входа в режим замещения", Toast.LENGTH_SHORT).show();
+            });
+
+        } else {
+          Toast.makeText(this, "Невозможно войти в режим замещения: дождитесь обработки очереди запросов", Toast.LENGTH_SHORT).show();
+        }
+      }
+    } else {
+      Toast.makeText(this, "Невозможно войти в режим замещения в оффлайне", Toast.LENGTH_SHORT).show();
+    }
+  }
+
+  private void switchDocuments() {
+    new DocumentStateSaver().saveRestoreDocumentStates( settings.getLogin(), settings.getOldLogin(), TAG );
+  }
+
+  private void stopSubstituteMode() {
+    if ( settings.isOnline() ) {
+      if ( queue.isAllTasksComplete() ) {
+        Timber.tag("Substitute").d("Stopping substitute mode");
+
+        jobManager.cancelJobsInBackground(null, TagConstraint.ANY, "DocJob");
+
+        exitFromSubstituteModeStarted = true;
+
+        settings.setSubstituteMode( false );
+        switchUser();
+
+        dataLoader.unsubcribeAll();
+        showStopSubstituteDialog();
+
+        dataLoader.updateAuth(null, true);
+
+      } else {
+        Toast.makeText(this, "Невозможно выйти из режима замещения: дождитесь обработки очереди запросов", Toast.LENGTH_SHORT).show();
+      }
+    } else {
+      Toast.makeText(this, "Невозможно выйти из режима замещения в оффлайне", Toast.LENGTH_SHORT).show();
+    }
+  }
+
+  private void switchUser() {
+    // Меняем логин и сразу сохраняем/восстанавливаем состояние тех документов, которые имеются у обоих пользователей,
+    // и обновляем боковое меню
+    swapLogin();
+    switchDocuments();
+    initDrawer();
+  }
+
+  private void swapLogin() {
+    String temp = settings.getLogin();
+    settings.setLogin( settings.getOldLogin() );
+    settings.setOldLogin( temp );
+
+    temp = settings.getCurrentUser();
+    settings.setCurrentUser( settings.getOldCurrentUser() );
+    settings.setOldCurrentUser( temp );
+
+    temp = settings.getCurrentUserOrganization();
+    settings.setCurrentUserOrganization( settings.getOldCurrentUserOrganization() );
+    settings.setOldCurrentUserOrganization( temp );
+
+    temp = settings.getCurrentUserImage();
+    settings.setCurrentUserImage( settings.getOldCurrentUserImage() );
+    settings.setOldCurrentUserImage( temp );
+  }
+
+  private void showStartSubstituteDialog() {
+    prepareStartSubstituteDialog();
+    startSubstituteDialog.show();
+  }
+
+  private void dismissStartSubstituteDialog() {
+    if ( startSubstituteDialog != null && startSubstituteDialog.isShowing() ) {
+      startSubstituteDialog.dismiss();
+    }
+  }
+
+  private void prepareStartSubstituteDialog() {
+    if (startSubstituteDialog == null){
+      startSubstituteDialog = new MaterialDialog.Builder( this )
+        .title(R.string.app_name)
+        .content(R.string.start_substitute)
+        .cancelable(false)
+        .progress(true, 0).build();
+    }
+  }
+
+  private void showStopSubstituteDialog() {
+    prepareStopSubstituteDialog();
+    stopSubstituteDialog.show();
+  }
+
+  private void dismissStopSubstituteDialog() {
+    if ( stopSubstituteDialog != null && stopSubstituteDialog.isShowing() ) {
+      stopSubstituteDialog.dismiss();
+    }
+  }
+
+  private void prepareStopSubstituteDialog() {
+    if (stopSubstituteDialog == null){
+      stopSubstituteDialog = new MaterialDialog.Builder( this )
+        .title(R.string.app_name)
+        .content(R.string.stop_substitute)
+        .cancelable(false)
+        .progress(true, 0).build();
+    }
+  }
+
   private void drawer_add_item(int index, String title, Long identifier) {
     Timber.tag("drawer_add_item").v(" !index " + index + " " + title);
 
@@ -727,7 +1037,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     );
   }
 
-  public void rxSettings() {
+  public void initDrawer() {
     drawer_build_head();
 
     Fields.Menu menu = Fields.Menu.ALL;
@@ -819,12 +1129,60 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(UpdateCountEvent event) {
+    Timber.tag(TAG).i("UpdateCountEvent");
     update( false );
   }
 
-//  @Subscribe(threadMode = ThreadMode.MAIN)
-//  public void onMessageEvent(JournalSelectorUpdateCountEvent event) {
-//    Timber.tag(TAG).d("JournalSelectorUpdateCountEvent");
-//  }
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(LoadedFromDbEvent event) {
+    Timber.tag(TAG).i("LoadedFromDbEvent");
 
+    if ( switchToSubstituteModeStarted ) {
+      switchToSubstituteModeStarted = false;
+      dataLoader.initV2( true );
+      setJournalType(ALL, false);
+      update( false );
+      dismissStartSubstituteDialog();
+
+    } else if ( exitFromSubstituteModeStarted ) {
+      exitFromSubstituteModeStarted = false;
+      setJournalType(ALL, false);
+      update( true );
+      dismissStopSubstituteDialog();
+
+    } else {
+      update( false );
+    }
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(UpdateDrawerEvent event) {
+    Timber.tag(TAG).i("UpdateDrawerEvent");
+    initDrawer();
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(ReceivedTokenEvent event) {
+    Timber.tag(TAG).i("ReceivedTokenEvent");
+
+    if ( exitFromSubstituteModeStarted ) {
+      store.clearAndLoadFromDb();
+    } else {
+      updateByStatus();
+    }
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(ErrorReceiveTokenEvent event) {
+    Timber.tag(TAG).i("ErrorReceiveTokenEvent");
+
+    if ( exitFromSubstituteModeStarted ) {
+      exitFromSubstituteModeStarted = false;
+      settings.setSubstituteMode( true );
+      // В случае ошибки меняем логин и состояние документов и бокового меню обратно
+      switchUser();
+      dismissStopSubstituteDialog();
+      Toast.makeText(this, "Ошибка выхода из режима замещения", Toast.LENGTH_SHORT).show();
+    }
+  }
 }

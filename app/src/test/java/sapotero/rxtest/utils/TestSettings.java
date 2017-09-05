@@ -25,6 +25,7 @@ public class TestSettings implements ISettings {
   public String currentUser;
   public String currentUserOrganization;
   public String currentUserPosition;
+  public String currentUserImage;
   public int mainMenuPosition;
   public String regNumber;
   public String regDate;
@@ -65,7 +66,15 @@ public class TestSettings implements ISettings {
   public boolean showPrimaryConsideration;
   public boolean organizationFilterActive;
   public Set<String> organizationFilterSelection;
+  public boolean isSubstituteMode;
+  public String oldLogin;
+  public String oldCurrentUser;
+  public String oldCurrentUserOrganization;
+  public String oldCurrentUserImage;
+  public String colleagueId;
+  public boolean isUpdateAuthStarted;
   public boolean isTabChanged;
+  public boolean isStartRegularRefresh;
 
   public TestSettings() {
     login = "dummyLogin";
@@ -627,6 +636,81 @@ public class TestSettings implements ISettings {
   }
 
   @Override
+  public boolean isSubstituteMode() {
+    return isSubstituteMode;
+  }
+
+  @Override
+  public Preference<Boolean> getSubstituteModePreference() {
+    return null;
+  }
+
+  @Override
+  public void setSubstituteMode(boolean value) {
+    isSubstituteMode = value;
+  }
+
+  @Override
+  public String getOldLogin() {
+    return oldLogin;
+  }
+
+  @Override
+  public void setOldLogin(String value) {
+    oldLogin = value;
+  }
+
+  @Override
+  public String getOldCurrentUser() {
+    return oldCurrentUser;
+  }
+
+  @Override
+  public void setOldCurrentUser(String value) {
+    oldCurrentUser = value;
+  }
+
+  @Override
+  public String getOldCurrentUserOrganization() {
+    return oldCurrentUserOrganization;
+  }
+
+  @Override
+  public void setOldCurrentUserOrganization(String value) {
+    oldCurrentUserOrganization = value;
+  }
+
+  @Override
+  public String getOldCurrentUserImage() {
+    return oldCurrentUserImage;
+  }
+
+  @Override
+  public void setOldCurrentUserImage(String value) {
+    oldCurrentUserImage = value;
+  }
+
+  @Override
+  public String getColleagueId() {
+    return colleagueId;
+  }
+
+  @Override
+  public void setColleagueId(String value) {
+    colleagueId = value;
+  }
+
+  @Override
+  public boolean isUpdateAuthStarted() {
+    return isUpdateAuthStarted;
+  }
+
+  @Override
+  public void setUpdateAuthStarted(boolean value) {
+    isUpdateAuthStarted = value;
+  }
+
+  @Override
   public boolean isTabChanged() {
     return isTabChanged;
   }
@@ -634,5 +718,25 @@ public class TestSettings implements ISettings {
   @Override
   public void setTabChanged(boolean value) {
     isTabChanged = value;
+  }
+
+  @Override
+  public boolean isStartRegularRefresh() {
+    return isStartRegularRefresh;
+  }
+
+  @Override
+  public void setStartRegularRefresh(boolean value) {
+    isStartRegularRefresh = value;
+  }
+
+  @Override
+  public String getCurrentUserImage() {
+    return currentUserImage;
+  }
+
+  @Override
+  public void setCurrentUserImage(String value) {
+    currentUserImage = value;
   }
 }

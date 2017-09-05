@@ -1,21 +1,13 @@
 package sapotero.rxtest.db.mapper;
 
-import javax.inject.Inject;
-
-import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RAssistantEntity;
 import sapotero.rxtest.retrofit.models.Assistant;
-import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 
 // Maps between Assistant, RAssistantEntity and PrimaryConsiderationPeople
 public class AssistantMapper extends AbstractMapper<Assistant, RAssistantEntity> {
 
-  @Inject ISettings settings;
-
-  public AssistantMapper() {
-    EsdApplication.getDataComponent().inject(this);
-  }
+  private String login = "";
 
   @Override
   public RAssistantEntity toEntity(Assistant model) {
@@ -27,7 +19,7 @@ public class AssistantMapper extends AbstractMapper<Assistant, RAssistantEntity>
     entity.setForDecision( model.getForDecision() );
     entity.setHeadId( model.getHeadId() );
     entity.setHeadName( model.getHeadName() );
-    entity.setUser( settings.getLogin() );
+    entity.setUser( login );
 
     return entity;
   }
@@ -44,6 +36,11 @@ public class AssistantMapper extends AbstractMapper<Assistant, RAssistantEntity>
     model.setHeadName( entity.getHeadName() );
 
     return model;
+  }
+
+  public AssistantMapper withLogin(String login) {
+    this.login = login;
+    return this;
   }
 
   public PrimaryConsiderationPeople toPrimaryConsiderationPeople(RAssistantEntity entity) {

@@ -3,12 +3,9 @@ package sapotero.rxtest.mapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-
-import javax.inject.Inject;
 
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.dagger.components.DaggerTestDataComponent;
@@ -16,15 +13,12 @@ import sapotero.rxtest.dagger.components.TestDataComponent;
 import sapotero.rxtest.db.mapper.AssistantMapper;
 import sapotero.rxtest.db.requery.models.RAssistantEntity;
 import sapotero.rxtest.retrofit.models.Assistant;
-import sapotero.rxtest.utils.ISettings;
-import sapotero.rxtest.utils.TestSettings;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.times;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ EsdApplication.class })
@@ -37,8 +31,7 @@ public class AssistantMapperTest {
   private RAssistantEntity entity;
   private Assistant model;
   private PrimaryConsiderationPeople people;
-
-  @Inject ISettings settings;
+  private String dummyLogin;
 
   @Before
   public void init() {
@@ -60,17 +53,13 @@ public class AssistantMapperTest {
     dummyAssistant.setForDecision( false );
     dummyAssistant.setHeadId( "56eaaddb1372000002000001" );
     dummyAssistant.setHeadName( "Иванов И.И." );
+    dummyLogin = "dummyLogin";
   }
 
   @Test
   public void toEntity() {
     mapper = new AssistantMapper();
-    entity = mapper.toEntity(dummyAssistant);
-
-    PowerMockito.verifyStatic(times(1));
-    EsdApplication.getDataComponent();
-
-    Mockito.verify(settings, times(1)).getLogin();
+    entity = mapper.withLogin(dummyLogin).toEntity(dummyAssistant);
 
     assertNotNull( entity );
     assertEquals( 0, entity.getId() );
@@ -80,7 +69,7 @@ public class AssistantMapperTest {
     assertEquals( dummyAssistant.getForDecision(), entity.isForDecision() );
     assertEquals( dummyAssistant.getHeadId(), entity.getHeadId() );
     assertEquals( dummyAssistant.getHeadName(), entity.getHeadName() );
-    assertEquals( ((TestSettings) settings).login, entity.getUser() );
+    assertEquals( dummyLogin, entity.getUser() );
   }
 
   @Test
@@ -88,11 +77,6 @@ public class AssistantMapperTest {
     mapper = new AssistantMapper();
     entity = mapper.toEntity(dummyAssistant);
     model = mapper.toModel(entity);
-
-    PowerMockito.verifyStatic(times(1));
-    EsdApplication.getDataComponent();
-
-    Mockito.verify(settings, times(1)).getLogin();
 
     assertNotNull( model );
     assertEquals( dummyAssistant.getToS(), model.getToS() );
@@ -109,11 +93,6 @@ public class AssistantMapperTest {
     entity = mapper.toEntity(dummyAssistant);
     entity.setSortIndex(dummySortIndex);
     people = mapper.toPrimaryConsiderationPeople(entity);
-
-    PowerMockito.verifyStatic(times(1));
-    EsdApplication.getDataComponent();
-
-    Mockito.verify(settings, times(1)).getLogin();
 
     assertNotNull( people );
     assertEquals( dummyAssistant.getHeadId(), people.getId() );

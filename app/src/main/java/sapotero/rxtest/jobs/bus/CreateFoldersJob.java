@@ -25,9 +25,10 @@ public class CreateFoldersJob extends BaseJob {
 
   private String TAG = this.getClass().getSimpleName();
 
-  public CreateFoldersJob(ArrayList<Folder> templates) {
+  public CreateFoldersJob(ArrayList<Folder> templates, String login) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.templates = templates;
+    this.login = login;
   }
 
   @Override
@@ -52,7 +53,7 @@ public class CreateFoldersJob extends BaseJob {
     data.setUid( template.getId() );
     data.setTitle( template.getTitle() );
     data.setType( template.getType() );
-    data.setUser( settings.getLogin() );
+    data.setUser( login );
 
 
     dataStore
@@ -75,7 +76,7 @@ public class CreateFoldersJob extends BaseJob {
     Integer count = dataStore
       .count(RFolderEntity.UID)
       .where(RFolderEntity.UID.eq(uid))
-      .and(RFolderEntity.USER.eq(settings.getLogin()))
+      .and(RFolderEntity.USER.eq(login))
       .get().value();
 
     if( count != 0 ){

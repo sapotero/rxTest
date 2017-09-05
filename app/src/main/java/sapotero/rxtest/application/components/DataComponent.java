@@ -4,19 +4,15 @@ import dagger.Component;
 import sapotero.rxtest.application.modules.EsdModule;
 import sapotero.rxtest.application.modules.SettingsModule;
 import sapotero.rxtest.application.scopes.DataScope;
-import sapotero.rxtest.db.mapper.AssistantMapper;
-import sapotero.rxtest.db.mapper.ColleagueMapper;
-import sapotero.rxtest.db.mapper.DocumentMapper;
-import sapotero.rxtest.db.mapper.FavoriteUserMapper;
-import sapotero.rxtest.db.mapper.PrimaryConsiderationMapper;
-import sapotero.rxtest.db.mapper.TemplateMapper;
 import sapotero.rxtest.db.mapper.utils.MappersModule;
 import sapotero.rxtest.db.requery.utils.Deleter;
+import sapotero.rxtest.db.requery.utils.DocumentStateSaver;
 import sapotero.rxtest.db.requery.utils.RequeryDbModule;
 import sapotero.rxtest.db.requery.utils.validation.ValidationModule;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.managers.view.DecisionManager;
 import sapotero.rxtest.retrofit.utils.OkHttpModule;
+import sapotero.rxtest.services.task.UpdateAllDocumentsTask;
 import sapotero.rxtest.utils.memory.utils.MemoryStoreModule;
 import sapotero.rxtest.utils.queue.db.QueueDBManager;
 import sapotero.rxtest.views.activities.DocumentImageFullScreenActivity;
@@ -85,15 +81,11 @@ public interface DataComponent {
   void inject(DecisionManager decisionManager);
 
   void inject(Deleter deleter);
+  void inject(DocumentStateSaver documentStateSaver);
 
   void inject(OrganizationSpinner organizationSpinner);
 
-  void inject(AssistantMapper assistantMapper);
-  void inject(ColleagueMapper colleagueMapper);
-  void inject(DocumentMapper documentMapper);
-  void inject(FavoriteUserMapper favoriteUserMapper);
-  void inject(PrimaryConsiderationMapper primaryConsiderationMapper);
-  void inject(TemplateMapper templateMapper);
-
   void inject(CommandParams commandParams);
+
+  void inject(UpdateAllDocumentsTask updateAllDocumentsTask);
 }

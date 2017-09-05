@@ -11,7 +11,7 @@ import sapotero.rxtest.db.requery.models.utils.enums.DocumentCondition;
 // Хранит состояние документа после выполнения операции для корректного проставления плашки
 // в случае, если документ будет снова направлен пользователю.
 @Entity
-public class RReturnedRejectedAgain {
+public abstract class RReturnedRejectedAgain {
   @Key
   @Generated
   int id;

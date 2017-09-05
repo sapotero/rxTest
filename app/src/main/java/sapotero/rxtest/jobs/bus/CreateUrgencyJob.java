@@ -22,9 +22,10 @@ public class CreateUrgencyJob extends BaseJob {
   private final ArrayList<Urgency> urgencies;
   private String TAG = this.getClass().getSimpleName();
 
-  public CreateUrgencyJob(ArrayList<Urgency> urgencies) {
+  public CreateUrgencyJob(ArrayList<Urgency> urgencies, String login) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.urgencies = urgencies;
+    this.login = login;
   }
 
   @Override
@@ -46,7 +47,7 @@ public class CreateUrgencyJob extends BaseJob {
     data.setUid( urgency.getId() );
     data.setCode( urgency.getCode() );
     data.setName( urgency.getName() );
-    data.setUser( settings.getLogin() );
+    data.setUser( login );
 
 
     dataStore

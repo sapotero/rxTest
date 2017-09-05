@@ -22,9 +22,10 @@ public class CreatePrimaryConsiderationJob extends BaseJob {
 
   private String TAG = this.getClass().getSimpleName();
 
-  public CreatePrimaryConsiderationJob(ArrayList<Oshs> users) {
+  public CreatePrimaryConsiderationJob(ArrayList<Oshs> users, String login) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.users = users;
+    this.login = login;
   }
 
   @Override
@@ -45,7 +46,7 @@ public class CreatePrimaryConsiderationJob extends BaseJob {
   }
 
   private void add(Oshs user, int index) {
-    RPrimaryConsiderationEntity data = mappers.getPrimaryConsiderationMapper().toEntity(user);
+    RPrimaryConsiderationEntity data = mappers.getPrimaryConsiderationMapper().withLogin(login).toEntity(user);
     data.setSortIndex(index);
 
     dataStore
@@ -67,7 +68,7 @@ public class CreatePrimaryConsiderationJob extends BaseJob {
     Integer count = dataStore
       .count(RPrimaryConsiderationEntity.UID)
       .where(RPrimaryConsiderationEntity.UID.eq(uid))
-      .and(RPrimaryConsiderationEntity.USER.eq(settings.getLogin()))
+      .and(RPrimaryConsiderationEntity.USER.eq(login))
       .get().value();
 
     if( count != 0 ){

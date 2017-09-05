@@ -11,6 +11,7 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Objects;
 
 import sapotero.rxtest.db.mapper.DocumentMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
@@ -28,10 +29,12 @@ public class CreateProcessedDocumentsJob extends DocumentJob {
   private String uid;
   private String folder;
 
-  public CreateProcessedDocumentsJob(String uid, String folder) {
+  public CreateProcessedDocumentsJob(String uid, String folder, String login, String currentUserId) {
     super( new Params(PRIORITY).requireNetwork().persist().addTags("DocJob") );
     this.uid = uid;
     this.folder = folder;
+    this.login = login;
+    this.currentUserId = currentUserId;
   }
 
   @Override
@@ -46,7 +49,13 @@ public class CreateProcessedDocumentsJob extends DocumentJob {
 
   @Override
   public void doAfterLoad(DocumentInfo document) {
-    DocumentMapper documentMapper = mappers.getDocumentMapper();
+    if ( !Objects.equals( login, settings.getLogin() ) ) {
+      // Обрабатываем загруженный документ только если логин не сменился (режим замещения)
+      Timber.tag(TAG).d("Login changed, quit doAfterLoad %s", document.getUid());
+      return;
+    }
+
+    DocumentMapper documentMapper = mappers.getDocumentMapper().withLogin(login).withCurrentUserId(currentUserId);
     RDocumentEntity doc = new RDocumentEntity();
 
     int period = 1;

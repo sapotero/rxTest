@@ -37,6 +37,8 @@ import timber.log.Timber;
 
 abstract class DocumentJob extends BaseJob {
 
+  public String currentUserId;
+
   DocumentJob(Params params) {
     super(params);
   }
@@ -61,6 +63,12 @@ abstract class DocumentJob extends BaseJob {
   }
 
   void loadDocument(String uid, String TAG) {
+    if ( !Objects.equals( login, settings.getLogin() ) ) {
+      // Загружаем документ только если логин не сменился (режим замещения)
+      Timber.tag(TAG).d("Login changed, quit loading %s", uid);
+      return;
+    }
+
     Observable<DocumentInfo> info = getDocumentInfoObservable(uid);
 
     info
@@ -83,7 +91,7 @@ abstract class DocumentJob extends BaseJob {
     DocumentService documentService = retrofit.create( DocumentService.class );
     return documentService.getInfo(
             uid,
-            settings.getLogin(),
+            login,
             settings.getToken()
     );
   }
@@ -100,7 +108,7 @@ abstract class DocumentJob extends BaseJob {
   abstract public void doAfterLoad(DocumentInfo document);
 
   RDocumentEntity createDocument(DocumentInfo documentReceived, String status, boolean shared) {
-    DocumentMapper documentMapper = mappers.getDocumentMapper();
+    DocumentMapper documentMapper = mappers.getDocumentMapper().withLogin(login).withCurrentUserId(currentUserId);
     RDocumentEntity doc = documentMapper.toEntity(documentReceived);
 
     documentMapper.setFilter(doc, status);
@@ -110,6 +118,12 @@ abstract class DocumentJob extends BaseJob {
   }
 
   void saveDocument(DocumentInfo documentReceived, RDocumentEntity documentToSave, boolean isLink, String TAG) {
+    if ( !Objects.equals( login, settings.getLogin() ) ) {
+      // Сохраняем документ только если логин не сменился (режим замещения)
+      Timber.tag(TAG).d("Login changed, quit saving %s", documentToSave.getUid());
+      return;
+    }
+
     RDocumentEntity existingDoc =
       dataStore
         .select(RDocumentEntity.class)
@@ -182,7 +196,7 @@ abstract class DocumentJob extends BaseJob {
       for (RImage _image : images) {
         settings.addTotalDocCount(1);
         RImageEntity image = (RImageEntity) _image;
-        jobManager.addJobInBackground( new DownloadFileJob( settings.getHost(), image.getPath(), image.getMd5() + "_" + image.getTitle(), image.getId() ) );
+        jobManager.addJobInBackground( new DownloadFileJob( settings.getHost(), image.getPath(), image.getMd5() + "_" + image.getTitle(), image.getId(), login ) );
       }
     }
   }
@@ -216,7 +230,7 @@ abstract class DocumentJob extends BaseJob {
   private void loadLinkedDoc(String linkUid, String parentUid, boolean saveFirstLink) {
     if ( exist( linkUid ) ) {
       settings.addTotalDocCount(1);
-      jobManager.addJobInBackground( new CreateLinksJob( linkUid, parentUid, saveFirstLink ) );
+      jobManager.addJobInBackground( new CreateLinksJob( linkUid, parentUid, saveFirstLink, login, currentUserId ) );
     }
   }
 
@@ -229,7 +243,7 @@ abstract class DocumentJob extends BaseJob {
       List<Status> statuses = exemplar.getStatuses();
       if ( notEmpty( statuses ) ) {
         Status currentStatus = statuses.get( statuses.size() - 1 );
-        if ( Objects.equals( currentStatus.getAddressedToId(), settings.getCurrentUserId() ) ) {
+        if ( Objects.equals( currentStatus.getAddressedToId(), currentUserId ) ) {
           if ( Objects.equals( currentStatus.getStatusCode(), "primary_consideration")
             || Objects.equals( currentStatus.getStatusCode(), "sent_to_the_report") ) {
             result = true;
@@ -250,7 +264,7 @@ abstract class DocumentJob extends BaseJob {
       for (String title : titles) {
         Step step = getStep(steps, title);
         for ( Person person : nullGuard( step.getPeople() ) ) {
-          if ( Objects.equals( person.getOfficialId(), settings.getCurrentUserId() ) ) {
+          if ( Objects.equals( person.getOfficialId(), currentUserId ) ) {
             List<Action> actions = person.getActions();
             if ( notEmpty( actions ) ) {
               String lastActionStatus = actions.get( actions.size() - 1 ).getStatus();

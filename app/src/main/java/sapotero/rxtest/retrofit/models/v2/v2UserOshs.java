@@ -38,7 +38,7 @@ public class v2UserOshs {
   private String gender;
   @SerializedName("image")
   @Expose
-  private Object image;
+  private String image;
 
   public String getId() {
     return id;
@@ -170,15 +170,15 @@ public class v2UserOshs {
     return this;
   }
 
-  public Object getImage() {
+  public String getImage() {
     return image;
   }
 
-  public void setImage(Object image) {
+  public void setImage(String image) {
     this.image = image;
   }
 
-  public v2UserOshs withImage(Object image) {
+  public v2UserOshs withImage(String image) {
     this.image = image;
     return this;
   }

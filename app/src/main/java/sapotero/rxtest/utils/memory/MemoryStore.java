@@ -3,6 +3,7 @@ package sapotero.rxtest.utils.memory;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -17,6 +18,7 @@ import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
+import sapotero.rxtest.events.utils.LoadedFromDbEvent;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.fields.DocumentType;
@@ -77,21 +79,27 @@ public class MemoryStore implements Processable{
     Timber.w("startSub");
 
     sub
-      .buffer( 200, TimeUnit.MILLISECONDS )
+      .buffer( 500, TimeUnit.MILLISECONDS )
       .onBackpressureBuffer(512)
       .onBackpressureDrop()
       .subscribeOn(Schedulers.computation())
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(
         docs -> {
-          for (InMemoryDocument doc: docs ) {
-            documents.put( doc.getUid(), doc );
-            Timber.tag("RecyclerViewRefresh").d("MemoryStore: pub.onNext()");
+          int count = 0;
 
-            pub.onNext( doc );
+          for (InMemoryDocument doc: docs ) {
+            // Добавляем в хранилище только те документы, у которых пользователь равен текущему
+            // (может отличаться при входе/выходе из режима замещения)
+            if ( Objects.equals( doc.getUser(), settings.getLogin() ) ) {
+              documents.put( doc.getUid(), doc );
+              Timber.tag("RecyclerViewRefresh").d("MemoryStore: pub.onNext() for %s", doc.getUid());
+              pub.onNext( doc );
+              count++;
+            }
           }
 
-          if (docs.size() > 0){
+          if (count > 0){
             Timber.tag("RecyclerViewRefresh").d("MemoryStore: sending event to update MainActivity");
             EventBus.getDefault().post( new UpdateCountEvent() );
           }
@@ -122,6 +130,7 @@ public class MemoryStore implements Processable{
   }
 
   public void clear() {
+    Timber.tag(TAG).d("MEMORY STORE CLEAR");
     documents.clear();
   }
 
@@ -145,6 +154,8 @@ public class MemoryStore implements Processable{
             InMemoryDocument document = InMemoryDocumentMapper.fromDB(doc);
             documents.put(doc.getUid(), document);
           }
+
+          EventBus.getDefault().post( new LoadedFromDbEvent() );
         },
         Timber::e
       );
@@ -164,26 +175,30 @@ public class MemoryStore implements Processable{
 
 
   @Override
-  public void process(HashMap<String, Document> docs, String filter, String index) {
+  public void process(HashMap<String, Document> docs, String filter, String index, String login, String currentUserId) {
     Timber.tag("RecyclerViewRefresh").d("MemoryStore: Process documents from HashMap");
 
     new Processor(sub)
       .withDocuments(docs)
       .withFilter(filter)
       .withIndex(index)
+      .withLogin(login)
+      .withCurrentUserId(currentUserId)
       .execute();
 
 //    counterRecreate();
   }
 
   @Override
-  public void process(HashMap<String, Document> docs, String folderUid, DocumentType documentType ) {
+  public void process(HashMap<String, Document> docs, String folderUid, DocumentType documentType, String login, String currentUserId ) {
     Timber.tag("RecyclerViewRefresh").d("MemoryStore: Process documents from HashMap");
 
     new Processor(sub)
       .withDocuments(docs)
       .withFolder(folderUid)
       .withDocumentType(documentType)
+      .withLogin(login)
+      .withCurrentUserId(currentUserId)
       .execute();
   }
 

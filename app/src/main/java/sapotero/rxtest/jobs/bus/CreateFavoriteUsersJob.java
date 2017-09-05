@@ -26,9 +26,10 @@ public class CreateFavoriteUsersJob extends BaseJob {
 
   private String TAG = this.getClass().getSimpleName();
 
-  public CreateFavoriteUsersJob(ArrayList<Oshs> users) {
+  public CreateFavoriteUsersJob(ArrayList<Oshs> users, String login) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.users = users;
+    this.login = login;
   }
 
   @Override
@@ -53,7 +54,7 @@ public class CreateFavoriteUsersJob extends BaseJob {
   }
 
   private void add(Oshs user, int index) {
-    RFavoriteUserEntity data = mappers.getFavoriteUserMapper().toEntity(user);
+    RFavoriteUserEntity data = mappers.getFavoriteUserMapper().withLogin(login).toEntity(user);
     data.setSortIndex(index);
 
     dataStore
@@ -75,7 +76,7 @@ public class CreateFavoriteUsersJob extends BaseJob {
     Integer count = dataStore
       .count(RFavoriteUserEntity.UID)
       .where(RFavoriteUserEntity.UID.eq(uid))
-      .and(RFavoriteUserEntity.USER.eq(settings.getLogin()))
+      .and(RFavoriteUserEntity.USER.eq(login))
       .get().value();
 
     if( count != 0 ){

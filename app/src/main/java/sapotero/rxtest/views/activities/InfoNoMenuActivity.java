@@ -284,7 +284,7 @@ public class InfoNoMenuActivity extends AppCompatActivity {
   }
 
   private void updateDocument() {
-    jobManager.addJobInBackground( new UpdateDocumentJob( UID, true ) );
+    jobManager.addJobInBackground( new UpdateDocumentJob( UID, true, settings.getLogin(), settings.getCurrentUserId() ) );
   }
 
   @Override

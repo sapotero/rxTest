@@ -7,11 +7,14 @@ import com.birbit.android.jobqueue.CancelReason;
 import com.birbit.android.jobqueue.Params;
 import com.birbit.android.jobqueue.RetryConstraint;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.ArrayList;
 
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RColleagueEntity;
+import sapotero.rxtest.events.view.UpdateDrawerEvent;
 import sapotero.rxtest.retrofit.models.Colleague;
 import timber.log.Timber;
 
@@ -23,9 +26,10 @@ public class CreateColleagueJob extends BaseJob {
 
   private String TAG = this.getClass().getSimpleName();
 
-  public CreateColleagueJob(ArrayList<Colleague> users) {
+  public CreateColleagueJob(ArrayList<Colleague> users, String login) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.users = users;
+    this.login = login;
   }
 
   @Override
@@ -42,10 +46,14 @@ public class CreateColleagueJob extends BaseJob {
       index++;
     }
 
+    // In substitute mode update drawer only once to display the colleague we currently substitute
+    if ( settings.isSubstituteMode() ) {
+      EventBus.getDefault().post( new UpdateDrawerEvent() );
+    }
   }
 
   private void add(Colleague user, int index) {
-    RColleagueEntity data = mappers.getColleagueMapper().toEntity(user);
+    RColleagueEntity data = mappers.getColleagueMapper().withLogin(login).toEntity(user);
     data.setSortIndex(index);
 
     dataStore
@@ -55,6 +63,11 @@ public class CreateColleagueJob extends BaseJob {
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(u -> {
         Timber.tag(TAG).v("addByOne " + u.getOfficialName() );
+
+        // If not in substitute mode update drawer for every actived colleague
+        if ( u.isActived() && !settings.isSubstituteMode() ) {
+          EventBus.getDefault().post( new UpdateDrawerEvent() );
+        }
       }, Timber::e);
   }
 
@@ -67,7 +80,7 @@ public class CreateColleagueJob extends BaseJob {
     Integer count = dataStore
       .count(RColleagueEntity.class)
       .where(RColleagueEntity.COLLEAGUE_ID.eq(user))
-      .and(RColleagueEntity.USER.eq(settings.getLogin()))
+      .and(RColleagueEntity.USER.eq(login))
       .get().value();
 
     if( count != 0 ){

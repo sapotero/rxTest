@@ -559,8 +559,10 @@ public class InfoActivity extends AppCompatActivity {
         // или он обработан и время последней команды старше 5 мин
         || ( doc != null && doc.isProcessed() && doc.getUpdatedAt() != null
         && DateUtil.isSomeTimePassed( doc.getUpdatedAt(), time ) )
+        // или он из папки Обработанное
+        || ( doc != null && doc.getDocument() != null && doc.getDocument().isFromProcessedFolder() )
     ){
-      jobManager.addJobInBackground( new UpdateDocumentJob( settings.getUid() ) );
+      jobManager.addJobInBackground( new UpdateDocumentJob( settings.getUid(), settings.getLogin(), settings.getCurrentUserId() ) );
     }
   }
 

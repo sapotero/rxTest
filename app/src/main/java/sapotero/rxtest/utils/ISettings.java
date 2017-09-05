@@ -94,6 +94,10 @@ public interface ISettings {
 
   void setCurrentUserPosition(String value);
 
+  String getCurrentUserImage();
+
+  void setCurrentUserImage(String value);
+
   int getMainMenuPosition();
 
   void setMainMenuPosition(int value);
@@ -230,7 +234,41 @@ public interface ISettings {
 
   void setOrganizationFilterSelection(Set<String> value);
 
+  boolean isSubstituteMode();
+
+  Preference<Boolean> getSubstituteModePreference();
+
+  void setSubstituteMode(boolean value);
+
+  String getOldLogin();
+
+  void setOldLogin(String value);
+
+  String getOldCurrentUser();
+
+  void setOldCurrentUser(String value);
+
+  String getOldCurrentUserOrganization();
+
+  void setOldCurrentUserOrganization(String value);
+
+  String getOldCurrentUserImage();
+
+  void setOldCurrentUserImage(String value);
+
+  String getColleagueId();
+
+  void setColleagueId(String value);
+
+  boolean isUpdateAuthStarted();
+
+  void setUpdateAuthStarted(boolean value);
+
   boolean isTabChanged();
 
   void setTabChanged(boolean value);
+
+  boolean isStartRegularRefresh();
+
+  void setStartRegularRefresh(boolean value);
 }
