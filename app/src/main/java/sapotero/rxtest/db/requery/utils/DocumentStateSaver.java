@@ -33,7 +33,10 @@ public class DocumentStateSaver {
   public void saveDocumentState(RDocumentEntity doc, String currentLogin, String TAG) {
     createUpdateDocumentStateForLogin( doc, doc.getUser(), TAG );
     dropDocumentState( doc, TAG );
-    createUpdateDocumentStateForLogin( doc, currentLogin, TAG );
+    RDocumentEntity doc2 = getDocumentEntity( doc.getUid() ); // берем из базы обновленный документ после очищения
+    if ( doc2 != null ) {
+      createUpdateDocumentStateForLogin( doc2, currentLogin, TAG );
+    }
   }
 
   private void createUpdateDocumentStateForLogin(RDocumentEntity doc, String login, String TAG) {
@@ -47,13 +50,16 @@ public class DocumentStateSaver {
       saveFields( stateEntity, doc );
       dataStore
         .update( stateEntity )
-        .toObservable()
-        .subscribeOn(Schedulers.computation())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(
-          result -> Timber.tag(TAG).d("Updated document state in RStateEntity table %s for %s", result.getUid(), login),
-          error -> Timber.tag(TAG).e(error)
-        );
+        .toBlocking().value();
+//        .toObservable()
+//        .subscribeOn(Schedulers.computation())
+//        .observeOn(AndroidSchedulers.mainThread())
+//        .subscribe(
+//          result -> Timber.tag(TAG).d("Updated document state in RStateEntity table %s for %s", result.getUid(), login),
+//          error -> Timber.tag(TAG).e(error)
+//        );
+
+      Timber.tag(TAG).d("Updated document state in RStateEntity table %s for %s", stateEntity.getUid(), login);
 
     } else {
       stateEntity = new RStateEntity();
@@ -62,13 +68,16 @@ public class DocumentStateSaver {
       saveFields( stateEntity, doc );
       dataStore
         .insert( stateEntity )
-        .toObservable()
-        .subscribeOn(Schedulers.computation())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(
-          result -> Timber.tag(TAG).d("Added document state to RStateEntity table %s for %s", result.getUid(), login),
-          error -> Timber.tag(TAG).e(error)
-        );
+        .toBlocking().value();
+//        .toObservable()
+//        .subscribeOn(Schedulers.computation())
+//        .observeOn(AndroidSchedulers.mainThread())
+//        .subscribe(
+//          result -> Timber.tag(TAG).d("Added document state to RStateEntity table %s for %s", result.getUid(), login),
+//          error -> Timber.tag(TAG).e(error)
+//        );
+
+      Timber.tag(TAG).d("Added document state to RStateEntity table %s for %s", stateEntity.getUid(), login);
     }
   }
 
@@ -88,6 +97,7 @@ public class DocumentStateSaver {
       .set( RDocumentEntity.REJECTED, false )
       .set( RDocumentEntity.RETURNED, false )
       .set( RDocumentEntity.AGAIN, false )
+      .set( RDocumentEntity.UPDATED_AT, null )
       .where(RDocumentEntity.UID.eq( doc.getUid() ))
       .get()
       .value();
@@ -105,6 +115,7 @@ public class DocumentStateSaver {
     stateEntity.setReturned( doc.isReturned() );
     stateEntity.setRejected( doc.isRejected() );
     stateEntity.setAgain( doc.isAgain() );
+    stateEntity.setUpdatedAt( doc.getUpdatedAt() );
   }
 
   // При переключении режима:
@@ -156,13 +167,16 @@ public class DocumentStateSaver {
       restoreFields( stateEntity, doc, login );
       dataStore
         .update( doc )
-        .toObservable()
-        .subscribeOn(Schedulers.computation())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(
-          result -> Timber.tag(TAG).d("Restored document state from RStateEntity table %s for %s", result.getUid(), login),
-          error -> Timber.tag(TAG).e(error)
-        );
+        .toBlocking().value();
+//        .toObservable()
+//        .subscribeOn(Schedulers.computation())
+//        .observeOn(AndroidSchedulers.mainThread())
+//        .subscribe(
+//          result -> Timber.tag(TAG).d("Restored document state from RStateEntity table %s for %s", result.getUid(), login),
+//          error -> Timber.tag(TAG).e(error)
+//        );
+
+      Timber.tag(TAG).d("Restored document state from RStateEntity table %s for %s", doc.getUid(), login);
     }
   }
 
@@ -179,5 +193,6 @@ public class DocumentStateSaver {
     doc.setReturned( stateEntity.isReturned() );
     doc.setRejected( stateEntity.isRejected() );
     doc.setAgain( stateEntity.isAgain() );
+    doc.setUpdatedAt( stateEntity.getUpdatedAt() );
   }
 }

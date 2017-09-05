@@ -330,6 +330,7 @@ public class Processor {
           new DocumentStateSaver().saveDocumentState( documentInDb, login, TAG );
           documentInMemory = InMemoryDocumentMapper.fromDB( documentInDb );
           documentInMemory.setMd5("");
+          documentInMemory.setUpdatedAt( null );
           store.getDocuments().put( uid, documentInMemory );
         }
       }
