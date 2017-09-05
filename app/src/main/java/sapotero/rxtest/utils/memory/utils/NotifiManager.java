@@ -27,10 +27,6 @@ public class NotifiManager {
     @Inject Context appContext;
    //@Inject ISettings settings;
 
-
-
-
-
     private final String TAG = NotifiManager.class.getSimpleName();
     private List<String> addedDocList;
     private HashMap<String, Document> documentsMap;
