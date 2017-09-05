@@ -10,7 +10,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -39,7 +38,6 @@ import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import timber.log.Timber;
 
-import static com.googlecode.totallylazy.Sequences.breakOn;
 import static com.googlecode.totallylazy.Sequences.cartesianProduct;
 import static com.googlecode.totallylazy.Sequences.sequence;
 
@@ -243,8 +241,6 @@ public class Processor {
         List<String> remove = new ArrayList<>(memory);
         remove.removeAll(api);
 
-
-
         Timber.tag(TAG).e("add: %s", add.size());
         Timber.tag(TAG).e("rem: %s", remove.size());
 
@@ -254,10 +250,11 @@ public class Processor {
             updateAndSetProcessed( uid );
         }
 
+
         validateDocuments();
-          if (add.size() > 0) {
-             generateNotifiMsg(add);
-          }
+        if (add.size() > 0) {
+            generateNotificationMsg(add);
+        }
 
         return Collections.singletonList("");
       })
@@ -275,12 +272,9 @@ public class Processor {
 
     return new ArrayList<>();
   }
-    /* генерация уведомления, в случ. получения нового документа, отсутствующего в MemoryStore*/
-    private void generateNotifiMsg(List<String> addedDocList) {
-        Timber.tag(TAG).d("this.index = " + this.index );
-        Timber.tag(TAG).d("this.filter = " + this.filter );
-        Timber.tag(TAG).d("addedDocList.size() = " + addedDocList.size() );
-        NotifiManager mNotifiManager = new NotifiManager(addedDocList, documents);
+    /* генерируем уведомления, если в MemoryStore появился новый документ. addedDocList - List новых документов*/
+    private void generateNotificationMsg(List<String> addedDocList) {
+      NotifiManager mNotifiManager = new NotifiManager(addedDocList, documents, index, filter);
 
         if(index != null){
             switch (index){
@@ -294,7 +288,7 @@ public class Processor {
                     mNotifiManager.generateNotifyMsg("Вам поступил НПА:");}
                 break;
 
-                case "orders_production_db_core_cards_orders_cards":                           /*Приказ */
+                case "orders_production_db_core_cards_orders_cards":                           /*Приказ*/
                 if(settings.getNotificatedJournals().contains(ORDERS)){
                     mNotifiManager.generateNotifyMsg("Вам поступил Приказ:");}
                 break;
@@ -316,11 +310,11 @@ public class Processor {
                     mNotifiManager.generateNotifyMsg("Вам поступило Обращение граждан:");}
                 break;
             }
-        } else if(filter == "signing"){
+        } else if(filter == "signing"){                                                        /*документ на подпись*/
             if (settings.getNotificatedJournals().contains(SIGNING_OR_APPROVAL)){
                 mNotifiManager.generateNotifyMsg("Вам поступил документ на согласование:");
             }
-        } else if (filter == "approval"){                                                        /*документ на подпись или на согласование*/
+        } else if (filter == "approval"){                                                      /*документ на согласование*/
             if (settings.getNotificatedJournals().contains(SIGNING_OR_APPROVAL)){
                 mNotifiManager.generateNotifyMsg("Вам поступил документ на подпись:");
             }

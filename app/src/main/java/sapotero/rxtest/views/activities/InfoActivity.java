@@ -62,6 +62,7 @@ import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentInfoActivityEvent;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.managers.toolbar.ToolbarManager;
+import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.services.task.UpdateCurrentDocumentTask;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
@@ -103,6 +104,14 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   private ScheduledThreadPoolExecutor scheduller;
 
   private List<String> documentUids;
+  /*ключи EXTRA. Для передачи в PendingIntent в NotifiManager */
+  private static final String EXTRA_DOCUMENTUID_KEY              = "document_uid";
+  private static final String EXTRA_IS_PROJECT_KEY               = "is_project";
+  private static final String EXTRA_REGISTRATION_NUMBER_KEY      = "registration_number";
+  private static final String EXTRA_STATUS_CODE_KEY              = "status_code";
+  private static final String EXTRA_IS_LOAD_FROM_SEARCHE_KEY     = "is_load_from_search";
+  private static final String EXTRA_REGISTRATION_DATE_KEY        = "registration_date";
+  private static final String EXTRA_IS_FROM_NOTIFICATION_BAR_KEY = "is_from_notification";
 
   public static Intent newIntent(Context context, ArrayList<String> documentUids) {
     Intent intent = new Intent(context, InfoActivity.class);
@@ -110,15 +119,41 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     return intent;
   }
 
+  public static Intent newIntent(Context context, Document document, String filter ) {
+    Intent intent = new Intent(context, InfoActivity.class);
+    intent.putExtra(EXTRA_DOCUMENTUID_KEY, document.getUid());
+    intent.putExtra(EXTRA_IS_PROJECT_KEY,document.isProject());
+    intent.putExtra(EXTRA_REGISTRATION_NUMBER_KEY, document.getRegistrationNumber());
+    intent.putExtra(EXTRA_STATUS_CODE_KEY, filter);
+    intent.putExtra(EXTRA_IS_LOAD_FROM_SEARCHE_KEY, true);
+    intent.putExtra(EXTRA_REGISTRATION_DATE_KEY, document.getRegistrationDate() );
+    intent.putExtra(EXTRA_IS_FROM_NOTIFICATION_BAR_KEY, true);
+    return intent;
+  }
+
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
-
     setTheme(R.style.AppTheme);
     super.onCreate(savedInstanceState);
-
     setContentView(R.layout.activity_info);
     ButterKnife.bind(this);
     EsdApplication.getManagerComponent().inject(this);
+    boolean isFromNotificationBar = false;
+
+    if (getIntent().getExtras() != null){
+      isFromNotificationBar =  getIntent().getExtras().getBoolean(EXTRA_IS_FROM_NOTIFICATION_BAR_KEY, false);
+    }
+
+    if ( isFromNotificationBar ) {
+      settings.setUid(getIntent().getStringExtra(EXTRA_DOCUMENTUID_KEY));
+      settings.setIsProject(getIntent().getBooleanExtra(EXTRA_IS_PROJECT_KEY,true)) ;
+      settings.setMainMenuPosition( 0 );
+      settings.setRegNumber(getIntent().getStringExtra(EXTRA_REGISTRATION_NUMBER_KEY));
+      settings.setStatusCode(getIntent().getStringExtra(EXTRA_STATUS_CODE_KEY));
+      settings.setLoadFromSearch(getIntent().getBooleanExtra(EXTRA_IS_LOAD_FROM_SEARCHE_KEY,true));
+      settings.setRegDate(getIntent().getStringExtra(EXTRA_REGISTRATION_DATE_KEY));
+    }
 
     clearImageIndex();
 
@@ -146,7 +181,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
     setTabContent();
     setPreview();
-
   }
 
   private void setTabContent() {
