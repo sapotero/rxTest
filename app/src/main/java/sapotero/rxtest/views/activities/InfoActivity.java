@@ -104,7 +104,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   private ScheduledThreadPoolExecutor scheduller;
 
   private List<String> documentUids;
-  /*ключи EXTRA. Для передачи в PendingIntent в NotifiManager */
+  /*ключи EXTRA. Для передачи в PendingIntent в NotifiManager*/
   private static final String EXTRA_DOCUMENTUID_KEY              = "document_uid";
   private static final String EXTRA_IS_PROJECT_KEY               = "is_project";
   private static final String EXTRA_REGISTRATION_NUMBER_KEY      = "registration_number";
@@ -139,7 +139,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     setContentView(R.layout.activity_info);
     ButterKnife.bind(this);
     EsdApplication.getManagerComponent().inject(this);
-    boolean isFromNotificationBar = false;
+    boolean isFromNotificationBar = false; /*если intent "прилетел" из NotifiManager -> значение будет true*/
 
     if (getIntent().getExtras() != null){
       isFromNotificationBar =  getIntent().getExtras().getBoolean(EXTRA_IS_FROM_NOTIFICATION_BAR_KEY, false);

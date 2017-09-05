@@ -67,7 +67,7 @@ public class Processor {
   private Transaction transaction;
   private Source source = Source.EMPTY;
 
-  /*константы чекбоксов, в настройках уведомлений журналов */
+  /*константы чекбоксов, в настройках уведомлений для журналов */
   private final String INCOMING_DOCUMENTS    = "1";
   private final String CITIZEN_REQUESTS      = "2";
   private final String NPA                   = "3";
@@ -274,12 +274,12 @@ public class Processor {
   }
     /* генерируем уведомления, если в MemoryStore появился новый документ. addedDocList - List новых документов*/
     private void generateNotificationMsg(List<String> addedDocList) {
-      NotifiManager mNotifiManager = new NotifiManager(addedDocList, documents, index, filter);
+      NotifiManager mNotifiManager = new NotifiManager(addedDocList, documents, filter);
 
         if(index != null){
             switch (index){
                 case "incoming_documents_production_db_core_cards_incoming_documents_cards":   /*Входящий документ*/
-                if(settings.getNotificatedJournals().contains(INCOMING_DOCUMENTS) ) {
+                if(settings.getNotificatedJournals().contains(INCOMING_DOCUMENTS)) {
                     mNotifiManager.generateNotifyMsg("Вам поступил Входящий документ:");}
                 break;
 
