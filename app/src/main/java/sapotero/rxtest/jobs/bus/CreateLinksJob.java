@@ -9,6 +9,8 @@ import com.birbit.android.jobqueue.RetryConstraint;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.Objects;
+
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.mapper.DocumentMapper;
@@ -49,6 +51,12 @@ public class CreateLinksJob extends DocumentJob {
 
   @Override
   public void onRun() throws Throwable {
+    if ( !Objects.equals( login, settings.getLogin() ) ) {
+      // Запускаем job только если логин не сменился (режим замещения)
+      Timber.tag(TAG).d("Login changed, quit onRun %s", linkUid);
+      return;
+    }
+
     RDocumentEntity existingLink =
       dataStore
         .select(RDocumentEntity.class)
@@ -99,6 +107,12 @@ public class CreateLinksJob extends DocumentJob {
 
   @Override
   public void doAfterLoad(DocumentInfo document) {
+    if ( !Objects.equals( login, settings.getLogin() ) ) {
+      // Обрабатываем загруженный документ только если логин не сменился (режим замещения)
+      Timber.tag(TAG).d("Login changed, quit doAfterLoad %s", document.getUid());
+      return;
+    }
+
     DocumentMapper documentMapper = mappers.getDocumentMapper().withLogin(login).withCurrentUserId(currentUserId);
     RDocumentEntity doc = new RDocumentEntity();
 

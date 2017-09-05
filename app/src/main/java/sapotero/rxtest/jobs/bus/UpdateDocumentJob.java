@@ -138,6 +138,12 @@ public class UpdateDocumentJob extends DocumentJob {
 
   @Override
   public void doAfterLoad(DocumentInfo documentReceived) {
+    if ( !Objects.equals( login, settings.getLogin() ) ) {
+      // Обрабатываем загруженный документ только если логин не сменился (режим замещения)
+      Timber.tag(TAG).d("Login changed, quit doAfterLoad %s", uid);
+      return;
+    }
+
     Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: doAfterLoad");
 
     RDocumentEntity documentExisting = dataStore

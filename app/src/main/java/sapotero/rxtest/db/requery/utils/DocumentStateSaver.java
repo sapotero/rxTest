@@ -32,7 +32,7 @@ public class DocumentStateSaver {
   // (нужно, чтобы для этого документа было сохранено состояние при обратном переключении режима)
   public void saveDocumentState(RDocumentEntity doc, String currentLogin, String TAG) {
     createUpdateDocumentStateForLogin( doc, doc.getUser(), TAG );
-    dropDocumentState( doc );
+    dropDocumentState( doc, TAG );
     createUpdateDocumentStateForLogin( doc, currentLogin, TAG );
   }
 
@@ -51,7 +51,7 @@ public class DocumentStateSaver {
         .subscribeOn(Schedulers.computation())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(
-          result -> Timber.tag(TAG).d("Updated document state in RStateEntity table"),
+          result -> Timber.tag(TAG).d("Updated document state in RStateEntity table %s for %s", result.getUid(), login),
           error -> Timber.tag(TAG).e(error)
         );
 
@@ -66,13 +66,15 @@ public class DocumentStateSaver {
         .subscribeOn(Schedulers.computation())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(
-          result -> Timber.tag(TAG).d("Added document state to RStateEntity table"),
+          result -> Timber.tag(TAG).d("Added document state to RStateEntity table %s for %s", result.getUid(), login),
           error -> Timber.tag(TAG).e(error)
         );
     }
   }
 
-  private void dropDocumentState(RDocumentEntity doc) {
+  private void dropDocumentState(RDocumentEntity doc, String TAG) {
+    Timber.tag(TAG).d("Drop document state for %s", doc.getUid());
+
     dataStore
       .update(RDocumentEntity.class)
       .set( RDocumentEntity.FILTER, "")
@@ -158,7 +160,7 @@ public class DocumentStateSaver {
         .subscribeOn(Schedulers.computation())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(
-          result -> Timber.tag(TAG).d("Restored document state from RStateEntity table"),
+          result -> Timber.tag(TAG).d("Restored document state from RStateEntity table %s for %s", result.getUid(), login),
           error -> Timber.tag(TAG).e(error)
         );
     }

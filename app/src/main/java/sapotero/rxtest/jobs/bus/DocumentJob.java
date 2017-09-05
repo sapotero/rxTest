@@ -63,6 +63,12 @@ abstract class DocumentJob extends BaseJob {
   }
 
   void loadDocument(String uid, String TAG) {
+    if ( !Objects.equals( login, settings.getLogin() ) ) {
+      // Загружаем документ только если логин не сменился (режим замещения)
+      Timber.tag(TAG).d("Login changed, quit loading %s", uid);
+      return;
+    }
+
     Observable<DocumentInfo> info = getDocumentInfoObservable(uid);
 
     info
@@ -112,6 +118,12 @@ abstract class DocumentJob extends BaseJob {
   }
 
   void saveDocument(DocumentInfo documentReceived, RDocumentEntity documentToSave, boolean isLink, String TAG) {
+    if ( !Objects.equals( login, settings.getLogin() ) ) {
+      // Сохраняем документ только если логин не сменился (режим замещения)
+      Timber.tag(TAG).d("Login changed, quit saving %s", documentToSave.getUid());
+      return;
+    }
+
     RDocumentEntity existingDoc =
       dataStore
         .select(RDocumentEntity.class)

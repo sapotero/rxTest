@@ -11,6 +11,7 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Objects;
 
 import sapotero.rxtest.db.mapper.DocumentMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
@@ -48,6 +49,12 @@ public class CreateProcessedDocumentsJob extends DocumentJob {
 
   @Override
   public void doAfterLoad(DocumentInfo document) {
+    if ( !Objects.equals( login, settings.getLogin() ) ) {
+      // Обрабатываем загруженный документ только если логин не сменился (режим замещения)
+      Timber.tag(TAG).d("Login changed, quit doAfterLoad %s", document.getUid());
+      return;
+    }
+
     DocumentMapper documentMapper = mappers.getDocumentMapper().withLogin(login).withCurrentUserId(currentUserId);
     RDocumentEntity doc = new RDocumentEntity();
 
