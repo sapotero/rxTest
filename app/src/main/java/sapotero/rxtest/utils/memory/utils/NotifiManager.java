@@ -25,7 +25,7 @@ import sapotero.rxtest.views.activities.MainActivity;
 public class NotifiManager {
 
     @Inject Context appContext;
-//  @Inject ISettings settings;
+    //@Inject ISettings settings;
 
     private final String TAG = NotifiManager.class.getSimpleName();
     private List<String> addedDocList;
