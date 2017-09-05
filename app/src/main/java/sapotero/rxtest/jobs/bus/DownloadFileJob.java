@@ -15,6 +15,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Objects;
 
 import okhttp3.ResponseBody;
 import retrofit2.Response;
@@ -56,6 +57,12 @@ public class DownloadFileJob  extends BaseJob {
 
   @Override
   public void onRun() throws Throwable {
+    if ( !Objects.equals( login, settings.getLogin() ) ) {
+      // Запускаем job только если логин не сменился (режим замещения)
+      Timber.tag(TAG).d("Login changed, quit onRun for image %s", rImageId);
+      return;
+    }
+
     getImage();
 
     boolean sendEvent = true;
