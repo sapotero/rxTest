@@ -163,6 +163,7 @@ public class InfoActivity extends AppCompatActivity {
 
     if (viewPagerAdapter != null) {
       Timber.tag(TAG).e("adapter type: %s | type: %s", viewPagerAdapter.getLabel(), type );
+//      Timber.tag(TAG).e("adapter type: %s | type: %s", viewPagerAdapter.getLabel(), type );
     }
 
     if ( viewPagerAdapter != null && Objects.equals(viewPagerAdapter.getLabel(), type)){
