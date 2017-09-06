@@ -1,6 +1,5 @@
 package sapotero.rxtest.jobs.bus;
 
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.birbit.android.jobqueue.CancelReason;
@@ -10,9 +9,12 @@ import com.birbit.android.jobqueue.RetryConstraint;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
+import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.db.mapper.TemplateMapper;
 import sapotero.rxtest.db.requery.models.RTemplateEntity;
 import sapotero.rxtest.events.decision.AddDecisionTemplateEvent;
 import sapotero.rxtest.retrofit.models.Template;
@@ -40,53 +42,34 @@ public class CreateTemplatesJob extends BaseJob {
 
   @Override
   public void onRun() throws Throwable {
-    for (Template template : templates){
-      if ( !exist( template.getId()) ){
-        add(template);
-      }
+    List<RTemplateEntity> templateEntityList = new ArrayList<>();
+    TemplateMapper mapper = mappers.getTemplateMapper().withLogin(login);
+
+    for (Template template : templates) {
+      RTemplateEntity templateEntity = mapper.toEntity(template);
+      templateEntity.setType( type != null && !Objects.equals(type, "") ? type : "decision");
+      templateEntityList.add(templateEntity);
     }
-
-  }
-
-  private void add(Template template) {
-    RTemplateEntity data = mappers.getTemplateMapper().withLogin(login).toEntity(template);
-    data.setType( type != null && !Objects.equals(type, "") ? type : "decision");
 
     dataStore
-      .insert(data)
+      .insert(templateEntityList)
       .toObservable()
       .subscribeOn(Schedulers.computation())
-      .observeOn(Schedulers.io())
-      .subscribe(u -> {
-        Timber.tag(TAG).v("addByOne " + u.getTitle() );
-        EventBus.getDefault().post( new AddDecisionTemplateEvent() );
-      }, Timber::e);
-  }
-
-
-  @NonNull
-  private Boolean exist(String uid){
-
-    boolean result = false;
-
-    Integer count = dataStore
-      .count(RTemplateEntity.UID)
-      .where(RTemplateEntity.UID.eq(uid))
-      .get().value();
-
-    if( count != 0 ){
-      result = true;
-    }
-
-    Timber.tag(TAG).v("exist " + result );
-
-    return result;
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(
+        u -> {
+          Timber.tag(TAG).v("Added templates");
+          EventBus.getDefault().post( new AddDecisionTemplateEvent() );
+        },
+        Timber::e
+      );
   }
 
   @Override
   protected RetryConstraint shouldReRunOnThrowable(Throwable throwable, int runCount, int maxRunCount) {
     return RetryConstraint.createExponentialBackoff(runCount, 1000);
   }
+
   @Override
   protected void onCancel(@CancelReason int cancelReason, @Nullable Throwable throwable) {
     // Job has exceeded retry attempts or shouldReRunOnThrowable() has decided to cancel.

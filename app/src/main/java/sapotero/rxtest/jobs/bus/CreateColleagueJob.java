@@ -1,6 +1,5 @@
 package sapotero.rxtest.jobs.bus;
 
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.birbit.android.jobqueue.CancelReason;
@@ -10,9 +9,11 @@ import com.birbit.android.jobqueue.RetryConstraint;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.db.mapper.ColleagueMapper;
 import sapotero.rxtest.db.requery.models.RColleagueEntity;
 import sapotero.rxtest.events.view.UpdateDrawerEvent;
 import sapotero.rxtest.retrofit.models.Colleague;
@@ -39,57 +40,30 @@ public class CreateColleagueJob extends BaseJob {
   @Override
   public void onRun() throws Throwable {
     int index = 0;
-    for (Colleague user : users){
-      if ( !exist( user.getColleagueId()) ){
-        add(user, index);
-      }
+
+    List<RColleagueEntity> colleagueEntityList = new ArrayList<>();
+    ColleagueMapper mapper = mappers.getColleagueMapper().withLogin(login);
+
+    for (Colleague user : users) {
+      RColleagueEntity colleagueEntity = mapper.toEntity(user);
+      colleagueEntity.setSortIndex(index);
+      colleagueEntityList.add(colleagueEntity);
       index++;
     }
 
-    // In substitute mode update drawer only once to display the colleague we currently substitute
-    if ( settings.isSubstituteMode() ) {
-      EventBus.getDefault().post( new UpdateDrawerEvent() );
-    }
-  }
-
-  private void add(Colleague user, int index) {
-    RColleagueEntity data = mappers.getColleagueMapper().withLogin(login).toEntity(user);
-    data.setSortIndex(index);
-
     dataStore
-      .insert(data)
+      .insert(colleagueEntityList)
       .toObservable()
       .subscribeOn(Schedulers.computation())
       .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(u -> {
-        Timber.tag(TAG).v("addByOne " + u.getOfficialName() );
-
-        // If not in substitute mode update drawer for every actived colleague
-        if ( u.isActived() && !settings.isSubstituteMode() ) {
+      .subscribe(
+        u -> {
+          Timber.tag(TAG).v("Added colleagues");
+          // Update drawer only once after all colleagues created
           EventBus.getDefault().post( new UpdateDrawerEvent() );
-        }
-      }, Timber::e);
-  }
-
-
-  @NonNull
-  private Boolean exist(String user){
-
-    boolean result = false;
-
-    Integer count = dataStore
-      .count(RColleagueEntity.class)
-      .where(RColleagueEntity.COLLEAGUE_ID.eq(user))
-      .and(RColleagueEntity.USER.eq(login))
-      .get().value();
-
-    if( count != 0 ){
-      result = true;
-    }
-
-    Timber.tag(TAG).v("exist " + result );
-
-    return result;
+        },
+        Timber::e
+      );
   }
 
   @Override

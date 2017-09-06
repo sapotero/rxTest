@@ -820,20 +820,16 @@ public class MainService extends Service {
   // При первом входе загружать документы из папки избранное и обработанное
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(FolderCreatedEvent event){
-    if ( Objects.equals( event.getType(), "favorites" ) ) {
-      if ( !settings.isFavoritesLoaded() ) {
-        Timber.tag("LoadSequence").d("Favorites folder created, starting update");
-        settings.setFavoritesLoaded(true);
-        dataLoaderInterface.updateFavorites(false);
-      }
+    if ( !settings.isFavoritesLoaded() ) {
+      Timber.tag("LoadSequence").d("Favorites folder created, starting update");
+      settings.setFavoritesLoaded(true);
+      dataLoaderInterface.updateFavorites(false);
     }
 
-    if ( Objects.equals( event.getType(), "processed" ) ) {
-      if ( !settings.isProcessedLoaded() ) {
-        Timber.tag("LoadSequence").d("Processed folder created, starting update");
-        settings.setProcessedLoaded(true);
-        dataLoaderInterface.updateProcessed(false);
-      }
+    if ( !settings.isProcessedLoaded() ) {
+      Timber.tag("LoadSequence").d("Processed folder created, starting update");
+      settings.setProcessedLoaded(true);
+      dataLoaderInterface.updateProcessed(false);
     }
   }
 

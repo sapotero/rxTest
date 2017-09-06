@@ -6,8 +6,6 @@ import javax.inject.Inject;
 
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.utils.RStateEntity;
@@ -33,7 +31,10 @@ public class DocumentStateSaver {
   public void saveDocumentState(RDocumentEntity doc, String currentLogin, String TAG) {
     createUpdateDocumentStateForLogin( doc, doc.getUser(), TAG );
     dropDocumentState( doc, TAG );
-    createUpdateDocumentStateForLogin( doc, currentLogin, TAG );
+    RDocumentEntity doc2 = getDocumentEntity( doc.getUid() ); // берем из базы обновленный документ после очищения
+    if ( doc2 != null ) {
+      createUpdateDocumentStateForLogin( doc2, currentLogin, TAG );
+    }
   }
 
   private void createUpdateDocumentStateForLogin(RDocumentEntity doc, String login, String TAG) {
@@ -44,31 +45,48 @@ public class DocumentStateSaver {
       .get().firstOrNull();
 
     if ( stateEntity != null ) {
-      saveFields( stateEntity, doc );
       dataStore
-        .update( stateEntity )
-        .toObservable()
-        .subscribeOn(Schedulers.computation())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(
-          result -> Timber.tag(TAG).d("Updated document state in RStateEntity table %s for %s", result.getUid(), login),
-          error -> Timber.tag(TAG).e(error)
-        );
+        .update( RStateEntity.class )
+        .set( RStateEntity.FILTER, doc.getFilter() )
+        .set( RStateEntity.DOCUMENT_TYPE, doc.getDocumentType() )
+        .set( RStateEntity.CONTROL, doc.isControl() )
+        .set( RStateEntity.FAVORITES, doc.isFavorites() )
+        .set( RStateEntity.PROCESSED, doc.isProcessed() )
+        .set( RStateEntity.FROM_FAVORITES_FOLDER, doc.isFromFavoritesFolder() )
+        .set( RStateEntity.FROM_PROCESSED_FOLDER, doc.isFromProcessedFolder() )
+        .set( RStateEntity.FROM_LINKS, doc.isFromLinks() )
+        .set( RStateEntity.RETURNED, doc.isReturned() )
+        .set( RStateEntity.REJECTED, doc.isRejected() )
+        .set( RStateEntity.AGAIN, doc.isAgain() )
+        .set( RStateEntity.UPDATED_AT, doc.getUpdatedAt() )
+        .where( RStateEntity.UID.eq( doc.getUid() ))
+        .and( RStateEntity.USER.eq( login ))
+        .get()
+        .value();
+
+      Timber.tag(TAG).d("Updated document state in RStateEntity table %s for %s", doc.getUid(), login);
 
     } else {
-      stateEntity = new RStateEntity();
-      stateEntity.setUid( doc.getUid() );
-      stateEntity.setUser( login );
-      saveFields( stateEntity, doc );
       dataStore
-        .insert( stateEntity )
-        .toObservable()
-        .subscribeOn(Schedulers.computation())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(
-          result -> Timber.tag(TAG).d("Added document state to RStateEntity table %s for %s", result.getUid(), login),
-          error -> Timber.tag(TAG).e(error)
-        );
+        .insert( RStateEntity.class )
+        .value( RStateEntity.UID, doc.getUid() )
+        .value( RStateEntity.USER, login )
+        .value( RStateEntity.FILTER, doc.getFilter() )
+        .value( RStateEntity.DOCUMENT_TYPE, doc.getDocumentType() )
+        .value( RStateEntity.CONTROL, doc.isControl() )
+        .value( RStateEntity.FAVORITES, doc.isFavorites() )
+        .value( RStateEntity.PROCESSED, doc.isProcessed() )
+        .value( RStateEntity.FROM_FAVORITES_FOLDER, doc.isFromFavoritesFolder() )
+        .value( RStateEntity.FROM_PROCESSED_FOLDER, doc.isFromProcessedFolder() )
+        .value( RStateEntity.FROM_LINKS, doc.isFromLinks() )
+        .value( RStateEntity.RETURNED, doc.isReturned() )
+        .value( RStateEntity.REJECTED, doc.isRejected() )
+        .value( RStateEntity.AGAIN, doc.isAgain() )
+        .value( RStateEntity.UPDATED_AT, doc.getUpdatedAt() )
+        .get()
+        .firstOrNull();
+
+      Timber.tag(TAG).d("Added document state to RStateEntity table %s for %s", doc.getUid(), login);
     }
   }
 
@@ -76,7 +94,7 @@ public class DocumentStateSaver {
     Timber.tag(TAG).d("Drop document state for %s", doc.getUid());
 
     dataStore
-      .update(RDocumentEntity.class)
+      .update( RDocumentEntity.class)
       .set( RDocumentEntity.FILTER, "")
       .set( RDocumentEntity.DOCUMENT_TYPE, "")
       .set( RDocumentEntity.CONTROL, false)
@@ -85,26 +103,13 @@ public class DocumentStateSaver {
       .set( RDocumentEntity.FROM_FAVORITES_FOLDER, false)
       .set( RDocumentEntity.FROM_PROCESSED_FOLDER, false)
       .set( RDocumentEntity.FROM_LINKS, false)
-      .set( RDocumentEntity.REJECTED, false )
       .set( RDocumentEntity.RETURNED, false )
+      .set( RDocumentEntity.REJECTED, false )
       .set( RDocumentEntity.AGAIN, false )
+      .set( RDocumentEntity.UPDATED_AT, null )
       .where(RDocumentEntity.UID.eq( doc.getUid() ))
       .get()
       .value();
-  }
-
-  private void saveFields(RStateEntity stateEntity, RDocumentEntity doc) {
-    stateEntity.setFilter( doc.getFilter() );
-    stateEntity.setDocumentType( doc.getDocumentType() );
-    stateEntity.setControl( doc.isControl() );
-    stateEntity.setFavorites( doc.isFavorites() );
-    stateEntity.setProcessed( doc.isProcessed() );
-    stateEntity.setFromFavoritesFolder( doc.isFromFavoritesFolder() );
-    stateEntity.setFromProcessedFolder( doc.isFromProcessedFolder() );
-    stateEntity.setFromLinks( doc.isFromLinks() );
-    stateEntity.setReturned( doc.isReturned() );
-    stateEntity.setRejected( doc.isRejected() );
-    stateEntity.setAgain( doc.isAgain() );
   }
 
   // При переключении режима:
@@ -150,34 +155,25 @@ public class DocumentStateSaver {
   }
 
   private void restoreDocumentState(RStateEntity stateEntity, String login, String TAG) {
-    RDocumentEntity doc = getDocumentEntity( stateEntity.getUid() );
+    dataStore
+      .update( RDocumentEntity.class )
+      .set( RDocumentEntity.USER, login )
+      .set( RDocumentEntity.FILTER, stateEntity.getFilter() )
+      .set( RDocumentEntity.DOCUMENT_TYPE, stateEntity.getDocumentType() )
+      .set( RDocumentEntity.CONTROL, stateEntity.isControl() )
+      .set( RDocumentEntity.FAVORITES, stateEntity.isFavorites() )
+      .set( RDocumentEntity.PROCESSED, stateEntity.isProcessed() )
+      .set( RDocumentEntity.FROM_FAVORITES_FOLDER, stateEntity.isFromFavoritesFolder() )
+      .set( RDocumentEntity.FROM_PROCESSED_FOLDER, stateEntity.isFromProcessedFolder() )
+      .set( RDocumentEntity.FROM_LINKS, stateEntity.isFromLinks() )
+      .set( RDocumentEntity.RETURNED, stateEntity.isReturned() )
+      .set( RDocumentEntity.REJECTED, stateEntity.isRejected() )
+      .set( RDocumentEntity.AGAIN, stateEntity.isAgain() )
+      .set( RDocumentEntity.UPDATED_AT, stateEntity.getUpdatedAt() )
+      .where( RDocumentEntity.UID.eq( stateEntity.getUid() ) )
+      .get()
+      .value();
 
-    if ( doc != null ) {
-      restoreFields( stateEntity, doc, login );
-      dataStore
-        .update( doc )
-        .toObservable()
-        .subscribeOn(Schedulers.computation())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(
-          result -> Timber.tag(TAG).d("Restored document state from RStateEntity table %s for %s", result.getUid(), login),
-          error -> Timber.tag(TAG).e(error)
-        );
-    }
-  }
-
-  private void restoreFields(RStateEntity stateEntity, RDocumentEntity doc, String login) {
-    doc.setUser( login );
-    doc.setFilter( stateEntity.getFilter() );
-    doc.setDocumentType( stateEntity.getDocumentType() );
-    doc.setControl( stateEntity.isControl() );
-    doc.setFavorites( stateEntity.isFavorites() );
-    doc.setProcessed( stateEntity.isProcessed() );
-    doc.setFromFavoritesFolder( stateEntity.isFromFavoritesFolder() );
-    doc.setFromProcessedFolder( stateEntity.isFromProcessedFolder() );
-    doc.setFromLinks( stateEntity.isFromLinks() );
-    doc.setReturned( stateEntity.isReturned() );
-    doc.setRejected( stateEntity.isRejected() );
-    doc.setAgain( stateEntity.isAgain() );
+    Timber.tag(TAG).d("Restored document state from RStateEntity table %s for %s", stateEntity.getUid(), login);
   }
 }

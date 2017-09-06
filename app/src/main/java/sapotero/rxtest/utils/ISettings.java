@@ -244,6 +244,10 @@ public interface ISettings {
 
   void setOldLogin(String value);
 
+  String getOldCurrentUserId();
+
+  void setOldCurrentUserId(String value);
+
   String getOldCurrentUser();
 
   void setOldCurrentUser(String value);

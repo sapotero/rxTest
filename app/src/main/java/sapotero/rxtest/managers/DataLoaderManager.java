@@ -39,6 +39,7 @@ import sapotero.rxtest.db.requery.models.RFavoriteUserEntity;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
 import sapotero.rxtest.db.requery.models.RPrimaryConsiderationEntity;
 import sapotero.rxtest.db.requery.models.RTemplateEntity;
+import sapotero.rxtest.db.requery.models.RUrgencyEntity;
 import sapotero.rxtest.events.auth.AuthDcCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthDcCheckSuccessEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
@@ -117,7 +118,6 @@ public class DataLoaderManager {
     unsubscribeInitV2();
 
     String login = settings.getLogin();
-    String currentUserId = settings.getCurrentUserId();
 
     subscriptionInitV2.add(
       // получаем данные о пользователе
@@ -137,8 +137,12 @@ public class DataLoaderManager {
               setCurrentUserPosition(user.getPosition());
               setCurrentUserImage(user.getImage());
 
+              String currentUserId = user.getId();
+
               deleteUsers(login);
               deleteTemplates(login);
+              deleteFolders(login);
+              deleteUrgencies(login);
 
               // получаем папки
               subscriptionInitV2.add(
@@ -159,7 +163,6 @@ public class DataLoaderManager {
                     }
                 })
               );
-
 
               subscriptionInitV2.add(
                 auth.getPrimaryConsiderationUsers(login, settings.getToken())
@@ -288,7 +291,7 @@ public class DataLoaderManager {
           error -> {
             Timber.tag("USER_INFO").e( "ERROR: %s", error);
             if ( Objects.equals( login, settings.getLogin() ) ) {
-              loadAllDocs( loadAllDocs, login, currentUserId );
+              loadAllDocs( loadAllDocs, login, settings.getCurrentUserId() );
             }
           })
     );
@@ -321,6 +324,20 @@ public class DataLoaderManager {
     dataStore
       .delete(RTemplateEntity.class)
       .where(RTemplateEntity.USER.eq(login))
+      .get().value();
+  }
+
+  private void deleteFolders(String login) {
+    dataStore
+      .delete(RFolderEntity.class)
+      .where(RFolderEntity.USER.eq(login))
+      .get().value();
+  }
+
+  private void deleteUrgencies(String login) {
+    dataStore
+      .delete(RUrgencyEntity.class)
+      .where(RUrgencyEntity.USER.eq(login))
       .get().value();
   }
 
