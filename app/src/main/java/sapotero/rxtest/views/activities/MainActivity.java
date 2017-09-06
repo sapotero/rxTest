@@ -751,7 +751,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
       addMainProfile( profiles );
 
-      profiles[1] = new ProfileDrawerItem()
+      Bitmap userImage = getUserImage( settings.getOldCurrentUserImage() );
+
+      ProfileDrawerItem profileDrawerItem = new ProfileDrawerItem()
         .withName( settings.getOldCurrentUser() )
         .withSelectable( false )
         .withSetSelected( false )
@@ -763,8 +765,15 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
             Toast.makeText(this, "Невозможно выйти из режима замещения: дождитесь обновления данных", Toast.LENGTH_SHORT).show();
           }
           return false;
-        })
-        .withIcon( R.drawable.gerb );
+        });
+
+      if ( userImage != null ) {
+        profileDrawerItem.withIcon( userImage );
+      } else {
+        profileDrawerItem.withIcon( R.drawable.gerb );
+      }
+
+      profiles[1] = profileDrawerItem;
     }
 
     AccountHeader headerResult = new AccountHeaderBuilder()
@@ -790,7 +799,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void addMainProfile(IProfile[] profiles) {
-    Bitmap userImage = getUserImage();
+    Bitmap userImage = getUserImage( settings.getCurrentUserImage() );
 
     ProfileDrawerItem profileDrawerItem = new ProfileDrawerItem()
       .withName( settings.getCurrentUserOrganization() )
@@ -808,9 +817,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-12618
   // Отображать фото пользователя
-  private Bitmap getUserImage() {
+  private Bitmap getUserImage(String imageString) {
     Bitmap imageBitmap = null;
-    String imageString = settings.getCurrentUserImage();
 
     if ( imageString != null && !Objects.equals(imageString, "" ) ) {
       try {
