@@ -141,7 +141,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
       index = savedInstanceState.getInt(STATE_CURRENT_PAGE_INDEX, 0);
     }
 
-    updateDocument();
+//    updateDocument();
 //    initSubscription();
 
     return view;
