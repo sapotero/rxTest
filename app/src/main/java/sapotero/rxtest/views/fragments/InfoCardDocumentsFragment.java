@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.FileProvider;
 import android.view.GestureDetector;
@@ -141,6 +142,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
       index = savedInstanceState.getInt(STATE_CURRENT_PAGE_INDEX, 0);
     }
 
+    new Handler().postDelayed(this::updateDocument, 200);
 //    updateDocument();
 //    initSubscription();
 
