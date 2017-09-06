@@ -11,16 +11,21 @@ import org.greenrobot.eventbus.EventBus;
 import java.util.ArrayList;
 import java.util.List;
 
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.mapper.ColleagueMapper;
 import sapotero.rxtest.db.requery.models.RColleagueEntity;
 import sapotero.rxtest.events.view.UpdateDrawerEvent;
 import sapotero.rxtest.retrofit.models.Colleague;
+import timber.log.Timber;
 
 
 public class CreateColleagueJob extends BaseJob {
 
   public static final int PRIORITY = 1;
   private final ArrayList<Colleague> users;
+
+  private String TAG = this.getClass().getSimpleName();
 
   public CreateColleagueJob(ArrayList<Colleague> users, String login) {
     super( new Params(PRIORITY).requireNetwork().persist() );
@@ -48,11 +53,17 @@ public class CreateColleagueJob extends BaseJob {
 
     dataStore
       .insert(colleagueEntityList)
-      .toBlocking().value();
-    // Blocking - to send update drawer event AFTER all colleagues created
-
-    // Update drawer only once after all colleagues created
-    EventBus.getDefault().post( new UpdateDrawerEvent() );
+      .toObservable()
+      .subscribeOn(Schedulers.computation())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(
+        u -> {
+          Timber.tag(TAG).v("Added colleagues");
+          // Update drawer only once after all colleagues created
+          EventBus.getDefault().post( new UpdateDrawerEvent() );
+        },
+        Timber::e
+      );
   }
 
   @Override
