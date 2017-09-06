@@ -297,7 +297,7 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
 
           if (file.exists()) {
             com.github.barteksc.pdfviewer.util.Constants.THUMBNAIL_RATIO = 1.0f;
-            com.github.barteksc.pdfviewer.util.Constants.PART_SIZE = 512;
+            com.github.barteksc.pdfviewer.util.Constants.PART_SIZE = 256;
 
             pdfView
               .fromStream(targetStream)
@@ -507,8 +507,8 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
   }
 
   private void disablePdfView() {
-    pdfView.setOnDragListener(null);
-    pdfView.setOnTouchListener(null);
+//    pdfView.setOnDragListener(null);
+//    pdfView.setOnTouchListener(null);
     pdfView.recycle();
   }
 
