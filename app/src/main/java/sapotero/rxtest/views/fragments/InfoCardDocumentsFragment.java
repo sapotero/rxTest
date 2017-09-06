@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.os.Handler;
 import android.support.v4.content.FileProvider;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -65,9 +65,10 @@ import sapotero.rxtest.views.activities.DocumentImageFullScreenActivity;
 import sapotero.rxtest.views.adapters.DocumentLinkAdapter;
 import sapotero.rxtest.views.custom.CircleLeftArrow;
 import sapotero.rxtest.views.custom.CircleRightArrow;
+import sapotero.rxtest.views.fragments.interfaces.PreviewFragment;
 import timber.log.Timber;
 
-public class InfoCardDocumentsFragment extends Fragment implements AdapterView.OnItemClickListener, GestureDetector.OnDoubleTapListener {
+public class InfoCardDocumentsFragment extends PreviewFragment implements AdapterView.OnItemClickListener, GestureDetector.OnDoubleTapListener {
 
   public static final int REQUEST_CODE_INDEX = 1;
   @Inject ISettings settings;
@@ -141,11 +142,18 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
       index = savedInstanceState.getInt(STATE_CURRENT_PAGE_INDEX, 0);
     }
 
-    updateDocument();
+    new Handler().postDelayed(this::updateDocument, 200);
+//    updateDocument();
 //    initSubscription();
 
     return view;
   }
+
+  @Override
+  public void update() {
+    updateDocument();
+  }
+
 
   private void initSubscription() {
     // TODO: создавать подписку только если образов больше 1
@@ -289,7 +297,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
           if (file.exists()) {
             com.github.barteksc.pdfviewer.util.Constants.THUMBNAIL_RATIO = 1.0f;
-            com.github.barteksc.pdfviewer.util.Constants.PART_SIZE = 512;
+            com.github.barteksc.pdfviewer.util.Constants.PART_SIZE = 256;
 
             pdfView
               .fromStream(targetStream)
@@ -499,8 +507,8 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   }
 
   private void disablePdfView() {
-    pdfView.setOnDragListener(null);
-    pdfView.setOnTouchListener(null);
+//    pdfView.setOnDragListener(null);
+//    pdfView.setOnTouchListener(null);
     pdfView.recycle();
   }
 

@@ -11,7 +11,6 @@ import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
@@ -91,11 +90,12 @@ import sapotero.rxtest.views.adapters.DecisionSpinnerAdapter;
 import sapotero.rxtest.views.adapters.models.DecisionSpinnerItem;
 import sapotero.rxtest.views.dialogs.DecisionMagniferFragment;
 import sapotero.rxtest.views.dialogs.SelectTemplateDialogFragment;
+import sapotero.rxtest.views.fragments.interfaces.PreviewFragment;
 import timber.log.Timber;
 
 
 @SuppressLint("ValidFragment")
-public class InfoActivityDecisionPreviewFragment extends Fragment implements SelectTemplateDialogFragment.Callback{
+public class InfoActivityDecisionPreviewFragment extends PreviewFragment implements SelectTemplateDialogFragment.Callback{
 
   @Inject ISettings settings;
   @Inject Mappers mappers;
@@ -326,6 +326,13 @@ public class InfoActivityDecisionPreviewFragment extends Fragment implements Sel
     super.onResume();
     invalidate();
   }
+
+  @Override
+  public void update() {
+    Timber.tag(TAG).d("update!");
+    invalidate();
+  }
+
 
   @Override
   public void onSelectTemplate(String template) {

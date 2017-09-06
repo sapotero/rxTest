@@ -2,7 +2,6 @@ package sapotero.rxtest.views.fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.util.Base64;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -33,9 +32,10 @@ import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.activities.DocumentInfocardFullScreenActivity;
 import sapotero.rxtest.views.adapters.utils.OnSwipeTouchListener;
+import sapotero.rxtest.views.fragments.interfaces.PreviewFragment;
 import timber.log.Timber;
 
-public class InfoCardWebViewFragment extends Fragment {
+public class InfoCardWebViewFragment extends PreviewFragment {
 
   @BindView(R.id.web_infocard) WebView infocard;
   @BindView(R.id.fragment_info_card_web_wrapper) RelativeLayout wrapper;
@@ -51,13 +51,27 @@ public class InfoCardWebViewFragment extends Fragment {
   }
 
   @Override
+  public void update() {
+    initWebView();
+  }
+
+  @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.fragment_info_card_web_view, container, false);
     ButterKnife.bind(this, view);
     EsdApplication.getDataComponent().inject( this );
 
     initEvents();
+    return view;
+  }
 
+  @Override
+  public void onResume() {
+    super.onResume();
+    initWebView();
+  }
+
+  private void initWebView() {
     final GestureDetector gestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener() {
       @Override
       public boolean onDoubleTap(MotionEvent event) {
@@ -96,8 +110,6 @@ public class InfoCardWebViewFragment extends Fragment {
     wrapper.setOnTouchListener( new OnSwipeTouchListener( getContext() ) );
 
     setWebView();
-
-    return view;
   }
 
   private void initEvents() {
@@ -148,7 +160,7 @@ public class InfoCardWebViewFragment extends Fragment {
     return this;
   }
 
-  public InfoCardWebViewFragment withEnableDoubleTap(boolean doubleTabEnabled) {
+  public PreviewFragment withEnableDoubleTap(boolean doubleTabEnabled) {
     this.doubleTabEnabled = doubleTabEnabled;
     return this;
   }

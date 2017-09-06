@@ -55,9 +55,10 @@ import sapotero.rxtest.retrofit.models.document.Card;
 import sapotero.rxtest.retrofit.models.document.Person;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.activities.InfoNoMenuActivity;
+import sapotero.rxtest.views.fragments.interfaces.PreviewFragment;
 import timber.log.Timber;
 
-public class RoutePreviewFragment extends Fragment {
+public class RoutePreviewFragment extends PreviewFragment {
 
   @Inject ISettings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
@@ -81,6 +82,7 @@ public class RoutePreviewFragment extends Fragment {
 
   }
 
+
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.fragment_route_preview, container, false);
@@ -97,12 +99,27 @@ public class RoutePreviewFragment extends Fragment {
 
     initEvents();
 
+    return view;
+  }
+
+  @Override
+  public void onResume() {
+    super.onResume();
+
     showPreview(true);
     loadRoute();
     updateButtonView();
 
-    return view;
   }
+
+  @Override
+  public void update() {
+    Timber.tag(TAG).d("update!");
+    showPreview(true);
+    loadRoute();
+    updateButtonView();
+  }
+
 
 
   private void changeState(View view){

@@ -5,17 +5,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.View;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -66,8 +63,10 @@ import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.adapters.TabSigningPagerAdapter;
+import sapotero.rxtest.views.adapters.utils.FragmentAdapter;
 import sapotero.rxtest.views.fragments.InfoActivityDecisionPreviewFragment;
 import sapotero.rxtest.views.fragments.RoutePreviewFragment;
+import sapotero.rxtest.views.fragments.interfaces.PreviewFragment;
 import timber.log.Timber;
 
 public class InfoActivity extends AppCompatActivity {
@@ -95,6 +94,7 @@ public class InfoActivity extends AppCompatActivity {
   private Fields.Status  status;
 
   private List<String> documentUids;
+  private FragmentAdapter viewPagerAdapter;
 
   public static Intent newIntent(Context context, ArrayList<String> documentUids) {
     Intent intent = new Intent(context, InfoActivity.class);
@@ -146,19 +146,31 @@ public class InfoActivity extends AppCompatActivity {
 
   private void setTabContent() {
 
-    try {
-      tabLayout.removeAllTabs();
-      viewPager.removeAllViews();
-    } catch (Exception e) {
-      e.printStackTrace();
+//    try {
+//      tabLayout.removeAllTabs();
+//      viewPager.removeAllViews();
+//    } catch (Exception e) {
+//      e.printStackTrace();
+//    }
+
+    String type = "TabPagerAdapter";
+    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || settings.isProject() ){
+      type = "TabSigningPagerAdapter";
     }
 
-    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || settings.isProject() ){
-      TabSigningPagerAdapter adapter = new TabSigningPagerAdapter( getSupportFragmentManager() );
-      viewPager.setAdapter(adapter);
+    FragmentManager fm = getSupportFragmentManager();
+
+
+    if (viewPagerAdapter != null) {
+      Timber.tag(TAG).e("adapter type: %s | type: %s", viewPagerAdapter.getLabel(), type );
+    }
+
+    if ( viewPagerAdapter != null && Objects.equals(viewPagerAdapter.getLabel(), type)){
+
+      viewPagerAdapter.update();
     } else {
-      TabPagerAdapter adapter = new TabPagerAdapter ( getSupportFragmentManager() );
-      viewPager.setAdapter(adapter);
+      viewPagerAdapter = Objects.equals(type, "TabPagerAdapter") ? new TabPagerAdapter(fm) : new TabSigningPagerAdapter(fm);
+      viewPager.setAdapter(viewPagerAdapter);
     }
     viewPager.setOffscreenPageLimit(4);
 
@@ -186,56 +198,70 @@ public class InfoActivity extends AppCompatActivity {
   private void setPreview() {
     addLoader();
 
-    FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-    fragmentTransaction.addToBackStack("PREVIEW");
+    String TAG = "DECISION";
 
     if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || settings.isProject() ){
-      fragmentTransaction.replace( R.id.activity_info_preview_container, new RoutePreviewFragment(), "PREVIEW" );
+      TAG = "ROUTE";
+    }
+
+    Timber.tag(TAG).e("TAG: %s", TAG);
+
+    FragmentManager fm = getSupportFragmentManager();
+
+    if ( fm.findFragmentByTag(TAG) == null ){
+      Timber.tag(TAG).d("fm.findFragmentByTag(TAG) == null");
+
+      removeAllFragments(fm);
+
+      FragmentTransaction fragmentTransaction = fm.beginTransaction();
+      Fragment fragment = Objects.equals(TAG, "DECISION") ? new InfoActivityDecisionPreviewFragment(toolbarManager) : new RoutePreviewFragment();
+      fragmentTransaction.addToBackStack(TAG);
+      fragmentTransaction.replace( R.id.activity_info_preview_container, fragment, TAG );
+      fragmentTransaction.commit();
     } else {
-      fragmentTransaction.replace( R.id.activity_info_preview_container, new InfoActivityDecisionPreviewFragment(toolbarManager), "PREVIEW" );
+      Timber.tag(TAG).d("fm.findFragmentByTag(TAG) != null");
+      Fragment preview = fm.findFragmentByTag(TAG);
+      ((PreviewFragment) preview).update();
     }
 
 
-    fragmentTransaction.commit();
+  }
+
+  private void removeAllFragments(FragmentManager fm) {
+    while (fm.getBackStackEntryCount() > 0) {
+      fm.popBackStackImmediate();
+    }
   }
 
   private void addLoader() {
-    preview_container.removeAllViews();
-
-    frame.setVisibility(View.VISIBLE);
-
-    int durationMillis = 300;
-
-    Animation fadeIn = new AlphaAnimation(0, 1);
-    fadeIn.setInterpolator(new DecelerateInterpolator());
-    fadeIn.setDuration(durationMillis);
-
-    Animation fadeOut = new AlphaAnimation(1, 0);
-    fadeOut.setInterpolator(new AccelerateInterpolator());
-    fadeOut.setStartOffset(durationMillis);
-    fadeOut.setDuration(durationMillis);
-
-    AnimationSet animation = new AnimationSet(true);
-    AnimationSet wrapperAnimation = new AnimationSet(true);
-
-    wrapperAnimation.addAnimation(fadeIn);
-    animation.addAnimation(fadeOut);
-
-    frame.setAnimation(animation);
-    preview_container.setAnimation(wrapperAnimation);
-
-    Observable.just("")
-      .delay(durationMillis, TimeUnit.MILLISECONDS)
-      .subscribeOn( Schedulers.newThread() )
-      .observeOn( AndroidSchedulers.mainThread() )
-      .subscribe(
-        data  -> {
-          frame.setVisibility(View.GONE);
-        },
-        Timber::e
-      );
+//    preview_container.removeAllViews();
+//
+    frame.setVisibility(View.GONE);
+//
+//    int durationMillis = 300;
+//
+//    Animation fadeIn = new AlphaAnimation(0, 1);
+//    fadeIn.setInterpolator(new DecelerateInterpolator());
+//    fadeIn.setDuration(durationMillis);
+//
+//    Animation fadeOut = new AlphaAnimation(1, 0);
+//    fadeOut.setInterpolator(new AccelerateInterpolator());
+//    fadeOut.setStartOffset(durationMillis);
+//    fadeOut.setDuration(durationMillis);
+//
+//    AnimationSet animation = new AnimationSet(true);
+//    AnimationSet wrapperAnimation = new AnimationSet(true);
+//
+//    wrapperAnimation.addAnimation(fadeIn);
+//    animation.addAnimation(fadeOut);
+//
+//    frame.setAnimation(animation);
+//    preview_container.setAnimation(wrapperAnimation);
+//
+//    new Handler().postDelayed(() -> frame.setVisibility(View.GONE), durationMillis);
 
   }
+
 
   @OnClick(R.id.activity_info_prev_document)
   public void prev_doc(){

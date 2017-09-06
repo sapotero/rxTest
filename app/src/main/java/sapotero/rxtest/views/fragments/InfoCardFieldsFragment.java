@@ -1,7 +1,6 @@
 package sapotero.rxtest.views.fragments;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,9 +27,10 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.adapters.utils.OnSwipeTouchListener;
+import sapotero.rxtest.views.fragments.interfaces.PreviewFragment;
 import timber.log.Timber;
 
-public class InfoCardFieldsFragment extends Fragment {
+public class InfoCardFieldsFragment extends PreviewFragment {
 
   @Inject ISettings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
@@ -58,13 +58,26 @@ public class InfoCardFieldsFragment extends Fragment {
     ButterKnife.bind(this, view);
     EsdApplication.getDataComponent().inject( this );
 
-    initEvents();
-
     view.setOnTouchListener( new OnSwipeTouchListener( getContext() ) );
 
+    return view;
+  }
+
+  @Override
+  public void onResume() {
+    super.onResume();
+
+    initEvents();
     loadSettings();
 
-    return view;
+  }
+
+  @Override
+  public void update() {
+
+    initEvents();
+    loadSettings();
+
   }
 
   private void loadSettings() {
@@ -104,7 +117,7 @@ public class InfoCardFieldsFragment extends Fragment {
       }, Timber::e);
   }
 
-  public Fragment withUid(String uid) {
+  public PreviewFragment withUid(String uid) {
     this.uid = uid;
     return this;
   }
