@@ -1,6 +1,5 @@
 package sapotero.rxtest.jobs.bus;
 
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.birbit.android.jobqueue.CancelReason;
@@ -10,19 +9,18 @@ import com.birbit.android.jobqueue.RetryConstraint;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import sapotero.rxtest.db.mapper.ColleagueMapper;
 import sapotero.rxtest.db.requery.models.RColleagueEntity;
 import sapotero.rxtest.events.view.UpdateDrawerEvent;
 import sapotero.rxtest.retrofit.models.Colleague;
-import timber.log.Timber;
 
 
 public class CreateColleagueJob extends BaseJob {
 
   public static final int PRIORITY = 1;
   private final ArrayList<Colleague> users;
-
-  private String TAG = this.getClass().getSimpleName();
 
   public CreateColleagueJob(ArrayList<Colleague> users, String login) {
     super( new Params(PRIORITY).requireNetwork().persist() );
@@ -37,46 +35,24 @@ public class CreateColleagueJob extends BaseJob {
   @Override
   public void onRun() throws Throwable {
     int index = 0;
-    for (Colleague user : users){
-      if ( !exist( user.getColleagueId()) ){
-        add(user, index);
-      }
+
+    List<RColleagueEntity> colleagueEntityList = new ArrayList<>();
+    ColleagueMapper mapper = mappers.getColleagueMapper().withLogin(login);
+
+    for (Colleague user : users) {
+      RColleagueEntity colleagueEntity = mapper.toEntity(user);
+      colleagueEntity.setSortIndex(index);
+      colleagueEntityList.add(colleagueEntity);
       index++;
     }
 
-    // Update drawer only once after all colleagues created
-    EventBus.getDefault().post( new UpdateDrawerEvent() );
-  }
-
-  private void add(Colleague user, int index) {
-    RColleagueEntity data = mappers.getColleagueMapper().withLogin(login).toEntity(user);
-    data.setSortIndex(index);
-
     dataStore
-      .insert(data)
+      .insert(colleagueEntityList)
       .toBlocking().value();
     // Blocking - to send update drawer event AFTER all colleagues created
-  }
 
-
-  @NonNull
-  private Boolean exist(String user){
-
-    boolean result = false;
-
-    Integer count = dataStore
-      .count(RColleagueEntity.class)
-      .where(RColleagueEntity.COLLEAGUE_ID.eq(user))
-      .and(RColleagueEntity.USER.eq(login))
-      .get().value();
-
-    if( count != 0 ){
-      result = true;
-    }
-
-    Timber.tag(TAG).v("exist " + result );
-
-    return result;
+    // Update drawer only once after all colleagues created
+    EventBus.getDefault().post( new UpdateDrawerEvent() );
   }
 
   @Override
