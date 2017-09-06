@@ -60,6 +60,7 @@ public class DocumentStateSaver {
         .set( RStateEntity.AGAIN, doc.isAgain() )
         .set( RStateEntity.UPDATED_AT, doc.getUpdatedAt() )
         .where( RStateEntity.UID.eq( doc.getUid() ))
+        .and( RStateEntity.USER.eq( login ))
         .get()
         .value();
 
@@ -67,7 +68,7 @@ public class DocumentStateSaver {
 
     } else {
       dataStore
-        .insert(RStateEntity.class )
+        .insert( RStateEntity.class )
         .value( RStateEntity.UID, doc.getUid() )
         .value( RStateEntity.USER, login )
         .value( RStateEntity.FILTER, doc.getFilter() )
@@ -93,7 +94,7 @@ public class DocumentStateSaver {
     Timber.tag(TAG).d("Drop document state for %s", doc.getUid());
 
     dataStore
-      .update(RDocumentEntity.class)
+      .update( RDocumentEntity.class)
       .set( RDocumentEntity.FILTER, "")
       .set( RDocumentEntity.DOCUMENT_TYPE, "")
       .set( RDocumentEntity.CONTROL, false)
