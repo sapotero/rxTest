@@ -45,25 +45,47 @@ public class DocumentStateSaver {
       .get().firstOrNull();
 
     if ( stateEntity != null ) {
-      saveFields( stateEntity, doc );
       dataStore
-        .update( stateEntity )
-        .toBlocking().value();
-      // Blocking - чтобы последовательность выполнения save, drop, restore не изменилась
+        .update( RStateEntity.class )
+        .set( RStateEntity.FILTER, doc.getFilter() )
+        .set( RStateEntity.DOCUMENT_TYPE, doc.getDocumentType() )
+        .set( RStateEntity.CONTROL, doc.isControl() )
+        .set( RStateEntity.FAVORITES, doc.isFavorites() )
+        .set( RStateEntity.PROCESSED, doc.isProcessed() )
+        .set( RStateEntity.FROM_FAVORITES_FOLDER, doc.isFromFavoritesFolder() )
+        .set( RStateEntity.FROM_PROCESSED_FOLDER, doc.isFromProcessedFolder() )
+        .set( RStateEntity.FROM_LINKS, doc.isFromLinks() )
+        .set( RStateEntity.RETURNED, doc.isReturned() )
+        .set( RStateEntity.REJECTED, doc.isRejected() )
+        .set( RStateEntity.AGAIN, doc.isAgain() )
+        .set( RStateEntity.UPDATED_AT, doc.getUpdatedAt() )
+        .where( RStateEntity.UID.eq( doc.getUid() ))
+        .get()
+        .value();
 
-      Timber.tag(TAG).d("Updated document state in RStateEntity table %s for %s", stateEntity.getUid(), login);
+      Timber.tag(TAG).d("Updated document state in RStateEntity table %s for %s", doc.getUid(), login);
 
     } else {
-      stateEntity = new RStateEntity();
-      stateEntity.setUid( doc.getUid() );
-      stateEntity.setUser( login );
-      saveFields( stateEntity, doc );
       dataStore
-        .insert( stateEntity )
-        .toBlocking().value();
-      // Blocking - чтобы последовательность выполнения save, drop, restore не изменилась
+        .insert(RStateEntity.class )
+        .value( RStateEntity.UID, doc.getUid() )
+        .value( RStateEntity.USER, login )
+        .value( RStateEntity.FILTER, doc.getFilter() )
+        .value( RStateEntity.DOCUMENT_TYPE, doc.getDocumentType() )
+        .value( RStateEntity.CONTROL, doc.isControl() )
+        .value( RStateEntity.FAVORITES, doc.isFavorites() )
+        .value( RStateEntity.PROCESSED, doc.isProcessed() )
+        .value( RStateEntity.FROM_FAVORITES_FOLDER, doc.isFromFavoritesFolder() )
+        .value( RStateEntity.FROM_PROCESSED_FOLDER, doc.isFromProcessedFolder() )
+        .value( RStateEntity.FROM_LINKS, doc.isFromLinks() )
+        .value( RStateEntity.RETURNED, doc.isReturned() )
+        .value( RStateEntity.REJECTED, doc.isRejected() )
+        .value( RStateEntity.AGAIN, doc.isAgain() )
+        .value( RStateEntity.UPDATED_AT, doc.getUpdatedAt() )
+        .get()
+        .firstOrNull();
 
-      Timber.tag(TAG).d("Added document state to RStateEntity table %s for %s", stateEntity.getUid(), login);
+      Timber.tag(TAG).d("Added document state to RStateEntity table %s for %s", doc.getUid(), login);
     }
   }
 
@@ -80,28 +102,13 @@ public class DocumentStateSaver {
       .set( RDocumentEntity.FROM_FAVORITES_FOLDER, false)
       .set( RDocumentEntity.FROM_PROCESSED_FOLDER, false)
       .set( RDocumentEntity.FROM_LINKS, false)
-      .set( RDocumentEntity.REJECTED, false )
       .set( RDocumentEntity.RETURNED, false )
+      .set( RDocumentEntity.REJECTED, false )
       .set( RDocumentEntity.AGAIN, false )
       .set( RDocumentEntity.UPDATED_AT, null )
       .where(RDocumentEntity.UID.eq( doc.getUid() ))
       .get()
       .value();
-  }
-
-  private void saveFields(RStateEntity stateEntity, RDocumentEntity doc) {
-    stateEntity.setFilter( doc.getFilter() );
-    stateEntity.setDocumentType( doc.getDocumentType() );
-    stateEntity.setControl( doc.isControl() );
-    stateEntity.setFavorites( doc.isFavorites() );
-    stateEntity.setProcessed( doc.isProcessed() );
-    stateEntity.setFromFavoritesFolder( doc.isFromFavoritesFolder() );
-    stateEntity.setFromProcessedFolder( doc.isFromProcessedFolder() );
-    stateEntity.setFromLinks( doc.isFromLinks() );
-    stateEntity.setReturned( doc.isReturned() );
-    stateEntity.setRejected( doc.isRejected() );
-    stateEntity.setAgain( doc.isAgain() );
-    stateEntity.setUpdatedAt( doc.getUpdatedAt() );
   }
 
   // При переключении режима:
@@ -147,32 +154,25 @@ public class DocumentStateSaver {
   }
 
   private void restoreDocumentState(RStateEntity stateEntity, String login, String TAG) {
-    RDocumentEntity doc = getDocumentEntity( stateEntity.getUid() );
+    dataStore
+      .update( RDocumentEntity.class )
+      .set( RDocumentEntity.USER, login )
+      .set( RDocumentEntity.FILTER, stateEntity.getFilter() )
+      .set( RDocumentEntity.DOCUMENT_TYPE, stateEntity.getDocumentType() )
+      .set( RDocumentEntity.CONTROL, stateEntity.isControl() )
+      .set( RDocumentEntity.FAVORITES, stateEntity.isFavorites() )
+      .set( RDocumentEntity.PROCESSED, stateEntity.isProcessed() )
+      .set( RDocumentEntity.FROM_FAVORITES_FOLDER, stateEntity.isFromFavoritesFolder() )
+      .set( RDocumentEntity.FROM_PROCESSED_FOLDER, stateEntity.isFromProcessedFolder() )
+      .set( RDocumentEntity.FROM_LINKS, stateEntity.isFromLinks() )
+      .set( RDocumentEntity.RETURNED, stateEntity.isReturned() )
+      .set( RDocumentEntity.REJECTED, stateEntity.isRejected() )
+      .set( RDocumentEntity.AGAIN, stateEntity.isAgain() )
+      .set( RDocumentEntity.UPDATED_AT, stateEntity.getUpdatedAt() )
+      .where( RDocumentEntity.UID.eq( stateEntity.getUid() ) )
+      .get()
+      .value();
 
-    if ( doc != null ) {
-      restoreFields( stateEntity, doc, login );
-      dataStore
-        .update( doc )
-        .toBlocking().value();
-      // Blocking - чтобы последовательность выполнения save, drop, restore не изменилась
-
-      Timber.tag(TAG).d("Restored document state from RStateEntity table %s for %s", doc.getUid(), login);
-    }
-  }
-
-  private void restoreFields(RStateEntity stateEntity, RDocumentEntity doc, String login) {
-    doc.setUser( login );
-    doc.setFilter( stateEntity.getFilter() );
-    doc.setDocumentType( stateEntity.getDocumentType() );
-    doc.setControl( stateEntity.isControl() );
-    doc.setFavorites( stateEntity.isFavorites() );
-    doc.setProcessed( stateEntity.isProcessed() );
-    doc.setFromFavoritesFolder( stateEntity.isFromFavoritesFolder() );
-    doc.setFromProcessedFolder( stateEntity.isFromProcessedFolder() );
-    doc.setFromLinks( stateEntity.isFromLinks() );
-    doc.setReturned( stateEntity.isReturned() );
-    doc.setRejected( stateEntity.isRejected() );
-    doc.setAgain( stateEntity.isAgain() );
-    doc.setUpdatedAt( stateEntity.getUpdatedAt() );
+    Timber.tag(TAG).d("Restored document state from RStateEntity table %s for %s", stateEntity.getUid(), login);
   }
 }
