@@ -39,6 +39,7 @@ import sapotero.rxtest.db.requery.models.RFavoriteUserEntity;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
 import sapotero.rxtest.db.requery.models.RPrimaryConsiderationEntity;
 import sapotero.rxtest.db.requery.models.RTemplateEntity;
+import sapotero.rxtest.db.requery.models.RUrgencyEntity;
 import sapotero.rxtest.events.auth.AuthDcCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthDcCheckSuccessEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
@@ -141,6 +142,7 @@ public class DataLoaderManager {
               deleteUsers(login);
               deleteTemplates(login);
               deleteFolders(login);
+              deleteUrgencies(login);
 
               // получаем папки
               subscriptionInitV2.add(
@@ -329,6 +331,13 @@ public class DataLoaderManager {
     dataStore
       .delete(RFolderEntity.class)
       .where(RFolderEntity.USER.eq(login))
+      .get().value();
+  }
+
+  private void deleteUrgencies(String login) {
+    dataStore
+      .delete(RUrgencyEntity.class)
+      .where(RUrgencyEntity.USER.eq(login))
       .get().value();
   }
 
