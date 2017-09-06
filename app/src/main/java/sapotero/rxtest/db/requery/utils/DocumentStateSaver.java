@@ -51,13 +51,7 @@ public class DocumentStateSaver {
       dataStore
         .update( stateEntity )
         .toBlocking().value();
-//        .toObservable()
-//        .subscribeOn(Schedulers.computation())
-//        .observeOn(AndroidSchedulers.mainThread())
-//        .subscribe(
-//          result -> Timber.tag(TAG).d("Updated document state in RStateEntity table %s for %s", result.getUid(), login),
-//          error -> Timber.tag(TAG).e(error)
-//        );
+      // Blocking - чтобы последовательность выполнения save, drop, restore не изменилась
 
       Timber.tag(TAG).d("Updated document state in RStateEntity table %s for %s", stateEntity.getUid(), login);
 
@@ -69,13 +63,7 @@ public class DocumentStateSaver {
       dataStore
         .insert( stateEntity )
         .toBlocking().value();
-//        .toObservable()
-//        .subscribeOn(Schedulers.computation())
-//        .observeOn(AndroidSchedulers.mainThread())
-//        .subscribe(
-//          result -> Timber.tag(TAG).d("Added document state to RStateEntity table %s for %s", result.getUid(), login),
-//          error -> Timber.tag(TAG).e(error)
-//        );
+      // Blocking - чтобы последовательность выполнения save, drop, restore не изменилась
 
       Timber.tag(TAG).d("Added document state to RStateEntity table %s for %s", stateEntity.getUid(), login);
     }
@@ -168,13 +156,7 @@ public class DocumentStateSaver {
       dataStore
         .update( doc )
         .toBlocking().value();
-//        .toObservable()
-//        .subscribeOn(Schedulers.computation())
-//        .observeOn(AndroidSchedulers.mainThread())
-//        .subscribe(
-//          result -> Timber.tag(TAG).d("Restored document state from RStateEntity table %s for %s", result.getUid(), login),
-//          error -> Timber.tag(TAG).e(error)
-//        );
+      // Blocking - чтобы последовательность выполнения save, drop, restore не изменилась
 
       Timber.tag(TAG).d("Restored document state from RStateEntity table %s for %s", doc.getUid(), login);
     }

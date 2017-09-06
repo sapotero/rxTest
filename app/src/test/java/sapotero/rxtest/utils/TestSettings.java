@@ -68,6 +68,7 @@ public class TestSettings implements ISettings {
   public Set<String> organizationFilterSelection;
   public boolean isSubstituteMode;
   public String oldLogin;
+  public String oldCurrentUserId;
   public String oldCurrentUser;
   public String oldCurrentUserOrganization;
   public String oldCurrentUserImage;
@@ -658,6 +659,16 @@ public class TestSettings implements ISettings {
   @Override
   public void setOldLogin(String value) {
     oldLogin = value;
+  }
+
+  @Override
+  public String getOldCurrentUserId() {
+    return oldCurrentUserId;
+  }
+
+  @Override
+  public void setOldCurrentUserId(String value) {
+    oldCurrentUserId = value;
   }
 
   @Override

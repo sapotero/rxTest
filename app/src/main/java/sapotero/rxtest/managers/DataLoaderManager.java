@@ -117,7 +117,6 @@ public class DataLoaderManager {
     unsubscribeInitV2();
 
     String login = settings.getLogin();
-    String currentUserId = settings.getCurrentUserId();
 
     subscriptionInitV2.add(
       // получаем данные о пользователе
@@ -136,6 +135,8 @@ public class DataLoaderManager {
               setCurrentUserOrganization(user.getOrganization());
               setCurrentUserPosition(user.getPosition());
               setCurrentUserImage(user.getImage());
+
+              String currentUserId = user.getId();
 
               deleteUsers(login);
               deleteTemplates(login);
@@ -288,7 +289,7 @@ public class DataLoaderManager {
           error -> {
             Timber.tag("USER_INFO").e( "ERROR: %s", error);
             if ( Objects.equals( login, settings.getLogin() ) ) {
-              loadAllDocs( loadAllDocs, login, currentUserId );
+              loadAllDocs( loadAllDocs, login, settings.getCurrentUserId() );
             }
           })
     );

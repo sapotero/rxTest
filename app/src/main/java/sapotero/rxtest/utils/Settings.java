@@ -49,6 +49,7 @@ public class Settings implements ISettings {
   private static final String ORGANIZATION_FILTER_SELECTION_KEY = "organization.filter.savedselection";
   private static final String IS_SUBSTITUTE_MODE_KEY = "substitute.mode";
   private static final String OLD_LOGIN_KEY = "old_login";
+  private static final String OLD_CURRENT_USER_ID_KEY = "old_current_user_id";
   private static final String OLD_CURRENT_USER_KEY = "old_current_user";
   private static final String OLD_CURRENT_USER_ORGANIZATION_KEY = "old_current_user_organization";
   private static final String OLD_CURRENT_USER_IMAGE_KEY = "old_current_user_image";
@@ -150,6 +151,7 @@ public class Settings implements ISettings {
   private Preference<Set<String>> organizationFilterSelection;
   private Preference<Boolean> isSubstituteMode;
   private Preference<String> oldLogin;
+  private Preference<String> oldCurrentUserId;
   private Preference<String> oldCurrentUser;
   private Preference<String> oldCurrentUserOrganization;
   private Preference<String> oldCurrentUserImage;
@@ -257,6 +259,7 @@ public class Settings implements ISettings {
     organizationFilterSelection    = settings.getStringSet(ORGANIZATION_FILTER_SELECTION_KEY);
     isSubstituteMode               = settings.getBoolean(IS_SUBSTITUTE_MODE_KEY);
     oldLogin                       = settings.getString(OLD_LOGIN_KEY);
+    oldCurrentUserId               = settings.getString(OLD_CURRENT_USER_ID_KEY);
     oldCurrentUser                 = settings.getString(OLD_CURRENT_USER_KEY);
     oldCurrentUserOrganization     = settings.getString(OLD_CURRENT_USER_ORGANIZATION_KEY);
     oldCurrentUserImage            = settings.getString(OLD_CURRENT_USER_IMAGE_KEY);
@@ -932,6 +935,16 @@ public class Settings implements ISettings {
   @Override
   public void setOldLogin(String value) {
     setString(oldLogin, value);
+  }
+
+  @Override
+  public String getOldCurrentUserId() {
+    return getString(oldCurrentUserId);
+  }
+
+  @Override
+  public void setOldCurrentUserId(String value) {
+    setString(oldCurrentUserId, value);
   }
 
   @Override

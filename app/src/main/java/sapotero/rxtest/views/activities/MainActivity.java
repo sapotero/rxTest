@@ -896,11 +896,13 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
               settings.setSubstituteMode( true );
               settings.setOldLogin( settings.getLogin() );
+              settings.setOldCurrentUserId( settings.getCurrentUserId() );
               settings.setOldCurrentUser( settings.getCurrentUser() );
               settings.setOldCurrentUserOrganization( settings.getCurrentUserOrganization() );
               settings.setOldCurrentUserImage( settings.getCurrentUserImage() );
               settings.setLogin( colleagueResponse.getLogin() );
               settings.setToken( colleagueResponse.getAuthToken() );
+              settings.setCurrentUserId( colleagueResponse.getOfficialId() );
               settings.setColleagueId( colleagueEntity.getColleagueId() );
 
               settings.setCurrentUser( splitName( colleagueEntity.getOfficialName() ) );
@@ -971,6 +973,10 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     String temp = settings.getLogin();
     settings.setLogin( settings.getOldLogin() );
     settings.setOldLogin( temp );
+
+    temp = settings.getCurrentUserId();
+    settings.setCurrentUserId( settings.getOldCurrentUserId() );
+    settings.setOldCurrentUserId( temp );
 
     temp = settings.getCurrentUser();
     settings.setCurrentUser( settings.getOldCurrentUser() );
