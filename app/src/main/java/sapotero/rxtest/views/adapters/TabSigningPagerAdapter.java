@@ -2,13 +2,13 @@ package sapotero.rxtest.views.adapters;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 
+import sapotero.rxtest.views.adapters.utils.FragmentAdapter;
 import sapotero.rxtest.views.fragments.InfoCardDocumentsFragment;
 import sapotero.rxtest.views.fragments.InfoCardFieldsFragment;
 import sapotero.rxtest.views.fragments.InfoCardLinksFragment;
 
-public class TabSigningPagerAdapter extends FragmentPagerAdapter {
+public class TabSigningPagerAdapter extends FragmentAdapter {
 
   private String uid;
   private boolean withoutZoom  = false;
@@ -44,11 +44,6 @@ public class TabSigningPagerAdapter extends FragmentPagerAdapter {
     return null;
   }
 
-  @Override
-  public int getCount() {
-    return withoutLinks ? 2 : 3;
-  }
-
   public void withUid(String uid) {
     this.uid = uid;
   }
@@ -59,5 +54,19 @@ public class TabSigningPagerAdapter extends FragmentPagerAdapter {
 
   public void withoutLinks(boolean withoutLinks) {
     this.withoutLinks = withoutLinks;
+  }
+
+  @Override
+  public int getCount() {
+    return withoutLinks ? 2 : 3;
+  }
+
+  @Override
+  public String getLabel() {
+    return this.getClass().getSimpleName();
+  }
+
+  @Override
+  public void update() {
   }
 }

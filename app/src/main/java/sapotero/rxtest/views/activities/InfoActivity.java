@@ -63,6 +63,7 @@ import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.adapters.TabSigningPagerAdapter;
+import sapotero.rxtest.views.adapters.utils.FragmentAdapter;
 import sapotero.rxtest.views.fragments.InfoActivityDecisionPreviewFragment;
 import sapotero.rxtest.views.fragments.RoutePreviewFragment;
 import sapotero.rxtest.views.fragments.interfaces.PreviewFragment;
@@ -93,6 +94,7 @@ public class InfoActivity extends AppCompatActivity {
   private Fields.Status  status;
 
   private List<String> documentUids;
+  private FragmentAdapter viewPagerAdapter;
 
   public static Intent newIntent(Context context, ArrayList<String> documentUids) {
     Intent intent = new Intent(context, InfoActivity.class);
@@ -144,19 +146,31 @@ public class InfoActivity extends AppCompatActivity {
 
   private void setTabContent() {
 
-    try {
-      tabLayout.removeAllTabs();
-      viewPager.removeAllViews();
-    } catch (Exception e) {
-      e.printStackTrace();
+//    try {
+//      tabLayout.removeAllTabs();
+//      viewPager.removeAllViews();
+//    } catch (Exception e) {
+//      e.printStackTrace();
+//    }
+
+    String type = "TabPagerAdapter";
+    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || settings.isProject() ){
+      type = "TabSigningPagerAdapter";
     }
 
-    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || settings.isProject() ){
-      TabSigningPagerAdapter adapter = new TabSigningPagerAdapter( getSupportFragmentManager() );
-      viewPager.setAdapter(adapter);
+    FragmentManager fm = getSupportFragmentManager();
+
+
+    if (viewPagerAdapter != null) {
+      Timber.tag(TAG).e("adapter type: %s | type: %s", viewPagerAdapter.getLabel(), type );
+    }
+
+    if ( viewPagerAdapter != null && Objects.equals(viewPagerAdapter.getLabel(), type)){
+
+      viewPagerAdapter.update();
     } else {
-      TabPagerAdapter adapter = new TabPagerAdapter ( getSupportFragmentManager() );
-      viewPager.setAdapter(adapter);
+      viewPagerAdapter = Objects.equals(type, "TabPagerAdapter") ? new TabPagerAdapter(fm) : new TabSigningPagerAdapter(fm);
+      viewPager.setAdapter(viewPagerAdapter);
     }
     viewPager.setOffscreenPageLimit(4);
 

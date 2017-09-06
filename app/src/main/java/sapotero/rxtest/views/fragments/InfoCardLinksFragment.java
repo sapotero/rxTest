@@ -3,7 +3,6 @@ package sapotero.rxtest.views.fragments;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,9 +42,10 @@ import sapotero.rxtest.views.activities.InfoNoMenuActivity;
 import sapotero.rxtest.views.adapters.LinkAdapter;
 import sapotero.rxtest.views.adapters.models.Link;
 import sapotero.rxtest.views.adapters.utils.OnSwipeTouchListener;
+import sapotero.rxtest.views.fragments.interfaces.PreviewFragment;
 import timber.log.Timber;
 
-public class InfoCardLinksFragment extends Fragment {
+public class InfoCardLinksFragment extends PreviewFragment {
 
   @Inject ISettings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
@@ -62,6 +62,11 @@ public class InfoCardLinksFragment extends Fragment {
   private LinkAdapter adapter;
 
   public InfoCardLinksFragment() {
+  }
+
+  @Override
+  public void update() {
+    initLinks();
   }
 
   @Override
@@ -82,6 +87,11 @@ public class InfoCardLinksFragment extends Fragment {
   public void onResume(){
     super.onResume();
 
+    initLinks();
+
+  }
+
+  private void initLinks() {
     adapter = new LinkAdapter(getContext(), new ArrayList<Link>());
 
     loadSettings();
@@ -96,7 +106,6 @@ public class InfoCardLinksFragment extends Fragment {
       public void onNothingSelected(AdapterView<?> parent) {
       }
     });
-
   }
 
   private void loadSettings() {
@@ -218,7 +227,7 @@ public class InfoCardLinksFragment extends Fragment {
     mContext = context;
   }
 
-  public Fragment withUid(String uid) {
+  public InfoCardLinksFragment withUid(String uid) {
     this.uid = uid;
     return this;
   }
