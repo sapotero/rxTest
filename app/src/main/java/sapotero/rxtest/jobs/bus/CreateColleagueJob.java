@@ -11,8 +11,6 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RColleagueEntity;
 import sapotero.rxtest.events.view.UpdateDrawerEvent;
 import sapotero.rxtest.retrofit.models.Colleague;
@@ -46,10 +44,8 @@ public class CreateColleagueJob extends BaseJob {
       index++;
     }
 
-    // In substitute mode update drawer only once to display the colleague we currently substitute
-    if ( settings.isSubstituteMode() ) {
-      EventBus.getDefault().post( new UpdateDrawerEvent() );
-    }
+    // Update drawer only once after all colleagues created
+    EventBus.getDefault().post( new UpdateDrawerEvent() );
   }
 
   private void add(Colleague user, int index) {
@@ -58,17 +54,8 @@ public class CreateColleagueJob extends BaseJob {
 
     dataStore
       .insert(data)
-      .toObservable()
-      .subscribeOn(Schedulers.computation())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(u -> {
-        Timber.tag(TAG).v("addByOne " + u.getOfficialName() );
-
-        // If not in substitute mode update drawer for every actived colleague
-        if ( u.isActived() && !settings.isSubstituteMode() ) {
-          EventBus.getDefault().post( new UpdateDrawerEvent() );
-        }
-      }, Timber::e);
+      .toBlocking().value();
+    // Blocking - to send update drawer event AFTER all colleagues created
   }
 
 

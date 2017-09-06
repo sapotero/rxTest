@@ -161,7 +161,6 @@ public class DataLoaderManager {
                 })
               );
 
-
               subscriptionInitV2.add(
                 auth.getPrimaryConsiderationUsers(login, settings.getToken())
                   .subscribeOn(Schedulers.computation())
