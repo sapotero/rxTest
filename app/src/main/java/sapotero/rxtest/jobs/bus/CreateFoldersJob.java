@@ -38,6 +38,14 @@ public class CreateFoldersJob extends BaseJob {
 
   @Override
   public void onRun() throws Throwable {
+    // resolved https://tasks.n-core.ru/browse/MPSED-2134
+    // 2.Списки группы избр. моб клиент, первичн рассмотр, врио, по поручен, Коллеги, шаблоны, папки сбрасываются в базе при смене пользователя
+    // Удаляем старые папки непосредственно перед записью новых
+    dataStore
+      .delete(RFolderEntity.class)
+      .where(RFolderEntity.USER.eq(login))
+      .get().value();
+
     List<RFolderEntity> folderEntityList = new ArrayList<>();
 
     for (Folder template : templates) {

@@ -36,6 +36,14 @@ public class CreatePrimaryConsiderationJob extends BaseJob {
 
   @Override
   public void onRun() throws Throwable {
+    // resolved https://tasks.n-core.ru/browse/MPSED-2134
+    // 2.Списки группы избр. моб клиент, первичн рассмотр, врио, по поручен, Коллеги, шаблоны, папки сбрасываются в базе при смене пользователя
+    // Удаляем старых пользователей из группы первичного рассмотрения непосредственно перед записью новых
+    dataStore
+      .delete(RPrimaryConsiderationEntity.class)
+      .where(RPrimaryConsiderationEntity.USER.eq(login))
+      .get().value();
+
     int index = 0;
 
     List<RPrimaryConsiderationEntity> primaryConsiderationEntityList = new ArrayList<>();

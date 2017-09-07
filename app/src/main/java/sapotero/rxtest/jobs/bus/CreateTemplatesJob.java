@@ -42,12 +42,23 @@ public class CreateTemplatesJob extends BaseJob {
 
   @Override
   public void onRun() throws Throwable {
+    String templateType = type != null && !Objects.equals(type, "") ? type : "decision";
+
+    // resolved https://tasks.n-core.ru/browse/MPSED-2134
+    // 2.Списки группы избр. моб клиент, первичн рассмотр, врио, по поручен, Коллеги, шаблоны, папки сбрасываются в базе при смене пользователя
+    // Удаляем старые шаблоны непосредственно перед записью новых
+    dataStore
+      .delete(RTemplateEntity.class)
+      .where(RTemplateEntity.USER.eq(login))
+      .and(RTemplateEntity.TYPE.eq(templateType))
+      .get().value();
+
     List<RTemplateEntity> templateEntityList = new ArrayList<>();
     TemplateMapper mapper = mappers.getTemplateMapper().withLogin(login);
 
     for (Template template : templates) {
       RTemplateEntity templateEntity = mapper.toEntity(template);
-      templateEntity.setType( type != null && !Objects.equals(type, "") ? type : "decision");
+      templateEntity.setType( templateType );
       templateEntityList.add(templateEntity);
     }
 

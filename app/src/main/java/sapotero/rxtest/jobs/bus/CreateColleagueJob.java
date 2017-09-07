@@ -39,6 +39,14 @@ public class CreateColleagueJob extends BaseJob {
 
   @Override
   public void onRun() throws Throwable {
+    // resolved https://tasks.n-core.ru/browse/MPSED-2134
+    // 2.Списки группы избр. моб клиент, первичн рассмотр, врио, по поручен, Коллеги, шаблоны, папки сбрасываются в базе при смене пользователя
+    // Удаляем старых коллег непосредственно перед записью новых
+    dataStore
+      .delete(RColleagueEntity.class)
+      .where(RColleagueEntity.USER.eq(login))
+      .get().value();
+
     int index = 0;
 
     List<RColleagueEntity> colleagueEntityList = new ArrayList<>();
@@ -59,8 +67,11 @@ public class CreateColleagueJob extends BaseJob {
       .subscribe(
         u -> {
           Timber.tag(TAG).v("Added colleagues");
-          // Update drawer only once after all colleagues created
-          EventBus.getDefault().post( new UpdateDrawerEvent() );
+          // Update drawer only once after all colleagues created and only if not substitute mode
+          // (we don't show colleagues in substitute mode)
+          if ( !settings.isSubstituteMode() ) {
+            EventBus.getDefault().post( new UpdateDrawerEvent() );
+          }
         },
         Timber::e
       );

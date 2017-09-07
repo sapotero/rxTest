@@ -32,14 +32,8 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.db.requery.models.RAssistantEntity;
-import sapotero.rxtest.db.requery.models.RColleagueEntity;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.models.RFavoriteUserEntity;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
-import sapotero.rxtest.db.requery.models.RPrimaryConsiderationEntity;
-import sapotero.rxtest.db.requery.models.RTemplateEntity;
-import sapotero.rxtest.db.requery.models.RUrgencyEntity;
 import sapotero.rxtest.events.auth.AuthDcCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthDcCheckSuccessEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
@@ -138,11 +132,6 @@ public class DataLoaderManager {
               setCurrentUserImage(user.getImage());
 
               String currentUserId = user.getId();
-
-              deleteUsers(login);
-              deleteTemplates(login);
-              deleteFolders(login);
-              deleteUrgencies(login);
 
               // получаем папки
               subscriptionInitV2.add(
@@ -247,7 +236,7 @@ public class DataLoaderManager {
                   .subscribe( data -> {
                     // Обрабатываем ответ только если логин не поменялся (при входе/выходе в режим замещения)
                     if ( Objects.equals( login, settings.getLogin() ) ) {
-                      jobManager.addJobInBackground(new CreateAssistantJob(data, login));
+                      jobManager.addJobInBackground(new CreateAssistantJob(data, login, true));
                     }
                   }, error -> {
                     Timber.tag(TAG).e(error);
@@ -262,7 +251,7 @@ public class DataLoaderManager {
                   .subscribe( data -> {
                     // Обрабатываем ответ только если логин не поменялся (при входе/выходе в режим замещения)
                     if ( Objects.equals( login, settings.getLogin() ) ) {
-                      jobManager.addJobInBackground(new CreateAssistantJob(data, login));
+                      jobManager.addJobInBackground(new CreateAssistantJob(data, login, false));
                     }
                   }, error -> {
                     Timber.tag(TAG).e(error);
@@ -295,50 +284,6 @@ public class DataLoaderManager {
             }
           })
     );
-
-  }
-
-  private void deleteUsers(String login) {
-    dataStore
-      .delete(RAssistantEntity.class)
-      .where(RAssistantEntity.USER.eq(login))
-      .get().value();
-
-    dataStore
-      .delete(RFavoriteUserEntity.class)
-      .where(RFavoriteUserEntity.USER.eq(login))
-      .get().value();
-
-    dataStore
-      .delete(RPrimaryConsiderationEntity.class)
-      .where(RPrimaryConsiderationEntity.USER.eq(login))
-      .get().value();
-
-    dataStore
-      .delete(RColleagueEntity.class)
-      .where(RColleagueEntity.USER.eq(login))
-      .get().value();
-  }
-
-  private void deleteTemplates(String login) {
-    dataStore
-      .delete(RTemplateEntity.class)
-      .where(RTemplateEntity.USER.eq(login))
-      .get().value();
-  }
-
-  private void deleteFolders(String login) {
-    dataStore
-      .delete(RFolderEntity.class)
-      .where(RFolderEntity.USER.eq(login))
-      .get().value();
-  }
-
-  private void deleteUrgencies(String login) {
-    dataStore
-      .delete(RUrgencyEntity.class)
-      .where(RUrgencyEntity.USER.eq(login))
-      .get().value();
   }
 
   private void loadAllDocs(boolean load, String login, String currentUserId) {

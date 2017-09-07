@@ -31,4 +31,5 @@ public abstract class RAssistant {
   @Index("assistant_user_index")
   String  user;
 
+  String type;
 }
