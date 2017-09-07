@@ -20,14 +20,19 @@ import timber.log.Timber;
 public class CreateAssistantJob extends BaseJob {
 
   public static final int PRIORITY = 1;
+  public static final String BY_HEAD = "byHead";
+  public static final String BY_ASSISTANT = "byAssistant";
   private final ArrayList<Assistant> users;
 
   private String TAG = this.getClass().getSimpleName();
 
-  public CreateAssistantJob(ArrayList<Assistant> users, String login) {
+  private String type;
+
+  public CreateAssistantJob(ArrayList<Assistant> users, String login, boolean byHead) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.users = users;
     this.login = login;
+    type = byHead ? BY_HEAD : BY_ASSISTANT;
   }
 
   @Override
@@ -36,6 +41,15 @@ public class CreateAssistantJob extends BaseJob {
 
   @Override
   public void onRun() throws Throwable {
+    // resolved https://tasks.n-core.ru/browse/MPSED-2134
+    // 2.Списки группы избр. моб клиент, первичн рассмотр, врио, по поручен, Коллеги, шаблоны, папки сбрасываются в базе при смене пользователя
+    // Удаляем старых ассистентов непосредственно перед записью новых
+    dataStore
+      .delete(RAssistantEntity.class)
+      .where(RAssistantEntity.USER.eq(login))
+      .and(RAssistantEntity.TYPE.eq(type))
+      .get().value();
+
     int index = 0;
 
     List<RAssistantEntity> assistantEntityList = new ArrayList<>();
@@ -44,6 +58,7 @@ public class CreateAssistantJob extends BaseJob {
     for (Assistant user : users) {
       RAssistantEntity assistantEntity = mapper.toEntity(user);
       assistantEntity.setSortIndex(index);
+      assistantEntity.setType(type);
       assistantEntityList.add(assistantEntity);
       index++;
     }
