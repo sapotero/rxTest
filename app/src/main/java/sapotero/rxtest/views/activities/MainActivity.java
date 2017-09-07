@@ -198,13 +198,12 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     updateToken();
     /*пришёл ли intent из notification bar*/
     if (getIntent().getExtras() != null){
-        isIntentFromNotificationBar =  getIntent().getExtras().getBoolean(EXTRA_IS_FROM_NOTIFICATION_BAR_KEY, false);
+      isIntentFromNotificationBar =  getIntent().getExtras().getBoolean(EXTRA_IS_FROM_NOTIFICATION_BAR_KEY, false);
     }
-   /*после открытия MainActivity(из notification bar), счётчик уведомлений должен быть сброшен*/
+    /*после открытия MainActivity(из notification bar), счётчик уведомлений должен быть сброшен*/
     if(isIntentFromNotificationBar){
-        settings.setСurrentNotificationId(0);
+      settings.setСurrentNotificationId(0);
     }
-
   }
 
   private void setFirstRunFalse() {

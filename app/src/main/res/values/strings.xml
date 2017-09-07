@@ -577,7 +577,8 @@
         <item>Внутренние документы</item>
         <item>Приказы </item>
         <item>Приказы ДДО</item>
-        <item>Подписание/согласование</item>
+        <item>Подписание</item>
+        <item>Cогласование</item>
     </string-array>
 
     <string-array name="settings_notificated_journals_values">
@@ -588,6 +589,7 @@
         <item>04</item>
         <item>10</item>
         <item>98</item>
+        <item>99</item>
     </string-array>
 
 </resources>
