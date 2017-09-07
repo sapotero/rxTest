@@ -224,5 +224,7 @@ public interface ISettings {
 
   Set<String> getNotificatedJournals();
 
-  Preference<Set<String>> getNotificatedJournalsPreference();
+  void setСurrentNotificationId(int value);
+
+  int getСurrentNotificationId();
 }

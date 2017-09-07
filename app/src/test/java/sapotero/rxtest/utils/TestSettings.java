@@ -611,8 +611,15 @@ public class TestSettings implements ISettings {
   }
 
   @Override
-  public Preference<Set<String>> getNotificatedJournalsPreference() {
-    return null;
+  public void setСurrentNotificationId(int value) {
+
   }
+
+  @Override
+  public int getСurrentNotificationId() {
+    return 0;
+  }
+
+
 
 }

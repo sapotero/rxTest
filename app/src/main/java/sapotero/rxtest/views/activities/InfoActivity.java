@@ -104,7 +104,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   private ScheduledThreadPoolExecutor scheduller;
 
   private List<String> documentUids;
-  /*ключи EXTRA. Для передачи в PendingIntent в NotifiManager*/
+  /*ключи EXTRA. Для передачи в PendingIntent в NotifyManager*/
   private static final String EXTRA_DOCUMENTUID_KEY              = "document_uid";
   private static final String EXTRA_IS_PROJECT_KEY               = "is_project";
   private static final String EXTRA_REGISTRATION_NUMBER_KEY      = "registration_number";
@@ -139,13 +139,14 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     setContentView(R.layout.activity_info);
     ButterKnife.bind(this);
     EsdApplication.getManagerComponent().inject(this);
-    boolean isFromNotificationBar = false; /*если intent "прилетел" из NotifiManager -> значение будет true*/
+    /*если intent "прилетел" из NotifyManager -> значение будет true*/
+    boolean isIntentFromNotificationBar = false;
 
     if (getIntent().getExtras() != null){
-      isFromNotificationBar =  getIntent().getExtras().getBoolean(EXTRA_IS_FROM_NOTIFICATION_BAR_KEY, false);
+      isIntentFromNotificationBar =  getIntent().getExtras().getBoolean(EXTRA_IS_FROM_NOTIFICATION_BAR_KEY, false);
     }
 
-    if ( isFromNotificationBar ) {
+    if ( isIntentFromNotificationBar ) {
       settings.setUid(getIntent().getStringExtra(EXTRA_DOCUMENTUID_KEY));
       settings.setIsProject(getIntent().getBooleanExtra(EXTRA_IS_PROJECT_KEY,true)) ;
       settings.setMainMenuPosition( 0 );
@@ -153,6 +154,7 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
       settings.setStatusCode(getIntent().getStringExtra(EXTRA_STATUS_CODE_KEY));
       settings.setLoadFromSearch(getIntent().getBooleanExtra(EXTRA_IS_LOAD_FROM_SEARCHE_KEY,true));
       settings.setRegDate(getIntent().getStringExtra(EXTRA_REGISTRATION_DATE_KEY));
+      settings.setСurrentNotificationId(settings.getСurrentNotificationId() - 1);
     }
 
     clearImageIndex();

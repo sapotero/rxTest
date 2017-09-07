@@ -20,6 +20,7 @@ import rx.subjects.PublishSubject;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Deleter;
+import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.jobs.bus.CreateDocumentsJob;
@@ -66,17 +67,6 @@ public class Processor {
   private HashMap<String, Document> documents;
   private Transaction transaction;
   private Source source = Source.EMPTY;
-
-  /*константы чекбоксов, в настройках уведомлений для журналов */
-  private final String INCOMING_DOCUMENTS    = "1";
-  private final String CITIZEN_REQUESTS      = "2";
-  private final String NPA                   = "3";
-  private final String IN_DOCUMENTS          = "4";
-  private final String ORDERS                = "5";
-  private final String ORDERS_DDO            = "6";
-  private final String SIGNING_OR_APPROVAL   = "7";
-
-
 
   public Processor(PublishSubject<InMemoryDocument> subscribeSubject) {
     EsdApplication.getManagerComponent().inject(this);
@@ -272,52 +262,28 @@ public class Processor {
 
     return new ArrayList<>();
   }
+    
+    private String getShortJournalName(String longJournalName){
+        String shortJournalName = "";
+
+        if (  longJournalName != null ) {
+            String[] index = longJournalName.split("_production_db_");
+            shortJournalName = index[0];
+        }
+        return shortJournalName;
+    }
+
     /* генерируем уведомления, если в MemoryStore появился новый документ. addedDocList - List новых документов*/
     private void generateNotificationMsg(List<String> addedDocList) {
-      NotifiManager mNotifiManager = new NotifiManager(addedDocList, documents, filter);
+        NotifyManager mNotifyManager = new NotifyManager(addedDocList, documents, filter);
 
-        if(index != null){
-            switch (index){
-                case "incoming_documents_production_db_core_cards_incoming_documents_cards":   /*Входящий документ*/
-                if(settings.getNotificatedJournals().contains(INCOMING_DOCUMENTS)) {
-                    mNotifiManager.generateNotifyMsg("Вам поступил Входящий документ:");}
-                break;
+        /*приводим строку index к виду Fields.Journal*/
+        String shortNameJournal = getShortJournalName(index).toUpperCase();
+        Fields.Journal itemJournal = Fields.Journal.valueOf(shortNameJournal);
 
-                case "incoming_orders_production_db_core_cards_incoming_orders_cards":         /*НПА*/
-                if(settings.getNotificatedJournals().contains(NPA)){
-                    mNotifiManager.generateNotifyMsg("Вам поступил НПА:");}
-                break;
-
-                case "orders_production_db_core_cards_orders_cards":                           /*Приказ*/
-                if(settings.getNotificatedJournals().contains(ORDERS)){
-                    mNotifiManager.generateNotifyMsg("Вам поступил Приказ:");}
-                break;
-
-                case "orders_ddo_production_db_core_cards_orders_ddo_cards":                   /*Приказ ДДО*/
-                if (settings.getNotificatedJournals().contains(ORDERS_DDO)) {
-                    mNotifiManager.generateNotifyMsg("Вам поступил Приказ ДДО:");
-                }
-                break;
-
-                case "outgoing_documents_production_db_core_cards_outgoing_documents_cards":   /*Внутренний документ*/
-                if (settings.getNotificatedJournals().contains(IN_DOCUMENTS)){
-                    mNotifiManager.generateNotifyMsg("Вам поступил Внутренний документ:");
-                }
-                break;
-
-                case "citizen_requests_production_db_core_cards_citizen_requests_cards":       /*Обращение граждан*/
-                if (settings.getNotificatedJournals().contains(CITIZEN_REQUESTS)) {
-                    mNotifiManager.generateNotifyMsg("Вам поступило Обращение граждан:");}
-                break;
-            }
-        } else if(filter == "signing"){                                                        /*документ на подпись*/
-            if (settings.getNotificatedJournals().contains(SIGNING_OR_APPROVAL)){
-                mNotifiManager.generateNotifyMsg("Вам поступил документ на согласование:");
-            }
-        } else if (filter == "approval"){                                                      /*документ на согласование*/
-            if (settings.getNotificatedJournals().contains(SIGNING_OR_APPROVAL)){
-                mNotifiManager.generateNotifyMsg("Вам поступил документ на подпись:");
-            }
+        /*проверяем, включён ли checkBox для журнала. -> генерируем уведомление */
+        if( settings.getNotificatedJournals().contains( itemJournal.getValue()) ) {
+            mNotifyManager.generateNotifyMsg(itemJournal.getFormattedName() + itemJournal.getSingle());
         }
     }
 

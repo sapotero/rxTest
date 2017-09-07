@@ -13,7 +13,7 @@ import sapotero.rxtest.services.MainService;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.utils.Filter;
 import sapotero.rxtest.utils.memory.utils.MemoryStoreModule;
-import sapotero.rxtest.utils.memory.utils.NotifiManager;
+import sapotero.rxtest.utils.memory.utils.NotifyManager;
 import sapotero.rxtest.utils.memory.utils.Processor;
 import sapotero.rxtest.utils.queue.utils.QueueManagerModule;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
@@ -86,7 +86,7 @@ public interface ManagerComponent {
 
   void inject(JournalSelectorAdapter context);
 
-  void inject(NotifiManager notifiManager);
+  void inject(NotifyManager notifyManager);
 
   void inject(TestActivity context);
 }
