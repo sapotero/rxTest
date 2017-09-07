@@ -141,8 +141,6 @@ public class DataLoaderManager {
 
               deleteUsers(login);
               deleteTemplates(login);
-              deleteFolders(login);
-              deleteUrgencies(login);
 
               // получаем папки
               subscriptionInitV2.add(
@@ -309,20 +307,6 @@ public class DataLoaderManager {
     dataStore
       .delete(RTemplateEntity.class)
       .where(RTemplateEntity.USER.eq(login))
-      .get().value();
-  }
-
-  private void deleteFolders(String login) {
-    dataStore
-      .delete(RFolderEntity.class)
-      .where(RFolderEntity.USER.eq(login))
-      .get().value();
-  }
-
-  private void deleteUrgencies(String login) {
-    dataStore
-      .delete(RUrgencyEntity.class)
-      .where(RUrgencyEntity.USER.eq(login))
       .get().value();
   }
 

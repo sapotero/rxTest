@@ -35,6 +35,14 @@ public class CreateUrgencyJob extends BaseJob {
 
   @Override
   public void onRun() throws Throwable {
+    // resolved https://tasks.n-core.ru/browse/MPSED-2134
+    // 2.Списки группы избр. моб клиент, первичн рассмотр, врио, по поручен, Коллеги, шаблоны, папки сбрасываются в базе при смене пользователя
+    // Удаляем старые срочности непосредственно перед записью новых
+    dataStore
+      .delete(RUrgencyEntity.class)
+      .where(RUrgencyEntity.USER.eq(login))
+      .get().value();
+
     List<RUrgencyEntity> urgencyEntityList = new ArrayList<>();
 
     for (Urgency urgency : urgencies) {
