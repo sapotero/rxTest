@@ -164,7 +164,7 @@ public class MemoryStore implements Processable{
   public void process(HashMap<String, Document> docs, String filter, String index) {
     Timber.tag("RecyclerViewRefresh").d("MemoryStore: Process documents from HashMap");
 
-      new Processor(sub)
+    new Processor(sub)
       .withDocuments(docs)
       .withFilter(filter)
       .withIndex(index)
