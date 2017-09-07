@@ -67,8 +67,11 @@ public class CreateColleagueJob extends BaseJob {
       .subscribe(
         u -> {
           Timber.tag(TAG).v("Added colleagues");
-          // Update drawer only once after all colleagues created
-          EventBus.getDefault().post( new UpdateDrawerEvent() );
+          // Update drawer only once after all colleagues created and only if not substitute mode
+          // (we don't show colleagues in substitute mode)
+          if ( !settings.isSubstituteMode() ) {
+            EventBus.getDefault().post( new UpdateDrawerEvent() );
+          }
         },
         Timber::e
       );
