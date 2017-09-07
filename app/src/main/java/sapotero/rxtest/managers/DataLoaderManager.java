@@ -140,7 +140,6 @@ public class DataLoaderManager {
               String currentUserId = user.getId();
 
               deleteUsers(login);
-              deleteTemplates(login);
 
               // получаем папки
               subscriptionInitV2.add(
@@ -300,13 +299,6 @@ public class DataLoaderManager {
     dataStore
       .delete(RAssistantEntity.class)
       .where(RAssistantEntity.USER.eq(login))
-      .get().value();
-  }
-
-  private void deleteTemplates(String login) {
-    dataStore
-      .delete(RTemplateEntity.class)
-      .where(RTemplateEntity.USER.eq(login))
       .get().value();
   }
 
