@@ -303,21 +303,6 @@ public class DataLoaderManager {
       .delete(RAssistantEntity.class)
       .where(RAssistantEntity.USER.eq(login))
       .get().value();
-
-    dataStore
-      .delete(RFavoriteUserEntity.class)
-      .where(RFavoriteUserEntity.USER.eq(login))
-      .get().value();
-
-    dataStore
-      .delete(RPrimaryConsiderationEntity.class)
-      .where(RPrimaryConsiderationEntity.USER.eq(login))
-      .get().value();
-
-    dataStore
-      .delete(RColleagueEntity.class)
-      .where(RColleagueEntity.USER.eq(login))
-      .get().value();
   }
 
   private void deleteTemplates(String login) {
