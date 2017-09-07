@@ -256,49 +256,49 @@ abstract class DocumentJob extends BaseJob {
     if ( document.getRoute() != null && document.getRoute().getSteps() != null  ) {
       List<Step> steps = document.getRoute().getSteps();
 
-      // Сначала смотрим шаг Подписывающие, потом Согласующие
+      // Сначала смотрим шаги Подписывающие, потом Согласующие
       List<String> titles = new ArrayList<>();
       titles.add("Подписывающие");
       titles.add("Согласующие");
 
       for (String title : titles) {
-        Step step = getStep(steps, title);
-        for ( Person person : nullGuard( step.getPeople() ) ) {
-          if ( Objects.equals( person.getOfficialId(), currentUserId ) ) {
-            List<Action> actions = person.getActions();
-            if ( notEmpty( actions ) ) {
-              String lastActionStatus = actions.get( actions.size() - 1 ).getStatus();
-              if ( !lastActionStatus.toLowerCase().contains("отклонено")
-                && !lastActionStatus.toLowerCase().contains("согласовано")
-                && !lastActionStatus.toLowerCase().contains("подписано") ) {
-                if ( title.equals( "Подписывающие" ) ) {
-                  documentMapper.setFilter( documentEntity, "signing" );
-                } else {
-                  documentMapper.setFilter( documentEntity, "approval" );
-                }
-                result = true;
-                return result;
-              }
+        // Идем по шагам в обратном порядке, так как, например,
+        // может быть несколько блоков Подписывающие с одним и тем же пользователем,
+        // а нам нужен последний актуальный
+        for (int i = steps.size() - 1; i >= 0; i-- ) {
+          Step step = steps.get(i);
+          if ( Objects.equals( step.getTitle(), title) ) {
+            if ( checkStep(step, title, documentEntity, documentMapper) ) {
+              return true;
             }
           }
         }
       }
-
     }
 
     return result;
   }
 
-  private Step getStep(List<Step> steps, String title) {
-    Step result = new Step();
-
-    for ( Step step : nullGuard( steps) ) {
-      if ( Objects.equals( step.getTitle(), title) ) {
-        result = step;
-        break;
+  private boolean checkStep(Step step, String title, RDocumentEntity documentEntity, DocumentMapper documentMapper) {
+    for ( Person person : nullGuard( step.getPeople() ) ) {
+      if ( Objects.equals( person.getOfficialId(), currentUserId ) ) {
+        List<Action> actions = person.getActions();
+        if ( notEmpty( actions ) ) {
+          String lastActionStatus = actions.get( actions.size() - 1 ).getStatus();
+          if ( !lastActionStatus.toLowerCase().contains("отклонено")
+            && !lastActionStatus.toLowerCase().contains("согласовано")
+            && !lastActionStatus.toLowerCase().contains("подписано") ) {
+            if ( title.equals( "Подписывающие" ) ) {
+              documentMapper.setFilter( documentEntity, "signing" );
+            } else {
+              documentMapper.setFilter( documentEntity, "approval" );
+            }
+            return true;
+          }
+        }
       }
     }
 
-    return result;
+    return false;
   }
 }
