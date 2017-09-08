@@ -1,5 +1,6 @@
 package sapotero.rxtest.views.activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -145,6 +146,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   private final int SETTINGS_REJECTION_TEMPLATES = 22;
 
+  private static final String EXTRA_IS_FROM_NOTIFICATION_BAR_KEY = "is_from_notification";
+
   public DocumentsAdapter RAdapter;
 
   public  DBQueryBuilder dbQueryBuilder;
@@ -159,6 +162,12 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   private int menuIndex;
 
+  public static Intent newIntent(Context context){
+      Intent intent = new Intent(context, MainActivity.class);
+      intent.putExtra(EXTRA_IS_FROM_NOTIFICATION_BAR_KEY, true);
+      return intent;
+  }
+
   private List<RColleagueEntity> colleagues;
   private MaterialDialog startSubstituteDialog;
   private MaterialDialog stopSubstituteDialog;
@@ -167,6 +176,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private boolean exitFromSubstituteModeStarted = false;
 
   protected void onCreate(Bundle savedInstanceState) {
+    /*если intent "прилетел" из NotifyManager -> значение будет true*/
+    boolean isIntentFromNotificationBar = false;
     setTheme(R.style.AppTheme);
 
     super.onCreate(savedInstanceState);
@@ -210,6 +221,14 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     setFirstRunFalse();
 
     updateToken();
+    /*пришёл ли intent из notification bar*/
+    if (getIntent().getExtras() != null){
+      isIntentFromNotificationBar =  getIntent().getExtras().getBoolean(EXTRA_IS_FROM_NOTIFICATION_BAR_KEY, false);
+    }
+    /*после открытия MainActivity(из notification bar), счётчик уведомлений должен быть сброшен*/
+    if(isIntentFromNotificationBar){
+      settings.setСurrentNotificationId(0);
+    }
   }
 
   private void setFirstRunFalse() {

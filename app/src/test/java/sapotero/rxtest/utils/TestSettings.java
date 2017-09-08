@@ -637,6 +637,11 @@ public class TestSettings implements ISettings {
   }
 
   @Override
+
+  public Set<String> getNotificatedJournals() {
+    return null;
+  }
+
   public boolean isSubstituteMode() {
     return isSubstituteMode;
   }
@@ -647,6 +652,15 @@ public class TestSettings implements ISettings {
   }
 
   @Override
+  public void setСurrentNotificationId(int value) {
+
+  }
+
+  @Override
+  public int getСurrentNotificationId() {
+    return 0;
+  }
+
   public void setSubstituteMode(boolean value) {
     isSubstituteMode = value;
   }

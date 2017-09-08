@@ -171,6 +171,17 @@
     </android.support.v7.preference.PreferenceCategory>
 
     <android.support.v7.preference.PreferenceCategory
+        android:title="Настройки уведомлений">
+        <MultiSelectListPreference
+            android:key="@string/notificated_journals_key"
+            android:title="Журналы"
+            android:summary="Выберете журналы для уведомлений"
+            android:defaultValue="@array/settings_notificated_journals_values"
+            android:entries="@array/settings_notificated_journals"
+            android:entryValues="@array/settings_notificated_journals_values" />
+    </android.support.v7.preference.PreferenceCategory>
+
+    <android.support.v7.preference.PreferenceCategory
         android:title="Расширенные настройки">
 
         <SwitchPreference
@@ -183,5 +194,4 @@
             android:title="Отображение окна авторизации"
             android:defaultValue="true" />
     </android.support.v7.preference.PreferenceCategory>
-
 </android.support.v7.preference.PreferenceScreen>

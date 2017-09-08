@@ -64,7 +64,6 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
     setTheme(R.style.AppTheme);
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_login);
-
     EsdApplication.getManagerComponent().inject(this);
 
     initialize();
@@ -88,6 +87,8 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
         })
         .show();
     }
+    /*сбрасываем счётчик уведомлений(Notification) при старте application */
+    settings.setСurrentNotificationId(0);
   }
 
   private void showSelectDialog(List<String> keyStoreTypeList) {

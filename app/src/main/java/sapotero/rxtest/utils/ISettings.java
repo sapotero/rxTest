@@ -234,6 +234,12 @@ public interface ISettings {
 
   void setOrganizationFilterSelection(Set<String> value);
 
+  Set<String> getNotificatedJournals();
+
+  void setСurrentNotificationId(int value);
+
+  int getСurrentNotificationId();
+
   boolean isSubstituteMode();
 
   Preference<Boolean> getSubstituteModePreference();
@@ -275,4 +281,5 @@ public interface ISettings {
   boolean isStartRegularRefresh();
 
   void setStartRegularRefresh(boolean value);
+
 }

@@ -23,6 +23,7 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Deleter;
 import sapotero.rxtest.db.requery.utils.DocumentStateSaver;
+import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.jobs.bus.CreateDocumentsJob;
@@ -151,7 +152,6 @@ public class Processor {
   }
 
   public void execute() {
-
     Transaction transaction = new Transaction();
 
     switch (source){
@@ -284,9 +284,14 @@ public class Processor {
           updateAndSetProcessed( uid );
         }
 
+
         validateDocuments();
 
-        return Collections.singletonList("");
+        if (add.size() > 0) {
+          generateNotificationMsg(add);
+        }
+
+          return Collections.singletonList("");
       })
 //      .buffer(200, TimeUnit.MILLISECONDS)
       .subscribeOn(Schedulers.immediate())
@@ -296,11 +301,39 @@ public class Processor {
 //          EventBus.getDefault().post( new JournalSelectorUpdateCountEvent() );
           Timber.tag(TAG).e("processed");
         },
-        Timber::e
+          Timber::e
       );
 
 
     return new ArrayList<>();
+  }
+
+  private String getShortJournalName(String longJournalName){
+    String shortJournalName = "";
+
+    if (  longJournalName != null ) {
+      String[] index = longJournalName.split("_production_db_");
+      shortJournalName = index[0];
+    }else if (Objects.equals(this.filter, "approval")){
+      shortJournalName = "APPROVE" ;
+    }else if (Objects.equals(this.filter, "signing")){
+      shortJournalName = "SIGN" ;
+    }
+    return shortJournalName;
+  }
+
+  /* генерируем уведомления, если в MemoryStore появился новый документ. addedDocList - List новых документов*/
+  private void generateNotificationMsg(List<String> addedDocList) {
+    NotifyManager mNotifyManager = new NotifyManager(addedDocList, documents, filter);
+
+    /*приводим строку index к виду Fields.Journal*/
+    String shortNameJournal = getShortJournalName(index).toUpperCase();
+    Fields.Journal itemJournal = Fields.Journal.valueOf(shortNameJournal);
+
+    /*проверяем, включён ли checkBox для журнала. -> генерируем уведомление */
+    if( settings.getNotificatedJournals().contains( itemJournal.getValue()) ) {
+      mNotifyManager.generateNotifyMsg(itemJournal.getFormattedName() + itemJournal.getSingle());
+    }
   }
 
   private void resetMd5(List<String> add) {
@@ -481,8 +514,8 @@ public class Processor {
       settings.addTotalDocCount(1);
 
       store.process(
-        store.startTransactionFor( uid )
-          .removeLabel(LabelType.FAVORITES)
+          store.startTransactionFor( uid )
+              .removeLabel(LabelType.FAVORITES)
       );
 
       jobManager.addJobInBackground( new UpdateDocumentJob( uid, documentType, true, login, currentUserId ) );
