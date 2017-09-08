@@ -80,6 +80,7 @@ public class NotifyManager {
       .setVisibility(Notification.VISIBILITY_PUBLIC);
     notificationManagerCompat.notify(сurrentNotificationId, builder.build());
     settings.setСurrentNotificationId(сurrentNotificationId);
+
   }
 
   private void showGroupSummaryNotification(String title, List<String> addedDocList) {
