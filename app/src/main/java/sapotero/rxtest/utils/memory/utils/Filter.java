@@ -1,5 +1,7 @@
 package sapotero.rxtest.utils.memory.utils;
 
+import android.text.TextUtils;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
@@ -246,13 +248,14 @@ public class Filter {
     } else if ( o2 == null || Objects.equals( o2, "" ) ) {
       result = -1;
     } else {
-      try {
         SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
+
+      try {
         Date date1 = format.parse( o1 );
         Date date2 = format.parse( o2 );
         result = date2.compareTo( date1 );  // вначале свежие
       } catch (ParseException e) {
-        // Do nothing
+        e.printStackTrace();
       }
     }
 
@@ -280,14 +283,11 @@ public class Filter {
   private int compareNumbers(String o1, String o2) {
     int result = 0;
 
-    try {
+    if ( fastIntCheck(o1) && fastIntCheck(o2) ){
       Long num1 = Long.valueOf( o1 );
       Long num2 = Long.valueOf( o2 );
       result = num2.compareTo( num1 );  // вначале наибольший номер
-    } catch (NumberFormatException e) {
-      // Do nothing
     }
-
     return result;
   }
 
@@ -295,7 +295,6 @@ public class Filter {
   private int compareRegNumbersWithPrefixes(String regNum1, String regNum2) {
     int result = 0;
 
-    try {
       String[] split1 = regNum1.split("/");
       String[] split2 = regNum2.split("/");
 
@@ -306,7 +305,6 @@ public class Filter {
         String regNum2Prefix = split2[0];
         String regNum2Number = split2[1];
 
-        // Сортировка по префиксу (то, что до "/")
         result = compareNumbers(regNum1Prefix, regNum2Prefix);
 
         // Сортировка по номеру (то, что после "/")
@@ -314,9 +312,6 @@ public class Filter {
           result = compareNumbers(regNum1Number, regNum2Number);
         }
       }
-    } catch (Exception error) {
-      // Do nothing
-    }
 
     return result;
   }
@@ -341,5 +336,8 @@ public class Filter {
     }
 
 
+  private boolean fastIntCheck(String str) {
+    return TextUtils.isDigitsOnly(str);
+  }
 
 }

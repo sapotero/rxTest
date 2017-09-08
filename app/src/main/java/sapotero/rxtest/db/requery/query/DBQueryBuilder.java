@@ -112,12 +112,7 @@ public class DBQueryBuilder {
         .filter(filter::isFavorites)
         .filter(filter::isControl);
 
-      try {
-        // Long lists with different documents may throw exception "Comparison method violates its general contract"
-        _docs = _docs.sortBy(filter::byJournalDateNumber);
-      } catch (Exception e1) {
-        Timber.tag(TAG).e(e1);
-      }
+       _docs = _docs.sortBy(filter::byJournalDateNumber);
 
       List<InMemoryDocument> docs = _docs.toList();
       long endTime = System.nanoTime();
@@ -125,19 +120,17 @@ public class DBQueryBuilder {
 
       Timber.e("SIZE: %s | %sms", docs.size(), duration);
 
-      adapter.removeAllWithRange();
+
 
       if (docs.size() > 0){
         hideEmpty();
-        for (InMemoryDocument doc: docs ) {
-//                  Timber.tag(TAG).w("add %s", doc.getUid() );
-          InMemoryDocument docFromMem = store.getDocuments().get( doc.getUid() );
-          if ( docFromMem != null ) {
-            adapter.addItem( docFromMem );
-          }
-        }
+        adapter.addList(docs);
+//        for (InMemoryDocument doc: docs ) {
+////          adapter.addItem( doc );
+//        }
 
       } else {
+        adapter.removeAllWithRange();
         showEmpty();
       }
     }
