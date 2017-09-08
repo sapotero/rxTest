@@ -177,10 +177,10 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     context = this;
     searchSubject = PublishSubject.create();
 
+    initAdapters();
+
     unregisterEventBus();
     EventBus.getDefault().register(this);
-
-    initAdapters();
 
     menuBuilder = new MenuBuilder(this);
     menuBuilder
@@ -309,6 +309,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   private void initAdapters() {
     if (settings.isFirstRun()){
+      EventBus.getDefault().removeStickyEvent(LoadedFromDbEvent.class);
       store.clearAndLoadFromDb();
     }
 
@@ -1147,9 +1148,10 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     update( false );
   }
 
-  @Subscribe(threadMode = ThreadMode.MAIN)
+  @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
   public void onMessageEvent(LoadedFromDbEvent event) {
     Timber.tag("LoadFromDb").i("MainActivity: handle LoadedFromDbEvent");
+    EventBus.getDefault().removeStickyEvent(event);
 
     if ( switchToSubstituteModeStarted ) {
       switchToSubstituteModeStarted = false;
