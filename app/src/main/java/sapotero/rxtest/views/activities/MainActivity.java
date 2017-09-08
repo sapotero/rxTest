@@ -1149,7 +1149,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(LoadedFromDbEvent event) {
-    Timber.tag(TAG).i("LoadedFromDbEvent");
+    Timber.tag("LoadFromDb").i("MainActivity: handle LoadedFromDbEvent");
 
     if ( switchToSubstituteModeStarted ) {
       switchToSubstituteModeStarted = false;

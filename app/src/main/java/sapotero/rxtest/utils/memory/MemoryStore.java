@@ -156,6 +156,7 @@ public class MemoryStore implements Processable{
             documents.put(doc.getUid(), document);
           }
 
+          Timber.tag("LoadFromDb").d("MemoryStore: send LoadedFromDbEvent");
           EventBus.getDefault().post( new LoadedFromDbEvent() );
         },
         Timber::e
