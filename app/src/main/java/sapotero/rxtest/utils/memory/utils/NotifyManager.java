@@ -71,13 +71,13 @@ public class NotifyManager {
 
     NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext);
     builder.setContentTitle(title)
-        .setContentText(msg)
-        .setSmallIcon(R.drawable.ic_error)
-        .setContentIntent(pendingIntentOpenDoc)
-        .setAutoCancel(true)
-        .setDefaults(Notification.DEFAULT_ALL)
-        .setPriority(NotificationCompat.PRIORITY_HIGH)
-        .setVisibility(Notification.VISIBILITY_PUBLIC);
+      .setContentText(msg)
+      .setSmallIcon(R.drawable.ic_error)
+      .setContentIntent(pendingIntentOpenDoc)
+      .setAutoCancel(true)
+      .setDefaults(Notification.DEFAULT_ALL)
+      .setPriority(NotificationCompat.PRIORITY_HIGH)
+      .setVisibility(Notification.VISIBILITY_PUBLIC);
     notificationManagerCompat.notify(сurrentNotificationId, builder.build());
     settings.setСurrentNotificationId(сurrentNotificationId);
   }
@@ -90,17 +90,17 @@ public class NotifyManager {
 
     NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext);
     builder.setContentTitle(title + сurrentNotificationId)
-        .setContentText("Итого требующих рассмотрения: " + сurrentNotificationId)
-        .setNumber(addedDocList.size())
-        .setSmallIcon(R.drawable.ic_error)
-        .setCategory(Notification.CATEGORY_MESSAGE)
-        .setGroupSummary(true)
-        .setGroup("group")
-        .setAutoCancel(true)
-        .setDefaults(Notification.DEFAULT_ALL)
-        .setPriority(NotificationCompat.PRIORITY_HIGH)
-        .setVisibility(Notification.VISIBILITY_PUBLIC)
-        .setContentIntent(pendingIntent);
+      .setContentText("Итого требующих рассмотрения: " + сurrentNotificationId)
+      .setNumber(addedDocList.size())
+      .setSmallIcon(R.drawable.ic_error)
+      .setCategory(Notification.CATEGORY_MESSAGE)
+      .setGroupSummary(true)
+      .setGroup("group")
+      .setAutoCancel(true)
+      .setDefaults(Notification.DEFAULT_ALL)
+      .setPriority(NotificationCompat.PRIORITY_HIGH)
+      .setVisibility(Notification.VISIBILITY_PUBLIC)
+      .setContentIntent(pendingIntent);
     notificationManagerCompat.notify(сurrentNotificationId, builder.build());
     settings.setСurrentNotificationId(сurrentNotificationId);
   }
