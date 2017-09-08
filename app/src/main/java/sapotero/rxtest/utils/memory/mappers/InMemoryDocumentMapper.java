@@ -56,6 +56,9 @@ public class InMemoryDocumentMapper {
 
     document.setSigner( signer );
     document.setViewed( doc.isViewed() );
+    document.setReturned( doc.isReturned() );
+    document.setRejected( doc.isRejected() );
+    document.setAgain( doc.isAgain() );
 
     return document;
   }
@@ -67,6 +70,7 @@ public class InMemoryDocumentMapper {
     doc.setProject(document.getRoute() != null && ((RRouteEntity) document.getRoute()).getSteps() != null && ((RRouteEntity) document.getRoute()).getSteps().size() > 0);
 
     imd.setUid( document.getUid() );
+    imd.setUpdatedAt( document.getUpdatedAt() );
     imd.setMd5( document.getMd5() );
     imd.setFilter(document.getFilter());
     imd.setIndex(document.getDocumentType());
@@ -76,6 +80,7 @@ public class InMemoryDocumentMapper {
     imd.setHasDecision( document.isWithDecision() != null ? document.isWithDecision() : false );
     imd.setProject(document.getRoute() != null && ((RRouteEntity) document.getRoute()).getSteps() != null && ((RRouteEntity) document.getRoute()).getSteps().size() > 0);
     imd.setAsReady();
+    imd.setUser( document.getUser() );
 
     return imd;
   }

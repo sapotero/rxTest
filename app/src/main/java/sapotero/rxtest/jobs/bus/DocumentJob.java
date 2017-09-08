@@ -19,7 +19,6 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.mapper.DocumentMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.db.requery.utils.Deleter;
@@ -37,6 +36,8 @@ import sapotero.rxtest.retrofit.models.document.Step;
 import timber.log.Timber;
 
 abstract class DocumentJob extends BaseJob {
+
+  public String currentUserId;
 
   DocumentJob(Params params) {
     super(params);
@@ -62,6 +63,12 @@ abstract class DocumentJob extends BaseJob {
   }
 
   void loadDocument(String uid, String TAG) {
+    if ( !Objects.equals( login, settings.getLogin() ) ) {
+      // Загружаем документ только если логин не сменился (режим замещения)
+      Timber.tag(TAG).d("Login changed, quit loading %s", uid);
+      return;
+    }
+
     Observable<DocumentInfo> info = getDocumentInfoObservable(uid);
 
     info
@@ -84,7 +91,7 @@ abstract class DocumentJob extends BaseJob {
     DocumentService documentService = retrofit.create( DocumentService.class );
     return documentService.getInfo(
             uid,
-            settings.getLogin(),
+            login,
             settings.getToken()
     );
   }
@@ -101,7 +108,7 @@ abstract class DocumentJob extends BaseJob {
   abstract public void doAfterLoad(DocumentInfo document);
 
   RDocumentEntity createDocument(DocumentInfo documentReceived, String status, boolean shared) {
-    DocumentMapper documentMapper = mappers.getDocumentMapper();
+    DocumentMapper documentMapper = mappers.getDocumentMapper().withLogin(login).withCurrentUserId(currentUserId);
     RDocumentEntity doc = documentMapper.toEntity(documentReceived);
 
     documentMapper.setFilter(doc, status);
@@ -111,10 +118,16 @@ abstract class DocumentJob extends BaseJob {
   }
 
   void saveDocument(DocumentInfo documentReceived, RDocumentEntity documentToSave, boolean isLink, String TAG) {
+    if ( !Objects.equals( login, settings.getLogin() ) ) {
+      // Сохраняем документ только если логин не сменился (режим замещения)
+      Timber.tag(TAG).d("Login changed, quit saving %s", documentToSave.getUid());
+      return;
+    }
+
     RDocumentEntity existingDoc =
       dataStore
         .select(RDocumentEntity.class)
-        .where(RDecisionEntity.UID.eq( documentToSave.getUid() ))
+        .where(RDocumentEntity.UID.eq( documentToSave.getUid() ))
         .get().firstOrNull();
 
     if ( isLink ) {
@@ -183,7 +196,7 @@ abstract class DocumentJob extends BaseJob {
       for (RImage _image : images) {
         settings.addTotalDocCount(1);
         RImageEntity image = (RImageEntity) _image;
-        jobManager.addJobInBackground( new DownloadFileJob( settings.getHost(), image.getPath(), image.getMd5() + "_" + image.getTitle(), image.getId() ) );
+        jobManager.addJobInBackground( new DownloadFileJob( settings.getHost(), image.getPath(), image.getMd5() + "_" + image.getTitle(), image.getId(), login ) );
       }
     }
   }
@@ -217,7 +230,7 @@ abstract class DocumentJob extends BaseJob {
   private void loadLinkedDoc(String linkUid, String parentUid, boolean saveFirstLink) {
     if ( exist( linkUid ) ) {
       settings.addTotalDocCount(1);
-      jobManager.addJobInBackground( new CreateLinksJob( linkUid, parentUid, saveFirstLink ) );
+      jobManager.addJobInBackground( new CreateLinksJob( linkUid, parentUid, saveFirstLink, login, currentUserId ) );
     }
   }
 
@@ -230,7 +243,7 @@ abstract class DocumentJob extends BaseJob {
       List<Status> statuses = exemplar.getStatuses();
       if ( notEmpty( statuses ) ) {
         Status currentStatus = statuses.get( statuses.size() - 1 );
-        if ( Objects.equals( currentStatus.getAddressedToId(), settings.getCurrentUserId() ) ) {
+        if ( Objects.equals( currentStatus.getAddressedToId(), currentUserId ) ) {
           if ( Objects.equals( currentStatus.getStatusCode(), "primary_consideration")
             || Objects.equals( currentStatus.getStatusCode(), "sent_to_the_report") ) {
             result = true;
@@ -243,49 +256,51 @@ abstract class DocumentJob extends BaseJob {
     if ( document.getRoute() != null && document.getRoute().getSteps() != null  ) {
       List<Step> steps = document.getRoute().getSteps();
 
-      // Сначала смотрим шаг Подписывающие, потом Согласующие
+      // Сначала смотрим шаги Подписывающие, потом Согласующие
       List<String> titles = new ArrayList<>();
       titles.add("Подписывающие");
       titles.add("Согласующие");
 
       for (String title : titles) {
-        Step step = getStep(steps, title);
-        for ( Person person : nullGuard( step.getPeople() ) ) {
-          if ( Objects.equals( person.getOfficialId(), settings.getCurrentUserId() ) ) {
-            List<Action> actions = person.getActions();
-            if ( notEmpty( actions ) ) {
-              String lastActionStatus = actions.get( actions.size() - 1 ).getStatus();
-              if ( !lastActionStatus.toLowerCase().contains("отклонено")
-                && !lastActionStatus.toLowerCase().contains("согласовано")
-                && !lastActionStatus.toLowerCase().contains("подписано") ) {
-                if ( title.equals( "Подписывающие" ) ) {
-                  documentMapper.setFilter( documentEntity, "signing" );
-                } else {
-                  documentMapper.setFilter( documentEntity, "approval" );
-                }
-                result = true;
-                return result;
-              }
+        // resolved https://tasks.n-core.ru/browse/MPSED-2149
+        // Блок подписание в маршруте прохождения
+        // Идем по шагам в обратном порядке, так как, например,
+        // может быть несколько блоков Подписывающие с одним и тем же пользователем,
+        // а нам нужен последний актуальный
+        for (int i = steps.size() - 1; i >= 0; i-- ) {
+          Step step = steps.get(i);
+          if ( Objects.equals( step.getTitle(), title) ) {
+            if ( checkStep(step, title, documentEntity, documentMapper) ) {
+              return true;
             }
           }
         }
       }
-
     }
 
     return result;
   }
 
-  private Step getStep(List<Step> steps, String title) {
-    Step result = new Step();
-
-    for ( Step step : nullGuard( steps) ) {
-      if ( Objects.equals( step.getTitle(), title) ) {
-        result = step;
-        break;
+  private boolean checkStep(Step step, String title, RDocumentEntity documentEntity, DocumentMapper documentMapper) {
+    for ( Person person : nullGuard( step.getPeople() ) ) {
+      if ( Objects.equals( person.getOfficialId(), currentUserId ) ) {
+        List<Action> actions = person.getActions();
+        if ( notEmpty( actions ) ) {
+          String lastActionStatus = actions.get( actions.size() - 1 ).getStatus();
+          if ( !lastActionStatus.toLowerCase().contains("отклонено")
+            && !lastActionStatus.toLowerCase().contains("согласовано")
+            && !lastActionStatus.toLowerCase().contains("подписано") ) {
+            if ( title.equals( "Подписывающие" ) ) {
+              documentMapper.setFilter( documentEntity, "signing" );
+            } else {
+              documentMapper.setFilter( documentEntity, "approval" );
+            }
+            return true;
+          }
+        }
       }
     }
 
-    return result;
+    return false;
   }
 }

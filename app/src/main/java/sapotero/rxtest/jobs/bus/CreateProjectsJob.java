@@ -25,11 +25,13 @@ public class CreateProjectsJob extends DocumentJob {
   private String status;
   private boolean shared = false;
 
-  public CreateProjectsJob(String uid, String status, boolean shared) {
+  public CreateProjectsJob(String uid, String status, boolean shared, String login, String currentUserId) {
     super( new Params(PRIORITY).requireNetwork().persist().addTags("DocJob") );
     this.uid = uid;
     this.status = status;
     this.shared = shared;
+    this.login = login;
+    this.currentUserId = currentUserId;
   }
 
   @Override

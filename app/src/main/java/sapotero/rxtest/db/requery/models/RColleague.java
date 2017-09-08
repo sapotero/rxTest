@@ -6,7 +6,7 @@ import io.requery.Index;
 import io.requery.Key;
 
 @Entity
-public class RColleague {
+public abstract class RColleague {
   @Key
   @Generated
   int id;
@@ -17,6 +17,7 @@ public class RColleague {
   String officialId;
   String officialName;
   Boolean actived;
+  String image;
 
   @Index("colleague_user_index")
   String user;

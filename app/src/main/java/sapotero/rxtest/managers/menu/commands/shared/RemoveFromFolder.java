@@ -2,18 +2,22 @@ package sapotero.rxtest.managers.menu.commands.shared;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.List;
+
+import rx.Observable;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Deleter;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.managers.menu.commands.SharedCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.managers.menu.utils.DateUtil;
+import sapotero.rxtest.retrofit.models.OperationResult;
+import sapotero.rxtest.utils.memory.fields.FieldType;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import sapotero.rxtest.utils.memory.utils.Transaction;
 import timber.log.Timber;
 
 public class RemoveFromFolder extends SharedCommand {
-
-  private String TAG = this.getClass().getSimpleName();
 
   public RemoveFromFolder(CommandParams params) {
     super(params);
@@ -52,19 +56,26 @@ public class RemoveFromFolder extends SharedCommand {
   @Override
   public void executeLocal() {
     queueManager.setExecutedLocal(this);
-
-    if ( callback != null ){
-      callback.onCommandExecuteSuccess( getType() );
-    }
+    sendSuccessCallback();
   }
 
   @Override
   public void executeRemote() {
-    remoteFolderOperation( this, true, TAG );
+    printCommandType();
+    Observable<OperationResult> info = getOperationResultObservable();
+    sendOperationRequest( info );
   }
 
   @Override
-  protected void setSuccess() {
+  public void finishOnOperationSuccess() {
+
+    String timestamp = DateUtil.getTimestamp();
+    String timestampEarly = DateUtil.getTimestampEarly();
+    Timber.d("DateUtil: now   %s | %s", timestamp, DateUtil.isSomeTimePassed(timestamp) );
+    Timber.d("DateUtil: early %s | %s", timestampEarly, DateUtil.isSomeTimePassed(timestampEarly) );
+
+
+
     RDocumentEntity documentEntity = dataStore
       .select( RDocumentEntity.class )
       .where( RDocumentEntity.UID.eq( getParams().getDocument() ) )
@@ -80,16 +91,19 @@ public class RemoveFromFolder extends SharedCommand {
       Transaction transaction = new Transaction();
       transaction
         .from( store.getDocuments().get(getParams().getDocument()) )
+        .setField(FieldType.UPDATED_AT, DateUtil.getTimestamp())
         .removeLabel(LabelType.SYNC)
         .removeLabel(LabelType.FAVORITES);
       store.process( transaction );
 
-      setChangedFalse();
+      removeChangedInDb();
     }
+
+    queueManager.setExecutedRemote(this);
   }
 
   @Override
-  protected void setError() {
+  public void finishOnOperationError(List<String> errors) {
     Transaction transaction = new Transaction();
     transaction
       .from( store.getDocuments().get(getParams().getDocument()) )
@@ -104,5 +118,7 @@ public class RemoveFromFolder extends SharedCommand {
       .where( RDocumentEntity.UID.eq( getParams().getDocument() ) )
       .get()
       .value();
+
+    queueManager.setExecutedWithError( this, errors );
   }
 }

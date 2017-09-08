@@ -63,7 +63,7 @@
         <ListPreference
             android:key="@string/processed_load_period_key"
             android:title="Загрузка"
-            android:summary="За какой период загружать ЭО из папки «Обработанные»"
+            android:summary="Период загрузки документов из папки «Обработанные»"
             android:defaultValue="1"
             android:entries="@array/settings_view_processed_load_period"
             android:entryValues="@array/settings_view_processed_load_period_values" />
@@ -119,12 +119,23 @@
             android:defaultValue="true"
             />
 
+        <EditTextPreference
+            android:key="@string/zoomTextSize_key"
+            android:title="@string/zoomText"
+            android:defaultValue="@string/zoomTextSize"/>
+
 
 
     </android.support.v7.preference.PreferenceCategory>
 
     <android.support.v7.preference.PreferenceCategory
         android:title="Настройки операций">
+
+        <EditTextPreference
+            android:key="@string/update_time_key"
+            android:title="@string/update_time_title"
+            android:defaultValue="@string/update_time_value"/>
+
         <SwitchPreference
             android:key="@string/show_create_decision_post_key"
             android:title="Показывать кнопку «Создать поручение»"

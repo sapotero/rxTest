@@ -70,11 +70,11 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
     super.onResume();
     subscriptions = new CompositeSubscription();
 
-    // Enable First run flag preference only if not first run
-    boolean isFirstRun = settings.isFirstRun();
+    // Enable First run flag preference only if not first run and not substitute mode
+    boolean enable = !settings.isFirstRun() && !settings.isSubstituteMode();
     Preference firstFlagPreference = findPreference(Settings.FIRST_RUN_KEY);
     if (firstFlagPreference != null) {
-      firstFlagPreference.setEnabled(!isFirstRun);
+      firstFlagPreference.setEnabled( enable );
     }
   }
 }

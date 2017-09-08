@@ -1,25 +1,24 @@
 package sapotero.rxtest.db.mapper;
 
-import javax.inject.Inject;
-
-import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RPrimaryConsiderationEntity;
 import sapotero.rxtest.retrofit.models.Oshs;
-import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 
 // Maps between RPrimaryConsideration, Oshs and PrimaryConsiderationPeople
 // (model for RPrimaryConsideration is Oshs)
 public class PrimaryConsiderationMapper extends AbstractMapper<Oshs, RPrimaryConsiderationEntity> {
 
-  @Inject ISettings settings;
-
   private Mappers mappers;
+  private String login = "";
 
   public PrimaryConsiderationMapper(Mappers mappers) {
     this.mappers = mappers;
-    EsdApplication.getDataComponent().inject(this);
+  }
+
+  public PrimaryConsiderationMapper withLogin(String login) {
+    this.login = login;
+    return this;
   }
 
   @Override
@@ -36,7 +35,8 @@ public class PrimaryConsiderationMapper extends AbstractMapper<Oshs, RPrimaryCon
     entity.setName( model.getName() );
     entity.setIsGroup( model.getIsGroup() );
     entity.setIsOrganization( model.getIsOrganization() );
-    entity.setUser( settings.getLogin() );
+    entity.setUser( login );
+    entity.setImage( model.getIImage() );
 
     return entity;
   }
@@ -55,6 +55,7 @@ public class PrimaryConsiderationMapper extends AbstractMapper<Oshs, RPrimaryCon
     model.setName( entity.getName() );
     model.setIsGroup( entity.isIsGroup() );
     model.setIsOrganization( entity.isIsOrganization() );
+    model.setImage( entity.getImage() );
 
     return model;
   }

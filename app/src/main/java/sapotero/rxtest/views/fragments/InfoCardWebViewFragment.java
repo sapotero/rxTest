@@ -1,10 +1,7 @@
 package sapotero.rxtest.views.fragments;
 
-import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.util.Base64;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -13,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.RelativeLayout;
 
 import org.greenrobot.eventbus.EventBus;
@@ -34,9 +32,10 @@ import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.activities.DocumentInfocardFullScreenActivity;
 import sapotero.rxtest.views.adapters.utils.OnSwipeTouchListener;
+import sapotero.rxtest.views.fragments.interfaces.PreviewFragment;
 import timber.log.Timber;
 
-public class InfoCardWebViewFragment extends Fragment {
+public class InfoCardWebViewFragment extends PreviewFragment {
 
   @BindView(R.id.web_infocard) WebView infocard;
   @BindView(R.id.fragment_info_card_web_wrapper) RelativeLayout wrapper;
@@ -44,7 +43,6 @@ public class InfoCardWebViewFragment extends Fragment {
   @Inject ISettings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
 
-  private OnFragmentInteractionListener mListener;
   private String TAG = this.getClass().getSimpleName();
   private String uid;
   private boolean doubleTabEnabled = true;
@@ -52,16 +50,9 @@ public class InfoCardWebViewFragment extends Fragment {
   public InfoCardWebViewFragment() {
   }
 
-  public static InfoCardWebViewFragment newInstance(String param1, String param2) {
-    InfoCardWebViewFragment fragment = new InfoCardWebViewFragment();
-    return fragment;
-  }
-
   @Override
-  public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    if (getArguments() != null) {
-    }
+  public void update() {
+    initWebView();
   }
 
   @Override
@@ -71,7 +62,16 @@ public class InfoCardWebViewFragment extends Fragment {
     EsdApplication.getDataComponent().inject( this );
 
     initEvents();
+    return view;
+  }
 
+  @Override
+  public void onResume() {
+    super.onResume();
+    initWebView();
+  }
+
+  private void initWebView() {
     final GestureDetector gestureDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener() {
       @Override
       public boolean onDoubleTap(MotionEvent event) {
@@ -98,11 +98,18 @@ public class InfoCardWebViewFragment extends Fragment {
     webSettings.setNeedInitialFocus(false);
     webSettings.setSaveFormData(false);
 
+    int fontsize = 16;
+    try {
+      fontsize = Integer.parseInt(settings.getInfocardFontSize());
+    } catch (NumberFormatException e) {
+      Timber.e(e);
+    }
+
+    webSettings.setDefaultFontSize( fontsize );
+
     wrapper.setOnTouchListener( new OnSwipeTouchListener( getContext() ) );
 
     setWebView();
-
-    return view;
   }
 
   private void initEvents() {
@@ -123,12 +130,6 @@ public class InfoCardWebViewFragment extends Fragment {
     unregisterEventBus();
   }
 
-  public void onButtonPressed(Uri uri) {
-    if (mListener != null) {
-      mListener.onFragmentInteraction(uri);
-    }
-  }
-
   public void setWebView() {
     infocard.loadUrl("about:blank");
 
@@ -144,23 +145,14 @@ public class InfoCardWebViewFragment extends Fragment {
 
       String htmlData = "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />" + new String(Base64.decode( doc.getInfoCard(), Base64.DEFAULT) );
       infocard.loadDataWithBaseURL("file:///android_asset/", htmlData, "text/html", "UTF-8", null);
+      infocard.setWebViewClient(new WebViewClient(){
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+          return true;
+        }
+      });
     }
-  }
 
-  @Override
-  public void onAttach(Context context) {
-    super.onAttach(context);
-    if (context instanceof OnFragmentInteractionListener) {
-      mListener = (OnFragmentInteractionListener) context;
-    } else {
-      throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
-    }
-  }
-
-  @Override
-  public void onDetach() {
-    super.onDetach();
-    mListener = null;
   }
 
   public InfoCardWebViewFragment withUid(String uid) {
@@ -168,13 +160,9 @@ public class InfoCardWebViewFragment extends Fragment {
     return this;
   }
 
-  public InfoCardWebViewFragment withEnableDoubleTap(boolean doubleTabEnabled) {
+  public PreviewFragment withEnableDoubleTap(boolean doubleTabEnabled) {
     this.doubleTabEnabled = doubleTabEnabled;
     return this;
-  }
-
-  public interface OnFragmentInteractionListener {
-    void onFragmentInteraction(Uri uri);
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)

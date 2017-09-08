@@ -3,6 +3,7 @@ package sapotero.rxtest.managers.menu.commands.performance;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Retrofit;
 import rx.Observable;
@@ -12,13 +13,15 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.managers.menu.utils.DateUtil;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
+import sapotero.rxtest.utils.memory.fields.FieldType;
+import sapotero.rxtest.utils.memory.fields.LabelType;
+import sapotero.rxtest.utils.memory.utils.Transaction;
 import timber.log.Timber;
 
 public class ApprovalPerformance extends AbstractCommand {
-
-  private String TAG = this.getClass().getSimpleName();
 
   public ApprovalPerformance(CommandParams params) {
     super(params);
@@ -63,12 +66,18 @@ public class ApprovalPerformance extends AbstractCommand {
           Timber.tag(TAG).i("ok: %s", data.getOk());
           Timber.tag(TAG).i("error: %s", data.getMessage());
           Timber.tag(TAG).i("type: %s", data.getType());
+
+          Transaction transaction = new Transaction();
+          transaction
+            .from( store.getDocuments().get(getParams().getDocument()) )
+            .setField(FieldType.UPDATED_AT, DateUtil.getTimestamp())
+            .removeLabel(LabelType.SYNC);
+          store.process( transaction );
+
           queueManager.setExecutedRemote(this);
         },
         error -> {
-          if (callback != null){
-            callback.onCommandExecuteError(getType());
-          }
+          sendErrorCallback( getType() );
         }
       );
   }
@@ -83,9 +92,7 @@ public class ApprovalPerformance extends AbstractCommand {
       .get()
       .value();
 
-    if (callback != null){
-      callback.onCommandExecuteSuccess(getType());
-    }
+    sendErrorCallback( getType() );
 
     queueManager.setExecutedLocal(this);
   }
@@ -93,5 +100,9 @@ public class ApprovalPerformance extends AbstractCommand {
   @Override
   public String getType() {
     return "to_the_approval_performance";
+  }
+
+  @Override
+  public void finishOnOperationError(List<String> errors) {
   }
 }

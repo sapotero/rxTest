@@ -9,6 +9,8 @@ import com.birbit.android.jobqueue.RetryConstraint;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.Objects;
+
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.mapper.DocumentMapper;
@@ -33,12 +35,14 @@ public class CreateLinksJob extends DocumentJob {
 
   private Fields.Status filter;
 
-  public CreateLinksJob(String linkUid, String parentUid, boolean saveFirstLink) {
+  public CreateLinksJob(String linkUid, String parentUid, boolean saveFirstLink, String login, String currentUserId) {
     super( new Params(PRIORITY).requireNetwork().persist().addTags("DocJob") );
     this.linkUid = linkUid;
     this.parentUid = parentUid;
     this.saveFirstLink = saveFirstLink;
     this.filter = Fields.Status.LINK;
+    this.login = login;
+    this.currentUserId = currentUserId;
   }
 
   @Override
@@ -47,10 +51,16 @@ public class CreateLinksJob extends DocumentJob {
 
   @Override
   public void onRun() throws Throwable {
+    if ( !Objects.equals( login, settings.getLogin() ) ) {
+      // Запускаем job только если логин не сменился (режим замещения)
+      Timber.tag(TAG).d("Login changed, quit onRun %s", linkUid);
+      return;
+    }
+
     RDocumentEntity existingLink =
       dataStore
         .select(RDocumentEntity.class)
-        .where(RDecisionEntity.UID.eq(linkUid))
+        .where(RDocumentEntity.UID.eq(linkUid))
         .get().firstOrNull();
 
     if ( exist( existingLink ) ) {
@@ -73,7 +83,7 @@ public class CreateLinksJob extends DocumentJob {
       RDocumentEntity parentDoc =
         dataStore
           .select(RDocumentEntity.class)
-          .where(RDecisionEntity.UID.eq(parentUid))
+          .where(RDocumentEntity.UID.eq(parentUid))
           .get().firstOrNull();
 
       if ( exist( parentDoc ) ) {
@@ -97,7 +107,13 @@ public class CreateLinksJob extends DocumentJob {
 
   @Override
   public void doAfterLoad(DocumentInfo document) {
-    DocumentMapper documentMapper = mappers.getDocumentMapper();
+    if ( !Objects.equals( login, settings.getLogin() ) ) {
+      // Обрабатываем загруженный документ только если логин не сменился (режим замещения)
+      Timber.tag(TAG).d("Login changed, quit doAfterLoad %s", document.getUid());
+      return;
+    }
+
+    DocumentMapper documentMapper = mappers.getDocumentMapper().withLogin(login).withCurrentUserId(currentUserId);
     RDocumentEntity doc = new RDocumentEntity();
 
     documentMapper.setSimpleFields(doc, document);

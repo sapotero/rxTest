@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.os.Handler;
 import android.support.v4.content.FileProvider;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -65,9 +65,10 @@ import sapotero.rxtest.views.activities.DocumentImageFullScreenActivity;
 import sapotero.rxtest.views.adapters.DocumentLinkAdapter;
 import sapotero.rxtest.views.custom.CircleLeftArrow;
 import sapotero.rxtest.views.custom.CircleRightArrow;
+import sapotero.rxtest.views.fragments.interfaces.PreviewFragment;
 import timber.log.Timber;
 
-public class InfoCardDocumentsFragment extends Fragment implements AdapterView.OnItemClickListener, GestureDetector.OnDoubleTapListener {
+public class InfoCardDocumentsFragment extends PreviewFragment implements AdapterView.OnItemClickListener, GestureDetector.OnDoubleTapListener {
 
   public static final int REQUEST_CODE_INDEX = 1;
   @Inject ISettings settings;
@@ -96,7 +97,6 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   @BindView(R.id.open_in_another_app_wrapper) LinearLayout open_in_another_app_wrapper;
   @BindView(R.id.pdf_linear_wrapper) RelativeLayout pdf_linear_wrapper;
 
-  private OnFragmentInteractionListener mListener;
   private Context mContext;
   private String TAG = this.getClass().getSimpleName();
 
@@ -118,6 +118,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   private boolean toastShown = false;
   private Subscription sub;
   private Subscription reload;
+  private boolean canScroll = true;
 
   public InfoCardDocumentsFragment() {
     swipeUtil = new SwipeUtil();
@@ -141,11 +142,18 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
       index = savedInstanceState.getInt(STATE_CURRENT_PAGE_INDEX, 0);
     }
 
-    updateDocument();
+    new Handler().postDelayed(this::updateDocument, 200);
+//    updateDocument();
 //    initSubscription();
 
     return view;
   }
+
+  @Override
+  public void update() {
+    updateDocument();
+  }
+
 
   private void initSubscription() {
     // TODO: создавать подписку только если образов больше 1
@@ -153,7 +161,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     directionSub = PublishSubject.create();
 
     sub = directionSub
-      .buffer( 1000, TimeUnit.MILLISECONDS )
+      .buffer( 600, TimeUnit.MILLISECONDS )
       .onBackpressureBuffer(32)
       .onBackpressureDrop()
       .subscribeOn(Schedulers.computation())
@@ -178,11 +186,17 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
               Timber.d("NOT CHANGED: %s", positions.get(0) );
 
               if ( positions.get(0) == 0.0f ){
-                getPrevImage();
+                if (canScroll){
+                  canScroll = false;
+                  getPrevImage();
+                }
               }
 
               if ( positions.get(0) == 1.0f ){
-                getNextImage();
+                if (canScroll){
+                  canScroll = false;
+                  getNextImage();
+                }
               }
             }
 
@@ -206,13 +220,13 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
     if ( document != null ) {
       //resolved https://tasks.n-core.ru/browse/MVDESD-12626 - срочность
-      if (document.getUrgency() != null) {
+      if ( document.getUrgency() != null ){
         urgency.setVisibility(View.VISIBLE);
       }
 
       index = settings.getImageIndex();
 
-      if (document.getImages().size() > 0) {
+      if (document.getImages().size() > 0){
         adapter.clear();
 
         List<RImageEntity> tmp = new ArrayList<>();
@@ -229,14 +243,14 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
         }
 
         try {
-          Collections.sort(tmp, (o1, o2) -> o1.getNumber().compareTo(o2.getNumber()));
+          Collections.sort(tmp, (o1, o2) -> o1.getNumber().compareTo( o2.getNumber() ));
         } catch (Exception e) {
           e.printStackTrace();
         }
 
 
         for (RImageEntity image : tmp) {
-          adapter.add(image);
+          adapter.add( image );
         }
 
         showPdf();
@@ -283,7 +297,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
           if (file.exists()) {
             com.github.barteksc.pdfviewer.util.Constants.THUMBNAIL_RATIO = 1.0f;
-            com.github.barteksc.pdfviewer.util.Constants.PART_SIZE = 512;
+            com.github.barteksc.pdfviewer.util.Constants.PART_SIZE = 256;
 
             pdfView
               .fromStream(targetStream)
@@ -385,13 +399,20 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
 
           if ( !toastShown ) {
             toast = Toast.makeText(getContext(), direction.getMessage(), Toast.LENGTH_SHORT);
-            toast.show();
+
+            if ( index == adapter.getCount()-1 && direction != SwipeUtil.DIRECTION.DOWN
+              || index == 0 && direction != SwipeUtil.DIRECTION.UP){
+              toast.show();
+            }
+
             toastShown = true;
+
           }
 
         }
       } else {
         toastShown = false;
+        canScroll = true;
       }
 
 
@@ -432,14 +453,15 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   public void getPrevImage() {
     Timber.tag(TAG).i( "BEFORE %s - %s", index, adapter.getCount() );
     if ( index <= 0 ){
-      index = adapter.getCount()-1;
+      index = 0;
     } else {
       index--;
+      settings.setImageIndex( index );
+      showPdf();
     }
     Timber.tag(TAG).i( "AFTER %s - %s", index, adapter.getCount() );
 
-    settings.setImageIndex( index );
-    showPdf();
+
   }
 
   @OnClick(R.id.info_card_pdf_reload)
@@ -460,14 +482,13 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   public void getNextImage() {
     Timber.tag(TAG).i( "BEFORE %s - %s", index, adapter.getCount() );
     if ( index >= adapter.getCount()-1 ){
-      index = 0;
+      index = adapter.getCount()-1;
     } else {
       index++;
+      settings.setImageIndex( index );
+      showPdf();
     }
     Timber.tag(TAG).i( "AFTER %s - %s", index, adapter.getCount() );
-
-    settings.setImageIndex( index );
-    showPdf();
   }
 
   private void showPdf() {
@@ -486,8 +507,8 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   }
 
   private void disablePdfView() {
-    pdfView.setOnDragListener(null);
-    pdfView.setOnTouchListener(null);
+//    pdfView.setOnDragListener(null);
+//    pdfView.setOnTouchListener(null);
     pdfView.recycle();
   }
 
@@ -501,6 +522,13 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
     Intent intent = DocumentImageFullScreenActivity.newIntent( getContext(), adapter.getItems(), index );
     startActivityForResult(intent, REQUEST_CODE_INDEX);
   }
+
+  @OnClick(R.id.info_card_pdf_open)
+  public void openPdf() {
+    openInAnotherApp();
+  }
+
+
 
   // This is called, when DocumentImageFullScreenActivity returns
   // (needed to switch to the image shown in full screen).
@@ -518,12 +546,7 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   @Override
   public void onAttach(Context context) {
     super.onAttach(context);
-    if (context instanceof OnFragmentInteractionListener) {
-      mListener = (OnFragmentInteractionListener) context;
-      mContext = context;
-    } else {
-      throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
-    }
+    mContext = context;
   }
 
   @Override
@@ -572,10 +595,6 @@ public class InfoCardDocumentsFragment extends Fragment implements AdapterView.O
   public InfoCardDocumentsFragment withOutZoom(Boolean withOutZoom) {
     this.withOutZoom = withOutZoom;
     return this;
-  }
-
-  public interface OnFragmentInteractionListener {
-    void onFragmentInteraction(Uri uri);
   }
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13415

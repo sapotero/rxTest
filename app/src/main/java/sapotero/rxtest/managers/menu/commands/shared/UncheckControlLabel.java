@@ -1,5 +1,7 @@
 package sapotero.rxtest.managers.menu.commands.shared;
 
+import java.util.List;
+
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.managers.menu.commands.SharedCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -7,8 +9,6 @@ import sapotero.rxtest.utils.memory.fields.LabelType;
 import timber.log.Timber;
 
 public class UncheckControlLabel extends SharedCommand {
-
-  private String TAG = this.getClass().getSimpleName();
 
   public UncheckControlLabel(CommandParams params) {
     super(params);
@@ -53,18 +53,16 @@ public class UncheckControlLabel extends SharedCommand {
 
     queueManager.setExecutedLocal(this);
 
-    if ( callback != null ){
-      callback.onCommandExecuteSuccess( getType() );
-    }
+    sendSuccessCallback();
   }
 
   @Override
   public void executeRemote() {
-    remoteControlLabelOperation( this, TAG );
+    remoteControlLabelOperation();
   }
 
   @Override
-  protected void setSuccess() {
+  public void finishOnOperationSuccess() {
     Timber.tag("RecyclerViewRefresh").d("UncheckControlLabel: executeRemote success - update in DB and MemoryStore");
 
     store.process(
@@ -80,10 +78,12 @@ public class UncheckControlLabel extends SharedCommand {
       .where(RDocumentEntity.UID.eq(getParams().getDocument()))
       .get()
       .value();
+
+    queueManager.setExecutedRemote(this);
   }
 
   @Override
-  protected void setError() {
+  public void finishOnOperationError(List<String> errors) {
     store.process(
       store.startTransactionFor(getParams().getDocument())
         .removeLabel(LabelType.SYNC)
@@ -97,5 +97,7 @@ public class UncheckControlLabel extends SharedCommand {
       .where(RDocumentEntity.UID.eq(getParams().getDocument()))
       .get()
       .value();
+
+    queueManager.setExecutedWithError( this, errors );
   }
 }

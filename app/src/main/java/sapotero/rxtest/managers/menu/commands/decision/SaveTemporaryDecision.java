@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.List;
+
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
@@ -13,11 +15,10 @@ import sapotero.rxtest.managers.menu.commands.DecisionCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
+import sapotero.rxtest.retrofit.models.v2.DecisionError;
 import timber.log.Timber;
 
 public class SaveTemporaryDecision extends DecisionCommand {
-
-  private String TAG = this.getClass().getSimpleName();
 
   public SaveTemporaryDecision(CommandParams params) {
     super(params);
@@ -109,5 +110,13 @@ public class SaveTemporaryDecision extends DecisionCommand {
   @Override
   public void executeRemote() {
 //    queueManager.setExecutedRemote(this);
+  }
+
+  @Override
+  public void finishOnDecisionSuccess(DecisionError data) {
+  }
+
+  @Override
+  public void finishOnOperationError(List<String> errors) {
   }
 }

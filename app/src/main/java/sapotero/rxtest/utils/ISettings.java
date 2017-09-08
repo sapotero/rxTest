@@ -70,6 +70,10 @@ public interface ISettings {
 
   void setUid(String value);
 
+  String getUpdateTime();
+
+  void setUpdateTime(String value);
+
   String getStatusCode();
 
   void setStatusCode(String value);
@@ -89,6 +93,10 @@ public interface ISettings {
   String getCurrentUserPosition();
 
   void setCurrentUserPosition(String value);
+
+  String getCurrentUserImage();
+
+  void setCurrentUserImage(String value);
 
   int getMainMenuPosition();
 
@@ -147,6 +155,10 @@ public interface ISettings {
   String getPrevDialogComment();
 
   void setPrevDialogComment(String value);
+
+  String getInfocardFontSize();
+
+  void setInfocardFontSize(String value);
 
   String getStartPage();
 
@@ -227,4 +239,47 @@ public interface ISettings {
   void setСurrentNotificationId(int value);
 
   int getСurrentNotificationId();
+
+  boolean isSubstituteMode();
+
+  Preference<Boolean> getSubstituteModePreference();
+
+  void setSubstituteMode(boolean value);
+
+  String getOldLogin();
+
+  void setOldLogin(String value);
+
+  String getOldCurrentUserId();
+
+  void setOldCurrentUserId(String value);
+
+  String getOldCurrentUser();
+
+  void setOldCurrentUser(String value);
+
+  String getOldCurrentUserOrganization();
+
+  void setOldCurrentUserOrganization(String value);
+
+  String getOldCurrentUserImage();
+
+  void setOldCurrentUserImage(String value);
+
+  String getColleagueId();
+
+  void setColleagueId(String value);
+
+  boolean isUpdateAuthStarted();
+
+  void setUpdateAuthStarted(boolean value);
+
+  boolean isTabChanged();
+
+  void setTabChanged(boolean value);
+
+  boolean isStartRegularRefresh();
+
+  void setStartRegularRefresh(boolean value);
+
 }

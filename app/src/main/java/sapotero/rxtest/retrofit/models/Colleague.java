@@ -24,6 +24,16 @@ public class Colleague implements Serializable {
   @Expose
   private Boolean actived;
 
+  @SerializedName("auth_token")
+  @Expose
+  private String authToken;
+
+  @SerializedName("login")
+  @Expose
+  private String login;
+
+  // Colleague с непустыми authToken и login возвращается в ответ на запрос перехода в режим замещения
+
   public String getColleagueId() {
     return colleagueId;
   }
@@ -54,5 +64,13 @@ public class Colleague implements Serializable {
 
   public void setActived(Boolean actived) {
     this.actived = actived;
+  }
+
+  public String getAuthToken() {
+    return authToken;
+  }
+
+  public String getLogin() {
+    return login;
   }
 }

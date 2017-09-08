@@ -21,109 +21,77 @@ import sapotero.rxtest.db.mapper.TemplateMapper;
 // Keeps all mappers in one place
 public class Mappers {
 
-  private ActionMapper actionMapper;
-  private AssistantMapper assistantMapper;
-  private BlockMapper blockMapper;
-  private ControlLabelMapper controlLabelMapper;
-  private DecisionMapper decisionMapper;
-  private DocumentMapper documentMapper;
-  private ExemplarMapper exemplarMapper;
-  private FavoriteUserMapper favoriteUserMapper;
-  private ImageMapper imageMapper;
-  private LinkMapper linkMapper;
-  private PerformerMapper performerMapper;
-  private PrimaryConsiderationMapper primaryConsiderationMapper;
-  private RouteMapper routeMapper;
-  private SignerMapper signerMapper;
-  private StepMapper stepMapper;
-  private TemplateMapper templateMapper;
-  private ColleagueMapper colleagueMapper;
-
   public Mappers() {
-    actionMapper = new ActionMapper();
-    assistantMapper = new AssistantMapper();
-    blockMapper = new BlockMapper(this);
-    controlLabelMapper = new ControlLabelMapper();
-    decisionMapper = new DecisionMapper(this);
-    documentMapper = new DocumentMapper(this);
-    exemplarMapper = new ExemplarMapper();
-    favoriteUserMapper = new FavoriteUserMapper(this);
-    imageMapper = new ImageMapper();
-    linkMapper = new LinkMapper();
-    performerMapper = new PerformerMapper();
-    primaryConsiderationMapper = new PrimaryConsiderationMapper(this);
-    routeMapper = new RouteMapper(this);
-    signerMapper = new SignerMapper();
-    stepMapper = new StepMapper();
-    templateMapper = new TemplateMapper();
-    colleagueMapper = new ColleagueMapper();
   }
 
+  // Каждый раз создается новый экземпляр маппера, чтобы job одного пользователя не смогла поменать логин
+  // в маппере другого (вход/выход в режим замещения)
+
   public ActionMapper getActionMapper() {
-    return actionMapper;
+    return new ActionMapper();
   }
 
   public AssistantMapper getAssistantMapper() {
-    return assistantMapper;
+    return new AssistantMapper();
   }
 
   public BlockMapper getBlockMapper() {
-    return blockMapper;
+    return new BlockMapper(this);
   }
 
   public ControlLabelMapper getControlLabelMapper() {
-    return controlLabelMapper;
+    return new ControlLabelMapper();
   }
 
   public DecisionMapper getDecisionMapper() {
-    return decisionMapper;
+    return new DecisionMapper(this);
   }
 
   public DocumentMapper getDocumentMapper() {
-    return documentMapper;
+    return new DocumentMapper(this);
   }
 
   public ExemplarMapper getExemplarMapper() {
-    return exemplarMapper;
+    return new ExemplarMapper();
   }
 
   public FavoriteUserMapper getFavoriteUserMapper() {
-    return favoriteUserMapper;
+    return new FavoriteUserMapper(this);
   }
 
   public ImageMapper getImageMapper() {
-    return imageMapper;
+    return new ImageMapper();
   }
 
   public LinkMapper getLinkMapper() {
-    return linkMapper;
+    return new LinkMapper();
   }
 
   public PerformerMapper getPerformerMapper() {
-    return performerMapper;
+    return new PerformerMapper();
   }
 
   public PrimaryConsiderationMapper getPrimaryConsiderationMapper() {
-    return primaryConsiderationMapper;
+    return new PrimaryConsiderationMapper(this);
   }
 
   public RouteMapper getRouteMapper() {
-    return routeMapper;
+    return new RouteMapper(this);
   }
 
   public SignerMapper getSignerMapper() {
-    return signerMapper;
+    return new SignerMapper();
   }
 
   public StepMapper getStepMapper() {
-    return stepMapper;
+    return new StepMapper();
   }
 
   public TemplateMapper getTemplateMapper() {
-    return templateMapper;
+    return new TemplateMapper();
   }
 
   public ColleagueMapper getColleagueMapper() {
-    return colleagueMapper;
+    return new ColleagueMapper();
   }
 }

@@ -29,6 +29,7 @@ public class Settings implements ISettings {
   private static final String CURRENT_USER_KEY = "current_user";
   private static final String CURRENT_USER_ORGANIZATION_KEY = "current_user_organization";
   private static final String CURRENT_USER_POSITION_KEY = "current_user_position";
+  private static final String CURRENT_USER_IMAGE_KEY = "current_user_image";
   private static final String MAIN_MENU_POSITION_KEY = "activity_main_menu.position";
   private static final String REGNUMBER_KEY = "activity_main_menu.regnumber";
   private static final String REGDATE_KEY = "activity_main_menu.date";
@@ -46,10 +47,22 @@ public class Settings implements ISettings {
   private static final String SHOW_PRIMARY_CONSIDERATION = "show_primary_consideration";
   private static final String ORGANIZATION_FILTER_ACTIVE_KEY = "organization.filter.active";
   private static final String ORGANIZATION_FILTER_SELECTION_KEY = "organization.filter.savedselection";
+  private static final String IS_SUBSTITUTE_MODE_KEY = "substitute.mode";
+  private static final String OLD_LOGIN_KEY = "old_login";
+  private static final String OLD_CURRENT_USER_ID_KEY = "old_current_user_id";
+  private static final String OLD_CURRENT_USER_KEY = "old_current_user";
+  private static final String OLD_CURRENT_USER_ORGANIZATION_KEY = "old_current_user_organization";
+  private static final String OLD_CURRENT_USER_IMAGE_KEY = "old_current_user_image";
+  private static final String COLLEAGUE_ID_KEY = "colleague.id";
+  private static final String UPDATE_AUTH_STARTED_KEY = "update.auth.started";
+  private static final String TAB_CHANGED_KEY = "tab.changed";
+  private static final String START_REGULAR_REFRESH_KEY = "start.regular.refresh";
 
   public static String FIRST_RUN_KEY;
   public static String IS_PROJECT;
+  private static String UPDATE_TIME_KEY;
   private static String HOST_KEY;
+  private static String INFOCARD_FONTSIZE;
   private static String ACTIONS_CONFIRM_KEY;
   private static String CONTROL_CONFIRM_KEY;
   private static String SHOW_COMMENT_POST_KEY;
@@ -86,6 +99,7 @@ public class Settings implements ISettings {
   private Preference<Integer> docProjCount;
   private Preference<String> login;
   private Preference<String> token;
+  private Preference<String> infocard_fontSize;
   private Preference<String> current_activity;
   private Preference<String> host;
   private Preference<String> password;
@@ -97,6 +111,7 @@ public class Settings implements ISettings {
   private Preference<String> currentUser;
   private Preference<String> currentUserOrganization;
   private Preference<String> currentUserPosition;
+  private Preference<String> currentUserImage;
   private Preference<Integer> mainMenuPosition;
   private Preference<String> regNumber;
   private Preference<String> regDate;
@@ -139,7 +154,17 @@ public class Settings implements ISettings {
   private Preference<Set<String>> organizationFilterSelection;
   private Preference<Set<String>> notificatedJournals;
   private Preference<Integer> currentNotificationId;
-
+  private Preference<Boolean> isSubstituteMode;
+  private Preference<String> oldLogin;
+  private Preference<String> oldCurrentUserId;
+  private Preference<String> oldCurrentUser;
+  private Preference<String> oldCurrentUserOrganization;
+  private Preference<String> oldCurrentUserImage;
+  private Preference<String> colleagueId;
+  private Preference<Boolean> isUpdateAuthStarted;
+  private Preference<Boolean> isTabChanged;
+  private Preference<String> updateTime;
+  private Preference<Boolean> isStartRegularRefresh;
 
   public Settings(Context context, RxSharedPreferences settings) {
     this.context = context;
@@ -148,9 +173,11 @@ public class Settings implements ISettings {
   }
 
   private void loadSettings() {
+    UPDATE_TIME_KEY                = context.getResources().getString(R.string.update_time_key);
     FIRST_RUN_KEY                  = context.getResources().getString(R.string.first_run_key);
     IS_PROJECT                     = context.getResources().getString(R.string.is_project_key);
     HOST_KEY                       = context.getResources().getString(R.string.host_key);
+    INFOCARD_FONTSIZE              = context.getResources().getString(R.string.zoomTextSize_key);
     ACTIONS_CONFIRM_KEY            = context.getResources().getString(R.string.actions_confirm_key);
     CONTROL_CONFIRM_KEY            = context.getResources().getString(R.string.control_confirm_key);
     SHOW_COMMENT_POST_KEY          = context.getResources().getString(R.string.show_comment_post_key);
@@ -181,7 +208,7 @@ public class Settings implements ISettings {
     signWithDc                     = settings.getBoolean(SIGN_WITH_DC_KEY);
     totalDocCount                  = settings.getInteger(DOCUMENTS_TOTAL_COUNT_KEY);
     docProjCount                   = settings.getInteger(DOCPROJ_COUNT_KEY);
-    login                          = settings.getString(LOGIN_KEY);
+    updateTime                     = settings.getString(UPDATE_TIME_KEY);
     login                          = settings.getString(LOGIN_KEY);
     token                          = settings.getString(TOKEN_KEY);
     host                           = settings.getString(HOST_KEY);
@@ -194,6 +221,7 @@ public class Settings implements ISettings {
     currentUser                    = settings.getString(CURRENT_USER_KEY);
     currentUserOrganization        = settings.getString(CURRENT_USER_ORGANIZATION_KEY);
     currentUserPosition            = settings.getString(CURRENT_USER_POSITION_KEY);
+    currentUserImage               = settings.getString(CURRENT_USER_IMAGE_KEY);
     mainMenuPosition               = settings.getInteger(MAIN_MENU_POSITION_KEY);
     regNumber                      = settings.getString(REGNUMBER_KEY);
     regDate                        = settings.getString(REGDATE_KEY);
@@ -227,6 +255,7 @@ public class Settings implements ISettings {
     startLoadData                  = settings.getBoolean(START_LOAD_DATA_KEY);
     authType                       = settings.getEnum(STEPPER_AUTH_TYPE_KEY, AuthType.class);
     current_activity               = settings.getString(CURRENT_ACTIVITY_KEY);
+    infocard_fontSize              = settings.getString(INFOCARD_FONTSIZE);
     online                         = settings.getBoolean(IS_ONLINE);
     favoritesLoaded                = settings.getBoolean(FAVORITES_LOADED_KEY);
     processedLoaded                = settings.getBoolean(PROCESSED_LOADED_KEY);
@@ -237,6 +266,16 @@ public class Settings implements ISettings {
     organizationFilterSelection    = settings.getStringSet(ORGANIZATION_FILTER_SELECTION_KEY);
     notificatedJournals            = settings.getStringSet(NOTIFICATED_JOURNALS_KEY);
     currentNotificationId          = settings.getInteger(CURRENT_NOTIFICATION_ID_KEY);
+    isSubstituteMode               = settings.getBoolean(IS_SUBSTITUTE_MODE_KEY);
+    oldLogin                       = settings.getString(OLD_LOGIN_KEY);
+    oldCurrentUserId               = settings.getString(OLD_CURRENT_USER_ID_KEY);
+    oldCurrentUser                 = settings.getString(OLD_CURRENT_USER_KEY);
+    oldCurrentUserOrganization     = settings.getString(OLD_CURRENT_USER_ORGANIZATION_KEY);
+    oldCurrentUserImage            = settings.getString(OLD_CURRENT_USER_IMAGE_KEY);
+    colleagueId                    = settings.getString(COLLEAGUE_ID_KEY);
+    isUpdateAuthStarted            = settings.getBoolean(UPDATE_AUTH_STARTED_KEY);
+    isTabChanged                   = settings.getBoolean(TAB_CHANGED_KEY);
+    isStartRegularRefresh          = settings.getBoolean(START_REGULAR_REFRESH_KEY);
   }
 
   @Override
@@ -356,7 +395,6 @@ public class Settings implements ISettings {
     return getString(login);
   }
 
-
   @Override
   public void setLogin(String value) {
     setString(login, value);
@@ -453,6 +491,20 @@ public class Settings implements ISettings {
     setString(uid, value);
   }
 
+
+
+  @Override
+  public String getUpdateTime() {
+    return getString(updateTime);
+  }
+
+  @Override
+  public void setUpdateTime(String value) {
+    setString(updateTime, value);
+  }
+
+
+
   @Override
   public String getStatusCode() {
     return getString(statusCode);
@@ -501,6 +553,16 @@ public class Settings implements ISettings {
   @Override
   public void setCurrentUserPosition(String value) {
     setString(currentUserPosition, value);
+  }
+
+  @Override
+  public String getCurrentUserImage() {
+    return getString(currentUserImage);
+  }
+
+  @Override
+  public void setCurrentUserImage(String value) {
+    setString(currentUserImage, value);
   }
 
   @Override
@@ -662,6 +724,16 @@ public class Settings implements ISettings {
   @Override
   public void setPrevDialogComment(String value) {
     setString(prevDialogComment, value);
+  }
+
+  @Override
+  public String getInfocardFontSize() {
+    return getString(infocard_fontSize);
+  }
+
+  @Override
+  public void setInfocardFontSize(String value) {
+    setString(infocard_fontSize, value);
   }
 
   @Override
@@ -861,6 +933,110 @@ public class Settings implements ISettings {
 
   @Override
   public int getСurrentNotificationId() {
-        return getInteger(currentNotificationId);
+    return getInteger(currentNotificationId);
+  }
+
+  public boolean isSubstituteMode() {
+    return getBoolean(isSubstituteMode);
+  }
+
+  @Override
+  public void setSubstituteMode(boolean value) {
+    setBoolean(isSubstituteMode, value);
+  }
+
+  @Override
+  public Preference<Boolean> getSubstituteModePreference() {
+    return isSubstituteMode;
+  }
+
+  @Override
+  public String getOldLogin() {
+    return getString(oldLogin);
+  }
+
+  @Override
+  public void setOldLogin(String value) {
+    setString(oldLogin, value);
+  }
+
+  @Override
+  public String getOldCurrentUserId() {
+    return getString(oldCurrentUserId);
+  }
+
+  @Override
+  public void setOldCurrentUserId(String value) {
+    setString(oldCurrentUserId, value);
+  }
+
+  @Override
+  public String getOldCurrentUser() {
+    return getString(oldCurrentUser);
+  }
+
+  @Override
+  public void setOldCurrentUser(String value) {
+    setString(oldCurrentUser, value);
+  }
+
+  @Override
+  public String getOldCurrentUserOrganization() {
+    return getString(oldCurrentUserOrganization);
+  }
+
+  @Override
+  public void setOldCurrentUserOrganization(String value) {
+    setString(oldCurrentUserOrganization, value);
+  }
+
+  @Override
+  public String getOldCurrentUserImage() {
+    return getString(oldCurrentUserImage);
+  }
+
+  @Override
+  public void setOldCurrentUserImage(String value) {
+    setString(oldCurrentUserImage, value);
+  }
+
+  @Override
+  public String getColleagueId() {
+    return getString(colleagueId);
+  }
+
+  @Override
+  public void setColleagueId(String value) {
+    setString(colleagueId, value);
+  }
+
+  @Override
+  public boolean isUpdateAuthStarted() {
+    return getBoolean(isUpdateAuthStarted);
+  }
+
+  @Override
+  public void setUpdateAuthStarted(boolean value) {
+    setBoolean(isUpdateAuthStarted, value);
+  }
+
+  @Override
+  public boolean isTabChanged() {
+    return getBoolean(isTabChanged);
+  }
+
+  @Override
+  public void setTabChanged(boolean value) {
+    setBoolean(isTabChanged, value);
+  }
+
+  @Override
+  public boolean isStartRegularRefresh() {
+    return getBoolean(isStartRegularRefresh);
+  }
+
+  @Override
+  public void setStartRegularRefresh(boolean value) {
+    setBoolean(isStartRegularRefresh, value);
   }
 }

@@ -3,6 +3,7 @@ package sapotero.rxtest.managers.menu.commands.signing;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import rx.schedulers.Schedulers;
@@ -23,8 +24,6 @@ public class NextPerson extends ApprovalSigningCommand {
   private static final int IMAGE_SIGN_ERROR = 1;
   private static final int NOT_ALL_IMAGES_SIGNED = 2;
 
-  private String TAG = this.getClass().getSimpleName();
-
   public NextPerson(CommandParams params) {
     super(params);
   }
@@ -35,10 +34,11 @@ public class NextPerson extends ApprovalSigningCommand {
 
   @Override
   public void execute() {
+    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
     queueManager.add(this);
     EventBus.getDefault().post( new ShowNextDocumentEvent( true,  getParams().getDocument() ));
 
-    setDocOperationProcessedStartedInMemory();
+    startProcessedOperationInMemory();
 
     resetSignImageError();
     setAsProcessed();
@@ -66,40 +66,28 @@ public class NextPerson extends ApprovalSigningCommand {
 
   @Override
   public void executeLocal() {
-    dataStore
-      .update(RDocumentEntity.class)
-      .set( RDocumentEntity.PROCESSED, true)
-      .set( RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq(getParams().getDocument()))
-      .get()
-      .value();
-
-    if (callback != null){
-      callback.onCommandExecuteSuccess(getType());
-    }
-
+    startProcessedOperationInDb();
+    sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }
 
   @Override
   public void executeRemote() {
-    printCommandType( this, TAG );
+    printCommandType();
 
     int result = signImages();
 
     if ( result == ALL_IMAGES_SIGNED ) {
-      remoteOperation(TAG);
+      approvalSigningRemote();
     }
 
     if ( result == IMAGE_SIGN_ERROR ) {
       String errorMessage = "Электронные образы не были подписаны";
       Timber.tag(TAG).i("error: %s", errorMessage);
 
-      if (callback != null){
-        callback.onCommandExecuteError( errorMessage );
-      }
+      sendErrorCallback( errorMessage );
 
-      finishOperationProcessedOnError( this, Collections.singletonList( errorMessage ) );
+      finishOnOperationError( Collections.singletonList( errorMessage ) );
     }
   }
 
@@ -215,6 +203,12 @@ public class NextPerson extends ApprovalSigningCommand {
   }
 
   @Override
-  public void onRemoteError() {
+  public void finishOnOperationSuccess() {
+    finishProcessedOperationOnSuccess();
+  }
+
+  @Override
+  public void finishOnOperationError(List<String> errors) {
+    finishRejectedProcessedOperationOnError( errors );
   }
 }

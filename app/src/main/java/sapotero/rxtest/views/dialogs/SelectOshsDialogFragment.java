@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
+import android.support.design.widget.TextInputLayout;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -50,10 +51,10 @@ import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 import sapotero.rxtest.views.custom.DelayAutoCompleteTextView;
 import timber.log.Timber;
 
-public class SelectOshsDialogFragment extends DialogFragment implements View.OnClickListener, PrimaryUsersAdapter.PrimaryUsersAdapterFilterListener, OshsAutoCompleteAdapter.OshsAutoCompleteAdapterFilterListener {
+public class SelectOshsDialogFragment extends DialogFragment implements PrimaryUsersAdapter.PrimaryUsersAdapterFilterListener, OshsAutoCompleteAdapter.OshsAutoCompleteAdapterFilterListener {
 
-  public static final String SEPARATOR_FAVORITES_TEXT = "Результат поиска по избранному:";
-  public static final String SEPARATOR_OSHS_TEXT = "Результат поиска по ОШС МВД:";
+  public static final String SEPARATOR_FAVORITES_TEXT = "Результат поиска по избранному";
+  public static final String SEPARATOR_OSHS_TEXT = "Результат поиска по ОШС МВД";
 
   @Inject ISettings settings;
   @Inject Mappers mappers;
@@ -62,6 +63,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
   private String TAG = this.getClass().getSimpleName();
 
   @BindView(R.id.user_autocomplete_field) DelayAutoCompleteTextView title;
+  @BindView(R.id.user_autocomplete_textinputlayout) TextInputLayout textInputLayout;
   @BindView(R.id.pb_loading_indicator) ProgressBar indicator;
   @BindView(R.id.oshs_wrapper) FrameLayout oshs_wrapper;
 
@@ -133,6 +135,11 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
     this.callback = callback;
   }
 
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setCancelable(false);
+  }
 
   @RequiresApi(api = Build.VERSION_CODES.M)
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -415,6 +422,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
 
     PrimaryConsiderationPeople separatorFavorites = new PrimaryConsiderationPeople();
     separatorFavorites.setOrganization( SEPARATOR_FAVORITES_TEXT );
+    separatorFavorites.setDelimiter(true);
     adapter.removeItem( separatorFavorites );
 
     if ( adapter.getCount() > 0 ) {
@@ -443,6 +451,8 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
 
     PrimaryConsiderationPeople separatorOshs = new PrimaryConsiderationPeople();
     separatorOshs.setOrganization(SEPARATOR_OSHS_TEXT);
+    separatorOshs.setDelimiter(true);
+
     resultFromOshs.add( separatorOshs );
     adapter.addResultItem( separatorOshs );
 
@@ -463,12 +473,5 @@ public class SelectOshsDialogFragment extends DialogFragment implements View.OnC
   public void onCancel(DialogInterface dialog) {
     super.onCancel(dialog);
     Timber.tag(TAG).i( "onCancel");
-  }
-
-
-
-  @Override
-  public void onClick(View v) {
-
   }
 }

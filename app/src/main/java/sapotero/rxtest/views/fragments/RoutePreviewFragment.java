@@ -3,7 +3,6 @@ package sapotero.rxtest.views.fragments;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -56,9 +55,10 @@ import sapotero.rxtest.retrofit.models.document.Card;
 import sapotero.rxtest.retrofit.models.document.Person;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.activities.InfoNoMenuActivity;
+import sapotero.rxtest.views.fragments.interfaces.PreviewFragment;
 import timber.log.Timber;
 
-public class RoutePreviewFragment extends Fragment {
+public class RoutePreviewFragment extends PreviewFragment {
 
   @Inject ISettings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
@@ -69,11 +69,9 @@ public class RoutePreviewFragment extends Fragment {
   private String uid;
 
   private State state;
-  private ArrayList<ItemBuilder> views = new ArrayList<>();
 
   private ImageButton button;
 
-  private OnFragmentInteractionListener mListener;
   private FrameLayout card;
   private FrameLayout frame;
 
@@ -83,6 +81,7 @@ public class RoutePreviewFragment extends Fragment {
     super.onCreate(savedInstanceState);
 
   }
+
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -100,12 +99,27 @@ public class RoutePreviewFragment extends Fragment {
 
     initEvents();
 
+    return view;
+  }
+
+  @Override
+  public void onResume() {
+    super.onResume();
+
     showPreview(true);
     loadRoute();
     updateButtonView();
 
-    return view;
   }
+
+  @Override
+  public void update() {
+    Timber.tag(TAG).d("update!");
+    showPreview(true);
+    loadRoute();
+    updateButtonView();
+  }
+
 
 
   private void changeState(View view){
@@ -196,22 +210,6 @@ public class RoutePreviewFragment extends Fragment {
 
   }
 
-  @Override
-  public void onAttach(Context context) {
-    super.onAttach(context);
-    if (context instanceof OnFragmentInteractionListener) {
-      mListener = (OnFragmentInteractionListener) context;
-    } else {
-      throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
-    }
-  }
-
-  @Override
-  public void onDetach() {
-    super.onDetach();
-    mListener = null;
-  }
-
   public Fragment withUid(String uid) {
     this.uid = uid;
     return this;
@@ -219,11 +217,6 @@ public class RoutePreviewFragment extends Fragment {
 
   private String getUid() {
     return uid == null ? settings.getUid() : uid ;
-  }
-
-  public interface OnFragmentInteractionListener {
-    void onFragmentInteraction(Uri uri);
-
   }
 
   @Override

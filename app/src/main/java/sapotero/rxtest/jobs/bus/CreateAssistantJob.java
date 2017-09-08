@@ -1,6 +1,5 @@
 package sapotero.rxtest.jobs.bus;
 
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.birbit.android.jobqueue.CancelReason;
@@ -8,9 +7,11 @@ import com.birbit.android.jobqueue.Params;
 import com.birbit.android.jobqueue.RetryConstraint;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.db.mapper.AssistantMapper;
 import sapotero.rxtest.db.requery.models.RAssistantEntity;
 import sapotero.rxtest.retrofit.models.Assistant;
 import timber.log.Timber;
@@ -19,13 +20,19 @@ import timber.log.Timber;
 public class CreateAssistantJob extends BaseJob {
 
   public static final int PRIORITY = 1;
+  public static final String BY_HEAD = "byHead";
+  public static final String BY_ASSISTANT = "byAssistant";
   private final ArrayList<Assistant> users;
 
   private String TAG = this.getClass().getSimpleName();
 
-  public CreateAssistantJob(ArrayList<Assistant> users) {
+  private String type;
+
+  public CreateAssistantJob(ArrayList<Assistant> users, String login, boolean byHead) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.users = users;
+    this.login = login;
+    type = byHead ? BY_HEAD : BY_ASSISTANT;
   }
 
   @Override
@@ -34,55 +41,44 @@ public class CreateAssistantJob extends BaseJob {
 
   @Override
   public void onRun() throws Throwable {
+    // resolved https://tasks.n-core.ru/browse/MPSED-2134
+    // 2.Списки группы избр. моб клиент, первичн рассмотр, врио, по поручен, Коллеги, шаблоны, папки сбрасываются в базе при смене пользователя
+    // Удаляем старых ассистентов непосредственно перед записью новых
+    dataStore
+      .delete(RAssistantEntity.class)
+      .where(RAssistantEntity.USER.eq(login))
+      .and(RAssistantEntity.TYPE.eq(type))
+      .get().value();
+
     int index = 0;
-    for (Assistant user : users){
-      if ( !exist( user.getToS()) ){
-        add(user, index);
-      }
+
+    List<RAssistantEntity> assistantEntityList = new ArrayList<>();
+    AssistantMapper mapper = mappers.getAssistantMapper().withLogin(login);
+
+    for (Assistant user : users) {
+      RAssistantEntity assistantEntity = mapper.toEntity(user);
+      assistantEntity.setSortIndex(index);
+      assistantEntity.setType(type);
+      assistantEntityList.add(assistantEntity);
       index++;
     }
 
-  }
-
-  private void add(Assistant user, int index) {
-    RAssistantEntity data = mappers.getAssistantMapper().toEntity(user);
-    data.setSortIndex(index);
-
     dataStore
-      .insert(data)
+      .insert(assistantEntityList)
       .toObservable()
       .subscribeOn(Schedulers.computation())
       .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(u -> {
-        Timber.tag(TAG).v("addByOne " + u.getTitle() );
-      }, Timber::e);
-  }
-
-
-  @NonNull
-  private Boolean exist(String user){
-
-    boolean result = false;
-
-    Integer count = dataStore
-      .count(RAssistantEntity.TITLE)
-      .where(RAssistantEntity.TITLE.eq(user))
-      .and(RAssistantEntity.USER.eq(settings.getLogin()))
-      .get().value();
-
-    if( count != 0 ){
-      result = true;
-    }
-
-    Timber.tag(TAG).v("exist " + result );
-
-    return result;
+      .subscribe(
+        u -> Timber.tag(TAG).v("Added assistants"),
+        Timber::e
+      );
   }
 
   @Override
   protected RetryConstraint shouldReRunOnThrowable(Throwable throwable, int runCount, int maxRunCount) {
     return RetryConstraint.createExponentialBackoff(runCount, 1000);
   }
+
   @Override
   protected void onCancel(@CancelReason int cancelReason, @Nullable Throwable throwable) {
     // Job has exceeded retry attempts or shouldReRunOnThrowable() has decided to cancel.

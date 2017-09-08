@@ -2,21 +2,17 @@ package sapotero.rxtest.views.activities;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.View;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -31,7 +27,6 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -61,23 +56,21 @@ import sapotero.rxtest.events.view.ShowSnackEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentInfoActivityEvent;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
+import sapotero.rxtest.managers.menu.utils.DateUtil;
 import sapotero.rxtest.managers.toolbar.ToolbarManager;
 import sapotero.rxtest.retrofit.models.documents.Document;
-import sapotero.rxtest.services.task.UpdateCurrentDocumentTask;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.views.adapters.TabPagerAdapter;
 import sapotero.rxtest.views.adapters.TabSigningPagerAdapter;
+import sapotero.rxtest.views.adapters.utils.FragmentAdapter;
 import sapotero.rxtest.views.fragments.InfoActivityDecisionPreviewFragment;
-import sapotero.rxtest.views.fragments.InfoCardDocumentsFragment;
-import sapotero.rxtest.views.fragments.InfoCardFieldsFragment;
-import sapotero.rxtest.views.fragments.InfoCardLinksFragment;
-import sapotero.rxtest.views.fragments.InfoCardWebViewFragment;
 import sapotero.rxtest.views.fragments.RoutePreviewFragment;
+import sapotero.rxtest.views.fragments.interfaces.PreviewFragment;
 import timber.log.Timber;
 
-public class InfoActivity extends AppCompatActivity implements InfoActivityDecisionPreviewFragment.OnFragmentInteractionListener, RoutePreviewFragment.OnFragmentInteractionListener, InfoCardDocumentsFragment.OnFragmentInteractionListener, InfoCardWebViewFragment.OnFragmentInteractionListener, InfoCardLinksFragment.OnFragmentInteractionListener, InfoCardFieldsFragment.OnFragmentInteractionListener{
+public class InfoActivity extends AppCompatActivity {
 
   @BindView(R.id.activity_info_preview_container) LinearLayout preview_container;
   @BindView(R.id.frame_preview_decision) FrameLayout frame;
@@ -99,11 +92,10 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   private String TAG = this.getClass().getSimpleName();
   private CompositeSubscription subscription;
   private ToolbarManager toolbarManager;
-  private Fields.Journal journal;
   private Fields.Status  status;
-  private ScheduledThreadPoolExecutor scheduller;
 
   private List<String> documentUids;
+
   /*ключи EXTRA. Для передачи в PendingIntent в NotifyManager*/
   private static final String EXTRA_DOCUMENTUID_KEY              = "document_uid";
   private static final String EXTRA_IS_PROJECT_KEY               = "is_project";
@@ -112,6 +104,9 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   private static final String EXTRA_IS_LOAD_FROM_SEARCHE_KEY     = "is_load_from_search";
   private static final String EXTRA_REGISTRATION_DATE_KEY        = "registration_date";
   private static final String EXTRA_IS_FROM_NOTIFICATION_BAR_KEY = "is_from_notification";
+
+  private FragmentAdapter viewPagerAdapter;
+
 
   public static Intent newIntent(Context context, ArrayList<String> documentUids) {
     Intent intent = new Intent(context, InfoActivity.class);
@@ -173,13 +168,17 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     EventBus.getDefault().register(this);
 
 
-    toolbarManager = new ToolbarManager( this, toolbar);
+//    toolbarManager = new ToolbarManager( this, toolbar);
+//    toolbarManager.init();
+    toolbarManager = ToolbarManager.getInstance();
+    toolbarManager.withToolbar(toolbar);
+    toolbarManager.withContext(this);
+    toolbarManager.build();
     toolbarManager.init();
 
     setLastSeen();
 
     status  = Fields.Status.findStatus( settings.getStatusCode() );
-    journal = Fields.getJournalByUid( settings.getUid() );
 
     setTabContent();
     setPreview();
@@ -187,19 +186,32 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
 
   private void setTabContent() {
 
-    try {
-      tabLayout.removeAllTabs();
-      viewPager.removeAllViews();
-    } catch (Exception e) {
-      e.printStackTrace();
+//    try {
+//      tabLayout.removeAllTabs();
+//      viewPager.removeAllViews();
+//    } catch (Exception e) {
+//      e.printStackTrace();
+//    }
+
+    String type = "TabPagerAdapter";
+    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || settings.isProject() ){
+      type = "TabSigningPagerAdapter";
     }
 
-    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || settings.isProject() ){
-      TabSigningPagerAdapter adapter = new TabSigningPagerAdapter( getSupportFragmentManager() );
-      viewPager.setAdapter(adapter);
+    FragmentManager fm = getSupportFragmentManager();
+
+
+    if (viewPagerAdapter != null) {
+      Timber.tag(TAG).e("adapter type: %s | type: %s", viewPagerAdapter.getLabel(), type );
+//      Timber.tag(TAG).e("adapter type: %s | type: %s", viewPagerAdapter.getLabel(), type );
+    }
+
+    if ( viewPagerAdapter != null && Objects.equals(viewPagerAdapter.getLabel(), type)){
+
+      viewPagerAdapter.update();
     } else {
-      TabPagerAdapter adapter = new TabPagerAdapter ( getSupportFragmentManager() );
-      viewPager.setAdapter(adapter);
+      viewPagerAdapter = Objects.equals(type, "TabPagerAdapter") ? new TabPagerAdapter(fm) : new TabSigningPagerAdapter(fm);
+      viewPager.setAdapter(viewPagerAdapter);
     }
     viewPager.setOffscreenPageLimit(4);
 
@@ -227,56 +239,70 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   private void setPreview() {
     addLoader();
 
-    FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-    fragmentTransaction.addToBackStack("PREVIEW");
+    String TAG = "DECISION";
 
     if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || settings.isProject() ){
-      fragmentTransaction.replace( R.id.activity_info_preview_container, new RoutePreviewFragment(), "PREVIEW" );
+      TAG = "ROUTE";
+    }
+
+    Timber.tag(TAG).e("TAG: %s", TAG);
+
+    FragmentManager fm = getSupportFragmentManager();
+
+    if ( fm.findFragmentByTag(TAG) == null ){
+      Timber.tag(TAG).d("fm.findFragmentByTag(TAG) == null");
+
+      removeAllFragments(fm);
+
+      FragmentTransaction fragmentTransaction = fm.beginTransaction();
+      Fragment fragment = Objects.equals(TAG, "DECISION") ? new InfoActivityDecisionPreviewFragment(toolbarManager) : new RoutePreviewFragment();
+      fragmentTransaction.addToBackStack(TAG);
+      fragmentTransaction.replace( R.id.activity_info_preview_container, fragment, TAG );
+      fragmentTransaction.commit();
     } else {
-      fragmentTransaction.replace( R.id.activity_info_preview_container, new InfoActivityDecisionPreviewFragment(toolbarManager), "PREVIEW" );
+      Timber.tag(TAG).d("fm.findFragmentByTag(TAG) != null");
+      Fragment preview = fm.findFragmentByTag(TAG);
+      ((PreviewFragment) preview).update();
     }
 
 
-    fragmentTransaction.commit();
+  }
+
+  private void removeAllFragments(FragmentManager fm) {
+    while (fm.getBackStackEntryCount() > 0) {
+      fm.popBackStackImmediate();
+    }
   }
 
   private void addLoader() {
-    preview_container.removeAllViews();
-
-    frame.setVisibility(View.VISIBLE);
-
-    int durationMillis = 300;
-
-    Animation fadeIn = new AlphaAnimation(0, 1);
-    fadeIn.setInterpolator(new DecelerateInterpolator());
-    fadeIn.setDuration(durationMillis);
-
-    Animation fadeOut = new AlphaAnimation(1, 0);
-    fadeOut.setInterpolator(new AccelerateInterpolator());
-    fadeOut.setStartOffset(durationMillis);
-    fadeOut.setDuration(durationMillis);
-
-    AnimationSet animation = new AnimationSet(true);
-    AnimationSet wrapperAnimation = new AnimationSet(true);
-
-    wrapperAnimation.addAnimation(fadeIn);
-    animation.addAnimation(fadeOut);
-
-    frame.setAnimation(animation);
-    preview_container.setAnimation(wrapperAnimation);
-
-    Observable.just("")
-      .delay(durationMillis, TimeUnit.MILLISECONDS)
-      .subscribeOn( Schedulers.newThread() )
-      .observeOn( AndroidSchedulers.mainThread() )
-      .subscribe(
-        data  -> {
-          frame.setVisibility(View.GONE);
-        },
-        Timber::e
-      );
+//    preview_container.removeAllViews();
+//
+    frame.setVisibility(View.GONE);
+//
+//    int durationMillis = 300;
+//
+//    Animation fadeIn = new AlphaAnimation(0, 1);
+//    fadeIn.setInterpolator(new DecelerateInterpolator());
+//    fadeIn.setDuration(durationMillis);
+//
+//    Animation fadeOut = new AlphaAnimation(1, 0);
+//    fadeOut.setInterpolator(new AccelerateInterpolator());
+//    fadeOut.setStartOffset(durationMillis);
+//    fadeOut.setDuration(durationMillis);
+//
+//    AnimationSet animation = new AnimationSet(true);
+//    AnimationSet wrapperAnimation = new AnimationSet(true);
+//
+//    wrapperAnimation.addAnimation(fadeIn);
+//    animation.addAnimation(fadeOut);
+//
+//    frame.setAnimation(animation);
+//    preview_container.setAnimation(wrapperAnimation);
+//
+//    new Handler().postDelayed(() -> frame.setVisibility(View.GONE), durationMillis);
 
   }
+
 
   @OnClick(R.id.activity_info_prev_document)
   public void prev_doc(){
@@ -321,10 +347,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
       EventBus.getDefault().unregister(this);
     }
 
-    if (scheduller != null){
-      scheduller.shutdown();
-    }
-
     unsubscribe();
 
     finish();
@@ -340,12 +362,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   public void setLastSeen(){
     settings.setLastSeenUid( settings.getUid() );
   }
-
-
-  @Override
-  public void onFragmentInteraction(Uri uri) {
-  }
-
 
   @Override
   protected void onResume() {
@@ -383,11 +399,6 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
     } catch (Exception e) {
       e.printStackTrace();
     }
-  }
-
-  private void startThreadedUpdate() {
-    scheduller = new ScheduledThreadPoolExecutor(1);
-    scheduller.scheduleWithFixedDelay( new UpdateCurrentDocumentTask(settings.getUid()), 0 ,5, TimeUnit.SECONDS );
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
@@ -600,7 +611,26 @@ public class InfoActivity extends AppCompatActivity implements InfoActivityDecis
   }
 
   private void updateDocument() {
-    jobManager.addJobInBackground( new UpdateDocumentJob( settings.getUid() ) );
+    InMemoryDocument doc = store.getDocuments().get(settings.getUid());
+
+    int time = 600;
+    try {
+      time = Integer.parseInt(settings.getUpdateTime());
+    } catch (NumberFormatException e) {
+      Timber.e(e);
+    }
+
+    if ( doc != null
+        // если док не обработан
+        && !doc.isProcessed()
+        // или он обработан и время последней команды старше 5 мин
+        || ( doc != null && doc.isProcessed() && doc.getUpdatedAt() != null
+        && DateUtil.isSomeTimePassed( doc.getUpdatedAt(), time ) )
+        // или он из папки Обработанное
+        || ( doc != null && doc.getDocument() != null && doc.getDocument().isFromProcessedFolder() )
+    ){
+      jobManager.addJobInBackground( new UpdateDocumentJob( settings.getUid(), settings.getLogin(), settings.getCurrentUserId() ) );
+    }
   }
 
   private void unsubscribe(){

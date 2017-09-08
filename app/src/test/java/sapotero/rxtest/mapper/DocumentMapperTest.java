@@ -10,8 +10,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import javax.inject.Inject;
-
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.dagger.components.DaggerTestDataComponent;
 import sapotero.rxtest.dagger.components.TestDataComponent;
@@ -51,8 +49,6 @@ import sapotero.rxtest.retrofit.models.document.Exemplar;
 import sapotero.rxtest.retrofit.models.document.Image;
 import sapotero.rxtest.retrofit.models.document.Route;
 import sapotero.rxtest.retrofit.models.document.Signer;
-import sapotero.rxtest.utils.ISettings;
-import sapotero.rxtest.utils.TestSettings;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -82,10 +78,10 @@ public class DocumentMapperTest {
   private RDocumentEntity entity;
   private DocumentInfo model;
   private int dummyYear;
+  private String dummyLogin;
+  private String dummyCurrentUserId;
 
   @Mock Mappers mappers;
-
-  @Inject ISettings settings;
 
   @Before
   public void init() {
@@ -167,6 +163,8 @@ public class DocumentMapperTest {
     String dummyLink = LinkMapperTest.generateLink();
     dummyDoc.getLinks().add(dummyLink);
 
+    dummyLogin = "dummyLogin";
+    dummyCurrentUserId = "dummyCurrentUserId";
   }
 
   private String generateInfoCard() {
@@ -176,10 +174,8 @@ public class DocumentMapperTest {
   @Test
   public void toEntity() {
     mapper = new DocumentMapper(mappers);
-    entity = mapper.toEntity(dummyDoc);
+    entity = mapper.withLogin(dummyLogin).toEntity(dummyDoc);
 
-    Mockito.verify(settings, times(1)).getLogin();
-    Mockito.verify(settings, times(1)).getCurrentUserId();
     Mockito.verify(mappers, times(1)).getSignerMapper();
     Mockito.verify(mappers, times(1)).getDecisionMapper();
     Mockito.verify(mappers, times(1)).getBlockMapper();
@@ -207,7 +203,6 @@ public class DocumentMapperTest {
     assertEquals( dummyDoc.getReceiptDate(), entity.getReceiptDate() );
     assertEquals( dummyDoc.getViewed(), entity.isViewed() );
 
-    assertEquals( ((TestSettings) settings).login, entity.getUser() );
     assertEquals( dummyYear, entity.getYear() );
     assertEquals( dummyDoc.getSigner().getOrganisation(), entity.getOrganization() );
     assertEquals( false, entity.isFavorites() );
@@ -219,6 +214,10 @@ public class DocumentMapperTest {
     assertEquals( false, entity.isChanged() );
     assertEquals( true, entity.isWithDecision() );
     assertEquals( false, entity.isRed() );
+    assertEquals( false, entity.isReturned() );
+    assertEquals( false, entity.isRejected() );
+    assertEquals( false, entity.isAgain() );
+    assertEquals( dummyLogin, entity.getUser() );
 
     assertEquals( dummyDoc.getInfoCard(), entity.getInfoCard() );
 
@@ -275,8 +274,6 @@ public class DocumentMapperTest {
     entity = mapper.toEntity(dummyDoc);
     model = mapper.toModel(entity);
 
-    Mockito.verify(settings, times(1)).getLogin();
-    Mockito.verify(settings, times(1)).getCurrentUserId();
     Mockito.verify(mappers, times(2)).getSignerMapper();
     Mockito.verify(mappers, times(2)).getDecisionMapper();
     Mockito.verify(mappers, times(2)).getBlockMapper();
@@ -365,11 +362,10 @@ public class DocumentMapperTest {
 
   @Test
   public void control() {
-    String currentUserId = ((TestSettings) settings).currentUserId;
-    dummyDoc.getControlLabels().get(0).setOfficialId( currentUserId );
+    dummyDoc.getControlLabels().get(0).setOfficialId( dummyCurrentUserId );
 
     mapper = new DocumentMapper(mappers);
-    entity = mapper.toEntity(dummyDoc);
+    entity = mapper.withCurrentUserId(dummyCurrentUserId).toEntity(dummyDoc);
 
     assertEquals( true, entity.isControl() );
   }

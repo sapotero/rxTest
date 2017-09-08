@@ -1,15 +1,17 @@
 package sapotero.rxtest.managers.menu.commands.shared;
 
+import java.util.List;
+
+import rx.Observable;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.managers.menu.commands.SharedCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.retrofit.models.OperationResult;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import sapotero.rxtest.utils.memory.utils.Transaction;
 import timber.log.Timber;
 
 public class AddToFolder extends SharedCommand {
-
-  private String TAG = this.getClass().getSimpleName();
 
   public AddToFolder(CommandParams params) {
     super(params);
@@ -51,18 +53,18 @@ public class AddToFolder extends SharedCommand {
 
     queueManager.setExecutedLocal(this);
 
-    if ( callback != null ){
-      callback.onCommandExecuteSuccess( getType() );
-    }
+    sendSuccessCallback();
   }
 
   @Override
   public void executeRemote() {
-    remoteFolderOperation( this, false, TAG );
+    printCommandType();
+    Observable<OperationResult> info = getOperationResultObservable();
+    sendOperationRequest( info );
   }
 
   @Override
-  protected void setSuccess() {
+  public void finishOnOperationSuccess() {
     Transaction transaction = new Transaction();
     transaction
       .from( store.getDocuments().get(getParams().getDocument()) )
@@ -70,11 +72,13 @@ public class AddToFolder extends SharedCommand {
       .setLabel(LabelType.FAVORITES);
     store.process( transaction );
 
-    setChangedFalse();
+    removeChangedInDb();
+
+    queueManager.setExecutedRemote(this);
   }
 
   @Override
-  protected void setError() {
+  public void finishOnOperationError(List<String> errors) {
     Transaction transaction = new Transaction();
     transaction
       .from( store.getDocuments().get(getParams().getDocument()) )
@@ -89,5 +93,7 @@ public class AddToFolder extends SharedCommand {
       .where( RDocumentEntity.UID.eq( getParams().getDocument() ) )
       .get()
       .value();
+
+    queueManager.setExecutedWithError( this, errors );
   }
 }

@@ -5,8 +5,12 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -120,8 +124,11 @@ public class Filter {
   public Boolean isProcessed(InMemoryDocument doc) {
     Boolean result = true;
 
-    // Фильтруем обработанные для всех журналов, кроме Избранное и На контроле
-    if ( !isFavorites && !isControl ) {
+    // Фильтруем обработанные для всех журналов, кроме Избранное
+    // resolved https://tasks.n-core.ru/browse/MVDESD-13985
+    // Убрать из списка "На контроле" рассмотренные документы
+//    if ( !isFavorites && !isControl ) {
+    if ( !isFavorites ) {
       result = isProcessed == doc.isProcessed();
     }
 
@@ -133,7 +140,7 @@ public class Filter {
   }
 
   public Boolean byYear(InMemoryDocument doc) {
-    return settings.getYears().contains( String.valueOf(doc.getYear()) );
+    return doc.getYear() == 0 || settings.getYears().contains(String.valueOf(doc.getYear()));
   }
 
   public Boolean isFavorites(InMemoryDocument doc) {
@@ -150,7 +157,9 @@ public class Filter {
     Boolean result = true;
 
     if ( isControl ){
-      result = doc != null && doc.getDocument() != null && doc.getDocument().getControl() != null && doc.getDocument().getControl();
+      // resolved https://tasks.n-core.ru/browse/MVDESD-13985
+      // Не показываем документы из папки Избранное с замочком во вкладке На контроль
+      result = doc != null && doc.getDocument() != null && doc.getDocument().getControl() != null && doc.getDocument().getControl() && !doc.getDocument().isFromFavoritesFolder();
     }
 
     return result;
@@ -173,6 +182,140 @@ public class Filter {
 
     if (imd1.getDocument().getSortKey() != null && imd2.getDocument().getSortKey() != null) {
       result = imd1.getDocument().getSortKey().compareTo( imd2.getDocument().getSortKey() );
+    }
+
+    return result;
+  }
+
+  // resolved https://tasks.n-core.ru/browse/MVDESD-14115
+  // Сортировка документов в списке
+  public int byJournalDateNumber(InMemoryDocument o1, InMemoryDocument o2) {
+    int result = 0;
+
+    // Sort by journal
+    Integer journalNumber1 = getJournalNumber( o1.getIndex() );
+    Integer journalNumber2 = getJournalNumber( o2.getIndex() );
+    result = journalNumber1.compareTo( journalNumber2 );
+
+    if ( result == 0 ) {
+      if ( o1.getDocument() == null ) {
+        result = 1; // documents with null values should go to the end of the list
+      } else if ( o2.getDocument() == null ) {
+        result = -1;
+      } else {
+        // Sort by date
+        result = compareDates( o1.getDocument().getRegistrationDate(), o2.getDocument().getRegistrationDate() );
+
+        // Sort by registration number
+        if ( result == 0 ) {
+          result = compareRegNumbers( o1.getDocument().getRegistrationNumber(), o2.getDocument().getRegistrationNumber() );
+        }
+      }
+    }
+
+    return result;
+  }
+
+  private Integer getJournalNumber(String journalName) {
+    Integer result;
+
+    if ( Objects.equals( journalName, "incoming_documents" ) ) {
+      result = 1;
+    } else if ( Objects.equals( journalName, "citizen_requests" ) ) {
+      result = 2;
+    } else if ( Objects.equals( journalName, "incoming_orders" ) ) {
+      result = 3;
+    } else if ( Objects.equals( journalName, "orders" ) ) {
+      result = 4;
+    } else if ( Objects.equals( journalName, "orders_ddo" ) ) {
+      result = 5;
+    } else if ( Objects.equals( journalName, "outgoing_documents" ) ) {
+      result = 6;
+    } else {
+      result = 7;
+    }
+
+    return result;
+  }
+
+  private int compareDates(String o1, String o2) {
+    int result = 0;
+
+    if ( o1 == null || Objects.equals( o1, "" ) ) {
+      result = 1;
+    } else if ( o2 == null || Objects.equals( o2, "" ) ) {
+      result = -1;
+    } else {
+      try {
+        SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
+        Date date1 = format.parse( o1 );
+        Date date2 = format.parse( o2 );
+        result = date2.compareTo( date1 );  // вначале свежие
+      } catch (ParseException e) {
+        // Do nothing
+      }
+    }
+
+    return result;
+  }
+
+  private int compareRegNumbers(String regNum1, String regNum2) {
+    int result = 0;
+
+    if ( regNum1 == null || Objects.equals( regNum1, "" ) ) {
+      result = 1;
+    } else if ( regNum2 == null || Objects.equals( regNum2, "" ) ) {
+      result = -1;
+    } else {
+      if ( regNum1.contains("/") && regNum2.contains("/") ) {
+        result = compareRegNumbersWithPrefixes( regNum1, regNum2 );
+      } else {
+        result = compareNumbers( regNum1, regNum2 );
+      }
+    }
+
+    return result;
+  }
+
+  private int compareNumbers(String o1, String o2) {
+    int result = 0;
+
+    try {
+      Long num1 = Long.valueOf( o1 );
+      Long num2 = Long.valueOf( o2 );
+      result = num2.compareTo( num1 );  // вначале наибольший номер
+    } catch (NumberFormatException e) {
+      // Do nothing
+    }
+
+    return result;
+  }
+
+  // Сравнение регистрационных номеров вида 3/17790032428
+  private int compareRegNumbersWithPrefixes(String regNum1, String regNum2) {
+    int result = 0;
+
+    try {
+      String[] split1 = regNum1.split("/");
+      String[] split2 = regNum2.split("/");
+
+      if ( split1.length >= 2 && split2.length >= 2 ) {
+        String regNum1Prefix = split1[0];
+        String regNum1Number = split1[1];
+
+        String regNum2Prefix = split2[0];
+        String regNum2Number = split2[1];
+
+        // Сортировка по префиксу (то, что до "/")
+        result = compareNumbers(regNum1Prefix, regNum2Prefix);
+
+        // Сортировка по номеру (то, что после "/")
+        if ( result == 0 ) {
+          result = compareNumbers(regNum1Number, regNum2Number);
+        }
+      }
+    } catch (Exception error) {
+      // Do nothing
     }
 
     return result;

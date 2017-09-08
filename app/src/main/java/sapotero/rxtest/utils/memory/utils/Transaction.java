@@ -44,6 +44,9 @@ public class Transaction {
         case FILTER:
           document.setFilter(value);
           break;
+        case UPDATED_AT:
+          document.setUpdatedAt(value);
+          break;
 
       }
     }
@@ -64,6 +67,15 @@ public class Transaction {
           break;
         case FAVORITES:
           document.getDocument().setFavorites(value);
+          break;
+        case RETURNED:
+          document.getDocument().setReturned(value);
+          break;
+        case REJECTED:
+          document.getDocument().setRejected(value);
+          break;
+        case AGAIN:
+          document.getDocument().setAgain(value);
           break;
       }
     }

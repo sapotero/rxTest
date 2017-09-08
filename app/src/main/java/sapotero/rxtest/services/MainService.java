@@ -50,7 +50,6 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.auth.AuthDcCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthDcCheckSuccessEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
@@ -66,7 +65,6 @@ import sapotero.rxtest.events.crypto.SignDataEvent;
 import sapotero.rxtest.events.crypto.SignDataResultEvent;
 import sapotero.rxtest.events.crypto.SignDataWrongPinEvent;
 import sapotero.rxtest.events.decision.SignAfterCreateEvent;
-import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.service.AuthServiceAuthEvent;
 import sapotero.rxtest.events.service.CheckNetworkEvent;
@@ -103,6 +101,7 @@ public class MainService extends Service {
   final String TAG = MainService.class.getSimpleName();
   private ScheduledThreadPoolExecutor scheduller;
   private ScheduledFuture futureNetwork;
+  private ScheduledFuture futureRefresh;
 
   @Inject OkHttpClient okHttpClient;
   @Inject ISettings settings;
@@ -197,6 +196,16 @@ public class MainService extends Service {
     scheduller.setRemoveOnCancelPolicy(true);
 
     scheduller.scheduleWithFixedDelay( new UpdateQueueTask(queue), 0 ,10, TimeUnit.SECONDS );
+
+    CheckNetworkEvent checkNetworkEvent = EventBus.getDefault().removeStickyEvent(CheckNetworkEvent.class);
+    if ( checkNetworkEvent != null ) {
+      startStopNetworkCheck( checkNetworkEvent );
+    }
+
+    // resolved https://tasks.n-core.ru/browse/MVDESD-12618
+    // Починить регулярное обновление документов после закрытия приложения
+    // Start regular refresh if true in settings
+    startStopRegularRefresh( true );
   }
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13625
@@ -209,7 +218,7 @@ public class MainService extends Service {
         boolean isUnauthorized = value != null ? value : false;
         if ( isUnauthorized ) {
           Timber.tag(TAG).d("Unauthorized, logging in");
-          dataLoaderInterface.updateAuth(SIGN);
+          dataLoaderInterface.updateAuth(SIGN, false);
         }
       },
         Timber::e
@@ -713,7 +722,7 @@ public class MainService extends Service {
       .subscribeOn(Schedulers.io())
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(interval -> {
-        dataLoaderInterface.updateAuth(SIGN);
+        dataLoaderInterface.updateAuth(SIGN, false);
       }, Timber::e);
 
     settings.getLoginPreference()
@@ -802,21 +811,8 @@ public class MainService extends Service {
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(UpdateDocumentsByStatusEvent event) throws Exception {
     Timber.tag(TAG).e("UpdateDocumentsByStatusEvent");
-    dataLoaderInterface.updateByCurrentStatus( event.item, event.button, false);
+    dataLoaderInterface.updateByCurrentStatus( event.item, event.button, settings.getLogin(), settings.getCurrentUserId() );
   }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(ForceUpdateDocumentEvent event){
-    Timber.tag(TAG).e("ForceUpdateDocumentEvent");
-
-    int count = dataStore.update(RDocumentEntity.class)
-      .set(RDocumentEntity.MD5, "")
-      .where(RDocumentEntity.UID.eq(event.uid))
-      .get()
-      .value();
-    Timber.tag(TAG).e("updated: %s", count);
-  }
-
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13017
   // При первом запуске выгружаем все избранные с ЭО
@@ -824,20 +820,16 @@ public class MainService extends Service {
   // При первом входе загружать документы из папки избранное и обработанное
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(FolderCreatedEvent event){
-    if ( Objects.equals( event.getType(), "favorites" ) ) {
-      if ( !settings.isFavoritesLoaded() ) {
-        Timber.tag("LoadSequence").d("Favorites folder created, starting update");
-        settings.setFavoritesLoaded(true);
-        dataLoaderInterface.updateFavorites(false);
-      }
+    if ( !settings.isFavoritesLoaded() ) {
+      Timber.tag("LoadSequence").d("Favorites folder created, starting update");
+      settings.setFavoritesLoaded(true);
+      dataLoaderInterface.updateFavorites(false);
     }
 
-    if ( Objects.equals( event.getType(), "processed" ) ) {
-      if ( !settings.isProcessedLoaded() ) {
-        Timber.tag("LoadSequence").d("Processed folder created, starting update");
-        settings.setProcessedLoaded(true);
-        dataLoaderInterface.updateProcessed(false);
-      }
+    if ( !settings.isProcessedLoaded() ) {
+      Timber.tag("LoadSequence").d("Processed folder created, starting update");
+      settings.setProcessedLoaded(true);
+      dataLoaderInterface.updateProcessed(false);
     }
   }
 
@@ -861,10 +853,17 @@ public class MainService extends Service {
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-13314
   // Старт / стоп проверки наличия сети
-  @Subscribe(threadMode = ThreadMode.MAIN)
+  @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
   public void onMessageEvent(CheckNetworkEvent event){
+    Timber.tag(TAG).d("CheckNetworkEvent");
 
-    Timber.i("CheckNetworkEvent");
+    if ( scheduller != null ) {
+      startStopNetworkCheck( event );
+      EventBus.getDefault().removeStickyEvent(event);
+    }
+  }
+
+  private void startStopNetworkCheck(CheckNetworkEvent event) {
     // Stop previously started checking network connection task, if exists
     if ( futureNetwork != null && !futureNetwork.isCancelled() ) {
       futureNetwork.cancel(true);
@@ -882,10 +881,30 @@ public class MainService extends Service {
     return intent;
   }
 
-  @Subscribe(threadMode = ThreadMode.MAIN)
+  // resolved https://tasks.n-core.ru/browse/MVDESD-12618
+  // Починить регулярное обновление документов после закрытия приложения
+  // If scheduler is already created, start regular refresh.
+  @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
   public void onMessageEvent(StartRegularRefreshEvent event){
+
     scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 5*60, 5*60, TimeUnit.SECONDS );
 //  scheduller.scheduleWithFixedDelay( new UpdateAllDocumentnContext()), 10, 10, TimeUnit.SECONDS );
 
+    Timber.tag(TAG).d("StartRegularRefreshEvent");
+
+    if ( scheduller != null ) {
+      startStopRegularRefresh( event.isStart() );
+      EventBus.getDefault().removeStickyEvent(event);
+    }
+  }
+
+  private void startStopRegularRefresh(boolean isStart) {
+    if ( futureRefresh != null && !futureRefresh.isCancelled() ) {
+      futureRefresh.cancel(true);
+    }
+
+    if ( settings.isStartRegularRefresh() && isStart ) {
+      futureRefresh = scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 5*60, 5*60, TimeUnit.SECONDS );
+    }
   }
 }

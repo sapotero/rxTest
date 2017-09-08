@@ -3,6 +3,7 @@ package sapotero.rxtest.managers.menu.commands.performance;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Retrofit;
 import rx.Observable;
@@ -16,8 +17,6 @@ import sapotero.rxtest.retrofit.models.OperationResult;
 import timber.log.Timber;
 
 public class DelegatePerformance extends AbstractCommand {
-
-  private String TAG = this.getClass().getSimpleName();
 
   public DelegatePerformance(CommandParams params) {
     super(params);
@@ -62,14 +61,10 @@ public class DelegatePerformance extends AbstractCommand {
           Timber.tag(TAG).i("error: %s", data.getMessage());
           Timber.tag(TAG).i("type: %s", data.getType());
 
-          if (callback != null){
-            callback.onCommandExecuteSuccess(getType());
-          }
+          sendSuccessCallback();
         },
         error -> {
-          if (callback != null){
-            callback.onCommandExecuteError(getType());
-          }
+          sendErrorCallback( getType() );
         }
       );
 
@@ -90,5 +85,9 @@ public class DelegatePerformance extends AbstractCommand {
   @Override
   public void executeRemote() {
 
+  }
+
+  @Override
+  public void finishOnOperationError(List<String> errors) {
   }
 }

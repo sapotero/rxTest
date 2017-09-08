@@ -257,6 +257,7 @@ public class ButtonBuilder {
     view.setOnCheckedChangeListener((buttonView, isChecked) -> {
       setActive(isChecked);
       if (isChecked){
+//        EventBus.getDefault().post( new UpdateDocumentsByStatusEvent( getSelectedItem(), MainMenuButton.getByIndex(index) ) );
         callback.onButtonBuilderUpdate(index);
       }
     });
@@ -273,8 +274,9 @@ public class ButtonBuilder {
     view.setOnClickListener(v -> {
       // If previous state was false and after click state changed to true, then user switched between tabs
       if ( !previousState && view.isChecked() ) {
-        // Reset previous state of organization filter
+        // Reset previous state of organization filter and set tab changed
         settings.setOrganizationFilterActive( false );
+        settings.setTabChanged(true);
       }
     });
 

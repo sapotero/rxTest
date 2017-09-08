@@ -1,6 +1,5 @@
 package sapotero.rxtest.jobs.bus;
 
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.birbit.android.jobqueue.CancelReason;
@@ -10,7 +9,9 @@ import com.birbit.android.jobqueue.RetryConstraint;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
 import sapotero.rxtest.events.bus.FolderCreatedEvent;
@@ -25,9 +26,10 @@ public class CreateFoldersJob extends BaseJob {
 
   private String TAG = this.getClass().getSimpleName();
 
-  public CreateFoldersJob(ArrayList<Folder> templates) {
+  public CreateFoldersJob(ArrayList<Folder> templates, String login) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.templates = templates;
+    this.login = login;
   }
 
   @Override
@@ -36,49 +38,48 @@ public class CreateFoldersJob extends BaseJob {
 
   @Override
   public void onRun() throws Throwable {
-    //    Timber.tag(TAG).i( "folders: %s | %s", templates.size(), templates.startTransactionFor(0).getTitle() );
-    for (Folder template : templates){
-      if ( !exist( template.getId()) ){
-        add(template);
-      } else {
-        EventBus.getDefault().post( new FolderCreatedEvent(template.getType()) );
+    List<RFolderEntity> folderEntityList = new ArrayList<>();
+
+    for (Folder template : templates) {
+      // resolved https://tasks.n-core.ru/browse/MPSED-2134
+      // Не работает добавление/удаление в избранное, если перезайти в режимы замещения.
+      // также не работает добавление в избранное в режиме замещения
+      // Не удаляем папки, а добавляем те, которых нет в базе
+      if ( !exist( template.getId() ) ) {
+        RFolderEntity folderEntity = new RFolderEntity();
+        folderEntity.setUid( template.getId() );
+        folderEntity.setTitle( template.getTitle() );
+        folderEntity.setType( template.getType() );
+        folderEntity.setUser( login );
+
+        folderEntityList.add(folderEntity);
       }
     }
 
-  }
-
-  private void add(Folder template) {
-    RFolderEntity data = new RFolderEntity();
-    data.setUid( template.getId() );
-    data.setTitle( template.getTitle() );
-    data.setType( template.getType() );
-    data.setUser( settings.getLogin() );
-
-
     dataStore
-      .insert(data)
+      .insert(folderEntityList)
       .toObservable()
-      .subscribeOn(Schedulers.newThread())
-      .observeOn(Schedulers.newThread())
-      .subscribe(u -> {
-        Timber.tag(TAG).v("addByOne " + u.getTitle() );
-        EventBus.getDefault().post( new FolderCreatedEvent(u.getType()) );
-      }, Timber::e);
+      .subscribeOn(Schedulers.computation())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(
+        u -> {
+          Timber.tag(TAG).v("Added folders");
+          EventBus.getDefault().post( new FolderCreatedEvent() );
+        },
+        Timber::e
+      );
   }
 
-
-  @NonNull
-  private Boolean exist(String uid){
-
+  private boolean exist(String uid) {
     boolean result = false;
 
-    Integer count = dataStore
+    int count = dataStore
       .count(RFolderEntity.UID)
       .where(RFolderEntity.UID.eq(uid))
-      .and(RFolderEntity.USER.eq(settings.getLogin()))
+      .and(RFolderEntity.USER.eq(login))
       .get().value();
 
-    if( count != 0 ){
+    if ( count != 0 ) {
       result = true;
     }
 
@@ -91,6 +92,7 @@ public class CreateFoldersJob extends BaseJob {
   protected RetryConstraint shouldReRunOnThrowable(Throwable throwable, int runCount, int maxRunCount) {
     return RetryConstraint.createExponentialBackoff(runCount, 1000);
   }
+
   @Override
   protected void onCancel(@CancelReason int cancelReason, @Nullable Throwable throwable) {
     // Job has exceeded retry attempts or shouldReRunOnThrowable() has decided to cancel.

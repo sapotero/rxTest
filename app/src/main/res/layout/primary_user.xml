@@ -1,36 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingBottom="@dimen/half_date_offset"
+    android:paddingEnd="@dimen/date_offset"
+    android:paddingStart="@dimen/date_offset"
+    android:paddingTop="@dimen/half_date_offset"
+    >
 
-<FrameLayout android:layout_height="match_parent" android:layout_width="match_parent"
-             xmlns:android="http://schemas.android.com/apk/res/android">
+    <android.support.v7.widget.CardView
+        android:id="@+id/primary_user__image_wrapper"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        app:cardCornerRadius="28dp"
+        app:cardElevation="2dp"
+        android:elevation="2dp"
+        android:forceHasOverlappingRendering="true"
+        android:padding="4dp"
+        android:layout_marginBottom="4dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginStart="1dp"
+        android:layout_marginEnd="@dimen/date_offset"
+        >
+
+        <ImageView
+            android:id="@+id/primary_user__image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="logo"/>
+
+    </android.support.v7.widget.CardView>
 
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingStart="@dimen/date_offset"
-        android:paddingEnd="@dimen/date_offset"
-        android:paddingTop="@dimen/half_date_offset"
-        android:paddingBottom="@dimen/half_date_offset"
-        >
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:id="@+id/primary_user__wrapper">
 
         <TextView
             android:id="@+id/primary_user__name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:layout_gravity="center_vertical"
+            android:layout_weight="1"
             android:gravity="center_vertical"
+            android:text="title"
             android:textAppearance="@style/TextAppearance.AppCompat.Body2"
-            android:textSize="16dp"
-            android:text="title"/>
-
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textSize="16dp"/>
         <TextView
             android:id="@+id/primary_user__title"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="tile"
+            android:ellipsize="end"
+            android:maxLines="1"
             />
 
     </LinearLayout>
-</FrameLayout>
+
+</LinearLayout>

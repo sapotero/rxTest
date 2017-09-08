@@ -1,6 +1,8 @@
 package sapotero.rxtest.views.adapters;
 
 import android.content.Context;
+import android.graphics.Paint;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,26 +32,18 @@ public class DecisionSpinnerAdapter extends BaseAdapter {
   @Inject SingleEntityStore<Persistable> dataStore;
 
   private final String current_user;
+  private final Context context;
   private List<DecisionSpinnerItem> decisions;
-  private LayoutInflater inflter;
-  private int template;
-  private Context context;
-  private int filterCount[];
-  private String[] filterName;
+  private LayoutInflater inflater;
+  private int mPos = -1;
 
-  private TextView count;
-  private TextView name;
-  private View mainView;
-  private int mPos;
-
-  private ArrayList<DecisionSpinnerItem> suggestions = new ArrayList<>();
   private String TAG = this.getClass().getSimpleName();
 
   public DecisionSpinnerAdapter(Context context, String current_user,  List<DecisionSpinnerItem> decisions) {
-    this.current_user = current_user;
     this.context = context;
+    this.current_user = current_user;
     this.decisions = decisions;
-    this.inflter = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
     EsdApplication.getDataComponent().inject(this);
   }
@@ -133,15 +127,10 @@ public class DecisionSpinnerAdapter extends BaseAdapter {
 
     View view = convertView;
     if (view == null) {
-      view = inflter.inflate(R.layout.filter_decision_spinner_items, parent, false);
+      view = inflater.inflate(R.layout.filter_decision_spinner_items, parent, false);
     }
-
-    mPos = position;
-
     DecisionSpinnerItem item = getItem(position);
-
     ( (TextView) view.findViewById(R.id.decision_name) ).setText( item.getName() );
-    ( (TextView) view.findViewById(R.id.decision_date) ).setText( item.getDate() );
 
     return view;
   }
@@ -191,5 +180,29 @@ public class DecisionSpinnerAdapter extends BaseAdapter {
       decisions.get(selectedItemPosition).getDecision().setTemporary(true);
       notifyDataSetChanged();
     }
+  }
+
+  public void setSelection(int position) {
+    mPos =  position;
+    notifyDataSetChanged();
+  }
+
+  @Override
+  public View getDropDownView(int position, View convertView, ViewGroup parent) {
+    Timber.e("getDropDownView: %s | %s", mPos, position);
+
+    TextView itemView = (TextView) super.getDropDownView(position, convertView, parent);
+    itemView.setTextColor( ContextCompat.getColor(context, position == mPos ? R.color.md_grey_900 : R.color.md_grey_600) );
+
+    //resolved https://tasks.n-core.ru/browse/MVDESD-14112
+    // увеличить ширину списка и увеличить отступ
+    itemView.setPadding( 16, 24, 16, 24);
+    itemView.setWidth(476);
+
+    if (position == mPos){
+      itemView.setPaintFlags( Paint.FAKE_BOLD_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG );
+    }
+
+    return itemView;
   }
 }

@@ -1,6 +1,7 @@
 package sapotero.rxtest.managers.menu.commands.file;
 
 import java.util.Collections;
+import java.util.List;
 
 import okhttp3.RequestBody;
 import retrofit2.Retrofit;
@@ -11,12 +12,14 @@ import sapotero.rxtest.db.requery.models.images.RSignImageEntity;
 import sapotero.rxtest.db.requery.models.queue.FileSignEntity;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
+import sapotero.rxtest.managers.menu.utils.DateUtil;
 import sapotero.rxtest.retrofit.ImagesService;
+import sapotero.rxtest.utils.memory.fields.FieldType;
+import sapotero.rxtest.utils.memory.fields.LabelType;
+import sapotero.rxtest.utils.memory.utils.Transaction;
 import timber.log.Timber;
 
 public class SignFile extends AbstractCommand {
-
-  private String TAG = this.getClass().getSimpleName();
 
   public SignFile(CommandParams params) {
     super(params);
@@ -42,11 +45,7 @@ public class SignFile extends AbstractCommand {
 
   @Override
   public void executeLocal() {
-
-    if (callback != null ){
-      callback.onCommandExecuteSuccess( getType() );
-    }
-
+    sendSuccessCallback();
     queueManager.setExecutedLocal(this);
     setAsProcessed();
   }
@@ -119,9 +118,7 @@ public class SignFile extends AbstractCommand {
   private void onError() {
     Timber.tag(TAG).i("Sign error");
 
-    if (callback != null) {
-      callback.onCommandExecuteError(getType());
-    }
+    sendErrorCallback( getType() );
 
     if ( settings.isOnline() ) {
       String errorMessage = "Ошибка подписания электронного образа";
@@ -140,6 +137,13 @@ public class SignFile extends AbstractCommand {
     task.setImageId( getParams().getImageId() );
     task.setDocumentId( getParams().getDocument() );
     task.setSign( sign );
+
+    Transaction transaction = new Transaction();
+    transaction
+      .from( store.getDocuments().get(getParams().getDocument()) )
+      .setField(FieldType.UPDATED_AT, DateUtil.getTimestamp())
+      .removeLabel(LabelType.SYNC);
+    store.process( transaction );
 
     dataStore
       .insert(task)
@@ -161,6 +165,7 @@ public class SignFile extends AbstractCommand {
       .where( RSignImageEntity.IMAGE_ID.eq( imageId ) )
       .get()
       .value();
+
 
     Timber.tag(TAG).i("Set sign success");
   }
@@ -186,5 +191,9 @@ public class SignFile extends AbstractCommand {
       .value();
 
     Timber.tag(TAG).i("Set sign task started = %s", value);
+  }
+
+  @Override
+  public void finishOnOperationError(List<String> errors) {
   }
 }

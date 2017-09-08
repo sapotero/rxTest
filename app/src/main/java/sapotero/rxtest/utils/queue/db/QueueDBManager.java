@@ -288,4 +288,21 @@ public class QueueDBManager implements JobCountInterface {
       }
     }
   }
+
+  public boolean isAllTasksComplete() {
+    QueueEntity uncompleteLocalTask = dataStore
+      .select(QueueEntity.class)
+      .where(QueueEntity.LOCAL.eq(false))
+      .and(QueueEntity.WITH_ERROR.eq(false))
+      .get().firstOrNull();
+
+    QueueEntity uncompleteRemoteTask = dataStore
+      .select(QueueEntity.class)
+      .where(QueueEntity.REMOTE.eq(false))
+      .and( QueueEntity.LOCAL.eq(true) )
+      .and(QueueEntity.WITH_ERROR.eq(false))
+      .get().firstOrNull();
+
+    return uncompleteLocalTask == null && uncompleteRemoteTask == null;
+  }
 }

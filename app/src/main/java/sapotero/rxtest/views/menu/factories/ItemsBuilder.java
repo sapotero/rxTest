@@ -223,7 +223,8 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
         }
       }
 
-    } else {
+    }
+    else {
       onButtonBuilderUpdate(index);
     }
 
@@ -281,7 +282,9 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
     try {
       this.index = index;
       Timber.tag(TAG).i( "+ set last_checked_index %s | %s" ,index, view_index);
-      EventBus.getDefault().post( new UpdateDocumentsByStatusEvent( getSelectedItem(), MainMenuButton.getByIndex(index) ) );
+      if ( settings.isTabChanged() ) {
+        EventBus.getDefault().post( new UpdateDocumentsByStatusEvent( getSelectedItem(), MainMenuButton.getByIndex(index) ) );
+      }
       callback.onMenuUpdate( getConditions() );
     } catch (Exception e) {
       e.printStackTrace();

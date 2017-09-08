@@ -13,6 +13,8 @@ import java.util.Objects;
 
 import javax.inject.Inject;
 
+import io.requery.Persistable;
+import io.requery.rx.SingleEntityStore;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -20,6 +22,7 @@ import rx.subjects.PublishSubject;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Deleter;
+import sapotero.rxtest.db.requery.utils.DocumentStateSaver;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
@@ -28,10 +31,12 @@ import sapotero.rxtest.jobs.bus.CreateFavoriteDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateProcessedDocumentsJob;
 import sapotero.rxtest.jobs.bus.CreateProjectsJob;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
+import sapotero.rxtest.managers.menu.utils.DateUtil;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.fields.DocumentType;
+import sapotero.rxtest.utils.memory.fields.FieldType;
 import sapotero.rxtest.utils.memory.fields.InMemoryState;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import sapotero.rxtest.utils.memory.mappers.InMemoryDocumentMapper;
@@ -39,13 +44,13 @@ import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import timber.log.Timber;
 
-import static com.googlecode.totallylazy.Sequences.cartesianProduct;
 import static com.googlecode.totallylazy.Sequences.sequence;
 
 public class Processor {
   @Inject MemoryStore store;
   @Inject JobManager jobManager;
   @Inject ISettings settings;
+  @Inject SingleEntityStore<Persistable> dataStore;
 
   enum Source {
     EMPTY,
@@ -67,6 +72,9 @@ public class Processor {
   private HashMap<String, Document> documents;
   private Transaction transaction;
   private Source source = Source.EMPTY;
+
+  private String login;
+  private String currentUserId;
 
   public Processor(PublishSubject<InMemoryDocument> subscribeSubject) {
     EsdApplication.getManagerComponent().inject(this);
@@ -129,16 +137,35 @@ public class Processor {
     return this;
   }
 
+  public Processor withLogin(String login) {
+    if (login != null) {
+      this.login = login;
+    }
+    return this;
+  }
+
+  public Processor withCurrentUserId(String currentUserId) {
+    if (currentUserId != null) {
+      this.currentUserId = currentUserId;
+    }
+    return this;
+  }
+
   public void execute() {
     Transaction transaction = new Transaction();
 
     switch (source){
       case DB:
-        transaction
-          .from(InMemoryDocumentMapper.fromDB(document_from_db))
-          .setState(InMemoryState.READY);
+        // Добавляем документ из job, только если пользователь не сменился
+        if ( Objects.equals( document_from_db.getUser(), settings.getLogin() ) ) {
+          Timber.w("process as db");
+          transaction
+            .from(InMemoryDocumentMapper.fromDB(document_from_db))
+            .setField(FieldType.UPDATED_AT, DateUtil.getTimestampEarly() )
+            .setState(InMemoryState.READY);
 
-        commit( transaction );
+          commit( transaction );
+        }
         break;
       case TRANSACTION:
         commit( this.transaction );
@@ -165,34 +192,51 @@ public class Processor {
       transaction.withIndex(index);
     }
 
-
+    Timber.tag(TAG).d("Transaction sub.onNext() for %s", transaction.commit().getUid());
     sub.onNext( transaction.commit() );
   }
 
-  private void validate(Document document){
-    Timber.tag(TAG).e("->      : %s / %s@%5.10s  ", document.getUid(), filter, index );
-
-//    upsert( document );
+  private void validate(Document document) {
+    Timber.tag(TAG).e("-> : %s / %s@%5.10s  ", document.getUid(), filter, index);
 
     // new upsert job
-    if ( store.getDocuments().keySet().contains( document.getUid() ) ){
-      InMemoryDocument doc = store.getDocuments().get( document.getUid() );
+    if (store.getDocuments().keySet().contains(document.getUid())) {
+      InMemoryDocument doc = store.getDocuments().get(document.getUid());
 
-      Timber.tag(TAG).e("filters : %s | %s", doc.getFilter(), filter);
+      Timber.tag(TAG).e("    * %s | %s | %s", doc.getFilter(), filter, doc.getUpdatedAt());
+
+      int time = 15;
+      try {
+        time = Integer.parseInt(settings.getUpdateTime());
+      } catch (NumberFormatException e) {
+        Timber.e(e);
+      }
 
       // изменилось MD5
-      if ( Filter.isChanged( doc.getMd5(), document.getMd5() ) ){
-        Timber.tag(TAG).e("md5     : %s | %s", doc.getMd5(), document.getMd5());
-        updateJob( doc.getUid(), doc.getMd5() );
+      if ( Filter.isChanged(doc.getMd5(), document.getMd5()) ) {
+
+        if ( doc.getUpdatedAt() != null && doc.isProcessed() && !DateUtil.isSomeTimePassed(doc.getUpdatedAt(), time) ) {
+          Timber.tag(TAG).e("    ** %s @ %s || %s : %s ", doc.getUpdatedAt(), DateUtil.isSomeTimePassed(doc.getUpdatedAt(), time), doc.getMd5(), document.getMd5());
+          EventBus.getDefault().post(new StepperLoadDocumentEvent(doc.getUid()));
+
+          if ( Filter.isChanged(doc.getFilter(), filter) ){
+            updateJob(doc.getUid(), doc.getMd5());
+          }
+
+        } else {
+          updateJob(doc.getUid(), doc.getMd5());
+        }
+
       } else {
-        EventBus.getDefault().post( new StepperLoadDocumentEvent( doc.getUid() ) );
+
+        EventBus.getDefault().post(new StepperLoadDocumentEvent(doc.getUid()));
       }
+
 
     } else {
       Timber.tag(TAG).e("new: %s", document.getUid());
       createJob(document.getUid());
     }
-
   }
 
   private ArrayList<String> intersect(){
@@ -293,13 +337,35 @@ public class Processor {
   }
 
   private void resetMd5(List<String> add) {
-    // Для тех документов, которые надо добавить во вкладку, если они есть в памяти,
-    // сбрасываем MD5, чтобы далее для их обновления была вызвана UpdateDocumentJob.
     for (String uid : add) {
       InMemoryDocument documentInMemory = store.getDocuments().get( uid );
+
       if ( documentInMemory != null ) {
-        documentInMemory.setMd5("");
-        store.getDocuments().put( uid, documentInMemory );
+        if ( documentInMemory.isProcessed() || documentType == DocumentType.FAVORITE ) {
+          // Для тех документов, которые надо добавить во вкладку, если они есть в памяти,
+          // сбрасываем MD5, чтобы далее для их обновления была вызвана UpdateDocumentJob.
+          documentInMemory.setMd5("");
+          store.getDocuments().put( uid, documentInMemory );
+        }
+
+      } else {
+        RDocumentEntity documentInDb = dataStore
+          .select(RDocumentEntity.class)
+          .where(RDocumentEntity.UID.eq(uid))
+          .get().firstOrNull();
+
+        if ( documentInDb != null && !Objects.equals( documentInDb.getUser(), login ) ) {
+          // Если их нет в памяти, но они есть в базе и пользователь не равен текущему, то сохраняем состояние документов,
+          // добавляем их память и сбрасываем MD5, чтобы далее для их обновления была вызвана UpdateDocumentJob.
+          // (Нужно для перехода в режим замещения и обратно,
+          // когда один и тот же документ присутсвует у обоих пользователей)
+
+          new DocumentStateSaver().saveDocumentState( documentInDb, login, TAG );
+          documentInMemory = InMemoryDocumentMapper.fromDB( documentInDb );
+          documentInMemory.setMd5("");
+          documentInMemory.setUpdatedAt( null );
+          store.getDocuments().put( uid, documentInMemory );
+        }
       }
     }
   }
@@ -393,21 +459,21 @@ public class Processor {
     switch (documentType) {
       case DOCUMENT:
         if (index != null) {
-          jobManager.addJobInBackground( new CreateDocumentsJob(uid, index, filter, false) );
+          jobManager.addJobInBackground( new CreateDocumentsJob(uid, index, filter, false, login, currentUserId) );
         } else {
-          jobManager.addJobInBackground( new CreateProjectsJob(uid, filter, false) );
+          jobManager.addJobInBackground( new CreateProjectsJob(uid, filter, false, login, currentUserId) );
         }
         break;
 
       case FAVORITE:
         if (folder != null) {
-          jobManager.addJobInBackground( new CreateFavoriteDocumentsJob(uid, folder) );
+          jobManager.addJobInBackground( new CreateFavoriteDocumentsJob(uid, folder, login, currentUserId) );
         }
         break;
 
       case PROCESSED:
         if (folder != null) {
-          jobManager.addJobInBackground( new CreateProcessedDocumentsJob(uid, folder) );
+          jobManager.addJobInBackground( new CreateProcessedDocumentsJob(uid, folder, login, currentUserId) );
         }
         break;
     }
@@ -415,10 +481,12 @@ public class Processor {
 
   private void updateJob(String uid, String md5) {
     if (documentType == DocumentType.DOCUMENT) {
-      jobManager.addJobInBackground( new UpdateDocumentJob( uid, index, filter ) );
+      jobManager.addJobInBackground( new UpdateDocumentJob( uid, index, filter, login, currentUserId ) );
     } else {
       if ( Objects.equals( md5, "" ) ) {
-        jobManager.addJobInBackground( new UpdateDocumentJob( uid, documentType ) );
+        jobManager.addJobInBackground( new UpdateDocumentJob( uid, documentType, login, currentUserId ) );
+      } else {
+        EventBus.getDefault().post( new StepperLoadDocumentEvent( uid ) );
       }
     }
   }
@@ -427,7 +495,7 @@ public class Processor {
     settings.addTotalDocCount(1);
     Timber.tag("RecyclerViewRefresh").d("Processor Intersect: Start UpdateDocumentJob for %s", uid);
     Timber.tag("RecyclerViewRefresh").d("Processor Intersect: index %s, filter %s", index, filter);
-    jobManager.addJobInBackground( new UpdateDocumentJob( uid, index, filter, true ) );
+    jobManager.addJobInBackground( new UpdateDocumentJob( uid, index, filter, true, login, currentUserId ) );
   }
 
   private void updateAndDropFavorite(String uid) {
@@ -450,7 +518,7 @@ public class Processor {
               .removeLabel(LabelType.FAVORITES)
       );
 
-      jobManager.addJobInBackground( new UpdateDocumentJob( uid, documentType, true ) );
+      jobManager.addJobInBackground( new UpdateDocumentJob( uid, documentType, true, login, currentUserId ) );
     }
   }
 

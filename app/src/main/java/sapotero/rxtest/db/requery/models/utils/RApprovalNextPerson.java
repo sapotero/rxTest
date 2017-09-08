@@ -7,7 +7,7 @@ import io.requery.Key;
 
 // Keeps track of the approval next person process
 @Entity
-public class RApprovalNextPerson {
+public abstract class RApprovalNextPerson {
   @Key
   @Generated
   int id;

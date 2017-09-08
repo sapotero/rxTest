@@ -3,22 +3,18 @@ package sapotero.rxtest.managers.menu.commands.report;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Retrofit;
 import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
-import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
-import sapotero.rxtest.managers.menu.commands.AbstractCommand;
+import sapotero.rxtest.managers.menu.commands.OperationResultCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.OperationService;
 import sapotero.rxtest.retrofit.models.OperationResult;
 import timber.log.Timber;
 
-public class FromTheReport extends AbstractCommand {
-
-  private String TAG = this.getClass().getSimpleName();
+public class FromTheReport extends OperationResultCommand {
 
   public FromTheReport(CommandParams params) {
     super(params);
@@ -30,9 +26,12 @@ public class FromTheReport extends AbstractCommand {
 
   @Override
   public void execute() {
+    saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
     queueManager.add(this);
-    update();
-    setDocOperationProcessedStartedInMemory();
+    EventBus.getDefault().post( new ShowNextDocumentEvent( true, getParams().getDocument() ));
+
+    startProcessedOperationInMemory();
+
     setAsProcessed();
   }
 
@@ -41,26 +40,10 @@ public class FromTheReport extends AbstractCommand {
     return "from_the_report";
   }
 
-  private void update(){
-    String uid = getParams().getDocument();
-
-    dataStore
-      .update(RDocumentEntity.class)
-      .set( RDocumentEntity.PROCESSED, true)
-      .set( RDocumentEntity.CHANGED, true)
-      .where(RDocumentEntity.UID.eq(uid))
-      .get()
-      .value();
-
-    EventBus.getDefault().post( new ShowNextDocumentEvent( true, getParams().getDocument() ));
-  }
-
   @Override
   public void executeLocal() {
-    if (callback != null){
-      callback.onCommandExecuteSuccess(getType());
-    }
-
+    startProcessedOperationInDb();
+    sendSuccessCallback();
     queueManager.setExecutedLocal(this);
   }
 
@@ -90,20 +73,17 @@ public class FromTheReport extends AbstractCommand {
       getParams().getStatusCode()
     );
 
-    info.subscribeOn( Schedulers.computation() )
-      .observeOn( AndroidSchedulers.mainThread() )
-      .subscribe(
-        data -> {
-          Timber.tag(TAG).i("ok: %s", data.getOk());
-          Timber.tag(TAG).i("error: %s", data.getMessage());
-          Timber.tag(TAG).i("type: %s", data.getType());
+    sendOperationRequest( info );
+  }
 
-          queueManager.setExecutedRemote(this);
+  @Override
+  public void finishOnOperationSuccess() {
+    // Do not save document condition, just finish operation
+    finishOperationOnSuccess();
+  }
 
-          finishOperationOnSuccess();
-
-        },
-        error -> onError( this, error.getLocalizedMessage(), true, TAG )
-      );
+  @Override
+  public void finishOnOperationError(List<String> errors) {
+    finishRejectedProcessedOperationOnError( errors );
   }
 }

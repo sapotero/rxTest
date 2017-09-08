@@ -104,4 +104,11 @@ public interface AuthService {
     @Query("login") String username,
     @Query("auth_token") String token
   );
+
+  @PUT("v3/colleagues/{colleagueId}.json")
+  Observable<Colleague> switchToColleague(
+    @Path("colleagueId") String colleagueId,
+    @Query("login") String username,
+    @Query("auth_token") String token
+  );
 }

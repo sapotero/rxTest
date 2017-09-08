@@ -4,5 +4,8 @@ public enum LabelType {
   CONTROL,
   FAVORITES,
   SYNC,
-  LOCK
+  LOCK,
+  RETURNED,
+  REJECTED,
+  AGAIN
 }

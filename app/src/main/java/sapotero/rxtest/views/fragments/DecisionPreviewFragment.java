@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -37,7 +36,6 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
-import sapotero.rxtest.managers.toolbar.ToolbarManager;
 import sapotero.rxtest.managers.view.interfaces.DecisionInterface;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
@@ -51,7 +49,6 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
   @Inject ISettings settings;
   @Inject OperationManager operationManager;
 
-  private OnFragmentInteractionListener mListener;
   private Context mContext;
 
   @BindView(R.id.decision_preview_bottom) LinearLayout decision_preview_bottom;
@@ -62,22 +59,11 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
   @BindView(R.id.fragment_decision_preview_next_person) Button next_person_button;
   @BindView(R.id.fragment_decision_preview_prev_person) Button prev_person_button;
 
-
-
-
   private View view;
   private String TAG = this.getClass().getSimpleName();
   public Decision decision;
-  private ToolbarManager toolbarManager;
 
   public DecisionPreviewFragment() {
-  }
-
-  public static DecisionPreviewFragment newInstance(String param1, String param2) {
-    DecisionPreviewFragment fragment = new DecisionPreviewFragment();
-
-
-    return fragment;
   }
 
   @Override
@@ -88,7 +74,6 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
       Gson gson = new Gson();
       decision = gson.fromJson(getArguments().getString("decision"), Decision.class);
     }
-
   }
 
   @Override
@@ -209,7 +194,8 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
       // Показывать комментарий при отклонении
       if ( settings.isShowCommentPost() ){
         prev_dialog.inputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES )
-          .input(R.string.comment_hint, R.string.dialog_empty_value, (dialog12, input) -> {});
+          .input(R.string.comment_hint, R.string.dialog_empty_value, (dialog12, input) -> {})
+          .cancelable(false);
       }
 
 
@@ -413,12 +399,6 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
     decision_preview_head.addView( delimiter );
   }
 
-  public void onButtonPressed(Uri uri) {
-    if (mListener != null) {
-      mListener.onFragmentInteraction(uri);
-    }
-  }
-
   public void updateSignText() {
 
     Timber.tag(TAG).i( "DecisionPreviewUpdate\n%s", new Gson().toJson(decision) );
@@ -536,25 +516,10 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
 
   }
 
-  public interface OnFragmentInteractionListener {
-    void onFragmentInteraction(Uri uri);
-  }
-
   @Override
   public void onAttach(Context context) {
     super.onAttach(context);
     mContext = context;
-    if (context instanceof OnFragmentInteractionListener) {
-      mListener = (OnFragmentInteractionListener) context;
-    } else {
-      throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
-    }
-  }
-
-  @Override
-  public void onDetach() {
-    super.onDetach();
-    mListener = null;
   }
 
   @Override

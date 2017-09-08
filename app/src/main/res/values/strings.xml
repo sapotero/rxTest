@@ -209,7 +209,7 @@
     <string name="constructor_close">Закрыть</string>
     <string name="constructor_clear">Очистить</string>
     <string name="constructor_delete">Удалить</string>
-    <string name="wait_for_sync">Ожидает синхронизации</string>
+    <string name="wait_for_sync">Синхр.</string>
 
     <string name="menu_info_from_the_report">Возврата с доклада</string>
     <string name="return_to_the_primary_consideration">Отклонить</string>
@@ -476,6 +476,9 @@
     <string name="sign_as_current_user">Лично</string>
     <string name="favorites_text"> Избранное </string>
     <string name="control_text"> На контроле </string>
+    <string name="returned_text"> Возвращено </string>
+    <string name="rejected_text"> Отклонено </string>
+    <string name="again_text"> Повторно </string>
 
     <string name="primary_consideration_oshs_dialog_yes"> Передать документ </string>
     <string name="error_csp_not_installed"> Внимание! </string>
@@ -494,6 +497,9 @@
     <string name="is_online">В сети</string>
     <string name="is_offline">Не в сети</string>
 
+    <string name="start_substitute">Выполняется вход в режим замещения</string>
+    <string name="stop_substitute">Выполняется выход из режима замещения</string>
+
     <string-array name="IntentsCAAddressList">
         <item>http://www.cryptopro.ru/certsrv/</item>
         <item>https://www.cryptopro.ru:5555/ui/</item>
@@ -504,6 +510,10 @@
         <item>1.5</item>
     </string-array>
 
+
+    <string name="update_time_title">Задержка обновления документа, секунд</string>
+    <string name="update_time_value">30</string>
+    <string name="update_time_key">settings_update_time</string>
 
     <string name="host_key_title">Домен</string>
     <string name="settings_journal_title">Журналы</string>
@@ -569,6 +579,11 @@
 
     <string name="crash_toast_text">Приложение остановлено. Обратитесь к администратору устройства.</string>
     <string name="loading_file">Выполняется загрузка ЭО</string>
+    <string name="zoom">Масштаб</string>
+
+    <string name="zoomTextSize">16</string>
+    <string name="zoomText">Размер текста инфокарточки по умолчанию</string>
+    <string name="zoomTextSize_key">zoomTextSize</string>
 
     <string-array name="settings_notificated_journals">
         <item>Входящие документы</item>

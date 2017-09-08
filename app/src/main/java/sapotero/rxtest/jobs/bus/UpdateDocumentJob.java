@@ -13,24 +13,13 @@ import java.util.Objects;
 
 import sapotero.rxtest.db.mapper.DocumentMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.models.RLinksEntity;
 import sapotero.rxtest.db.requery.models.RRouteEntity;
 import sapotero.rxtest.db.requery.models.RSignerEntity;
-import sapotero.rxtest.db.requery.models.RStepEntity;
-import sapotero.rxtest.db.requery.models.actions.RActionEntity;
-import sapotero.rxtest.db.requery.models.control_labels.RControlLabelsEntity;
-import sapotero.rxtest.db.requery.models.decisions.RBlock;
-import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
-import sapotero.rxtest.db.requery.models.decisions.RDecision;
-import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
-import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
-import sapotero.rxtest.db.requery.models.exemplars.RExemplarEntity;
-import sapotero.rxtest.db.requery.models.images.RImageEntity;
+import sapotero.rxtest.db.requery.models.utils.RReturnedRejectedAgainEntity;
 import sapotero.rxtest.db.requery.utils.Deleter;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
 import sapotero.rxtest.utils.memory.fields.DocumentType;
-import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import timber.log.Timber;
 
 // Updates ordinary documents, projects, documents from favorite folder and documents from processed folder
@@ -53,12 +42,14 @@ public class UpdateDocumentJob extends DocumentJob {
 
   private boolean fromLinks = false;
 
-  public UpdateDocumentJob(String uid) {
+  public UpdateDocumentJob(String uid, String login, String currentUserId) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.uid = uid;
+    this.login = login;
+    this.currentUserId = currentUserId;
   }
 
-  public UpdateDocumentJob(String uid, String index, String filter) {
+  public UpdateDocumentJob(String uid, String index, String filter, String login, String currentUserId) {
     super( new Params(PRIORITY).requireNetwork().persist().addTags("DocJob") );
 
     Timber.tag(TAG).e( "create %s - %s / %s", uid, index, filter );
@@ -66,13 +57,15 @@ public class UpdateDocumentJob extends DocumentJob {
     this.uid = uid;
     this.index = getJournalName(index);
     this.filter = filter;
+    this.login = login;
+    this.currentUserId = currentUserId;
 
     // если создаем с указанием типа журнала и статуса
     // то принудительно обновляем документ
     this.forceUpdate = true;
   }
 
-  public UpdateDocumentJob(String uid, String index, String filter, boolean forceProcessed) {
+  public UpdateDocumentJob(String uid, String index, String filter, boolean forceProcessed, String login, String currentUserId) {
     super( new Params(PRIORITY).requireNetwork().persist().addTags("DocJob") );
 
     Timber.tag(TAG).e( "create %s - %s / %s", uid, index, filter );
@@ -80,6 +73,8 @@ public class UpdateDocumentJob extends DocumentJob {
     this.uid = uid;
     this.index = getJournalName(index);
     this.filter = filter;
+    this.login = login;
+    this.currentUserId = currentUserId;
 
     this.forceProcessed = forceProcessed;
 
@@ -87,27 +82,33 @@ public class UpdateDocumentJob extends DocumentJob {
     this.forceUpdate = true;
   }
 
-  public UpdateDocumentJob(String uid, DocumentType documentType) {
+  public UpdateDocumentJob(String uid, DocumentType documentType, String login, String currentUserId) {
     super( new Params(PRIORITY).requireNetwork().persist().addTags("DocJob") );
 
     this.uid = uid;
     this.documentType = documentType;
+    this.login = login;
+    this.currentUserId = currentUserId;
   }
 
-  public UpdateDocumentJob(String uid, DocumentType documentType, boolean forceDropFavorite) {
+  public UpdateDocumentJob(String uid, DocumentType documentType, boolean forceDropFavorite, String login, String currentUserId) {
     super( new Params(PRIORITY).requireNetwork().persist().addTags("DocJob") );
 
     this.uid = uid;
     this.documentType = documentType;
+    this.login = login;
+    this.currentUserId = currentUserId;
     this.forceDropFavorite = forceDropFavorite;
     this.forceUpdate = true;
   }
 
-  public UpdateDocumentJob(String uid, boolean fromLinks) {
+  public UpdateDocumentJob(String uid, boolean fromLinks, String login, String currentUserId) {
     super( new Params(PRIORITY).requireNetwork().persist() );
 
     this.uid = uid;
     this.fromLinks = fromLinks;
+    this.login = login;
+    this.currentUserId = currentUserId;
 
     // если ссылка, то обновляем принудительно, чтобы загрузились образы
     this.forceUpdate = true;
@@ -137,6 +138,12 @@ public class UpdateDocumentJob extends DocumentJob {
 
   @Override
   public void doAfterLoad(DocumentInfo documentReceived) {
+    if ( !Objects.equals( login, settings.getLogin() ) ) {
+      // Обрабатываем загруженный документ только если логин не сменился (режим замещения)
+      Timber.tag(TAG).d("Login changed, quit doAfterLoad %s", uid);
+      return;
+    }
+
     Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: doAfterLoad");
 
     RDocumentEntity documentExisting = dataStore
@@ -163,7 +170,7 @@ public class UpdateDocumentJob extends DocumentJob {
 
         saveIdsToDelete( documentExisting );
 
-        DocumentMapper documentMapper = mappers.getDocumentMapper();
+        DocumentMapper documentMapper = mappers.getDocumentMapper().withLogin(login).withCurrentUserId(currentUserId);
         documentMapper.setBaseFields( documentExisting, documentReceived );
         documentMapper.setJournal( documentExisting, index );
         documentMapper.setFilter( documentExisting, filter );
@@ -200,16 +207,20 @@ public class UpdateDocumentJob extends DocumentJob {
           documentExisting.setProcessed( false );
         }
 
-        // Если документ адресован текущему пользователю, то убрать из обработанных и из папки обработанных
+        // Если документ адресован текущему пользователю, то убрать из обработанных и из папки обработанных и из папки избранных
         // (например, документ возвращен текущему пользователю после отклонения)
         if ( addressedToCurrentUser( documentReceived, documentExisting, documentMapper ) ) {
           Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Set processed = false");
           documentExisting.setProcessed( false );
           documentExisting.setFromProcessedFolder( false );
+          documentExisting.setFromFavoritesFolder( false );
+
+          setReturnedRejectedAgainLabel( documentExisting );
         }
 
         if ( forceProcessed ) {
           Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Set processed = true");
+          clearReturnedRejectedAgainLabels( documentExisting );
           documentExisting.setProcessed( true );
         }
 
@@ -240,6 +251,33 @@ public class UpdateDocumentJob extends DocumentJob {
     } else {
       Timber.tag("RecyclerViewRefresh").d("UpdateDocumentJob: Document has Sync label, quit updating in DB");
     }
+  }
+
+  private void setReturnedRejectedAgainLabel(RDocumentEntity documentExisting) {
+    clearReturnedRejectedAgainLabels( documentExisting );
+
+    RReturnedRejectedAgainEntity returnedRejectedAgainEntity = dataStore
+      .select( RReturnedRejectedAgainEntity.class )
+      .where( RReturnedRejectedAgainEntity.DOCUMENT_UID.eq( documentExisting.getUid() ) )
+      .and( RReturnedRejectedAgainEntity.USER.eq( login ) )
+      .get().firstOrNull();
+
+    if ( returnedRejectedAgainEntity != null && Objects.equals( documentExisting.getFilter(), returnedRejectedAgainEntity.getStatus() ) ) {
+      switch (returnedRejectedAgainEntity.getDocumentCondition()) {
+        case PROCESSED:
+          documentExisting.setReturned( true );
+          break;
+        case REJECTED:
+          documentExisting.setAgain( true );
+          break;
+      }
+    }
+  }
+
+  private void clearReturnedRejectedAgainLabels(RDocumentEntity documentExisting) {
+    documentExisting.setReturned( false );
+    documentExisting.setRejected( false );
+    documentExisting.setAgain( false );
   }
 
   @Override

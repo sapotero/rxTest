@@ -1,6 +1,5 @@
 package sapotero.rxtest.jobs.bus;
 
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.birbit.android.jobqueue.CancelReason;
@@ -8,8 +7,11 @@ import com.birbit.android.jobqueue.Params;
 import com.birbit.android.jobqueue.RetryConstraint;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.db.mapper.PrimaryConsiderationMapper;
 import sapotero.rxtest.db.requery.models.RPrimaryConsiderationEntity;
 import sapotero.rxtest.retrofit.models.Oshs;
 import timber.log.Timber;
@@ -22,9 +24,10 @@ public class CreatePrimaryConsiderationJob extends BaseJob {
 
   private String TAG = this.getClass().getSimpleName();
 
-  public CreatePrimaryConsiderationJob(ArrayList<Oshs> users) {
+  public CreatePrimaryConsiderationJob(ArrayList<Oshs> users, String login) {
     super( new Params(PRIORITY).requireNetwork().persist() );
     this.users = users;
+    this.login = login;
   }
 
   @Override
@@ -33,56 +36,42 @@ public class CreatePrimaryConsiderationJob extends BaseJob {
 
   @Override
   public void onRun() throws Throwable {
-    Timber.tag(TAG).i( "users: %s | %s", users.size(), users.get(0).getName() );
+    // resolved https://tasks.n-core.ru/browse/MPSED-2134
+    // 2.Списки группы избр. моб клиент, первичн рассмотр, врио, по поручен, Коллеги, шаблоны, папки сбрасываются в базе при смене пользователя
+    // Удаляем старых пользователей из группы первичного рассмотрения непосредственно перед записью новых
+    dataStore
+      .delete(RPrimaryConsiderationEntity.class)
+      .where(RPrimaryConsiderationEntity.USER.eq(login))
+      .get().value();
+
     int index = 0;
-    for (Oshs user : users){
-      if ( !exist( user.getId()) ){
-        add(user, index);
-      }
+
+    List<RPrimaryConsiderationEntity> primaryConsiderationEntityList = new ArrayList<>();
+    PrimaryConsiderationMapper mapper = mappers.getPrimaryConsiderationMapper().withLogin(login);
+
+    for (Oshs user : users) {
+      RPrimaryConsiderationEntity primaryConsiderationEntity = mapper.toEntity(user);
+      primaryConsiderationEntity.setSortIndex(index);
+      primaryConsiderationEntityList.add(primaryConsiderationEntity);
       index++;
     }
 
-  }
-
-  private void add(Oshs user, int index) {
-    RPrimaryConsiderationEntity data = mappers.getPrimaryConsiderationMapper().toEntity(user);
-    data.setSortIndex(index);
-
     dataStore
-      .insert(data)
+      .insert(primaryConsiderationEntityList)
       .toObservable()
       .subscribeOn(Schedulers.computation())
-      .observeOn(Schedulers.computation())
-      .subscribe(u -> {
-        Timber.tag(TAG).v("addByOne " + u.getName() );
-      }, Timber::e);
-  }
-
-
-  @NonNull
-  private Boolean exist(String uid){
-
-    boolean result = false;
-
-    Integer count = dataStore
-      .count(RPrimaryConsiderationEntity.UID)
-      .where(RPrimaryConsiderationEntity.UID.eq(uid))
-      .and(RPrimaryConsiderationEntity.USER.eq(settings.getLogin()))
-      .get().value();
-
-    if( count != 0 ){
-      result = true;
-    }
-
-    Timber.tag(TAG).v("exist " + result );
-
-    return result;
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(
+        u -> Timber.tag(TAG).v("Added primary consideration people"),
+        Timber::e
+      );
   }
 
   @Override
   protected RetryConstraint shouldReRunOnThrowable(Throwable throwable, int runCount, int maxRunCount) {
     return RetryConstraint.createExponentialBackoff(runCount, 1000);
   }
+
   @Override
   protected void onCancel(@CancelReason int cancelReason, @Nullable Throwable throwable) {
     // Job has exceeded retry attempts or shouldReRunOnThrowable() has decided to cancel.
