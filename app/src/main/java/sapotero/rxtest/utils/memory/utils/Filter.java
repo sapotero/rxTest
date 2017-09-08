@@ -5,7 +5,6 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -189,7 +188,7 @@ public class Filter {
 
   // resolved https://tasks.n-core.ru/browse/MVDESD-14115
   // Сортировка документов в списке
-  public int byJournalDateNumber(InMemoryDocument o1, InMemoryDocument o2) {
+  public int byJournalDateNumber(InMemoryDocument o1, InMemoryDocument o2) throws Exception {
     int result = 0;
 
     // Sort by journal
@@ -238,7 +237,7 @@ public class Filter {
     return result;
   }
 
-  private int compareDates(String o1, String o2) {
+  private int compareDates(String o1, String o2) throws Exception {
     int result = 0;
 
     if ( o1 == null || Objects.equals( o1, "" ) ) {
@@ -246,20 +245,16 @@ public class Filter {
     } else if ( o2 == null || Objects.equals( o2, "" ) ) {
       result = -1;
     } else {
-      try {
         SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
         Date date1 = format.parse( o1 );
         Date date2 = format.parse( o2 );
         result = date2.compareTo( date1 );  // вначале свежие
-      } catch (ParseException e) {
-        // Do nothing
-      }
     }
 
     return result;
   }
 
-  private int compareRegNumbers(String regNum1, String regNum2) {
+  private int compareRegNumbers(String regNum1, String regNum2) throws Exception {
     int result = 0;
 
     if ( regNum1 == null || Objects.equals( regNum1, "" ) ) {
@@ -277,25 +272,20 @@ public class Filter {
     return result;
   }
 
-  private int compareNumbers(String o1, String o2) {
+  private int compareNumbers(String o1, String o2) throws Exception {
     int result = 0;
 
-    try {
       Long num1 = Long.valueOf( o1 );
       Long num2 = Long.valueOf( o2 );
       result = num2.compareTo( num1 );  // вначале наибольший номер
-    } catch (NumberFormatException e) {
-      // Do nothing
-    }
 
     return result;
   }
 
   // Сравнение регистрационных номеров вида 3/17790032428
-  private int compareRegNumbersWithPrefixes(String regNum1, String regNum2) {
+  private int compareRegNumbersWithPrefixes(String regNum1, String regNum2) throws Exception {
     int result = 0;
 
-    try {
       String[] split1 = regNum1.split("/");
       String[] split2 = regNum2.split("/");
 
@@ -314,9 +304,6 @@ public class Filter {
           result = compareNumbers(regNum1Number, regNum2Number);
         }
       }
-    } catch (Exception error) {
-      // Do nothing
-    }
 
     return result;
   }

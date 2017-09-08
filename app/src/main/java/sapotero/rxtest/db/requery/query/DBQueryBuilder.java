@@ -112,12 +112,15 @@ public class DBQueryBuilder {
         .filter(filter::isFavorites)
         .filter(filter::isControl);
 
-      try {
-        // Long lists with different documents may throw exception "Comparison method violates its general contract"
-        _docs = _docs.sortBy(filter::byJournalDateNumber);
-      } catch (Exception e1) {
-        Timber.tag(TAG).e(e1);
-      }
+        _docs = _docs.sortBy((o1, o2) -> {
+          int result = -1;
+          try {
+            result = filter.byJournalDateNumber(o1, o2);
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+          return result;
+        });
 
       List<InMemoryDocument> docs = _docs.toList();
       long endTime = System.nanoTime();
