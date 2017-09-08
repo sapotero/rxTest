@@ -259,32 +259,12 @@ public class ButtonBuilder {
       if (isChecked){
         if ( buttonView.isPressed() ) {
           Timber.tag("TabChanged").d( "ButtonBuilder onCheckedChangeListener, button is pressed by user: set true");
+          // If button is pressed by user, reset previous state of organization filter and set tab changed
+          settings.setOrganizationFilterActive( false );
           settings.setTabChanged(true);
-        } else {
-          Timber.tag("TabChanged").d( "ButtonBuilder onCheckedChangeListener, button is not pressed by user: do not change value");
         }
 
-//        EventBus.getDefault().post( new UpdateDocumentsByStatusEvent( getSelectedItem(), MainMenuButton.getByIndex(index) ) );
         callback.onButtonBuilderUpdate(index);
-      }
-    });
-
-    // Save button state before click
-    // (call sequence: 1. onTouch, 2. onCheckedChange, 3. onClick)
-    view.setOnTouchListener((v, event) -> {
-      if ( event.getAction() == MotionEvent.ACTION_DOWN ) {
-        previousState = view.isChecked();
-      }
-      return false;
-    });
-
-    view.setOnClickListener(v -> {
-      // If previous state was false and after click state changed to true, then user switched between tabs
-      if ( !previousState && view.isChecked() ) {
-        // Reset previous state of organization filter and set tab changed
-        settings.setOrganizationFilterActive( false );
-//        Timber.tag("TabChanged").d( "ButtonBuilder onClickListener: set true");
-//        settings.setTabChanged(true);
       }
     });
 
