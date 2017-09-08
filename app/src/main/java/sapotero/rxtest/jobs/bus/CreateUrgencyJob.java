@@ -35,24 +35,18 @@ public class CreateUrgencyJob extends BaseJob {
 
   @Override
   public void onRun() throws Throwable {
-    // resolved https://tasks.n-core.ru/browse/MPSED-2134
-    // 2.Списки группы избр. моб клиент, первичн рассмотр, врио, по поручен, Коллеги, шаблоны, папки сбрасываются в базе при смене пользователя
-    // Удаляем старые срочности непосредственно перед записью новых
-    dataStore
-      .delete(RUrgencyEntity.class)
-      .where(RUrgencyEntity.USER.eq(login))
-      .get().value();
-
     List<RUrgencyEntity> urgencyEntityList = new ArrayList<>();
 
     for (Urgency urgency : urgencies) {
-      RUrgencyEntity urgencyEntity = new RUrgencyEntity();
-      urgencyEntity.setUid( urgency.getId() );
-      urgencyEntity.setCode( urgency.getCode() );
-      urgencyEntity.setName( urgency.getName() );
-      urgencyEntity.setUser( login );
+      if ( !exist( urgency.getId() ) ) {
+        RUrgencyEntity urgencyEntity = new RUrgencyEntity();
+        urgencyEntity.setUid( urgency.getId() );
+        urgencyEntity.setCode( urgency.getCode() );
+        urgencyEntity.setName( urgency.getName() );
+        urgencyEntity.setUser( login );
 
-      urgencyEntityList.add(urgencyEntity);
+        urgencyEntityList.add(urgencyEntity);
+      }
     }
 
     dataStore
@@ -64,6 +58,24 @@ public class CreateUrgencyJob extends BaseJob {
         u -> Timber.tag(TAG).v("Added urgencies"),
         Timber::e
       );
+  }
+
+  private boolean exist(String uid){
+    boolean result = false;
+
+    int count = dataStore
+      .count(RUrgencyEntity.UID)
+      .where(RUrgencyEntity.UID.eq(uid))
+      .and(RUrgencyEntity.USER.eq(login))
+      .get().value();
+
+    if ( count != 0 ) {
+      result = true;
+    }
+
+    Timber.tag(TAG).v("exist " + result );
+
+    return result;
   }
 
   @Override
