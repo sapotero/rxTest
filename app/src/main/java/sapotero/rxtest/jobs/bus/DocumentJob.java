@@ -262,6 +262,8 @@ abstract class DocumentJob extends BaseJob {
       titles.add("Согласующие");
 
       for (String title : titles) {
+        // resolved https://tasks.n-core.ru/browse/MPSED-2149
+        // Блок подписание в маршруте прохождения
         // Идем по шагам в обратном порядке, так как, например,
         // может быть несколько блоков Подписывающие с одним и тем же пользователем,
         // а нам нужен последний актуальный
