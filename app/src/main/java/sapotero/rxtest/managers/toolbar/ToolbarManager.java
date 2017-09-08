@@ -320,9 +320,14 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
              operation = CommandFactory.Operation.REMOVE_FROM_FOLDER;
             }
 
+            // resolved https://tasks.n-core.ru/browse/MPSED-2134
+            // Не работает добавление/удаление в избранное, если перезайти в режимы замещения.
+            // также не работает добавление в избранное в режиме замещения
+            // Ищем папку favorites по логину
             String favorites = dataStore
               .select(RFolderEntity.class)
               .where(RFolderEntity.TYPE.eq("favorites"))
+              .and(RFolderEntity.USER.eq(settings.getLogin()))
               .get().first().getUid();
 
             params.setFolder( favorites );

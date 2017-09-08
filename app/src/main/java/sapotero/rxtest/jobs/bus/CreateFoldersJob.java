@@ -38,24 +38,22 @@ public class CreateFoldersJob extends BaseJob {
 
   @Override
   public void onRun() throws Throwable {
-    // resolved https://tasks.n-core.ru/browse/MPSED-2134
-    // 2.Списки группы избр. моб клиент, первичн рассмотр, врио, по поручен, Коллеги, шаблоны, папки сбрасываются в базе при смене пользователя
-    // Удаляем старые папки непосредственно перед записью новых
-    dataStore
-      .delete(RFolderEntity.class)
-      .where(RFolderEntity.USER.eq(login))
-      .get().value();
-
     List<RFolderEntity> folderEntityList = new ArrayList<>();
 
     for (Folder template : templates) {
-      RFolderEntity folderEntity = new RFolderEntity();
-      folderEntity.setUid( template.getId() );
-      folderEntity.setTitle( template.getTitle() );
-      folderEntity.setType( template.getType() );
-      folderEntity.setUser( login );
+      // resolved https://tasks.n-core.ru/browse/MPSED-2134
+      // Не работает добавление/удаление в избранное, если перезайти в режимы замещения.
+      // также не работает добавление в избранное в режиме замещения
+      // Не удаляем папки, а добавляем те, которых нет в базе
+      if ( !exist( template.getId() ) ) {
+        RFolderEntity folderEntity = new RFolderEntity();
+        folderEntity.setUid( template.getId() );
+        folderEntity.setTitle( template.getTitle() );
+        folderEntity.setType( template.getType() );
+        folderEntity.setUser( login );
 
-      folderEntityList.add(folderEntity);
+        folderEntityList.add(folderEntity);
+      }
     }
 
     dataStore
@@ -70,6 +68,24 @@ public class CreateFoldersJob extends BaseJob {
         },
         Timber::e
       );
+  }
+
+  private boolean exist(String uid) {
+    boolean result = false;
+
+    int count = dataStore
+      .count(RFolderEntity.UID)
+      .where(RFolderEntity.UID.eq(uid))
+      .and(RFolderEntity.USER.eq(login))
+      .get().value();
+
+    if ( count != 0 ) {
+      result = true;
+    }
+
+    Timber.tag(TAG).v("exist " + result );
+
+    return result;
   }
 
   @Override
