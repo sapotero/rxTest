@@ -522,6 +522,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   public void update(boolean reloadDocuments) {
+    Timber.tag("TabChanged").d( "MainActivity update: set %s", reloadDocuments);
     settings.setTabChanged( reloadDocuments );
     updateCount();
     updateOrganizationFilter();
@@ -551,6 +552,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   protected void onDestroy() {
     // Reset previous state of organization filter and set tab changed on application quit
     settings.setOrganizationFilterActive( false );
+    Timber.tag("TabChanged").d( "MainActivity onDestroy: set true");
     settings.setTabChanged(true);
 
     unregisterEventBus();
@@ -567,6 +569,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private void setJournalType(int type, boolean reloadDocuments) {
     // Reset previous state of organization filter and set tab changed
     settings.setOrganizationFilterActive(false);
+    Timber.tag("TabChanged").d( "MainActivity setJournalType: set %s", reloadDocuments);
     settings.setTabChanged(reloadDocuments);
 
     menuBuilder.selectJournal( type );
@@ -1132,6 +1135,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       if ( menuIndex != event.index ) {
         // Reset previous state of organization filter on journal change and set tab changed
         settings.setOrganizationFilterActive( false );
+        Timber.tag("TabChanged").d( "MainActivity onMessageEvent(JournalSelectorIndexEvent event): set true");
         settings.setTabChanged( true );
       }
       menuIndex = event.index;
