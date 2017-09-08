@@ -112,15 +112,7 @@ public class DBQueryBuilder {
         .filter(filter::isFavorites)
         .filter(filter::isControl);
 
-        _docs = _docs.sortBy((o1, o2) -> {
-          int result = -1;
-          try {
-            result = filter.byJournalDateNumber(o1, o2);
-          } catch (Exception e) {
-            e.printStackTrace();
-          }
-          return result;
-        });
+       _docs = _docs.sortBy(filter::byJournalDateNumber);
 
       List<InMemoryDocument> docs = _docs.toList();
       long endTime = System.nanoTime();
@@ -128,19 +120,17 @@ public class DBQueryBuilder {
 
       Timber.e("SIZE: %s | %sms", docs.size(), duration);
 
-      adapter.removeAllWithRange();
+
 
       if (docs.size() > 0){
         hideEmpty();
-        for (InMemoryDocument doc: docs ) {
-//                  Timber.tag(TAG).w("add %s", doc.getUid() );
-          InMemoryDocument docFromMem = store.getDocuments().get( doc.getUid() );
-          if ( docFromMem != null ) {
-            adapter.addItem( docFromMem );
-          }
-        }
+        adapter.addList(docs);
+//        for (InMemoryDocument doc: docs ) {
+////          adapter.addItem( doc );
+//        }
 
       } else {
+        adapter.removeAllWithRange();
         showEmpty();
       }
     }

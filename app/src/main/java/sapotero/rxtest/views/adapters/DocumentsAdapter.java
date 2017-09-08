@@ -260,6 +260,15 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
     }
   }
 
+
+  public void addList(List<InMemoryDocument> docs) {
+
+    documents = docs;
+    recreateHash();
+
+    notifyDataSetChanged();
+  }
+
   public class DocumentViewHolder extends RecyclerView.ViewHolder {
     private TextView sync_label;
     private TextView lock_label;
