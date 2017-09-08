@@ -282,7 +282,7 @@ public class ItemsBuilder implements ButtonBuilder.Callback {
     try {
       this.index = index;
       Timber.tag(TAG).i( "+ set last_checked_index %s | %s" ,index, view_index);
-      Timber.tag("TabChanged").d( "Send UpdateDocumentsByStatusEvent: %s", settings.isTabChanged());
+      Timber.tag("TabChanged").d( "Send UpdateDocumentsByStatusEvent: %s, index: %s", settings.isTabChanged(), index);
       if ( settings.isTabChanged() ) {
         EventBus.getDefault().post( new UpdateDocumentsByStatusEvent( getSelectedItem(), MainMenuButton.getByIndex(index) ) );
       }
