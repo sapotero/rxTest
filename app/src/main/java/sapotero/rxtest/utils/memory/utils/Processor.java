@@ -135,8 +135,8 @@ public class Processor {
     switch (source){
       case DB:
         transaction
-            .from(InMemoryDocumentMapper.fromDB(document_from_db))
-            .setState(InMemoryState.READY);
+          .from(InMemoryDocumentMapper.fromDB(document_from_db))
+          .setState(InMemoryState.READY);
 
         commit( transaction );
         break;
@@ -202,62 +202,63 @@ public class Processor {
     Sequence<InMemoryDocument> _docs = sequence(store.getDocuments().values());
 
     List<String> lazy_docs = _docs
-        .filter(imdFilter::isProcessed)   // restored previously removed line
-        .filter(imdFilter::byType)
-        .filter(imdFilter::byStatus)
-        .map(InMemoryDocument::getUid)
-        .toList();
+      .filter(imdFilter::isProcessed)   // restored previously removed line
+      .filter(imdFilter::byType)
+      .filter(imdFilter::byStatus)
+      .map(InMemoryDocument::getUid)
+      .toList();
 
     Observable<List<String>> docs = Observable
-        .from(documents.keySet())
-        .toList();
+      .from(documents.keySet())
+      .toList();
 
     Observable<List<String>> imd = Observable
-        .from( lazy_docs )
-        .toList();
+      .from( lazy_docs )
+      .toList();
 
     Timber.tag(TAG).e("conditions: %s", imdFilter.hasStatuses());
     Timber.tag(TAG).e("store values: %s", imd.toBlocking().first().size() );
 
     Observable
-        .zip(imd, docs, (memory, api) -> {
+      .zip(imd, docs, (memory, api) -> {
 
-          Timber.tag(TAG).e("memory: %s", memory.size());
-          Timber.tag(TAG).e("api: %s", api.size());
+        Timber.tag(TAG).e("memory: %s", memory.size());
+        Timber.tag(TAG).e("api: %s", api.size());
 
-          List<String> add = new ArrayList<>(api);
-          add.removeAll(memory);
+        List<String> add = new ArrayList<>(api);
+        add.removeAll(memory);
 
-          List<String> remove = new ArrayList<>(memory);
-          remove.removeAll(api);
+        List<String> remove = new ArrayList<>(memory);
+        remove.removeAll(api);
 
-          Timber.tag(TAG).e("add: %s", add.size());
-          Timber.tag(TAG).e("rem: %s", remove.size());
+        Timber.tag(TAG).e("add: %s", add.size());
+        Timber.tag(TAG).e("rem: %s", remove.size());
 
-          resetMd5(add);
+        resetMd5(add);
 
-          for (String uid : remove) {
-            updateAndSetProcessed( uid );
-          }
+        for (String uid : remove) {
+          updateAndSetProcessed( uid );
+        }
 
 
-          validateDocuments();
-          if (add.size() > 0) {
-            generateNotificationMsg(add);
-          }
+        validateDocuments();
+
+        if (add.size() > 0) {
+          generateNotificationMsg(add);
+        }
 
           return Collections.singletonList("");
-        })
+      })
 //      .buffer(200, TimeUnit.MILLISECONDS)
-        .subscribeOn(Schedulers.immediate())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(
-            data -> {
+      .subscribeOn(Schedulers.immediate())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(
+        data -> {
 //          EventBus.getDefault().post( new JournalSelectorUpdateCountEvent() );
-              Timber.tag(TAG).e("processed");
-            },
-            Timber::e
-        );
+          Timber.tag(TAG).e("processed");
+        },
+          Timber::e
+      );
 
 
     return new ArrayList<>();
@@ -336,46 +337,46 @@ public class Processor {
     Timber.tag(TAG).d("Intersecting favorites");
 
     Observable<List<String>> imd = Observable
-        .from( store.getDocuments().values() )
-        .filter( this::byFavorites )
-        .map( InMemoryDocument::getUid )
-        .toList();
+      .from( store.getDocuments().values() )
+      .filter( this::byFavorites )
+      .map( InMemoryDocument::getUid )
+      .toList();
 
     Observable<List<String>> docs = Observable
-        .from( documents.keySet() )
-        .toList();
+      .from( documents.keySet() )
+      .toList();
 
     Observable
-        .zip(imd, docs, (memory, api) -> {
+      .zip(imd, docs, (memory, api) -> {
 
-          List<String> remove = new ArrayList<>(memory);
-          remove.removeAll(api);
+        List<String> remove = new ArrayList<>(memory);
+        remove.removeAll(api);
 
-          List<String> add = new ArrayList<>(api);
-          add.removeAll(memory);
+        List<String> add = new ArrayList<>(api);
+        add.removeAll(memory);
 
-          Timber.tag(TAG).d("memory favorites: %s", memory.size());
-          Timber.tag(TAG).d("api favorites: %s", api.size());
-          Timber.tag(TAG).d("remove favorites: %s", remove.size());
+        Timber.tag(TAG).d("memory favorites: %s", memory.size());
+        Timber.tag(TAG).d("api favorites: %s", api.size());
+        Timber.tag(TAG).d("remove favorites: %s", remove.size());
 
-          resetMd5(add);
+        resetMd5(add);
 
-          for (String uid : remove) {
-            Timber.tag(TAG).d("Removing from favorites: %s", uid);
-            updateAndDropFavorite( uid );
-          }
+        for (String uid : remove) {
+          Timber.tag(TAG).d("Removing from favorites: %s", uid);
+          updateAndDropFavorite( uid );
+        }
 
-          validateDocuments();
+        validateDocuments();
 
-          return Collections.singletonList("");
-        })
+        return Collections.singletonList("");
+      })
 //      .buffer(200, TimeUnit.MILLISECONDS)
-        .subscribeOn(Schedulers.immediate())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(
-            data -> Timber.tag(TAG).d("Intersected favorites successfully"),
-            Timber::e
-        );
+      .subscribeOn(Schedulers.immediate())
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(
+        data -> Timber.tag(TAG).d("Intersected favorites successfully"),
+        Timber::e
+      );
   }
 
   private boolean byFavorites(InMemoryDocument doc) {
