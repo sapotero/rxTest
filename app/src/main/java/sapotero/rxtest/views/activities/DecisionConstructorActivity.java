@@ -159,7 +159,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
 
         if (showSaveDialog){
           new MaterialDialog.Builder(this)
-            .title("Имеются несохранненые данные")
+            .title("Имеются несохранённые данные")
             .content(content)
             .positiveText("сохранить")
             .onPositive(
