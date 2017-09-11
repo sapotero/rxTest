@@ -38,7 +38,7 @@ public class JournalSelectorView extends AppCompatTextView implements View.OnCli
     build();
   }
 
-  private void build(){
+  public void build(){
     setOnClickListener(this);
     adapter = new JournalSelectorAdapter();
     setText( adapter.setDefault() );

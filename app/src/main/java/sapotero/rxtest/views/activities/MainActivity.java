@@ -190,9 +190,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
     initAdapters();
 
-    unregisterEventBus();
-    EventBus.getDefault().register(this);
-
     menuBuilder = new MenuBuilder(this);
     menuBuilder
       .withButtonsLayout( menu_builder_buttons )
@@ -229,6 +226,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     if(isIntentFromNotificationBar){
       settings.setСurrentNotificationId(0);
     }
+
+    unregisterEventBus();
+    EventBus.getDefault().register(this);
   }
 
   private void setFirstRunFalse() {
@@ -1190,6 +1190,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       dismissStopSubstituteDialog();
 
     } else {
+      journalSelector.build();
       update( false );
     }
   }
