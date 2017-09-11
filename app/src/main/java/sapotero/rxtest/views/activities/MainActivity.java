@@ -327,10 +327,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void initAdapters() {
-    if (settings.isFirstRun()){
-      store.clearAndLoadFromDb();
-    }
-
     int columnCount = 2;
     int spacing = 32;
 

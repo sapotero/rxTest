@@ -137,12 +137,13 @@ public class MemoryStore implements Processable{
   }
 
   public void clearAndLoadFromDb() {
-    EventBus.getDefault().removeStickyEvent(LoadedFromDbEvent.class);
     clear();
     loadFromDB();
   }
 
   public void loadFromDB() {
+    EventBus.getDefault().removeStickyEvent(LoadedFromDbEvent.class);
+
     dataStore
       .select(RDocumentEntity.class)
       .where(RDocumentEntity.FROM_LINKS.eq(false))
