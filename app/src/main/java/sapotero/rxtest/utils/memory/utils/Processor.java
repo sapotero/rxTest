@@ -287,9 +287,9 @@ public class Processor {
 
         validateDocuments();
 
-        if (add.size() > 0) {
-          generateNotificationMsg(add);
-        }
+//        if (add.size() > 0) {
+//          generateNotificationMsg(add);
+//        }
 
           return Collections.singletonList("");
       })
