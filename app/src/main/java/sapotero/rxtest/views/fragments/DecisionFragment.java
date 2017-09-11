@@ -514,9 +514,10 @@ public class DecisionFragment extends Fragment implements PrimaryConsiderationAd
     if (decision_text == null) {
       return;
     }
-    decision_text.setText(query);
-    decision_text.setSelection(mSelection);
 
+    String decisionText = decision_text.getText().toString() + " " + query;
+    decision_text.setText(decisionText);
+    decision_text.setSelection(mSelection);
   }
 
   @Override
