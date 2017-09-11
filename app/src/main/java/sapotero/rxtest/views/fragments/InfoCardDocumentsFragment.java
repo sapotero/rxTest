@@ -507,9 +507,9 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
   }
 
   private void disablePdfView() {
-//    pdfView.setOnDragListener(null);
-//    pdfView.setOnTouchListener(null);
-    pdfView.recycle();
+    if (pdfView != null ) {
+      pdfView.recycle();
+    }
   }
 
   private void hideBrokenImage() {
