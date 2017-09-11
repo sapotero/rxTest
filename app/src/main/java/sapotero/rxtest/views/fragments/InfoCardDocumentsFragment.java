@@ -31,6 +31,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -507,9 +508,18 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
   }
 
   private void disablePdfView() {
-    if (pdfView != null ) {
+    if (pdfView != null) {
       pdfView.recycle();
     }
+
+    try {
+      InputStream is = getContext().getAssets().open("empty.pdf");
+      pdfView.fromStream( is ).load();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+
   }
 
   private void hideBrokenImage() {
