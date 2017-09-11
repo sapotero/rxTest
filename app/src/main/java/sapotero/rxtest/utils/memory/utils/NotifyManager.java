@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.app.TaskStackBuilder;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +20,7 @@ import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.activities.InfoActivity;
 import sapotero.rxtest.views.activities.MainActivity;
+import timber.log.Timber;
 
 /**
  * NotifyManager создаёт системные  уведомления ( Notification ) на основании коллекции докуметов, переданной в конструктор.
@@ -31,19 +33,21 @@ public class NotifyManager {
   private final String TAG = NotifyManager.class.getSimpleName();
   /*порог количества новых документов в списке, больше которого, уведомления группируем*/
   private final int THRESHOLD_VALUE = 5;
-  @Inject
-  ISettings settings;
+  @Inject  ISettings settings;
   private Context appContext = EsdApplication.getApplication();
   private List<String> addedDocList;
   private HashMap<String, Document> documentsMap;
   private String filter;
   private NotificationManagerCompat notificationManagerCompat = (NotificationManagerCompat) NotificationManagerCompat.from(appContext);
+  private boolean isFirstRunApp;
+
 
   public NotifyManager(List<String> addedDocList, HashMap<String, Document> documentsMap, String filter) {
+    EsdApplication.getManagerComponent().inject(this);
     this.addedDocList = addedDocList;
     this.documentsMap = documentsMap;
     this.filter = filter;
-    EsdApplication.getManagerComponent().inject(this);
+    this.isFirstRunApp = settings.isFirstRun();
   }
 
   /*Если от REST API получено больше THRESHOLD_VALUE документов -> группируем.
@@ -51,10 +55,10 @@ public class NotifyManager {
   void generateNotifyMsg(String title) {
     int сurrentNotificationId = settings.getСurrentNotificationId();
 
-    if (сurrentNotificationId > THRESHOLD_VALUE) {
+    if (!isFirstRunApp && сurrentNotificationId > THRESHOLD_VALUE - 1 ) {
       notificationManagerCompat.cancelAll();
       showGroupSummaryNotification("Вам поступило новых документов: ", addedDocList);
-    } else {
+    } else if(!isFirstRunApp){
       for (String uidDoc : addedDocList) {
         showSingleNotification(title, documentsMap.get(uidDoc).getTitle(), documentsMap.get(uidDoc), filter);
       }
@@ -67,7 +71,13 @@ public class NotifyManager {
     int requestCode = UUID.randomUUID().hashCode();
 
     Intent intent = InfoActivity.newIntent(appContext, document, filter);
-    PendingIntent pendingIntentOpenDoc = PendingIntent.getActivity(appContext, requestCode, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+    TaskStackBuilder stackBuilder = TaskStackBuilder.create(appContext);
+    stackBuilder.addParentStack(InfoActivity.class);
+    stackBuilder.addNextIntent(intent);
+
+    PendingIntent pendingIntentOpenDoc = stackBuilder.getPendingIntent(requestCode, PendingIntent.FLAG_CANCEL_CURRENT);
+//  PendingIntent.getActivity(appContext, requestCode, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
     NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext);
     builder.setContentTitle(title)
@@ -80,7 +90,6 @@ public class NotifyManager {
       .setVisibility(Notification.VISIBILITY_PUBLIC);
     notificationManagerCompat.notify(сurrentNotificationId, builder.build());
     settings.setСurrentNotificationId(сurrentNotificationId);
-
   }
 
   private void showGroupSummaryNotification(String title, List<String> addedDocList) {
