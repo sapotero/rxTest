@@ -137,6 +137,7 @@ public class MemoryStore implements Processable{
   }
 
   public void clearAndLoadFromDb() {
+    EventBus.getDefault().removeStickyEvent(LoadedFromDbEvent.class);
     clear();
     loadFromDB();
   }

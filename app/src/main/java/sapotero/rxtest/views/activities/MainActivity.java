@@ -328,7 +328,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   private void initAdapters() {
     if (settings.isFirstRun()){
-      EventBus.getDefault().removeStickyEvent(LoadedFromDbEvent.class);
       store.clearAndLoadFromDb();
     }
 
