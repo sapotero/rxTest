@@ -142,6 +142,8 @@ public class MemoryStore implements Processable{
   }
 
   public void loadFromDB() {
+    EventBus.getDefault().removeStickyEvent(LoadedFromDbEvent.class);
+
     dataStore
       .select(RDocumentEntity.class)
       .where(RDocumentEntity.FROM_LINKS.eq(false))
@@ -158,7 +160,7 @@ public class MemoryStore implements Processable{
           }
 
           Timber.tag("LoadFromDb").d("MemoryStore: send LoadedFromDbEvent");
-          EventBus.getDefault().post( new LoadedFromDbEvent() );
+          EventBus.getDefault().postSticky( new LoadedFromDbEvent() );
         },
         Timber::e
       );

@@ -188,9 +188,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     context = this;
     searchSubject = PublishSubject.create();
 
-    unregisterEventBus();
-    EventBus.getDefault().register(this);
-
     initAdapters();
 
     menuBuilder = new MenuBuilder(this);
@@ -229,6 +226,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     if(isIntentFromNotificationBar){
       settings.setСurrentNotificationId(0);
     }
+
+    unregisterEventBus();
+    EventBus.getDefault().register(this);
   }
 
   private void setFirstRunFalse() {
@@ -327,10 +327,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void initAdapters() {
-    if (settings.isFirstRun()){
-      store.clearAndLoadFromDb();
-    }
-
     int columnCount = 2;
     int spacing = 32;
 
@@ -1170,9 +1166,10 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     update( false );
   }
 
-  @Subscribe(threadMode = ThreadMode.MAIN)
+  @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
   public void onMessageEvent(LoadedFromDbEvent event) {
     Timber.tag("LoadFromDb").i("MainActivity: handle LoadedFromDbEvent");
+    EventBus.getDefault().removeStickyEvent(event);
 
     if ( switchToSubstituteModeStarted ) {
       switchToSubstituteModeStarted = false;
@@ -1188,6 +1185,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       dismissStopSubstituteDialog();
 
     } else {
+      journalSelector.build();
       update( false );
     }
   }

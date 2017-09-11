@@ -886,10 +886,6 @@ public class MainService extends Service {
   // If scheduler is already created, start regular refresh.
   @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
   public void onMessageEvent(StartRegularRefreshEvent event){
-
-    scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 5*60, 5*60, TimeUnit.SECONDS );
-//  scheduller.scheduleWithFixedDelay( new UpdateAllDocumentnContext()), 10, 10, TimeUnit.SECONDS );
-
     Timber.tag(TAG).d("StartRegularRefreshEvent");
 
     if ( scheduller != null ) {
