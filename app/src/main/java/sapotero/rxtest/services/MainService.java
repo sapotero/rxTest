@@ -75,6 +75,7 @@ import sapotero.rxtest.events.stepper.auth.StepperDcCheckSuccesEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckFailEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckSuccessEvent;
+import sapotero.rxtest.events.stepper.load.StartLoadDataEvent;
 import sapotero.rxtest.events.view.UpdateCurrentInfoActivityEvent;
 import sapotero.rxtest.managers.DataLoaderManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
@@ -782,6 +783,10 @@ public class MainService extends Service {
     EventBus.getDefault().post( new StepperLoginCheckFailEvent(event.error) );
   }
 
+  @Subscribe(threadMode = ThreadMode.BACKGROUND)
+  public void onMessageEvent(StartLoadDataEvent event) throws Exception {
+    dataLoaderInterface.initV2( true );
+  }
 
   @Subscribe(threadMode = ThreadMode.BACKGROUND)
   public void onMessageEvent(SignDataEvent event) throws Exception {

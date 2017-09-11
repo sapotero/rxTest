@@ -516,7 +516,7 @@ public class DataLoaderManager {
 
             EventBus.getDefault().post( new AuthDcCheckSuccessEvent() );
 
-            initV2(true);
+//            initV2(true);
 
 //            updateByCurrentStatus(MainMenuItem.ALL, null, false);
 //            updateByCurrentStatus(MainMenuItem.ALL, null, true);
@@ -558,7 +558,7 @@ public class DataLoaderManager {
 
             EventBus.getDefault().post(new AuthLoginCheckSuccessEvent());
 
-            initV2(true);
+//            initV2(true);
 //            updateByCurrentStatus(MainMenuItem.ALL, null, false);
 //            updateFavoritesAndProcessed();
           },
