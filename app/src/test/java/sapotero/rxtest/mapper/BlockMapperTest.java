@@ -128,7 +128,7 @@ public class BlockMapperTest {
     assertEquals( expected.getAppealText(), actual.getAppealText() );
     assertEquals( expected.getTextBefore(), actual.getTextBefore() );
     assertEquals( expected.getHidePerformers(), actual.getHidePerformers() );
-    assertEquals( "14", actual.getFontSize() );
+    assertEquals( expected.getFontSize(), actual.getFontSize() );
     assertEquals( "5", actual.getIndentation() );
     assertEquals( null, actual.getToCopy() );
     assertEquals( null, actual.getToFamiliarization() );
