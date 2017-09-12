@@ -4,7 +4,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -13,7 +12,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.dagger.components.DaggerTestDataComponent;
 import sapotero.rxtest.dagger.components.TestDataComponent;
-import sapotero.rxtest.db.mapper.DecisionMapper;
 import sapotero.rxtest.db.mapper.DocumentMapper;
 import sapotero.rxtest.db.mapper.StepMapper;
 import sapotero.rxtest.db.mapper.utils.Mappers;
@@ -45,7 +43,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.times;
 
 
 @RunWith(PowerMockRunner.class)
@@ -54,7 +51,6 @@ public class DocumentMapperTest {
 
   private TestDataComponent testDataComponent;
   private DocumentMapper mapper;
-  private DecisionMapper decisionMapper;
   private StepMapper stepMapper;
   private DocumentInfo dummyDoc;
   private RDocumentEntity entity;
@@ -72,15 +68,12 @@ public class DocumentMapperTest {
     testDataComponent = DaggerTestDataComponent.builder().build();
     testDataComponent.inject(this);
 
-    decisionMapper = new DecisionMapper(mappers);
     stepMapper = new StepMapper();
 
     generateDocument();
 
     PowerMockito.mockStatic(EsdApplication.class);
     PowerMockito.when(EsdApplication.getDataComponent()).thenReturn(testDataComponent);
-
-    Mockito.when(mappers.getDecisionMapper()).thenReturn(decisionMapper);
   }
 
   private void generateDocument() {
@@ -138,8 +131,6 @@ public class DocumentMapperTest {
   public void toEntity() {
     mapper = new DocumentMapper(mappers);
     entity = mapper.withLogin(dummyLogin).toEntity(dummyDoc);
-
-    Mockito.verify(mappers, times(1)).getDecisionMapper();
 
     assertNotNull( entity );
     assertEquals( 0, entity.getId() );
@@ -226,8 +217,6 @@ public class DocumentMapperTest {
     mapper = new DocumentMapper(mappers);
     entity = mapper.toEntity(dummyDoc);
     model = mapper.toModel(entity);
-
-    Mockito.verify(mappers, times(2)).getDecisionMapper();
 
     assertNotNull( model );
     assertEquals( dummyDoc.getUid(), model.getUid() );

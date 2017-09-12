@@ -2,14 +2,8 @@ package sapotero.rxtest.mapper;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 
-import sapotero.rxtest.db.mapper.BlockMapper;
 import sapotero.rxtest.db.mapper.DecisionMapper;
-import sapotero.rxtest.db.mapper.PerformerMapper;
-import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.decisions.RBlock;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
@@ -20,7 +14,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.times;
 
 public class DecisionMapperTest {
 
@@ -30,11 +23,8 @@ public class DecisionMapperTest {
   private Decision model;
   private Decision formattedModel;
 
-  @Mock Mappers mappers;
-
   @Before
   public void init() {
-    MockitoAnnotations.initMocks(this);
     dummyDecision = generateDecision();
   }
 
@@ -66,7 +56,7 @@ public class DecisionMapperTest {
 
   @Test
   public void toEntity() {
-    mapper = new DecisionMapper(mappers);
+    mapper = new DecisionMapper();
     entity = mapper.toEntity(dummyDecision);
 
     verifyDecision( dummyDecision, entity );
@@ -104,7 +94,7 @@ public class DecisionMapperTest {
 
   @Test
   public void toModel() {
-    mapper = new DecisionMapper(mappers);
+    mapper = new DecisionMapper();
     entity = mapper.toEntity(dummyDecision);
     model = mapper.toModel(entity);
 
@@ -140,7 +130,7 @@ public class DecisionMapperTest {
 
   @Test
   public void hasDiff() {
-    mapper = new DecisionMapper(mappers);
+    mapper = new DecisionMapper();
 
     RDecisionEntity entity1 = mapper.toEntity(dummyDecision);
     RDecisionEntity entity2 = mapper.toEntity(dummyDecision);
@@ -157,7 +147,7 @@ public class DecisionMapperTest {
 
   @Test
   public void toFormattedModel() {
-    mapper = new DecisionMapper(mappers);
+    mapper = new DecisionMapper();
     entity = mapper.toEntity(dummyDecision);
     formattedModel = mapper.toFormattedModel(entity);
 

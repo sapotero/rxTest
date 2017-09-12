@@ -36,6 +36,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.mapper.DecisionMapper;
 import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RUrgencyEntity;
@@ -174,7 +175,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
 
                 if (rDecisionEntity != null) {
 //                  params.setDecision( rDecisionEntity );
-                  params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
+                  params.setDecisionModel( new DecisionMapper().toFormattedModel(rDecisionEntity) );
                   params.setDecisionId( rDecisionEntity.getUid() );
 
                   RDocumentEntity doc = (RDocumentEntity) rDecisionEntity.getDocument();
@@ -201,7 +202,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
                   decision.setDocumentUid( settings.getUid() );
 
                   if (rDecisionEntity != null) {
-                    params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
+                    params.setDecisionModel( new DecisionMapper().toFormattedModel(rDecisionEntity) );
                     params.setDecisionId( rDecisionEntity.getUid() );
                   }
 
@@ -307,7 +308,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
             decision.setDocumentUid( settings.getUid() );
 
             if (rDecisionEntity != null) {
-              commandParams.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
+              commandParams.setDecisionModel( new DecisionMapper().toFormattedModel(rDecisionEntity) );
               commandParams.setDecisionId( rDecisionEntity.getUid() );
             }
 
@@ -348,7 +349,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
 
             commandParams = new CommandParams();
             commandParams.setDecisionId( rDecisionEntity.getUid() );
-            commandParams.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
+            commandParams.setDecisionModel( new DecisionMapper().toFormattedModel(rDecisionEntity) );
 
             if ( settings.isDecisionWithAssignment() ){
               Timber.tag(TAG).w("ASSIGNMENT: %s", settings.isDecisionWithAssignment() );
@@ -371,7 +372,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
 
             commandParams = new CommandParams();
             commandParams.setDecisionId( rDecisionEntity.getUid() );
-            commandParams.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
+            commandParams.setDecisionModel( new DecisionMapper().toFormattedModel(rDecisionEntity) );
             operationManager.execute(operation, commandParams);
           }
 
@@ -889,7 +890,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
 
           CommandParams params = new CommandParams();
           params.setDecisionId(rDecisionEntity.getUid());
-          params.setDecisionModel(mappers.getDecisionMapper().toFormattedModel(rDecisionEntity));
+          params.setDecisionModel(new DecisionMapper().toFormattedModel(rDecisionEntity));
 
           operationManager.execute(operation, params);
         })
@@ -914,7 +915,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
 
           CommandParams params = new CommandParams();
           params.setDecisionId(rDecisionEntity.getUid());
-          params.setDecisionModel(mappers.getDecisionMapper().toFormattedModel(rDecisionEntity));
+          params.setDecisionModel(new DecisionMapper().toFormattedModel(rDecisionEntity));
 
           if (settings.isDecisionWithAssignment()) {
             Timber.tag(TAG).w("ASSIGNMENT: %s", settings.isDecisionWithAssignment());

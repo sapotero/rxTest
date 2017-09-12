@@ -375,7 +375,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
 
     if ( notEmpty( decisions ) ) {
       with_decision = true;
-      DecisionMapper decisionMapper = mappers.getDecisionMapper();
+      DecisionMapper decisionMapper = new DecisionMapper();
 
       for (Decision decisionModel : decisions ) {
         if ( decisionModel.getRed() ) {
@@ -397,7 +397,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
 
   private void setDecisions(DocumentInfo model, Set<RDecision> decisions) {
     if ( notEmpty( decisions ) ) {
-      DecisionMapper decisionMapper = mappers.getDecisionMapper();
+      DecisionMapper decisionMapper = new DecisionMapper();
 
       for (RDecision decision : decisions ) {
         RDecisionEntity decisionEntity = (RDecisionEntity) decision;

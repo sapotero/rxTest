@@ -2,7 +2,6 @@ package sapotero.rxtest.db.mapper;
 
 import java.util.Collections;
 
-import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.decisions.RBlock;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
@@ -11,12 +10,6 @@ import sapotero.rxtest.retrofit.models.document.Decision;
 
 // Maps between Decision and RDecisionEntity
 public class DecisionMapper extends AbstractMapper<Decision, RDecisionEntity> {
-
-  private Mappers mappers;
-
-  public DecisionMapper(Mappers mappers) {
-    this.mappers = mappers;
-  }
 
   @Override
   public RDecisionEntity toEntity(Decision model) {
