@@ -254,12 +254,6 @@ public class MainService extends Service {
       EventBus.getDefault().unregister(this);
     }
 
-    if (dataLoaderInterface != null) {
-      if ( dataLoaderInterface.isRegistered() ){
-        dataLoaderInterface.unregister();
-      }
-    }
-
     Timber.tag(TAG).d("onDestroy");
   }
 

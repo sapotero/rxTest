@@ -301,16 +301,6 @@ public class DataLoaderManager {
     }
   }
 
-  public void unregister(){
-    if ( isRegistered() ){
-      EventBus.getDefault().unregister(this);
-    }
-  }
-
-  public Boolean isRegistered(){
-    return EventBus.getDefault().isRegistered(this);
-  }
-
   private void setToken( String token ){
     settings.setToken(token);
   }
@@ -346,7 +336,6 @@ public class DataLoaderManager {
   public void setPassword(String password) {
     settings.setPassword(password);
   }
-
 
   private boolean validateHost(String host) {
     Boolean error = false;
