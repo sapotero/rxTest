@@ -73,6 +73,7 @@ import sapotero.rxtest.events.decision.CheckActiveDecisionEvent;
 import sapotero.rxtest.events.decision.CheckDecisionVisibilityEvent;
 import sapotero.rxtest.events.decision.DecisionVisibilityEvent;
 import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
+import sapotero.rxtest.events.decision.HideTemporaryEvent;
 import sapotero.rxtest.events.decision.RejectDecisionEvent;
 import sapotero.rxtest.events.decision.ShowDecisionConstructor;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
@@ -309,6 +310,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
       displayDecision();
     } catch (Exception e) {
       e.printStackTrace();
+      updateTemporary();
     }
 
     setAsFakeProcessed();
@@ -341,7 +343,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
     templates.dismiss();
   }
 
-  public class GestureListener extends GestureDetector.SimpleOnGestureListener {
+  private class GestureListener extends GestureDetector.SimpleOnGestureListener {
 
     @Override
     public boolean onDown(MotionEvent e) {
@@ -427,6 +429,8 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
 
   private void invalidate() {
 
+    temporary.setVisibility(View.GONE);
+
     initToolBar();
 
     setAdapter();
@@ -481,6 +485,9 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
           current_decision = decision_spinner_adapter.getItem(position).getDecision();
           settings.setDecisionActiveId( current_decision.getId() );
           displayDecision();
+        } else {
+          // resolved https://tasks.n-core.ru/browse/MPSED-2154
+          updateTemporary();
         }
       }
 
@@ -491,9 +498,25 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
           current_decision = decision_spinner_adapter.getItem(0).getDecision();
           Timber.tag(TAG).e("onNothingSelected");
           displayDecision();
+        } else {
+          // resolved https://tasks.n-core.ru/browse/MPSED-2154
+          updateTemporary();
         }
       }
     });
+  }
+  private void  updateTemporary(){
+    Timber.tag(TAG).d(" * updateTemporary %s", temporary.getVisibility() );
+
+    if (current_decision != null) {
+      if ( current_decision.isTemporary() != null && current_decision.isTemporary() ){
+        temporary.setVisibility(View.VISIBLE);
+        next_person_button.setVisibility( View.GONE );
+        prev_person_button.setVisibility( View.GONE );
+      } else {
+        temporary.setVisibility(View.GONE);
+      }
+    }
   }
 
   private void updateVisibility(Boolean approved) {
@@ -553,7 +576,8 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
       prev_person_button.setVisibility( View.INVISIBLE );
     }
 
-    if ( current_decision.isTemporary() != null && current_decision.isTemporary() ){
+
+    if ( current_decision != null && current_decision.isTemporary() != null && current_decision.isTemporary() ){
       temporary.setVisibility(View.VISIBLE);
       next_person_button.setVisibility( View.GONE );
       prev_person_button.setVisibility( View.GONE );
@@ -564,19 +588,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
     // resolved https://tasks.n-core.ru/browse/MVDESD-13423
     //  Отображать информацию от кого поступила резолюция
     updateActionText(true);
-//
-//    if (
-//        current_decision.isApproved() != null && current_decision.isApproved()
-//        || doc.isProcessed() != null && doc.isProcessed()
-//      ){
-//      if ( toolbarManager != null ) {
-//        toolbarManager.setEditDecisionMenuItemVisible(false);
-//      }
-//    } else {
-//      if ( toolbarManager != null ) {
-//        toolbarManager.setEditDecisionMenuItemVisible(true);
-//      }
-//    }
 
     //resolved https://tasks.n-core.ru/browse/MVDESD-14142
     // Скрывать кнопки "Подписать", "Отклонить" ,"Редактировать"
@@ -603,7 +614,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
   // Так нужно отображать, но есть проблемы на стороне СЭДика
   // Поэтому пока не используем честный способ, а просто показываем последнее действие
   private void updateActionText(Boolean showAsFake) {
-
 
     dataStore
       .select(RActionEntity.class)
@@ -876,7 +886,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
       .where(RDocumentEntity.UID.eq( uid == null? settings.getUid() : uid ))
       .get()
       .toObservable()
-      .subscribeOn(Schedulers.newThread())
+      .subscribeOn(Schedulers.computation())
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(doc -> {
 
@@ -956,8 +966,9 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
           bottom_line.setVisibility( View.GONE);
 
           updateActionText(true);
-        }
 
+
+        }
       }, error -> {
         Timber.tag(TAG).e(error);
       });
@@ -1002,7 +1013,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
 
   private void sendDecisionVisibilityEvent() {
     if (current_decision != null) {
-      EventBus.getDefault().post( new DecisionVisibilityEvent( isActiveOrRed() && current_decision.isApproved() != null && !current_decision.isApproved() ) );
+      EventBus.getDefault().post( new DecisionVisibilityEvent( isActiveOrRed() && current_decision.isApproved() != null && !current_decision.isApproved(), current_decision.getUid() ) );
     }
   }
 
@@ -1398,9 +1409,19 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(HideTemporaryEvent event) throws Exception {
+    temporary.setVisibility(View.GONE);
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(CheckDecisionVisibilityEvent event) throws Exception {
 //    current_decision = decision_spinner_adapter.getItem(decision_spinner.getSelectedItemPosition()).getDecision();
-    EventBus.getDefault().post( new DecisionVisibilityEvent( isActiveOrRed() && current_decision != null && current_decision.isApproved() != null && current_decision.isApproved() ) );
+    if (current_decision != null) {
+      sendDecisionVisibilityEvent();
+    } else {
+      EventBus.getDefault().post( new DecisionVisibilityEvent( null, null ) );
+    }
+
   }
 
 

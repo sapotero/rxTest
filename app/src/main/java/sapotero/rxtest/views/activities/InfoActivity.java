@@ -48,6 +48,7 @@ import sapotero.rxtest.events.bus.MassInsertDoneEvent;
 import sapotero.rxtest.events.crypto.SignDataResultEvent;
 import sapotero.rxtest.events.crypto.SignDataWrongPinEvent;
 import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
+import sapotero.rxtest.events.decision.HideTemporaryEvent;
 import sapotero.rxtest.events.decision.ShowDecisionConstructor;
 import sapotero.rxtest.events.document.DropControlEvent;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
@@ -476,6 +477,9 @@ public class InfoActivity extends AppCompatActivity {
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(HasNoActiveDecisionConstructor event) throws Exception {
 //    toolbarManager.showCreateDecisionButton();
+//    setPreview();
+    EventBus.getDefault().post( new HideTemporaryEvent() );
+
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)

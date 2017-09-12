@@ -379,6 +379,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         return false;
       }
     );
+    EventBus.getDefault().post( new CheckDecisionVisibilityEvent() );
   }
 
   public void showPrimaryConsiderationDialog(Activity activity) {
@@ -947,18 +948,21 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(DecisionVisibilityEvent event){
-    Timber.tag(TAG).e("DecisionVisibilityEvent %s | %s", event.approved, store.getDocuments().get( settings.getUid() ).isProcessed());
+    Timber.tag(TAG).e("DecisionVisibilityEvent %s", event.toString() );
 
-    setEditDecisionMenuItemVisible(event.approved);
+    if (event.approved != null) {
 
-    if ( store.getDocuments().get( settings.getUid() ).isProcessed() ){
-      setEditDecisionMenuItemVisible(false);
-    }
+      // resolved https://tasks.n-core.ru/browse/MPSED-2154
+      setEditDecisionMenuItemVisible(event.approved);
 
+      if ( store.getDocuments().get( settings.getUid() ).isProcessed() ){
+        setEditDecisionMenuItemVisible(false);
+      }
 
-    if ( hasTemporaryDecision() ){
-      safeSetVisibility(R.id.menu_info_decision_edit, false);
-      safeSetVisibility(R.id.menu_info_decision_create, false);
+      if ( hasTemporaryDecision() ){
+        safeSetVisibility(R.id.menu_info_decision_edit, false);
+        safeSetVisibility(R.id.menu_info_decision_create, false);
+      }
     }
   }
 }
