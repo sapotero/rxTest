@@ -7,7 +7,6 @@ import sapotero.rxtest.application.scopes.DataScope;
 import sapotero.rxtest.db.requery.utils.Deleter;
 import sapotero.rxtest.db.requery.utils.DocumentStateSaver;
 import sapotero.rxtest.db.requery.utils.RequeryDbModule;
-import sapotero.rxtest.db.requery.utils.validation.ValidationModule;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.managers.view.DecisionManager;
 import sapotero.rxtest.retrofit.utils.OkHttpModule;
@@ -45,7 +44,6 @@ import sapotero.rxtest.views.menu.factories.ItemsBuilder;
 
 public interface DataComponent {
   NetworkComponent plusNetworkComponent(OkHttpModule okHttpModule);
-  ValidationComponent plusValidationComponent(ValidationModule validationModule);
 
   void inject(LogActivity activity);
   void inject(SettingsViewFragment activity);
