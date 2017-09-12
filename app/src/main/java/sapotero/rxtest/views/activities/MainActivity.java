@@ -243,11 +243,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void updateToken() {
-    String sign = settings.getSign();
-    if (sign == null) {
-      sign = "";
-    }
-    dataLoader.updateAuth(sign, false);
+    dataLoader.updateAuth(false);
   }
 
   private void initSearch() {
@@ -394,7 +390,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
         case R.id.reload:
 
           Toast.makeText(this, "Обновление данных...", Toast.LENGTH_SHORT).show();
-          dataLoader.updateAuth(null, true);
+          dataLoader.updateAuth(true);
 
 //          if (menuBuilder.getItem() != MainMenuItem.PROCESSED || menuBuilder.getItem() != MainMenuItem.FAVORITES ){
 //            updateProgressBar();
@@ -977,7 +973,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
         dataLoader.unsubcribeAll();
         showStopSubstituteDialog();
 
-        dataLoader.updateAuth(null, true);
+        dataLoader.updateAuth(true);
 
       } else {
         Toast.makeText(this, "Невозможно выйти из режима замещения: дождитесь обработки очереди запросов", Toast.LENGTH_SHORT).show();

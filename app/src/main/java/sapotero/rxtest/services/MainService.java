@@ -219,7 +219,7 @@ public class MainService extends Service {
         boolean isUnauthorized = value != null ? value : false;
         if ( isUnauthorized ) {
           Timber.tag(TAG).d("Unauthorized, logging in");
-          dataLoaderInterface.updateAuth(SIGN, false);
+          dataLoaderInterface.updateAuth(false);
         }
       },
         Timber::e
@@ -723,7 +723,7 @@ public class MainService extends Service {
       .subscribeOn(Schedulers.io())
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(interval -> {
-        dataLoaderInterface.updateAuth(SIGN, false);
+        dataLoaderInterface.updateAuth(false);
       }, Timber::e);
 
     settings.getLoginPreference()
