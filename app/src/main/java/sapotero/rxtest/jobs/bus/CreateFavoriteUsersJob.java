@@ -51,7 +51,7 @@ public class CreateFavoriteUsersJob extends BaseJob {
     int index = INDEX_INIT_VALUE;
 
     List<RFavoriteUserEntity> favoriteUserEntityList = new ArrayList<>();
-    FavoriteUserMapper mapper = mappers.getFavoriteUserMapper().withLogin(login);
+    FavoriteUserMapper mapper = new FavoriteUserMapper().withLogin(login);
 
     for (Oshs user : users) {
       RFavoriteUserEntity favoriteUserEntity = mapper.toEntity(user);

@@ -2,8 +2,6 @@ package sapotero.rxtest.db.mapper.utils;
 
 import sapotero.rxtest.db.mapper.DecisionMapper;
 import sapotero.rxtest.db.mapper.DocumentMapper;
-import sapotero.rxtest.db.mapper.FavoriteUserMapper;
-import sapotero.rxtest.db.mapper.PrimaryConsiderationMapper;
 
 // Keeps all mappers in one place
 public class Mappers {
@@ -20,13 +18,5 @@ public class Mappers {
 
   public DocumentMapper getDocumentMapper() {
     return new DocumentMapper(this);
-  }
-
-  public FavoriteUserMapper getFavoriteUserMapper() {
-    return new FavoriteUserMapper(this);
-  }
-
-  public PrimaryConsiderationMapper getPrimaryConsiderationMapper() {
-    return new PrimaryConsiderationMapper(this);
   }
 }

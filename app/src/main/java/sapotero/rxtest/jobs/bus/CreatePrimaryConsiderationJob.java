@@ -47,7 +47,7 @@ public class CreatePrimaryConsiderationJob extends BaseJob {
     int index = 0;
 
     List<RPrimaryConsiderationEntity> primaryConsiderationEntityList = new ArrayList<>();
-    PrimaryConsiderationMapper mapper = mappers.getPrimaryConsiderationMapper().withLogin(login);
+    PrimaryConsiderationMapper mapper = new PrimaryConsiderationMapper().withLogin(login);
 
     for (Oshs user : users) {
       RPrimaryConsiderationEntity primaryConsiderationEntity = mapper.toEntity(user);
