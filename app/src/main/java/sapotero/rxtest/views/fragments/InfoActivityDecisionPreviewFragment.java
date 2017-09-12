@@ -73,6 +73,7 @@ import sapotero.rxtest.events.decision.CheckActiveDecisionEvent;
 import sapotero.rxtest.events.decision.CheckDecisionVisibilityEvent;
 import sapotero.rxtest.events.decision.DecisionVisibilityEvent;
 import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
+import sapotero.rxtest.events.decision.HideTemporaryEvent;
 import sapotero.rxtest.events.decision.RejectDecisionEvent;
 import sapotero.rxtest.events.decision.ShowDecisionConstructor;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
@@ -969,9 +970,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
 
 
         }
-
-        updateTemporary();
-
       }, error -> {
         Timber.tag(TAG).e(error);
       });
@@ -1409,6 +1407,11 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(CheckActiveDecisionEvent event) throws Exception {
     checkActiveDecision();
+  }
+
+  @Subscribe(threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(HideTemporaryEvent event) throws Exception {
+    temporary.setVisibility(View.GONE);
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
