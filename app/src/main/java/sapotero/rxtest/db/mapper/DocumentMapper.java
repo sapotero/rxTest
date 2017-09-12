@@ -354,7 +354,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     entity.setRoute( null );
 
     if ( exist( route ) ) {
-      RRouteEntity routeEntity = mappers.getRouteMapper().toEntity( route );
+      RRouteEntity routeEntity = new RouteMapper().toEntity( route );
       entity.setRoute( routeEntity );
     }
   }
@@ -362,7 +362,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
   private void setRoute(DocumentInfo model, RRoute route) {
     if ( exist( route ) ) {
       RRouteEntity routeEntity = (RRouteEntity) route;
-      Route routeModel = mappers.getRouteMapper().toModel( routeEntity );
+      Route routeModel = new RouteMapper().toModel( routeEntity );
       model.setRoute( routeModel );
     }
   }

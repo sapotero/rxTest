@@ -3,7 +3,6 @@ package sapotero.rxtest.db.mapper;
 import java.util.ArrayList;
 import java.util.List;
 
-import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RRouteEntity;
 import sapotero.rxtest.db.requery.models.RStep;
 import sapotero.rxtest.db.requery.models.RStepEntity;
@@ -12,12 +11,6 @@ import sapotero.rxtest.retrofit.models.document.Step;
 
 // Maps between Route and RRouteEntity
 public class RouteMapper extends AbstractMapper<Route, RRouteEntity> {
-
-  private Mappers mappers;
-
-  public RouteMapper(Mappers mappers) {
-    this.mappers = mappers;
-  }
 
   @Override
   public RRouteEntity toEntity(Route model) {
