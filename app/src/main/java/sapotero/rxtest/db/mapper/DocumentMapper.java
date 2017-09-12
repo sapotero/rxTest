@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RLinks;
 import sapotero.rxtest.db.requery.models.RLinksEntity;
@@ -38,13 +37,8 @@ import timber.log.Timber;
 // Maps between DocumentInfo and RDocumentEntity
 public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity> {
 
-  private Mappers mappers;
   private String login = "";
   private String currentUserId = "";
-
-  public DocumentMapper(Mappers mappers) {
-    this.mappers = mappers;
-  }
 
   public DocumentMapper withLogin(String login) {
     this.login = login;

@@ -3,8 +3,6 @@ package sapotero.rxtest.mapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -14,7 +12,6 @@ import sapotero.rxtest.dagger.components.DaggerTestDataComponent;
 import sapotero.rxtest.dagger.components.TestDataComponent;
 import sapotero.rxtest.db.mapper.DocumentMapper;
 import sapotero.rxtest.db.mapper.StepMapper;
-import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RLinks;
 import sapotero.rxtest.db.requery.models.RLinksEntity;
@@ -59,12 +56,8 @@ public class DocumentMapperTest {
   private String dummyLogin;
   private String dummyCurrentUserId;
 
-  @Mock Mappers mappers;
-
   @Before
   public void init() {
-    MockitoAnnotations.initMocks(this);
-
     testDataComponent = DaggerTestDataComponent.builder().build();
     testDataComponent.inject(this);
 
@@ -129,7 +122,7 @@ public class DocumentMapperTest {
 
   @Test
   public void toEntity() {
-    mapper = new DocumentMapper(mappers);
+    mapper = new DocumentMapper();
     entity = mapper.withLogin(dummyLogin).toEntity(dummyDoc);
 
     assertNotNull( entity );
@@ -214,7 +207,7 @@ public class DocumentMapperTest {
 
   @Test
   public void toModel() {
-    mapper = new DocumentMapper(mappers);
+    mapper = new DocumentMapper();
     entity = mapper.toEntity(dummyDoc);
     model = mapper.toModel(entity);
 
@@ -277,7 +270,7 @@ public class DocumentMapperTest {
 
   @Test
   public void hasDiff() {
-    mapper = new DocumentMapper(mappers);
+    mapper = new DocumentMapper();
 
     RDocumentEntity entity1 = mapper.toEntity(dummyDoc);
     RDocumentEntity entity2 = mapper.toEntity(dummyDoc);
@@ -296,7 +289,7 @@ public class DocumentMapperTest {
   public void control() {
     dummyDoc.getControlLabels().get(0).setOfficialId( dummyCurrentUserId );
 
-    mapper = new DocumentMapper(mappers);
+    mapper = new DocumentMapper();
     entity = mapper.withCurrentUserId(dummyCurrentUserId).toEntity(dummyDoc);
 
     assertEquals( true, entity.isControl() );
@@ -306,7 +299,7 @@ public class DocumentMapperTest {
   public void withoutOrganization() {
     dummyDoc.getSigner().setOrganisation( "" );
 
-    mapper = new DocumentMapper(mappers);
+    mapper = new DocumentMapper();
     entity = mapper.toEntity(dummyDoc);
 
     assertEquals( "Без организации", entity.getOrganization() );
@@ -314,7 +307,7 @@ public class DocumentMapperTest {
 
   @Test
   public void shared() {
-    mapper = new DocumentMapper(mappers);
+    mapper = new DocumentMapper();
     entity = mapper.toEntity(dummyDoc);
 
     mapper.setShared( entity, false );
@@ -328,7 +321,7 @@ public class DocumentMapperTest {
   public void withoutDecision() {
     dummyDoc.getDecisions().clear();
 
-    mapper = new DocumentMapper(mappers);
+    mapper = new DocumentMapper();
     entity = mapper.toEntity(dummyDoc);
 
     assertEquals( false, entity.isWithDecision() );
@@ -338,7 +331,7 @@ public class DocumentMapperTest {
   public void red() {
     dummyDoc.getDecisions().get(0).setRed(true);
 
-    mapper = new DocumentMapper(mappers);
+    mapper = new DocumentMapper();
     entity = mapper.toEntity(dummyDoc);
 
     assertEquals( true, entity.isRed() );
@@ -348,7 +341,7 @@ public class DocumentMapperTest {
   public void emptyDoc() {
     DocumentInfo emptyDoc = new DocumentInfo();
 
-    mapper = new DocumentMapper(mappers);
+    mapper = new DocumentMapper();
     entity = mapper.toEntity(emptyDoc);
 
     assertNotNull( entity );
@@ -364,7 +357,7 @@ public class DocumentMapperTest {
     String dummyJournal = "incoming_documents_production_db_core_cards_incoming_documents_cards";
     String dummyFilter = "sent_to_the_report";
 
-    mapper = new DocumentMapper(mappers);
+    mapper = new DocumentMapper();
     entity = mapper.toEntity(dummyDoc);
 
     mapper.setJournal( entity, dummyJournal );

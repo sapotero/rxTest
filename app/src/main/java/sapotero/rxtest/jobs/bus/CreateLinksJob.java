@@ -113,7 +113,7 @@ public class CreateLinksJob extends DocumentJob {
       return;
     }
 
-    DocumentMapper documentMapper = mappers.getDocumentMapper().withLogin(login).withCurrentUserId(currentUserId);
+    DocumentMapper documentMapper = new DocumentMapper().withLogin(login).withCurrentUserId(currentUserId);
     RDocumentEntity doc = new RDocumentEntity();
 
     documentMapper.setSimpleFields(doc, document);
