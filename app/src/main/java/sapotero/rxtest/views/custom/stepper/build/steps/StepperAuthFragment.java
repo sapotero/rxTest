@@ -157,8 +157,7 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
         if (enteredText.equals("qwerty")) {
           setAuthTypePassword();
         } else {
-          oldLogin = settings.getLogin();
-          startAuthorization = true;
+          initStartAuthorization();
           EventBus.getDefault().post( new StepperDcCheckEvent( enteredText ) );
         }
 
@@ -168,8 +167,7 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
         EditText pwd   = (EditText) stepper_auth_password_wrapper.findViewById(R.id.stepper_auth_password);
 //        EditText host  = (EditText) stepper_auth_password_wrapper.findViewById(R.id.stepper_auth_host);
 
-        oldLogin = settings.getLogin();
-        startAuthorization = true;
+        initStartAuthorization();
         EventBus.getDefault().post(
           new StepperLoginCheckEvent(
             login.getText().toString(),
@@ -182,6 +180,11 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
     error = null;
 
     return error;
+  }
+
+  private void initStartAuthorization() {
+    oldLogin = settings.getLogin();
+    startAuthorization = true;
   }
 
   @Override
