@@ -342,7 +342,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
     templates.dismiss();
   }
 
-  public class GestureListener extends GestureDetector.SimpleOnGestureListener {
+  private class GestureListener extends GestureDetector.SimpleOnGestureListener {
 
     @Override
     public boolean onDown(MotionEvent e) {
