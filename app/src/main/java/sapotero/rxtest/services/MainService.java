@@ -630,8 +630,8 @@ public class MainService extends Service {
       );
   }
 
-  private void checkLogin(String login, String password, String host) throws Exception {
-    dataLoaderInterface.tryToSignWithLogin( login, password, host );
+  private void checkLogin(String login, String password) throws Exception {
+    dataLoaderInterface.tryToSignWithLogin( login, password );
   }
 
   private void getSign(String password) throws Exception {
@@ -718,8 +718,7 @@ public class MainService extends Service {
   public void onMessageEvent(StepperLoginCheckEvent event) throws Exception {
     checkLogin(
       event.login,
-      event.password,
-      event.host
+      event.password
     );
   }
 

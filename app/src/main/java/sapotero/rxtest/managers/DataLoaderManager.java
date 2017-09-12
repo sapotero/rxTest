@@ -313,10 +313,6 @@ public class DataLoaderManager {
     settings.setLogin(login);
   }
 
-  private void setHost( String host ){
-    settings.setHost(host);
-  }
-
   private void setCurrentUser( String user ){
     settings.setCurrentUser(user);
   }
@@ -339,16 +335,6 @@ public class DataLoaderManager {
 
   public void setPassword(String password) {
     settings.setPassword(password);
-  }
-
-  private boolean validateHost(String host) {
-    Boolean error = false;
-
-    if (host == null){
-      error = true;
-    }
-
-    return error;
   }
 
   private void unsubscribe(){
@@ -501,13 +487,7 @@ public class DataLoaderManager {
     );
   }
 
-  public void tryToSignWithLogin(String login, String password, String host) {
-    Timber.v("tryToSignWithLogin %s", host);
-    if (validateHost(host)) {
-      EventBus.getDefault().post(new AuthLoginCheckFailEvent("Wrong Host address"));
-      return;
-    }
-
+  public void tryToSignWithLogin(String login, String password) {
     AuthService auth = getAuthService();
 
     unsubscribe();
@@ -521,7 +501,6 @@ public class DataLoaderManager {
           data -> {
             Timber.tag(TAG).i("tryToSignWithLogin: token %s", data.getAuthToken());
 
-            setHost(host);
             setLogin(login);
             setPassword(password);
             setToken(data.getAuthToken());

@@ -171,8 +171,7 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
         EventBus.getDefault().post(
           new StepperLoginCheckEvent(
             login.getText().toString(),
-            pwd.getText().toString(),
-            settings.getHost()
+            pwd.getText().toString()
           )
         );
         break;
