@@ -2,14 +2,7 @@ package sapotero.rxtest.mapper;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.dagger.components.DaggerTestDataComponent;
-import sapotero.rxtest.dagger.components.TestDataComponent;
 import sapotero.rxtest.db.mapper.AssistantMapper;
 import sapotero.rxtest.db.requery.models.RAssistantEntity;
 import sapotero.rxtest.retrofit.models.Assistant;
@@ -20,11 +13,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ EsdApplication.class })
 public class AssistantMapperTest {
 
-  private TestDataComponent testDataComponent;
   private AssistantMapper mapper;
   private Assistant dummyAssistant;
   private Integer dummySortIndex;
@@ -35,14 +25,8 @@ public class AssistantMapperTest {
 
   @Before
   public void init() {
-    testDataComponent = DaggerTestDataComponent.builder().build();
-    testDataComponent.inject(this);
-
     generateAssistant();
     dummySortIndex = PrimaryConsiderationMapperTest.generateDummySortIndex();
-
-    PowerMockito.mockStatic(EsdApplication.class);
-    PowerMockito.when(EsdApplication.getDataComponent()).thenReturn(testDataComponent);
   }
 
   private void generateAssistant() {
@@ -60,6 +44,7 @@ public class AssistantMapperTest {
   public void toEntity() {
     mapper = new AssistantMapper();
     entity = mapper.withLogin(dummyLogin).toEntity(dummyAssistant);
+    entity.setSortIndex( dummySortIndex );
 
     assertNotNull( entity );
     assertEquals( 0, entity.getId() );
@@ -70,6 +55,7 @@ public class AssistantMapperTest {
     assertEquals( dummyAssistant.getHeadId(), entity.getHeadId() );
     assertEquals( dummyAssistant.getHeadName(), entity.getHeadName() );
     assertEquals( dummyLogin, entity.getUser() );
+    assertEquals( dummySortIndex, entity.getSortIndex() );
   }
 
   @Test

@@ -2,14 +2,7 @@ package sapotero.rxtest.mapper;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.dagger.components.DaggerTestDataComponent;
-import sapotero.rxtest.dagger.components.TestDataComponent;
 import sapotero.rxtest.db.mapper.DocumentMapper;
 import sapotero.rxtest.db.mapper.StepMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
@@ -42,11 +35,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ EsdApplication.class })
 public class DocumentMapperTest {
 
-  private TestDataComponent testDataComponent;
   private DocumentMapper mapper;
   private StepMapper stepMapper;
   private DocumentInfo dummyDoc;
@@ -58,15 +48,8 @@ public class DocumentMapperTest {
 
   @Before
   public void init() {
-    testDataComponent = DaggerTestDataComponent.builder().build();
-    testDataComponent.inject(this);
-
     stepMapper = new StepMapper();
-
     generateDocument();
-
-    PowerMockito.mockStatic(EsdApplication.class);
-    PowerMockito.when(EsdApplication.getDataComponent()).thenReturn(testDataComponent);
   }
 
   private void generateDocument() {

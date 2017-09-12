@@ -2,14 +2,7 @@ package sapotero.rxtest.mapper;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.dagger.components.DaggerTestDataComponent;
-import sapotero.rxtest.dagger.components.TestDataComponent;
 import sapotero.rxtest.db.mapper.FavoriteUserMapper;
 import sapotero.rxtest.db.requery.models.RFavoriteUserEntity;
 import sapotero.rxtest.retrofit.models.Oshs;
@@ -20,11 +13,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ EsdApplication.class })
 public class FavoriteUserMapperTest {
 
-  private TestDataComponent testDataComponent;
   private FavoriteUserMapper mapper;
   private Oshs dummyOshs;
   private Integer dummySortIndex;
@@ -35,15 +25,8 @@ public class FavoriteUserMapperTest {
 
   @Before
   public void init() {
-    testDataComponent = DaggerTestDataComponent.builder().build();
-    testDataComponent.inject(this);
-
     dummyOshs = PrimaryConsiderationMapperTest.generateOshs();
     dummySortIndex = PrimaryConsiderationMapperTest.generateDummySortIndex();
-
-    PowerMockito.mockStatic(EsdApplication.class);
-    PowerMockito.when(EsdApplication.getDataComponent()).thenReturn(testDataComponent);
-
     dummyLogin = "dummyLogin";
   }
 
@@ -51,6 +34,7 @@ public class FavoriteUserMapperTest {
   public void toEntity() {
     mapper = new FavoriteUserMapper();
     entity = mapper.withLogin(dummyLogin).toEntity(dummyOshs);
+    entity.setSortIndex( dummySortIndex );
 
     assertNotNull( entity );
     assertEquals( 0, entity.getId() );
@@ -65,6 +49,7 @@ public class FavoriteUserMapperTest {
     assertEquals( dummyOshs.getIsGroup(), entity.isIsGroup() );
     assertEquals( dummyOshs.getIsOrganization(), entity.isIsOrganization() );
     assertEquals( dummyLogin, entity.getUser() );
+    assertEquals( dummySortIndex, entity.getSortIndex() );
   }
 
   @Test
