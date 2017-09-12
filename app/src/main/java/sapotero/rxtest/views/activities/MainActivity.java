@@ -932,7 +932,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
               settings.setCurrentUserImage("");
               initDrawer();
 
-              dataLoader.unsubcribeAll();
+              dataLoader.unsubscribeAll();
 
               // Сначала сохраняем/восстанавливаем состояние тех документов, которые имеются у обоих пользователей,
               // затем перезагружаем MemoryStore
@@ -970,7 +970,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
         settings.setSubstituteMode( false );
         switchUser();
 
-        dataLoader.unsubcribeAll();
+        dataLoader.unsubscribeAll();
         showStopSubstituteDialog();
 
         dataLoader.updateAuth(true);

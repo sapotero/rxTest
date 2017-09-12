@@ -359,36 +359,28 @@ public class DataLoaderManager {
   }
 
   private void unsubscribe(){
-    if ( !isSubscriptionExist() ){
-      subscription = new CompositeSubscription();
+    if (subscription != null) {
+      subscription.unsubscribe();
     }
-    if (subscription.hasSubscriptions()){
-      subscription.clear();
-    }
-  }
 
-  private boolean isSubscriptionExist() {
-    return subscription != null;
+    subscription = new CompositeSubscription();
   }
 
   private void unsubscribeInitV2() {
-    if ( subscriptionInitV2 == null ){
-      subscriptionInitV2 = new CompositeSubscription();
+    if (subscriptionInitV2 != null) {
+      subscriptionInitV2.unsubscribe();
     }
-    if (subscriptionInitV2.hasSubscriptions()){
-      subscriptionInitV2.clear();
-    }
+
+    subscriptionInitV2 = new CompositeSubscription();
   }
 
   private void unsubscribeUpdateAuth() {
-    if ( subscriptionUpdateAuth == null ){
-      subscriptionUpdateAuth = new CompositeSubscription();
+    if (subscriptionUpdateAuth != null) {
+      subscriptionUpdateAuth.unsubscribe();
     }
-    if (subscriptionUpdateAuth.hasSubscriptions()){
-      subscriptionUpdateAuth.clear();
-    }
-  }
 
+    subscriptionUpdateAuth = new CompositeSubscription();
+  }
 
   public void updateAuth( boolean sendEvent ){
     if ( settings.isUpdateAuthStarted() ) {
@@ -494,8 +486,8 @@ public class DataLoaderManager {
     Timber.tag(TAG).i("json: %s", json .toString());
 
     unsubscribe();
-    subscription.add(
 
+    subscription.add(
       auth
         .getAuthBySign( json )
         .subscribeOn( Schedulers.io() )
@@ -529,6 +521,7 @@ public class DataLoaderManager {
     AuthService auth = retrofit.create(AuthService.class);
 
     unsubscribe();
+
     subscription.add(
       auth
         .getAuth(login, password)
@@ -555,10 +548,6 @@ public class DataLoaderManager {
 
   public void updateByCurrentStatus(MainMenuItem items, MainMenuButton button, String login, String currentUserId) {
     Timber.tag(TAG).e("updateByCurrentStatus: %s %s", items, button );
-
-    if ( !isSubscriptionExist() ) {
-      unsubscribe();
-    }
 
     favoritesDataLoaded = false;
     processedDataLoaded = false;
@@ -614,7 +603,6 @@ public class DataLoaderManager {
 
         }
       }
-
 
       // обновляем всё
       if (items == MainMenuItem.ALL || items.getIndex() == 11 || items == MainMenuItem.ON_CONTROL) {
@@ -678,10 +666,7 @@ public class DataLoaderManager {
       settings.setTotalDocCount(0);
       settings.setDocProjCount(0);
 
-      if (subscription != null) {
-        subscription.clear();
-      }
-
+      unsubscribe();
 
       for (String index: indexes ) {
         for (String status: statuses ) {
@@ -710,7 +695,6 @@ public class DataLoaderManager {
           );
         }
       }
-
 
       for (String code : sp) {
         subscription.add(
@@ -855,10 +839,10 @@ public class DataLoaderManager {
     DocumentsService docService = retrofit.create(DocumentsService.class);
 
     RFolderEntity favorites_folder = dataStore
-            .select(RFolderEntity.class)
-            .where(RFolderEntity.TYPE.eq("favorites"))
-            .and(RFolderEntity.USER.eq( settings.getLogin() ))
-            .get().firstOrNull();
+      .select(RFolderEntity.class)
+      .where(RFolderEntity.TYPE.eq("favorites"))
+      .and(RFolderEntity.USER.eq( settings.getLogin() ))
+      .get().firstOrNull();
 
     if ( favorites_folder != null ) {
       Timber.tag(TAG).e("FAVORITES EXIST!");
@@ -918,6 +902,7 @@ public class DataLoaderManager {
     if (subscriptionFavorites != null) {
       subscriptionFavorites.unsubscribe();
     }
+
     subscriptionFavorites = new CompositeSubscription();
   }
 
@@ -1010,6 +995,7 @@ public class DataLoaderManager {
     if (subscriptionProcessed != null) {
       subscriptionProcessed.unsubscribe();
     }
+
     subscriptionProcessed = new CompositeSubscription();
   }
 
@@ -1017,7 +1003,7 @@ public class DataLoaderManager {
     processDocuments( processedData, null, null, processed_folder.getUid(), DocumentType.PROCESSED, login, currentUserId );
   }
 
-  public void unsubcribeAll() {
+  public void unsubscribeAll() {
     Timber.tag(TAG).d("Unsubscribe all");
 
     unsubscribe();
