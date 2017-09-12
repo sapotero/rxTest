@@ -54,7 +54,7 @@ public class CreateTemplatesJob extends BaseJob {
       .get().value();
 
     List<RTemplateEntity> templateEntityList = new ArrayList<>();
-    TemplateMapper mapper = mappers.getTemplateMapper().withLogin(login);
+    TemplateMapper mapper = new TemplateMapper().withLogin(login);
 
     for (Template template : templates) {
       RTemplateEntity templateEntity = mapper.toEntity(template);

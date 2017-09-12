@@ -13,6 +13,7 @@ import javax.inject.Inject;
 
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.mapper.ImageMapper;
 import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.retrofit.models.document.Image;
@@ -65,7 +66,7 @@ public class DocumentLinkAdapter extends BaseAdapter {
   }
 
   public void add(RImageEntity img) {
-    Image image = mappers.getImageMapper().toModel(img);
+    Image image = new ImageMapper().toModel(img);
     images.add( image );
     notifyDataSetChanged();
   }

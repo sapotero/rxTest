@@ -189,7 +189,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
 
   public void setSigner(RDocumentEntity entity, Signer signerModel) {
     if ( exist( signerModel ) ) {
-      RSignerEntity signerEntity = mappers.getSignerMapper().toEntity( signerModel );
+      RSignerEntity signerEntity = new SignerMapper().toEntity( signerModel );
       entity.setSigner( signerEntity );
     }
   }
@@ -198,7 +198,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     RSignerEntity signerEntity = (RSignerEntity) signer;
 
     if ( exist( signerEntity ) ) {
-      Signer signerModel = mappers.getSignerMapper().toModel( signerEntity );
+      Signer signerModel = new SignerMapper().toModel( signerEntity );
       model.setSigner( signerModel );
     }
   }
@@ -216,7 +216,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     entity.setFirstLink(null);
 
     if ( notEmpty( links ) ) {
-      LinkMapper linkMapper = mappers.getLinkMapper();
+      LinkMapper linkMapper = new LinkMapper();
 
       for (String linkModel : links) {
         RLinksEntity linkEntity = linkMapper.toEntity( linkModel );
@@ -228,7 +228,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
 
   private void setLinks(DocumentInfo model, Set<RLinks> links) {
     if ( notEmpty( links ) ) {
-      LinkMapper linkMapper = mappers.getLinkMapper();
+      LinkMapper linkMapper = new LinkMapper();
 
       for (RLinks link : links) {
         RLinksEntity linksEntity = (RLinksEntity) link;
@@ -243,7 +243,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     boolean isControl = false;
 
     if ( notEmpty( controlLabels ) ) {
-      ControlLabelMapper controlLabelMapper = mappers.getControlLabelMapper();
+      ControlLabelMapper controlLabelMapper = new ControlLabelMapper();
 
       for (ControlLabel labelModel : controlLabels ) {
         RControlLabelsEntity labelEntity = controlLabelMapper.toEntity( labelModel );
@@ -262,7 +262,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
 
   private void setControlLabels(DocumentInfo model, Set<RControlLabels> controlLabels) {
     if ( notEmpty( controlLabels ) ) {
-      ControlLabelMapper controlLabelMapper = mappers.getControlLabelMapper();
+      ControlLabelMapper controlLabelMapper = new ControlLabelMapper();
 
       for (RControlLabels label : controlLabels ) {
         RControlLabelsEntity labelEntity = (RControlLabelsEntity) label;
@@ -276,7 +276,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     entity.getImages().clear();
 
     if ( notEmpty( images ) ) {
-      ImageMapper imageMapper = mappers.getImageMapper();
+      ImageMapper imageMapper = new ImageMapper();
 
       for (Image imageModel : images ) {
         RImageEntity imageEntity = imageMapper.toEntity( imageModel );
@@ -288,7 +288,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
 
   private void setImages(DocumentInfo model, Set<RImage> images) {
     if ( notEmpty( images ) ) {
-      ImageMapper imageMapper = mappers.getImageMapper();
+      ImageMapper imageMapper = new ImageMapper();
 
       for (RImage image : images ) {
         RImageEntity imageEntity = (RImageEntity) image;
@@ -302,7 +302,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     entity.getExemplars().clear();
 
     if ( notEmpty( exemplars ) ) {
-      ExemplarMapper exemplarMapper = mappers.getExemplarMapper();
+      ExemplarMapper exemplarMapper = new ExemplarMapper();
 
       for (Exemplar exemplarModel : exemplars ) {
         RExemplarEntity exemplarEntity = exemplarMapper.toEntity( exemplarModel );
@@ -314,7 +314,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
 
   private void setExemplars(DocumentInfo model, Set<RExemplar> exemplars) {
     if ( notEmpty( exemplars ) ) {
-      ExemplarMapper exemplarMapper = mappers.getExemplarMapper();
+      ExemplarMapper exemplarMapper = new ExemplarMapper();
 
       for (RExemplar exemplar : exemplars ) {
         RExemplarEntity exemplarEntity = (RExemplarEntity) exemplar;
@@ -328,7 +328,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
     entity.getActions().clear();
 
     if ( notEmpty( actions ) ) {
-      ActionMapper actionMapper = mappers.getActionMapper();
+      ActionMapper actionMapper = new ActionMapper();
 
       for (DocumentInfoAction actionModel : actions ) {
         RActionEntity actionEntity = actionMapper.toEntity( actionModel );
@@ -340,7 +340,7 @@ public class DocumentMapper extends AbstractMapper<DocumentInfo, RDocumentEntity
 
   private void setActions(DocumentInfo model, Set<RAction> actions) {
     if ( notEmpty( actions ) ) {
-      ActionMapper actionMapper = mappers.getActionMapper();
+      ActionMapper actionMapper = new ActionMapper();
 
       for (RAction action : actions ) {
         RActionEntity actionEntity = (RActionEntity) action;

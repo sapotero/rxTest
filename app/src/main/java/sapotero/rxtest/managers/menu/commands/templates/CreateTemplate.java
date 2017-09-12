@@ -11,6 +11,7 @@ import retrofit2.Retrofit;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.db.mapper.TemplateMapper;
 import sapotero.rxtest.db.requery.models.RTemplateEntity;
 import sapotero.rxtest.events.decision.AddDecisionTemplateEvent;
 import sapotero.rxtest.managers.menu.commands.AbstractCommand;
@@ -75,7 +76,7 @@ public class CreateTemplate extends AbstractCommand {
   }
 
   private void insertTemplate(Template data) {
-    RTemplateEntity template = mappers.getTemplateMapper().withLogin(getParams().getLogin()).toEntity(data);
+    RTemplateEntity template = new TemplateMapper().withLogin(getParams().getLogin()).toEntity(data);
     template.setType(getParams().getLabel());
 
     dataStore

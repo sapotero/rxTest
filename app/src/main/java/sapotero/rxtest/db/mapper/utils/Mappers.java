@@ -27,20 +27,8 @@ public class Mappers {
   // Каждый раз создается новый экземпляр маппера, чтобы job одного пользователя не смогла поменать логин
   // в маппере другого (вход/выход в режим замещения)
 
-  public ActionMapper getActionMapper() {
-    return new ActionMapper();
-  }
-
-  public AssistantMapper getAssistantMapper() {
-    return new AssistantMapper();
-  }
-
   public BlockMapper getBlockMapper() {
     return new BlockMapper(this);
-  }
-
-  public ControlLabelMapper getControlLabelMapper() {
-    return new ControlLabelMapper();
   }
 
   public DecisionMapper getDecisionMapper() {
@@ -51,20 +39,8 @@ public class Mappers {
     return new DocumentMapper(this);
   }
 
-  public ExemplarMapper getExemplarMapper() {
-    return new ExemplarMapper();
-  }
-
   public FavoriteUserMapper getFavoriteUserMapper() {
     return new FavoriteUserMapper(this);
-  }
-
-  public ImageMapper getImageMapper() {
-    return new ImageMapper();
-  }
-
-  public LinkMapper getLinkMapper() {
-    return new LinkMapper();
   }
 
   public PerformerMapper getPerformerMapper() {
@@ -79,19 +55,7 @@ public class Mappers {
     return new RouteMapper(this);
   }
 
-  public SignerMapper getSignerMapper() {
-    return new SignerMapper();
-  }
-
   public StepMapper getStepMapper() {
     return new StepMapper();
-  }
-
-  public TemplateMapper getTemplateMapper() {
-    return new TemplateMapper();
-  }
-
-  public ColleagueMapper getColleagueMapper() {
-    return new ColleagueMapper();
   }
 }

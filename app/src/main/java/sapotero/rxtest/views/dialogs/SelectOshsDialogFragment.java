@@ -37,6 +37,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.mapper.AssistantMapper;
 import sapotero.rxtest.db.mapper.PerformerMapper;
 import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RAssistantEntity;
@@ -267,7 +268,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements PrimaryU
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe( user -> {
-           adapter.add( mappers.getAssistantMapper().toPrimaryConsiderationPeople(user) );
+           adapter.add( new AssistantMapper().toPrimaryConsiderationPeople(user) );
         }, Timber::e);
     }
 
