@@ -4,7 +4,6 @@ import dagger.Component;
 import sapotero.rxtest.application.modules.EsdModule;
 import sapotero.rxtest.application.modules.SettingsModule;
 import sapotero.rxtest.application.scopes.DataScope;
-import sapotero.rxtest.db.mapper.utils.MappersModule;
 import sapotero.rxtest.db.requery.utils.Deleter;
 import sapotero.rxtest.db.requery.utils.DocumentStateSaver;
 import sapotero.rxtest.db.requery.utils.RequeryDbModule;
@@ -20,10 +19,8 @@ import sapotero.rxtest.views.activities.DocumentInfocardFullScreenActivity;
 import sapotero.rxtest.views.activities.FileSignActivity;
 import sapotero.rxtest.views.activities.LogActivity;
 import sapotero.rxtest.views.adapters.DecisionSpinnerAdapter;
-import sapotero.rxtest.views.adapters.DocumentLinkAdapter;
 import sapotero.rxtest.views.adapters.DocumentTypeAdapter;
 import sapotero.rxtest.views.adapters.PrimaryConsiderationAdapter;
-import sapotero.rxtest.views.adapters.PrimaryUsersAdapter;
 import sapotero.rxtest.views.custom.OrganizationSpinner;
 import sapotero.rxtest.views.custom.stepper.build.steps.StepperChooseAuthTypeFragment;
 import sapotero.rxtest.views.custom.stepper.build.steps.StepperLoadDataFragment;
@@ -44,7 +41,6 @@ import sapotero.rxtest.views.menu.factories.ItemsBuilder;
   SettingsModule.class,
   RequeryDbModule.class,
   MemoryStoreModule.class,
-  MappersModule.class
 })
 
 public interface DataComponent {
@@ -59,8 +55,6 @@ public interface DataComponent {
 
   void inject(DocumentTypeAdapter adapter);
   void inject(PrimaryConsiderationAdapter adapter);
-  void inject(DocumentLinkAdapter documentLinkAdapter);
-  void inject(PrimaryUsersAdapter primaryUsersAdapter);
   void inject(DecisionSpinnerAdapter decisionSpinnerAdapter);
 
   void inject(StepperLoadDataFragment fragment);

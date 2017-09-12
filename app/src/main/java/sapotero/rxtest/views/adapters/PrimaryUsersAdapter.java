@@ -20,19 +20,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import sapotero.rxtest.R;
-import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.mapper.PerformerMapper;
-import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 import timber.log.Timber;
 
 public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
-
-  @Inject Mappers mappers;
 
   private Context context;
   private final ArrayList<PrimaryConsiderationPeople> sourceItems;
@@ -45,8 +39,6 @@ public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
     this.sourceItems = items;
     this.resultItems = items;
     this.context = context;
-
-    EsdApplication.getDataComponent().inject(this);
   }
 
   public void registerListener(PrimaryUsersAdapterFilterListener primaryUsersAdapterFilterListener) {

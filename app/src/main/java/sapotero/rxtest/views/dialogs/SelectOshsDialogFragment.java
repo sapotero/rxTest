@@ -41,7 +41,6 @@ import sapotero.rxtest.db.mapper.AssistantMapper;
 import sapotero.rxtest.db.mapper.FavoriteUserMapper;
 import sapotero.rxtest.db.mapper.PerformerMapper;
 import sapotero.rxtest.db.mapper.PrimaryConsiderationMapper;
-import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RAssistantEntity;
 import sapotero.rxtest.db.requery.models.RFavoriteUserEntity;
 import sapotero.rxtest.db.requery.models.RPrimaryConsiderationEntity;
@@ -60,7 +59,6 @@ public class SelectOshsDialogFragment extends DialogFragment implements PrimaryU
   public static final String SEPARATOR_OSHS_TEXT = "Результат поиска по ОШС МВД";
 
   @Inject ISettings settings;
-  @Inject Mappers mappers;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   private String TAG = this.getClass().getSimpleName();
