@@ -23,7 +23,6 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Deleter;
 import sapotero.rxtest.db.requery.utils.DocumentStateSaver;
-import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.jobs.bus.CreateDocumentsJob;
@@ -41,18 +40,22 @@ import sapotero.rxtest.utils.memory.fields.InMemoryState;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import sapotero.rxtest.utils.memory.mappers.InMemoryDocumentMapper;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
+import sapotero.rxtest.utils.memory.models.NotifyMessageModel;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import timber.log.Timber;
 
 import static com.googlecode.totallylazy.Sequences.sequence;
+import static com.googlecode.totallylazy.Sequences.third;
 
 public class Processor {
   @Inject MemoryStore store;
   @Inject JobManager jobManager;
   @Inject ISettings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
+  @Inject NotifyManager notifyManager;
 
-  enum Source {
+
+  public enum Source {
     EMPTY,
     DB,
     TRANSACTION,
@@ -62,6 +65,7 @@ public class Processor {
 
   private final String TAG = this.getClass().getSimpleName();
   private final PublishSubject<InMemoryDocument> sub;
+  private PublishSubject<NotifyMessageModel> notifyPubSubject;
 
   private String filter;
   private String index;
@@ -76,13 +80,15 @@ public class Processor {
   private String login;
   private String currentUserId;
 
-  public Processor(PublishSubject<InMemoryDocument> subscribeSubject) {
+  public Processor(PublishSubject<InMemoryDocument> subscribeSubject, PublishSubject<NotifyMessageModel> notifyPubSubject) {
     EsdApplication.getManagerComponent().inject(this);
 
     this.filter = null;
     this.index  = null;
 
     this.sub = subscribeSubject;
+    this.notifyPubSubject = notifyPubSubject;
+    notifyManager.subscribeOnNotifyEvents(notifyPubSubject);
   }
 
   public Processor withFilter(String filter){
@@ -288,7 +294,8 @@ public class Processor {
         validateDocuments();
 
         if (add.size() > 0) {
-          generateNotificationMsg(add);
+          NotifyMessageModel notifyMessageModel = new NotifyMessageModel(add, documents, filter, source);
+          notifyPubSubject.onNext(notifyMessageModel);
         }
 
           return Collections.singletonList("");
@@ -308,32 +315,29 @@ public class Processor {
     return new ArrayList<>();
   }
 
-  private String getShortJournalName(String longJournalName){
-    String shortJournalName = "";
 
-    if (  longJournalName != null ) {
-      String[] index = longJournalName.split("_production_db_");
-      shortJournalName = index[0];
-    }else if (Objects.equals(this.filter, "approval")){
-      shortJournalName = "APPROVE" ;
-    }else if (Objects.equals(this.filter, "signing")){
-      shortJournalName = "SIGN" ;
-    }
-    return shortJournalName;
-  }
 
   /* генерируем уведомления, если в MemoryStore появился новый документ. addedDocList - List новых документов*/
   private void generateNotificationMsg(List<String> addedDocList) {
-    NotifyManager mNotifyManager = new NotifyManager(addedDocList, documents, filter);
-
     /*приводим строку index к виду Fields.Journal*/
-    String shortNameJournal = getShortJournalName(index).toUpperCase();
-    Fields.Journal itemJournal = Fields.Journal.valueOf(shortNameJournal);
+    //String shortNameJournal = getShortJournalName(index).toUpperCase();
+    //Fields.Journal itemJournal = Fields.Journal.valueOf(shortNameJournal);
 
-    /*проверяем, включён ли checkBox для журнала. -> генерируем уведомление */
-    if( settings.getNotificatedJournals().contains( itemJournal.getValue()) ) {
-      mNotifyManager.generateNotifyMsg(itemJournal.getFormattedName() + itemJournal.getSingle());
-    }
+  //NotifyManager mNotifyManager = new NotifyManager(addedDocList, documents, filter);
+//    notifyManager
+//      .withDocUidList(addedDocList)
+//      .withDocuments(documents)
+//      .withFilter(filter)
+//      .withAllowJournals(settings.getNotificatedJournals())
+//      .generate();
+//
+
+
+
+//    /*проверяем, включён ли checkBox для журнала. -> генерируем уведомление */
+//    if( settings.getNotificatedJournals().contains( itemJournal.getValue()) ) {
+//      mNotifyManager.generateNotifyMsg(itemJournal.getFormattedName() + itemJournal.getSingle());
+//    }
   }
 
   private void resetMd5(List<String> add) {

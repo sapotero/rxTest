@@ -4,6 +4,7 @@ package sapotero.rxtest.utils.memory;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -27,6 +28,7 @@ import sapotero.rxtest.utils.memory.interfaces.Processable;
 import sapotero.rxtest.utils.memory.mappers.InMemoryDocumentMapper;
 import sapotero.rxtest.utils.memory.models.Counter;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
+import sapotero.rxtest.utils.memory.models.NotifyMessageModel;
 import sapotero.rxtest.utils.memory.utils.Processor;
 import sapotero.rxtest.utils.memory.utils.Transaction;
 import timber.log.Timber;
@@ -43,6 +45,7 @@ public class MemoryStore implements Processable{
 
   private PublishSubject<InMemoryDocument> pub;
   private PublishSubject<InMemoryDocument> sub;
+  private PublishSubject<NotifyMessageModel> notifyPubSubject;
   private Counter counter;
   private boolean withDB = true;
 
@@ -57,6 +60,7 @@ public class MemoryStore implements Processable{
   private void init() {
     this.pub = PublishSubject.create();
     this.sub = PublishSubject.create();
+    this.notifyPubSubject = PublishSubject.create();
     this.counter = new Counter();
     this.documents  = new HashMap<>();
 
@@ -179,7 +183,7 @@ public class MemoryStore implements Processable{
   public void process(HashMap<String, Document> docs, String filter, String index, String login, String currentUserId) {
     Timber.tag("RecyclerViewRefresh").d("MemoryStore: Process documents from HashMap");
 
-    new Processor(sub)
+    new Processor(sub, notifyPubSubject)
       .withDocuments(docs)
       .withFilter(filter)
       .withIndex(index)
@@ -194,7 +198,7 @@ public class MemoryStore implements Processable{
   public void process(HashMap<String, Document> docs, String folderUid, DocumentType documentType, String login, String currentUserId ) {
     Timber.tag("RecyclerViewRefresh").d("MemoryStore: Process documents from HashMap");
 
-    new Processor(sub)
+    new Processor(sub, notifyPubSubject)
       .withDocuments(docs)
       .withFolder(folderUid)
       .withDocumentType(documentType)
@@ -207,7 +211,7 @@ public class MemoryStore implements Processable{
   public void process(Transaction transaction) {
     Timber.tag("RecyclerViewRefresh").d("MemoryStore: Process transaction");
 
-    new Processor(sub)
+    new Processor(sub, notifyPubSubject)
       .withTransaction(transaction)
       .execute();
 
@@ -220,7 +224,7 @@ public class MemoryStore implements Processable{
 
     Timber.tag(TAG).e("process: %s %s %s", doc.getUid(), filter, index);
 
-    new Processor(sub)
+    new Processor(sub, notifyPubSubject)
       .withFilter(filter)
       .withIndex(index)
       .withDocument(doc)
