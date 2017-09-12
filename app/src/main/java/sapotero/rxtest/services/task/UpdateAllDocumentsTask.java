@@ -1,7 +1,5 @@
 package sapotero.rxtest.services.task;
 
-import android.content.Context;
-
 import org.greenrobot.eventbus.EventBus;
 
 import javax.inject.Inject;
@@ -19,10 +17,10 @@ public class UpdateAllDocumentsTask implements Runnable {
 
   private DataLoaderManager dataLoaderInterface;
 
-  public UpdateAllDocumentsTask(Context context) {
+  public UpdateAllDocumentsTask() {
     Timber.tag("UpdateAllDocumentsTask").i("start");
     EsdApplication.getDataComponent().inject(this);
-    dataLoaderInterface = new DataLoaderManager(context);
+    dataLoaderInterface = new DataLoaderManager();
   }
 
   @Override

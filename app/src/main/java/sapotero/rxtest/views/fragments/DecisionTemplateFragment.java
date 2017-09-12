@@ -178,7 +178,7 @@ public class DecisionTemplateFragment extends Fragment {
   }
 
   private void refresh() {
-    Retrofit retrofit = new RetrofitManager(getContext(), settings.getHost(), okHttpClient).process();
+    Retrofit retrofit = new RetrofitManager(settings.getHost(), okHttpClient).process();
     AuthService auth = retrofit.create(AuthService.class);
 
     auth.getTemplates(settings.getLogin(), settings.getToken(), templateType.getTypeForApi())

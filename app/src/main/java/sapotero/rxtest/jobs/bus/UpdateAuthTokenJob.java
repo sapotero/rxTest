@@ -43,7 +43,7 @@ public class UpdateAuthTokenJob extends BaseJob {
   @Override
   public void onRun() throws Throwable {
 
-    Retrofit retrofit = new RetrofitManager( getApplicationContext(), settings.getHost(), okHttpClient).process();
+    Retrofit retrofit = new RetrofitManager(settings.getHost(), okHttpClient).process();
     AuthService auth = retrofit.create( AuthService.class );
 
     Observable<AuthSignToken> user = auth.getAuth( login, settings.getPassword() );

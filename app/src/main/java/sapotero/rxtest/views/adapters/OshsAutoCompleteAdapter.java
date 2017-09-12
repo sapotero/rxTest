@@ -98,7 +98,7 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
         if (constraint != null && constraint.length() >= threshold) {
           List<Oshs> results = null;
           try {
-            results = findOshs(mContext, constraint.toString());
+            results = findOshs(constraint.toString());
           } catch (IOException e) {
             e.printStackTrace();
           }
@@ -132,9 +132,9 @@ public class OshsAutoCompleteAdapter  extends BaseAdapter implements Filterable 
       }};
   }
 
-  private List<Oshs> findOshs(Context context, String term) throws IOException {
+  private List<Oshs> findOshs(String term) throws IOException {
 
-    Retrofit retrofit = new RetrofitManager( context, settings.getHost() + "/v2/", okHttpClient).process();
+    Retrofit retrofit = new RetrofitManager( settings.getHost() + "/v2/", okHttpClient).process();
     OshsAdapterService documentsService = retrofit.create( OshsAdapterService.class );
     Call<Oshs[]> call = documentsService.find(settings.getLogin(), settings.getToken(), term);
 

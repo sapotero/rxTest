@@ -1,6 +1,5 @@
 package sapotero.rxtest.managers;
 
-import android.content.Context;
 import android.support.annotation.Nullable;
 
 import com.birbit.android.jobqueue.JobManager;
@@ -79,7 +78,6 @@ public class DataLoaderManager {
   private CompositeSubscription subscriptionProcessed;
   private CompositeSubscription subscriptionInitV2;
   private CompositeSubscription subscriptionUpdateAuth;
-  private final Context context;
 
   // Network request counter. Incremented when request created, decremented when response received.
   private int requestCount;
@@ -95,8 +93,7 @@ public class DataLoaderManager {
   private boolean processFavoritesData = false;
   private boolean processProcessedData = false;
 
-  public DataLoaderManager(Context context) {
-    this.context = context;
+  public DataLoaderManager() {
     EsdApplication.getManagerComponent().inject(this);
   }
 
@@ -294,7 +291,7 @@ public class DataLoaderManager {
   }
 
   private Retrofit getRetrofit() {
-    return new RetrofitManager(context, settings.getHost(), okHttpClient).process();
+    return new RetrofitManager(settings.getHost(), okHttpClient).process();
   }
 
   private AuthService getAuthService() {

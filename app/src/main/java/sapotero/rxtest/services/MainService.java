@@ -142,7 +142,7 @@ public class MainService extends Service {
         }
         EventBus.getDefault().register(this);
 
-        dataLoaderInterface = new DataLoaderManager(getApplicationContext());
+        dataLoaderInterface = new DataLoaderManager();
 
         // 1. Инициализация RxSharedPreferences
 //        initialize();
@@ -898,7 +898,7 @@ public class MainService extends Service {
     }
 
     if ( settings.isStartRegularRefresh() && isStart ) {
-      futureRefresh = scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 5*60, 5*60, TimeUnit.SECONDS );
+      futureRefresh = scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(), 5*60, 5*60, TimeUnit.SECONDS );
 //      futureRefresh = scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 10, 10, TimeUnit.SECONDS );
     }
   }

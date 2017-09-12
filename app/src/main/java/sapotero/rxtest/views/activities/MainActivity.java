@@ -208,7 +208,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       .withEmptyView( documents_empty_list )
       .withProgressBar( progressBar );
 
-    dataLoader = new DataLoaderManager(this);
+    dataLoader = new DataLoaderManager();
 
     initToolbar();
 
@@ -903,7 +903,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
           RColleagueEntity colleagueEntity = colleagues.get( colleagueIndex );
 
-          Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
+          Retrofit retrofit = new RetrofitManager(settings.getHost(), okHttpClient).process();
           AuthService auth = retrofit.create(AuthService.class);
 
           auth.switchToColleague(colleagueEntity.getColleagueId(), settings.getLogin(), settings.getToken())
