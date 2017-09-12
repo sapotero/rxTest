@@ -174,7 +174,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements PrimaryU
 
     view.findViewById(R.id.dialog_oshs_add).setOnClickListener( v ->{
       if ( callback != null && user != null ) {
-        Oshs oshs = (Oshs) mappers.getPerformerMapper().convert(user, PerformerMapper.DestinationType.OSHS);
+        Oshs oshs = (Oshs) new PerformerMapper().convert(user, PerformerMapper.DestinationType.OSHS);
         Timber.e("setOnItemClickListener OPERATION: %s", operation.toString());
         callback.onSearchSuccess(oshs, operation, documentUid);
         dismiss();
@@ -371,7 +371,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements PrimaryU
 //            callback.onSearchSuccess( user, operation);
           }
 
-          user = (PrimaryConsiderationPeople) mappers.getPerformerMapper().convert(_user, PerformerMapper.DestinationType.PRIMARYCONSIDERATIONPEOPLE);
+          user = (PrimaryConsiderationPeople) new PerformerMapper().convert(_user, PerformerMapper.DestinationType.PRIMARYCONSIDERATIONPEOPLE);
 
           title.setText( _user.getName() );
           title.cancelPendingInputEvents();
@@ -458,7 +458,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements PrimaryU
     adapter.addResultItem( separatorOshs );
 
     for ( Oshs oshs : autocomplete_adapter.getResultList() ) {
-      PrimaryConsiderationPeople people = (PrimaryConsiderationPeople) mappers.getPerformerMapper().convert(oshs, PerformerMapper.DestinationType.PRIMARYCONSIDERATIONPEOPLE);
+      PrimaryConsiderationPeople people = (PrimaryConsiderationPeople) new PerformerMapper().convert(oshs, PerformerMapper.DestinationType.PRIMARYCONSIDERATIONPEOPLE);
       resultFromOshs.add(people);
       adapter.addResultItem( people );
     }

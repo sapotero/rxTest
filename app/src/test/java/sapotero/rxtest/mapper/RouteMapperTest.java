@@ -40,8 +40,6 @@ public class RouteMapperTest {
     stepMapper = new StepMapper();
 
     dummyRoute = generateRoute();
-
-    Mockito.when(mappers.getStepMapper()).thenReturn(stepMapper);
   }
 
   public static Route generateRoute() {
@@ -60,8 +58,6 @@ public class RouteMapperTest {
   public void toEntity() {
     mapper = new RouteMapper(mappers);
     entity = mapper.toEntity(dummyRoute);
-
-    Mockito.verify(mappers, times(1)).getStepMapper();
 
     verifyRoute( dummyRoute, entity, stepMapper );
   }
@@ -84,8 +80,6 @@ public class RouteMapperTest {
     mapper = new RouteMapper(mappers);
     entity = mapper.toEntity(dummyRoute);
     model = mapper.toModel(entity);
-
-    Mockito.verify(mappers, times(2)).getStepMapper();
 
     verifyRoute( dummyRoute, model );
   }

@@ -33,7 +33,7 @@ public class BlockMapper extends AbstractMapper<Block, RBlockEntity> {
     entity.setToFamiliarization(model.getToFamiliarization());
 
     if ( notEmpty(model.getPerformers() ) ) {
-      PerformerMapper performerMapper = mappers.getPerformerMapper();
+      PerformerMapper performerMapper = new PerformerMapper();
 
       for (Performer performerModel : model.getPerformers()) {
         RPerformerEntity performerEntity = performerMapper.toEntity(performerModel);
@@ -80,7 +80,7 @@ public class BlockMapper extends AbstractMapper<Block, RBlockEntity> {
 
   private void setPerformers(Block model, RBlockEntity entity, boolean formatted) {
     if ( notEmpty( entity.getPerformers() ) ) {
-      PerformerMapper performerMapper = mappers.getPerformerMapper();
+      PerformerMapper performerMapper = new PerformerMapper();
 
       for (RPerformer _performer : entity.getPerformers()) {
         RPerformerEntity performerEntity = (RPerformerEntity) _performer;

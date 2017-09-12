@@ -24,7 +24,7 @@ public class RouteMapper extends AbstractMapper<Route, RRouteEntity> {
     RRouteEntity entity = new RRouteEntity();
 
     entity.setText( model.getTitle() );
-    StepMapper stepMapper = mappers.getStepMapper();
+    StepMapper stepMapper = new StepMapper();
 
     for (Step stepModel : model.getSteps() ) {
       RStepEntity stepEntity = stepMapper.toEntity( stepModel );
@@ -40,7 +40,7 @@ public class RouteMapper extends AbstractMapper<Route, RRouteEntity> {
     Route model = new Route();
 
     model.setTitle( entity.getText() );
-    StepMapper stepMapper = mappers.getStepMapper();
+    StepMapper stepMapper = new StepMapper();
 
     List<Step> steps = new ArrayList<>();
 

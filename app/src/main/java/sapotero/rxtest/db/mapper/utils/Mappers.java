@@ -43,19 +43,11 @@ public class Mappers {
     return new FavoriteUserMapper(this);
   }
 
-  public PerformerMapper getPerformerMapper() {
-    return new PerformerMapper();
-  }
-
   public PrimaryConsiderationMapper getPrimaryConsiderationMapper() {
     return new PrimaryConsiderationMapper(this);
   }
 
   public RouteMapper getRouteMapper() {
     return new RouteMapper(this);
-  }
-
-  public StepMapper getStepMapper() {
-    return new StepMapper();
   }
 }

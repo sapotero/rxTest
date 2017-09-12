@@ -63,7 +63,6 @@ public class DocumentMapperTest {
 
   private TestDataComponent testDataComponent;
   private DocumentMapper mapper;
-  private PerformerMapper performerMapper;
   private BlockMapper blockMapper;
   private DecisionMapper decisionMapper;
   private RouteMapper routeMapper;
@@ -84,7 +83,6 @@ public class DocumentMapperTest {
     testDataComponent = DaggerTestDataComponent.builder().build();
     testDataComponent.inject(this);
 
-    performerMapper = new PerformerMapper();
     blockMapper = new BlockMapper(mappers);
     decisionMapper = new DecisionMapper(mappers);
     routeMapper = new RouteMapper(mappers);
@@ -95,11 +93,9 @@ public class DocumentMapperTest {
     PowerMockito.mockStatic(EsdApplication.class);
     PowerMockito.when(EsdApplication.getDataComponent()).thenReturn(testDataComponent);
 
-    Mockito.when(mappers.getPerformerMapper()).thenReturn(performerMapper);
     Mockito.when(mappers.getBlockMapper()).thenReturn(blockMapper);
     Mockito.when(mappers.getDecisionMapper()).thenReturn(decisionMapper);
     Mockito.when(mappers.getRouteMapper()).thenReturn(routeMapper);
-    Mockito.when(mappers.getStepMapper()).thenReturn(stepMapper);
   }
 
   private void generateDocument() {
@@ -160,9 +156,7 @@ public class DocumentMapperTest {
 
     Mockito.verify(mappers, times(1)).getDecisionMapper();
     Mockito.verify(mappers, times(1)).getBlockMapper();
-    Mockito.verify(mappers, times(1)).getPerformerMapper();
     Mockito.verify(mappers, times(1)).getRouteMapper();
-    Mockito.verify(mappers, times(1)).getStepMapper();
 
     assertNotNull( entity );
     assertEquals( 0, entity.getId() );
@@ -252,9 +246,7 @@ public class DocumentMapperTest {
 
     Mockito.verify(mappers, times(2)).getDecisionMapper();
     Mockito.verify(mappers, times(2)).getBlockMapper();
-    Mockito.verify(mappers, times(2)).getPerformerMapper();
     Mockito.verify(mappers, times(2)).getRouteMapper();
-    Mockito.verify(mappers, times(2)).getStepMapper();
 
     assertNotNull( model );
     assertEquals( dummyDoc.getUid(), model.getUid() );

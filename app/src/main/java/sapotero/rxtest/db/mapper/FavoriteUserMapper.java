@@ -63,7 +63,7 @@ public class FavoriteUserMapper extends AbstractMapper<Oshs, RFavoriteUserEntity
   public PrimaryConsiderationPeople toPrimaryConsiderationPeople(RFavoriteUserEntity entity) {
     Oshs model = toModel(entity);
     PrimaryConsiderationPeople people =
-            (PrimaryConsiderationPeople) mappers.getPerformerMapper().convert(model, PerformerMapper.DestinationType.PRIMARYCONSIDERATIONPEOPLE);
+            (PrimaryConsiderationPeople) new PerformerMapper().convert(model, PerformerMapper.DestinationType.PRIMARYCONSIDERATIONPEOPLE);
     people.setSortIndex(entity.getSortIndex());
     return people;
   }

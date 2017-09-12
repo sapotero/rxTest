@@ -32,7 +32,6 @@ public class PrimaryConsiderationMapperTest {
 
   private TestDataComponent testDataComponent;
   private PrimaryConsiderationMapper mapper;
-  private PerformerMapper performerMapper;
   private Oshs dummyOshs;
   private Integer dummySortIndex;
   private RPrimaryConsiderationEntity entity;
@@ -49,15 +48,11 @@ public class PrimaryConsiderationMapperTest {
     testDataComponent = DaggerTestDataComponent.builder().build();
     testDataComponent.inject(this);
 
-    performerMapper = new PerformerMapper();
-
     dummyOshs = generateOshs();
     dummySortIndex = generateDummySortIndex();
 
     PowerMockito.mockStatic(EsdApplication.class);
     PowerMockito.when(EsdApplication.getDataComponent()).thenReturn(testDataComponent);
-
-    Mockito.when(mappers.getPerformerMapper()).thenReturn(performerMapper);
 
     dummyLogin = "dummyLogin";
   }
@@ -126,8 +121,6 @@ public class PrimaryConsiderationMapperTest {
     entity = mapper.toEntity(dummyOshs);
     entity.setSortIndex(dummySortIndex);
     people = mapper.toPrimaryConsiderationPeople(entity);
-
-    Mockito.verify(mappers, times(1)).getPerformerMapper();
 
     assertNotNull( people );
     assertEquals( dummyOshs.getOrganization(), people.getOrganization() );

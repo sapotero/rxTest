@@ -32,7 +32,6 @@ public class FavoriteUserMapperTest {
 
   private TestDataComponent testDataComponent;
   private FavoriteUserMapper mapper;
-  private PerformerMapper performerMapper;
   private Oshs dummyOshs;
   private Integer dummySortIndex;
   private RFavoriteUserEntity entity;
@@ -49,15 +48,11 @@ public class FavoriteUserMapperTest {
     testDataComponent = DaggerTestDataComponent.builder().build();
     testDataComponent.inject(this);
 
-    performerMapper = new PerformerMapper();
-
     dummyOshs = PrimaryConsiderationMapperTest.generateOshs();
     dummySortIndex = PrimaryConsiderationMapperTest.generateDummySortIndex();
 
     PowerMockito.mockStatic(EsdApplication.class);
     PowerMockito.when(EsdApplication.getDataComponent()).thenReturn(testDataComponent);
-
-    Mockito.when(mappers.getPerformerMapper()).thenReturn(performerMapper);
 
     dummyLogin = "dummyLogin";
   }
@@ -107,8 +102,6 @@ public class FavoriteUserMapperTest {
     entity = mapper.toEntity(dummyOshs);
     entity.setSortIndex(dummySortIndex);
     people = mapper.toPrimaryConsiderationPeople(entity);
-
-    Mockito.verify(mappers, times(1)).getPerformerMapper();
 
     assertNotNull( people );
     assertEquals( dummyOshs.getOrganization(), people.getOrganization() );

@@ -114,7 +114,7 @@ public class PrimaryUsersAdapter extends BaseAdapter implements Filterable {
 
   public Oshs getOshs(int position){
     PrimaryConsiderationPeople item = resultItems.get(position);
-    Oshs oshs = (Oshs) mappers.getPerformerMapper().convert(item, PerformerMapper.DestinationType.OSHS);
+    Oshs oshs = (Oshs) new PerformerMapper().convert(item, PerformerMapper.DestinationType.OSHS);
     return oshs;
   }
 

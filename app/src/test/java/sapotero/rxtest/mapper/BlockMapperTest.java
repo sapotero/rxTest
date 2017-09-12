@@ -25,7 +25,6 @@ import static org.mockito.Mockito.times;
 public class BlockMapperTest {
 
   private BlockMapper mapper;
-  private PerformerMapper performerMapper;
   private Block dummyBlock;
   private RBlockEntity entity;
   private Block model;
@@ -35,11 +34,8 @@ public class BlockMapperTest {
   @Before
   public void init() {
     MockitoAnnotations.initMocks(this);
-    performerMapper = new PerformerMapper();
 
     dummyBlock = generateBlock();
-
-    Mockito.when(mappers.getPerformerMapper()).thenReturn(performerMapper);
   }
 
   public static Block generateBlock() {
@@ -63,8 +59,6 @@ public class BlockMapperTest {
   public void toEntity() {
     mapper = new BlockMapper(mappers);
     entity = mapper.toEntity(dummyBlock);
-
-    Mockito.verify(mappers, times(1)).getPerformerMapper();
 
     verifyBlock( dummyBlock, entity );
   }
@@ -95,8 +89,6 @@ public class BlockMapperTest {
     mapper = new BlockMapper(mappers);
     entity = mapper.toEntity(dummyBlock);
     model = mapper.toModel(entity);
-
-    Mockito.verify(mappers, times(2)).getPerformerMapper();
 
     verifyBlock( dummyBlock, model );
   }

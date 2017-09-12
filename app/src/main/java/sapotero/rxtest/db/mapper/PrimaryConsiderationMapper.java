@@ -63,7 +63,7 @@ public class PrimaryConsiderationMapper extends AbstractMapper<Oshs, RPrimaryCon
   public PrimaryConsiderationPeople toPrimaryConsiderationPeople(RPrimaryConsiderationEntity entity) {
     Oshs model = toModel(entity);
     PrimaryConsiderationPeople people =
-            (PrimaryConsiderationPeople) mappers.getPerformerMapper().convert(model, PerformerMapper.DestinationType.PRIMARYCONSIDERATIONPEOPLE);
+            (PrimaryConsiderationPeople) new PerformerMapper().convert(model, PerformerMapper.DestinationType.PRIMARYCONSIDERATIONPEOPLE);
     people.setSortIndex(entity.getSortIndex());
     return people;
   }
