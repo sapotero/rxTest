@@ -786,7 +786,7 @@ public class DataLoaderManager {
   }
 
   private void processDocuments(Documents data, String status, String index, String folder, DocumentType documentType, String login, String currentUserId) {
-    if (data.getDocuments().size() > 0){
+    if (data.getDocuments().size() >= 0){
       HashMap<String, Document> doc_hash = new HashMap<>();
 
       for (Document doc: data.getDocuments() ) {
