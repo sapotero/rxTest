@@ -21,7 +21,6 @@ import java.util.Objects;
 import javax.inject.Inject;
 
 import io.requery.Persistable;
-import io.requery.query.Tuple;
 import io.requery.rx.SingleEntityStore;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -98,10 +97,8 @@ public class DataLoaderManager {
   private boolean processProcessedData = false;
 
   public DataLoaderManager(Context context) {
-
     this.context = context;
     EsdApplication.getManagerComponent().inject(this);
-
   }
 
   public void initV2(boolean loadAllDocs) {
@@ -515,13 +512,6 @@ public class DataLoaderManager {
             setToken( data.getAuthToken() );
 
             EventBus.getDefault().post( new AuthDcCheckSuccessEvent() );
-
-//            initV2(true);
-
-//            updateByCurrentStatus(MainMenuItem.ALL, null, false);
-//            updateByCurrentStatus(MainMenuItem.ALL, null, true);
-
-//            updateFavoritesAndProcessed();
           },
           error -> {
             Timber.tag(TAG).i("tryToSignWithDc error: %s" , error );
@@ -557,10 +547,6 @@ public class DataLoaderManager {
             setToken(data.getAuthToken());
 
             EventBus.getDefault().post(new AuthLoginCheckSuccessEvent());
-
-//            initV2(true);
-//            updateByCurrentStatus(MainMenuItem.ALL, null, false);
-//            updateFavoritesAndProcessed();
           },
           error -> {
             Timber.tag(TAG).i("tryToSignWithLogin error: %s", error);
@@ -829,32 +815,6 @@ public class DataLoaderManager {
     }
   }
 
-  private boolean isDocumentMd5Changed(String uid, String md5) {
-
-    Boolean result = false;
-
-    Tuple doc = dataStore
-      .select(RDocumentEntity.MD5)
-      .where(RDocumentEntity.UID.eq(uid))
-      .get()
-      .firstOrNull();
-
-    if (doc != null){
-      if (doc.get(0).equals(md5)){
-        result = true;
-      }
-    }
-
-    return result;
-  }
-
-  private boolean isExist(Document doc) {
-    return dataStore
-      .count(RDocumentEntity.class)
-      .where(RDocumentEntity.UID.eq(doc.getUid()))
-      .get().value() > 0;
-  }
-
   private Observable<AuthSignToken> getAuthSubscription() {
     Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
     AuthService auth = retrofit.create(AuthService.class);
@@ -888,10 +848,6 @@ public class DataLoaderManager {
     }
 
     return authSubscription;
-  }
-
-  public void updateDocument(String uid) {
-//    jobManager.addJobInBackground(new UpdateDocumentJob( uid, "" ));
   }
 
   public void updateFavorites(boolean processLoadedData) {
@@ -1073,9 +1029,4 @@ public class DataLoaderManager {
     unsubscribeInitV2();
     unsubscribeUpdateAuth();
   }
-
-//  @Subscribe(threadMode = ThreadMode.BACKGROUND)
-//  public void onMessageEvent(StepperDcCheckEvent event) throws Exception {
-//    String token = event.pin;
-//  }
 }

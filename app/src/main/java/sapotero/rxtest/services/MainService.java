@@ -797,7 +797,6 @@ public class MainService extends Service {
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(UpdateDocumentEvent event) throws Exception {
     EventBus.getDefault().post( new UpdateCurrentInfoActivityEvent() );
-    dataLoaderInterface.updateDocument(event.uid);
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
