@@ -523,70 +523,20 @@ public class DataLoaderManager {
     favoritesDataLoading = false;
     processedDataLoading = false;
 
-    if (items == MainMenuItem.PROCESSED){
+    if ( items == MainMenuItem.PROCESSED ) {
       updateProcessed( true );
-    } else if (items == MainMenuItem.FAVORITES) {
+
+    } else if ( items == MainMenuItem.FAVORITES ) {
       updateFavorites( true );
+
     } else {
-
-      ArrayList<String> indexes = new ArrayList<>();
-
-      switch (items) {
-        case CITIZEN_REQUESTS:
-          indexes.add("citizen_requests_production_db_core_cards_citizen_requests_cards");
-          break;
-        case INCOMING_DOCUMENTS:
-          indexes.add("incoming_documents_production_db_core_cards_incoming_documents_cards");
-          break;
-        case ORDERS_DDO:
-          indexes.add("orders_ddo_production_db_core_cards_orders_ddo_cards");
-          break;
-        case ORDERS:
-          indexes.add("orders_production_db_core_cards_orders_cards");
-          break;
-        case IN_DOCUMENTS:
-          indexes.add("outgoing_documents_production_db_core_cards_outgoing_documents_cards");
-          break;
-        case INCOMING_ORDERS:
-          indexes.add("incoming_orders_production_db_core_cards_incoming_orders_cards");
-          break;
-      }
-
       ArrayList<String> sp = new ArrayList<>();
       ArrayList<String> statuses = new ArrayList<>();
-
-      if (button != null) {
-        switch (button) {
-          case APPROVAL:
-            sp.add("approval");
-            break;
-          case ASSIGN:
-            sp.add("signing");
-            break;
-          case PRIMARY_CONSIDERATION:
-            statuses.add("primary_consideration");
-            break;
-          case PERFORMANCE:
-            statuses.add("sent_to_the_report");
-            break;
-
-        }
-      }
+      ArrayList<String> indexes = new ArrayList<>();
 
       // обновляем всё
       if (items == MainMenuItem.ALL || items.getIndex() == 11 || items == MainMenuItem.ON_CONTROL) {
-        if ( !statuses.contains("primary_consideration") ) {
-          statuses.add("primary_consideration");
-        }
-        if ( !statuses.contains( "sent_to_the_report" ) ) {
-          statuses.add("sent_to_the_report");
-        }
-        if ( !sp.contains( "approval" ) ) {
-          sp.add("approval");
-        }
-        if ( !sp.contains( "signing" ) ) {
-          sp.add("signing");
-        }
+        addAllStatuses(sp, statuses);
 
         indexes.add("citizen_requests_production_db_core_cards_citizen_requests_cards");
         indexes.add("incoming_documents_production_db_core_cards_incoming_documents_cards");
@@ -596,23 +546,49 @@ public class DataLoaderManager {
         indexes.add("incoming_orders_production_db_core_cards_incoming_orders_cards");
 
         checkImagesToDelete();
-      }
 
-      if (button == null) {
-        if ( !statuses.contains("primary_consideration") ) {
-          statuses.add("primary_consideration");
+      } else {
+        switch (items) {
+          case CITIZEN_REQUESTS:
+            indexes.add("citizen_requests_production_db_core_cards_citizen_requests_cards");
+            break;
+          case INCOMING_DOCUMENTS:
+            indexes.add("incoming_documents_production_db_core_cards_incoming_documents_cards");
+            break;
+          case ORDERS_DDO:
+            indexes.add("orders_ddo_production_db_core_cards_orders_ddo_cards");
+            break;
+          case ORDERS:
+            indexes.add("orders_production_db_core_cards_orders_cards");
+            break;
+          case IN_DOCUMENTS:
+            indexes.add("outgoing_documents_production_db_core_cards_outgoing_documents_cards");
+            break;
+          case INCOMING_ORDERS:
+            indexes.add("incoming_orders_production_db_core_cards_incoming_orders_cards");
+            break;
         }
-        if ( !statuses.contains( "sent_to_the_report" ) ) {
-          statuses.add("sent_to_the_report");
-        }
-        if ( !sp.contains( "approval" ) && items == MainMenuItem.APPROVE_ASSIGN ) {
-          sp.add("approval");
-        }
-        if ( !sp.contains( "signing" ) && items == MainMenuItem.APPROVE_ASSIGN ) {
-          sp.add("signing");
+
+        if (button == null) {
+          addAllStatuses(sp, statuses);
+
+        } else {
+          switch (button) {
+            case APPROVAL:
+              sp.add("approval");
+              break;
+            case ASSIGN:
+              sp.add("signing");
+              break;
+            case PRIMARY_CONSIDERATION:
+              statuses.add("primary_consideration");
+              break;
+            case PERFORMANCE:
+              statuses.add("sent_to_the_report");
+              break;
+          }
         }
       }
-
 
       Timber.tag(TAG).e("data: %s %s", indexes, statuses);
 
@@ -625,7 +601,6 @@ public class DataLoaderManager {
       // if (items.getIndex() == 11){
       //   shared = true;
       // }
-
 
       jobManager.cancelJobsInBackground(null, TagConstraint.ANY, "SyncDocument");
 
@@ -690,6 +665,13 @@ public class DataLoaderManager {
         );
       }
     }
+  }
+
+  private void addAllStatuses(ArrayList<String> sp, ArrayList<String> statuses) {
+    sp.add("approval");
+    sp.add("signing");
+    statuses.add("primary_consideration");
+    statuses.add("sent_to_the_report");
   }
 
   private DocumentsService getDocumentService() {
