@@ -12,12 +12,6 @@ import sapotero.rxtest.retrofit.models.document.Performer;
 // Maps between Block and RBlockEntity
 public class BlockMapper extends AbstractMapper<Block, RBlockEntity> {
 
-  private Mappers mappers;
-
-  public BlockMapper(Mappers mappers) {
-    this.mappers = mappers;
-  }
-
   @Override
   public RBlockEntity toEntity(Block model) {
     RBlockEntity entity = new RBlockEntity();

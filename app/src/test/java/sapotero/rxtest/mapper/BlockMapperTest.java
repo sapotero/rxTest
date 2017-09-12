@@ -3,13 +3,8 @@ package sapotero.rxtest.mapper;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 
 import sapotero.rxtest.db.mapper.BlockMapper;
-import sapotero.rxtest.db.mapper.PerformerMapper;
-import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RPerformer;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
@@ -20,7 +15,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.times;
 
 public class BlockMapperTest {
 
@@ -29,12 +23,8 @@ public class BlockMapperTest {
   private RBlockEntity entity;
   private Block model;
 
-  @Mock Mappers mappers;
-
   @Before
   public void init() {
-    MockitoAnnotations.initMocks(this);
-
     dummyBlock = generateBlock();
   }
 
@@ -57,7 +47,7 @@ public class BlockMapperTest {
 
   @Test
   public void toEntity() {
-    mapper = new BlockMapper(mappers);
+    mapper = new BlockMapper();
     entity = mapper.toEntity(dummyBlock);
 
     verifyBlock( dummyBlock, entity );
@@ -86,7 +76,7 @@ public class BlockMapperTest {
 
   @Test
   public void toModel() {
-    mapper = new BlockMapper(mappers);
+    mapper = new BlockMapper();
     entity = mapper.toEntity(dummyBlock);
     model = mapper.toModel(entity);
 
@@ -134,7 +124,7 @@ public class BlockMapperTest {
 
   @Test
   public void hasDiff() {
-    mapper = new BlockMapper(mappers);
+    mapper = new BlockMapper();
 
     RBlockEntity entity1 = mapper.toEntity(dummyBlock);
     RBlockEntity entity2 = mapper.toEntity(dummyBlock);

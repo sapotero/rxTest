@@ -25,7 +25,6 @@ import static org.mockito.Mockito.times;
 public class DecisionMapperTest {
 
   private DecisionMapper mapper;
-  private BlockMapper blockMapper;
   private Decision dummyDecision;
   private RDecisionEntity entity;
   private Decision model;
@@ -36,11 +35,7 @@ public class DecisionMapperTest {
   @Before
   public void init() {
     MockitoAnnotations.initMocks(this);
-    blockMapper = new BlockMapper(mappers);
-
     dummyDecision = generateDecision();
-
-    Mockito.when(mappers.getBlockMapper()).thenReturn(blockMapper);
   }
 
   public static Decision generateDecision() {
@@ -73,8 +68,6 @@ public class DecisionMapperTest {
   public void toEntity() {
     mapper = new DecisionMapper(mappers);
     entity = mapper.toEntity(dummyDecision);
-
-    Mockito.verify(mappers, times(1)).getBlockMapper();
 
     verifyDecision( dummyDecision, entity );
   }
@@ -114,8 +107,6 @@ public class DecisionMapperTest {
     mapper = new DecisionMapper(mappers);
     entity = mapper.toEntity(dummyDecision);
     model = mapper.toModel(entity);
-
-    Mockito.verify(mappers, times(2)).getBlockMapper();
 
     verifyDecision( dummyDecision, model );
   }
@@ -169,8 +160,6 @@ public class DecisionMapperTest {
     mapper = new DecisionMapper(mappers);
     entity = mapper.toEntity(dummyDecision);
     formattedModel = mapper.toFormattedModel(entity);
-
-    Mockito.verify(mappers, times(2)).getBlockMapper();
 
     assertNotNull( formattedModel );
     assertEquals( dummyDecision.getId(), formattedModel.getId() );

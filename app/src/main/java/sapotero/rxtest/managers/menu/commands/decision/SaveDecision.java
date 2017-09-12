@@ -86,7 +86,7 @@ public class SaveDecision extends DecisionCommand {
       decision.getBlocks().clear();
     }
 
-    BlockMapper blockMapper = mappers.getBlockMapper();
+    BlockMapper blockMapper = new BlockMapper();
 
     for (Block _block : dec.getBlocks()) {
       RBlockEntity block = blockMapper.toEntity(_block);

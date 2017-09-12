@@ -42,7 +42,7 @@ public class DecisionMapper extends AbstractMapper<Decision, RDecisionEntity> {
     entity.setPerformerFontSize(model.getPerformersFontSize());
 
     if ( notEmpty( model.getBlocks() ) ) {
-      BlockMapper blockMapper = mappers.getBlockMapper();
+      BlockMapper blockMapper = new BlockMapper();
 
       for (Block blockModel: model.getBlocks() ) {
         RBlockEntity blockEntity = blockMapper.toEntity(blockModel);
@@ -95,7 +95,7 @@ public class DecisionMapper extends AbstractMapper<Decision, RDecisionEntity> {
 
   private void setBlocks(Decision model, RDecisionEntity entity, boolean formatted) {
     if ( notEmpty( entity.getBlocks() ) ) {
-      BlockMapper blockMapper = mappers.getBlockMapper();
+      BlockMapper blockMapper = new BlockMapper();
 
       for (RBlock _block : entity.getBlocks()) {
         RBlockEntity blockEntity = (RBlockEntity) _block;

@@ -27,10 +27,6 @@ public class Mappers {
   // Каждый раз создается новый экземпляр маппера, чтобы job одного пользователя не смогла поменать логин
   // в маппере другого (вход/выход в режим замещения)
 
-  public BlockMapper getBlockMapper() {
-    return new BlockMapper(this);
-  }
-
   public DecisionMapper getDecisionMapper() {
     return new DecisionMapper(this);
   }

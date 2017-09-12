@@ -63,7 +63,6 @@ public class DocumentMapperTest {
 
   private TestDataComponent testDataComponent;
   private DocumentMapper mapper;
-  private BlockMapper blockMapper;
   private DecisionMapper decisionMapper;
   private RouteMapper routeMapper;
   private StepMapper stepMapper;
@@ -83,7 +82,6 @@ public class DocumentMapperTest {
     testDataComponent = DaggerTestDataComponent.builder().build();
     testDataComponent.inject(this);
 
-    blockMapper = new BlockMapper(mappers);
     decisionMapper = new DecisionMapper(mappers);
     routeMapper = new RouteMapper(mappers);
     stepMapper = new StepMapper();
@@ -93,7 +91,6 @@ public class DocumentMapperTest {
     PowerMockito.mockStatic(EsdApplication.class);
     PowerMockito.when(EsdApplication.getDataComponent()).thenReturn(testDataComponent);
 
-    Mockito.when(mappers.getBlockMapper()).thenReturn(blockMapper);
     Mockito.when(mappers.getDecisionMapper()).thenReturn(decisionMapper);
     Mockito.when(mappers.getRouteMapper()).thenReturn(routeMapper);
   }
@@ -155,7 +152,6 @@ public class DocumentMapperTest {
     entity = mapper.withLogin(dummyLogin).toEntity(dummyDoc);
 
     Mockito.verify(mappers, times(1)).getDecisionMapper();
-    Mockito.verify(mappers, times(1)).getBlockMapper();
     Mockito.verify(mappers, times(1)).getRouteMapper();
 
     assertNotNull( entity );
@@ -245,7 +241,6 @@ public class DocumentMapperTest {
     model = mapper.toModel(entity);
 
     Mockito.verify(mappers, times(2)).getDecisionMapper();
-    Mockito.verify(mappers, times(2)).getBlockMapper();
     Mockito.verify(mappers, times(2)).getRouteMapper();
 
     assertNotNull( model );
