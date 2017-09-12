@@ -101,9 +101,7 @@ public class DataLoaderManager {
   }
 
   public void initV2(boolean loadAllDocs) {
-    Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
-
-    AuthService auth = retrofit.create(AuthService.class);
+    AuthService auth = getAuthService();
 
     unsubscribeInitV2();
 
@@ -295,6 +293,15 @@ public class DataLoaderManager {
     );
   }
 
+  private Retrofit getRetrofit() {
+    return new RetrofitManager(context, settings.getHost(), okHttpClient).process();
+  }
+
+  private AuthService getAuthService() {
+    Retrofit retrofit = getRetrofit();
+    return retrofit.create(AuthService.class);
+  }
+
   private void loadAllDocs(boolean load, String login, String currentUserId) {
     if ( load ) {
       updateByCurrentStatus(MainMenuItem.ALL, null, login, currentUserId);
@@ -434,8 +441,7 @@ public class DataLoaderManager {
   }
 
   private void getColleagueToken() {
-    Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
-    AuthService auth = retrofit.create(AuthService.class);
+    AuthService auth = getAuthService();
 
     // Запрос на получение токена коллеги выполняется от имени основного пользователя
     auth.switchToColleague(settings.getColleagueId(), settings.getOldLogin(), settings.getToken())
@@ -461,8 +467,7 @@ public class DataLoaderManager {
   public void tryToSignWithDc(String sign){
     Timber.tag(TAG).i("tryToSignWithDc: %s", sign );
 
-    Retrofit retrofit = new RetrofitManager( context, settings.getHost(), okHttpClient).process();
-    AuthService auth = retrofit.create( AuthService.class );
+    AuthService auth = getAuthService();
 
     Map<String, Object> map = new HashMap<>();
     map.put( "sign", sign );
@@ -506,8 +511,7 @@ public class DataLoaderManager {
       return;
     }
 
-    Retrofit retrofit = new RetrofitManager(context, host, okHttpClient).process();
-    AuthService auth = retrofit.create(AuthService.class);
+    AuthService auth = getAuthService();
 
     unsubscribe();
 
@@ -636,8 +640,7 @@ public class DataLoaderManager {
 
       Timber.tag(TAG).e("data: %s %s", indexes, statuses);
 
-      Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
-      DocumentsService docService = retrofit.create(DocumentsService.class);
+      DocumentsService docService = getDocumentService();
 
       // resolved https://tasks.n-core.ru/browse/MVDESD-13343
       // если общие документы
@@ -713,6 +716,11 @@ public class DataLoaderManager {
     }
   }
 
+  private DocumentsService getDocumentService() {
+    Retrofit retrofit = getRetrofit();
+    return retrofit.create(DocumentsService.class);
+  }
+
   private void checkImagesToDelete() {
     Timber.tag(TAG).e( "checkImagesToDelete" );
 
@@ -786,8 +794,7 @@ public class DataLoaderManager {
   }
 
   private Observable<AuthSignToken> getAuthSubscription() {
-    Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
-    AuthService auth = retrofit.create(AuthService.class);
+    AuthService auth = getAuthService();
 
     Observable<AuthSignToken> authSubscription;
 
@@ -824,8 +831,7 @@ public class DataLoaderManager {
 
     processFavoritesData = processLoadedData;
 
-    Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
-    DocumentsService docService = retrofit.create(DocumentsService.class);
+    DocumentsService docService = getDocumentService();
 
     RFolderEntity favorites_folder = dataStore
       .select(RFolderEntity.class)
@@ -903,8 +909,7 @@ public class DataLoaderManager {
 
     processProcessedData = processLoadedData;
 
-    Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
-    DocumentsService docService = retrofit.create(DocumentsService.class);
+    DocumentsService docService = getDocumentService();
 
     RFolderEntity processed_folder = dataStore
       .select(RFolderEntity.class)
