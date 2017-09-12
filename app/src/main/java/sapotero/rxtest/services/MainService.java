@@ -23,7 +23,6 @@ import java.security.Security;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -56,7 +55,6 @@ import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckSuccessEvent;
 import sapotero.rxtest.events.bus.FolderCreatedEvent;
 import sapotero.rxtest.events.bus.StartRegularRefreshEvent;
-import sapotero.rxtest.events.bus.UpdateAuthTokenEvent;
 import sapotero.rxtest.events.bus.UpdateFavoritesAndProcessedEvent;
 import sapotero.rxtest.events.crypto.AddKeyEvent;
 import sapotero.rxtest.events.crypto.SelectKeyStoreEvent;
@@ -118,7 +116,6 @@ public class MainService extends Service {
   private static final ArrayList<String> aliasesList = new ArrayList<String>();
   private DataLoaderManager dataLoaderInterface;
   private String SIGN;
-  public static String user;
   private int keyStoreTypeIndex = 0;
 
   boolean isOnCreateComplete = false;
@@ -707,32 +704,6 @@ public class MainService extends Service {
 
   }
 
-  private void checkSedAvailibility() {
-//    dataLoaderInterface.updateByStatus( MainMenuItem.ALL );
-  }
-
-  public void getAuth(){
-    Observable
-      .interval( 3600, TimeUnit.SECONDS )
-      .subscribeOn(Schedulers.io())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(interval -> {
-        dataLoaderInterface.updateAuth(false);
-      }, Timber::e);
-
-    settings.getLoginPreference()
-      .asObservable()
-      .subscribe(username -> {
-        user = username;
-      }, Timber::e);
-  }
-
-  public void updateAll(){
-    Timber.tag(TAG).e("updateAll");
-  }
-
-
-
   @Subscribe(threadMode = ThreadMode.BACKGROUND)
   public void onMessageEvent(StepperDcCheckEvent event) throws Exception {
     String token = event.pin;
@@ -750,11 +721,6 @@ public class MainService extends Service {
       event.password,
       event.host
     );
-  }
-
-  @Subscribe(threadMode = ThreadMode.BACKGROUND)
-  public void onMessageEvent(UpdateAuthTokenEvent event) throws Exception {
-    getAuth();
   }
 
   @Subscribe(threadMode = ThreadMode.BACKGROUND)

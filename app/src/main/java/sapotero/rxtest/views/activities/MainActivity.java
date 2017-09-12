@@ -75,7 +75,6 @@ import sapotero.rxtest.events.utils.LoadedFromDbEvent;
 import sapotero.rxtest.events.utils.RecalculateMenuEvent;
 import sapotero.rxtest.events.utils.ReceivedTokenEvent;
 import sapotero.rxtest.events.view.UpdateDrawerEvent;
-import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
 import sapotero.rxtest.managers.DataLoaderManager;
 import sapotero.rxtest.retrofit.Api.AuthService;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
@@ -409,7 +408,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 //          setEmptyToolbarClickListener();
           break;
         default:
-          jobManager.addJobInBackground(new UpdateAuthTokenJob(settings.getLogin()));
           break;
       }
       return false;
