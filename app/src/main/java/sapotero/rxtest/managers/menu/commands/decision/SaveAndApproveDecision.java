@@ -60,7 +60,6 @@ public class SaveAndApproveDecision extends DecisionCommand {
       Timber.tag(TAG).d("++++++doc index: %s | status: %s", doc.getIndex(), doc.getFilter());
     }
     
-
     if ( isActiveOrRed() || (doc != null && Objects.equals(doc.getFilter(), "primary_consideration")) ) {
       startProcessedOperationInMemory();
       startProcessedOperationInDb();
