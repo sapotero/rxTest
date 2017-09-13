@@ -534,17 +534,32 @@ public class DataLoaderManager {
       ArrayList<String> statuses = new ArrayList<>();
       ArrayList<String> indexes = new ArrayList<>();
 
-      // обновляем всё
-      if (items == MainMenuItem.ALL || items.getIndex() == 11 || items == MainMenuItem.ON_CONTROL) {
+      // Обновляем все журналы и статусы только для На контроле или если button null
+      if (items == MainMenuItem.ALL || items.getIndex() == 11) {
+        addAllIndexes(indexes);
+
+        if (button == null) {
+          addAllStatuses(sp, statuses);
+
+        } else {
+          switch (button) {
+            case PROJECTS:
+              addApprovalSigning(sp);
+              break;
+            case PRIMARY_CONSIDERATION:
+              statuses.add("primary_consideration");
+              break;
+            case PERFORMANCE:
+              statuses.add("sent_to_the_report");
+              break;
+          }
+        }
+
+        checkImagesToDelete();
+
+      } else if (items == MainMenuItem.ON_CONTROL) {
+        addAllIndexes(indexes);
         addAllStatuses(sp, statuses);
-
-        indexes.add("citizen_requests_production_db_core_cards_citizen_requests_cards");
-        indexes.add("incoming_documents_production_db_core_cards_incoming_documents_cards");
-        indexes.add("orders_ddo_production_db_core_cards_orders_ddo_cards");
-        indexes.add("orders_production_db_core_cards_orders_cards");
-        indexes.add("outgoing_documents_production_db_core_cards_outgoing_documents_cards");
-        indexes.add("incoming_orders_production_db_core_cards_incoming_orders_cards");
-
         checkImagesToDelete();
 
       } else {
@@ -667,9 +682,22 @@ public class DataLoaderManager {
     }
   }
 
-  private void addAllStatuses(ArrayList<String> sp, ArrayList<String> statuses) {
+  private void addAllIndexes(ArrayList<String> indexes) {
+    indexes.add("citizen_requests_production_db_core_cards_citizen_requests_cards");
+    indexes.add("incoming_documents_production_db_core_cards_incoming_documents_cards");
+    indexes.add("orders_ddo_production_db_core_cards_orders_ddo_cards");
+    indexes.add("orders_production_db_core_cards_orders_cards");
+    indexes.add("outgoing_documents_production_db_core_cards_outgoing_documents_cards");
+    indexes.add("incoming_orders_production_db_core_cards_incoming_orders_cards");
+  }
+
+  private void addApprovalSigning(ArrayList<String> sp) {
     sp.add("approval");
     sp.add("signing");
+  }
+
+  private void addAllStatuses(ArrayList<String> sp, ArrayList<String> statuses) {
+    addApprovalSigning( sp );
     statuses.add("primary_consideration");
     statuses.add("sent_to_the_report");
   }
