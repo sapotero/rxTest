@@ -7,14 +7,14 @@ import timber.log.Timber;
 public class Fields {
 
   public enum Status {
-    SENT_TO_THE_REPORT      ("sent_to_the_report",      "Отправлен на исполнение"),
+    SENT_TO_THE_REPORT      (V2FilterType.FOR_REPORT.getName(), "Отправлен на исполнение"),
 //    SENT_TO_THE_PERFORMANCE ("sent_to_the_performance", "Отправлен на доклад"),
-    PRIMARY_CONSIDERATION   ("primary_consideration",   "Первичное рассмотрение"),
-    APPROVAL                ("approval",                "Согласование проектов документов"),
-    SIGNING                 ("signing",                 "Подписание проектов документов"),
-    LINK                    ("link",                    "Связанный документ"),
-    PROJECTS                ("project",                 "Проекты"),
-    PROCESSED               ("processed",               "Рассмотренные");
+    PRIMARY_CONSIDERATION   (V2FilterType.PRIMARY.getName(),    "Первичное рассмотрение"),
+    APPROVAL                (V2FilterType.APPROVAL.getName(),   "Согласование проектов документов"),
+    SIGNING                 (V2FilterType.SIGNING.getName(),    "Подписание проектов документов"),
+    LINK                    (V2FilterType.LINK.getName(),       "Связанный документ"),
+    PROJECTS                (V2FilterType.PROJECTS.getName(),   "Проекты"),
+    PROCESSED               (V2FilterType.PROCESSED.getName(),  "Рассмотренные");
 
     private final String value;
     private final String name;

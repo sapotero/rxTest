@@ -32,7 +32,7 @@ public enum V2DocumentType {
     return documentName;
   }
 
-  public static V2DocumentType findDocumentType(String typeName ){
+  public static V2DocumentType findDocumentType(String typeName ) {
     V2DocumentType type = null;
 
     for ( V2DocumentType item : V2DocumentType.values() ) {

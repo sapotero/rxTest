@@ -35,6 +35,7 @@ import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.db.requery.utils.V2DocumentType;
+import sapotero.rxtest.db.requery.utils.V2FilterType;
 import sapotero.rxtest.events.crypto.SignDataEvent;
 import sapotero.rxtest.events.decision.CheckDecisionVisibilityEvent;
 import sapotero.rxtest.events.decision.DecisionVisibilityEvent;
@@ -554,29 +555,29 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     int menu = R.menu.info_menu;
 
     if (settings.getStatusCode() != null) {
-      switch ( settings.getStatusCode() ){
-        case "sent_to_the_report":
-          menu = R.menu.info_menu_sent_to_the_report;
-          break;
-        case "sent_to_the_performance":
-          menu = R.menu.info_menu_sent_to_the_performance;
-          break;
-        case "primary_consideration":
-          menu = R.menu.info_menu_primary_consideration;
-          break;
-        case "approval":
-          menu = R.menu.info_menu_approval;
-          break;
-        case "signing":
-          menu = R.menu.info_menu_signing;
-          break;
-        case "processed":
-          menu = R.menu.info_menu;
-          break;
+      V2FilterType filterType = V2FilterType.findFilterType( settings.getStatusCode() );
 
-        default:
-          menu = R.menu.info_menu;
-          break;
+      if ( filterType != null ) {
+        switch ( filterType ) {
+          case FOR_REPORT:
+            menu = R.menu.info_menu_sent_to_the_report;
+            break;
+          case PRIMARY:
+            menu = R.menu.info_menu_primary_consideration;
+            break;
+          case APPROVAL:
+            menu = R.menu.info_menu_approval;
+            break;
+          case SIGNING:
+            menu = R.menu.info_menu_signing;
+            break;
+          case PROCESSED:
+            menu = R.menu.info_menu;
+            break;
+          default:
+            menu = R.menu.info_menu;
+            break;
+        }
       }
     }
     toolbar.inflateMenu(menu);

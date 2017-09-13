@@ -24,6 +24,7 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Deleter;
 import sapotero.rxtest.db.requery.utils.DocumentStateSaver;
 import sapotero.rxtest.db.requery.utils.Fields;
+import sapotero.rxtest.db.requery.utils.V2FilterType;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.jobs.bus.CreateDocumentsJob;
@@ -314,9 +315,9 @@ public class Processor {
     if (  longJournalName != null ) {
       String[] index = longJournalName.split("_production_db_");
       shortJournalName = index[0];
-    }else if (Objects.equals(this.filter, "approval")){
+    }else if (Objects.equals(this.filter, V2FilterType.APPROVAL.getName())){
       shortJournalName = "APPROVE" ;
-    }else if (Objects.equals(this.filter, "signing")){
+    }else if (Objects.equals(this.filter, V2FilterType.SIGNING.getName())){
       shortJournalName = "SIGN" ;
     }
     return shortJournalName;

@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import sapotero.rxtest.db.mapper.ExemplarMapper;
 import sapotero.rxtest.db.requery.models.exemplars.RExemplarEntity;
+import sapotero.rxtest.db.requery.utils.V2FilterType;
 import sapotero.rxtest.retrofit.models.document.Exemplar;
 
 import static org.junit.Assert.assertEquals;
@@ -29,7 +30,7 @@ public class ExemplarMapperTest {
     Exemplar dummyExemplar = new Exemplar();
     dummyExemplar.setNumber( 3 );
     dummyExemplar.setIsOriginal( true );
-    dummyExemplar.setStatusCode( "sent_to_the_report" );
+    dummyExemplar.setStatusCode( V2FilterType.FOR_REPORT.getName() );
     dummyExemplar.setAddressedToId( "58f88dfc776b000026000001" );
     dummyExemplar.setAddressedToName( "Сотрудник_а2 A.T. (ОДиР ГУ МВД России по Самарской области)" );
     dummyExemplar.setDate( "05.06.2017" );

@@ -9,6 +9,7 @@ import java.util.Objects;
 
 import rx.Observable;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
+import sapotero.rxtest.db.requery.utils.V2FilterType;
 import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.DecisionCommand;
@@ -58,7 +59,7 @@ public class RejectDecision extends DecisionCommand {
       Timber.tag(TAG).d("++++++doc index: %s | status: %s", doc.getIndex(), doc.getFilter());
     }
 
-    if ( signerIsCurrentUser() || (doc != null && Objects.equals(doc.getFilter(), "primary_consideration"))) {
+    if ( signerIsCurrentUser() || (doc != null && Objects.equals(doc.getFilter(), V2FilterType.PRIMARY.getName()))) {
       startRejectedOperationInMemory();
       startRejectedOperationInDb();
     } else {

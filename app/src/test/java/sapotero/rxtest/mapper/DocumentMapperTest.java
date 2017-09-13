@@ -20,6 +20,8 @@ import sapotero.rxtest.db.requery.models.exemplars.RExemplar;
 import sapotero.rxtest.db.requery.models.exemplars.RExemplarEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
+import sapotero.rxtest.db.requery.utils.V2DocumentType;
+import sapotero.rxtest.db.requery.utils.V2FilterType;
 import sapotero.rxtest.retrofit.models.document.ControlLabel;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
@@ -337,8 +339,8 @@ public class DocumentMapperTest {
 
   @Test
   public void journalFilter() {
-    String dummyJournal = "incoming_documents_production_db_core_cards_incoming_documents_cards";
-    String dummyFilter = "sent_to_the_report";
+    String dummyJournal = V2DocumentType.INCOMING_DOCUMENTS.getNameForApi();
+    String dummyFilter = V2FilterType.FOR_REPORT.getName();
 
     mapper = new DocumentMapper();
     entity = mapper.toEntity(dummyDoc);
