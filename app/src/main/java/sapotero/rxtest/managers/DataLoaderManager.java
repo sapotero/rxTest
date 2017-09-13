@@ -585,7 +585,11 @@ public class DataLoaderManager {
         }
 
         if (button == null) {
-          addAllStatuses(sp, statuses);
+          if (items == MainMenuItem.APPROVE_ASSIGN) {
+            addApprovalSigning( sp );
+          } else {
+            addPrimaryReport( statuses );
+          }
 
         } else {
           switch (button) {
@@ -696,10 +700,14 @@ public class DataLoaderManager {
     sp.add("signing");
   }
 
-  private void addAllStatuses(ArrayList<String> sp, ArrayList<String> statuses) {
-    addApprovalSigning( sp );
+  private void addPrimaryReport(ArrayList<String> statuses) {
     statuses.add("primary_consideration");
     statuses.add("sent_to_the_report");
+  }
+
+  private void addAllStatuses(ArrayList<String> sp, ArrayList<String> statuses) {
+    addApprovalSigning( sp );
+    addPrimaryReport( statuses );
   }
 
   private DocumentsService getDocumentService() {

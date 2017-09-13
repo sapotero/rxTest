@@ -1197,6 +1197,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     if ( exitFromSubstituteModeStarted ) {
       store.clearAndLoadFromDb();
     } else {
+      // срабатывает при нажатии на кнопку Обновить все
       updateByStatus();
     }
   }
