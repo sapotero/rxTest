@@ -34,6 +34,7 @@ import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
+import sapotero.rxtest.db.requery.utils.V2DocumentType;
 import sapotero.rxtest.events.crypto.SignDataEvent;
 import sapotero.rxtest.events.decision.CheckDecisionVisibilityEvent;
 import sapotero.rxtest.events.decision.DecisionVisibilityEvent;
@@ -725,7 +726,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
     toolbar.setTitle( String.format("%s от %s", settings.getRegNumber(), settings.getRegDate()) );
     if (doc!=null && doc.getDocumentType() != null){
-      toolbar.setSubtitle( String.format("%s", Fields.getJournalName(doc.getDocumentType()) ) );
+      toolbar.setSubtitle( String.format("%s", V2DocumentType.getDocumentName( doc.getDocumentType() ) ) );
     }
   }
 

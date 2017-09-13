@@ -24,6 +24,7 @@ import javax.inject.Inject;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.utils.Fields;
+import sapotero.rxtest.db.requery.utils.V2DocumentType;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
@@ -73,7 +74,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
       //resolved https://tasks.n-core.ru/browse/MVDESD-12625
       //  На плитке Обращения и НПА не показывать строку "Без организации", если её действительно нет(
-      if( Arrays.asList( "incoming_orders", "citizen_requests" ).contains( doc.getIndex() ) ) {
+      if( Arrays.asList( V2DocumentType.INCOMING_ORDERS.getName(), V2DocumentType.CITIZEN_REQUESTS.getName() ).contains( doc.getIndex() ) ) {
 
         if ( item.getOrganization() != null && item.getOrganization().toLowerCase().contains("без организации") ){
           viewHolder.from.setText("");

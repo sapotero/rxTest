@@ -112,60 +112,6 @@ public class Fields {
 
   }
 
-  public static String getJournalName( String raw ){
-    String journal = "";
-
-    switch (raw){
-      case "incoming_documents":
-        journal = "Входящий документ";
-        break;
-
-      case "outgoing_documents":
-        journal = "Исходящий документ";
-        break;
-
-      case "orders":
-        journal = "Приказ";
-        break;
-
-      case "incoming_orders":
-        journal = "НПА";
-        break;
-
-      case "citizen_requests":
-        journal = "Обращение граждан";
-        break;
-
-      case "secret_incoming_documents":
-        journal = "Входящие секретное";
-        break;
-
-      case "secret_outgoing_documents":
-        journal = "Исходящие секретное";
-        break;
-
-      case "secret_orders":
-        journal = "Секретный приказ";
-        break;
-
-      case "secret_incoming_orders":
-        journal = "Секретный НПА";
-        break;
-
-      case "orders_ddo":
-        journal = "Приказ ДДО";
-        break;
-
-      case "attorney_letters":
-        journal = "Доверенность";
-        break;
-
-    }
-
-    return journal;
-  }
-
-
   public enum Menu {
     ALL                ( 0  , "ALL"                , "Документы / Проекты" ),
     INCOMING_DOCUMENTS ( 1  , "INCOMING_DOCUMENTS" , "Входящие документы" ),
