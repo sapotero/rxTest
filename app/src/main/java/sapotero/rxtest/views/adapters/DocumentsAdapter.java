@@ -25,6 +25,7 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.db.requery.utils.V2DocumentType;
+import sapotero.rxtest.db.requery.utils.V2FilterType;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
@@ -96,7 +97,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
       viewHolder.date.setText( item.getTitle() );
 
-      if( Arrays.asList( Fields.Status.SIGNING.getValue(), Fields.Status.APPROVAL.getValue() ).contains(doc.getFilter()) ){
+      if( Arrays.asList( V2FilterType.SIGNING.getName(), V2FilterType.APPROVAL.getName() ).contains(doc.getFilter()) ){
 
         if (item.getFirstLink() != null && !Objects.equals(item.getFirstLink(), "")){
           viewHolder.date.setText( item.getTitle() + " на " + item.getFirstLink() );

@@ -2,15 +2,15 @@ package sapotero.rxtest.views.adapters.utils;
 
 import java.util.List;
 
-import sapotero.rxtest.db.requery.utils.Fields;
+import sapotero.rxtest.db.requery.utils.V2FilterType;
 import sapotero.rxtest.retrofit.models.documents.Document;
 
 public class TDmodel {
   private final String type;
   private final List<Document> documents;
 
-  public TDmodel(Fields.Status type, List<Document> documents) {
-    this.type = type.getValue();
+  public TDmodel(V2FilterType type, List<Document> documents) {
+    this.type = type.getName();
     this.documents = documents;
   }
 

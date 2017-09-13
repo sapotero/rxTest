@@ -594,7 +594,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
 
   private boolean isFromProject() {
-    return doc != null && doc.getFilter() != null && Arrays.asList( Fields.Status.APPROVAL.getValue(), Fields.Status.SIGNING.getValue() ).contains(doc.getFilter());
+    return doc != null && doc.getFilter() != null && Arrays.asList( V2FilterType.APPROVAL.getName(), V2FilterType.SIGNING.getName() ).contains(doc.getFilter());
   }
 
   private void clearToolbar() {

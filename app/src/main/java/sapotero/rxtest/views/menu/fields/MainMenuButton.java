@@ -6,13 +6,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.db.requery.utils.V2FilterType;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 
-import static sapotero.rxtest.db.requery.utils.V2FilterType.FOR_REPORT;
-import static sapotero.rxtest.db.requery.utils.V2FilterType.PRIMARY;
-import static sapotero.rxtest.db.requery.utils.V2FilterType.SIGNING;
 
 public enum MainMenuButton {
 
@@ -31,7 +27,7 @@ public enum MainMenuButton {
       // new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in( ButtonStatus.getPerformance() )  ),
       //new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FROM_LINKS.eq( false  ) ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(false) ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq( FOR_REPORT.getName() )  )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq( V2FilterType.FOR_REPORT.getName() )  )
     }
   ),
   PRIMARY_CONSIDERATION ( 3,
@@ -39,7 +35,7 @@ public enum MainMenuButton {
     new ConditionBuilder[]{
       //V3
       //new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in(Arrays.asList(Fields.Status.PRIMARY_CONSIDERATION.getValue()))  ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq( PRIMARY.getName() )  ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq( V2FilterType.PRIMARY.getName() )  ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(false) ),
     }
   ),
@@ -57,7 +53,7 @@ public enum MainMenuButton {
 
       //new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in(Arrays.asList(Fields.Status.SIGNING.getValue())  ) ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(false) ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq( SIGNING.getName() )  )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq( V2FilterType.SIGNING.getName() )  )
 
     }
   ),
@@ -71,7 +67,7 @@ public enum MainMenuButton {
   PROCESSED ( 7, "Обработанные %s" ,
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(true) ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in(Arrays.asList( Fields.Status.APPROVAL.getValue(), Fields.Status.SIGNING.getValue() ) ) ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in(Arrays.asList( V2FilterType.APPROVAL.getName(), V2FilterType.SIGNING.getName() ) ) ),
     }
   ),
   FAVORITES ( 8, "Избранное %s" ,
@@ -82,7 +78,7 @@ public enum MainMenuButton {
   ),
   SHARED_PRIMARY ( 9, "Аппараты %s" ,
     new ConditionBuilder[]{
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq( PRIMARY.getName() )  ),
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq( V2FilterType.PRIMARY.getName() )  ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(false) ),
     }
   );
@@ -128,20 +124,20 @@ public enum MainMenuButton {
   public static class ButtonStatus {
     public static ArrayList<String> getPerformance(){
       ArrayList<String> projectArray = new ArrayList<String>();
-      projectArray.add( Fields.Status.SENT_TO_THE_REPORT.getValue() );
+      projectArray.add( V2FilterType.FOR_REPORT.getName() );
 //      projectArray.addByOne( Fields.Status.SENT_TO_THE_PERFORMANCE.getValue() );
       return projectArray;
     }
     public static ArrayList<String> getProject(){
       ArrayList<String> projectArray = new ArrayList<String>();
-      projectArray.add( Fields.Status.APPROVAL.getValue() );
-      projectArray.add( Fields.Status.SIGNING.getValue());
+      projectArray.add( V2FilterType.APPROVAL.getName() );
+      projectArray.add( V2FilterType.SIGNING.getName());
       return projectArray;
     }
     public static ArrayList<String> forAllDocuments(){
       ArrayList<String> projectArray = new ArrayList<String>();
-      projectArray.add( Fields.Status.SENT_TO_THE_REPORT.getValue());
-      projectArray.add( Fields.Status.PRIMARY_CONSIDERATION.getValue());;
+      projectArray.add( V2FilterType.FOR_REPORT.getName());
+      projectArray.add( V2FilterType.PRIMARY.getName());;
       return projectArray;
     }
 

@@ -44,7 +44,6 @@ import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RPerformer;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
-import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.db.requery.utils.V2FilterType;
 import sapotero.rxtest.events.decision.ApproveDecisionEvent;
 import sapotero.rxtest.events.decision.RejectDecisionEvent;
@@ -88,7 +87,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
   private Decision raw_decision;
   private RDecisionEntity rDecisionEntity;
   private SelectOshsDialogFragment dialogFragment;
-  private Fields.Status status;
+  private V2FilterType status;
   private DecisionConstructorActivity context;
 
   private String originalSigner;
@@ -110,7 +109,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
 
     context = this;
 
-    status  = Fields.Status.findStatus( settings.getStatusCode() );
+    status  = V2FilterType.findFilterType( settings.getStatusCode() );
 
     toolbar.setTitleTextColor( getResources().getColor( R.color.md_grey_100 ) );
     toolbar.setSubtitleTextColor( getResources().getColor( R.color.md_grey_400 ) );
@@ -542,7 +541,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
 
 
 
-    if ( status == Fields.Status.SENT_TO_THE_REPORT ){
+    if ( status == V2FilterType.FOR_REPORT ){
       // настройка
       if ( !settings.isShowChangeSigner() ){
         select_oshs_wrapper.setVisibility(View.GONE);
