@@ -32,6 +32,8 @@ import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
+import sapotero.rxtest.db.requery.utils.V2DocumentType;
+import sapotero.rxtest.db.requery.utils.V2FilterType;
 import sapotero.rxtest.events.auth.AuthDcCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthDcCheckSuccessEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
@@ -547,10 +549,10 @@ public class DataLoaderManager {
               addApprovalSigning(sp);
               break;
             case PRIMARY_CONSIDERATION:
-              statuses.add("primary_consideration");
+              statuses.add( V2FilterType.PRIMARY.getName() );
               break;
             case PERFORMANCE:
-              statuses.add("sent_to_the_report");
+              statuses.add( V2FilterType.FOR_REPORT.getName() );
               break;
           }
         }
@@ -565,22 +567,22 @@ public class DataLoaderManager {
       } else {
         switch (items) {
           case CITIZEN_REQUESTS:
-            indexes.add("citizen_requests_production_db_core_cards_citizen_requests_cards");
+            indexes.add( V2DocumentType.CITIZEN_REQUESTS.getNameForApi() );
             break;
           case INCOMING_DOCUMENTS:
-            indexes.add("incoming_documents_production_db_core_cards_incoming_documents_cards");
+            indexes.add( V2DocumentType.INCOMING_DOCUMENTS.getNameForApi() );
             break;
           case ORDERS_DDO:
-            indexes.add("orders_ddo_production_db_core_cards_orders_ddo_cards");
+            indexes.add( V2DocumentType.ORDERS_DDO.getNameForApi() );
             break;
           case ORDERS:
-            indexes.add("orders_production_db_core_cards_orders_cards");
+            indexes.add( V2DocumentType.ORDERS.getNameForApi() );
             break;
           case IN_DOCUMENTS:
-            indexes.add("outgoing_documents_production_db_core_cards_outgoing_documents_cards");
+            indexes.add( V2DocumentType.OUTGOING_DOCUMENTS.getNameForApi() );
             break;
           case INCOMING_ORDERS:
-            indexes.add("incoming_orders_production_db_core_cards_incoming_orders_cards");
+            indexes.add( V2DocumentType.INCOMING_ORDERS.getNameForApi() );
             break;
         }
 
@@ -594,16 +596,16 @@ public class DataLoaderManager {
         } else {
           switch (button) {
             case APPROVAL:
-              sp.add("approval");
+              sp.add( V2FilterType.APPROVAL.getName() );
               break;
             case ASSIGN:
-              sp.add("signing");
+              sp.add( V2FilterType.SIGNING.getName() );
               break;
             case PRIMARY_CONSIDERATION:
-              statuses.add("primary_consideration");
+              statuses.add( V2FilterType.PRIMARY.getName() );
               break;
             case PERFORMANCE:
-              statuses.add("sent_to_the_report");
+              statuses.add( V2FilterType.FOR_REPORT.getName() );
               break;
           }
         }
@@ -687,22 +689,22 @@ public class DataLoaderManager {
   }
 
   private void addAllIndexes(ArrayList<String> indexes) {
-    indexes.add("citizen_requests_production_db_core_cards_citizen_requests_cards");
-    indexes.add("incoming_documents_production_db_core_cards_incoming_documents_cards");
-    indexes.add("orders_ddo_production_db_core_cards_orders_ddo_cards");
-    indexes.add("orders_production_db_core_cards_orders_cards");
-    indexes.add("outgoing_documents_production_db_core_cards_outgoing_documents_cards");
-    indexes.add("incoming_orders_production_db_core_cards_incoming_orders_cards");
+    indexes.add( V2DocumentType.CITIZEN_REQUESTS.getNameForApi() );
+    indexes.add( V2DocumentType.INCOMING_DOCUMENTS.getNameForApi() );
+    indexes.add( V2DocumentType.ORDERS_DDO.getNameForApi() );
+    indexes.add( V2DocumentType.ORDERS.getNameForApi() );
+    indexes.add( V2DocumentType.OUTGOING_DOCUMENTS.getNameForApi() );
+    indexes.add( V2DocumentType.INCOMING_ORDERS.getNameForApi() );
   }
 
   private void addApprovalSigning(ArrayList<String> sp) {
-    sp.add("approval");
-    sp.add("signing");
+    sp.add( V2FilterType.APPROVAL.getName() );
+    sp.add( V2FilterType.SIGNING.getName() );
   }
 
   private void addPrimaryReport(ArrayList<String> statuses) {
-    statuses.add("primary_consideration");
-    statuses.add("sent_to_the_report");
+    statuses.add( V2FilterType.PRIMARY.getName() );
+    statuses.add( V2FilterType.FOR_REPORT.getName() );
   }
 
   private void addAllStatuses(ArrayList<String> sp, ArrayList<String> statuses) {

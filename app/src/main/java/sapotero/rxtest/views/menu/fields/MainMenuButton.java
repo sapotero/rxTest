@@ -7,29 +7,12 @@ import java.util.Map;
 
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Fields;
+import sapotero.rxtest.db.requery.utils.V2FilterType;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 
-import static sapotero.rxtest.views.menu.fields.V2FilterType.FOR_REPORT;
-import static sapotero.rxtest.views.menu.fields.V2FilterType.PRIMARY;
-import static sapotero.rxtest.views.menu.fields.V2FilterType.SIGNING;
-
-enum V2FilterType{
-  SIGNING    ("signing"),
-  APPROVAL   ("approval"),
-  FOR_REPORT ("sent_to_the_report"),
-  PRIMARY    ("primary_consideration");
-
-
-  private final String name;
-
-  V2FilterType(String name) {
-    this.name = name;
-  }
-
-  public String getName() {
-    return name;
-  }
-}
+import static sapotero.rxtest.db.requery.utils.V2FilterType.FOR_REPORT;
+import static sapotero.rxtest.db.requery.utils.V2FilterType.PRIMARY;
+import static sapotero.rxtest.db.requery.utils.V2FilterType.SIGNING;
 
 public enum MainMenuButton {
 

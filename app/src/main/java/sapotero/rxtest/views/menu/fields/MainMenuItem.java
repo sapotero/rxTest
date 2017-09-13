@@ -6,28 +6,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.db.requery.utils.V2DocumentType;
 import sapotero.rxtest.views.menu.builders.ButtonBuilder;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 
-
-enum V2DocumentType{
-  INCOMING_DOCUMENTS ("incoming_documents"),
-  CITIZEN_REQUESTS   ("citizen_requests"),
-  INCOMING_ORDERS    ("incoming_orders"),
-  ORDERS             ("orders"),
-  ORDERS_DDO         ("orders_ddo"),
-  OUTGOING_DOCUMENTS ("outgoing_documents");
-
-  private final String name;
-
-  V2DocumentType(String name) {
-    this.name = name;
-  }
-
-  public String getName() {
-    return name;
-  }
-}
 
 public enum MainMenuItem {
 
