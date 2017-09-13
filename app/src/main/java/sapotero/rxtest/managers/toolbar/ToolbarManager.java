@@ -47,6 +47,7 @@ import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
+import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.dialogs.SelectOshsDialogFragment;
 import timber.log.Timber;
@@ -339,7 +340,14 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             // настройка
             // Показывать подтверждения о постановке на контроль документов для раздела «Обращение граждан»
 
-            if ( settings.isControlConfirm() && settings.getUid().startsWith( Fields.Journal.CITIZEN_REQUESTS.getValue() ) ){
+            boolean isCitizenRequest = false;
+
+            InMemoryDocument doc = store.getDocuments().get( settings.getUid() );
+            if ( doc != null && Objects.equals( doc.getIndex(), V2DocumentType.CITIZEN_REQUESTS.getName() ) ) {
+              isCitizenRequest = true;
+            }
+
+            if ( settings.isControlConfirm() && isCitizenRequest ){
               operation = CommandFactory.Operation.INCORRECT;
 
               showToControlDialog();
