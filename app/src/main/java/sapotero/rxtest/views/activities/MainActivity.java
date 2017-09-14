@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -68,6 +69,7 @@ import sapotero.rxtest.db.requery.query.DBQueryBuilder;
 import sapotero.rxtest.db.requery.utils.DocumentStateSaver;
 import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.events.adapter.JournalSelectorIndexEvent;
+import sapotero.rxtest.events.notification.RemoveAllNotificationEvent;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.events.service.CheckNetworkEvent;
 import sapotero.rxtest.events.utils.ErrorReceiveTokenEvent;
@@ -163,9 +165,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private int menuIndex;
 
   public static Intent newIntent(Context context){
-      Intent intent = new Intent(context, MainActivity.class);
-      intent.putExtra(EXTRA_IS_FROM_NOTIFICATION_BAR_KEY, true);
-      return intent;
+    Intent intent = new Intent(context, MainActivity.class);
+    intent.putExtra(EXTRA_IS_FROM_NOTIFICATION_BAR_KEY, true);
+    return intent;
   }
 
   private List<RColleagueEntity> colleagues;
@@ -224,11 +226,17 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     /*пришёл ли intent из notification bar*/
     if (getIntent().getExtras() != null){
       isIntentFromNotificationBar =  getIntent().getExtras().getBoolean(EXTRA_IS_FROM_NOTIFICATION_BAR_KEY, false);
+      Timber.tag(TAG).e("22 isIntentFromNotificationBar ="+ isIntentFromNotificationBar);
     }
     /*после открытия MainActivity(из notification bar), счётчик уведомлений должен быть сброшен*/
     if(isIntentFromNotificationBar){
-      settings.setСurrentNotificationId(0);
+
     }
+    removeAllNotification();
+  }
+  private void removeAllNotification(){
+    Timber.tag(TAG).e("call removeAllNotification()");
+    EventBus.getDefault().postSticky( new RemoveAllNotificationEvent(true));
   }
 
   private void setFirstRunFalse() {
@@ -470,7 +478,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     update( true );
 
     initDrawer();
-
 
 //    EventBus.getDefault().post( new RecalculateMenuEvent());
 

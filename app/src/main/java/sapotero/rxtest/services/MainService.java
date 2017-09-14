@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.os.IBinder;
+import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -887,7 +888,7 @@ public class MainService extends Service {
   @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
   public void onMessageEvent(StartRegularRefreshEvent event){
 
-    scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 5*60, 5*60, TimeUnit.SECONDS );
+//    scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 5*60, 5*60, TimeUnit.SECONDS );
 //  scheduller.scheduleWithFixedDelay( new UpdateAllDocumentnContext()), 10, 10, TimeUnit.SECONDS );
 
     Timber.tag(TAG).d("StartRegularRefreshEvent");
@@ -908,4 +909,8 @@ public class MainService extends Service {
 //      futureRefresh = scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 10, 10, TimeUnit.SECONDS );
     }
   }
+  public  static NotificationManagerCompat getNotificationManagerCompat(){
+    return NotificationManagerCompat.from(EsdApplication.getApplication());
+  }
+
 }

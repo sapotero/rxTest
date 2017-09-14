@@ -45,7 +45,6 @@ import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import timber.log.Timber;
 
 import static com.googlecode.totallylazy.Sequences.sequence;
-import static com.googlecode.totallylazy.Sequences.third;
 
 public class Processor {
   @Inject MemoryStore store;
@@ -294,7 +293,7 @@ public class Processor {
         validateDocuments();
 
         if (add.size() > 0) {
-          NotifyMessageModel notifyMessageModel = new NotifyMessageModel(add, documents, filter, source);
+          NotifyMessageModel notifyMessageModel = new NotifyMessageModel(add, documents, filter, index, settings.isFirstRun(), source);
           notifyPubSubject.onNext(notifyMessageModel);
         }
 
