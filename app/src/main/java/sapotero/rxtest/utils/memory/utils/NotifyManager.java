@@ -21,11 +21,10 @@ import java.util.UUID;
 import javax.inject.Inject;
 
 import rx.functions.Action1;
-import rx.functions.Func1;
 import rx.subjects.PublishSubject;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.db.requery.utils.Fields;
+import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.events.notification.RemoveAllNotificationEvent;
 import sapotero.rxtest.events.notification.RemoveIdNotificationEvent;
 import sapotero.rxtest.retrofit.models.documents.Document;
@@ -61,69 +60,53 @@ public class NotifyManager {
     if (!notifyPubSubject.hasObservers()) {
       notifyPubSubject
 //      .throttleLast(5, TimeUnit.SECONDS)
-        .filter(new Func1<NotifyMessageModel, Boolean>() {
-          @Override
-          public Boolean call(NotifyMessageModel notifyMessageModel) {
-            return !notifyMessageModel.isFirstRunApp();
-          }
+        .filter(notifyMessageModel -> !notifyMessageModel.isFirstRunApp())
+        .filter(notifyMessageModel -> !Objects.equals(notifyMessageModel.getSource().name(), "FOLDER"))
+        .filter(notifyMessageModel -> {
+          /*приводим строку index к виду JournalStatus*/
+          JournalStatus itemJournal = getJournal(notifyMessageModel);
+          return checkAllowedJournal(itemJournal);
         })
-        .filter(new Func1<NotifyMessageModel, Boolean>() {
-          @Override
-          public Boolean call(NotifyMessageModel notifyMessageModel) {
-            return !Objects.equals(notifyMessageModel.getSource().name(), "FOLDER");
-          }
-        })
-        .filter(new Func1<NotifyMessageModel, Boolean>() {
-          @Override
-          public Boolean call(NotifyMessageModel notifyMessageModel) {
-            /*приводим строку index к виду Fields.Journal*/
-            Fields.Journal itemJournal = getJournal(notifyMessageModel);
-            return checkAllowedJournal(itemJournal);
-          }
-        })
-        .subscribe(new Action1<NotifyMessageModel>() {
-          @Override
-          public void call(NotifyMessageModel notifyMessageModel) {
-            String filtr = notifyMessageModel.getFilter();
-            List<String> docUIDList = notifyMessageModel.getUidDocsLIst();
-            HashMap<String, Document> documentsMap = notifyMessageModel.getDocumentsMap();
+        .subscribe(notifyMessageModel -> {
+          String filtr = notifyMessageModel.getFilter();
+          List<String> docUIDList = notifyMessageModel.getUidDocsLIst();
+          HashMap<String, Document> documentsMap = notifyMessageModel.getDocumentsMap();
 
-            String Title =  getTitle(getJournal(notifyMessageModel));
+          String Title =  getTitle(getJournal(notifyMessageModel));
 
 
-            if (docUIDList.size() >= THRESHOLD_VALUE){
-              notificationManagerCompat.cancelAll();
-              notificationIdSet.clear();
+          if (docUIDList.size() >= THRESHOLD_VALUE){
+            notificationManagerCompat.cancelAll();
+            notificationIdSet.clear();
 
-              int notificationId =  UUID.randomUUID().hashCode();
-              notificationIdSet.add(notificationId);
-
-
-              showGroupSummaryNotificationTest("Вам поступило новых документов: " + docUIDList.size(), "Вам поступило новых документов: " + docUIDList.size(),
-                  notificationId, NotificationCompat.PRIORITY_HIGH);
+            int notificationId =  UUID.randomUUID().hashCode();
+            notificationIdSet.add(notificationId);
 
 
-            } else {
-                for (String uid : docUIDList) {
-                  int notificationId =  UUID.randomUUID().hashCode();
-                  showSingleNotification(Title, documentsMap.get(uid).getTitle(), documentsMap.get(uid), filtr, notificationId);
-                  notificationIdSet.add(notificationId);
-                  notViewedDocumentQuantity ++;
+            showGroupSummaryNotificationTest("Вам поступило новых документов: " + docUIDList.size(), "Вам поступило новых документов: " + docUIDList.size(),
+                notificationId, NotificationCompat.PRIORITY_HIGH);
 
 
-                }
-                if(notificationIdSet.size() >= THRESHOLD_VALUE){
-                  notificationManagerCompat.cancelAll();
-                  notificationIdSet.clear();
-                  int notificationId =  UUID.randomUUID().hashCode();
-                  showWithoutHeadsUpNotificationTest("Вам поступило новых документов: " + notViewedDocumentQuantity, notificationId);
-                  notificationIdSet.add(notificationId);
+          } else {
+              for (String uid : docUIDList) {
+                int notificationId =  UUID.randomUUID().hashCode();
+                showSingleNotification(Title, documentsMap.get(uid).getTitle(), documentsMap.get(uid), filtr, notificationId);
+                notificationIdSet.add(notificationId);
+                notViewedDocumentQuantity ++;
 
-                }
+
               }
+              if(notificationIdSet.size() >= THRESHOLD_VALUE){
+                notificationManagerCompat.cancelAll();
+                notificationIdSet.clear();
+                int notificationId =  UUID.randomUUID().hashCode();
+                showWithoutHeadsUpNotificationTest("Вам поступило новых документов: " + notViewedDocumentQuantity, notificationId);
+                notificationIdSet.add(notificationId);
 
-
+              }
             }
+
+
           }, new Action1<Throwable>() {
             @Override
             public void call(Throwable throwable) {
@@ -138,8 +121,8 @@ public class NotifyManager {
 
 
   /*проверяем, включён ли checkBox для журнала. -> генерируем уведомление */
-  private boolean checkAllowedJournal(Fields.Journal itemJournal){
-    return settings.getNotificatedJournals().contains(itemJournal.getValue());
+  private boolean checkAllowedJournal(JournalStatus itemJournal){
+    return settings.getNotificatedJournals().contains(itemJournal.getStringIndex());
   }
 
   private String getShortJournalName(String longJournalName, String filter) {
@@ -156,13 +139,24 @@ public class NotifyManager {
     return shortJournalName;
   }
 
-  private String getTitle(Fields.Journal itemJournal){
+  private String getTitle(JournalStatus itemJournal){
    return itemJournal.getFormattedName() + itemJournal.getSingle();
   }
 
-  private Fields.Journal getJournal(NotifyMessageModel notifyMessageModel){
-    String shortNameJournal = getShortJournalName(notifyMessageModel.getIndex(), notifyMessageModel.getFilter()).toUpperCase();
-    return Fields.Journal.valueOf(shortNameJournal);
+  private JournalStatus getJournal(NotifyMessageModel notifyMessageModel){
+    return getJournalStatus(notifyMessageModel.getIndex(), notifyMessageModel.getFilter());
+  }
+
+  private JournalStatus getJournalStatus(String index, String filter) {
+    JournalStatus result = null;
+
+    if ( index != null ) {
+      result = JournalStatus.getByNameForApi( index );
+    } else if ( filter != null ) {
+      result = JournalStatus.getByNameForApi( filter );
+    }
+
+    return result;
   }
 
   /*вызов одного уведомления со случайным notificationId. */

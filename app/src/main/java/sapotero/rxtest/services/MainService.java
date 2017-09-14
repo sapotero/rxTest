@@ -24,7 +24,6 @@ import java.security.Security;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -57,7 +56,6 @@ import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckSuccessEvent;
 import sapotero.rxtest.events.bus.FolderCreatedEvent;
 import sapotero.rxtest.events.bus.StartRegularRefreshEvent;
-import sapotero.rxtest.events.bus.UpdateAuthTokenEvent;
 import sapotero.rxtest.events.bus.UpdateFavoritesAndProcessedEvent;
 import sapotero.rxtest.events.crypto.AddKeyEvent;
 import sapotero.rxtest.events.crypto.SelectKeyStoreEvent;
@@ -76,6 +74,7 @@ import sapotero.rxtest.events.stepper.auth.StepperDcCheckSuccesEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckFailEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckSuccessEvent;
+import sapotero.rxtest.events.stepper.load.StartLoadDataEvent;
 import sapotero.rxtest.events.view.UpdateCurrentInfoActivityEvent;
 import sapotero.rxtest.managers.DataLoaderManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
@@ -118,7 +117,6 @@ public class MainService extends Service {
   private static final ArrayList<String> aliasesList = new ArrayList<String>();
   private DataLoaderManager dataLoaderInterface;
   private String SIGN;
-  public static String user;
   private int keyStoreTypeIndex = 0;
 
   boolean isOnCreateComplete = false;
@@ -142,7 +140,7 @@ public class MainService extends Service {
         }
         EventBus.getDefault().register(this);
 
-        dataLoaderInterface = new DataLoaderManager(getApplicationContext());
+        dataLoaderInterface = new DataLoaderManager();
 
         // 1. Инициализация RxSharedPreferences
 //        initialize();
@@ -219,7 +217,7 @@ public class MainService extends Service {
         boolean isUnauthorized = value != null ? value : false;
         if ( isUnauthorized ) {
           Timber.tag(TAG).d("Unauthorized, logging in");
-          dataLoaderInterface.updateAuth(SIGN, false);
+          dataLoaderInterface.updateAuth(false);
         }
       },
         Timber::e
@@ -252,12 +250,6 @@ public class MainService extends Service {
 
     if ( EventBus.getDefault().isRegistered(this) ){
       EventBus.getDefault().unregister(this);
-    }
-
-    if (dataLoaderInterface != null) {
-      if ( dataLoaderInterface.isRegistered() ){
-        dataLoaderInterface.unregister();
-      }
     }
 
     Timber.tag(TAG).d("onDestroy");
@@ -639,8 +631,8 @@ public class MainService extends Service {
       );
   }
 
-  private void checkLogin(String login, String password, String host) throws Exception {
-    dataLoaderInterface.tryToSignWithLogin( login, password, host );
+  private void checkLogin(String login, String password) throws Exception {
+    dataLoaderInterface.tryToSignWithLogin( login, password );
   }
 
   private void getSign(String password) throws Exception {
@@ -713,32 +705,6 @@ public class MainService extends Service {
 
   }
 
-  private void checkSedAvailibility() {
-//    dataLoaderInterface.updateByStatus( MainMenuItem.ALL );
-  }
-
-  public void getAuth(){
-    Observable
-      .interval( 3600, TimeUnit.SECONDS )
-      .subscribeOn(Schedulers.io())
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(interval -> {
-        dataLoaderInterface.updateAuth(SIGN, false);
-      }, Timber::e);
-
-    settings.getLoginPreference()
-      .asObservable()
-      .subscribe(username -> {
-        user = username;
-      }, Timber::e);
-  }
-
-  public void updateAll(){
-    Timber.tag(TAG).e("updateAll");
-  }
-
-
-
   @Subscribe(threadMode = ThreadMode.BACKGROUND)
   public void onMessageEvent(StepperDcCheckEvent event) throws Exception {
     String token = event.pin;
@@ -753,14 +719,8 @@ public class MainService extends Service {
   public void onMessageEvent(StepperLoginCheckEvent event) throws Exception {
     checkLogin(
       event.login,
-      event.password,
-      event.host
+      event.password
     );
-  }
-
-  @Subscribe(threadMode = ThreadMode.BACKGROUND)
-  public void onMessageEvent(UpdateAuthTokenEvent event) throws Exception {
-    getAuth();
   }
 
   @Subscribe(threadMode = ThreadMode.BACKGROUND)
@@ -783,6 +743,10 @@ public class MainService extends Service {
     EventBus.getDefault().post( new StepperLoginCheckFailEvent(event.error) );
   }
 
+  @Subscribe(threadMode = ThreadMode.BACKGROUND)
+  public void onMessageEvent(StartLoadDataEvent event) throws Exception {
+    dataLoaderInterface.initV2( true );
+  }
 
   @Subscribe(threadMode = ThreadMode.BACKGROUND)
   public void onMessageEvent(SignDataEvent event) throws Exception {
@@ -793,7 +757,6 @@ public class MainService extends Service {
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(UpdateDocumentEvent event) throws Exception {
     EventBus.getDefault().post( new UpdateCurrentInfoActivityEvent() );
-    dataLoaderInterface.updateDocument(event.uid);
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
@@ -887,10 +850,6 @@ public class MainService extends Service {
   // If scheduler is already created, start regular refresh.
   @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
   public void onMessageEvent(StartRegularRefreshEvent event){
-
-//    scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 5*60, 5*60, TimeUnit.SECONDS );
-//  scheduller.scheduleWithFixedDelay( new UpdateAllDocumentnContext()), 10, 10, TimeUnit.SECONDS );
-
     Timber.tag(TAG).d("StartRegularRefreshEvent");
 
     if ( scheduller != null ) {
@@ -905,7 +864,7 @@ public class MainService extends Service {
     }
 
     if ( settings.isStartRegularRefresh() && isStart ) {
-      futureRefresh = scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 5*60, 5*60, TimeUnit.SECONDS );
+      futureRefresh = scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(), 5*60, 5*60, TimeUnit.SECONDS );
 //      futureRefresh = scheduller.scheduleWithFixedDelay( new UpdateAllDocumentsTask(getApplicationContext()), 10, 10, TimeUnit.SECONDS );
     }
   }

@@ -6,6 +6,7 @@ import org.greenrobot.eventbus.EventBus;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -39,7 +40,7 @@ public class MemoryStore implements Processable{
   @Inject ISettings settings;
   private String TAG = this.getClass().getSimpleName();
 
-  private HashMap<String, InMemoryDocument> documents;
+  private ConcurrentHashMap<String, InMemoryDocument> documents;
 
   private CompositeSubscription subscription;
 
@@ -62,7 +63,7 @@ public class MemoryStore implements Processable{
     this.sub = PublishSubject.create();
     this.notifyPubSubject = PublishSubject.create();
     this.counter = new Counter();
-    this.documents  = new HashMap<>();
+    this.documents  = new ConcurrentHashMap<>();
 
     this.subscription = new CompositeSubscription();
 
@@ -145,14 +146,16 @@ public class MemoryStore implements Processable{
   }
 
   public void loadFromDB() {
+    EventBus.getDefault().removeStickyEvent(LoadedFromDbEvent.class);
+
     dataStore
       .select(RDocumentEntity.class)
       .where(RDocumentEntity.FROM_LINKS.eq(false))
       .and(RDocumentEntity.USER.eq(settings.getLogin()))
       .get().toObservable()
       .toList()
-      .subscribeOn(Schedulers.immediate())
-      .observeOn(AndroidSchedulers.mainThread())
+      .subscribeOn(Schedulers.computation())
+      .observeOn(Schedulers.computation())
       .subscribe(
         docs -> {
           for (RDocumentEntity doc : docs) {
@@ -160,7 +163,8 @@ public class MemoryStore implements Processable{
             documents.put(doc.getUid(), document);
           }
 
-          EventBus.getDefault().post( new LoadedFromDbEvent() );
+          Timber.tag("LoadFromDb").d("MemoryStore: send LoadedFromDbEvent");
+          EventBus.getDefault().postSticky( new LoadedFromDbEvent() );
         },
         Timber::e
       );
@@ -170,7 +174,7 @@ public class MemoryStore implements Processable{
     return new Transaction( documents.get(uid) );
   }
 
-  public HashMap<String, InMemoryDocument> getDocuments() {
+  public ConcurrentHashMap<String, InMemoryDocument> getDocuments() {
     return documents;
   }
 

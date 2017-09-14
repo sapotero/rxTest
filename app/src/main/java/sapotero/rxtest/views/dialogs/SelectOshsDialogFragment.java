@@ -37,8 +37,10 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.mapper.AssistantMapper;
+import sapotero.rxtest.db.mapper.FavoriteUserMapper;
 import sapotero.rxtest.db.mapper.PerformerMapper;
-import sapotero.rxtest.db.mapper.utils.Mappers;
+import sapotero.rxtest.db.mapper.PrimaryConsiderationMapper;
 import sapotero.rxtest.db.requery.models.RAssistantEntity;
 import sapotero.rxtest.db.requery.models.RFavoriteUserEntity;
 import sapotero.rxtest.db.requery.models.RPrimaryConsiderationEntity;
@@ -57,7 +59,6 @@ public class SelectOshsDialogFragment extends DialogFragment implements PrimaryU
   public static final String SEPARATOR_OSHS_TEXT = "Результат поиска по ОШС МВД";
 
   @Inject ISettings settings;
-  @Inject Mappers mappers;
   @Inject SingleEntityStore<Persistable> dataStore;
 
   private String TAG = this.getClass().getSimpleName();
@@ -173,7 +174,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements PrimaryU
 
     view.findViewById(R.id.dialog_oshs_add).setOnClickListener( v ->{
       if ( callback != null && user != null ) {
-        Oshs oshs = (Oshs) mappers.getPerformerMapper().convert(user, PerformerMapper.DestinationType.OSHS);
+        Oshs oshs = (Oshs) new PerformerMapper().convert(user, PerformerMapper.DestinationType.OSHS);
         Timber.e("setOnItemClickListener OPERATION: %s", operation.toString());
         callback.onSearchSuccess(oshs, operation, documentUid);
         dismiss();
@@ -267,7 +268,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements PrimaryU
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe( user -> {
-           adapter.add( mappers.getAssistantMapper().toPrimaryConsiderationPeople(user) );
+           adapter.add( new AssistantMapper().toPrimaryConsiderationPeople(user) );
         }, Timber::e);
     }
 
@@ -282,7 +283,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements PrimaryU
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe( user -> {
-           adapter.add( mappers.getPrimaryConsiderationMapper().toPrimaryConsiderationPeople(user) );
+           adapter.add( new PrimaryConsiderationMapper().toPrimaryConsiderationPeople(user) );
         }, Timber::e);
     } else {
 
@@ -302,7 +303,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements PrimaryU
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe( user -> {
-           adapter.add( mappers.getFavoriteUserMapper().toPrimaryConsiderationPeople(user) );
+           adapter.add( new FavoriteUserMapper().toPrimaryConsiderationPeople(user) );
         }, Timber::e);
     }
 
@@ -370,7 +371,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements PrimaryU
 //            callback.onSearchSuccess( user, operation);
           }
 
-          user = (PrimaryConsiderationPeople) mappers.getPerformerMapper().convert(_user, PerformerMapper.DestinationType.PRIMARYCONSIDERATIONPEOPLE);
+          user = (PrimaryConsiderationPeople) new PerformerMapper().convert(_user, PerformerMapper.DestinationType.PRIMARYCONSIDERATIONPEOPLE);
 
           title.setText( _user.getName() );
           title.cancelPendingInputEvents();
@@ -457,7 +458,7 @@ public class SelectOshsDialogFragment extends DialogFragment implements PrimaryU
     adapter.addResultItem( separatorOshs );
 
     for ( Oshs oshs : autocomplete_adapter.getResultList() ) {
-      PrimaryConsiderationPeople people = (PrimaryConsiderationPeople) mappers.getPerformerMapper().convert(oshs, PerformerMapper.DestinationType.PRIMARYCONSIDERATIONPEOPLE);
+      PrimaryConsiderationPeople people = (PrimaryConsiderationPeople) new PerformerMapper().convert(oshs, PerformerMapper.DestinationType.PRIMARYCONSIDERATIONPEOPLE);
       resultFromOshs.add(people);
       adapter.addResultItem( people );
     }

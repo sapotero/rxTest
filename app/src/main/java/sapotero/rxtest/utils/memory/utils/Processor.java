@@ -289,7 +289,6 @@ public class Processor {
           updateAndSetProcessed( uid );
         }
 
-
         validateDocuments();
 
         if (add.size() > 0) {
@@ -312,31 +311,6 @@ public class Processor {
 
 
     return new ArrayList<>();
-  }
-
-
-
-  /* генерируем уведомления, если в MemoryStore появился новый документ. addedDocList - List новых документов*/
-  private void generateNotificationMsg(List<String> addedDocList) {
-    /*приводим строку index к виду Fields.Journal*/
-    //String shortNameJournal = getShortJournalName(index).toUpperCase();
-    //Fields.Journal itemJournal = Fields.Journal.valueOf(shortNameJournal);
-
-  //NotifyManager mNotifyManager = new NotifyManager(addedDocList, documents, filter);
-//    notifyManager
-//      .withDocUidList(addedDocList)
-//      .withDocuments(documents)
-//      .withFilter(filter)
-//      .withAllowJournals(settings.getNotificatedJournals())
-//      .generate();
-//
-
-
-
-//    /*проверяем, включён ли checkBox для журнала. -> генерируем уведомление */
-//    if( settings.getNotificatedJournals().contains( itemJournal.getValue()) ) {
-//      mNotifyManager.generateNotifyMsg(itemJournal.getFormattedName() + itemJournal.getSingle());
-//    }
   }
 
   private void resetMd5(List<String> add) {

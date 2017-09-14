@@ -17,7 +17,6 @@ import javax.inject.Inject;
 import io.requery.Persistable;
 import io.requery.rx.SingleEntityStore;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.managers.view.builders.DecisionBuilder;
 import sapotero.rxtest.managers.view.builders.PreviewBuilder;
 import sapotero.rxtest.managers.view.interfaces.DecisionInterface;
@@ -33,7 +32,6 @@ public class DecisionManager implements DecisionInterface, DecisionBuilder.Callb
 
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject ISettings settings;
-  @Inject Mappers mappers;
 
   private Decision decision;
   private final String md5;

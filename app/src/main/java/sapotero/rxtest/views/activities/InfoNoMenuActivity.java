@@ -39,7 +39,7 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RRouteEntity;
-import sapotero.rxtest.db.requery.utils.Fields;
+import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.events.bus.MassInsertDoneEvent;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.utils.ISettings;
@@ -64,7 +64,7 @@ public class InfoNoMenuActivity extends AppCompatActivity {
   @Inject MemoryStore store;
 
   private String TAG = this.getClass().getSimpleName();
-  private Fields.Status status;
+  private JournalStatus status;
 
   private String UID;
   private RDocumentEntity doc;
@@ -123,7 +123,7 @@ public class InfoNoMenuActivity extends AppCompatActivity {
     android.support.v4.app.FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
     fragmentTransaction.addToBackStack("PREVIEW");
 
-    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || isProject ) {
+    if ( status == JournalStatus.SIGNING || status == JournalStatus.APPROVAL || isProject ) {
       fragmentTransaction.replace( R.id.activity_info_preview_container, new RoutePreviewFragment().withUid(UID), "PREVIEW" );
     } else {
       fragmentTransaction.replace( R.id.activity_info_preview_container, new InfoActivityDecisionPreviewFragment().withUid(UID).withEnableButtons(false), "PREVIEW" );
@@ -182,7 +182,7 @@ public class InfoNoMenuActivity extends AppCompatActivity {
 
     String _filter = doc.getFilter() != null ? doc.getFilter() : "";
 
-    status  = Fields.Status.findStatus( _filter  );
+    status = JournalStatus.getByName( _filter  );
 
     toolbar.setTitle( String.format("%s от %s", doc.getRegistrationNumber(), doc.getRegistrationDate() ) );
   }
@@ -203,7 +203,7 @@ public class InfoNoMenuActivity extends AppCompatActivity {
         viewPager.setAdapter(adapter);
 
       } else{
-        if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || isProject ) {
+        if ( status == JournalStatus.SIGNING || status == JournalStatus.APPROVAL || isProject ) {
           TabSigningPagerAdapter adapter = new TabSigningPagerAdapter( getSupportFragmentManager() );
           adapter.withUid(UID);
           adapter.withoutZoom(true);

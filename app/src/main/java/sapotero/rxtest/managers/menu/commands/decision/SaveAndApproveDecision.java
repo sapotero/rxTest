@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Objects;
 
 import rx.Observable;
+import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
@@ -16,6 +17,7 @@ import sapotero.rxtest.managers.menu.commands.DecisionCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.v2.DecisionError;
+import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import timber.log.Timber;
 
 public class SaveAndApproveDecision extends DecisionCommand {
@@ -53,8 +55,14 @@ public class SaveAndApproveDecision extends DecisionCommand {
     setDecisionTemporary();
 
     setChangedInDb();
+    InMemoryDocument doc = store.getDocuments().get(getParams().getDocument());
 
-    if ( isActiveOrRed() ) {
+    if (doc != null) {
+      Timber.tag(TAG).d("++++++doc index: %s | status: %s", doc.getIndex(), doc.getFilter());
+    }
+
+    
+    if ( isActiveOrRed() || (doc != null && Objects.equals(doc.getFilter(), JournalStatus.PRIMARY.getName())) ) {
       startProcessedOperationInMemory();
       startProcessedOperationInDb();
       EventBus.getDefault().post( new ShowNextDocumentEvent( true, getParams().getDocument() ));
@@ -81,7 +89,7 @@ public class SaveAndApproveDecision extends DecisionCommand {
 
       // resolved https://tasks.n-core.ru/browse/MVDESD-14141
       // при нажатии кнопки согласовать - не отправляем подпись
-      Boolean equals = Objects.equals(store.getDocuments().get(params.getDocument()).getFilter(), "primary_consideration") && !Objects.equals(getParams().getDecisionModel().getSignerId(), settings.getCurrentUserId());
+      Boolean equals = Objects.equals(store.getDocuments().get(params.getDocument()).getFilter(), JournalStatus.PRIMARY.getName()) && !Objects.equals(getParams().getDecisionModel().getSignerId(), settings.getCurrentUserId());
       _decision.setSign( equals? null : sign );
 
       Observable<DecisionError> info = getDecisionUpdateOperationObservable(_decision);

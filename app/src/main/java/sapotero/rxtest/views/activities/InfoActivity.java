@@ -43,11 +43,12 @@ import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
-import sapotero.rxtest.db.requery.utils.Fields;
+import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.events.bus.MassInsertDoneEvent;
 import sapotero.rxtest.events.crypto.SignDataResultEvent;
 import sapotero.rxtest.events.crypto.SignDataWrongPinEvent;
 import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
+import sapotero.rxtest.events.decision.HideTemporaryEvent;
 import sapotero.rxtest.events.decision.ShowDecisionConstructor;
 import sapotero.rxtest.events.document.DropControlEvent;
 import sapotero.rxtest.events.notification.RemoveIdNotificationEvent;
@@ -93,7 +94,7 @@ public class InfoActivity extends AppCompatActivity {
   private String TAG = this.getClass().getSimpleName();
   private CompositeSubscription subscription;
   private ToolbarManager toolbarManager;
-  private Fields.Status  status;
+  private JournalStatus status;
 
   private List<String> documentUids;
 
@@ -182,7 +183,7 @@ public class InfoActivity extends AppCompatActivity {
 
     setLastSeen();
 
-    status  = Fields.Status.findStatus( settings.getStatusCode() );
+    status  = JournalStatus.getByName( settings.getStatusCode() );
 
     setTabContent();
     setPreview();
@@ -198,7 +199,7 @@ public class InfoActivity extends AppCompatActivity {
 //    }
 
     String type = "TabPagerAdapter";
-    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || settings.isProject() ){
+    if ( status == JournalStatus.SIGNING || status == JournalStatus.APPROVAL || settings.isProject() ){
       type = "TabSigningPagerAdapter";
     }
 
@@ -245,7 +246,7 @@ public class InfoActivity extends AppCompatActivity {
 
     String TAG = "DECISION";
 
-    if ( status == Fields.Status.SIGNING || status == Fields.Status.APPROVAL || settings.isProject() ){
+    if ( status == JournalStatus.SIGNING || status == JournalStatus.APPROVAL || settings.isProject() ){
       TAG = "ROUTE";
     }
 
@@ -480,6 +481,9 @@ public class InfoActivity extends AppCompatActivity {
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(HasNoActiveDecisionConstructor event) throws Exception {
 //    toolbarManager.showCreateDecisionButton();
+//    setPreview();
+    EventBus.getDefault().post( new HideTemporaryEvent() );
+
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)

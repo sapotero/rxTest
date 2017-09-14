@@ -2,7 +2,6 @@ package sapotero.rxtest.db.mapper;
 
 import java.util.Collections;
 
-import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RPerformer;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
@@ -11,12 +10,6 @@ import sapotero.rxtest.retrofit.models.document.Performer;
 
 // Maps between Block and RBlockEntity
 public class BlockMapper extends AbstractMapper<Block, RBlockEntity> {
-
-  private Mappers mappers;
-
-  public BlockMapper(Mappers mappers) {
-    this.mappers = mappers;
-  }
 
   @Override
   public RBlockEntity toEntity(Block model) {
@@ -33,7 +26,7 @@ public class BlockMapper extends AbstractMapper<Block, RBlockEntity> {
     entity.setToFamiliarization(model.getToFamiliarization());
 
     if ( notEmpty(model.getPerformers() ) ) {
-      PerformerMapper performerMapper = mappers.getPerformerMapper();
+      PerformerMapper performerMapper = new PerformerMapper();
 
       for (Performer performerModel : model.getPerformers()) {
         RPerformerEntity performerEntity = performerMapper.toEntity(performerModel);
@@ -62,7 +55,7 @@ public class BlockMapper extends AbstractMapper<Block, RBlockEntity> {
     Block formattedModel = new Block();
 
     setBaseFields( formattedModel, entity );
-    formattedModel.setFontSize( "14" );
+    formattedModel.setFontSize( entity.getFontSize() );
     formattedModel.setIndentation( "5" ); // Не трогать!
     setPerformers( formattedModel, entity, true );
 
@@ -80,7 +73,7 @@ public class BlockMapper extends AbstractMapper<Block, RBlockEntity> {
 
   private void setPerformers(Block model, RBlockEntity entity, boolean formatted) {
     if ( notEmpty( entity.getPerformers() ) ) {
-      PerformerMapper performerMapper = mappers.getPerformerMapper();
+      PerformerMapper performerMapper = new PerformerMapper();
 
       for (RPerformer _performer : entity.getPerformers()) {
         RPerformerEntity performerEntity = (RPerformerEntity) _performer;

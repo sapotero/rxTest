@@ -26,7 +26,6 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.images.RSignImageEntity;
 import sapotero.rxtest.db.requery.models.utils.RReturnedRejectedAgainEntity;
@@ -54,7 +53,6 @@ public abstract class AbstractCommand implements Serializable, Command, Operatio
 
   @Inject public OkHttpClient okHttpClient;
   @Inject public ISettings settings;
-  @Inject public Mappers mappers;
   @Inject public SingleEntityStore<Persistable> dataStore;
   @Inject public QueueManager queueManager;
   @Inject public MemoryStore store;

@@ -2,14 +2,7 @@ package sapotero.rxtest.mapper;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.dagger.components.DaggerTestDataComponent;
-import sapotero.rxtest.dagger.components.TestDataComponent;
 import sapotero.rxtest.db.mapper.TemplateMapper;
 import sapotero.rxtest.db.requery.models.RTemplateEntity;
 import sapotero.rxtest.retrofit.models.Template;
@@ -19,11 +12,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ EsdApplication.class })
 public class TemplateMapperTest {
 
-  private TestDataComponent testDataComponent;
   private TemplateMapper mapper;
   private Template dummyTemplate;
   private RTemplateEntity entity;
@@ -32,13 +22,7 @@ public class TemplateMapperTest {
 
   @Before
   public void init() {
-    testDataComponent = DaggerTestDataComponent.builder().build();
-    testDataComponent.inject(this);
-
     generateTemplate();
-
-    PowerMockito.mockStatic(EsdApplication.class);
-    PowerMockito.when(EsdApplication.getDataComponent()).thenReturn(testDataComponent);
   }
 
   private void generateTemplate() {

@@ -8,6 +8,7 @@ import java.util.List;
 
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import sapotero.rxtest.db.mapper.BlockMapper;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
@@ -84,7 +85,7 @@ public class SaveTemporaryDecision extends DecisionCommand {
       }
 
       for (Block _block : dec.getBlocks()) {
-        RBlockEntity block = mappers.getBlockMapper().toEntity(_block);
+        RBlockEntity block = new BlockMapper().toEntity(_block);
         block.setDecision(decision);
         decision.getBlocks().add(block);
       }

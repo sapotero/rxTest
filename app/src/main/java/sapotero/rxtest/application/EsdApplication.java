@@ -3,6 +3,8 @@ package sapotero.rxtest.application;
 import android.app.Application;
 import android.content.Context;
 
+import com.facebook.stetho.Stetho;
+
 import org.acra.ACRA;
 import org.acra.ReportingInteractionMode;
 import org.acra.annotation.ReportsCrashes;
@@ -14,9 +16,7 @@ import sapotero.rxtest.application.components.DaggerDataComponent;
 import sapotero.rxtest.application.components.DataComponent;
 import sapotero.rxtest.application.components.ManagerComponent;
 import sapotero.rxtest.application.components.NetworkComponent;
-import sapotero.rxtest.application.components.ValidationComponent;
 import sapotero.rxtest.application.config.Constant;
-import sapotero.rxtest.db.requery.utils.validation.ValidationModule;
 import sapotero.rxtest.jobs.utils.JobModule;
 import sapotero.rxtest.managers.menu.utils.OperationManagerModule;
 import sapotero.rxtest.retrofit.utils.OkHttpModule;
@@ -69,7 +69,7 @@ import static org.acra.ReportField.USER_IP;
 // в бою android-app-logs.sed.mvd.ru
 
 @ReportsCrashes(formUri = "http://android-app-logs.sed.mvd.ru/send",
-//@ReportsCrashes(formUri = "http://http://10.0.32.77/send",
+//@ReportsCrashes(formUri = "http://10.0.32.77/send",
   mailTo = "rgiliazov6@mvd.ru",
   customReportContent = {
     REPORT_ID,
@@ -124,7 +124,6 @@ public final class EsdApplication extends Application {
   private static EsdApplication application;
 
   private static DataComponent dataComponent;
-  private static ValidationComponent validationComponent;
   private static NetworkComponent networkComponent;
   private static ManagerComponent managerComponent;
 
@@ -149,11 +148,11 @@ public final class EsdApplication extends Application {
 
     }
 
-//    Stetho.Initializer initializer = Stetho.newInitializerBuilder(this)
-//        .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this))
-//        .enableDumpapp(Stetho.defaultDumperPluginsProvider(getApplicationContext()))
-//        .build();
-//    Stetho.initialize(initializer);
+    Stetho.Initializer initializer = Stetho.newInitializerBuilder(this)
+        .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this))
+        .enableDumpapp(Stetho.defaultDumperPluginsProvider(getApplicationContext()))
+        .build();
+    Stetho.initialize(initializer);
 
     application = this;
 
@@ -164,7 +163,6 @@ public final class EsdApplication extends Application {
 
   private void initComponents() {
     dataComponent = DaggerDataComponent.builder().build();
-    validationComponent = dataComponent.plusValidationComponent(new ValidationModule());
     networkComponent = dataComponent.plusNetworkComponent(new OkHttpModule());
     managerComponent = networkComponent.plusManagerComponent(
             new JobModule(), new QueueManagerModule(), new OperationManagerModule() );
@@ -172,10 +170,6 @@ public final class EsdApplication extends Application {
 
   public static DataComponent getDataComponent() {
     return dataComponent;
-  }
-
-  public static ValidationComponent getValidationComponent() {
-    return validationComponent;
   }
 
   public static NetworkComponent getNetworkComponent() {

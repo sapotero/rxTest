@@ -20,17 +20,21 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.util.Objects;
+
 import javax.inject.Inject;
 
 import rx.Subscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
+import sapotero.rxtest.db.requery.utils.DocumentStateSaver;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckFailEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckSuccesEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckFailEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckSuccessEvent;
+import sapotero.rxtest.events.utils.LoadedFromDbEvent;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.views.custom.stepper.BlockingStep;
@@ -60,6 +64,9 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
   private VerificationError error = new VerificationError("error");
 
   private StepperLayout.OnNextClickedCallback callback;
+
+  private boolean startAuthorization = false;
+  private String oldLogin;
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -150,6 +157,7 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
         if (enteredText.equals("qwerty")) {
           setAuthTypePassword();
         } else {
+          initStartAuthorization();
           EventBus.getDefault().post( new StepperDcCheckEvent( enteredText ) );
         }
 
@@ -159,11 +167,11 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
         EditText pwd   = (EditText) stepper_auth_password_wrapper.findViewById(R.id.stepper_auth_password);
 //        EditText host  = (EditText) stepper_auth_password_wrapper.findViewById(R.id.stepper_auth_host);
 
+        initStartAuthorization();
         EventBus.getDefault().post(
           new StepperLoginCheckEvent(
             login.getText().toString(),
-            pwd.getText().toString(),
-            settings.getHost()
+            pwd.getText().toString()
           )
         );
         break;
@@ -173,10 +181,14 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
     return error;
   }
 
+  private void initStartAuthorization() {
+    oldLogin = settings.getLogin();
+    startAuthorization = true;
+  }
+
   @Override
   public void onSelected() {
     passwordEditText.setText("");
-    store.clear();
     jobManager.cancelJobsInBackground(null, TagConstraint.ANY, "DocJob");
   }
 
@@ -236,10 +248,16 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(StepperDcCheckSuccesEvent event) throws Exception {
     Timber.tag(TAG).d("SignFileCommand success");
-    if (callback != null) {
-      loadingDialog.dismiss();
-      callback.goToNextStep();
+    initDocuments();
+  }
+
+  private void initDocuments() {
+    // Если сменился логин, сохраняем / восстанавливаем состояние документов, общих для этих двух пользователей (как в режиме замещения)
+    if ( oldLogin != null && !Objects.equals( oldLogin, "" ) && !Objects.equals( oldLogin, settings.getLogin() ) ) {
+      new DocumentStateSaver().saveRestoreDocumentStates( settings.getLogin(), oldLogin, TAG );
     }
+
+    store.clearAndLoadFromDb();
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
@@ -256,10 +274,7 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(StepperLoginCheckSuccessEvent event) throws Exception {
     Timber.tag(TAG).d("login success");
-    if (callback != null) {
-      loadingDialog.dismiss();
-      callback.goToNextStep();
-    }
+    initDocuments();
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
@@ -271,5 +286,20 @@ public class StepperAuthFragment extends Fragment implements BlockingStep {
     }
 
     loadingDialog.dismiss();
+  }
+
+  @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+  public void onMessageEvent(LoadedFromDbEvent event) {
+    EventBus.getDefault().removeStickyEvent(event);
+
+    if ( startAuthorization ) {
+      startAuthorization = false;
+      Timber.tag("LoadFromDb").i("StepperAuthFragment: handle LoadedFromDbEvent");
+
+      if (callback != null) {
+        loadingDialog.dismiss();
+        callback.goToNextStep();
+      }
+    }
   }
 }

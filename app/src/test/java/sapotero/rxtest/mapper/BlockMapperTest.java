@@ -3,13 +3,8 @@ package sapotero.rxtest.mapper;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 
 import sapotero.rxtest.db.mapper.BlockMapper;
-import sapotero.rxtest.db.mapper.PerformerMapper;
-import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RPerformer;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
@@ -20,26 +15,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.times;
 
 public class BlockMapperTest {
 
   private BlockMapper mapper;
-  private PerformerMapper performerMapper;
   private Block dummyBlock;
   private RBlockEntity entity;
   private Block model;
 
-  @Mock Mappers mappers;
-
   @Before
   public void init() {
-    MockitoAnnotations.initMocks(this);
-    performerMapper = new PerformerMapper();
-
     dummyBlock = generateBlock();
-
-    Mockito.when(mappers.getPerformerMapper()).thenReturn(performerMapper);
   }
 
   public static Block generateBlock() {
@@ -61,10 +47,8 @@ public class BlockMapperTest {
 
   @Test
   public void toEntity() {
-    mapper = new BlockMapper(mappers);
+    mapper = new BlockMapper();
     entity = mapper.toEntity(dummyBlock);
-
-    Mockito.verify(mappers, times(1)).getPerformerMapper();
 
     verifyBlock( dummyBlock, entity );
   }
@@ -92,11 +76,9 @@ public class BlockMapperTest {
 
   @Test
   public void toModel() {
-    mapper = new BlockMapper(mappers);
+    mapper = new BlockMapper();
     entity = mapper.toEntity(dummyBlock);
     model = mapper.toModel(entity);
-
-    Mockito.verify(mappers, times(2)).getPerformerMapper();
 
     verifyBlock( dummyBlock, model );
   }
@@ -128,7 +110,7 @@ public class BlockMapperTest {
     assertEquals( expected.getAppealText(), actual.getAppealText() );
     assertEquals( expected.getTextBefore(), actual.getTextBefore() );
     assertEquals( expected.getHidePerformers(), actual.getHidePerformers() );
-    assertEquals( "14", actual.getFontSize() );
+    assertEquals( expected.getFontSize(), actual.getFontSize() );
     assertEquals( "5", actual.getIndentation() );
     assertEquals( null, actual.getToCopy() );
     assertEquals( null, actual.getToFamiliarization() );
@@ -142,7 +124,7 @@ public class BlockMapperTest {
 
   @Test
   public void hasDiff() {
-    mapper = new BlockMapper(mappers);
+    mapper = new BlockMapper();
 
     RBlockEntity entity1 = mapper.toEntity(dummyBlock);
     RBlockEntity entity2 = mapper.toEntity(dummyBlock);
