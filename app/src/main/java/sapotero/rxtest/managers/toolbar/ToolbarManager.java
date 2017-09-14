@@ -578,9 +578,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
           case SIGNING:
             menu = R.menu.info_menu_signing;
             break;
-          case PROCESSED:
-            menu = R.menu.info_menu;
-            break;
           default:
             menu = R.menu.info_menu;
             break;

@@ -3,28 +3,28 @@ package sapotero.rxtest.db.requery.utils;
 import java.util.Objects;
 
 public enum V2DocumentType {
-  ALL                ("0", "Документы / Проекты",     "",                     "",                                                                     "",                   ""),
-  INCOMING_DOCUMENTS ("1", "Входящие документы",      "incoming_documents",   "incoming_documents_production_db_core_cards_incoming_documents_cards", "Входящий документ",  "Вам поступил "),
-  CITIZEN_REQUESTS   ("2", "Обращения граждан",       "citizen_requests",     "citizen_requests_production_db_core_cards_citizen_requests_cards",     "Обращение граждан",  "Вам поступило "),
-  APPROVE_ASSIGN     ("3", "Подписание/Согласование", "",                     "",                                                                     "",                   ""),
-  INCOMING_ORDERS    ("4", "НПА",                     "incoming_orders",      "incoming_orders_production_db_core_cards_incoming_orders_cards",       "НПА",                "Вам поступил "),
-  ORDERS             ("5", "Приказы",                 "orders",               "orders_production_db_core_cards_orders_cards",                         "Приказ",             "Вам поступил "),
-  ORDERS_DDO         ("6", "Приказы ДДО",             "orders_ddo",           "orders_ddo_production_db_core_cards_orders_ddo_cards",                 "Приказ ДДО",         "Вам поступил "),
-  OUTGOING_DOCUMENTS ("7", "Внутренние документы",    "outgoing_documents",   "outgoing_documents_production_db_core_cards_outgoing_documents_cards", "Исходящий документ", "Вам поступил "),
-  ON_CONTROL         ("8", "На контроле",             "",                     "",                                                                     "",                   ""),
-  PROCESSED          ("9", "Обработанное",            "",                     "",                                                                     "",                   ""),
-  FAVORITES          ("10", "Избранное",              "",                     "",                                                                     "",                   ""),
-  SIGNING            ("98", "",                       "",                     "",                                                                     "Подписание",         "Вам поступил документ на "),
-  APPROVAL           ("99", "",                       "",                     "",                                                                     "Согласование",       "Вам поступил документ на ");
+  ALL                (Journals.ALL,                "Документы / Проекты",     "",                     "",                                                                     "",                   ""),
+  INCOMING_DOCUMENTS (Journals.INCOMING_DOCUMENTS, "Входящие документы",      "incoming_documents",   "incoming_documents_production_db_core_cards_incoming_documents_cards", "Входящий документ",  "Вам поступил "),
+  CITIZEN_REQUESTS   (Journals.CITIZEN_REQUESTS,   "Обращения граждан",       "citizen_requests",     "citizen_requests_production_db_core_cards_citizen_requests_cards",     "Обращение граждан",  "Вам поступило "),
+  APPROVE_ASSIGN     (Journals.APPROVE_ASSIGN,     "Подписание/Согласование", "",                     "",                                                                     "",                   ""),
+  INCOMING_ORDERS    (Journals.INCOMING_ORDERS,    "НПА",                     "incoming_orders",      "incoming_orders_production_db_core_cards_incoming_orders_cards",       "НПА",                "Вам поступил "),
+  ORDERS             (Journals.ORDERS,             "Приказы",                 "orders",               "orders_production_db_core_cards_orders_cards",                         "Приказ",             "Вам поступил "),
+  ORDERS_DDO         (Journals.ORDERS_DDO,         "Приказы ДДО",             "orders_ddo",           "orders_ddo_production_db_core_cards_orders_ddo_cards",                 "Приказ ДДО",         "Вам поступил "),
+  OUTGOING_DOCUMENTS (Journals.IN_DOCUMENTS,       "Внутренние документы",    "outgoing_documents",   "outgoing_documents_production_db_core_cards_outgoing_documents_cards", "Исходящий документ", "Вам поступил "),
+  ON_CONTROL         (Journals.ON_CONTROL,         "На контроле",             "",                     "",                                                                     "",                   ""),
+  PROCESSED          (Journals.PROCESSED,          "Обработанное",            "",                     "",                                                                     "",                   ""),
+  FAVORITES          (Journals.FAVORITES,          "Избранное",               "",                     "",                                                                     "",                   ""),
+  SIGNING            (98,                          "",                        "",                     "",                                                                     "Подписание",         "Вам поступил документ на "),
+  APPROVAL           (99,                          "",                        "",                     "",                                                                     "Согласование",       "Вам поступил документ на ");
 
-  private final String index;
+  private final int index;
   private final String journal;
   private final String name;
   private final String nameForApi;
   private final String single;
   private final String formattedName;
 
-  V2DocumentType(String index, String journal, String name, String nameForApi, String single, String formattedName) {
+  V2DocumentType(int index, String journal, String name, String nameForApi, String single, String formattedName) {
     this.index = index;
     this.journal = journal;
     this.name = name;
@@ -33,12 +33,12 @@ public enum V2DocumentType {
     this.formattedName = formattedName;
   }
 
-  public String getIndex() {
+  public int getIndex() {
     return index;
   }
 
-  public int getIntIndex() {
-    return Integer.valueOf( getIndex() );
+  public String getStringIndex() {
+    return String.valueOf( getIndex() );
   }
 
   public String getJournal() {
@@ -90,7 +90,7 @@ public enum V2DocumentType {
     V2DocumentType type = null;
 
     for ( V2DocumentType item : V2DocumentType.values() ) {
-      if ( Objects.equals( item.getIndex(), index ) ) {
+      if ( Objects.equals( item.getStringIndex(), index ) ) {
         type = item;
         break;
       }

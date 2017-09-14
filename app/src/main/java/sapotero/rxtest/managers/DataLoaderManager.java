@@ -32,6 +32,7 @@ import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
+import sapotero.rxtest.db.requery.utils.Journals;
 import sapotero.rxtest.db.requery.utils.V2DocumentType;
 import sapotero.rxtest.db.requery.utils.V2FilterType;
 import sapotero.rxtest.events.auth.AuthDcCheckFailEvent;
@@ -537,7 +538,7 @@ public class DataLoaderManager {
       ArrayList<String> indexes = new ArrayList<>();
 
       // Обновляем все журналы и статусы только для На контроле или если button null
-      if (items == MainMenuItem.ALL || items.getIndex() == 11) {
+      if (items == MainMenuItem.ALL || items.getIndex() == Journals.SHARED) {
         addAllIndexes(indexes);
 
         if (button == null) {

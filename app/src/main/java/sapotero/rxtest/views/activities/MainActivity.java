@@ -95,6 +95,18 @@ import sapotero.rxtest.views.menu.MenuBuilder;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import timber.log.Timber;
 
+import static sapotero.rxtest.db.requery.utils.Journals.ALL;
+import static sapotero.rxtest.db.requery.utils.Journals.APPROVE_ASSIGN;
+import static sapotero.rxtest.db.requery.utils.Journals.CITIZEN_REQUESTS;
+import static sapotero.rxtest.db.requery.utils.Journals.FAVORITES;
+import static sapotero.rxtest.db.requery.utils.Journals.INCOMING_DOCUMENTS;
+import static sapotero.rxtest.db.requery.utils.Journals.IN_DOCUMENTS;
+import static sapotero.rxtest.db.requery.utils.Journals.ON_CONTROL;
+import static sapotero.rxtest.db.requery.utils.Journals.ORDERS;
+import static sapotero.rxtest.db.requery.utils.Journals.INCOMING_ORDERS;
+import static sapotero.rxtest.db.requery.utils.Journals.ORDERS_DDO;
+import static sapotero.rxtest.db.requery.utils.Journals.PROCESSED;
+
 public class MainActivity extends AppCompatActivity implements MenuBuilder.Callback, SearchView.OnVisibilityChangeListener {
 
   @Inject JobManager jobManager;
@@ -124,18 +136,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private String TAG = MainActivity.class.getSimpleName();
   private OrganizationAdapter organization_adapter;
   private DrawerBuilder drawer;
-
-  private final int ALL                = 0;
-  private final int INCOMING_DOCUMENTS = 1;
-  private final int CITIZEN_REQUESTS   = 2;
-  private final int APPROVE_ASSIGN     = 3;
-  private final int INCOMING_ORDERS    = 4;
-  private final int ORDERS             = 5;
-  private final int ORDERS_DDO         = 6;
-  private final int IN_DOCUMENTS       = 7;
-  private final int ON_CONTROL         = 8;
-  private final int PROCESSED          = 9;
-  private final int FAVORITES          = 10;
 
   private final int SETTINGS_VIEW_TYPE_APPROVE = 18;
   private final int SETTINGS_VIEW = 20;
@@ -1053,7 +1053,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     }
   }
 
-  private void drawer_add_item(String index, String title, Long identifier) {
+  private void drawer_add_item(int index, String title, long identifier) {
     Timber.tag("drawer_add_item").v(" !index " + index + " " + title);
 
     drawer.addDrawerItems(
@@ -1067,7 +1067,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     drawer_build_head();
 
     V2DocumentType menu = V2DocumentType.ALL;
-    drawer_add_item( menu.getIndex() , menu.getJournal(), Long.valueOf( menu.getIndex()) );
+    drawer_add_item( menu.getIndex() , menu.getJournal(), menu.getIndex());
 
     // resolved https://tasks.n-core.ru/browse/MVDESD-13752
     // Добавить в боковую панель разделы: Контроль, Обраб, Избр.
@@ -1087,7 +1087,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     for(String uid : menuItems ){
       V2DocumentType m = V2DocumentType.getDocumentTypeByIndex(uid);
       if (m != null) {
-        drawer_add_item( m.getIndex() , m.getJournal(), Long.valueOf( m.getIndex()) );
+        drawer_add_item( m.getIndex() , m.getJournal(), m.getIndex());
       }
     }
 

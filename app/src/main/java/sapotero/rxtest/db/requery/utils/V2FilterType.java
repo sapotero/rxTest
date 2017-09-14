@@ -7,9 +7,7 @@ public enum V2FilterType{
   APPROVAL   ("approval"),
   FOR_REPORT ("sent_to_the_report"),
   PRIMARY    ("primary_consideration"),
-  LINK       ("link"),
-  PROJECTS   ("project"),
-  PROCESSED  ("processed");
+  LINK       ("link");
 
   private final String name;
 
