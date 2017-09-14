@@ -48,15 +48,8 @@ abstract class DocumentJob extends BaseJob {
     return collection != null && collection.size() > 0;
   }
 
-  public String getJournalName(String journal) {
-    String journalName = null;
-
-    if ( exist( journal ) ) {
-      String[] index = journal.split("_production_db_");
-      journalName = index[0];
-    }
-
-    return journalName;
+  String getJournalName(String journal) {
+    return JournalStatus.splitNameForApi( journal );
   }
 
   public boolean exist(Object obj) {

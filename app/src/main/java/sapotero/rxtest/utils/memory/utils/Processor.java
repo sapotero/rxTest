@@ -308,20 +308,6 @@ public class Processor {
     return new ArrayList<>();
   }
 
-  private String getShortJournalName(String longJournalName){
-    String shortJournalName = "";
-
-    if (  longJournalName != null ) {
-      String[] index = longJournalName.split("_production_db_");
-      shortJournalName = index[0];
-    }else if (Objects.equals(this.filter, JournalStatus.APPROVAL.getName())){
-      shortJournalName = "APPROVAL" ;
-    }else if (Objects.equals(this.filter, JournalStatus.SIGNING.getName())){
-      shortJournalName = "SIGNING" ;
-    }
-    return shortJournalName;
-  }
-
   private JournalStatus getJournalStatus() {
     JournalStatus result = null;
 
