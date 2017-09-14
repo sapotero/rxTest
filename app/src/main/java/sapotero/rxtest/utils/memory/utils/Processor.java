@@ -322,16 +322,27 @@ public class Processor {
     return shortJournalName;
   }
 
+  private JournalStatus getJournalStatus() {
+    JournalStatus result = null;
+
+    if ( index != null ) {
+      result = JournalStatus.getByNameForApi( index );
+    } else if ( filter != null ) {
+      result = JournalStatus.getByNameForApi( filter );
+    }
+
+    return result;
+  }
+
   /* генерируем уведомления, если в MemoryStore появился новый документ. addedDocList - List новых документов*/
   private void generateNotificationMsg(List<String> addedDocList) {
     NotifyManager mNotifyManager = new NotifyManager(addedDocList, documents, filter);
 
-    /*приводим строку index к виду Fields.Journal*/
-    String shortNameJournal = getShortJournalName(index).toUpperCase();
-    JournalStatus itemJournal = JournalStatus.valueOf(shortNameJournal);
+    /*приводим строку index к виду JournalStatus*/
+    JournalStatus itemJournal = getJournalStatus();
 
     /*проверяем, включён ли checkBox для журнала. -> генерируем уведомление */
-    if( settings.getNotificatedJournals().contains( itemJournal.getStringIndex() ) ) {
+    if ( itemJournal != null && settings.getNotificatedJournals().contains( itemJournal.getStringIndex() ) ) {
       mNotifyManager.generateNotifyMsg(itemJournal.getFormattedName() + itemJournal.getSingle());
     }
   }

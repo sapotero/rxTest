@@ -77,6 +77,19 @@ public enum JournalStatus {
     return result;
   }
 
+  public static JournalStatus getByNameForApi(String nameForApi) {
+    JournalStatus result = null;
+
+    for ( JournalStatus item : JournalStatus.values() ) {
+      if ( Objects.equals( item.getNameForApi(), nameForApi ) ) {
+        result = item;
+        break;
+      }
+    }
+
+    return result;
+  }
+
   public static String getSingleByName(String name) {
     String documentName = "";
 
