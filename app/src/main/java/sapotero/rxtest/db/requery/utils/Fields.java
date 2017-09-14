@@ -4,44 +4,6 @@ import java.util.Objects;
 
 public class Fields {
 
-  public enum Journal {
-    ALL_JOURNALS              ( "90", " ",                     ""),
-    CITIZEN_REQUESTS          ( "01", "Обращение граждан",     "Вам поступило "),
-    INCOMING_DOCUMENTS        ( "02", "Входящий документ",     "Вам поступил "),
-    INCOMING_ORDERS           ( "03", "НПА",                   "Вам поступил "),
-    ORDERS                    ( "04", "Приказ старый",         "Вам поступил "),
-    OUTGOING_DOCUMENTS        ( "05", "Исходящий документ",    "Вам поступил "),
-    ORDERS_DDO                ( "10", "Приказ",                "Вам поступил "),
-    SIGN                      ( "98", "Подписание",            "Вам поступил документ на "),
-    APPROVE                   ( "99", "Согласование",          "Вам поступил документ на ");
-
-    private final String value;
-    private final String single;
-    private final String formattedName;
-
-    Journal(final String value, final String single, final  String formattedName) {
-      this.value = value;
-      this.single  = single;
-      this.formattedName = formattedName;
-    }
-
-    public String getFormattedName() {
-      return formattedName;
-    }
-
-    public String getValue(){
-      return value;
-    }
-    public String getSingle() {
-      return single;
-    }
-
-    @Override
-    public String toString() {
-      return value;
-    }
-  }
-
   public enum Menu {
     ALL                ( 0  , "Документы / Проекты" ),
     INCOMING_DOCUMENTS ( 1  , "Входящие документы" ),

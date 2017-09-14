@@ -23,7 +23,7 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Deleter;
 import sapotero.rxtest.db.requery.utils.DocumentStateSaver;
-import sapotero.rxtest.db.requery.utils.Fields;
+import sapotero.rxtest.db.requery.utils.V2DocumentType;
 import sapotero.rxtest.db.requery.utils.V2FilterType;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
@@ -316,9 +316,9 @@ public class Processor {
       String[] index = longJournalName.split("_production_db_");
       shortJournalName = index[0];
     }else if (Objects.equals(this.filter, V2FilterType.APPROVAL.getName())){
-      shortJournalName = "APPROVE" ;
+      shortJournalName = "APPROVAL" ;
     }else if (Objects.equals(this.filter, V2FilterType.SIGNING.getName())){
-      shortJournalName = "SIGN" ;
+      shortJournalName = "SIGNING" ;
     }
     return shortJournalName;
   }
@@ -329,7 +329,7 @@ public class Processor {
 
     /*приводим строку index к виду Fields.Journal*/
     String shortNameJournal = getShortJournalName(index).toUpperCase();
-    Fields.Journal itemJournal = Fields.Journal.valueOf(shortNameJournal);
+    V2DocumentType itemJournal = V2DocumentType.valueOf(shortNameJournal);
 
     /*проверяем, включён ли checkBox для журнала. -> генерируем уведомление */
     if( settings.getNotificatedJournals().contains( itemJournal.getValue()) ) {
