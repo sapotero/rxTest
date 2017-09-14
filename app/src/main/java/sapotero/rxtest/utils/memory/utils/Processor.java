@@ -332,7 +332,7 @@ public class Processor {
     V2DocumentType itemJournal = V2DocumentType.valueOf(shortNameJournal);
 
     /*проверяем, включён ли checkBox для журнала. -> генерируем уведомление */
-    if( settings.getNotificatedJournals().contains( itemJournal.getValue()) ) {
+    if( settings.getNotificatedJournals().contains( itemJournal.getIndex()) ) {
       mNotifyManager.generateNotifyMsg(itemJournal.getFormattedName() + itemJournal.getSingle());
     }
   }

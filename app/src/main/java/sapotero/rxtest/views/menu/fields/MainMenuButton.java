@@ -17,7 +17,7 @@ public enum MainMenuButton {
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in( ButtonStatus.getProject() )  ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(false) ),
-//      new ConditionBuilder( ConditionBuilder.Condition.OR,  RDocumentEntity.FILTER.eq( Fields.Status.SIGNING.getValue() )  )
+//      new ConditionBuilder( ConditionBuilder.Condition.OR,  RDocumentEntity.FILTER.eq( Fields.Status.SIGNING.getIndex() )  )
     }
   ),
   PERFORMANCE ( 2,
@@ -34,7 +34,7 @@ public enum MainMenuButton {
     "Первичное рассмотрение %s" ,
     new ConditionBuilder[]{
       //V3
-      //new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in(Arrays.asList(Fields.Status.PRIMARY_CONSIDERATION.getValue()))  ),
+      //new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in(Arrays.asList(Fields.Status.PRIMARY_CONSIDERATION.getIndex()))  ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq( V2FilterType.PRIMARY.getName() )  ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(false) ),
     }
@@ -43,15 +43,15 @@ public enum MainMenuButton {
     "Рассмотренные %s" ,
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(true) ),
-//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.ne(Fields.Status.LINK.getValue() ) ),
-//      new ConditionBuilder( ConditionBuilder.Condition.OR, RDocumentEntity.FILTER.in(Arrays.asList(Fields.Status.PROCESSED.getValue() ) ) ),
+//      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.ne(Fields.Status.LINK.getIndex() ) ),
+//      new ConditionBuilder( ConditionBuilder.Condition.OR, RDocumentEntity.FILTER.in(Arrays.asList(Fields.Status.PROCESSED.getIndex() ) ) ),
     }
   ),
   ASSIGN ( 5,
     "На подпись %s" ,
     new ConditionBuilder[]{
 
-      //new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in(Arrays.asList(Fields.Status.SIGNING.getValue())  ) ),
+      //new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in(Arrays.asList(Fields.Status.SIGNING.getIndex())  ) ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(false) ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq( V2FilterType.SIGNING.getName() )  )
 
@@ -59,7 +59,7 @@ public enum MainMenuButton {
   ),
   APPROVAL ( 6, "На согласование %s" ,
     new ConditionBuilder[]{
-      //new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in(Arrays.asList(Fields.Status.APPROVAL.getValue()) ) ),
+      //new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.in(Arrays.asList(Fields.Status.APPROVAL.getIndex()) ) ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(false) ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FILTER.eq( V2FilterType.APPROVAL.getName() )  )
     }
@@ -125,7 +125,7 @@ public enum MainMenuButton {
     public static ArrayList<String> getPerformance(){
       ArrayList<String> projectArray = new ArrayList<String>();
       projectArray.add( V2FilterType.FOR_REPORT.getName() );
-//      projectArray.addByOne( Fields.Status.SENT_TO_THE_PERFORMANCE.getValue() );
+//      projectArray.addByOne( Fields.Status.SENT_TO_THE_PERFORMANCE.getIndex() );
       return projectArray;
     }
     public static ArrayList<String> getProject(){

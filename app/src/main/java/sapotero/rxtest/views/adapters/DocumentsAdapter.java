@@ -23,7 +23,6 @@ import javax.inject.Inject;
 
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.db.requery.utils.V2DocumentType;
 import sapotero.rxtest.db.requery.utils.V2FilterType;
 import sapotero.rxtest.retrofit.models.documents.Document;

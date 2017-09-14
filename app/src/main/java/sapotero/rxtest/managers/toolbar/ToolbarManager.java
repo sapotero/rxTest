@@ -33,7 +33,6 @@ import sapotero.rxtest.db.requery.models.decisions.RDecision;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
-import sapotero.rxtest.db.requery.utils.Fields;
 import sapotero.rxtest.db.requery.utils.V2DocumentType;
 import sapotero.rxtest.db.requery.utils.V2FilterType;
 import sapotero.rxtest.events.crypto.SignDataEvent;

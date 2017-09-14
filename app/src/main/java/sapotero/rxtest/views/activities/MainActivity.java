@@ -66,7 +66,7 @@ import sapotero.rxtest.db.requery.models.RColleagueEntity;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.query.DBQueryBuilder;
 import sapotero.rxtest.db.requery.utils.DocumentStateSaver;
-import sapotero.rxtest.db.requery.utils.Fields;
+import sapotero.rxtest.db.requery.utils.V2DocumentType;
 import sapotero.rxtest.events.adapter.JournalSelectorIndexEvent;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.events.service.CheckNetworkEvent;
@@ -1053,7 +1053,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     }
   }
 
-  private void drawer_add_item(int index, String title, Long identifier) {
+  private void drawer_add_item(String index, String title, Long identifier) {
     Timber.tag("drawer_add_item").v(" !index " + index + " " + title);
 
     drawer.addDrawerItems(
@@ -1066,8 +1066,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   public void initDrawer() {
     drawer_build_head();
 
-    Fields.Menu menu = Fields.Menu.ALL;
-    drawer_add_item( menu.getIndex() , menu.getTitle(), Long.valueOf( menu.getIndex()) );
+    V2DocumentType menu = V2DocumentType.ALL;
+    drawer_add_item( menu.getIndex() , menu.getJournal(), Long.valueOf( menu.getIndex()) );
 
     // resolved https://tasks.n-core.ru/browse/MVDESD-13752
     // Добавить в боковую панель разделы: Контроль, Обраб, Избр.
@@ -1085,9 +1085,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     } );
 
     for(String uid : menuItems ){
-      Fields.Menu m = Fields.Menu.getMenu(uid);
+      V2DocumentType m = V2DocumentType.getDocumentTypeByIndex(uid);
       if (m != null) {
-        drawer_add_item( m.getIndex() , m.getTitle(), Long.valueOf( m.getIndex()) );
+        drawer_add_item( m.getIndex() , m.getJournal(), Long.valueOf( m.getIndex()) );
       }
     }
 
