@@ -39,7 +39,7 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RRouteEntity;
-import sapotero.rxtest.db.requery.utils.V2FilterType;
+import sapotero.rxtest.db.requery.utils.V2DocumentType;
 import sapotero.rxtest.events.bus.MassInsertDoneEvent;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.utils.ISettings;
@@ -64,7 +64,7 @@ public class InfoNoMenuActivity extends AppCompatActivity {
   @Inject MemoryStore store;
 
   private String TAG = this.getClass().getSimpleName();
-  private V2FilterType status;
+  private V2DocumentType status;
 
   private String UID;
   private RDocumentEntity doc;
@@ -123,7 +123,7 @@ public class InfoNoMenuActivity extends AppCompatActivity {
     android.support.v4.app.FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
     fragmentTransaction.addToBackStack("PREVIEW");
 
-    if ( status == V2FilterType.SIGNING || status == V2FilterType.APPROVAL || isProject ) {
+    if ( status == V2DocumentType.SIGNING || status == V2DocumentType.APPROVAL || isProject ) {
       fragmentTransaction.replace( R.id.activity_info_preview_container, new RoutePreviewFragment().withUid(UID), "PREVIEW" );
     } else {
       fragmentTransaction.replace( R.id.activity_info_preview_container, new InfoActivityDecisionPreviewFragment().withUid(UID).withEnableButtons(false), "PREVIEW" );
@@ -182,7 +182,7 @@ public class InfoNoMenuActivity extends AppCompatActivity {
 
     String _filter = doc.getFilter() != null ? doc.getFilter() : "";
 
-    status = V2FilterType.findFilterType( _filter  );
+    status = V2DocumentType.getDocumentTypeByName( _filter  );
 
     toolbar.setTitle( String.format("%s от %s", doc.getRegistrationNumber(), doc.getRegistrationDate() ) );
   }
@@ -203,7 +203,7 @@ public class InfoNoMenuActivity extends AppCompatActivity {
         viewPager.setAdapter(adapter);
 
       } else{
-        if ( status == V2FilterType.SIGNING || status == V2FilterType.APPROVAL || isProject ) {
+        if ( status == V2DocumentType.SIGNING || status == V2DocumentType.APPROVAL || isProject ) {
           TabSigningPagerAdapter adapter = new TabSigningPagerAdapter( getSupportFragmentManager() );
           adapter.withUid(UID);
           adapter.withoutZoom(true);

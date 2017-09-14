@@ -34,7 +34,6 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
 import sapotero.rxtest.db.requery.utils.Journals;
 import sapotero.rxtest.db.requery.utils.V2DocumentType;
-import sapotero.rxtest.db.requery.utils.V2FilterType;
 import sapotero.rxtest.events.auth.AuthDcCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthDcCheckSuccessEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
@@ -550,10 +549,10 @@ public class DataLoaderManager {
               addApprovalSigning(sp);
               break;
             case PRIMARY_CONSIDERATION:
-              statuses.add( V2FilterType.PRIMARY.getName() );
+              statuses.add( V2DocumentType.PRIMARY.getNameForApi() );
               break;
             case PERFORMANCE:
-              statuses.add( V2FilterType.FOR_REPORT.getName() );
+              statuses.add( V2DocumentType.FOR_REPORT.getNameForApi() );
               break;
           }
         }
@@ -597,16 +596,16 @@ public class DataLoaderManager {
         } else {
           switch (button) {
             case APPROVAL:
-              sp.add( V2FilterType.APPROVAL.getName() );
+              sp.add( V2DocumentType.APPROVAL.getNameForApi() );
               break;
             case ASSIGN:
-              sp.add( V2FilterType.SIGNING.getName() );
+              sp.add( V2DocumentType.SIGNING.getNameForApi() );
               break;
             case PRIMARY_CONSIDERATION:
-              statuses.add( V2FilterType.PRIMARY.getName() );
+              statuses.add( V2DocumentType.PRIMARY.getNameForApi() );
               break;
             case PERFORMANCE:
-              statuses.add( V2FilterType.FOR_REPORT.getName() );
+              statuses.add( V2DocumentType.FOR_REPORT.getNameForApi() );
               break;
           }
         }
@@ -699,13 +698,13 @@ public class DataLoaderManager {
   }
 
   private void addApprovalSigning(ArrayList<String> sp) {
-    sp.add( V2FilterType.APPROVAL.getName() );
-    sp.add( V2FilterType.SIGNING.getName() );
+    sp.add( V2DocumentType.APPROVAL.getNameForApi() );
+    sp.add( V2DocumentType.SIGNING.getNameForApi() );
   }
 
   private void addPrimaryReport(ArrayList<String> statuses) {
-    statuses.add( V2FilterType.PRIMARY.getName() );
-    statuses.add( V2FilterType.FOR_REPORT.getName() );
+    statuses.add( V2DocumentType.PRIMARY.getNameForApi() );
+    statuses.add( V2DocumentType.FOR_REPORT.getNameForApi() );
   }
 
   private void addAllStatuses(ArrayList<String> sp, ArrayList<String> statuses) {

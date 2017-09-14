@@ -15,7 +15,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.mapper.DocumentMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.utils.V2FilterType;
+import sapotero.rxtest.db.requery.utils.V2DocumentType;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
 import timber.log.Timber;
@@ -31,14 +31,14 @@ public class CreateLinksJob extends DocumentJob {
   private String parentUid;
   private boolean saveFirstLink;
 
-  private V2FilterType filter;
+  private V2DocumentType filter;
 
   public CreateLinksJob(String linkUid, String parentUid, boolean saveFirstLink, String login, String currentUserId) {
     super( new Params(PRIORITY).requireNetwork().persist().addTags("DocJob") );
     this.linkUid = linkUid;
     this.parentUid = parentUid;
     this.saveFirstLink = saveFirstLink;
-    this.filter = V2FilterType.LINK;
+    this.filter = V2DocumentType.LINK;
     this.login = login;
     this.currentUserId = currentUserId;
   }

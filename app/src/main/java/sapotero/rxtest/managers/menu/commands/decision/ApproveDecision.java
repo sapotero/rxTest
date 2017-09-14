@@ -10,7 +10,7 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import rx.Observable;
-import sapotero.rxtest.db.requery.utils.V2FilterType;
+import sapotero.rxtest.db.requery.utils.V2DocumentType;
 import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
@@ -86,7 +86,7 @@ public class ApproveDecision extends DecisionCommand {
 
       // resolved https://tasks.n-core.ru/browse/MVDESD-14141
       // при нажатии кнопки согласовать - не отправляем подпись
-      Boolean equals = Objects.equals(store.getDocuments().get(params.getDocument()).getFilter(), V2FilterType.PRIMARY.getName()) && !Objects.equals(getParams().getDecisionModel().getSignerId(), settings.getCurrentUserId());
+      Boolean equals = Objects.equals(store.getDocuments().get(params.getDocument()).getFilter(), V2DocumentType.PRIMARY.getName()) && !Objects.equals(getParams().getDecisionModel().getSignerId(), settings.getCurrentUserId());
       _decision.setSign( equals? null : sign );
 
       if ( getParams().isAssignment() ) {

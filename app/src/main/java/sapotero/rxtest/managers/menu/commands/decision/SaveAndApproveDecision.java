@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Objects;
 
 import rx.Observable;
-import sapotero.rxtest.db.requery.utils.V2FilterType;
+import sapotero.rxtest.db.requery.utils.V2DocumentType;
 import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
@@ -62,7 +62,7 @@ public class SaveAndApproveDecision extends DecisionCommand {
     }
 
     
-    if ( isActiveOrRed() || (doc != null && Objects.equals(doc.getFilter(), V2FilterType.PRIMARY.getName())) ) {
+    if ( isActiveOrRed() || (doc != null && Objects.equals(doc.getFilter(), V2DocumentType.PRIMARY.getName())) ) {
       startProcessedOperationInMemory();
       startProcessedOperationInDb();
       EventBus.getDefault().post( new ShowNextDocumentEvent( true, getParams().getDocument() ));
@@ -89,7 +89,7 @@ public class SaveAndApproveDecision extends DecisionCommand {
 
       // resolved https://tasks.n-core.ru/browse/MVDESD-14141
       // при нажатии кнопки согласовать - не отправляем подпись
-      Boolean equals = Objects.equals(store.getDocuments().get(params.getDocument()).getFilter(), V2FilterType.PRIMARY.getName()) && !Objects.equals(getParams().getDecisionModel().getSignerId(), settings.getCurrentUserId());
+      Boolean equals = Objects.equals(store.getDocuments().get(params.getDocument()).getFilter(), V2DocumentType.PRIMARY.getName()) && !Objects.equals(getParams().getDecisionModel().getSignerId(), settings.getCurrentUserId());
       _decision.setSign( equals? null : sign );
 
       Observable<DecisionError> info = getDecisionUpdateOperationObservable(_decision);

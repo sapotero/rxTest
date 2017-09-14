@@ -22,7 +22,7 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.db.requery.utils.Deleter;
-import sapotero.rxtest.db.requery.utils.V2FilterType;
+import sapotero.rxtest.db.requery.utils.V2DocumentType;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.retrofit.DocumentService;
@@ -245,8 +245,8 @@ abstract class DocumentJob extends BaseJob {
       if ( notEmpty( statuses ) ) {
         Status currentStatus = statuses.get( statuses.size() - 1 );
         if ( Objects.equals( currentStatus.getAddressedToId(), currentUserId ) ) {
-          if ( Objects.equals( currentStatus.getStatusCode(), V2FilterType.PRIMARY.getName() )
-            || Objects.equals( currentStatus.getStatusCode(), V2FilterType.FOR_REPORT.getName() ) ) {
+          if ( Objects.equals( currentStatus.getStatusCode(), V2DocumentType.PRIMARY.getName() )
+            || Objects.equals( currentStatus.getStatusCode(), V2DocumentType.FOR_REPORT.getName() ) ) {
             result = true;
             break;
           }
@@ -292,9 +292,9 @@ abstract class DocumentJob extends BaseJob {
             && !lastActionStatus.toLowerCase().contains("согласовано")
             && !lastActionStatus.toLowerCase().contains("подписано") ) {
             if ( title.equals( "Подписывающие" ) ) {
-              documentMapper.setFilter( documentEntity, V2FilterType.SIGNING.getName() );
+              documentMapper.setFilter( documentEntity, V2DocumentType.SIGNING.getName() );
             } else {
-              documentMapper.setFilter( documentEntity, V2FilterType.APPROVAL.getName() );
+              documentMapper.setFilter( documentEntity, V2DocumentType.APPROVAL.getName() );
             }
             return true;
           }

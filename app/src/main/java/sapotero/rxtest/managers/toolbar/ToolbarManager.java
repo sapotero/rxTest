@@ -34,7 +34,6 @@ import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.db.requery.utils.V2DocumentType;
-import sapotero.rxtest.db.requery.utils.V2FilterType;
 import sapotero.rxtest.events.crypto.SignDataEvent;
 import sapotero.rxtest.events.decision.CheckDecisionVisibilityEvent;
 import sapotero.rxtest.events.decision.DecisionVisibilityEvent;
@@ -562,10 +561,10 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     int menu = R.menu.info_menu;
 
     if (settings.getStatusCode() != null) {
-      V2FilterType filterType = V2FilterType.findFilterType( settings.getStatusCode() );
+      V2DocumentType documentType = V2DocumentType.getDocumentTypeByName( settings.getStatusCode() );
 
-      if ( filterType != null ) {
-        switch ( filterType ) {
+      if ( documentType != null ) {
+        switch ( documentType ) {
           case FOR_REPORT:
             menu = R.menu.info_menu_sent_to_the_report;
             break;
@@ -598,7 +597,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
 
   private boolean isFromProject() {
-    return doc != null && doc.getFilter() != null && Arrays.asList( V2FilterType.APPROVAL.getName(), V2FilterType.SIGNING.getName() ).contains(doc.getFilter());
+    return doc != null && doc.getFilter() != null && Arrays.asList( V2DocumentType.APPROVAL.getName(), V2DocumentType.SIGNING.getName() ).contains(doc.getFilter());
   }
 
   private void clearToolbar() {
