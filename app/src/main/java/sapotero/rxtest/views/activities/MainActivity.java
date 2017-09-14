@@ -66,7 +66,7 @@ import sapotero.rxtest.db.requery.models.RColleagueEntity;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.query.DBQueryBuilder;
 import sapotero.rxtest.db.requery.utils.DocumentStateSaver;
-import sapotero.rxtest.db.requery.utils.V2DocumentType;
+import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.events.adapter.JournalSelectorIndexEvent;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.events.service.CheckNetworkEvent;
@@ -1066,7 +1066,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   public void initDrawer() {
     drawer_build_head();
 
-    V2DocumentType menu = V2DocumentType.ALL;
+    JournalStatus menu = JournalStatus.ALL;
     drawer_add_item( menu.getIndex() , menu.getJournal(), menu.getIndex());
 
     // resolved https://tasks.n-core.ru/browse/MVDESD-13752
@@ -1085,7 +1085,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     } );
 
     for(String uid : menuItems ){
-      V2DocumentType m = V2DocumentType.getDocumentTypeByIndex(uid);
+      JournalStatus m = JournalStatus.getByIndex(uid);
       if (m != null) {
         drawer_add_item( m.getIndex() , m.getJournal(), m.getIndex());
       }

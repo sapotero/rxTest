@@ -43,7 +43,7 @@ import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
-import sapotero.rxtest.db.requery.utils.V2DocumentType;
+import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.events.bus.MassInsertDoneEvent;
 import sapotero.rxtest.events.crypto.SignDataResultEvent;
 import sapotero.rxtest.events.crypto.SignDataWrongPinEvent;
@@ -93,7 +93,7 @@ public class InfoActivity extends AppCompatActivity {
   private String TAG = this.getClass().getSimpleName();
   private CompositeSubscription subscription;
   private ToolbarManager toolbarManager;
-  private V2DocumentType status;
+  private JournalStatus status;
 
   private List<String> documentUids;
 
@@ -179,7 +179,7 @@ public class InfoActivity extends AppCompatActivity {
 
     setLastSeen();
 
-    status  = V2DocumentType.getDocumentTypeByName( settings.getStatusCode() );
+    status  = JournalStatus.getByName( settings.getStatusCode() );
 
     setTabContent();
     setPreview();
@@ -195,7 +195,7 @@ public class InfoActivity extends AppCompatActivity {
 //    }
 
     String type = "TabPagerAdapter";
-    if ( status == V2DocumentType.SIGNING || status == V2DocumentType.APPROVAL || settings.isProject() ){
+    if ( status == JournalStatus.SIGNING || status == JournalStatus.APPROVAL || settings.isProject() ){
       type = "TabSigningPagerAdapter";
     }
 
@@ -242,7 +242,7 @@ public class InfoActivity extends AppCompatActivity {
 
     String TAG = "DECISION";
 
-    if ( status == V2DocumentType.SIGNING || status == V2DocumentType.APPROVAL || settings.isProject() ){
+    if ( status == JournalStatus.SIGNING || status == JournalStatus.APPROVAL || settings.isProject() ){
       TAG = "ROUTE";
     }
 

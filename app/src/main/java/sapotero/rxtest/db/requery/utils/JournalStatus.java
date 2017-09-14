@@ -2,7 +2,7 @@ package sapotero.rxtest.db.requery.utils;
 
 import java.util.Objects;
 
-public enum V2DocumentType {
+public enum JournalStatus {
   ALL                (Journals.ALL,                "Документы / Проекты",     "",                      "",                                                                     "",                   ""),
   INCOMING_DOCUMENTS (Journals.INCOMING_DOCUMENTS, "Входящие документы",      "incoming_documents",    "incoming_documents_production_db_core_cards_incoming_documents_cards", "Входящий документ",  "Вам поступил "),
   CITIZEN_REQUESTS   (Journals.CITIZEN_REQUESTS,   "Обращения граждан",       "citizen_requests",      "citizen_requests_production_db_core_cards_citizen_requests_cards",     "Обращение граждан",  "Вам поступило "),
@@ -27,7 +27,7 @@ public enum V2DocumentType {
   private final String single;
   private final String formattedName;
 
-  V2DocumentType(int index, String journal, String name, String nameForApi, String single, String formattedName) {
+  JournalStatus(int index, String journal, String name, String nameForApi, String single, String formattedName) {
     this.index = index;
     this.journal = journal;
     this.name = name;
@@ -64,41 +64,41 @@ public enum V2DocumentType {
     return formattedName;
   }
 
-  public static V2DocumentType getDocumentTypeByName(String typeName) {
-    V2DocumentType type = null;
+  public static JournalStatus getByName(String name) {
+    JournalStatus result = null;
 
-    for ( V2DocumentType item : V2DocumentType.values() ) {
-      if ( Objects.equals( item.getName(), typeName ) ) {
-        type = item;
+    for ( JournalStatus item : JournalStatus.values() ) {
+      if ( Objects.equals( item.getName(), name ) ) {
+        result = item;
         break;
       }
     }
 
-    return type;
+    return result;
   }
 
-  public static String getDocumentName(String typeName) {
+  public static String getSingleByName(String name) {
     String documentName = "";
 
-    V2DocumentType type = getDocumentTypeByName( typeName );
+    JournalStatus journalStatus = getByName( name );
 
-    if ( type != null ) {
-      documentName = type.getSingle();
+    if ( journalStatus != null ) {
+      documentName = journalStatus.getSingle();
     }
 
     return documentName;
   }
 
-  public static V2DocumentType getDocumentTypeByIndex(String index) {
-    V2DocumentType type = null;
+  public static JournalStatus getByIndex(String index) {
+    JournalStatus result = null;
 
-    for ( V2DocumentType item : V2DocumentType.values() ) {
+    for ( JournalStatus item : JournalStatus.values() ) {
       if ( Objects.equals( item.getStringIndex(), index ) ) {
-        type = item;
+        result = item;
         break;
       }
     }
 
-    return type;
+    return result;
   }
 }

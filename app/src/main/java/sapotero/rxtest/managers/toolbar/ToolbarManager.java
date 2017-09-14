@@ -33,7 +33,7 @@ import sapotero.rxtest.db.requery.models.decisions.RDecision;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
-import sapotero.rxtest.db.requery.utils.V2DocumentType;
+import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.events.crypto.SignDataEvent;
 import sapotero.rxtest.events.decision.CheckDecisionVisibilityEvent;
 import sapotero.rxtest.events.decision.DecisionVisibilityEvent;
@@ -341,7 +341,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
             boolean isCitizenRequest = false;
 
             InMemoryDocument doc = store.getDocuments().get( settings.getUid() );
-            if ( doc != null && Objects.equals( doc.getIndex(), V2DocumentType.CITIZEN_REQUESTS.getName() ) ) {
+            if ( doc != null && Objects.equals( doc.getIndex(), JournalStatus.CITIZEN_REQUESTS.getName() ) ) {
               isCitizenRequest = true;
             }
 
@@ -561,7 +561,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     int menu = R.menu.info_menu;
 
     if (settings.getStatusCode() != null) {
-      V2DocumentType documentType = V2DocumentType.getDocumentTypeByName( settings.getStatusCode() );
+      JournalStatus documentType = JournalStatus.getByName( settings.getStatusCode() );
 
       if ( documentType != null ) {
         switch ( documentType ) {
@@ -597,7 +597,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
 
   private boolean isFromProject() {
-    return doc != null && doc.getFilter() != null && Arrays.asList( V2DocumentType.APPROVAL.getName(), V2DocumentType.SIGNING.getName() ).contains(doc.getFilter());
+    return doc != null && doc.getFilter() != null && Arrays.asList( JournalStatus.APPROVAL.getName(), JournalStatus.SIGNING.getName() ).contains(doc.getFilter());
   }
 
   private void clearToolbar() {
@@ -730,7 +730,7 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
     toolbar.setTitle( String.format("%s от %s", settings.getRegNumber(), settings.getRegDate()) );
     if (doc!=null && doc.getDocumentType() != null){
-      toolbar.setSubtitle( String.format("%s", V2DocumentType.getDocumentName( doc.getDocumentType() ) ) );
+      toolbar.setSubtitle( String.format("%s", JournalStatus.getSingleByName( doc.getDocumentType() ) ) );
     }
   }
 

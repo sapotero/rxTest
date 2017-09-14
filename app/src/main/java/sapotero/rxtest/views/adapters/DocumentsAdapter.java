@@ -23,7 +23,7 @@ import javax.inject.Inject;
 
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.db.requery.utils.V2DocumentType;
+import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
@@ -73,7 +73,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
       //resolved https://tasks.n-core.ru/browse/MVDESD-12625
       //  На плитке Обращения и НПА не показывать строку "Без организации", если её действительно нет(
-      if( Arrays.asList( V2DocumentType.INCOMING_ORDERS.getName(), V2DocumentType.CITIZEN_REQUESTS.getName() ).contains( doc.getIndex() ) ) {
+      if( Arrays.asList( JournalStatus.INCOMING_ORDERS.getName(), JournalStatus.CITIZEN_REQUESTS.getName() ).contains( doc.getIndex() ) ) {
 
         if ( item.getOrganization() != null && item.getOrganization().toLowerCase().contains("без организации") ){
           viewHolder.from.setText("");
@@ -95,7 +95,7 @@ public class DocumentsAdapter extends RecyclerView.Adapter<DocumentsAdapter.Docu
 
       viewHolder.date.setText( item.getTitle() );
 
-      if( Arrays.asList( V2DocumentType.SIGNING.getName(), V2DocumentType.APPROVAL.getName() ).contains(doc.getFilter()) ){
+      if( Arrays.asList( JournalStatus.SIGNING.getName(), JournalStatus.APPROVAL.getName() ).contains(doc.getFilter()) ){
 
         if (item.getFirstLink() != null && !Objects.equals(item.getFirstLink(), "")){
           viewHolder.date.setText( item.getTitle() + " на " + item.getFirstLink() );

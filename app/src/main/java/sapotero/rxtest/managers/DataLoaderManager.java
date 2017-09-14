@@ -33,7 +33,7 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
 import sapotero.rxtest.db.requery.utils.Journals;
-import sapotero.rxtest.db.requery.utils.V2DocumentType;
+import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.events.auth.AuthDcCheckFailEvent;
 import sapotero.rxtest.events.auth.AuthDcCheckSuccessEvent;
 import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
@@ -549,10 +549,10 @@ public class DataLoaderManager {
               addApprovalSigning(sp);
               break;
             case PRIMARY_CONSIDERATION:
-              statuses.add( V2DocumentType.PRIMARY.getNameForApi() );
+              statuses.add( JournalStatus.PRIMARY.getNameForApi() );
               break;
             case PERFORMANCE:
-              statuses.add( V2DocumentType.FOR_REPORT.getNameForApi() );
+              statuses.add( JournalStatus.FOR_REPORT.getNameForApi() );
               break;
           }
         }
@@ -567,22 +567,22 @@ public class DataLoaderManager {
       } else {
         switch (items) {
           case CITIZEN_REQUESTS:
-            indexes.add( V2DocumentType.CITIZEN_REQUESTS.getNameForApi() );
+            indexes.add( JournalStatus.CITIZEN_REQUESTS.getNameForApi() );
             break;
           case INCOMING_DOCUMENTS:
-            indexes.add( V2DocumentType.INCOMING_DOCUMENTS.getNameForApi() );
+            indexes.add( JournalStatus.INCOMING_DOCUMENTS.getNameForApi() );
             break;
           case ORDERS_DDO:
-            indexes.add( V2DocumentType.ORDERS_DDO.getNameForApi() );
+            indexes.add( JournalStatus.ORDERS_DDO.getNameForApi() );
             break;
           case ORDERS:
-            indexes.add( V2DocumentType.ORDERS.getNameForApi() );
+            indexes.add( JournalStatus.ORDERS.getNameForApi() );
             break;
           case IN_DOCUMENTS:
-            indexes.add( V2DocumentType.OUTGOING_DOCUMENTS.getNameForApi() );
+            indexes.add( JournalStatus.OUTGOING_DOCUMENTS.getNameForApi() );
             break;
           case INCOMING_ORDERS:
-            indexes.add( V2DocumentType.INCOMING_ORDERS.getNameForApi() );
+            indexes.add( JournalStatus.INCOMING_ORDERS.getNameForApi() );
             break;
         }
 
@@ -596,16 +596,16 @@ public class DataLoaderManager {
         } else {
           switch (button) {
             case APPROVAL:
-              sp.add( V2DocumentType.APPROVAL.getNameForApi() );
+              sp.add( JournalStatus.APPROVAL.getNameForApi() );
               break;
             case ASSIGN:
-              sp.add( V2DocumentType.SIGNING.getNameForApi() );
+              sp.add( JournalStatus.SIGNING.getNameForApi() );
               break;
             case PRIMARY_CONSIDERATION:
-              statuses.add( V2DocumentType.PRIMARY.getNameForApi() );
+              statuses.add( JournalStatus.PRIMARY.getNameForApi() );
               break;
             case PERFORMANCE:
-              statuses.add( V2DocumentType.FOR_REPORT.getNameForApi() );
+              statuses.add( JournalStatus.FOR_REPORT.getNameForApi() );
               break;
           }
         }
@@ -689,22 +689,22 @@ public class DataLoaderManager {
   }
 
   private void addAllIndexes(ArrayList<String> indexes) {
-    indexes.add( V2DocumentType.CITIZEN_REQUESTS.getNameForApi() );
-    indexes.add( V2DocumentType.INCOMING_DOCUMENTS.getNameForApi() );
-    indexes.add( V2DocumentType.ORDERS_DDO.getNameForApi() );
-    indexes.add( V2DocumentType.ORDERS.getNameForApi() );
-    indexes.add( V2DocumentType.OUTGOING_DOCUMENTS.getNameForApi() );
-    indexes.add( V2DocumentType.INCOMING_ORDERS.getNameForApi() );
+    indexes.add( JournalStatus.CITIZEN_REQUESTS.getNameForApi() );
+    indexes.add( JournalStatus.INCOMING_DOCUMENTS.getNameForApi() );
+    indexes.add( JournalStatus.ORDERS_DDO.getNameForApi() );
+    indexes.add( JournalStatus.ORDERS.getNameForApi() );
+    indexes.add( JournalStatus.OUTGOING_DOCUMENTS.getNameForApi() );
+    indexes.add( JournalStatus.INCOMING_ORDERS.getNameForApi() );
   }
 
   private void addApprovalSigning(ArrayList<String> sp) {
-    sp.add( V2DocumentType.APPROVAL.getNameForApi() );
-    sp.add( V2DocumentType.SIGNING.getNameForApi() );
+    sp.add( JournalStatus.APPROVAL.getNameForApi() );
+    sp.add( JournalStatus.SIGNING.getNameForApi() );
   }
 
   private void addPrimaryReport(ArrayList<String> statuses) {
-    statuses.add( V2DocumentType.PRIMARY.getNameForApi() );
-    statuses.add( V2DocumentType.FOR_REPORT.getNameForApi() );
+    statuses.add( JournalStatus.PRIMARY.getNameForApi() );
+    statuses.add( JournalStatus.FOR_REPORT.getNameForApi() );
   }
 
   private void addAllStatuses(ArrayList<String> sp, ArrayList<String> statuses) {

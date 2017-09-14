@@ -23,7 +23,7 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Deleter;
 import sapotero.rxtest.db.requery.utils.DocumentStateSaver;
-import sapotero.rxtest.db.requery.utils.V2DocumentType;
+import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.jobs.bus.CreateDocumentsJob;
@@ -314,9 +314,9 @@ public class Processor {
     if (  longJournalName != null ) {
       String[] index = longJournalName.split("_production_db_");
       shortJournalName = index[0];
-    }else if (Objects.equals(this.filter, V2DocumentType.APPROVAL.getName())){
+    }else if (Objects.equals(this.filter, JournalStatus.APPROVAL.getName())){
       shortJournalName = "APPROVAL" ;
-    }else if (Objects.equals(this.filter, V2DocumentType.SIGNING.getName())){
+    }else if (Objects.equals(this.filter, JournalStatus.SIGNING.getName())){
       shortJournalName = "SIGNING" ;
     }
     return shortJournalName;
@@ -328,7 +328,7 @@ public class Processor {
 
     /*приводим строку index к виду Fields.Journal*/
     String shortNameJournal = getShortJournalName(index).toUpperCase();
-    V2DocumentType itemJournal = V2DocumentType.valueOf(shortNameJournal);
+    JournalStatus itemJournal = JournalStatus.valueOf(shortNameJournal);
 
     /*проверяем, включён ли checkBox для журнала. -> генерируем уведомление */
     if( settings.getNotificatedJournals().contains( itemJournal.getStringIndex() ) ) {

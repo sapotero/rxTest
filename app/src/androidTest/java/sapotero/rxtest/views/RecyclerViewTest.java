@@ -16,7 +16,7 @@ import org.junit.runner.RunWith;
 import java.util.concurrent.atomic.AtomicReference;
 
 import sapotero.rxtest.R;
-import sapotero.rxtest.db.requery.utils.V2DocumentType;
+import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.retrofit.models.documents.Signer;
 import sapotero.rxtest.retrofit.models.documents.Document;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
@@ -155,11 +155,11 @@ public class RecyclerViewTest {
 
     onView(withId(R.id.swipe_layout_from)).check(matches(withText( dummyDoc.getDocument().getOrganization() )));
 
-    dummyDoc.setIndex( V2DocumentType.INCOMING_ORDERS.getName() );
+    dummyDoc.setIndex( JournalStatus.INCOMING_ORDERS.getName() );
     addDoc();
     onView(withId(R.id.swipe_layout_from)).check(matches(withText( "" )));
 
-    dummyDoc.setIndex( V2DocumentType.CITIZEN_REQUESTS.getName() );
+    dummyDoc.setIndex( JournalStatus.CITIZEN_REQUESTS.getName() );
     addDoc();
     onView(withId(R.id.swipe_layout_from)).check(matches(withText( "" )));
   }

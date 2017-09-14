@@ -7,7 +7,7 @@ import java.util.Map;
 
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Journals;
-import sapotero.rxtest.db.requery.utils.V2DocumentType;
+import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.views.menu.builders.ButtonBuilder;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 
@@ -45,11 +45,11 @@ public enum MainMenuItem {
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(false) ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( V2DocumentType.INCOMING_DOCUMENTS.getName() )  )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( JournalStatus.INCOMING_DOCUMENTS.getName() )  )
     },
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( V2DocumentType.INCOMING_DOCUMENTS.getName() )  )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( JournalStatus.INCOMING_DOCUMENTS.getName() )  )
     },
     false, false),
 
@@ -62,11 +62,11 @@ public enum MainMenuItem {
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(false) ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( V2DocumentType.CITIZEN_REQUESTS.getName() )  )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( JournalStatus.CITIZEN_REQUESTS.getName() )  )
     },
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( V2DocumentType.CITIZEN_REQUESTS.getName() )  )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( JournalStatus.CITIZEN_REQUESTS.getName() )  )
     },
     false, false),
 
@@ -98,11 +98,11 @@ public enum MainMenuItem {
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(false) ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( V2DocumentType.INCOMING_ORDERS.getName() )  )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( JournalStatus.INCOMING_ORDERS.getName() )  )
     },
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( V2DocumentType.INCOMING_ORDERS.getName() )  )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( JournalStatus.INCOMING_ORDERS.getName() )  )
     },
     false, false),
 
@@ -114,11 +114,11 @@ public enum MainMenuItem {
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(false) ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( V2DocumentType.ORDERS.getName() )  )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( JournalStatus.ORDERS.getName() )  )
     },
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( V2DocumentType.ORDERS.getName() )  )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( JournalStatus.ORDERS.getName() )  )
     },
     false, false),
 
@@ -130,11 +130,11 @@ public enum MainMenuItem {
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(false) ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( V2DocumentType.ORDERS_DDO.getName() )  )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( JournalStatus.ORDERS_DDO.getName() )  )
     },
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( V2DocumentType.ORDERS_DDO.getName() )  )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( JournalStatus.ORDERS_DDO.getName() )  )
     },
     false, false),
 
@@ -147,11 +147,11 @@ public enum MainMenuItem {
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(false) ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( V2DocumentType.OUTGOING_DOCUMENTS.getName() )  )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( JournalStatus.OUTGOING_DOCUMENTS.getName() )  )
     },
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( V2DocumentType.OUTGOING_DOCUMENTS.getName() )  )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( JournalStatus.OUTGOING_DOCUMENTS.getName() )  )
     },
     false, false),
 

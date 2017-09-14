@@ -68,7 +68,7 @@ import sapotero.rxtest.db.requery.models.decisions.RDecision;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RPerformer;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
-import sapotero.rxtest.db.requery.utils.V2DocumentType;
+import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.events.decision.ApproveDecisionEvent;
 import sapotero.rxtest.events.decision.CheckActiveDecisionEvent;
 import sapotero.rxtest.events.decision.CheckDecisionVisibilityEvent;
@@ -552,7 +552,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
     // resolved https://tasks.n-core.ru/browse/MVDESD-13146
     // для статуса "на первичное рассмотрение" вместо "Подписать" должно быть "Согласовать"
     // Если подписывающий в резолюции и оператор в МП совпадают, то кнопка должна быть "Подписать"
-    if ( doc.getFilter() != null && doc.getFilter().equals(V2DocumentType.PRIMARY.getName()) ){
+    if ( doc.getFilter() != null && doc.getFilter().equals(JournalStatus.PRIMARY.getName()) ){
       if ( current_decision != null &&
            current_decision.getSignerId() != null &&
            current_decision.getSignerId().equals( settings.getCurrentUserId() ) ){

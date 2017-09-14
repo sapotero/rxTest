@@ -44,7 +44,7 @@ import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RPerformer;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
-import sapotero.rxtest.db.requery.utils.V2DocumentType;
+import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.events.decision.ApproveDecisionEvent;
 import sapotero.rxtest.events.decision.RejectDecisionEvent;
 import sapotero.rxtest.managers.menu.OperationManager;
@@ -87,7 +87,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
   private Decision raw_decision;
   private RDecisionEntity rDecisionEntity;
   private SelectOshsDialogFragment dialogFragment;
-  private V2DocumentType status;
+  private JournalStatus status;
   private DecisionConstructorActivity context;
 
   private String originalSigner;
@@ -109,7 +109,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
 
     context = this;
 
-    status  = V2DocumentType.getDocumentTypeByName( settings.getStatusCode() );
+    status  = JournalStatus.getByName( settings.getStatusCode() );
 
     toolbar.setTitleTextColor( getResources().getColor( R.color.md_grey_100 ) );
     toolbar.setSubtitleTextColor( getResources().getColor( R.color.md_grey_400 ) );
@@ -541,7 +541,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
 
 
 
-    if ( status == V2DocumentType.FOR_REPORT ){
+    if ( status == JournalStatus.FOR_REPORT ){
       // настройка
       if ( !settings.isShowChangeSigner() ){
         select_oshs_wrapper.setVisibility(View.GONE);
@@ -639,7 +639,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
       RDocumentEntity doc = (RDocumentEntity) rDecisionEntity.getDocument();
       Timber.tag(TAG).e("rDecisionEntity %s", doc.getUid());
 
-      if (!settings.isShowApproveOnPrimary() && Objects.equals(doc.getFilter(), V2DocumentType.PRIMARY.getName())) {
+      if (!settings.isShowApproveOnPrimary() && Objects.equals(doc.getFilter(), JournalStatus.PRIMARY.getName())) {
         if (
           manager.getDecision() != null &&
             manager.getDecision().getSignerId() != null &&
@@ -652,7 +652,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
 
 
 
-      if ( doc.getFilter() != null && Objects.equals(doc.getFilter(), V2DocumentType.PRIMARY.getName()) && doc.isProcessed() != null && !doc.isProcessed()){
+      if ( doc.getFilter() != null && Objects.equals(doc.getFilter(), JournalStatus.PRIMARY.getName()) && doc.isProcessed() != null && !doc.isProcessed()){
         if (rDecisionEntity != null){
           toolbar.getMenu().findItem(R.id.action_constructor_to_the_primary_consideration).setVisible(true);
         }
@@ -663,7 +663,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
 
     } else {
       // если новая резолюция
-      if (!settings.isShowApproveOnPrimary() && Objects.equals(settings.getStatusCode(), V2DocumentType.PRIMARY.getName())) {
+      if (!settings.isShowApproveOnPrimary() && Objects.equals(settings.getStatusCode(), JournalStatus.PRIMARY.getName())) {
         if (
           manager.getDecision() != null &&
             manager.getDecision().getSignerId() != null &&

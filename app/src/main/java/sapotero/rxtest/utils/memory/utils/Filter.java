@@ -18,7 +18,7 @@ import javax.inject.Inject;
 
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.utils.V2DocumentType;
+import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
@@ -222,17 +222,17 @@ public class Filter {
   private Integer getJournalNumber(String journalName) {
     Integer result;
 
-    if ( Objects.equals( journalName, V2DocumentType.INCOMING_DOCUMENTS.getName() ) ) {
+    if ( Objects.equals( journalName, JournalStatus.INCOMING_DOCUMENTS.getName() ) ) {
       result = 1;
-    } else if ( Objects.equals( journalName, V2DocumentType.CITIZEN_REQUESTS.getName() ) ) {
+    } else if ( Objects.equals( journalName, JournalStatus.CITIZEN_REQUESTS.getName() ) ) {
       result = 2;
-    } else if ( Objects.equals( journalName, V2DocumentType.INCOMING_ORDERS.getName() ) ) {
+    } else if ( Objects.equals( journalName, JournalStatus.INCOMING_ORDERS.getName() ) ) {
       result = 3;
-    } else if ( Objects.equals( journalName, V2DocumentType.ORDERS.getName() ) ) {
+    } else if ( Objects.equals( journalName, JournalStatus.ORDERS.getName() ) ) {
       result = 4;
-    } else if ( Objects.equals( journalName, V2DocumentType.ORDERS_DDO.getName() ) ) {
+    } else if ( Objects.equals( journalName, JournalStatus.ORDERS_DDO.getName() ) ) {
       result = 5;
-    } else if ( Objects.equals( journalName, V2DocumentType.OUTGOING_DOCUMENTS.getName() ) ) {
+    } else if ( Objects.equals( journalName, JournalStatus.OUTGOING_DOCUMENTS.getName() ) ) {
       result = 6;
     } else {
       result = 7;
