@@ -56,9 +56,6 @@ import sapotero.rxtest.events.bus.UpdateFavoritesAndProcessedEvent;
 import sapotero.rxtest.events.crypto.AddKeyEvent;
 import sapotero.rxtest.events.crypto.SelectKeyStoreEvent;
 import sapotero.rxtest.events.crypto.SelectKeysEvent;
-import sapotero.rxtest.events.crypto.SignDataEvent;
-import sapotero.rxtest.events.crypto.SignDataResultEvent;
-import sapotero.rxtest.events.crypto.SignDataWrongPinEvent;
 import sapotero.rxtest.events.decision.SignAfterCreateEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.service.AuthServiceAuthEvent;
@@ -628,41 +625,6 @@ public class MainService extends Service {
     dataLoaderInterface.tryToSignWithLogin( login, password );
   }
 
-  private void getSign(String password) throws Exception {
-
-    ContainerAdapter adapter = new ContainerAdapter(aliasesList.get(0), null, aliasesList.get(0), null);
-
-    adapter.setProviderType(ProviderType.currentProviderType());
-    adapter.setClientPassword( password.toCharArray() );
-    adapter.setResources(getResources());
-
-
-    final String trustStorePath = this.getApplicationInfo().dataDir + File.separator + BKSTrustStore.STORAGE_DIRECTORY + File.separator + BKSTrustStore.STORAGE_FILE_TRUST;
-
-    adapter.setTrustStoreProvider(BouncyCastleProvider.PROVIDER_NAME);
-    adapter.setTrustStoreType(BKSTrustStore.STORAGE_TYPE);
-
-    adapter.setTrustStoreStream(new FileInputStream(trustStorePath));
-    adapter.setTrustStorePassword(BKSTrustStore.STORAGE_PASSWORD);
-
-    PinCheck pinCheck = new PinCheck(adapter);
-    Boolean pinValid = pinCheck.check();
-
-    if (pinValid){
-      CMSSign sign = new CMSSign(true, adapter, null);
-      sign.getResult(null);
-
-      byte[] signature = sign.getSignature();
-      Encoder enc = new Encoder();
-      Timber.tag( "CRT_BASE64" ).d( enc.encode(signature) );
-
-      EventBus.getDefault().post( new SignDataResultEvent( enc.encode(signature) ) );
-
-    } else {
-      EventBus.getDefault().post( new SignDataWrongPinEvent("Pin is invalid") );
-    }
-  }
-
   public static String getFakeSign(String password, File file) throws Exception {
 
     ContainerAdapter adapter = new ContainerAdapter(aliasesList.get(0), null, aliasesList.get(0), null);
@@ -720,12 +682,6 @@ public class MainService extends Service {
   public void onMessageEvent(StartLoadDataEvent event) throws Exception {
     dataLoaderInterface.initV2( true );
   }
-
-  @Subscribe(threadMode = ThreadMode.BACKGROUND)
-  public void onMessageEvent(SignDataEvent event) throws Exception {
-    getSign( event.data );
-  }
-
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(UpdateDocumentEvent event) throws Exception {

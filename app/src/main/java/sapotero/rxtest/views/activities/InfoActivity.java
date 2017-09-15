@@ -44,8 +44,6 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.utils.JournalStatus;
-import sapotero.rxtest.events.crypto.SignDataResultEvent;
-import sapotero.rxtest.events.crypto.SignDataWrongPinEvent;
 import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
 import sapotero.rxtest.events.decision.HideTemporaryEvent;
 import sapotero.rxtest.events.decision.ShowDecisionConstructor;
@@ -402,29 +400,6 @@ public class InfoActivity extends AppCompatActivity {
     } catch (Exception e) {
       e.printStackTrace();
     }
-  }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(SignDataResultEvent event) throws Exception {
-    Timber.d("SignDataResultEvent %s", event.sign);
-
-    if (event.sign != null) {
-      Toast.makeText( getApplicationContext(), event.sign, Toast.LENGTH_SHORT ).show();
-    }
-    toolbarManager.hideDialog();
-
-  }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(SignDataWrongPinEvent event) throws Exception {
-    Timber.d("SignDataWrongPinEvent %s", event.data);
-
-    if (event.data != null) {
-      Toast.makeText( getApplicationContext(), event.data, Toast.LENGTH_SHORT ).show();
-
-    }
-
-    toolbarManager.hideDialog();
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)

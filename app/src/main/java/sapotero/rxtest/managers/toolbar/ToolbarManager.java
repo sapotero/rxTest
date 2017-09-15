@@ -8,10 +8,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.EditText;
 
-import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 
 import org.greenrobot.eventbus.EventBus;
@@ -34,7 +31,6 @@ import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
 import sapotero.rxtest.db.requery.utils.JournalStatus;
-import sapotero.rxtest.events.crypto.SignDataEvent;
 import sapotero.rxtest.events.decision.CheckDecisionVisibilityEvent;
 import sapotero.rxtest.events.decision.DecisionVisibilityEvent;
 import sapotero.rxtest.events.decision.ShowDecisionConstructor;
@@ -67,7 +63,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   private Context context;
 
   private RDocumentEntity doc;
-  private MaterialDialog dialog;
   private String command;
   private static ToolbarManager instance;
 
@@ -78,8 +73,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
     registerEvents();
     setListener();
-
-    buildDialog();
 
     operationManager.registerCallBack(this);
 
@@ -112,8 +105,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
 
     registerEvents();
     setListener();
-
-    buildDialog();
 
     operationManager.registerCallBack(this);
 
@@ -687,29 +678,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     // }
   }
 
-  private void buildDialog() {
-    dialog = new MaterialDialog.Builder( context )
-      .title(R.string.app_name)
-      .cancelable(false)
-      .customView( R.layout.dialog_pin_check, true )
-      .positiveText("OK")
-      .autoDismiss(false)
-
-      .onPositive( (dialog, which) -> {
-        try {
-          EditText pass = (EditText) this.dialog.getCustomView().findViewById(R.id.dialog_pin_password);
-          pass.setVisibility(View.GONE);
-
-          this.dialog.getCustomView().findViewById(R.id.dialog_pin_progress).setVisibility(View.VISIBLE);
-          dialog.getActionButton(DialogAction.POSITIVE).setVisibility(View.GONE);
-
-          EventBus.getDefault().post( new SignDataEvent( pass.getText().toString() ) );
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-      }).build();
-  }
-
   public void init() {
 
     toolbar.setTitleTextColor( context.getResources().getColor( R.color.md_grey_100 ) );
@@ -737,12 +705,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
   private void showCreateDecisionButton() {
     if (!isFromProject()){
       safeSetVisibility( R.id.menu_info_decision_create, true);
-    }
-  }
-
-  public void hideDialog() {
-    if (dialog != null) {
-      dialog.hide();
     }
   }
 
