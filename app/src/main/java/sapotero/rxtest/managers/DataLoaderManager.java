@@ -67,6 +67,8 @@ import timber.log.Timber;
 
 public class DataLoaderManager {
 
+  public static final int LIMIT = 500;
+
   private final String TAG = this.getClass().getSimpleName();
 
   @Inject OkHttpClient okHttpClient;
@@ -636,7 +638,7 @@ public class DataLoaderManager {
         for (String status: statuses ) {
           subscription.add(
             docService
-              .getDocumentsByIndexes(login, settings.getToken(), index, status, null , 500, getYears())
+              .getDocumentsByIndexes(login, settings.getToken(), index, status, null , LIMIT, getYears())
               .subscribeOn(Schedulers.io())
               .observeOn(AndroidSchedulers.mainThread())
               .subscribe(
@@ -663,7 +665,7 @@ public class DataLoaderManager {
       for (String code : sp) {
         subscription.add(
           docService
-            .getDocuments(login, settings.getToken(), code, null , 500, 0, getYears())
+            .getDocuments(login, settings.getToken(), code, null , LIMIT, 0, getYears())
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
@@ -770,6 +772,10 @@ public class DataLoaderManager {
       total = 0;
     }
 
+    if ( total > LIMIT ) {
+      total = LIMIT;
+    }
+
     settings.addTotalDocCount( total );
 
     if ( isDocProj ) {
@@ -861,7 +867,7 @@ public class DataLoaderManager {
       unsubscribeFavorites();
 
       subscriptionFavorites.add(
-        docService.getByFolders(login, settings.getToken(), null, 500, 0, favorites_folder.getUid(), null)
+        docService.getByFolders(login, settings.getToken(), null, LIMIT, 0, favorites_folder.getUid(), null)
           .subscribeOn( Schedulers.io() )
           .observeOn( AndroidSchedulers.mainThread() )
           .subscribe(
@@ -953,7 +959,7 @@ public class DataLoaderManager {
       unsubscribeProcessed();
 
       subscriptionProcessed.add(
-        docService.getByFolders(login, settings.getToken(), null, 500, 0, processed_folder.getUid(), date)
+        docService.getByFolders(login, settings.getToken(), null, LIMIT, 0, processed_folder.getUid(), date)
           .subscribeOn( Schedulers.io() )
           .observeOn( AndroidSchedulers.mainThread() )
           .subscribe(
