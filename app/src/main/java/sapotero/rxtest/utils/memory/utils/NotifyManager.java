@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 
 import rx.functions.Action1;
+import rx.functions.Func1;
 import rx.subjects.PublishSubject;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;

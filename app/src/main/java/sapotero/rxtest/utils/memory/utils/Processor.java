@@ -291,9 +291,10 @@ public class Processor {
         validateDocuments();
 
         if (add.size() > 0) {
-          Timber.tag(TAG).e("add.size() = " + add.size() );
-          NotifyMessageModel notifyMessageModel = new NotifyMessageModel(add, documents, filter, index, settings.isFirstRun(), source);
-          notifyPubSubject.onNext(notifyMessageModel);
+         if (documentType == DocumentType.DOCUMENT){
+            NotifyMessageModel notifyMessageModel = new NotifyMessageModel(add, documents, filter, index, settings.isFirstRun(), source);
+            notifyPubSubject.onNext(notifyMessageModel);
+          }
         }
 
           return Collections.singletonList("");
