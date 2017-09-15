@@ -8,7 +8,6 @@ import sapotero.rxtest.managers.menu.commands.decision.ApproveDecision;
 import sapotero.rxtest.managers.menu.commands.decision.RejectDecision;
 import sapotero.rxtest.managers.menu.commands.decision.SaveAndApproveDecision;
 import sapotero.rxtest.managers.menu.commands.decision.SaveDecision;
-import sapotero.rxtest.managers.menu.commands.decision.SaveTemporaryDecision;
 import sapotero.rxtest.managers.menu.commands.file.SignFile;
 import sapotero.rxtest.managers.menu.commands.performance.ApprovalPerformance;
 import sapotero.rxtest.managers.menu.commands.performance.DelegatePerformance;
@@ -333,20 +332,6 @@ public class CommandFactory implements AbstractCommand.Callback{
       }
     },
 
-    SAVE_TEMPORARY_DECISION {
-      @Override
-      public Command getCommand(CommandFactory instance, CommandParams params) {
-        SaveTemporaryDecision command = new SaveTemporaryDecision(params);
-        command.registerCallBack(instance);
-        return command;
-      }
-
-      @Override
-      public String getRussianName() {
-        return "*Сохранение резолюции";
-      }
-    },
-
     SAVE_AND_APPROVE_DECISION {
       @Override
       public Command getCommand(CommandFactory instance, CommandParams params) {
@@ -468,9 +453,6 @@ public class CommandFactory implements AbstractCommand.Callback{
           break;
         case "sapotero.rxtest.managers.menu.commands.decision.SaveAndApproveDecision":
           operation = Operation.SAVE_AND_APPROVE_DECISION;
-          break;
-        case "sapotero.rxtest.managers.menu.commands.decision.SaveTemporaryDecision":
-          operation = Operation.SAVE_TEMPORARY_DECISION;
           break;
 
         case "sapotero.rxtest.managers.menu.commands.decision.ApproveDecision":
