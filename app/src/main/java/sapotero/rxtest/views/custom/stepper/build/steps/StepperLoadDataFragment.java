@@ -24,7 +24,6 @@ import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.events.bus.UpdateFavoritesAndProcessedEvent;
-import sapotero.rxtest.events.stepper.auth.StepperLoginCheckFailEvent;
 import sapotero.rxtest.events.stepper.load.StartLoadDataEvent;
 import sapotero.rxtest.events.stepper.load.StepperDocumentCountReadyEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
@@ -157,15 +156,6 @@ public class StepperLoadDataFragment extends Fragment implements Step {
   @Override
   public void onError(@NonNull VerificationError error) {
     //handle error inside of the fragment, e.g. show error on EditText
-  }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(StepperLoginCheckFailEvent event) throws Exception {
-    Timber.tag(TAG).d("login fail");
-
-    if (event.error != null) {
-//      Toast.makeText( getContext(), event.error, Toast.LENGTH_SHORT ).show();
-    }
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
