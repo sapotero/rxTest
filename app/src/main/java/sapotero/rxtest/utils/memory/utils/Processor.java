@@ -222,10 +222,11 @@ public class Processor {
 
         if ( doc.getUpdatedAt() != null && doc.isProcessed() && !DateUtil.isSomeTimePassed(doc.getUpdatedAt(), time) ) {
           Timber.tag(TAG).e("    ** %s @ %s || %s : %s ", doc.getUpdatedAt(), DateUtil.isSomeTimePassed(doc.getUpdatedAt(), time), doc.getMd5(), document.getMd5());
-          EventBus.getDefault().post(new StepperLoadDocumentEvent(doc.getUid()));
 
           if ( Filter.isChanged(doc.getFilter(), filter) ){
             updateJob(doc.getUid(), doc.getMd5());
+          } else {
+            EventBus.getDefault().post(new StepperLoadDocumentEvent(doc.getUid()));
           }
 
         } else {
@@ -233,10 +234,8 @@ public class Processor {
         }
 
       } else {
-
         EventBus.getDefault().post(new StepperLoadDocumentEvent(doc.getUid()));
       }
-
 
     } else {
       Timber.tag(TAG).e("new: %s", document.getUid());
@@ -446,12 +445,16 @@ public class Processor {
       case FAVORITE:
         if (folder != null) {
           jobManager.addJobInBackground( new CreateFavoriteDocumentsJob(uid, folder, login, currentUserId) );
+        } else {
+          EventBus.getDefault().post( new StepperLoadDocumentEvent( uid ) );
         }
         break;
 
       case PROCESSED:
         if (folder != null) {
           jobManager.addJobInBackground( new CreateProcessedDocumentsJob(uid, folder, login, currentUserId) );
+        } else {
+          EventBus.getDefault().post( new StepperLoadDocumentEvent( uid ) );
         }
         break;
     }

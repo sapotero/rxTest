@@ -326,15 +326,8 @@ public class Filter {
   }
 
   public static String getIndexName(String raw_index) {
-    String indexName = null;
-
-    if ( raw_index != null ) {
-      String[] index = raw_index.split("_production_db_");
-      indexName = index[0];
-    }
-
-    return indexName;
-    }
+    return JournalStatus.splitNameForApi( raw_index );
+  }
 
 
   private boolean fastIntCheck(String str) {

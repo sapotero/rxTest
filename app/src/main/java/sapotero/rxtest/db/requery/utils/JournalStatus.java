@@ -91,15 +91,15 @@ public enum JournalStatus {
   }
 
   public static String getSingleByName(String name) {
-    String documentName = "";
+    String result = "";
 
     JournalStatus journalStatus = getByName( name );
 
     if ( journalStatus != null ) {
-      documentName = journalStatus.getSingle();
+      result = journalStatus.getSingle();
     }
 
-    return documentName;
+    return result;
   }
 
   public static JournalStatus getByIndex(String index) {
@@ -110,6 +110,17 @@ public enum JournalStatus {
         result = item;
         break;
       }
+    }
+
+    return result;
+  }
+
+  public static String splitNameForApi(String nameForApi) {
+    String result = null;
+
+    if ( nameForApi != null ) {
+      String[] index = nameForApi.split("_production_db_");
+      result = index[0];
     }
 
     return result;
