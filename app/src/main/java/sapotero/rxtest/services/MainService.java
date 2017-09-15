@@ -56,7 +56,6 @@ import sapotero.rxtest.events.bus.UpdateFavoritesAndProcessedEvent;
 import sapotero.rxtest.events.crypto.AddKeyEvent;
 import sapotero.rxtest.events.crypto.SelectKeyStoreEvent;
 import sapotero.rxtest.events.crypto.SelectKeysEvent;
-import sapotero.rxtest.events.service.AuthServiceAuthEvent;
 import sapotero.rxtest.events.service.CheckNetworkEvent;
 import sapotero.rxtest.events.service.UpdateDocumentsByStatusEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckEvent;
@@ -557,7 +556,6 @@ public class MainService extends Service {
         data -> {
 
           if (aliasesList.size() > 0){
-            EventBus.getDefault().post( new AuthServiceAuthEvent( aliasesList.toString() ) );
             ContainerAdapter adapter = new ContainerAdapter(aliasesList.get( 0 ), null, aliasesList.get( 0 ), null);
 
             adapter.setProviderType(ProviderType.currentProviderType());
