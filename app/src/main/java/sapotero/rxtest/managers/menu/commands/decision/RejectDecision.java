@@ -10,7 +10,6 @@ import java.util.Objects;
 import rx.Observable;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.utils.JournalStatus;
-import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.DecisionCommand;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
@@ -129,6 +128,5 @@ public class RejectDecision extends DecisionCommand {
   @Override
   public void finishOnOperationError(List<String> errors) {
     finishRejectedProcessedOperationOnError( errors );
-    EventBus.getDefault().post( new ForceUpdateDocumentEvent( getParams().getDocument() ));
   }
 }

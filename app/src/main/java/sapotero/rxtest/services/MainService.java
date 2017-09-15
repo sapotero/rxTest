@@ -56,7 +56,6 @@ import sapotero.rxtest.events.bus.UpdateFavoritesAndProcessedEvent;
 import sapotero.rxtest.events.crypto.AddKeyEvent;
 import sapotero.rxtest.events.crypto.SelectKeyStoreEvent;
 import sapotero.rxtest.events.crypto.SelectKeysEvent;
-import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.service.AuthServiceAuthEvent;
 import sapotero.rxtest.events.service.CheckNetworkEvent;
 import sapotero.rxtest.events.service.UpdateDocumentsByStatusEvent;
@@ -64,7 +63,6 @@ import sapotero.rxtest.events.stepper.auth.StepperDcCheckEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckFailEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckEvent;
 import sapotero.rxtest.events.stepper.load.StartLoadDataEvent;
-import sapotero.rxtest.events.view.UpdateCurrentInfoActivityEvent;
 import sapotero.rxtest.managers.DataLoaderManager;
 import sapotero.rxtest.services.task.CheckNetworkTask;
 import sapotero.rxtest.services.task.UpdateAllDocumentsTask;
@@ -677,11 +675,6 @@ public class MainService extends Service {
   @Subscribe(threadMode = ThreadMode.BACKGROUND)
   public void onMessageEvent(StartLoadDataEvent event) throws Exception {
     dataLoaderInterface.initV2( true );
-  }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(UpdateDocumentEvent event) throws Exception {
-    EventBus.getDefault().post( new UpdateCurrentInfoActivityEvent() );
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)

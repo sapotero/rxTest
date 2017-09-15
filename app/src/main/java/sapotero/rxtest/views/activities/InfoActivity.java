@@ -48,12 +48,12 @@ import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
 import sapotero.rxtest.events.decision.HideTemporaryEvent;
 import sapotero.rxtest.events.decision.ShowDecisionConstructor;
 import sapotero.rxtest.events.document.DropControlEvent;
+import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.notification.RemoveIdNotificationEvent;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.events.view.ShowPrevDocumentEvent;
 import sapotero.rxtest.events.view.ShowSnackEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
-import sapotero.rxtest.events.view.UpdateCurrentInfoActivityEvent;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.managers.menu.utils.DateUtil;
 import sapotero.rxtest.managers.toolbar.ToolbarManager;
@@ -455,11 +455,9 @@ public class InfoActivity extends AppCompatActivity {
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(UpdateCurrentInfoActivityEvent event) throws Exception {
-
-    Timber.d("UpdateCurrentInfoActivityEvent");
+  public void onMessageEvent(UpdateDocumentEvent event) throws Exception {
+    Timber.d("UpdateDocumentEvent");
     updateCurrent();
-
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)

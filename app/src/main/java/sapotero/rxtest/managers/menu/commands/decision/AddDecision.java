@@ -5,7 +5,6 @@ import org.greenrobot.eventbus.EventBus;
 import java.util.List;
 
 import rx.Observable;
-import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.managers.menu.commands.DecisionCommand;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
@@ -86,6 +85,5 @@ public class AddDecision extends DecisionCommand {
   @Override
   public void finishOnOperationError(List<String> errors) {
     finishOperationOnError( errors );
-    EventBus.getDefault().post( new ForceUpdateDocumentEvent( getParams().getDocument() ));
   }
 }
