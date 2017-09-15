@@ -55,7 +55,7 @@ public class CreateProcessedDocumentsJob extends DocumentJob {
       return;
     }
 
-    DocumentMapper documentMapper = mappers.getDocumentMapper().withLogin(login).withCurrentUserId(currentUserId);
+    DocumentMapper documentMapper = new DocumentMapper().withLogin(login).withCurrentUserId(currentUserId);
     RDocumentEntity doc = new RDocumentEntity();
 
     int period = 1;

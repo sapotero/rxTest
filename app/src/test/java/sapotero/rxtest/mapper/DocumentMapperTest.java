@@ -2,30 +2,9 @@ package sapotero.rxtest.mapper;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.dagger.components.DaggerTestDataComponent;
-import sapotero.rxtest.dagger.components.TestDataComponent;
-import sapotero.rxtest.db.mapper.ActionMapper;
-import sapotero.rxtest.db.mapper.BlockMapper;
-import sapotero.rxtest.db.mapper.ControlLabelMapper;
-import sapotero.rxtest.db.mapper.DecisionMapper;
 import sapotero.rxtest.db.mapper.DocumentMapper;
-import sapotero.rxtest.db.mapper.ExemplarMapper;
-import sapotero.rxtest.db.mapper.ImageMapper;
-import sapotero.rxtest.db.mapper.LinkMapper;
-import sapotero.rxtest.db.mapper.PerformerMapper;
-import sapotero.rxtest.db.mapper.RouteMapper;
-import sapotero.rxtest.db.mapper.SignerMapper;
 import sapotero.rxtest.db.mapper.StepMapper;
-import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RLinks;
 import sapotero.rxtest.db.requery.models.RLinksEntity;
@@ -41,6 +20,7 @@ import sapotero.rxtest.db.requery.models.exemplars.RExemplar;
 import sapotero.rxtest.db.requery.models.exemplars.RExemplarEntity;
 import sapotero.rxtest.db.requery.models.images.RImage;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
+import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.retrofit.models.document.ControlLabel;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
@@ -54,26 +34,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.times;
 
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ EsdApplication.class })
 public class DocumentMapperTest {
 
-  private TestDataComponent testDataComponent;
   private DocumentMapper mapper;
-  private PerformerMapper performerMapper;
-  private BlockMapper blockMapper;
-  private DecisionMapper decisionMapper;
-  private ControlLabelMapper controlLabelMapper;
-  private ExemplarMapper exemplarMapper;
-  private ImageMapper imageMapper;
-  private LinkMapper linkMapper;
-  private RouteMapper routeMapper;
   private StepMapper stepMapper;
-  private SignerMapper signerMapper;
-  private ActionMapper actionMapper;
   private DocumentInfo dummyDoc;
   private RDocumentEntity entity;
   private DocumentInfo model;
@@ -81,43 +47,10 @@ public class DocumentMapperTest {
   private String dummyLogin;
   private String dummyCurrentUserId;
 
-  @Mock Mappers mappers;
-
   @Before
   public void init() {
-    MockitoAnnotations.initMocks(this);
-
-    testDataComponent = DaggerTestDataComponent.builder().build();
-    testDataComponent.inject(this);
-
-    performerMapper = new PerformerMapper();
-    blockMapper = new BlockMapper(mappers);
-    decisionMapper = new DecisionMapper(mappers);
-    controlLabelMapper = new ControlLabelMapper();
-    exemplarMapper = new ExemplarMapper();
-    imageMapper = new ImageMapper();
-    linkMapper = new LinkMapper();
-    routeMapper = new RouteMapper(mappers);
     stepMapper = new StepMapper();
-    signerMapper = new SignerMapper();
-    actionMapper = new ActionMapper();
-
     generateDocument();
-
-    PowerMockito.mockStatic(EsdApplication.class);
-    PowerMockito.when(EsdApplication.getDataComponent()).thenReturn(testDataComponent);
-
-    Mockito.when(mappers.getPerformerMapper()).thenReturn(performerMapper);
-    Mockito.when(mappers.getBlockMapper()).thenReturn(blockMapper);
-    Mockito.when(mappers.getDecisionMapper()).thenReturn(decisionMapper);
-    Mockito.when(mappers.getControlLabelMapper()).thenReturn(controlLabelMapper);
-    Mockito.when(mappers.getExemplarMapper()).thenReturn(exemplarMapper);
-    Mockito.when(mappers.getImageMapper()).thenReturn(imageMapper);
-    Mockito.when(mappers.getLinkMapper()).thenReturn(linkMapper);
-    Mockito.when(mappers.getRouteMapper()).thenReturn(routeMapper);
-    Mockito.when(mappers.getStepMapper()).thenReturn(stepMapper);
-    Mockito.when(mappers.getSignerMapper()).thenReturn(signerMapper);
-    Mockito.when(mappers.getActionMapper()).thenReturn(actionMapper);
   }
 
   private void generateDocument() {
@@ -173,20 +106,8 @@ public class DocumentMapperTest {
 
   @Test
   public void toEntity() {
-    mapper = new DocumentMapper(mappers);
+    mapper = new DocumentMapper();
     entity = mapper.withLogin(dummyLogin).toEntity(dummyDoc);
-
-    Mockito.verify(mappers, times(1)).getSignerMapper();
-    Mockito.verify(mappers, times(1)).getDecisionMapper();
-    Mockito.verify(mappers, times(1)).getBlockMapper();
-    Mockito.verify(mappers, times(1)).getPerformerMapper();
-    Mockito.verify(mappers, times(1)).getRouteMapper();
-    Mockito.verify(mappers, times(1)).getStepMapper();
-    Mockito.verify(mappers, times(1)).getExemplarMapper();
-    Mockito.verify(mappers, times(1)).getImageMapper();
-    Mockito.verify(mappers, times(1)).getControlLabelMapper();
-    Mockito.verify(mappers, times(1)).getActionMapper();
-    Mockito.verify(mappers, times(1)).getLinkMapper();
 
     assertNotNull( entity );
     assertEquals( 0, entity.getId() );
@@ -270,21 +191,9 @@ public class DocumentMapperTest {
 
   @Test
   public void toModel() {
-    mapper = new DocumentMapper(mappers);
+    mapper = new DocumentMapper();
     entity = mapper.toEntity(dummyDoc);
     model = mapper.toModel(entity);
-
-    Mockito.verify(mappers, times(2)).getSignerMapper();
-    Mockito.verify(mappers, times(2)).getDecisionMapper();
-    Mockito.verify(mappers, times(2)).getBlockMapper();
-    Mockito.verify(mappers, times(2)).getPerformerMapper();
-    Mockito.verify(mappers, times(2)).getRouteMapper();
-    Mockito.verify(mappers, times(2)).getStepMapper();
-    Mockito.verify(mappers, times(2)).getExemplarMapper();
-    Mockito.verify(mappers, times(2)).getImageMapper();
-    Mockito.verify(mappers, times(2)).getControlLabelMapper();
-    Mockito.verify(mappers, times(2)).getActionMapper();
-    Mockito.verify(mappers, times(2)).getLinkMapper();
 
     assertNotNull( model );
     assertEquals( dummyDoc.getUid(), model.getUid() );
@@ -345,7 +254,7 @@ public class DocumentMapperTest {
 
   @Test
   public void hasDiff() {
-    mapper = new DocumentMapper(mappers);
+    mapper = new DocumentMapper();
 
     RDocumentEntity entity1 = mapper.toEntity(dummyDoc);
     RDocumentEntity entity2 = mapper.toEntity(dummyDoc);
@@ -364,7 +273,7 @@ public class DocumentMapperTest {
   public void control() {
     dummyDoc.getControlLabels().get(0).setOfficialId( dummyCurrentUserId );
 
-    mapper = new DocumentMapper(mappers);
+    mapper = new DocumentMapper();
     entity = mapper.withCurrentUserId(dummyCurrentUserId).toEntity(dummyDoc);
 
     assertEquals( true, entity.isControl() );
@@ -374,7 +283,7 @@ public class DocumentMapperTest {
   public void withoutOrganization() {
     dummyDoc.getSigner().setOrganisation( "" );
 
-    mapper = new DocumentMapper(mappers);
+    mapper = new DocumentMapper();
     entity = mapper.toEntity(dummyDoc);
 
     assertEquals( "Без организации", entity.getOrganization() );
@@ -382,7 +291,7 @@ public class DocumentMapperTest {
 
   @Test
   public void shared() {
-    mapper = new DocumentMapper(mappers);
+    mapper = new DocumentMapper();
     entity = mapper.toEntity(dummyDoc);
 
     mapper.setShared( entity, false );
@@ -396,7 +305,7 @@ public class DocumentMapperTest {
   public void withoutDecision() {
     dummyDoc.getDecisions().clear();
 
-    mapper = new DocumentMapper(mappers);
+    mapper = new DocumentMapper();
     entity = mapper.toEntity(dummyDoc);
 
     assertEquals( false, entity.isWithDecision() );
@@ -406,7 +315,7 @@ public class DocumentMapperTest {
   public void red() {
     dummyDoc.getDecisions().get(0).setRed(true);
 
-    mapper = new DocumentMapper(mappers);
+    mapper = new DocumentMapper();
     entity = mapper.toEntity(dummyDoc);
 
     assertEquals( true, entity.isRed() );
@@ -416,7 +325,7 @@ public class DocumentMapperTest {
   public void emptyDoc() {
     DocumentInfo emptyDoc = new DocumentInfo();
 
-    mapper = new DocumentMapper(mappers);
+    mapper = new DocumentMapper();
     entity = mapper.toEntity(emptyDoc);
 
     assertNotNull( entity );
@@ -429,10 +338,10 @@ public class DocumentMapperTest {
 
   @Test
   public void journalFilter() {
-    String dummyJournal = "incoming_documents_production_db_core_cards_incoming_documents_cards";
-    String dummyFilter = "sent_to_the_report";
+    String dummyJournal = JournalStatus.INCOMING_DOCUMENTS.getNameForApi();
+    String dummyFilter = JournalStatus.FOR_REPORT.getName();
 
-    mapper = new DocumentMapper(mappers);
+    mapper = new DocumentMapper();
     entity = mapper.toEntity(dummyDoc);
 
     mapper.setJournal( entity, dummyJournal );

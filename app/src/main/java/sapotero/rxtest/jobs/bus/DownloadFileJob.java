@@ -60,6 +60,7 @@ public class DownloadFileJob  extends BaseJob {
     if ( !Objects.equals( login, settings.getLogin() ) ) {
       // Запускаем job только если логин не сменился (режим замещения)
       Timber.tag(TAG).d("Login changed, quit onRun for image %s", rImageId);
+      EventBus.getDefault().post(new FileDownloadedEvent("Quit load file: " + fileName));
       return;
     }
 
@@ -145,7 +146,7 @@ public class DownloadFileJob  extends BaseJob {
     String admin = login;
     String token = settings.getToken();
 
-    Retrofit retrofit = new RetrofitManager(getApplicationContext(), settings.getHost(), okHttpClient).process();
+    Retrofit retrofit = new RetrofitManager(settings.getHost(), okHttpClient).process();
     DocumentLinkService documentLinkService = retrofit.create(DocumentLinkService.class);
 
     strUrl = strUrl.replace("?expired_link=1", "");
@@ -186,7 +187,7 @@ public class DownloadFileJob  extends BaseJob {
       .build();
 
 
-    Retrofit retrofit = new RetrofitManager(getApplicationContext(), settings.getHost(), okHttpClient).process();
+    Retrofit retrofit = new RetrofitManager(settings.getHost(), okHttpClient).process();
     DocumentLinkService documentLinkService = retrofit.create(DocumentLinkService.class);
 
     Observable<Response<ResponseBody>> call = documentLinkService.download(new_builtUri.toString(), admin, token);

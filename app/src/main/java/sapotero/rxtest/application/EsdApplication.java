@@ -14,9 +14,7 @@ import sapotero.rxtest.application.components.DaggerDataComponent;
 import sapotero.rxtest.application.components.DataComponent;
 import sapotero.rxtest.application.components.ManagerComponent;
 import sapotero.rxtest.application.components.NetworkComponent;
-import sapotero.rxtest.application.components.ValidationComponent;
 import sapotero.rxtest.application.config.Constant;
-import sapotero.rxtest.db.requery.utils.validation.ValidationModule;
 import sapotero.rxtest.jobs.utils.JobModule;
 import sapotero.rxtest.managers.menu.utils.OperationManagerModule;
 import sapotero.rxtest.retrofit.utils.OkHttpModule;
@@ -124,7 +122,6 @@ public final class EsdApplication extends Application {
   private static EsdApplication application;
 
   private static DataComponent dataComponent;
-  private static ValidationComponent validationComponent;
   private static NetworkComponent networkComponent;
   private static ManagerComponent managerComponent;
 
@@ -164,7 +161,6 @@ public final class EsdApplication extends Application {
 
   private void initComponents() {
     dataComponent = DaggerDataComponent.builder().build();
-    validationComponent = dataComponent.plusValidationComponent(new ValidationModule());
     networkComponent = dataComponent.plusNetworkComponent(new OkHttpModule());
     managerComponent = networkComponent.plusManagerComponent(
             new JobModule(), new QueueManagerModule(), new OperationManagerModule() );
@@ -172,10 +168,6 @@ public final class EsdApplication extends Application {
 
   public static DataComponent getDataComponent() {
     return dataComponent;
-  }
-
-  public static ValidationComponent getValidationComponent() {
-    return validationComponent;
   }
 
   public static NetworkComponent getNetworkComponent() {

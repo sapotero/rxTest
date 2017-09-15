@@ -2,14 +2,7 @@ package sapotero.rxtest.mapper;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.dagger.components.DaggerTestDataComponent;
-import sapotero.rxtest.dagger.components.TestDataComponent;
 import sapotero.rxtest.db.mapper.ColleagueMapper;
 import sapotero.rxtest.db.requery.models.RColleagueEntity;
 import sapotero.rxtest.retrofit.models.Colleague;
@@ -19,11 +12,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ EsdApplication.class })
 public class ColleagueMapperTest {
 
-  private TestDataComponent testDataComponent;
   private ColleagueMapper mapper;
   private Colleague dummyColleague;
   private Integer dummySortIndex;
@@ -33,14 +23,8 @@ public class ColleagueMapperTest {
 
   @Before
   public void init() {
-    testDataComponent = DaggerTestDataComponent.builder().build();
-    testDataComponent.inject(this);
-
     generateColleague();
     dummySortIndex = PrimaryConsiderationMapperTest.generateDummySortIndex();
-
-    PowerMockito.mockStatic(EsdApplication.class);
-    PowerMockito.when(EsdApplication.getDataComponent()).thenReturn(testDataComponent);
   }
 
   private void generateColleague() {
@@ -56,6 +40,7 @@ public class ColleagueMapperTest {
   public void toEntity() {
     mapper = new ColleagueMapper();
     entity = mapper.withLogin(dummyLogin).toEntity(dummyColleague);
+    entity.setSortIndex( dummySortIndex );
 
     assertNotNull( entity );
     assertEquals( 0, entity.getId() );
@@ -64,6 +49,7 @@ public class ColleagueMapperTest {
     assertEquals( dummyColleague.getOfficialName(), entity.getOfficialName() );
     assertEquals( dummyColleague.getActived(), entity.isActived() );
     assertEquals( dummyLogin, entity.getUser() );
+    assertEquals( dummySortIndex, entity.getSortIndex() );
   }
 
   @Test

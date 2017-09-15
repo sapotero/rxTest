@@ -15,10 +15,8 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.mapper.DocumentMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
-import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
-import sapotero.rxtest.db.requery.utils.Fields;
+import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
-import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
 import timber.log.Timber;
 
@@ -33,14 +31,14 @@ public class CreateLinksJob extends DocumentJob {
   private String parentUid;
   private boolean saveFirstLink;
 
-  private Fields.Status filter;
+  private JournalStatus filter;
 
   public CreateLinksJob(String linkUid, String parentUid, boolean saveFirstLink, String login, String currentUserId) {
     super( new Params(PRIORITY).requireNetwork().persist().addTags("DocJob") );
     this.linkUid = linkUid;
     this.parentUid = parentUid;
     this.saveFirstLink = saveFirstLink;
-    this.filter = Fields.Status.LINK;
+    this.filter = JournalStatus.LINK;
     this.login = login;
     this.currentUserId = currentUserId;
   }
@@ -54,6 +52,7 @@ public class CreateLinksJob extends DocumentJob {
     if ( !Objects.equals( login, settings.getLogin() ) ) {
       // Запускаем job только если логин не сменился (режим замещения)
       Timber.tag(TAG).d("Login changed, quit onRun %s", linkUid);
+      EventBus.getDefault().post( new StepperLoadDocumentEvent(linkUid) );
       return;
     }
 
@@ -113,14 +112,14 @@ public class CreateLinksJob extends DocumentJob {
       return;
     }
 
-    DocumentMapper documentMapper = mappers.getDocumentMapper().withLogin(login).withCurrentUserId(currentUserId);
+    DocumentMapper documentMapper = new DocumentMapper().withLogin(login).withCurrentUserId(currentUserId);
     RDocumentEntity doc = new RDocumentEntity();
 
     documentMapper.setSimpleFields(doc, document);
     documentMapper.setNestedFields(doc, document, false);
 
     documentMapper.setJournal(doc, "");
-    documentMapper.setFilter(doc, filter.toString());
+    documentMapper.setFilter(doc, filter.getName());
     documentMapper.setShared(doc, false);
     doc.setFolder("");
     doc.setFromLinks(true);

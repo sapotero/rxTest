@@ -23,7 +23,7 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Deleter;
 import sapotero.rxtest.db.requery.utils.DocumentStateSaver;
-import sapotero.rxtest.db.requery.utils.Fields;
+import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.jobs.bus.CreateDocumentsJob;
@@ -217,10 +217,11 @@ public class Processor {
 
         if ( doc.getUpdatedAt() != null && doc.isProcessed() && !DateUtil.isSomeTimePassed(doc.getUpdatedAt(), time) ) {
           Timber.tag(TAG).e("    ** %s @ %s || %s : %s ", doc.getUpdatedAt(), DateUtil.isSomeTimePassed(doc.getUpdatedAt(), time), doc.getMd5(), document.getMd5());
-          EventBus.getDefault().post(new StepperLoadDocumentEvent(doc.getUid()));
 
           if ( Filter.isChanged(doc.getFilter(), filter) ){
             updateJob(doc.getUid(), doc.getMd5());
+          } else {
+            EventBus.getDefault().post(new StepperLoadDocumentEvent(doc.getUid()));
           }
 
         } else {
@@ -228,10 +229,8 @@ public class Processor {
         }
 
       } else {
-
         EventBus.getDefault().post(new StepperLoadDocumentEvent(doc.getUid()));
       }
-
 
     } else {
       Timber.tag(TAG).e("new: %s", document.getUid());
@@ -308,30 +307,27 @@ public class Processor {
     return new ArrayList<>();
   }
 
-  private String getShortJournalName(String longJournalName){
-    String shortJournalName = "";
+  private JournalStatus getJournalStatus() {
+    JournalStatus result = null;
 
-    if (  longJournalName != null ) {
-      String[] index = longJournalName.split("_production_db_");
-      shortJournalName = index[0];
-    }else if (Objects.equals(this.filter, "approval")){
-      shortJournalName = "APPROVE" ;
-    }else if (Objects.equals(this.filter, "signing")){
-      shortJournalName = "SIGN" ;
+    if ( index != null ) {
+      result = JournalStatus.getByNameForApi( index );
+    } else if ( filter != null ) {
+      result = JournalStatus.getByNameForApi( filter );
     }
-    return shortJournalName;
+
+    return result;
   }
 
   /* генерируем уведомления, если в MemoryStore появился новый документ. addedDocList - List новых документов*/
   private void generateNotificationMsg(List<String> addedDocList) {
     NotifyManager mNotifyManager = new NotifyManager(addedDocList, documents, filter);
 
-    /*приводим строку index к виду Fields.Journal*/
-    String shortNameJournal = getShortJournalName(index).toUpperCase();
-    Fields.Journal itemJournal = Fields.Journal.valueOf(shortNameJournal);
+    /*приводим строку index к виду JournalStatus*/
+    JournalStatus itemJournal = getJournalStatus();
 
     /*проверяем, включён ли checkBox для журнала. -> генерируем уведомление */
-    if( settings.getNotificatedJournals().contains( itemJournal.getValue()) ) {
+    if ( itemJournal != null && settings.getNotificatedJournals().contains( itemJournal.getStringIndex() ) ) {
       mNotifyManager.generateNotifyMsg(itemJournal.getFormattedName() + itemJournal.getSingle());
     }
   }
@@ -468,12 +464,16 @@ public class Processor {
       case FAVORITE:
         if (folder != null) {
           jobManager.addJobInBackground( new CreateFavoriteDocumentsJob(uid, folder, login, currentUserId) );
+        } else {
+          EventBus.getDefault().post( new StepperLoadDocumentEvent( uid ) );
         }
         break;
 
       case PROCESSED:
         if (folder != null) {
           jobManager.addJobInBackground( new CreateProcessedDocumentsJob(uid, folder, login, currentUserId) );
+        } else {
+          EventBus.getDefault().post( new StepperLoadDocumentEvent( uid ) );
         }
         break;
     }

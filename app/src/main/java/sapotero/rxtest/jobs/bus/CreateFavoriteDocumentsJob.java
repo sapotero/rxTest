@@ -44,7 +44,7 @@ public class CreateFavoriteDocumentsJob extends DocumentJob {
 
   @Override
   public void doAfterLoad(DocumentInfo document) {
-    DocumentMapper documentMapper = mappers.getDocumentMapper().withLogin(login).withCurrentUserId(currentUserId);
+    DocumentMapper documentMapper = new DocumentMapper().withLogin(login).withCurrentUserId(currentUserId);
     RDocumentEntity doc = documentMapper.toEntity(document);
 
     documentMapper.setJournal(doc, "");

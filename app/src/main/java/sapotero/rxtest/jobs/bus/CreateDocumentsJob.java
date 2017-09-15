@@ -9,6 +9,7 @@ import com.birbit.android.jobqueue.RetryConstraint;
 
 import org.greenrobot.eventbus.EventBus;
 
+import sapotero.rxtest.db.mapper.DocumentMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.retrofit.models.document.DocumentInfo;
@@ -52,7 +53,7 @@ public class CreateDocumentsJob extends DocumentJob {
   @Override
   public void doAfterLoad(DocumentInfo document){
     RDocumentEntity doc = createDocument(document, status, shared);
-    mappers.getDocumentMapper().withLogin(login).withCurrentUserId(currentUserId).setJournal(doc, journal);
+    new DocumentMapper().withLogin(login).withCurrentUserId(currentUserId).setJournal(doc, journal);
     saveDocument(document, doc, false, TAG);
   }
 

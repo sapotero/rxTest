@@ -26,6 +26,7 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.events.bus.FileDownloadedEvent;
 import sapotero.rxtest.events.bus.UpdateFavoritesAndProcessedEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckFailEvent;
+import sapotero.rxtest.events.stepper.load.StartLoadDataEvent;
 import sapotero.rxtest.events.stepper.load.StepperDocumentCountReadyEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.utils.ISettings;
@@ -143,6 +144,8 @@ public class StepperLoadDataFragment extends Fragment implements Step {
             }
           }, Timber::e)
       );
+
+      EventBus.getDefault().post( new StartLoadDataEvent() );
     }
   }
 

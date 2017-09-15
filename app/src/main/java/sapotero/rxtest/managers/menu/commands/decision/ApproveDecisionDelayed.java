@@ -5,6 +5,7 @@ import org.greenrobot.eventbus.EventBus;
 import java.util.List;
 
 import rx.Observable;
+import sapotero.rxtest.db.mapper.DecisionMapper;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
@@ -66,7 +67,7 @@ public class ApproveDecisionDelayed extends DecisionCommand {
     RDecisionEntity decision= getDecision(getParams().getDecisionId());
     if ( sign != null && decision != null) {
 
-      Decision _decision = mappers.getDecisionMapper().toFormattedModel(decision);
+      Decision _decision = new DecisionMapper().toFormattedModel(decision);
       _decision.setDocumentUid( null );
       _decision.setDocumentUid( null );
       _decision.setApproved(true);

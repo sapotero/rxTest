@@ -50,7 +50,7 @@ public class CreateColleagueJob extends BaseJob {
     int index = 0;
 
     List<RColleagueEntity> colleagueEntityList = new ArrayList<>();
-    ColleagueMapper mapper = mappers.getColleagueMapper().withLogin(login);
+    ColleagueMapper mapper = new ColleagueMapper().withLogin(login);
 
     for (Colleague user : users) {
       RColleagueEntity colleagueEntity = mapper.toEntity(user);

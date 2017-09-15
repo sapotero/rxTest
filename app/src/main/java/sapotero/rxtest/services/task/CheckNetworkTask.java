@@ -1,7 +1,5 @@
 package sapotero.rxtest.services.task;
 
-import android.content.Context;
-
 import javax.inject.Inject;
 
 import okhttp3.OkHttpClient;
@@ -18,7 +16,6 @@ public class CheckNetworkTask implements Runnable {
 
   final String TAG = CheckNetworkTask.class.getSimpleName();
 
-  @Inject Context context;
   @Inject ISettings settings;
   @Inject OkHttpClient okHttpClient;
 
@@ -28,7 +25,7 @@ public class CheckNetworkTask implements Runnable {
 
   @Override
   public void run() {
-    Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
+    Retrofit retrofit = new RetrofitManager(settings.getHost(), okHttpClient).process();
     AuthService auth = retrofit.create(AuthService.class);
 
     Timber.tag(TAG).d("Checking internet connectivity");

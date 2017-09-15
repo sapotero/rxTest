@@ -66,7 +66,7 @@ import sapotero.rxtest.db.requery.models.RColleagueEntity;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.query.DBQueryBuilder;
 import sapotero.rxtest.db.requery.utils.DocumentStateSaver;
-import sapotero.rxtest.db.requery.utils.Fields;
+import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.events.adapter.JournalSelectorIndexEvent;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.events.service.CheckNetworkEvent;
@@ -75,7 +75,6 @@ import sapotero.rxtest.events.utils.LoadedFromDbEvent;
 import sapotero.rxtest.events.utils.RecalculateMenuEvent;
 import sapotero.rxtest.events.utils.ReceivedTokenEvent;
 import sapotero.rxtest.events.view.UpdateDrawerEvent;
-import sapotero.rxtest.jobs.bus.UpdateAuthTokenJob;
 import sapotero.rxtest.managers.DataLoaderManager;
 import sapotero.rxtest.retrofit.Api.AuthService;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
@@ -95,6 +94,18 @@ import sapotero.rxtest.views.custom.spinner.JournalSelectorView;
 import sapotero.rxtest.views.menu.MenuBuilder;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import timber.log.Timber;
+
+import static sapotero.rxtest.db.requery.utils.Journals.ALL;
+import static sapotero.rxtest.db.requery.utils.Journals.APPROVE_ASSIGN;
+import static sapotero.rxtest.db.requery.utils.Journals.CITIZEN_REQUESTS;
+import static sapotero.rxtest.db.requery.utils.Journals.FAVORITES;
+import static sapotero.rxtest.db.requery.utils.Journals.INCOMING_DOCUMENTS;
+import static sapotero.rxtest.db.requery.utils.Journals.IN_DOCUMENTS;
+import static sapotero.rxtest.db.requery.utils.Journals.ON_CONTROL;
+import static sapotero.rxtest.db.requery.utils.Journals.ORDERS;
+import static sapotero.rxtest.db.requery.utils.Journals.INCOMING_ORDERS;
+import static sapotero.rxtest.db.requery.utils.Journals.ORDERS_DDO;
+import static sapotero.rxtest.db.requery.utils.Journals.PROCESSED;
 
 public class MainActivity extends AppCompatActivity implements MenuBuilder.Callback, SearchView.OnVisibilityChangeListener {
 
@@ -125,18 +136,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private String TAG = MainActivity.class.getSimpleName();
   private OrganizationAdapter organization_adapter;
   private DrawerBuilder drawer;
-
-  private final int ALL                = 0;
-  private final int INCOMING_DOCUMENTS = 1;
-  private final int CITIZEN_REQUESTS   = 2;
-  private final int APPROVE_ASSIGN     = 3;
-  private final int INCOMING_ORDERS    = 4;
-  private final int ORDERS             = 5;
-  private final int ORDERS_DDO         = 6;
-  private final int IN_DOCUMENTS       = 7;
-  private final int ON_CONTROL         = 8;
-  private final int PROCESSED          = 9;
-  private final int FAVORITES          = 10;
 
   private final int SETTINGS_VIEW_TYPE_APPROVE = 18;
   private final int SETTINGS_VIEW = 20;
@@ -208,7 +207,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
       .withEmptyView( documents_empty_list )
       .withProgressBar( progressBar );
 
-    dataLoader = new DataLoaderManager(this);
+    dataLoader = new DataLoaderManager();
 
     initToolbar();
 
@@ -243,11 +242,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void updateToken() {
-    String sign = settings.getSign();
-    if (sign == null) {
-      sign = "";
-    }
-    dataLoader.updateAuth(sign, false);
+    dataLoader.updateAuth(false);
   }
 
   private void initSearch() {
@@ -394,7 +389,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
         case R.id.reload:
 
           Toast.makeText(this, "Обновление данных...", Toast.LENGTH_SHORT).show();
-          dataLoader.updateAuth(null, true);
+          dataLoader.updateAuth(true);
 
 //          if (menuBuilder.getItem() != MainMenuItem.PROCESSED || menuBuilder.getItem() != MainMenuItem.FAVORITES ){
 //            updateProgressBar();
@@ -413,7 +408,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 //          setEmptyToolbarClickListener();
           break;
         default:
-          jobManager.addJobInBackground(new UpdateAuthTokenJob(settings.getLogin()));
           break;
       }
       return false;
@@ -907,7 +901,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
           RColleagueEntity colleagueEntity = colleagues.get( colleagueIndex );
 
-          Retrofit retrofit = new RetrofitManager(context, settings.getHost(), okHttpClient).process();
+          Retrofit retrofit = new RetrofitManager(settings.getHost(), okHttpClient).process();
           AuthService auth = retrofit.create(AuthService.class);
 
           auth.switchToColleague(colleagueEntity.getColleagueId(), settings.getLogin(), settings.getToken())
@@ -936,7 +930,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
               settings.setCurrentUserImage("");
               initDrawer();
 
-              dataLoader.unsubcribeAll();
+              dataLoader.unsubscribeAll();
 
               // Сначала сохраняем/восстанавливаем состояние тех документов, которые имеются у обоих пользователей,
               // затем перезагружаем MemoryStore
@@ -974,10 +968,10 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
         settings.setSubstituteMode( false );
         switchUser();
 
-        dataLoader.unsubcribeAll();
+        dataLoader.unsubscribeAll();
         showStopSubstituteDialog();
 
-        dataLoader.updateAuth(null, true);
+        dataLoader.updateAuth(true);
 
       } else {
         Toast.makeText(this, "Невозможно выйти из режима замещения: дождитесь обработки очереди запросов", Toast.LENGTH_SHORT).show();
@@ -1059,7 +1053,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     }
   }
 
-  private void drawer_add_item(int index, String title, Long identifier) {
+  private void drawer_add_item(int index, String title, long identifier) {
     Timber.tag("drawer_add_item").v(" !index " + index + " " + title);
 
     drawer.addDrawerItems(
@@ -1072,8 +1066,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   public void initDrawer() {
     drawer_build_head();
 
-    Fields.Menu menu = Fields.Menu.ALL;
-    drawer_add_item( menu.getIndex() , menu.getTitle(), Long.valueOf( menu.getIndex()) );
+    JournalStatus menu = JournalStatus.ALL;
+    drawer_add_item( menu.getIndex() , menu.getJournal(), menu.getIndex());
 
     // resolved https://tasks.n-core.ru/browse/MVDESD-13752
     // Добавить в боковую панель разделы: Контроль, Обраб, Избр.
@@ -1091,9 +1085,9 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     } );
 
     for(String uid : menuItems ){
-      Fields.Menu m = Fields.Menu.getMenu(uid);
+      JournalStatus m = JournalStatus.getByIndex(uid);
       if (m != null) {
-        drawer_add_item( m.getIndex() , m.getTitle(), Long.valueOf( m.getIndex()) );
+        drawer_add_item( m.getIndex() , m.getJournal(), m.getIndex());
       }
     }
 
@@ -1203,6 +1197,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     if ( exitFromSubstituteModeStarted ) {
       store.clearAndLoadFromDb();
     } else {
+      // срабатывает при нажатии на кнопку Обновить все
       updateByStatus();
     }
   }

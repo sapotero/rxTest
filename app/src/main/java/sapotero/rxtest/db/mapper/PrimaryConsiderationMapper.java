@@ -1,6 +1,5 @@
 package sapotero.rxtest.db.mapper;
 
-import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RPrimaryConsiderationEntity;
 import sapotero.rxtest.retrofit.models.Oshs;
 import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
@@ -9,12 +8,7 @@ import sapotero.rxtest.views.adapters.utils.PrimaryConsiderationPeople;
 // (model for RPrimaryConsideration is Oshs)
 public class PrimaryConsiderationMapper extends AbstractMapper<Oshs, RPrimaryConsiderationEntity> {
 
-  private Mappers mappers;
   private String login = "";
-
-  public PrimaryConsiderationMapper(Mappers mappers) {
-    this.mappers = mappers;
-  }
 
   public PrimaryConsiderationMapper withLogin(String login) {
     this.login = login;
@@ -63,7 +57,7 @@ public class PrimaryConsiderationMapper extends AbstractMapper<Oshs, RPrimaryCon
   public PrimaryConsiderationPeople toPrimaryConsiderationPeople(RPrimaryConsiderationEntity entity) {
     Oshs model = toModel(entity);
     PrimaryConsiderationPeople people =
-            (PrimaryConsiderationPeople) mappers.getPerformerMapper().convert(model, PerformerMapper.DestinationType.PRIMARYCONSIDERATIONPEOPLE);
+            (PrimaryConsiderationPeople) new PerformerMapper().convert(model, PerformerMapper.DestinationType.PRIMARYCONSIDERATIONPEOPLE);
     people.setSortIndex(entity.getSortIndex());
     return people;
   }

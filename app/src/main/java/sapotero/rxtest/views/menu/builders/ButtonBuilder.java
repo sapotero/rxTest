@@ -41,7 +41,6 @@ public class ButtonBuilder {
 
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject ISettings settings;
-  //  @Inject Validation validation;
   @Inject MemoryStore store;
 
   private ConditionBuilder[] conditions;

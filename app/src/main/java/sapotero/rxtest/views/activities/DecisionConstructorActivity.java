@@ -36,7 +36,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.db.mapper.utils.Mappers;
+import sapotero.rxtest.db.mapper.DecisionMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RUrgencyEntity;
 import sapotero.rxtest.db.requery.models.decisions.RBlock;
@@ -44,7 +44,7 @@ import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RPerformer;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
-import sapotero.rxtest.db.requery.utils.Fields;
+import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.events.decision.ApproveDecisionEvent;
 import sapotero.rxtest.events.decision.RejectDecisionEvent;
 import sapotero.rxtest.managers.menu.OperationManager;
@@ -67,7 +67,6 @@ import timber.log.Timber;
 public class DecisionConstructorActivity extends AppCompatActivity implements OperationManager.Callback, SelectOshsDialogFragment.Callback {
 
   @Inject ISettings settings;
-  @Inject Mappers mappers;
   @Inject OperationManager operationManager;
   @Inject SingleEntityStore<Persistable> dataStore;
 
@@ -88,7 +87,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
   private Decision raw_decision;
   private RDecisionEntity rDecisionEntity;
   private SelectOshsDialogFragment dialogFragment;
-  private Fields.Status status;
+  private JournalStatus status;
   private DecisionConstructorActivity context;
 
   private String originalSigner;
@@ -110,7 +109,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
 
     context = this;
 
-    status  = Fields.Status.findStatus( settings.getStatusCode() );
+    status  = JournalStatus.getByName( settings.getStatusCode() );
 
     toolbar.setTitleTextColor( getResources().getColor( R.color.md_grey_100 ) );
     toolbar.setSubtitleTextColor( getResources().getColor( R.color.md_grey_400 ) );
@@ -174,7 +173,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
 
                 if (rDecisionEntity != null) {
 //                  params.setDecision( rDecisionEntity );
-                  params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
+                  params.setDecisionModel( new DecisionMapper().toFormattedModel(rDecisionEntity) );
                   params.setDecisionId( rDecisionEntity.getUid() );
 
                   RDocumentEntity doc = (RDocumentEntity) rDecisionEntity.getDocument();
@@ -201,7 +200,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
                   decision.setDocumentUid( settings.getUid() );
 
                   if (rDecisionEntity != null) {
-                    params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
+                    params.setDecisionModel( new DecisionMapper().toFormattedModel(rDecisionEntity) );
                     params.setDecisionId( rDecisionEntity.getUid() );
                   }
 
@@ -307,7 +306,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
             decision.setDocumentUid( settings.getUid() );
 
             if (rDecisionEntity != null) {
-              commandParams.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
+              commandParams.setDecisionModel( new DecisionMapper().toFormattedModel(rDecisionEntity) );
               commandParams.setDecisionId( rDecisionEntity.getUid() );
             }
 
@@ -348,7 +347,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
 
             commandParams = new CommandParams();
             commandParams.setDecisionId( rDecisionEntity.getUid() );
-            commandParams.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
+            commandParams.setDecisionModel( new DecisionMapper().toFormattedModel(rDecisionEntity) );
 
             if ( settings.isDecisionWithAssignment() ){
               Timber.tag(TAG).w("ASSIGNMENT: %s", settings.isDecisionWithAssignment() );
@@ -371,7 +370,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
 
             commandParams = new CommandParams();
             commandParams.setDecisionId( rDecisionEntity.getUid() );
-            commandParams.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(rDecisionEntity) );
+            commandParams.setDecisionModel( new DecisionMapper().toFormattedModel(rDecisionEntity) );
             operationManager.execute(operation, commandParams);
           }
 
@@ -542,7 +541,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
 
 
 
-    if ( status == Fields.Status.SENT_TO_THE_REPORT ){
+    if ( status == JournalStatus.FOR_REPORT ){
       // настройка
       if ( !settings.isShowChangeSigner() ){
         select_oshs_wrapper.setVisibility(View.GONE);
@@ -640,7 +639,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
       RDocumentEntity doc = (RDocumentEntity) rDecisionEntity.getDocument();
       Timber.tag(TAG).e("rDecisionEntity %s", doc.getUid());
 
-      if (!settings.isShowApproveOnPrimary() && Objects.equals(doc.getFilter(), "primary_consideration")) {
+      if (!settings.isShowApproveOnPrimary() && Objects.equals(doc.getFilter(), JournalStatus.PRIMARY.getName())) {
         if (
           manager.getDecision() != null &&
             manager.getDecision().getSignerId() != null &&
@@ -653,7 +652,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
 
 
 
-      if ( doc.getFilter() != null && Objects.equals(doc.getFilter(), "primary_consideration") && doc.isProcessed() != null && !doc.isProcessed()){
+      if ( doc.getFilter() != null && Objects.equals(doc.getFilter(), JournalStatus.PRIMARY.getName()) && doc.isProcessed() != null && !doc.isProcessed()){
         if (rDecisionEntity != null){
           toolbar.getMenu().findItem(R.id.action_constructor_to_the_primary_consideration).setVisible(true);
         }
@@ -664,7 +663,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
 
     } else {
       // если новая резолюция
-      if (!settings.isShowApproveOnPrimary() && Objects.equals(settings.getStatusCode(), "primary_consideration")) {
+      if (!settings.isShowApproveOnPrimary() && Objects.equals(settings.getStatusCode(), JournalStatus.PRIMARY.getName())) {
         if (
           manager.getDecision() != null &&
             manager.getDecision().getSignerId() != null &&
@@ -889,7 +888,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
 
           CommandParams params = new CommandParams();
           params.setDecisionId(rDecisionEntity.getUid());
-          params.setDecisionModel(mappers.getDecisionMapper().toFormattedModel(rDecisionEntity));
+          params.setDecisionModel(new DecisionMapper().toFormattedModel(rDecisionEntity));
 
           operationManager.execute(operation, params);
         })
@@ -914,7 +913,7 @@ public class DecisionConstructorActivity extends AppCompatActivity implements Op
 
           CommandParams params = new CommandParams();
           params.setDecisionId(rDecisionEntity.getUid());
-          params.setDecisionModel(mappers.getDecisionMapper().toFormattedModel(rDecisionEntity));
+          params.setDecisionModel(new DecisionMapper().toFormattedModel(rDecisionEntity));
 
           if (settings.isDecisionWithAssignment()) {
             Timber.tag(TAG).w("ASSIGNMENT: %s", settings.isDecisionWithAssignment());

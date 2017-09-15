@@ -2,16 +2,12 @@ package sapotero.rxtest.mapper;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import sapotero.rxtest.db.mapper.RouteMapper;
 import sapotero.rxtest.db.mapper.StepMapper;
-import sapotero.rxtest.db.mapper.utils.Mappers;
 import sapotero.rxtest.db.requery.models.RRouteEntity;
 import sapotero.rxtest.db.requery.models.RStep;
 import sapotero.rxtest.db.requery.models.RStepEntity;
@@ -22,7 +18,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.times;
 
 public class RouteMapperTest {
 
@@ -32,16 +27,10 @@ public class RouteMapperTest {
   private RRouteEntity entity;
   private Route model;
 
-  @Mock Mappers mappers;
-
   @Before
   public void init() {
-    MockitoAnnotations.initMocks(this);
     stepMapper = new StepMapper();
-
     dummyRoute = generateRoute();
-
-    Mockito.when(mappers.getStepMapper()).thenReturn(stepMapper);
   }
 
   public static Route generateRoute() {
@@ -58,10 +47,8 @@ public class RouteMapperTest {
 
   @Test
   public void toEntity() {
-    mapper = new RouteMapper(mappers);
+    mapper = new RouteMapper();
     entity = mapper.toEntity(dummyRoute);
-
-    Mockito.verify(mappers, times(1)).getStepMapper();
 
     verifyRoute( dummyRoute, entity, stepMapper );
   }
@@ -81,11 +68,9 @@ public class RouteMapperTest {
 
   @Test
   public void toModel() {
-    mapper = new RouteMapper(mappers);
+    mapper = new RouteMapper();
     entity = mapper.toEntity(dummyRoute);
     model = mapper.toModel(entity);
-
-    Mockito.verify(mappers, times(2)).getStepMapper();
 
     verifyRoute( dummyRoute, model );
   }
@@ -103,7 +88,7 @@ public class RouteMapperTest {
 
   @Test
   public void hasDiff() {
-    mapper = new RouteMapper(mappers);
+    mapper = new RouteMapper();
 
     RRouteEntity entity1 = mapper.toEntity(dummyRoute);
     RRouteEntity entity2 = mapper.toEntity(dummyRoute);

@@ -53,7 +53,7 @@ public class CreateAssistantJob extends BaseJob {
     int index = 0;
 
     List<RAssistantEntity> assistantEntityList = new ArrayList<>();
-    AssistantMapper mapper = mappers.getAssistantMapper().withLogin(login);
+    AssistantMapper mapper = new AssistantMapper().withLogin(login);
 
     for (Assistant user : users) {
       RAssistantEntity assistantEntity = mapper.toEntity(user);

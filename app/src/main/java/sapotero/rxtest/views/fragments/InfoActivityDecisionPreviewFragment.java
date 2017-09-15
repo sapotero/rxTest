@@ -58,7 +58,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.db.mapper.utils.Mappers;
+import sapotero.rxtest.db.mapper.DecisionMapper;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.actions.RAction;
 import sapotero.rxtest.db.requery.models.actions.RActionEntity;
@@ -68,6 +68,7 @@ import sapotero.rxtest.db.requery.models.decisions.RDecision;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.models.decisions.RPerformer;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
+import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.events.decision.ApproveDecisionEvent;
 import sapotero.rxtest.events.decision.CheckActiveDecisionEvent;
 import sapotero.rxtest.events.decision.CheckDecisionVisibilityEvent;
@@ -99,7 +100,6 @@ import timber.log.Timber;
 public class InfoActivityDecisionPreviewFragment extends PreviewFragment implements SelectTemplateDialogFragment.Callback{
 
   @Inject ISettings settings;
-  @Inject Mappers mappers;
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject OperationManager operationManager;
 
@@ -179,7 +179,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
             CommandParams params = new CommandParams();
 
             params.setDecisionId( current_decision.getUid() );
-            params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(current_decision) );
+            params.setDecisionModel( new DecisionMapper().toFormattedModel(current_decision) );
 
             operationManager.execute(operation, params);
             updateAfteButtonPressed();
@@ -196,7 +196,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
       CommandParams params = new CommandParams();
 
       params.setDecisionId( current_decision.getUid() );
-      params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(current_decision) );
+      params.setDecisionModel( new DecisionMapper().toFormattedModel(current_decision) );
 
       operationManager.execute(operation, params);
       updateAfteButtonPressed();
@@ -225,7 +225,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
 
       CommandParams params = new CommandParams();
       params.setDecisionId( current_decision.getUid() );
-      params.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(current_decision) );
+      params.setDecisionModel( new DecisionMapper().toFormattedModel(current_decision) );
 
       operationManager.execute(operation, params);
       updateAfteButtonPressed();
@@ -245,7 +245,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
 
         CommandParams commandParams = new CommandParams();
         commandParams.setDecisionId( current_decision.getUid() );
-        commandParams.setDecisionModel( mappers.getDecisionMapper().toFormattedModel(current_decision) );
+        commandParams.setDecisionModel( new DecisionMapper().toFormattedModel(current_decision) );
 
         if ( settings.isShowCommentPost() ) {
           commandParams.setComment(dialog1.getInputEditText().getText().toString());
@@ -552,7 +552,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
     // resolved https://tasks.n-core.ru/browse/MVDESD-13146
     // для статуса "на первичное рассмотрение" вместо "Подписать" должно быть "Согласовать"
     // Если подписывающий в резолюции и оператор в МП совпадают, то кнопка должна быть "Подписать"
-    if ( doc.getFilter() != null && doc.getFilter().equals("primary_consideration") ){
+    if ( doc.getFilter() != null && doc.getFilter().equals(JournalStatus.PRIMARY.getName()) ){
       if ( current_decision != null &&
            current_decision.getSignerId() != null &&
            current_decision.getSignerId().equals( settings.getCurrentUserId() ) ){
@@ -799,7 +799,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
           CommandFactory.Operation operation = CommandFactory.Operation.SAVE_DECISION;
           CommandParams params = new CommandParams();
 
-          Decision decision = mappers.getDecisionMapper().toFormattedModel( current_decision );
+          Decision decision = new DecisionMapper().toFormattedModel( current_decision );
           decision.setComment( dialog.getInputEditText().getText().toString() );
           params.setDecisionModel( decision );
           params.setDecisionId( current_decision.getUid() );

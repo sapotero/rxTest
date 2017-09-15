@@ -6,32 +6,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
+import sapotero.rxtest.db.requery.utils.Journals;
+import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.views.menu.builders.ButtonBuilder;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 
 
-enum V2DocumentType{
-  INCOMING_DOCUMENTS ("incoming_documents"),
-  CITIZEN_REQUESTS   ("citizen_requests"),
-  INCOMING_ORDERS    ("incoming_orders"),
-  ORDERS             ("orders"),
-  ORDERS_DDO         ("orders_ddo"),
-  OUTGOING_DOCUMENTS ("outgoing_documents");
-
-  private final String name;
-
-  V2DocumentType(String name) {
-    this.name = name;
-  }
-
-  public String getName() {
-    return name;
-  }
-}
-
 public enum MainMenuItem {
 
-  ALL ( 0, "Документы %s / Проекты %s",
+  ALL (Journals.ALL, "Документы %s / Проекты %s",
     new MainMenuButton[]{
       MainMenuButton.PROJECTS,
       MainMenuButton.PERFORMANCE,
@@ -53,7 +36,7 @@ public enum MainMenuItem {
     },
     true, false),
 
-  INCOMING_DOCUMENTS ( 1, "Входящие документы %s", new MainMenuButton[]{
+  INCOMING_DOCUMENTS (Journals.INCOMING_DOCUMENTS, "Входящие документы %s", new MainMenuButton[]{
     MainMenuButton.PERFORMANCE,
     MainMenuButton.PRIMARY_CONSIDERATION,
     MainMenuButton.VIEWED
@@ -62,15 +45,15 @@ public enum MainMenuItem {
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(false) ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( V2DocumentType.INCOMING_DOCUMENTS.getName() )  )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( JournalStatus.INCOMING_DOCUMENTS.getName() )  )
     },
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( V2DocumentType.INCOMING_DOCUMENTS.getName() )  )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( JournalStatus.INCOMING_DOCUMENTS.getName() )  )
     },
     false, false),
 
-  CITIZEN_REQUESTS ( 2, "Обращения граждан %s", new MainMenuButton[]{
+  CITIZEN_REQUESTS (Journals.CITIZEN_REQUESTS, "Обращения граждан %s", new MainMenuButton[]{
     MainMenuButton.PERFORMANCE,
     MainMenuButton.PRIMARY_CONSIDERATION,
     MainMenuButton.VIEWED
@@ -79,15 +62,15 @@ public enum MainMenuItem {
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(false) ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( V2DocumentType.CITIZEN_REQUESTS.getName() )  )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( JournalStatus.CITIZEN_REQUESTS.getName() )  )
     },
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( V2DocumentType.CITIZEN_REQUESTS.getName() )  )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( JournalStatus.CITIZEN_REQUESTS.getName() )  )
     },
     false, false),
 
-  APPROVE_ASSIGN ( 3, "Подписание/Согласование %s",
+  APPROVE_ASSIGN (Journals.APPROVE_ASSIGN, "Подписание/Согласование %s",
     new MainMenuButton[]{
       MainMenuButton.APPROVAL,
       MainMenuButton.ASSIGN,
@@ -107,7 +90,7 @@ public enum MainMenuItem {
     },
     true, true),
 
-  INCOMING_ORDERS ( 4, "НПА %s", new MainMenuButton[]{
+  INCOMING_ORDERS (Journals.INCOMING_ORDERS, "НПА %s", new MainMenuButton[]{
     MainMenuButton.PERFORMANCE,
     MainMenuButton.PRIMARY_CONSIDERATION,
     MainMenuButton.VIEWED
@@ -115,15 +98,15 @@ public enum MainMenuItem {
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(false) ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( V2DocumentType.INCOMING_ORDERS.getName() )  )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( JournalStatus.INCOMING_ORDERS.getName() )  )
     },
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( V2DocumentType.INCOMING_ORDERS.getName() )  )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( JournalStatus.INCOMING_ORDERS.getName() )  )
     },
     false, false),
 
-  ORDERS ( 5, "Приказы %s", new MainMenuButton[]{
+  ORDERS (Journals.ORDERS, "Приказы %s", new MainMenuButton[]{
     MainMenuButton.PERFORMANCE,
     MainMenuButton.PRIMARY_CONSIDERATION,
     MainMenuButton.VIEWED
@@ -131,15 +114,15 @@ public enum MainMenuItem {
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(false) ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( V2DocumentType.ORDERS.getName() )  )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( JournalStatus.ORDERS.getName() )  )
     },
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( V2DocumentType.ORDERS.getName() )  )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( JournalStatus.ORDERS.getName() )  )
     },
     false, false),
 
-  ORDERS_DDO ( 6, "Приказы ДДО %s", new MainMenuButton[]{
+  ORDERS_DDO (Journals.ORDERS_DDO, "Приказы ДДО %s", new MainMenuButton[]{
     MainMenuButton.PERFORMANCE,
     MainMenuButton.PRIMARY_CONSIDERATION,
     MainMenuButton.VIEWED
@@ -147,15 +130,15 @@ public enum MainMenuItem {
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(false) ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( V2DocumentType.ORDERS_DDO.getName() )  )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( JournalStatus.ORDERS_DDO.getName() )  )
     },
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( V2DocumentType.ORDERS_DDO.getName() )  )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( JournalStatus.ORDERS_DDO.getName() )  )
     },
     false, false),
 
-  IN_DOCUMENTS ( 7, "Внутренние документы %s", new MainMenuButton[]{
+  IN_DOCUMENTS (Journals.IN_DOCUMENTS, "Внутренние документы %s", new MainMenuButton[]{
     MainMenuButton.PERFORMANCE,
     MainMenuButton.PRIMARY_CONSIDERATION,
     MainMenuButton.VIEWED
@@ -164,15 +147,15 @@ public enum MainMenuItem {
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq(false) ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( V2DocumentType.OUTGOING_DOCUMENTS.getName() )  )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( JournalStatus.OUTGOING_DOCUMENTS.getName() )  )
     },
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.ADDRESSED_TO_TYPE.eq("") ),
-      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( V2DocumentType.OUTGOING_DOCUMENTS.getName() )  )
+      new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.DOCUMENT_TYPE.eq( JournalStatus.OUTGOING_DOCUMENTS.getName() )  )
     },
     false, false),
 
-  ON_CONTROL ( 8, "На контроле %s", new MainMenuButton[]{},
+  ON_CONTROL (Journals.ON_CONTROL, "На контроле %s", new MainMenuButton[]{},
     true,
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.CONTROL.eq( true ) ),
@@ -181,7 +164,7 @@ public enum MainMenuItem {
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.CONTROL.eq( true ) ),
     },
     true, true),
-  PROCESSED ( 9, "Обработанное %s", new MainMenuButton[]{},
+  PROCESSED (Journals.PROCESSED, "Обработанное %s", new MainMenuButton[]{},
     true,
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.PROCESSED.eq( true ) ),
@@ -191,7 +174,7 @@ public enum MainMenuItem {
     },
     true, true),
 
-  FAVORITES ( 10, "Избранное %s", new MainMenuButton[]{},
+  FAVORITES (Journals.FAVORITES, "Избранное %s", new MainMenuButton[]{},
     true,
     new ConditionBuilder[]{
       new ConditionBuilder( ConditionBuilder.Condition.AND, RDocumentEntity.FAVORITES.eq( true ) ),
@@ -205,7 +188,7 @@ public enum MainMenuItem {
     true, true
     // Общие документы - аппараты - пока не нужны от слова совсем
     // ),
-    //  SHARED ( 11, "Общие документы %s", new MainMenuButton[]{
+    //  SHARED (Journals.SHARED, "Общие документы %s", new MainMenuButton[]{
     //    MainMenuButton.SHARED_PRIMARY,
     //    MainMenuButton.ASSIGN,
     //    MainMenuButton.APPROVAL,
