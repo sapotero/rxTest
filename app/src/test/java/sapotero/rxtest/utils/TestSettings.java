@@ -651,16 +651,6 @@ public class TestSettings implements ISettings {
     return null;
   }
 
-  @Override
-  public void setСurrentNotificationId(int value) {
-
-  }
-
-  @Override
-  public int getСurrentNotificationId() {
-    return 0;
-  }
-
   public void setSubstituteMode(boolean value) {
     isSubstituteMode = value;
   }

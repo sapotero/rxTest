@@ -86,7 +86,6 @@ public class Settings implements ISettings {
   private static String MAX_IMAGE_SIZE_KEY;
   private static String DEBUG_ENABLED_KEY;
   private static String NOTIFICATED_JOURNALS_KEY;
-  private static String CURRENT_NOTIFICATION_ID_KEY;
 
 
   private Context context;
@@ -153,7 +152,6 @@ public class Settings implements ISettings {
   private Preference<Boolean> organizationFilterActive;
   private Preference<Set<String>> organizationFilterSelection;
   private Preference<Set<String>> notificatedJournals;
-  private Preference<Integer> currentNotificationId;
   private Preference<Boolean> isSubstituteMode;
   private Preference<String> oldLogin;
   private Preference<String> oldCurrentUserId;
@@ -201,7 +199,6 @@ public class Settings implements ISettings {
     MAX_IMAGE_SIZE_KEY             = context.getResources().getString(R.string.max_image_size_key);
     DEBUG_ENABLED_KEY              = context.getResources().getString(R.string.debug_enabled_key);
     NOTIFICATED_JOURNALS_KEY       = context.getResources().getString(R.string.notificated_journals_key);
-    CURRENT_NOTIFICATION_ID_KEY    = context.getResources().getString(R.string.current_notification_id_key);
 
     firstRunFlag                   = settings.getBoolean(FIRST_RUN_KEY);
     isProject                      = settings.getBoolean(IS_PROJECT);
@@ -265,7 +262,6 @@ public class Settings implements ISettings {
     organizationFilterActive       = settings.getBoolean(ORGANIZATION_FILTER_ACTIVE_KEY);
     organizationFilterSelection    = settings.getStringSet(ORGANIZATION_FILTER_SELECTION_KEY);
     notificatedJournals            = settings.getStringSet(NOTIFICATED_JOURNALS_KEY);
-    currentNotificationId          = settings.getInteger(CURRENT_NOTIFICATION_ID_KEY);
     isSubstituteMode               = settings.getBoolean(IS_SUBSTITUTE_MODE_KEY);
     oldLogin                       = settings.getString(OLD_LOGIN_KEY);
     oldCurrentUserId               = settings.getString(OLD_CURRENT_USER_ID_KEY);
@@ -926,15 +922,6 @@ public class Settings implements ISettings {
     return getStringSet(notificatedJournals);
   }
 
-  @Override
-  public void setСurrentNotificationId(int value) {
-      setInteger(currentNotificationId, value);
-  }
-
-  @Override
-  public int getСurrentNotificationId() {
-    return getInteger(currentNotificationId);
-  }
 
   public boolean isSubstituteMode() {
     return getBoolean(isSubstituteMode);

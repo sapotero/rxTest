@@ -87,8 +87,6 @@ public class LoginActivity extends AppCompatActivity implements StepperLayout.St
         })
         .show();
     }
-    /*сбрасываем счётчик уведомлений(Notification) при старте application */
-    settings.setСurrentNotificationId(0);
   }
 
   private void showSelectDialog(List<String> keyStoreTypeList) {

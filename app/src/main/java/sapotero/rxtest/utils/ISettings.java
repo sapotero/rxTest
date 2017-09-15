@@ -236,10 +236,6 @@ public interface ISettings {
 
   Set<String> getNotificatedJournals();
 
-  void setСurrentNotificationId(int value);
-
-  int getСurrentNotificationId();
-
   boolean isSubstituteMode();
 
   Preference<Boolean> getSubstituteModePreference();

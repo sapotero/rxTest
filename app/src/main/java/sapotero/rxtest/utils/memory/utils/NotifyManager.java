@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -59,21 +60,20 @@ public class NotifyManager {
   public void subscribeOnNotifyEvents(PublishSubject<NotifyMessageModel> notifyPubSubject) {
     if (!notifyPubSubject.hasObservers()) {
       notifyPubSubject
-//      .throttleLast(5, TimeUnit.SECONDS)
+        .throttleLast(5, TimeUnit.SECONDS)
         .filter(notifyMessageModel -> !notifyMessageModel.isFirstRunApp())
         .filter(notifyMessageModel -> !Objects.equals(notifyMessageModel.getSource().name(), "FOLDER"))
         .filter(notifyMessageModel -> {
           /*приводим строку index к виду JournalStatus*/
-          JournalStatus itemJournal = getJournal(notifyMessageModel);
-          return checkAllowedJournal(itemJournal);
+          JournalStatus itemJournalStatus = getJournal(notifyMessageModel);
+          return checkAllowedJournal(itemJournalStatus);
         })
         .subscribe(notifyMessageModel -> {
-          String filtr = notifyMessageModel.getFilter();
+          String filter = notifyMessageModel.getFilter();
           List<String> docUIDList = notifyMessageModel.getUidDocsLIst();
           HashMap<String, Document> documentsMap = notifyMessageModel.getDocumentsMap();
 
           String Title =  getTitle(getJournal(notifyMessageModel));
-
 
           if (docUIDList.size() >= THRESHOLD_VALUE){
             notificationManagerCompat.cancelAll();
@@ -82,43 +82,29 @@ public class NotifyManager {
             int notificationId =  UUID.randomUUID().hashCode();
             notificationIdSet.add(notificationId);
 
-
-            showGroupSummaryNotificationTest("Вам поступило новых документов: " + docUIDList.size(), "Вам поступило новых документов: " + docUIDList.size(),
-                notificationId, NotificationCompat.PRIORITY_HIGH);
-
-
+            showGroupSummaryNotificationTest("Вам поступило новых документов: " + docUIDList.size(), "Вам поступило новых документов: " + docUIDList.size(), notificationId, NotificationCompat.PRIORITY_HIGH);
           } else {
-              for (String uid : docUIDList) {
-                int notificationId =  UUID.randomUUID().hashCode();
-                showSingleNotification(Title, documentsMap.get(uid).getTitle(), documentsMap.get(uid), filtr, notificationId);
-                notificationIdSet.add(notificationId);
-                notViewedDocumentQuantity ++;
-
-
-              }
-              if(notificationIdSet.size() >= THRESHOLD_VALUE){
-                notificationManagerCompat.cancelAll();
-                notificationIdSet.clear();
-                int notificationId =  UUID.randomUUID().hashCode();
-                showWithoutHeadsUpNotificationTest("Вам поступило новых документов: " + notViewedDocumentQuantity, notificationId);
-                notificationIdSet.add(notificationId);
-
-              }
+            for (String uid : docUIDList) {
+              int notificationId =  UUID.randomUUID().hashCode();
+              showSingleNotification(Title, documentsMap.get(uid).getTitle(), documentsMap.get(uid), filter, notificationId);
+              notificationIdSet.add(notificationId);
+              notViewedDocumentQuantity ++;
+            } if(notificationIdSet.size() >= THRESHOLD_VALUE){
+              notificationManagerCompat.cancelAll();
+              notificationIdSet.clear();
+              int notificationId =  UUID.randomUUID().hashCode();
+              showSingleWithoutHeadsUpNotificationTest("Вам поступило новых документов: " + notViewedDocumentQuantity, notificationId);
+              notificationIdSet.add(notificationId);
             }
-
-
-          }, new Action1<Throwable>() {
-            @Override
-            public void call(Throwable throwable) {
-              Timber.tag(TAG).e("!!!throwable = " + throwable);
-            }
-          });
+          }
+        }, new Action1<Throwable>() {
+          @Override
+          public void call(Throwable throwable) {
+            Timber.tag(TAG).e("Throwable = " + throwable);
+          }
+        });
     }
   }
-
-
-
-
 
   /*проверяем, включён ли checkBox для журнала. -> генерируем уведомление */
   private boolean checkAllowedJournal(JournalStatus itemJournal){
@@ -170,7 +156,6 @@ public class NotifyManager {
 
     PendingIntent pendingIntentOpenDoc = stackBuilder.getPendingIntent(requestCode, PendingIntent.FLAG_CANCEL_CURRENT);
 
-
     Intent intentDismiss = new Intent(appContext, NotificationDismissedReceiver.class);
     intentDismiss.putExtra("notificationId",notificationId);
     PendingIntent pendingIntentDismiss = PendingIntent.getBroadcast(appContext, requestCode, intentDismiss, PendingIntent.FLAG_CANCEL_CURRENT );
@@ -202,22 +187,21 @@ public class NotifyManager {
 
     NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext);
     builder.setContentTitle(contentTitle)
-//        .setContentText("Итого требующих рассмотрения: " + notViewedDocQuantity)
-        .setStyle(inboxStyle)
-        .setSmallIcon(R.drawable.ic_error)
-        .setCategory(Notification.CATEGORY_MESSAGE)
-        .setGroupSummary(true)
-        .setGroup("group")
-        .setDeleteIntent(pendingIntentDismiss)
-        .setAutoCancel(true)
-        .setDefaults(Notification.DEFAULT_ALL)
-        .setPriority(notificationCompatPriority)
-        .setVisibility(Notification.VISIBILITY_PUBLIC)
-        .setContentIntent(pendingIntent);
+      .setStyle(inboxStyle)
+      .setSmallIcon(R.drawable.ic_error)
+      .setCategory(Notification.CATEGORY_MESSAGE)
+      .setGroupSummary(true)
+      .setGroup("group")
+      .setDeleteIntent(pendingIntentDismiss)
+      .setAutoCancel(true)
+      .setDefaults(Notification.DEFAULT_ALL)
+      .setPriority(notificationCompatPriority)
+      .setVisibility(Notification.VISIBILITY_PUBLIC)
+      .setContentIntent(pendingIntent);
     notificationManagerCompat.notify(notificationId, builder.build());
   }
 
-  private void showWithoutHeadsUpNotificationTest(String contentTitle, int notificationId) {
+  private void showSingleWithoutHeadsUpNotificationTest(String contentTitle, int notificationId) {
     int requestCode = UUID.randomUUID().hashCode();
     Intent IntentOpenDoc = MainActivity.newIntent(appContext);
     PendingIntent pendingIntentOpenDoc = PendingIntent.getActivity(appContext, 0, IntentOpenDoc, PendingIntent.FLAG_CANCEL_CURRENT);
@@ -248,12 +232,10 @@ public class NotifyManager {
 
   private void removeIdNotification(int notificationId){
     notificationIdSet.remove(notificationId);
-    Timber.tag(TAG).e(" 22 removeIdNotification.=" + notificationIdSet.size());
   }
 
   @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
   public void onMessageEvent(RemoveAllNotificationEvent event) {
-    Timber.tag(TAG).e("RemoveAllNotification(). Event =" + event.isRemoveAllNotification);
     removeAllNotification();
     notViewedDocumentQuantity = 0;
     EventBus.getDefault().removeStickyEvent(event);
@@ -261,7 +243,6 @@ public class NotifyManager {
 
   @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
   public void onMessageEvent(RemoveIdNotificationEvent event) {
-    Timber.tag(TAG).e("RemoveIdNotificationEvent. event.notificationId =" + event.notificationId);
     removeIdNotification(event.notificationId);
     notViewedDocumentQuantity --;
     EventBus.getDefault().removeStickyEvent(event);

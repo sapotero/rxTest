@@ -147,7 +147,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   private final int SETTINGS_REJECTION_TEMPLATES = 22;
 
-  private static final String EXTRA_IS_FROM_NOTIFICATION_BAR_KEY = "is_from_notification";
 
   public DocumentsAdapter RAdapter;
 
@@ -163,12 +162,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
 
   private int menuIndex;
 
-  public static Intent newIntent(Context context){
-    Intent intent = new Intent(context, MainActivity.class);
-    intent.putExtra(EXTRA_IS_FROM_NOTIFICATION_BAR_KEY, true);
-    return intent;
-  }
-
   private List<RColleagueEntity> colleagues;
   private MaterialDialog startSubstituteDialog;
   private MaterialDialog stopSubstituteDialog;
@@ -176,9 +169,12 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   private boolean switchToSubstituteModeStarted = false;
   private boolean exitFromSubstituteModeStarted = false;
 
+  public static Intent newIntent(Context context){
+    Intent intent = new Intent(context, MainActivity.class);
+    return intent;
+  }
+
   protected void onCreate(Bundle savedInstanceState) {
-    /*если intent "прилетел" из NotifyManager -> значение будет true*/
-    boolean isIntentFromNotificationBar = false;
     setTheme(R.style.AppTheme);
 
     super.onCreate(savedInstanceState);
@@ -219,15 +215,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     setFirstRunFalse();
 
     updateToken();
-    /*пришёл ли intent из notification bar*/
-    if (getIntent().getExtras() != null){
-      isIntentFromNotificationBar =  getIntent().getExtras().getBoolean(EXTRA_IS_FROM_NOTIFICATION_BAR_KEY, false);
-      Timber.tag(TAG).e("22 isIntentFromNotificationBar ="+ isIntentFromNotificationBar);
-    }
-    /*после открытия MainActivity(из notification bar), счётчик уведомлений должен быть сброшен*/
-    if(isIntentFromNotificationBar){
-
-    }
 
     removeAllNotification();
     unregisterEventBus();
@@ -235,7 +222,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void removeAllNotification(){
-    Timber.tag(TAG).e("call removeAllNotification()");
     EventBus.getDefault().postSticky( new RemoveAllNotificationEvent(true));
   }
 

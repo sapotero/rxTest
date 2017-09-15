@@ -153,7 +153,6 @@ public class InfoActivity extends AppCompatActivity {
       settings.setStatusCode(getIntent().getStringExtra(EXTRA_STATUS_CODE_KEY));
       settings.setLoadFromSearch(getIntent().getBooleanExtra(EXTRA_IS_LOAD_FROM_SEARCHE_KEY,true));
       settings.setRegDate(getIntent().getStringExtra(EXTRA_REGISTRATION_DATE_KEY));
-      settings.setСurrentNotificationId(settings.getСurrentNotificationId() - 1);
       EventBus.getDefault().postSticky( new RemoveIdNotificationEvent(getIntent().getExtras().getInt(EXTRA_NOTIFICATION_ID)));
     }
 
