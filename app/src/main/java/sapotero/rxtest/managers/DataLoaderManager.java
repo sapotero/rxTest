@@ -34,10 +34,10 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.models.RFolderEntity;
 import sapotero.rxtest.db.requery.utils.Journals;
 import sapotero.rxtest.db.requery.utils.JournalStatus;
-import sapotero.rxtest.events.auth.AuthDcCheckFailEvent;
-import sapotero.rxtest.events.auth.AuthDcCheckSuccessEvent;
-import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
-import sapotero.rxtest.events.auth.AuthLoginCheckSuccessEvent;
+import sapotero.rxtest.events.stepper.auth.StepperDcCheckFailEvent;
+import sapotero.rxtest.events.stepper.auth.StepperDcCheckSuccesEvent;
+import sapotero.rxtest.events.stepper.auth.StepperLoginCheckFailEvent;
+import sapotero.rxtest.events.stepper.auth.StepperLoginCheckSuccessEvent;
 import sapotero.rxtest.events.stepper.load.StepperDocumentCountReadyEvent;
 import sapotero.rxtest.events.utils.ErrorReceiveTokenEvent;
 import sapotero.rxtest.events.utils.ReceivedTokenEvent;
@@ -481,11 +481,11 @@ public class DataLoaderManager {
             setLogin( data.getLogin() );
             setToken( data.getAuthToken() );
 
-            EventBus.getDefault().post( new AuthDcCheckSuccessEvent() );
+            EventBus.getDefault().post( new StepperDcCheckSuccesEvent() );
           },
           error -> {
             Timber.tag(TAG).i("tryToSignWithDc error: %s" , error );
-            EventBus.getDefault().post( new AuthDcCheckFailEvent( error.getMessage() ) );
+            EventBus.getDefault().post( new StepperDcCheckFailEvent( error.getMessage() ) );
           }
         )
     );
@@ -509,11 +509,11 @@ public class DataLoaderManager {
             setPassword(password);
             setToken(data.getAuthToken());
 
-            EventBus.getDefault().post(new AuthLoginCheckSuccessEvent());
+            EventBus.getDefault().post( new StepperLoginCheckSuccessEvent() );
           },
           error -> {
             Timber.tag(TAG).i("tryToSignWithLogin error: %s", error);
-            EventBus.getDefault().post(new AuthLoginCheckFailEvent(error.getMessage()));
+            EventBus.getDefault().post( new StepperLoginCheckFailEvent( error.getMessage() ) );
           }
         )
     );

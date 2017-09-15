@@ -50,10 +50,6 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.events.auth.AuthDcCheckFailEvent;
-import sapotero.rxtest.events.auth.AuthDcCheckSuccessEvent;
-import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
-import sapotero.rxtest.events.auth.AuthLoginCheckSuccessEvent;
 import sapotero.rxtest.events.bus.FolderCreatedEvent;
 import sapotero.rxtest.events.bus.StartRegularRefreshEvent;
 import sapotero.rxtest.events.bus.UpdateFavoritesAndProcessedEvent;
@@ -70,10 +66,7 @@ import sapotero.rxtest.events.service.CheckNetworkEvent;
 import sapotero.rxtest.events.service.UpdateDocumentsByStatusEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckFailEvent;
-import sapotero.rxtest.events.stepper.auth.StepperDcCheckSuccesEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckEvent;
-import sapotero.rxtest.events.stepper.auth.StepperLoginCheckFailEvent;
-import sapotero.rxtest.events.stepper.auth.StepperLoginCheckSuccessEvent;
 import sapotero.rxtest.events.stepper.load.StartLoadDataEvent;
 import sapotero.rxtest.events.view.UpdateCurrentInfoActivityEvent;
 import sapotero.rxtest.managers.DataLoaderManager;
@@ -721,26 +714,6 @@ public class MainService extends Service {
       event.login,
       event.password
     );
-  }
-
-  @Subscribe(threadMode = ThreadMode.BACKGROUND)
-  public void onMessageEvent(AuthDcCheckSuccessEvent event) throws Exception {
-    EventBus.getDefault().post( new StepperDcCheckSuccesEvent() );
-  }
-
-  @Subscribe(threadMode = ThreadMode.BACKGROUND)
-  public void onMessageEvent(AuthDcCheckFailEvent event) throws Exception {
-    EventBus.getDefault().post( new StepperDcCheckFailEvent(event.error) );
-  }
-
-  @Subscribe(threadMode = ThreadMode.BACKGROUND)
-  public void onMessageEvent(AuthLoginCheckSuccessEvent event) throws Exception {
-    EventBus.getDefault().post( new StepperLoginCheckSuccessEvent() );
-  }
-
-  @Subscribe(threadMode = ThreadMode.BACKGROUND)
-  public void onMessageEvent(AuthLoginCheckFailEvent event) throws Exception {
-    EventBus.getDefault().post( new StepperLoginCheckFailEvent(event.error) );
   }
 
   @Subscribe(threadMode = ThreadMode.BACKGROUND)
