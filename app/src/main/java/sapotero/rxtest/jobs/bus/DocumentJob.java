@@ -60,6 +60,7 @@ abstract class DocumentJob extends BaseJob {
     if ( !Objects.equals( login, settings.getLogin() ) ) {
       // Загружаем документ только если логин не сменился (режим замещения)
       Timber.tag(TAG).d("Login changed, quit loading %s", uid);
+      EventBus.getDefault().post( new StepperLoadDocumentEvent( uid ) );
       return;
     }
 

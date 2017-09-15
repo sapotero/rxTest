@@ -52,6 +52,7 @@ public class CreateLinksJob extends DocumentJob {
     if ( !Objects.equals( login, settings.getLogin() ) ) {
       // Запускаем job только если логин не сменился (режим замещения)
       Timber.tag(TAG).d("Login changed, quit onRun %s", linkUid);
+      EventBus.getDefault().post( new StepperLoadDocumentEvent(linkUid) );
       return;
     }
 

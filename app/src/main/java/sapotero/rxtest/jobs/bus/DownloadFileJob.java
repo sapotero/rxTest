@@ -60,6 +60,7 @@ public class DownloadFileJob  extends BaseJob {
     if ( !Objects.equals( login, settings.getLogin() ) ) {
       // Запускаем job только если логин не сменился (режим замещения)
       Timber.tag(TAG).d("Login changed, quit onRun for image %s", rImageId);
+      EventBus.getDefault().post(new FileDownloadedEvent("Quit load file: " + fileName));
       return;
     }
 
