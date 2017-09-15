@@ -14,6 +14,7 @@ import sapotero.rxtest.utils.memory.MemoryStore;
 import sapotero.rxtest.utils.memory.utils.Filter;
 import sapotero.rxtest.utils.memory.utils.MemoryStoreModule;
 import sapotero.rxtest.utils.memory.utils.NotifyManager;
+import sapotero.rxtest.utils.memory.utils.NotifyManagerModule;
 import sapotero.rxtest.utils.memory.utils.Processor;
 import sapotero.rxtest.utils.queue.utils.QueueManagerModule;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
@@ -41,7 +42,8 @@ import sapotero.rxtest.views.menu.builders.ButtonBuilder;
   JobModule.class,
   QueueManagerModule.class,
   OperationManagerModule.class,
-  MemoryStoreModule.class
+  MemoryStoreModule.class,
+  NotifyManagerModule.class
 })
 
 public interface ManagerComponent {

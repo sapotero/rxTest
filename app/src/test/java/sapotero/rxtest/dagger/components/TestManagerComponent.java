@@ -7,6 +7,7 @@ import sapotero.rxtest.jobs.utils.JobModule;
 import sapotero.rxtest.managers.menu.utils.OperationManagerModule;
 import sapotero.rxtest.memory.MemoryStoreTest;
 import sapotero.rxtest.utils.memory.utils.MemoryStoreModule;
+import sapotero.rxtest.utils.memory.utils.NotifyManagerModule;
 import sapotero.rxtest.utils.queue.utils.QueueManagerModule;
 
 @ManagerScope
@@ -14,7 +15,8 @@ import sapotero.rxtest.utils.queue.utils.QueueManagerModule;
   JobModule.class,
   QueueManagerModule.class,
   OperationManagerModule.class,
-  MemoryStoreModule.class
+  MemoryStoreModule.class,
+  NotifyManagerModule.class
 })
 
 public interface TestManagerComponent extends ManagerComponent {

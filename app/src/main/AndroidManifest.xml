@@ -103,6 +103,10 @@
             android:exported="true"
             android:screenOrientation="landscape">
         </activity>
+        <receiver
+            android:name=".utils.memory.utils.NotificationDismissedReceiver"
+            android:exported="false">
+        </receiver>
     </application>
 
 </manifest>

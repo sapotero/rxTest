@@ -23,7 +23,6 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.db.requery.utils.Deleter;
 import sapotero.rxtest.db.requery.utils.DocumentStateSaver;
-import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.jobs.bus.CreateDocumentsJob;
@@ -41,6 +40,7 @@ import sapotero.rxtest.utils.memory.fields.InMemoryState;
 import sapotero.rxtest.utils.memory.fields.LabelType;
 import sapotero.rxtest.utils.memory.mappers.InMemoryDocumentMapper;
 import sapotero.rxtest.utils.memory.models.InMemoryDocument;
+import sapotero.rxtest.utils.memory.models.NotifyMessageModel;
 import sapotero.rxtest.views.menu.builders.ConditionBuilder;
 import timber.log.Timber;
 
@@ -51,8 +51,10 @@ public class Processor {
   @Inject JobManager jobManager;
   @Inject ISettings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
+  @Inject NotifyManager notifyManager;
 
-  enum Source {
+
+  public enum Source {
     EMPTY,
     DB,
     TRANSACTION,
@@ -62,6 +64,7 @@ public class Processor {
 
   private final String TAG = this.getClass().getSimpleName();
   private final PublishSubject<InMemoryDocument> sub;
+  private PublishSubject<NotifyMessageModel> notifyPubSubject;
 
   private String filter;
   private String index;
@@ -76,13 +79,15 @@ public class Processor {
   private String login;
   private String currentUserId;
 
-  public Processor(PublishSubject<InMemoryDocument> subscribeSubject) {
+  public Processor(PublishSubject<InMemoryDocument> subscribeSubject, PublishSubject<NotifyMessageModel> notifyPubSubject) {
     EsdApplication.getManagerComponent().inject(this);
 
     this.filter = null;
     this.index  = null;
 
     this.sub = subscribeSubject;
+    this.notifyPubSubject = notifyPubSubject;
+    notifyManager.subscribeOnNotifyEvents(notifyPubSubject);
   }
 
   public Processor withFilter(String filter){
@@ -283,12 +288,14 @@ public class Processor {
           updateAndSetProcessed( uid );
         }
 
-
         validateDocuments();
 
-//        if (add.size() > 0) {
-//          generateNotificationMsg(add);
-//        }
+        if (add.size() > 0) {
+         if (documentType == DocumentType.DOCUMENT){
+            NotifyMessageModel notifyMessageModel = new NotifyMessageModel(add, documents, filter, index, settings.isFirstRun(), source);
+            notifyPubSubject.onNext(notifyMessageModel);
+          }
+        }
 
           return Collections.singletonList("");
       })
@@ -305,31 +312,6 @@ public class Processor {
 
 
     return new ArrayList<>();
-  }
-
-  private JournalStatus getJournalStatus() {
-    JournalStatus result = null;
-
-    if ( index != null ) {
-      result = JournalStatus.getByNameForApi( index );
-    } else if ( filter != null ) {
-      result = JournalStatus.getByNameForApi( filter );
-    }
-
-    return result;
-  }
-
-  /* генерируем уведомления, если в MemoryStore появился новый документ. addedDocList - List новых документов*/
-  private void generateNotificationMsg(List<String> addedDocList) {
-    NotifyManager mNotifyManager = new NotifyManager(addedDocList, documents, filter);
-
-    /*приводим строку index к виду JournalStatus*/
-    JournalStatus itemJournal = getJournalStatus();
-
-    /*проверяем, включён ли checkBox для журнала. -> генерируем уведомление */
-    if ( itemJournal != null && settings.getNotificatedJournals().contains( itemJournal.getStringIndex() ) ) {
-      mNotifyManager.generateNotifyMsg(itemJournal.getFormattedName() + itemJournal.getSingle());
-    }
   }
 
   private void resetMd5(List<String> add) {
