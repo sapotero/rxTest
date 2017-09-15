@@ -23,7 +23,6 @@ import rx.subjects.PublishSubject;
 import rx.subscriptions.CompositeSubscription;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.events.bus.FileDownloadedEvent;
 import sapotero.rxtest.events.bus.UpdateFavoritesAndProcessedEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckFailEvent;
 import sapotero.rxtest.events.stepper.load.StartLoadDataEvent;
@@ -172,11 +171,6 @@ public class StepperLoadDataFragment extends Fragment implements Step {
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(StepperLoadDocumentEvent event) {
     updateProgressBar(event.message);
-  }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(FileDownloadedEvent event) {
-    updateProgressBar(event.path);
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)

@@ -23,7 +23,7 @@ import retrofit2.Retrofit;
 import rx.Observable;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.requery.models.images.RImageEntity;
-import sapotero.rxtest.events.bus.FileDownloadedEvent;
+import sapotero.rxtest.events.stepper.load.StepperLoadDocumentEvent;
 import sapotero.rxtest.retrofit.DocumentLinkService;
 import sapotero.rxtest.retrofit.models.DownloadLink;
 import sapotero.rxtest.retrofit.utils.RetrofitManager;
@@ -60,7 +60,7 @@ public class DownloadFileJob  extends BaseJob {
     if ( !Objects.equals( login, settings.getLogin() ) ) {
       // Запускаем job только если логин не сменился (режим замещения)
       Timber.tag(TAG).d("Login changed, quit onRun for image %s", rImageId);
-      EventBus.getDefault().post(new FileDownloadedEvent("Quit load file: " + fileName));
+      EventBus.getDefault().post( new StepperLoadDocumentEvent("Quit load file: " + fileName) );
       return;
     }
 
@@ -73,13 +73,13 @@ public class DownloadFileJob  extends BaseJob {
       if ( !image.isLoading() && image.isComplete() ){
         Timber.tag(TAG).e("File exists!");
         sendEvent = false;
-        EventBus.getDefault().post(new FileDownloadedEvent("File exists: " + fileName));
+        EventBus.getDefault().post( new StepperLoadDocumentEvent("File exists: " + fileName) );
       }
 
       if ( image.isLoading() ){
         Timber.tag(TAG).e("File already downloading!");
         sendEvent = false;
-        EventBus.getDefault().post(new FileDownloadedEvent("File already downloading: " + fileName));
+        EventBus.getDefault().post( new StepperLoadDocumentEvent("File already downloading: " + fileName) );
       }
 
       Boolean isError = image.isError();
@@ -94,7 +94,7 @@ public class DownloadFileJob  extends BaseJob {
     }
 
     if ( sendEvent ) {
-      EventBus.getDefault().post(new FileDownloadedEvent(fileName));
+      EventBus.getDefault().post( new StepperLoadDocumentEvent(fileName) );
     }
 
   }
@@ -102,7 +102,7 @@ public class DownloadFileJob  extends BaseJob {
 //  if ( fileExist() ){
 //    File file = new File(getApplicationContext().getFilesDir(), fileName);
 //    Timber.tag(TAG).v( "file exists: %s", file.getAbsolutePath() );
-//    EventBus.getDefault().post( new FileDownloadedEvent(file.getAbsolutePath()) );
+//    EventBus.getDefault().post( new StepperLoadDocumentEvent(file.getAbsolutePath()) );
 //  } else {
 //    Timber.tag(TAG).v( "file not exists" );
 //    loadFile();
@@ -163,7 +163,7 @@ public class DownloadFileJob  extends BaseJob {
           setComplete(false);
           setError(true);
 
-          EventBus.getDefault().post(new FileDownloadedEvent("Error downloading file"));
+          EventBus.getDefault().post( new StepperLoadDocumentEvent("Error downloading file") );
         }
       );
   }
@@ -201,9 +201,9 @@ public class DownloadFileJob  extends BaseJob {
           boolean writtenToDisk = writeResponseBodyToDisk(data.body());
 
           if (writtenToDisk){
-            EventBus.getDefault().post(new FileDownloadedEvent(fileName));
+            EventBus.getDefault().post( new StepperLoadDocumentEvent(fileName) );
           } else {
-            EventBus.getDefault().post(new FileDownloadedEvent("Error writing file to disk"));
+            EventBus.getDefault().post( new StepperLoadDocumentEvent("Error writing file to disk") );
           }
 
           Timber.tag(TAG).d("file download was a success? " + writtenToDisk);
@@ -220,7 +220,7 @@ public class DownloadFileJob  extends BaseJob {
           setComplete(false);
           setError(true);
 
-          EventBus.getDefault().post(new FileDownloadedEvent("Error downloading file"));
+          EventBus.getDefault().post( new StepperLoadDocumentEvent("Error downloading file") );
         }
       );
 
@@ -279,6 +279,6 @@ public class DownloadFileJob  extends BaseJob {
   @Override
   protected void onCancel(@CancelReason int cancelReason, @Nullable Throwable throwable) {
     // Job has exceeded retry attempts or shouldReRunOnThrowable() has decided to cancel.
-    EventBus.getDefault().post(new FileDownloadedEvent("Error downloading file (job cancelled)"));
+    EventBus.getDefault().post( new StepperLoadDocumentEvent("Error downloading file (job cancelled)") );
   }
 }

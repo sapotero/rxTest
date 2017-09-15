@@ -44,7 +44,6 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.utils.JournalStatus;
-import sapotero.rxtest.events.bus.MassInsertDoneEvent;
 import sapotero.rxtest.events.crypto.SignDataResultEvent;
 import sapotero.rxtest.events.crypto.SignDataWrongPinEvent;
 import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
@@ -403,11 +402,6 @@ public class InfoActivity extends AppCompatActivity {
     } catch (Exception e) {
       e.printStackTrace();
     }
-  }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(MassInsertDoneEvent event) {
-    Toast.makeText( getApplicationContext(), event.message, Toast.LENGTH_SHORT).show();
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
