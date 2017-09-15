@@ -56,7 +56,6 @@ import sapotero.rxtest.events.bus.UpdateFavoritesAndProcessedEvent;
 import sapotero.rxtest.events.crypto.AddKeyEvent;
 import sapotero.rxtest.events.crypto.SelectKeyStoreEvent;
 import sapotero.rxtest.events.crypto.SelectKeysEvent;
-import sapotero.rxtest.events.decision.SignAfterCreateEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.service.AuthServiceAuthEvent;
 import sapotero.rxtest.events.service.CheckNetworkEvent;
@@ -67,9 +66,6 @@ import sapotero.rxtest.events.stepper.auth.StepperLoginCheckEvent;
 import sapotero.rxtest.events.stepper.load.StartLoadDataEvent;
 import sapotero.rxtest.events.view.UpdateCurrentInfoActivityEvent;
 import sapotero.rxtest.managers.DataLoaderManager;
-import sapotero.rxtest.managers.menu.factories.CommandFactory;
-import sapotero.rxtest.managers.menu.interfaces.Command;
-import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.services.task.CheckNetworkTask;
 import sapotero.rxtest.services.task.UpdateAllDocumentsTask;
 import sapotero.rxtest.services.task.UpdateQueueTask;
@@ -686,19 +682,6 @@ public class MainService extends Service {
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(UpdateDocumentEvent event) throws Exception {
     EventBus.getDefault().post( new UpdateCurrentInfoActivityEvent() );
-  }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(SignAfterCreateEvent event) throws Exception {
-    Timber.tag(TAG).e("SignAfterCreateEvent - %s", event.uid);
-
-    CommandFactory.Operation operation = CommandFactory.Operation.APPROVE_DECISION_DELAYED;
-    CommandParams params = new CommandParams();
-    params.setDecisionId( event.uid );
-    params.setAssignment( event.assignment );
-
-    Command command = operation.getCommand(null, params);
-    queue.add(command);
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)

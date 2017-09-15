@@ -894,7 +894,6 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
     }
 
     invalidate();
-//    EventBus.getDefault().post( new CheckActiveDecisionEvent() );
   }
 
   public void dropControlLabel(Boolean control){
