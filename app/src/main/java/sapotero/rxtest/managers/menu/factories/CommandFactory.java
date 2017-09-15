@@ -5,11 +5,9 @@ import sapotero.rxtest.managers.menu.commands.decision.AddAndApproveDecision;
 import sapotero.rxtest.managers.menu.commands.decision.AddDecision;
 import sapotero.rxtest.managers.menu.commands.decision.AddTemporaryDecision;
 import sapotero.rxtest.managers.menu.commands.decision.ApproveDecision;
-import sapotero.rxtest.managers.menu.commands.decision.ApproveDecisionDelayed;
 import sapotero.rxtest.managers.menu.commands.decision.RejectDecision;
 import sapotero.rxtest.managers.menu.commands.decision.SaveAndApproveDecision;
 import sapotero.rxtest.managers.menu.commands.decision.SaveDecision;
-import sapotero.rxtest.managers.menu.commands.decision.SaveTemporaryDecision;
 import sapotero.rxtest.managers.menu.commands.file.SignFile;
 import sapotero.rxtest.managers.menu.commands.performance.ApprovalPerformance;
 import sapotero.rxtest.managers.menu.commands.performance.DelegatePerformance;
@@ -334,20 +332,6 @@ public class CommandFactory implements AbstractCommand.Callback{
       }
     },
 
-    SAVE_TEMPORARY_DECISION {
-      @Override
-      public Command getCommand(CommandFactory instance, CommandParams params) {
-        SaveTemporaryDecision command = new SaveTemporaryDecision(params);
-        command.registerCallBack(instance);
-        return command;
-      }
-
-      @Override
-      public String getRussianName() {
-        return "*Сохранение резолюции";
-      }
-    },
-
     SAVE_AND_APPROVE_DECISION {
       @Override
       public Command getCommand(CommandFactory instance, CommandParams params) {
@@ -380,20 +364,6 @@ public class CommandFactory implements AbstractCommand.Callback{
       @Override
       public Command getCommand(CommandFactory instance, CommandParams params) {
         ApproveDecision command = new ApproveDecision(params);
-        command.registerCallBack(instance);
-        return command;
-      }
-
-      @Override
-      public String getRussianName() {
-        return "Подписание резолюции";
-      }
-    },
-
-    APPROVE_DECISION_DELAYED {
-      @Override
-      public Command getCommand(CommandFactory instance, CommandParams params) {
-        ApproveDecisionDelayed command = new ApproveDecisionDelayed(params);
         command.registerCallBack(instance);
         return command;
       }
@@ -484,17 +454,10 @@ public class CommandFactory implements AbstractCommand.Callback{
         case "sapotero.rxtest.managers.menu.commands.decision.SaveAndApproveDecision":
           operation = Operation.SAVE_AND_APPROVE_DECISION;
           break;
-        case "sapotero.rxtest.managers.menu.commands.decision.SaveTemporaryDecision":
-          operation = Operation.SAVE_TEMPORARY_DECISION;
-          break;
 
         case "sapotero.rxtest.managers.menu.commands.decision.ApproveDecision":
           operation = Operation.APPROVE_DECISION;
           break;
-        case "sapotero.rxtest.managers.menu.commands.decision.ApproveDecisionDelayed":
-          operation = Operation.APPROVE_DECISION_DELAYED;
-          break;
-
         case "sapotero.rxtest.managers.menu.commands.decision.RejectDecision":
           operation = Operation.REJECT_DECISION;
           break;

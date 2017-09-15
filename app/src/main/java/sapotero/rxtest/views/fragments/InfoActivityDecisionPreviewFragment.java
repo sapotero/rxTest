@@ -70,7 +70,6 @@ import sapotero.rxtest.db.requery.models.decisions.RPerformer;
 import sapotero.rxtest.db.requery.models.decisions.RPerformerEntity;
 import sapotero.rxtest.db.requery.utils.JournalStatus;
 import sapotero.rxtest.events.decision.ApproveDecisionEvent;
-import sapotero.rxtest.events.decision.CheckActiveDecisionEvent;
 import sapotero.rxtest.events.decision.CheckDecisionVisibilityEvent;
 import sapotero.rxtest.events.decision.DecisionVisibilityEvent;
 import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
@@ -183,7 +182,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
 
             operationManager.execute(operation, params);
             updateAfteButtonPressed();
-            EventBus.getDefault().post( new ShowNextDocumentEvent( true, settings.getUid() ));
+            EventBus.getDefault().post( new ShowNextDocumentEvent( settings.getUid() ));
           })
           .autoDismiss(true);
 
@@ -200,7 +199,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
 
       operationManager.execute(operation, params);
       updateAfteButtonPressed();
-      EventBus.getDefault().post( new ShowNextDocumentEvent( true, settings.getUid() ));
+      EventBus.getDefault().post( new ShowNextDocumentEvent( settings.getUid() ));
     }
 
     Timber.tag(TAG).v("decision_preview_next end");
@@ -229,7 +228,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
 
       operationManager.execute(operation, params);
       updateAfteButtonPressed();
-      EventBus.getDefault().post( new ShowNextDocumentEvent( true, settings.getUid() ));
+      EventBus.getDefault().post( new ShowNextDocumentEvent( settings.getUid() ));
     }
   }
 
@@ -253,7 +252,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
 
         operationManager.execute(operation, commandParams);
         updateAfteButtonPressed();
-        EventBus.getDefault().post( new ShowNextDocumentEvent( true, settings.getUid() ));
+        EventBus.getDefault().post( new ShowNextDocumentEvent( settings.getUid() ));
       })
       .autoDismiss(true);
 
@@ -1402,11 +1401,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
   public void onMessageEvent(InvalidateDecisionSpinnerEvent event) throws Exception {
     Timber.tag(TAG).w("InvalidateDecisionSpinnerEvent %s", event.uid);
     decision_spinner_adapter.invalidate(event.uid);
-  }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(CheckActiveDecisionEvent event) throws Exception {
-    checkActiveDecision();
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)

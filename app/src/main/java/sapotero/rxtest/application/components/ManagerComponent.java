@@ -24,7 +24,6 @@ import sapotero.rxtest.views.activities.LoginActivity;
 import sapotero.rxtest.views.activities.MainActivity;
 import sapotero.rxtest.views.activities.SettingsTemplatesActivity;
 import sapotero.rxtest.views.activities.TestActivity;
-import sapotero.rxtest.views.adapters.DecisionAdapter;
 import sapotero.rxtest.views.adapters.DocumentsAdapter;
 import sapotero.rxtest.views.adapters.SearchResultAdapter;
 import sapotero.rxtest.views.adapters.main.FragmentBuilder;
@@ -61,8 +60,6 @@ public interface ManagerComponent {
   void inject(DecisionTemplateFragment fragment);
   void inject(DecisionPreviewFragment fragment);
   void inject(StepperAuthFragment fragment);
-
-  void inject(DecisionAdapter adapter);
 
   void inject(BaseJob job);
 

@@ -13,7 +13,6 @@ import rx.schedulers.Schedulers;
 import sapotero.rxtest.db.mapper.BlockMapper;
 import sapotero.rxtest.db.requery.models.decisions.RBlockEntity;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
-import sapotero.rxtest.events.document.ForceUpdateDocumentEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.view.InvalidateDecisionSpinnerEvent;
 import sapotero.rxtest.managers.menu.commands.DecisionCommand;
@@ -134,6 +133,5 @@ public class SaveDecision extends DecisionCommand {
   @Override
   public void finishOnOperationError(List<String> errors) {
     finishOperationOnError( errors );
-    EventBus.getDefault().post( new ForceUpdateDocumentEvent( getParams().getDocument() ));
   }
 }

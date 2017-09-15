@@ -50,36 +50,19 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.events.auth.AuthDcCheckFailEvent;
-import sapotero.rxtest.events.auth.AuthDcCheckSuccessEvent;
-import sapotero.rxtest.events.auth.AuthLoginCheckFailEvent;
-import sapotero.rxtest.events.auth.AuthLoginCheckSuccessEvent;
 import sapotero.rxtest.events.bus.FolderCreatedEvent;
 import sapotero.rxtest.events.bus.StartRegularRefreshEvent;
 import sapotero.rxtest.events.bus.UpdateFavoritesAndProcessedEvent;
 import sapotero.rxtest.events.crypto.AddKeyEvent;
 import sapotero.rxtest.events.crypto.SelectKeyStoreEvent;
 import sapotero.rxtest.events.crypto.SelectKeysEvent;
-import sapotero.rxtest.events.crypto.SignDataEvent;
-import sapotero.rxtest.events.crypto.SignDataResultEvent;
-import sapotero.rxtest.events.crypto.SignDataWrongPinEvent;
-import sapotero.rxtest.events.decision.SignAfterCreateEvent;
-import sapotero.rxtest.events.document.UpdateDocumentEvent;
-import sapotero.rxtest.events.service.AuthServiceAuthEvent;
 import sapotero.rxtest.events.service.CheckNetworkEvent;
 import sapotero.rxtest.events.service.UpdateDocumentsByStatusEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckEvent;
 import sapotero.rxtest.events.stepper.auth.StepperDcCheckFailEvent;
-import sapotero.rxtest.events.stepper.auth.StepperDcCheckSuccesEvent;
 import sapotero.rxtest.events.stepper.auth.StepperLoginCheckEvent;
-import sapotero.rxtest.events.stepper.auth.StepperLoginCheckFailEvent;
-import sapotero.rxtest.events.stepper.auth.StepperLoginCheckSuccessEvent;
 import sapotero.rxtest.events.stepper.load.StartLoadDataEvent;
-import sapotero.rxtest.events.view.UpdateCurrentInfoActivityEvent;
 import sapotero.rxtest.managers.DataLoaderManager;
-import sapotero.rxtest.managers.menu.factories.CommandFactory;
-import sapotero.rxtest.managers.menu.interfaces.Command;
-import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.services.task.CheckNetworkTask;
 import sapotero.rxtest.services.task.UpdateAllDocumentsTask;
 import sapotero.rxtest.services.task.UpdateQueueTask;
@@ -573,7 +556,6 @@ public class MainService extends Service {
         data -> {
 
           if (aliasesList.size() > 0){
-            EventBus.getDefault().post( new AuthServiceAuthEvent( aliasesList.toString() ) );
             ContainerAdapter adapter = new ContainerAdapter(aliasesList.get( 0 ), null, aliasesList.get( 0 ), null);
 
             adapter.setProviderType(ProviderType.currentProviderType());
@@ -635,41 +617,6 @@ public class MainService extends Service {
     dataLoaderInterface.tryToSignWithLogin( login, password );
   }
 
-  private void getSign(String password) throws Exception {
-
-    ContainerAdapter adapter = new ContainerAdapter(aliasesList.get(0), null, aliasesList.get(0), null);
-
-    adapter.setProviderType(ProviderType.currentProviderType());
-    adapter.setClientPassword( password.toCharArray() );
-    adapter.setResources(getResources());
-
-
-    final String trustStorePath = this.getApplicationInfo().dataDir + File.separator + BKSTrustStore.STORAGE_DIRECTORY + File.separator + BKSTrustStore.STORAGE_FILE_TRUST;
-
-    adapter.setTrustStoreProvider(BouncyCastleProvider.PROVIDER_NAME);
-    adapter.setTrustStoreType(BKSTrustStore.STORAGE_TYPE);
-
-    adapter.setTrustStoreStream(new FileInputStream(trustStorePath));
-    adapter.setTrustStorePassword(BKSTrustStore.STORAGE_PASSWORD);
-
-    PinCheck pinCheck = new PinCheck(adapter);
-    Boolean pinValid = pinCheck.check();
-
-    if (pinValid){
-      CMSSign sign = new CMSSign(true, adapter, null);
-      sign.getResult(null);
-
-      byte[] signature = sign.getSignature();
-      Encoder enc = new Encoder();
-      Timber.tag( "CRT_BASE64" ).d( enc.encode(signature) );
-
-      EventBus.getDefault().post( new SignDataResultEvent( enc.encode(signature) ) );
-
-    } else {
-      EventBus.getDefault().post( new SignDataWrongPinEvent("Pin is invalid") );
-    }
-  }
-
   public static String getFakeSign(String password, File file) throws Exception {
 
     ContainerAdapter adapter = new ContainerAdapter(aliasesList.get(0), null, aliasesList.get(0), null);
@@ -724,52 +671,8 @@ public class MainService extends Service {
   }
 
   @Subscribe(threadMode = ThreadMode.BACKGROUND)
-  public void onMessageEvent(AuthDcCheckSuccessEvent event) throws Exception {
-    EventBus.getDefault().post( new StepperDcCheckSuccesEvent() );
-  }
-
-  @Subscribe(threadMode = ThreadMode.BACKGROUND)
-  public void onMessageEvent(AuthDcCheckFailEvent event) throws Exception {
-    EventBus.getDefault().post( new StepperDcCheckFailEvent(event.error) );
-  }
-
-  @Subscribe(threadMode = ThreadMode.BACKGROUND)
-  public void onMessageEvent(AuthLoginCheckSuccessEvent event) throws Exception {
-    EventBus.getDefault().post( new StepperLoginCheckSuccessEvent() );
-  }
-
-  @Subscribe(threadMode = ThreadMode.BACKGROUND)
-  public void onMessageEvent(AuthLoginCheckFailEvent event) throws Exception {
-    EventBus.getDefault().post( new StepperLoginCheckFailEvent(event.error) );
-  }
-
-  @Subscribe(threadMode = ThreadMode.BACKGROUND)
   public void onMessageEvent(StartLoadDataEvent event) throws Exception {
     dataLoaderInterface.initV2( true );
-  }
-
-  @Subscribe(threadMode = ThreadMode.BACKGROUND)
-  public void onMessageEvent(SignDataEvent event) throws Exception {
-    getSign( event.data );
-  }
-
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(UpdateDocumentEvent event) throws Exception {
-    EventBus.getDefault().post( new UpdateCurrentInfoActivityEvent() );
-  }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(SignAfterCreateEvent event) throws Exception {
-    Timber.tag(TAG).e("SignAfterCreateEvent - %s", event.uid);
-
-    CommandFactory.Operation operation = CommandFactory.Operation.APPROVE_DECISION_DELAYED;
-    CommandParams params = new CommandParams();
-    params.setDecisionId( event.uid );
-    params.setAssignment( event.assignment );
-
-    Command command = operation.getCommand(null, params);
-    queue.add(command);
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
