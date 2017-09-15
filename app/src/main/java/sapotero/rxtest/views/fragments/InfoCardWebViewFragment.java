@@ -31,7 +31,6 @@ import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.activities.DocumentInfocardFullScreenActivity;
-import sapotero.rxtest.views.adapters.utils.OnSwipeTouchListener;
 import sapotero.rxtest.views.fragments.interfaces.PreviewFragment;
 import timber.log.Timber;
 
@@ -106,8 +105,6 @@ public class InfoCardWebViewFragment extends PreviewFragment {
     }
 
     webSettings.setDefaultFontSize( fontsize );
-
-    wrapper.setOnTouchListener( new OnSwipeTouchListener( getContext() ) );
 
     setWebView();
   }
