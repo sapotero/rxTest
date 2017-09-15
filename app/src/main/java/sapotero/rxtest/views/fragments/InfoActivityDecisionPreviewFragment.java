@@ -182,7 +182,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
 
             operationManager.execute(operation, params);
             updateAfteButtonPressed();
-            EventBus.getDefault().post( new ShowNextDocumentEvent( true, settings.getUid() ));
+            EventBus.getDefault().post( new ShowNextDocumentEvent( settings.getUid() ));
           })
           .autoDismiss(true);
 
@@ -199,7 +199,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
 
       operationManager.execute(operation, params);
       updateAfteButtonPressed();
-      EventBus.getDefault().post( new ShowNextDocumentEvent( true, settings.getUid() ));
+      EventBus.getDefault().post( new ShowNextDocumentEvent( settings.getUid() ));
     }
 
     Timber.tag(TAG).v("decision_preview_next end");
@@ -228,7 +228,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
 
       operationManager.execute(operation, params);
       updateAfteButtonPressed();
-      EventBus.getDefault().post( new ShowNextDocumentEvent( true, settings.getUid() ));
+      EventBus.getDefault().post( new ShowNextDocumentEvent( settings.getUid() ));
     }
   }
 
@@ -252,7 +252,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
 
         operationManager.execute(operation, commandParams);
         updateAfteButtonPressed();
-        EventBus.getDefault().post( new ShowNextDocumentEvent( true, settings.getUid() ));
+        EventBus.getDefault().post( new ShowNextDocumentEvent( settings.getUid() ));
       })
       .autoDismiss(true);
 

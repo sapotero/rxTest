@@ -32,7 +32,7 @@ public class AddAndApproveDecision extends DecisionCommand {
     updateLocal();
     setAsProcessed();
 
-    EventBus.getDefault().post( new ShowNextDocumentEvent( true, getParams().getDocument() ) );
+    EventBus.getDefault().post( new ShowNextDocumentEvent( getParams().getDocument() ) );
   }
 
   private void updateLocal() {

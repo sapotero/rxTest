@@ -32,7 +32,7 @@ public class DelegatePerformance extends AbstractCommand {
 
   @Override
   public void execute() {
-    EventBus.getDefault().post( new ShowNextDocumentEvent( true, getParams().getDocument() ));
+    EventBus.getDefault().post( new ShowNextDocumentEvent( getParams().getDocument() ));
 
     Timber.tag(TAG).i( "type: %s", this.getClass().getName() );
 

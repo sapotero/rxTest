@@ -51,7 +51,6 @@ import sapotero.rxtest.events.document.DropControlEvent;
 import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.notification.RemoveIdNotificationEvent;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
-import sapotero.rxtest.events.view.ShowPrevDocumentEvent;
 import sapotero.rxtest.events.view.ShowSnackEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
@@ -466,12 +465,6 @@ public class InfoActivity extends AppCompatActivity {
     updateCurrent();
   }
 
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(ShowPrevDocumentEvent event) throws Exception {
-    Timber.tag(TAG).e("ShowPrevDocumentEvent");
-    showPrevDocument();
-  }
-
   private void showPrevDocument() {
     Timber.tag("SHOW_PREV").e("info_act");
 
@@ -531,17 +524,15 @@ public class InfoActivity extends AppCompatActivity {
     Timber.tag(TAG).e("ShowNextDocumentEvent: showing next document");
     showNextDocument();
 
-    if ( event.isRemoveUid() ) {
-      Timber.tag(TAG).e("ShowNextDocumentEvent: removing uid from list");
-      int index = documentUids.indexOf( event.getUid() );
+    Timber.tag(TAG).e("ShowNextDocumentEvent: removing uid from list");
+    int index = documentUids.indexOf( event.getUid() );
 
-      if ( index > -1 ) {
-        documentUids.remove( index );
+    if ( index > -1 ) {
+      documentUids.remove( index );
 
-        int mainMenuPosition = settings.getMainMenuPosition();
-        if ( index < mainMenuPosition ) {
-          settings.setMainMenuPosition( mainMenuPosition - 1 );
-        }
+      int mainMenuPosition = settings.getMainMenuPosition();
+      if ( index < mainMenuPosition ) {
+        settings.setMainMenuPosition( mainMenuPosition - 1 );
       }
     }
   }

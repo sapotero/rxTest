@@ -1,11 +1,8 @@
 package sapotero.rxtest.services.task;
 
-import org.greenrobot.eventbus.EventBus;
-
 import javax.inject.Inject;
 
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.events.view.UpdateMainActivityEvent;
 import sapotero.rxtest.managers.DataLoaderManager;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.menu.fields.MainMenuItem;
@@ -28,6 +25,5 @@ public class UpdateAllDocumentsTask implements Runnable {
     dataLoaderInterface.updateByCurrentStatus(MainMenuItem.ALL, null, settings.getLogin(), settings.getCurrentUserId());
     dataLoaderInterface.updateFavorites(true);
     dataLoaderInterface.updateProcessed(true);
-    EventBus.getDefault().post( new UpdateMainActivityEvent() );
   }
 }

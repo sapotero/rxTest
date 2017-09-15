@@ -64,7 +64,7 @@ public class SaveAndApproveDecision extends DecisionCommand {
     if ( isActiveOrRed() || (doc != null && Objects.equals(doc.getFilter(), JournalStatus.PRIMARY.getName())) ) {
       startProcessedOperationInMemory();
       startProcessedOperationInDb();
-      EventBus.getDefault().post( new ShowNextDocumentEvent( true, getParams().getDocument() ));
+      EventBus.getDefault().post( new ShowNextDocumentEvent( getParams().getDocument() ));
 
     } else {
       setSyncLabelInMemory();

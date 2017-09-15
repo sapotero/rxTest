@@ -5,16 +5,10 @@ package sapotero.rxtest.events.view;
  */
 
 public class ShowNextDocumentEvent {
-  private boolean removeUid;
   private String uid;
 
-  public ShowNextDocumentEvent(boolean removeUid, String uid) {
-    this.removeUid = removeUid;
+  public ShowNextDocumentEvent(String uid) {
     this.uid = uid;
-  }
-
-  public boolean isRemoveUid() {
-    return removeUid;
   }
 
   public String getUid() {
