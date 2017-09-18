@@ -68,6 +68,7 @@ import timber.log.Timber;
 public class DataLoaderManager {
 
   public static final int LIMIT = 500;
+  public static final int LIMIT2 = 100;
 
   private final String TAG = this.getClass().getSimpleName();
 
@@ -664,29 +665,6 @@ public class DataLoaderManager {
 
       for (String code : sp) {
         loadScroll( docService, login, currentUserId, code, "", new ArrayList<>() );
-//        subscription.add(
-//          docService
-//            .getDocuments(login, settings.getToken(), code, null , getYears(), "")
-//            .subscribeOn(Schedulers.io())
-//            .observeOn(AndroidSchedulers.mainThread())
-//            .subscribe(
-//              data -> {
-//                Timber.tag("LoadSequence").d("Received list of projects");
-//                requestCount--;
-//                updateDocCount( data, true );
-//                checkAndSendCountReady();
-//                if ( Objects.equals( login, settings.getLogin() ) ) {
-//                  // Обрабатываем полученный список только если логин не поменялся (при входе/выходе в режим замещения)
-//                  Timber.tag("LoadSequence").d("Processing list of projects");
-//                  processDocuments( data, code, null, null, DocumentType.DOCUMENT, login, currentUserId );
-//                }
-//              },
-//              error -> {
-//                requestCount--;
-//                checkAndSendCountReady();
-//                Timber.tag(TAG).e(error);
-//              })
-//        );
       }
     }
   }
@@ -694,16 +672,13 @@ public class DataLoaderManager {
   private void loadScroll(DocumentsService docService, String login, String currentUserId, String status_code, String scroll_id, List<Document> resultList) {
     subscription.add(
       docService
-        .getDocuments(login, settings.getToken(), status_code, null , getYears(), scroll_id)
+        .getDocuments(login, settings.getToken(), status_code, null , LIMIT2, getYears(), scroll_id)
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(
           data -> {
-            Timber.tag("LoadSequence").d("Received scroll page");
-
             if ( Objects.equals( scroll_id, "" ) ) {
               // Обновляем счетчик документов, если получили первую страницу скролла
-              Timber.tag("LoadSequence").d("Scroll page is first");
               requestCount--;
               updateDocCount( data, true );
               checkAndSendCountReady();
@@ -711,17 +686,14 @@ public class DataLoaderManager {
 
             if ( Objects.equals( login, settings.getLogin() ) ) {
               // Обрабатываем полученный список только если логин не поменялся (при входе/выходе в режим замещения)
-              Timber.tag("LoadSequence").d("Processing scroll page");
               resultList.addAll( data.getDocuments() );
 
               String scrollIdFromMeta = getScrollId( data );
               if ( data.getDocuments().size() > 0 && scrollIdFromMeta != null ) {
                 // Запрашиваем очередную страницу скролла, пока пришедший в ответе список документов не пуст
-                Timber.tag("LoadSequence").d("Loading next scroll page");
                 loadScroll( docService, login, currentUserId, status_code, scrollIdFromMeta, resultList );
               } else {
                 // Обрабатываем итоговый список
-                Timber.tag("LoadSequence").d("Processing result list");
                 processDocuments( resultList, status_code, null, null, DocumentType.DOCUMENT, login, currentUserId );
               }
             }
@@ -729,7 +701,6 @@ public class DataLoaderManager {
           error -> {
             if ( Objects.equals( scroll_id, "" ) ) {
               // Если ошибка при загрузке первой страницы скролла
-              Timber.tag("LoadSequence").d("Error receiving first scroll page");
               requestCount--;
               checkAndSendCountReady();
             }
@@ -817,7 +788,7 @@ public class DataLoaderManager {
   }
 
   private void processDocuments(List<Document> documentList, String status, String index, String folder, DocumentType documentType, String login, String currentUserId) {
-    if (documentList.size() >= 0){
+    if (documentList.size() >= 0) {
       HashMap<String, Document> doc_hash = new HashMap<>();
 
       for (Document doc: documentList ) {
