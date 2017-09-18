@@ -654,8 +654,11 @@ public class DataLoaderManager {
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(
           data -> {
+            Timber.tag("LoadSequence").d("Received scroll page, project %s", isProject);
+
             if ( Objects.equals( scroll_id, "" ) ) {
               // Обновляем счетчик документов, если получили первую страницу скролла
+              Timber.tag("LoadSequence").d("Scroll page is first, project %s", isProject);
               requestCount--;
               updateDocCount( data, isProject );
               checkAndSendCountReady();
@@ -663,14 +666,17 @@ public class DataLoaderManager {
 
             if ( Objects.equals( login, settings.getLogin() ) ) {
               // Обрабатываем полученный список только если логин не поменялся (при входе/выходе в режим замещения)
+              Timber.tag("LoadSequence").d("Processing scroll page, project %s", isProject);
               resultList.addAll( data.getDocuments() );
 
               String scrollIdFromMeta = getScrollId( data );
               if ( data.getDocuments().size() > 0 && scrollIdFromMeta != null ) {
                 // Запрашиваем очередную страницу скролла, пока пришедший в ответе список документов не пуст
+                Timber.tag("LoadSequence").d("Loading next scroll page, project %s", isProject);
                 loadScroll( docService, login, currentUserId, index, status, scrollIdFromMeta, isProject, resultList );
               } else {
                 // Обрабатываем итоговый список
+                Timber.tag("LoadSequence").d("Processing result list, project %s", isProject);
                 processDocuments( resultList, status, index, null, DocumentType.DOCUMENT, login, currentUserId );
               }
             }
@@ -827,7 +833,6 @@ public class DataLoaderManager {
   }
 
   public void updateFavorites(boolean processLoadedData) {
-
     processFavoritesData = processLoadedData;
 
     DocumentsService docService = getDocumentService();
@@ -892,6 +897,7 @@ public class DataLoaderManager {
                 // Запрашиваем очередную страницу скролла, пока пришедший в ответе список документов не пуст
                 Timber.tag("LoadSequence").d("Loading next scroll page, favorites %s", isFavorites);
                 loadScrollFolder( docService, login, currentUserId, folder, created_at, scrollIdFromMeta, resultList, isFavorites );
+
               } else {
                 // Все страницы скролла загружены
                 if ( isFavorites ) {
@@ -935,7 +941,6 @@ public class DataLoaderManager {
   }
 
   public void updateProcessed(boolean processLoadedData) {
-
     processProcessedData = processLoadedData;
 
     DocumentsService docService = getDocumentService();
