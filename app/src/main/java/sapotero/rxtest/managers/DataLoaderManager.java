@@ -89,7 +89,7 @@ public class DataLoaderManager {
 
   private boolean isDocumentCountSent;
 
-  private Documents favoritesData;
+  private List<Document> favoritesList;
   private Documents processedData;
   private boolean favoritesDataLoaded = false;
   private boolean processedDataLoaded = false;
@@ -877,36 +877,75 @@ public class DataLoaderManager {
 
       Timber.tag("LoadSequence").d("Loading list of favorites");
       favoritesDataLoading = true;
-
       unsubscribeFavorites();
+      loadScrollFavorites( docService, login, currentUserId, favorites_folder, "", new ArrayList<>() );
 
-      subscriptionFavorites.add(
-        docService.getByFolders(login, settings.getToken(), null, LIMIT, 0, favorites_folder.getUid(), null)
-          .subscribeOn( Schedulers.io() )
-          .observeOn( AndroidSchedulers.mainThread() )
-          .subscribe(
-            data -> {
-              Timber.tag("LoadSequence").d("Received list of favorites");
-              Timber.tag("FAVORITES").e("DOCUMENTS COUNT: %s", data.getDocuments().size() );
-              favoritesData = data;
-              favoritesDataLoaded = true;
-              updateDocCount( favoritesData, false );
-              if ( processFavoritesData ) {
-                if ( Objects.equals( login, settings.getLogin() ) ) {
-                  // Обрабатываем полученный список только если логин не поменялся (при входе/выходе в режим замещения)
-                  Timber.tag("LoadSequence").d("Processing list of favorites");
+//      subscriptionFavorites.add(
+//        docService.getByFolders(login, settings.getToken(), null, LIMIT, 0, favorites_folder.getUid(), null)
+//          .subscribeOn( Schedulers.io() )
+//          .observeOn( AndroidSchedulers.mainThread() )
+//          .subscribe(
+//            data -> {
+//              Timber.tag("LoadSequence").d("Received list of favorites");
+//              Timber.tag("FAVORITES").e("DOCUMENTS COUNT: %s", data.getDocuments().size() );
+//              favoritesData = data;
+//              favoritesDataLoaded = true;
+//              updateDocCount( favoritesData, false );
+//              if ( processFavoritesData ) {
+//                if ( Objects.equals( login, settings.getLogin() ) ) {
+//                  // Обрабатываем полученный список только если логин не поменялся (при входе/выходе в режим замещения)
+//                  Timber.tag("LoadSequence").d("Processing list of favorites");
+//                  processFavorites(favorites_folder, login, currentUserId);
+//                }
+//              } else {
+//                Timber.tag("LoadSequence").d("processLoadedData = false, quit processing list of favorites");
+//              }
+//            }, error -> {
+//              Timber.tag(TAG).e(error);
+//              favoritesDataLoading = false;
+//            }
+//          )
+//      );
+    }
+  }
+
+  private void loadScrollFavorites(DocumentsService docService, String login, String currentUserId, RFolderEntity favorites_folder, String scroll_id, List<Document> resultList) {
+    subscriptionFavorites.add(
+      docService.getByFolders(login, settings.getToken(), LIMIT2, favorites_folder.getUid(), null)
+        .subscribeOn( Schedulers.io() )
+        .observeOn( AndroidSchedulers.mainThread() )
+        .subscribe(
+          data -> {
+            if ( Objects.equals( scroll_id, "" ) ) {
+              // Обновляем счетчик документов, если получили первую страницу скролла
+              updateDocCount( data, false );
+            }
+
+            if ( Objects.equals( login, settings.getLogin() ) ) {
+              // Обрабатываем полученный список только если логин не поменялся (при входе/выходе в режим замещения)
+              resultList.addAll( data.getDocuments() );
+
+              String scrollIdFromMeta = getScrollId( data );
+              if ( data.getDocuments().size() > 0 && scrollIdFromMeta != null ) {
+                // Запрашиваем очередную страницу скролла, пока пришедший в ответе список документов не пуст
+                loadScrollFavorites( docService, login, currentUserId, favorites_folder, scrollIdFromMeta, resultList );
+              } else {
+                // Все страницы скролла загружены
+                favoritesDataLoaded = true;
+                favoritesList = resultList;
+                if ( processFavoritesData ) {
+                  // Обрабатываем итоговый список
                   processFavorites(favorites_folder, login, currentUserId);
                 }
-              } else {
-                Timber.tag("LoadSequence").d("processLoadedData = false, quit processing list of favorites");
               }
-            }, error -> {
-              Timber.tag(TAG).e(error);
-              favoritesDataLoading = false;
             }
-          )
-      );
-    }
+
+          }, error -> {
+            Timber.tag(TAG).e(error);
+            favoritesDataLoading = false;
+          }
+        )
+    );
   }
 
   private void unsubscribeFavorites() {
@@ -918,7 +957,7 @@ public class DataLoaderManager {
   }
 
   private void processFavorites(RFolderEntity favorites_folder, String login, String currentUserId) {
-    processDocuments( favoritesData, null, null, favorites_folder.getUid(), DocumentType.FAVORITE, login, currentUserId );
+    processDocuments( favoritesList, null, null, favorites_folder.getUid(), DocumentType.FAVORITE, login, currentUserId );
   }
 
   public void updateProcessed(boolean processLoadedData) {
@@ -973,7 +1012,7 @@ public class DataLoaderManager {
       unsubscribeProcessed();
 
       subscriptionProcessed.add(
-        docService.getByFolders(login, settings.getToken(), null, LIMIT, 0, processed_folder.getUid(), date)
+        docService.getByFolders(login, settings.getToken(), LIMIT, processed_folder.getUid(), date)
           .subscribeOn( Schedulers.io() )
           .observeOn( AndroidSchedulers.mainThread() )
           .subscribe(
