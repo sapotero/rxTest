@@ -637,42 +637,20 @@ public class DataLoaderManager {
 
       for (String index: indexes ) {
         for (String status: statuses ) {
-          subscription.add(
-            docService
-              .getDocumentsByIndexes(login, settings.getToken(), index, status, null , LIMIT, getYears())
-              .subscribeOn(Schedulers.io())
-              .observeOn(AndroidSchedulers.mainThread())
-              .subscribe(
-                data -> {
-                  Timber.tag("LoadSequence").d("Received list of documents");
-                  requestCount--;
-                  updateDocCount( data, true );
-                  checkAndSendCountReady();
-                  if ( Objects.equals( login, settings.getLogin() ) ) {
-                    // Обрабатываем полученный список только если логин не поменялся (при входе/выходе в режим замещения)
-                    Timber.tag("LoadSequence").d("Processing list of documents");
-                    processDocuments( data, status, index, null, DocumentType.DOCUMENT, login, currentUserId );
-                  }
-                },
-                error -> {
-                  requestCount--;
-                  checkAndSendCountReady();
-                  Timber.tag(TAG).e(error);
-                })
-          );
+          loadScroll( docService, login, currentUserId, index, status, "", false, new ArrayList<>() );
         }
       }
 
       for (String code : sp) {
-        loadScroll( docService, login, currentUserId, code, "", new ArrayList<>() );
+        loadScroll( docService, login, currentUserId, null, code, "", true, new ArrayList<>() );
       }
     }
   }
 
-  private void loadScroll(DocumentsService docService, String login, String currentUserId, String status_code, String scroll_id, List<Document> resultList) {
+  private void loadScroll(DocumentsService docService, String login, String currentUserId, String index, String status, String scroll_id, boolean isProject, List<Document> resultList) {
     subscription.add(
       docService
-        .getDocuments(login, settings.getToken(), status_code, null , LIMIT2, getYears(), scroll_id)
+        .getDocuments(login, settings.getToken(), index, status, null , LIMIT2, getYears(), scroll_id)
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(
@@ -680,7 +658,7 @@ public class DataLoaderManager {
             if ( Objects.equals( scroll_id, "" ) ) {
               // Обновляем счетчик документов, если получили первую страницу скролла
               requestCount--;
-              updateDocCount( data, true );
+              updateDocCount( data, isProject );
               checkAndSendCountReady();
             }
 
@@ -691,10 +669,10 @@ public class DataLoaderManager {
               String scrollIdFromMeta = getScrollId( data );
               if ( data.getDocuments().size() > 0 && scrollIdFromMeta != null ) {
                 // Запрашиваем очередную страницу скролла, пока пришедший в ответе список документов не пуст
-                loadScroll( docService, login, currentUserId, status_code, scrollIdFromMeta, resultList );
+                loadScroll( docService, login, currentUserId, index, status, scrollIdFromMeta, isProject, resultList );
               } else {
                 // Обрабатываем итоговый список
-                processDocuments( resultList, status_code, null, null, DocumentType.DOCUMENT, login, currentUserId );
+                processDocuments( resultList, status, index, null, DocumentType.DOCUMENT, login, currentUserId );
               }
             }
           },
