@@ -37,7 +37,8 @@ public interface DocumentsService {
     @Query("auth_token") String auth_token,
     @Query("limit")  Integer limit,
     @Query("folder_id") String folder,
-    @Query("created_at") String created_at
+    @Query("created_at") String created_at,
+    @Query("scroll_id") String scroll_id
   );
 
   @PUT("/v3/documents/{UID}/view.json")
