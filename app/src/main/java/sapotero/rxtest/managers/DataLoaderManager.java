@@ -861,32 +861,37 @@ public class DataLoaderManager {
       Timber.tag("LoadSequence").d("Loading list of favorites");
       favoritesDataLoading = true;
       unsubscribeFavorites();
-      loadScrollFolder( docService, login, currentUserId, favorites_folder, "", new ArrayList<>(), true );
+      loadScrollFolder( docService, login, currentUserId, favorites_folder, null, "", new ArrayList<>(), true );
     }
   }
 
-  private void loadScrollFolder(DocumentsService docService, String login, String currentUserId, RFolderEntity folder, String scroll_id, List<Document> resultList, boolean isFavorites) {
+  private void loadScrollFolder(DocumentsService docService, String login, String currentUserId, RFolderEntity folder, String created_at, String scroll_id, List<Document> resultList, boolean isFavorites) {
     CompositeSubscription compositeSubscription = isFavorites ? subscriptionFavorites : subscriptionProcessed;
 
     compositeSubscription.add(
-      docService.getByFolders(login, settings.getToken(), LIMIT, folder.getUid(), null, scroll_id)
+      docService.getByFolders(login, settings.getToken(), LIMIT, folder.getUid(), created_at, scroll_id)
         .subscribeOn( Schedulers.io() )
         .observeOn( AndroidSchedulers.mainThread() )
         .subscribe(
           data -> {
+            Timber.tag("LoadSequence").d("Received scroll page, favorites %s", isFavorites);
+
             if ( Objects.equals( scroll_id, "" ) ) {
               // Обновляем счетчик документов, если получили первую страницу скролла
+              Timber.tag("LoadSequence").d("Scroll page is first, favorites %s", isFavorites);
               updateDocCount( data, false );
             }
 
             if ( Objects.equals( login, settings.getLogin() ) ) {
               // Обрабатываем полученный список только если логин не поменялся (при входе/выходе в режим замещения)
+              Timber.tag("LoadSequence").d("Processing scroll page, favorites %s", isFavorites);
               resultList.addAll( data.getDocuments() );
 
               String scrollIdFromMeta = getScrollId( data );
               if ( data.getDocuments().size() > 0 && scrollIdFromMeta != null ) {
                 // Запрашиваем очередную страницу скролла, пока пришедший в ответе список документов не пуст
-                loadScrollFolder( docService, login, currentUserId, folder, scrollIdFromMeta, resultList, isFavorites );
+                Timber.tag("LoadSequence").d("Loading next scroll page, favorites %s", isFavorites);
+                loadScrollFolder( docService, login, currentUserId, folder, created_at, scrollIdFromMeta, resultList, isFavorites );
               } else {
                 // Все страницы скролла загружены
                 if ( isFavorites ) {
@@ -899,6 +904,7 @@ public class DataLoaderManager {
 
                 if ( isFavorites ? processFavoritesData : processProcessedData ) {
                   // Обрабатываем итоговый список
+                  Timber.tag("LoadSequence").d("Processing result list, favorites %s", isFavorites);
                   processFolder(folder, login, currentUserId, isFavorites);
                 }
               }
@@ -977,34 +983,7 @@ public class DataLoaderManager {
       Timber.tag("LoadSequence").d("Loading list of processed");
       processedDataLoading = true;
       unsubscribeProcessed();
-      loadScrollFolder( docService, login, currentUserId, processed_folder, "", new ArrayList<>(), false );
-
-//      subscriptionProcessed.add(
-//        docService.getByFolders(login, settings.getToken(), LIMIT, processed_folder.getUid(), date, null)
-//          .subscribeOn( Schedulers.io() )
-//          .observeOn( AndroidSchedulers.mainThread() )
-//          .subscribe(
-//            data -> {
-//              Timber.tag("LoadSequence").d("Received list of processed");
-//              Timber.tag("PROCESSED").e("DOCUMENTS COUNT: %s", data.getDocuments().size() );
-//              processedData = data;
-//              processedDataLoaded = true;
-//              updateDocCount( processedData, false );
-//              if ( processProcessedData ) {
-//                if ( Objects.equals( login, settings.getLogin() ) ) {
-//                  // Обрабатываем полученный список только если логин не поменялся (при входе/выходе в режим замещения)
-//                  Timber.tag("LoadSequence").d("Processing list of processed");
-//                  processProcessed( processed_folder, login, currentUserId );
-//                }
-//              } else {
-//                Timber.tag("LoadSequence").d("processLoadedData = false, quit processing list of processed");
-//              }
-//            }, error -> {
-//              Timber.tag(TAG).e(error);
-//              processedDataLoading = false;
-//            }
-//          )
-//      );
+      loadScrollFolder( docService, login, currentUserId, processed_folder, date, "", new ArrayList<>(), false );
     }
   }
 
@@ -1015,10 +994,6 @@ public class DataLoaderManager {
 
     subscriptionProcessed = new CompositeSubscription();
   }
-
-//  private void processProcessed(RFolderEntity processed_folder, String login, String currentUserId) {
-//    processDocuments( processedData, null, null, processed_folder.getUid(), DocumentType.PROCESSED, login, currentUserId );
-//  }
 
   public void unsubscribeAll() {
     Timber.tag(TAG).d("Unsubscribe all");
