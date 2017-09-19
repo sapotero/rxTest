@@ -636,17 +636,17 @@ public class DataLoaderManager {
 
       for (String index: indexes ) {
         for (String status: statuses ) {
-          loadScroll( docService, login, currentUserId, index, status, "", false, new ArrayList<>() );
+          loadScroll( docService, login, currentUserId, index, status, "", new ArrayList<>() );
         }
       }
 
       for (String code : sp) {
-        loadScroll( docService, login, currentUserId, null, code, "", true, new ArrayList<>() );
+        loadScroll( docService, login, currentUserId, null, code, "", new ArrayList<>() );
       }
     }
   }
 
-  private void loadScroll(DocumentsService docService, String login, String currentUserId, String index, String status, String scroll_id, boolean isProject, List<Document> resultList) {
+  private void loadScroll(DocumentsService docService, String login, String currentUserId, String index, String status, String scroll_id, List<Document> resultList) {
     subscription.add(
       docService
         .getDocuments(login, settings.getToken(), index, status, null , LIMIT, getYears(), scroll_id)
@@ -654,21 +654,15 @@ public class DataLoaderManager {
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(
           data -> {
-            Timber.tag("LoadSequence").d("Received scroll page, project %s", isProject);
-
             if ( Objects.equals( login, settings.getLogin() ) ) {
               // Обрабатываем полученный список только если логин не поменялся (при входе/выходе в режим замещения)
-              Timber.tag("LoadSequence").d("Processing scroll page, project %s", isProject);
               resultList.addAll( data.getDocuments() );
 
               String scrollIdFromMeta = getScrollId( data );
               if ( data.getDocuments().size() > 0 && scrollIdFromMeta != null ) {
                 // Запрашиваем очередную страницу скролла, пока пришедший в ответе список документов не пуст
-                Timber.tag("LoadSequence").d("Loading next scroll page, project %s", isProject);
-                loadScroll( docService, login, currentUserId, index, status, scrollIdFromMeta, isProject, resultList );
+                loadScroll( docService, login, currentUserId, index, status, scrollIdFromMeta, resultList );
               } else {
-                Timber.tag("LoadSequence").d("Processing result list, project %s", isProject);
-
                 // Обновляем счетчик только после успешной загрузки всех страниц скролла
                 requestCount--;
                 updateDocCount( data, true );
@@ -873,17 +867,13 @@ public class DataLoaderManager {
         .observeOn( AndroidSchedulers.mainThread() )
         .subscribe(
           data -> {
-            Timber.tag("LoadSequence").d("Received scroll page, favorites %s", isFavorites);
-
             if ( Objects.equals( login, settings.getLogin() ) ) {
               // Обрабатываем полученный список только если логин не поменялся (при входе/выходе в режим замещения)
-              Timber.tag("LoadSequence").d("Processing scroll page, favorites %s", isFavorites);
               resultList.addAll( data.getDocuments() );
 
               String scrollIdFromMeta = getScrollId( data );
               if ( data.getDocuments().size() > 0 && scrollIdFromMeta != null ) {
                 // Запрашиваем очередную страницу скролла, пока пришедший в ответе список документов не пуст
-                Timber.tag("LoadSequence").d("Loading next scroll page, favorites %s", isFavorites);
                 loadScrollFolder( docService, login, currentUserId, folder, created_at, scrollIdFromMeta, resultList, isFavorites );
 
               } else {
@@ -901,7 +891,6 @@ public class DataLoaderManager {
 
                 if ( isFavorites ? processFavoritesData : processProcessedData ) {
                   // Обрабатываем итоговый список
-                  Timber.tag("LoadSequence").d("Processing result list, favorites %s", isFavorites);
                   processFolder(folder, login, currentUserId, isFavorites);
                 }
               }
