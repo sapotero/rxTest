@@ -86,8 +86,7 @@ public class MemoryStore implements Processable{
 
     sub
       .buffer( 500, TimeUnit.MILLISECONDS )
-      .onBackpressureBuffer(512)
-      .onBackpressureDrop()
+      .onBackpressureBuffer()
       .subscribeOn(Schedulers.computation())
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(

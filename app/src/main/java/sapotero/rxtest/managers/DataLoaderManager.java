@@ -651,6 +651,8 @@ public class DataLoaderManager {
     }
   }
 
+  // resolved https://tasks.n-core.ru/browse/MPSED-2180
+  // Переделать загрузку документов на scroll
   private void loadScroll(DocumentsService docService, String login, String currentUserId, String index, String status, String scroll_id, List<Document> resultList) {
     subscription.add(
       docService
@@ -863,6 +865,8 @@ public class DataLoaderManager {
     }
   }
 
+  // resolved https://tasks.n-core.ru/browse/MPSED-2180
+  // Переделать загрузку документов на scroll
   private void loadScrollFolder(DocumentsService docService, String login, String currentUserId, RFolderEntity folder, String created_at, String scroll_id, List<Document> resultList, boolean isFavorites) {
     CompositeSubscription compositeSubscription = isFavorites ? subscriptionFavorites : subscriptionProcessed;
 
