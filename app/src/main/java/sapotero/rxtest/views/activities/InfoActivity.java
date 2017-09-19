@@ -44,18 +44,14 @@ import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.decisions.RDecisionEntity;
 import sapotero.rxtest.db.requery.utils.JournalStatus;
-import sapotero.rxtest.events.bus.MassInsertDoneEvent;
-import sapotero.rxtest.events.crypto.SignDataResultEvent;
-import sapotero.rxtest.events.crypto.SignDataWrongPinEvent;
 import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
 import sapotero.rxtest.events.decision.HideTemporaryEvent;
 import sapotero.rxtest.events.decision.ShowDecisionConstructor;
 import sapotero.rxtest.events.document.DropControlEvent;
+import sapotero.rxtest.events.document.UpdateDocumentEvent;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
-import sapotero.rxtest.events.view.ShowPrevDocumentEvent;
 import sapotero.rxtest.events.view.ShowSnackEvent;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
-import sapotero.rxtest.events.view.UpdateCurrentInfoActivityEvent;
 import sapotero.rxtest.jobs.bus.UpdateDocumentJob;
 import sapotero.rxtest.managers.menu.utils.DateUtil;
 import sapotero.rxtest.managers.toolbar.ToolbarManager;
@@ -388,34 +384,6 @@ public class InfoActivity extends AppCompatActivity {
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(MassInsertDoneEvent event) {
-    Toast.makeText( getApplicationContext(), event.message, Toast.LENGTH_SHORT).show();
-  }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(SignDataResultEvent event) throws Exception {
-    Timber.d("SignDataResultEvent %s", event.sign);
-
-    if (event.sign != null) {
-      Toast.makeText( getApplicationContext(), event.sign, Toast.LENGTH_SHORT ).show();
-    }
-    toolbarManager.hideDialog();
-
-  }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(SignDataWrongPinEvent event) throws Exception {
-    Timber.d("SignDataWrongPinEvent %s", event.data);
-
-    if (event.data != null) {
-      Toast.makeText( getApplicationContext(), event.data, Toast.LENGTH_SHORT ).show();
-
-    }
-
-    toolbarManager.hideDialog();
-  }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(ShowSnackEvent event) throws Exception {
     Snackbar.make( wrapper, event.message, Snackbar.LENGTH_LONG ).show();
   }
@@ -468,23 +436,15 @@ public class InfoActivity extends AppCompatActivity {
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(UpdateCurrentInfoActivityEvent event) throws Exception {
-
-    Timber.d("UpdateCurrentInfoActivityEvent");
+  public void onMessageEvent(UpdateDocumentEvent event) throws Exception {
+    Timber.d("UpdateDocumentEvent");
     updateCurrent();
-
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(UpdateCurrentDocumentEvent event) throws Exception {
     Timber.d("UpdateCurrentDocumentEvent");
     updateCurrent();
-  }
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(ShowPrevDocumentEvent event) throws Exception {
-    Timber.tag(TAG).e("ShowPrevDocumentEvent");
-    showPrevDocument();
   }
 
   private void showPrevDocument() {
@@ -546,17 +506,15 @@ public class InfoActivity extends AppCompatActivity {
     Timber.tag(TAG).e("ShowNextDocumentEvent: showing next document");
     showNextDocument();
 
-    if ( event.isRemoveUid() ) {
-      Timber.tag(TAG).e("ShowNextDocumentEvent: removing uid from list");
-      int index = documentUids.indexOf( event.getUid() );
+    Timber.tag(TAG).e("ShowNextDocumentEvent: removing uid from list");
+    int index = documentUids.indexOf( event.getUid() );
 
-      if ( index > -1 ) {
-        documentUids.remove( index );
+    if ( index > -1 ) {
+      documentUids.remove( index );
 
-        int mainMenuPosition = settings.getMainMenuPosition();
-        if ( index < mainMenuPosition ) {
-          settings.setMainMenuPosition( mainMenuPosition - 1 );
-        }
+      int mainMenuPosition = settings.getMainMenuPosition();
+      if ( index < mainMenuPosition ) {
+        settings.setMainMenuPosition( mainMenuPosition - 1 );
       }
     }
   }

@@ -41,7 +41,6 @@ import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.views.activities.InfoNoMenuActivity;
 import sapotero.rxtest.views.adapters.LinkAdapter;
 import sapotero.rxtest.views.adapters.models.Link;
-import sapotero.rxtest.views.adapters.utils.OnSwipeTouchListener;
 import sapotero.rxtest.views.fragments.interfaces.PreviewFragment;
 import timber.log.Timber;
 
@@ -77,8 +76,6 @@ public class InfoCardLinksFragment extends PreviewFragment {
     ButterKnife.bind(this, view);
 
     initEvents();
-
-    view.setOnTouchListener( new OnSwipeTouchListener( getContext() ) );
 
     return view;
   }

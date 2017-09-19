@@ -269,82 +269,83 @@ public class InfoCardDocumentsFragment extends PreviewFragment implements Adapte
   }
 
   private void setPdfPreview() throws FileNotFoundException {
+    if (getContext() != null && getContext().getFilesDir() != null ){
+      Image image = adapter.getItem(index);
+      file = new File(getContext().getFilesDir(), String.format( "%s_%s", image.getMd5(), image.getTitle() ));
 
-    Image image = adapter.getItem(index);
-    file = new File(getContext().getFilesDir(), String.format( "%s_%s", image.getMd5(), image.getTitle() ));
 
+      Timber.tag(TAG).e("image: %s", new Gson().toJson(image) );
+      Timber.tag(TAG).e("file: %s", file.toString() );
 
-    Timber.tag(TAG).e("image: %s", new Gson().toJson(image) );
-    Timber.tag(TAG).e("file: %s", file.toString() );
+      // Проверяем что файл загружен полность,
+      // иначе рисуем крутилку с окошком
+      if (image.getSize() != null && file.length() == image.getSize()){
+        Timber.tag(TAG).e("image size: %s | %s", file.length(), image.getSize());
+        showFileLoading(false);
 
-    // Проверяем что файл загружен полность,
-    // иначе рисуем крутилку с окошком
-    if (image.getSize() != null && file.length() == image.getSize()){
-      Timber.tag(TAG).e("image size: %s | %s", file.length(), image.getSize());
-      showFileLoading(false);
+        // Проверяем, существует ли ЭО
+        // ЭО автоматически удаляются через период времени
+        // заданный в настройках
+        if ( image.isDeleted() ){
+          showDownloadButton();
+        } else {
 
-      // Проверяем, существует ли ЭО
-      // ЭО автоматически удаляются через период времени
-      // заданный в настройках
-      if ( image.isDeleted() ){
-        showDownloadButton();
-      } else {
+          contentType = image.getContentType();
+          document_title.setText( image.getTitle() );
 
-        contentType = image.getContentType();
-        document_title.setText( image.getTitle() );
+          if ( Objects.equals(contentType, "application/pdf") ) {
+            InputStream targetStream = new FileInputStream(file);
 
-        if ( Objects.equals(contentType, "application/pdf") ) {
-          InputStream targetStream = new FileInputStream(file);
+            if (file.exists()) {
+              com.github.barteksc.pdfviewer.util.Constants.THUMBNAIL_RATIO = 1.0f;
+              com.github.barteksc.pdfviewer.util.Constants.PART_SIZE = 256;
 
-          if (file.exists()) {
-            com.github.barteksc.pdfviewer.util.Constants.THUMBNAIL_RATIO = 1.0f;
-            com.github.barteksc.pdfviewer.util.Constants.PART_SIZE = 256;
+              pdfView
+                .fromStream(targetStream)
+                //         .fromFile( file )
+                .enableSwipe(true)
+                .enableDoubletap(true)
+                .defaultPage(0)
+                .swipeHorizontal(false)
+                .onRender((nbPages, pageWidth, pageHeight) -> pdfView.fitToWidth())
+                .onPageChange((page, pageCount) -> {
+                  updatePageCount();
+                })
+                .onPageScroll(this::setDirection)
+                .enableAnnotationRendering(true)
+                .scrollHandle(null)
+                .load();
 
-            pdfView
-              .fromStream(targetStream)
-  //         .fromFile( file )
-              .enableSwipe(true)
-              .enableDoubletap(true)
-              .defaultPage(0)
-              .swipeHorizontal(false)
-              .onRender((nbPages, pageWidth, pageHeight) -> pdfView.fitToWidth())
-              .onPageChange((page, pageCount) -> {
-                updatePageCount();
-              })
-              .onPageScroll(this::setDirection)
-              .enableAnnotationRendering(true)
-              .scrollHandle(null)
-              .load();
+              pdfView.useBestQuality(false);
+              pdfView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_LOW);
+              pdfView.setWillNotCacheDrawing(false);
+              pdfView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+              pdfView.setDrawingCacheEnabled(true);
+              pdfView.enableRenderDuringScale(false);
 
-            pdfView.useBestQuality(false);
-            pdfView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_LOW);
-            pdfView.setWillNotCacheDrawing(false);
-            pdfView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-            pdfView.setDrawingCacheEnabled(true);
-            pdfView.enableRenderDuringScale(false);
+            }
 
+            pdfView.setVisibility(View.VISIBLE);
+            open_in_another_app_wrapper.setVisibility(View.GONE);
+            page_counter.setVisibility(View.VISIBLE);
+
+          } else {
+            pdfView.setVisibility(View.GONE);
+            open_in_another_app_wrapper.setVisibility(View.VISIBLE);
+            page_counter.setVisibility(View.INVISIBLE);
           }
 
-          pdfView.setVisibility(View.VISIBLE);
-          open_in_another_app_wrapper.setVisibility(View.GONE);
-          page_counter.setVisibility(View.VISIBLE);
+          updateDocumentCount();
+          updatePageCount();
+          updateVisibility();
 
-        } else {
-          pdfView.setVisibility(View.GONE);
-          open_in_another_app_wrapper.setVisibility(View.VISIBLE);
-          page_counter.setVisibility(View.INVISIBLE);
         }
-
-        updateDocumentCount();
-        updatePageCount();
-        updateVisibility();
-
+      } else {
+        showFileLoading(true);
       }
-    } else {
-      showFileLoading(true);
-    }
 
-    hideZoom();
+      hideZoom();
+    }
   }
 
   private void showFileLoading(boolean show) {

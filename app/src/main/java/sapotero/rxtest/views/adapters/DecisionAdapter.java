@@ -8,24 +8,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.birbit.android.jobqueue.JobManager;
 import com.google.gson.Gson;
 
 import java.util.Collections;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import sapotero.rxtest.R;
-import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.jobs.rx.SetActiveDecisionJob;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.views.activities.DecisionConstructorActivity;
 import sapotero.rxtest.views.adapters.holders.DecisionViewHolder;
 import timber.log.Timber;
 
 public class DecisionAdapter extends RecyclerView.Adapter<DecisionViewHolder> {
-  @Inject JobManager jobManager;
 
   private final RecyclerView recycler_view;
   private List<Decision> decisions = Collections.emptyList();
@@ -37,7 +31,6 @@ public class DecisionAdapter extends RecyclerView.Adapter<DecisionViewHolder> {
     this.decisions = decisions;
     this.context = context;
     this.recycler_view = recyclerView;
-    EsdApplication.getManagerComponent().inject(this);
   }
 
   @Override
@@ -52,12 +45,6 @@ public class DecisionAdapter extends RecyclerView.Adapter<DecisionViewHolder> {
 
       if (pos >= 0 && pos < getItemCount()) {
         Timber.tag(TAG).v( "COMMENT " + decisions.get(pos).getSigner() );
-
-        try {
-          jobManager.addJobInBackground( new SetActiveDecisionJob( pos ) );
-        } catch ( Exception e){
-          Timber.tag(TAG + " massInsert error").v( e );
-        }
       }
     });
 

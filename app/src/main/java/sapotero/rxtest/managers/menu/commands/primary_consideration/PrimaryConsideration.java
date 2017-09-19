@@ -28,7 +28,7 @@ public class PrimaryConsideration extends OperationResultCommand {
   public void execute() {
     saveOldLabelValues(); // Must be before queueManager.add(this), because old label values are stored in params
     queueManager.add(this);
-    EventBus.getDefault().post( new ShowNextDocumentEvent( true, getParams().getDocument() ));
+    EventBus.getDefault().post( new ShowNextDocumentEvent( getParams().getDocument() ));
 
     startProcessedOperationInMemory();
     setAsProcessed();

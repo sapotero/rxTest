@@ -74,7 +74,6 @@ import sapotero.rxtest.events.rx.UpdateCountEvent;
 import sapotero.rxtest.events.service.CheckNetworkEvent;
 import sapotero.rxtest.events.utils.ErrorReceiveTokenEvent;
 import sapotero.rxtest.events.utils.LoadedFromDbEvent;
-import sapotero.rxtest.events.utils.RecalculateMenuEvent;
 import sapotero.rxtest.events.utils.ReceivedTokenEvent;
 import sapotero.rxtest.events.view.UpdateDrawerEvent;
 import sapotero.rxtest.managers.DataLoaderManager;
@@ -446,7 +445,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     initSearchSub();
     initSearch();
 
-
     initService();
     startNetworkCheck();
     subscribeToNetworkCheckResults();
@@ -455,10 +453,8 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     update( true );
 
     initDrawer();
+
     removeAllNotification();
-
-//    EventBus.getDefault().post( new RecalculateMenuEvent());
-
   }
 
   private void startNetworkCheck() {
@@ -1122,15 +1118,6 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   @Override
   public void onDismiss() {
     setToolbarClickListener();
-  }
-
-
-  @Subscribe(threadMode = ThreadMode.MAIN)
-  public void onMessageEvent(RecalculateMenuEvent event) {
-    if (menuBuilder != null) {
-      Timber.tag(TAG).i("RecalculateMenuEvent");
-//      menuBuilder.getItemsBuilder().updateView();
-    }
   }
 
   @Subscribe(threadMode = ThreadMode.MAIN)

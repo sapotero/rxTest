@@ -26,7 +26,6 @@ import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.db.requery.models.RDocumentEntity;
 import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.utils.ISettings;
-import sapotero.rxtest.views.adapters.utils.OnSwipeTouchListener;
 import sapotero.rxtest.views.fragments.interfaces.PreviewFragment;
 import timber.log.Timber;
 
@@ -57,8 +56,6 @@ public class InfoCardFieldsFragment extends PreviewFragment {
     View view = inflater.inflate(R.layout.fragment_info_card_fields, container, false);
     ButterKnife.bind(this, view);
     EsdApplication.getDataComponent().inject( this );
-
-    view.setOnTouchListener( new OnSwipeTouchListener( getContext() ) );
 
     return view;
   }

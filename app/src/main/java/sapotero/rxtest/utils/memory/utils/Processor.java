@@ -302,7 +302,6 @@ public class Processor {
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(
         data -> {
-//          EventBus.getDefault().post( new JournalSelectorUpdateCountEvent() );
           Timber.tag(TAG).e("processed");
         },
           Timber::e
