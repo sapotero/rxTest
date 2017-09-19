@@ -656,14 +656,6 @@ public class DataLoaderManager {
           data -> {
             Timber.tag("LoadSequence").d("Received scroll page, project %s", isProject);
 
-            if ( Objects.equals( scroll_id, "" ) ) {
-              // Обновляем счетчик документов, если получили первую страницу скролла
-              Timber.tag("LoadSequence").d("Scroll page is first, project %s", isProject);
-              requestCount--;
-              updateDocCount( data, isProject );
-              checkAndSendCountReady();
-            }
-
             if ( Objects.equals( login, settings.getLogin() ) ) {
               // Обрабатываем полученный список только если логин не поменялся (при входе/выходе в режим замещения)
               Timber.tag("LoadSequence").d("Processing scroll page, project %s", isProject);
@@ -675,19 +667,21 @@ public class DataLoaderManager {
                 Timber.tag("LoadSequence").d("Loading next scroll page, project %s", isProject);
                 loadScroll( docService, login, currentUserId, index, status, scrollIdFromMeta, isProject, resultList );
               } else {
-                // Обрабатываем итоговый список
                 Timber.tag("LoadSequence").d("Processing result list, project %s", isProject);
+
+                // Обновляем счетчик только после успешной загрузки всех страниц скролла
+                requestCount--;
+                updateDocCount( data, true );
+                checkAndSendCountReady();
+
+                // Обрабатываем итоговый список
                 processDocuments( resultList, status, index, null, DocumentType.DOCUMENT, login, currentUserId );
               }
             }
           },
           error -> {
-            if ( Objects.equals( scroll_id, "" ) ) {
-              // Если ошибка при загрузке первой страницы скролла
-              requestCount--;
-              checkAndSendCountReady();
-            }
-
+            requestCount--;
+            checkAndSendCountReady();
             Timber.tag(TAG).e(error);
           })
     );
@@ -881,12 +875,6 @@ public class DataLoaderManager {
           data -> {
             Timber.tag("LoadSequence").d("Received scroll page, favorites %s", isFavorites);
 
-            if ( Objects.equals( scroll_id, "" ) ) {
-              // Обновляем счетчик документов, если получили первую страницу скролла
-              Timber.tag("LoadSequence").d("Scroll page is first, favorites %s", isFavorites);
-              updateDocCount( data, false );
-            }
-
             if ( Objects.equals( login, settings.getLogin() ) ) {
               // Обрабатываем полученный список только если логин не поменялся (при входе/выходе в режим замещения)
               Timber.tag("LoadSequence").d("Processing scroll page, favorites %s", isFavorites);
@@ -908,6 +896,9 @@ public class DataLoaderManager {
                   processedList = resultList;
                 }
 
+                // Обновляем счетчик только после успешной загрузки всех страниц скролла
+                updateDocCount( data, false );
+
                 if ( isFavorites ? processFavoritesData : processProcessedData ) {
                   // Обрабатываем итоговый список
                   Timber.tag("LoadSequence").d("Processing result list, favorites %s", isFavorites);
@@ -918,11 +909,11 @@ public class DataLoaderManager {
 
           }, error -> {
             Timber.tag(TAG).e(error);
-              if ( isFavorites ) {
-                favoritesDataLoading = false;
-              } else {
-                processedDataLoading = false;
-              }
+            if ( isFavorites ) {
+              favoritesDataLoading = false;
+            } else {
+              processedDataLoading = false;
+            }
           }
         )
     );
