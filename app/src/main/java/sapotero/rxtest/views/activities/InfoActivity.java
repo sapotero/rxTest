@@ -51,7 +51,6 @@ import sapotero.rxtest.events.decision.HasNoActiveDecisionConstructor;
 import sapotero.rxtest.events.decision.HideTemporaryEvent;
 import sapotero.rxtest.events.decision.ShowDecisionConstructor;
 import sapotero.rxtest.events.document.DropControlEvent;
-import sapotero.rxtest.events.notification.RemoveIdNotificationEvent;
 import sapotero.rxtest.events.view.ShowNextDocumentEvent;
 import sapotero.rxtest.events.view.ShowPrevDocumentEvent;
 import sapotero.rxtest.events.view.ShowSnackEvent;
@@ -138,23 +137,6 @@ public class InfoActivity extends AppCompatActivity {
     setContentView(R.layout.activity_info);
     ButterKnife.bind(this);
     EsdApplication.getManagerComponent().inject(this);
-    /*если intent "прилетел" из NotifyManager -> значение будет true*/
-    boolean isIntentFromNotificationBar = false;
-
-    if (getIntent().getExtras() != null){
-      isIntentFromNotificationBar =  getIntent().getExtras().getBoolean(EXTRA_IS_FROM_NOTIFICATION_BAR_KEY, false);
-    }
-
-    if ( isIntentFromNotificationBar ) {
-      settings.setUid(getIntent().getStringExtra(EXTRA_DOCUMENTUID_KEY));
-      settings.setIsProject(getIntent().getBooleanExtra(EXTRA_IS_PROJECT_KEY,true)) ;
-      settings.setMainMenuPosition( 0 );
-      settings.setRegNumber(getIntent().getStringExtra(EXTRA_REGISTRATION_NUMBER_KEY));
-      settings.setStatusCode(getIntent().getStringExtra(EXTRA_STATUS_CODE_KEY));
-      settings.setLoadFromSearch(getIntent().getBooleanExtra(EXTRA_IS_LOAD_FROM_SEARCHE_KEY,true));
-      settings.setRegDate(getIntent().getStringExtra(EXTRA_REGISTRATION_DATE_KEY));
-      EventBus.getDefault().postSticky( new RemoveIdNotificationEvent(getIntent().getExtras().getInt(EXTRA_NOTIFICATION_ID)));
-    }
 
     clearImageIndex();
 

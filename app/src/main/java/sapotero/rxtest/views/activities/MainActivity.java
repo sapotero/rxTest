@@ -222,7 +222,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
   }
 
   private void removeAllNotification(){
-    EventBus.getDefault().postSticky( new RemoveAllNotificationEvent(true));
+    EventBus.getDefault().postSticky( new RemoveAllNotificationEvent());
   }
 
   private void setFirstRunFalse() {
@@ -455,6 +455,7 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
     update( true );
 
     initDrawer();
+    removeAllNotification();
 
 //    EventBus.getDefault().post( new RecalculateMenuEvent());
 
