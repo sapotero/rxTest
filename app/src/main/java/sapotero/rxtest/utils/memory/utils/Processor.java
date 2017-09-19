@@ -61,7 +61,6 @@ public class Processor {
     INTERSECT,
     FOLDER
   }
-
   private final String TAG = this.getClass().getSimpleName();
   private final PublishSubject<InMemoryDocument> sub;
   private PublishSubject<NotifyMessageModel> notifyPubSubject;
@@ -206,7 +205,7 @@ public class Processor {
 
     // new upsert job
     if (store.getDocuments().keySet().contains(document.getUid())) {
-      InMemoryDocument doc = store.getDocuments().get(document.getUid());
+       InMemoryDocument doc = store.getDocuments().get(document.getUid());
 
       Timber.tag(TAG).e("    * %s | %s | %s", doc.getFilter(), filter, doc.getUpdatedAt());
 
@@ -225,12 +224,16 @@ public class Processor {
 
           if ( Filter.isChanged(doc.getFilter(), filter) ){
             updateJob(doc.getUid(), doc.getMd5());
+            NotifyMessageModel notifyMessageModel = new NotifyMessageModel(document, filter, index, settings.isFirstRun(), source);
+            notifyPubSubject.onNext(notifyMessageModel);
           } else {
             EventBus.getDefault().post(new StepperLoadDocumentEvent(doc.getUid()));
           }
 
         } else {
           updateJob(doc.getUid(), doc.getMd5());
+          NotifyMessageModel notifyMessageModel = new NotifyMessageModel(document, filter, index, settings.isFirstRun(), source);
+          notifyPubSubject.onNext(notifyMessageModel);
         }
 
       } else {
@@ -240,6 +243,8 @@ public class Processor {
     } else {
       Timber.tag(TAG).e("new: %s", document.getUid());
       createJob(document.getUid());
+      NotifyMessageModel notifyMessageModel = new NotifyMessageModel(document, filter, index, settings.isFirstRun(), source);
+      notifyPubSubject.onNext(notifyMessageModel);
     }
   }
 
@@ -290,14 +295,7 @@ public class Processor {
 
         validateDocuments();
 
-        if (add.size() > 0) {
-         if (documentType == DocumentType.DOCUMENT){
-            NotifyMessageModel notifyMessageModel = new NotifyMessageModel(add, documents, filter, index, settings.isFirstRun(), source);
-            notifyPubSubject.onNext(notifyMessageModel);
-          }
-        }
-
-          return Collections.singletonList("");
+        return Collections.singletonList("");
       })
 //      .buffer(200, TimeUnit.MILLISECONDS)
       .subscribeOn(Schedulers.immediate())
