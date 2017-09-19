@@ -126,6 +126,11 @@ public class DataLoaderManager {
               setCurrentUserPosition(user.getPosition());
               setCurrentUserImage(user.getImage());
 
+              // В режиме замещения обновляем drawer после получения сведений о пользователе, чтобы отобразить иконку пользователя
+              if ( settings.isSubstituteMode() ) {
+                EventBus.getDefault().post( new UpdateDrawerEvent() );
+              }
+
               String currentUserId = user.getId();
 
               // получаем папки
