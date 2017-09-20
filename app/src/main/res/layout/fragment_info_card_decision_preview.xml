@@ -19,7 +19,7 @@
             android:orientation="horizontal">
 
             <Spinner
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="48dp"
                 android:id="@+id/activity_info_decision_spinner"
                 android:paddingTop="4sp"
@@ -84,7 +84,7 @@
 
             <ScrollView
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="0dp"
                 android:layout_weight="1"
                 android:fillViewport="true">
 
@@ -130,7 +130,7 @@
                 <TextView
                     android:id="@+id/activity_info_decision_preview_action_text"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
+                    android:layout_height="0dp"
                     android:paddingStart="@dimen/half_date_offset"
                     android:paddingEnd="@dimen/half_date_offset"
                     android:paddingTop="@dimen/half_date_offset"
@@ -181,7 +181,7 @@
                 android:id="@+id/activity_info_decision_preview_approved_text"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="Утверждена"
+                android:text="@string/decision_preview_approved"
                 android:padding="@dimen/date_offset"
                 android:gravity="center|start"
                 android:visibility="gone"
@@ -191,18 +191,24 @@
 
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/activity_info_decision_preview_temporary"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text=" Ожидает синхронизации"
-            android:drawableStart="@drawable/sync"
-            android:padding="@dimen/date_offset"
-            android:gravity="center|start"
-            android:visibility="gone"
-            android:textColor="@color/md_red_900"
-            android:textSize="16sp"
-            android:textAppearance="@style/TextAppearance.AppCompat.Caption"/>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/activity_info_decision_preview_temporary"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="@string/decision_preview_sync"
+                android:drawableStart="@drawable/sync"
+                android:padding="@dimen/date_offset"
+                android:gravity="center|start"
+                android:visibility="gone"
+                android:textColor="@color/md_red_900"
+                android:textSize="16sp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Caption"/>
+
+        </LinearLayout>
 
     </LinearLayout>
 
@@ -212,7 +218,6 @@
         android:layout_height="1dp"
         android:background="@color/md_grey_100"
         android:padding="@dimen/half_date_offset"
-        android:layout_above="@+id/activity_info_decision_spinner"
         android:layout_marginBottom="48dp"
         android:layout_gravity="bottom"/>
 
