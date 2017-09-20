@@ -37,8 +37,9 @@ public class SettingsViewFragment extends PreferenceFragmentCompat {
     subscriptions = new CompositeSubscription();
     subscriptions.add(
       settings.getShowUrgencyPreference().asObservable().subscribe(active -> {
-        findPreference( context.getResources().getString(R.string.only_urgent_key) ).setEnabled(active);
-        settings.setOnlyUrgent(active);
+        if(!active){settings.setOnlyUrgent(active);}
+//        findPreference( context.getResources().getString(R.string.only_urgent_key) ).setEnabled(active);
+//        settings.setOnlyUrgent(active);
       },Timber::e)
     );
 
