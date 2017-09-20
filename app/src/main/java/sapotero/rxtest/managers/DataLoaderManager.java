@@ -641,19 +641,19 @@ public class DataLoaderManager {
 
       for (String index: indexes ) {
         for (String status: statuses ) {
-          loadScroll( docService, login, currentUserId, index, status, "", new ArrayList<>() );
+          loadScroll( docService, login, currentUserId, index, status, "", new ArrayList<>(), 0 );
         }
       }
 
       for (String code : sp) {
-        loadScroll( docService, login, currentUserId, null, code, "", new ArrayList<>() );
+        loadScroll( docService, login, currentUserId, null, code, "", new ArrayList<>(), 0 );
       }
     }
   }
 
   // resolved https://tasks.n-core.ru/browse/MPSED-2180
   // Переделать загрузку документов на scroll
-  private void loadScroll(DocumentsService docService, String login, String currentUserId, String index, String status, String scroll_id, List<Document> resultList) {
+  private void loadScroll(DocumentsService docService, String login, String currentUserId, String index, String status, String scroll_id, List<Document> resultList, int total) {
     subscription.add(
       docService
         .getDocuments(login, settings.getToken(), index, status, null , LIMIT, getYears(), scroll_id)
@@ -665,22 +665,33 @@ public class DataLoaderManager {
               // Обрабатываем полученный список только если логин не поменялся (при входе/выходе в режим замещения)
               resultList.addAll( data.getDocuments() );
 
+              int tempTotal = total;
+
+              if ( Objects.equals( scroll_id, "" ) ) {
+                // Обновляем счетчик после загрузки первой страницы скролла
+                requestCount--;
+                tempTotal = updateDocCount( data, true );
+                checkAndSendCountReady();
+                Timber.tag("TotalDocCount").d("Add to total doc count %s", tempTotal);
+              }
+
               String scrollIdFromMeta = getScrollId( data );
               if ( data.getDocuments().size() > 0 && scrollIdFromMeta != null ) {
                 // Запрашиваем очередную страницу скролла, пока пришедший в ответе список документов не пуст
-                loadScroll( docService, login, currentUserId, index, status, scrollIdFromMeta, resultList );
+                loadScroll( docService, login, currentUserId, index, status, scrollIdFromMeta, resultList, tempTotal );
               } else {
-                // Обновляем счетчик только после успешной загрузки всех страниц скролла
-                requestCount--;
-                updateDocCount( data, true );
-                checkAndSendCountReady();
-
                 // Обрабатываем итоговый список
                 processDocuments( resultList, status, index, null, DocumentType.DOCUMENT, login, currentUserId );
               }
             }
           },
           error -> {
+            if ( !Objects.equals( scroll_id, "" ) ) {
+              // Если ошибка во время загрузки не первой страницы скролла, то вернуть счетчик в прежнее состояние
+              subtractDocCount( total, true );
+              Timber.tag("TotalDocCount").d("Subtract from total doc count %s", total);
+            }
+
             requestCount--;
             checkAndSendCountReady();
             Timber.tag(TAG).e(error);
@@ -765,7 +776,7 @@ public class DataLoaderManager {
     }
   }
 
-  private void updateDocCount(Documents data, boolean isDocProj) {
+  private int updateDocCount(Documents data, boolean isDocProj) {
     int total;
 
     try {
@@ -778,6 +789,16 @@ public class DataLoaderManager {
 
     if ( isDocProj ) {
       settings.addDocProjCount( total );
+    }
+
+    return total;
+  }
+
+  private void subtractDocCount(int value, boolean isDocProj) {
+    settings.setTotalDocCount( settings.getTotalDocCount() - value );
+
+    if ( isDocProj ) {
+      settings.setDocProjCount( settings.getDocProjCount() - value );
     }
   }
 
@@ -861,13 +882,13 @@ public class DataLoaderManager {
       Timber.tag("LoadSequence").d("Loading list of favorites");
       favoritesDataLoading = true;
       unsubscribeFavorites();
-      loadScrollFolder( docService, login, currentUserId, favorites_folder, null, "", new ArrayList<>(), true );
+      loadScrollFolder( docService, login, currentUserId, favorites_folder, null, "", new ArrayList<>(), true, 0 );
     }
   }
 
   // resolved https://tasks.n-core.ru/browse/MPSED-2180
   // Переделать загрузку документов на scroll
-  private void loadScrollFolder(DocumentsService docService, String login, String currentUserId, RFolderEntity folder, String created_at, String scroll_id, List<Document> resultList, boolean isFavorites) {
+  private void loadScrollFolder(DocumentsService docService, String login, String currentUserId, RFolderEntity folder, String created_at, String scroll_id, List<Document> resultList, boolean isFavorites, int total) {
     CompositeSubscription compositeSubscription = isFavorites ? subscriptionFavorites : subscriptionProcessed;
 
     compositeSubscription.add(
@@ -880,10 +901,18 @@ public class DataLoaderManager {
               // Обрабатываем полученный список только если логин не поменялся (при входе/выходе в режим замещения)
               resultList.addAll( data.getDocuments() );
 
+              int tempTotal = total;
+
+              if ( Objects.equals( scroll_id, "" ) ) {
+                // Обновляем счетчик после загрузки первой страницы скролла
+                tempTotal = updateDocCount( data, false );
+                Timber.tag("TotalDocCount").d("Add to total doc count %s", tempTotal);
+              }
+
               String scrollIdFromMeta = getScrollId( data );
               if ( data.getDocuments().size() > 0 && scrollIdFromMeta != null ) {
                 // Запрашиваем очередную страницу скролла, пока пришедший в ответе список документов не пуст
-                loadScrollFolder( docService, login, currentUserId, folder, created_at, scrollIdFromMeta, resultList, isFavorites );
+                loadScrollFolder( docService, login, currentUserId, folder, created_at, scrollIdFromMeta, resultList, isFavorites, tempTotal );
 
               } else {
                 // Все страницы скролла загружены
@@ -895,9 +924,6 @@ public class DataLoaderManager {
                   processedList = resultList;
                 }
 
-                // Обновляем счетчик только после успешной загрузки всех страниц скролла
-                updateDocCount( data, false );
-
                 if ( isFavorites ? processFavoritesData : processProcessedData ) {
                   // Обрабатываем итоговый список
                   processFolder(folder, login, currentUserId, isFavorites);
@@ -905,8 +931,16 @@ public class DataLoaderManager {
               }
             }
 
-          }, error -> {
+          },
+          error -> {
             Timber.tag(TAG).e(error);
+
+            if ( !Objects.equals( scroll_id, "" ) ) {
+              // Если ошибка во время загрузки не первой страницы скролла, то вернуть счетчик в прежнее состояние
+              Timber.tag("TotalDocCount").d("Subtract from total doc count %s", total);
+              subtractDocCount( total, false );
+            }
+
             if ( isFavorites ) {
               favoritesDataLoading = false;
             } else {
@@ -977,7 +1011,7 @@ public class DataLoaderManager {
       Timber.tag("LoadSequence").d("Loading list of processed");
       processedDataLoading = true;
       unsubscribeProcessed();
-      loadScrollFolder( docService, login, currentUserId, processed_folder, date, "", new ArrayList<>(), false );
+      loadScrollFolder( docService, login, currentUserId, processed_folder, date, "", new ArrayList<>(), false, 0 );
     }
   }
 
