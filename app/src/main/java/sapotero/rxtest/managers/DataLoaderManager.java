@@ -672,7 +672,6 @@ public class DataLoaderManager {
                 requestCount--;
                 tempTotal = updateDocCount( data, true );
                 checkAndSendCountReady();
-                Timber.tag("TotalDocCount").d("Add to total doc count %s", tempTotal);
               }
 
               String scrollIdFromMeta = getScrollId( data );
@@ -689,7 +688,6 @@ public class DataLoaderManager {
             if ( !Objects.equals( scroll_id, "" ) ) {
               // Если ошибка во время загрузки не первой страницы скролла, то вернуть счетчик в прежнее состояние
               subtractDocCount( total, true );
-              Timber.tag("TotalDocCount").d("Subtract from total doc count %s", total);
             }
 
             requestCount--;
@@ -906,7 +904,6 @@ public class DataLoaderManager {
               if ( Objects.equals( scroll_id, "" ) ) {
                 // Обновляем счетчик после загрузки первой страницы скролла
                 tempTotal = updateDocCount( data, false );
-                Timber.tag("TotalDocCount").d("Add to total doc count %s", tempTotal);
               }
 
               String scrollIdFromMeta = getScrollId( data );
@@ -937,7 +934,6 @@ public class DataLoaderManager {
 
             if ( !Objects.equals( scroll_id, "" ) ) {
               // Если ошибка во время загрузки не первой страницы скролла, то вернуть счетчик в прежнее состояние
-              Timber.tag("TotalDocCount").d("Subtract from total doc count %s", total);
               subtractDocCount( total, false );
             }
 
