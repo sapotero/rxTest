@@ -44,17 +44,15 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
 
   @BindView(R.id.dialog_magnifer_decision_seekbar_font_size) SeekBar seekbar;
 
-  @BindView(R.id.dialog_magniger_preview_head)   LinearLayout preview_head;
-  @BindView(R.id.dialog_magniger_preview_body)   LinearLayout preview_body;
-  @BindView(R.id.dialog_magniger_preview_bottom) LinearLayout preview_bottom;
-
+  @BindView(R.id.dialog_magnifer_preview_head)   LinearLayout preview_head;
+  @BindView(R.id.dialog_magnifer_preview_body)   LinearLayout preview_body;
+  @BindView(R.id.dialog_magnifer_preview_bottom) LinearLayout preview_bottom;
 
   private ArrayList<TextView> textLabels = new ArrayList<>();
 
   private DecisionSpinnerItem decision;
   private String regNumber;
-  private Preview viewer
-    ;
+  private Preview viewer;
 
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.dialog_magnifer_decision, null);

@@ -5,73 +5,68 @@
     android:orientation="vertical"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-
     style="@style/Theme.AppCompat.Dialog"
+    android:paddingTop="24dp"
+    android:paddingBottom="16dp"
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp">
 
-        android:paddingTop="24dp"
-        android:paddingBottom="16dp"
-        android:paddingStart="24dp"
-        android:paddingEnd="24dp"
-        >
+    <SeekBar
+        android:id="@+id/dialog_magnifer_decision_seekbar_font_size"
+        style="@android:style/Widget.Material.SeekBar.Discrete"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="30"
+        android:padding="@dimen/half_date_offset"
+        android:progress="4"
+        tools:targetApi="n"/>
 
-        <SeekBar
-            android:id="@+id/dialog_magnifer_decision_seekbar_font_size"
-            style="@android:style/Widget.Material.SeekBar.Discrete"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:max="30"
-            android:padding="@dimen/half_date_offset"
-            android:progress="4"
-            tools:targetApi="n"/>
+    <RelativeLayout
+        android:orientation="vertical"
+        android:layout_height="wrap_content"
+        android:weightSum="3"
+        android:layout_width="900dp">
 
-
-        <RelativeLayout
+        <LinearLayout
+            android:id="@+id/decision_view_root"
+            android:background="@drawable/corner_background"
             android:orientation="vertical"
-            android:layout_height="wrap_content"
-            android:weightSum="3"
-            android:layout_width="900dp">
+            android:layout_width="match_parent"
+            android:padding="@dimen/date_offset"
+            android:layout_height="match_parent">
 
             <LinearLayout
-                android:id="@+id/desigion_view_root"
-                android:background="@drawable/corner_background"
+                android:id="@+id/dialog_magnifer_preview_head"
                 android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:padding="@dimen/date_offset"
-                android:layout_below="@+id/textView4"
-                android:layout_height="match_parent">
-
-                <LinearLayout
-                    android:id="@+id/dialog_magniger_preview_head"
-                    android:orientation="vertical"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                </LinearLayout>
-
-                <ScrollView
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
-                    >
-
-                    <LinearLayout
-                        android:id="@+id/dialog_magniger_preview_body"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"/>
-                </ScrollView>
-
-                <LinearLayout
-                    android:id="@+id/dialog_magniger_preview_bottom"
-                    android:orientation="vertical"
-                    android:layout_gravity="bottom"
-                    android:gravity="bottom"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-                </LinearLayout>
+                android:layout_height="wrap_content">
             </LinearLayout>
 
-        </RelativeLayout>
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
 
+                <LinearLayout
+                    android:id="@+id/dialog_magnifer_preview_body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                </LinearLayout>
+
+            </ScrollView>
+
+            <LinearLayout
+                android:id="@+id/dialog_magnifer_preview_bottom"
+                android:orientation="vertical"
+                android:layout_gravity="bottom"
+                android:gravity="bottom"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </RelativeLayout>
 
 </LinearLayout>
