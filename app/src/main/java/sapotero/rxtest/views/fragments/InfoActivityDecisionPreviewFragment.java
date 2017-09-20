@@ -142,7 +142,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
   public InfoActivityDecisionPreviewFragment() {
   }
 
-
   public InfoActivityDecisionPreviewFragment(ToolbarManager toolbarManager) {
     this.toolbarManager = toolbarManager;
   }
@@ -151,7 +150,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
   public void expandView(){
     magnifer();
   }
-
 
   // Approve current decision
   @OnClick(R.id.activity_info_decision_preview_next_person)
@@ -273,8 +271,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
         });
     }
 
-
-
     if ( text != null ){
       MaterialDialog build = prev_dialog.build();
       build.getInputEditText().setText(text);
@@ -283,20 +279,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
       MaterialDialog build = prev_dialog.build();
       build.show();
     }
-
-    setAsFakeProcessed();
-  }
-
-  private void setAsFakeProcessed() {
-    // resolved https://tasks.n-core.ru/browse/MVDESD-13366
-    // ставим плашку всегда
-//    dataStore
-//      .update(RDocumentEntity.class)
-//      .set(RDocumentEntity.CHANGED, true)
-//      .set(RDocumentEntity.MD5, "")
-//      .where(RDocumentEntity.UID.eq( settings.getUid() ))
-//      .get()
-//      .value();
   }
 
   private void updateAfteButtonPressed() {
@@ -308,14 +290,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
       e.printStackTrace();
       updateTemporary();
     }
-
-    setAsFakeProcessed();
-  }
-
-  @Override
-  public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-
   }
 
   @Override
@@ -330,17 +304,13 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
     invalidate();
   }
 
-
   @Override
   public void onSelectTemplate(String template) {
-
     showPrevDialog(template);
-
     templates.dismiss();
   }
 
   private class GestureListener extends GestureDetector.SimpleOnGestureListener {
-
     @Override
     public boolean onDown(MotionEvent e) {
       return true;
@@ -386,9 +356,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
               Timber.tag("GestureListener").w("-1");
             }
           }
-
-
-
         }
 
         if ( doc.isFromLinks() != null && !doc.isFromLinks() &&
@@ -398,7 +365,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
           Context context = getContext();
           Intent create_intent = new Intent(context, DecisionConstructorActivity.class);
           context.startActivity(create_intent);
-
         }
       }
 
@@ -424,7 +390,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
   }
 
   private void invalidate() {
-
     temporary.setVisibility(View.GONE);
 
     setAdapter();
@@ -445,7 +410,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
   }
 
   private void setAdapter() {
-
     ArrayList<DecisionSpinnerItem> decisionSpinnerItems = new ArrayList<>();
     decision_spinner_adapter = new DecisionSpinnerAdapter(getContext(), settings.getCurrentUserId(), decisionSpinnerItems);
     decision_spinner.setAdapter(decision_spinner_adapter);
@@ -479,6 +443,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
       }
     });
   }
+
   private void  updateTemporary(){
     Timber.tag(TAG).d(" * updateTemporary %s", temporary.getVisibility() );
 
@@ -494,7 +459,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
   }
 
   private void updateVisibility(Boolean approved) {
-
     next_person_button.setVisibility(approved ? View.GONE : View.VISIBLE);
     prev_person_button.setVisibility(approved ? View.GONE : View.VISIBLE);
 
@@ -509,7 +473,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
     approved_text.setVisibility(!approved ? View.GONE : View.VISIBLE);
 
     checkActiveDecision();
-
 
     //FIX не даем выполнять операции для связанных документов
     if ( doc!=null && doc.isFromLinks()!=null && doc.isFromLinks() ){
@@ -539,12 +502,10 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
       }
     }
 
-
     if ( doc.isProcessed() != null && doc.isProcessed() && !current_decision.isApproved() ){
       next_person_button.setVisibility( View.INVISIBLE );
       prev_person_button.setVisibility( View.INVISIBLE );
     }
-
 
     if ( current_decision != null && current_decision.isTemporary() != null && current_decision.isTemporary() ){
       temporary.setVisibility(View.VISIBLE);
@@ -603,35 +564,10 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
         }
       );
 
-
     if (doc != null && doc.getActions() != null && doc.getActions().size() > 0){
-      String action_temporary_text = "";
-
       // refactor
       // убрать эту дичь
-      if( showAsFake ){
-//
-//        ArrayList<RActionEntity> list = new ArrayList<>();
-//
-//        for ( RAction act: doc.getActions() ) {
-//          RActionEntity _act = (RActionEntity) act;
-//          list.add(_act);
-//        }
-//
-//        Timber.tag(TAG).i("list: %s", list);
-//
-//
-//          if ( list.size() == 1 ){
-//            setActionText(list.startTransactionFor(0).getToS());
-//          } else if ( list.size() >= 2 ){
-//            Collections.sort(list, (a1, a2) -> a1.getUpdatedAt().compareTo( a2.getUpdatedAt() ));
-//            setActionText( list.startTransactionFor( list.size()-1 ).getToS() );
-//          }
-//        } catch (Exception e) {
-//          Timber.tag(TAG).e(e);
-//          action_wrapper.setVisibility(View.GONE);
-//        }
-
+      if( showAsFake ) {
 
       } else {
 
@@ -689,7 +625,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
   }
 
   private void setSignEnabled(boolean active) {
-
     if (active){
       next_person_button.setAlpha(1f);
     } else {
@@ -804,7 +739,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
   }
 
   public void edit(){
-
     Timber.tag(TAG).v("edit");
     RDecisionEntity data = decision_spinner_adapter.getItem( decision_spinner.getSelectedItemPosition() ).getDecision();
 
@@ -816,9 +750,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
     Intent intent = new Intent( context , DecisionConstructorActivity.class);
 
     context.startActivity(intent);
-
   }
-
 
   private Boolean documentExist(){
     Integer count = dataStore
@@ -833,14 +765,11 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
   private void loadDocument() {
     Timber.tag(TAG).v("loadDocument | exist %s | %s", documentExist(), settings.getUid() );
 
-    if ( documentExist() ){
+    if ( documentExist() ) {
       loadFromDb();
-    } else {
-      loadFromJson();
     }
   }
 
-  
   private void loadFromDb() {
     Timber.tag("loadFromDb").v("star");
 
@@ -854,8 +783,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
       .subscribe(doc -> {
 
         this.doc = doc;
-
-//        Timber.tag("loadFromDb").i( "loaded %s", doc.getId() );
 
         preview.showEmpty();
 
@@ -872,19 +799,13 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
             unsorterd_decisions.add( new DecisionSpinnerItem( decision ) );
           }
 
-//          Collections.sort(unsorterd_decisions, (o1, o2) -> o1.getDecision().getUid().compareTo( o2.getDecision().getUid() ));
-//          Timber.tag(TAG).e("unsorterd_decisions > %s", unsorterd_decisions.size());
-
           decision_spinner_adapter.addAll( unsorterd_decisions );
-
 
 //           если есть резолюции, то отобразить первую
           if ( decision_spinner_adapter.size() > 0 ) {
             current_decision = decision_spinner_adapter.getItem(0).getDecision();
             Timber.tag(TAG).e("decision_spinner_adapter > 0");
             displayDecision();
-
-
           }
 
           if (decision_spinner_adapter.size() == 1){
@@ -898,19 +819,15 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
             invalidateSpinner(true);
           }
 
-
         } else {
           Timber.e("no decisions");
 
           if (toolbarManager != null) {
-
-
-
             if (doc.isProcessed() != null && !doc.isProcessed()){
               toolbarManager.setEditDecisionMenuItemVisible(false);
             }
-
           }
+
           decision_spinner_adapter.clear();
 
           RDecisionEntity empty = new RDecisionEntity();
@@ -928,8 +845,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
           bottom_line.setVisibility( View.GONE);
 
           updateActionText(true);
-
-
         }
       }, error -> {
         Timber.tag(TAG).e(error);
@@ -937,8 +852,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
   }
 
   private void invalidateSpinner(boolean visibility) {
-//    decision_spinner.setBackgroundColor( ContextCompat.getColor(getContext(), R.color.md_grey_50) );
-
     decision_spinner
       .getBackground()
       .setColorFilter(
@@ -968,9 +881,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
       updateVisibility( current_decision.isApproved() );
 
       sendDecisionVisibilityEvent();
-
     }
-
   }
 
   private void sendDecisionVisibilityEvent() {
@@ -979,16 +890,10 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
     }
   }
 
-  private void loadFromJson(){
-    Timber.e("loadFromJson");
-
-  }
-
   public class Preview{
 
     private final Context context;
     private String TAG = this.getClass().getSimpleName();
-    private String reg_number;
 
     Preview(Context context) {
       this.context = context;
@@ -1003,7 +908,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
       } catch (Exception e) {
         e.printStackTrace();
       }
-    };
+    }
 
     private void show( RDecisionEntity decision ){
       clear();
@@ -1037,7 +942,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
         }
 
         Collections.sort(blocks, (o1, o2) -> o1.getNumber().compareTo( o2.getNumber() ));
-
 
         for (RBlock b: blocks){
           RBlockEntity block = (RBlockEntity) b;
@@ -1073,7 +977,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
       clear();
       printLetterHead( getString(R.string.decision_blank) );
       hideMagnifer();
-
     }
 
     private void hideMagnifer() {
@@ -1089,9 +992,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
     }
 
     private void printSigner(RDecisionEntity decision, String registrationNumber) {
-
-//      Timber.tag(TAG).i("DECISION\n%s", new Gson().toJson(decision));
-
       LinearLayout relativeSigner = new LinearLayout(context);
       relativeSigner.setOrientation(LinearLayout.VERTICAL);
       relativeSigner.setVerticalGravity( Gravity.BOTTOM );
@@ -1100,9 +1000,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
       relativeSigner_params.height = LinearLayout.LayoutParams.WRAP_CONTENT;
       relativeSigner.setLayoutParams( relativeSigner_params );
 
-
       LinearLayout.LayoutParams viewsLayotuParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
-
 
       LinearLayout signer_view = new LinearLayout(context);
       signer_view.setOrientation(LinearLayout.VERTICAL);
@@ -1238,7 +1136,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
     }
 
     private void printAppealText(RBlock _block, Boolean isOnlyOneBlock) {
-
       RBlockEntity block = (RBlockEntity) _block;
       String text = "";
 
@@ -1261,7 +1158,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
     }
 
     private void printBlockPerformers(RBlock _block, Boolean isOnlyOneBlock) {
-
       RBlockEntity block = (RBlockEntity) _block;
 
       boolean numberPrinted = false;
@@ -1303,9 +1199,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
             performerName += " *";
           }
 
-//          performerName = performerName.replaceAll( "\\(.+\\)", "" );
-
-
           TextView performer_view = new TextView( getActivity() );
           performer_view.setText( performerName );
           performer_view.setTextColor( Color.BLACK );
@@ -1317,10 +1210,8 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
         }
       }
 
-
       preview_body.addView( users_view );
     }
-
   }
 
   private void initEvents() {
@@ -1358,7 +1249,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
     }
   }
 
-
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(InvalidateDecisionSpinnerEvent event) throws Exception {
     Timber.tag(TAG).w("InvalidateDecisionSpinnerEvent %s", event.uid);
@@ -1372,19 +1262,15 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
 
   @Subscribe(threadMode = ThreadMode.MAIN)
   public void onMessageEvent(CheckDecisionVisibilityEvent event) throws Exception {
-//    current_decision = decision_spinner_adapter.getItem(decision_spinner.getSelectedItemPosition()).getDecision();
     if (current_decision != null) {
       sendDecisionVisibilityEvent();
     } else {
       EventBus.getDefault().post( new DecisionVisibilityEvent( null, null ) );
     }
-
   }
-
 
   private void hideButtons() {
     next_person_button.setVisibility( View.INVISIBLE );
     prev_person_button.setVisibility( View.INVISIBLE );
   }
-
 }

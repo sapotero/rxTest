@@ -224,6 +224,8 @@
     <string name="menu_info_next_person">Подписать</string>
     <string name="menu_info_sign_next_person">Согласовать</string>
     <string name="menu_info_prev_person">Отклонить</string>
+    <string name="decision_preview_approved">Утверждена</string>
+    <string name="decision_preview_sync"> Ожидает синхронизации</string>
     <string name="magnifer">Увеличить</string>
     <string name="dialog_oshs_close">Закрыть</string>
     <string name="empty_list">В этом журнале документы отсутствуют</string>
