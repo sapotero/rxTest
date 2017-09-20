@@ -18,7 +18,6 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -29,7 +28,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
-import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.view.interfaces.DecisionInterface;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
@@ -41,16 +39,15 @@ import timber.log.Timber;
 public class DecisionPreviewFragment extends Fragment implements DecisionInterface {
 
   @Inject ISettings settings;
-  @Inject OperationManager operationManager;
 
-  private Context mContext;
+  private String TAG = this.getClass().getSimpleName();
 
   @BindView(R.id.decision_preview_bottom) LinearLayout decision_preview_bottom;
   @BindView(R.id.decision_preview_head)   LinearLayout decision_preview_head;
   @BindView(R.id.decision_preview_body)   LinearLayout decision_preview_body;
 
-  private View view;
-  private String TAG = this.getClass().getSimpleName();
+  private Context mContext;
+
   public Decision decision;
 
   public DecisionPreviewFragment() {
@@ -68,7 +65,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    view = inflater.inflate(R.layout.fragment_decision_preview, container, false);
+    View view = inflater.inflate(R.layout.fragment_decision_preview, container, false);
 
     ButterKnife.bind(this, view);
     EsdApplication.getManagerComponent().inject( this );
@@ -84,13 +81,6 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
     decision_preview_head.removeAllViews();
     decision_preview_body.removeAllViews();
     decision_preview_bottom.removeAllViews();
-  };
-
-  private void showEmpty(){
-    Timber.tag(TAG).d( "showEmpty" );
-
-    clear();
-    updateSignLetterhead( getString(R.string.decision_blank) );
   }
 
   private void updateView() {
@@ -271,7 +261,6 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
     LinearLayout relativeSigner = new LinearLayout( getActivity() );
     relativeSigner.setOrientation(LinearLayout.VERTICAL);
     relativeSigner.setVerticalGravity( Gravity.BOTTOM );
-//    relativeSigner.setMinimumHeight(350);
     LinearLayout.LayoutParams relativeSigner_params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f);
     relativeSigner_params.height = LinearLayout.LayoutParams.WRAP_CONTENT;
     relativeSigner.setLayoutParams( relativeSigner_params );
@@ -282,7 +271,6 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
     LinearLayout signer_view = new LinearLayout(getActivity());
     signer_view.setOrientation(LinearLayout.VERTICAL);
     signer_view.setWeightSum(2);
-//    signer_view.setPadding(0,40,0,0);
 
     if ( decision.getShowPosition() ){
       TextView signerPositionView = new TextView(getActivity());
@@ -353,32 +341,15 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
     relativeSigner.addView( date_and_number_view );
 
     decision_preview_bottom.addView( relativeSigner );
-
-
-  }
-
-  public void setBlocks(ArrayList<Block> blocks) {
-    decision.setBlocks(blocks);
-    updateView();
-  }
-
-  public void getBlocksInfo() {
-    for (Block block : decision.getBlocks() ){
-      Timber.tag(TAG).i(String.valueOf(block.getNumber()));
-      Timber.tag(TAG).i( block.getText() );
-    }
-
   }
 
   public void update() {
     try{
-//      Timber.tag(TAG).w( "UPDATE: %s", decision.getBlocks().startTransactionFor(0).getText() );
       updateView();
     }
     catch (Error e){
       Timber.tag(TAG).w( e );
     }
-
   }
 
   @Override
