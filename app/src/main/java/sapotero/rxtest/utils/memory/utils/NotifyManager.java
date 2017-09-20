@@ -140,6 +140,7 @@ public class NotifyManager {
   @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
   public void onMessageEvent(RemoveAllNotificationEvent event) {
     notViewedDocumentQuantity = 0;
+    notificationManagerCompat.cancelAll();
     EventBus.getDefault().removeStickyEvent(event);
   }
 
