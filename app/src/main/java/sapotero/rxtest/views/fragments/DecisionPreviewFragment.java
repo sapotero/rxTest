@@ -7,18 +7,15 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.text.InputType;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -30,12 +27,9 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import sapotero.rxtest.R;
 import sapotero.rxtest.application.EsdApplication;
 import sapotero.rxtest.managers.menu.OperationManager;
-import sapotero.rxtest.managers.menu.factories.CommandFactory;
-import sapotero.rxtest.managers.menu.utils.CommandParams;
 import sapotero.rxtest.managers.view.interfaces.DecisionInterface;
 import sapotero.rxtest.retrofit.models.document.Block;
 import sapotero.rxtest.retrofit.models.document.Decision;
@@ -54,10 +48,6 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
   @BindView(R.id.decision_preview_bottom) LinearLayout decision_preview_bottom;
   @BindView(R.id.decision_preview_head)   LinearLayout decision_preview_head;
   @BindView(R.id.decision_preview_body)   LinearLayout decision_preview_body;
-  @BindView(R.id.fragment_decision_preview_button_wrapper)   LinearLayout wrapper;
-
-  @BindView(R.id.fragment_decision_preview_next_person) Button next_person_button;
-  @BindView(R.id.fragment_decision_preview_prev_person) Button prev_person_button;
 
   private View view;
   private String TAG = this.getClass().getSimpleName();
@@ -87,132 +77,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
       updateView();
     }
 
-    updateVisibility();
-
     return view;
-  }
-
-  private void updateVisibility() {
-    if (decision == null || decision.getId() == null){
-      wrapper.setVisibility(View.GONE);
-    } else {
-      next_person_button.setVisibility(View.VISIBLE);
-      prev_person_button.setVisibility(View.VISIBLE);
-    }
-
-
-    if ( settings.isDecisionWithAssignment() ){
-      wrapper.setVisibility(View.GONE);
-    }
-//
-//    showDecisionCardTollbarMenuItems(true);
-//
-//    // FIX для ссылок
-//    if (current_decision == null) {
-//      next_person_button.setVisibility( !approved ? View.INVISIBLE : View.GONE);
-//      prev_person_button.setVisibility( !approved ? View.INVISIBLE : View.GONE);
-//    }
-  }
-
-  // Approve current decision
-  @OnClick(R.id.fragment_decision_preview_next_person)
-  public void decision_preview_next(){
-    Timber.tag(TAG).v("decision_preview_next star");
-
-    if ( settings.isActionsConfirm() ){
-      // resolved https://tasks.n-core.ru/browse/MVDESD-12765
-      // выводить подтверждение при подписании резолюции
-
-      MaterialDialog.Builder prev_dialog = new MaterialDialog.Builder( getContext() )
-        .content(R.string.decision_approve_body)
-        .cancelable(true)
-        .positiveText(R.string.yes)
-        .negativeText(R.string.no)
-        .onPositive((dialog1, which) -> {
-
-          //CommandFactory.Operation operation = CommandFactory.Operation.APPROVE_DECISION;
-          CommandFactory.Operation operation = CommandFactory.Operation.SAVE_AND_APPROVE_DECISION;
-
-          CommandParams params = new CommandParams();
-
-          params.setDecisionId( decision.getId() );
-          params.setDecisionModel( decision );
-
-          operationManager.execute(operation, params);
-
-        })
-        .autoDismiss(true);
-
-      prev_dialog.build().show();
-
-    } else {
-      CommandFactory.Operation operation;
-      //operation =CommandFactory.Operation.APPROVE_DECISION;
-      operation =CommandFactory.Operation.SAVE_AND_APPROVE_DECISION;
-
-      CommandParams params = new CommandParams();
-
-      params.setDecisionId( decision.getId() );
-      params.setDecisionModel( decision );
-
-      operationManager.execute(operation, params);
-    }
-
-
-    Timber.tag(TAG).v("decision_preview_next end");
-  }
-
-  // Reject current decision
-  @OnClick(R.id.fragment_decision_preview_prev_person)
-  public void decision_preview_prev(){
-    Timber.tag(TAG).v("decision_preview_prev");
-
-    // resolved https://tasks.n-core.ru/browse/MVDESD-12765
-    // Добавить ввод комментариев на "Отклонить резолюцию" и "без ответа"
-
-    if ( settings.isShowCommentPost() ){
-
-      MaterialDialog.Builder prev_dialog = new MaterialDialog.Builder( getContext() )
-        .content(R.string.decision_reject_body)
-        .cancelable(true)
-        .positiveText(R.string.yes)
-        .negativeText(R.string.no)
-        .onPositive((dialog1, which) -> {
-
-          CommandFactory.Operation operation =CommandFactory.Operation.REJECT_DECISION;
-
-          CommandParams commandParams = new CommandParams();
-          commandParams.setDecisionId( decision.getId() );
-          commandParams.setDecisionModel( decision );
-          commandParams.setComment( dialog1.getInputEditText().getText().toString() );
-
-          operationManager.execute(operation, commandParams);
-        })
-        .autoDismiss(true);
-
-      // настройка
-      // Показывать комментарий при отклонении
-      if ( settings.isShowCommentPost() ){
-        prev_dialog.inputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES )
-          .input(R.string.comment_hint, R.string.dialog_empty_value, (dialog12, input) -> {})
-          .cancelable(false);
-      }
-
-
-      prev_dialog.build().show();
-
-    } else {
-
-      CommandFactory.Operation operation;
-      operation =CommandFactory.Operation.REJECT_DECISION;
-
-      CommandParams params = new CommandParams();
-      params.setDecisionId( decision.getId() );
-      params.setDecisionModel( decision );
-
-      operationManager.execute(operation, params);
-    }
-
   }
 
   private void clear(){

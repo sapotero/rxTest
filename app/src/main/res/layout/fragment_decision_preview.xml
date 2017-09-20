@@ -8,75 +8,41 @@
     app:cardElevation="2dp">
 
     <LinearLayout
+        android:id="@+id/decision_view_root"
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:padding="@dimen/date_offset">
 
         <LinearLayout
-            android:id="@+id/decision_view_root"
+            android:id="@+id/decision_preview_head"
             android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        </LinearLayout>
+
+        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:padding="@dimen/date_offset">
+            android:fillViewport="true">
 
             <LinearLayout
-                android:id="@+id/decision_preview_head"
-                android:orientation="vertical"
+                android:id="@+id/decision_preview_body"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
             </LinearLayout>
 
-            <ScrollView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:fillViewport="true">
-
-                <LinearLayout
-                    android:id="@+id/decision_preview_body"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-                </LinearLayout>
-
-            </ScrollView>
-
-            <LinearLayout
-                android:id="@+id/decision_preview_bottom"
-                android:orientation="vertical"
-                android:layout_gravity="bottom"
-                android:gravity="bottom"
-                android:layout_width="match_parent"
-                android:layout_height="64dp">
-            </LinearLayout>
-
-        </LinearLayout>
+        </ScrollView>
 
         <LinearLayout
-            android:id="@+id/fragment_decision_preview_button_wrapper"
+            android:id="@+id/decision_preview_bottom"
+            android:orientation="vertical"
+            android:layout_gravity="bottom"
+            android:gravity="bottom"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:visibility="gone">
-
-            <Button
-                android:id="@+id/fragment_decision_preview_next_person"
-                android:text="@string/menu_info_next_person"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:drawableStart="@drawable/sign_small"
-                style="@style/Widget.AppCompat.Button.Borderless"/>
-
-            <Button
-                android:id="@+id/fragment_decision_preview_prev_person"
-                android:text="@string/menu_info_prev_person"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:drawableStart="@drawable/close_small"
-                android:layout_weight="1"
-                style="@style/Widget.AppCompat.Button.Borderless"/>
-
+            android:layout_height="64dp">
         </LinearLayout>
 
     </LinearLayout>
