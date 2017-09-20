@@ -104,15 +104,13 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
   private ToolbarManager toolbarManager;
 
   @BindView(R.id.activity_info_decision_preview_head) LinearLayout preview_head;
-  @BindView(R.id.activity_info_decision_preview_acition_wrapper) LinearLayout action_wrapper;
+  @BindView(R.id.activity_info_decision_preview_action_wrapper) LinearLayout action_wrapper;
 
   @BindView(R.id.activity_info_decision_preview_body) LinearLayout preview_body;
   @BindView(R.id.activity_info_decision_preview_bottom) LinearLayout preview_bottom;
-  @BindView(R.id.desigion_view_root) LinearLayout desigion_view_root;
+  @BindView(R.id.decision_view_root) LinearLayout decision_view_root;
 
-  @BindView(R.id.activity_info_button_magnifer) ImageButton magnifer_button;
   @BindView(R.id.activity_info_decision_preview_comment) ImageButton comment_button;
-  @BindView(R.id.activity_info_button_edit) ImageButton edit;
 
   @BindView(R.id.activity_info_decision_spinner) Spinner decision_spinner;
   @BindView(R.id.activity_info_decision_preview_magnifer) ImageButton magnifer;
@@ -121,7 +119,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
   @BindView(R.id.activity_info_decision_preview_prev_person) Button prev_person_button;
   @BindView(R.id.activity_info_decision_preview_buttons_wrapper) LinearLayout buttons_wrapper;
   @BindView(R.id.activity_info_decision_preview_approved_text) TextView approved_text;
-  @BindView(R.id.activity_info_decision_preview_acition_text)  TextView action_text;
+  @BindView(R.id.activity_info_decision_preview_action_text)  TextView action_text;
   @BindView(R.id.activity_info_decision_preview_temporary) TextView temporary;
   @BindView(R.id.activity_info_decision_preview_count) TextView decision_count;
   @BindView(R.id.activity_info_decision_bottom_line) View bottom_line;
@@ -435,7 +433,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
     gestureDetector = new GestureDetector( getContext(),new GestureListener() );
 
     if ( buttonsEnabled ) {
-      desigion_view_root.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
+      decision_view_root.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
       preview_body.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
     }
 
@@ -731,7 +729,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
     return this;
   }
 
-  @OnClick(R.id.activity_info_button_magnifer)
   public void magnifer(){
     Timber.tag(TAG).v("magnifer");
     DecisionSpinnerItem decision;
@@ -806,8 +803,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
     materialDialog.show();
   }
 
-
-  @OnClick(R.id.activity_info_button_edit)
   public void edit(){
 
     Timber.tag(TAG).v("edit");
@@ -924,7 +919,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
 
           preview.showEmpty();
 
-          magnifer_button.setVisibility(View.GONE);
           comment_button.setVisibility(View.GONE);
           decision_count.setVisibility(View.GONE);
           invalidateSpinner(false);
