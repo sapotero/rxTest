@@ -46,8 +46,6 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
   @BindView(R.id.decision_preview_head)   LinearLayout decision_preview_head;
   @BindView(R.id.decision_preview_body)   LinearLayout decision_preview_body;
 
-  private Context mContext;
-
   public Decision decision;
 
   public DecisionPreviewFragment() {
@@ -225,7 +223,7 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
       urgencyView.setAllCaps(true);
       urgencyView.setPaintFlags( Paint.UNDERLINE_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG | Paint.FAKE_BOLD_TEXT_FLAG );
       urgencyView.setText( urgency );
-      urgencyView.setTextColor( ContextCompat.getColor(mContext, R.color.md_black_1000) );
+      urgencyView.setTextColor( ContextCompat.getColor(getContext(), R.color.md_black_1000) );
 
       decision_preview_body.addView( urgencyView );
     }
@@ -350,12 +348,6 @@ public class DecisionPreviewFragment extends Fragment implements DecisionInterfa
     catch (Error e){
       Timber.tag(TAG).w( e );
     }
-  }
-
-  @Override
-  public void onAttach(Context context) {
-    super.onAttach(context);
-    mContext = context;
   }
 
   @Override
