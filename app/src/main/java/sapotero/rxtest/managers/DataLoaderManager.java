@@ -685,13 +685,15 @@ public class DataLoaderManager {
             }
           },
           error -> {
-            if ( !Objects.equals( scroll_id, "" ) ) {
-              // Если ошибка во время загрузки не первой страницы скролла, то вернуть счетчик в прежнее состояние
+            if ( Objects.equals( scroll_id, "" ) ) {
+              // Если ошибка во время загрузки первой страницы скролла, то обновить счетчик
+              requestCount--;
+              checkAndSendCountReady();
+            } else {
+              // Если ошибка во время загрузки не первой страницы скролла, то вернуть счетчик в прежнее состояние (до начала загрузки всего скролла)
               subtractDocCount( total, true );
             }
 
-            requestCount--;
-            checkAndSendCountReady();
             Timber.tag(TAG).e(error);
           })
     );
@@ -933,7 +935,7 @@ public class DataLoaderManager {
             Timber.tag(TAG).e(error);
 
             if ( !Objects.equals( scroll_id, "" ) ) {
-              // Если ошибка во время загрузки не первой страницы скролла, то вернуть счетчик в прежнее состояние
+              // Если ошибка во время загрузки не первой страницы скролла, то вернуть счетчик в прежнее состояние (до начала загрузки всего скролла)
               subtractDocCount( total, false );
             }
 
