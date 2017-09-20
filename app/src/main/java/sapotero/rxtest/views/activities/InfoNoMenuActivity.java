@@ -19,8 +19,6 @@ import android.widget.LinearLayout;
 
 import com.birbit.android.jobqueue.JobManager;
 
-import org.greenrobot.eventbus.EventBus;
-
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -243,26 +241,6 @@ public class InfoNoMenuActivity extends AppCompatActivity {
   public boolean onCreateOptionsMenu(Menu menu) {
     Timber.tag(TAG).i(String.valueOf(menu));
     return false;
-  }
-
-  @Override
-  public void onStart() {
-    super.onStart();
-
-    if ( !EventBus.getDefault().isRegistered(this) ){
-      EventBus.getDefault().register(this);
-    }
-  }
-
-  @Override
-  protected void onDestroy() {
-    super.onDestroy();
-
-    if ( EventBus.getDefault().isRegistered(this) ){
-      EventBus.getDefault().unregister(this);
-    }
-
-    finish();
   }
 
   @Override

@@ -50,11 +50,6 @@ public class StepperChooseAuthTypeFragment extends Fragment implements Step, Vie
     ds.setOnClickListener(this);
     password.setOnClickListener(this);
 
-//    if ( EventBus.getDefault().isRegistered(this) ) {
-//      EventBus.getDefault().unregister(this);
-//    }
-//    EventBus.getDefault().register(this);
-
     return view;
   }
 
@@ -62,15 +57,6 @@ public class StepperChooseAuthTypeFragment extends Fragment implements Step, Vie
   public void onResume() {
     super.onResume();
     setAuthTypeDc();
-  }
-
-  @Override
-  public void onDestroy(){
-    super.onDestroy();
-//    if ( EventBus.getDefault().isRegistered(this) ) {
-//      EventBus.getDefault().unregister(this);
-//    }
-
   }
 
   @Override

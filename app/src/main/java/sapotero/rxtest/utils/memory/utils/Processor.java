@@ -316,12 +316,10 @@ public class Processor {
       InMemoryDocument documentInMemory = store.getDocuments().get( uid );
 
       if ( documentInMemory != null ) {
-        if ( documentInMemory.isProcessed() || documentType == DocumentType.FAVORITE ) {
-          // Для тех документов, которые надо добавить во вкладку, если они есть в памяти,
-          // сбрасываем MD5, чтобы далее для их обновления была вызвана UpdateDocumentJob.
-          documentInMemory.setMd5("");
-          store.getDocuments().put( uid, documentInMemory );
-        }
+        // Для тех документов, которые надо добавить во вкладку, если они есть в памяти,
+        // сбрасываем MD5, чтобы далее для их обновления была вызвана UpdateDocumentJob.
+        documentInMemory.setMd5("");
+        store.getDocuments().put( uid, documentInMemory );
 
       } else {
         RDocumentEntity documentInDb = dataStore

@@ -11,12 +11,18 @@ public class Meta implements Serializable {
     @SerializedName("total")
     @Expose
     private String total;
+
     @SerializedName("skip_count")
     @Expose
     private Object skipCount;
+
     @SerializedName("limit")
     @Expose
     private Object limit;
+
+    @SerializedName("scroll_id")
+    @Expose
+    private String scrollId;
 
     /**
      * 
@@ -72,4 +78,11 @@ public class Meta implements Serializable {
         this.limit = limit;
     }
 
+    public String getScrollId() {
+        return scrollId;
+    }
+
+    public void setScrollId(String scrollId) {
+        this.scrollId = scrollId;
+    }
 }
