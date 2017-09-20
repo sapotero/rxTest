@@ -12,7 +12,6 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.util.Base64;
 import android.util.TypedValue;
@@ -116,7 +115,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
   @BindView(R.id.activity_info_button_edit) ImageButton edit;
 
   @BindView(R.id.activity_info_decision_spinner) Spinner decision_spinner;
-  @BindView(R.id.activity_info_decision_preview_toolbar) Toolbar decision_toolbar;
   @BindView(R.id.activity_info_decision_preview_magnifer) ImageButton magnifer;
 
   @BindView(R.id.activity_info_decision_preview_next_person) Button next_person_button;
@@ -431,8 +429,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
 
     temporary.setVisibility(View.GONE);
 
-    initToolBar();
-
     setAdapter();
     loadDocument();
 
@@ -448,26 +444,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
     initEvents();
 
     sendDecisionVisibilityEvent();
-  }
-
-  private void initToolBar() {
-
-    if (decision_toolbar != null) {
-      decision_toolbar.inflateMenu(R.menu.fragment_decision_preview_menu);
-      decision_toolbar.setOnMenuItemClickListener(item -> {
-        switch ( item.getItemId() ){
-          case R.id.decision_preview_magnifer:
-            magnifer();
-            break;
-          case R.id.decision_preview_edit:
-            edit();
-            break;
-          default:
-            break;
-        }
-        return false;
-      });
-    }
   }
 
   private void setAdapter() {
@@ -530,11 +506,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
     if (current_decision == null) {
       next_person_button.setVisibility( !approved ? View.INVISIBLE : View.GONE);
       prev_person_button.setVisibility( !approved ? View.INVISIBLE : View.GONE);
-    }
-
-
-    if (approved){
-      decision_toolbar.getMenu().findItem(R.id.decision_preview_edit).setVisible(false);
     }
 
     approved_text.setVisibility(!approved ? View.GONE : View.VISIBLE);
@@ -735,9 +706,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
 
   private void showDecisionCardTollbarMenuItems(boolean visible) {
     try {
-      decision_toolbar.getMenu().findItem(R.id.decision_preview_magnifer).setVisible(visible);
-      decision_toolbar.getMenu().findItem(R.id.decision_preview_edit).setVisible(visible);
-
       if (!visible){
         next_person_button.setVisibility( View.GONE );
         prev_person_button.setVisibility( View.GONE );
