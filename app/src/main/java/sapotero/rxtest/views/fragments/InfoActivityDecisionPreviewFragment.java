@@ -126,7 +126,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
   private Unbinder binder;
   private String uid;
   private RDecisionEntity current_decision;
-  private GestureDetector gestureDetector;
   private RDocumentEntity doc;
   private SelectTemplateDialogFragment templates;
 
@@ -300,15 +299,9 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
     public boolean onDoubleTap(MotionEvent e) {
       Timber.tag("GestureListener").w("DOUBLE TAP");
 
-
       if ( doc != null && Objects.equals(doc.getAddressedToType(), "") ){
-
         if ( doc.isFromLinks() != null && !doc.isFromLinks() && current_decision != null ){
-
-          // зачем то это тут было
-          // EventBus.getDefault().post( new ShowDecisionConstructor() );
           if ( settings.isOnline() ){
-
             if ( current_decision.isChanged() != null &&  current_decision.isChanged() ){
               // resolved https://tasks.n-core.ru/browse/MVDESD-13727
               // В онлайне не давать редактировать резолюцию, если она в статусе "ожидает синхронизации"
@@ -373,7 +366,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
     setAdapter();
     loadDocument();
 
-    gestureDetector = new GestureDetector( getContext(),new GestureListener() );
+    GestureDetector gestureDetector = new GestureDetector( getContext(),new GestureListener() );
 
     if ( buttonsEnabled ) {
       decision_view_root.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
