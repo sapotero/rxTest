@@ -38,7 +38,7 @@ import sapotero.rxtest.utils.padeg.Declension;
 import sapotero.rxtest.views.adapters.models.DecisionSpinnerItem;
 import timber.log.Timber;
 
-public class DecisionMagniferFragment extends DialogFragment implements View.OnClickListener {
+public class DecisionMagniferFragment extends DialogFragment {
 
   private String TAG = this.getClass().getSimpleName();
 
@@ -52,15 +52,12 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
 
   private DecisionSpinnerItem decision;
   private String regNumber;
-  private Preview viewer;
 
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.dialog_magnifer_decision, null);
     ButterKnife.bind(this, view);
 
-
     seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
       @Override
       public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
         updateTextSize(12 + progress);
@@ -68,17 +65,15 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
 
       @Override
       public void onStartTrackingTouch(SeekBar seekBar) {
-
       }
 
       @Override
       public void onStopTrackingTouch(SeekBar seekBar) {
-
       }
     });
 
     if (decision != null && decision.getDecision() != null){
-      viewer = new Preview( getActivity() );
+      Preview viewer = new Preview(getActivity());
       viewer.show( decision.getDecision() );
     }
 
@@ -89,11 +84,9 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
   }
 
   public void updateTextSize(Integer size){
-
     for (TextView view : textLabels){
       view.setTextSize(TypedValue.COMPLEX_UNIT_SP, size);
     }
-
   }
 
   public void onDismiss(DialogInterface dialog) {
@@ -106,11 +99,6 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
     Timber.tag(TAG).i( "onCancel");
   }
 
-  @Override
-  public void onClick(View v) {
-
-  }
-
   public void setDecision(DecisionSpinnerItem item) {
     this.decision = item;
   }
@@ -119,12 +107,8 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
     this.regNumber = regNumber;
   }
 
-
   public class Preview{
-
     private final Context context;
-    private String TAG = this.getClass().getSimpleName();
-    private String reg_number;
 
     Preview(Context context) {
       this.context = context;
@@ -134,7 +118,7 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
       preview_head.removeAllViews();
       preview_body.removeAllViews();
       preview_bottom.removeAllViews();
-    };
+    }
 
     private void show( RDecisionEntity decision ){
       clear();
@@ -192,11 +176,7 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
       printSigner( decision, regNumber );
     }
 
-
-
     private void printSigner(RDecisionEntity decision, String registrationNumber) {
-
-//      Timber.tag(TAG).i("DECISION\n%s", new Gson().toJson(decision));
 
       LinearLayout relativeSigner = new LinearLayout(context);
       relativeSigner.setOrientation(LinearLayout.VERTICAL);
@@ -207,7 +187,7 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
       relativeSigner.setLayoutParams( relativeSigner_params );
 
 
-      LinearLayout.LayoutParams viewsLayotuParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+      LinearLayout.LayoutParams viewsLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
 
 
       LinearLayout signer_view = new LinearLayout(context);
@@ -235,7 +215,7 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
       signerBlankTextView.setTextColor( Color.BLACK );
       signerBlankTextView.setGravity( Gravity.END);
       signerBlankTextView.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
-      signerBlankTextView.setLayoutParams(viewsLayotuParams);
+      signerBlankTextView.setLayoutParams(viewsLayoutParams);
 
       LinearLayout.LayoutParams param = new LinearLayout.LayoutParams(
         LinearLayout.LayoutParams.MATCH_PARENT,
@@ -257,7 +237,7 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
       numberView.setText( "№ " + registrationNumber );
       numberView.setTextColor( Color.BLACK );
       numberView.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
-      numberView.setLayoutParams(viewsLayotuParams);
+      numberView.setLayoutParams(viewsLayoutParams);
       numberView.setGravity( Gravity.END );
 
       TextView dateView = new TextView(context);
@@ -265,7 +245,7 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
       dateView.setGravity( Gravity.START );
       dateView.setTextColor( Color.BLACK );
       dateView.setTypeface( Typeface.create("sans-serif-medium", Typeface.NORMAL) );
-      dateView.setLayoutParams(viewsLayotuParams);
+      dateView.setLayoutParams(viewsLayoutParams);
 
       date_and_number_view.addView(dateView);
       date_and_number_view.addView(numberView);
@@ -331,7 +311,6 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
         block_view.setText( block.getText() );
       }
 
-
       LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
       params.setMargins(0, 10, 0, 10);
       block_view.setLayoutParams(params);
@@ -395,9 +374,6 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
             performerName += " *";
           }
 
-//          performerName = performerName.replaceAll( "\\(.+\\)", "" );
-
-
           TextView performer_view = new TextView( getActivity() );
           performer_view.setText( performerName );
           performer_view.setTextColor( Color.BLACK );
@@ -411,14 +387,7 @@ public class DecisionMagniferFragment extends DialogFragment implements View.OnC
         }
       }
 
-
       preview_body.addView( users_view );
     }
-
-
-    public String getRegNumber() {
-      return reg_number;
-    }
   }
-
 }
