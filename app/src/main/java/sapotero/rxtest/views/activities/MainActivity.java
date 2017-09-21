@@ -927,6 +927,10 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
               // затем перезагружаем MemoryStore
               switchDocuments();
               store.clearAndLoadFromDb();
+              /*удаляем все "висящие" уведомления в центре уведомлений*/
+              MainService.getNotificationManagerCompat().cancelAll();
+              /*сбрасываем счётчик уведомлений*/
+              removeAllNotification();
 
             }, error -> {
               Timber.tag(TAG).e(error);
@@ -963,6 +967,10 @@ public class MainActivity extends AppCompatActivity implements MenuBuilder.Callb
         showStopSubstituteDialog();
 
         dataLoader.updateAuth(true);
+        /*удаляем все "висящие"  уведомления в центре уведомлений*/
+        MainService.getNotificationManagerCompat().cancelAll();
+        /*сбрасываем счётчик уведомлений*/
+        removeAllNotification();
 
       } else {
         Toast.makeText(this, "Невозможно выйти из режима замещения: дождитесь обработки очереди запросов", Toast.LENGTH_SHORT).show();
