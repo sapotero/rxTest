@@ -255,7 +255,7 @@ public class InfoActivity extends AppCompatActivity {
       removeAllFragments(fm);
 
       FragmentTransaction fragmentTransaction = fm.beginTransaction();
-      Fragment fragment = Objects.equals(TAG, "DECISION") ? new InfoActivityDecisionPreviewFragment().withToolbarManager(toolbarManager) : new RoutePreviewFragment();
+      Fragment fragment = Objects.equals(TAG, "DECISION") ? new InfoActivityDecisionPreviewFragment() : new RoutePreviewFragment();
       fragmentTransaction.addToBackStack(TAG);
       fragmentTransaction.replace( R.id.activity_info_preview_container, fragment, TAG );
       fragmentTransaction.commit();

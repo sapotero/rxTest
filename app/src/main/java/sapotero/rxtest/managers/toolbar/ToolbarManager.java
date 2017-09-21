@@ -929,6 +929,9 @@ public class ToolbarManager  implements SelectOshsDialogFragment.Callback, Opera
         safeSetVisibility(R.id.menu_info_decision_edit, false);
         safeSetVisibility(R.id.menu_info_decision_create, false);
       }
+
+    } else if ( event.hideEditDecision != null && event.hideEditDecision ) {
+      setEditDecisionMenuItemVisible(false);
     }
   }
 }

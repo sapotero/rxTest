@@ -77,7 +77,6 @@ import sapotero.rxtest.events.view.UpdateCurrentDocumentEvent;
 import sapotero.rxtest.managers.menu.OperationManager;
 import sapotero.rxtest.managers.menu.factories.CommandFactory;
 import sapotero.rxtest.managers.menu.utils.CommandParams;
-import sapotero.rxtest.managers.toolbar.ToolbarManager;
 import sapotero.rxtest.retrofit.models.document.Decision;
 import sapotero.rxtest.utils.ISettings;
 import sapotero.rxtest.utils.padeg.Declension;
@@ -95,8 +94,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
   @Inject ISettings settings;
   @Inject SingleEntityStore<Persistable> dataStore;
   @Inject OperationManager operationManager;
-
-  private ToolbarManager toolbarManager;
 
   @BindView(R.id.decision_view_root) LinearLayout decision_view_root;
 
@@ -138,11 +135,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
   public InfoActivityDecisionPreviewFragment() {
   }
 
-  public InfoActivityDecisionPreviewFragment withToolbarManager(ToolbarManager toolbarManager) {
-    this.toolbarManager = toolbarManager;
-    return this;
-  }
-
   // Approve current decision
   @OnClick(R.id.activity_info_decision_preview_next_person)
   public void decision_preview_next(){
@@ -158,7 +150,6 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
           .positiveText(R.string.yes)
           .negativeText(R.string.no)
           .onPositive((dialog1, which) -> {
-
             CommandFactory.Operation operation = CommandFactory.Operation.APPROVE_DECISION;
 
             CommandParams params = new CommandParams();
@@ -776,10 +767,8 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
         } else {
           Timber.e("no decisions");
 
-          if (toolbarManager != null) {
-            if (doc.isProcessed() != null && !doc.isProcessed()){
-              toolbarManager.setEditDecisionMenuItemVisible(false);
-            }
+          if (doc.isProcessed() != null && !doc.isProcessed()){
+            EventBus.getDefault().post( new DecisionVisibilityEvent( null, null, true ) );
           }
 
           decision_spinner_adapter.clear();
@@ -839,7 +828,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
 
   private void sendDecisionVisibilityEvent() {
     if (current_decision != null) {
-      EventBus.getDefault().post( new DecisionVisibilityEvent( isActiveOrRed() && current_decision.isApproved() != null && !current_decision.isApproved(), current_decision.getUid() ) );
+      EventBus.getDefault().post( new DecisionVisibilityEvent( isActiveOrRed() && current_decision.isApproved() != null && !current_decision.isApproved(), current_decision.getUid(), null ) );
     }
   }
 
@@ -1214,7 +1203,7 @@ public class InfoActivityDecisionPreviewFragment extends PreviewFragment impleme
     if (current_decision != null) {
       sendDecisionVisibilityEvent();
     } else {
-      EventBus.getDefault().post( new DecisionVisibilityEvent( null, null ) );
+      EventBus.getDefault().post( new DecisionVisibilityEvent( null, null, null ) );
     }
   }
 
