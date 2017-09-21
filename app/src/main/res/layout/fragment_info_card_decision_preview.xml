@@ -109,99 +109,89 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/activity_info_decision_preview_action_wrapper"
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_height="wrap_content">
 
-            <LinearLayout
-                android:id="@+id/activity_info_decision_preview_action_wrapper"
-                android:orientation="vertical"
+            <View
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1">
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/md_grey_300"
-                    android:padding="@dimen/half_date_offset"
-                    android:layout_gravity="bottom"/>
-
-                <TextView
-                    android:id="@+id/activity_info_decision_preview_action_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="0dp"
-                    android:paddingStart="@dimen/half_date_offset"
-                    android:paddingEnd="@dimen/half_date_offset"
-                    android:paddingTop="@dimen/half_date_offset"
-                    android:paddingBottom="@dimen/half_date_offset"
-                    android:gravity="center|start"
-                    android:textSize="12sp"
-
-                    android:fontFamily="sans-serif-light"
-                    android:textStyle="italic"
-
-                    android:layout_weight="1"
-                    android:ellipsize="end"
-                    android:singleLine="true"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Caption"/>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/activity_info_decision_preview_buttons_wrapper"
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1">
-
-                <Button
-                    android:id="@+id/activity_info_decision_preview_prev_person"
-                    android:text="@string/menu_info_prev_person"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:drawableStart="@drawable/close_small"
-                    android:visibility="gone"
-                    android:layout_weight="1"
-                    style="@style/Widget.AppCompat.Button.Borderless"/>
-
-                <Button
-                    android:id="@+id/activity_info_decision_preview_next_person"
-                    android:text="@string/menu_info_next_person"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:drawableStart="@drawable/sign_small"
-                    android:visibility="gone"
-                    android:layout_weight="1"
-                    style="@style/Widget.AppCompat.Button.Borderless"/>
-
-            </LinearLayout>
+                android:layout_height="1dp"
+                android:background="@color/md_grey_300"
+                android:padding="@dimen/half_date_offset"
+                android:layout_gravity="bottom"/>
 
             <TextView
-                android:id="@+id/activity_info_decision_preview_approved_text"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="@string/decision_preview_approved"
-                android:padding="@dimen/date_offset"
+                android:id="@+id/activity_info_decision_preview_action_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="@dimen/half_date_offset"
+                android:paddingEnd="@dimen/half_date_offset"
+                android:paddingTop="@dimen/half_date_offset"
+                android:paddingBottom="@dimen/half_date_offset"
                 android:gravity="center|start"
-                android:visibility="gone"
-                android:textSize="16sp"
-                android:textAppearance="@style/TextAppearance.AppCompat.Caption"/>
+                android:textSize="12sp"
 
-            <TextView
-                android:id="@+id/activity_info_decision_preview_temporary"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="@string/decision_preview_sync"
-                android:drawableStart="@drawable/sync"
-                android:padding="@dimen/date_offset"
-                android:gravity="center|start"
-                android:visibility="gone"
-                android:textColor="@color/md_red_900"
-                android:textSize="16sp"
+                android:fontFamily="sans-serif-light"
+                android:textStyle="italic"
+
+                android:ellipsize="end"
+                android:singleLine="true"
                 android:textAppearance="@style/TextAppearance.AppCompat.Caption"/>
 
         </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/activity_info_decision_preview_buttons_wrapper"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/activity_info_decision_preview_prev_person"
+                android:text="@string/menu_info_prev_person"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/close_small"
+                android:visibility="gone"
+                android:layout_weight="1"
+                style="@style/Widget.AppCompat.Button.Borderless"/>
+
+            <Button
+                android:id="@+id/activity_info_decision_preview_next_person"
+                android:text="@string/menu_info_next_person"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/sign_small"
+                android:visibility="gone"
+                android:layout_weight="1"
+                style="@style/Widget.AppCompat.Button.Borderless"/>
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/activity_info_decision_preview_approved_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/decision_preview_approved"
+            android:padding="@dimen/date_offset"
+            android:gravity="center|start"
+            android:visibility="gone"
+            android:textSize="16sp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Caption"/>
+
+        <TextView
+            android:id="@+id/activity_info_decision_preview_temporary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/decision_preview_sync"
+            android:drawableStart="@drawable/sync"
+            android:padding="@dimen/date_offset"
+            android:gravity="center|start"
+            android:visibility="gone"
+            android:textColor="@color/md_red_900"
+            android:textSize="16sp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Caption"/>
 
     </LinearLayout>
 
